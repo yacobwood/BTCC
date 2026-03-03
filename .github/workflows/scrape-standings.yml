@@ -1,0 +1,37 @@
+name: Scrape BTCC Standings
+
+on:
+  schedule:
+    # Run every 6 hours during race season (Apr–Oct).
+    # Adjust or disable in the off-season.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r scraper/requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Run scraper
+        run: python scraper/scrape_standings.py
+
+      - name: Commit updated standings
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update standings [skip ci]"
+          file_pattern: data/standings.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"

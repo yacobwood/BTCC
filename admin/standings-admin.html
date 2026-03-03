@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>BTCC Fan Hub · Standings Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0B0C0F;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:16px;max-width:600px;margin:0 auto}
+h1{color:#E3000B;font-size:16px;letter-spacing:2px;font-weight:900;margin-bottom:4px}
+.subtitle{font-size:11px;color:#555;letter-spacing:1px;margin-bottom:20px}
+h2{font-size:11px;letter-spacing:1.5px;color:#888;margin:20px 0 10px;text-transform:uppercase;font-weight:700}
+label{display:block;font-size:11px;color:#666;margin-bottom:4px;letter-spacing:.5px}
+input[type=text],input[type=number],input[type=password]{background:#15161a;border:1px solid #2a2b30;color:#fff;padding:10px 12px;border-radius:8px;width:100%;font-size:16px;-webkit-appearance:none}
+input:focus{outline:none;border-color:#E3000B}
+.field{margin-bottom:12px}
+.row2{display:grid;grid-template-columns:80px 1fr;gap:10px;margin-bottom:12px}
+.card{background:#15161a;border:1px solid #1e1f24;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pos{color:#E3000B;font-weight:900;font-size:15px;width:22px;text-align:center;flex-shrink:0}
+.info{flex:1;min-width:0}
+.dname{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dteam{font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pts{width:68px;flex-shrink:0}
+.pts input{padding:8px 6px;text-align:center;border-radius:8px}
+button.save{width:100%;background:#E3000B;color:#fff;border:none;padding:16px;border-radius:12px;font-size:15px;font-weight:900;letter-spacing:1.5px;margin-top:24px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button.save:disabled{background:#3a0005;color:#666}
+#status{text-align:center;padding:14px;font-size:14px;min-height:20px}
+.ok{color:#4caf50}
+.err{color:#E3000B}
+#token-box{background:#15161a;border:1px solid #2a2b30;border-radius:10px;padding:14px;margin-bottom:20px}
+.token-row{display:flex;gap:8px;margin-top:8px}
+.token-row input{flex:1}
+.token-row button{background:#E3000B;color:#fff;border:none;padding:0 16px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+.token-note{font-size:11px;color:#555;margin-top:6px}
+.token-ok{font-size:12px;color:#4caf50;margin-top:6px}
+.section-note{font-size:11px;color:#555;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<h1>BTCC FAN HUB</h1>
+<div class="subtitle">STANDINGS ADMIN</div>
+
+<div id="token-box">
+  <label>GITHUB TOKEN</label>
+  <div class="token-row">
+    <input type="password" id="tok" placeholder="ghp_…" autocomplete="off">
+    <button onclick="saveToken()">SAVE</button>
+  </div>
+  <div class="token-note">Stored in this browser only — never sent anywhere except GitHub.</div>
+  <div id="tok-status"></div>
+</div>
+
+<div class="row2">
+  <div class="field"><label>ROUND</label><input type="number" id="round" min="1" max="10" placeholder="1"></div>
+  <div class="field"><label>VENUE</label><input type="text" id="venue" placeholder="Donington Park"></div>
+</div>
+
+<button class="save" id="fetchbtn" onclick="fetchFromAPI()" style="background:#1a3a1a;border:1px solid #4caf50;color:#4caf50;margin-bottom:8px">FETCH LATEST RESULTS</button>
+<div id="fetch-status" style="font-size:12px;color:#888;text-align:center;min-height:18px;margin-bottom:16px"></div>
+
+<h2>Drivers — cumulative points</h2>
+<div class="section-note">Drivers with 0 pts are hidden in the app. Order auto-sorts by pts.</div>
+<div id="drv-list"></div>
+
+<h2>Teams — enter cumulative points</h2>
+<div class="section-note">Teams with 0 pts are hidden in the app.</div>
+<div id="team-list"></div>
+
+<button class="save" id="savebtn" onclick="doSave()">SAVE TO APP</button>
+<button class="save" id="resetbtn" onclick="doReset()" style="background:transparent;border:1px solid #333;color:#555;margin-top:8px">RESET — CLEAR ALL 2026 DATA</button>
+<div id="status"></div>
+
+<script>
+const GIST_ID = '7a2af0a9690d24cab8eb608dd4c5ba42';
+const FILE    = 'btcc-standings.json';
+const RAW_URL = `https://gist.githubusercontent.com/yacobwood/${GIST_ID}/raw/${FILE}`;
+
+const DRIVERS = [
+  {name:'Jake Hill',         team:'West Surrey Racing'},
+  {name:'Daryl DeLeon',      team:'West Surrey Racing'},
+  {name:'Charles Rainford',  team:'West Surrey Racing'},
+  {name:'Tom Chilton',       team:'EXCELR8 Motorsport'},
+  {name:'Aiden Moffat',      team:'EXCELR8 Motorsport'},
+  {name:'Mikey Doble',       team:'EXCELR8 Motorsport'},
+  {name:'Tom Ingram',        team:'Team VERTU'},
+  {name:'Senna Proctor',     team:'Team VERTU'},
+  {name:'Ashley Sutton',     team:'NAPA Racing UK'},
+  {name:'Dan Cammish',       team:'NAPA Racing UK'},
+  {name:'Sam Osborne',       team:'NAPA Racing UK'},
+  {name:'Gordon Shedden',    team:'Laser Tools Racing'},
+  {name:'Árón Taylor-Smith', team:'Laser Tools Racing'},
+  {name:'Daniel Rowbottom',  team:'Plato Racing'},
+  {name:'Adam Morgan',       team:'Ciceley Motorsport'},
+  {name:'Josh Cook',         team:'One Motorsport'},
+  {name:'Nic Hamilton',      team:'Un-limited Motorsport'},
+  {name:'Dexter Patterson',  team:'Power Maxed Racing'},
+  {name:'Nick Halstead',     team:'Power Maxed Racing'},
+  {name:'Daniel Lloyd',      team:'Restart Racing'},
+];
+
+const TEAMS = [
+  'NAPA Racing UK','Team VERTU','West Surrey Racing',
+  'Restart Racing','Laser Tools Racing','Toyota Gazoo Racing UK',
+  'WSR','Power Maxed Racing','One Motorsport',
+  'Un-limited Motorsport','Ciceley Motorsport',
+];
+
+let drvPts  = {};
+let teamPts = {};
+
+// ── Token ──────────────────────────────────────────────────────────────────
+function getToken(){ return localStorage.getItem('btcc_tok')||''; }
+function saveToken(){
+  const v = document.getElementById('tok').value.trim();
+  if(!v) return;
+  localStorage.setItem('btcc_tok', v);
+  document.getElementById('tok').value='';
+  document.getElementById('tok-status').innerHTML='<div class="token-ok">Token saved.</div>';
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function id(name){ return name.replace(/[^a-zA-Z0-9]/g,'_'); }
+
+function renderDrivers(){
+  const sorted = [...DRIVERS].sort((a,b)=>(drvPts[b.name]||0)-(drvPts[a.name]||0));
+  const el = document.getElementById('drv-list');
+  el.innerHTML = sorted.map((d,i)=>`
+    <div class="card" id="card_${id(d.name)}">
+      <span class="pos" id="pos_${id(d.name)}">${i+1}</span>
+      <div class="info">
+        <div class="dname">${d.name}</div>
+        <div class="dteam">${d.team}</div>
+      </div>
+      <div class="pts">
+        <input type="number" min="0" max="9999" placeholder="0"
+          value="${drvPts[d.name]||''}"
+          oninput="onDrvChange('${d.name}',this.value)"
+          id="di_${id(d.name)}">
+      </div>
+    </div>`).join('');
+}
+
+function onDrvChange(name, val){
+  drvPts[name] = parseInt(val)||0;
+  const sorted = [...DRIVERS].sort((a,b)=>(drvPts[b.name]||0)-(drvPts[a.name]||0));
+  sorted.forEach((d,i)=>{
+    const el = document.getElementById(`pos_${id(d.name)}`);
+    if(el) el.textContent = i+1;
+  });
+}
+
+function renderTeams(){
+  const sorted = [...TEAMS].sort((a,b)=>(teamPts[b]||0)-(teamPts[a]||0));
+  const el = document.getElementById('team-list');
+  el.innerHTML = sorted.map((t,i)=>`
+    <div class="card">
+      <span class="pos" id="tpos_${id(t)}">${i+1}</span>
+      <div class="info"><div class="dname">${t}</div></div>
+      <div class="pts">
+        <input type="number" min="0" max="99999" placeholder="0"
+          value="${teamPts[t]||''}"
+          oninput="onTeamChange('${t}',this.value)"
+          id="ti_${id(t)}">
+      </div>
+    </div>`).join('');
+}
+
+function onTeamChange(name, val){
+  teamPts[name] = parseInt(val)||0;
+  const sorted = [...TEAMS].sort((a,b)=>(teamPts[b]||0)-(teamPts[a]||0));
+  sorted.forEach((t,i)=>{
+    const el = document.getElementById(`tpos_${id(t)}`);
+    if(el) el.textContent = i+1;
+  });
+}
+
+// ── Load existing ──────────────────────────────────────────────────────────
+async function loadExisting(){
+  try{
+    const r = await fetch(RAW_URL+'?t='+Date.now());
+    const data = await r.json();
+    if(data.round) document.getElementById('round').value = data.round;
+    if(data.venue) document.getElementById('venue').value = data.venue;
+    (data.drivers||[]).forEach(d=>{ drvPts[d.name]=d.points||0; });
+    (data.teams||[]).forEach(t=>{ teamPts[t.name]=t.points||0; });
+  }catch(e){}
+  renderDrivers();
+  renderTeams();
+}
+
+// ── Save ───────────────────────────────────────────────────────────────────
+async function doSave(){
+  const tok = getToken();
+  if(!tok){
+    document.getElementById('status').innerHTML='<span class="err">Save your GitHub token above first.</span>';
+    return;
+  }
+  const btn = document.getElementById('savebtn');
+  btn.disabled=true; btn.textContent='SAVING…';
+  document.getElementById('status').textContent='';
+
+  const drivers = [...DRIVERS]
+    .map(d=>({name:d.name, team:d.team, points: parseInt(document.getElementById('di_'+id(d.name))?.value)||0}))
+    .filter(d=>d.points>0)
+    .sort((a,b)=>b.points-a.points)
+    .map((d,i)=>({pos:i+1,...d}));
+
+  const teams = [...TEAMS]
+    .map(name=>({name, points: parseInt(document.getElementById('ti_'+id(name))?.value)||0}))
+    .filter(t=>t.points>0)
+    .sort((a,b)=>b.points-a.points)
+    .map((t,i)=>({pos:i+1,...t}));
+
+  const payload = {
+    season:'2026',
+    round: parseInt(document.getElementById('round').value)||0,
+    venue: document.getElementById('venue').value.trim(),
+    updated: new Date().toISOString(),
+    drivers, teams,
+  };
+
+  try{
+    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+      method:'PATCH',
+      headers:{'Authorization':'token '+tok,'Content-Type':'application/json'},
+      body: JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}}),
+    });
+    if(r.ok){
+      document.getElementById('status').innerHTML='<span class="ok">Saved ✓ — app updates within a minute.</span>';
+    } else {
+      const e=await r.json();
+      document.getElementById('status').innerHTML=`<span class="err">GitHub error: ${e.message}</span>`;
+    }
+  }catch(e){
+    document.getElementById('status').innerHTML=`<span class="err">Network error: ${e.message}</span>`;
+  }
+  btn.disabled=false; btn.textContent='SAVE TO APP';
+}
+
+// ── Fetch from TheSportsDB ─────────────────────────────────────────────────
+// Normalise "Tom INGRAM" / "Árón TAYLOR-SMITH" → "Tom Ingram" / "Árón Taylor-Smith"
+function normaliseName(raw) {
+  return raw.trim().split(/\s+/).map(word => {
+    if (word.includes('-')) {
+      return word.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('-');
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+// Fuzzy match: strip diacritics + lowercase for comparison
+function normKey(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z\s]/g,'').trim();
+}
+
+function matchDriver(apiName) {
+  const key = normKey(apiName);
+  // Try exact normalised match first
+  const exact = DRIVERS.find(d => normKey(d.name) === key);
+  if (exact) return exact.name;
+  // Try surname-only match (last word)
+  const surname = key.split(' ').pop();
+  const byLast = DRIVERS.find(d => normKey(d.name).split(' ').pop() === surname);
+  return byLast ? byLast.name : null;
+}
+
+async function fetchFromAPI() {
+  const btn = document.getElementById('fetchbtn');
+  const status = document.getElementById('fetch-status');
+  btn.disabled = true; btn.textContent = 'FETCHING…';
+  status.textContent = 'Contacting TheSportsDB…';
+
+  try {
+    const year = new Date().getFullYear();
+    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4372&s=${year}`);
+    const data = await r.json();
+    const events = (data.events || []).filter(e => e.strResult);
+
+    if (!events.length) {
+      status.textContent = `No results found for ${year} season yet — enter points manually.`;
+      btn.disabled = false; btn.textContent = 'FETCH LATEST RESULTS';
+      return;
+    }
+
+    // Use the last event that has standings embedded ("Pts" in strResult)
+    const withStandings = events.filter(e => /pts/i.test(e.strResult));
+    const latest = withStandings.length ? withStandings[withStandings.length - 1] : events[events.length - 1];
+
+    // Parse standings section: lines like "1 Tom INGRAM 462"
+    const text = latest.strResult || '';
+    const section = text.split(/pos.*driver.*pts/i).pop() || text;
+    const parsed = {};
+    for (const line of section.split('\n')) {
+      const m = line.trim().match(/^(\d+)\s+(.+?)\s+(\d+)\s*$/);
+      if (m) {
+        const pts = parseInt(m[3]);
+        const normalised = normaliseName(m[2]);
+        const matched = matchDriver(normalised);
+        if (matched) parsed[matched] = pts;
+      }
+    }
+
+    const matchCount = Object.keys(parsed).length;
+    if (!matchCount) {
+      status.textContent = 'Fetched data but could not parse standings — enter manually.';
+      btn.disabled = false; btn.textContent = 'FETCH LATEST RESULTS';
+      return;
+    }
+
+    // Populate fields
+    if (latest.intRound) document.getElementById('round').value = latest.intRound;
+    if (latest.strVenue) document.getElementById('venue').value = latest.strVenue;
+    Object.assign(drvPts, parsed);
+    renderDrivers();
+
+    const unmatched = DRIVERS.filter(d => !parsed[d.name]).map(d => d.name);
+    status.innerHTML = `<span class="ok">Fetched Round ${latest.intRound} · ${latest.strVenue} · ${matchCount} drivers matched.</span>`
+      + (unmatched.length ? `<br><span style="color:#888">Enter manually: ${unmatched.join(', ')}</span>` : '');
+
+  } catch(e) {
+    status.innerHTML = `<span class="err">Fetch failed: ${e.message}</span>`;
+  }
+  btn.disabled = false; btn.textContent = 'FETCH LATEST RESULTS';
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+async function doReset(){
+  const tok = getToken();
+  if(!tok){
+    document.getElementById('status').innerHTML='<span class="err">Save your GitHub token above first.</span>';
+    return;
+  }
+  if(!confirm('Clear all 2026 standings from the app?')) return;
+  const btn = document.getElementById('resetbtn');
+  btn.disabled=true; btn.textContent='RESETTING…';
+  document.getElementById('status').textContent='';
+
+  const payload = { season:'2026', round:0, venue:'', updated:new Date().toISOString(), drivers:[], teams:[] };
+  try{
+    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+      method:'PATCH',
+      headers:{'Authorization':'token '+tok,'Content-Type':'application/json'},
+      body: JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}}),
+    });
+    if(r.ok){
+      drvPts={}; teamPts={};
+      document.getElementById('round').value='';
+      document.getElementById('venue').value='';
+      renderDrivers(); renderTeams();
+      document.getElementById('status').innerHTML='<span class="ok">Reset ✓ — app 2026 tab now shows "No Standings Yet".</span>';
+    } else {
+      const e=await r.json();
+      document.getElementById('status').innerHTML=`<span class="err">GitHub error: ${e.message}</span>`;
+    }
+  }catch(e){
+    document.getElementById('status').innerHTML=`<span class="err">Network error: ${e.message}</span>`;
+  }
+  btn.disabled=false; btn.textContent='RESET — CLEAR ALL 2026 DATA';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+if(getToken()) document.getElementById('tok-status').innerHTML='<div class="token-ok">Token loaded.</div>';
+loadExisting();
+</script>
+</body>
+</html>
