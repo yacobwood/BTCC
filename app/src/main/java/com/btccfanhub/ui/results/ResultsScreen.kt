@@ -175,8 +175,16 @@ fun ResultsScreen() {
                         DriverStandingsList(drivers!!, showLiveRound = liveRound, showPastBanner = false)
                     page == 0 && selectedYear == 2026 && !seasonStarted ->
                         SeasonNotStarted()
-                    page == 1 ->
+                    page == 1 && selectedYear == 2026 ->
                         SeasonNotStarted()
+                    page == 1 ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                "Team standings not available.",
+                                color     = BtccTextSecondary,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     else ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
