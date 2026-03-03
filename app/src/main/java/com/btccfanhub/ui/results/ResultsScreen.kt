@@ -20,9 +20,12 @@ import com.btccfanhub.data.repository.StandingsRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccOutline
+import com.btccfanhub.ui.theme.BtccSurface
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import kotlinx.coroutines.launch
@@ -35,7 +38,8 @@ fun ResultsScreen() {
     var isRefreshing by remember { mutableStateOf(false) }
     var loadFailed   by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val scope      = rememberCoroutineScope()
 
     suspend fun refresh(invalidate: Boolean = false) {
         isRefreshing = true
@@ -46,7 +50,6 @@ fun ResultsScreen() {
             liveRound  = live.round
             loadFailed = false
         } else if (drivers == null) {
-            // Only mark failed if we have nothing to show
             loadFailed = true
         }
         isRefreshing = false
@@ -71,36 +74,64 @@ fun ResultsScreen() {
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
         )
 
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor   = BtccSurface,
+            contentColor     = BtccYellow,
+        ) {
+            listOf("DRIVERS", "TEAMS").forEachIndexed { index, label ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
+                    text = {
+                        Text(
+                            label,
+                            fontWeight    = FontWeight.ExtraBold,
+                            fontSize      = 12.sp,
+                            letterSpacing = 1.sp,
+                            color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                        )
+                    },
+                )
+            }
+        }
+
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh    = { scope.launch { refresh(invalidate = true) } },
             modifier     = Modifier.fillMaxSize(),
         ) {
-            when {
-                isRefreshing && drivers == null -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = BtccYellow)
-                    }
-                }
-                loadFailed -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "Could not load standings.\nPull down to retry.",
-                            color     = BtccTextSecondary,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                drivers != null -> {
-                    DriverStandingsList(
-                        standings      = drivers!!,
-                        showLiveRound  = liveRound,
-                    )
-                }
-                else -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = BtccYellow)
-                    }
+            HorizontalPager(
+                state    = pagerState,
+                modifier = Modifier.fillMaxSize(),
+            ) { page ->
+                when {
+                    isRefreshing && drivers == null ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = BtccYellow)
+                        }
+                    loadFailed ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                "Could not load standings.\nPull down to retry.",
+                                color     = BtccTextSecondary,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    page == 0 && drivers != null ->
+                        DriverStandingsList(drivers!!, liveRound)
+                    page == 1 ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                "Team standings coming\nonce the season starts.",
+                                color     = BtccTextSecondary,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    else ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = BtccYellow)
+                        }
                 }
             }
         }
