@@ -38,6 +38,17 @@ object Standings2025 {
         DriverStanding(position = 29, name = "Ryan Bensley",        team = "", car = "54",  points =   0, wins = 0),
     )
 
-    // TODO: populate once team standings are confirmed from btcc.net/standings/teams/
-    val teams: List<TeamStanding> = emptyList()
+    val teams: List<TeamStanding> = listOf(
+        TeamStanding(position =  1, name = "NAPA Racing UK",                                  points = 775),
+        TeamStanding(position =  2, name = "Team VERTU",                                      points = 773),
+        TeamStanding(position =  3, name = "LKQ Euro Car Parts Racing with WSR",              points = 462),
+        TeamStanding(position =  4, name = "Restart Racing",                                  points = 386),
+        TeamStanding(position =  5, name = "Laser Tools Racing with MB Motorsport",           points = 319),
+        TeamStanding(position =  6, name = "TOYOTA GAZOO Racing UK with IAA",                 points = 266),
+        TeamStanding(position =  7, name = "WSR",                                             points = 215),
+        TeamStanding(position =  8, name = "Motor Parts Direct with Power Maxed Racing",      points = 190),
+        TeamStanding(position =  9, name = "One Motorsport",                                  points = 156),
+        TeamStanding(position = 10, name = "ROKiT Racing with Un-Limited Motorsport",         points = 144),
+        TeamStanding(position = 11, name = "Powder Monkey Brewing Co with Esidock",           points =  32),
+    )
 }
