@@ -20,7 +20,7 @@ object StandingsRepository {
 
     private val client = OkHttpClient()
     private val url =
-        "https://gist.githubusercontent.com/yacobwood/7a2af0a9690d24cab8eb608dd4c5ba42/raw/btcc-standings.json"
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/standings.json"
 
     // Cache: avoid re-fetching on every screen open (valid for 5 minutes)
     private var cache: LiveStandings? = null
@@ -38,26 +38,16 @@ object StandingsRepository {
             val body = client.newCall(request).execute().use { it.body?.string() } ?: return@withContext null
             val json = JSONObject(body)
 
-            val drivers = json.optJSONArray("drivers")?.let { arr ->
+            val drivers = json.optJSONArray("standings")?.let { arr ->
                 (0 until arr.length()).map { i ->
                     val d = arr.getJSONObject(i)
                     DriverStanding(
                         position = d.optInt("pos", i + 1),
-                        name = d.getString("name"),
+                        name = d.optString("driver", ""),
                         team = d.optString("team", ""),
-                        car = "",
+                        car = d.optString("car", ""),
                         points = d.optInt("points", 0),
-                    )
-                }
-            } ?: emptyList()
-
-            val teams = json.optJSONArray("teams")?.let { arr ->
-                (0 until arr.length()).map { i ->
-                    val t = arr.getJSONObject(i)
-                    TeamStanding(
-                        position = t.optInt("pos", i + 1),
-                        name = t.getString("name"),
-                        points = t.optInt("points", 0),
+                        wins = d.optInt("wins", 0),
                     )
                 }
             } ?: emptyList()
@@ -67,7 +57,7 @@ object StandingsRepository {
                 round = json.optInt("round", 0),
                 venue = json.optString("venue", ""),
                 drivers = drivers,
-                teams = teams,
+                teams = emptyList(),
             )
             cache = result
             cacheTime = now
