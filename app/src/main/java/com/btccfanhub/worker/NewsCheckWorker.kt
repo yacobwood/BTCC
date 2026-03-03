@@ -21,10 +21,12 @@ class NewsCheckWorker(
 ) : CoroutineWorker(context, params) {
 
     companion object {
-        const val WORK_NAME   = "btcc_news_check"
-        const val CHANNEL_ID  = "btcc_news_channel"
-        const val PREFS_NAME  = "btcc_prefs"
-        const val KEY_LAST_ID = "last_news_id"
+        const val WORK_NAME        = "btcc_news_check"
+        const val WORK_NAME_TEST   = "btcc_news_check_test"
+        const val CHANNEL_ID       = "btcc_news_channel"
+        const val PREFS_NAME       = "btcc_prefs"
+        const val KEY_LAST_ID      = "last_news_id"
+        const val KEY_FORCE_NOTIFY = "force_notify"
         private const val NOTIF_ID = 1001
     }
 
@@ -52,10 +54,16 @@ class NewsCheckWorker(
                 .replace("&#8221;", "\u201D").replace("&hellip;", "\u2026")
                 .trim()
 
-            val prefs  = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val lastId = prefs.getInt(KEY_LAST_ID, -1)
+            val forceNotify = inputData.getBoolean(KEY_FORCE_NOTIFY, false)
+            val prefs       = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val lastId      = prefs.getInt(KEY_LAST_ID, -1)
 
             when {
+                forceNotify -> {
+                    // Test run — always notify with the current article
+                    prefs.edit().putInt(KEY_LAST_ID, id).apply()
+                    notify(title)
+                }
                 lastId == -1 -> {
                     // First run — store current article, no notification
                     prefs.edit().putInt(KEY_LAST_ID, id).apply()

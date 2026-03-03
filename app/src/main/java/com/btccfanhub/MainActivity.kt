@@ -29,7 +29,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.btccfanhub.navigation.AppNavHost
@@ -76,12 +79,29 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun scheduleNewsCheck() {
-        val request = PeriodicWorkRequestBuilder<NewsCheckWorker>(15, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        val wm = WorkManager.getInstance(this)
+
+        // Periodic background check (production)
+        val periodic = PeriodicWorkRequestBuilder<NewsCheckWorker>(15, TimeUnit.MINUTES).build()
+        wm.enqueueUniquePeriodicWork(
             NewsCheckWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
-            request,
+            periodic,
         )
+
+        // One-time immediate test run — fires a notification right away so you
+        // can verify the channel/permission/formatting before release.
+        // Remove this block once you're happy notifications are working.
+        if (BuildConfig.DEBUG) {
+            val test = OneTimeWorkRequestBuilder<NewsCheckWorker>()
+                .setInputData(Data.Builder().putBoolean(NewsCheckWorker.KEY_FORCE_NOTIFY, true).build())
+                .build()
+            wm.enqueueUniqueWork(
+                NewsCheckWorker.WORK_NAME_TEST,
+                ExistingWorkPolicy.REPLACE,
+                test,
+            )
+        }
     }
 
     private fun requestNewsNotificationPermission() {
