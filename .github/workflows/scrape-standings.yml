@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r scraper/requirements.txt
+          # Ubuntu 24.04 renamed libasound2 → libasound2t64; install it first
+          # so playwright's --with-deps resolves the virtual package correctly
+          sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
       - name: Run scraper

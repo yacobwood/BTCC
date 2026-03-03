@@ -15,7 +15,6 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 STANDINGS_URL = "https://btcc.net/standings/drivers/"
 OUT_FILE = Path(__file__).parent.parent / "data" / "standings.json"
 
-# Confirmed via DOM inspection: plain HTML table inside #standingsShortcode
 TABLE_SELECTOR = "#standingsShortcode table"
 
 
@@ -27,7 +26,6 @@ def scrape() -> list[dict]:
         print(f"Fetching {STANDINGS_URL} …")
         page.goto(STANDINGS_URL, wait_until="networkidle", timeout=30_000)
 
-        # Wait for the table to appear
         try:
             page.wait_for_selector(TABLE_SELECTOR, timeout=15_000)
         except PWTimeout:
@@ -42,7 +40,7 @@ def scrape() -> list[dict]:
         for row in rows:
             cells = row.query_selector_all("td")
             if len(cells) < 5:
-                continue  # skip header rows or malformed rows
+                continue
 
             pos_str    = cells[0].inner_text().strip()
             car_no_str = cells[1].inner_text().strip()
@@ -80,7 +78,6 @@ def main():
         print("No standings data extracted — aborting without overwriting file.", file=sys.stderr)
         sys.exit(1)
 
-    # Sort by position as a sanity check
     standings.sort(key=lambda x: x["pos"])
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
