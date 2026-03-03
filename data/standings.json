@@ -1,4 +1,5 @@
 {
+  "season": 2026,
   "standings": [
     {
       "pos": 1,
@@ -230,6 +231,74 @@
       "car": "54",
       "class": "M",
       "points": 0,
+      "wins": 0
+    }
+  ],
+  "teams": [
+    {
+      "pos": 1,
+      "team": "NAPA Racing UK",
+      "points": 775,
+      "wins": 0
+    },
+    {
+      "pos": 2,
+      "team": "Team VERTU",
+      "points": 773,
+      "wins": 0
+    },
+    {
+      "pos": 3,
+      "team": "LKQ Euro Car Parts Racing with WSR",
+      "points": 462,
+      "wins": 0
+    },
+    {
+      "pos": 4,
+      "team": "Restart Racing",
+      "points": 386,
+      "wins": 0
+    },
+    {
+      "pos": 5,
+      "team": "Laser Tools Racing with MB Motorsport",
+      "points": 319,
+      "wins": 0
+    },
+    {
+      "pos": 6,
+      "team": "TOYOTA GAZOO Racing UK with IAA",
+      "points": 266,
+      "wins": 0
+    },
+    {
+      "pos": 7,
+      "team": "WSR",
+      "points": 215,
+      "wins": 0
+    },
+    {
+      "pos": 8,
+      "team": "Motor Parts Direct with Power Maxed Racing",
+      "points": 190,
+      "wins": 0
+    },
+    {
+      "pos": 9,
+      "team": "One Motorsport",
+      "points": 156,
+      "wins": 0
+    },
+    {
+      "pos": 10,
+      "team": "ROKiT Racing with Un-Limited Motorsport",
+      "points": 144,
+      "wins": 0
+    },
+    {
+      "pos": 11,
+      "team": "Powder Monkey Brewing Co with Esidock",
+      "points": 32,
       "wins": 0
     }
   ]
