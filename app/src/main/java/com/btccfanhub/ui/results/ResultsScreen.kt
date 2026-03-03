@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +22,7 @@ import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.repository.StandingsRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
+import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccSurface
 import com.btccfanhub.ui.theme.BtccYellow
@@ -28,7 +32,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
+
+private val seasonStartDate = LocalDate.of(2026, 4, 18)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -121,17 +129,97 @@ fun ResultsScreen() {
                     page == 0 && drivers != null ->
                         DriverStandingsList(drivers!!, liveRound)
                     page == 1 ->
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                "Team standings coming\nonce the season starts.",
-                                color     = BtccTextSecondary,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                        SeasonNotStarted()
                     else ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
                         }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SeasonNotStarted() {
+    val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .background(
+                        Brush.radialGradient(listOf(BtccYellow.copy(alpha = 0.2f), Color.Transparent)),
+                        shape = RoundedCornerShape(48.dp),
+                    )
+                    .border(1.dp, BtccYellow.copy(alpha = 0.3f), RoundedCornerShape(48.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint     = BtccYellow,
+                    modifier = Modifier.size(44.dp),
+                )
+            }
+
+            Spacer(Modifier.height(28.dp))
+
+            Text(
+                "NO STANDINGS YET",
+                fontWeight    = FontWeight.Black,
+                fontSize      = 20.sp,
+                color         = MaterialTheme.colorScheme.onBackground,
+                letterSpacing = 0.5.sp,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                "The season kicks off at",
+                style     = MaterialTheme.typography.bodyMedium,
+                color     = BtccTextSecondary,
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .background(BtccCard, RoundedCornerShape(12.dp))
+                    .border(1.dp, BtccYellow.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "ROUND 1 · DONINGTON PARK",
+                        style         = MaterialTheme.typography.labelSmall,
+                        color         = BtccYellow,
+                        fontWeight    = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "18 April 2026",
+                        style      = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color      = MaterialTheme.colorScheme.onBackground,
+                    )
+                    if (daysUntil > 0) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "$daysUntil days away",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = BtccTextSecondary,
+                        )
+                    }
                 }
             }
         }
