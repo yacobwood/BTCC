@@ -46,8 +46,11 @@ fun ResultsScreen() {
     var isRefreshing by remember { mutableStateOf(false) }
     var loadFailed   by remember { mutableStateOf(false) }
 
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val scope      = rememberCoroutineScope()
+    val today         = LocalDate.now()
+    val seasonStarted = today >= seasonStartDate
+    var selectedYear  by remember { mutableIntStateOf(if (seasonStarted) 2026 else 2025) }
+    val pagerState    = rememberPagerState(pageCount = { 2 })
+    val scope         = rememberCoroutineScope()
 
     suspend fun refresh(invalidate: Boolean = false) {
         isRefreshing = true
@@ -65,6 +68,10 @@ fun ResultsScreen() {
 
     LaunchedEffect(Unit) { refresh() }
 
+    // What to show per year/tab combination
+    val show2025Drivers = selectedYear == 2025 && drivers != null
+    val show2026Drivers = selectedYear == 2026 && seasonStarted && drivers != null
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,6 +88,42 @@ fun ResultsScreen() {
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
         )
+
+        // Year selector
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BtccSurface)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            listOf(2025, 2026).forEach { year ->
+                FilterChip(
+                    selected = selectedYear == year,
+                    onClick  = { selectedYear = year },
+                    label = {
+                        Text(
+                            "$year",
+                            fontWeight    = FontWeight.ExtraBold,
+                            fontSize      = 12.sp,
+                            letterSpacing = 1.sp,
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = BtccYellow,
+                        selectedLabelColor     = BtccNavy,
+                        containerColor         = BtccCard,
+                        labelColor             = BtccTextSecondary,
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled             = true,
+                        selected            = selectedYear == year,
+                        borderColor         = BtccOutline,
+                        selectedBorderColor = BtccYellow,
+                    ),
+                )
+            }
+        }
 
         TabRow(
             selectedTabIndex = pagerState.currentPage,
@@ -126,8 +169,12 @@ fun ResultsScreen() {
                                 textAlign = TextAlign.Center,
                             )
                         }
-                    page == 0 && drivers != null ->
-                        DriverStandingsList(drivers!!, liveRound)
+                    page == 0 && show2025Drivers ->
+                        DriverStandingsList(drivers!!, showLiveRound = 0, showPastBanner = true)
+                    page == 0 && show2026Drivers ->
+                        DriverStandingsList(drivers!!, showLiveRound = liveRound, showPastBanner = false)
+                    page == 0 && selectedYear == 2026 && !seasonStarted ->
+                        SeasonNotStarted()
                     page == 1 ->
                         SeasonNotStarted()
                     else ->
@@ -227,18 +274,46 @@ private fun SeasonNotStarted() {
 }
 
 @Composable
-private fun DriverStandingsList(standings: List<DriverStanding>, showLiveRound: Int) {
+private fun DriverStandingsList(
+    standings: List<DriverStanding>,
+    showLiveRound: Int,
+    showPastBanner: Boolean,
+) {
     LazyColumn(
         contentPadding      = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (showLiveRound > 0) {
-            item { RoundBanner("ROUND $showLiveRound STANDINGS") }
+        item {
+            when {
+                showLiveRound > 0 -> RoundBanner("ROUND $showLiveRound STANDINGS")
+                showPastBanner    -> SeasonBanner()
+            }
         }
         itemsIndexed(standings) { _, driver ->
             DriverRow(driver)
         }
     }
+}
+
+@Composable
+private fun SeasonBanner() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(10.dp))
+            .border(1.dp, BtccYellow.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            "2025 FINAL STANDINGS",
+            fontWeight    = FontWeight.ExtraBold,
+            fontSize      = 11.sp,
+            letterSpacing = 1.5.sp,
+            color         = BtccYellow,
+        )
+    }
+    Spacer(Modifier.height(4.dp))
 }
 
 @Composable
