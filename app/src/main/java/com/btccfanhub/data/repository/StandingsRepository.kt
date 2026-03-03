@@ -52,12 +52,23 @@ object StandingsRepository {
                 }
             } ?: emptyList()
 
+            val teams = json.optJSONArray("teams")?.let { arr ->
+                (0 until arr.length()).map { i ->
+                    val t = arr.getJSONObject(i)
+                    TeamStanding(
+                        position = t.optInt("pos", i + 1),
+                        name     = t.optString("team", ""),
+                        points   = t.optInt("points", 0),
+                    )
+                }
+            } ?: emptyList()
+
             val result = LiveStandings(
                 season = json.optString("season", "2026"),
                 round = json.optInt("round", 0),
                 venue = json.optString("venue", ""),
                 drivers = drivers,
-                teams = emptyList(),
+                teams = teams,
             )
             cache = result
             cacheTime = now

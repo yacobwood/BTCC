@@ -18,7 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.data.Standings2025
 import com.btccfanhub.data.model.DriverStanding
+import com.btccfanhub.data.model.TeamStanding
 import com.btccfanhub.data.repository.StandingsRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
@@ -41,7 +43,9 @@ private val seasonStartDate = LocalDate.of(2026, 4, 18)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ResultsScreen() {
-    var drivers      by remember { mutableStateOf<List<DriverStanding>?>(null) }
+    // Live 2026 data fetched from the network
+    var liveDrivers  by remember { mutableStateOf<List<DriverStanding>?>(null) }
+    var liveTeams    by remember { mutableStateOf<List<TeamStanding>?>(null) }
     var liveRound    by remember { mutableIntStateOf(0) }
     var isRefreshing by remember { mutableStateOf(false) }
     var loadFailed   by remember { mutableStateOf(false) }
@@ -57,20 +61,25 @@ fun ResultsScreen() {
         if (invalidate) StandingsRepository.invalidateCache()
         val live = StandingsRepository.getStandings()
         if (live != null && live.drivers.isNotEmpty()) {
-            drivers    = live.drivers
-            liveRound  = live.round
-            loadFailed = false
-        } else if (drivers == null) {
+            liveDrivers = live.drivers
+            liveTeams   = live.teams.ifEmpty { null }
+            liveRound   = live.round
+            loadFailed  = false
+        } else if (liveDrivers == null) {
             loadFailed = true
         }
         isRefreshing = false
     }
 
-    LaunchedEffect(Unit) { refresh() }
+    // Only fetch live data when the 2026 season is in scope
+    LaunchedEffect(Unit) { if (seasonStarted) refresh() }
 
-    // What to show per year/tab combination
-    val show2025Drivers = selectedYear == 2025 && drivers != null
-    val show2026Drivers = selectedYear == 2026 && seasonStarted && drivers != null
+    // Resolve what to display for each year
+    val drivers2025 = Standings2025.drivers
+    val teams2025   = Standings2025.teams.ifEmpty { null }
+
+    val show2026Drivers = selectedYear == 2026 && seasonStarted && liveDrivers != null
+    val show2026Teams   = selectedYear == 2026 && seasonStarted && liveTeams != null
 
     Column(
         modifier = Modifier
@@ -100,7 +109,12 @@ fun ResultsScreen() {
             listOf(2025, 2026).forEach { year ->
                 FilterChip(
                     selected = selectedYear == year,
-                    onClick  = { selectedYear = year },
+                    onClick  = {
+                        selectedYear = year
+                        if (year == 2026 && seasonStarted && liveDrivers == null) {
+                            scope.launch { refresh() }
+                        }
+                    },
                     label = {
                         Text(
                             "$year",
@@ -147,9 +161,12 @@ fun ResultsScreen() {
             }
         }
 
+        val isLiveLoading = selectedYear == 2026 && isRefreshing && liveDrivers == null
+        val isLiveFailed  = selectedYear == 2026 && loadFailed && liveDrivers == null
+
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh    = { scope.launch { refresh(invalidate = true) } },
+            isRefreshing = isRefreshing && selectedYear == 2026,
+            onRefresh    = { if (selectedYear == 2026) scope.launch { refresh(invalidate = true) } },
             modifier     = Modifier.fillMaxSize(),
         ) {
             HorizontalPager(
@@ -157,11 +174,12 @@ fun ResultsScreen() {
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
                 when {
-                    isRefreshing && drivers == null ->
+                    // --- Loading / error states (live only) ---
+                    isLiveLoading ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
                         }
-                    loadFailed ->
+                    isLiveFailed ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
                                 "Could not load standings.\nPull down to retry.",
@@ -169,15 +187,13 @@ fun ResultsScreen() {
                                 textAlign = TextAlign.Center,
                             )
                         }
-                    page == 0 && show2025Drivers ->
-                        DriverStandingsList(drivers!!, showLiveRound = 0, showPastBanner = true)
-                    page == 0 && show2026Drivers ->
-                        DriverStandingsList(drivers!!, showLiveRound = liveRound, showPastBanner = false)
-                    page == 0 && selectedYear == 2026 && !seasonStarted ->
-                        SeasonNotStarted()
-                    page == 1 && selectedYear == 2026 ->
-                        SeasonNotStarted()
-                    page == 1 ->
+
+                    // --- 2025 (hardcoded) ---
+                    page == 0 && selectedYear == 2025 ->
+                        DriverStandingsList(drivers2025, showLiveRound = 0, showPastBanner = true)
+                    page == 1 && selectedYear == 2025 && teams2025 != null ->
+                        TeamStandingsList(teams2025, showPastBanner = true)
+                    page == 1 && selectedYear == 2025 ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
                                 "Team standings not available.",
@@ -185,6 +201,21 @@ fun ResultsScreen() {
                                 textAlign = TextAlign.Center,
                             )
                         }
+
+                    // --- 2026 live ---
+                    page == 0 && show2026Drivers ->
+                        DriverStandingsList(liveDrivers!!, showLiveRound = liveRound, showPastBanner = false)
+                    page == 0 && selectedYear == 2026 && !seasonStarted ->
+                        SeasonNotStarted()
+                    page == 0 && selectedYear == 2026 ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = BtccYellow)
+                        }
+                    page == 1 && show2026Teams ->
+                        TeamStandingsList(liveTeams!!, showPastBanner = false)
+                    page == 1 && selectedYear == 2026 ->
+                        SeasonNotStarted()
+
                     else ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
@@ -304,6 +335,24 @@ private fun DriverStandingsList(
 }
 
 @Composable
+private fun TeamStandingsList(
+    standings: List<TeamStanding>,
+    showPastBanner: Boolean,
+) {
+    LazyColumn(
+        contentPadding      = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            if (showPastBanner) SeasonBanner()
+        }
+        itemsIndexed(standings) { _, team ->
+            TeamRow(team)
+        }
+    }
+}
+
+@Composable
 private fun SeasonBanner() {
     Box(
         modifier = Modifier
@@ -357,6 +406,46 @@ private fun DriverRow(driver: DriverStanding) {
         }
         Text(
             "${driver.points} pts",
+            style      = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color      = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+@Composable
+private fun TeamRow(team: TeamStanding) {
+    val positionColor = when (team.position) {
+        1    -> Color(0xFFFFD700)
+        2    -> Color(0xFFC0C0C0)
+        3    -> Color(0xFFCD7F32)
+        else -> BtccOutline
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(10.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Text(
+            "${team.position}",
+            style      = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Black,
+            color      = positionColor,
+            modifier   = Modifier.width(24.dp),
+            textAlign  = TextAlign.Center,
+        )
+        Text(
+            team.name,
+            fontWeight = FontWeight.Bold,
+            style      = MaterialTheme.typography.bodyLarge,
+            modifier   = Modifier.weight(1f),
+        )
+        Text(
+            "${team.points} pts",
             style      = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.ExtraBold,
             color      = MaterialTheme.colorScheme.onBackground,

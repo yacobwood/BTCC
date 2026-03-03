@@ -5,7 +5,12 @@ on:
     # Run every 6 hours during race season (Apr–Oct).
     # Adjust or disable in the off-season.
     - cron: "0 */6 * * *"
-  workflow_dispatch: # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force scrape even outside the race season (for historical capture)"
+        type: boolean
+        default: false
 
 jobs:
   scrape:
@@ -31,7 +36,12 @@ jobs:
           playwright install chromium --with-deps
 
       - name: Run scraper
-        run: python scraper/scrape_standings.py
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            ARGS="--force"
+          fi
+          python scraper/scrape_standings.py $ARGS
 
       - name: Commit updated standings
         uses: stefanzweifel/git-auto-commit-action@v5
