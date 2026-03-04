@@ -1,0 +1,21 @@
+{
+  "season": 2026,
+  "drivers": [
+    { "number": 2,   "team": "West Surrey Racing",    "car": "BMW 330i M Sport" },
+    { "number": 3,   "team": "EXCELR8 Motorsport",    "car": "Hyundai i30 N" },
+    { "number": 17,  "team": "Power Maxed Racing",    "car": "Audi S3 Saloon" },
+    { "number": 27,  "team": "NAPA Racing UK",        "car": "Ford Focus Titanium Saloon" },
+    { "number": 28,  "team": "Un-Limited Motorsport", "car": "BMW 330i M Sport" },
+    { "number": 32,  "team": "Plato Racing",          "car": "Mercedes-AMG A35 Saloon" },
+    { "number": 33,  "team": "Plato Racing",          "car": "Mercedes-AMG A35 Saloon", "bio": "A long-standing BTCC competitor, Adam Morgan joins Plato Racing for 2026, reuniting with the Mercedes-AMG A35 Saloon he raced to 6th in the 2025 championship with Ciceley Motorsport." },
+    { "number": 40,  "team": "Laser Tools Racing",    "car": "Toyota Corolla GR Sport" },
+    { "number": 50,  "team": "Power Maxed Racing",    "car": "Audi S3 Saloon" },
+    { "number": 52,  "team": "Laser Tools Racing",    "car": "Toyota Corolla GR Sport" },
+    { "number": 66,  "team": "One Motorsport",        "car": "Honda Civic Type R" },
+    { "number": 77,  "team": "NAPA Racing UK",        "car": "Ford Focus Titanium Saloon" },
+    { "number": 80,  "team": "Speedworks Motorsport", "car": "Toyota Corolla GR Sport" },
+    { "number": 99,  "team": "West Surrey Racing",    "car": "BMW 330i M Sport" },
+    { "number": 116, "team": "NAPA Racing UK",        "car": "Ford Focus Titanium Saloon" },
+    { "number": 123, "team": "Restart Racing",        "car": "Honda Civic Type R" }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "season": "2026",
+  "rounds": [
+    {
+      "round": 1,
+      "venue": "Donington Park",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 3,
+      "venue": "Snetterton",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 4,
+      "venue": "Oulton Park",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 5,
+      "venue": "Thruxton",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 6,
+      "venue": "Knockhill",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 7,
+      "venue": "Donington Park GP",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 8,
+      "venue": "Croft",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 9,
+      "venue": "Silverstone",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    },
+    {
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "sessions": [
+        { "name": "Free Practice 1", "day": "SAT", "time": "TBA" },
+        { "name": "Free Practice 2", "day": "SAT", "time": "TBA" },
+        { "name": "Qualifying",      "day": "SAT", "time": "TBA" },
+        { "name": "Race 1",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 2",          "day": "SUN", "time": "TBA" },
+        { "name": "Race 3",          "day": "SUN", "time": "TBA" }
+      ]
+    }
+  ]
+}
