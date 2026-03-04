@@ -32,7 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.btccfanhub.ui.theme.*
+import androidx.compose.ui.platform.LocalContext
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Data models
@@ -363,6 +366,7 @@ private val teams2026 = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriversScreen() {
+    val context = LocalContext.current
     var patches by remember { mutableStateOf<Map<Int, DriverPatch>>(emptyMap()) }
     LaunchedEffect(Unit) {
         val p = withContext(Dispatchers.IO) { DriversRepository.fetch() }
@@ -374,6 +378,27 @@ fun DriversScreen() {
         else drivers2026.map { d ->
             val p = patches[d.number] ?: return@map d
             d.copy(team = p.team ?: d.team, car = p.car ?: d.car, bio = p.bio ?: d.bio)
+        }
+    }
+
+    LaunchedEffect(drivers) {
+        if (drivers.isEmpty()) return@LaunchedEffect
+        drivers.forEach { driver ->
+            if (driver.imageUrl.isNotEmpty()) {
+                // Prefetch list size (58dp * 2)
+                val listReq = ImageRequest.Builder(context)
+                    .data(driver.imageUrl)
+                    .size(116)
+                    .build()
+                context.imageLoader.enqueue(listReq)
+
+                // Prefetch detail size (100dp * 2)
+                val detailReq = ImageRequest.Builder(context)
+                    .data(driver.imageUrl)
+                    .size(200)
+                    .build()
+                context.imageLoader.enqueue(detailReq)
+            }
         }
     }
     val teams = remember(drivers) {
@@ -1137,8 +1162,12 @@ private fun DriverAvatar(imageUrl: String, name: String, size: Int, modifier: Mo
     ) {
         Text(initials, fontWeight = FontWeight.ExtraBold, fontSize = (size * 0.3f).sp, color = BtccTextSecondary)
         if (imageUrl.isNotEmpty()) {
+            val displaySize = if (size > 80) 200 else 116
             AsyncImage(
-                model              = imageUrl,
+                model              = ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .size(displaySize)
+                    .build(),
                 contentDescription = name,
                 modifier           = Modifier.fillMaxSize(),
                 contentScale       = ContentScale.Crop,

@@ -19,15 +19,15 @@ android {
         applicationId = "com.btccfanhub"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 8
+        versionName = "closed beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
         create("release") {
-            storeFile = file(keystoreProps["storeFile"] as String)
+            storeFile = rootProject.file(keystoreProps["storeFile"] as String)
             storePassword = keystoreProps["storePassword"] as String
             keyAlias = keystoreProps["keyAlias"] as String
             keyPassword = keystoreProps["keyPassword"] as String
@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.youtube.player)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
