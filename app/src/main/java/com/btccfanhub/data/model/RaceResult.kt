@@ -22,5 +22,7 @@ data class RoundResult(
     val venue: String,
     val date: String,           // e.g. "18 Apr 2026"
     val races: List<RaceEntry>,
+    val r_id: String? = null,
     val highlightsUrl: String? = null,
+    val fullRacesUrl: String? = null,
 )

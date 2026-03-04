@@ -1,7 +1,11 @@
 package com.btccfanhub.ui.results
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.btccfanhub.data.model.DriverResult
 import com.btccfanhub.data.model.RaceEntry
 import com.btccfanhub.data.repository.RaceResultsRepository
@@ -108,46 +113,99 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                 }
                 else -> {
                     val context = LocalContext.current
+                    
+                    var selectedVideoType by remember { mutableStateOf("highlights") }
                     val highlightsUrl = roundResult?.highlightsUrl
-                    if (highlightsUrl != null) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp)
-                                .background(Color(0xFF1A0000), RoundedCornerShape(10.dp))
-                                .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-                                .clickable {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(highlightsUrl))
+                    val fullRacesUrl = roundResult?.fullRacesUrl
+                    
+                    val activeUrl = if (selectedVideoType == "full_races" && fullRacesUrl != null) {
+                        fullRacesUrl
+                    } else if (highlightsUrl != null) {
+                        highlightsUrl
+                    } else {
+                        fullRacesUrl // Fallback if highlights null but full races exists
+                    }
+                    
+                    if (highlightsUrl != null || fullRacesUrl != null) {
+                        // Show toggle buttons if both exist
+                        if (highlightsUrl != null && fullRacesUrl != null) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                VideoToggleButton(
+                                    text = "HIGHLIGHTS",
+                                    icon = Icons.Default.PlayCircle,
+                                    isSelected = activeUrl == highlightsUrl,
+                                    onClick = { selectedVideoType = "highlights" },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                VideoToggleButton(
+                                    text = "FULL RACES",
+                                    icon = Icons.Default.PlayCircle,
+                                    isSelected = activeUrl == fullRacesUrl,
+                                    onClick = { selectedVideoType = "full_races" },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                        
+                        if (activeUrl != null) {
+                            val videoId = extractYouTubeVideoId(activeUrl)
+                            if (videoId != null) {
+                                YouTubePlayer(
+                                    videoId  = videoId,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(16f / 9f)
+                                        .padding(horizontal = 16.dp)
+                                        .background(Color.Black, RoundedCornerShape(10.dp))
+                                )
+                            } else {
+                                // fallback: open externally
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        .background(Color(0xFF1A0000), RoundedCornerShape(10.dp))
+                                        .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                        .clickable {
+                                            context.startActivity(
+                                                Intent(Intent.ACTION_VIEW, Uri.parse(activeUrl))
+                                            )
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                ) {
+                                    Icon(
+                                        Icons.Default.PlayCircle,
+                                        contentDescription = null,
+                                        tint     = Color(0xFFFF0000),
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                    Text(
+                                        if (activeUrl == fullRacesUrl) "WATCH FULL RACES" else "WATCH HIGHLIGHTS",
+                                        fontWeight    = FontWeight.ExtraBold,
+                                        fontSize      = 13.sp,
+                                        letterSpacing = 1.sp,
+                                        color         = Color.White,
+                                        modifier      = Modifier.weight(1f),
+                                    )
+                                    Text(
+                                        "YouTube",
+                                        style         = MaterialTheme.typography.labelSmall,
+                                        color         = Color(0xFFFF0000),
+                                        fontWeight    = FontWeight.Bold,
+                                        letterSpacing = 0.5.sp,
                                     )
                                 }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        ) {
-                            Icon(
-                                Icons.Default.PlayCircle,
-                                contentDescription = null,
-                                tint     = Color(0xFFFF0000),
-                                modifier = Modifier.size(24.dp),
-                            )
-                            Text(
-                                "WATCH HIGHLIGHTS",
-                                fontWeight    = FontWeight.ExtraBold,
-                                fontSize      = 13.sp,
-                                letterSpacing = 1.sp,
-                                color         = Color.White,
-                                modifier      = Modifier.weight(1f),
-                            )
-                            Text(
-                                "YouTube",
-                                style         = MaterialTheme.typography.labelSmall,
-                                color         = Color(0xFFFF0000),
-                                fontWeight    = FontWeight.Bold,
-                                letterSpacing = 0.5.sp,
-                            )
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
@@ -180,6 +238,111 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+/** Extracts the YouTube video ID from a watch or short URL. */
+private fun extractYouTubeVideoId(url: String): String? {
+    // Handles: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+    val patterns = listOf(
+        Regex("""[?&]v=([a-zA-Z0-9_-]{11})"""),
+        Regex("""youtu\.be/([a-zA-Z0-9_-]{11})"""),
+        Regex("""youtube\.com/embed/([a-zA-Z0-9_-]{11})"""),
+    )
+    for (pattern in patterns) {
+        val match = pattern.find(url)
+        if (match != null) return match.groupValues[1]
+    }
+    return null
+}
+
+@SuppressLint("SetJavaScriptEnabled")
+@Composable
+private fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
+    val embedHtml = """
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              * { margin:0; padding:0; background:#000; }
+              iframe { width:100%; height:100%; border:none; }
+            </style>
+          </head>
+          <body>
+            <iframe
+              src="https://www.youtube.com/embed/${'$'}videoId?autoplay=0&rel=0&modestbranding=1"
+              allowfullscreen>
+            </iframe>
+          </body>
+        </html>
+    """.trimIndent()
+
+    AndroidView(
+        modifier = modifier,
+        factory  = { ctx ->
+            WebView(ctx).apply {
+                settings.javaScriptEnabled    = true
+                settings.loadWithOverviewMode = true
+                settings.useWideViewPort      = true
+                settings.mediaPlaybackRequiresUserGesture = false
+                webViewClient   = WebViewClient()
+                webChromeClient = WebChromeClient()
+                loadDataWithBaseURL(
+                    "https://www.youtube.com",
+                    embedHtml,
+                    "text/html",
+                    "utf-8",
+                    null,
+                )
+            }
+        },
+        update = { webView ->
+            webView.loadDataWithBaseURL(
+                "https://www.youtube.com",
+                embedHtml,
+                "text/html",
+                "utf-8",
+                null,
+            )
+        },
+    )
+}
+
+@Composable
+private fun VideoToggleButton(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val bgColor = if (isSelected) Color(0xFFFF0000) else Color(0xFF1A0000)
+    val contentColor = if (isSelected) Color.White else Color(0xFFFF0000).copy(alpha = 0.7f)
+    val borderColor = if (isSelected) Color(0xFFFF0000) else Color(0xFFFF0000).copy(alpha = 0.3f)
+
+    Row(
+        modifier = modifier
+            .background(bgColor, RoundedCornerShape(8.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text,
+            color = contentColor,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 11.sp,
+            letterSpacing = 0.5.sp
+        )
     }
 }
 

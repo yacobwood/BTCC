@@ -94,6 +94,7 @@ object RaceResultsRepository {
                 date          = r.optString("date", ""),
                 races         = races,
                 highlightsUrl = r.optString("highlightsUrl", "").takeIf { it.isNotEmpty() },
+                fullRacesUrl  = r.optString("fullRacesUrl", "").takeIf { it.isNotEmpty() },
             )
         }
     }
