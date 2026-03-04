@@ -27,8 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.btccfanhub.data.model.LapRecord
 import com.btccfanhub.data.model.Race
+import com.btccfanhub.data.model.RaceSession
 import com.btccfanhub.data.model.TrackInfo
+import com.btccfanhub.data.repository.ScheduleRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccOutline
@@ -57,7 +60,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "One of Britain's most historic circuits, dating back to 1931. The National layout features the infamous Craner Curves — a sweeping downhill chicane that rewards commitment — alongside the Old Hairpin and the fast Schwantz Curve. The circuit also hosted a famous Formula 1 European Grand Prix in 1993, remembered for Ayrton Senna's extraordinary opening lap.",
         btccFact = "Donington opens the BTCC season almost every year, meaning the winner of the first race here is often considered the early championship favourite.",
         imageUrl = "https://btcc.net/wp-content/uploads/2025/04/Start-0H5A6101-scaled.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/1-Donington-Park.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/2-Donington-Park-1.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/04/start-0H5A1735-scaled-e1745785780179.jpg",
             "https://btcc.net/wp-content/uploads/2025/04/sutton-0H5A6349-scaled-e1745765754484.jpg",
@@ -65,6 +68,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/04/podium0H5A5174-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2025/04/Cammish-0Q3A5960-scaled.jpg",
         ),
+        firstBtccYear = 1977,
+        qualifyingRecord = LapRecord("Ash Sutton", "1:07.570", "106.39 mph", 2023),
+        raceRecord      = LapRecord("Ash Sutton", "1:08.011", "104.75 mph", 2025),
     ),
     TrackInfo(
         round = 2,
@@ -77,7 +83,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "The short, intense Indy loop of the legendary Brands Hatch circuit. Paddock Hill Bend is one of the most famous corners in British motorsport — blind, downhill, and off-camber — providing spectacular action on the opening lap. The tight Druids hairpin and Clark Curve create close-quarters racing throughout the field.",
         btccFact = "The BTCC visits Brands Hatch twice each season — on the shorter Indy circuit in spring and the full Grand Prix layout for the season finale in October.",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/Brands-Hatch1.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/2-Brands-Hatch-Indy-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/750x625.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/05/Cook-0H5A4404-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2025/05/Doble-0H5A4021-scaled.jpg",
@@ -85,6 +91,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/05/Hill-0Q3A1643-scaled-e1748079457751.jpg",
             "https://btcc.net/wp-content/uploads/2025/05/Cammish-0H5A8317-scaled-e1748620603557.jpg",
         ),
+        firstBtccYear = 1958,
+        qualifyingRecord = LapRecord("Jake Hill",   "46.493s",   "94.54 mph", 2025),
+        raceRecord       = LapRecord("Tom Ingram",  "47.157s",   "92.53 mph", 2025),
     ),
     TrackInfo(
         round = 3,
@@ -97,7 +106,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "Built on a former Second World War airfield in the flat Norfolk countryside, Snetterton is one of the longest circuits on the BTCC calendar. The Bentley Straight offers tyre-testing high-speed running, while technical sections like the Senna Chicane and Coram Corner reward smooth, committed driving. Setup compromise between straight-line speed and mechanical grip is key.",
         btccFact = "Snetterton's long straights mean it's one of the circuits where power advantage makes the biggest difference — teams running higher-powered cars often shine here.",
         imageUrl = "https://btcc.net/wp-content/uploads/2023/05/Snetterton-BTCC.net-750x340-1.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/7-Snetterton-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/6-Snetterton.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/05/Doble-0Q3A8800-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2025/05/Morgan-33-0H5A8454-scaled-e1748081530691.jpg",
@@ -105,6 +114,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/05/Hill-0H5A1809-scaled-e1748426133523.jpg",
             "https://btcc.net/wp-content/uploads/2025/04/NAPA_Snetterton_Testing-2-scaled.jpg",
         ),
+        firstBtccYear = 1959,
+        qualifyingRecord = LapRecord("Dan Cammish", "1:53.750", "94.62 mph", 2025),
+        raceRecord       = LapRecord("Ash Sutton",  "1:54.871", "91.06 mph", 2023),
     ),
     TrackInfo(
         round = 4,
@@ -117,7 +129,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "A consistent driver favourite. Set in the rolling Cheshire countryside, Oulton Park combines sweeping fast corners with elevation changes that put the car through its paces. Cascades is a breathtaking flat-out downhill right-hander, while the Knickerbrook complex and the Lodge chicane reward precision. It's the type of track that exposes both talent and machinery.",
         btccFact = "Oulton Park has produced some of the most memorable BTCC moments of recent seasons, with its undulating nature leading to unpredictable results and dramatic incidents.",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/Oulton-Park-2.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/5-Oulton-Park-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/4-Oulton-Park-1.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/07/Ingram-0Q3A3136-scaled-e1753783962919.jpg",
             "https://btcc.net/wp-content/uploads/2025/07/Jelley-0Q3A9321-scaled.jpg",
@@ -125,6 +137,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/07/Smiley-Morgan-Deleon-Sutton-0H5A2139-scaled-e1752223838566.jpg",
             "https://btcc.net/wp-content/uploads/2025/07/Hill-0Q3A9688-scaled-e1752051499535.jpg",
         ),
+        firstBtccYear = 1960,
+        qualifyingRecord = LapRecord("Tom Ingram", "1:23.856", "96.72 mph", 2025),
+        raceRecord       = LapRecord("Tom Ingram", "1:24.052", "95.57 mph", 2025),
     ),
     TrackInfo(
         round = 5,
@@ -137,7 +152,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb–Noble–Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
         btccFact = "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
         imageUrl = "https://btcc.net/wp-content/uploads/2025/06/Thruxton-0Q3A4321-scaled-e1749317843966.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/4-Thruxton-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/07/Cook-0H5A7560-scaled-e1753397162433.jpg",
             "https://btcc.net/wp-content/uploads/2025/07/Ingram-0H5A6509-1.jpg",
@@ -145,6 +160,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/07/Rainford-0Q3A4157-1-e1752682089797.jpg",
             "https://btcc.net/wp-content/uploads/2025/07/sutton-0Q3A9385-scaled-e1751448841991.jpg",
         ),
+        firstBtccYear = 1968,
+        qualifyingRecord = LapRecord("Dan Cammish", "1:15.201", "112.79 mph", 2020),
+        raceRecord       = LapRecord("Ash Sutton",  "1:15.254", "112.71 mph", 2025),
     ),
     TrackInfo(
         round = 6,
@@ -157,7 +175,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "Scotland's National Motorsport Centre, tucked into the Fife hills. Compact and technically demanding, Knockhill is unlike any other circuit on the calendar — the undulating gradient means cars are constantly loaded and unloaded through corners, making the rear of a touring car particularly lively. The blind crest at Clark's Corner demands total commitment.",
         btccFact = "The Knockhill crowd is famously passionate, and the circuit's compact nature means fans can see virtually the entire lap from the hillside spectator banks — making it a fantastic atmosphere for a race meeting.",
         imageUrl = "https://btcc.net/wp-content/uploads/2025/08/Knockhill-0Q3A7021-scaled-e1755340971797.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/8-Knockhill-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/knockhill-2020-03.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/08/Release_start-0Q3A1361-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2025/08/Ingram-0H5A8227-scaled-e1756658215859.jpg",
@@ -165,6 +183,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/08/Cammish-0H5A6429-scaled-e1756648705691.jpg",
             "https://btcc.net/wp-content/uploads/2025/08/Action-0H5A3520-scaled.jpg",
         ),
+        firstBtccYear = 1992,
+        qualifyingRecord = LapRecord("Rory Butcher",   "50.451s", "90.40 mph", 2019),
+        raceRecord       = LapRecord("Ashley Sutton",  "50.876s", "89.65 mph", 2020),
     ),
     TrackInfo(
         round = 7,
@@ -177,7 +198,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "The full Grand Prix layout extends the National circuit with the Melbourne Loop and the Foggy/Goddards complex, significantly increasing lap length and introducing additional technical challenge. The extra section adds meaningful overtaking opportunities and changes the strategic picture for tyre management. It last hosted a Formula 1 race in 1993.",
         btccFact = "Donington GP provides a fascinating contrast with Round 1 at the same venue — drivers who struggled on the National loop earlier in the season can find the extra GP section suits their driving style far better.",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/Donington-DG5_2477-1.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/Donington-GP-detailed-map-1.png",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2022/11/Donington-GP-detailed-map-1.png",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/08/Chilton-0Q3A4225-scaled-e1756572398593.jpg",
             "https://btcc.net/wp-content/uploads/2025/08/Ingram-0Q3A7130-scaled-e1756567883972.jpg",
@@ -185,6 +206,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/08/Hill-1-0H5A7167-scaled-e1756474426795.jpg",
             "https://btcc.net/wp-content/uploads/2025/08/Chilton-0H5A4432.jpg",
         ),
+        firstBtccYear = 1986,
+        qualifyingRecord = LapRecord("Ashley Sutton", "1:33.154", "96.12 mph", 2023),
+        raceRecord       = LapRecord("Tom Ingram",    "1:33.621", "95.64 mph", 2025),
     ),
     TrackInfo(
         round = 8,
@@ -197,7 +221,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "A classic British club circuit with roots going back to the 1960s, built on a former RAF airfield in North Yorkshire. Croft combines fast sections with tight chicanes and the iconic Tower Hairpin — one of the best overtaking spots on the calendar. Its relative geographical isolation gives it a distinct, grassroots motorsport atmosphere.",
         btccFact = "Tower Hairpin at Croft is consistently one of the best places for late-braking overtakes in the BTCC, and it regularly produces race-defining moments.",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/Croft-A27I9730-1-scaled.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/6-Croft-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/5-Croft-1.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/09/Plato-0H5A4492-scaled-e1758724319601.jpg",
             "https://btcc.net/wp-content/uploads/2025/09/Hill-0Q3A4314-scaled-e1758718770643.jpg",
@@ -205,6 +229,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/08/Goodyear-0H5A4463-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2024/07/Croft-A27I9730-scaled.jpg",
         ),
+        firstBtccYear = 1968,
+        qualifyingRecord = LapRecord("Tom Ingram", "1:20.522", "95.85 mph", 2025),
+        raceRecord       = LapRecord("Tom Ingram", "1:21.374", "94.24 mph", 2025),
     ),
     TrackInfo(
         round = 9,
@@ -217,7 +244,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts–Becketts–Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
         btccFact = "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead — or deficit — can completely shape the outcome.",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/10-Silverstone-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/10/Rainford-0Q3A3688-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0H5A1979-scaled-e1760521629921.jpg",
@@ -225,6 +252,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/09/Hill-0Q3A4314-scaled-e1758718770643.jpg",
             "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
         ),
+        firstBtccYear = 1959,
+        qualifyingRecord = LapRecord("Daryl DeLeon", "56.734s", "105.43 mph", 2025),
+        raceRecord       = LapRecord("Tom Ingram",   "56.875s", "105.43 mph", 2025),
     ),
     TrackInfo(
         round = 10,
@@ -237,7 +267,7 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
         about = "The season finale. The full Grand Prix circuit adds Hawthorns, Westfield, Dingle Dell, and Stirlings to the Indy loop, creating one of the most spectacular circuits in Britain. Paddock Hill Bend on the opening lap of the finale race has been the scene of some of the most dramatic championship-deciding moments in BTCC history.",
         btccFact = "A Brands Hatch GP BTCC finale is one of the highlights of the British motorsport calendar. With reverse-grid races and three separate races across the weekend, the championship result is rarely decided until the very last lap.",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/Brands-Hatch1-2.jpg",
-        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/11-Brands-Hatch-GP-1.jpg",
+        layoutImageUrl = "https://btcc.net/wp-content/uploads/2024/03/10-Brands-GP.jpg",
         raceImages = listOf(
             "https://btcc.net/wp-content/uploads/2025/10/Doble-0H5A4603-scaled-e1760695111593.jpg",
             "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0Q3A1132-scaled.jpg",
@@ -245,6 +275,9 @@ private val trackInfoMap: Map<Int, TrackInfo> = listOf(
             "https://btcc.net/wp-content/uploads/2025/10/doble-0H5A6139-scaled.jpg",
             "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0H5A1821-scaled.jpg",
         ),
+        firstBtccYear = 1960,
+        qualifyingRecord = LapRecord("Charles Rainford", "1:28.919", "99.41 mph", 2025),
+        raceRecord       = LapRecord("Ashley Sutton",    "1:30.244", "97.06 mph", 2023),
     ),
 ).associateBy { it.round }
 
@@ -272,6 +305,12 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit) {
     val race = races2026.find { it.round == round } ?: return
     val today = LocalDate.now()
     val daysUntil = ChronoUnit.DAYS.between(today, race.startDate)
+
+    var sessions by remember { mutableStateOf<List<RaceSession>>(emptyList()) }
+    LaunchedEffect(round) {
+        val schedule = ScheduleRepository.getSchedule()
+        sessions = schedule[round] ?: emptyList()
+    }
 
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
     // hero image is index 0, race images follow
@@ -410,8 +449,21 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    StatChip(label = "LENGTH", value = info.lengthKm, sub = info.lengthMiles, modifier = Modifier.weight(1f))
-                    StatChip(label = "CORNERS", value = "${info.corners}", sub = "corners", modifier = Modifier.weight(1f))
+                    StatChip(label = "LENGTH",  value = info.lengthKm.substringBefore(' '), sub = "km · ${info.lengthMiles}", modifier = Modifier.weight(1f))
+                    StatChip(label = "CORNERS", value = "${info.corners}",   sub = "corners",        modifier = Modifier.weight(1f))
+                    if (info.firstBtccYear != null) {
+                        StatChip(label = "BTCC SINCE", value = "${info.firstBtccYear}", sub = "first race", modifier = Modifier.weight(1f))
+                    }
+                }
+
+                // ── Lap records ────────────────────────────────────────────────
+                if (info.qualifyingRecord != null || info.raceRecord != null) {
+                    LapRecordCard(qualifying = info.qualifyingRecord, race = info.raceRecord)
+                }
+
+                // ── Weekend timetable ──────────────────────────────────────────
+                if (sessions.isNotEmpty()) {
+                    TimetableCard(sessions = sessions, raceStartDate = race.startDate)
                 }
 
                 // ── Circuit layout ─────────────────────────────────────────────
@@ -424,22 +476,15 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit) {
                             color = BtccTextSecondary,
                             letterSpacing = 1.5.sp,
                         )
-                        Box(
+                        AsyncImage(
+                            model = info.layoutImageUrl,
+                            contentDescription = "${info.venue} circuit layout",
+                            contentScale = ContentScale.FillWidth,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(BtccCard, RoundedCornerShape(12.dp))
-                                .padding(12.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            AsyncImage(
-                                model = info.layoutImageUrl,
-                                contentDescription = "${info.venue} circuit layout",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 200.dp),
-                            )
-                        }
+                                .clip(RoundedCornerShape(12.dp)),
+                        )
                     }
                 }
 
@@ -543,6 +588,158 @@ private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: ()
                 .padding(8.dp),
         ) {
             Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+        }
+    }
+}
+
+@Composable
+private fun LapRecordCard(qualifying: LapRecord?, race: LapRecord?) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            "LAP RECORDS",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.ExtraBold,
+            color = BtccTextSecondary,
+            letterSpacing = 1.5.sp,
+        )
+        if (qualifying != null) {
+            LapRecordRow(label = "QUALIFYING", record = qualifying)
+        }
+        if (qualifying != null && race != null) {
+            HorizontalDivider(color = BtccOutline)
+        }
+        if (race != null) {
+            LapRecordRow(label = "RACE", record = race)
+        }
+    }
+}
+
+@Composable
+private fun LapRecordRow(label: String, record: LapRecord) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = BtccYellow,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+            )
+            Text(
+                record.driver,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                "${record.speed} · ${record.year}",
+                style = MaterialTheme.typography.bodySmall,
+                color = BtccTextSecondary,
+            )
+        }
+        Text(
+            record.time,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+@Composable
+private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate) {
+    // SAT = raceStartDate - 1, SUN = raceStartDate
+    val today = LocalDate.now()
+    val satDate = raceStartDate.minusDays(1)
+    val sunDate = raceStartDate
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            "WEEKEND TIMETABLE",
+            style         = MaterialTheme.typography.labelSmall,
+            fontWeight    = FontWeight.ExtraBold,
+            color         = BtccTextSecondary,
+            letterSpacing = 1.5.sp,
+        )
+
+        val grouped = sessions.groupBy { it.day }
+        listOf("SAT" to satDate, "SUN" to sunDate).forEach { (dayKey, date) ->
+            val daySessions = grouped[dayKey] ?: return@forEach
+            val isToday = today == date
+
+            // Day header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    dayKey,
+                    style         = MaterialTheme.typography.labelSmall,
+                    fontWeight    = FontWeight.ExtraBold,
+                    letterSpacing = 1.sp,
+                    color         = if (isToday) BtccYellow else BtccTextSecondary,
+                )
+                Text(
+                    date.format(shortDateFormat),
+                    style  = MaterialTheme.typography.labelSmall,
+                    color  = BtccTextSecondary,
+                )
+                if (isToday) {
+                    Box(
+                        modifier = Modifier
+                            .background(BtccYellow, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            "TODAY",
+                            style      = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color      = androidx.compose.ui.graphics.Color.Black,
+                            fontSize   = 9.sp,
+                        )
+                    }
+                }
+            }
+
+            // Sessions for this day
+            daySessions.forEach { session ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        session.name,
+                        style    = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f),
+                        color    = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        session.time,
+                        style      = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color      = if (session.time == "TBA") BtccTextSecondary else MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+
+            if (dayKey == "SAT" && grouped.containsKey("SUN")) {
+                HorizontalDivider(color = BtccOutline)
+            }
         }
     }
 }

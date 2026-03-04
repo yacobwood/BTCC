@@ -18,9 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.clickable
 import com.btccfanhub.data.Standings2025
 import com.btccfanhub.data.model.DriverStanding
+import com.btccfanhub.data.model.RoundResult
 import com.btccfanhub.data.model.TeamStanding
+import com.btccfanhub.data.repository.RaceResultsRepository
 import com.btccfanhub.data.repository.StandingsRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
@@ -42,7 +45,7 @@ private val seasonStartDate = LocalDate.of(2026, 4, 18)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun ResultsScreen() {
+fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     // Live 2026 data fetched from the network
     var liveDrivers  by remember { mutableStateOf<List<DriverStanding>?>(null) }
     var liveTeams    by remember { mutableStateOf<List<TeamStanding>?>(null) }
@@ -50,10 +53,14 @@ fun ResultsScreen() {
     var isRefreshing by remember { mutableStateOf(false) }
     var loadFailed   by remember { mutableStateOf(false) }
 
+    var raceResults     by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
+    var raceResults2025 by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
+    var resultsLoading  by remember { mutableStateOf(false) }
+
     val today         = LocalDate.now()
     val seasonStarted = today >= seasonStartDate
     var selectedYear  by remember { mutableIntStateOf(if (seasonStarted) 2026 else 2025) }
-    val pagerState    = rememberPagerState(pageCount = { 2 })
+    val pagerState    = rememberPagerState(pageCount = { 3 })
     val scope         = rememberCoroutineScope()
 
     suspend fun refresh(invalidate: Boolean = false) {
@@ -71,8 +78,19 @@ fun ResultsScreen() {
         isRefreshing = false
     }
 
+    suspend fun refreshResults(invalidate: Boolean = false) {
+        resultsLoading = true
+        if (invalidate) RaceResultsRepository.invalidateCache()
+        raceResults = RaceResultsRepository.getResults()
+        resultsLoading = false
+    }
+
     // Only fetch live data when the 2026 season is in scope
-    LaunchedEffect(Unit) { if (seasonStarted) refresh() }
+    LaunchedEffect(Unit) {
+        if (seasonStarted) refresh()
+        refreshResults()
+        raceResults2025 = RaceResultsRepository.getResults2025()
+    }
 
     // Resolve what to display for each year
     val drivers2025 = Standings2025.drivers
@@ -144,7 +162,7 @@ fun ResultsScreen() {
             containerColor   = BtccSurface,
             contentColor     = BtccYellow,
         ) {
-            listOf("DRIVERS", "TEAMS").forEachIndexed { index, label ->
+            listOf("DRIVERS", "TEAMS", "RESULTS").forEachIndexed { index, label ->
                 Tab(
                     selected = pagerState.currentPage == index,
                     onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
@@ -165,8 +183,16 @@ fun ResultsScreen() {
         val isLiveFailed  = selectedYear == 2026 && loadFailed && liveDrivers == null
 
         PullToRefreshBox(
-            isRefreshing = isRefreshing && selectedYear == 2026,
-            onRefresh    = { if (selectedYear == 2026) scope.launch { refresh(invalidate = true) } },
+            isRefreshing = isRefreshing || resultsLoading,
+            onRefresh    = {
+                scope.launch {
+                    if (pagerState.currentPage == 2) {
+                        refreshResults(invalidate = true)
+                    } else if (selectedYear == 2026) {
+                        refresh(invalidate = true)
+                    }
+                }
+            },
             modifier     = Modifier.fillMaxSize(),
         ) {
             HorizontalPager(
@@ -216,6 +242,15 @@ fun ResultsScreen() {
                     page == 1 && selectedYear == 2026 ->
                         SeasonNotStarted()
 
+                    // --- Race results ---
+                    page == 2 ->
+                        RaceResultsTab(
+                            year          = selectedYear,
+                            results       = if (selectedYear == 2025) raceResults2025 else raceResults,
+                            loading       = resultsLoading,
+                            onRoundClick  = { round -> onRoundClick(selectedYear, round) },
+                        )
+
                     else ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
@@ -223,6 +258,74 @@ fun ResultsScreen() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RaceResultsTab(
+    year: Int,
+    results: List<RoundResult>,
+    loading: Boolean,
+    onRoundClick: (Int) -> Unit,
+) {
+    when {
+        loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = BtccYellow)
+        }
+        results.isEmpty() -> ResultsNotStarted(year)
+        else -> LazyColumn(
+            contentPadding      = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            itemsIndexed(results) { _, round ->
+                RoundResultCard(round = round, onClick = { onRoundClick(round.round) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Round badge
+        Box(
+            modifier = Modifier
+                .background(BtccYellow.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                .border(1.dp, BtccYellow.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "R${round.round}",
+                    fontWeight    = FontWeight.Black,
+                    fontSize      = 14.sp,
+                    color         = BtccYellow,
+                    letterSpacing = 0.5.sp,
+                )
+            }
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(round.venue, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+            Text(round.date,  style = MaterialTheme.typography.bodySmall, color = BtccTextSecondary)
+        }
+
+        Text(
+            "${round.races.size} RACES",
+            style         = MaterialTheme.typography.labelSmall,
+            fontWeight    = FontWeight.ExtraBold,
+            color         = BtccTextSecondary,
+            letterSpacing = 1.sp,
+        )
     }
 }
 
@@ -305,6 +408,94 @@ private fun SeasonNotStarted() {
                             style = MaterialTheme.typography.bodySmall,
                             color = BtccTextSecondary,
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResultsNotStarted(year: Int) {
+    val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .background(
+                        Brush.radialGradient(listOf(BtccYellow.copy(alpha = 0.2f), Color.Transparent)),
+                        shape = RoundedCornerShape(48.dp),
+                    )
+                    .border(1.dp, BtccYellow.copy(alpha = 0.3f), RoundedCornerShape(48.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint     = BtccYellow,
+                    modifier = Modifier.size(44.dp),
+                )
+            }
+
+            Spacer(Modifier.height(28.dp))
+
+            Text(
+                "NO RESULTS YET",
+                fontWeight    = FontWeight.Black,
+                fontSize      = 20.sp,
+                color         = MaterialTheme.colorScheme.onBackground,
+                letterSpacing = 0.5.sp,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                if (year == 2025) "Results will appear after each race weekend" else "The season kicks off at",
+                style     = MaterialTheme.typography.bodyMedium,
+                color     = BtccTextSecondary,
+                textAlign = TextAlign.Center,
+            )
+
+            if (year == 2026) {
+                Spacer(Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .background(BtccCard, RoundedCornerShape(12.dp))
+                        .border(1.dp, BtccYellow.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            "ROUND 1 · DONINGTON PARK",
+                            style         = MaterialTheme.typography.labelSmall,
+                            color         = BtccYellow,
+                            fontWeight    = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "18 April 2026",
+                            style      = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color      = MaterialTheme.colorScheme.onBackground,
+                        )
+                        if (daysUntil > 0) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "$daysUntil days away",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = BtccTextSecondary,
+                            )
+                        }
                     }
                 }
             }
@@ -404,12 +595,23 @@ private fun DriverRow(driver: DriverStanding) {
                 Text(driver.team, style = MaterialTheme.typography.bodySmall, color = BtccTextSecondary)
             }
         }
-        Text(
-            "${driver.points} pts",
-            style      = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color      = MaterialTheme.colorScheme.onBackground,
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                "${driver.points} pts",
+                style      = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color      = MaterialTheme.colorScheme.onBackground,
+            )
+            if (driver.wins > 0) {
+                Text(
+                    "${driver.wins}W",
+                    style         = MaterialTheme.typography.labelSmall,
+                    fontWeight    = FontWeight.ExtraBold,
+                    color         = BtccYellow,
+                    letterSpacing = 0.5.sp,
+                )
+            }
+        }
     }
 }
 

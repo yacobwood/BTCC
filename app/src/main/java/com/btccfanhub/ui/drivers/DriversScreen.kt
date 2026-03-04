@@ -13,12 +13,16 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
+import com.btccfanhub.data.repository.DriverPatch
+import com.btccfanhub.data.repository.DriversRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -175,9 +179,9 @@ private val drivers2026 = listOf(
     ),
     Driver(
         number = 33, name = "Adam Morgan",
-        team = "", car = "",
+        team = "Plato Racing", car = "Mercedes-AMG A35 Saloon",
         imageUrl = "https://btcc.net/wp-content/uploads/2024/03/Morgan-0H5A7392-e1745404802430.png",
-        bio = "A long-standing BTCC competitor, Adam Morgan has raced with several teams across his extensive career in the championship.",
+        bio = "A long-standing BTCC competitor, Adam Morgan joins Plato Racing for 2026, reuniting with the Mercedes-AMG A35 Saloon he raced to 6th in the 2025 championship with Ciceley Motorsport.",
         history = listOf(
             SeasonStat(2025, "Ciceley Motorsport", "Mercedes-AMG A35 Saloon", 6, 241),
         ),
@@ -325,7 +329,7 @@ private val teams2026 = listOf(
     Team(
         name = "Plato Racing", car = "Mercedes-AMG A35 Saloon", entries = 2,
         drivers = drivers2026.filter { it.team == "Plato Racing" },
-        bio = "Jason Plato's own team, running Mercedes-AMG A35 Saloon machinery on the 2026 BTCC grid.",
+        bio = "Jason Plato's own team, running Mercedes-AMG A35 Saloon machinery for 2026. Daniel Rowbottom and Adam Morgan form the confirmed line-up.",
     ),
     Team(
         name = "One Motorsport", car = "Honda Civic Type R", entries = 2,
@@ -359,6 +363,23 @@ private val teams2026 = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriversScreen() {
+    var patches by remember { mutableStateOf<Map<Int, DriverPatch>>(emptyMap()) }
+    LaunchedEffect(Unit) {
+        val p = withContext(Dispatchers.IO) { DriversRepository.fetch() }
+        if (p != null) patches = p
+    }
+
+    val drivers = remember(patches) {
+        if (patches.isEmpty()) drivers2026
+        else drivers2026.map { d ->
+            val p = patches[d.number] ?: return@map d
+            d.copy(team = p.team ?: d.team, car = p.car ?: d.car, bio = p.bio ?: d.bio)
+        }
+    }
+    val teams = remember(drivers) {
+        teams2026.map { t -> t.copy(drivers = drivers.filter { it.team == t.name }) }
+    }
+
     var selectedDriver by remember { mutableStateOf<Driver?>(null) }
     var selectedTeam   by remember { mutableStateOf<Team?>(null) }
 
@@ -373,6 +394,8 @@ fun DriversScreen() {
         }
         else -> {
             GridTabs(
+                drivers       = drivers,
+                teams         = teams,
                 onDriverClick = { selectedDriver = it },
                 onTeamClick   = { selectedTeam = it },
             )
@@ -387,6 +410,8 @@ fun DriversScreen() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun GridTabs(
+    drivers: List<Driver>,
+    teams: List<Team>,
     onDriverClick: (Driver) -> Unit,
     onTeamClick: (Team) -> Unit,
 ) {
@@ -437,8 +462,8 @@ private fun GridTabs(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) { page ->
             when (page) {
-                0 -> DriversList(PaddingValues(0.dp), onDriverClick)
-                1 -> TeamsList(PaddingValues(0.dp), onTeamClick)
+                0 -> DriversList(PaddingValues(0.dp), drivers, onDriverClick)
+                1 -> TeamsList(PaddingValues(0.dp), teams, onTeamClick)
                 else -> Unit
             }
         }
@@ -450,7 +475,7 @@ private fun GridTabs(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DriversList(padding: PaddingValues, onDriverClick: (Driver) -> Unit) {
+private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverClick: (Driver) -> Unit) {
     LazyColumn(
         modifier        = Modifier.fillMaxSize().padding(padding),
         contentPadding  = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
@@ -458,7 +483,7 @@ private fun DriversList(padding: PaddingValues, onDriverClick: (Driver) -> Unit)
     ) {
         item {
             Text(
-                "${drivers2026.size} CONFIRMED",
+                "${drivers.size} CONFIRMED",
                 style      = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color      = BtccTextSecondary,
@@ -466,7 +491,7 @@ private fun DriversList(padding: PaddingValues, onDriverClick: (Driver) -> Unit)
                 modifier   = Modifier.padding(bottom = 4.dp, top = 12.dp),
             )
         }
-        items(drivers2026) { DriverCard(it, onClick = { onDriverClick(it) }) }
+        items(drivers) { DriverCard(it, onClick = { onDriverClick(it) }) }
         item {
             Text(
                 "Full entry list published April 2026 · btcc.net",
@@ -483,7 +508,7 @@ private fun DriversList(padding: PaddingValues, onDriverClick: (Driver) -> Unit)
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TeamsList(padding: PaddingValues, onTeamClick: (Team) -> Unit) {
+private fun TeamsList(padding: PaddingValues, teams: List<Team>, onTeamClick: (Team) -> Unit) {
     LazyColumn(
         modifier        = Modifier.fillMaxSize().padding(padding),
         contentPadding  = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
@@ -491,7 +516,7 @@ private fun TeamsList(padding: PaddingValues, onTeamClick: (Team) -> Unit) {
     ) {
         item {
             Text(
-                "${teams2026.size} TEAMS",
+                "${teams.size} TEAMS",
                 style      = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
                 color      = BtccTextSecondary,
@@ -499,7 +524,7 @@ private fun TeamsList(padding: PaddingValues, onTeamClick: (Team) -> Unit) {
                 modifier   = Modifier.padding(bottom = 4.dp, top = 12.dp),
             )
         }
-        items(teams2026) { TeamCard(it, onClick = { onTeamClick(it) }) }
+        items(teams) { TeamCard(it, onClick = { onTeamClick(it) }) }
         item {
             Text(
                 "Full entry list published April 2026 · btcc.net",
@@ -637,7 +662,7 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
@@ -747,7 +772,7 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
@@ -1064,7 +1089,7 @@ private fun DriverAvatarWithNumber(
     teamConfirmed: Boolean,
     avatarSize: Int,
 ) {
-    val badgeH  = (avatarSize * 0.30f).toInt().coerceAtLeast(12)
+    val badgeH  = (avatarSize * 0.30f).toInt().coerceAtLeast(12).coerceAtMost(22)
     val overhang = 4
     Box(modifier = Modifier.size((avatarSize + overhang).dp)) {
         DriverAvatar(

@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Radio
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -29,14 +31,15 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.data.network.RssParser
 import com.btccfanhub.navigation.AppNavHost
 import com.btccfanhub.navigation.Screen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.btccfanhub.ui.ads.AdmobBanner
 import com.btccfanhub.ui.theme.BTCCFanHubTheme
 import com.btccfanhub.ui.theme.BtccNavy
@@ -52,18 +55,34 @@ class MainActivity : ComponentActivity() {
     private val requestNotificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op */ }
 
+    private val pendingArticleId = mutableStateOf<Int?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this)
         createNewsNotificationChannel()
         scheduleNewsCheck()
         requestNewsNotificationPermission()
+        handleNotificationIntent(intent)
         enableEdgeToEdge()
         setContent {
             BTCCFanHubTheme {
-                MainScreen()
+                MainScreen(
+                    pendingArticleId = pendingArticleId.value,
+                    onArticleIdConsumed = { pendingArticleId.value = null },
+                )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNotificationIntent(intent)
+    }
+
+    private fun handleNotificationIntent(intent: Intent?) {
+        val id = intent?.getIntExtra(NewsCheckWorker.EXTRA_ARTICLE_ID, -1) ?: -1
+        if (id != -1) pendingArticleId.value = id
     }
 
     private fun createNewsNotificationChannel() {
@@ -89,19 +108,6 @@ class MainActivity : ComponentActivity() {
             periodic,
         )
 
-        // One-time immediate test run — fires a notification right away so you
-        // can verify the channel/permission/formatting before release.
-        // Remove this block once you're happy notifications are working.
-        if (BuildConfig.DEBUG) {
-            val test = OneTimeWorkRequestBuilder<NewsCheckWorker>()
-                .setInputData(Data.Builder().putBoolean(NewsCheckWorker.KEY_FORCE_NOTIFY, true).build())
-                .build()
-            wm.enqueueUniqueWork(
-                NewsCheckWorker.WORK_NAME_TEST,
-                ExistingWorkPolicy.REPLACE,
-                test,
-            )
-        }
     }
 
     private fun requestNewsNotificationPermission() {
@@ -121,10 +127,23 @@ private data class NavItem(
 )
 
 @Composable
-private fun MainScreen() {
+private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () -> Unit = {}) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+
+    LaunchedEffect(pendingArticleId) {
+        if (pendingArticleId != null) {
+            val article = withContext(Dispatchers.IO) {
+                RssParser.fetchArticleById(pendingArticleId)
+            }
+            onArticleIdConsumed()
+            if (article != null) {
+                ArticleHolder.current = article
+                navController.navigate(Screen.Article.route) { launchSingleTop = true }
+            }
+        }
+    }
 
     val showBottomBar = currentRoute != Screen.Article.route &&
             currentRoute?.startsWith("track/") != true
@@ -134,7 +153,7 @@ private fun MainScreen() {
         NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange),
         NavItem(Screen.Drivers, "Drivers", Icons.Default.Groups),
         NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents),
-        NavItem(Screen.Radio,   "Radio",   Icons.Default.Radio),
+        NavItem(Screen.Radio, "Radio", Icons.Default.Radio),
     )
 
     val navItemColors = NavigationBarItemDefaults.colors(

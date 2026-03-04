@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import com.btccfanhub.ui.theme.BtccTextSecondary
 @Composable
 fun NewsScreen(
     onArticleClick: (Article) -> Unit,
+    onSettingsClick: () -> Unit = {},
     viewModel: NewsViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -72,6 +74,7 @@ fun NewsScreen(
                             HeroCard(
                                 article = articles[0],
                                 onRefresh = { viewModel.load() },
+                                onSettingsClick = onSettingsClick,
                                 onClick = { onArticleClick(articles[0]) },
                             )
                         }
@@ -134,7 +137,7 @@ fun NewsScreen(
 // Hero card — full-bleed, 300dp tall, gradient overlay
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun HeroCard(article: Article, onRefresh: () -> Unit, onClick: () -> Unit) {
+private fun HeroCard(article: Article, onRefresh: () -> Unit, onSettingsClick: () -> Unit, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,6 +194,12 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onClick: () -> Uni
                 modifier = Modifier.size(36.dp),
             ) {
                 Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White.copy(alpha = 0.7f))
+            }
+            IconButton(
+                onClick = onSettingsClick,
+                modifier = Modifier.size(36.dp),
+            ) {
+                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White.copy(alpha = 0.7f))
             }
         }
 

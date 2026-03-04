@@ -1,5 +1,18 @@
 package com.btccfanhub.data.model
 
+data class RaceSession(
+    val name: String,       // "Free Practice 1", "Qualifying", "Race 1", etc.
+    val day: String,        // "SAT" or "SUN"
+    val time: String,       // "09:00" or "TBA"
+)
+
+data class LapRecord(
+    val driver: String,
+    val time: String,
+    val speed: String,   // e.g. "106.39 mph"
+    val year: Int,
+)
+
 data class TrackInfo(
     val round: Int,
     val venue: String,
@@ -13,4 +26,8 @@ data class TrackInfo(
     val imageUrl: String = "",
     val layoutImageUrl: String = "",
     val raceImages: List<String> = emptyList(),
+    val firstBtccYear: Int? = null,
+    val qualifyingRecord: LapRecord? = null,
+    val raceRecord: LapRecord? = null,
+    val sessions: List<RaceSession> = emptyList(),
 )

@@ -26,8 +26,10 @@ class NewsCheckWorker(
         const val CHANNEL_ID       = "btcc_news_channel"
         const val PREFS_NAME       = "btcc_prefs"
         const val KEY_LAST_ID      = "last_news_id"
-        const val KEY_FORCE_NOTIFY = "force_notify"
-        private const val NOTIF_ID = 1001
+        const val KEY_FORCE_NOTIFY   = "force_notify"
+        const val KEY_NOTIF_ENABLED  = "notifications_enabled"
+        const val EXTRA_ARTICLE_ID   = "article_id"
+        private const val NOTIF_ID   = 1001
     }
 
     private val client = OkHttpClient()
@@ -54,15 +56,16 @@ class NewsCheckWorker(
                 .replace("&#8221;", "\u201D").replace("&hellip;", "\u2026")
                 .trim()
 
-            val forceNotify = inputData.getBoolean(KEY_FORCE_NOTIFY, false)
-            val prefs       = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val lastId      = prefs.getInt(KEY_LAST_ID, -1)
+            val forceNotify    = inputData.getBoolean(KEY_FORCE_NOTIFY, false)
+            val prefs          = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val lastId         = prefs.getInt(KEY_LAST_ID, -1)
+            val notifEnabled   = prefs.getBoolean(KEY_NOTIF_ENABLED, true)
 
             when {
                 forceNotify -> {
                     // Test run — always notify with the current article
                     prefs.edit().putInt(KEY_LAST_ID, id).apply()
-                    notify(title)
+                    if (notifEnabled) notify(title, id)
                 }
                 lastId == -1 -> {
                     // First run — store current article, no notification
@@ -70,7 +73,7 @@ class NewsCheckWorker(
                 }
                 id != lastId -> {
                     prefs.edit().putInt(KEY_LAST_ID, id).apply()
-                    notify(title)
+                    if (notifEnabled) notify(title, id)
                 }
             }
 
@@ -80,9 +83,10 @@ class NewsCheckWorker(
         }
     }
 
-    private fun notify(title: String) {
+    private fun notify(title: String, id: Int) {
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra(EXTRA_ARTICLE_ID, id)
         }
         val pending = PendingIntent.getActivity(
             context, 0, intent,
@@ -91,8 +95,8 @@ class NewsCheckWorker(
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(title)
-            .setContentText("New article on BTCC.net")
+            .setContentTitle("New article on BTCC.net")
+            .setContentText(title)
             .setAutoCancel(true)
             .setContentIntent(pending)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

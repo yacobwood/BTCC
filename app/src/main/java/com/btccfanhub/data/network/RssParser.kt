@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -12,6 +13,26 @@ object RssParser {
 
     private val client = OkHttpClient()
     private val outputDateFormat = DateTimeFormatter.ofPattern("d MMM yyyy")
+
+    fun fetchArticleById(id: Int): Article? {
+        return try {
+            val request = Request.Builder()
+                .url("https://www.btcc.net/wp-json/wp/v2/posts/$id?_embed=1")
+                .header("User-Agent", "BTCCFanHub/1.0 Android")
+                .build()
+            val json = client.newCall(request).execute().body?.string() ?: return null
+            val post = JSONObject(json)
+            val title       = decodeEntities(post.getJSONObject("title").getString("rendered"))
+            val link        = post.getString("link")
+            val description = stripHtml(post.getJSONObject("excerpt").getString("rendered"))
+            val content     = post.getJSONObject("content").getString("rendered")
+            val pubDate     = formatDate(post.getString("date"))
+            val embedded    = post.optJSONObject("_embedded")
+            Article(title, link, description, pubDate, extractFeaturedImage(embedded), extractCategory(embedded), content)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     fun fetchArticles(): List<Article> {
         return try {

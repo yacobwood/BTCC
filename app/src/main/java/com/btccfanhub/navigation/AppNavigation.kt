@@ -15,6 +15,8 @@ import com.btccfanhub.ui.news.ArticleScreen
 import com.btccfanhub.ui.news.NewsScreen
 import com.btccfanhub.ui.radio.RadioScreen
 import com.btccfanhub.ui.results.ResultsScreen
+import com.btccfanhub.ui.results.RoundResultsScreen
+import com.btccfanhub.ui.settings.SettingsScreen
 
 sealed class Screen(val route: String) {
     object News : Screen("news")
@@ -23,8 +25,12 @@ sealed class Screen(val route: String) {
     object Results : Screen("results")
     object Radio : Screen("radio")
     object Article : Screen("article")
+    object Settings : Screen("settings")
     object Track : Screen("track/{round}") {
         fun route(round: Int) = "track/$round"
+    }
+    object RoundResults : Screen("round_results/{year}/{round}") {
+        fun route(year: Int, round: Int) = "round_results/$year/$round"
     }
 }
 
@@ -38,6 +44,7 @@ fun AppNavHost(navController: NavHostController) {
                     ArticleHolder.current = article
                     navController.navigate(Screen.Article.route)
                 },
+                onSettingsClick = { navController.navigate(Screen.Settings.route) },
             )
         }
 
@@ -54,7 +61,21 @@ fun AppNavHost(navController: NavHostController) {
         }
 
         composable(Screen.Results.route) {
-            ResultsScreen()
+            ResultsScreen(onRoundClick = { year, round ->
+                navController.navigate(Screen.RoundResults.route(year, round))
+            })
+        }
+
+        composable(
+            route = Screen.RoundResults.route,
+            arguments = listOf(
+                navArgument("year")  { type = NavType.IntType },
+                navArgument("round") { type = NavType.IntType },
+            ),
+        ) { backStackEntry ->
+            val year  = backStackEntry.arguments?.getInt("year")  ?: 2026
+            val round = backStackEntry.arguments?.getInt("round") ?: return@composable
+            RoundResultsScreen(year = year, round = round, onBack = { navController.popBackStack() })
         }
 
         composable(Screen.Radio.route) {
@@ -63,6 +84,10 @@ fun AppNavHost(navController: NavHostController) {
 
         composable(Screen.Article.route) {
             ArticleScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(
