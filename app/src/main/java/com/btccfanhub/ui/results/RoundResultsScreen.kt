@@ -258,23 +258,7 @@ private fun extractYouTubeVideoId(url: String): String? {
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
-    val embedHtml = """
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-              * { margin:0; padding:0; background:#000; }
-              iframe { width:100%; height:100%; border:none; }
-            </style>
-          </head>
-          <body>
-            <iframe
-              src="https://www.youtube.com/embed/${'$'}videoId?autoplay=0&rel=0&modestbranding=1"
-              allowfullscreen>
-            </iframe>
-          </body>
-        </html>
-    """.trimIndent()
+    val embedUrl = "https://www.youtube.com/embed/$videoId?autoplay=1&rel=0&modestbranding=1"
 
     AndroidView(
         modifier = modifier,
@@ -287,23 +271,11 @@ private fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
                 settings.mediaPlaybackRequiresUserGesture = false
                 webViewClient   = WebViewClient()
                 webChromeClient = WebChromeClient()
-                loadDataWithBaseURL(
-                    "https://www.youtube.com",
-                    embedHtml,
-                    "text/html",
-                    "utf-8",
-                    null,
-                )
+                loadUrl(embedUrl)
             }
         },
         update = { webView ->
-            webView.loadDataWithBaseURL(
-                "https://www.youtube.com",
-                embedHtml,
-                "text/html",
-                "utf-8",
-                null,
-            )
+            webView.loadUrl(embedUrl)
         },
     )
 }
