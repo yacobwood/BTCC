@@ -5,6 +5,7 @@
       "round": 1,
       "venue": "Donington Park",
       "date": "27 Apr 2025",
+      "highlightsUrl": "https://www.youtube.com/watch?v=xvFUGq112qM",
       "races": [
         {
           "label": "Race 1",
@@ -273,8 +274,7 @@
               "bestLap": "1:09.866",
               "points": 0
             }
-          ],
-          "highlightsUrl": "https://www.youtube.com/watch?v=xvFUGq112qM"
+          ]
         },
         {
           "label": "Race 2",
