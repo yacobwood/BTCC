@@ -114,38 +114,37 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                 else -> {
                     val context = LocalContext.current
                     
-                    var selectedVideoType by remember { mutableStateOf("highlights") }
+                    var selectedVideoType by remember { mutableStateOf<String?>(null) }
                     val highlightsUrl = roundResult?.highlightsUrl
                     val fullRacesUrl = roundResult?.fullRacesUrl
                     
-                    val activeUrl = if (selectedVideoType == "full_races" && fullRacesUrl != null) {
-                        fullRacesUrl
-                    } else if (highlightsUrl != null) {
-                        highlightsUrl
-                    } else {
-                        fullRacesUrl // Fallback if highlights null but full races exists
+                    val activeUrl = when (selectedVideoType) {
+                        "full_races" -> fullRacesUrl
+                        "highlights" -> highlightsUrl
+                        else -> null
                     }
                     
                     if (highlightsUrl != null || fullRacesUrl != null) {
-                        // Show toggle buttons if both exist
-                        if (highlightsUrl != null && fullRacesUrl != null) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (highlightsUrl != null) {
                                 VideoToggleButton(
                                     text = "HIGHLIGHTS",
                                     icon = Icons.Default.PlayCircle,
-                                    isSelected = activeUrl == highlightsUrl,
+                                    isSelected = selectedVideoType == "highlights",
                                     onClick = { selectedVideoType = "highlights" },
                                     modifier = Modifier.weight(1f)
                                 )
+                            }
+                            if (fullRacesUrl != null) {
                                 VideoToggleButton(
                                     text = "FULL RACES",
                                     icon = Icons.Default.PlayCircle,
-                                    isSelected = activeUrl == fullRacesUrl,
+                                    isSelected = selectedVideoType == "full_races",
                                     onClick = { selectedVideoType = "full_races" },
                                     modifier = Modifier.weight(1f)
                                 )
@@ -284,6 +283,7 @@ private fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
                 settings.javaScriptEnabled    = true
                 settings.loadWithOverviewMode = true
                 settings.useWideViewPort      = true
+                settings.domStorageEnabled    = true
                 settings.mediaPlaybackRequiresUserGesture = false
                 webViewClient   = WebViewClient()
                 webChromeClient = WebChromeClient()
