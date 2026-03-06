@@ -274,7 +274,8 @@
               "bestLap": "1:09.866",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=sY4HtzM7sCk&list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&index=33"
         },
         {
           "label": "Race 2",
@@ -532,7 +533,8 @@
               "bestLap": "1:09.666",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/sY4HtzM7sCk?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=1812"
         },
         {
           "label": "Race 3",
@@ -801,10 +803,10 @@
               "bestLap": "1:10.367",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/sY4HtzM7sCk?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=3329"
         }
-      ],
-      "fullRacesUrl": "https://www.youtube.com/watch?v=sY4HtzM7sCk"
+      ]
     },
     {
       "round": 2,
@@ -1089,7 +1091,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=0zfhh9XuCUo&list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&index=30"
         },
         {
           "label": "Race 2",
@@ -1369,7 +1372,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/0zfhh9XuCUo?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=1514"
         },
         {
           "label": "Race 3",
@@ -1649,11 +1653,11 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/0zfhh9XuCUo?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=3342"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=5o6W4syac0w",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=0zfhh9XuCUo"
+      "highlightsUrl": "https://www.youtube.com/watch?v=5o6W4syac0w"
     },
     {
       "round": 3,
@@ -1938,7 +1942,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=jQH9beY9FcA&list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&index=27"
         },
         {
           "label": "Race 2",
@@ -2218,7 +2223,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/jQH9beY9FcA?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=1777"
         },
         {
           "label": "Race 3",
@@ -2498,11 +2504,11 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/jQH9beY9FcA?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=3549"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=67Y2sMqeaLE",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=jQH9beY9FcA"
+      "highlightsUrl": "https://www.youtube.com/watch?v=67Y2sMqeaLE"
     },
     {
       "round": 4,
@@ -2776,7 +2782,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8YGOsiHroLM&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=10"
         },
         {
           "label": "Race 2",
@@ -3034,7 +3041,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=iqVENZysnak&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=9"
         },
         {
           "label": "Race 3",
@@ -3292,11 +3300,11 @@
               "bestLap": "1:16.557",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=VsMk7TMcH7c&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=8"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=Kke_pLlVP9w",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=CmuDrUrUSxQ"
+      "highlightsUrl": "https://www.youtube.com/watch?v=Kke_pLlVP9w"
     },
     {
       "round": 5,
@@ -3581,7 +3589,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=c4HTldhUZf8&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=3"
         },
         {
           "label": "Race 2",
@@ -3861,7 +3870,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=I5Ww8Sn-WxI&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=2"
         },
         {
           "label": "Race 3",
@@ -4119,11 +4129,11 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=oKsppWKsgQ8&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=2"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=Dh_EjLRn6x0",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=t7JXLDri6uE"
+      "highlightsUrl": "https://www.youtube.com/watch?v=Dh_EjLRn6x0"
     },
     {
       "round": 6,
@@ -4375,7 +4385,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=_LYuv5BtU24&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=26"
         },
         {
           "label": "Race 2",
@@ -4622,7 +4633,8 @@
               "bestLap": "1:25.083",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=SHcqoP_tMXE&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=27"
         },
         {
           "label": "Race 3",
@@ -4858,11 +4870,11 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/EKV34Nu1P8U?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=3376"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=cUJr6Aahni8",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=EKV34Nu1P8U"
+      "highlightsUrl": "https://www.youtube.com/watch?v=cUJr6Aahni8"
     },
     {
       "round": 7,
@@ -5114,7 +5126,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=-IyCGzNiOS8&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=31"
         },
         {
           "label": "Race 2",
@@ -5361,7 +5374,8 @@
               "bestLap": "52.245",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/M8T10RxgIfU?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=1850"
         },
         {
           "label": "Race 3",
@@ -5608,11 +5622,11 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/M8T10RxgIfU?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=3503"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=cajZL8avtnE",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=M8T10RxgIfU"
+      "highlightsUrl": "https://www.youtube.com/watch?v=cajZL8avtnE"
     },
     {
       "round": 8,
@@ -5864,7 +5878,8 @@
               "bestLap": "1:36.874",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=JZXfEmhxTxg&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=35"
         },
         {
           "label": "Race 2",
@@ -6111,7 +6126,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://youtu.be/y2V2PSeHy_0?list=PLRhC9EroPISmJknMEAO-SuWOntUj0WlW4&t=1653"
         },
         {
           "label": "Race 3",
@@ -6358,11 +6374,11 @@
               "bestLap": "1:37.389",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=rNijhNAQziw&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=36"
         }
       ],
-      "highlightsUrl": "https://www.youtube.com/watch?v=K3i7gn1ZTX4",
-      "fullRacesUrl": "https://www.youtube.com/watch?v=y2V2PSeHy_0"
+      "highlightsUrl": "https://www.youtube.com/watch?v=K3i7gn1ZTX4"
     },
     {
       "round": 9,
@@ -6614,7 +6630,8 @@
               "bestLap": "58.550",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=qhH8sYZlO0Q&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=41"
         },
         {
           "label": "Race 2",
@@ -6850,7 +6867,8 @@
               "bestLap": "58.197",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=fEz_9w5YTsQ&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=42"
         },
         {
           "label": "Race 3",
@@ -7086,10 +7104,10 @@
               "bestLap": "58.651",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=CXNbagG_cy8&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=43"
         }
-      ],
-      "fullRacesUrl": "https://www.youtube.com/watch?v=dtGj7Oq4Iyg"
+      ]
     },
     {
       "round": 10,
@@ -7341,7 +7359,8 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=1RNnQ6iXPXs&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=49"
         },
         {
           "label": "Race 2",
@@ -7588,7 +7607,8 @@
               "bestLap": "1:30.888",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=1-It6I6Nnfw&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=48"
         },
         {
           "label": "Race 3",
@@ -7835,10 +7855,10 @@
               "bestLap": "",
               "points": 0
             }
-          ]
+          ],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=kLVY9BphggA&list=PLGijDR4bU8yJ0xrqPEC8xNYoeXGgHQUb7&index=50"
         }
-      ],
-      "fullRacesUrl": "https://www.youtube.com/watch?v=K1dAU0WcTH0"
+      ]
     }
   ]
 }
