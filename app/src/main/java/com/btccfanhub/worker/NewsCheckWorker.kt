@@ -28,6 +28,9 @@ class NewsCheckWorker(
         const val KEY_LAST_ID      = "last_news_id"
         const val KEY_FORCE_NOTIFY   = "force_notify"
         const val KEY_NOTIF_ENABLED  = "notifications_enabled"
+        const val KEY_UNIT_SYSTEM    = "unit_system"
+        const val UNIT_MILES         = "miles"
+        const val UNIT_KM            = "km"
         const val EXTRA_ARTICLE_ID   = "article_id"
         private const val NOTIF_ID   = 1001
     }

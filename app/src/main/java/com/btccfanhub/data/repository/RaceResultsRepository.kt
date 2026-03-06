@@ -71,7 +71,8 @@ object RaceResultsRepository {
                 val race = racesArr.getJSONObject(j)
                 val resultsArr = race.optJSONArray("results") ?: org.json.JSONArray()
                 RaceEntry(
-                    label = race.optString("label", "Race ${j + 1}"),
+                    label       = race.optString("label", "Race ${j + 1}"),
+                    fullRaceUrl = race.optString("fullRaceUrl", "").takeIf { it.isNotEmpty() },
                     results = (0 until resultsArr.length()).map { k ->
                         val d = resultsArr.getJSONObject(k)
                         DriverResult(
@@ -93,8 +94,6 @@ object RaceResultsRepository {
                 venue         = r.optString("venue", ""),
                 date          = r.optString("date", ""),
                 races         = races,
-                highlightsUrl = r.optString("highlightsUrl", "").takeIf { it.isNotEmpty() },
-                fullRacesUrl  = r.optString("fullRacesUrl", "").takeIf { it.isNotEmpty() },
             )
         }
     }

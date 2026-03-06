@@ -211,7 +211,7 @@ private fun buildHtml(title: String, pubDate: String, content: String): String =
         }
         .divider {
           height: 2px;
-          background: #E3000B;
+          background: #FEBD02;
           margin-bottom: 20px;
           border-radius: 2px;
         }
@@ -226,10 +226,10 @@ private fun buildHtml(title: String, pubDate: String, content: String): String =
         .wp-block-image, .wp-block-embed, .wp-block-gallery { width: 100% !important; }
         p { margin-bottom: 14px; }
         h2, h3, h4 { margin: 20px 0 8px; color: #FFFFFF; }
-        a { color: #E3000B; text-decoration: none; }
+        a { color: #FEBD02; text-decoration: none; }
         a[href^="app-image://"] { display: block; color: inherit; }
         blockquote {
-          border-left: 3px solid #E3000B;
+          border-left: 3px solid #FEBD02;
           padding-left: 14px;
           margin: 16px 0;
           color: #8B949E;
@@ -242,7 +242,6 @@ private fun buildHtml(title: String, pubDate: String, content: String): String =
       </style>
     </head>
     <body>
-      <h1 class="article-title">$title</h1>
       <p class="article-date">$pubDate</p>
       <div class="divider"></div>
       $content

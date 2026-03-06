@@ -151,7 +151,7 @@ private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () ->
     val navItems = listOf(
         NavItem(Screen.News, "News", Icons.Default.Home),
         NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange),
-        NavItem(Screen.Drivers, "Drivers", Icons.Default.Groups),
+        NavItem(Screen.Drivers, "Grid", Icons.Default.Groups),
         NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents),
         NavItem(Screen.Radio, "Radio", Icons.Default.Radio),
     )
@@ -177,7 +177,11 @@ private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () ->
                             NavigationBarItem(
                                 icon = { Icon(item.icon, contentDescription = item.label) },
                                 label = { Text(item.label, fontWeight = FontWeight.SemiBold, fontSize = 11.sp) },
-                                selected = currentRoute == item.screen.route,
+                                selected = when (item.screen) {
+                                    Screen.Calendar -> currentRoute == Screen.Calendar.route || currentRoute == Screen.Track.route
+                                    Screen.Results  -> currentRoute == Screen.Results.route || currentRoute == Screen.RoundResults.route
+                                    else            -> currentRoute == item.screen.route
+                                },
                                 colors = navItemColors,
                                 onClick = {
                                     navController.navigate(item.screen.route) {

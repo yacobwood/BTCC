@@ -105,6 +105,59 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 color    = BtccOutline,
                 modifier = Modifier.padding(vertical = 20.dp),
             )
+
+            Text(
+                "UNIT DISPLAY",
+                style         = MaterialTheme.typography.labelSmall,
+                fontWeight    = FontWeight.ExtraBold,
+                color         = BtccTextSecondary,
+                letterSpacing = 2.sp,
+                modifier      = Modifier.padding(bottom = 12.dp),
+            )
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Kilometers",
+                        color      = BtccTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 15.sp,
+                    )
+                    Text(
+                        "Show distance in km instead of miles",
+                        color    = BtccTextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                var useKm by remember {
+                    mutableStateOf(prefs.getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM)
+                }
+                Switch(
+                    checked = useKm,
+                    onCheckedChange = {
+                        useKm = it
+                        prefs.edit().putString(
+                            NewsCheckWorker.KEY_UNIT_SYSTEM,
+                            if (it) NewsCheckWorker.UNIT_KM else NewsCheckWorker.UNIT_MILES
+                        ).apply()
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor   = BtccTextPrimary,
+                        checkedTrackColor   = BtccYellow,
+                        uncheckedThumbColor = BtccTextSecondary,
+                        uncheckedTrackColor = BtccOutline,
+                    ),
+                )
+            }
+
+            HorizontalDivider(
+                color    = BtccOutline,
+                modifier = Modifier.padding(vertical = 20.dp),
+            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.btccfanhub.ui.results
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -25,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.btccfanhub.data.model.DriverResult
 import com.btccfanhub.data.model.RaceEntry
 import com.btccfanhub.data.repository.RaceResultsRepository
@@ -35,7 +33,6 @@ import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
 import kotlinx.coroutines.launch
-import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
@@ -43,6 +40,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     var roundResult by remember { mutableStateOf<com.btccfanhub.data.model.RoundResult?>(null) }
     var loading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     LaunchedEffect(year, round) {
         loading = true
@@ -59,97 +57,50 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     val pageCount = races.size.coerceAtLeast(1)
     val pagerState = rememberPagerState(pageCount = { pageCount })
 
-    Scaffold(
-        containerColor = BtccBackground,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            roundResult?.venue ?: "Round $round",
-                            fontWeight    = FontWeight.Black,
-                            fontSize      = 17.sp,
-                            letterSpacing = 0.5.sp,
-                        )
-                        Text(
-                            "ROUND $round · ${roundResult?.date ?: ""}",
-                            style         = MaterialTheme.typography.labelSmall,
-                            color         = BtccYellow,
-                            fontWeight    = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp,
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
-            )
-        },
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-        ) {
-            when {
-                loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = BtccYellow)
-                    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BtccBackground),
+    ) {
+        TopAppBar(
+            title = {
+                Column {
+                    Text(
+                        roundResult?.venue ?: "Round $round",
+                        fontWeight    = FontWeight.Black,
+                        fontSize      = 17.sp,
+                        letterSpacing = 0.5.sp,
+                    )
+                    Text(
+                        "ROUND $round · ${roundResult?.date ?: ""}",
+                        style         = MaterialTheme.typography.labelSmall,
+                        color         = BtccYellow,
+                        fontWeight    = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp,
+                    )
                 }
-                races.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "No results available for this round.",
-                            color     = BtccTextSecondary,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
+            },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+        )
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            when {
+                loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = BtccYellow)
+                }
+                races.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        "No results available for this round.",
+                        color     = BtccTextSecondary,
+                        textAlign = TextAlign.Center,
+                    )
                 }
                 else -> {
-                    val context = LocalContext.current
-                    
-                    val highlightsUrl = roundResult?.highlightsUrl
-                    val fullRacesUrl = roundResult?.fullRacesUrl
-                    
-                    if (highlightsUrl != null || fullRacesUrl != null) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            if (highlightsUrl != null) {
-                                VideoExternalButton(
-                                    text = "HIGHLIGHTS",
-                                    icon = Icons.Default.PlayCircle,
-                                    onClick = {
-                                        context.startActivity(
-                                            Intent(Intent.ACTION_VIEW, Uri.parse(highlightsUrl))
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            if (fullRacesUrl != null) {
-                                VideoExternalButton(
-                                    text = "FULL RACES",
-                                    icon = Icons.Default.PlayCircle,
-                                    onClick = {
-                                        context.startActivity(
-                                            Intent(Intent.ACTION_VIEW, Uri.parse(fullRacesUrl))
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
                         containerColor   = BtccBackground,
@@ -176,7 +127,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         state    = pagerState,
                         modifier = Modifier.fillMaxSize(),
                     ) { page ->
-                        RaceResultsList(races[page])
+                        RaceResultsList(race = races[page])
                     }
                 }
             }
@@ -187,36 +138,42 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
 @Composable
 private fun VideoExternalButton(
     text: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    url: String,
+    modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     Row(
         modifier = modifier
             .background(Color(0xFF1A0000), RoundedCornerShape(10.dp))
             .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 12.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(
-            icon,
+            Icons.Default.PlayCircle,
             contentDescription = null,
-            tint = Color(0xFFFF0000),
-            modifier = Modifier.size(20.dp)
+            tint     = Color(0xFFFF0000),
+            modifier = Modifier.size(20.dp),
         )
-        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text,
-            color = Color.White,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 12.sp,
-            letterSpacing = 0.5.sp
+            color         = Color.White,
+            fontWeight    = FontWeight.ExtraBold,
+            fontSize      = 13.sp,
+            letterSpacing = 1.sp,
+            modifier      = Modifier.weight(1f),
+        )
+        Text(
+            "YouTube",
+            style         = MaterialTheme.typography.labelSmall,
+            color         = Color(0xFFFF0000),
+            fontWeight    = FontWeight.Bold,
+            letterSpacing = 0.5.sp,
         )
     }
 }
-
 
 @Composable
 private fun RaceResultsList(race: RaceEntry) {
@@ -230,6 +187,17 @@ private fun RaceResultsList(race: RaceEntry) {
         contentPadding      = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        if (race.fullRaceUrl != null) {
+            item {
+                VideoExternalButton(
+                    text     = "WATCH FULL RACE",
+                    url      = race.fullRaceUrl,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 6.dp),
+                )
+            }
+        }
         items(race.results) { result ->
             DriverResultRow(result)
         }
@@ -253,7 +221,6 @@ private fun DriverResultRow(result: DriverResult) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Position
         Text(
             if (result.position > 0) "${result.position}" else "DNF",
             style      = MaterialTheme.typography.titleMedium,
@@ -262,8 +229,6 @@ private fun DriverResultRow(result: DriverResult) {
             modifier   = Modifier.width(32.dp),
             textAlign  = TextAlign.Center,
         )
-
-        // Driver + team
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 result.driver,
@@ -276,8 +241,6 @@ private fun DriverResultRow(result: DriverResult) {
                 color = BtccTextSecondary,
             )
         }
-
-        // Gap / time + points
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 result.gap ?: result.time,

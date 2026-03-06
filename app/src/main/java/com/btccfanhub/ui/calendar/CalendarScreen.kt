@@ -1,5 +1,7 @@
 package com.btccfanhub.ui.calendar
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,8 +12,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,11 +25,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.model.Race
+import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.ui.theme.BtccBackground
-import com.btccfanhub.ui.theme.BtccOutline
-import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccNavy
+import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccTextSecondary
+import com.btccfanhub.ui.theme.BtccYellow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -34,47 +38,55 @@ import java.time.temporal.ChronoUnit
 private val dateFormat = DateTimeFormatter.ofPattern("d MMM yyyy")
 private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 
-private val races = listOf(
-    Race(1,  "Donington Park",    LocalDate.of(2026, 4,  18), LocalDate.of(2026, 4,  19)),
-    Race(2,  "Brands Hatch Indy", LocalDate.of(2026, 5,  9),  LocalDate.of(2026, 5,  10)),
-    Race(3,  "Snetterton",        LocalDate.of(2026, 5,  23), LocalDate.of(2026, 5,  24)),
-    Race(4,  "Oulton Park",       LocalDate.of(2026, 6,  6),  LocalDate.of(2026, 6,  7)),
-    Race(5,  "Thruxton",          LocalDate.of(2026, 7,  25), LocalDate.of(2026, 7,  26)),
-    Race(6,  "Knockhill",         LocalDate.of(2026, 8,  8),  LocalDate.of(2026, 8,  9)),
-    Race(7,  "Donington Park GP", LocalDate.of(2026, 8,  22), LocalDate.of(2026, 8,  23)),
-    Race(8,  "Croft",             LocalDate.of(2026, 9,  5),  LocalDate.of(2026, 9,  6)),
-    Race(9,  "Silverstone",       LocalDate.of(2026, 9,  26), LocalDate.of(2026, 9,  27)),
-    Race(10, "Brands Hatch GP",   LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 11)),
-)
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(onRaceClick: (Race) -> Unit = {}) {
     val today = LocalDate.now()
+    var races by remember { mutableStateOf<List<Race>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        races = CalendarRepository.getCalendarData().rounds
+        loading = false
+    }
     val nextRace = races.firstOrNull { it.endDate >= today }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "2026 SEASON",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 18.sp,
-                        letterSpacing = 1.sp,
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                ),
-            )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BtccBackground),
+    ) {
+        TopAppBar(
+            title = {
+                Text(
+                    "2026 SEASON",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    letterSpacing = 1.sp,
+                )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = BtccBackground,
+            ),
+        )
+        if (loading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = BtccYellow)
+            }
+            return@Column
         }
-    ) { padding ->
+
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
         ) {
+            val isRaceWeekend = nextRace != null && today >= nextRace.startDate
+            if (isRaceWeekend) {
+                item {
+                    LiveTimingCard()
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
             if (nextRace != null) {
                 item {
                     CountdownCard(race = nextRace, today = today, onClick = { onRaceClick(nextRace) })
@@ -280,5 +292,53 @@ private fun TimelineRaceRow(
                     .size(14.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun LiveTimingCard() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0xFF0D0A00))
+            .border(1.dp, BtccYellow.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+            .clickable {
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.btcc.net/live-timing/"))
+                )
+            }
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Pulsing live dot
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(BtccYellow),
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                "LIVE TIMING",
+                fontWeight    = FontWeight.ExtraBold,
+                fontSize      = 14.sp,
+                letterSpacing = 1.sp,
+                color         = BtccYellow,
+            )
+            Text(
+                "Race weekend is live · btcc.net",
+                style = MaterialTheme.typography.labelSmall,
+                color = BtccYellow.copy(alpha = 0.6f),
+            )
+        }
+        Icon(
+            Icons.Default.SignalCellularAlt,
+            contentDescription = null,
+            tint     = BtccYellow,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }

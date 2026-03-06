@@ -23,6 +23,7 @@ import com.btccfanhub.data.Standings2025
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.RoundResult
 import com.btccfanhub.data.model.TeamStanding
+import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.RaceResultsRepository
 import com.btccfanhub.data.repository.StandingsRepository
 import com.btccfanhub.ui.theme.BtccBackground
@@ -41,8 +42,6 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
-private val seasonStartDate = LocalDate.of(2026, 4, 18)
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
@@ -57,9 +56,12 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     var raceResults2025 by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
     var resultsLoading  by remember { mutableStateOf(false) }
 
+    // Season start date from remote config (fallback: 2026-04-18)
+    var seasonStartDate by remember { mutableStateOf(LocalDate.of(2026, 4, 18)) }
+
     val today         = LocalDate.now()
     val seasonStarted = today >= seasonStartDate
-    var selectedYear  by remember { mutableIntStateOf(if (seasonStarted) 2026 else 2025) }
+    var selectedYear  by remember(seasonStartDate) { mutableIntStateOf(if (today >= seasonStartDate) 2026 else 2025) }
     val pagerState    = rememberPagerState(pageCount = { 3 })
     val scope         = rememberCoroutineScope()
 
@@ -85,9 +87,10 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         resultsLoading = false
     }
 
-    // Only fetch live data when the 2026 season is in scope
+    // Fetch season start date + live data on first composition
     LaunchedEffect(Unit) {
-        if (seasonStarted) refresh()
+        seasonStartDate = CalendarRepository.getCalendarData().seasonStartDate
+        if (today >= seasonStartDate) refresh()
         refreshResults()
         raceResults2025 = RaceResultsRepository.getResults2025()
     }
@@ -232,7 +235,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     page == 0 && show2026Drivers ->
                         DriverStandingsList(liveDrivers!!, showLiveRound = liveRound, showPastBanner = false)
                     page == 0 && selectedYear == 2026 && !seasonStarted ->
-                        SeasonNotStarted()
+                        SeasonNotStarted(seasonStartDate)
                     page == 0 && selectedYear == 2026 ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
@@ -240,15 +243,16 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     page == 1 && show2026Teams ->
                         TeamStandingsList(liveTeams!!, showPastBanner = false)
                     page == 1 && selectedYear == 2026 ->
-                        SeasonNotStarted()
+                        SeasonNotStarted(seasonStartDate)
 
                     // --- Race results ---
                     page == 2 ->
                         RaceResultsTab(
-                            year          = selectedYear,
-                            results       = if (selectedYear == 2025) raceResults2025 else raceResults,
-                            loading       = resultsLoading,
-                            onRoundClick  = { round -> onRoundClick(selectedYear, round) },
+                            year            = selectedYear,
+                            results         = if (selectedYear == 2025) raceResults2025 else raceResults,
+                            loading         = resultsLoading,
+                            seasonStartDate = seasonStartDate,
+                            onRoundClick    = { round -> onRoundClick(selectedYear, round) },
                         )
 
                     else ->
@@ -266,13 +270,14 @@ private fun RaceResultsTab(
     year: Int,
     results: List<RoundResult>,
     loading: Boolean,
+    seasonStartDate: LocalDate,
     onRoundClick: (Int) -> Unit,
 ) {
     when {
         loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = BtccYellow)
         }
-        results.isEmpty() -> ResultsNotStarted(year)
+        results.isEmpty() -> ResultsNotStarted(year, seasonStartDate)
         else -> LazyColumn(
             contentPadding      = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -319,18 +324,11 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
             Text(round.date,  style = MaterialTheme.typography.bodySmall, color = BtccTextSecondary)
         }
 
-        Text(
-            "${round.races.size} RACES",
-            style         = MaterialTheme.typography.labelSmall,
-            fontWeight    = FontWeight.ExtraBold,
-            color         = BtccTextSecondary,
-            letterSpacing = 1.sp,
-        )
     }
 }
 
 @Composable
-private fun SeasonNotStarted() {
+private fun SeasonNotStarted(seasonStartDate: LocalDate) {
     val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
 
     Box(
@@ -416,7 +414,7 @@ private fun SeasonNotStarted() {
 }
 
 @Composable
-private fun ResultsNotStarted(year: Int) {
+private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
     val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
 
     Box(
@@ -576,6 +574,7 @@ private fun DriverRow(driver: DriverStanding) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 64.dp)
             .background(BtccCard, RoundedCornerShape(10.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment     = Alignment.CenterVertically,
@@ -590,9 +589,17 @@ private fun DriverRow(driver: DriverStanding) {
             textAlign  = TextAlign.Center,
         )
         Column(modifier = Modifier.weight(1f)) {
-            Text(driver.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                driver.name,
+                fontWeight = FontWeight.Bold,
+                style      = MaterialTheme.typography.bodyLarge,
+            )
             if (driver.team.isNotEmpty()) {
-                Text(driver.team, style = MaterialTheme.typography.bodySmall, color = BtccTextSecondary)
+                Text(
+                    driver.team,
+                    style    = MaterialTheme.typography.bodySmall,
+                    color    = BtccTextSecondary,
+                )
             }
         }
         Column(horizontalAlignment = Alignment.End) {
@@ -602,15 +609,13 @@ private fun DriverRow(driver: DriverStanding) {
                 fontWeight = FontWeight.ExtraBold,
                 color      = MaterialTheme.colorScheme.onBackground,
             )
-            if (driver.wins > 0) {
-                Text(
-                    "${driver.wins}W",
-                    style         = MaterialTheme.typography.labelSmall,
-                    fontWeight    = FontWeight.ExtraBold,
-                    color         = BtccYellow,
-                    letterSpacing = 0.5.sp,
-                )
-            }
+            Text(
+                if (driver.wins > 0) "${driver.wins}W" else "0W",
+                style         = MaterialTheme.typography.labelSmall,
+                fontWeight    = FontWeight.ExtraBold,
+                color         = if (driver.wins > 0) BtccYellow else Color.Transparent,
+                letterSpacing = 0.5.sp,
+            )
         }
     }
 }
@@ -627,6 +632,7 @@ private fun TeamRow(team: TeamStanding) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 64.dp)
             .background(BtccCard, RoundedCornerShape(10.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment     = Alignment.CenterVertically,

@@ -21,30 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.data.repository.RadioRepository
+import com.btccfanhub.data.repository.RadioStation
 import com.btccfanhub.service.RadioService
 import com.btccfanhub.ui.theme.*
-
-private data class RadioStation(
-    val name: String,
-    val tagline: String,
-    val streamUrl: String,
-    val coverage: String,
-)
-
-private val stations = listOf(
-    RadioStation(
-        name      = "talkSPORT",
-        tagline   = "UK Sports Radio",
-        streamUrl = "https://radio.talksport.com/stream",
-        coverage  = "Live BTCC commentary on race weekends",
-    ),
-    RadioStation(
-        name      = "talkSPORT 2",
-        tagline   = "UK Sports Radio",
-        streamUrl = "https://radio.talksport.com/stream2",
-        coverage  = "Backup BTCC coverage on select weekends",
-    ),
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +32,8 @@ fun RadioScreen() {
     val context        = LocalContext.current
     val isPlaying      by RadioService.isPlaying.collectAsState()
     val currentStation by RadioService.currentStation.collectAsState()
+    var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
+    LaunchedEffect(Unit) { stations = RadioRepository.getStations() }
 
     Column(
         modifier = Modifier
@@ -112,8 +94,8 @@ fun RadioScreen() {
                     .padding(14.dp),
             ) {
                 Text(
-                    "talkSPORT and talkSPORT 2 carry live BTCC race coverage. Streams are only active during " +
-                    "broadcast hours — check the BTCC calendar for race weekend dates.",
+                    "talkSPORT and talkSPORT 2 carry live BTCC race coverage on race weekends. " +
+                    "Streams are usually active 24/7 — check the BTCC calendar for upcoming race dates.",
                     style = MaterialTheme.typography.bodySmall,
                     color = BtccTextSecondary,
                     lineHeight = 18.sp,
