@@ -1,6 +1,7 @@
 {
   "season": 2026,
   "seasonStartDate": "2026-04-18",
+  "liveTimingEnabled": true,
   "rounds": [
     {
       "round": 1,

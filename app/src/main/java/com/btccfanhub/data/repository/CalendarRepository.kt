@@ -107,6 +107,7 @@ object CalendarRepository {
             )
         }
 
-        return CalendarData(seasonStartDate, races, trackMap)
+        val liveTimingEnabled = root.optBoolean("liveTimingEnabled", true)
+        return CalendarData(seasonStartDate, races, trackMap, liveTimingEnabled)
     }
 }

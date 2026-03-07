@@ -42,9 +42,12 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: () -> Unit = {}) {
     val today = LocalDate.now()
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
+    var liveTimingEnabled by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
-        races = CalendarRepository.getCalendarData().rounds
+        val cal = CalendarRepository.getCalendarData()
+        races = cal.rounds
+        liveTimingEnabled = cal.liveTimingEnabled
         loading = false
     }
     val nextRace = races.firstOrNull { it.endDate >= today }
@@ -78,7 +81,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: () -> Un
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
         ) {
-            val isRaceWeekend = nextRace != null && today >= nextRace.startDate
+            val isRaceWeekend = liveTimingEnabled && nextRace != null && today >= nextRace.startDate
             if (isRaceWeekend) {
                 item {
                     LiveTimingCard(onClick = onLiveTimingClick)

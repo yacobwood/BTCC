@@ -6,4 +6,5 @@ data class CalendarData(
     val seasonStartDate: LocalDate,
     val rounds: List<Race>,
     val trackInfoMap: Map<Int, TrackInfo>,
+    val liveTimingEnabled: Boolean = true,
 )
