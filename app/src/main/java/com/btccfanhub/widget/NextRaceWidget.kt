@@ -38,8 +38,8 @@ class NextRaceWidget : AppWidgetProvider() {
     }
 
     companion object {
-        private val DATE_FMT  = DateTimeFormatter.ofPattern("d MMM")
-        private val DATE_FULL = DateTimeFormatter.ofPattern("d MMM yyyy")
+        private val DAY_FMT        = DateTimeFormatter.ofPattern("d")
+        private val MONTH_YEAR_FMT = DateTimeFormatter.ofPattern("MMM yyyy")
 
         private suspend fun buildViews(context: Context): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.next_race_widget)
@@ -69,7 +69,7 @@ class NextRaceWidget : AppWidgetProvider() {
 
             val isWeekend  = today >= nextRace.startDate
             val daysUntil  = ChronoUnit.DAYS.between(today, nextRace.startDate)
-            val dateString = "${nextRace.startDate.format(DATE_FMT)} – ${nextRace.endDate.format(DATE_FULL)}"
+            val dateString = "${nextRace.startDate.format(DAY_FMT)} - ${nextRace.endDate.format(DAY_FMT)} ${nextRace.endDate.format(MONTH_YEAR_FMT)}"
 
             views.setTextViewText(R.id.widget_round, "ROUND ${nextRace.round}")
             views.setTextViewText(R.id.widget_venue, nextRace.venue)

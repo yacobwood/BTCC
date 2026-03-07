@@ -6,6 +6,7 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONException
+import java.net.URLEncoder
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -34,10 +35,14 @@ object RssParser {
         }
     }
 
-    fun fetchArticles(): List<Article> {
+    fun fetchArticles(page: Int = 1, perPage: Int = 20, search: String = ""): List<Article> {
         return try {
+            val url = buildString {
+                append("https://www.btcc.net/wp-json/wp/v2/posts?per_page=$perPage&page=$page&_embed=1")
+                if (search.isNotBlank()) append("&search=${URLEncoder.encode(search, "UTF-8")}")
+            }
             val request = Request.Builder()
-                .url("https://www.btcc.net/wp-json/wp/v2/posts?per_page=20&_embed=1")
+                .url(url)
                 .header("User-Agent", "BTCCFanHub/1.0 Android")
                 .build()
             val json = client.newCall(request).execute().body?.string() ?: return emptyList()

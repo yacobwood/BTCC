@@ -5,14 +5,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -34,9 +46,48 @@ import com.btccfanhub.ui.theme.BtccTextSecondary
 fun NewsScreen(
     onArticleClick: (Article) -> Unit,
     onSettingsClick: () -> Unit = {},
+    scrollToTopTrigger: Int = 0,
     viewModel: NewsViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val searchState by viewModel.searchState.collectAsState()
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    var searchActive by remember { mutableStateOf(false) }
+    var searchQuery  by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+
+    val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
+    LaunchedEffect(scrollToTopTrigger) {
+        if (scrollToTopTrigger > 0) {
+            searchActive = false
+            searchQuery  = ""
+            viewModel.clearSearch()
+            listState.animateScrollToItem(0)
+        }
+    }
+
+    LaunchedEffect(searchActive) {
+        if (searchActive) focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(searchQuery) {
+        viewModel.search(searchQuery)
+    }
+
+    // Trigger loadMore when within 4 items of the end (not during search)
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            if (searchQuery.isNotBlank()) return@derivedStateOf false
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val total = listState.layoutInfo.totalItemsCount
+            total > 0 && lastVisible >= total - 4
+        }
+    }
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) viewModel.loadMore()
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(BtccBackground)) {
         when (val s = state) {
@@ -63,71 +114,181 @@ fun NewsScreen(
             }
 
             is NewsState.Success -> {
-                val articles = s.articles
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 20.dp),
-                ) {
-                    // ── Hero (header floats over it) ─────────────────────────
-                    if (articles.isNotEmpty()) {
-                        item {
-                            HeroCard(
-                                article = articles[0],
-                                onRefresh = { viewModel.load() },
-                                onSettingsClick = onSettingsClick,
-                                onClick = { onArticleClick(articles[0]) },
-                            )
-                        }
-                    }
+                val articles      = s.articles
+                val isLoadingMore = s.isLoadingMore
 
-                    // ── 2-column grid (articles 1 & 2) ───────────────────────
-                    if (articles.size >= 3) {
-                        item {
-                            Spacer(Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                GridCard(
-                                    article = articles[1],
-                                    onClick = { onArticleClick(articles[1]) },
-                                    modifier = Modifier.weight(1f),
-                                )
-                                GridCard(
-                                    article = articles[2],
-                                    onClick = { onArticleClick(articles[2]) },
-                                    modifier = Modifier.weight(1f),
-                                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (searchActive) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(BtccBackground)
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Search news…", color = BtccTextSecondary) },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f).focusRequester(focusRequester),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor   = BtccCard,
+                                    unfocusedContainerColor = BtccCard,
+                                    focusedIndicatorColor   = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    cursorColor             = BtccYellow,
+                                    focusedTextColor        = Color.White,
+                                    unfocusedTextColor      = Color.White,
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                leadingIcon = {
+                                    Icon(Icons.Default.Search, contentDescription = null, tint = BtccTextSecondary)
+                                },
+                            )
+                            IconButton(onClick = { searchActive = false; searchQuery = ""; viewModel.clearSearch() }) {
+                                Icon(Icons.Default.Close, contentDescription = "Close search", tint = BtccTextSecondary)
                             }
                         }
                     }
 
-                    // ── Section label ────────────────────────────────────────
-                    if (articles.size > 3) {
-                        item {
-                            Text(
-                                "MORE STORIES",
-                                modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 10.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = BtccTextSecondary,
-                                letterSpacing = 2.sp,
-                            )
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 20.dp),
+                    ) {
+                        if (searchQuery.isNotBlank()) {
+                            // ── Server-side search results ─────────────────────
+                            when (val ss = searchState) {
+                                is SearchState.Loading -> {
+                                    item {
+                                        Box(
+                                            Modifier.fillMaxWidth().padding(top = 64.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            CircularProgressIndicator(color = BtccYellow, strokeWidth = 2.dp, modifier = Modifier.size(28.dp))
+                                        }
+                                    }
+                                }
+                                is SearchState.Results -> {
+                                    if (ss.articles.isEmpty()) {
+                                        item {
+                                            Box(
+                                                Modifier.fillMaxWidth().padding(top = 64.dp),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                Text("No results for \"$searchQuery\"", color = BtccTextSecondary)
+                                            }
+                                        }
+                                    } else {
+                                        item { Spacer(Modifier.height(8.dp)) }
+                                        items(ss.articles) { article ->
+                                            CompactCard(
+                                                article = article,
+                                                onClick = { onArticleClick(article) },
+                                                modifier = Modifier
+                                                    .padding(horizontal = 16.dp)
+                                                    .padding(bottom = 10.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                                else -> {}
+                            }
+                        } else {
+                            // ── Normal layout ─────────────────────────────────
+                            if (articles.isNotEmpty()) {
+                                item {
+                                    HeroCard(
+                                        article = articles[0],
+                                        onRefresh = { viewModel.load() },
+                                        onSettingsClick = onSettingsClick,
+                                        onSearchClick = { searchActive = true },
+                                        onClick = { onArticleClick(articles[0]) },
+                                    )
+                                }
+                            }
+
+                            if (articles.size >= 3) {
+                                item {
+                                    Spacer(Modifier.height(10.dp))
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    ) {
+                                        GridCard(
+                                            article = articles[1],
+                                            onClick = { onArticleClick(articles[1]) },
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                        GridCard(
+                                            article = articles[2],
+                                            onClick = { onArticleClick(articles[2]) },
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (articles.size > 3) {
+                                item {
+                                    Text(
+                                        "MORE STORIES",
+                                        modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 10.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = BtccTextSecondary,
+                                        letterSpacing = 2.sp,
+                                    )
+                                }
+                            }
+
+                            val remaining = if (articles.size > 3) articles.drop(3) else emptyList()
+                            items(remaining) { article ->
+                                CompactCard(
+                                    article = article,
+                                    onClick = { onArticleClick(article) },
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 10.dp),
+                                )
+                            }
+
+                            if (isLoadingMore) {
+                                item {
+                                    Box(
+                                        Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        CircularProgressIndicator(
+                                            color       = BtccYellow,
+                                            strokeWidth = 2.dp,
+                                            modifier    = Modifier.size(24.dp),
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    // ── Compact list (articles 3+) ────────────────────────────
-                    val remaining = if (articles.size > 3) articles.drop(3) else emptyList()
-                    items(remaining) { article ->
-                        CompactCard(
-                            article = article,
-                            onClick = { onArticleClick(article) },
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 10.dp),
-                        )
-                    }
                 }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = showScrollToTop,
+            enter = fadeIn() + scaleIn(initialScale = 0.8f),
+            exit  = fadeOut() + scaleOut(targetScale = 0.8f),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 16.dp),
+        ) {
+            SmallFloatingActionButton(
+                onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                containerColor = BtccYellow,
+                contentColor   = BtccNavy,
+            ) {
+                Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Scroll to top")
             }
         }
     }
@@ -137,7 +298,7 @@ fun NewsScreen(
 // Hero card — full-bleed, 300dp tall, gradient overlay
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun HeroCard(article: Article, onRefresh: () -> Unit, onSettingsClick: () -> Unit, onClick: () -> Unit) {
+private fun HeroCard(article: Article, onRefresh: () -> Unit, onSettingsClick: () -> Unit, onSearchClick: () -> Unit, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -189,6 +350,12 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSettingsClick: (
                 letterSpacing = (-0.5).sp,
                 modifier = Modifier.weight(1f),
             )
+            IconButton(
+                onClick = onSearchClick,
+                modifier = Modifier.size(36.dp),
+            ) {
+                Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.White.copy(alpha = 0.7f))
+            }
             IconButton(
                 onClick = onRefresh,
                 modifier = Modifier.size(36.dp),

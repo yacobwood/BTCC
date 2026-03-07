@@ -6,7 +6,10 @@
     android:background="@drawable/widget_background"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="16dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <!-- Left: round label, venue, date -->
     <LinearLayout
@@ -31,12 +34,13 @@
             android:id="@+id/widget_venue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:fontFamily="sans-serif-black"
-            android:maxLines="2"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:text="Donington Park"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/widget_dates"
@@ -66,7 +70,7 @@
             android:gravity="center"
             android:text="42"
             android:textColor="#FFFFFF"
-            android:textSize="40sp"
+            android:textSize="32sp"
             android:lineSpacingMultiplier="0.9" />
 
         <TextView

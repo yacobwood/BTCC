@@ -37,7 +37,7 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun AppNavHost(navController: NavHostController) {
+fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0) {
     NavHost(navController = navController, startDestination = Screen.News.route) {
 
         composable(Screen.News.route) {
@@ -47,6 +47,7 @@ fun AppNavHost(navController: NavHostController) {
                     navController.navigate(Screen.Article.route)
                 },
                 onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                scrollToTopTrigger = newsScrollToTopTrigger,
             )
         }
 

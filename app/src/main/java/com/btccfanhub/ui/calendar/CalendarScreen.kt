@@ -33,8 +33,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-private val dateFormat = DateTimeFormatter.ofPattern("d MMM yyyy")
-private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
+private val dayFmt       = DateTimeFormatter.ofPattern("d")
+private val monthYearFmt = DateTimeFormatter.ofPattern("MMM yyyy")
+
+private fun formatDateRange(start: java.time.LocalDate, end: java.time.LocalDate) =
+    "${start.format(dayFmt)} - ${end.format(dayFmt)} ${end.format(monthYearFmt)}"
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,8 +143,10 @@ private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                val startRound = (race.round - 1) * 3 + 1
+                val endRound   = startRound + 2
                 Text(
-                    "ROUND ${race.round} · NEXT RACE",
+                    "ROUNDS $startRound–$endRound · NEXT RACE",
                     style = MaterialTheme.typography.labelSmall,
                     color = BtccYellow,
                     fontWeight = FontWeight.ExtraBold,
@@ -156,7 +161,7 @@ private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${race.startDate.format(dateFormat)} – ${race.endDate.format(shortDateFormat)}",
+                    formatDateRange(race.startDate, race.endDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = BtccTextSecondary,
                 )
@@ -246,8 +251,10 @@ private fun TimelineRaceRow(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val rStart = (race.round - 1) * 3 + 1
+                    val rEnd   = rStart + 2
                     Text(
-                        "Round ${race.round}",
+                        "Rounds $rStart–$rEnd",
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isNext) BtccYellow else BtccTextSecondary.copy(alpha = textAlpha),
                         fontWeight = FontWeight.Bold,
@@ -277,7 +284,7 @@ private fun TimelineRaceRow(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = textAlpha),
                 )
                 Text(
-                    "${race.startDate.format(dateFormat)} – ${race.endDate.format(shortDateFormat)}",
+                    formatDateRange(race.startDate, race.endDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = BtccTextSecondary.copy(alpha = textAlpha),
                 )

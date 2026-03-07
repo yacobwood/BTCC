@@ -14,6 +14,7 @@ object RaceResultsRepository {
     private val client = OkHttpClient()
     private val url2026 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results.json"
     private val url2025 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2025.json"
+    private val url2024 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2024.json"
 
     private var cache2026: List<RoundResult>? = null
     private var cacheTime2026: Long = 0
@@ -22,6 +23,9 @@ object RaceResultsRepository {
     private var cache2025: List<RoundResult>? = null
     private var cacheTime2025: Long = 0
     private const val CACHE_MS_2025 = 24 * 60 * 60 * 1000L // historical — rarely changes
+
+    private var cache2024: List<RoundResult>? = null
+    private var cacheTime2024: Long = 0
 
     suspend fun getResults(): List<RoundResult> = fetchAndCache(
         url = url2026,
@@ -37,6 +41,14 @@ object RaceResultsRepository {
         cacheTime = { cacheTime2025 },
         ttl = CACHE_MS_2025,
         setCache = { r, t -> cache2025 = r; cacheTime2025 = t },
+    )
+
+    suspend fun getResults2024(): List<RoundResult> = fetchAndCache(
+        url = url2024,
+        cache = { cache2024 },
+        cacheTime = { cacheTime2024 },
+        ttl = CACHE_MS_2025,
+        setCache = { r, t -> cache2024 = r; cacheTime2024 = t },
     )
 
     private suspend fun fetchAndCache(
@@ -72,6 +84,7 @@ object RaceResultsRepository {
                 val resultsArr = race.optJSONArray("results") ?: org.json.JSONArray()
                 RaceEntry(
                     label       = race.optString("label", "Race ${j + 1}"),
+                    date        = race.optString("date", "").takeIf { it.isNotEmpty() },
                     fullRaceUrl = race.optString("fullRaceUrl", "").takeIf { it.isNotEmpty() },
                     results = (0 until resultsArr.length()).map { k ->
                         val d = resultsArr.getJSONObject(k)
@@ -94,12 +107,14 @@ object RaceResultsRepository {
                 venue         = r.optString("venue", ""),
                 date          = r.optString("date", ""),
                 races         = races,
+                polePosition  = r.optString("polePosition", "").takeIf { it.isNotEmpty() },
             )
         }
     }
 
     fun invalidateCache() {
-        cache2026 = null
-        cacheTime2026 = 0
+        cache2026 = null; cacheTime2026 = 0
+        cache2025 = null; cacheTime2025 = 0
+        cache2024 = null; cacheTime2024 = 0
     }
 }

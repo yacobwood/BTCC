@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Star
+import com.btccfanhub.data.FavouriteDriverStore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,10 +46,10 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
 
     LaunchedEffect(year, round) {
         loading = true
-        val results = if (year == 2025) {
-            RaceResultsRepository.getResults2025()
-        } else {
-            RaceResultsRepository.getResults()
+        val results = when (year) {
+            2024 -> RaceResultsRepository.getResults2024()
+            2025 -> RaceResultsRepository.getResults2025()
+            else -> RaceResultsRepository.getResults()
         }
         roundResult = results.find { it.round == round }
         loading = false
@@ -71,8 +73,10 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         fontSize      = 17.sp,
                         letterSpacing = 0.5.sp,
                     )
+                    val startRound = (round - 1) * 3 + 1
+                    val endRound   = startRound + 2
                     Text(
-                        "ROUND $round · ${roundResult?.date ?: ""}",
+                        "ROUNDS $startRound–$endRound · ${roundResult?.date ?: ""}",
                         style         = MaterialTheme.typography.labelSmall,
                         color         = BtccYellow,
                         fontWeight    = FontWeight.ExtraBold,
@@ -127,7 +131,10 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         state    = pagerState,
                         modifier = Modifier.fillMaxSize(),
                     ) { page ->
-                        RaceResultsList(race = races[page])
+                        RaceResultsList(
+                            race      = races[page],
+                            roundDate = roundResult?.date ?: "",
+                        )
                     }
                 }
             }
@@ -176,17 +183,30 @@ private fun VideoExternalButton(
 }
 
 @Composable
-private fun RaceResultsList(race: RaceEntry) {
+private fun RaceResultsList(race: RaceEntry, roundDate: String) {
     if (race.results.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No results available.", color = BtccTextSecondary)
         }
         return
     }
+    val displayDate = race.date ?: roundDate
     LazyColumn(
         contentPadding      = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        if (displayDate.isNotEmpty()) {
+            item {
+                Text(
+                    displayDate.uppercase(),
+                    style         = MaterialTheme.typography.labelSmall,
+                    color         = BtccTextSecondary,
+                    fontWeight    = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    modifier      = Modifier.padding(bottom = 4.dp),
+                )
+            }
+        }
         if (race.fullRaceUrl != null) {
             item {
                 VideoExternalButton(
@@ -206,6 +226,9 @@ private fun RaceResultsList(race: RaceEntry) {
 
 @Composable
 private fun DriverResultRow(result: DriverResult) {
+    val favourite   by FavouriteDriverStore.driver.collectAsState()
+    val isFavourite = favourite == result.driver
+
     val posColor = when (result.position) {
         1    -> Color(0xFFFFD700)
         2    -> Color(0xFFC0C0C0)
@@ -217,6 +240,7 @@ private fun DriverResultRow(result: DriverResult) {
         modifier = Modifier
             .fillMaxWidth()
             .background(BtccCard, RoundedCornerShape(10.dp))
+            .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(10.dp)) else Modifier)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -230,11 +254,25 @@ private fun DriverResultRow(result: DriverResult) {
             textAlign  = TextAlign.Center,
         )
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                result.driver,
-                fontWeight = FontWeight.Bold,
-                style      = MaterialTheme.typography.bodyMedium,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (isFavourite) {
+                    Icon(
+                        Icons.Filled.Star,
+                        contentDescription = null,
+                        tint     = BtccYellow,
+                        modifier = Modifier.size(12.dp),
+                    )
+                }
+                Text(
+                    result.driver,
+                    fontWeight = FontWeight.Bold,
+                    style      = MaterialTheme.typography.bodyMedium,
+                    color      = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onBackground,
+                )
+            }
             Text(
                 result.team,
                 style = MaterialTheme.typography.bodySmall,

@@ -14,6 +14,7 @@ data class DriverResult(
 
 data class RaceEntry(
     val label: String,          // "Race 1", "Race 2", "Race 3"
+    val date: String? = null,   // e.g. "27 Apr 2025" — null falls back to round date
     val results: List<DriverResult>,
     val fullRaceUrl: String? = null,
 )
@@ -24,4 +25,5 @@ data class RoundResult(
     val date: String,           // e.g. "18 Apr 2026"
     val races: List<RaceEntry>,
     val r_id: String? = null,
+    val polePosition: String? = null,  // qualifying pole sitter (driver name)
 )

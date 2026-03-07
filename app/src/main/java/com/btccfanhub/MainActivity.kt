@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,7 +36,12 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.data.FavouriteDriverStore
+import com.btccfanhub.data.OnboardingStore
+import com.btccfanhub.data.WhatsNewStore
 import com.btccfanhub.data.network.RssParser
+import com.btccfanhub.ui.NotificationOnboardingScreen
+import com.btccfanhub.ui.WhatsNewDialog
 import com.btccfanhub.navigation.AppNavHost
 import com.btccfanhub.navigation.Screen
 import kotlinx.coroutines.Dispatchers
@@ -61,18 +67,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this)
+        FavouriteDriverStore.init(this)
         createNewsNotificationChannel()
         createRaceNotificationChannel()
         scheduleNewsCheck()
         scheduleRaceNotifications()
-        requestNewsNotificationPermission()
         handleNotificationIntent(intent)
         enableEdgeToEdge()
         setContent {
             BTCCFanHubTheme {
                 MainScreen(
-                    pendingArticleId = pendingArticleId.value,
+                    pendingArticleId    = pendingArticleId.value,
                     onArticleIdConsumed = { pendingArticleId.value = null },
+                    onRequestPermission = { requestNewsNotificationPermission() },
                 )
             }
         }
@@ -149,10 +156,33 @@ private data class NavItem(
 )
 
 @Composable
-private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () -> Unit = {}) {
+private fun MainScreen(
+    pendingArticleId: Int? = null,
+    onArticleIdConsumed: () -> Unit = {},
+    onRequestPermission: () -> Unit = {},
+) {
+    val context       = LocalContext.current
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+    var newsScrollTrigger by remember { mutableIntStateOf(0) }
+    var showOnboarding by remember { mutableStateOf(OnboardingStore.shouldShow(context)) }
+    var showWhatsNew by remember { mutableStateOf(WhatsNewStore.shouldShow(context)) }
+
+    if (showOnboarding) {
+        NotificationOnboardingScreen(
+            onEnableNotifications = {
+                onRequestPermission()
+                OnboardingStore.markComplete(context)
+                showOnboarding = false
+            },
+            onSkip = {
+                OnboardingStore.markComplete(context)
+                showOnboarding = false
+            },
+        )
+        return
+    }
 
     LaunchedEffect(pendingArticleId) {
         if (pendingArticleId != null) {
@@ -187,6 +217,16 @@ private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () ->
         unselectedTextColor = BtccTextSecondary,
     )
 
+    if (showWhatsNew) {
+        WhatsNewDialog(
+            changes   = WhatsNewStore.changes,
+            onDismiss = {
+                WhatsNewStore.markSeen(context)
+                showWhatsNew = false
+            },
+        )
+    }
+
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
@@ -207,6 +247,7 @@ private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () ->
                                 },
                                 colors = navItemColors,
                                 onClick = {
+                                    if (item.screen == Screen.News) newsScrollTrigger++
                                     navController.navigate(item.screen.route) {
                                         popUpTo(Screen.News.route)
                                         launchSingleTop = true
@@ -220,7 +261,7 @@ private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () ->
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            AppNavHost(navController = navController)
+            AppNavHost(navController = navController, newsScrollToTopTrigger = newsScrollTrigger)
         }
     }
 }
