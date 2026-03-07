@@ -10,7 +10,22 @@
       "nationality": "British",
       "bio": "Scored his first BTCC race win in 2025 and retained his West Surrey Racing seat for 2026.",
       "history": [
-        { "year": 2025, "team": "West Surrey Racing", "car": "BMW 330i M Sport", "pos": 13, "points": 149, "wins": 1 }
+        {
+          "year": 2025,
+          "team": "West Surrey Racing",
+          "car": "BMW 330i M Sport",
+          "pos": 13,
+          "points": 149,
+          "wins": 1
+        },
+        {
+          "year": 2024,
+          "team": "Duckhams Racing with Bartercard",
+          "car": "Honda Civic Type R",
+          "pos": 13,
+          "points": 165,
+          "wins": 1
+        }
       ]
     },
     {
@@ -22,7 +37,22 @@
       "nationality": "British",
       "bio": "Highly experienced BTCC campaigner with multiple race wins across his career. Took 2 victories in 2025 with EXCELR8 Motorsport.",
       "history": [
-        { "year": 2025, "team": "EXCELR8 Motorsport", "car": "Hyundai i30 N", "pos": 7, "points": 230, "wins": 2 }
+        {
+          "year": 2025,
+          "team": "EXCELR8 Motorsport",
+          "car": "Hyundai i30 N",
+          "pos": 7,
+          "points": 230,
+          "wins": 2
+        },
+        {
+          "year": 2024,
+          "team": "Team BRISTOL STREET MOTORS",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 18,
+          "points": 116,
+          "wins": 0
+        }
       ]
     },
     {
@@ -34,7 +64,21 @@
       "nationality": "Scottish",
       "bio": "Scotland's Aiden Moffat has been a fixture in the BTCC paddock for over a decade, racing with a number of front-running outfits.",
       "history": [
-        { "year": 2025, "team": "EXCELR8 Motorsport", "car": "Hyundai i30 N", "pos": 11, "points": 166 }
+        {
+          "year": 2025,
+          "team": "EXCELR8 Motorsport",
+          "car": "Hyundai i30 N",
+          "pos": 11,
+          "points": 166
+        },
+        {
+          "year": 2024,
+          "team": "Laser Tools Racing with MB Motorsport",
+          "car": "BMW 330i M Sport",
+          "pos": 9,
+          "points": 210,
+          "wins": 2
+        }
       ]
     },
     {
@@ -46,7 +90,13 @@
       "nationality": "British",
       "bio": "An emerging talent in the BTCC, Dexter Patterson campaigns with Power Maxed Racing's Audi programme.",
       "history": [
-        { "year": 2025, "team": "Power Maxed Racing", "car": "Audi S3 Saloon", "pos": 20, "points": 42 }
+        {
+          "year": 2025,
+          "team": "Power Maxed Racing",
+          "car": "Audi S3 Saloon",
+          "pos": 20,
+          "points": 42
+        }
       ]
     },
     {
@@ -58,7 +108,13 @@
       "nationality": "British",
       "bio": "A quick and exciting BTCC competitor who has shown strong pace throughout his time in the series.",
       "history": [
-        { "year": 2025, "team": "Team VERTU", "car": "Toyota Corolla GR Sport", "pos": 10, "points": 167 }
+        {
+          "year": 2025,
+          "team": "Team VERTU",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 10,
+          "points": 167
+        }
       ]
     },
     {
@@ -70,7 +126,13 @@
       "nationality": "British",
       "bio": "Max Buxton made his BTCC debut in 2025 with West Surrey Racing and steps up to a full programme with Speedworks Corolla Racing for 2026.",
       "history": [
-        { "year": 2025, "team": "West Surrey Racing", "car": "BMW 330i M Sport", "pos": 22, "points": 8 }
+        {
+          "year": 2025,
+          "team": "West Surrey Racing",
+          "car": "BMW 330i M Sport",
+          "pos": 22,
+          "points": 8
+        }
       ]
     },
     {
@@ -82,7 +144,21 @@
       "nationality": "Northern Irish",
       "bio": "Northern Irish driver Chris Smiley is a tenacious BTCC competitor with several strong seasons in the championship.",
       "history": [
-        { "year": 2025, "team": "Ciceley Motorsport", "car": "Mercedes-AMG A35 Saloon", "pos": 14, "points": 140 }
+        {
+          "year": 2025,
+          "team": "Ciceley Motorsport",
+          "car": "Mercedes-AMG A35 Saloon",
+          "pos": 14,
+          "points": 140
+        },
+        {
+          "year": 2024,
+          "team": "BTC Racing",
+          "car": "Honda Civic Type R",
+          "pos": 16,
+          "points": 142,
+          "wins": 0
+        }
       ]
     },
     {
@@ -94,7 +170,22 @@
       "nationality": "British",
       "bio": "A multiple race winner and regular title contender. Cammish finished 3rd in the 2025 championship with NAPA Racing UK.",
       "history": [
-        { "year": 2025, "team": "NAPA Racing UK", "car": "Ford Focus Titanium Saloon", "pos": 3, "points": 307, "wins": 3 }
+        {
+          "year": 2025,
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus Titanium Saloon",
+          "pos": 3,
+          "points": 307,
+          "wins": 3
+        },
+        {
+          "year": 2024,
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST Saloon",
+          "pos": 3,
+          "points": 342,
+          "wins": 2
+        }
       ]
     },
     {
@@ -106,7 +197,22 @@
       "nationality": "British",
       "bio": "A three-time race winner in 2025 with Restart Racing, Rowbottom joins Plato Racing for the 2026 season.",
       "history": [
-        { "year": 2025, "team": "Restart Racing", "car": "Honda Civic Type R", "pos": 5, "points": 277, "wins": 3 }
+        {
+          "year": 2025,
+          "team": "Restart Racing",
+          "car": "Honda Civic Type R",
+          "pos": 5,
+          "points": 277,
+          "wins": 3
+        },
+        {
+          "year": 2024,
+          "team": "Team Dynamics",
+          "car": "Honda Civic Type R",
+          "pos": 17,
+          "points": 135,
+          "wins": 0
+        }
       ]
     },
     {
@@ -118,19 +224,47 @@
       "nationality": "British",
       "bio": "A long-standing BTCC competitor, Adam Morgan joins Plato Racing for 2026, reuniting with the Mercedes-AMG A35 Saloon he raced to 6th in the 2025 championship with Ciceley Motorsport.",
       "history": [
-        { "year": 2025, "team": "Ciceley Motorsport", "car": "Mercedes-AMG A35 Saloon", "pos": 6, "points": 241 }
+        {
+          "year": 2025,
+          "team": "Ciceley Motorsport",
+          "car": "Mercedes-AMG A35 Saloon",
+          "pos": 6,
+          "points": 241
+        },
+        {
+          "year": 2024,
+          "team": "Ciceley Motorsport",
+          "car": "BMW 330i M Sport",
+          "pos": 5,
+          "points": 268,
+          "wins": 0
+        }
       ]
     },
     {
       "number": 40,
-      "name": "\u00c1r\u00f3n Taylor-Smith",
+      "name": "Árón Taylor-Smith",
       "team": "Laser Tools Racing",
       "car": "Toyota Corolla",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/TaylorSmith-0H5A7061.png",
       "nationality": "Northern Irish",
       "bio": "A Northern Irish driver with over a decade of BTCC experience. Known for his aggressive racecraft and determination throughout the field.",
       "history": [
-        { "year": 2025, "team": "Laser Tools Racing", "car": "Toyota Corolla GR Sport", "pos": 17, "points": 103 }
+        {
+          "year": 2025,
+          "team": "Laser Tools Racing",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 17,
+          "points": 103
+        },
+        {
+          "year": 2024,
+          "team": "Evans Halshaw Power Maxed Racing",
+          "car": "Vauxhall Astra",
+          "pos": 19,
+          "points": 98,
+          "wins": 1
+        }
       ]
     },
     {
@@ -142,7 +276,13 @@
       "nationality": "British",
       "bio": "Nick Halstead continues to build his BTCC career with Power Maxed Racing's Audi programme.",
       "history": [
-        { "year": 2025, "team": "Power Maxed Racing", "car": "Audi S3 Saloon", "pos": 27, "points": 4 }
+        {
+          "year": 2025,
+          "team": "Power Maxed Racing",
+          "car": "Audi S3 Saloon",
+          "pos": 27,
+          "points": 4
+        }
       ]
     },
     {
@@ -154,10 +294,38 @@
       "nationality": "Scottish",
       "bio": "Three-time BTCC Drivers' Champion with Honda. 'Flash' Gordon returned to the series with Laser Tools Racing and secured a race win in 2025.",
       "history": [
-        { "year": 2025, "team": "Laser Tools Racing",    "car": "Toyota Corolla GR Sport", "pos": 9, "points": 177, "wins": 1 },
-        { "year": 2016, "team": "Halfords Yuasa Racing", "car": "Honda Civic Type R",      "pos": 1, "points": 0, "champion": true },
-        { "year": 2014, "team": "Halfords Yuasa Racing", "car": "Honda Civic Type R",      "pos": 1, "points": 0, "champion": true },
-        { "year": 2012, "team": "Halfords Yuasa Racing", "car": "Honda Civic Type R",      "pos": 1, "points": 0, "champion": true }
+        {
+          "year": 2025,
+          "team": "Laser Tools Racing",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 9,
+          "points": 177,
+          "wins": 1
+        },
+        {
+          "year": 2016,
+          "team": "Halfords Yuasa Racing",
+          "car": "Honda Civic Type R",
+          "pos": 1,
+          "points": 0,
+          "champion": true
+        },
+        {
+          "year": 2014,
+          "team": "Halfords Yuasa Racing",
+          "car": "Honda Civic Type R",
+          "pos": 1,
+          "points": 0,
+          "champion": true
+        },
+        {
+          "year": 2012,
+          "team": "Halfords Yuasa Racing",
+          "car": "Honda Civic Type R",
+          "pos": 1,
+          "points": 0,
+          "champion": true
+        }
       ]
     },
     {
@@ -169,7 +337,22 @@
       "nationality": "British",
       "bio": "A race winner across multiple BTCC seasons, Cook switches to Speedworks Corolla Racing and Toyota power for 2026.",
       "history": [
-        { "year": 2025, "team": "One Motorsport", "car": "Honda Civic Type R", "pos": 12, "points": 160, "wins": 1 }
+        {
+          "year": 2025,
+          "team": "One Motorsport",
+          "car": "Honda Civic Type R",
+          "pos": 12,
+          "points": 160,
+          "wins": 1
+        },
+        {
+          "year": 2024,
+          "team": "LKQ Euro Car Parts with SYNETIQ",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 7,
+          "points": 247,
+          "wins": 2
+        }
       ]
     },
     {
@@ -181,7 +364,14 @@
       "nationality": "British",
       "bio": "Sam Osborne secured his first BTCC race win in 2025 as part of the championship-winning NAPA Racing UK squad.",
       "history": [
-        { "year": 2025, "team": "NAPA Racing UK", "car": "Ford Focus Titanium Saloon", "pos": 16, "points": 108, "wins": 1 }
+        {
+          "year": 2025,
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus Titanium Saloon",
+          "pos": 16,
+          "points": 108,
+          "wins": 1
+        }
       ]
     },
     {
@@ -193,7 +383,23 @@
       "nationality": "British",
       "bio": "2025 BTCC Drivers' Champion with 7 race wins. Ingram moves to Team VERTU's Hyundai programme for 2026 as he defends his title.",
       "history": [
-        { "year": 2025, "team": "Team VERTU", "car": "Toyota Corolla GR Sport", "pos": 1, "points": 462, "wins": 7, "champion": true }
+        {
+          "year": 2025,
+          "team": "Team VERTU",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 1,
+          "points": 462,
+          "wins": 7,
+          "champion": true
+        },
+        {
+          "year": 2024,
+          "team": "Team BRISTOL STREET MOTORS",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 2,
+          "points": 431,
+          "wins": 5
+        }
       ]
     },
     {
@@ -205,7 +411,22 @@
       "nationality": "British",
       "bio": "Mikey Doble claimed a BTCC race win in 2025 with EXCELR8 Motorsport and is looking to build on that form in 2026.",
       "history": [
-        { "year": 2025, "team": "EXCELR8 Motorsport", "car": "Hyundai i30 N", "pos": 18, "points": 100, "wins": 1 }
+        {
+          "year": 2025,
+          "team": "EXCELR8 Motorsport",
+          "car": "Hyundai i30 N",
+          "pos": 18,
+          "points": 100,
+          "wins": 1
+        },
+        {
+          "year": 2024,
+          "team": "Evans Halshaw Power Maxed Racing",
+          "car": "Vauxhall Astra",
+          "pos": 15,
+          "points": 156,
+          "wins": 0
+        }
       ]
     },
     {
@@ -217,7 +438,14 @@
       "nationality": "British",
       "bio": "Charles Rainford secured his first BTCC race win in 2025 and has earned a full-season role with West Surrey Racing for 2026.",
       "history": [
-        { "year": 2025, "team": "West Surrey Racing", "car": "BMW 330i M Sport", "pos": 8, "points": 179, "wins": 1 }
+        {
+          "year": 2025,
+          "team": "West Surrey Racing",
+          "car": "BMW 330i M Sport",
+          "pos": 8,
+          "points": 179,
+          "wins": 1
+        }
       ]
     },
     {
@@ -229,9 +457,31 @@
       "nationality": "British",
       "bio": "Two-time BTCC Drivers' Champion (2017 and 2024). Sutton mounted a strong title challenge in 2025, falling just short behind Tom Ingram.",
       "history": [
-        { "year": 2025, "team": "NAPA Racing UK",            "car": "Ford Focus Titanium Saloon", "pos": 2,  "points": 428, "wins": 5 },
-        { "year": 2024, "team": "NAPA Racing UK",            "car": "Ford Focus Titanium Saloon", "pos": 1,  "points": 0,   "champion": true },
-        { "year": 2017, "team": "Adrian Flux Subaru Racing", "car": "Subaru Levorg",              "pos": 1,  "points": 0,   "champion": true }
+        {
+          "year": 2025,
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus Titanium Saloon",
+          "pos": 2,
+          "points": 428,
+          "wins": 5
+        },
+        {
+          "year": 2024,
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST Saloon",
+          "pos": 1,
+          "points": 457,
+          "wins": 6,
+          "champion": true
+        },
+        {
+          "year": 2017,
+          "team": "Adrian Flux Subaru Racing",
+          "car": "Subaru Levorg",
+          "pos": 1,
+          "points": 0,
+          "champion": true
+        }
       ]
     },
     {
@@ -290,7 +540,7 @@
       "name": "Laser Tools Racing",
       "car": "Toyota Corolla GR Sport",
       "entries": 2,
-      "bio": "Run by Speedworks Motorsport, Laser Tools Racing with MB Motorsport pair three-time champion Gordon Shedden with \u00c1r\u00f3n Taylor-Smith in Toyota Corolla GR Sport machinery.",
+      "bio": "Run by Speedworks Motorsport, Laser Tools Racing with MB Motorsport pair three-time champion Gordon Shedden with Árón Taylor-Smith in Toyota Corolla GR Sport machinery.",
       "standing2025": 5,
       "points2025": 319
     },
