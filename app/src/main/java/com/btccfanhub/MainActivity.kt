@@ -47,6 +47,7 @@ import com.btccfanhub.ui.theme.BtccSurface
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
+import com.btccfanhub.worker.RaceNotificationWorker
 import com.google.android.gms.ads.MobileAds
 import java.util.concurrent.TimeUnit
 
@@ -61,7 +62,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this)
         createNewsNotificationChannel()
+        createRaceNotificationChannel()
         scheduleNewsCheck()
+        scheduleRaceNotifications()
         requestNewsNotificationPermission()
         handleNotificationIntent(intent)
         enableEdgeToEdge()
@@ -97,17 +100,36 @@ class MainActivity : ComponentActivity() {
         nm.createNotificationChannel(channel)
     }
 
+    private fun createRaceNotificationChannel() {
+        val channel = NotificationChannel(
+            RaceNotificationWorker.CHANNEL_ID,
+            "Race Alerts",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Notifications when BTCC sessions are about to start"
+        }
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channel)
+    }
+
     private fun scheduleNewsCheck() {
         val wm = WorkManager.getInstance(this)
-
-        // Periodic background check (production)
         val periodic = PeriodicWorkRequestBuilder<NewsCheckWorker>(15, TimeUnit.MINUTES).build()
         wm.enqueueUniquePeriodicWork(
             NewsCheckWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
             periodic,
         )
+    }
 
+    private fun scheduleRaceNotifications() {
+        val wm = WorkManager.getInstance(this)
+        val periodic = PeriodicWorkRequestBuilder<RaceNotificationWorker>(15, TimeUnit.MINUTES).build()
+        wm.enqueueUniquePeriodicWork(
+            RaceNotificationWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodic,
+        )
     }
 
     private fun requestNewsNotificationPermission() {
