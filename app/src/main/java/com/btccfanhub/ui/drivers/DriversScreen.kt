@@ -1,6 +1,9 @@
 package com.btccfanhub.ui.drivers
 
 import androidx.activity.compose.BackHandler
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,13 +12,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
+import com.btccfanhub.data.FavouriteDriverStore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import com.btccfanhub.data.model.Driver
@@ -27,7 +34,9 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -73,6 +82,7 @@ fun DriversScreen() {
         }
     }
 
+    val gridPagerState = rememberPagerState(pageCount = { 2 })
     var selectedDriver by remember { mutableStateOf<Driver?>(null) }
     var selectedTeam   by remember { mutableStateOf<Team?>(null) }
 
@@ -102,6 +112,7 @@ fun DriversScreen() {
         }
         else -> {
             GridTabs(
+                pagerState    = gridPagerState,
                 drivers       = drivers,
                 teams         = teams,
                 onDriverClick = { selectedDriver = it },
@@ -118,13 +129,13 @@ fun DriversScreen() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun GridTabs(
+    pagerState: PagerState,
     drivers: List<Driver>,
     teams: List<Team>,
     onDriverClick: (Driver) -> Unit,
     onTeamClick: (Team) -> Unit,
 ) {
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val scope      = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -250,13 +261,18 @@ private fun TeamsList(padding: PaddingValues, teams: List<Team>, onTeamClick: (T
 
 @Composable
 private fun DriverCard(driver: Driver, onClick: () -> Unit) {
+    val context     = LocalContext.current
+    val favourite   by FavouriteDriverStore.driver.collectAsState()
+    val isFavourite = favourite == driver.name
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(BtccCard)
+            .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(12.dp)) else Modifier)
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(start = 12.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -271,12 +287,25 @@ private fun DriverCard(driver: Driver, onClick: () -> Unit) {
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                driver.name,
-                style      = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color      = MaterialTheme.colorScheme.onBackground,
-            )
+            Row(
+                verticalAlignment     = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (isFavourite) {
+                    Icon(
+                        Icons.Filled.Star,
+                        contentDescription = null,
+                        tint     = BtccYellow,
+                        modifier = Modifier.size(13.dp),
+                    )
+                }
+                Text(
+                    driver.name,
+                    style      = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color      = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onBackground,
+                )
+            }
             if (driver.team.isNotEmpty()) {
                 Text(
                     driver.team,
@@ -300,6 +329,17 @@ private fun DriverCard(driver: Driver, onClick: () -> Unit) {
                     )
                 }
             }
+        }
+        IconButton(
+            onClick  = { FavouriteDriverStore.toggle(context, driver.name) },
+            modifier = Modifier.size(40.dp),
+        ) {
+            Icon(
+                imageVector = if (isFavourite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                contentDescription = if (isFavourite) "Unstar" else "Star",
+                tint     = if (isFavourite) BtccYellow else BtccTextSecondary,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }
@@ -363,6 +403,10 @@ private fun TeamCard(team: Team, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
+    val context     = LocalContext.current
+    val favourite   by FavouriteDriverStore.driver.collectAsState()
+    val isFavourite = favourite == driver.name
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -380,6 +424,15 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+            },
+            actions = {
+                IconButton(onClick = { FavouriteDriverStore.toggle(context, driver.name) }) {
+                    Icon(
+                        imageVector = if (isFavourite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                        contentDescription = if (isFavourite) "Unstar" else "Star",
+                        tint = if (isFavourite) BtccYellow else BtccTextSecondary,
+                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
@@ -434,6 +487,107 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                             color      = BtccTextSecondary,
                             lineHeight = 22.sp,
                         )
+                    }
+                }
+            }
+
+            // ── Personal stats ───────────────────────────────────────────────
+            val hasDob        = driver.dateOfBirth.isNotEmpty()
+            val hasBirthplace = driver.birthplace.isNotEmpty()
+            if (hasDob || hasBirthplace) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BtccCard, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        if (hasDob) {
+                            val dob    = LocalDate.parse(driver.dateOfBirth)
+                            val age    = Period.between(dob, LocalDate.now()).years
+                            val dobFmt = dob.format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+                            PersonalStatRow(label = "Age", value = "$age  ·  $dobFmt")
+                        }
+                        if (hasDob && hasBirthplace) {
+                            HorizontalDivider(color = BtccOutline.copy(alpha = 0.4f), thickness = 0.5.dp)
+                        }
+                        if (hasBirthplace) {
+                            PersonalStatRow(label = "Birthplace", value = driver.birthplace)
+                        }
+                    }
+                }
+            }
+
+            // ── 2024 season ──────────────────────────────────────────────────
+            val stat2024 = driver.history.find { it.year == 2024 }
+            if (stat2024 != null) {
+                item {
+                    Text(
+                        "2024 SEASON",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = BtccTextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier      = Modifier.padding(top = 4.dp),
+                    )
+                }
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BtccCard, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Drivers' Championship",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = BtccTextSecondary,
+                            )
+                            Text(
+                                "P${stat2024.pos}",
+                                fontWeight = FontWeight.Black,
+                                fontSize   = 36.sp,
+                                color      = when (stat2024.pos) {
+                                    1    -> Color(0xFFFFD700)
+                                    2    -> Color(0xFFC0C0C0)
+                                    3    -> Color(0xFFCD7F32)
+                                    else -> MaterialTheme.colorScheme.onBackground
+                                },
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                "Points",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = BtccTextSecondary,
+                            )
+                            Text(
+                                "${stat2024.points}",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize   = 28.sp,
+                                color      = MaterialTheme.colorScheme.onBackground,
+                            )
+                            if (stat2024.wins > 0) {
+                                Text(
+                                    "${stat2024.wins} ${if (stat2024.wins == 1) "win" else "wins"}",
+                                    style      = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color      = BtccYellow,
+                                )
+                            }
+                        }
+                        if (stat2024.isChampion) {
+                            Spacer(Modifier.width(16.dp))
+                            Icon(
+                                Icons.Default.EmojiEvents,
+                                contentDescription = "Champion",
+                                tint     = BtccYellow,
+                                modifier = Modifier.size(40.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -495,48 +649,98 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
         )
         LazyColumn(
-            modifier       = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier    = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
-            // ── Header ──────────────────────────────────────────────────────
+            // ── Car image banner ─────────────────────────────────────────────
             item {
-                Column(
-                    modifier            = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (team.carImageUrl.isNotEmpty()) 200.dp else 100.dp)
+                        .background(BtccCard),
                 ) {
-                    // Big team name
-                    Text(
-                        team.name,
-                        fontWeight    = FontWeight.Black,
-                        fontSize      = 24.sp,
-                        letterSpacing = 0.5.sp,
-                        color         = MaterialTheme.colorScheme.onBackground,
+                    if (team.carImageUrl.isNotEmpty()) {
+                        AsyncImage(
+                            model              = ImageRequest.Builder(LocalContext.current)
+                                .data(team.carImageUrl)
+                                .build(),
+                            contentDescription = team.car,
+                            modifier           = Modifier.fillMaxSize(),
+                            contentScale       = ContentScale.Fit,
+                        )
+                    }
+                    // Gradient fade to background at bottom
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .align(Alignment.BottomCenter)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color.Transparent, BtccBackground)
+                                )
+                            )
                     )
-                    // Car + entries chips
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (team.car.isNotEmpty()) InfoChip(team.car)
-                        InfoChip("${team.entries} cars")
+                    // Car name chip bottom-left
+                    if (team.car.isNotEmpty()) {
+                        Surface(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(12.dp),
+                            shape  = RoundedCornerShape(6.dp),
+                            color  = BtccCard.copy(alpha = 0.9f),
+                        ) {
+                            Text(
+                                team.car,
+                                modifier   = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                style      = MaterialTheme.typography.labelSmall,
+                                color      = BtccTextSecondary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
                 }
             }
 
-            // ── Bio ─────────────────────────────────────────────────────────
-            if (team.bio.isNotEmpty()) {
-                item {
-                    Box(
+            // ── Drivers ──────────────────────────────────────────────────────
+            item {
+                Text(
+                    "2026 DRIVERS",
+                    style         = MaterialTheme.typography.labelSmall,
+                    fontWeight    = FontWeight.ExtraBold,
+                    color         = BtccTextSecondary,
+                    letterSpacing = 2.sp,
+                    modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
+                )
+            }
+            item {
+                val tbc = team.entries - team.drivers.size
+                if (team.drivers.size >= 2 && tbc == 0) {
+                    // Side-by-side for 2 or more confirmed drivers (no TBC slots)
+                    val avatarSize = if (team.drivers.size >= 3) 56 else 72
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(BtccCard, RoundedCornerShape(10.dp))
-                            .padding(14.dp),
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(
-                            team.bio,
-                            style      = MaterialTheme.typography.bodyMedium,
-                            color      = BtccTextSecondary,
-                            lineHeight = 22.sp,
-                        )
+                        team.drivers.forEach { driver ->
+                            TeamDriverCard(driver = driver, avatarSize = avatarSize, modifier = Modifier.weight(1f))
+                        }
+                    }
+                } else {
+                    Column(
+                        modifier            = Modifier.padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        team.drivers.forEach { driver ->
+                            TeamDriverCard(driver = driver, modifier = Modifier.fillMaxWidth())
+                        }
+                        repeat(tbc) {
+                            TbcDriverCard(modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }
@@ -550,81 +754,159 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                         fontWeight    = FontWeight.ExtraBold,
                         color         = BtccTextSecondary,
                         letterSpacing = 2.sp,
-                        modifier      = Modifier.padding(top = 4.dp),
+                        modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
                     )
                 }
                 item {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(BtccCard, RoundedCornerShape(10.dp))
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                            .padding(horizontal = 16.dp)
+                            .background(BtccCard, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
                         verticalAlignment     = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Column {
+                        // Position
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 "Teams' Championship",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = BtccTextSecondary,
                             )
                             Text(
                                 "P${team.standing2025}",
                                 fontWeight = FontWeight.Black,
-                                fontSize   = 28.sp,
-                                color      = if (team.standing2025 == 1) BtccYellow else MaterialTheme.colorScheme.onBackground,
+                                fontSize   = 36.sp,
+                                color      = when (team.standing2025) {
+                                    1 -> Color(0xFFFFD700)
+                                    2 -> Color(0xFFC0C0C0)
+                                    3 -> Color(0xFFCD7F32)
+                                    else -> MaterialTheme.colorScheme.onBackground
+                                },
                             )
                         }
+                        // Points
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
                                 "Points",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = BtccTextSecondary,
                             )
                             Text(
                                 "${team.points2025}",
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize   = 22.sp,
+                                fontSize   = 28.sp,
                                 color      = MaterialTheme.colorScheme.onBackground,
                             )
                         }
                         if (team.standing2025 == 1) {
+                            Spacer(Modifier.width(16.dp))
                             Icon(
                                 Icons.Default.EmojiEvents,
                                 contentDescription = "Champions",
                                 tint     = BtccYellow,
-                                modifier = Modifier.size(36.dp),
+                                modifier = Modifier.size(40.dp),
                             )
                         }
                     }
                 }
             }
 
-            // ── 2026 drivers ─────────────────────────────────────────────────
-            item {
-                Text(
-                    "2026 DRIVERS",
-                    style         = MaterialTheme.typography.labelSmall,
-                    fontWeight    = FontWeight.ExtraBold,
-                    color         = BtccTextSecondary,
-                    letterSpacing = 2.sp,
-                    modifier      = Modifier.padding(top = 4.dp),
-                )
-            }
-            item {
-                Column(
-                    modifier            = Modifier
-                        .fillMaxWidth()
-                        .background(BtccCard, RoundedCornerShape(10.dp))
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    val tbc = team.entries - team.drivers.size
-                    team.drivers.forEach { TeamDriverRow(it) }
-                    repeat(tbc) { TbcDriverRow() }
+            // ── Bio ──────────────────────────────────────────────────────────
+            if (team.bio.isNotEmpty()) {
+                item {
+                    Text(
+                        "ABOUT",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = BtccTextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
+                    )
+                }
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(BtccCard, RoundedCornerShape(12.dp))
+                            .padding(14.dp),
+                    ) {
+                        Text(
+                            team.bio,
+                            style      = MaterialTheme.typography.bodyMedium,
+                            color      = BtccTextSecondary,
+                            lineHeight = 22.sp,
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TeamDriverCard(driver: Driver, avatarSize: Int = 72, modifier: Modifier = Modifier) {
+    val favourite   by FavouriteDriverStore.driver.collectAsState()
+    val isFavourite = favourite == driver.name
+
+    Column(
+        modifier = modifier
+            .background(BtccCard, RoundedCornerShape(12.dp))
+            .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(12.dp)) else Modifier)
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        DriverAvatarWithNumber(
+            imageUrl      = driver.imageUrl,
+            name          = driver.name,
+            number        = driver.number,
+            teamConfirmed = driver.team.isNotEmpty(),
+            avatarSize    = avatarSize,
+        )
+        Text(
+            driver.name,
+            style      = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color      = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onBackground,
+            textAlign  = TextAlign.Center,
+        )
+        if (driver.nationality.isNotEmpty()) {
+            Text(
+                driver.nationality,
+                style  = MaterialTheme.typography.labelSmall,
+                color  = BtccTextSecondary,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TbcDriverCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(BtccCard, RoundedCornerShape(12.dp))
+            .padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(BtccOutline.copy(alpha = 0.3f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("?", fontWeight = FontWeight.Black, fontSize = 28.sp, color = BtccOutline)
+        }
+        Text(
+            "Driver TBC",
+            style     = MaterialTheme.typography.bodyMedium,
+            color     = BtccOutline,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -717,6 +999,32 @@ private fun SeasonStatRow(stat: SeasonStat) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Personal stat row
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun PersonalStatRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            label,
+            style      = MaterialTheme.typography.bodySmall,
+            color      = BtccTextSecondary,
+            fontWeight = FontWeight.Medium,
+        )
+        Text(
+            value,
+            style      = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color      = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Info chip
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -742,6 +1050,9 @@ private fun InfoChip(label: String) {
 
 @Composable
 private fun TeamDriverRow(driver: Driver) {
+    val favourite   by FavouriteDriverStore.driver.collectAsState()
+    val isFavourite = favourite == driver.name
+
     Row(
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -753,11 +1064,19 @@ private fun TeamDriverRow(driver: Driver) {
             teamConfirmed = driver.team.isNotEmpty(),
             avatarSize    = 40,
         )
+        if (isFavourite) {
+            Icon(
+                Icons.Filled.Star,
+                contentDescription = null,
+                tint     = BtccYellow,
+                modifier = Modifier.size(12.dp),
+            )
+        }
         Text(
             driver.name,
             style      = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
-            color      = MaterialTheme.colorScheme.onBackground,
+            color      = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onBackground,
         )
     }
 }

@@ -56,6 +56,8 @@ object DriversRepository {
                 imageUrl    = d.optString("imageUrl"),
                 nationality = d.optString("nationality", "British"),
                 bio         = d.optString("bio"),
+                dateOfBirth = d.optString("dateOfBirth", ""),
+                birthplace  = d.optString("birthplace", ""),
                 history     = (0 until histArr.length()).map { j ->
                     val h = histArr.getJSONObject(j)
                     SeasonStat(
@@ -82,6 +84,7 @@ object DriversRepository {
                 bio          = t.optString("bio"),
                 standing2025 = t.optInt("standing2025"),
                 points2025   = t.optInt("points2025"),
+                carImageUrl  = t.optString("carImageUrl"),
                 drivers      = drivers.filter { it.team == name },
             )
         }

@@ -26,7 +26,9 @@
           "points": 165,
           "wins": 1
         }
-      ]
+      ],
+      "dateOfBirth": "1996-07-03",
+      "birthplace": "Macclesfield, Cheshire"
     },
     {
       "number": 3,
@@ -53,7 +55,9 @@
           "points": 116,
           "wins": 0
         }
-      ]
+      ],
+      "dateOfBirth": "1988-11-07",
+      "birthplace": "Guildford, Surrey"
     },
     {
       "number": 16,
@@ -79,7 +83,9 @@
           "points": 210,
           "wins": 2
         }
-      ]
+      ],
+      "dateOfBirth": "1996-11-07",
+      "birthplace": "Bellshill, Scotland"
     },
     {
       "number": 17,
@@ -97,7 +103,9 @@
           "pos": 20,
           "points": 42
         }
-      ]
+      ],
+      "dateOfBirth": "2005-03-16",
+      "birthplace": "Irvine, Scotland"
     },
     {
       "number": 18,
@@ -115,7 +123,9 @@
           "pos": 10,
           "points": 167
         }
-      ]
+      ],
+      "dateOfBirth": "2001-07-24",
+      "birthplace": "Harrogate, Yorkshire"
     },
     {
       "number": 19,
@@ -159,7 +169,9 @@
           "points": 142,
           "wins": 0
         }
-      ]
+      ],
+      "dateOfBirth": "1991-04-18",
+      "birthplace": "Larne, Northern Ireland"
     },
     {
       "number": 27,
@@ -186,7 +198,9 @@
           "points": 342,
           "wins": 2
         }
-      ]
+      ],
+      "dateOfBirth": "1989-09-26",
+      "birthplace": "Harrogate, Yorkshire"
     },
     {
       "number": 32,
@@ -213,7 +227,9 @@
           "points": 135,
           "wins": 0
         }
-      ]
+      ],
+      "dateOfBirth": "1991-09-12",
+      "birthplace": "Crewe, Cheshire"
     },
     {
       "number": 33,
@@ -239,7 +255,9 @@
           "points": 268,
           "wins": 0
         }
-      ]
+      ],
+      "dateOfBirth": "1990-07-11",
+      "birthplace": "Lancaster, Lancashire"
     },
     {
       "number": 40,
@@ -265,7 +283,9 @@
           "points": 98,
           "wins": 1
         }
-      ]
+      ],
+      "dateOfBirth": "1992-06-01",
+      "birthplace": "Ballymena, Northern Ireland"
     },
     {
       "number": 50,
@@ -326,7 +346,9 @@
           "points": 0,
           "champion": true
         }
-      ]
+      ],
+      "dateOfBirth": "1981-09-26",
+      "birthplace": "Edinburgh, Scotland"
     },
     {
       "number": 66,
@@ -353,7 +375,9 @@
           "points": 247,
           "wins": 2
         }
-      ]
+      ],
+      "dateOfBirth": "1992-02-22",
+      "birthplace": "Shepton Mallet, Somerset"
     },
     {
       "number": 77,
@@ -372,7 +396,9 @@
           "points": 108,
           "wins": 1
         }
-      ]
+      ],
+      "dateOfBirth": "2001-05-17",
+      "birthplace": "Taunton, Somerset"
     },
     {
       "number": 80,
@@ -400,7 +426,9 @@
           "points": 431,
           "wins": 5
         }
-      ]
+      ],
+      "dateOfBirth": "1992-03-21",
+      "birthplace": "Northampton"
     },
     {
       "number": 88,
@@ -427,7 +455,9 @@
           "points": 156,
           "wins": 0
         }
-      ]
+      ],
+      "dateOfBirth": "1996-08-10",
+      "birthplace": "Truro, Cornwall"
     },
     {
       "number": 99,
@@ -482,7 +512,9 @@
           "points": 0,
           "champion": true
         }
-      ]
+      ],
+      "dateOfBirth": "1991-04-14",
+      "birthplace": "Bideford, Devon"
     },
     {
       "number": 200,

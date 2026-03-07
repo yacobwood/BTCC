@@ -18,6 +18,8 @@ data class Driver(
     val imageUrl: String,
     val nationality: String = "British",
     val bio: String = "",
+    val dateOfBirth: String = "",   // "YYYY-MM-DD"
+    val birthplace: String = "",
     val history: List<SeasonStat> = emptyList(),
 )
 
@@ -29,6 +31,7 @@ data class Team(
     val bio: String = "",
     val standing2025: Int = 0,
     val points2025: Int = 0,
+    val carImageUrl: String = "",
 )
 
 data class GridData(
