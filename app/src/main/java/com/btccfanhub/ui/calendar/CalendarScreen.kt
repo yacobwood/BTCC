@@ -1,7 +1,5 @@
 package com.btccfanhub.ui.calendar
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,7 +39,7 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(onRaceClick: (Race) -> Unit = {}) {
+fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: () -> Unit = {}) {
     val today = LocalDate.now()
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
@@ -83,7 +81,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}) {
             val isRaceWeekend = nextRace != null && today >= nextRace.startDate
             if (isRaceWeekend) {
                 item {
-                    LiveTimingCard()
+                    LiveTimingCard(onClick = onLiveTimingClick)
                     Spacer(Modifier.height(12.dp))
                 }
             }
@@ -296,19 +294,14 @@ private fun TimelineRaceRow(
 }
 
 @Composable
-private fun LiveTimingCard() {
-    val context = androidx.compose.ui.platform.LocalContext.current
+private fun LiveTimingCard(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xFF0D0A00))
             .border(1.dp, BtccYellow.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
-            .clickable {
-                context.startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.btcc.net/live-timing/"))
-                )
-            }
+            .clickable { onClick() }
             .padding(horizontal = 18.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),

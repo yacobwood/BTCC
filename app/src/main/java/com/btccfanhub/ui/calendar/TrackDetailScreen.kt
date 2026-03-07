@@ -1,8 +1,6 @@
 package com.btccfanhub.ui.calendar
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,7 +52,7 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackDetailScreen(round: Int, onBack: () -> Unit) {
+fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: () -> Unit = {}) {
     val today = LocalDate.now()
     val context = LocalContext.current
 
@@ -216,7 +214,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit) {
 
                 // ── Live timing (race weekend only) ────────────────────────────
                 if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate)) {
-                    LiveTimingButton(context)
+                    LiveTimingButton(onLiveTimingClick)
                 }
 
                 // ── Stats row ──────────────────────────────────────────────────
@@ -604,18 +602,14 @@ private fun InfoCard(title: String, body: String, highlight: Boolean = false) {
 }
 
 @Composable
-private fun LiveTimingButton(context: Context) {
+private fun LiveTimingButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xFF0D0A00))
             .border(1.dp, BtccYellow.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
-            .clickable {
-                context.startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.btcc.net/live-timing/"))
-                )
-            }
+            .clickable { onClick() }
             .padding(horizontal = 18.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),

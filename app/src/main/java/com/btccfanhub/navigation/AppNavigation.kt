@@ -17,6 +17,7 @@ import com.btccfanhub.ui.radio.RadioScreen
 import com.btccfanhub.ui.results.ResultsScreen
 import com.btccfanhub.ui.results.RoundResultsScreen
 import com.btccfanhub.ui.settings.SettingsScreen
+import com.btccfanhub.ui.timing.LiveTimingScreen
 
 sealed class Screen(val route: String) {
     object News : Screen("news")
@@ -32,6 +33,7 @@ sealed class Screen(val route: String) {
     object RoundResults : Screen("round_results/{year}/{round}") {
         fun route(year: Int, round: Int) = "round_results/$year/$round"
     }
+    object LiveTiming : Screen("live_timing")
 }
 
 @Composable
@@ -52,7 +54,8 @@ fun AppNavHost(navController: NavHostController) {
             CalendarScreen(
                 onRaceClick = { race ->
                     navController.navigate(Screen.Track.route(race.round))
-                }
+                },
+                onLiveTimingClick = { navController.navigate(Screen.LiveTiming.route) },
             )
         }
 
@@ -95,7 +98,15 @@ fun AppNavHost(navController: NavHostController) {
             arguments = listOf(navArgument("round") { type = NavType.IntType }),
         ) { backStackEntry ->
             val round = backStackEntry.arguments?.getInt("round") ?: return@composable
-            TrackDetailScreen(round = round, onBack = { navController.popBackStack() })
+            TrackDetailScreen(
+                round = round,
+                onBack = { navController.popBackStack() },
+                onLiveTimingClick = { navController.navigate(Screen.LiveTiming.route) },
+            )
+        }
+
+        composable(Screen.LiveTiming.route) {
+            LiveTimingScreen(onBack = { navController.popBackStack() })
         }
 
     }

@@ -146,7 +146,8 @@ private fun MainScreen(pendingArticleId: Int? = null, onArticleIdConsumed: () ->
     }
 
     val showBottomBar = currentRoute != Screen.Article.route &&
-            currentRoute?.startsWith("track/") != true
+            currentRoute?.startsWith("track/") != true &&
+            currentRoute != Screen.LiveTiming.route
 
     val navItems = listOf(
         NavItem(Screen.News, "News", Icons.Default.Home),
