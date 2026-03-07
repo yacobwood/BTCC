@@ -206,6 +206,28 @@
               "gap": "27.259",
               "bestLap": "1:17.201",
               "points": 21
+            },
+            {
+              "pos": 0,
+              "no": 32,
+              "driver": "Daniel ROWBOTTOM",
+              "team": "NAPA Racing UK",
+              "laps": 20,
+              "time": "32:15.792",
+              "gap": "1 Lap",
+              "bestLap": "1:17.404",
+              "points": 17
+            },
+            {
+              "pos": 0,
+              "no": 77,
+              "driver": "Sam OSBORNE",
+              "team": "NAPA Racing UK",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
             }
           ]
         },
@@ -398,6 +420,28 @@
               "gap": "1 Lap",
               "bestLap": "1:09.134",
               "points": 11
+            },
+            {
+              "pos": 0,
+              "no": 29,
+              "driver": "Scott SUMPTON",
+              "team": "Restart Racing",
+              "laps": 12,
+              "time": "14:29.923",
+              "gap": "6 Laps",
+              "bestLap": "1:10.705",
+              "points": 10
+            },
+            {
+              "pos": 0,
+              "no": 3,
+              "driver": "Tom CHILTON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 11,
+              "time": "13:37.159",
+              "gap": "7 Laps",
+              "bestLap": "1:09.963",
+              "points": 6
             }
           ]
         },
@@ -590,6 +634,39 @@
               "gap": "26.382",
               "bestLap": "1:10.736",
               "points": 11
+            },
+            {
+              "pos": 0,
+              "no": 222,
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "laps": 8,
+              "time": "11:06.941",
+              "gap": "12 Laps",
+              "bestLap": "1:10.771",
+              "points": 7
+            },
+            {
+              "pos": 0,
+              "no": 14,
+              "driver": "Ronan PEARSON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 4,
+              "time": "6:20.938",
+              "gap": "16 Laps",
+              "bestLap": "1:21.843",
+              "points": 2
+            },
+            {
+              "pos": 0,
+              "no": 18,
+              "driver": "Daryl DELEON",
+              "team": "Duckhams Racing With Bartercard",
+              "laps": 2,
+              "time": "2:33.515",
+              "gap": "18 Laps",
+              "bestLap": "1:11.985",
+              "points": 2
             }
           ]
         }
@@ -811,6 +888,17 @@
               "gap": "2 Laps",
               "bestLap": "49.212",
               "points": 12
+            },
+            {
+              "pos": 0,
+              "no": 18,
+              "driver": "Daryl DELEON",
+              "team": "Duckhams Racing With Bartercard",
+              "laps": 20,
+              "time": "20:22.618",
+              "gap": "4 Laps",
+              "bestLap": "49.641",
+              "points": 5
             }
           ]
         },
@@ -1003,6 +1091,39 @@
               "gap": "2 Laps",
               "bestLap": "49.521",
               "points": 11
+            },
+            {
+              "pos": 0,
+              "no": 12,
+              "driver": "Rob HUFF",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 19,
+              "time": "17:07.455",
+              "gap": "8 Laps",
+              "bestLap": "48.944",
+              "points": 6
+            },
+            {
+              "pos": 0,
+              "no": 24,
+              "driver": "Jake HILL",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "laps": 14,
+              "time": "11:44.799",
+              "gap": "13 Laps",
+              "bestLap": "48.723",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 29,
+              "driver": "Scott SUMPTON",
+              "team": "Restart Racing",
+              "laps": 7,
+              "time": "7:47.928",
+              "gap": "20 Laps",
+              "bestLap": "49.69",
+              "points": 5
             }
           ]
         },
@@ -1217,6 +1338,17 @@
               "gap": "3 Laps",
               "bestLap": "48.964",
               "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 11,
+              "time": "9:07.762",
+              "gap": "13 Laps",
+              "bestLap": "48.888",
+              "points": 5
             }
           ]
         }
@@ -1652,6 +1784,28 @@
               "gap": "1:07.413",
               "bestLap": "1:28.919",
               "points": 5
+            },
+            {
+              "pos": 0,
+              "no": 3,
+              "driver": "Tom CHILTON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 7,
+              "time": "10:30.758",
+              "gap": "8 Laps",
+              "bestLap": "1:26.754",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 3,
+              "time": "8:10.076",
+              "gap": "12 Laps",
+              "bestLap": "1:37.051",
+              "points": 1
             }
           ]
         },
@@ -1855,6 +2009,28 @@
               "gap": "1:17.217",
               "bestLap": "1:25.406",
               "points": 5
+            },
+            {
+              "pos": 0,
+              "no": 77,
+              "driver": "Sam OSBORNE",
+              "team": "NAPA Racing UK",
+              "laps": 10,
+              "time": "14:50.123",
+              "gap": "5 Laps",
+              "bestLap": "1:26.346",
+              "points": 4
+            },
+            {
+              "pos": 0,
+              "no": 3,
+              "driver": "Tom CHILTON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
             }
           ]
         }
@@ -2279,6 +2455,39 @@
               "gap": "2 Laps",
               "bestLap": "1:23.464",
               "points": 13
+            },
+            {
+              "pos": 0,
+              "no": 22,
+              "driver": "Nick HALSTEAD",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 14,
+              "time": "20:29.939",
+              "gap": "1 Lap",
+              "bestLap": "1:25.374",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 222,
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "laps": 12,
+              "time": "17:10.325",
+              "gap": "3 Laps",
+              "bestLap": "1:23.930",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 14,
+              "driver": "Ronan PEARSON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 7,
+              "time": "13:29.358",
+              "gap": "8 Laps",
+              "bestLap": "1:23.607",
+              "points": 5
             }
           ]
         },
@@ -2482,6 +2691,28 @@
               "gap": "1:05.223",
               "bestLap": "1:26.412",
               "points": 4
+            },
+            {
+              "pos": 0,
+              "no": 11,
+              "driver": "Andrew WATSON",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 11,
+              "time": "21:48.905",
+              "gap": "4 Laps",
+              "bestLap": "1:23.327",
+              "points": 6
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 3,
+              "time": "4:34.328",
+              "gap": "12 Laps",
+              "bestLap": "1:24.639",
+              "points": 2
             }
           ]
         }
@@ -2703,6 +2934,17 @@
               "gap": "52.699",
               "bestLap": "53.224",
               "points": 6
+            },
+            {
+              "pos": 0,
+              "no": 80,
+              "driver": "Tom INGRAM",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 10,
+              "time": "9:11.509",
+              "gap": "14 Laps",
+              "bestLap": "52.477",
+              "points": 5
             }
           ]
         },
@@ -2917,6 +3159,17 @@
               "gap": "42.903",
               "bestLap": "52.519",
               "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 14,
+              "driver": "Ronan PEARSON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 22,
+              "time": "20:24.375",
+              "gap": "2 Laps",
+              "bestLap": "52.223",
+              "points": 2
             }
           ]
         },
@@ -3087,6 +3340,39 @@
               "gap": "1 Lap",
               "bestLap": "52.623",
               "points": 17
+            },
+            {
+              "pos": 0,
+              "no": 11,
+              "driver": "Andrew WATSON",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 23,
+              "time": "26:03.240",
+              "gap": "4 Laps",
+              "bestLap": "51.996",
+              "points": 2
+            },
+            {
+              "pos": 0,
+              "no": 33,
+              "driver": "Adam MORGAN",
+              "team": "Team BMW",
+              "laps": 16,
+              "time": "16:13.050",
+              "gap": "11 Laps",
+              "bestLap": "52.101",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 66,
+              "driver": "Josh COOK",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 12,
+              "time": "10:59.846",
+              "gap": "15 Laps",
+              "bestLap": "52.243",
+              "points": 3
             }
           ]
         }
@@ -3769,6 +4055,17 @@
               "gap": "1 Lap",
               "bestLap": "2:03.682",
               "points": 11
+            },
+            {
+              "pos": 0,
+              "no": 222,
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
             }
           ]
         }
@@ -3990,6 +4287,17 @@
               "gap": "48.924",
               "bestLap": "1:19.521",
               "points": 6
+            },
+            {
+              "pos": 0,
+              "no": 29,
+              "driver": "Scott SUMPTON",
+              "team": "Restart Racing",
+              "laps": 13,
+              "time": "19:23.060",
+              "gap": "5 Laps",
+              "bestLap": "1:18.759",
+              "points": 6
             }
           ]
         },
@@ -4204,6 +4512,17 @@
               "gap": "44.72",
               "bestLap": "1:18.616",
               "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 11,
+              "driver": "Andrew WATSON",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 1,
+              "time": "1:28.078",
+              "gap": "15 Laps",
+              "bestLap": "1:28.078",
+              "points": 1
             }
           ]
         },
@@ -4396,6 +4715,39 @@
               "gap": "1 Lap",
               "bestLap": "1:16.570",
               "points": 5
+            },
+            {
+              "pos": 0,
+              "no": 22,
+              "driver": "Nick HALSTEAD",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 18,
+              "time": "26:32.544",
+              "gap": "1 Lap",
+              "bestLap": "1:19.887",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 18,
+              "driver": "Daryl DELEON",
+              "team": "Duckhams Racing With Bartercard",
+              "laps": 12,
+              "time": "28:40.583",
+              "gap": "7 Laps",
+              "bestLap": "1:18.060",
+              "points": 10
+            },
+            {
+              "pos": 0,
+              "no": 3,
+              "driver": "Tom CHILTON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 7,
+              "time": "9:17.982",
+              "gap": "12 Laps",
+              "bestLap": "1:17.351",
+              "points": 4
             }
           ]
         }
@@ -4606,6 +4958,28 @@
               "gap": "1 Lap",
               "bestLap": "1:04.624",
               "points": 14
+            },
+            {
+              "pos": 0,
+              "no": 32,
+              "driver": "Daniel ROWBOTTOM",
+              "team": "NAPA Racing UK",
+              "laps": 4,
+              "time": "4:36.922",
+              "gap": "18 Laps",
+              "bestLap": "1:04.686",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 88,
+              "driver": "Mikey DOBLE",
+              "team": "Evans Halshaw Power Maxed Racing",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
             }
           ]
         },
@@ -4820,6 +5194,17 @@
               "gap": "39.827",
               "bestLap": "1:05.784",
               "points": 4
+            },
+            {
+              "pos": 0,
+              "no": 3,
+              "driver": "Tom CHILTON",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 11,
+              "time": "12:50.308",
+              "gap": "11 Laps",
+              "bestLap": "1:05.370",
+              "points": 4
             }
           ]
         },
@@ -5023,6 +5408,28 @@
               "gap": "29.463",
               "bestLap": "1:04.899",
               "points": 18
+            },
+            {
+              "pos": 0,
+              "no": 20,
+              "driver": "Colin TURKINGTON",
+              "team": "Team BMW",
+              "laps": 3,
+              "time": "3:36.679",
+              "gap": "22 Laps",
+              "bestLap": "1:11.183",
+              "points": 2
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 3,
+              "time": "4:48.678",
+              "gap": "22 Laps",
+              "bestLap": "1:12.525",
+              "points": 2
             }
           ]
         }
@@ -5244,6 +5651,17 @@
               "gap": "42.108",
               "bestLap": "1:37.077",
               "points": 13
+            },
+            {
+              "pos": 0,
+              "no": 11,
+              "driver": "Andrew WATSON",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 2,
+              "time": "3:21.972",
+              "gap": "15 Laps",
+              "bestLap": "1:37.037",
+              "points": 2
             }
           ]
         },
@@ -5447,6 +5865,28 @@
               "gap": "1 Lap",
               "bestLap": "1:36.573",
               "points": 13
+            },
+            {
+              "pos": 0,
+              "no": 80,
+              "driver": "Tom INGRAM",
+              "team": "Team BRISTOL STREET MOTORS",
+              "laps": 11,
+              "time": "17:50.803",
+              "gap": "3 Laps",
+              "bestLap": "1:34.133",
+              "points": 5
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 3,
+              "time": "5:10.845",
+              "gap": "11 Laps",
+              "bestLap": "1:36.636",
+              "points": 2
             }
           ]
         },
@@ -5639,6 +6079,39 @@
               "gap": "1:36.845",
               "bestLap": "1:36.914",
               "points": 8
+            },
+            {
+              "pos": 0,
+              "no": 1,
+              "driver": "Ashley SUTTON",
+              "team": "NAPA Racing UK",
+              "laps": 14,
+              "time": "29:48.075",
+              "gap": "3 Laps",
+              "bestLap": "1:34.111",
+              "points": 13
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 7,
+              "time": "11:59.807",
+              "gap": "10 Laps",
+              "bestLap": "1:35.897",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 222,
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "laps": 5,
+              "time": "8:48.169",
+              "gap": "12 Laps",
+              "bestLap": "1:36.079",
+              "points": 3
             }
           ]
         }
@@ -5816,6 +6289,61 @@
               "gap": "1 Lap",
               "bestLap": "1:31.967",
               "points": 8
+            },
+            {
+              "pos": 0,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 10,
+              "time": "18:54.954",
+              "gap": "8 Laps",
+              "bestLap": "1:31.429",
+              "points": 7
+            },
+            {
+              "pos": 0,
+              "no": 1,
+              "driver": "Ashley SUTTON",
+              "team": "NAPA Racing UK",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
+            },
+            {
+              "pos": 0,
+              "no": 66,
+              "driver": "Josh COOK",
+              "team": "LKQ Euro Car Parts with SYNETIQ",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
+            },
+            {
+              "pos": 0,
+              "no": 33,
+              "driver": "Adam MORGAN",
+              "team": "Team BMW",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
+            },
+            {
+              "pos": 0,
+              "no": 12,
+              "driver": "Rob HUFF",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 0,
+              "time": "0",
+              "gap": "",
+              "bestLap": "",
+              "points": 0
             }
           ]
         },
@@ -6008,6 +6536,28 @@
               "gap": "40.37",
               "bestLap": "1:32.808",
               "points": 5
+            },
+            {
+              "pos": 0,
+              "no": 32,
+              "driver": "Daniel ROWBOTTOM",
+              "team": "NAPA Racing UK",
+              "laps": 12,
+              "time": "18:41.731",
+              "gap": "3 Laps",
+              "bestLap": "1:31.559",
+              "points": 4
+            },
+            {
+              "pos": 0,
+              "no": 88,
+              "driver": "Mikey DOBLE",
+              "team": "Evans Halshaw Power Maxed Racing",
+              "laps": 9,
+              "time": "23:45.617",
+              "gap": "6 Laps",
+              "bestLap": "1:31.762",
+              "points": 7
             }
           ]
         },
@@ -6221,6 +6771,17 @@
               "time": "26:23.132",
               "gap": "46.948",
               "bestLap": "1:44.219",
+              "points": 3
+            },
+            {
+              "pos": 0,
+              "no": 12,
+              "driver": "Rob HUFF",
+              "team": "TOYOTA GAZOO Racing UK",
+              "laps": 9,
+              "time": "15:44.162",
+              "gap": "6 Laps",
+              "bestLap": "1:42.328",
               "points": 3
             }
           ]

@@ -77,13 +77,14 @@ def parse_rows(rows: list[list[str]]) -> list[dict]:
     """Convert raw table rows into DriverResult dicts, skipping header rows."""
     results = []
     for cells in rows:
-        # Skip header rows (first cell is not a number)
+        # Skip header rows; but keep DNF/Ret/NC rows (non-numeric positions)
         pos_raw = cells[0] if cells else ""
-        if not re.search(r'\d', pos_raw):
+        is_dnf_pos = bool(re.search(r'\b(dnf|ret|dns|dsq|nc)\b', pos_raw, re.IGNORECASE))
+        if not re.search(r'\d', pos_raw) and not is_dnf_pos:
             continue
 
         try:
-            pos      = int(re.sub(r"[^\d]", "", pos_raw) or "0")
+            pos      = 0 if is_dnf_pos else int(re.sub(r"[^\d]", "", pos_raw) or "0")
             no       = int(re.sub(r"[^\d]", "", cells[1]) or "0") if len(cells) > 1 else 0
             driver   = cells[2].strip() if len(cells) > 2 else ""
             team     = cells[3].strip() if len(cells) > 3 else ""
@@ -101,8 +102,7 @@ def parse_rows(rows: list[list[str]]) -> list[dict]:
         laps   = int(re.sub(r"[^\d]", "", laps_raw) or "0")
         points = int(re.sub(r"[^\d]", "", pts_raw) or "0")
 
-        is_dnf = any("dnf" in str(x).lower() for x in [laps_raw, time_raw])
-        if is_dnf:
+        if not is_dnf_pos and any("dnf" in str(x).lower() for x in [laps_raw, time_raw]):
             pos = 0
 
         results.append({
