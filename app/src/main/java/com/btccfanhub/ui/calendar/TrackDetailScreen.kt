@@ -52,7 +52,7 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: () -> Unit = {}) {
+fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> Unit)? = null) {
     val today = LocalDate.now()
     val context = LocalContext.current
 
@@ -99,7 +99,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: () -> U
                 title = {
                     Column {
                         Text(
-                            "ROUND $round",
+                            "ROUNDS ${(round - 1) * 3 + 1}–${round * 3}",
                             style = MaterialTheme.typography.labelSmall,
                             color = BtccYellow,
                             fontWeight = FontWeight.ExtraBold,
@@ -213,7 +213,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: () -> U
                 }
 
                 // ── Live timing (race weekend only) ────────────────────────────
-                if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate)) {
+                if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate) && onLiveTimingClick != null) {
                     LiveTimingButton(onLiveTimingClick)
                 }
 

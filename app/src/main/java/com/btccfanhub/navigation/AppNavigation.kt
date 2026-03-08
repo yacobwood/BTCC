@@ -2,10 +2,13 @@ package com.btccfanhub.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.data.FeatureFlagsStore
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.btccfanhub.ui.calendar.CalendarScreen
@@ -16,6 +19,8 @@ import com.btccfanhub.ui.news.NewsScreen
 import com.btccfanhub.ui.radio.RadioScreen
 import com.btccfanhub.ui.results.ResultsScreen
 import com.btccfanhub.ui.results.RoundResultsScreen
+import com.btccfanhub.ui.settings.BugReportScreen
+import com.btccfanhub.ui.settings.FeatureFlagsScreen
 import com.btccfanhub.ui.settings.SettingsScreen
 import com.btccfanhub.ui.timing.LiveTimingScreen
 
@@ -34,6 +39,8 @@ sealed class Screen(val route: String) {
         fun route(year: Int, round: Int) = "round_results/$year/$round"
     }
     object LiveTiming : Screen("live_timing")
+    object FeatureFlags : Screen("feature_flags")
+    object BugReport : Screen("bug_report")
 }
 
 @Composable
@@ -52,11 +59,14 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         }
 
         composable(Screen.Calendar.route) {
+            val flagLiveUpdates by FeatureFlagsStore.liveUpdates.collectAsState()
             CalendarScreen(
                 onRaceClick = { race ->
                     navController.navigate(Screen.Track.route(race.round))
                 },
-                onLiveTimingClick = { navController.navigate(Screen.LiveTiming.route) },
+                onLiveTimingClick = if (flagLiveUpdates) {
+                    { navController.navigate(Screen.LiveTiming.route) }
+                } else null,
             )
         }
 
@@ -91,7 +101,21 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack      = { navController.popBackStack() },
+                onBugReport = { navController.navigate(Screen.BugReport.route) },
+            )
+        }
+
+        composable(Screen.FeatureFlags.route) {
+            FeatureFlagsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Screen.BugReport.route) {
+            BugReportScreen(
+                onBack          = { navController.popBackStack() },
+                onReturnToNews  = { navController.popBackStack(Screen.News.route, inclusive = false) },
+            )
         }
 
         composable(
@@ -99,10 +123,13 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("round") { type = NavType.IntType }),
         ) { backStackEntry ->
             val round = backStackEntry.arguments?.getInt("round") ?: return@composable
+            val flagLiveUpdates by FeatureFlagsStore.liveUpdates.collectAsState()
             TrackDetailScreen(
                 round = round,
                 onBack = { navController.popBackStack() },
-                onLiveTimingClick = { navController.navigate(Screen.LiveTiming.route) },
+                onLiveTimingClick = if (flagLiveUpdates) {
+                    { navController.navigate(Screen.LiveTiming.route) }
+                } else null,
             )
         }
 

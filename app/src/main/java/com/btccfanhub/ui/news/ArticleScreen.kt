@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.data.network.RssParser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +35,70 @@ fun ArticleScreen(onBack: () -> Unit) {
     val article = ArticleHolder.current
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
     val imageUrls = remember { mutableStateOf<List<String>>(emptyList()) }
+    var htmlToLoad by remember { mutableStateOf<String?>(null) }
+    // Plain (non-observable) guard so the update block doesn't reload on every recomposition
+    val loadGuard = remember { object { var loaded: String? = null } }
+
+    LaunchedEffect(article) {
+        if (article == null) {
+            htmlToLoad = "<html><body style='background:#0B0C0F;color:#fff;padding:16px'>No content available.</body></html>"
+            return@LaunchedEffect
+        }
+
+        val sanitised = sanitiseContent(article.content)
+
+        val finalUrls: List<String>
+        val finalContent: String
+
+        // Check for NGG gallery script data FIRST.
+        // NGG renders both noscript fallback <img> tags (thumbnails at 2+ sizes) AND a <script>
+        // with the full-size image JSON. We must use the script data and strip the noscript
+        // section to avoid showing each image multiple times.
+        val nggScriptImages = extractNggScriptImages(sanitised)
+
+        if (nggScriptImages.isNotEmpty()) {
+            // Strip all noscript blocks and stray img tags — replace with deduplicated gallery images
+            val stripped = sanitised
+                .replace(Regex("""<noscript\b[^>]*>.*?</noscript>""",
+                    setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)), "")
+                .replace(Regex("""<img\b[^>]*>""", RegexOption.IGNORE_CASE), "")
+            finalUrls = nggScriptImages
+            finalContent = stripped + nggScriptImages.mapIndexed { i, url ->
+                """<a href="app-image://$i"><img src="$url"></a>"""
+            }.joinToString("\n")
+        } else {
+            // No NGG script — process inline img tags normally, then try network fallbacks
+            val (processedContent, urls) = prepareImages(sanitised)
+
+            if (urls.isEmpty()) {
+                val attachmentUrls = if (article.id != 0) {
+                    withContext(Dispatchers.IO) { RssParser.fetchGalleryImages(article.id) }
+                } else emptyList()
+                val galleryUrls = attachmentUrls.ifEmpty {
+                    withContext(Dispatchers.IO) { RssParser.fetchPageImages(article.link) }
+                }
+                val dedupedGalleryUrls = deduplicateNggImages(galleryUrls)
+                if (dedupedGalleryUrls.isNotEmpty()) {
+                    finalUrls = dedupedGalleryUrls
+                    finalContent = processedContent + dedupedGalleryUrls.mapIndexed { i, url ->
+                        """<a href="app-image://$i"><img src="$url"></a>"""
+                    }.joinToString("\n")
+                } else if (article.imageUrl != null) {
+                    finalUrls = listOf(article.imageUrl)
+                    finalContent = processedContent + """<a href="app-image://0"><img src="${article.imageUrl}"></a>"""
+                } else {
+                    finalUrls = emptyList()
+                    finalContent = processedContent
+                }
+            } else {
+                finalUrls = urls
+                finalContent = processedContent
+            }
+        }
+
+        imageUrls.value = finalUrls
+        htmlToLoad = buildHtml(article.title, article.pubDate, finalContent)
+    }
 
     Box(Modifier.fillMaxSize()) {
         Scaffold(
@@ -66,22 +133,17 @@ fun ArticleScreen(onBack: () -> Unit) {
                                 return false
                             }
                         }
-                        settings.javaScriptEnabled = false
+                        settings.javaScriptEnabled = true
                         settings.useWideViewPort = true
                         settings.loadWithOverviewMode = false
                         setBackgroundColor(AndroidColor.parseColor("#0B0C0F"))
-
-                        val sanitised = article?.let { sanitiseContent(it.content) } ?: ""
-                        val (processedContent, urls) = prepareImages(sanitised)
-                        imageUrls.value = urls
-
-                        val html = if (article != null) {
-                            buildHtml(article.title, article.pubDate, processedContent)
-                        } else {
-                            "<html><body style='background:#0B0C0F;color:#fff;padding:16px'>No content available.</body></html>"
-                        }
-
-                        loadDataWithBaseURL("https://www.btcc.net", html, "text/html", "UTF-8", null)
+                    }
+                },
+                update = { webView ->
+                    val html = htmlToLoad ?: return@AndroidView
+                    if (html != loadGuard.loaded) {
+                        loadGuard.loaded = html
+                        webView.loadDataWithBaseURL("https://www.btcc.net", html, "text/html", "UTF-8", null)
                     }
                 }
             )
@@ -147,17 +209,55 @@ private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: ()
     }
 }
 
-// Extract image URLs and wrap each <img> with an app-image:// link so taps open the lightbox
+// Extract image URLs and wrap each <img> with an app-image:// link so taps open the lightbox.
+// Handles WordPress lazy-loading where the real URL is in data-src / data-lazy-src and src
+// is a base64 placeholder.
 private fun prepareImages(sanitised: String): Pair<String, List<String>> {
     val urls = mutableListOf<String>()
+    val seenUrls = mutableSetOf<String>()
+    val seenNggIds = mutableSetOf<String>()
+    val nggIdRegex = Regex("""nggid(\d+)""", RegexOption.IGNORE_CASE)
+
     val processed = Regex("""<img\b([^>]*)>""", setOf(RegexOption.IGNORE_CASE)).replace(sanitised) { match ->
         val attrs = match.groupValues[1]
-        val src = Regex("""src="([^"]+)"""").find(attrs)?.groupValues?.get(1)
-            ?: Regex("""src='([^']+)'""").find(attrs)?.groupValues?.get(1)
+
+        fun attr(name: String) = Regex("""$name="([^"]+)"""").find(attrs)?.groupValues?.get(1)
+            ?: Regex("""$name='([^']+)'""").find(attrs)?.groupValues?.get(1)
+
+        val rawSrc = attr("src")
+        val dataSrc = attr("data-src") ?: attr("data-lazy-src") ?: attr("data-original")
+        val src = when {
+            dataSrc != null                               -> dataSrc
+            rawSrc != null && !rawSrc.startsWith("data:") -> rawSrc
+            else                                          -> null
+        }
+
         if (src != null) {
             val resolved = if (src.startsWith("http")) src else "https://www.btcc.net$src"
-            urls.add(resolved)
-            """<a href="app-image://${urls.size - 1}">${match.value}</a>"""
+            if (!seenUrls.add(resolved)) return@replace ""  // exact duplicate
+
+            // NGG "thumbs" variant (.../thumbs/thumbs-image.jpg) — original comes separately, skip
+            if ("/thumbs/thumbs-" in resolved) return@replace ""
+
+            val nggId = nggIdRegex.find(resolved)?.groupValues?.get(1)
+            if (nggId != null) {
+                // NGG cached image (nggid format): deduplicate by nggid, upgrade to full-size original.
+                // Cached path: .../gallery/slug/cache/image.jpg-nggid001-ngg0dyn-0xHHH-...jpg
+                // Original path: .../gallery/slug/image.jpg
+                if (!seenNggIds.add(nggId)) return@replace ""
+                val cacheIdx = resolved.indexOf("/cache/")
+                val finalUrl = if (cacheIdx >= 0) {
+                    val filename = resolved.substringAfterLast("/")
+                    val nggIdx = filename.lowercase().indexOf("-nggid")
+                    if (nggIdx >= 0) "${resolved.substring(0, cacheIdx)}/${filename.substring(0, nggIdx)}"
+                    else resolved
+                } else resolved
+                urls.add(finalUrl)
+                """<a href="app-image://${urls.size - 1}"><img src="$finalUrl"></a>"""
+            } else {
+                urls.add(resolved)
+                """<a href="app-image://${urls.size - 1}"><img src="$resolved"></a>"""
+            }
         } else {
             match.value
         }
@@ -165,14 +265,62 @@ private fun prepareImages(sanitised: String): Pair<String, List<String>> {
     return processed to urls
 }
 
-// Remove WordPress embedded styles, inline styles, and sizing attributes that cause overflow
+// Extract image URLs from NextGEN Gallery 3.x inline <script> JSON blocks.
+// NGG renders a placeholder <div> + a <script> with image data rather than <img> tags.
+private fun extractNggScriptImages(html: String): List<String> {
+    val seen = linkedSetOf<String>()
+    val imageExtRegex = Regex("""\.(?:jpe?g|png|webp|gif)\b""", RegexOption.IGNORE_CASE)
+    for (scriptMatch in Regex(
+        """<script\b[^>]*>(.*?)</script>""",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+    ).findAll(html)) {
+        val body = scriptMatch.groupValues[1]
+        if (!body.contains("ngg", ignoreCase = true) &&
+            !body.contains("gallery", ignoreCase = true)) continue
+        for (m in Regex(""""([^"]+\.(?:jpe?g|png|webp|gif)[^"]*)"""", RegexOption.IGNORE_CASE).findAll(body)) {
+            val v = m.groupValues[1].replace("\\/", "/")
+            if (!v.startsWith("data:") &&
+                (v.contains("wp-content/gallery") || v.contains("nggid")) &&
+                imageExtRegex.containsMatchIn(v)) {
+                val resolved = if (v.startsWith("http")) v
+                               else if (v.startsWith("//")) "https:$v"
+                               else "https://www.btcc.net$v"
+                seen.add(resolved)
+            }
+        }
+    }
+    return deduplicateNggImages(seen.toList())
+}
+
+// Each NGG image appears at multiple cached resolutions AND as an original.
+// Strategy: prefer original files (not in /cache/ subdirectory); if only cached exist, keep one per nggid.
+private fun deduplicateNggImages(urls: List<String>): List<String> {
+    // Always discard NGG thumbnail variants — originals (.../gallery/slug/image.jpg) come separately
+    val withoutThumbs = urls.filter { "/thumbs/thumbs-" !in it }
+    val originals = withoutThumbs.filter { "/cache/" !in it && "ngg0dyn" !in it }
+    if (originals.isNotEmpty()) {
+        // Deduplicate originals by lowercase filename (strips query strings too)
+        return originals.distinctBy { it.substringAfterLast("/").substringBefore("?").lowercase() }
+    }
+    // All cached — keep one per nggid, or by filename if no nggid present
+    val byKey = linkedMapOf<String, String>()
+    val nggIdRegex = Regex("""nggid(\d+)""", RegexOption.IGNORE_CASE)
+    for (url in withoutThumbs) {
+        val key = nggIdRegex.find(url)?.groupValues?.get(1)
+            ?: url.substringAfterLast("/").substringBefore("?").lowercase()
+        if (key !in byKey) byKey[key] = url
+    }
+    return byKey.values.toList()
+}
+
+// Remove WordPress embedded styles, inline styles, sizing, and lazy-load attributes
 private fun sanitiseContent(html: String): String =
     html
         .replace(Regex("<style[^>]*>.*?</style>", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)), "")
         .replace(Regex("""\s+style="[^"]*""""), "")
         .replace(Regex("""\s+style='[^']*'"""), "")
-        .replace(Regex("""\s+(?:width|height|srcset|sizes)="[^"]*""""), "")
-        .replace(Regex("""\s+(?:width|height|srcset|sizes)='[^']*'"""), "")
+        .replace(Regex("""\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*""""), "")
+        .replace(Regex("""\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)='[^']*'"""), "")
 
 private fun buildHtml(title: String, pubDate: String, content: String): String = """
     <!DOCTYPE html>
@@ -231,7 +379,7 @@ private fun buildHtml(title: String, pubDate: String, content: String): String =
         figcaption { font-size: 12px; color: #8B949E; margin-top: 4px; }
         figure { margin: 12px 0; }
         .wp-block-image, .wp-block-embed { margin: 16px 0; }
-        iframe { display: none; }
+        iframe { width: 100% !important; max-width: 100% !important; border: none; }
       </style>
     </head>
     <body>

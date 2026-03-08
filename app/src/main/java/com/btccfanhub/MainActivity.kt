@@ -36,6 +36,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.OnboardingStore
 import com.btccfanhub.data.WhatsNewStore
@@ -44,7 +45,9 @@ import com.btccfanhub.ui.NotificationOnboardingScreen
 import com.btccfanhub.ui.WhatsNewDialog
 import com.btccfanhub.navigation.AppNavHost
 import com.btccfanhub.navigation.Screen
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.btccfanhub.ui.ads.AdmobBanner
 import com.btccfanhub.ui.theme.BTCCFanHubTheme
@@ -67,6 +70,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this)
+        FeatureFlagsStore.init(this)
+        lifecycleScope.launch(Dispatchers.IO) { FeatureFlagsStore.fetchRemote() }
         FavouriteDriverStore.init(this)
         createNewsNotificationChannel()
         createRaceNotificationChannel()
@@ -169,6 +174,10 @@ private fun MainScreen(
     var showOnboarding by remember { mutableStateOf(OnboardingStore.shouldShow(context)) }
     var showWhatsNew by remember { mutableStateOf(WhatsNewStore.shouldShow(context)) }
 
+    val flagRadio   by FeatureFlagsStore.radioTab.collectAsState()
+    val flagAds     by FeatureFlagsStore.adsEnabled.collectAsState()
+    val flagWhatsNew by FeatureFlagsStore.whatsNew.collectAsState()
+
     if (showOnboarding) {
         NotificationOnboardingScreen(
             onEnableNotifications = {
@@ -201,13 +210,13 @@ private fun MainScreen(
             currentRoute?.startsWith("track/") != true &&
             currentRoute != Screen.LiveTiming.route
 
-    val navItems = listOf(
-        NavItem(Screen.News, "News", Icons.Default.Home),
-        NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange),
-        NavItem(Screen.Drivers, "Grid", Icons.Default.Groups),
-        NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents),
-        NavItem(Screen.Radio, "Radio", Icons.Default.Radio),
-    )
+    val navItems = buildList {
+        add(NavItem(Screen.News,     "News",     Icons.Default.Home))
+        add(NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange))
+        add(NavItem(Screen.Drivers,  "Grid",     Icons.Default.Groups))
+        add(NavItem(Screen.Results,  "Results",  Icons.Default.EmojiEvents))
+        if (flagRadio) add(NavItem(Screen.Radio, "Radio", Icons.Default.Radio))
+    }
 
     val navItemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = BtccYellow,
@@ -217,7 +226,7 @@ private fun MainScreen(
         unselectedTextColor = BtccTextSecondary,
     )
 
-    if (showWhatsNew) {
+    if (showWhatsNew && flagWhatsNew) {
         WhatsNewDialog(
             changes   = WhatsNewStore.changes,
             onDismiss = {
@@ -231,7 +240,7 @@ private fun MainScreen(
         bottomBar = {
             if (showBottomBar) {
                 Column {
-                    AdmobBanner()
+                    if (flagAds) AdmobBanner()
                     NavigationBar(
                         containerColor = BtccSurface,
                         tonalElevation = 0.dp,

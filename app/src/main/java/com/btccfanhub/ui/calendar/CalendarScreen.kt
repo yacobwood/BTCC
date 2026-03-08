@@ -42,7 +42,7 @@ private fun formatDateRange(start: java.time.LocalDate, end: java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: () -> Unit = {}) {
+fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: (() -> Unit)? = null) {
     val today = LocalDate.now()
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
     var liveTimingEnabled by remember { mutableStateOf(true) }
@@ -84,7 +84,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: () -> Un
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
         ) {
-            val isRaceWeekend = liveTimingEnabled && nextRace != null && today >= nextRace.startDate
+            val isRaceWeekend = liveTimingEnabled && onLiveTimingClick != null && nextRace != null && today >= nextRace.startDate
             if (isRaceWeekend) {
                 item {
                     LiveTimingCard(onClick = onLiveTimingClick)

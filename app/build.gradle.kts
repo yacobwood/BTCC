@@ -11,6 +11,11 @@ val keystoreProps = Properties().apply {
     if (f.exists()) load(f.inputStream())
 }
 
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
 android {
     namespace = "com.btccfanhub"
     compileSdk = 36
@@ -23,6 +28,7 @@ android {
         versionName = "closed beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "CONFIGCAT_SDK_KEY", "\"${localProps["configcat.sdk.key"] ?: ""}\"")
     }
 
     signingConfigs {
@@ -81,6 +87,7 @@ dependencies {
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.youtube.player)
+    implementation(libs.configcat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

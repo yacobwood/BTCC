@@ -16,6 +16,7 @@ coroutines = "1.9.0"
 media3 = "1.5.1"
 work  = "2.10.0"
 youtube-player = "12.1.0"
+configcat = "10.4.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,7 @@ androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplaye
 androidx-media3-session   = { group = "androidx.media3", name = "media3-session",   version.ref = "media3" }
 androidx-work-runtime-ktx = { group = "androidx.work",   name = "work-runtime-ktx", version.ref = "work" }
 youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtube-player" }
+configcat = { group = "com.configcat", name = "configcat-android-client", version.ref = "configcat" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

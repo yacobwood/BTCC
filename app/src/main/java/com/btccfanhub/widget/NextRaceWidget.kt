@@ -71,7 +71,9 @@ class NextRaceWidget : AppWidgetProvider() {
             val daysUntil  = ChronoUnit.DAYS.between(today, nextRace.startDate)
             val dateString = "${nextRace.startDate.format(DAY_FMT)} - ${nextRace.endDate.format(DAY_FMT)} ${nextRace.endDate.format(MONTH_YEAR_FMT)}"
 
-            views.setTextViewText(R.id.widget_round, "ROUND ${nextRace.round}")
+            val rStart = (nextRace.round - 1) * 3 + 1
+            val rEnd   = nextRace.round * 3
+            views.setTextViewText(R.id.widget_round, "ROUNDS $rStart - $rEnd")
             views.setTextViewText(R.id.widget_venue, nextRace.venue)
             views.setTextViewText(R.id.widget_dates, dateString)
 
