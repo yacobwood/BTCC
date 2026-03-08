@@ -281,8 +281,11 @@ private fun DriverResultRow(result: DriverResult) {
             )
         }
         Column(horizontalAlignment = Alignment.End) {
+            val displayTime = result.gap
+                ?: result.time.takeIf { it.isNotEmpty() }
+                ?: result.bestLap
             Text(
-                result.gap ?: result.time,
+                displayTime,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize   = 13.sp,
                 color      = if (result.gap == null) BtccYellow else MaterialTheme.colorScheme.onBackground,

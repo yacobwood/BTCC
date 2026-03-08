@@ -105,13 +105,35 @@ def parse_rows(rows: list[list[str]]) -> list[dict]:
             if len(cells) > 2 and cells[2].strip() in ("M", "I"):
                 offset = 1
 
-            driver   = cells[2 + offset].strip() if len(cells) > 2 + offset else ""
-            team     = cells[3 + offset].strip() if len(cells) > 3 + offset else ""
-            laps_raw = cells[4 + offset]          if len(cells) > 4 + offset else "0"
-            time_raw = cells[5 + offset]          if len(cells) > 5 + offset else ""
-            gap_raw  = cells[6 + offset]          if len(cells) > 6 + offset else ""
-            best_lap = cells[7 + offset]          if len(cells) > 7 + offset else ""
-            pts_raw  = cells[8 + offset]          if len(cells) > 8 + offset else "0"
+            driver = cells[2 + offset].strip() if len(cells) > 2 + offset else ""
+            team   = cells[3 + offset].strip() if len(cells) > 3 + offset else ""
+
+            # Column formats vary by season:
+            #   Short  (7 col): Pos No (CL) Driver Car Gap Best          — 2 cols after team
+            #   Medium (8 col): Pos No (CL) Driver Car Laps Gap Best     — 3 cols after team
+            #   Long  (10 col): Pos No (CL) Driver Team Laps Time Gap Best Pts — 5 cols after team
+            cols_after_team = len(cells) - (4 + offset)
+            if cols_after_team <= 2:
+                # Short: no Laps, no Time
+                laps_raw = "0"
+                time_raw = ""
+                gap_raw  = cells[4 + offset] if len(cells) > 4 + offset else ""
+                best_lap = cells[5 + offset] if len(cells) > 5 + offset else ""
+                pts_raw  = "0"
+            elif cols_after_team == 3:
+                # Medium: Laps, Gap, Best — no Time or Pts columns
+                laps_raw = cells[4 + offset] if len(cells) > 4 + offset else "0"
+                time_raw = ""
+                gap_raw  = cells[5 + offset] if len(cells) > 5 + offset else ""
+                best_lap = cells[6 + offset] if len(cells) > 6 + offset else ""
+                pts_raw  = "0"
+            else:
+                # Long: Laps, Time, Gap, Best, Pts
+                laps_raw = cells[4 + offset] if len(cells) > 4 + offset else "0"
+                time_raw = cells[5 + offset] if len(cells) > 5 + offset else ""
+                gap_raw  = cells[6 + offset] if len(cells) > 6 + offset else ""
+                best_lap = cells[7 + offset] if len(cells) > 7 + offset else ""
+                pts_raw  = cells[8 + offset] if len(cells) > 8 + offset else "0"
         except (IndexError, ValueError):
             continue
 
