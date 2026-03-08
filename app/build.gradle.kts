@@ -24,7 +24,7 @@ android {
         applicationId = "com.btccfanhub"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
+        versionCode = 12
         versionName = "closed beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

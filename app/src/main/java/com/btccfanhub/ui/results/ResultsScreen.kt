@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.btccfanhub.data.DriverSeasonStats
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.SeasonStatsComputer
+import com.btccfanhub.data.Standings2023
 import com.btccfanhub.data.Standings2024
 import com.btccfanhub.data.Standings2025
 import com.btccfanhub.data.model.DriverStanding
@@ -63,6 +64,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     var raceResults     by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
     var raceResults2025 by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
     var raceResults2024 by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
+    var raceResults2023 by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
     var resultsLoading  by remember { mutableStateOf(false) }
 
     // Season start date from remote config (fallback: 2026-04-18)
@@ -95,6 +97,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         raceResults     = RaceResultsRepository.getResults()
         raceResults2025 = RaceResultsRepository.getResults2025()
         raceResults2024 = RaceResultsRepository.getResults2024()
+        raceResults2023 = RaceResultsRepository.getResults2023()
         resultsLoading = false
     }
 
@@ -103,11 +106,11 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         seasonStartDate = CalendarRepository.getCalendarData().seasonStartDate
         if (today >= seasonStartDate) refresh()
         refreshResults()
-        raceResults2025 = RaceResultsRepository.getResults2025()
-        raceResults2024 = RaceResultsRepository.getResults2024()
     }
 
     // Resolve what to display for each year
+    val drivers2023 = Standings2023.drivers
+    val teams2023   = Standings2023.teams.ifEmpty { null }
     val drivers2024 = Standings2024.drivers
     val teams2024   = Standings2024.teams.ifEmpty { null }
     val drivers2025 = Standings2025.drivers
@@ -141,7 +144,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            listOf(2024, 2025, 2026).forEach { year ->
+            listOf(2023, 2024, 2025, 2026).forEach { year ->
                 FilterChip(
                     selected = selectedYear == year,
                     onClick  = {
@@ -231,6 +234,20 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                             )
                         }
 
+                    // --- 2023 (hardcoded) ---
+                    page == 0 && selectedYear == 2023 ->
+                        DriverStandingsList(drivers2023, showLiveRound = 0, showPastBanner = true, bannerYear = 2023)
+                    page == 1 && selectedYear == 2023 && teams2023 != null ->
+                        TeamStandingsList(teams2023, showPastBanner = true, bannerYear = 2023)
+                    page == 1 && selectedYear == 2023 ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                "Team standings not available.",
+                                color     = BtccTextSecondary,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+
                     // --- 2024 (hardcoded) ---
                     page == 0 && selectedYear == 2024 ->
                         DriverStandingsList(drivers2024, showLiveRound = 0, showPastBanner = true, bannerYear = 2024)
@@ -278,6 +295,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                         RaceResultsTab(
                             year            = selectedYear,
                             results         = when (selectedYear) {
+                                2023 -> raceResults2023
                                 2024 -> raceResults2024
                                 2025 -> raceResults2025
                                 else -> raceResults
@@ -290,6 +308,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     // --- Season stats ---
                     page == 3 -> {
                         val activeResults = when (selectedYear) {
+                            2023 -> raceResults2023
                             2024 -> raceResults2024
                             2025 -> raceResults2025
                             else -> raceResults

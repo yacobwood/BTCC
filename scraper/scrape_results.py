@@ -17,6 +17,18 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2024
 
 ROUNDS = {
+    2023: [
+        {"round": 1,  "venue": "Donington Park",    "date": "23 Apr 2023", "slug": "2023-donington-park"},
+        {"round": 2,  "venue": "Brands Hatch Indy", "date": "14 May 2023", "slug": "2023-brands-hatch-indy"},
+        {"round": 3,  "venue": "Thruxton",          "date": "28 May 2023", "slug": "2023-thruxton"},
+        {"round": 4,  "venue": "Oulton Park",       "date": "11 Jun 2023", "slug": "2023-oulton-park"},
+        {"round": 5,  "venue": "Snetterton",        "date": "23 Jul 2023", "slug": "2023-snetterton"},
+        {"round": 6,  "venue": "Knockhill",         "date": "13 Aug 2023", "slug": "2023-knockhill"},
+        {"round": 7,  "venue": "Donington Park GP", "date": "27 Aug 2023", "slug": "2023-donington-park-gp"},
+        {"round": 8,  "venue": "Croft",             "date": "17 Sep 2023", "slug": "2023-croft"},
+        {"round": 9,  "venue": "Silverstone",       "date": "01 Oct 2023", "slug": "2023-silverstone"},
+        {"round": 10, "venue": "Brands Hatch GP",   "date": "15 Oct 2023", "slug": "2023-brands-hatch-gp"},
+    ],
     2024: [
         {"round": 1,  "venue": "Donington Park",    "date": "28 Apr 2024", "slug": "2024-donington-park"},
         {"round": 2,  "venue": "Brands Hatch Indy", "date": "19 May 2024", "slug": "2024-brands-hatch-indy"},
@@ -84,15 +96,22 @@ def parse_rows(rows: list[list[str]]) -> list[dict]:
             continue
 
         try:
-            pos      = 0 if is_dnf_pos else int(re.sub(r"[^\d]", "", pos_raw) or "0")
-            no       = int(re.sub(r"[^\d]", "", cells[1]) or "0") if len(cells) > 1 else 0
-            driver   = cells[2].strip() if len(cells) > 2 else ""
-            team     = cells[3].strip() if len(cells) > 3 else ""
-            laps_raw = cells[4]          if len(cells) > 4 else "0"
-            time_raw = cells[5]          if len(cells) > 5 else ""
-            gap_raw  = cells[6]          if len(cells) > 6 else ""
-            best_lap = cells[7]          if len(cells) > 7 else ""
-            pts_raw  = cells[8]          if len(cells) > 8 else "0"
+            pos = 0 if is_dnf_pos else int(re.sub(r"[^\d]", "", pos_raw) or "0")
+            no  = int(re.sub(r"[^\d]", "", cells[1]) or "0") if len(cells) > 1 else 0
+
+            # Some season tables include a manufacturer/independent class column (M/I)
+            # after the car number — detect and skip it.
+            offset = 0
+            if len(cells) > 2 and cells[2].strip() in ("M", "I"):
+                offset = 1
+
+            driver   = cells[2 + offset].strip() if len(cells) > 2 + offset else ""
+            team     = cells[3 + offset].strip() if len(cells) > 3 + offset else ""
+            laps_raw = cells[4 + offset]          if len(cells) > 4 + offset else "0"
+            time_raw = cells[5 + offset]          if len(cells) > 5 + offset else ""
+            gap_raw  = cells[6 + offset]          if len(cells) > 6 + offset else ""
+            best_lap = cells[7 + offset]          if len(cells) > 7 + offset else ""
+            pts_raw  = cells[8 + offset]          if len(cells) > 8 + offset else "0"
         except (IndexError, ValueError):
             continue
 

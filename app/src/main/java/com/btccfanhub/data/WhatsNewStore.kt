@@ -27,6 +27,12 @@ object WhatsNewStore {
             "Star from Grid — star or unstar your favourite driver directly from the driver list and detail screen",
             "Notification onboarding — new install flow explains what notifications the app sends before asking",
         ),
+        12 to listOf(
+            "Raise a Bug — report issues directly in the app from Settings without leaving the app",
+            "Audio embeds — podcast and audio players in articles now load and play correctly",
+            "Gallery images fixed — no more duplicate photos in image galleries",
+            "Round labels — widget and track detail now correctly show the full round range (e.g. Rounds 1–3)",
+        ),
     )
 
     val changes: List<String>

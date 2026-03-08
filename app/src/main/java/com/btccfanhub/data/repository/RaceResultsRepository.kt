@@ -15,6 +15,7 @@ object RaceResultsRepository {
     private val url2026 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results.json"
     private val url2025 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2025.json"
     private val url2024 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2024.json"
+    private val url2023 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2023.json"
 
     private var cache2026: List<RoundResult>? = null
     private var cacheTime2026: Long = 0
@@ -26,6 +27,9 @@ object RaceResultsRepository {
 
     private var cache2024: List<RoundResult>? = null
     private var cacheTime2024: Long = 0
+
+    private var cache2023: List<RoundResult>? = null
+    private var cacheTime2023: Long = 0
 
     suspend fun getResults(): List<RoundResult> = fetchAndCache(
         url = url2026,
@@ -49,6 +53,14 @@ object RaceResultsRepository {
         cacheTime = { cacheTime2024 },
         ttl = CACHE_MS_2025,
         setCache = { r, t -> cache2024 = r; cacheTime2024 = t },
+    )
+
+    suspend fun getResults2023(): List<RoundResult> = fetchAndCache(
+        url = url2023,
+        cache = { cache2023 },
+        cacheTime = { cacheTime2023 },
+        ttl = CACHE_MS_2025,
+        setCache = { r, t -> cache2023 = r; cacheTime2023 = t },
     )
 
     private suspend fun fetchAndCache(
@@ -116,5 +128,6 @@ object RaceResultsRepository {
         cache2026 = null; cacheTime2026 = 0
         cache2025 = null; cacheTime2025 = 0
         cache2024 = null; cacheTime2024 = 0
+        cache2023 = null; cacheTime2023 = 0
     }
 }
