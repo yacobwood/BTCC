@@ -1063,7 +1063,7 @@
           "year": 2022,
           "team": "",
           "car": "Hyundai i30N",
-          "pos": 2,
+          "pos": 1,
           "points": 442,
           "wins": 7,
           "champion": true
@@ -1239,7 +1239,7 @@
           "year": 2021,
           "team": "",
           "car": "Infiniti Q50",
-          "pos": 3,
+          "pos": 1,
           "points": 346,
           "wins": 4,
           "champion": true
@@ -1248,7 +1248,7 @@
           "year": 2020,
           "team": "",
           "car": "Infiniti Q50",
-          "pos": 4,
+          "pos": 1,
           "points": 326,
           "wins": 5,
           "champion": true
