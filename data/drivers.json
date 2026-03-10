@@ -25,6 +25,14 @@
           "pos": 13,
           "points": 165,
           "wins": 1
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Cupra Leon",
+          "pos": 28,
+          "points": 2,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1996-07-03",
@@ -54,6 +62,62 @@
           "pos": 18,
           "points": 116,
           "wins": 0
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 15,
+          "points": 108,
+          "wins": 1
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 16,
+          "points": 83,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "BMW 330i M Sport",
+          "pos": 19,
+          "points": 56,
+          "wins": 0
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 11,
+          "points": 133,
+          "wins": 0
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Ford Focus RS",
+          "pos": 12,
+          "points": 183,
+          "wins": 0
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Ford Focus RS",
+          "pos": 6,
+          "points": 246,
+          "wins": 0
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Vauxhall Astra",
+          "pos": 14,
+          "points": 107,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1988-11-07",
@@ -82,6 +146,86 @@
           "pos": 9,
           "points": 210,
           "wins": 2
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 20,
+          "points": 49,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Infiniti Q50",
+          "pos": 19,
+          "points": 52,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Infiniti Q50",
+          "pos": 10,
+          "points": 227,
+          "wins": 2
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Infiniti Q50",
+          "pos": 16,
+          "points": 58,
+          "wins": 0
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 20,
+          "points": 52,
+          "wins": 0
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 17,
+          "points": 100,
+          "wins": 0
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 13,
+          "points": 157,
+          "wins": 2
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 16,
+          "points": 117,
+          "wins": 0
+        },
+        {
+          "year": 2015,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 17,
+          "points": 54,
+          "wins": 0
+        },
+        {
+          "year": 2014,
+          "team": "",
+          "car": "Chevrolet Cruze 4dr",
+          "pos": 25,
+          "points": 7,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1996-11-07",
@@ -102,6 +246,22 @@
           "car": "Audi S3 Saloon",
           "pos": 20,
           "points": 42
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Cupra Leon",
+          "pos": 22,
+          "points": 17,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Infiniti Q50",
+          "pos": 23,
+          "points": 12,
+          "wins": 0
         }
       ],
       "dateOfBirth": "2005-03-16",
@@ -122,6 +282,46 @@
           "car": "Toyota Corolla GR Sport",
           "pos": 10,
           "points": 167
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 8,
+          "points": 259,
+          "wins": 3
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 13,
+          "points": 98,
+          "wins": 0
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Subaru Levorg GT",
+          "pos": 18,
+          "points": 67,
+          "wins": 0
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Vauxhall Astra",
+          "pos": 15,
+          "points": 132,
+          "wins": 1
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Vauxhall Astra",
+          "pos": 21,
+          "points": 52,
+          "wins": 0
         }
       ],
       "dateOfBirth": "2001-07-24",
@@ -168,6 +368,54 @@
           "pos": 16,
           "points": 142,
           "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 15,
+          "points": 136,
+          "wins": 0
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 14,
+          "points": 82,
+          "wins": 0
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 13,
+          "points": 181,
+          "wins": 0
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 13,
+          "points": 165,
+          "wins": 0
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Chevrolet Cruze 4dr",
+          "pos": 26,
+          "points": 21,
+          "wins": 0
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "Toyota Avensis",
+          "pos": 31,
+          "points": 0,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1991-04-18",
@@ -197,6 +445,54 @@
           "pos": 3,
           "points": 342,
           "wins": 2
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Ford Focus ST MK.III",
+          "pos": 5,
+          "points": 269,
+          "wins": 3
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Ford Focus ST Mk 4",
+          "pos": 6,
+          "points": 262,
+          "wins": 2
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 20,
+          "points": 37,
+          "wins": 0
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 2,
+          "points": 344,
+          "wins": 4
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 2,
+          "points": 412,
+          "wins": 1
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 1,
+          "points": 323,
+          "wins": 3
         }
       ],
       "dateOfBirth": "1989-09-26",
@@ -226,6 +522,38 @@
           "pos": 17,
           "points": 135,
           "wins": 0
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Ford Focus ST MK.III",
+          "pos": 7,
+          "points": 215,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 10,
+          "points": 191,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 7,
+          "points": 280,
+          "wins": 3
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 26,
+          "points": 5,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1991-09-12",
@@ -254,6 +582,86 @@
           "pos": 5,
           "points": 268,
           "wins": 0
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "BMW 330i M Sport",
+          "pos": 11,
+          "points": 173,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "BMW 330e M Sport",
+          "pos": 9,
+          "points": 222,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "BMW 330i M Sport",
+          "pos": 13,
+          "points": 147,
+          "wins": 0
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 10,
+          "points": 158,
+          "wins": 0
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 14,
+          "points": 138,
+          "wins": 0
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 10,
+          "points": 200,
+          "wins": 2
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 8,
+          "points": 198,
+          "wins": 0
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 9,
+          "points": 236,
+          "wins": 1
+        },
+        {
+          "year": 2015,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 8,
+          "points": 269,
+          "wins": 0
+        },
+        {
+          "year": 2014,
+          "team": "",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 9,
+          "points": 178,
+          "wins": 1
         }
       ],
       "dateOfBirth": "1990-07-11",
@@ -282,6 +690,62 @@
           "pos": 19,
           "points": 98,
           "wins": 1
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Vauxhall Astra",
+          "pos": 9,
+          "points": 184,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Cupra Leon",
+          "pos": 21,
+          "points": 16,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Cupra Leon",
+          "pos": 23,
+          "points": 9,
+          "wins": 0
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "MG6 GT",
+          "pos": 24,
+          "points": 34,
+          "wins": 0
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "Volkswagen CC",
+          "pos": 14,
+          "points": 137,
+          "wins": 0
+        },
+        {
+          "year": 2015,
+          "team": "",
+          "car": "Volkswagen CC",
+          "pos": 6,
+          "points": 286,
+          "wins": 1
+        },
+        {
+          "year": 2014,
+          "team": "",
+          "car": "Volkswagen CC",
+          "pos": 13,
+          "points": 156,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1992-06-01",
@@ -302,6 +766,22 @@
           "car": "Audi S3 Saloon",
           "pos": 27,
           "points": 4
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 24,
+          "points": 10,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 34,
+          "points": 0,
+          "wins": 0
         }
       ]
     },
@@ -323,11 +803,44 @@
           "wins": 1
         },
         {
+          "year": 2022,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 8,
+          "points": 247,
+          "wins": 1
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 9,
+          "points": 257,
+          "wins": 2
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 5,
+          "points": 301,
+          "wins": 1
+        },
+        {
           "year": 2016,
           "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
           "pos": 1,
           "points": 0,
+          "champion": true
+        },
+        {
+          "year": 2015,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 1,
+          "points": 403,
+          "wins": 4,
           "champion": true
         },
         {
@@ -374,6 +887,78 @@
           "pos": 7,
           "points": 247,
           "wins": 2
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 6,
+          "points": 262,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 7,
+          "points": 256,
+          "wins": 5
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 1,
+          "points": 355,
+          "wins": 5
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 8,
+          "points": 187,
+          "wins": 3
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 10,
+          "points": 211,
+          "wins": 2
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Vauxhall Astra",
+          "pos": 11,
+          "points": 194,
+          "wins": 3
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "MG6 GT",
+          "pos": 15,
+          "points": 107,
+          "wins": 0
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "MG6 GT",
+          "pos": 11,
+          "points": 206,
+          "wins": 0
+        },
+        {
+          "year": 2015,
+          "team": "",
+          "car": "Chevrolet Cruze 5dr",
+          "pos": 16,
+          "points": 96,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1992-02-22",
@@ -395,6 +980,46 @@
           "pos": 16,
           "points": 108,
           "wins": 1
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Ford Focus ST MK.III",
+          "pos": 19,
+          "points": 63,
+          "wins": 0
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Ford Focus ST Mk 4",
+          "pos": 24,
+          "points": 3,
+          "wins": 0
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Ford Focus ST Mk 4",
+          "pos": 22,
+          "points": 22,
+          "wins": 0
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Honda Civic Type R",
+          "pos": 19,
+          "points": 18,
+          "wins": 0
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "MG6 GT",
+          "pos": 32,
+          "points": 0,
+          "wins": 0
         }
       ],
       "dateOfBirth": "2001-05-17",
@@ -425,6 +1050,87 @@
           "pos": 2,
           "points": 431,
           "wins": 5
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 3,
+          "points": 428,
+          "wins": 1
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 2,
+          "points": 442,
+          "wins": 7,
+          "champion": true
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Hyundai i30N",
+          "pos": 6,
+          "points": 296,
+          "wins": 1
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 3,
+          "points": 343,
+          "wins": 3
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 5,
+          "points": 258,
+          "wins": 4
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Toyota Avensis",
+          "pos": 9,
+          "points": 220,
+          "wins": 2
+        },
+        {
+          "year": 2017,
+          "team": "",
+          "car": "Toyota Avensis",
+          "pos": 3,
+          "points": 350,
+          "wins": 3
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "Toyota Avensis",
+          "pos": 3,
+          "points": 322,
+          "wins": 4
+        },
+        {
+          "year": 2015,
+          "team": "",
+          "car": "Toyota Avensis",
+          "pos": 13,
+          "points": 170,
+          "wins": 0
+        },
+        {
+          "year": 2014,
+          "team": "",
+          "car": "Toyota Avensis",
+          "pos": 11,
+          "points": 163,
+          "wins": 0
         }
       ],
       "dateOfBirth": "1992-03-21",
@@ -453,6 +1159,14 @@
           "car": "Vauxhall Astra",
           "pos": 15,
           "points": 156,
+          "wins": 0
+        },
+        {
+          "year": 2023,
+          "team": "",
+          "car": "Vauxhall Astra",
+          "pos": 17,
+          "points": 78,
           "wins": 0
         }
       ],
@@ -505,12 +1219,71 @@
           "champion": true
         },
         {
+          "year": 2023,
+          "team": "",
+          "car": "Ford Focus ST MK.III",
+          "pos": 1,
+          "points": 589,
+          "wins": 16,
+          "champion": true
+        },
+        {
+          "year": 2022,
+          "team": "",
+          "car": "Ford Focus ST Mk 4",
+          "pos": 4,
+          "points": 392,
+          "wins": 2
+        },
+        {
+          "year": 2021,
+          "team": "",
+          "car": "Infiniti Q50",
+          "pos": 3,
+          "points": 346,
+          "wins": 4,
+          "champion": true
+        },
+        {
+          "year": 2020,
+          "team": "",
+          "car": "Infiniti Q50",
+          "pos": 4,
+          "points": 326,
+          "wins": 5,
+          "champion": true
+        },
+        {
+          "year": 2019,
+          "team": "",
+          "car": "Subaru Levorg GT",
+          "pos": 4,
+          "points": 259,
+          "wins": 2
+        },
+        {
+          "year": 2018,
+          "team": "",
+          "car": "Subaru Levorg GT",
+          "pos": 8,
+          "points": 238,
+          "wins": 5
+        },
+        {
           "year": 2017,
           "team": "Adrian Flux Subaru Racing",
           "car": "Subaru Levorg",
           "pos": 1,
           "points": 0,
           "champion": true
+        },
+        {
+          "year": 2016,
+          "team": "",
+          "car": "MG6 GT",
+          "pos": 10,
+          "points": 217,
+          "wins": 2
         }
       ],
       "dateOfBirth": "1991-04-14",

@@ -862,17 +862,20 @@ private fun SeasonStatRow(stat: SeasonStat) {
 
         // Team + car
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                stat.team,
-                style      = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                color      = MaterialTheme.colorScheme.onBackground,
-            )
+            if (stat.team.isNotEmpty()) {
+                Text(
+                    stat.team,
+                    style      = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color      = MaterialTheme.colorScheme.onBackground,
+                )
+            }
             if (stat.car.isNotEmpty()) {
                 Text(
                     stat.car,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = BtccTextSecondary,
+                    style      = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (stat.team.isEmpty()) FontWeight.SemiBold else FontWeight.Normal,
+                    color      = if (stat.team.isEmpty()) MaterialTheme.colorScheme.onBackground else BtccTextSecondary,
                 )
             }
         }
