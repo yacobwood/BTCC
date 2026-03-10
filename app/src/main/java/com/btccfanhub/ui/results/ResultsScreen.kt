@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,8 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.btccfanhub.data.DriverSeasonStats
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.SeasonStatsComputer
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import com.btccfanhub.data.Standings2014
 import com.btccfanhub.data.Standings2015
 import com.btccfanhub.data.Standings2016
@@ -175,44 +175,62 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
         )
 
-        // Year selector (scrollable)
+        // Year selector — arrow navigation
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(BtccSurface)
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 8.dp, vertical = 2.dp),
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            listOf(2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014).forEach { year ->
-                FilterChip(
-                    selected = selectedYear == year,
-                    onClick  = {
-                        selectedYear = year
-                        if (year == 2026 && seasonStarted && liveDrivers == null) {
+            val canGoOlder = selectedYear > 2014
+            val canGoNewer = selectedYear < 2026
+            IconButton(
+                onClick  = {
+                    if (canGoOlder) selectedYear -= 1
+                },
+                enabled  = canGoOlder,
+            ) {
+                Icon(
+                    Icons.Default.KeyboardArrowLeft,
+                    contentDescription = "Older season",
+                    modifier = Modifier.size(28.dp),
+                    tint = if (canGoOlder) MaterialTheme.colorScheme.onBackground else BtccOutline,
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "$selectedYear",
+                    fontWeight    = FontWeight.Black,
+                    fontSize      = 22.sp,
+                    letterSpacing = 1.sp,
+                    color         = BtccYellow,
+                )
+                Text(
+                    "SEASON",
+                    style         = MaterialTheme.typography.labelSmall,
+                    color         = BtccTextSecondary,
+                    fontWeight    = FontWeight.ExtraBold,
+                    letterSpacing = 2.sp,
+                )
+            }
+            IconButton(
+                onClick  = {
+                    if (canGoNewer) {
+                        selectedYear += 1
+                        if (selectedYear == 2026 && seasonStarted && liveDrivers == null) {
                             scope.launch { refresh() }
                         }
-                    },
-                    label = {
-                        Text(
-                            "$year",
-                            fontWeight    = FontWeight.ExtraBold,
-                            fontSize      = 12.sp,
-                            letterSpacing = 1.sp,
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = BtccYellow,
-                        selectedLabelColor     = BtccNavy,
-                        containerColor         = BtccCard,
-                        labelColor             = BtccTextSecondary,
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        enabled             = true,
-                        selected            = selectedYear == year,
-                        borderColor         = BtccOutline,
-                        selectedBorderColor = BtccYellow,
-                    ),
+                    }
+                },
+                enabled  = canGoNewer,
+            ) {
+                Icon(
+                    Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Newer season",
+                    modifier = Modifier.size(28.dp),
+                    tint = if (canGoNewer) MaterialTheme.colorScheme.onBackground else BtccOutline,
                 )
             }
         }
