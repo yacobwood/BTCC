@@ -881,47 +881,47 @@ private fun SeasonStatRow(stat: SeasonStat) {
         }
 
         // Stats / champion badge
-        if (stat.isChampion) {
-            Row(
-                verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Icon(
-                    Icons.Default.EmojiEvents,
-                    contentDescription = "Champion",
-                    tint     = BtccYellow,
-                    modifier = Modifier.size(16.dp),
-                )
-                Text(
-                    "CHAMPION",
-                    fontWeight    = FontWeight.ExtraBold,
-                    fontSize      = 11.sp,
-                    letterSpacing = 0.5.sp,
-                    color         = BtccYellow,
-                )
-            }
-        } else {
-            Column(horizontalAlignment = Alignment.End) {
+        Column(horizontalAlignment = Alignment.End) {
+            if (stat.isChampion) {
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        contentDescription = "Champion",
+                        tint     = BtccYellow,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        "CHAMPION",
+                        fontWeight    = FontWeight.ExtraBold,
+                        fontSize      = 11.sp,
+                        letterSpacing = 0.5.sp,
+                        color         = BtccYellow,
+                    )
+                }
+            } else {
                 Text(
                     "P${stat.pos}",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize   = 14.sp,
                     color      = MaterialTheme.colorScheme.onBackground,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    "${stat.points} pts",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = BtccTextSecondary,
+                )
+                if (stat.wins > 0) {
                     Text(
-                        "${stat.points} pts",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = BtccTextSecondary,
+                        "${stat.wins}W",
+                        style      = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color      = BtccYellow,
                     )
-                    if (stat.wins > 0) {
-                        Text(
-                            "${stat.wins}W",
-                            style      = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color      = BtccYellow,
-                        )
-                    }
                 }
             }
         }
