@@ -33,6 +33,12 @@ object WhatsNewStore {
             "Gallery images fixed — no more duplicate photos in image galleries",
             "Round labels — widget and track detail now correctly show the full round range (e.g. Rounds 1–3)",
         ),
+        13 to listOf(
+            "Race history back to 2014 — browse full results for every season from 2014 to 2025",
+            "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",
+            "Driver season history — each driver profile now shows their full career stats back to 2014",
+            "Champion entries — trophy rows now correctly display points and race wins alongside the champion badge",
+        ),
     )
 
     val changes: List<String>
