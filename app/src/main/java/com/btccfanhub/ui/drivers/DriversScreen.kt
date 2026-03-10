@@ -846,6 +846,7 @@ private fun SeasonStatRow(stat: SeasonStat) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 60.dp)
             .background(BtccCard, RoundedCornerShape(10.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment     = Alignment.CenterVertically,
@@ -861,7 +862,7 @@ private fun SeasonStatRow(stat: SeasonStat) {
         )
 
         // Team + car
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
             if (stat.team.isNotEmpty()) {
                 Text(
                     stat.team,
@@ -921,6 +922,22 @@ private fun SeasonStatRow(stat: SeasonStat) {
                         style      = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color      = BtccYellow,
+                    )
+                }
+                if (stat.podiums > 0) {
+                    Text(
+                        "${stat.podiums}P",
+                        style      = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color      = Color(0xFFC0C0C0),
+                    )
+                }
+                if (stat.fastestLaps > 0) {
+                    Text(
+                        "${stat.fastestLaps}FL",
+                        style      = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color      = Color(0xFF9C27B0),
                     )
                 }
             }

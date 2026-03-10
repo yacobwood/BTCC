@@ -7,6 +7,9 @@ data class SeasonStat(
     val pos: Int,
     val points: Int,
     val wins: Int = 0,
+    val podiums: Int = 0,
+    val poles: Int = 0,
+    val fastestLaps: Int = 0,
     val isChampion: Boolean = false,
 )
 

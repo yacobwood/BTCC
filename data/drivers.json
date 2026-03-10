@@ -13,30 +13,39 @@
         {
           "year": 2025,
           "team": "West Surrey Racing",
-          "car": "BMW 330i M Sport",
+          "car": "BMW 330e M Sport",
           "pos": 13,
           "points": 149,
-          "wins": 1
+          "wins": 1,
+          "podiums": 2,
+          "poles": 2,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
           "team": "Duckhams Racing with Bartercard",
-          "car": "Honda Civic Type R",
-          "pos": 13,
-          "points": 165,
-          "wins": 1
+          "car": "Cupra León",
+          "pos": 18,
+          "points": 48,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Cupra Leon",
-          "pos": 28,
-          "points": 2,
-          "wins": 0
+          "team": "Team HARD",
+          "car": "Cupra León",
+          "pos": 25,
+          "points": 6,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
-      "dateOfBirth": "1996-07-03",
-      "birthplace": "Macclesfield, Cheshire"
+      "dateOfBirth": "2005-08-02",
+      "birthplace": "Drogheda, Ireland"
     },
     {
       "number": 3,
@@ -45,83 +54,110 @@
       "car": "Hyundai i30 Fastback N",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Chilton-0H5A6995-e1745404581533.png",
       "nationality": "British",
-      "bio": "Highly experienced BTCC campaigner with multiple race wins across his career. Took 2 victories in 2025 with EXCELR8 Motorsport.",
+      "bio": "Highly experienced BTCC campaigner with 18 race wins across his career. Took 2 victories in 2025 with Team VERTU.",
       "history": [
         {
           "year": 2025,
-          "team": "EXCELR8 Motorsport",
-          "car": "Hyundai i30 N",
+          "team": "Team VERTU",
+          "car": "Hyundai i30 Fastback N",
           "pos": 7,
           "points": 230,
-          "wins": 2
+          "wins": 2,
+          "podiums": 6,
+          "poles": 1,
+          "fastestLaps": 3
         },
         {
           "year": 2024,
-          "team": "Team BRISTOL STREET MOTORS",
-          "car": "Toyota Corolla GR Sport",
-          "pos": 18,
-          "points": 116,
-          "wins": 0
+          "team": "Team Bristol Street Motors",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 10,
+          "points": 187,
+          "wins": 1,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Hyundai i30N",
-          "pos": 15,
-          "points": 108,
-          "wins": 1
+          "team": "Bristol Street Motors with EXCELR8",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 14,
+          "points": 97,
+          "wins": 1,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
-          "car": "Hyundai i30N",
-          "pos": 16,
+          "team": "Bristol Street Motors with EXCELR8",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 15,
           "points": 83,
-          "wins": 0
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 1
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "Car Gods with Ciceley Motorsport",
           "car": "BMW 330i M Sport",
           "pos": 19,
-          "points": 56,
-          "wins": 0
+          "points": 64,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 1
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 11,
-          "points": 133,
-          "wins": 0
+          "pos": 10,
+          "points": 184,
+          "wins": 0,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Team Shredded Wheat Racing with Gallagher",
           "car": "Ford Focus RS",
-          "pos": 12,
-          "points": 183,
-          "wins": 0
+          "pos": 10,
+          "points": 200,
+          "wins": 1,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "Team Shredded Wheat Racing with Gallagher",
           "car": "Ford Focus RS",
-          "pos": 6,
-          "points": 246,
-          "wins": 0
+          "pos": 3,
+          "points": 266,
+          "wins": 1,
+          "podiums": 6,
+          "poles": 0,
+          "fastestLaps": 3
         },
         {
           "year": 2017,
-          "team": "",
+          "team": "Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 14,
-          "points": 107,
-          "wins": 0
+          "pos": 15,
+          "points": 100,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 1
         }
       ],
-      "dateOfBirth": "1988-11-07",
-      "birthplace": "Guildford, Surrey"
+      "dateOfBirth": "1985-03-15",
+      "birthplace": "Reigate, Surrey"
     },
     {
       "number": 16,
@@ -134,102 +170,139 @@
       "history": [
         {
           "year": 2025,
-          "team": "EXCELR8 Motorsport",
-          "car": "Hyundai i30 N",
+          "team": "LKQ Euro Car Parts Racing with WSR",
+          "car": "BMW 330e M Sport",
           "pos": 11,
-          "points": 166
+          "points": 166,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
-          "team": "Laser Tools Racing with MB Motorsport",
-          "car": "BMW 330i M Sport",
-          "pos": 9,
-          "points": 210,
-          "wins": 2
+          "team": "LKQ Euro Car Parts with SYNETIQ",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 13,
+          "points": 138,
+          "wins": 1,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
+          "team": "One Motorsport with Starline Racing",
           "car": "Honda Civic Type R",
-          "pos": 20,
-          "points": 49,
-          "wins": 0
+          "pos": 16,
+          "points": 87,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Infiniti Q50",
-          "pos": 19,
-          "points": 52,
-          "wins": 0
+          "pos": 18,
+          "points": 69,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Infiniti Q50",
-          "pos": 10,
-          "points": 227,
-          "wins": 2
+          "pos": 8,
+          "points": 230,
+          "wins": 1,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Infiniti Q50",
-          "pos": 16,
-          "points": 58,
-          "wins": 0
+          "pos": 15,
+          "points": 105,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Mercedes-Benz A-Class",
-          "pos": 20,
-          "points": 52,
-          "wins": 0
+          "pos": 18,
+          "points": 89,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2018,
-          "team": "",
-          "car": "Mercedes-Benz A-Class",
-          "pos": 17,
-          "points": 100,
-          "wins": 0
-        },
-        {
-          "year": 2017,
-          "team": "",
-          "car": "Mercedes-Benz A-Class",
-          "pos": 13,
-          "points": 157,
-          "wins": 2
-        },
-        {
-          "year": 2016,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Mercedes-Benz A-Class",
           "pos": 16,
           "points": 117,
-          "wins": 0
+          "wins": 1,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2017,
+          "team": "Laser Tools Racing",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 13,
+          "points": 121,
+          "wins": 2,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2016,
+          "team": "Laser Tools Racing",
+          "car": "Mercedes-Benz A-Class",
+          "pos": 14,
+          "points": 138,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2015,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Mercedes-Benz A-Class",
           "pos": 17,
-          "points": 54,
-          "wins": 0
+          "points": 77,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2014,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Chevrolet Cruze 4dr",
           "pos": 25,
-          "points": 7,
-          "wins": 0
+          "points": 6,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
-      "dateOfBirth": "1996-11-07",
-      "birthplace": "Bellshill, Scotland"
+      "dateOfBirth": "1996-09-28",
+      "birthplace": "Dalkeith, Scotland"
     },
     {
       "number": 17,
@@ -242,26 +315,36 @@
       "history": [
         {
           "year": 2025,
-          "team": "Power Maxed Racing",
-          "car": "Audi S3 Saloon",
+          "team": "ROKiT Racing with Un-Limited Motorsport",
+          "car": "Cupra León",
           "pos": 20,
-          "points": 42
+          "points": 42,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Cupra Leon",
+          "team": "Team HARD",
+          "car": "Cupra León",
           "pos": 22,
-          "points": 17,
-          "wins": 0
+          "points": 41,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Infiniti Q50",
           "pos": 23,
-          "points": 12,
-          "wins": 0
+          "points": 5,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "2005-03-16",
@@ -279,49 +362,68 @@
         {
           "year": 2025,
           "team": "Team VERTU",
-          "car": "Toyota Corolla GR Sport",
+          "car": "Hyundai i30 Fastback N",
           "pos": 10,
-          "points": 167
+          "points": 167,
+          "wins": 0,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 8,
-          "points": 259,
-          "wins": 3
+          "pos": 10,
+          "points": 206,
+          "wins": 1,
+          "podiums": 6,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
-          "car": "Hyundai i30N",
+          "team": "Excelr8 Motorsport",
+          "car": "Hyundai i30 Fastback N",
           "pos": 13,
-          "points": 98,
-          "wins": 0
+          "points": 141,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Adrian Flux Subaru Racing",
           "car": "Subaru Levorg GT",
-          "pos": 18,
-          "points": 67,
-          "wins": 0
+          "pos": 20,
+          "points": 47,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "Power Maxed TAG Racing",
           "car": "Vauxhall Astra",
-          "pos": 15,
-          "points": 132,
-          "wins": 1
+          "pos": 12,
+          "points": 170,
+          "wins": 1,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2017,
-          "team": "",
+          "team": "Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 21,
-          "points": 52,
-          "wins": 0
+          "pos": 19,
+          "points": 63,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "2001-07-24",
@@ -334,16 +436,22 @@
       "car": "Toyota Corolla GR Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/08/Buxton-0H5A5290-cut-out.png",
       "nationality": "British",
-      "bio": "Max Buxton made his BTCC debut in 2025 with West Surrey Racing and steps up to a full programme with Speedworks Corolla Racing for 2026.",
+      "bio": "Max Buxton made his BTCC debut in 2025 with Toyota Gazoo Racing UK and steps up to a full programme with Speedworks Corolla Racing for 2026.",
       "history": [
         {
           "year": 2025,
-          "team": "West Surrey Racing",
-          "car": "BMW 330i M Sport",
+          "team": "Toyota Gazoo Racing UK with IAA",
+          "car": "Toyota Corolla GR Sport",
           "pos": 22,
-          "points": 8
+          "points": 8,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
-      ]
+      ],
+      "dateOfBirth": "2005-08-14",
+      "birthplace": "Lancashire"
     },
     {
       "number": 25,
@@ -356,66 +464,91 @@
       "history": [
         {
           "year": 2025,
-          "team": "Ciceley Motorsport",
-          "car": "Mercedes-AMG A35 Saloon",
+          "team": "Restart Racing",
+          "car": "Hyundai i30 Fastback N",
           "pos": 14,
-          "points": 140
+          "points": 140,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
-          "team": "BTC Racing",
-          "car": "Honda Civic Type R",
-          "pos": 16,
-          "points": 142,
-          "wins": 0
+          "team": "Restart Racing",
+          "car": "Cupra León",
+          "pos": 17,
+          "points": 70,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
-          "car": "Hyundai i30N",
+          "team": "Ginsters Excelr8 with TradePriceCars.com",
+          "car": "Hyundai i30 Fastback N",
           "pos": 15,
-          "points": 136,
-          "wins": 0
+          "points": 138,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
-          "car": "Hyundai i30N",
+          "team": "Excelr8 Motorsport",
+          "car": "Hyundai i30 Fastback N",
           "pos": 14,
-          "points": 82,
-          "wins": 0
+          "points": 106,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 13,
-          "points": 181,
-          "wins": 0
+          "pos": 14,
+          "points": 132,
+          "wins": 0,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "BTC Norlin Racing",
           "car": "Honda Civic Type R",
           "pos": 13,
-          "points": 165,
-          "wins": 0
+          "points": 152,
+          "wins": 1,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2017,
-          "team": "",
-          "car": "Chevrolet Cruze 4dr",
-          "pos": 26,
-          "points": 21,
-          "wins": 0
+          "team": "BTC Norlin Racing",
+          "car": "Chevrolet Cruze",
+          "pos": 21,
+          "points": 45,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2016,
-          "team": "",
+          "team": "TLC Racing",
           "car": "Toyota Avensis",
-          "pos": 31,
+          "pos": 32,
           "points": 0,
-          "wins": 0
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "1991-04-18",
@@ -433,66 +566,90 @@
         {
           "year": 2025,
           "team": "NAPA Racing UK",
-          "car": "Ford Focus Titanium Saloon",
+          "car": "Ford Focus ST",
           "pos": 3,
           "points": 307,
-          "wins": 3
+          "wins": 3,
+          "podiums": 10,
+          "poles": 2,
+          "fastestLaps": 2
         },
         {
           "year": 2024,
           "team": "NAPA Racing UK",
-          "car": "Ford Focus ST Saloon",
-          "pos": 3,
-          "points": 342,
-          "wins": 2
+          "car": "Ford Focus ST",
+          "pos": 5,
+          "points": 346,
+          "wins": 1,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 3
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Ford Focus ST MK.III",
-          "pos": 5,
-          "points": 269,
-          "wins": 3
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
+          "pos": 6,
+          "points": 253,
+          "wins": 3,
+          "podiums": 6,
+          "poles": 2,
+          "fastestLaps": 1
         },
         {
           "year": 2022,
-          "team": "",
-          "car": "Ford Focus ST Mk 4",
-          "pos": 6,
-          "points": 262,
-          "wins": 2
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
+          "pos": 8,
+          "points": 207,
+          "wins": 1,
+          "podiums": 4,
+          "poles": 1,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 20,
-          "points": 37,
-          "wins": 0
+          "pos": 21,
+          "points": 30,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
-          "pos": 2,
-          "points": 344,
-          "wins": 4
+          "pos": 3,
+          "points": 334,
+          "wins": 4,
+          "podiums": 10,
+          "poles": 2,
+          "fastestLaps": 3
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
-          "pos": 2,
-          "points": 412,
-          "wins": 1
+          "pos": 3,
+          "points": 318,
+          "wins": 2,
+          "podiums": 14,
+          "poles": 0,
+          "fastestLaps": 3
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
-          "pos": 1,
-          "points": 323,
-          "wins": 3
+          "pos": 10,
+          "points": 218,
+          "wins": 2,
+          "podiums": 7,
+          "poles": 1,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "1989-09-26",
@@ -505,59 +662,77 @@
       "car": "Mercedes-AMG A35",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Rowbottom-0H5A7475.png",
       "nationality": "British",
-      "bio": "A three-time race winner in 2025 with Restart Racing, Rowbottom joins Plato Racing for the 2026 season.",
+      "bio": "A three-time race winner in 2025 with NAPA Racing UK, Rowbottom joins Plato Racing for the 2026 season.",
       "history": [
         {
           "year": 2025,
-          "team": "Restart Racing",
-          "car": "Honda Civic Type R",
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
           "pos": 5,
           "points": 277,
-          "wins": 3
+          "wins": 3,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 2
         },
         {
           "year": 2024,
-          "team": "Team Dynamics",
-          "car": "Honda Civic Type R",
-          "pos": 17,
-          "points": 135,
-          "wins": 0
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
+          "pos": 11,
+          "points": 186,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Ford Focus ST MK.III",
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
           "pos": 7,
-          "points": 215,
-          "wins": 0
+          "points": 226,
+          "wins": 1,
+          "podiums": 6,
+          "poles": 0,
+          "fastestLaps": 1
         },
         {
           "year": 2022,
-          "team": "",
+          "team": "Halfords Racing with Cataclean",
           "car": "Honda Civic Type R",
-          "pos": 10,
-          "points": 191,
-          "wins": 0
+          "pos": 12,
+          "points": 151,
+          "wins": 0,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "Halfords Racing with Cataclean",
           "car": "Honda Civic Type R",
-          "pos": 7,
-          "points": 280,
-          "wins": 3
+          "pos": 9,
+          "points": 222,
+          "wins": 1,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Cataclean Racing with Ciceley Motorsport",
           "car": "Mercedes-Benz A-Class",
-          "pos": 26,
+          "pos": 28,
           "points": 5,
-          "wins": 0
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
-      "dateOfBirth": "1991-09-12",
-      "birthplace": "Crewe, Cheshire"
+      "dateOfBirth": "1989-02-18",
+      "birthplace": "Kidderminster, Worcestershire"
     },
     {
       "number": 33,
@@ -566,102 +741,139 @@
       "car": "Mercedes-AMG A35 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Morgan-0H5A7392-e1745404802430.png",
       "nationality": "British",
-      "bio": "A long-standing BTCC competitor, Adam Morgan joins Plato Racing for 2026, reuniting with the Mercedes-AMG A35 Saloon he raced to 6th in the 2025 championship with Ciceley Motorsport.",
+      "bio": "A long-standing BTCC competitor, Adam Morgan joins Plato Racing for 2026. Finished 6th in the 2025 championship with Team VERTU.",
       "history": [
         {
           "year": 2025,
-          "team": "Ciceley Motorsport",
-          "car": "Mercedes-AMG A35 Saloon",
+          "team": "Team VERTU",
+          "car": "Hyundai i30 Fastback N",
           "pos": 6,
-          "points": 241
+          "points": 241,
+          "wins": 0,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
-          "team": "Ciceley Motorsport",
-          "car": "BMW 330i M Sport",
-          "pos": 5,
-          "points": 268,
-          "wins": 0
+          "team": "Team BMW",
+          "car": "BMW 330e M Sport",
+          "pos": 8,
+          "points": 201,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "BMW 330i M Sport",
-          "pos": 11,
-          "points": 173,
-          "wins": 0
+          "team": "Team BMW",
+          "car": "BMW 330e M Sport",
+          "pos": 9,
+          "points": 199,
+          "wins": 0,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
+          "team": "Car Gods with Ciceley Motorsport",
           "car": "BMW 330e M Sport",
           "pos": 9,
-          "points": 222,
-          "wins": 0
+          "points": 193,
+          "wins": 1,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "Car Gods with Ciceley Motorsport",
           "car": "BMW 330i M Sport",
           "pos": 13,
-          "points": 147,
-          "wins": 0
+          "points": 161,
+          "wins": 2,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "Carlube TripleR Racing with Mac Tools",
           "car": "Mercedes-Benz A-Class",
-          "pos": 10,
-          "points": 158,
-          "wins": 0
+          "pos": 8,
+          "points": 206,
+          "wins": 1,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Mac Tools with Ciceley Motorsport",
           "car": "Mercedes-Benz A-Class",
-          "pos": 14,
-          "points": 138,
-          "wins": 0
+          "pos": 12,
+          "points": 155,
+          "wins": 0,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "Mac Tools with Ciceley Motorsport",
           "car": "Mercedes-Benz A-Class",
-          "pos": 10,
-          "points": 200,
-          "wins": 2
+          "pos": 7,
+          "points": 232,
+          "wins": 3,
+          "podiums": 5,
+          "poles": 1,
+          "fastestLaps": 0
         },
         {
           "year": 2017,
-          "team": "",
+          "team": "Ciceley Motorsport with MAC Tools",
           "car": "Mercedes-Benz A-Class",
-          "pos": 8,
-          "points": 198,
-          "wins": 0
+          "pos": 10,
+          "points": 187,
+          "wins": 0,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2016,
-          "team": "",
+          "team": "WIX Racing",
           "car": "Mercedes-Benz A-Class",
           "pos": 9,
-          "points": 236,
-          "wins": 1
+          "points": 241,
+          "wins": 2,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2015,
-          "team": "",
+          "team": "WIX Racing",
           "car": "Mercedes-Benz A-Class",
-          "pos": 8,
-          "points": 269,
-          "wins": 0
+          "pos": 7,
+          "points": 267,
+          "wins": 1,
+          "podiums": 7,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2014,
-          "team": "",
+          "team": "WIX Racing",
           "car": "Mercedes-Benz A-Class",
-          "pos": 9,
-          "points": 178,
-          "wins": 1
+          "pos": 10,
+          "points": 183,
+          "wins": 1,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "1990-07-11",
@@ -674,78 +886,106 @@
       "car": "Toyota Corolla",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/TaylorSmith-0H5A7061.png",
       "nationality": "Northern Irish",
-      "bio": "A Northern Irish driver with over a decade of BTCC experience. Known for his aggressive racecraft and determination throughout the field.",
+      "bio": "A Northern Irish driver with over a decade of BTCC experience. Known for his aggressive racecraft and determination.",
       "history": [
         {
           "year": 2025,
-          "team": "Laser Tools Racing",
+          "team": "Toyota Gazoo Racing UK with IAA",
           "car": "Toyota Corolla GR Sport",
           "pos": 17,
-          "points": 103
+          "points": 103,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
           "team": "Evans Halshaw Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 19,
-          "points": 98,
-          "wins": 1
+          "pos": 7,
+          "points": 224,
+          "wins": 0,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
+          "team": "CarStore Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 9,
-          "points": 184,
-          "wins": 0
+          "pos": 11,
+          "points": 165,
+          "wins": 0,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
-          "car": "Cupra Leon",
+          "team": "Yazoo with Safuu.com Racing",
+          "car": "Cupra León",
           "pos": 21,
-          "points": 16,
-          "wins": 0
+          "points": 38,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
-          "car": "Cupra Leon",
-          "pos": 23,
-          "points": 9,
-          "wins": 0
+          "team": "Team HARD with HUB Financial Solutions",
+          "car": "Cupra León",
+          "pos": 20,
+          "points": 33,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2017,
-          "team": "",
+          "team": "MG RCIB Insurance Racing",
           "car": "MG6 GT",
-          "pos": 24,
-          "points": 34,
-          "wins": 0
+          "pos": 27,
+          "points": 25,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2016,
-          "team": "",
+          "team": "Team BKR",
           "car": "Volkswagen CC",
-          "pos": 14,
-          "points": 137,
-          "wins": 0
+          "pos": 15,
+          "points": 132,
+          "wins": 1,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2015,
-          "team": "",
+          "team": "Team BMR RCIB Insurance",
           "car": "Volkswagen CC",
-          "pos": 6,
-          "points": 286,
-          "wins": 1
+          "pos": 11,
+          "points": 209,
+          "wins": 0,
+          "podiums": 6,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2014,
-          "team": "",
+          "team": "CHROME Edition Restart Racing",
           "car": "Volkswagen CC",
-          "pos": 13,
-          "points": 156,
-          "wins": 0
+          "pos": 9,
+          "points": 201,
+          "wins": 2,
+          "podiums": 4,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "1992-06-01",
@@ -762,26 +1002,47 @@
       "history": [
         {
           "year": 2025,
-          "team": "Power Maxed Racing",
-          "car": "Audi S3 Saloon",
+          "team": "Motor Parts Direct with Power Maxed Racing",
+          "car": "Vauxhall Astra",
           "pos": 27,
-          "points": 4
+          "points": 4,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2024,
+          "team": "Team Bristol Street Motors",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 22,
+          "points": 7,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Hyundai i30N",
-          "pos": 24,
-          "points": 10,
-          "wins": 0
+          "team": "Bristol Street Motors with EXCELR8",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 30,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
-          "car": "Hyundai i30N",
+          "team": "Excelr8 with TradePriceCars.com",
+          "car": "Hyundai i30 Fastback N",
           "pos": 34,
           "points": 0,
-          "wins": 0
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ]
     },
@@ -792,75 +1053,112 @@
       "car": "Toyota Corolla",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Shedden-0H5A6436-e1745591902397.png",
       "nationality": "Scottish",
-      "bio": "Three-time BTCC Drivers' Champion with Honda. 'Flash' Gordon returned to the series with Laser Tools Racing and secured a race win in 2025.",
+      "bio": "Three-time BTCC Drivers' Champion. 'Flash' Gordon returned to the series with Laser Tools Racing and secured a race win in 2025.",
       "history": [
         {
           "year": 2025,
-          "team": "Laser Tools Racing",
+          "team": "Toyota Gazoo Racing UK with IAA",
           "car": "Toyota Corolla GR Sport",
           "pos": 9,
           "points": 177,
-          "wins": 1
+          "wins": 1,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
+          "team": "Halfords Racing with Cataclean",
           "car": "Honda Civic Type R",
-          "pos": 8,
-          "points": 247,
-          "wins": 1
+          "pos": 7,
+          "points": 248,
+          "wins": 2,
+          "podiums": 8,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "Halfords Racing with Cataclean",
           "car": "Honda Civic Type R",
-          "pos": 9,
-          "points": 257,
-          "wins": 2
+          "pos": 6,
+          "points": 251,
+          "wins": 2,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2017,
-          "team": "",
+          "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
-          "pos": 5,
-          "points": 301,
-          "wins": 1
+          "pos": 4,
+          "points": 309,
+          "wins": 3,
+          "podiums": 10,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2016,
           "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
           "pos": 1,
-          "points": 0,
+          "points": 308,
+          "wins": 4,
+          "podiums": 10,
+          "poles": 0,
+          "fastestLaps": 0,
           "champion": true
         },
         {
           "year": 2015,
-          "team": "",
+          "team": "Honda Yuasa Racing",
           "car": "Honda Civic Type R",
           "pos": 1,
-          "points": 403,
+          "points": 348,
           "wins": 4,
+          "podiums": 12,
+          "poles": 0,
+          "fastestLaps": 0,
           "champion": true
         },
         {
           "year": 2014,
-          "team": "Halfords Yuasa Racing",
-          "car": "Honda Civic Type R",
-          "pos": 1,
-          "points": 0,
-          "champion": true
+          "team": "Honda Yuasa Racing",
+          "car": "Honda Civic Tourer",
+          "pos": 3,
+          "points": 349,
+          "wins": 2,
+          "podiums": 8,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2013,
+          "team": "Honda Yuasa Racing",
+          "car": "Honda Civic",
+          "pos": 2,
+          "points": 390,
+          "wins": 5,
+          "podiums": 16,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2012,
-          "team": "Halfords Yuasa Racing",
-          "car": "Honda Civic Type R",
+          "team": "Honda Yuasa Racing",
+          "car": "Honda Civic",
           "pos": 1,
-          "points": 0,
+          "points": 408,
+          "wins": 7,
+          "podiums": 14,
+          "poles": 0,
+          "fastestLaps": 0,
           "champion": true
         }
       ],
-      "dateOfBirth": "1981-09-26",
+      "dateOfBirth": "1979-01-23",
       "birthplace": "Edinburgh, Scotland"
     },
     {
@@ -878,87 +1176,120 @@
           "car": "Honda Civic Type R",
           "pos": 12,
           "points": 160,
-          "wins": 1
+          "wins": 1,
+          "podiums": 3,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
           "team": "LKQ Euro Car Parts with SYNETIQ",
-          "car": "Hyundai i30 Fastback N",
-          "pos": 7,
-          "points": 247,
-          "wins": 2
+          "car": "Toyota Corolla GR Sport",
+          "pos": 6,
+          "points": 327,
+          "wins": 2,
+          "podiums": 10,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
+          "team": "One Motorsport with Starline Racing",
           "car": "Honda Civic Type R",
-          "pos": 6,
-          "points": 262,
-          "wins": 0
+          "pos": 5,
+          "points": 268,
+          "wins": 0,
+          "podiums": 6,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
+          "team": "Rich Energy BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 7,
-          "points": 256,
-          "wins": 5
+          "pos": 6,
+          "points": 296,
+          "wins": 5,
+          "podiums": 10,
+          "poles": 1,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 1,
-          "points": 355,
-          "wins": 5
+          "pos": 3,
+          "points": 303,
+          "wins": 4,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 8,
-          "points": 187,
-          "wins": 3
+          "pos": 9,
+          "points": 196,
+          "wins": 3,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "BTC Racing",
           "car": "Honda Civic Type R",
-          "pos": 10,
-          "points": 211,
-          "wins": 2
+          "pos": 4,
+          "points": 278,
+          "wins": 3,
+          "podiums": 10,
+          "poles": 1,
+          "fastestLaps": 0
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "Power Maxed TAG Racing",
           "car": "Vauxhall Astra",
-          "pos": 11,
-          "points": 194,
-          "wins": 3
+          "pos": 6,
+          "points": 246,
+          "wins": 2,
+          "podiums": 5,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2017,
-          "team": "",
-          "car": "MG6 GT",
-          "pos": 15,
-          "points": 107,
-          "wins": 0
+          "team": "Team Parker Racing",
+          "car": "Ford Focus ST",
+          "pos": 18,
+          "points": 75,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2016,
-          "team": "",
+          "team": "MG Racing RCIB Insurance",
           "car": "MG6 GT",
-          "pos": 11,
-          "points": 206,
-          "wins": 0
+          "pos": 12,
+          "points": 175,
+          "wins": 0,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2015,
-          "team": "",
-          "car": "Chevrolet Cruze 5dr",
-          "pos": 16,
-          "points": 96,
-          "wins": 0
+          "team": "#RacingforHeroes",
+          "car": "Chevrolet Cruze",
+          "pos": 15,
+          "points": 97,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
       "dateOfBirth": "1992-02-22",
@@ -971,59 +1302,88 @@
       "car": "Ford Focus",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Osborne-0H5A7553-e1745404843375.png",
       "nationality": "British",
-      "bio": "Sam Osborne secured his first BTCC race win in 2025 as part of the championship-winning NAPA Racing UK squad.",
+      "bio": "Sam Osborne secured his first BTCC race win in 2025 as part of the NAPA Racing UK squad.",
       "history": [
         {
           "year": 2025,
           "team": "NAPA Racing UK",
-          "car": "Ford Focus Titanium Saloon",
+          "car": "Ford Focus ST",
           "pos": 16,
           "points": 108,
-          "wins": 1
+          "wins": 1,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2024,
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
+          "pos": 15,
+          "points": 93,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Ford Focus ST MK.III",
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
           "pos": 19,
-          "points": 63,
-          "wins": 0
+          "points": 65,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2022,
-          "team": "",
-          "car": "Ford Focus ST Mk 4",
-          "pos": 24,
-          "points": 3,
-          "wins": 0
+          "team": "Apec Racing with Beavis Morgan",
+          "car": "Ford Focus ST",
+          "pos": 25,
+          "points": 1,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2021,
-          "team": "",
-          "car": "Ford Focus ST Mk 4",
-          "pos": 22,
-          "points": 22,
-          "wins": 0
+          "team": "Racing with Wera & Photon Group",
+          "car": "Ford Focus ST",
+          "pos": 23,
+          "points": 16,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "MB Motorsport accelerated by Blue Square",
           "car": "Honda Civic Type R",
           "pos": 19,
-          "points": 18,
-          "wins": 0
+          "points": 29,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Excelr8 Motorsport",
           "car": "MG6 GT",
-          "pos": 32,
-          "points": 0,
-          "wins": 0
+          "pos": 30,
+          "points": 2,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
-      "dateOfBirth": "2001-05-17",
-      "birthplace": "Taunton, Somerset"
+      "dateOfBirth": "1993-03-24",
+      "birthplace": "Worksop, Nottinghamshire"
     },
     {
       "number": 80,
@@ -1032,49 +1392,64 @@
       "car": "Hyundai i30 Fastback N",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Ingram-0H5A6913.png",
       "nationality": "British",
-      "bio": "2025 BTCC Drivers' Champion with 7 race wins. Ingram moves to Team VERTU's Hyundai programme for 2026 as he defends his title.",
+      "bio": "2022 and 2025 BTCC Drivers' Champion with 40 career race wins. Ingram moves to Team VERTU's Hyundai programme for 2026 as he defends his title.",
       "history": [
         {
           "year": 2025,
           "team": "Team VERTU",
-          "car": "Hyundai i30N",
+          "car": "Hyundai i30 Fastback N",
           "pos": 1,
           "points": 462,
           "wins": 7,
+          "podiums": 18,
+          "poles": 2,
+          "fastestLaps": 9,
           "champion": true
         },
         {
           "year": 2024,
           "team": "Team Bristol Street Motors",
-          "car": "Hyundai i30N",
+          "car": "Hyundai i30 Fastback N",
           "pos": 2,
           "points": 413,
-          "wins": 6
+          "wins": 6,
+          "podiums": 15,
+          "poles": 4,
+          "fastestLaps": 10
         },
         {
           "year": 2023,
           "team": "Bristol Street Motors with EXCELR8",
-          "car": "Hyundai i30N",
+          "car": "Hyundai i30 Fastback N",
           "pos": 2,
           "points": 400,
-          "wins": 2
+          "wins": 2,
+          "podiums": 17,
+          "poles": 0,
+          "fastestLaps": 5
         },
         {
           "year": 2022,
-          "team": "Bristol Street Motors with EXCELR8",
-          "car": "Hyundai i30N",
+          "team": "Bristol Street Motors with EXCELR8 TradePriceCars.com",
+          "car": "Hyundai i30 Fastback N",
           "pos": 1,
           "points": 394,
           "wins": 6,
+          "podiums": 12,
+          "poles": 2,
+          "fastestLaps": 7,
           "champion": true
         },
         {
           "year": 2021,
           "team": "Ginsters EXCELR8 with TradePriceCars.com",
-          "car": "Hyundai i30N",
+          "car": "Hyundai i30 Fastback N",
           "pos": 4,
           "points": 309,
-          "wins": 3
+          "wins": 3,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 3
         },
         {
           "year": 2020,
@@ -1082,7 +1457,10 @@
           "car": "Toyota Corolla",
           "pos": 4,
           "points": 326,
-          "wins": 3
+          "wins": 3,
+          "podiums": 11,
+          "poles": 1,
+          "fastestLaps": 4
         },
         {
           "year": 2019,
@@ -1090,7 +1468,10 @@
           "car": "Toyota Corolla",
           "pos": 6,
           "points": 245,
-          "wins": 4
+          "wins": 4,
+          "podiums": 4,
+          "poles": 1,
+          "fastestLaps": 1
         },
         {
           "year": 2018,
@@ -1098,7 +1479,10 @@
           "car": "Toyota Avensis",
           "pos": 2,
           "points": 292,
-          "wins": 3
+          "wins": 3,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 5
         },
         {
           "year": 2017,
@@ -1106,7 +1490,10 @@
           "car": "Toyota Avensis",
           "pos": 3,
           "points": 311,
-          "wins": 4
+          "wins": 4,
+          "podiums": 9,
+          "poles": 0,
+          "fastestLaps": 2
         },
         {
           "year": 2016,
@@ -1114,7 +1501,10 @@
           "car": "Toyota Avensis",
           "pos": 10,
           "points": 219,
-          "wins": 2
+          "wins": 2,
+          "podiums": 6,
+          "poles": 2,
+          "fastestLaps": 0
         },
         {
           "year": 2015,
@@ -1122,7 +1512,10 @@
           "car": "Toyota Avensis",
           "pos": 13,
           "points": 173,
-          "wins": 0
+          "wins": 0,
+          "podiums": 2,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2014,
@@ -1130,11 +1523,14 @@
           "car": "Toyota Avensis",
           "pos": 14,
           "points": 121,
-          "wins": 0
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
         }
       ],
-      "dateOfBirth": "1992-03-21",
-      "birthplace": "Northampton"
+      "dateOfBirth": "1993-08-20",
+      "birthplace": "High Wycombe"
     },
     {
       "number": 88,
@@ -1143,35 +1539,44 @@
       "car": "",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-0H5A6257-e1745404879475.png",
       "nationality": "British",
-      "bio": "Mikey Doble claimed a BTCC race win in 2025 with EXCELR8 Motorsport and is looking to build on that form in 2026.",
+      "bio": "Mikey Doble claimed a BTCC race win in 2025 with Power Maxed Racing and is looking to build on that form in 2026.",
       "history": [
         {
           "year": 2025,
-          "team": "EXCELR8 Motorsport",
-          "car": "Hyundai i30 N",
+          "team": "Motor Parts Direct with Power Maxed Racing",
+          "car": "Vauxhall Astra",
           "pos": 18,
           "points": 100,
-          "wins": 1
+          "wins": 1,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2024,
           "team": "Evans Halshaw Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 15,
-          "points": 156,
-          "wins": 0
+          "pos": 12,
+          "points": 148,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
         },
         {
           "year": 2023,
-          "team": "",
+          "team": "CarStore Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 17,
-          "points": 78,
-          "wins": 0
+          "pos": 20,
+          "points": 63,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 1,
+          "fastestLaps": 0
         }
       ],
-      "dateOfBirth": "1996-08-10",
-      "birthplace": "Truro, Cornwall"
+      "dateOfBirth": "1998-12-08",
+      "birthplace": "Caterham, Surrey"
     },
     {
       "number": 99,
@@ -1184,13 +1589,18 @@
       "history": [
         {
           "year": 2025,
-          "team": "West Surrey Racing",
-          "car": "BMW 330i M Sport",
+          "team": "LKQ Euro Car Parts Racing with WSR",
+          "car": "BMW 330e M Sport",
           "pos": 8,
           "points": 179,
-          "wins": 1
+          "wins": 1,
+          "podiums": 3,
+          "poles": 1,
+          "fastestLaps": 3
         }
-      ]
+      ],
+      "dateOfBirth": "1998-07-20",
+      "birthplace": "Horsham, Sussex"
     },
     {
       "number": 116,
@@ -1199,94 +1609,124 @@
       "car": "Ford Focus",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Sutton-0H5A6649-e1745404951693.png",
       "nationality": "British",
-      "bio": "Two-time BTCC Drivers' Champion (2017 and 2024). Sutton mounted a strong title challenge in 2025, falling just short behind Tom Ingram.",
+      "bio": "Five-time BTCC Drivers' Champion (2017, 2020, 2021, 2023, 2024). Sutton mounted a strong title challenge in 2025, finishing runner-up to Tom Ingram.",
       "history": [
         {
           "year": 2025,
           "team": "NAPA Racing UK",
-          "car": "Ford Focus Titanium Saloon",
+          "car": "Ford Focus ST",
           "pos": 2,
           "points": 428,
-          "wins": 5
+          "wins": 5,
+          "podiums": 17,
+          "poles": 1,
+          "fastestLaps": 7
         },
         {
           "year": 2024,
           "team": "NAPA Racing UK",
-          "car": "Ford Focus ST Saloon",
-          "pos": 1,
-          "points": 457,
-          "wins": 6,
-          "champion": true
+          "car": "Ford Focus ST",
+          "pos": 3,
+          "points": 365,
+          "wins": 3,
+          "podiums": 14,
+          "poles": 0,
+          "fastestLaps": 6
         },
         {
           "year": 2023,
-          "team": "",
-          "car": "Ford Focus ST MK.III",
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
           "pos": 1,
-          "points": 589,
-          "wins": 16,
+          "points": 446,
+          "wins": 12,
+          "podiums": 20,
+          "poles": 6,
+          "fastestLaps": 12,
           "champion": true
         },
         {
           "year": 2022,
-          "team": "",
-          "car": "Ford Focus ST Mk 4",
-          "pos": 4,
-          "points": 392,
-          "wins": 2
+          "team": "NAPA Racing UK",
+          "car": "Ford Focus ST",
+          "pos": 2,
+          "points": 382,
+          "wins": 3,
+          "podiums": 12,
+          "poles": 0,
+          "fastestLaps": 4
         },
         {
           "year": 2021,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Infiniti Q50",
           "pos": 1,
-          "points": 346,
-          "wins": 4,
+          "points": 357,
+          "wins": 5,
+          "podiums": 9,
+          "poles": 1,
+          "fastestLaps": 5,
           "champion": true
         },
         {
           "year": 2020,
-          "team": "",
+          "team": "Laser Tools Racing",
           "car": "Infiniti Q50",
           "pos": 1,
-          "points": 326,
+          "points": 350,
           "wins": 5,
+          "podiums": 10,
+          "poles": 1,
+          "fastestLaps": 10,
           "champion": true
         },
         {
           "year": 2019,
-          "team": "",
+          "team": "Adrian Flux Subaru Racing",
           "car": "Subaru Levorg GT",
-          "pos": 4,
-          "points": 259,
-          "wins": 2
+          "pos": 8,
+          "points": 233,
+          "wins": 1,
+          "podiums": 6,
+          "poles": 1,
+          "fastestLaps": 1
         },
         {
           "year": 2018,
-          "team": "",
+          "team": "Adrian Flux Subaru Racing",
           "car": "Subaru Levorg GT",
-          "pos": 8,
-          "points": 238,
-          "wins": 5
+          "pos": 4,
+          "points": 256,
+          "wins": 6,
+          "podiums": 8,
+          "poles": 1,
+          "fastestLaps": 3
         },
         {
           "year": 2017,
           "team": "Adrian Flux Subaru Racing",
-          "car": "Subaru Levorg",
+          "car": "Subaru Levorg GT",
           "pos": 1,
-          "points": 0,
+          "points": 372,
+          "wins": 6,
+          "podiums": 15,
+          "poles": 1,
+          "fastestLaps": 4,
           "champion": true
         },
         {
           "year": 2016,
-          "team": "",
+          "team": "MG Racing RCIB Insurance",
           "car": "MG6 GT",
-          "pos": 10,
-          "points": 217,
-          "wins": 2
+          "pos": 13,
+          "points": 162,
+          "wins": 1,
+          "podiums": 2,
+          "poles": 2,
+          "fastestLaps": 2
         }
       ],
-      "dateOfBirth": "1991-04-14",
+      "dateOfBirth": "1994-07-15",
       "birthplace": "Bideford, Devon"
     },
     {
@@ -1345,7 +1785,7 @@
       "name": "Laser Tools Racing",
       "car": "Toyota Corolla GR Sport",
       "entries": 2,
-      "bio": "Run by Speedworks Motorsport, Laser Tools Racing with MB Motorsport pair three-time champion Gordon Shedden with Árón Taylor-Smith in Toyota Corolla GR Sport machinery.",
+      "bio": "Run by Speedworks Motorsport, Laser Tools Racing pair three-time champion Gordon Shedden with Árón Taylor-Smith in Toyota Corolla GR Sport machinery.",
       "standing2025": 5,
       "points2025": 319
     },

@@ -61,13 +61,16 @@ object DriversRepository {
                 history     = (0 until histArr.length()).map { j ->
                     val h = histArr.getJSONObject(j)
                     SeasonStat(
-                        year       = h.optInt("year"),
-                        team       = h.optString("team"),
-                        car        = h.optString("car"),
-                        pos        = h.optInt("pos"),
-                        points     = h.optInt("points"),
-                        wins       = h.optInt("wins"),
-                        isChampion = h.optBoolean("champion"),
+                        year        = h.optInt("year"),
+                        team        = h.optString("team"),
+                        car         = h.optString("car"),
+                        pos         = h.optInt("pos"),
+                        points      = h.optInt("points"),
+                        wins        = h.optInt("wins"),
+                        podiums     = h.optInt("podiums"),
+                        poles       = h.optInt("poles"),
+                        fastestLaps = h.optInt("fastestLaps"),
+                        isChampion  = h.optBoolean("champion"),
                     )
                 },
             )
