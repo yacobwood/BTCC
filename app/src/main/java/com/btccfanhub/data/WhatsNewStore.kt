@@ -1,7 +1,6 @@
 package com.btccfanhub.data
 
 import android.content.Context
-import android.content.pm.PackageManager
 import com.btccfanhub.BuildConfig
 
 object WhatsNewStore {
@@ -46,12 +45,10 @@ object WhatsNewStore {
 
     fun shouldShow(context: Context): Boolean {
         if (changes.isEmpty()) return false
-        val seen = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getInt(KEY_SEEN_VERSION, 0)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val seen = prefs.getInt(KEY_SEEN_VERSION, 0)
         if (seen >= BuildConfig.VERSION_CODE) return false
-        // Don't show to fresh installs — only to users upgrading from a previous version
-        val info = context.packageManager.getPackageInfo(context.packageName, 0)
-        if (info.firstInstallTime == info.lastUpdateTime) {
+        if (!prefs.getBoolean("onboarding_shown", false)) {
             markSeen(context)
             return false
         }

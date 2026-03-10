@@ -18,12 +18,14 @@ object FeatureFlagsStore {
     const val KEY_RADIO_TAB    = "radio_tab"
     const val KEY_ADS          = "ads_enabled"
     const val KEY_WHATS_NEW    = "whats_new"
-    const val KEY_LIVE_UPDATES = "live_updates"
+    const val KEY_LIVE_UPDATES          = "live_updates"
+    const val KEY_RESULTS_NOTIFICATIONS = "results_notifications"
 
-    val radioTab    = MutableStateFlow(true)
-    val adsEnabled  = MutableStateFlow(true)
-    val whatsNew    = MutableStateFlow(true)
-    val liveUpdates = MutableStateFlow(true)
+    val radioTab              = MutableStateFlow(true)
+    val adsEnabled            = MutableStateFlow(true)
+    val whatsNew              = MutableStateFlow(true)
+    val liveUpdates           = MutableStateFlow(true)
+    val resultsNotifications  = MutableStateFlow(false)
 
     private var prefs: android.content.SharedPreferences? = null
     private var user: User? = null
@@ -32,10 +34,11 @@ object FeatureFlagsStore {
     fun init(context: Context) {
         val p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs            = p
-        radioTab.value    = p.getBoolean(KEY_RADIO_TAB,    true)
-        adsEnabled.value  = p.getBoolean(KEY_ADS,          true)
-        whatsNew.value    = p.getBoolean(KEY_WHATS_NEW,    true)
-        liveUpdates.value = p.getBoolean(KEY_LIVE_UPDATES, true)
+        radioTab.value             = p.getBoolean(KEY_RADIO_TAB,              true)
+        adsEnabled.value           = p.getBoolean(KEY_ADS,                    true)
+        whatsNew.value             = p.getBoolean(KEY_WHATS_NEW,              true)
+        liveUpdates.value          = p.getBoolean(KEY_LIVE_UPDATES,           true)
+        resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
 
         val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
         user = User.newBuilder().build(deviceId)
@@ -58,10 +61,11 @@ object FeatureFlagsStore {
     }
 
     private fun applyAll() {
-        apply(KEY_RADIO_TAB,    client.getValue(Boolean::class.java, KEY_RADIO_TAB,    user, true))
-        apply(KEY_ADS,          client.getValue(Boolean::class.java, KEY_ADS,          user, true))
-        apply(KEY_WHATS_NEW,    client.getValue(Boolean::class.java, KEY_WHATS_NEW,    user, true))
-        apply(KEY_LIVE_UPDATES, client.getValue(Boolean::class.java, KEY_LIVE_UPDATES, user, true))
+        apply(KEY_RADIO_TAB,              client.getValue(Boolean::class.java, KEY_RADIO_TAB,              user, true))
+        apply(KEY_ADS,                    client.getValue(Boolean::class.java, KEY_ADS,                    user, true))
+        apply(KEY_WHATS_NEW,              client.getValue(Boolean::class.java, KEY_WHATS_NEW,              user, true))
+        apply(KEY_LIVE_UPDATES,           client.getValue(Boolean::class.java, KEY_LIVE_UPDATES,           user, true))
+        apply(KEY_RESULTS_NOTIFICATIONS,  client.getValue(Boolean::class.java, KEY_RESULTS_NOTIFICATIONS,  user, false))
         Log.d("FeatureFlags", "Flags applied for device: ${user?.identifier}")
     }
 
@@ -71,7 +75,8 @@ object FeatureFlagsStore {
             KEY_RADIO_TAB    -> radioTab.value    = value
             KEY_ADS          -> adsEnabled.value  = value
             KEY_WHATS_NEW    -> whatsNew.value    = value
-            KEY_LIVE_UPDATES -> liveUpdates.value = value
+            KEY_LIVE_UPDATES          -> liveUpdates.value          = value
+            KEY_RESULTS_NOTIFICATIONS -> resultsNotifications.value = value
         }
     }
 

@@ -1,5 +1,7 @@
 package com.btccfanhub.ui.settings
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,9 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.BuildConfig
+import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.ui.components.PillToggle
 import com.btccfanhub.ui.theme.*
 import com.btccfanhub.worker.NewsCheckWorker
+import com.btccfanhub.worker.RaceNotificationWorker
+import com.btccfanhub.worker.ResultsCheckWorker
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +33,12 @@ fun SettingsScreen(onBack: () -> Unit = {}, onBugReport: () -> Unit = {}) {
     }
     var notificationsEnabled by remember {
         mutableStateOf(prefs.getBoolean(NewsCheckWorker.KEY_NOTIF_ENABLED, true))
+    }
+    var raceEnabled by remember {
+        mutableStateOf(prefs.getBoolean(RaceNotificationWorker.KEY_RACE_NOTIF_ENABLED, true))
+    }
+    var resultsEnabled by remember {
+        mutableStateOf(prefs.getBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true))
     }
 
     Scaffold(
@@ -96,8 +107,109 @@ fun SettingsScreen(onBack: () -> Unit = {}, onBugReport: () -> Unit = {}) {
                     onSelectionChanged = {
                         notificationsEnabled = it == 0
                         prefs.edit().putBoolean(NewsCheckWorker.KEY_NOTIF_ENABLED, it == 0).apply()
+                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        if (it == 0) {
+                            nm.createNotificationChannel(
+                                NotificationChannel(
+                                    NewsCheckWorker.CHANNEL_ID,
+                                    "News Alerts",
+                                    NotificationManager.IMPORTANCE_DEFAULT,
+                                )
+                            )
+                        } else {
+                            nm.deleteNotificationChannel(NewsCheckWorker.CHANNEL_ID)
+                        }
                     },
                 )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Race alerts",
+                        color      = BtccTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 15.sp,
+                    )
+                    Text(
+                        "Get notified when a race session is about to start",
+                        color    = BtccTextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                PillToggle(
+                    options = listOf("On", "Off"),
+                    selectedIndex = if (raceEnabled) 0 else 1,
+                    onSelectionChanged = {
+                        raceEnabled = it == 0
+                        prefs.edit().putBoolean(RaceNotificationWorker.KEY_RACE_NOTIF_ENABLED, it == 0).apply()
+                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        if (it == 0) {
+                            nm.createNotificationChannel(
+                                NotificationChannel(
+                                    RaceNotificationWorker.CHANNEL_ID,
+                                    "Race Alerts",
+                                    NotificationManager.IMPORTANCE_HIGH,
+                                )
+                            )
+                        } else {
+                            nm.deleteNotificationChannel(RaceNotificationWorker.CHANNEL_ID)
+                        }
+                    },
+                )
+            }
+
+            val flagResultsNotifs by FeatureFlagsStore.resultsNotifications.collectAsState()
+
+            if (flagResultsNotifs) {
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier          = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Results alerts",
+                            color      = BtccTextPrimary,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize   = 15.sp,
+                        )
+                        Text(
+                            "Get notified when new round results are published",
+                            color    = BtccTextSecondary,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                    }
+                    PillToggle(
+                        options = listOf("On", "Off"),
+                        selectedIndex = if (resultsEnabled) 0 else 1,
+                        onSelectionChanged = {
+                            resultsEnabled = it == 0
+                            prefs.edit().putBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, it == 0).apply()
+                            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            if (it == 0) {
+                                nm.createNotificationChannel(
+                                    NotificationChannel(
+                                        ResultsCheckWorker.CHANNEL_ID,
+                                        "Results Alerts",
+                                        NotificationManager.IMPORTANCE_HIGH,
+                                    )
+                                )
+                            } else {
+                                nm.deleteNotificationChannel(ResultsCheckWorker.CHANNEL_ID)
+                            }
+                        },
+                    )
+                }
+
             }
 
             HorizontalDivider(

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -83,6 +84,12 @@ fun NotificationOnboardingScreen(
                 icon     = Icons.Default.Article,
                 label    = "Breaking BTCC news",
                 sublabel = "Latest headlines from btcc.net",
+            )
+            Spacer(Modifier.height(10.dp))
+            NotifBullet(
+                icon     = Icons.Default.EmojiEvents,
+                label    = "New round results",
+                sublabel = "Know when race results are published",
             )
 
             Spacer(Modifier.height(40.dp))

@@ -57,6 +57,7 @@ import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
+import com.btccfanhub.worker.ResultsCheckWorker
 import com.google.android.gms.ads.MobileAds
 import java.util.concurrent.TimeUnit
 
@@ -66,6 +67,8 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op */ }
 
     private val pendingArticleId = mutableStateOf<Int?>(null)
+    private val pendingOpenResults = mutableIntStateOf(0)
+    private val pendingResultsRound = mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +78,10 @@ class MainActivity : ComponentActivity() {
         FavouriteDriverStore.init(this)
         createNewsNotificationChannel()
         createRaceNotificationChannel()
+        if (FeatureFlagsStore.resultsNotifications.value) {
+            createResultsNotificationChannel()
+            scheduleResultsCheck()
+        }
         scheduleNewsCheck()
         scheduleRaceNotifications()
         handleNotificationIntent(intent)
@@ -84,6 +91,9 @@ class MainActivity : ComponentActivity() {
                 MainScreen(
                     pendingArticleId    = pendingArticleId.value,
                     onArticleIdConsumed = { pendingArticleId.value = null },
+                    pendingOpenResults  = pendingOpenResults.intValue,
+                    pendingResultsRound = pendingResultsRound.intValue,
+                    onResultsConsumed   = { },
                     onRequestPermission = { requestNewsNotificationPermission() },
                 )
             }
@@ -98,9 +108,17 @@ class MainActivity : ComponentActivity() {
     private fun handleNotificationIntent(intent: Intent?) {
         val id = intent?.getIntExtra(NewsCheckWorker.EXTRA_ARTICLE_ID, -1) ?: -1
         if (id != -1) pendingArticleId.value = id
+        val openResults = intent?.getBooleanExtra(ResultsCheckWorker.EXTRA_OPEN_RESULTS, false) == true
+        if (openResults) {
+            val round = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) ?: 0
+            pendingResultsRound.intValue = round
+            pendingOpenResults.intValue++
+        }
     }
 
     private fun createNewsNotificationChannel() {
+        val prefs = getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(NewsCheckWorker.KEY_NOTIF_ENABLED, true)) return
         val channel = NotificationChannel(
             NewsCheckWorker.CHANNEL_ID,
             "News Alerts",
@@ -144,6 +162,30 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private fun createResultsNotificationChannel() {
+        val prefs = getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true)) return
+        val channel = NotificationChannel(
+            ResultsCheckWorker.CHANNEL_ID,
+            "Results Alerts",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Notifications when new BTCC round results are published"
+        }
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channel)
+    }
+
+    private fun scheduleResultsCheck() {
+        val wm = WorkManager.getInstance(this)
+        val periodic = PeriodicWorkRequestBuilder<ResultsCheckWorker>(15, TimeUnit.MINUTES).build()
+        wm.enqueueUniquePeriodicWork(
+            ResultsCheckWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodic,
+        )
+    }
+
     private fun requestNewsNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -164,6 +206,9 @@ private data class NavItem(
 private fun MainScreen(
     pendingArticleId: Int? = null,
     onArticleIdConsumed: () -> Unit = {},
+    pendingOpenResults: Int = 0,
+    pendingResultsRound: Int = 0,
+    onResultsConsumed: () -> Unit = {},
     onRequestPermission: () -> Unit = {},
 ) {
     val context       = LocalContext.current
@@ -182,12 +227,28 @@ private fun MainScreen(
         NotificationOnboardingScreen(
             onEnableNotifications = {
                 onRequestPermission()
+                val prefs = context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+                prefs.edit().putBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true).apply()
+                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.createNotificationChannel(
+                    NotificationChannel(
+                        ResultsCheckWorker.CHANNEL_ID,
+                        "Results Alerts",
+                        NotificationManager.IMPORTANCE_HIGH,
+                    ).apply {
+                        description = "Notifications when new BTCC round results are published"
+                    }
+                )
                 OnboardingStore.markComplete(context)
+                WhatsNewStore.markSeen(context)
                 showOnboarding = false
+                showWhatsNew = false
             },
             onSkip = {
                 OnboardingStore.markComplete(context)
+                WhatsNewStore.markSeen(context)
                 showOnboarding = false
+                showWhatsNew = false
             },
         )
         return
@@ -202,6 +263,22 @@ private fun MainScreen(
             if (article != null) {
                 ArticleHolder.current = article
                 navController.navigate(Screen.Article.route) { launchSingleTop = true }
+            }
+        }
+    }
+
+    LaunchedEffect(pendingOpenResults) {
+        if (pendingOpenResults > 0) {
+            if (pendingResultsRound > 0) {
+                navController.navigate(Screen.RoundResults.route(2026, pendingResultsRound)) {
+                    popUpTo(Screen.News.route)
+                    launchSingleTop = true
+                }
+            } else {
+                navController.navigate(Screen.Results.route) {
+                    popUpTo(Screen.News.route)
+                    launchSingleTop = true
+                }
             }
         }
     }
