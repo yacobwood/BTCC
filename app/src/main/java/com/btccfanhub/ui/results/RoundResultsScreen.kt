@@ -47,6 +47,15 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     LaunchedEffect(year, round) {
         loading = true
         val results = when (year) {
+            2014 -> RaceResultsRepository.getResults2014()
+            2015 -> RaceResultsRepository.getResults2015()
+            2016 -> RaceResultsRepository.getResults2016()
+            2017 -> RaceResultsRepository.getResults2017()
+            2018 -> RaceResultsRepository.getResults2018()
+            2019 -> RaceResultsRepository.getResults2019()
+            2020 -> RaceResultsRepository.getResults2020()
+            2021 -> RaceResultsRepository.getResults2021()
+            2022 -> RaceResultsRepository.getResults2022()
             2023 -> RaceResultsRepository.getResults2023()
             2024 -> RaceResultsRepository.getResults2024()
             2025 -> RaceResultsRepository.getResults2025()
