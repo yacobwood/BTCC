@@ -32,6 +32,10 @@ object WhatsNewStore {
             "Gallery images fixed — no more duplicate photos in image galleries",
             "Round labels — widget and track detail now correctly show the full round range (e.g. Rounds 1–3)",
         ),
+        14 to listOf(
+            "Push notifications — get notified for race results; toggle on/off in Settings",
+            "Driver career stats — season history now shows podiums, poles and fastest laps alongside wins",
+        ),
         13 to listOf(
             "Race history back to 2014 — browse full results for every season from 2014 to 2025",
             "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",
