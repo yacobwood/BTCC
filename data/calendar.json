@@ -360,14 +360,14 @@
           "sector": "Sector 2",
           "corners": [
             { "number": "T6",  "name": "McLeans",         "description": "Right-hander at the end of Starkey's Straight.", "overtaking": true },
-            { "number": "T7",  "name": "Coppice",         "description": "Fast right-hand bend. On the GP layout this leads to the Melbourne Loop rather than Goddards." }
+            { "number": "T7",  "name": "Coppice",         "description": "Fast right-hand bend. On the GP layout this leads into the Fogarty Esses rather than straight to the start/finish." }
           ]
         },
         {
           "sector": "Sector 3",
           "corners": [
-            { "number": "T8",  "name": "Melbourne Hairpin","description": "Tight left-hand hairpin added by the GP extension. A heavy braking zone and major overtaking opportunity.", "overtaking": true },
-            { "number": "T9-10","name": "Melbourne Loop",  "description": "Right-left complex through the GP extension. A technical section that changes the character of the lap." },
+            { "number": "T8-9","name": "Fogarty Esses",   "description": "Right-left chicane on the run down to the Melbourne Hairpin. Same complex as the final corner on the National layout, but here it feeds into the GP extension." },
+            { "number": "T10", "name": "Melbourne Hairpin","description": "Tight left-hand hairpin added by the GP extension. A heavy braking zone and major overtaking opportunity.", "overtaking": true },
             { "number": "T11-12","name": "Goddards",       "description": "Tight right-hand chicane complex, the final braking zone before the pit straight.", "overtaking": true }
           ]
         }
