@@ -93,6 +93,8 @@ object CalendarRepository {
                 venue            = venue,
                 location         = r.optString("location"),
                 country          = r.optString("country"),
+                lat              = r.optDouble("lat", 0.0),
+                lng              = r.optDouble("lng", 0.0),
                 lengthMiles      = r.optString("lengthMiles"),
                 lengthKm         = r.optString("lengthKm"),
                 corners          = r.optInt("corners"),

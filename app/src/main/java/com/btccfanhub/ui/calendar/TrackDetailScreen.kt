@@ -30,12 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.model.DayForecast
 import com.btccfanhub.data.model.LapRecord
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.model.RaceSession
 import com.btccfanhub.data.model.TrackInfo
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.ScheduleRepository
+import com.btccfanhub.data.repository.WeatherRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccOutline
@@ -59,6 +62,8 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
     var info by remember { mutableStateOf<TrackInfo?>(null) }
     var race by remember { mutableStateOf<Race?>(null) }
     var sessions by remember { mutableStateOf<List<RaceSession>>(emptyList()) }
+    var forecast by remember { mutableStateOf<List<DayForecast>?>(null) }
+    var forecastLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(round) {
         val cal = CalendarRepository.getCalendarData()
@@ -66,6 +71,14 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
         race = cal.rounds.find { it.round == round }
         val schedule = ScheduleRepository.getSchedule()
         sessions = schedule[round] ?: emptyList()
+
+        val ti = cal.trackInfoMap[round]
+        val r = cal.rounds.find { it.round == round }
+        if (ti != null && r != null && ti.lat != 0.0 && FeatureFlagsStore.trackWeather.value) {
+            forecastLoading = true
+            forecast = WeatherRepository.getForecast(round, ti.lat, ti.lng, r.startDate, r.endDate)
+            forecastLoading = false
+        }
     }
 
     if (info == null || race == null) {
@@ -215,6 +228,21 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
                 // ── Live timing (race weekend only) ────────────────────────────
                 if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate) && onLiveTimingClick != null) {
                     LiveTimingButton(onLiveTimingClick)
+                }
+
+                // ── Weather forecast ─────────────────────────────────────────
+                if (forecastLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BtccCard, RoundedCornerShape(14.dp))
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(color = BtccYellow, modifier = Modifier.size(24.dp))
+                    }
+                } else if (!forecast.isNullOrEmpty()) {
+                    WeatherCard(forecast!!, currentRace.startDate, useKm)
                 }
 
                 // ── Stats row ──────────────────────────────────────────────────
@@ -641,4 +669,123 @@ private fun LiveTimingButton(onClick: () -> Unit) {
             modifier = Modifier.size(20.dp),
         )
     }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Weather forecast card
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun WeatherCard(days: List<DayForecast>, raceStart: LocalDate, useKm: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(14.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            "RACE WEEKEND FORECAST",
+            style         = MaterialTheme.typography.labelSmall,
+            fontWeight    = FontWeight.ExtraBold,
+            color         = BtccTextSecondary,
+            letterSpacing = 1.5.sp,
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            days.forEach { day ->
+                val dayLabel = if (day.date == raceStart) "SAT" else "SUN"
+                WeatherDayColumn(day, dayLabel, useKm, modifier = Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeatherDayColumn(day: DayForecast, label: String, useKm: Boolean, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(BtccBackground.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            label,
+            fontWeight    = FontWeight.ExtraBold,
+            fontSize      = 12.sp,
+            letterSpacing = 1.sp,
+            color         = BtccYellow,
+        )
+        Text(
+            weatherDescription(day.weatherCode),
+            fontSize  = 22.sp,
+        )
+        Text(
+            weatherLabel(day.weatherCode),
+            style      = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color      = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            "${day.tempMax.toInt()}° / ${day.tempMin.toInt()}°",
+            fontWeight = FontWeight.Bold,
+            fontSize   = 15.sp,
+            color      = MaterialTheme.colorScheme.onBackground,
+        )
+        if (day.precipitationProbability > 0) {
+            Text(
+                "${day.precipitationProbability}% rain",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFF64B5F6),
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        val windDisplay = if (useKm) {
+            "${day.windSpeedMax.toInt()} km/h"
+        } else {
+            "${(day.windSpeedMax / 1.60934).toInt()} mph"
+        }
+        Text(
+            windDisplay,
+            style = MaterialTheme.typography.labelSmall,
+            color = BtccTextSecondary,
+        )
+    }
+}
+
+private fun weatherDescription(code: Int): String = when (code) {
+    0    -> "☀️"
+    1    -> "🌤️"
+    2    -> "⛅"
+    3    -> "☁️"
+    in 45..48 -> "🌫️"
+    in 51..57 -> "🌦️"
+    in 61..67 -> "🌧️"
+    in 71..77 -> "🌨️"
+    in 80..82 -> "🌧️"
+    in 85..86 -> "🌨️"
+    in 95..99 -> "⛈️"
+    else -> "🌤️"
+}
+
+private fun weatherLabel(code: Int): String = when (code) {
+    0    -> "Clear"
+    1    -> "Mostly clear"
+    2    -> "Partly cloudy"
+    3    -> "Overcast"
+    in 45..48 -> "Fog"
+    in 51..55 -> "Drizzle"
+    in 56..57 -> "Freezing drizzle"
+    in 61..65 -> "Rain"
+    in 66..67 -> "Freezing rain"
+    in 71..75 -> "Snow"
+    in 77..77 -> "Snow grains"
+    in 80..82 -> "Showers"
+    in 85..86 -> "Snow showers"
+    in 95..99 -> "Thunderstorm"
+    else -> "Unknown"
 }

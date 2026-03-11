@@ -1,13 +1,13 @@
 {
   "season": 2026,
-  "seasonStartDate": "2026-03-14",
+  "seasonStartDate": "2026-04-18",
   "liveTimingEnabled": true,
   "rounds": [
     {
       "round": 1,
       "venue": "Donington Park",
-      "startDate": "2026-03-14",
-      "endDate": "2026-03-15",
+      "startDate": "2026-04-18",
+      "endDate": "2026-04-19",
       "location": "Castle Donington, Leicestershire",
       "country": "England",
       "lat": 52.8306,

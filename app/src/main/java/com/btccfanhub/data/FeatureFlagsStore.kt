@@ -20,12 +20,14 @@ object FeatureFlagsStore {
     const val KEY_WHATS_NEW    = "whats_new"
     const val KEY_LIVE_UPDATES          = "live_updates"
     const val KEY_RESULTS_NOTIFICATIONS = "results_notifications"
+    const val KEY_TRACK_WEATHER         = "track_weather"
 
     val radioTab              = MutableStateFlow(true)
     val adsEnabled            = MutableStateFlow(true)
     val whatsNew              = MutableStateFlow(true)
     val liveUpdates           = MutableStateFlow(true)
     val resultsNotifications  = MutableStateFlow(false)
+    val trackWeather          = MutableStateFlow(false)
 
     private var prefs: android.content.SharedPreferences? = null
     private var user: User? = null
@@ -39,6 +41,7 @@ object FeatureFlagsStore {
         whatsNew.value             = p.getBoolean(KEY_WHATS_NEW,              true)
         liveUpdates.value          = p.getBoolean(KEY_LIVE_UPDATES,           true)
         resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
+        trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
 
         val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
         user = User.newBuilder().build(deviceId)
@@ -66,6 +69,7 @@ object FeatureFlagsStore {
         apply(KEY_WHATS_NEW,              client.getValue(Boolean::class.java, KEY_WHATS_NEW,              user, true))
         apply(KEY_LIVE_UPDATES,           client.getValue(Boolean::class.java, KEY_LIVE_UPDATES,           user, true))
         apply(KEY_RESULTS_NOTIFICATIONS,  client.getValue(Boolean::class.java, KEY_RESULTS_NOTIFICATIONS,  user, false))
+        apply(KEY_TRACK_WEATHER,          client.getValue(Boolean::class.java, KEY_TRACK_WEATHER,          user, false))
         Log.d("FeatureFlags", "Flags applied for device: ${user?.identifier}")
     }
 
@@ -77,6 +81,7 @@ object FeatureFlagsStore {
             KEY_WHATS_NEW    -> whatsNew.value    = value
             KEY_LIVE_UPDATES          -> liveUpdates.value          = value
             KEY_RESULTS_NOTIFICATIONS -> resultsNotifications.value = value
+            KEY_TRACK_WEATHER         -> trackWeather.value          = value
         }
     }
 

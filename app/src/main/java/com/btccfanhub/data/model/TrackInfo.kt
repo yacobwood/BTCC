@@ -27,6 +27,8 @@ data class TrackInfo(
     val layoutImageUrl: String = "",
     val raceImages: List<String> = emptyList(),
     val firstBtccYear: Int? = null,
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
     val qualifyingRecord: LapRecord? = null,
     val raceRecord: LapRecord? = null,
     val sessions: List<RaceSession> = emptyList(),

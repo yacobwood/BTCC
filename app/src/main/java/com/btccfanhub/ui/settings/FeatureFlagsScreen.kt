@@ -21,6 +21,7 @@ private val FLAG_ITEMS = listOf(
     Triple(FeatureFlagsStore.KEY_WHATS_NEW,    "What's New",      "Show the What's New dialog on launch"),
     Triple(FeatureFlagsStore.KEY_LIVE_UPDATES,          "Live Updates",            "Show live timing buttons during race weekends"),
     Triple(FeatureFlagsStore.KEY_RESULTS_NOTIFICATIONS, "Results Notifications",   "Enable results check worker and settings toggle"),
+    Triple(FeatureFlagsStore.KEY_TRACK_WEATHER,          "Track Weather",           "Show race weekend forecast on track detail screen"),
 )
 
 private val FLAG_FLOWS: Map<String, StateFlow<Boolean>> = mapOf(
@@ -29,6 +30,7 @@ private val FLAG_FLOWS: Map<String, StateFlow<Boolean>> = mapOf(
     FeatureFlagsStore.KEY_WHATS_NEW    to FeatureFlagsStore.whatsNew,
     FeatureFlagsStore.KEY_LIVE_UPDATES          to FeatureFlagsStore.liveUpdates,
     FeatureFlagsStore.KEY_RESULTS_NOTIFICATIONS to FeatureFlagsStore.resultsNotifications,
+    FeatureFlagsStore.KEY_TRACK_WEATHER          to FeatureFlagsStore.trackWeather,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
