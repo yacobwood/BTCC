@@ -34,8 +34,8 @@
           "sector": "Sector 1",
           "corners": [
             { "number": "T1",  "name": "Redgate",       "description": "Sharp right-hander at the end of the start/finish straight. The prime overtaking zone on lap one and throughout the race.", "overtaking": true },
-            { "number": "T2",  "name": "Hollywood",     "description": "Fast left-hand kink through the trees, taken flat out. Sets up the entry into Craner Curves." },
-            { "number": "T3-4","name": "Craner Curves",  "description": "Iconic downhill sweeping left-right sequence. One of the most thrilling corners in British motorsport — requires full commitment at high speed." },
+            { "number": "T2",  "name": "Hollywood",     "description": "Fast right-hand kink through the trees, taken flat out. Sets up the entry into Craner Curves." },
+            { "number": "T3-4","name": "Craner Curves",  "description": "Iconic downhill sweeping left-hand sequence. One of the most thrilling corners in British motorsport — requires full commitment at high speed." },
             { "number": "T5",  "name": "Old Hairpin",   "description": "Tight right-hand hairpin at the bottom of the hill. A classic late-braking overtaking spot with a wide entry.", "overtaking": true }
           ]
         },
