@@ -49,7 +49,7 @@
         {
           "sector": "Sector 3",
           "corners": [
-            { "number": "T8-9","name": "Goddards",      "description": "Tight right-hand chicane complex, the final braking zone before the pit straight. Last chance to make a pass each lap.", "overtaking": true }
+            { "number": "T8-9","name": "Fogarty Esses", "description": "Right-left chicane complex, the final braking zone before the pit straight. Last chance to make a pass each lap.", "overtaking": true }
           ]
         }
       ]
