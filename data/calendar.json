@@ -28,7 +28,31 @@
       ],
       "firstBtccYear": 1977,
       "qualifyingRecord": { "driver": "Ash Sutton",  "time": "1:07.570", "speed": "106.39 mph", "year": 2023 },
-      "raceRecord":       { "driver": "Ash Sutton",  "time": "1:08.011", "speed": "104.75 mph", "year": 2025 }
+      "raceRecord":       { "driver": "Ash Sutton",  "time": "1:08.011", "speed": "104.75 mph", "year": 2025 },
+      "trackGuide": [
+        {
+          "sector": "Sector 1",
+          "corners": [
+            { "number": "T1",  "name": "Redgate",       "description": "Sharp right-hander at the end of the start/finish straight. The prime overtaking zone on lap one and throughout the race.", "overtaking": true },
+            { "number": "T2",  "name": "Hollywood",     "description": "Fast left-hand kink through the trees, taken flat out. Sets up the entry into Craner Curves." },
+            { "number": "T3-4","name": "Craner Curves",  "description": "Iconic downhill sweeping left-right sequence. One of the most thrilling corners in British motorsport — requires full commitment at high speed." },
+            { "number": "T5",  "name": "Old Hairpin",   "description": "Tight left-hand hairpin at the bottom of the hill. A classic late-braking overtaking spot with a wide entry.", "overtaking": true }
+          ]
+        },
+        {
+          "sector": "Sector 2",
+          "corners": [
+            { "number": "T6",  "name": "McLeans",       "description": "Right-hander at the end of Starkey's Straight. Heavy braking zone with overtaking possible on the inside.", "overtaking": true },
+            { "number": "T7",  "name": "Coppice",       "description": "Fast right-hand bend taken in a high gear. Rewards bravery and a late apex sets up the run to the final corner." }
+          ]
+        },
+        {
+          "sector": "Sector 3",
+          "corners": [
+            { "number": "T8-9","name": "Goddards",      "description": "Tight left-hand chicane complex, the final braking zone before the pit straight. Last chance to make a pass each lap.", "overtaking": true }
+          ]
+        }
+      ]
     },
     {
       "round": 2,

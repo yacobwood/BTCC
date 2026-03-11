@@ -32,9 +32,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.data.model.DayForecast
+import com.btccfanhub.data.model.Corner
 import com.btccfanhub.data.model.LapRecord
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.model.RaceSession
+import com.btccfanhub.data.model.Sector
 import com.btccfanhub.data.model.TrackInfo
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.ScheduleRepository
@@ -301,6 +303,11 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
                                 .clip(RoundedCornerShape(12.dp)),
                         )
                     }
+                }
+
+                // ── Track guide ─────────────────────────────────────────────────
+                if (trackInfo.trackGuide.isNotEmpty()) {
+                    TrackGuideCard(trackInfo.trackGuide)
                 }
 
                 // ── Race photo gallery ─────────────────────────────────────────
@@ -668,6 +675,100 @@ private fun LiveTimingButton(onClick: () -> Unit) {
             tint     = BtccYellow,
             modifier = Modifier.size(20.dp),
         )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Track guide — corners grouped by sector
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun TrackGuideCard(sectors: List<Sector>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BtccCard, RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            "TRACK GUIDE",
+            style         = MaterialTheme.typography.labelSmall,
+            fontWeight    = FontWeight.ExtraBold,
+            color         = BtccTextSecondary,
+            letterSpacing = 1.5.sp,
+        )
+
+        sectors.forEachIndexed { sectorIndex, sector ->
+            Text(
+                sector.name.uppercase(),
+                style         = MaterialTheme.typography.labelSmall,
+                fontWeight    = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                color         = BtccYellow,
+            )
+
+            sector.corners.forEach { corner ->
+                CornerRow(corner)
+            }
+
+            if (sectorIndex < sectors.lastIndex) {
+                HorizontalDivider(color = BtccOutline.copy(alpha = 0.5f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun CornerRow(corner: Corner) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            corner.number,
+            style      = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Black,
+            color      = BtccYellow.copy(alpha = 0.7f),
+            modifier   = Modifier.width(36.dp),
+        )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    corner.name,
+                    style      = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color      = MaterialTheme.colorScheme.onBackground,
+                )
+                if (corner.overtaking) {
+                    Surface(
+                        color = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(4.dp),
+                    ) {
+                        Text(
+                            "OVERTAKING",
+                            modifier      = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            style         = MaterialTheme.typography.labelSmall,
+                            fontWeight    = FontWeight.ExtraBold,
+                            fontSize      = 8.sp,
+                            letterSpacing = 0.5.sp,
+                            color         = Color(0xFF4CAF50),
+                        )
+                    }
+                }
+            }
+            if (corner.description.isNotEmpty()) {
+                Text(
+                    corner.description,
+                    style      = MaterialTheme.typography.bodySmall,
+                    color      = BtccTextSecondary,
+                    lineHeight = 18.sp,
+                )
+            }
+        }
     }
 }
 

@@ -13,6 +13,18 @@ data class LapRecord(
     val year: Int,
 )
 
+data class Corner(
+    val number: String,
+    val name: String,
+    val description: String = "",
+    val overtaking: Boolean = false,
+)
+
+data class Sector(
+    val name: String,
+    val corners: List<Corner>,
+)
+
 data class TrackInfo(
     val round: Int,
     val venue: String,
@@ -32,4 +44,5 @@ data class TrackInfo(
     val qualifyingRecord: LapRecord? = null,
     val raceRecord: LapRecord? = null,
     val sessions: List<RaceSession> = emptyList(),
+    val trackGuide: List<Sector> = emptyList(),
 )

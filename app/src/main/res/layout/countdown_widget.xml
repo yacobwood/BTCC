@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <!-- Shown when widget is wide enough -->
+    <TextView
+        android:id="@+id/widget_round"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:letterSpacing="0.08"
+        android:textAllCaps="true"
+        android:textColor="#F5C400"
+        android:textSize="10sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:lineSpacingMultiplier="0.85"
+        android:textColor="#FFFFFF"
+        android:textSize="36sp" />
+
+    <TextView
+        android:id="@+id/widget_countdown_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:letterSpacing="0.05"
+        android:textColor="#8A8D94"
+        android:textSize="9sp" />
+
+    <TextView
+        android:id="@+id/widget_venue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="#F5C400"
+        android:textSize="10sp" />
+
+    <!-- Shown when widget is tall enough -->
+    <TextView
+        android:id="@+id/widget_dates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:textColor="#8A8D94"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+</LinearLayout>

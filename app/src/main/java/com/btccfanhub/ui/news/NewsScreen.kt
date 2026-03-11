@@ -1,6 +1,7 @@
 package com.btccfanhub.ui.news
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.model.Article
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
@@ -51,11 +54,16 @@ fun NewsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val searchState by viewModel.searchState.collectAsState()
+    val favName by FavouriteDriverStore.driver.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var searchActive by remember { mutableStateOf(false) }
     var searchQuery  by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
+
+    val favSurname = remember(favName) {
+        favName?.split(" ")?.lastOrNull()?.lowercase()
+    }
 
     val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
@@ -187,6 +195,7 @@ fun NewsScreen(
                                             CompactCard(
                                                 article = article,
                                                 onClick = { onArticleClick(article) },
+                                                favouriteSurname = favSurname,
                                                 modifier = Modifier
                                                     .padding(horizontal = 16.dp)
                                                     .padding(bottom = 10.dp),
@@ -249,6 +258,7 @@ fun NewsScreen(
                                 CompactCard(
                                     article = article,
                                     onClick = { onArticleClick(article) },
+                                    favouriteSurname = favSurname,
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp)
                                         .padding(bottom = 10.dp),
@@ -471,13 +481,21 @@ private fun GridCard(article: Article, onClick: () -> Unit, modifier: Modifier =
 private fun CompactCard(
     article: Article,
     onClick: () -> Unit,
+    favouriteSurname: String? = null,
     modifier: Modifier = Modifier,
 ) {
+    val mentionsFav = favouriteSurname != null &&
+            article.title.lowercase().contains(favouriteSurname)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(BtccCard)
+            .then(
+                if (mentionsFav) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                else Modifier
+            )
             .clickable { onClick() }
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -505,16 +523,29 @@ private fun CompactCard(
         }
 
         Column(modifier = Modifier.weight(1f)) {
-            if (article.category.isNotEmpty()) {
-                Text(
-                    article.category.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = BtccYellow,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp,
-                    modifier = Modifier.padding(bottom = 3.dp),
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (article.category.isNotEmpty()) {
+                    Text(
+                        article.category.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = BtccYellow,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.5.sp,
+                    )
+                }
+                if (mentionsFav) {
+                    Icon(
+                        Icons.Filled.Star,
+                        contentDescription = "Your driver",
+                        tint = BtccYellow,
+                        modifier = Modifier.size(12.dp),
+                    )
+                }
             }
+            if (article.category.isNotEmpty() || mentionsFav) Spacer(Modifier.height(3.dp))
             Text(
                 article.title,
                 style = MaterialTheme.typography.bodyMedium,
@@ -532,3 +563,4 @@ private fun CompactCard(
         }
     }
 }
+

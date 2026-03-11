@@ -87,7 +87,13 @@ class NewsViewModel : ViewModel() {
             delay(300)
             _searchState.value = SearchState.Loading
             val results = NewsRepository.searchArticles(query)
-            _searchState.value = SearchState.Results(results)
+            val q = query.lowercase()
+            val ranked = results.sortedWith(compareByDescending<Article> {
+                it.title.lowercase().contains(q)
+            }.thenByDescending {
+                it.title.lowercase().startsWith(q)
+            })
+            _searchState.value = SearchState.Results(ranked)
         }
     }
 

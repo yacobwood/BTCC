@@ -1,8 +1,10 @@
 package com.btccfanhub.data.repository
 
 import com.btccfanhub.data.model.CalendarData
+import com.btccfanhub.data.model.Corner
 import com.btccfanhub.data.model.LapRecord
 import com.btccfanhub.data.model.Race
+import com.btccfanhub.data.model.Sector
 import com.btccfanhub.data.model.TrackInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -88,6 +90,24 @@ object CalendarRepository {
                 )
             }
 
+            val guideArr = r.optJSONArray("trackGuide") ?: JSONArray()
+            val sectors = (0 until guideArr.length()).map { si ->
+                val sObj = guideArr.getJSONObject(si)
+                val cornersArr = sObj.optJSONArray("corners") ?: JSONArray()
+                Sector(
+                    name = sObj.optString("sector"),
+                    corners = (0 until cornersArr.length()).map { ci ->
+                        val c = cornersArr.getJSONObject(ci)
+                        Corner(
+                            number      = c.optString("number"),
+                            name        = c.optString("name"),
+                            description = c.optString("description"),
+                            overtaking  = c.optBoolean("overtaking", false),
+                        )
+                    }
+                )
+            }
+
             trackMap[round] = TrackInfo(
                 round            = round,
                 venue            = venue,
@@ -106,6 +126,7 @@ object CalendarRepository {
                 firstBtccYear    = r.optInt("firstBtccYear").takeIf { it > 0 },
                 qualifyingRecord = lapRecord(r.optJSONObject("qualifyingRecord")),
                 raceRecord       = lapRecord(r.optJSONObject("raceRecord")),
+                trackGuide       = sectors,
             )
         }
 
