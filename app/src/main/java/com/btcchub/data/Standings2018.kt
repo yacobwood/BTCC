@@ -1,0 +1,75 @@
+package com.btcchub.data
+
+import com.btcchub.data.model.DriverStanding
+import com.btcchub.data.model.TeamStanding
+
+/** Final 2018 BTCC Drivers' Championship standings (Wikipedia). */
+object Standings2018 {
+
+    val drivers: List<DriverStanding> = listOf(
+        DriverStanding(position =  1, name = "Colin Turkington",   team = "Team BMW", car = "2",   points = 304, wins = 1),
+        DriverStanding(position =  2, name = "Tom Ingram",        team = "Speedworks Motorsport", car = "80",  points = 292, wins = 3),
+        DriverStanding(position =  3, name = "Tom Chilton",      team = "Team Shredded Wheat Racing with Gallagher", car = "3",   points = 266, wins = 1),
+        DriverStanding(position =  4, name = "Ashley Sutton",     team = "Adrian Flux Subaru Racing", car = "1",   points = 256, wins = 6),
+        DriverStanding(position =  5, name = "Andrew Jordan",    team = "BMW Pirtek Racing", car = "77",  points = 247, wins = 1),
+        DriverStanding(position =  6, name = "Josh Cook",        team = "Power Maxed TAG Racing", car = "66",  points = 246, wins = 2),
+        DriverStanding(position =  7, name = "Adam Morgan",      team = "Mac Tools with Ciceley Motorsport", car = "33",  points = 232, wins = 3),
+        DriverStanding(position =  8, name = "Jack Goff",        team = "WIX Racing with Eurotech", car = "31",  points = 228, wins = 2),
+        DriverStanding(position =  9, name = "Matt Neal",         team = "Halfords Yuasa Racing", car = "25",  points = 223, wins = 2),
+        DriverStanding(position = 10, name = "Dan Cammish",      team = "Halfords Yuasa Racing", car = "27",  points = 218, wins = 2),
+        DriverStanding(position = 11, name = "Sam Tordoff",      team = "Team GardX Racing with Motorbase", car = "600", points = 202, wins = 1),
+        DriverStanding(position = 12, name = "Senna Proctor",     team = "Power Maxed TAG Racing", car = "18",  points = 177, wins = 1),
+        DriverStanding(position = 13, name = "Chris Smiley",      team = "BTC Norlin Racing", car = "22",  points = 128, wins = 1),
+        DriverStanding(position = 14, name = "Rob Austin",        team = "DUO Motorsport with HMS Racing", car = "11",  points = 126, wins = 0),
+        DriverStanding(position = 15, name = "Matt Simpson",     team = "Simpson Racing", car = "303", points = 120, wins = 1),
+        DriverStanding(position = 16, name = "Aiden Moffat",      team = "Laser Tools Racing", car = "16",  points = 117, wins = 1),
+        DriverStanding(position = 17, name = "Rory Butcher",      team = "AmD with Autoaid/RCIB Insurance Racing", car = "6",   points =  99, wins = 0),
+        DriverStanding(position = 18, name = "Daniel Lloyd",      team = "BTC Norlin Racing", car = "26",  points =  87, wins = 1),
+        DriverStanding(position = 19, name = "Rob Collard",       team = "Team BMW", car = "5",   points =  86, wins = 1),
+        DriverStanding(position = 20, name = "Brett Smith",       team = "WIX Racing with Eurotech", car = "39",  points =  70, wins = 0),
+        DriverStanding(position = 21, name = "James Cole",       team = "Team Shredded Wheat Racing with Gallagher", car = "20",  points =  67, wins = 0),
+        DriverStanding(position = 22, name = "Tom Oliphant",      team = "Ciceley Motorsport", car = "15",  points =  63, wins = 0),
+        DriverStanding(position = 23, name = "Ollie Jackson",     team = "AmD with Cobra Exhausts", car = "48",  points =  59, wins = 0),
+        DriverStanding(position = 24, name = "Mike Bushell",      team = "Trade Price Cars with Brisky Racing", car = "12",  points =  55, wins = 0),
+        DriverStanding(position = 25, name = "Ricky Collard",     team = "BMW Pirtek Racing", car = "55",  points =  46, wins = 0),
+        DriverStanding(position = 26, name = "Jake Hill",         team = "Trade Price Cars with Brisky Racing", car = "24",  points =  29, wins = 0),
+        DriverStanding(position = 27, name = "Jason Plato",      team = "Adrian Flux Subaru Racing", car = "99",  points =  26, wins = 0),
+        DriverStanding(position = 28, name = "Bobby Thompson",    team = "Team HARD. with Trade Price Cars", car = "19",  points =  23, wins = 0),
+        DriverStanding(position = 29, name = "Tom Boardman",      team = "AmD with Autoaid/RCIB Insurance Racing", car = "21",  points =  14, wins = 0),
+        DriverStanding(position = 30, name = "Ant Whorton-Eales", team = "AmD with Autoaid/RCIB Insurance Racing", car = "19",  points =   6, wins = 0),
+        DriverStanding(position = 31, name = "James Nash",        team = "BTC Norlin Racing", car = "14",  points =   6, wins = 0),
+        DriverStanding(position = 32, name = "Stephen Jelley",    team = "Team Parker Racing", car = "12",  points =   4, wins = 0),
+        DriverStanding(position = 33, name = "Glynn Geddie",      team = "AmD with Autoaid/RCIB Insurance Racing", car = "39",  points =   1, wins = 0),
+        DriverStanding(position = 34, name = "Sam Smelt",         team = "AmD with Cobra Exhausts", car = "18",  points =   0, wins = 0),
+        DriverStanding(position = 35, name = "Josh Price",        team = "Adrian Flux Subaru Racing", car = "28",  points =   0, wins = 0),
+        DriverStanding(position = 36, name = "Michael Caine",     team = "Team HARD. with Trade Price Cars", car = "27",  points =   0, wins = 0),
+        DriverStanding(position = 37, name = "Daniel Welch",      team = "Laser Tools Racing", car = "12",  points =   0, wins = 0),
+        DriverStanding(position = 38, name = "Ollie Pidgley",     team = "Trade Price Cars with Brisky Racing", car = "23",  points =   0, wins = 0),
+        DriverStanding(position = 39, name = "Ethan Hammerton",   team = "Team HARD. with Trade Price Cars", car = "14",  points =   0, wins = 0),
+        DriverStanding(position = 40, name = "Josh Caygill",      team = "AmD with Autoaid/RCIB Insurance Racing", car = "27",  points =   0, wins = 0),
+    )
+
+    val teams: List<TeamStanding> = listOf(
+        TeamStanding(position = 1, name = "Team BMW",                         points = 428),
+        TeamStanding(position = 2, name = "Halfords Yuasa Racing",              points = 409),
+        TeamStanding(position = 3, name = "Power Maxed TAG Racing",             points = 409),
+        TeamStanding(position = 4, name = "Team Shredded Wheat Racing with Gallagher", points = 382),
+        TeamStanding(position = 5, name = "Speedworks Motorsport",              points = 282),
+        TeamStanding(position = 6, name = "WIX Racing with Eurotech",          points = 278),
+        TeamStanding(position = 7, name = "BMW Pirtek Racing",                   points = 245),
+        TeamStanding(position = 8, name = "Mac Tools with Ciceley Motorsport",  points = 226),
+        TeamStanding(position = 9, name = "BTC Norlin Racing",                   points = 218),
+        TeamStanding(position = 10, name = "Adrian Flux Subaru Racing",          points = 212),
+        TeamStanding(position = 11, name = "Team GardX Racing with Motorbase",   points = 198),
+        TeamStanding(position = 12, name = "AmD with Autoaid/RCIB Insurance Racing", points = 120),
+        TeamStanding(position = 13, name = "Laser Tools Racing",                 points = 115),
+        TeamStanding(position = 14, name = "DUO Motorsport with HMS Racing",    points = 106),
+        TeamStanding(position = 15, name = "Simpson Racing",                     points = 112),
+        TeamStanding(position = 16, name = "Trade Price Cars with Brisky Racing", points = 91),
+        TeamStanding(position = 17, name = "Ciceley Motorsport",                 points = 62),
+        TeamStanding(position = 18, name = "AmD with Cobra Exhausts",            points = 59),
+        TeamStanding(position = 19, name = "Autoglym Academy Racing",            points = 0),
+        TeamStanding(position = 20, name = "Team Parker Racing",                 points = 4),
+        TeamStanding(position = 21, name = "Team HARD. with Trade Price Cars",   points = -17),
+    )
+}

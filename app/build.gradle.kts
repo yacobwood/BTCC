@@ -17,11 +17,11 @@ val localProps = Properties().apply {
 }
 
 android {
-    namespace = "com.btccfanhub"
+    namespace = "com.btcchub"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.btccfanhub"
+        applicationId = "com.btcchub"
         minSdk = 26
         targetSdk = 36
         versionCode = 14

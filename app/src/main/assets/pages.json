@@ -1,0 +1,414 @@
+{
+  "pages": [
+    {
+      "id": "about",
+      "title": "About BTCC",
+      "icon": "info",
+      "sections": [
+        {
+          "type": "text",
+          "body": "The British Touring Car Championship is one of the best-loved, most illustrious and famous motor racing championships in the world. Only Formula 1 and America's NASCAR stock car series have longer histories – since its inception in 1958, it has attracted and captivated millions of fans around the world."
+        },
+        {
+          "type": "text",
+          "body": "Saloon car racing was a huge success from the very start, with the public packing into Britain's motor sport venues to watch the top drivers of the day compete in racing versions of their road cars at simply unbelievable speeds. It's a lasting appeal that to this day continues to deliver a punch and panache that is the envy of every other motor sporting arena in the UK."
+        },
+        {
+          "type": "text",
+          "body": "Traditional, great British names such as Jaguar, Austin, Ford, Mini, Lotus, Sunbeam and Triumph – often with top international stars, including Formula 1 drivers, at the wheel – were all winners in the first 20 years, each aware of the importance of using the BTCC to showcase their latest models."
+        },
+        {
+          "type": "heading",
+          "body": "The Nineties Boom"
+        },
+        {
+          "type": "text",
+          "body": "It was in the Nineties that the BTCC truly boomed. The championship was already beginning to grow in stature, with regular television coverage on the BBC's flagship sports show, Grandstand. When the decision was taken to make the BTCC exclusively for 2-litre cars, it instantly created closer racing and attracted a host of high-profile manufacturers, teams and drivers to the series."
+        },
+        {
+          "type": "text",
+          "body": "Trackside crowd figures nudged the 40,000 mark as the calendar evolved into a major UK tour with events being added in Scotland and Wales. The social element of the championship quickly became important, and as is the case now, there was no substitute for 'being there'."
+        },
+        {
+          "type": "heading",
+          "body": "Manufacturer Appeal"
+        },
+        {
+          "type": "text",
+          "body": "Manufacturers simply could not afford to miss out on the enormous marketing value of competing in the BTCC. Alfa Romeo, Audi, BMW, Ford, Honda, Mazda, Nissan, Peugeot, Renault, Toyota, Vauxhall and Volvo were all quick to join the party. Every one of them has the BTCC to thank for being a part of their ongoing growth in the UK over the years."
+        },
+        {
+          "type": "heading",
+          "body": "Level Playing Field"
+        },
+        {
+          "type": "text",
+          "body": "Key to the BTCC's enduring success has been the potential for independently-run teams to face off against major manufacturers on a level playing field without the need for factory support. The consistently close competition is testament to carefully formulated sporting and technical regulations, allowing any number of entrants on the capacity grid to experience success – regardless of car body styles or engineering philosophy."
+        },
+        {
+          "type": "heading",
+          "body": "A New Era"
+        },
+        {
+          "type": "text",
+          "body": "The BTCC became the first major touring car championship in the world to introduce hybrid power in 2022, and was significantly enhanced for the 2024 campaign with cars receiving approximately double the amount of hybrid-boost."
+        },
+        {
+          "type": "text",
+          "body": "Now with unprecedented levels of national television coverage, ITV agreed a long-term contract extension up until the end of 2026, whilst the championship is broadcasted globally from the 2024 season onwards, thanks to a world-first deal between ITV and TikTok."
+        },
+        {
+          "type": "text",
+          "body": "From 2025, cars will have the same power-boost output as in 2024 with the additional power surge coming solely via turbo boost. The cars are also 55 kilogrammes lighter and nimbler as a result. The return of the 'Quick Six' qualifying format, a move to fully sustainable fuel and the Goodyear tyre options continue to spice up the on-track action."
+        }
+      ]
+    },
+    {
+      "id": "history",
+      "title": "BTCC History",
+      "icon": "history",
+      "sections": [
+        {
+          "type": "heading",
+          "body": "1958 – The Beginning"
+        },
+        {
+          "type": "text",
+          "body": "The man credited with the idea for a national championship for saloon cars is Ken Gregory, also well known as the manager of Stirling Moss. Gregory convinced the British Racing & Sports Car Club that it should fill the void and increase the profile of saloon car racing by running a championship."
+        },
+        {
+          "type": "text",
+          "body": "The very first race counting towards the 1958 points table was actually staged at Brands Hatch on Boxing Day 1957, won by Tommy Sopwith driving an Equipe Endeavour 3.4-litre Jaguar. That inaugural season ended in dramatic fashion – Sopwith and Jack Sears tied on points, resolved by a pair of five-lap races in identical Rileys. Sears was crowned the first Champion by just 1.6 seconds."
+        },
+        {
+          "type": "heading",
+          "body": "The Sixties – Muscle Cars & Cortinas"
+        },
+        {
+          "type": "text",
+          "body": "One of the first cars to popularise the championship was the Mini, producing many crowd-pleasing, giant-killing acts. A new era began with American 'muscle cars' and the British-built Ford Cortina. Jack Sears was champion again in 1963, and Jim Clark secured honours in 1964 with a works Lotus Cortina."
+        },
+        {
+          "type": "heading",
+          "body": "The Seventies – Rising Costs & Japanese Influence"
+        },
+        {
+          "type": "text",
+          "body": "By 1974, with costs of competing having become prohibitive, the RACMSA switched to Group 1 regulations. The Ford Capri emerged as the front-running model, with Gordon Spice winning the 3000cc class titles in five successive seasons from 1976 to 1980. Meanwhile, Japanese manufacturers began their challenge, with Tom Walkinshaw introducing the rotary-engined Mazda RX7."
+        },
+        {
+          "type": "heading",
+          "body": "The Eighties – Sierra vs M3"
+        },
+        {
+          "type": "text",
+          "body": "Andy Rouse established a reputation for first-class race car preparation as well as driving talent, winning four championships. The Ford Sierra RS500 Turbo and BMW M3 – two of the BTCC's most iconic cars – ruled their respective classes. Frank Sytner and the Prodrive BMW M3 won the overall title in 1988."
+        },
+        {
+          "type": "heading",
+          "body": "The Nineties – The Golden Era"
+        },
+        {
+          "type": "text",
+          "body": "The decision to make the BTCC exclusively for 2-litre cars transformed the championship. Combined with enhanced BBC television coverage and marketing genius, the series became essential viewing for millions. Alfa Romeo, Audi, BMW, Ford, Honda, Nissan, Peugeot, Renault, Toyota, Vauxhall and Volvo all joined the grid."
+        },
+        {
+          "type": "heading",
+          "body": "2000s to Present"
+        },
+        {
+          "type": "text",
+          "body": "The championship continued to evolve, introducing the NGTC (Next Generation Touring Car) specification in 2011 to reduce costs and improve competition. Hybrid power arrived in 2022, making the BTCC the first major touring car championship in the world to adopt the technology. The series remains the UK's premier motorsport championship, attracting capacity grids and passionate crowds at circuits across Britain."
+        }
+      ]
+    },
+    {
+      "id": "get-on-track",
+      "title": "Motorsport UK",
+      "icon": "directions_car",
+      "sections": [
+        {
+          "type": "text",
+          "body": "The BTCC is at the pinnacle of motor racing in the UK, but did you know there is also a vibrant club racing scene, with thousands of competitors getting out every weekend to have fun on four wheels?"
+        },
+        {
+          "type": "text",
+          "body": "They're all part of Motorsport UK, the national membership organisation and governing body for four-wheel motorsport. Around 11,000 people hold a Motorsport UK Race competition licence and there are approximately 300 race events every year across the country."
+        },
+        {
+          "type": "heading",
+          "body": "How to Get Started"
+        },
+        {
+          "type": "text",
+          "body": "If you want to join this community of racers, head to a track day to experience the thrill of driving on a circuit for the first time. Then, visit the Motorsport UK website to find your nearest car racing club. There are various clubs offering a wide range of events and championships in pretty much every kind of racing car you can think of, from tin-tops to entry level single-seaters."
+        },
+        {
+          "type": "text",
+          "body": "The next step is to get your Go Racing starter pack. This features more information on how to get on track, including details of the 'ARDS' course that you'll need to take. The pack also includes the cost of your first Motorsport UK licence."
+        },
+        {
+          "type": "heading",
+          "body": "Other Types of Motorsport"
+        },
+        {
+          "type": "text",
+          "body": "Motorsport is so much more than racing. Motorsport UK oversees many other types of the sport including Autocross, Autotest, Cross Country, Drag Racing, Hill Climb, Karting, Rally, Rallycross, Sprint, and Trials."
+        },
+        {
+          "type": "heading",
+          "body": "Autocross"
+        },
+        {
+          "type": "text",
+          "body": "Competitors drive on a short course on a grass or stubble field, against the clock. Perfect for newcomers."
+        },
+        {
+          "type": "heading",
+          "body": "Karting"
+        },
+        {
+          "type": "text",
+          "body": "Most of today's top racing drivers started in karting but it's a sport in its own right. Get down to your local kart centre to try it out."
+        },
+        {
+          "type": "heading",
+          "body": "Rally"
+        },
+        {
+          "type": "text",
+          "body": "A driver and co-driver take on a series of competitive stages, usually in the forests. The sport that made Colin McRae and Richard Burns household names."
+        },
+        {
+          "type": "heading",
+          "body": "Rallycross"
+        },
+        {
+          "type": "text",
+          "body": "A combination of rallying and circuit racing on a track that's part gravel and part asphalt. This is where you're guaranteed to find sideways wheel-to-wheel action."
+        },
+        {
+          "type": "heading",
+          "body": "Joining Motorsport UK"
+        },
+        {
+          "type": "text",
+          "body": "In total across all types of motorsport, there are 30,000 Motorsport UK competition licence holders. Even if you don't want to get behind the wheel, you can still become a member of Motorsport UK and support its work to promote fun on four wheels and protect motorsport for future generations."
+        },
+        {
+          "type": "text",
+          "body": "For all the latest news and updates, visit motorsportuk.org or follow @ourmotorsportuk on social media. To enquire about becoming a member, email membership@motorsportuk.org or call 01753 765 050."
+        }
+      ]
+    },
+    {
+      "id": "sustainability-introduction",
+      "title": "Sustainability Introduction",
+      "icon": "eco",
+      "sections": [
+        {
+          "type": "text",
+          "body": "The BTCC's ambition is to be the global leader in sustainable improvements and carbon neutrality for national level motor racing championships."
+        },
+        {
+          "type": "text",
+          "body": "Contributing to a sustainable future is one of the biggest challenges and opportunities in the motorsport industry. 2024 marked an important step for the British Touring Car Championship with the launch of its Sustainability Strategy. The strategy sets out the championship's vision, objectives and an implementation roadmap, with key actions and targets that can be measured over time."
+        },
+        {
+          "type": "text",
+          "body": "The strategy builds on work that has been underway for some time. The BTCC has developed informal sustainable practices over many years, including banning single use plastics in race paddocks, running 20% sustainable fuel in its cars (with an aim to increase to 100% for 2025/2026), and the introduction of the Hybrid system. The strategy represents the championship's commitment to being at the forefront of sustainable improvements."
+        },
+        {
+          "type": "heading",
+          "body": "Mission"
+        },
+        {
+          "type": "text",
+          "body": "The BTCC is on track to be carbon neutral, creating a platform for continual improvement across all areas of the championship. The championship aims to achieve this by developing and executing the policies and practices outlined in the strategy, with implementation continually assessed through success criteria and key performance indicators."
+        },
+        {
+          "type": "heading",
+          "body": "Six Pillars"
+        },
+        {
+          "type": "text",
+          "body": "The strategy is organised around six central pillars: Cars, Circuits, Suppliers & Partners, Teams, Central Functions, and Fans. Details and targets for each are set out in the Sustainability Targets section."
+        },
+        {
+          "type": "heading",
+          "body": "National and Global Relevance"
+        },
+        {
+          "type": "text",
+          "body": "The BTCC's strategy is aligned with the sustainable frameworks and goals outlined by key organisations and bodies, including the United Nations, FIA and Motorsport UK."
+        }
+      ]
+    },
+    {
+      "id": "sustainability",
+      "title": "Sustainability Targets",
+      "icon": "eco",
+      "sections": [
+        {
+          "type": "text",
+          "body": "The BTCC is committed to a comprehensive sustainability strategy spanning cars, teams, circuits, central functions, suppliers, partners and fans."
+        },
+        {
+          "type": "heading",
+          "body": "Cars"
+        },
+        {
+          "type": "text",
+          "body": "Aim to run 100% sustainable fuel from 2025/26. Sustainable bodywork materials to be researched and developed for future use. Tyres, brakes and wheels to be constructed from more sustainably sourced and recycled materials. Stable technical regulations to prolong the life of components. Used tyres, brakes and damaged wheels can be returned to manufacturers to ensure recycling."
+        },
+        {
+          "type": "heading",
+          "body": "Teams"
+        },
+        {
+          "type": "text",
+          "body": "New environmental policies at HQs, and Motorsport UK Sustainability Accreditation to be achieved. Enhanced communications of sustainability initiatives, actions and partnerships. Greener travel planning and mileage logging to measure and set targets for reducing carbon footprint. A new award to celebrate progress and proactive approaches to sustainability, judged by an independent panel of experts."
+        },
+        {
+          "type": "heading",
+          "body": "Circuits"
+        },
+        {
+          "type": "text",
+          "body": "Published commitments to environmental policies and local charities. Guidelines and procedures for spill management, waste oil recycling and disposal. Improved recycling and waste collection services for BTCC events. Digital ticketing for all events. Aim for 100% of recyclable waste from BTCC events to be reused, recycled or composted."
+        },
+        {
+          "type": "heading",
+          "body": "BTCC Central Functions"
+        },
+        {
+          "type": "text",
+          "body": "New environmental policies, and Motorsport UK Sustainability Accreditation to be achieved. The championship's carbon footprint to be measured, to reduce and work towards being carbon neutral. Greener travel planning and mileage logging to reduce carbon footprint."
+        },
+        {
+          "type": "heading",
+          "body": "Suppliers & Partners"
+        },
+        {
+          "type": "text",
+          "body": "Suppliers and partners to commit to working towards more sustainable working practices. All current official suppliers to publish sustainability pages on their respective websites. BTCC's procurement policy to be refined to ensure all current or future suppliers and partners adhere to the strategy. Investigation into the use of local suppliers to reduce transport and add benefit to each circuit's local economy."
+        },
+        {
+          "type": "heading",
+          "body": "Fans"
+        },
+        {
+          "type": "text",
+          "body": "Activations to educate fans on sustainability. Work with schools and STEM programmes to inspire the next generation."
+        }
+      ]
+    },
+    {
+      "id": "sustainability-implementation",
+      "title": "Sustainability Implementation",
+      "icon": "eco",
+      "sections": [
+        {
+          "type": "text",
+          "body": "The BTCC's sustainability targets are connected by three core themes: Lead, Track, and Race to Carbon Neutral."
+        },
+        {
+          "type": "heading",
+          "body": "2024"
+        },
+        {
+          "type": "text",
+          "body": "Cars: Used tyres, brakes and damaged wheels can be returned by teams to manufacturers to ensure recycling. Suppliers of tyres, brakes and wheels to communicate practices."
+        },
+        {
+          "type": "text",
+          "body": "Teams + Central: Appoint environmental manager to implement strategy. Publish travel plans for race weekends and logging of mileage. Publish sustainability page on website. Environmental policies published."
+        },
+        {
+          "type": "text",
+          "body": "Circuits: Commitment to environmental policy and align with local charity. Publish sustainability page on website."
+        },
+        {
+          "type": "text",
+          "body": "Suppliers: BTCC to refine procurement policy to include green credentials. Commit to moving towards more sustainable working practices."
+        },
+        {
+          "type": "heading",
+          "body": "2025"
+        },
+        {
+          "type": "text",
+          "body": "Teams: Sustainability award launch. Teams + Circuits: Oil spills and disposals appropriately handled with new procedures. Motorsport UK Sustainability Accreditation to have been applied for."
+        },
+        {
+          "type": "text",
+          "body": "Central: Measuring of overall championship carbon footprint begins. Circuits: Event programmes available digitally, with section on sustainability. Fans: Aim for new fan zone activations at events to educate on sustainability."
+        },
+        {
+          "type": "heading",
+          "body": "2025 / 2026"
+        },
+        {
+          "type": "text",
+          "body": "Cars: Aim to use 100% sustainable fuel."
+        },
+        {
+          "type": "heading",
+          "body": "2026"
+        },
+        {
+          "type": "text",
+          "body": "Circuits: Motorsport UK Sustainability Accreditation to have been applied for. Improved recycling, waste collection services and infrastructure. Central: Reduction of carbon footprint begins."
+        },
+        {
+          "type": "heading",
+          "body": "2030"
+        },
+        {
+          "type": "text",
+          "body": "Circuits: Aim to reuse, recycle or compost 100% of recyclable waste from events."
+        },
+        {
+          "type": "heading",
+          "body": "2035+"
+        },
+        {
+          "type": "text",
+          "body": "Cars: Tyre construction from 100% recycled materials. BTCC: Carbon neutral championship."
+        },
+        {
+          "type": "heading",
+          "body": "Ongoing"
+        },
+        {
+          "type": "text",
+          "body": "Cars: Discussions regarding powerplant finalisation from 2027 onwards. Brakes and wheels construction from sustainably sourced materials. Regulations review to allow more sustainable bodywork materials. Stability of technical regulations to prolong the life of components."
+        },
+        {
+          "type": "text",
+          "body": "Teams + Central: Explore sustainable fuels for commercial vehicle event travel. Working with organisations to collaborate on Climate Action."
+        },
+        {
+          "type": "text",
+          "body": "Fans: Continual reviews of education and STEM courses and programmes. Suppliers: Sustainability documents required as part of future tender processes. Investigation into use of more local suppliers for future events."
+        },
+        {
+          "type": "heading",
+          "body": "BTCC's Commitment"
+        },
+        {
+          "type": "text",
+          "body": "Lead — by placing sustainability at the forefront of operations through meaningful communication, competition and education."
+        },
+        {
+          "type": "text",
+          "body": "Track — by monitoring and honestly reporting on progress and continuous improvements across all areas of the championship."
+        },
+        {
+          "type": "text",
+          "body": "Race to Carbon Neutral — through proactive approaches to reducing, reusing, recycling, minimising waste and carbon output."
+        }
+      ]
+    }
+  ]
+}
