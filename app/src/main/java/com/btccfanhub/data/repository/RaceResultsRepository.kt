@@ -11,8 +11,29 @@ import org.json.JSONObject
 
 object RaceResultsRepository {
 
+    /** BTCC points for positions 1–15 when JSON has no points (e.g. 2014–2023 data). */
+    private val pointsByPosition = intArrayOf(20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+
+    private fun pointsFromPosition(position: Int): Int =
+        if (position in 1..15) pointsByPosition[position - 1] else 0
+
+    /** BTCC bonus points: fastest lap +1, lead lap +1, R1 pole +1. Used when JSON has no points. */
+    private fun pointsWithBonuses(
+        position: Int,
+        fastestLap: Boolean,
+        leadLap: Boolean,
+        pole: Boolean,
+        isRace1: Boolean,
+    ): Int {
+        var p = pointsFromPosition(position)
+        if (fastestLap) p += 1
+        if (leadLap) p += 1
+        if (pole && isRace1) p += 1
+        return p
+    }
+
     private val client = OkHttpClient()
-    private val url2026 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results.json"
+    private val url2026 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2026.json"
     private val url2025 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2025.json"
     private val url2024 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2024.json"
     private val url2023 = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2023.json"
@@ -75,6 +96,7 @@ object RaceResultsRepository {
         cache = { cache2023 },
         cacheTime = { cacheTime2023 },
         ttl = CACHE_MS_2025,
+        transform = ::reorder2023RoundsToChartOrder,
         setCache = { r, t -> cache2023 = r; cacheTime2023 = t },
     )
 
@@ -88,11 +110,32 @@ object RaceResultsRepository {
     suspend fun getResults2015(): List<RoundResult> = fetchAndCache(url2015, { cache2015 }, { cacheTime2015 }, CACHE_MS_2025) { r, t -> cache2015 = r; cacheTime2015 = t }
     suspend fun getResults2014(): List<RoundResult> = fetchAndCache(url2014, { cache2014 }, { cacheTime2014 }, CACHE_MS_2025) { r, t -> cache2014 = r; cacheTime2014 = t }
 
+    /** 2023 chart order: DPN, BHI, SNE, THR, OUL, CRO, KNO, DPGP, SIL, BHGP. */
+    private fun reorder2023RoundsToChartOrder(rounds: List<RoundResult>): List<RoundResult> {
+        val order = listOf(
+            "Donington Park",
+            "Brands Hatch Indy",
+            "Snetterton",
+            "Thruxton",
+            "Oulton Park",
+            "Croft",
+            "Knockhill",
+            "Donington Park GP",
+            "Silverstone",
+            "Brands Hatch GP",
+        )
+        val byVenue = rounds.associateBy { it.venue }
+        val reordered = order.mapNotNull { venue -> byVenue[venue] }
+        if (reordered.size != order.size) return rounds
+        return reordered.mapIndexed { i, r -> r.copy(round = i + 1) }
+    }
+
     private suspend fun fetchAndCache(
         url: String,
         cache: () -> List<RoundResult>?,
         cacheTime: () -> Long,
         ttl: Long,
+        transform: (List<RoundResult>) -> List<RoundResult> = { it },
         setCache: (List<RoundResult>, Long) -> Unit,
     ): List<RoundResult> = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
@@ -103,7 +146,7 @@ object RaceResultsRepository {
             val body = client.newCall(request).execute().use { it.body?.string() }
                 ?: return@withContext cache() ?: emptyList()
 
-            val rounds = parseRounds(JSONObject(body))
+            val rounds = transform(parseRounds(JSONObject(body)))
             setCache(rounds, now)
             rounds
         } catch (e: Exception) {
@@ -119,22 +162,35 @@ object RaceResultsRepository {
             val races = (0 until racesArr.length()).map { j ->
                 val race = racesArr.getJSONObject(j)
                 val resultsArr = race.optJSONArray("results") ?: org.json.JSONArray()
+                val isRace1 = (j == 0)
                 RaceEntry(
                     label       = race.optString("label", "Race ${j + 1}"),
                     date        = race.optString("date", "").takeIf { it.isNotEmpty() },
                     fullRaceUrl = race.optString("fullRaceUrl", "").takeIf { it.isNotEmpty() },
                     results = (0 until resultsArr.length()).map { k ->
                         val d = resultsArr.getJSONObject(k)
+                        val pos = d.optInt("pos", 0)
+                        val rawPoints = d.optInt("points", 0)
+                        val fl = d.optBoolean("fastestLap", false) || d.optBoolean("fl", false)
+                        val lead = d.optBoolean("leadLap", false) || d.optBoolean("l", false)
+                        val pole = d.optBoolean("pole", false) || d.optBoolean("p", false)
+                        val points = when {
+                            rawPoints > 0 -> rawPoints
+                            else -> pointsWithBonuses(pos, fl, lead, pole, isRace1)
+                        }
                         DriverResult(
-                            position = d.optInt("pos", 0),
-                            number   = d.optInt("no", 0),
-                            driver   = d.optString("driver", ""),
-                            team     = d.optString("team", ""),
-                            laps     = d.optInt("laps", 0),
-                            time     = d.optString("time", ""),
-                            gap      = d.optString("gap", "").takeIf { it.isNotEmpty() },
-                            bestLap  = d.optString("bestLap", ""),
-                            points   = d.optInt("points", 0),
+                            position   = pos,
+                            number     = d.optInt("no", 0),
+                            driver     = d.optString("driver", ""),
+                            team       = d.optString("team", ""),
+                            laps       = d.optInt("laps", 0),
+                            time       = d.optString("time", ""),
+                            gap        = d.optString("gap", "").takeIf { it.isNotEmpty() },
+                            bestLap    = d.optString("bestLap", ""),
+                            points     = points,
+                            fastestLap = fl,
+                            leadLap    = lead,
+                            pole       = pole,
                         )
                     },
                 )

@@ -14,11 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.platform.LocalContext
 import com.btccfanhub.data.DriverSeasonStats
 import com.btccfanhub.data.FavouriteDriverStore
+import com.btccfanhub.data.ChampionshipProgressionComputer
 import com.btccfanhub.data.SeasonStatsComputer
 import com.btccfanhub.data.Standings2014
 import com.btccfanhub.data.Standings2015
@@ -41,11 +45,13 @@ import com.btccfanhub.data.Standings2023
 import com.btccfanhub.data.Standings2024
 import com.btccfanhub.data.Standings2025
 import com.btccfanhub.data.Standings2026
+import com.btccfanhub.data.SeasonData
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.RoundResult
 import com.btccfanhub.data.model.TeamStanding
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.RaceResultsRepository
+import com.btccfanhub.data.repository.SeasonRepository
 import com.btccfanhub.data.repository.StandingsRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
@@ -55,6 +61,8 @@ import com.btccfanhub.ui.theme.BtccSurface
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,9 +71,14 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
+    val context = LocalContext.current
+
+    // Single source of truth for 2014–2025: from Excel (assets/data/season_YYYY.json)
+    var seasonData by remember { mutableStateOf<SeasonData?>(null) }
+
     // Live 2026 data fetched from the network
     var liveDrivers  by remember { mutableStateOf<List<DriverStanding>?>(null) }
     var liveTeams    by remember { mutableStateOf<List<TeamStanding>?>(null) }
@@ -82,7 +95,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     val today         = LocalDate.now()
     val seasonStarted = today >= seasonStartDate
     var selectedYear  by rememberSaveable { mutableIntStateOf(if (today >= LocalDate.of(2026, 4, 18)) 2026 else 2025) }
-    val pagerState    = rememberPagerState(pageCount = { 4 })
+    val pagerState    = rememberPagerState(pageCount = { 5 })
     val scope         = rememberCoroutineScope()
 
     suspend fun refresh(invalidate: Boolean = false) {
@@ -118,8 +131,15 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
     suspend fun refreshResults(invalidate: Boolean = false) {
         resultsLoading = true
-        if (invalidate) RaceResultsRepository.invalidateCache()
-        currentRaceResults = loadResultsForYear(selectedYear)
+        if (selectedYear in 2014..2025) {
+            if (invalidate) SeasonRepository.invalidateCache()
+            val data = SeasonRepository.getSeason(context, selectedYear)
+            seasonData = data
+            currentRaceResults = data?.rounds ?: emptyList()
+        } else {
+            if (invalidate) RaceResultsRepository.invalidateCache()
+            currentRaceResults = loadResultsForYear(selectedYear)
+        }
         resultsLoading = false
     }
 
@@ -129,34 +149,55 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         if (today >= seasonStartDate) refresh()
     }
 
-    // Load results whenever selected year changes (cached after first fetch)
+    // Load results whenever selected year changes: 2014–2025 from assets (Excel), else network
     LaunchedEffect(selectedYear) {
         resultsLoading = true
-        currentRaceResults = loadResultsForYear(selectedYear)
+        if (selectedYear in 2014..2025) {
+            val data = SeasonRepository.getSeason(context, selectedYear)
+            seasonData = data
+            currentRaceResults = data?.rounds ?: loadResultsForYear(selectedYear)
+        } else {
+            seasonData = null
+            currentRaceResults = loadResultsForYear(selectedYear)
+        }
         resultsLoading = false
     }
 
-    // Historical standings lookup helpers (2026 uses live data with Standings2026 as fallback)
-    val histDrivers = when (selectedYear) {
-        2014 -> Standings2014.drivers; 2015 -> Standings2015.drivers
-        2016 -> Standings2016.drivers; 2017 -> Standings2017.drivers
-        2018 -> Standings2018.drivers; 2019 -> Standings2019.drivers
-        2020 -> Standings2020.drivers; 2021 -> Standings2021.drivers
-        2022 -> Standings2022.drivers; 2023 -> Standings2023.drivers
-        2024 -> Standings2024.drivers; 2025 -> Standings2025.drivers
-        2026 -> Standings2026.drivers
+    // Historical standings: from season asset (Excel) when available, else Kotlin fallback
+    val histDrivers = when {
+        seasonData != null -> seasonData!!.drivers
+        selectedYear == 2014 -> Standings2014.drivers
+        selectedYear == 2015 -> Standings2015.drivers
+        selectedYear == 2016 -> Standings2016.drivers
+        selectedYear == 2017 -> Standings2017.drivers
+        selectedYear == 2018 -> Standings2018.drivers
+        selectedYear == 2019 -> Standings2019.drivers
+        selectedYear == 2020 -> Standings2020.drivers
+        selectedYear == 2021 -> Standings2021.drivers
+        selectedYear == 2022 -> Standings2022.drivers
+        selectedYear == 2023 -> Standings2023.drivers
+        selectedYear == 2024 -> Standings2024.drivers
+        selectedYear == 2025 -> Standings2025.drivers
+        selectedYear == 2026 -> Standings2026.drivers
         else -> emptyList()
     }
-    val histTeams = when (selectedYear) {
-        2014 -> Standings2014.teams; 2015 -> Standings2015.teams
-        2016 -> Standings2016.teams; 2017 -> Standings2017.teams
-        2018 -> Standings2018.teams; 2019 -> Standings2019.teams
-        2020 -> Standings2020.teams; 2021 -> Standings2021.teams
-        2022 -> Standings2022.teams; 2023 -> Standings2023.teams
-        2024 -> Standings2024.teams; 2025 -> Standings2025.teams
-        2026 -> Standings2026.teams
+    val histTeams = when {
+        seasonData != null -> seasonData!!.teams.ifEmpty { null }
+        selectedYear == 2014 -> Standings2014.teams
+        selectedYear == 2015 -> Standings2015.teams
+        selectedYear == 2016 -> Standings2016.teams
+        selectedYear == 2017 -> Standings2017.teams
+        selectedYear == 2018 -> Standings2018.teams
+        selectedYear == 2019 -> Standings2019.teams
+        selectedYear == 2020 -> Standings2020.teams
+        selectedYear == 2021 -> Standings2021.teams
+        selectedYear == 2022 -> Standings2022.teams
+        selectedYear == 2023 -> Standings2023.teams
+        selectedYear == 2024 -> Standings2024.teams
+        selectedYear == 2025 -> Standings2025.teams
+        selectedYear == 2026 -> Standings2026.teams
         else -> emptyList()
-    }.ifEmpty { null }
+    }?.ifEmpty { null }
 
     val show2026Drivers = selectedYear == 2026 && seasonStarted && liveDrivers != null
     val show2026Teams   = selectedYear == 2026 && seasonStarted && liveTeams != null
@@ -239,24 +280,72 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             }
         }
 
-        TabRow(
-            selectedTabIndex = pagerState.currentPage,
-            containerColor   = BtccSurface,
-            contentColor     = BtccYellow,
+        // Tab row with horizontal scroll; fade only on side where there's more content
+        val tabScrollState = rememberScrollState()
+        val canScrollLeft  = tabScrollState.value > 0
+        val canScrollRight = tabScrollState.maxValue > 0 && tabScrollState.value < tabScrollState.maxValue
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
         ) {
-            listOf("DRIVERS", "TEAMS", "RESULTS", "STATS").forEachIndexed { index, label ->
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
-                    text = {
-                        Text(
-                            label,
-                            fontWeight    = FontWeight.ExtraBold,
-                            fontSize      = 12.sp,
-                            letterSpacing = 1.sp,
-                            color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+            PrimaryScrollableTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor   = BtccSurface,
+                contentColor     = BtccYellow,
+                edgePadding     = 0.dp,
+                scrollState     = tabScrollState,
+            ) {
+                listOf("DRIVERS", "TEAMS", "RESULTS", "STATS", "CHART").forEachIndexed { index, label ->
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        text = {
+                            Text(
+                                label,
+                                fontWeight    = FontWeight.ExtraBold,
+                                fontSize      = 12.sp,
+                                letterSpacing = 1.sp,
+                                color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
+                }
+            }
+            if (canScrollLeft) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .width(32.dp)
+                        .fillMaxHeight()
+                        .background(
+                            Brush.horizontalGradient(
+                                colorStops = arrayOf(
+                                    0f to BtccBackground,
+                                    1f to Color.Transparent,
+                                ),
+                            ),
                         )
-                    },
+                        .pointerInteropFilter { false },
+                )
+            }
+            if (canScrollRight) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .width(32.dp)
+                        .fillMaxHeight()
+                        .background(
+                            Brush.horizontalGradient(
+                                colorStops = arrayOf(
+                                    0f to Color.Transparent,
+                                    1f to BtccBackground,
+                                ),
+                            ),
+                        )
+                        .pointerInteropFilter { false },
                 )
             }
         }
@@ -264,20 +353,21 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         val isLiveLoading = selectedYear == 2026 && isRefreshing && liveDrivers == null
         val isLiveFailed  = selectedYear == 2026 && loadFailed && liveDrivers == null
 
-        PullToRefreshBox(
-            isRefreshing = isRefreshing || resultsLoading,
-            onRefresh    = {
-                scope.launch {
-                    if (pagerState.currentPage in 2..3) {
-                        refreshResults(invalidate = true)
-                    } else if (selectedYear == 2026) {
-                        refresh(invalidate = true)
+        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+            PullToRefreshBox(
+                isRefreshing = isRefreshing || resultsLoading,
+                onRefresh    = {
+                    scope.launch {
+                        if (pagerState.currentPage in 2..4) {
+                            refreshResults(invalidate = true)
+                        } else if (selectedYear == 2026) {
+                            refresh(invalidate = true)
+                        }
                     }
-                }
-            },
-            modifier     = Modifier.fillMaxSize(),
-        ) {
-            HorizontalPager(
+                },
+                modifier     = Modifier.fillMaxSize(),
+            ) {
+                HorizontalPager(
                 state    = pagerState,
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
@@ -342,11 +432,93 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                         )
                     }
 
+                    // --- Championship progression chart ---
+                    page == 4 -> ProgressionTab(
+                        results = currentRaceResults,
+                        loading = resultsLoading,
+                        year = selectedYear,
+                        seasonStartDate = seasonStartDate,
+                        officialPointsOverride = seasonData?.drivers?.associate { it.name to it.points },
+                    )
+
                     else ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
                         }
                 }
+            }
+            }
+        }
+    }
+}
+
+/** Official final points by driver name for historical years (2014–2025). Used to scale chart to match official totals. */
+private fun officialPointsByDriver(year: Int): Map<String, Int>? = when (year) {
+    2014 -> Standings2014.drivers.associate { it.name to it.points }
+    2015 -> Standings2015.drivers.associate { it.name to it.points }
+    2016 -> Standings2016.drivers.associate { it.name to it.points }
+    2017 -> Standings2017.drivers.associate { it.name to it.points }
+    2018 -> Standings2018.drivers.associate { it.name to it.points }
+    2019 -> Standings2019.drivers.associate { it.name to it.points }
+    2020 -> Standings2020.drivers.associate { it.name to it.points }
+    2021 -> Standings2021.drivers.associate { it.name to it.points }
+    2022 -> Standings2022.drivers.associate { it.name to it.points }
+    2023 -> Standings2023.drivers.associate { it.name to it.points }
+    2024 -> Standings2024.drivers.associate { it.name to it.points }
+    2025 -> Standings2025.drivers.associate { it.name to it.points }
+    else -> null
+}
+
+@Composable
+private fun ProgressionTab(
+    results: List<RoundResult>,
+    loading: Boolean,
+    year: Int,
+    seasonStartDate: LocalDate,
+    officialPointsOverride: Map<String, Int>? = null,
+) {
+    when {
+        loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = BtccYellow)
+        }
+        results.isEmpty() -> ResultsNotStarted(year, seasonStartDate)
+        else -> {
+            val rawSeries = remember(results) { ChampionshipProgressionComputer.compute(results) }
+            val officialPoints = remember(year, officialPointsOverride) {
+                officialPointsOverride ?: officialPointsByDriver(year)
+            }
+            val series = remember(rawSeries, officialPoints) {
+                val list = if (officialPoints == null) rawSeries
+                else rawSeries.map { s ->
+                    val cumulative = s.cumulativePointsByRound
+                    val computedFinal = cumulative.lastOrNull() ?: 0
+                    val official = officialPoints[s.driver]
+                    if (official != null && computedFinal > 0) {
+                        val scale = official.toDouble() / computedFinal
+                        val maxPts = maxOf(0, official) // avoid empty range when official < 0 (e.g. penalties)
+                        val scaled = cumulative.mapIndexed { i, v ->
+                            if (i == cumulative.lastIndex) maxPts
+                            else (v * scale).toInt().coerceIn(0, maxPts)
+                        }
+                        s.copy(cumulativePointsByRound = scaled)
+                    } else s
+                }
+                list.sortedByDescending { it.cumulativePointsByRound.lastOrNull() ?: 0 }
+            }
+            val scrollState = androidx.compose.foundation.rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ChampionshipProgressionChart(
+                    series = series,
+                    roundLabels = remember(results) {
+                        results.sortedBy { it.round }.map { it.venue }
+                    },
+                )
             }
         }
     }

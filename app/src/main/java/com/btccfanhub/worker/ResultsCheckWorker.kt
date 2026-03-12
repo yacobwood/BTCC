@@ -30,7 +30,7 @@ class ResultsCheckWorker(
         const val EXTRA_RESULTS_ROUND = "results_round"
         private const val NOTIF_ID = 1002
         private const val RESULTS_URL =
-            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results.json"
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2026.json"
     }
 
     private val client = OkHttpClient()

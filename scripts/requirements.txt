@@ -1,0 +1,2 @@
+# For csv_to_standings.py when using Excel (Drivers.xlsx / Teams.xlsx)
+openpyxl>=3.0.0

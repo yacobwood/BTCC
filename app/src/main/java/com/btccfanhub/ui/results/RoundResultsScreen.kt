@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.model.DriverResult
 import com.btccfanhub.data.model.RaceEntry
 import com.btccfanhub.data.repository.RaceResultsRepository
+import com.btccfanhub.data.repository.SeasonRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccOutline
@@ -46,22 +47,26 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
 
     LaunchedEffect(year, round) {
         loading = true
-        val results = when (year) {
-            2014 -> RaceResultsRepository.getResults2014()
-            2015 -> RaceResultsRepository.getResults2015()
-            2016 -> RaceResultsRepository.getResults2016()
-            2017 -> RaceResultsRepository.getResults2017()
-            2018 -> RaceResultsRepository.getResults2018()
-            2019 -> RaceResultsRepository.getResults2019()
-            2020 -> RaceResultsRepository.getResults2020()
-            2021 -> RaceResultsRepository.getResults2021()
-            2022 -> RaceResultsRepository.getResults2022()
-            2023 -> RaceResultsRepository.getResults2023()
-            2024 -> RaceResultsRepository.getResults2024()
-            2025 -> RaceResultsRepository.getResults2025()
-            else -> RaceResultsRepository.getResults()
+        roundResult = if (year in 2014..2025) {
+            SeasonRepository.getSeason(context, year)?.rounds?.find { it.round == round }
+        } else {
+            val results = when (year) {
+                2014 -> RaceResultsRepository.getResults2014()
+                2015 -> RaceResultsRepository.getResults2015()
+                2016 -> RaceResultsRepository.getResults2016()
+                2017 -> RaceResultsRepository.getResults2017()
+                2018 -> RaceResultsRepository.getResults2018()
+                2019 -> RaceResultsRepository.getResults2019()
+                2020 -> RaceResultsRepository.getResults2020()
+                2021 -> RaceResultsRepository.getResults2021()
+                2022 -> RaceResultsRepository.getResults2022()
+                2023 -> RaceResultsRepository.getResults2023()
+                2024 -> RaceResultsRepository.getResults2024()
+                2025 -> RaceResultsRepository.getResults2025()
+                else -> RaceResultsRepository.getResults()
+            }
+            results.find { it.round == round }
         }
-        roundResult = results.find { it.round == round }
         loading = false
     }
 
@@ -246,6 +251,16 @@ private fun DriverResultRow(result: DriverResult) {
         else -> BtccOutline
     }
 
+    val isLeader = result.position == 1
+    val displayTime = if (result.displayTime.isNotEmpty()) {
+        result.displayTime
+    } else {
+        when {
+            isLeader -> result.time.takeIf { it.isNotEmpty() } ?: result.bestLap.takeIf { it.isNotEmpty() } ?: "—"
+            else     -> result.gap?.let { if (it.startsWith("+")) it else "+$it" } ?: "—"
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -290,22 +305,17 @@ private fun DriverResultRow(result: DriverResult) {
             )
         }
         Column(horizontalAlignment = Alignment.End) {
-            val displayTime = result.gap
-                ?: result.time.takeIf { it.isNotEmpty() }
-                ?: result.bestLap
             Text(
                 displayTime,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize   = 13.sp,
-                color      = if (result.gap == null) BtccYellow else MaterialTheme.colorScheme.onBackground,
+                color      = if (isLeader) BtccYellow else MaterialTheme.colorScheme.onBackground,
             )
-            if (result.points > 0) {
-                Text(
-                    "+${result.points} pts",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = BtccTextSecondary,
-                )
-            }
+            Text(
+                if (result.points > 0) "+${result.points} pts" else "0 pts",
+                style = MaterialTheme.typography.labelSmall,
+                color = BtccTextSecondary,
+            )
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.btccfanhub.data.model
 
 data class DriverResult(
-    val position: Int,      // 0 = DNF / NC
+    val position: Int,      // 0 = DNF / NC / Ret / DSQ etc.
     val number: Int,
     val driver: String,
     val team: String,
@@ -10,6 +10,10 @@ data class DriverResult(
     val gap: String?,       // null for P1
     val bestLap: String,    // e.g. "1:08.011"
     val points: Int,
+    val fastestLap: Boolean = false,  // F/FL in chart — +1 pt
+    val leadLap: Boolean = false,    // L in chart — +1 pt
+    val pole: Boolean = false,       // P in chart — +1 pt (Race 1 only)
+    val displayTime: String = "",   // precomputed: P1 full time, P2+ "+X.XXX" (no calculation on load)
 )
 
 data class RaceEntry(
