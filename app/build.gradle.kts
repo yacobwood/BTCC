@@ -17,15 +17,15 @@ val localProps = Properties().apply {
 }
 
 android {
-    namespace = "com.btcchub"
+    namespace = "com.btccfanhub"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.btcchub"
+        applicationId = "com.btccfanhub"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "closed beta"
+        versionCode = 15
+        versionName = "15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "CONFIGCAT_SDK_KEY", "\"${localProps["configcat.sdk.key"] ?: ""}\"")
@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.youtube.player)
     implementation(libs.configcat)
+    implementation(libs.play.review)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

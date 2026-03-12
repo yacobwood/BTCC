@@ -18,7 +18,8 @@ playwright install chromium
 | **scrape_calendar.py** | Race schedule (round, venue, dates) from btcc.net calendar | Updates dates/venues in `data/calendar.json` or writes `data/calendar_schedule.json` |
 | **scrape_grid.py** | Driver list with car numbers from btcc.net drivers page | `data/grid_scraped.json`; optional merge into `data/drivers.json` |
 | **scrape_results.py** | Historical race results (Race 1/2/3 per round) for a given year | `data/results{year}.json` |
-| **compute_standings.py** | Derive driver/team standings from a `results{year}.json` file | Prints to stdout (for past seasons) |
+| **compute_standings.py** | Derive driver/team standings from a `results{year}.json` file | Prints to stdout; use `--write` to write `data/standings.json` for the app |
+| **update_standings.sh** | Cron helper: run compute_standings for a year and optionally git push | Updates `data/standings.json`; use `--push` to commit and push |
 
 ## Usage
 
@@ -68,13 +69,27 @@ Writes `data/results2024.json`. Requires the year to be listed in the script’s
 
 ### Compute standings from results
 
-After you have `data/results2024.json`, you can compute championship standings for that year:
+After you have `data/results{year}.json`, you can compute championship standings:
 
 ```bash
-python compute_standings.py 2024
+python compute_standings.py 2026          # print to stdout
+python compute_standings.py 2026 --write # write data/standings.json (app loads this via GitHub)
 ```
 
-Prints driver and team standings; useful for checking or for backfilling historical Standings20XX.kt data.
+The app loads live 2026 standings from `data/standings.json` (served at `.../data/standings.json`). Use `--write` to refresh that file from your scraped results.
+
+**Cron:** To update standings from results and push to GitHub on a schedule:
+
+```bash
+./scraper/update_standings.sh 2026        # write data/standings.json only
+./scraper/update_standings.sh 2026 --push # write, then git add/commit/push
+```
+
+Example crontab (every 6 hours, after your results scraper has run):
+
+```cron
+0 */6 * * * cd /path/to/BTCC && ./scraper/update_standings.sh 2026 --push
+```
 
 ## Automating (no need to run manually)
 
