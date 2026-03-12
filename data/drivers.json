@@ -457,7 +457,7 @@
       "number": 25,
       "name": "Chris Smiley",
       "team": "Restart Racing",
-      "car": "Hyundai i30 N",
+      "car": "Hyundai i30 Fastback N",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/04/Smiley-0H5A4657-e1745404716647.png",
       "nationality": "Northern Irish",
       "bio": "Northern Irish driver Chris Smiley is a tenacious BTCC competitor with several strong seasons in the championship.",
@@ -553,6 +553,28 @@
       ],
       "dateOfBirth": "1991-04-18",
       "birthplace": "Larne, Northern Ireland"
+    },
+    {
+      "number": 132,
+      "name": "James Dorlin",
+      "team": "Restart Racing",
+      "car": "Hyundai i30 Fastback N",
+      "imageUrl": "",
+      "nationality": "British",
+      "bio": "James Dorlin joins Restart Racing for 2026 after racing with TOYOTA GAZOO Racing UK with IAA in 2025.",
+      "history": [
+        {
+          "year": 2025,
+          "team": "TOYOTA GAZOO Racing UK with IAA",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 19,
+          "points": 47,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        }
+      ]
     },
     {
       "number": 27,
@@ -1807,9 +1829,9 @@
     },
     {
       "name": "Restart Racing",
-      "car": "Hyundai i30 N",
+      "car": "Hyundai i30 Fastback N",
       "entries": 2,
-      "bio": "Formerly known as BTC Racing, Restart Racing switch to Hyundai i30 N machinery for 2026 in a technical partnership with EXCELR8.",
+      "bio": "Formerly known as BTC Racing, Restart Racing switch to Hyundai i30 Fastback N machinery for 2026 in a technical partnership with EXCELR8.",
       "standing2025": 4,
       "points2025": 386
     }
