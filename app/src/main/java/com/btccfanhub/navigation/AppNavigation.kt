@@ -145,6 +145,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             MoreScreen(
                 onSettingsClick = { navController.navigate(Screen.Settings.route) },
                 onBugReportClick = { navController.navigate(Screen.BugReport.route) },
+                onRadioClick = { navController.navigate(Screen.Radio.route) },
                 onInfoPageClick = { pageId -> navController.navigate(Screen.InfoPage.route(pageId)) },
             )
         }

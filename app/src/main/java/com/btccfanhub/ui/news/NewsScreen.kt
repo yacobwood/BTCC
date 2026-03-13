@@ -1,5 +1,6 @@
 package com.btccfanhub.ui.news
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,9 +29,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
@@ -38,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.btccfanhub.R
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.model.Article
 import com.btccfanhub.ui.theme.BtccBackground
@@ -323,7 +329,7 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () 
             )
         }
 
-        // Gradient: dark at top (for readability of header) + dark at bottom (for title)
+        // Gradient: dark at top (for readability of header) + strong dark at bottom (for title)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -331,9 +337,10 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () 
                     Brush.verticalGradient(
                         colorStops = if (article.imageUrl != null) arrayOf(
                             0.0f to Color(0xCC000000),
-                            0.25f to Color.Transparent,
-                            0.5f to Color.Transparent,
-                            1.0f to Color(0xF2000000),
+                            0.22f to Color.Transparent,
+                            0.4f to Color.Transparent,
+                            0.55f to Color(0xE6000000),
+                            1.0f to Color(0xF5000000),
                         ) else arrayOf(
                             0.0f to Color(0xCC000000),
                             0.2f to BtccYellow.copy(alpha = 0.45f),
@@ -348,17 +355,16 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () 
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                "BTCC",
-                fontWeight = FontWeight.Black,
-                fontSize = 26.sp,
-                color = BtccYellow,
-                letterSpacing = (-0.5).sp,
-                modifier = Modifier.weight(1f),
+            Image(
+                painter = painterResource(R.drawable.logo_long),
+                contentDescription = "BTCC",
+                modifier = Modifier.height(38.dp),
+                contentScale = ContentScale.Fit,
             )
+            Spacer(Modifier.weight(1f))
             IconButton(
                 onClick = onSearchClick,
                 modifier = Modifier.size(36.dp),
@@ -397,6 +403,13 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () 
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
                 lineHeight = 32.sp,
+                style = TextStyle(
+                    shadow = Shadow(
+                        color = Color.Black,
+                        offset = Offset(0f, 1f),
+                        blurRadius = 10f,
+                    ),
+                ),
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -436,8 +449,9 @@ private fun GridCard(article: Article, onClick: () -> Unit, modifier: Modifier =
                     Brush.verticalGradient(
                         colorStops = arrayOf(
                             0.0f to Color.Transparent,
-                            0.45f to Color.Transparent,
-                            1.0f to Color(0xEE000000),
+                            0.35f to Color.Transparent,
+                            0.7f to Color(0xE6000000),
+                            1.0f to Color(0xF5000000),
                         )
                     )
                 )
@@ -450,7 +464,13 @@ private fun GridCard(article: Article, onClick: () -> Unit, modifier: Modifier =
         ) {
             Text(
                 article.title,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    shadow = Shadow(
+                        color = Color.Black,
+                        offset = Offset(0f, 1f),
+                        blurRadius = 6f,
+                    ),
+                ),
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 maxLines = 3,
@@ -569,6 +589,7 @@ private fun AutoSizeText(
     fontWeight: FontWeight,
     color: Color,
     lineHeight: TextUnit,
+    style: TextStyle? = null,
     modifier: Modifier = Modifier,
 ) {
     var fontSize by remember(text) { mutableStateOf(maxFontSize) }
@@ -576,6 +597,7 @@ private fun AutoSizeText(
 
     Text(
         text = text,
+        style = style ?: TextStyle(),
         fontWeight = fontWeight,
         color = color,
         fontSize = fontSize,

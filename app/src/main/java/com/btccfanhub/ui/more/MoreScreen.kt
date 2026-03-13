@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 fun MoreScreen(
     onSettingsClick: () -> Unit,
     onBugReportClick: () -> Unit,
+    onRadioClick: () -> Unit,
     onInfoPageClick: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -109,6 +111,12 @@ fun MoreScreen(
                 modifier = Modifier.padding(bottom = 12.dp),
             )
 
+            MoreRow(
+                label = "Radio",
+                icon = Icons.Default.Radio,
+                onClick = onRadioClick,
+            )
+            Spacer(Modifier.height(4.dp))
             MoreRow(
                 label = "Settings",
                 icon = Icons.Default.Settings,

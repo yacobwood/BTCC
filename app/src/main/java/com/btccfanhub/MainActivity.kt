@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Radio
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -236,7 +235,6 @@ private fun MainScreen(
     var showOnboarding by remember { mutableStateOf(OnboardingStore.shouldShow(context)) }
     var showWhatsNew by remember { mutableStateOf(WhatsNewStore.shouldShow(context)) }
 
-    val flagRadio   by FeatureFlagsStore.radioTab.collectAsState()
     val flagAds     by FeatureFlagsStore.adsEnabled.collectAsState()
     val flagWhatsNew by FeatureFlagsStore.whatsNew.collectAsState()
 
@@ -310,7 +308,6 @@ private fun MainScreen(
         add(NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange))
         add(NavItem(Screen.Drivers,  "Grid",     Icons.Default.Groups))
         add(NavItem(Screen.Results,  "Results",  Icons.Default.EmojiEvents))
-        if (flagRadio) add(NavItem(Screen.Radio, "Radio", Icons.Default.Radio))
         add(NavItem(Screen.More,     "More",     Icons.Default.MoreHoriz))
     }
 

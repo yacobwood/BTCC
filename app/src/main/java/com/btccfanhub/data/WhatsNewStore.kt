@@ -47,6 +47,15 @@ object WhatsNewStore {
             "Championship chart — R1–R10 labels directly under each round line; drivers sorted by points",
             "2026 results — app now loads from results2026.json for the current season",
         ),
+        18 to listOf(
+            "Refreshed app icon and monochrome icon for Android 13+",
+            "New splash screen with BTCC blue",
+        ),
+        19 to listOf(
+            "BTCC logo on the news hero — refreshed header",
+            "Radio moved to More tab",
+            "Headlines on images easier to read — stronger gradients and text shadow",
+        ),
         13 to listOf(
             "Race history back to 2014 — browse full results for every season from 2014 to 2025",
             "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",
