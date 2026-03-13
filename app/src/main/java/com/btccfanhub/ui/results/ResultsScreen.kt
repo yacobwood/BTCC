@@ -32,18 +32,6 @@ import com.btccfanhub.data.DriverSeasonStats
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.ChampionshipProgressionComputer
 import com.btccfanhub.data.SeasonStatsComputer
-import com.btccfanhub.data.Standings2014
-import com.btccfanhub.data.Standings2015
-import com.btccfanhub.data.Standings2016
-import com.btccfanhub.data.Standings2017
-import com.btccfanhub.data.Standings2018
-import com.btccfanhub.data.Standings2019
-import com.btccfanhub.data.Standings2020
-import com.btccfanhub.data.Standings2021
-import com.btccfanhub.data.Standings2022
-import com.btccfanhub.data.Standings2023
-import com.btccfanhub.data.Standings2024
-import com.btccfanhub.data.Standings2025
 import com.btccfanhub.data.Standings2026
 import com.btccfanhub.data.SeasonData
 import com.btccfanhub.data.model.DriverStanding
@@ -155,7 +143,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         if (selectedYear in 2014..2025) {
             val data = SeasonRepository.getSeason(context, selectedYear)
             seasonData = data
-            currentRaceResults = data?.rounds ?: loadResultsForYear(selectedYear)
+            currentRaceResults = data?.rounds ?: emptyList()
         } else {
             seasonData = null
             currentRaceResults = loadResultsForYear(selectedYear)
@@ -163,40 +151,16 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         resultsLoading = false
     }
 
-    // Historical standings: from season asset (Excel) when available, else Kotlin fallback
+    // 2014–2025: single source of truth = season asset only (no Kotlin/network fallback)
     val histDrivers = when {
         seasonData != null -> seasonData!!.drivers
-        selectedYear == 2014 -> Standings2014.drivers
-        selectedYear == 2015 -> Standings2015.drivers
-        selectedYear == 2016 -> Standings2016.drivers
-        selectedYear == 2017 -> Standings2017.drivers
-        selectedYear == 2018 -> Standings2018.drivers
-        selectedYear == 2019 -> Standings2019.drivers
-        selectedYear == 2020 -> Standings2020.drivers
-        selectedYear == 2021 -> Standings2021.drivers
-        selectedYear == 2022 -> Standings2022.drivers
-        selectedYear == 2023 -> Standings2023.drivers
-        selectedYear == 2024 -> Standings2024.drivers
-        selectedYear == 2025 -> Standings2025.drivers
-        selectedYear == 2026 -> Standings2026.drivers
+        selectedYear == 2026 -> Standings2026.drivers // 2026 before live load
         else -> emptyList()
     }
     val histTeams = when {
         seasonData != null -> seasonData!!.teams.ifEmpty { null }
-        selectedYear == 2014 -> Standings2014.teams
-        selectedYear == 2015 -> Standings2015.teams
-        selectedYear == 2016 -> Standings2016.teams
-        selectedYear == 2017 -> Standings2017.teams
-        selectedYear == 2018 -> Standings2018.teams
-        selectedYear == 2019 -> Standings2019.teams
-        selectedYear == 2020 -> Standings2020.teams
-        selectedYear == 2021 -> Standings2021.teams
-        selectedYear == 2022 -> Standings2022.teams
-        selectedYear == 2023 -> Standings2023.teams
-        selectedYear == 2024 -> Standings2024.teams
-        selectedYear == 2025 -> Standings2025.teams
-        selectedYear == 2026 -> Standings2026.teams
-        else -> emptyList()
+        selectedYear == 2026 -> Standings2026.teams.ifEmpty { null }
+        else -> null
     }?.ifEmpty { null }
 
     val show2026Drivers = selectedYear == 2026 && seasonStarted && liveDrivers != null
@@ -423,7 +387,10 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
                     // --- Season stats ---
                     page == 3 -> {
-                        val stats = remember(currentRaceResults) { SeasonStatsComputer.compute(currentRaceResults) }
+                        val stats = if (selectedYear in 2014..2025 && !seasonData?.driverStats.isNullOrEmpty())
+                            seasonData!!.driverStats
+                        else
+                            remember(currentRaceResults) { SeasonStatsComputer.compute(currentRaceResults) }
                         SeasonStatsTab(
                             stats           = stats,
                             loading         = resultsLoading,
@@ -434,11 +401,11 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
                     // --- Championship progression chart ---
                     page == 4 -> ProgressionTab(
-                        results = currentRaceResults,
-                        loading = resultsLoading,
-                        year = selectedYear,
+                        results         = currentRaceResults,
+                        loading         = resultsLoading,
+                        year            = selectedYear,
                         seasonStartDate = seasonStartDate,
-                        officialPointsOverride = seasonData?.drivers?.associate { it.name to it.points },
+                        progression     = seasonData?.progression,
                     )
 
                     else ->
@@ -452,59 +419,27 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     }
 }
 
-/** Official final points by driver name for historical years (2014–2025). Used to scale chart to match official totals. */
-private fun officialPointsByDriver(year: Int): Map<String, Int>? = when (year) {
-    2014 -> Standings2014.drivers.associate { it.name to it.points }
-    2015 -> Standings2015.drivers.associate { it.name to it.points }
-    2016 -> Standings2016.drivers.associate { it.name to it.points }
-    2017 -> Standings2017.drivers.associate { it.name to it.points }
-    2018 -> Standings2018.drivers.associate { it.name to it.points }
-    2019 -> Standings2019.drivers.associate { it.name to it.points }
-    2020 -> Standings2020.drivers.associate { it.name to it.points }
-    2021 -> Standings2021.drivers.associate { it.name to it.points }
-    2022 -> Standings2022.drivers.associate { it.name to it.points }
-    2023 -> Standings2023.drivers.associate { it.name to it.points }
-    2024 -> Standings2024.drivers.associate { it.name to it.points }
-    2025 -> Standings2025.drivers.associate { it.name to it.points }
-    else -> null
-}
-
 @Composable
 private fun ProgressionTab(
     results: List<RoundResult>,
     loading: Boolean,
     year: Int,
     seasonStartDate: LocalDate,
-    officialPointsOverride: Map<String, Int>? = null,
+    progression: List<com.btccfanhub.data.DriverProgressionSeries>? = null,
 ) {
     when {
         loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = BtccYellow)
         }
-        results.isEmpty() -> ResultsNotStarted(year, seasonStartDate)
+        results.isEmpty() && progression.isNullOrEmpty() -> ResultsNotStarted(year, seasonStartDate)
         else -> {
-            val rawSeries = remember(results) { ChampionshipProgressionComputer.compute(results) }
-            val officialPoints = remember(year, officialPointsOverride) {
-                officialPointsOverride ?: officialPointsByDriver(year)
-            }
-            val series = remember(rawSeries, officialPoints) {
-                val list = if (officialPoints == null) rawSeries
-                else rawSeries.map { s ->
-                    val cumulative = s.cumulativePointsByRound
-                    val computedFinal = cumulative.lastOrNull() ?: 0
-                    val official = officialPoints[s.driver]
-                    if (official != null && computedFinal > 0) {
-                        val scale = official.toDouble() / computedFinal
-                        val maxPts = maxOf(0, official) // avoid empty range when official < 0 (e.g. penalties)
-                        val scaled = cumulative.mapIndexed { i, v ->
-                            if (i == cumulative.lastIndex) maxPts
-                            else (v * scale).toInt().coerceIn(0, maxPts)
-                        }
-                        s.copy(cumulativePointsByRound = scaled)
-                    } else s
+            val series = if (!progression.isNullOrEmpty())
+                progression.sortedByDescending { it.cumulativePointsByRound.lastOrNull() ?: 0 }
+            else
+                remember(results) {
+                    ChampionshipProgressionComputer.compute(results)
+                        .sortedByDescending { it.cumulativePointsByRound.lastOrNull() ?: 0 }
                 }
-                list.sortedByDescending { it.cumulativePointsByRound.lastOrNull() ?: 0 }
-            }
             val scrollState = androidx.compose.foundation.rememberScrollState()
             Column(
                 modifier = Modifier
@@ -516,7 +451,8 @@ private fun ProgressionTab(
                 ChampionshipProgressionChart(
                     series = series,
                     roundLabels = remember(results) {
-                        results.sortedBy { it.round }.map { it.venue }
+                        if (results.isNotEmpty()) results.sortedBy { it.round }.map { it.venue }
+                        else List(series.maxOfOrNull { it.cumulativePointsByRound.size } ?: 0) { "R${it + 1}" }
                     },
                 )
             }

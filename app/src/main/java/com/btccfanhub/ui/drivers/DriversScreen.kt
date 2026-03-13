@@ -30,6 +30,7 @@ import com.btccfanhub.data.model.GridData
 import com.btccfanhub.data.model.SeasonStat
 import com.btccfanhub.data.model.Team
 import com.btccfanhub.data.repository.DriversRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,8 +47,17 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.btccfanhub.ui.theme.*
 import androidx.compose.ui.platform.LocalContext
+import android.content.Context
+import java.io.File
 
 // Driver, Team, SeasonStat, GridData defined in data/model/GridData.kt
+
+/** Prefer bundled WebP from filesDir (from assets); fall back to network URL. */
+private fun driverImageData(context: Context, number: Int, imageUrl: String): String {
+    if (imageUrl.isEmpty()) return ""
+    val file = File(context.filesDir, "driver_images/$number.webp")
+    return if (file.exists()) file.absolutePath else imageUrl
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Top-level screen — fetches grid data from GitHub JSON
@@ -68,15 +78,21 @@ fun DriversScreen() {
     val drivers = gridData?.drivers ?: emptyList()
     val teams   = gridData?.teams   ?: emptyList()
 
+    // Prefetch driver images (bundled file or network URL) in batches
     LaunchedEffect(drivers) {
         if (drivers.isEmpty()) return@LaunchedEffect
-        drivers.forEach { driver ->
-            if (driver.imageUrl.isNotEmpty()) {
+        val withImages = drivers.filter { it.imageUrl.isNotEmpty() }
+        val batchSize = 10
+        withImages.chunked(batchSize).forEachIndexed { index, batch ->
+            if (index > 0) delay(400)
+            batch.forEach { driver ->
+                val data = driverImageData(context, driver.number, driver.imageUrl)
+                if (data.isEmpty()) return@forEach
                 context.imageLoader.enqueue(
-                    ImageRequest.Builder(context).data(driver.imageUrl).size(116).build()
+                    ImageRequest.Builder(context).data(data).size(116).build()
                 )
                 context.imageLoader.enqueue(
-                    ImageRequest.Builder(context).data(driver.imageUrl).size(200).build()
+                    ImageRequest.Builder(context).data(data).size(200).build()
                 )
             }
         }
@@ -279,7 +295,7 @@ private fun DriverCard(driver: Driver, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         DriverAvatarWithNumber(
-            imageUrl      = driver.imageUrl,
+            imageUrl      = driverImageData(LocalContext.current, driver.number, driver.imageUrl),
             name          = driver.name,
             number        = driver.number,
             teamConfirmed = driver.team.isNotEmpty(),
@@ -457,7 +473,7 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     DriverAvatarWithNumber(
-                        imageUrl      = driver.imageUrl,
+                        imageUrl      = driverImageData(LocalContext.current, driver.number, driver.imageUrl),
                         name          = driver.name,
                         number        = driver.number,
                         teamConfirmed = driver.team.isNotEmpty(),
@@ -801,7 +817,7 @@ private fun TeamDriverCard(driver: Driver, avatarSize: Int = 72, modifier: Modif
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         DriverAvatarWithNumber(
-            imageUrl      = driver.imageUrl,
+            imageUrl      = driverImageData(LocalContext.current, driver.number, driver.imageUrl),
             name          = driver.name,
             number        = driver.number,
             teamConfirmed = driver.team.isNotEmpty(),
@@ -1020,7 +1036,7 @@ private fun TeamDriverRow(driver: Driver) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         DriverAvatarWithNumber(
-            imageUrl      = driver.imageUrl,
+            imageUrl      = driverImageData(LocalContext.current, driver.number, driver.imageUrl),
             name          = driver.name,
             number        = driver.number,
             teamConfirmed = driver.team.isNotEmpty(),

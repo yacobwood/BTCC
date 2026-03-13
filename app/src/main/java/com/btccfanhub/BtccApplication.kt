@@ -8,8 +8,33 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.size.Precision
+import java.io.File
 
 class BtccApplication : Application(), ImageLoaderFactory {
+
+    override fun onCreate() {
+        super.onCreate()
+        copyBundledDriverImages()
+    }
+
+    /** Copy compressed driver WebPs from assets to filesDir so Coil can load by file path. */
+    private fun copyBundledDriverImages() {
+        try {
+            val list = assets.list("driver_images") ?: return
+            val webps = list.filter { it.endsWith(".webp") }
+            if (webps.isEmpty()) return
+            val outDir = File(filesDir, "driver_images")
+            if (outDir.exists() && (outDir.list()?.size ?: 0) >= webps.size) return
+            if (!outDir.exists()) outDir.mkdirs()
+            for (name in webps) {
+                val out = File(outDir, name)
+                assets.open("driver_images/$name").use { input ->
+                    out.outputStream().use { input.copyTo(it) }
+                }
+            }
+        } catch (_: Exception) { /* no bundled images */ }
+    }
+
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .memoryCache {

@@ -41,6 +41,12 @@ object WhatsNewStore {
             "Circuit pages — updated hero photos for every track on the calendar",
             "Schedule & standings — race dates and championship standings now refresh automatically from btcc.net",
         ),
+        16 to listOf(
+            "Single source of truth — all standings and results (2014–2025) now come from your Excel sheets",
+            "Results tab — full venue names and dates restored; round results show both time and points",
+            "Championship chart — R1–R10 labels directly under each round line; drivers sorted by points",
+            "2026 results — app now loads from results2026.json for the current season",
+        ),
         13 to listOf(
             "Race history back to 2014 — browse full results for every season from 2014 to 2025",
             "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",

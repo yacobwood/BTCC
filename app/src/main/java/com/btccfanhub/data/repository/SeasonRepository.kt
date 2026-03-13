@@ -1,6 +1,8 @@
 package com.btccfanhub.data.repository
 
 import android.content.Context
+import com.btccfanhub.data.DriverProgressionSeries
+import com.btccfanhub.data.DriverSeasonStats
 import com.btccfanhub.data.SeasonData
 import com.btccfanhub.data.model.DriverResult
 import com.btccfanhub.data.model.DriverStanding
@@ -39,7 +41,48 @@ object SeasonRepository {
         val drivers = parseDrivers(root.optJSONArray("drivers"))
         val teams = parseTeams(root.optJSONArray("teams"))
         val rounds = parseRounds(root.optJSONArray("rounds"))
-        return SeasonData(year = year, drivers = drivers, teams = teams, rounds = rounds)
+        val driverStats = parseDriverStats(root.optJSONArray("driverStats"))
+        val progression = parseProgression(root.optJSONArray("progression"))
+        return SeasonData(
+            year = year,
+            drivers = drivers,
+            teams = teams,
+            rounds = rounds,
+            driverStats = driverStats,
+            progression = progression,
+        )
+    }
+
+    private fun parseDriverStats(arr: org.json.JSONArray?): List<DriverSeasonStats> {
+        if (arr == null) return emptyList()
+        return (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            DriverSeasonStats(
+                driver = o.optString("driver", ""),
+                team = o.optString("team", ""),
+                races = o.optInt("races", 0),
+                wins = o.optInt("wins", 0),
+                podiums = o.optInt("podiums", 0),
+                poles = o.optInt("poles", 0),
+                dnfs = o.optInt("dnfs", 0),
+            )
+        }
+    }
+
+    private fun parseProgression(arr: org.json.JSONArray?): List<DriverProgressionSeries> {
+        if (arr == null) return emptyList()
+        return (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            val cumArr = o.optJSONArray("cumulativePointsByRound")
+            val cumulativePointsByRound = if (cumArr != null) {
+                (0 until cumArr.length()).map { j -> cumArr.optInt(j, 0) }
+            } else emptyList()
+            DriverProgressionSeries(
+                driver = o.optString("driver", ""),
+                team = o.optString("team", ""),
+                cumulativePointsByRound = cumulativePointsByRound,
+            )
+        }
     }
 
     private fun parseDrivers(arr: org.json.JSONArray?): List<DriverStanding> {

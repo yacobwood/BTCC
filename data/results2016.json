@@ -76,7 +76,7 @@
               "points": 0
             },
             {
-              "pos": 7,
+              "pos": 9,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -455,7 +455,7 @@
               "points": 0
             },
             {
-              "pos": 9,
+              "pos": 8,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -724,7 +724,7 @@
               "points": 0
             },
             {
-              "pos": 8,
+              "pos": 1,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -732,7 +732,9 @@
               "time": "",
               "gap": "10.076",
               "bestLap": "49.320",
-              "points": 0
+              "points": 0,
+              "fastestLap": true,
+              "leadLap": true
             },
             {
               "pos": 9,
@@ -1110,7 +1112,7 @@
               "points": 0
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -1445,7 +1447,7 @@
               "points": 0
             },
             {
-              "pos": 13,
+              "pos": 11,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -1714,7 +1716,7 @@
               "points": 0
             },
             {
-              "pos": 11,
+              "pos": 0,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -1946,7 +1948,7 @@
               "points": 0
             },
             {
-              "pos": 6,
+              "pos": 1,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -1954,7 +1956,10 @@
               "time": "",
               "gap": "0.650",
               "bestLap": "1:16.811",
-              "points": 0
+              "points": 0,
+              "fastestLap": true,
+              "leadLap": true,
+              "pole": true
             },
             {
               "pos": 7,
@@ -2248,7 +2253,7 @@
           "label": "Race 2",
           "results": [
             {
-              "pos": 1,
+              "pos": 3,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -2256,7 +2261,9 @@
               "time": "",
               "gap": "",
               "bestLap": "1:18.420",
-              "points": 0
+              "points": 0,
+              "leadLap": true,
+              "pole": true
             },
             {
               "pos": 2,
@@ -3079,7 +3086,7 @@
               "points": 0
             },
             {
-              "pos": 27,
+              "pos": 24,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -3403,7 +3410,7 @@
               "points": 0
             },
             {
-              "pos": 24,
+              "pos": 12,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
@@ -3628,7 +3635,7 @@
               "points": 0
             },
             {
-              "pos": 12,
+              "pos": 10,
               "no": 33,
               "driver": "Adam Morgan",
               "team": "Mercedes-Benz A-Class",
