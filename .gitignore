@@ -21,3 +21,6 @@ keystore.properties
 
 # Python venv
 scraper/.venv/
+
+# Kotlin/IDE cache and error logs
+.kotlin/
