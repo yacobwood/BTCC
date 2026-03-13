@@ -24,8 +24,8 @@ android {
         applicationId = "com.btccfanhub"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16
-        versionName = "16"
+        versionCode = 17
+        versionName = "17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "CONFIGCAT_SDK_KEY", "\"${localProps["configcat.sdk.key"] ?: ""}\"")

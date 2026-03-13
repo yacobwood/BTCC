@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome layer for themed icons: white shape, 108dp, content in 66dp safe zone.
+     System tints this with the user's theme color.
+     Replace this with your logo path (export white logo as SVG, then convert pathData). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Placeholder: rounded rect in safe zone (18–90). Replace with your logo pathData. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,18 L72,18 Q90,18 90,36 L90,72 Q90,90 72,90 L36,90 Q18,90 18,72 L18,36 Q18,18 36,18 Z" />
+</vector>

@@ -4,5 +4,7 @@
         <item name="android:windowBackground">@color/splash_background</item>
         <item name="android:statusBarColor">@color/splash_background</item>
         <item name="android:navigationBarColor">@color/splash_background</item>
+        <!-- Android 12+ splash: solid blue with app icon centered -->
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
     </style>
 </resources>
