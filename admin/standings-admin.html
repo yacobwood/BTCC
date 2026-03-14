@@ -114,6 +114,13 @@ body {
 .token-note { font-size: 11px; color: var(--text-sec); margin-top: 8px; }
 .token-ok { font-size: 11px; color: var(--green); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
 .token-ok::before { content: '●'; font-size: 8px; }
+/* collapsed state */
+.token-card.collapsed { padding: 10px 14px; cursor: pointer; }
+.token-card.collapsed .token-body { display: none; }
+.token-collapsed-row { display: none; align-items: center; gap: 8px; }
+.token-card.collapsed .token-collapsed-row { display: flex; }
+.token-collapsed-row .token-ok { margin: 0; }
+.token-edit-hint { font-size: 11px; color: var(--text-sec); margin-left: auto; }
 
 /* ── Section label ───────────────────────────────────────────────────────── */
 .section-label {
@@ -396,13 +403,21 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 <div id="panel-standings" class="tab-panel active">
 
   <!-- Token -->
-  <div class="token-card">
-    <div class="section-label">GITHUB TOKEN</div>
-    <div class="token-row" style="margin-top:8px">
-      <input type="password" id="tok" placeholder="ghp_…" autocomplete="off">
-      <button class="btn-run" onclick="saveToken()" style="padding:0 18px;border-radius:10px">SAVE</button>
+  <div class="token-card" id="token-card" onclick="expandToken()">
+    <!-- collapsed view -->
+    <div class="token-collapsed-row">
+      <div class="token-ok">Token loaded</div>
+      <div class="token-edit-hint">Tap to change</div>
     </div>
-    <div class="token-note">Stored in this browser only — never sent anywhere except GitHub.</div>
+    <!-- expanded view -->
+    <div class="token-body">
+      <div class="section-label">GITHUB TOKEN</div>
+      <div class="token-row" style="margin-top:8px">
+        <input type="password" id="tok" placeholder="ghp_…" autocomplete="off" onclick="event.stopPropagation()">
+        <button class="btn-run" onclick="event.stopPropagation();saveToken()" style="padding:0 18px;border-radius:10px">SAVE</button>
+      </div>
+      <div class="token-note">Stored in this browser only — never sent anywhere except GitHub.</div>
+    </div>
     <div id="tok-status"></div>
   </div>
 
@@ -550,12 +565,17 @@ let teamPts = {};
 
 // ── Token ───────────────────────────────────────────────────────────────────
 function getToken(){ return localStorage.getItem('btcc_tok')||''; }
+function collapseToken(){ document.getElementById('token-card').classList.add('collapsed'); }
+function expandToken(){
+  const card = document.getElementById('token-card');
+  if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
+}
 function saveToken(){
   const v = document.getElementById('tok').value.trim();
   if(!v) return;
   localStorage.setItem('btcc_tok', v);
   document.getElementById('tok').value='';
-  document.getElementById('tok-status').innerHTML='<div class="token-ok">Token saved</div>';
+  collapseToken();
   refreshAllStatus();
 }
 
@@ -889,7 +909,7 @@ async function refreshAllStatus() {
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
-if(getToken()) document.getElementById('tok-status').innerHTML='<div class="token-ok">Token loaded</div>';
+if(getToken()) collapseToken();
 loadExisting();
 if(getToken()) refreshAllStatus();
 </script>
