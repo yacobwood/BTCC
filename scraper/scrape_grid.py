@@ -28,10 +28,16 @@ def scrape_drivers(page) -> list[dict]:
     """Extract {name, number} from btcc.net/drivers/."""
     print(f"Fetching {DRIVERS_URL} …")
     page.goto(DRIVERS_URL, wait_until="networkidle", timeout=30_000)
-    try:
-        page.wait_for_selector('a[href*="/driver/"]', timeout=15_000)
-    except PWTimeout:
-        print("Driver links not found after 15s — page may not have rendered.", file=sys.stderr)
+    page.wait_for_timeout(3_000)
+
+    title = page.title()
+    total_links = page.evaluate("() => document.querySelectorAll('a').length")
+    driver_links = page.evaluate("() => document.querySelectorAll('a[href*=\"/driver/\"]').length")
+    print(f"Page title: {title!r}  |  <a> tags: {total_links}  |  /driver/ links: {driver_links}")
+
+    if driver_links == 0:
+        snippet = page.evaluate("() => document.body.innerText.slice(0, 400)")
+        print(f"Body snippet: {snippet!r}", file=sys.stderr)
         return []
 
     # Page structure: <a href="/driver/slug/"><div>NUMBER</div><img>...<h3>NAME</h3></a>
