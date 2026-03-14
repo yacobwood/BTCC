@@ -820,6 +820,25 @@ async function doReset(){
 const REPO = 'yacobwood/BTCC';
 const GH_API = 'https://api.github.com';
 let pollTimer = null;
+let liveTickTimer = null;
+const runningTimestamps = {}; // key -> epoch ms (run.created_at)
+
+function startLiveTick() {
+  if (liveTickTimer) return;
+  liveTickTimer = setInterval(() => {
+    let any = false;
+    for (const [key, ts] of Object.entries(runningTimestamps)) {
+      const el = document.getElementById('ss-' + key);
+      if (!el || !el.classList.contains('st-running')) { delete runningTimestamps[key]; continue; }
+      any = true;
+      const secs = Math.floor((Date.now() - ts) / 1000);
+      const timeStr = secs < 60 ? secs + 's' : Math.floor(secs / 60) + 'm ' + (secs % 60) + 's';
+      const prefix = el.textContent.split('·')[0].trimEnd();
+      el.textContent = prefix + ' · ' + timeStr;
+    }
+    if (!any) { clearInterval(liveTickTimer); liveTickTimer = null; }
+  }, 1000);
+}
 
 function scraperInputs(workflow) {
   if (workflow === 'scrape-standings.yml') {
@@ -883,10 +902,17 @@ function timeAgo(iso) {
   return Math.floor(secs / 86400) + 'd ago';
 }
 
-function setStatus(key, type, msg) {
+function setStatus(key, type, msg, ts) {
   const el = document.getElementById('ss-' + key);
   el.className = 'scraper-status-chip' + (type === 'running' ? ' st-running' : type === 'ok' ? ' st-ok' : type === 'fail' ? ' st-fail' : '');
   el.textContent = msg;
+  if (type === 'running') {
+    if (!runningTimestamps[key]) runningTimestamps[key] = ts || Date.now();
+    else if (ts) runningTimestamps[key] = ts;
+    startLiveTick();
+  } else {
+    delete runningTimestamps[key];
+  }
 }
 
 async function refreshAllStatus() {
@@ -908,7 +934,8 @@ async function refreshAllStatus() {
     if (inProgress) anyRunning = true;
     const ago = timeAgo(run.updated_at || run.created_at);
     if (inProgress) {
-      setStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running') + ' · ' + ago);
+      const runTs = new Date(run.created_at).getTime();
+      setStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running'), runTs);
     } else if (run.conclusion === 'success') {
       setStatus(w.key, 'ok', '✓ ' + ago);
     } else {
