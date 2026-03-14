@@ -1,0 +1,38 @@
+name: Scrape BTCC Grid
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r scraper/requirements.txt
+          sudo apt-get install -y libasound2t64
+          playwright install chromium --with-deps
+
+      - name: Scrape grid
+        run: python scraper/scrape_grid.py --merge
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update grid from btcc.net [skip ci]"
+          file_pattern: |
+            data/drivers.json
+            data/grid_scraped.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"

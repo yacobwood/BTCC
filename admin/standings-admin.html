@@ -493,22 +493,28 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     <button class="btn-run" onclick="runScraper('scrape-results.yml','results')">RUN ▶</button>
   </div>
 
-  <!-- Calendar & Grid scraper -->
+  <!-- Calendar scraper -->
   <div class="scraper-card" id="sc-calendar">
     <div class="scraper-head">
-      <div class="scraper-title">CALENDAR & GRID</div>
+      <div class="scraper-title">CALENDAR</div>
       <div class="scraper-status-chip" id="ss-calendar">—</div>
     </div>
-    <div class="scraper-desc">Scrape round dates, venues, and optionally the driver lineup. Run at season start or if dates change.</div>
+    <div class="scraper-desc">Scrape round dates and venues from btcc.net. Run at season start or if dates change.</div>
     <div class="scraper-inputs">
       <div class="field-label">SEASON</div>
       <input type="number" id="si-season" value="2026" min="2020" max="2030">
-      <label class="check-label">
-        <input type="checkbox" id="si-grid">
-        Merge grid
-      </label>
     </div>
     <button class="btn-run" onclick="runScraper('scrape-calendar.yml','calendar')">RUN ▶</button>
+  </div>
+
+  <!-- Grid scraper -->
+  <div class="scraper-card" id="sc-grid">
+    <div class="scraper-head">
+      <div class="scraper-title">GRID</div>
+      <div class="scraper-status-chip" id="ss-grid">—</div>
+    </div>
+    <div class="scraper-desc">Scrape driver names and car numbers from btcc.net and merge into drivers.json. Run at season start or when the grid changes.</div>
+    <button class="btn-run" onclick="runScraper('scrape-grid.yml','grid')">RUN ▶</button>
   </div>
 
   <button class="btn-refresh" onclick="refreshAllStatus()">↻ REFRESH STATUS</button>
@@ -823,10 +829,10 @@ function scraperInputs(workflow) {
     return { year: String(document.getElementById('si-year').value || 2026) };
   }
   if (workflow === 'scrape-calendar.yml') {
-    return {
-      season: String(document.getElementById('si-season').value || 2026),
-      merge_grid: String(document.getElementById('si-grid').checked),
-    };
+    return { season: String(document.getElementById('si-season').value || 2026) };
+  }
+  if (workflow === 'scrape-grid.yml') {
+    return {};
   }
   return {};
 }
@@ -888,6 +894,7 @@ async function refreshAllStatus() {
     { file: 'scrape-standings.yml', key: 'standings' },
     { file: 'scrape-results.yml',   key: 'results' },
     { file: 'scrape-calendar.yml',  key: 'calendar' },
+    { file: 'scrape-grid.yml',      key: 'grid' },
   ];
   let anyRunning = false;
   for (const w of workflows) {
