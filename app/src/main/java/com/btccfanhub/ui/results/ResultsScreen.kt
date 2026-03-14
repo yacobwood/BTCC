@@ -56,6 +56,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 
@@ -172,7 +173,6 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             .background(BtccBackground),
     ) {
         TopAppBar(
-            modifier = Modifier.height(52.dp),
             title = {
                 Text(
                     "STANDINGS",
@@ -523,9 +523,12 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
     }
 }
 
+private val SEASON_DATE_FMT = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
 @Composable
 private fun SeasonNotStarted(seasonStartDate: LocalDate) {
     val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
+    val seasonDateLabel = seasonStartDate.format(SEASON_DATE_FMT)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -590,7 +593,7 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate) {
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "18 April 2026",
+                        seasonDateLabel,
                         style      = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color      = MaterialTheme.colorScheme.onBackground,
@@ -612,6 +615,7 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate) {
 @Composable
 private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
     val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
+    val seasonDateLabel = seasonStartDate.format(SEASON_DATE_FMT)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -677,7 +681,7 @@ private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            "18 April 2026",
+                            seasonDateLabel,
                             style      = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color      = MaterialTheme.colorScheme.onBackground,
@@ -809,20 +813,22 @@ private fun DriverRow(driver: DriverStanding) {
                 )
             }
         }
-        Column(horizontalAlignment = Alignment.End) {
+        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Center) {
             Text(
                 "${driver.points} pts",
                 style      = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold,
                 color      = MaterialTheme.colorScheme.onBackground,
             )
-            Text(
-                if (driver.wins > 0) "${driver.wins}W" else "0W",
-                style         = MaterialTheme.typography.labelSmall,
-                fontWeight    = FontWeight.ExtraBold,
-                color         = if (driver.wins > 0) BtccYellow else Color.Transparent,
-                letterSpacing = 0.5.sp,
-            )
+            if (driver.wins > 0) {
+                Text(
+                    "${driver.wins}W",
+                    style         = MaterialTheme.typography.labelSmall,
+                    fontWeight    = FontWeight.ExtraBold,
+                    color         = BtccYellow,
+                    letterSpacing = 0.5.sp,
+                )
+            }
         }
         IconButton(
             onClick  = { FavouriteDriverStore.toggle(context, driver.name) },

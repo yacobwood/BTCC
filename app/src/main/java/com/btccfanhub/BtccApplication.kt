@@ -45,15 +45,14 @@ class BtccApplication : Application(), ImageLoaderFactory {
             .diskCache {
                 DiskCache.Builder()
                     .directory(cacheDir.resolve("image_cache"))
-                    .maxSizePercent(0.10) // ~200MB - let's be generous with those massive images
+                    .maxSizePercent(0.10)
                     .build()
             }
-            // MASSIVE IMAGE OPTIMIZATIONS
-            .bitmapConfig(Bitmap.Config.RGB_565) // Half memory usage vs ARGB_8888
-            .allowHardware(true) // Render on GPU
+            .bitmapConfig(Bitmap.Config.RGB_565) // half memory vs ARGB_8888
+            .allowHardware(true)
             .crossfade(true)
-            .precision(Precision.EXACT) // FORCE exact resize to tiny target dimension IMMEDIATELY
-            .respectCacheHeaders(false) // IGNORE strict server headers, keep things in cache!
+            .precision(Precision.EXACT)
+            .respectCacheHeaders(false) // ignore server cache headers so images stay cached locally
             .diskCachePolicy(CachePolicy.ENABLED)
             .memoryCachePolicy(CachePolicy.ENABLED)
             .build()

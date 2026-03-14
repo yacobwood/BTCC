@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>BTCC Fan Hub · Standings Admin</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -362,6 +364,168 @@ async function doReset(){
 // ── Init ───────────────────────────────────────────────────────────────────
 if(getToken()) document.getElementById('tok-status').innerHTML='<div class="token-ok">Token loaded.</div>';
 loadExisting();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════ SCRAPERS ══ -->
+<style>
+.scraper-section{margin-top:40px;border-top:1px solid #1e1f24;padding-top:24px}
+.scraper-card{background:#15161a;border:1px solid #1e1f24;border-radius:10px;padding:14px;margin-bottom:12px}
+.scraper-title{font-size:12px;font-weight:900;letter-spacing:1.5px;color:#E3000B;margin-bottom:2px}
+.scraper-desc{font-size:11px;color:#555;margin-bottom:10px}
+.scraper-inputs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.scraper-inputs label{font-size:11px;color:#666;display:flex;align-items:center;gap:5px;cursor:pointer}
+.scraper-inputs input[type=number]{width:72px;padding:7px 8px;font-size:14px}
+.scraper-inputs input[type=checkbox]{width:16px;height:16px;accent-color:#E3000B;cursor:pointer}
+.run-btn{background:#E3000B;color:#fff;border:none;padding:11px 20px;border-radius:8px;font-size:13px;font-weight:900;letter-spacing:1px;cursor:pointer;min-height:44px;-webkit-tap-highlight-color:transparent}
+.run-btn:disabled{background:#3a0005;color:#555;cursor:default}
+.scraper-status{font-size:11px;margin-top:8px;min-height:16px;color:#555}
+.st-running{color:#F5C400}
+.st-ok{color:#4caf50}
+.st-fail{color:#E3000B}
+.scraper-refresh{background:transparent;border:1px solid #2a2b30;color:#888;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;width:100%;margin-top:4px;min-height:44px;-webkit-tap-highlight-color:transparent}
+</style>
+
+<div class="scraper-section">
+  <h2>SCRAPERS</h2>
+  <div class="section-note" style="margin-bottom:14px">Trigger GitHub Actions workflows. Token must have <strong style="color:#ccc">repo + workflow</strong> scopes.</div>
+
+  <!-- Standings -->
+  <div class="scraper-card" id="sc-standings">
+    <div class="scraper-title">STANDINGS</div>
+    <div class="scraper-desc">Pull live driver & team standings from btcc.net. Run after each race weekend.</div>
+    <div class="scraper-inputs">
+      <label><input type="checkbox" id="si-force"> Force (ignore season date check)</label>
+    </div>
+    <button class="run-btn" onclick="runScraper('scrape-standings.yml','standings')">RUN ▶</button>
+    <div class="scraper-status" id="ss-standings">—</div>
+  </div>
+
+  <!-- Results -->
+  <div class="scraper-card" id="sc-results">
+    <div class="scraper-title">RESULTS</div>
+    <div class="scraper-desc">Scrape full race results and recompute standings. Run after each race weekend.</div>
+    <div class="scraper-inputs">
+      <label>Year <input type="number" id="si-year" value="2026" min="2014" max="2030"></label>
+    </div>
+    <button class="run-btn" onclick="runScraper('scrape-results.yml','results')">RUN ▶</button>
+    <div class="scraper-status" id="ss-results">—</div>
+  </div>
+
+  <!-- Calendar & Grid -->
+  <div class="scraper-card" id="sc-calendar">
+    <div class="scraper-title">CALENDAR & GRID</div>
+    <div class="scraper-desc">Scrape round dates, venues, and optionally the driver lineup. Run at season start or if dates change.</div>
+    <div class="scraper-inputs">
+      <label>Season <input type="number" id="si-season" value="2026" min="2020" max="2030"></label>
+      <label><input type="checkbox" id="si-grid"> Merge grid (drivers.json)</label>
+    </div>
+    <button class="run-btn" onclick="runScraper('scrape-calendar.yml','calendar')">RUN ▶</button>
+    <div class="scraper-status" id="ss-calendar">—</div>
+  </div>
+
+  <button class="scraper-refresh" onclick="refreshAllStatus()">↻ REFRESH STATUS</button>
+</div>
+
+<script>
+const REPO = 'yacobwood/BTCC';
+const GH_API = 'https://api.github.com';
+let pollTimer = null;
+
+function scraperInputs(workflow) {
+  if (workflow === 'scrape-standings.yml') {
+    return { force: String(document.getElementById('si-force').checked) };
+  }
+  if (workflow === 'scrape-results.yml') {
+    return { year: String(document.getElementById('si-year').value || 2026) };
+  }
+  if (workflow === 'scrape-calendar.yml') {
+    return {
+      season: String(document.getElementById('si-season').value || 2026),
+      merge_grid: String(document.getElementById('si-grid').checked),
+    };
+  }
+  return {};
+}
+
+async function runScraper(workflow, key) {
+  const tok = getToken();
+  if (!tok) { setStatus(key, 'err', 'Save your GitHub token above first.'); return; }
+  const btn = document.querySelector(`#sc-${key} .run-btn`);
+  btn.disabled = true; btn.textContent = 'QUEUING…';
+  setStatus(key, '', 'Dispatching…');
+  try {
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/dispatches`, {
+      method: 'POST',
+      headers: { Authorization: 'token ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main', inputs: scraperInputs(workflow) }),
+    });
+    if (r.status === 204) {
+      setStatus(key, 'running', '● Queued — checking status…');
+      setTimeout(() => refreshAllStatus(), 4000);
+    } else {
+      const e = await r.json();
+      setStatus(key, 'fail', '✗ ' + (e.message || r.status));
+    }
+  } catch (e) {
+    setStatus(key, 'fail', '✗ Network error: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'RUN ▶';
+}
+
+async function fetchLastRun(workflow) {
+  const tok = getToken();
+  if (!tok) return null;
+  try {
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/runs?per_page=1`, {
+      headers: { Authorization: 'token ' + tok },
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d.workflow_runs?.[0] || null;
+  } catch { return null; }
+}
+
+function timeAgo(iso) {
+  const secs = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (secs < 60) return secs + 's ago';
+  if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
+  if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
+  return Math.floor(secs / 86400) + 'd ago';
+}
+
+function setStatus(key, type, msg) {
+  const el = document.getElementById('ss-' + key);
+  el.className = 'scraper-status' + (type === 'running' ? ' st-running' : type === 'ok' ? ' st-ok' : type === 'fail' ? ' st-fail' : '');
+  el.textContent = msg;
+}
+
+async function refreshAllStatus() {
+  const workflows = [
+    { file: 'scrape-standings.yml', key: 'standings' },
+    { file: 'scrape-results.yml',   key: 'results' },
+    { file: 'scrape-calendar.yml',  key: 'calendar' },
+  ];
+  let anyRunning = false;
+  for (const w of workflows) {
+    const run = await fetchLastRun(w.file);
+    if (!run) { setStatus(w.key, '', '— no token or no runs yet'); continue; }
+    const inProgress = run.status === 'in_progress' || run.status === 'queued' || run.status === 'waiting';
+    if (inProgress) anyRunning = true;
+    const ago = timeAgo(run.updated_at || run.created_at);
+    if (inProgress) {
+      setStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running') + ' · ' + ago);
+    } else if (run.conclusion === 'success') {
+      setStatus(w.key, 'ok', '✓ Success · ' + ago);
+    } else {
+      setStatus(w.key, 'fail', '✗ ' + (run.conclusion || run.status) + ' · ' + ago);
+    }
+  }
+  clearInterval(pollTimer);
+  if (anyRunning) pollTimer = setInterval(refreshAllStatus, 15000);
+}
+
+// Auto-load status when token is present
+if (getToken()) refreshAllStatus();
 </script>
 </body>
 </html>

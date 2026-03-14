@@ -3,9 +3,13 @@ package com.btccfanhub.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
 import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
@@ -17,6 +21,7 @@ import com.btccfanhub.data.repository.ScheduleRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -31,12 +36,15 @@ class CountdownWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                for (id in appWidgetIds) {
-                    val opts = appWidgetManager.getAppWidgetOptions(id)
-                    val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
-                    val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
-                    val views = buildViews(context, minW, minH)
-                    appWidgetManager.updateAppWidget(id, views)
+                withTimeout(10_000L) {
+                    for (id in appWidgetIds) {
+                        val opts = appWidgetManager.getAppWidgetOptions(id)
+                        val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
+                        val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
+                        val theme = WidgetPrefs.getTheme(context, id)
+                        val views = buildViews(context, minW, minH, theme)
+                        appWidgetManager.updateAppWidget(id, views)
+                    }
                 }
             } finally {
                 pending.finish()
@@ -53,19 +61,27 @@ class CountdownWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
-                val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
-                val views = buildViews(context, minW, minH)
-                appWidgetManager.updateAppWidget(appWidgetId, views)
+                withTimeout(10_000L) {
+                    val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
+                    val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
+                    val theme = WidgetPrefs.getTheme(context, appWidgetId)
+                    val views = buildViews(context, minW, minH, theme)
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
+                }
             } finally {
                 pending.finish()
             }
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        appWidgetIds.forEach { WidgetPrefs.deleteTheme(context, it) }
+    }
+
     private enum class SizeClass { SMALL, WIDE, WIDE_TALL }
 
     companion object {
+
         private val DAY_FMT        = DateTimeFormatter.ofPattern("d")
         private val MONTH_YEAR_FMT = DateTimeFormatter.ofPattern("MMM yyyy")
 
@@ -74,10 +90,11 @@ class CountdownWidget : AppWidgetProvider() {
         private val SUN_NAME_IDS = intArrayOf(R.id.widget_sun_name1, R.id.widget_sun_name2, R.id.widget_sun_name3)
         private val SUN_TIME_IDS = intArrayOf(R.id.widget_sun_time1, R.id.widget_sun_time2, R.id.widget_sun_time3)
 
-        private suspend fun buildViews(
+        internal suspend fun buildViews(
             context: Context,
             minWidth: Int = 40,
             minHeight: Int = 40,
+            theme: WidgetTheme = WidgetTheme.NAVY,
         ): RemoteViews {
             val wide = minWidth >= 180
             val tall = minHeight >= 110
@@ -93,6 +110,10 @@ class CountdownWidget : AppWidgetProvider() {
                 SizeClass.SMALL     -> R.layout.countdown_widget
             }
             val views = RemoteViews(context.packageName, layoutId)
+            views.setImageViewBitmap(
+                R.id.widget_livery,
+                buildLiveryBitmap(context, minWidth, minHeight, theme),
+            )
 
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -165,14 +186,12 @@ class CountdownWidget : AppWidgetProvider() {
                 SizeClass.SMALL -> {
                     views.setTextViewText(R.id.widget_venue, nextRace.venue)
                     views.setViewVisibility(R.id.widget_venue, if (minHeight >= 50) View.VISIBLE else View.GONE)
-
                     if (minHeight >= 100) {
                         views.setTextViewText(R.id.widget_round, "ROUNDS $rStart - $rEnd")
                         views.setViewVisibility(R.id.widget_round, View.VISIBLE)
                     } else {
                         views.setViewVisibility(R.id.widget_round, View.GONE)
                     }
-
                     views.setViewVisibility(R.id.widget_dates, View.GONE)
                 }
 
@@ -217,8 +236,10 @@ class CountdownWidget : AppWidgetProvider() {
         ) {
             for (i in nameIds.indices) {
                 if (i < sessions.size) {
-                    views.setTextViewText(nameIds[i], abbreviate(sessions[i].name))
-                    views.setTextViewText(timeIds[i], sessions[i].time)
+                    val session = sessions[i]
+                    views.setTextViewText(nameIds[i], abbreviate(session.name))
+                    views.setTextViewText(timeIds[i], session.time)
+                    views.setTextColor(timeIds[i], 0xFFFFFFFF.toInt())
                     views.setViewVisibility(nameIds[i], View.VISIBLE)
                     views.setViewVisibility(timeIds[i], View.VISIBLE)
                 } else {
@@ -233,15 +254,59 @@ class CountdownWidget : AppWidgetProvider() {
             else -> name
         }
 
-        fun refresh(context: Context) {
-            val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, CountdownWidget::class.java))
-            if (ids.isEmpty()) return
-            val broadcast = Intent(context, CountdownWidget::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        private fun buildLiveryBitmap(
+            context: Context,
+            widthDp: Int,
+            heightDp: Int,
+            theme: WidgetTheme,
+        ): Bitmap {
+            val density = context.resources.displayMetrics.density
+            val w = (widthDp * density).toInt().coerceAtLeast(80)
+            val h = (heightDp * density).toInt().coerceAtLeast(40)
+            val cornerRadius = 16f * density
+
+            val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bmp)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+            val wf = w.toFloat()
+            val hf = h.toFloat()
+
+            val clipPath = Path().apply {
+                addRoundRect(RectF(0f, 0f, wf, hf), cornerRadius, cornerRadius, Path.Direction.CW)
             }
-            context.sendBroadcast(broadcast)
+            canvas.clipPath(clipPath)
+
+            paint.color = theme.previewColor.toInt()
+            canvas.drawRect(0f, 0f, wf, hf, paint)
+
+            paint.color = withAlpha(theme.accentColor, 0.22f)
+            canvas.drawPath(Path().apply {
+                moveTo(wf * 0.52f, 0f); lineTo(wf, 0f)
+                lineTo(wf, hf);         lineTo(wf * 0.22f, hf)
+                close()
+            }, paint)
+
+            paint.color = withAlpha(theme.accentColor, 0.80f)
+            canvas.drawPath(Path().apply {
+                moveTo(wf * 0.52f, 0f); lineTo(wf * 0.56f, 0f)
+                lineTo(wf * 0.26f, hf); lineTo(wf * 0.22f, hf)
+                close()
+            }, paint)
+
+            paint.color = withAlpha(theme.accentColor, 0.35f)
+            canvas.drawPath(Path().apply {
+                moveTo(wf * 0.45f, 0f); lineTo(wf * 0.47f, 0f)
+                lineTo(wf * 0.17f, hf); lineTo(wf * 0.15f, hf)
+                close()
+            }, paint)
+
+            return bmp
+        }
+
+        private fun withAlpha(color: Long, alpha: Float): Int {
+            val a = (alpha * 255).toInt().coerceIn(0, 255)
+            return (color.toInt() and 0x00FFFFFF) or (a shl 24)
         }
     }
 }
