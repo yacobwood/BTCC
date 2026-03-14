@@ -32,50 +32,19 @@ def scrape_drivers(page) -> list[dict]:
 
     # Page structure: driver names as headings, car number in a link or nearby
     # e.g. "Jake Hill" with "1" or "#1" — we'll get all driver links and parse
+    # Page structure: <a href="/driver/slug/"><div>NUMBER</div><img>...<h3>NAME</h3></a>
     entries = page.evaluate("""() => {
         const out = [];
-        // Common patterns: link to /driver/... with number in text, or heading + number
         const links = document.querySelectorAll('a[href*="/driver/"]');
         links.forEach(a => {
-            const href = a.getAttribute('href') || '';
-            const text = (a.textContent || '').replace(/\\s+/g, ' ').trim();
-            // Number might be in the link text (e.g. "1", "116") or in a sibling
-            const numMatch = text.match(/^(\\d+)$/);
-            let num = numMatch ? parseInt(numMatch[1], 10) : null;
-            // Parent might contain "Name" and "Number" — try to find driver name from parent/heading
-            let name = '';
-            const parent = a.closest('div, li, article, section');
-            if (parent) {
-                const headings = parent.querySelectorAll('h1, h2, h3, h4, h5, h6');
-                for (const h of headings) {
-                    const t = (h.textContent || '').trim();
-                    if (t && !/^\\d+$/.test(t) && t.length > 2) {
-                        name = t;
-                        break;
-                    }
-                }
-                if (!name) {
-                    const allText = (parent.textContent || '').trim();
-                    const parts = allText.split(/\\s+/).filter(Boolean);
-                    for (const p of parts) {
-                        if (!/^\\d+$/.test(p) && p.length > 2) {
-                            name = p;
-                            if (parts.indexOf(p) + 1 < parts.length && /^\\d+$/.test(parts[parts.indexOf(p)+1]))
-                                num = parseInt(parts[parts.indexOf(p)+1], 10);
-                            break;
-                        }
-                    }
-                }
+            const h3 = a.querySelector('h3, h2, h4');
+            const numDiv = [...a.querySelectorAll('div')].find(d => /^\\d+$/.test(d.textContent.trim()));
+            if (h3 && numDiv) {
+                out.push({ name: h3.textContent.trim(), number: parseInt(numDiv.textContent.trim(), 10) });
             }
-            if (num !== null && name) out.push({ name, number: num });
         });
-        // Dedupe by name (keep first)
         const seen = new Set();
-        return out.filter(x => {
-            if (seen.has(x.name)) return false;
-            seen.add(x.name);
-            return true;
-        });
+        return out.filter(x => { if (seen.has(x.name)) return false; seen.add(x.name); return true; });
     }""")
 
     return entries or []
