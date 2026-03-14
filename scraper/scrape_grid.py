@@ -104,8 +104,8 @@ def main():
         browser.close()
 
     if not grid:
-        print("No drivers scraped — check btcc.net/drivers/ structure.", file=sys.stderr)
-        sys.exit(1)
+        print("No drivers found — btcc.net/drivers/ may not be published yet.", file=sys.stderr)
+        sys.exit(0)
 
     # Sort by number
     grid.sort(key=lambda x: (x["number"], x["name"]))
