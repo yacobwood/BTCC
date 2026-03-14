@@ -28,10 +28,12 @@ def scrape_drivers(page) -> list[dict]:
     """Extract {name, number} from btcc.net/drivers/."""
     print(f"Fetching {DRIVERS_URL} …")
     page.goto(DRIVERS_URL, wait_until="networkidle", timeout=30_000)
-    page.wait_for_timeout(2_000)
+    try:
+        page.wait_for_selector('a[href*="/driver/"]', timeout=15_000)
+    except PWTimeout:
+        print("Driver links not found after 15s — page may not have rendered.", file=sys.stderr)
+        return []
 
-    # Page structure: driver names as headings, car number in a link or nearby
-    # e.g. "Jake Hill" with "1" or "#1" — we'll get all driver links and parse
     # Page structure: <a href="/driver/slug/"><div>NUMBER</div><img>...<h3>NAME</h3></a>
     entries = page.evaluate("""() => {
         const out = [];
