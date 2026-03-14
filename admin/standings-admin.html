@@ -851,7 +851,7 @@ async function runScraper(workflow, key) {
     });
     if (r.status === 204) {
       setStatus(key, 'running', '● Queued…');
-      setTimeout(() => refreshAllStatus(), 4000);
+      setTimeout(() => refreshAllStatus(), 8000);
     } else {
       const e = await r.json();
       setStatus(key, 'fail', '✗ ' + (e.message || r.status));
@@ -899,7 +899,11 @@ async function refreshAllStatus() {
   let anyRunning = false;
   for (const w of workflows) {
     const run = await fetchLastRun(w.file);
-    if (!run) { setStatus(w.key, '', '—'); continue; }
+    if (!run) {
+      const chip = document.getElementById('ss-' + w.key);
+      if (!chip.classList.contains('st-running')) setStatus(w.key, '', '—');
+      continue;
+    }
     const inProgress = run.status === 'in_progress' || run.status === 'queued' || run.status === 'waiting';
     if (inProgress) anyRunning = true;
     const ago = timeAgo(run.updated_at || run.created_at);
