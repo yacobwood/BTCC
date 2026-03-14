@@ -50,15 +50,14 @@ body {
 }
 .header-wordmark {
   flex: 1;
+  display: flex;
+  align-items: center;
 }
-.header-wordmark .brand {
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 2.5px;
-  color: var(--text);
-  line-height: 1;
+.header-logo {
+  height: 28px;
+  width: auto;
+  display: block;
 }
-.header-wordmark .brand span { color: var(--red); }
 .header-badge {
   background: var(--yellow-dim);
   border: 1px solid rgba(254,189,2,0.3);
@@ -382,7 +381,7 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 <!-- ── Header ─────────────────────────────────────────────────────────────── -->
 <header class="app-header">
   <div class="header-wordmark">
-    <div class="brand"><span>BTCC</span> FAN HUB</div>
+    <img src="../Logo%20Long.png" alt="BTCC Fan Hub" class="header-logo">
   </div>
   <div class="header-badge">ADMIN</div>
 </header>
