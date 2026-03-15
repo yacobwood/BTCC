@@ -4,6 +4,7 @@ import com.btccfanhub.data.model.Driver
 import com.btccfanhub.data.model.GridData
 import com.btccfanhub.data.model.SeasonStat
 import com.btccfanhub.data.model.Team
+import com.btccfanhub.data.model.TeamSeasonStat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -80,6 +81,7 @@ object DriversRepository {
         val teams = (0 until teamsArr.length()).map { i ->
             val t = teamsArr.getJSONObject(i)
             val name = t.optString("name")
+            val histArr = t.optJSONArray("history") ?: JSONArray()
             Team(
                 name                 = name,
                 car                  = t.optString("car"),
@@ -92,6 +94,14 @@ object DriversRepository {
                 base                 = t.optString("base"),
                 driversChampionships = t.optInt("driversChampionships"),
                 teamsChampionships   = t.optInt("teamsChampionships"),
+                history              = (0 until histArr.length()).map { j ->
+                    val h = histArr.getJSONObject(j)
+                    TeamSeasonStat(
+                        year   = h.optInt("year"),
+                        pos    = h.optInt("pos"),
+                        points = h.optInt("points"),
+                    )
+                },
                 drivers              = drivers.filter { it.team == name },
             )
         }

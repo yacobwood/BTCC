@@ -30,6 +30,7 @@ import com.btccfanhub.data.model.Driver
 import com.btccfanhub.data.model.GridData
 import com.btccfanhub.data.model.SeasonStat
 import com.btccfanhub.data.model.Team
+import com.btccfanhub.data.model.TeamSeasonStat
 import com.btccfanhub.data.repository.DriversRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -716,7 +717,7 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         if (team.founded > 0) {
-                            TeamInfoChip(label = "FOUNDED", value = "${team.founded}", modifier = Modifier.weight(1f))
+                            TeamInfoChip(label = "FOUNDED", value = "${team.founded}")
                         }
                         if (team.base.isNotEmpty()) {
                             TeamInfoChip(label = "BASE", value = team.base, modifier = Modifier.weight(1f))
@@ -848,6 +849,23 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                     }
                 }
             }
+
+            // ── Season history ────────────────────────────────────────────────
+            if (team.history.isNotEmpty()) {
+                item {
+                    Text(
+                        "SEASON HISTORY",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = BtccTextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
+                    )
+                }
+                items(team.history.sortedByDescending { it.year }) { stat ->
+                    TeamSeasonStatRow(stat)
+                }
+            }
         }
         // Back button overlaid top-left
         IconButton(
@@ -862,6 +880,64 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.size(28.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TeamSeasonStatRow(stat: TeamSeasonStat) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .background(BtccCard, RoundedCornerShape(10.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            stat.year.toString(),
+            fontWeight = FontWeight.Black,
+            fontSize   = 16.sp,
+            color      = BtccYellow,
+            modifier   = Modifier.width(42.dp),
+        )
+        Text(
+            "Teams' Championship",
+            style    = MaterialTheme.typography.bodySmall,
+            color    = BtccTextSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        Column(horizontalAlignment = Alignment.End) {
+            Row(
+                verticalAlignment     = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (stat.pos == 1) {
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        contentDescription = null,
+                        tint     = BtccYellow,
+                        modifier = Modifier.size(14.dp),
+                    )
+                }
+                Text(
+                    "P${stat.pos}",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize   = 14.sp,
+                    color      = when (stat.pos) {
+                        1    -> Color(0xFFFFD700)
+                        2    -> Color(0xFFC0C0C0)
+                        3    -> Color(0xFFCD7F32)
+                        else -> MaterialTheme.colorScheme.onBackground
+                    },
+                )
+            }
+            Text(
+                "${stat.points} pts",
+                style = MaterialTheme.typography.labelSmall,
+                color = BtccTextSecondary,
             )
         }
     }

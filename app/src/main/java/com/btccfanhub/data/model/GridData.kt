@@ -26,6 +26,12 @@ data class Driver(
     val history: List<SeasonStat> = emptyList(),
 )
 
+data class TeamSeasonStat(
+    val year: Int,
+    val pos: Int,
+    val points: Int,
+)
+
 data class Team(
     val name: String,
     val car: String,
@@ -39,6 +45,7 @@ data class Team(
     val base: String = "",
     val driversChampionships: Int = 0,
     val teamsChampionships: Int = 0,
+    val history: List<TeamSeasonStat> = emptyList(),
 )
 
 data class GridData(
