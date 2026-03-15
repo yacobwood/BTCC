@@ -1,8 +1,10 @@
 package com.btccfanhub.ui.more
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.btccfanhub.data.model.ContentBlock
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
 import com.btccfanhub.ui.theme.*
@@ -78,6 +81,28 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
             return@Scaffold
         }
 
+        // Pre-process: collect group-start..group-end ranges into sublists
+        val segments: List<Any> = remember(info.sections) {
+            val result = mutableListOf<Any>()
+            var i = 0
+            while (i < info.sections.size) {
+                val block = info.sections[i]
+                if (block.type == "group-start") {
+                    val group = mutableListOf<ContentBlock>()
+                    i++
+                    while (i < info.sections.size && info.sections[i].type != "group-end") {
+                        group.add(info.sections[i])
+                        i++
+                    }
+                    result.add(group.toList())
+                } else if (block.type != "group-end") {
+                    result.add(block)
+                }
+                i++
+            }
+            result
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -91,75 +116,98 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
                 modifier = Modifier.padding(bottom = 20.dp),
             )
 
-            info.sections.forEach { block ->
-                when (block.type) {
-                    "heading" -> {
-                        Text(
-                            block.body,
-                            color = BtccYellow,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
-                        )
-                    }
-                    "subheading" -> {
-                        Text(
-                            block.body,
-                            color = BtccTextSecondary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp,
-                            letterSpacing = 0.8.sp,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 6.dp),
-                        )
-                    }
-                    "image" -> {
-                        if (block.url.isNotEmpty()) {
-                            AsyncImage(
-                                model = block.url,
-                                contentDescription = null,
-                                contentScale = ContentScale.FillWidth,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                            )
-                        }
-                    }
-                    "link" -> {
-                        Row(
+            segments.forEach { segment ->
+                when (segment) {
+                    is ContentBlock -> BlockContent(segment, onPageClick)
+                    is List<*> -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val group = segment as List<ContentBlock>
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onPageClick(block.url) }
-                                .padding(vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+                                .padding(top = 4.dp, bottom = 8.dp),
+                            colors = CardDefaults.cardColors(containerColor = BtccBackground),
+                            border = BorderStroke(1.dp, BtccOutline),
+                            shape = RoundedCornerShape(8.dp),
                         ) {
-                            Text(
-                                block.body,
-                                color = BtccTextPrimary,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp,
-                                modifier = Modifier.weight(1f),
-                            )
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = BtccTextSecondary,
-                            )
+                            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+                                group.forEach { block -> BlockContent(block, onPageClick) }
+                            }
                         }
-                        HorizontalDivider(color = BtccOutline)
-                    }
-                    else -> {
-                        Text(
-                            block.body,
-                            color = BtccTextPrimary,
-                            fontSize = 15.sp,
-                            lineHeight = 24.sp,
-                            modifier = Modifier.padding(bottom = 12.dp),
-                        )
                     }
                 }
             }
 
             Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun BlockContent(block: ContentBlock, onPageClick: (String) -> Unit) {
+    when (block.type) {
+        "heading" -> {
+            Text(
+                block.body,
+                color = BtccYellow,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
+            )
+        }
+        "subheading" -> {
+            Text(
+                block.body,
+                color = BtccTextSecondary,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                letterSpacing = 0.8.sp,
+                modifier = Modifier.padding(top = 16.dp, bottom = 6.dp),
+            )
+        }
+        "image" -> {
+            if (block.url.isNotEmpty()) {
+                AsyncImage(
+                    model = block.url,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                )
+            }
+        }
+        "link" -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onPageClick(block.url) }
+                    .padding(vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    block.body,
+                    color = BtccTextPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = BtccTextSecondary,
+                )
+            }
+            HorizontalDivider(color = BtccOutline)
+        }
+        else -> {
+            Text(
+                block.body,
+                color = BtccTextPrimary,
+                fontSize = 15.sp,
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
         }
     }
 }
