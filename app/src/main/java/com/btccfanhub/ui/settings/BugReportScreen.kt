@@ -57,7 +57,7 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
                 windowInsets = WindowInsets(0),
                 title = {
                     Text(
-                        "RAISE A BUG",
+                        "FEEDBACK & BUGS",
                         fontWeight    = FontWeight.Black,
                         fontSize      = 18.sp,
                         letterSpacing = 1.sp,

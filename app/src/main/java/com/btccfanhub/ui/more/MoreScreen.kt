@@ -125,7 +125,7 @@ fun MoreScreen(
             )
             Spacer(Modifier.height(4.dp))
             MoreRow(
-                label = "Report a Bug",
+                label = "Feedback & Bugs",
                 icon = Icons.Default.BugReport,
                 onClick = onBugReportClick,
             )
