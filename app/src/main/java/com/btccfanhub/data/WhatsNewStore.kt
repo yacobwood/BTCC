@@ -63,8 +63,7 @@ object WhatsNewStore {
             "Headlines on images easier to read — stronger gradients and text shadow",
         ),
         20 to listOf(
-            "Widget themes — choose from 11 team-themed colour schemes when adding the widget to your home screen",
-            "Fixed extra space at the top of Standings, Grid, Calendar and other screens",
+            "Widget themes — choose from standard or team-themed colour schemes when adding the widget to your home screen"
         )
     )
 
