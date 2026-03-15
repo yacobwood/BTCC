@@ -19,15 +19,15 @@
         },
         {
           "type": "text",
-          "body": "Free Practice takes place on Saturday morning. Teams use this session to set up their cars for the circuit, try tyre compounds and gather data. It's not televised but gives teams vital preparation time."
+          "body": "Saturday begins with a 40-minute free practice session, giving teams time to set up their cars for the circuit and try different tyre compounds."
         },
         {
           "type": "text",
-          "body": "Qualifying — also on Saturday — determines the starting grid for Race 1. The BTCC uses a 'Quick Six' format: all cars qualify on a set of Option (softer) tyres for the first 10 minutes, then the top six times go through to a final shootout for pole position. The driver on pole earns 3 bonus points."
+          "body": "Qualifying on Saturday consists of two 15-minute sessions that set the Race 1 grid, followed by a Qualifying Race to finalise the order heading into Sunday."
         },
         {
           "type": "text",
-          "body": "Three Races are held on Sunday, typically in the morning and early afternoon so ITV can broadcast them all live. Race 2's grid is the reversed top eight from Race 1's finishing order, which almost always produces dramatic overtaking. Race 3's grid is drawn by ballot from the top ten in the championship standings."
+          "body": "Three Races are held on Sunday. Race 2's grid is the reversed finishing order from Race 1. Race 3 uses a reversed grid for positions 6–12, mixing up the midfield and producing unpredictable racing throughout the pack."
         },
         {
           "type": "heading",
@@ -35,7 +35,7 @@
         },
         {
           "type": "text",
-          "body": "Points are awarded to the top 15 finishers in each race: 20–17–15–13–11–10–9–8–7–6–5–4–3–2–1. Three additional points are available each round: 1 for pole position (Race 1 only), 1 for the fastest lap, and 1 for leading a lap."
+          "body": "Points are awarded to the top 15 finishers in each race: 20–17–15–13–11–10–9–8–7–6–5–4–3–2–1. Bonus points are also available for setting the fastest lap and for leading a lap."
         },
         {
           "type": "text",
@@ -47,11 +47,11 @@
         },
         {
           "type": "text",
-          "body": "All BTCC cars are built to the NGTC (Next Generation Touring Car) specification, introduced in 2011 to reduce costs and level the playing field. The regulations mean that, despite wearing different body shells — currently Honda Civic, BMW 1 Series, Volkswagen Golf and others — all cars share the same steel safety cage, front subframe and rear suspension. Teams fit their own engine and bodywork on top."
+          "body": "All BTCC cars are built to the NGTC (Next Generation Touring Car) specification, introduced in 2011 to cut costs and level the playing field. Despite wearing different body shells — currently Honda Civic, BMW 1 Series, Volkswagen Golf and others — every car shares the same core components: subframes, suspension, Xtrac 6-speed sequential gearbox, Cosworth ECU, brakes, wheels and dampers. Teams fit their own engine and bodywork on top."
         },
         {
           "type": "text",
-          "body": "Engines are 2.0-litre turbocharged units, producing roughly 360 bhp. From 2022, every car has also carried a hybrid system that stores energy under braking and releases it as an additional power boost — around 80–100 bhp — on the straights. Drivers choose when to deploy the boost using a button on the steering wheel."
+          "body": "Engines are 2.0-litre turbocharged direct-injection units producing 350+ bhp, running on 100% sustainable fossil-free fuel since 2025. Every car also carries a hybrid system that stores energy under braking and releases it as a power boost on the straights — drivers control deployment via a button on the steering wheel. To balance competition, the top seven drivers in the standings have their boost deployment restricted. Minimum weight is 1270 kg for front-wheel-drive cars and 1300 kg for rear-wheel-drive."
         },
         {
           "type": "heading",
@@ -59,23 +59,15 @@
         },
         {
           "type": "text",
-          "body": "Goodyear is the sole tyre supplier. Drivers have two compounds available each weekend: Prime (the harder, more durable tyre) and Option (the softer, faster tyre that degrades more quickly). Each driver must use both compounds across the three races — so tyre strategy is a key part of every weekend."
-        },
-        {
-          "type": "text",
-          "body": "The Option tyre is mandatory in qualifying, giving everyone a chance at a fast lap. Teams then decide which compound to run in which race based on track conditions, weather and championship position."
+          "body": "Goodyear is the sole tyre supplier, offering four compounds: Hard, Medium, Soft and Wet. The specific compounds available vary by circuit — Thruxton, for example, uses the hard tyre exclusively due to its high-speed nature. For each event two dry compounds are designated as Prime (harder) and Option (softer). Drivers must use both across the three races, making tyre strategy a key part of every weekend."
         },
         {
           "type": "heading",
-          "body": "Success Ballast"
+          "body": "Boost Restriction"
         },
         {
           "type": "text",
-          "body": "To keep the racing close, the BTCC uses a success ballast system. After each race, the top drivers are required to carry additional weight (up to 75 kg) in the following race. The more points you score, the more ballast you carry — slowing you down and giving your rivals a chance to close the gap."
-        },
-        {
-          "type": "text",
-          "body": "Ballast resets to zero at the start of each new race weekend, meaning the fastest cars from Round 1 start Round 2 with a clean slate. This is why you'll often see different winners across the season."
+          "body": "To keep the racing close, the top seven drivers in the championship standings have their hybrid boost deployment restricted — meaning less of that extra power is available on the straights. The more championship points you have, the greater the restriction. This resets at the start of each new race weekend, giving rivals a chance to close the gap."
         },
         {
           "type": "heading",
