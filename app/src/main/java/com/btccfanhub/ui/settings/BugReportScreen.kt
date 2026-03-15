@@ -54,6 +54,7 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = {
                     Text(
                         "RAISE A BUG",

@@ -38,6 +38,7 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = {
                     Text(
                         page?.title?.uppercase() ?: "",

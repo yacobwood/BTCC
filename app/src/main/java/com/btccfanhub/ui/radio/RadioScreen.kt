@@ -43,7 +43,7 @@ fun RadioScreen() {
             .background(BtccBackground),
     ) {
         TopAppBar(
-            modifier = Modifier.height(52.dp),
+            windowInsets = WindowInsets(0),
             title = {
                 Text(
                     "RADIO",

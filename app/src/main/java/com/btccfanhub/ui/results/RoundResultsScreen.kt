@@ -80,6 +80,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
             .background(BtccBackground),
     ) {
         TopAppBar(
+            windowInsets = WindowInsets(0),
             title = {
                 Column {
                     Text(

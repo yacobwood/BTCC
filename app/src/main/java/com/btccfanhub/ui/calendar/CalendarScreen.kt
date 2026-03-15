@@ -61,7 +61,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: (() -> U
             .background(BtccBackground),
     ) {
         TopAppBar(
-            modifier = Modifier.height(52.dp),
+            windowInsets = WindowInsets(0),
             title = {
                 Text(
                     "2026 SEASON",

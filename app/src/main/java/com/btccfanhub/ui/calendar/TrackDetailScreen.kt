@@ -111,6 +111,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
     Box(Modifier.fillMaxSize().background(BtccBackground)) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = {
                     Column {
                         Text(

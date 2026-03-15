@@ -173,6 +173,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             .background(BtccBackground),
     ) {
         TopAppBar(
+            windowInsets = WindowInsets(0),
             title = {
                 Text(
                     "STANDINGS",

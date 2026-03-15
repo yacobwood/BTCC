@@ -34,6 +34,7 @@ fun LiveTimingScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

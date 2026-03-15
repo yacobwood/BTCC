@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
@@ -118,7 +119,7 @@ fun DriversScreen() {
                     .background(BtccBackground),
             ) {
                 TopAppBar(
-                    modifier = Modifier.height(52.dp),
+                    windowInsets = WindowInsets(0),
                     title  = { Text("2026 GRID", fontWeight = FontWeight.Black, fontSize = 18.sp, letterSpacing = 1.sp) },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
                 )
@@ -161,7 +162,7 @@ private fun GridTabs(
     ) {
         Column {
             TopAppBar(
-                modifier = Modifier.height(52.dp),
+                windowInsets = WindowInsets(0),
                 title = {
                     Text(
                         "2026 GRID",
@@ -577,35 +578,11 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BtccBackground),
     ) {
-        TopAppBar(
-            modifier = Modifier.height(56.dp),
-            title = {
-                Text(
-                    team.name,
-                    fontWeight    = FontWeight.Black,
-                    fontSize      = 16.sp,
-                    letterSpacing = 0.5.sp,
-                )
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick   = onBack,
-                    modifier  = Modifier.size(48.dp),
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
-        )
         LazyColumn(
             modifier    = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 28.dp),
@@ -616,7 +593,7 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(if (team.carImageUrl.isNotEmpty()) 200.dp else 100.dp)
+                        .height(if (team.carImageUrl.isNotEmpty()) 200.dp else 130.dp)
                         .background(BtccCard),
                 ) {
                     if (team.carImageUrl.isNotEmpty()) {
@@ -662,6 +639,18 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 }
             }
 
+            // ── Team name header ─────────────────────────────────────────────
+            item {
+                Text(
+                    team.name,
+                    fontWeight    = FontWeight.Black,
+                    fontSize      = 20.sp,
+                    letterSpacing = 0.5.sp,
+                    color         = MaterialTheme.colorScheme.onBackground,
+                    modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 2.dp),
+                )
+            }
+
             // ── Drivers ──────────────────────────────────────────────────────
             item {
                 Text(
@@ -675,9 +664,10 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
             }
             item {
                 val tbc = team.entries - team.drivers.size
-                if (team.drivers.size >= 2 && tbc == 0) {
-                    // Side-by-side for 2 or more confirmed drivers (no TBC slots)
-                    val avatarSize = if (team.drivers.size >= 3) 56 else 72
+                val totalSlots = team.drivers.size + tbc
+                if (totalSlots >= 2) {
+                    // Side-by-side for 2+ total slots (confirmed or TBC)
+                    val avatarSize = if (totalSlots >= 3) 56 else 72
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -686,6 +676,9 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                     ) {
                         team.drivers.forEach { driver ->
                             TeamDriverCard(driver = driver, avatarSize = avatarSize, modifier = Modifier.weight(1f))
+                        }
+                        repeat(tbc) {
+                            TbcDriverCard(avatarSize = avatarSize, modifier = Modifier.weight(1f))
                         }
                     }
                 } else {
@@ -800,6 +793,21 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 }
             }
         }
+        // Back button overlaid top-left
+        IconButton(
+            onClick  = onBack,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(start = 4.dp, top = 8.dp)
+                .size(48.dp),
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier.size(28.dp),
+            )
+        }
     }
 }
 
@@ -842,7 +850,7 @@ private fun TeamDriverCard(driver: Driver, avatarSize: Int = 72, modifier: Modif
 }
 
 @Composable
-private fun TbcDriverCard(modifier: Modifier = Modifier) {
+private fun TbcDriverCard(avatarSize: Int = 72, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .background(BtccCard, RoundedCornerShape(12.dp))
@@ -852,12 +860,17 @@ private fun TbcDriverCard(modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(72.dp)
+                .size(avatarSize.dp)
                 .clip(CircleShape)
                 .background(BtccOutline.copy(alpha = 0.3f)),
             contentAlignment = Alignment.Center,
         ) {
-            Text("?", fontWeight = FontWeight.Black, fontSize = 28.sp, color = BtccOutline)
+            Icon(
+                Icons.Filled.Person,
+                contentDescription = null,
+                tint     = BtccOutline,
+                modifier = Modifier.size((avatarSize * 0.65f).dp),
+            )
         }
         Text(
             "Driver TBC",
@@ -1074,7 +1087,12 @@ private fun TbcDriverRow() {
                     .align(Alignment.BottomStart),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("?", fontWeight = FontWeight.Black, fontSize = 16.sp, color = BtccOutline)
+                Icon(
+                    Icons.Filled.Person,
+                    contentDescription = null,
+                    tint     = BtccOutline,
+                    modifier = Modifier.size(26.dp),
+                )
             }
             Box(
                 modifier = Modifier

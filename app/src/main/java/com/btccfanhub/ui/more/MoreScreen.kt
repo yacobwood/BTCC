@@ -50,6 +50,7 @@ fun MoreScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(0),
                 title = {
                     Text(
                         "MORE",
