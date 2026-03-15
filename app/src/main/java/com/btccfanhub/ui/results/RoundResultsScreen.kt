@@ -70,7 +70,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
         loading = false
     }
 
-    val races = roundResult?.races ?: emptyList()
+    val races = (roundResult?.races ?: emptyList()).filter { it.results.isNotEmpty() }
     val pageCount = races.size.coerceAtLeast(1)
     val pagerState = rememberPagerState(pageCount = { pageCount })
 
