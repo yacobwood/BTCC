@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -390,12 +389,12 @@ private fun LegendChip(
                 onClick = onClick,
             )
             .background(
-                color = BtccCard,
+                color = if (isVisible) color.copy(alpha = 0.18f) else BtccCard,
                 shape = RoundedCornerShape(10.dp),
             )
             .border(
                 width = 1.dp,
-                color = if (isVisible) color.copy(alpha = 0.5f) else BtccOutline,
+                color = if (isVisible) color.copy(alpha = 0.6f) else BtccOutline,
                 shape = RoundedCornerShape(10.dp),
             )
             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -407,11 +406,6 @@ private fun LegendChip(
             contentDescription = if (isVisible) "Shown" else "Hidden",
             tint = if (isVisible) BtccYellow else BtccTextSecondary,
             modifier = Modifier.size(22.dp),
-        )
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .background(color.copy(alpha = alpha), CircleShape),
         )
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(

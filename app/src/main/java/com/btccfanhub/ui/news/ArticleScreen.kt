@@ -139,9 +139,10 @@ fun ArticleScreen(onBack: () -> Unit) {
         val context = LocalContext.current
         Row(
             modifier = Modifier
+                .align(Alignment.TopStart)
+                .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(4.dp)
-                .fillMaxWidth(),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -383,6 +384,7 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           position: relative;
           width: 100%;
           min-height: 340px;
+          padding-top: env(safe-area-inset-top, 0px);
           background-size: cover;
           background-position: center;
           display: flex;

@@ -753,73 +753,6 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 }
             }
 
-            // ── 2025 result ──────────────────────────────────────────────────
-            if (team.standing2025 > 0) {
-                item {
-                    Text(
-                        "2025 SEASON",
-                        style         = MaterialTheme.typography.labelSmall,
-                        fontWeight    = FontWeight.ExtraBold,
-                        color         = BtccTextSecondary,
-                        letterSpacing = 2.sp,
-                        modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
-                    )
-                }
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .background(BtccCard, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 20.dp, vertical = 16.dp),
-                        verticalAlignment     = Alignment.CenterVertically,
-                    ) {
-                        // Position
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Teams' Championship",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = BtccTextSecondary,
-                            )
-                            Text(
-                                "P${team.standing2025}",
-                                fontWeight = FontWeight.Black,
-                                fontSize   = 36.sp,
-                                color      = when (team.standing2025) {
-                                    1 -> Color(0xFFFFD700)
-                                    2 -> Color(0xFFC0C0C0)
-                                    3 -> Color(0xFFCD7F32)
-                                    else -> MaterialTheme.colorScheme.onBackground
-                                },
-                            )
-                        }
-                        // Points
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                "Points",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = BtccTextSecondary,
-                            )
-                            Text(
-                                "${team.points2025}",
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize   = 28.sp,
-                                color      = MaterialTheme.colorScheme.onBackground,
-                            )
-                        }
-                        if (team.standing2025 == 1) {
-                            Spacer(Modifier.width(16.dp))
-                            Icon(
-                                Icons.Default.EmojiEvents,
-                                contentDescription = "Champions",
-                                tint     = BtccYellow,
-                                modifier = Modifier.size(40.dp),
-                            )
-                        }
-                    }
-                }
-            }
-
             // ── Bio ──────────────────────────────────────────────────────────
             if (team.bio.isNotEmpty()) {
                 item {
@@ -862,8 +795,22 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                         modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
                     )
                 }
-                items(team.history.sortedByDescending { it.year }) { stat ->
-                    TeamSeasonStatRow(stat)
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(BtccCard, RoundedCornerShape(12.dp)),
+                    ) {
+                        team.history.sortedByDescending { it.year }.forEachIndexed { index, stat ->
+                            if (index > 0) HorizontalDivider(
+                                color     = BtccOutline.copy(alpha = 0.3f),
+                                thickness = 0.5.dp,
+                                modifier  = Modifier.padding(horizontal = 14.dp),
+                            )
+                            TeamSeasonStatRow(stat)
+                        }
+                    }
                 }
             }
         }
@@ -873,13 +820,15 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .statusBarsPadding()
-                .padding(start = 4.dp, top = 8.dp)
-                .size(48.dp),
+                .padding(start = 8.dp, top = 8.dp)
+                .size(40.dp)
+                .background(Color.Black.copy(alpha = 0.45f), CircleShape),
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
-                modifier = Modifier.size(28.dp),
+                tint     = Color.White,
+                modifier = Modifier.size(22.dp),
             )
         }
     }
@@ -887,59 +836,53 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
 
 @Composable
 private fun TeamSeasonStatRow(stat: TeamSeasonStat) {
+    val posColor = when (stat.pos) {
+        1    -> Color(0xFFFFD700)
+        2    -> Color(0xFFC0C0C0)
+        3    -> Color(0xFFCD7F32)
+        else -> MaterialTheme.colorScheme.onBackground
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .background(BtccCard, RoundedCornerShape(10.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment     = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        // Year
         Text(
             stat.year.toString(),
-            fontWeight = FontWeight.Black,
-            fontSize   = 16.sp,
-            color      = BtccYellow,
-            modifier   = Modifier.width(42.dp),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize   = 14.sp,
+            color      = BtccTextSecondary,
+            modifier   = Modifier.width(46.dp),
         )
-        Text(
-            "Teams' Championship",
-            style    = MaterialTheme.typography.bodySmall,
-            color    = BtccTextSecondary,
-            modifier = Modifier.weight(1f),
-        )
-        Column(horizontalAlignment = Alignment.End) {
-            Row(
-                verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                if (stat.pos == 1) {
-                    Icon(
-                        Icons.Default.EmojiEvents,
-                        contentDescription = null,
-                        tint     = BtccYellow,
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
-                Text(
-                    "P${stat.pos}",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize   = 14.sp,
-                    color      = when (stat.pos) {
-                        1    -> Color(0xFFFFD700)
-                        2    -> Color(0xFFC0C0C0)
-                        3    -> Color(0xFFCD7F32)
-                        else -> MaterialTheme.colorScheme.onBackground
-                    },
+        // Position (large, coloured)
+        Row(
+            modifier              = Modifier.weight(1f),
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            if (stat.pos == 1) {
+                Icon(
+                    Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint     = BtccYellow,
+                    modifier = Modifier.size(14.dp),
                 )
             }
             Text(
-                "${stat.points} pts",
-                style = MaterialTheme.typography.labelSmall,
-                color = BtccTextSecondary,
+                "P${stat.pos}",
+                fontWeight = FontWeight.Black,
+                fontSize   = 16.sp,
+                color      = posColor,
             )
         }
+        // Points (right-aligned, muted)
+        Text(
+            "${stat.points} pts",
+            style  = MaterialTheme.typography.bodySmall,
+            color  = BtccTextSecondary,
+        )
     }
 }
 

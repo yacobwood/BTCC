@@ -67,6 +67,9 @@ object WhatsNewStore {
         ),
         21 to listOf(
             "Accurate race gaps"
+        ),
+        22 to listOf(
+            "Improve teams pages"
         )
     )
 

@@ -337,10 +337,10 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () 
                     Brush.verticalGradient(
                         colorStops = if (article.imageUrl != null) arrayOf(
                             0.0f to Color(0xCC000000),
-                            0.22f to Color.Transparent,
-                            0.4f to Color.Transparent,
-                            0.55f to Color(0xE6000000),
-                            1.0f to Color(0xF5000000),
+                            0.2f to Color.Transparent,
+                            0.5f to Color.Transparent,
+                            0.72f to Color(0xCC000000),
+                            1.0f to Color(0xE0000000),
                         ) else arrayOf(
                             0.0f to Color(0xCC000000),
                             0.2f to BtccYellow.copy(alpha = 0.45f),

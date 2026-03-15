@@ -1,327 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_background"
-    android:orientation="vertical"
-    android:paddingStart="14dp"
-    android:paddingEnd="14dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp">
+    android:background="@drawable/widget_background_dark">
 
-    <!-- Top row: race info + countdown -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/widget_round"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.08"
-                android:textAllCaps="true"
-                android:textColor="#F5C400"
-                android:textSize="10sp" />
-
-            <TextView
-                android:id="@+id/widget_venue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
-                android:ellipsize="end"
-                android:fontFamily="sans-serif-black"
-                android:maxLines="1"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/widget_dates"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="#8A8D94"
-                android:textSize="11sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/widget_countdown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-black"
-                android:gravity="center"
-                android:lineSpacingMultiplier="0.9"
-                android:textColor="#FFFFFF"
-                android:textSize="28sp" />
-
-            <TextView
-                android:id="@+id/widget_countdown_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center"
-                android:letterSpacing="0.05"
-                android:textColor="#8A8D94"
-                android:textSize="9sp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!-- Divider -->
+    <!-- Livery background — filled programmatically via setImageViewBitmap -->
     <ImageView
-        android:id="@+id/widget_divider"
+        android:id="@+id/widget_livery"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="#1A1B20"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
         android:importantForAccessibility="no" />
 
-    <!-- Schedule: SAT | SUN side by side, centered vertically in remaining space -->
     <LinearLayout
-        android:id="@+id/widget_schedule_row"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
-        <!-- Saturday -->
+        <!-- Top row: race info + countdown -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <TextView
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_round"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.08"
+                    android:textAllCaps="true"
+                    android:textColor="#F5C400"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/widget_venue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-black"
+                    android:maxLines="1"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/widget_dates"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:textColor="#8A8D94"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.06"
-                android:text="SAT"
-                android:textColor="#F5C400"
-                android:textSize="10sp" />
-
-            <!-- Session row 1 (FP1) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
+                android:layout_marginStart="12dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/widget_sat_name1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/widget_sat_time1"
+                    android:id="@+id/widget_countdown"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#8A8D94"
-                    android:textSize="11sp" />
-
-            </LinearLayout>
-
-            <!-- Session row 2 (FP2) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/widget_sat_name2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
+                    android:fontFamily="sans-serif-black"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="0.9"
                     android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
+                    android:textSize="36sp" />
 
                 <TextView
-                    android:id="@+id/widget_sat_time2"
+                    android:id="@+id/widget_countdown_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:letterSpacing="0.05"
                     android:textColor="#8A8D94"
-                    android:textSize="11sp" />
-
-            </LinearLayout>
-
-            <!-- Session row 3 (Qualifying) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/widget_sat_name3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/widget_sat_time3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#8A8D94"
-                    android:textSize="11sp" />
+                    android:textSize="13sp" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Vertical divider -->
+        <!-- Divider -->
         <ImageView
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
+            android:id="@+id/widget_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:background="#1A1B20"
             android:importantForAccessibility="no" />
 
-        <!-- Sunday -->
+        <!-- Schedule: SAT | SUN side by side -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/widget_schedule_row"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.06"
-                android:text="SUN"
-                android:textColor="#F5C400"
-                android:textSize="10sp" />
-
-            <!-- Session row 1 (Race 1) -->
+            <!-- Saturday -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/widget_sun_name1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/widget_sun_time1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#8A8D94"
-                    android:textSize="11sp" />
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.06"
+                    android:text="SAT"
+                    android:textColor="#F5C400"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/widget_sat_name1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/widget_sat_name2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/widget_sat_name3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Session row 2 (Race 2) -->
+            <!-- Vertical divider -->
+            <ImageView
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:background="#1A1B20"
+                android:importantForAccessibility="no" />
+
+            <!-- Sunday -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/widget_sun_name2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/widget_sun_time2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#8A8D94"
-                    android:textSize="11sp" />
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.06"
+                    android:text="SUN"
+                    android:textColor="#F5C400"
+                    android:textSize="10sp" />
 
-            </LinearLayout>
-
-            <!-- Session row 3 (Race 3) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/widget_sun_name3"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/widget_sun_name1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/widget_sun_time3"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#8A8D94"
-                    android:textSize="11sp" />
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/widget_sun_name2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/widget_sun_name3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
+        <!-- Fallback when no schedule data -->
+        <TextView
+            android:id="@+id/widget_no_schedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Schedule TBA"
+            android:textColor="#8A8D94"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
-    <!-- Fallback when no schedule data is available -->
-    <TextView
-        android:id="@+id/widget_no_schedule"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Schedule TBA"
-        android:textColor="#8A8D94"
-        android:textSize="11sp"
-        android:visibility="gone" />
-
-</LinearLayout>
+</FrameLayout>

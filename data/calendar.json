@@ -14,8 +14,8 @@
       "lng": -1.3764,
       "lengthMiles": "1.957 mi",
       "lengthKm": "3.149 km",
-      "corners": 9,
-      "about": "One of Britain's most historic circuits, dating back to 1931. The National layout features the infamous Craner Curves \u2014 a sweeping downhill chicane that rewards commitment \u2014 alongside the Old Hairpin and the fast Schwantz Curve. The circuit also hosted a famous Formula 1 European Grand Prix in 1993, remembered for Ayrton Senna's extraordinary opening lap.",
+      "corners": 10,
+      "about": "One of Britain's most historic circuits, dating back to 1931. The National layout features the infamous Craner Curves — a sweeping downhill chicane that rewards commitment — alongside the Old Hairpin and the fast Schwantz Curve. The circuit also hosted a famous Formula 1 European Grand Prix in 1993, remembered for Ayrton Senna's extraordinary opening lap.",
       "btccFact": "Donington opens the BTCC season almost every year, meaning the winner of the first race here is often considered the early championship favourite.",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Start-0H5A6101-scaled.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/2-Donington-Park-1.jpg",
@@ -46,8 +46,8 @@
             {
               "number": "T1",
               "name": "Redgate",
-              "description": "Sharp right-hander at the end of the start/finish straight. The prime overtaking zone on lap one and throughout the race.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Sharp right-hander at the end of the start/finish straight. The prime overtaking zone on lap one and throughout the race."
             },
             {
               "number": "T2",
@@ -57,13 +57,13 @@
             {
               "number": "T3-4",
               "name": "Craner Curves",
-              "description": "Iconic downhill sweeping left-hand sequence. One of the most thrilling corners in British motorsport \u2014 requires full commitment at high speed."
+              "description": "Iconic downhill sweeping left-hand sequence. One of the most thrilling corners in British motorsport — requires full commitment at high speed."
             },
             {
               "number": "T5",
               "name": "Old Hairpin",
-              "description": "Tight right-hand hairpin at the bottom of the hill. A classic late-braking overtaking spot with a wide entry.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight right-hand hairpin at the bottom of the hill. A classic late-braking overtaking spot with a wide entry."
             }
           ]
         },
@@ -72,14 +72,19 @@
           "corners": [
             {
               "number": "T6",
-              "name": "McLeans",
-              "description": "Right-hander at the end of Starkey's Straight. Heavy braking zone with overtaking possible on the inside.",
-              "overtaking": true
+              "name": "Schwantz Curve",
+              "description": "Sweeping uphill left-hander named after MotoGP legend Kevin Schwantz. High commitment required as the car loads up through the long arc."
             },
             {
               "number": "T7",
+              "name": "McLeans",
+              "overtaking": true,
+              "description": "Right-hander at the end of Starkey's Straight. Heavy braking zone with overtaking possible on the inside."
+            },
+            {
+              "number": "T8",
               "name": "Coppice",
-              "description": "Fast right-hand bend taken in a high gear. Rewards bravery and a late apex sets up the run to the final corner."
+              "description": "Fast right-hand bend taken in a high gear. Rewards bravery — a late apex sets up the run to the final corner."
             }
           ]
         },
@@ -87,10 +92,10 @@
           "sector": "Sector 3",
           "corners": [
             {
-              "number": "T8-9",
+              "number": "T9-10",
               "name": "Fogarty Esses",
-              "description": "Right-left chicane complex, the final braking zone before the pit straight. Last chance to make a pass each lap.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Right-left chicane complex, the final braking zone before the pit straight. Named after Carl Fogarty — last chance to make a pass each lap."
             }
           ]
         }
@@ -108,8 +113,8 @@
       "lengthMiles": "1.208 mi",
       "lengthKm": "1.944 km",
       "corners": 9,
-      "about": "The short, intense Indy loop of the legendary Brands Hatch circuit. Paddock Hill Bend is one of the most famous corners in British motorsport \u2014 blind, downhill, and off-camber \u2014 providing spectacular action on the opening lap. The tight Druids hairpin and Clark Curve create close-quarters racing throughout the field.",
-      "btccFact": "The BTCC visits Brands Hatch twice each season \u2014 on the shorter Indy circuit in spring and the full Grand Prix layout for the season finale in October.",
+      "about": "The short, intense Indy loop of the legendary Brands Hatch circuit. Paddock Hill Bend is one of the most famous corners in British motorsport — blind, downhill, and off-camber — providing spectacular action on the opening lap. The tight Druids hairpin and Clark Curve create close-quarters racing throughout the field.",
+      "btccFact": "The BTCC visits Brands Hatch twice each season — on the shorter Indy circuit in spring and the full Grand Prix layout for the season finale in October.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2025-brands-hatch-indy/Rainford-0Q3A3551.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/750x625.jpg",
       "raceImages": [
@@ -139,13 +144,13 @@
             {
               "number": "T1",
               "name": "Paddock Hill Bend",
-              "description": "Iconic blind right-hander dropping steeply downhill with off-camber exit. One of the most famous corners in British motorsport \u2014 spectacular on the opening lap."
+              "description": "Iconic blind right-hander dropping steeply downhill with off-camber exit. One of the most famous corners in British motorsport — spectacular on the opening lap."
             },
             {
               "number": "T2",
               "name": "Druids",
-              "description": "Tight left-hand hairpin at the top of the hill. The prime overtaking spot \u2014 heavy braking and a wide entry invite late moves.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight left-hand hairpin at the top of the hill. The prime overtaking spot — heavy braking and a wide entry invite late moves."
             },
             {
               "number": "T3",
@@ -160,12 +165,12 @@
             {
               "number": "T4",
               "name": "Surtees",
-              "description": "Fast right-hand kink at the bottom of the hill. Taken at high speed, the dip loads the car before turning in."
+              "description": "Fast left-hand kink at the bottom of the hill. The dip loads the car as it turns in — deceptively quick."
             },
             {
               "number": "T5",
-              "name": "Pilgrims Drop",
-              "description": "Left-hand kink over a crest. The car goes light, making the rear end lively."
+              "name": "McLaren",
+              "description": "Right-hander before Pilgrims Drop. Smooth inputs required to set up the run into Clearways."
             }
           ]
         },
@@ -199,7 +204,7 @@
       "lengthKm": "4.779 km",
       "corners": 11,
       "about": "Built on a former Second World War airfield in the flat Norfolk countryside, Snetterton is one of the longest circuits on the BTCC calendar. The Bentley Straight offers tyre-testing high-speed running, while technical sections like the Senna Chicane and Coram Corner reward smooth, committed driving. Setup compromise between straight-line speed and mechanical grip is key.",
-      "btccFact": "Snetterton's long straights mean it's one of the circuits where power advantage makes the biggest difference \u2014 teams running higher-powered cars often shine here.",
+      "btccFact": "Snetterton's long straights mean it's one of the circuits where power advantage makes the biggest difference — teams running higher-powered cars often shine here.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2025-snetterton/Hall-5L0A0145.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/6-Snetterton.jpg",
       "raceImages": [
@@ -229,14 +234,14 @@
             {
               "number": "T1",
               "name": "Riches",
-              "description": "Right-hander at the end of the long Bentley Straight. Heavy braking zone and a prime overtaking opportunity.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Right-hander at the end of the long Bentley Straight. Heavy braking zone and a prime overtaking opportunity."
             },
             {
               "number": "T2",
               "name": "Montreal",
-              "description": "Tight left-hand hairpin. Slow speed and a wide entry make this another overtaking spot.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight right-hand hairpin named after the Canadian GP circuit. Slow speed and a wide entry make this another key overtaking spot."
             },
             {
               "number": "T3",
@@ -256,18 +261,17 @@
             {
               "number": "T5",
               "name": "Hamilton",
-              "description": "Left-hander that completes the complex before the run to the Senna Chicane."
+              "description": "Left-hander that completes the complex before the run to the back straight."
             },
             {
-              "number": "T6-7",
-              "name": "Oggies/Williams",
-              "description": "Right-left flick through a fast section. Smooth inputs are essential."
+              "number": "T6",
+              "name": "Oggies",
+              "description": "Right-hand corner heading into the Williams section."
             },
             {
-              "number": "T8",
-              "name": "Senna Chicane",
-              "description": "Tight right-left chicane named after the late Ayrton Senna. A key overtaking zone under braking.",
-              "overtaking": true
+              "number": "T7",
+              "name": "Williams",
+              "description": "Right-hander leading onto the long Bentley Straight. Exit speed here is critical for straight-line performance."
             }
           ]
         },
@@ -275,19 +279,25 @@
           "sector": "Sector 3",
           "corners": [
             {
+              "number": "T8",
+              "name": "Nelson",
+              "overtaking": true,
+              "description": "Right-hander at the end of the back straight. A braking zone with overtaking possible on the inside."
+            },
+            {
               "number": "T9",
-              "name": "Coram",
-              "description": "Long, fast right-hand sweeper. One of the most demanding corners \u2014 rewards commitment and a precise line."
+              "name": "Bomb Hole",
+              "description": "Left-hand dip through a compression. The car bottoms out, making it tricky under braking."
             },
             {
               "number": "T10",
-              "name": "Russell",
-              "description": "Right-hander linking Coram to the final section."
+              "name": "Coram",
+              "description": "Long, fast right-hand sweeper. One of the most demanding corners on the calendar — rewards commitment and a precise line."
             },
             {
               "number": "T11",
-              "name": "Bomb Hole",
-              "description": "Left-hand dip through a compression. The car bottoms out, making it tricky under braking for the pit straight."
+              "name": "Murrays",
+              "description": "Right-hander onto the pit straight. Exit speed here sets up the run down to Riches."
             }
           ]
         }
@@ -336,18 +346,18 @@
             {
               "number": "T1",
               "name": "Old Hall",
-              "description": "Right-hander off the start/finish straight. Tight and technical \u2014 a frequent overtaking spot on lap one.",
+              "description": "Right-hander off the start/finish straight. Tight and technical — a frequent overtaking spot on lap one.",
               "overtaking": true
             },
             {
               "number": "T2",
               "name": "Dentons",
-              "description": "Left-hand kink that leads downhill into the Cascades section."
+              "description": "Right-hand kink that leads downhill into the Cascades section."
             },
             {
               "number": "T3",
               "name": "Cascades",
-              "description": "Fast right-hander dropping steeply downhill. One of the most spectacular corners on the calendar \u2014 taken at high speed with limited visibility."
+              "description": "Fast left-hander dropping steeply downhill. One of the most spectacular corners on the calendar — taken at high speed with limited visibility."
             },
             {
               "number": "T4",
@@ -378,7 +388,7 @@
             {
               "number": "T8",
               "name": "Knickerbrook",
-              "description": "Right-hand chicane complex with a tricky change of direction. Gets the car unsettled."
+              "description": "Left-hand chicane complex with a tricky change of direction. Gets the car unsettled."
             }
           ]
         },
@@ -399,7 +409,7 @@
             {
               "number": "T12",
               "name": "Deer Leap",
-              "description": "Right-hand kink over a crest \u2014 the car goes light and the rear steps out."
+              "description": "Right-hand kink over a crest — the car goes light and the rear steps out."
             },
             {
               "number": "T13",
@@ -422,7 +432,7 @@
       "lengthMiles": "2.356 mi",
       "lengthKm": "3.792 km",
       "corners": 9,
-      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb\u2013Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
+      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb–Noble–Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
       "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
@@ -458,7 +468,7 @@
             {
               "number": "T2-3",
               "name": "Campbell/Cobb",
-              "description": "Fast right-left sweeping complex taken at enormous speed. One of the most demanding sequences in the BTCC \u2014 tyre wear here is critical."
+              "description": "Fast right-left sweeping complex taken at enormous speed. One of the most demanding sequences in the BTCC — tyre wear here is critical."
             }
           ]
         },
@@ -468,17 +478,17 @@
             {
               "number": "T4",
               "name": "Segrave",
-              "description": "Left-hand kink linking the high-speed section to Noble."
+              "description": "Right-hand kink linking the high-speed Campbell/Cobb section to Noble."
             },
             {
               "number": "T5",
               "name": "Noble",
-              "description": "Right-hander that feeds into the Church complex at high speed."
+              "description": "Fast left-hander that feeds into the Church complex at high speed."
             },
             {
               "number": "T6",
               "name": "Church",
-              "description": "Fast right-hand sweeper. Taken in a high gear \u2014 commitment through here defines the lap."
+              "description": "Fast right-hand sweeper. Taken in a high gear — commitment through here defines the lap."
             }
           ]
         },
@@ -499,7 +509,7 @@
             {
               "number": "T9",
               "name": "Goodwood",
-              "description": "Right-left chicane before the pit straight. A good exit here sets up a slipstream opportunity."
+              "description": "Long right-hander before the pit straight. A good exit sets up a slipstream opportunity into Allard."
             }
           ]
         }
@@ -516,9 +526,9 @@
       "lng": -3.509,
       "lengthMiles": "1.270 mi",
       "lengthKm": "2.045 km",
-      "corners": 13,
-      "about": "Scotland's National Motorsport Centre, tucked into the Fife hills. Compact and technically demanding, Knockhill is unlike any other circuit on the calendar \u2014 the undulating gradient means cars are constantly loaded and unloaded through corners, making the rear of a touring car particularly lively. The blind crest at Clark's Corner demands total commitment.",
-      "btccFact": "The Knockhill crowd is famously passionate, and the circuit's compact nature means fans can see virtually the entire lap from the hillside spectator banks \u2014 making it a fantastic atmosphere for a race meeting.",
+      "corners": 9,
+      "about": "Scotland's National Motorsport Centre, tucked into the Fife hills. Compact and technically demanding, Knockhill is unlike any other circuit on the calendar — the undulating gradient means cars are constantly loaded and unloaded through corners, making the rear of a touring car particularly lively. The blind crest at Clark's Corner demands total commitment.",
+      "btccFact": "The Knockhill crowd is famously passionate, and the circuit's compact nature means fans can see virtually the entire lap from the hillside spectator banks — making it a fantastic atmosphere for a race meeting.",
       "imageUrl": "https://btcc.net/wp-content/gallery/knockhill-2024/1-DJI_20240812121003_0175_D-1.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/knockhill-2020-03.jpg",
       "raceImages": [
@@ -553,13 +563,8 @@
             {
               "number": "T2",
               "name": "Leslie's",
-              "description": "Left-hand hairpin at the lowest point of the circuit. The tightest corner on the track and the primary overtaking zone.",
-              "overtaking": true
-            },
-            {
-              "number": "T3",
-              "name": "Scotsman",
-              "description": "Right-hander climbing back uphill."
+              "overtaking": true,
+              "description": "Left-hand hairpin at the lowest point of the circuit. The tightest corner on the track and the primary overtaking zone."
             }
           ]
         },
@@ -567,20 +572,19 @@
           "sector": "Sector 2",
           "corners": [
             {
-              "number": "T4",
+              "number": "T3-4",
+              "name": "Chicane",
+              "description": "Left-right chicane on the climb back uphill. Disrupts the car's rhythm and rewards smooth inputs."
+            },
+            {
+              "number": "T5",
               "name": "Clark's",
-              "description": "Left-hander over a blind crest. One of the most daunting corners on the BTCC calendar \u2014 total commitment required with zero visibility."
+              "description": "Blind right-hander over a crest. One of the most daunting corners on the BTCC calendar — total commitment required with zero visibility over the top."
             },
             {
-              "number": "T5-6",
-              "name": "Railway",
-              "description": "Right-left complex on the run down to the chicane."
-            },
-            {
-              "number": "T7",
-              "name": "McIntyres",
-              "description": "Right-hand hairpin. A heavy braking zone that offers overtaking opportunities.",
-              "overtaking": true
+              "number": "T6",
+              "name": "Hislop's",
+              "description": "Right-hand bend on the approach to the final sector."
             }
           ]
         },
@@ -588,19 +592,15 @@
           "sector": "Sector 3",
           "corners": [
             {
+              "number": "T7",
+              "name": "McIntyre's",
+              "overtaking": true,
+              "description": "Right-hand hairpin. A heavy braking zone and the best overtaking opportunity in the final sector."
+            },
+            {
               "number": "T8-9",
-              "name": "Chicane",
-              "description": "Left-right chicane feeding onto the uphill section."
-            },
-            {
-              "number": "T10-11",
-              "name": "Buttermilk",
-              "description": "Right-left sequence on the climb back to the top of the circuit."
-            },
-            {
-              "number": "T12-13",
               "name": "Taylor's",
-              "description": "Right-hand kink complex leading back onto the start/finish straight."
+              "description": "Right-hand complex leading back onto the start/finish straight."
             }
           ]
         }
@@ -617,9 +617,9 @@
       "lng": -1.3764,
       "lengthMiles": "2.500 mi",
       "lengthKm": "4.023 km",
-      "corners": 12,
+      "corners": 13,
       "about": "The full Grand Prix layout extends the National circuit with the Melbourne Loop and the Foggy/Goddards complex, significantly increasing lap length and introducing additional technical challenge. The extra section adds meaningful overtaking opportunities and changes the strategic picture for tyre management. It last hosted a Formula 1 race in 1993.",
-      "btccFact": "Donington GP provides a fascinating contrast with Round 1 at the same venue \u2014 drivers who struggled on the National loop earlier in the season can find the extra GP section suits their driving style far better.",
+      "btccFact": "Donington GP provides a fascinating contrast with Round 1 at the same venue — drivers who struggled on the National loop earlier in the season can find the extra GP section suits their driving style far better.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-donington-park-gp/Morgan-.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2022/11/Donington-GP-detailed-map-1.png",
       "raceImages": [
@@ -649,8 +649,8 @@
             {
               "number": "T1",
               "name": "Redgate",
-              "description": "Sharp right-hander at the end of the start/finish straight. Same as the National circuit \u2014 prime overtaking zone.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Sharp right-hander at the end of the start/finish straight. Same as the National circuit — prime overtaking zone."
             },
             {
               "number": "T2",
@@ -665,8 +665,8 @@
             {
               "number": "T5",
               "name": "Old Hairpin",
-              "description": "Tight right-hand hairpin. A classic late-braking overtaking spot.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight right-hand hairpin. A classic late-braking overtaking spot."
             }
           ]
         },
@@ -675,12 +675,17 @@
           "corners": [
             {
               "number": "T6",
-              "name": "McLeans",
-              "description": "Right-hander at the end of Starkey's Straight.",
-              "overtaking": true
+              "name": "Schwantz Curve",
+              "description": "Sweeping uphill left-hander named after Kevin Schwantz. High commitment required."
             },
             {
               "number": "T7",
+              "name": "McLeans",
+              "overtaking": true,
+              "description": "Right-hander at the end of Starkey's Straight. Heavy braking zone."
+            },
+            {
+              "number": "T8",
               "name": "Coppice",
               "description": "Fast right-hand bend. On the GP layout this leads into the Fogarty Esses rather than straight to the start/finish."
             }
@@ -690,21 +695,21 @@
           "sector": "Sector 3",
           "corners": [
             {
-              "number": "T8-9",
+              "number": "T9-10",
               "name": "Fogarty Esses",
               "description": "Right-left chicane on the run down to the Melbourne Hairpin. Same complex as the final corner on the National layout, but here it feeds into the GP extension."
             },
             {
-              "number": "T10",
+              "number": "T11",
               "name": "Melbourne Hairpin",
-              "description": "Tight left-hand hairpin added by the GP extension. A heavy braking zone and major overtaking opportunity.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight right-hand hairpin added by the GP extension. A heavy braking zone and major overtaking opportunity."
             },
             {
-              "number": "T11-12",
+              "number": "T12-13",
               "name": "Goddards",
-              "description": "Tight right-hand chicane complex, the final braking zone before the pit straight.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight left-hand chicane complex, the final braking zone before the pit straight."
             }
           ]
         }
@@ -722,7 +727,7 @@
       "lengthMiles": "2.127 mi",
       "lengthKm": "3.424 km",
       "corners": 13,
-      "about": "A classic British club circuit with roots going back to the 1960s, built on a former RAF airfield in North Yorkshire. Croft combines fast sections with tight chicanes and the iconic Tower Hairpin \u2014 one of the best overtaking spots on the calendar. Its relative geographical isolation gives it a distinct, grassroots motorsport atmosphere.",
+      "about": "A classic British club circuit with roots going back to the 1960s, built on a former RAF airfield in North Yorkshire. Croft combines fast sections with tight chicanes and the iconic Tower Hairpin — one of the best overtaking spots on the calendar. Its relative geographical isolation gives it a distinct, grassroots motorsport atmosphere.",
       "btccFact": "Tower Hairpin at Croft is consistently one of the best places for late-braking overtakes in the BTCC, and it regularly produces race-defining moments.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2025-croft/Ingram-start-DG5_0722.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/5-Croft-1.jpg",
@@ -773,18 +778,18 @@
             {
               "number": "T5",
               "name": "Tower Hairpin",
-              "description": "Tight right-hand hairpin. One of the best overtaking spots on the entire BTCC calendar \u2014 heavy braking from high speed.",
+              "description": "Tight right-hand hairpin. One of the best overtaking spots on the entire BTCC calendar — heavy braking from high speed.",
               "overtaking": true
             },
             {
               "number": "T6-8",
               "name": "Jim Clark Esses",
-              "description": "Left-right-left S-curves. A fast, flowing sequence that demands rhythm and precision."
+              "description": "Right-left S-curves. A fast, flowing sequence that demands rhythm and precision."
             },
             {
               "number": "T9",
               "name": "Sunny In",
-              "description": "Left-hander entering the Sunny complex."
+              "description": "Right-hander entering the Sunny complex."
             }
           ]
         },
@@ -827,9 +832,9 @@
       "lng": -1.0228,
       "lengthMiles": "3.666 mi",
       "lengthKm": "5.891 km",
-      "corners": 18,
-      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts\u2013Becketts\u2013Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
-      "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead \u2014 or deficit \u2014 can completely shape the outcome.",
+      "corners": 8,
+      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts–Becketts–Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
+      "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead — or deficit — can completely shape the outcome.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
       "raceImages": [
@@ -859,29 +864,18 @@
             {
               "number": "T1",
               "name": "Abbey",
-              "description": "Fast right-hander at the end of the Wellington Straight. A key overtaking zone under braking.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Fast right-hander at the end of the start/finish straight. A key overtaking zone under braking."
             },
             {
               "number": "T2",
               "name": "Farm",
-              "description": "Right-hand curve linking Abbey to Village."
+              "description": "Right-hand curve linking Abbey to Village. Taken at speed — carries momentum into the next section."
             },
             {
               "number": "T3",
               "name": "Village",
-              "description": "Right-hand corner leading into The Loop."
-            },
-            {
-              "number": "T4",
-              "name": "The Loop",
-              "description": "Tight left-hand hairpin. The slowest point on the lap and a prime overtaking spot.",
-              "overtaking": true
-            },
-            {
-              "number": "T5",
-              "name": "Aintree",
-              "description": "Right-hander exiting the Loop complex."
+              "description": "Right-hander leading into The Loop. Sets up the braking zone for the slowest corner on the lap."
             }
           ]
         },
@@ -889,30 +883,15 @@
           "sector": "Sector 2",
           "corners": [
             {
-              "number": "T6",
-              "name": "Wellington Straight",
-              "description": "Not a corner but the main overtaking straight \u2014 slipstreaming and DRS-style runs into Brooklands."
+              "number": "T4",
+              "name": "The Loop",
+              "overtaking": true,
+              "description": "Tight left-hand hairpin — the slowest point on the lap. A prime overtaking spot; late braking rewards the brave."
             },
             {
-              "number": "T7",
-              "name": "Brooklands",
-              "description": "Right-hander at the end of Wellington Straight.",
-              "overtaking": true
-            },
-            {
-              "number": "T8",
-              "name": "Luffield",
-              "description": "Left-hand hairpin. Slow speed corner where traction on exit is crucial."
-            },
-            {
-              "number": "T9",
-              "name": "Woodcote",
-              "description": "Right-hand kink, fast, leading to Copse."
-            },
-            {
-              "number": "T10",
-              "name": "Copse",
-              "description": "Fast right-hander. One of the great corners \u2014 demands commitment at very high speed."
+              "number": "T5",
+              "name": "Aintree",
+              "description": "Left-hand exit of The Loop complex. A clean exit here is crucial for carrying speed down Wellington Straight."
             }
           ]
         },
@@ -920,25 +899,20 @@
           "sector": "Sector 3",
           "corners": [
             {
-              "number": "T11-13",
-              "name": "Maggotts-Becketts-Chapel",
-              "description": "Iconic left-right-left high-speed esses. One of the greatest corner sequences in world motorsport \u2014 taken near flat out in qualifying."
+              "number": "T6",
+              "name": "Brooklands",
+              "overtaking": true,
+              "description": "Right-hander at the end of Wellington Straight. Heavy braking from high speed — overtaking is common here."
             },
             {
-              "number": "T14",
-              "name": "Stowe",
-              "description": "Right-hander at the end of Hangar Straight. Heavy braking from very high speed \u2014 overtaking is common here.",
-              "overtaking": true
+              "number": "T7",
+              "name": "Luffield",
+              "description": "Long right-hand sweeper. Traction on exit is crucial for the run onto the pit straight."
             },
             {
-              "number": "T15",
-              "name": "Vale",
-              "description": "Left-hander that feeds into the Club complex."
-            },
-            {
-              "number": "T16-18",
-              "name": "Club",
-              "description": "Right-hand complex, the final corners of the lap. A good exit is essential for the run back to Abbey."
+              "number": "T8",
+              "name": "Woodcote",
+              "description": "Right-hand corner back onto the start/finish straight. The final corner of the lap — a clean exit sets up the approach to Abbey."
             }
           ]
         }
@@ -992,8 +966,8 @@
             {
               "number": "T2",
               "name": "Druids",
-              "description": "Tight left-hand hairpin at the top of the hill. Prime overtaking spot.",
-              "overtaking": true
+              "overtaking": true,
+              "description": "Tight left-hand hairpin at the top of the hill. Prime overtaking spot."
             },
             {
               "number": "T3",
@@ -1008,12 +982,12 @@
             {
               "number": "T4",
               "name": "Surtees",
-              "description": "Fast right-hand kink at the bottom of the hill."
+              "description": "Fast left-hand kink at the bottom of the hill."
             },
             {
               "number": "T5",
-              "name": "Hawthorns",
-              "description": "Left-hand bend entering the GP extension. A commitment corner through the trees."
+              "name": "Hawthorn",
+              "description": "Fast right-hander heading into the GP extension. One of the quickest corners on the layout — full commitment required."
             },
             {
               "number": "T6",
@@ -1023,7 +997,7 @@
             {
               "number": "T7",
               "name": "Dingle Dell",
-              "description": "Left-hand dip through a compression \u2014 the car bottoms out making it tricky."
+              "description": "High-speed dip through a compression. The car bottoms out — unsettling even in a straight line."
             },
             {
               "number": "T8",
@@ -1038,8 +1012,7 @@
             {
               "number": "T9",
               "name": "Stirlings",
-              "description": "Right-hand bend rejoining the Indy loop. A key corner for exit speed.",
-              "overtaking": true
+              "description": "Left-hand bend named after Stirling Moss, rejoining the Indy loop. A key corner for exit speed onto Cooper Straight."
             },
             {
               "number": "T10",

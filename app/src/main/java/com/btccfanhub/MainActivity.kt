@@ -14,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -298,10 +299,11 @@ private fun MainScreen(
         }
     }
 
-    val showBottomBar = currentRoute != Screen.Article.route &&
-            currentRoute?.startsWith("track/") != true &&
-            currentRoute?.startsWith("info_page/") != true &&
-            currentRoute != Screen.LiveTiming.route
+    val showBottomBar = currentRoute == null ||
+            (currentRoute != Screen.Article.route &&
+                    currentRoute.startsWith("track/") != true &&
+                    !currentRoute.startsWith("info_page/") &&
+                    currentRoute != Screen.LiveTiming.route)
 
     val navItems = buildList {
         add(NavItem(Screen.News,     "News",     Icons.Default.Home))
@@ -332,7 +334,7 @@ private fun MainScreen(
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                Column {
+                Column(modifier = Modifier.navigationBarsPadding()) {
                     if (flagAds) AdmobBanner()
                     NavigationBar(
                         containerColor = BtccSurface,
