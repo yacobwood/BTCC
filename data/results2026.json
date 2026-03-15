@@ -1,4 +1,195 @@
 {
   "season": "2026",
-  "rounds": []
+  "rounds": [
+    {
+      "round": 1,
+      "venue": "Donington Park",
+      "date": "18 Apr 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "date": "09 May 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "venue": "Snetterton",
+      "date": "23 May 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "venue": "Oulton Park",
+      "date": "06 Jun 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "venue": "Thruxton",
+      "date": "25 Jul 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "venue": "Knockhill",
+      "date": "08 Aug 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "venue": "Donington Park GP",
+      "date": "22 Aug 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "venue": "Croft",
+      "date": "05 Sep 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "venue": "Silverstone",
+      "date": "26 Sep 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "date": "10 Oct 2026",
+      "races": [
+        {
+          "label": "Race 1",
+          "results": []
+        },
+        {
+          "label": "Race 2",
+          "results": []
+        },
+        {
+          "label": "Race 3",
+          "results": []
+        }
+      ]
+    }
+  ]
 }
