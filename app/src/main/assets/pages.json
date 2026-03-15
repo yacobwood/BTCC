@@ -47,11 +47,11 @@
         },
         {
           "type": "text",
-          "body": "All BTCC cars are built to the NGTC (Next Generation Touring Car) specification, introduced in 2011 to cut costs and level the playing field. Despite wearing different body shells — currently Honda Civic, BMW 1 Series, Volkswagen Golf and others — every car shares the same core components: subframes, suspension, Xtrac 6-speed sequential gearbox, Cosworth ECU, brakes, wheels and dampers. Teams fit their own engine and bodywork on top."
+          "body": "All BTCC cars are built to the NGTC (Next Generation Touring Car) specification, introduced in 2011 to cut costs and level the playing field. Despite wearing different body shells, every car shares the same core components: subframes, suspension, Xtrac 6-speed sequential gearbox, Cosworth ECU, brakes, wheels and dampers. Teams fit their own engine and bodywork on top."
         },
         {
           "type": "text",
-          "body": "Engines are 2.0-litre turbocharged direct-injection units producing 350+ bhp, running on 100% sustainable fossil-free fuel since 2025. Every car also carries a hybrid system that stores energy under braking and releases it as a power boost on the straights — drivers control deployment via a button on the steering wheel. To balance competition, the top seven drivers in the standings have their boost deployment restricted. Minimum weight is 1270 kg for front-wheel-drive cars and 1300 kg for rear-wheel-drive."
+          "body": "Engines are 2.0-litre turbocharged direct-injection units producing 350+ bhp, running on 100% sustainable fossil-free fuel since 2025. Every car also carries a hybrid system that stores energy under braking and releases it as a power boost on the straights. Drivers control deployment via a button on the steering wheel. To balance competition, the top seven drivers in the standings have their boost deployment restricted. Minimum weight is 1270 kg for front-wheel-drive cars and 1300 kg for rear-wheel-drive."
         },
         {
           "type": "heading",
@@ -59,7 +59,7 @@
         },
         {
           "type": "text",
-          "body": "Goodyear is the sole tyre supplier, offering four compounds: Hard, Medium, Soft and Wet. The specific compounds available vary by circuit — Thruxton, for example, uses the hard tyre exclusively due to its high-speed nature. For each event two dry compounds are designated as Prime (harder) and Option (softer). Drivers must use both across the three races, making tyre strategy a key part of every weekend."
+          "body": "Goodyear is the sole tyre supplier, offering four compounds: Hard, Medium, Soft and Wet. The specific compounds available vary by circuit, Thruxton, for example, uses the hard tyre exclusively due to its high-speed nature. For each event two dry compounds are designated as Prime (harder) and Option (softer). Drivers must use both across the three races, making tyre strategy a key part of every weekend."
         },
         {
           "type": "heading",
@@ -67,19 +67,7 @@
         },
         {
           "type": "text",
-          "body": "To keep the racing close, the top seven drivers in the championship standings have their hybrid boost deployment restricted — meaning less of that extra power is available on the straights. The more championship points you have, the greater the restriction. This resets at the start of each new race weekend, giving rivals a chance to close the gap."
-        },
-        {
-          "type": "heading",
-          "body": "The Joker Lap"
-        },
-        {
-          "type": "text",
-          "body": "Each driver must take the 'Joker' at least once per race — a slightly longer alternate route at one point on the circuit, marked with a distinctive yellow and black chequered board. Drivers choose when to take it: early to get it out of the way, or late as a tactical move. Taking it at a different time to the car ahead can be used to gain or lose time strategically."
-        },
-        {
-          "type": "text",
-          "body": "If a driver fails to take the Joker, they receive a 30-second time penalty after the race. The Joker adds around 2–3 seconds to a lap, so timing it right can make the difference between winning and losing."
+          "body": "To keep the racing close, the top seven drivers in the championship standings have their hybrid boost deployment restricted, meaning less of that extra power is available on the straights. The more championship points you have, the greater the restriction. This resets at the start of each new race weekend, giving rivals a chance to close the gap."
         }
       ]
     },
