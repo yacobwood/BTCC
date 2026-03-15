@@ -112,7 +112,7 @@ fun MoreScreen(
                 "leaderboard" to Icons.Default.Leaderboard,
             )
 
-            pages.filter { it.id != "new-to-btcc" }.forEach { page ->
+            pages.filter { !it.id.startsWith("btcc-") && it.id != "new-to-btcc" && it.id != "championships" }.forEach { page ->
                 MoreRow(
                     label = page.title,
                     icon = iconMap[page.icon] ?: Icons.Default.Info,

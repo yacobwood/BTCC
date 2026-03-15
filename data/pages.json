@@ -36,8 +36,8 @@
         },
         {
           "type": "link",
-          "body": "Jack Sears Trophy",
-          "url": "btcc-jack-sears"
+          "body": "The Championships",
+          "url": "championships"
         }
       ]
     },
@@ -655,6 +655,11 @@
         {
           "type": "text",
           "body": "Named after the first-ever BTCC champion, the Jack Sears Trophy is for drivers who have not previously won it and have not scored more than one outright podium finish prior to the current season. It's the best place to find tomorrow's stars — many of today's frontrunners competed for it early in their careers. Points follow the Independents' Trophy scale (no fastest lap or leading lap bonuses, and no Qualifying Race points). A trophy is also awarded to the leading Jack Sears driver across all three races at each individual meeting."
+        },
+        {
+          "type": "link",
+          "body": "Jack Sears Trophy — full deep dive",
+          "url": "btcc-jack-sears"
         }
       ]
     },
