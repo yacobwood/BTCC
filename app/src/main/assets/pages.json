@@ -27,7 +27,7 @@
         },
         {
           "type": "text",
-          "body": "Three Races are held on Sunday. Race 2's grid is based on the Race 1 finishing order. Race 3 uses a reversed grid for positions 6–12 from Race 2, mixing up the midfield and producing unpredictable racing throughout the pack."
+          "body": "Three Races are held on Sunday. Race 2's grid is based on the Race 1 finishing order. Race 3 has a unique twist: the numbers of the cars that finished 6th to 12th in Race 2 go into a bowl, and one is drawn at random. That car starts on pole, with the cars that finished ahead of it reversed behind it. The rest of the grid follows Race 2 order. This random element means nobody — including the teams — knows the Race 3 grid until the draw is made."
         },
         {
           "type": "heading",
@@ -35,7 +35,7 @@
         },
         {
           "type": "text",
-          "body": "Points are awarded to the top 15 finishers in each race: 20–17–15–13–11–10–9–8–7–6–5–4–3–2–1. Bonus points are also available for setting the fastest lap and for leading a lap."
+          "body": "The Qualifying Race awards points on a 10–9–8–7–6–5–5–4–4–3–3–2–2–1–1 scale for the top 15. Each Sunday race awards 20–17–15–13–11–10–9–8–7–6–5–4–3–2–1 for the top 15, with single bonus points for the fastest lap and for leading a lap."
         },
         {
           "type": "text",
@@ -59,7 +59,11 @@
         },
         {
           "type": "text",
-          "body": "Goodyear is the sole tyre supplier, offering Hard, Medium, Soft and Wet compounds. The specific compounds available vary by circuit — at Thruxton, the hard tyre is mandatory for all races due to the circuit's high-speed nature, though softer compounds can be used in qualifying. For each event, two dry compounds are designated as Prime (harder) and Option (softer). Drivers must use both across the three races. Top Race 1 finishers are also required to start Race 2 on the hardest available compound, adding another layer of strategy."
+          "body": "Goodyear is the sole tyre supplier, offering Hard, Medium, Soft and Wet compounds. Two dry compounds are available at most events. The softer of the two is called the Option tyre — every driver must use it at least once across their three Sunday races, but they choose which race to use it in. Teams don't have to declare their choice before qualifying, keeping strategies hidden until cars leave the pit lane. Option tyres are not permitted in the Qualifying Race. The top Race 1 finishers must start Race 2 on the hardest compound available."
+        },
+        {
+          "type": "text",
+          "body": "Thruxton is a special case: only the hard tyre can be used in the three races due to the circuit's high-speed and abrasive nature, though one set of medium tyres is permitted in qualifying. At some events all three dry compounds must be used across the three races."
         },
         {
           "type": "heading",
@@ -67,7 +71,7 @@
         },
         {
           "type": "text",
-          "body": "The BTCC's equalisation system is called TTB (TOCA Turbo Boost). The top seven drivers in the standings have their hybrid boost deployment reduced and face higher minimum deployment speeds. Drivers outside the top seven get extended boost capability, but can only deploy it on 50% of racing laps — turning boost management into a genuine tactical decision every race. TTB resets at the start of each round."
+          "body": "The BTCC's equalisation system is called TTB (TOCA Turbo Boost). It operates on a sliding scale based on championship position. The leader faces the tightest restrictions — they can only deploy boost above 140 kph and get just 1 second of boost per lap. By contrast, a driver in 8th gets 20 seconds per lap from a lower 105 kph threshold, but can only use boost on 50% of racing laps, making it a genuine tactical call each race. At shorter circuits (Brands Hatch Indy, Knockhill, Silverstone) more boost laps are available for all. TTB resets at the start of each round, and can also be deployed on the first lap after a safety car."
         },
         {
           "type": "heading",
