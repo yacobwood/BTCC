@@ -432,7 +432,7 @@ private fun ProgressionTab(
         loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = BtccYellow)
         }
-        results.isEmpty() && progression.isNullOrEmpty() -> ResultsNotStarted(year, seasonStartDate)
+        results.none { r -> r.races.any { it.results.isNotEmpty() } } && progression.isNullOrEmpty() -> ResultsNotStarted(year, seasonStartDate)
         else -> {
             val series = if (!progression.isNullOrEmpty())
                 progression.sortedByDescending { it.cumulativePointsByRound.lastOrNull() ?: 0 }
