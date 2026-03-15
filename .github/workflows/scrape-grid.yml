@@ -20,19 +20,30 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r scraper/requirements.txt
+          pip install -r scraper/requirements.txt requests Pillow
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
       - name: Scrape grid
         run: python scraper/scrape_grid.py --merge
 
+      - name: Download and optimise driver images
+        run: |
+          COUNT=$(python -c "import json; d=json.load(open('data/grid_scraped.json')) if __import__('os').path.exists('data/grid_scraped.json') else {}; print(len(d.get('drivers', [])))")
+          echo "Scraped driver count: $COUNT"
+          if [ "$COUNT" -gt 0 ]; then
+            python scripts/download_driver_images.py
+          else
+            echo "No drivers scraped — skipping image download"
+          fi
+
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update grid from btcc.net [skip ci]"
+          commit_message: "chore: update grid and driver images from btcc.net [skip ci]"
           file_pattern: |
             data/drivers.json
             data/grid_scraped.json
+            app/src/main/assets/driver_images/*.webp
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
