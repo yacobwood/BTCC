@@ -473,13 +473,19 @@ private fun RaceResultsTab(
         loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = BtccYellow)
         }
-        results.isEmpty() -> ResultsNotStarted(year, seasonStartDate)
-        else -> LazyColumn(
-            contentPadding      = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            itemsIndexed(results) { _, round ->
-                RoundResultCard(round = round, onClick = { onRoundClick(round.round) })
+        else -> {
+            val completedRounds = results.filter { r -> r.races.any { it.results.isNotEmpty() } }
+            if (completedRounds.isEmpty()) {
+                ResultsNotStarted(year, seasonStartDate)
+            } else {
+                LazyColumn(
+                    contentPadding      = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    itemsIndexed(completedRounds) { _, round ->
+                        RoundResultCard(round = round, onClick = { onRoundClick(round.round) })
+                    }
+                }
             }
         }
     }
