@@ -40,7 +40,7 @@ def scrape_drivers(page) -> list[dict]:
         print(f"Body snippet: {snippet!r}", file=sys.stderr)
         return []
 
-    # Page structure: <a href="/driver/slug/"><div>NUMBER</div><img>...<h3>NAME</h3></a>
+    # Page structure: <a href="/driver/slug/"><div>NUMBER</div><img number><img photo><h3>NAME</h3></a>
     entries = page.evaluate("""() => {
         const out = [];
         const links = document.querySelectorAll('a[href*="/driver/"]');
@@ -48,7 +48,13 @@ def scrape_drivers(page) -> list[dict]:
             const h3 = a.querySelector('h3, h2, h4');
             const numDiv = [...a.querySelectorAll('div')].find(d => /^\\d+$/.test(d.textContent.trim()));
             if (h3 && numDiv) {
-                out.push({ name: h3.textContent.trim(), number: parseInt(numDiv.textContent.trim(), 10) });
+                const imgs = [...a.querySelectorAll('img')];
+                const photo = imgs.find(img => !img.src.toLowerCase().includes('number'));
+                out.push({
+                    name: h3.textContent.trim(),
+                    number: parseInt(numDiv.textContent.trim(), 10),
+                    imageUrl: photo ? photo.src : '',
+                });
             }
         });
         const seen = new Set();
@@ -123,15 +129,23 @@ def main():
         data = json.load(f)
     drivers = data.get("drivers", [])
     name_to_idx = {d["name"]: i for i, d in enumerate(drivers)}
-    scraped_by_name = {g["name"]: g["number"] for g in grid}
+    scraped_by_name = {g["name"]: g for g in grid}
 
     updated = 0
     added = 0
-    for name, number in scraped_by_name.items():
+    for name, scraped in scraped_by_name.items():
+        number = scraped["number"]
+        image_url = scraped.get("imageUrl", "")
         if name in name_to_idx:
             idx = name_to_idx[name]
+            changed = False
             if drivers[idx].get("number") != number:
                 drivers[idx]["number"] = number
+                changed = True
+            if image_url and drivers[idx].get("imageUrl") != image_url:
+                drivers[idx]["imageUrl"] = image_url
+                changed = True
+            if changed:
                 updated += 1
         else:
             drivers.append({
@@ -139,7 +153,7 @@ def main():
                 "name": name,
                 "team": "TBC",
                 "car": "TBC",
-                "imageUrl": "",
+                "imageUrl": image_url,
                 "nationality": "",
                 "bio": "",
                 "history": [],
