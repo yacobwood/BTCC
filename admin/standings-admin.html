@@ -763,6 +763,8 @@ function setStatus(key, type, msg, ts) {
   const el = document.getElementById('ss-' + key);
   el.className = 'scraper-status-chip' + (type === 'running' ? ' st-running' : type === 'ok' ? ' st-ok' : type === 'fail' ? ' st-fail' : '');
   el.textContent = msg;
+  const btn = document.querySelector('#sc-' + key + ' .btn-run');
+  if (btn) btn.disabled = (type === 'running');
   if (type === 'running') {
     if (!runningTimestamps[key]) runningTimestamps[key] = ts || Date.now();
     else if (ts) runningTimestamps[key] = ts;
