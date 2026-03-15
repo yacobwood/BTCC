@@ -23,11 +23,11 @@
         },
         {
           "type": "text",
-          "body": "Qualifying on Saturday consists of two 15-minute sessions that set the Race 1 grid, followed by a Qualifying Race to finalise the order heading into Sunday."
+          "body": "Two 15-minute qualifying sessions on Saturday determine the grid for a Qualifying Race, also held on Saturday. The Qualifying Race result then sets the Race 1 grid for Sunday — and it counts for points too: 10–9–8–7–6–5–5–4–4–3–3–2–2–1–1 for the top 15 finishers."
         },
         {
           "type": "text",
-          "body": "Three Races are held on Sunday. Race 2's grid is the reversed finishing order from Race 1. Race 3 uses a reversed grid for positions 6–12, mixing up the midfield and producing unpredictable racing throughout the pack."
+          "body": "Three Races are held on Sunday. Race 2's grid is based on the Race 1 finishing order. Race 3 uses a reversed grid for positions 6–12 from Race 2, mixing up the midfield and producing unpredictable racing throughout the pack."
         },
         {
           "type": "heading",
@@ -59,7 +59,7 @@
         },
         {
           "type": "text",
-          "body": "Goodyear is the sole tyre supplier, offering four compounds: Hard, Medium, Soft and Wet. The specific compounds available vary by circuit, Thruxton, for example, uses the hard tyre exclusively due to its high-speed nature. For each event two dry compounds are designated as Prime (harder) and Option (softer). Drivers must use both across the three races, making tyre strategy a key part of every weekend."
+          "body": "Goodyear is the sole tyre supplier, offering Hard, Medium, Soft and Wet compounds. The specific compounds available vary by circuit — at Thruxton, the hard tyre is mandatory for all races due to the circuit's high-speed nature, though softer compounds can be used in qualifying. For each event, two dry compounds are designated as Prime (harder) and Option (softer). Drivers must use both across the three races. Top Race 1 finishers are also required to start Race 2 on the hardest available compound, adding another layer of strategy."
         },
         {
           "type": "heading",
@@ -67,7 +67,15 @@
         },
         {
           "type": "text",
-          "body": "To keep the racing close, the top seven drivers in the championship standings have their hybrid boost deployment restricted, meaning less of that extra power is available on the straights. The more championship points you have, the greater the restriction. This resets at the start of each new race weekend, giving rivals a chance to close the gap."
+          "body": "The BTCC's equalisation system is called TTB (TOCA Turbo Boost). The top seven drivers in the standings have their hybrid boost deployment reduced and face higher minimum deployment speeds. Drivers outside the top seven get extended boost capability, but can only deploy it on 50% of racing laps — turning boost management into a genuine tactical decision every race. TTB resets at the start of each round."
+        },
+        {
+          "type": "heading",
+          "body": "Jack Sears Trophy"
+        },
+        {
+          "type": "text",
+          "body": "Running alongside the main Drivers' Championship is the Jack Sears Trophy, named after the first-ever BTCC Champion. It's a separate competition for drivers who have not yet achieved more than one outright podium finish. It's a great way to follow up-and-coming talent early in their careers — many of today's front-runners started out competing for it."
         }
       ]
     },
