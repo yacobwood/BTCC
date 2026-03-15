@@ -155,7 +155,11 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("pageId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val pageId = backStackEntry.arguments?.getString("pageId") ?: return@composable
-            InfoPageScreen(pageId = pageId, onBack = { navController.popBackStack() })
+            InfoPageScreen(
+                pageId = pageId,
+                onBack = { navController.popBackStack() },
+                onPageClick = { targetId -> navController.navigate(Screen.InfoPage.route(targetId)) },
+            )
         }
 
     }

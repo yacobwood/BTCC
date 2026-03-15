@@ -1,10 +1,12 @@
 package com.btccfanhub.ui.more
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +23,7 @@ import com.btccfanhub.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InfoPageScreen(pageId: String, onBack: () -> Unit) {
+fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> Unit = {}) {
     val context = LocalContext.current
     var page by remember { mutableStateOf<InfoPage?>(null) }
     var loading by remember { mutableStateOf(true) }
@@ -111,6 +113,29 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit) {
                                     .padding(vertical = 12.dp),
                             )
                         }
+                    }
+                    "link" -> {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onPageClick(block.url) }
+                                .padding(vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                block.body,
+                                color = BtccTextPrimary,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 15.sp,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = BtccTextSecondary,
+                            )
+                        }
+                        HorizontalDivider(color = BtccOutline)
                     }
                     else -> {
                         Text(
