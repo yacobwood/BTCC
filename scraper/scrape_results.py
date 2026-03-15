@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2024
+YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2026
 
 ROUNDS = {
     2014: [
@@ -147,6 +147,30 @@ ROUNDS = {
         {"round": 8,  "venue": "Silverstone",        "date": "15 Sep 2024", "slug": "2024-silverstone"},
         {"round": 9,  "venue": "Donington Park GP",  "date": "22 Sep 2024", "slug": "2024-donington-park-gp"},
         {"round": 10, "venue": "Brands Hatch GP",    "date": "06 Oct 2024", "slug": "2024-brands-hatch-gp"},
+    ],
+    2025: [
+        {"round":  1, "venue": "Donington Park",    "date": "27 Apr 2025", "slug": "2025-donington-park"},
+        {"round":  2, "venue": "Brands Hatch Indy", "date": "18 May 2025", "slug": "2025-brands-hatch-indy"},
+        {"round":  3, "venue": "Oulton Park",       "date": "01 Jun 2025", "slug": "2025-oulton-park"},
+        {"round":  4, "venue": "Snetterton",        "date": "22 Jun 2025", "slug": "2025-snetterton"},
+        {"round":  5, "venue": "Knockhill",         "date": "03 Aug 2025", "slug": "2025-knockhill"},
+        {"round":  6, "venue": "Thruxton",          "date": "24 Aug 2025", "slug": "2025-thruxton"},
+        {"round":  7, "venue": "Croft",             "date": "07 Sep 2025", "slug": "2025-croft"},
+        {"round":  8, "venue": "Silverstone",       "date": "21 Sep 2025", "slug": "2025-silverstone"},
+        {"round":  9, "venue": "Donington Park GP", "date": "05 Oct 2025", "slug": "2025-donington-park-gp"},
+        {"round": 10, "venue": "Brands Hatch GP",   "date": "19 Oct 2025", "slug": "2025-brands-hatch-gp"},
+    ],
+    2026: [
+        {"round":  1, "venue": "Donington Park",    "date": "18 Apr 2026", "slug": "2026-donington-park"},
+        {"round":  2, "venue": "Brands Hatch Indy", "date": "09 May 2026", "slug": "2026-brands-hatch-indy"},
+        {"round":  3, "venue": "Snetterton",        "date": "23 May 2026", "slug": "2026-snetterton"},
+        {"round":  4, "venue": "Oulton Park",       "date": "06 Jun 2026", "slug": "2026-oulton-park"},
+        {"round":  5, "venue": "Thruxton",          "date": "25 Jul 2026", "slug": "2026-thruxton"},
+        {"round":  6, "venue": "Knockhill",         "date": "08 Aug 2026", "slug": "2026-knockhill"},
+        {"round":  7, "venue": "Donington Park GP", "date": "22 Aug 2026", "slug": "2026-donington-park-gp"},
+        {"round":  8, "venue": "Croft",             "date": "05 Sep 2026", "slug": "2026-croft"},
+        {"round":  9, "venue": "Silverstone",       "date": "26 Sep 2026", "slug": "2026-silverstone"},
+        {"round": 10, "venue": "Brands Hatch GP",   "date": "10 Oct 2026", "slug": "2026-brands-hatch-gp"},
     ],
 }
 
