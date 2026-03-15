@@ -56,6 +56,10 @@ object WhatsNewStore {
             "Radio moved to More tab",
             "Headlines on images easier to read — stronger gradients and text shadow",
         ),
+        20 to listOf(
+            "Fixed extra space at the top of Standings, Grid, Calendar and other screens",
+            "Run button now disables while a scraper job is in progress",
+        ),
         13 to listOf(
             "Race history back to 2014 — browse full results for every season from 2014 to 2025",
             "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",
