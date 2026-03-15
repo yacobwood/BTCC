@@ -32,6 +32,12 @@ object WhatsNewStore {
             "Gallery images fixed — no more duplicate photos in image galleries",
             "Round labels — widget and track detail now correctly show the full round range (e.g. Rounds 1–3)",
         ),
+        13 to listOf(
+            "Race history back to 2014 — browse full results for every season from 2014 to 2025",
+            "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",
+            "Driver season history — each driver profile now shows their full career stats back to 2014",
+            "Champion entries — trophy rows now correctly display points and race wins alongside the champion badge",
+        ),
         14 to listOf(
             "Push notifications — get notified for race results; toggle on/off in Settings",
             "Driver career stats — season history now shows podiums, poles and fastest laps alongside wins",
@@ -57,15 +63,9 @@ object WhatsNewStore {
             "Headlines on images easier to read — stronger gradients and text shadow",
         ),
         20 to listOf(
+            "Widget themes — choose from 11 team-themed colour schemes when adding the widget to your home screen",
             "Fixed extra space at the top of Standings, Grid, Calendar and other screens",
-            "Run button now disables while a scraper job is in progress",
-        ),
-        13 to listOf(
-            "Race history back to 2014 — browse full results for every season from 2014 to 2025",
-            "Year navigator — swipe left/right between seasons in Results using the new arrow navigator",
-            "Driver season history — each driver profile now shows their full career stats back to 2014",
-            "Champion entries — trophy rows now correctly display points and race wins alongside the champion badge",
-        ),
+        )
     )
 
     val changes: List<String>
