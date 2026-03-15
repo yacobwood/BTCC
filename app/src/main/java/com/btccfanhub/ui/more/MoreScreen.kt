@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -74,6 +75,26 @@ fun MoreScreen(
             Spacer(Modifier.height(8.dp))
 
             Text(
+                "NEW HERE?",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = BtccTextSecondary,
+                letterSpacing = 2.sp,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+
+            MoreRow(
+                label = "New to BTCC?",
+                icon = Icons.Default.School,
+                onClick = { onInfoPageClick("new-to-btcc") },
+            )
+
+            HorizontalDivider(
+                color = BtccOutline,
+                modifier = Modifier.padding(vertical = 16.dp),
+            )
+
+            Text(
                 "ABOUT BTCC",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.ExtraBold,
@@ -89,7 +110,7 @@ fun MoreScreen(
                 "eco" to Icons.Default.Eco,
             )
 
-            pages.forEach { page ->
+            pages.filter { it.id != "new-to-btcc" }.forEach { page ->
                 MoreRow(
                     label = page.title,
                     icon = iconMap[page.icon] ?: Icons.Default.Info,

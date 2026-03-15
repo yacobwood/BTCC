@@ -1,6 +1,97 @@
 {
   "pages": [
     {
+      "id": "new-to-btcc",
+      "title": "New to BTCC?",
+      "icon": "school",
+      "sections": [
+        {
+          "type": "text",
+          "body": "Welcome to the British Touring Car Championship — the UK's most exciting motorsport series. If you're watching for the first time, here's everything you need to know."
+        },
+        {
+          "type": "heading",
+          "body": "The Race Weekend"
+        },
+        {
+          "type": "text",
+          "body": "A typical BTCC round takes place over a single weekend, usually Saturday and Sunday. Each event is called a 'round' and consists of three separate races, giving every driver three chances to score points."
+        },
+        {
+          "type": "text",
+          "body": "Free Practice takes place on Saturday morning. Teams use this session to set up their cars for the circuit, try tyre compounds and gather data. It's not televised but gives teams vital preparation time."
+        },
+        {
+          "type": "text",
+          "body": "Qualifying — also on Saturday — determines the starting grid for Race 1. The BTCC uses a 'Quick Six' format: all cars qualify on a set of Option (softer) tyres for the first 10 minutes, then the top six times go through to a final shootout for pole position. The driver on pole earns 3 bonus points."
+        },
+        {
+          "type": "text",
+          "body": "Three Races are held on Sunday, typically in the morning and early afternoon so ITV can broadcast them all live. Race 2's grid is the reversed top eight from Race 1's finishing order, which almost always produces dramatic overtaking. Race 3's grid is drawn by ballot from the top ten in the championship standings."
+        },
+        {
+          "type": "heading",
+          "body": "The Points System"
+        },
+        {
+          "type": "text",
+          "body": "Points are awarded to the top 15 finishers in each race: 25–20–16–13–11–10–9–8–7–6–5–4–3–2–1. The driver who sets the fastest lap earns 2 bonus points, and pole position is worth 3. Winning all three races plus pole and two fastest laps in a single round is worth a maximum of 85 points."
+        },
+        {
+          "type": "text",
+          "body": "There are two separate championships running simultaneously: the Drivers' Championship and the Teams' Championship. The driver with the most points at the end of the season is crowned BTCC Champion. The Teams' Championship uses the combined points of each team's two scoring drivers."
+        },
+        {
+          "type": "heading",
+          "body": "The Cars"
+        },
+        {
+          "type": "text",
+          "body": "All BTCC cars are built to the NGTC (Next Generation Touring Car) specification, introduced in 2011 to reduce costs and level the playing field. The regulations mean that, despite wearing different body shells — currently Honda Civic, BMW 1 Series, Volkswagen Golf and others — all cars share the same steel safety cage, front subframe and rear suspension. Teams fit their own engine and bodywork on top."
+        },
+        {
+          "type": "text",
+          "body": "Engines are 2.0-litre turbocharged units, producing roughly 360 bhp. From 2022, every car has also carried a hybrid system that stores energy under braking and releases it as an additional power boost — around 80–100 bhp — on the straights. Drivers choose when to deploy the boost using a button on the steering wheel."
+        },
+        {
+          "type": "heading",
+          "body": "Tyres"
+        },
+        {
+          "type": "text",
+          "body": "Goodyear is the sole tyre supplier. Drivers have two compounds available each weekend: Prime (the harder, more durable tyre) and Option (the softer, faster tyre that degrades more quickly). Each driver must use both compounds across the three races — so tyre strategy is a key part of every weekend."
+        },
+        {
+          "type": "text",
+          "body": "The Option tyre is mandatory in qualifying, giving everyone a chance at a fast lap. Teams then decide which compound to run in which race based on track conditions, weather and championship position."
+        },
+        {
+          "type": "heading",
+          "body": "Success Ballast"
+        },
+        {
+          "type": "text",
+          "body": "To keep the racing close, the BTCC uses a success ballast system. After each race, the top drivers are required to carry additional weight (up to 75 kg) in the following race. The more points you score, the more ballast you carry — slowing you down and giving your rivals a chance to close the gap."
+        },
+        {
+          "type": "text",
+          "body": "Ballast resets to zero at the start of each new race weekend, meaning the fastest cars from Round 1 start Round 2 with a clean slate. This is why you'll often see different winners across the season."
+        },
+        {
+          "type": "heading",
+          "body": "The Joker Lap"
+        },
+        {
+          "type": "text",
+          "body": "Each driver must take the 'Joker' at least once per race — a slightly longer alternate route at one point on the circuit, marked with a distinctive yellow and black chequered board. Drivers choose when to take it: early to get it out of the way, or late as a tactical move. Taking it at a different time to the car ahead can be used to gain or lose time strategically."
+        },
+        {
+          "type": "text",
+          "body": "If a driver fails to take the Joker, they receive a 30-second time penalty after the race. The Joker adds around 2–3 seconds to a lap, so timing it right can make the difference between winning and losing."
+        },
+      ]
+    },
+    {
       "id": "about",
       "title": "About BTCC",
       "icon": "info",
