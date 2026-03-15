@@ -149,13 +149,6 @@ input[type=password] {
 input:focus { outline: none; border-color: var(--yellow); }
 input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
-/* ── Round/venue row ─────────────────────────────────────────────────────── */
-.meta-row {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
 .field-label {
   font-size: 10px;
   font-weight: 800;
@@ -164,26 +157,6 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   margin-bottom: 6px;
   text-transform: uppercase;
 }
-
-/* ── Fetch button ────────────────────────────────────────────────────────── */
-.btn-fetch {
-  width: 100%;
-  background: var(--green-dim);
-  border: 1px solid rgba(76,175,80,0.35);
-  color: var(--green);
-  padding: 13px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  min-height: 46px;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity .15s;
-}
-.btn-fetch:disabled { opacity: 0.4; }
-.fetch-status { font-size: 12px; color: var(--text-sec); text-align: center; min-height: 18px; margin-bottom: 16px; }
 
 /* ── Driver / team cards ─────────────────────────────────────────────────── */
 .list-section-header {
@@ -421,21 +394,6 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     <div id="tok-status"></div>
   </div>
 
-  <!-- Round + Venue -->
-  <div class="meta-row">
-    <div>
-      <div class="field-label">ROUND</div>
-      <input type="number" id="round" min="1" max="10" placeholder="1">
-    </div>
-    <div>
-      <div class="field-label">VENUE</div>
-      <input type="text" id="venue" placeholder="Donington Park">
-    </div>
-  </div>
-
-  <button class="btn-fetch" id="fetchbtn" onclick="fetchFromAPI()">↓ FETCH LATEST RESULTS</button>
-  <div id="fetch-status" class="fetch-status"></div>
-
   <!-- Drivers -->
   <div class="list-section-header">
     <div class="section-label">DRIVERS</div>
@@ -624,14 +582,15 @@ function onTeamChange(name, val){
 }
 
 // ── Load existing ───────────────────────────────────────────────────────────
+const STANDINGS_RAW = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/standings.json';
+
 async function loadExisting(){
   try{
-    const r = await fetch(RAW_URL+'?t='+Date.now());
+    const r = await fetch(STANDINGS_RAW+'?t='+Date.now());
     const data = await r.json();
-    if(data.round) document.getElementById('round').value = data.round;
-    if(data.venue) document.getElementById('venue').value = data.venue;
-    (data.drivers||[]).forEach(d=>{ drvPts[d.name]=d.points||0; });
-    (data.teams||[]).forEach(t=>{ teamPts[t.name]=t.points||0; });
+    // standings.json uses {standings:[{driver,points}], teams:[{team,points}]}
+    (data.standings||[]).forEach(d=>{ drvPts[d.driver||d.name]=d.points||0; });
+    (data.teams||[]).forEach(t=>{ teamPts[t.team||t.name]=t.points||0; });
   }catch(e){}
   renderDrivers();
   renderTeams();
@@ -662,8 +621,6 @@ async function doSave(){
 
   const payload = {
     season:'2026',
-    round: parseInt(document.getElementById('round').value)||0,
-    venue: document.getElementById('venue').value.trim(),
     updated: new Date().toISOString(),
     drivers, teams,
   };
@@ -686,85 +643,6 @@ async function doSave(){
   btn.disabled=false; btn.textContent='SAVE TO APP';
 }
 
-// ── Fetch from TheSportsDB ──────────────────────────────────────────────────
-function normaliseName(raw) {
-  return raw.trim().split(/\s+/).map(word => {
-    if (word.includes('-')) {
-      return word.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('-');
-    }
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }).join(' ');
-}
-
-function normKey(s) {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z\s]/g,'').trim();
-}
-
-function matchDriver(apiName) {
-  const key = normKey(apiName);
-  const exact = DRIVERS.find(d => normKey(d.name) === key);
-  if (exact) return exact.name;
-  const surname = key.split(' ').pop();
-  const byLast = DRIVERS.find(d => normKey(d.name).split(' ').pop() === surname);
-  return byLast ? byLast.name : null;
-}
-
-async function fetchFromAPI() {
-  const btn = document.getElementById('fetchbtn');
-  const status = document.getElementById('fetch-status');
-  btn.disabled = true; btn.textContent = 'FETCHING…';
-  status.textContent = 'Contacting TheSportsDB…';
-
-  try {
-    const year = new Date().getFullYear();
-    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4372&s=${year}`);
-    const data = await r.json();
-    const events = (data.events || []).filter(e => e.strResult);
-
-    if (!events.length) {
-      status.textContent = `No results found for ${year} — enter points manually.`;
-      btn.disabled = false; btn.textContent = '↓ FETCH LATEST RESULTS';
-      return;
-    }
-
-    const withStandings = events.filter(e => /pts/i.test(e.strResult));
-    const latest = withStandings.length ? withStandings[withStandings.length - 1] : events[events.length - 1];
-
-    const text = latest.strResult || '';
-    const section = text.split(/pos.*driver.*pts/i).pop() || text;
-    const parsed = {};
-    for (const line of section.split('\n')) {
-      const m = line.trim().match(/^(\d+)\s+(.+?)\s+(\d+)\s*$/);
-      if (m) {
-        const pts = parseInt(m[3]);
-        const normalised = normaliseName(m[2]);
-        const matched = matchDriver(normalised);
-        if (matched) parsed[matched] = pts;
-      }
-    }
-
-    const matchCount = Object.keys(parsed).length;
-    if (!matchCount) {
-      status.textContent = 'Fetched but could not parse standings — enter manually.';
-      btn.disabled = false; btn.textContent = '↓ FETCH LATEST RESULTS';
-      return;
-    }
-
-    if (latest.intRound) document.getElementById('round').value = latest.intRound;
-    if (latest.strVenue) document.getElementById('venue').value = latest.strVenue;
-    Object.assign(drvPts, parsed);
-    renderDrivers();
-
-    const unmatched = DRIVERS.filter(d => !parsed[d.name]).map(d => d.name);
-    status.innerHTML = `<span class="ok">Round ${latest.intRound} · ${latest.strVenue} · ${matchCount} matched</span>`
-      + (unmatched.length ? `<br><span style="color:var(--text-sec)">Manual: ${unmatched.join(', ')}</span>` : '');
-
-  } catch(e) {
-    status.innerHTML = `<span class="err">Fetch failed: ${e.message}</span>`;
-  }
-  btn.disabled = false; btn.textContent = '↓ FETCH LATEST RESULTS';
-}
-
 // ── Reset ───────────────────────────────────────────────────────────────────
 async function doReset(){
   const tok = getToken();
@@ -777,7 +655,7 @@ async function doReset(){
   btn.disabled=true; btn.textContent='RESETTING…';
   document.getElementById('status').textContent='';
 
-  const payload = { season:'2026', round:0, venue:'', updated:new Date().toISOString(), drivers:[], teams:[] };
+  const payload = { season:'2026', updated:new Date().toISOString(), drivers:[], teams:[] };
   try{
     const r = await fetch(`https://api.github.com/gists/${GIST_ID}`,{
       method:'PATCH',
@@ -786,8 +664,6 @@ async function doReset(){
     });
     if(r.ok){
       drvPts={}; teamPts={};
-      document.getElementById('round').value='';
-      document.getElementById('venue').value='';
       renderDrivers(); renderTeams();
       document.getElementById('status').innerHTML='<span class="ok">Reset ✓ — app 2026 tab shows "No Standings Yet".</span>';
     } else {
