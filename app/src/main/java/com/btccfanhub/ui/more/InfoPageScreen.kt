@@ -102,6 +102,16 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
                             modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
                         )
                     }
+                    "subheading" -> {
+                        Text(
+                            block.body,
+                            color = BtccTextSecondary,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp,
+                            letterSpacing = 0.8.sp,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 6.dp),
+                        )
+                    }
                     "image" -> {
                         if (block.url.isNotEmpty()) {
                             AsyncImage(
