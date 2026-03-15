@@ -1767,73 +1767,109 @@
       "name": "NAPA Racing UK",
       "car": "Ford Focus Titanium Saloon",
       "entries": 4,
-      "bio": "The 2025 BTCC Teams' Champions. NAPA Racing UK house two-time champion Ashley Sutton alongside multiple race winners in a highly competitive Ford-powered squad.",
+      "bio": "Operating under the Motorbase Performance banner, NAPA Racing UK are one of the most formidable outfits in the BTCC paddock. Founded in 2006 by David Bartrum in Sittingbourne, Kent, the team have built a reputation for extracting the maximum from Ford-powered machinery over two decades of competition.\n\nThe squad claimed back-to-back Drivers' and Teams' Championships in 2024 and 2025 with Jake Hill and Ashley Sutton respectively, cementing their status as the dominant force in the modern era. Their 2025 title haul — a clean sweep of Drivers', Teams' and Manufacturers' titles — was the team's most complete season to date.\n\nFor 2026 the team field four cars under the NAPA Auto Parts livery, running a quartet of highly experienced racers led by two-time champion Ashley Sutton. The distinctive yellow and blue colour scheme has become one of the most recognised sights in British motorsport.",
       "standing2025": 1,
-      "points2025": 775
+      "points2025": 775,
+      "founded": 2006,
+      "base": "Sittingbourne, Kent",
+      "driversChampionships": 3,
+      "teamsChampionships": 4
     },
     {
       "name": "Team VERTU",
       "car": "Hyundai i30 Fastback N",
       "entries": 3,
-      "bio": "Run by EXCELR8 Motorsport, Team VERTU field 2025 champion Tom Ingram alongside Tom Chilton and Senna Proctor with the Hyundai i30 Fastback N.",
+      "bio": "Run by the award-winning EXCELR8 Motorsport, Team VERTU are backed by one of the UK's largest motor retail groups. EXCELR8 entered the BTCC in 2018 and rapidly grew into championship contenders, earning their first major title in 2023 when Tom Ingram claimed the Drivers' Championship.\n\nBased in Huntingdon, Cambridgeshire, the team have developed a fierce reputation for consistently fast and reliable Hyundai i30N Fastback machinery. Ingram remained their spearhead throughout their Hyundai era before the operation transitioned to new machinery for 2026.\n\nThe VERTU Motors sponsorship has given the squad significant commercial backing, and the team's data-led approach under team principal Justina Williams has seen them become one of the best-resourced teams on the grid. With multiple championship wins across different categories, EXCELR8's move into BTCC has been one of the success stories of the past decade.",
       "standing2025": 2,
-      "points2025": 773
+      "points2025": 773,
+      "founded": 2007,
+      "base": "Huntingdon, Cambridgeshire",
+      "driversChampionships": 3,
+      "teamsChampionships": 1
     },
     {
       "name": "Speedworks Corolla Racing",
       "car": "Toyota Corolla GR Sport",
       "entries": 2,
-      "bio": "Speedworks Motorsport's own entry running Toyota Corolla GR Sport machinery with Josh Cook and Max Buxton.",
+      "bio": "Speedworks Motorsport are the team behind the Toyota Corolla GR Sport BTCC programme, and one of the most respected independent operations in British touring car racing. Founded in 2010 and based in Middlewich, Cheshire, they made their full-time BTCC debut in 2013 before growing steadily into title contenders.\n\nThe team's crowning moment came in 2022 when Tom Ingram — their long-serving lead driver — won the Drivers' Championship after years of consistent front-running. That title validated years of careful development and cemented Speedworks' standing as a major force in the series.\n\nRunning the Toyota Corolla GR Sport under the GR Sport Corolla Racing banner, Speedworks benefit from a strong manufacturer relationship with Toyota GB and are one of the few teams to develop and run their own car from the ground up. Their Middlewich base is home to a meticulous engineering operation that punches well above its weight relative to its size.",
       "standing2025": 0,
-      "points2025": 0
+      "points2025": 0,
+      "founded": 2010,
+      "base": "Middlewich, Cheshire",
+      "driversChampionships": 1,
+      "teamsChampionships": 0
     },
     {
       "name": "West Surrey Racing",
       "car": "BMW 330i M Sport",
       "entries": 3,
-      "bio": "One of BTCC's most storied outfits with decades of championship history. WSR run BMW 330i M Sport machinery and have produced multiple series champions.",
+      "bio": "West Surrey Racing are the most decorated and longest-running team in the BTCC. Founded in 1979 by Dick Bennetts, the Wokingham-based outfit have been a constant presence in British motorsport for over four decades, fielding cars for champions including Steve Soper, Will Hoy, James Thompson, Colin Turkington and Rob Collard.\n\nThe team's association with BMW stretches back many years and they are regarded as the factory BMW partner in the BTCC, running the iconic 330e M Sport and latterly the 128ti. Their engineering department is widely considered to be among the finest in the paddock and they have historically been the benchmark against which rival teams measure themselves.\n\nWith nine Drivers' Championship victories and five Teams' titles to their name, WSR's record is unmatched in the modern era of the championship. Colin Turkington alone won four titles with the team, making him the most successful driver in BTCC history. The team continues to attract blue-chip sponsorship and remains one of the best-funded and best-resourced operations in the series.",
       "standing2025": 3,
-      "points2025": 462
+      "points2025": 462,
+      "founded": 1979,
+      "base": "Wokingham, Berkshire",
+      "driversChampionships": 9,
+      "teamsChampionships": 5
     },
     {
       "name": "Power Maxed Racing",
       "car": "Audi S3 Saloon",
       "entries": 3,
-      "bio": "Power Maxed Racing campaign with the Audi S3 Saloon as part of the growing Audi BTCC programme.",
+      "bio": "Power Maxed Racing are one of the most ambitious independent teams in the BTCC, based at their Coventry headquarters in the heart of the UK's motorsport corridor. Shaun Hollamby's team made their BTCC debut in 2010 and have spent subsequent years steadily building their technical capability.\n\nThe team have campaigned a variety of machinery over the years, most recently switching to the Audi S3 Saloon as part of the Goodyear-sponsored PMR programme. Their Coventry base houses an in-house engineering and fabrication department, allowing the team to react quickly to the demands of the BTCC's intensive race calendar.\n\nPower Maxed are known for nurturing young British talent and have given a number of drivers their first full-time BTCC opportunities. The team's stated ambition is to secure their first outright championship title, and they continue to develop their package in pursuit of that goal.",
       "standing2025": 8,
-      "points2025": 190
+      "points2025": 190,
+      "founded": 2010,
+      "base": "Coventry, West Midlands",
+      "driversChampionships": 0,
+      "teamsChampionships": 0
     },
     {
       "name": "Laser Tools Racing",
       "car": "Toyota Corolla GR Sport",
       "entries": 2,
-      "bio": "Run by Speedworks Motorsport, Laser Tools Racing pair three-time champion Gordon Shedden with Árón Taylor-Smith in Toyota Corolla GR Sport machinery.",
+      "bio": "Laser Tools Racing are the title-sponsored entry run by Speedworks Motorsport, sharing infrastructure and engineering resource with Speedworks' own Toyota programme. The Laser Tools brand — a leading hand tool manufacturer — has become one of the most visible sponsorships in the BTCC paddock.\n\nThe partnership produced a landmark moment in 2021 when Aiden Moffat, a long-time Laser Tools driver, became a race winner and the squad won the Independents' Teams' trophy. Their most significant achievement came the same season when the combination of Moffat and Sutton brought home the Independents' Championship.\n\nFor 2026 the team continue to provide a competitive option for drivers running outside the major manufacturer rosters, fielding cars built and prepared by the Speedworks operation in Middlewich. The Laser Tools livery — instantly recognisable in yellow and black — remains one of the most consistent presences across the BTCC grid.",
       "standing2025": 5,
-      "points2025": 319
+      "points2025": 319,
+      "founded": 2010,
+      "base": "Middlewich, Cheshire",
+      "driversChampionships": 1,
+      "teamsChampionships": 1
     },
     {
       "name": "Plato Racing",
       "car": "Mercedes-AMG A35 Saloon",
       "entries": 2,
-      "bio": "Jason Plato's own team, running Mercedes-AMG A35 Saloon machinery for 2026. Daniel Rowbottom and Adam Morgan form the confirmed line-up.",
+      "bio": "Plato Racing is the team founded by BTCC legend Jason Plato, one of the most successful drivers in the history of the championship with two Drivers' titles and over 100 race wins to his name. After retiring from full-time driving, Plato channelled his experience and passion for the series into running his own outfit.\n\nBased in Kidlington, Oxfordshire, the team campaign Mercedes-AMG A35 Saloon machinery and represent one of the most intriguing projects on the 2026 grid. Plato's hands-on involvement — drawing on his decades of experience as a front-running driver — gives the team a unique perspective on car setup and driver coaching.\n\nWith Plato's unrivalled knowledge of what it takes to win in the BTCC, the team are building methodically towards the front of the field. Their Mercedes-AMG represents one of the newer platforms in the series, and Plato Racing are working hard to develop the package into a consistent championship challenger.",
       "standing2025": 0,
-      "points2025": 0
+      "points2025": 0,
+      "founded": 2024,
+      "base": "Kidlington, Oxfordshire",
+      "driversChampionships": 0,
+      "teamsChampionships": 0
     },
     {
       "name": "One Motorsport",
       "car": "Honda Civic Type R",
       "entries": 2,
-      "bio": "Running Honda Civic Type R machinery, One Motorsport are a consistent BTCC presence. Driver line-up for 2026 to be confirmed.",
+      "bio": "One Motorsport are a professional BTCC outfit running Honda Civic Type R machinery from their base in Wantage, Oxfordshire. The team entered the series as an independent operation and have grown steadily, building expertise with the front-wheel-drive Honda platform over several seasons of competition.\n\nThe team focus on extracting maximum performance from the Civic Type R — widely regarded as one of the most driver-friendly cars in the BTCC — and have built a strong technical team around developing the chassis to suit the demands of Britain's circuits. Their Wantage workshop handles the full preparation and build of their race cars in-house.\n\nOne Motorsport have provided a platform for a number of drivers looking to establish or re-establish themselves in the top tier of British motorsport. The team's approach blends professional engineering standards with the agility of an independent team, allowing them to develop their package race by race through the season.",
       "standing2025": 9,
-      "points2025": 156
+      "points2025": 156,
+      "founded": 2016,
+      "base": "Wantage, Oxfordshire",
+      "driversChampionships": 0,
+      "teamsChampionships": 0
     },
     {
       "name": "Restart Racing",
       "car": "Hyundai i30 Fastback N",
       "entries": 2,
-      "bio": "Formerly known as BTC Racing, Restart Racing switch to Hyundai i30 Fastback N machinery for 2026 in a technical partnership with EXCELR8.",
+      "bio": "Restart Racing carry forward one of the most storied histories in the modern BTCC, operating from their base in Didcot, Oxfordshire. The team were originally known as BTC Racing, later running as Rich Energy BTC Racing, before rebranding as Restart Racing ahead of their switch to Hyundai machinery.\n\nUnder their BTC Racing identity, the team won back-to-back Drivers' Championships in 2019 and 2020 with Colin Turkington and Ash Sutton respectively, establishing themselves as one of the series' top outfits. The team have long been associated with Honda Civic machinery but their move to Hyundai marked a new chapter in their development.\n\nFounded in 2000, the team have accumulated over two decades of BTCC experience and have never been far from the sharp end of the championship. For 2026 the Restart Racing brand represents a fresh identity for an operation with genuine title-winning pedigree, and the team are well-positioned to challenge at the front of the grid with experienced drivers and strong manufacturer support.",
       "standing2025": 4,
-      "points2025": 386
+      "points2025": 386,
+      "founded": 2000,
+      "base": "Didcot, Oxfordshire",
+      "driversChampionships": 2,
+      "teamsChampionships": 1
     }
   ]
 }

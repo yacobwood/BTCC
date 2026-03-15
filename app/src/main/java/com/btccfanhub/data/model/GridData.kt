@@ -35,6 +35,10 @@ data class Team(
     val standing2025: Int = 0,
     val points2025: Int = 0,
     val carImageUrl: String = "",
+    val founded: Int = 0,
+    val base: String = "",
+    val driversChampionships: Int = 0,
+    val teamsChampionships: Int = 0,
 )
 
 data class GridData(

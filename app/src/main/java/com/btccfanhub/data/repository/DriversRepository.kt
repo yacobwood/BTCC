@@ -81,14 +81,18 @@ object DriversRepository {
             val t = teamsArr.getJSONObject(i)
             val name = t.optString("name")
             Team(
-                name         = name,
-                car          = t.optString("car"),
-                entries      = t.optInt("entries"),
-                bio          = t.optString("bio"),
-                standing2025 = t.optInt("standing2025"),
-                points2025   = t.optInt("points2025"),
-                carImageUrl  = t.optString("carImageUrl"),
-                drivers      = drivers.filter { it.team == name },
+                name                 = name,
+                car                  = t.optString("car"),
+                entries              = t.optInt("entries"),
+                bio                  = t.optString("bio"),
+                standing2025         = t.optInt("standing2025"),
+                points2025           = t.optInt("points2025"),
+                carImageUrl          = t.optString("carImageUrl"),
+                founded              = t.optInt("founded"),
+                base                 = t.optString("base"),
+                driversChampionships = t.optInt("driversChampionships"),
+                teamsChampionships   = t.optInt("teamsChampionships"),
+                drivers              = drivers.filter { it.team == name },
             )
         }
 

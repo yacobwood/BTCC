@@ -64,6 +64,9 @@ object WhatsNewStore {
         ),
         20 to listOf(
             "Widget themes — choose from standard or team-themed colour schemes when adding the widget to your home screen"
+        ),
+        21 to listOf(
+            "Accurate race gaps"
         )
     )
 

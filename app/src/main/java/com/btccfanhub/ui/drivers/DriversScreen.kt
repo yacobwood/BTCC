@@ -696,6 +696,62 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 }
             }
 
+            // ── Team info stats ───────────────────────────────────────────────
+            if (team.founded > 0 || team.base.isNotEmpty() || team.driversChampionships > 0 || team.teamsChampionships > 0) {
+                item {
+                    Text(
+                        "TEAM INFO",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = BtccTextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier      = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 10.dp),
+                    )
+                }
+                item {
+                    Row(
+                        modifier            = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (team.founded > 0) {
+                            TeamInfoChip(label = "FOUNDED", value = "${team.founded}", modifier = Modifier.weight(1f))
+                        }
+                        if (team.base.isNotEmpty()) {
+                            TeamInfoChip(label = "BASE", value = team.base, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+                if (team.driversChampionships > 0 || team.teamsChampionships > 0) {
+                    item {
+                        Row(
+                            modifier            = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            if (team.driversChampionships > 0) {
+                                TeamInfoChip(
+                                    label    = "DRIVERS' TITLES",
+                                    value    = "${team.driversChampionships}",
+                                    highlight = true,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            if (team.teamsChampionships > 0) {
+                                TeamInfoChip(
+                                    label    = "TEAMS' TITLES",
+                                    value    = "${team.teamsChampionships}",
+                                    highlight = true,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             // ── 2025 result ──────────────────────────────────────────────────
             if (team.standing2025 > 0) {
                 item {
@@ -808,6 +864,35 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                 modifier = Modifier.size(28.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun TeamInfoChip(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    highlight: Boolean = false,
+) {
+    Column(
+        modifier = modifier
+            .background(BtccCard, RoundedCornerShape(10.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Text(
+            label,
+            style         = MaterialTheme.typography.labelSmall,
+            color         = BtccTextSecondary,
+            letterSpacing = 1.sp,
+            fontSize      = 9.sp,
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            value,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize   = 18.sp,
+            color      = if (highlight) BtccYellow else MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
 
