@@ -463,22 +463,6 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     Triggers GitHub Actions workflows remotely. Token must have <strong>repo + workflow</strong> scopes.
   </div>
 
-  <!-- Standings scraper -->
-  <div class="scraper-card" id="sc-standings">
-    <div class="scraper-head">
-      <div class="scraper-title">STANDINGS</div>
-      <div class="scraper-status-chip" id="ss-standings">—</div>
-    </div>
-    <div class="scraper-desc">Pull live driver & team standings from btcc.net. Run after each race weekend.</div>
-    <div class="scraper-inputs">
-      <label class="check-label">
-        <input type="checkbox" id="si-force">
-        Force (ignore season date check)
-      </label>
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-standings.yml','standings')">RUN ▶</button>
-  </div>
-
   <!-- Results scraper -->
   <div class="scraper-card" id="sc-results">
     <div class="scraper-head">
@@ -841,9 +825,6 @@ function startLiveTick() {
 }
 
 function scraperInputs(workflow) {
-  if (workflow === 'scrape-standings.yml') {
-    return { force: String(document.getElementById('si-force').checked) };
-  }
   if (workflow === 'scrape-results.yml') {
     return { year: String(document.getElementById('si-year').value || 2026) };
   }
@@ -917,10 +898,9 @@ function setStatus(key, type, msg, ts) {
 
 async function refreshAllStatus() {
   const workflows = [
-    { file: 'scrape-standings.yml', key: 'standings' },
-    { file: 'scrape-results.yml',   key: 'results' },
-    { file: 'scrape-calendar.yml',  key: 'calendar' },
-    { file: 'scrape-grid.yml',      key: 'grid' },
+    { file: 'scrape-results.yml',  key: 'results' },
+    { file: 'scrape-calendar.yml', key: 'calendar' },
+    { file: 'scrape-grid.yml',     key: 'grid' },
   ];
   let anyRunning = false;
   for (const w of workflows) {
