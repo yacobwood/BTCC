@@ -94,8 +94,12 @@ VENUE_FULL_NAMES = {
     "BHI": "Brands Hatch Indy",
     "BHGP": "Brands Hatch GP",
     "DON": "Donington Park",
+    "DPN": "Donington Park",
     "DONGP": "Donington Park GP",
+    "DPGP": "Donington Park GP",
     "THR": "Thruxton",
+    "THR1": "Thruxton",
+    "THR2": "Thruxton 2",
     "OUL": "Oulton Park",
     "CRO": "Croft",
     "SNE": "Snetterton",
@@ -216,11 +220,11 @@ DRIVER_NAME_ALIASES = {
     2015: {"Rob Collard": "Robert Collard", "Árón Smith": "Aron Taylor-Smith", "Daniel Welch": "Dan Welch", "Derek Palmer Jr.": "Derek Palmer"},
     2016: {"Rob Collard": "Robert Collard", "Árón Smith": "Aron Taylor-Smith"},
     2017: {"Rob Collard": "Robert Collard", "Robert Huff": "Rob Huff", "Árón Taylor-Smith": "Aron Taylor-Smith"},
-    2018: {"Rob Collard": "Robert Collard"},
-    2019: {"Rob Collard": "Robert Collard"},
-    2020: {"Nicolas Hamilton": "Nic Hamilton"},
-    2021: {"Árón Taylor-Smith": "Aron Taylor-Smith"},
-    2022: {"Árón Taylor-Smith": "Aron Taylor-Smith"},
+    2018: {"Rob Collard": "Robert Collard", "Daniel Welch": "Dan Welch"},
+    2019: {"Rob Collard": "Robert Collard", "Nicolas Hamilton": "Nic Hamilton"},
+    2020: {"Nicolas Hamilton": "Nic Hamilton", "Bradley Philpot": "Brad Philpot"},
+    2021: {"Árón Taylor-Smith": "Aron Taylor-Smith", "Nicolas Hamilton": "Nic Hamilton", "Rick Parfitt Jr.": "Rick Parfitt"},
+    2022: {"Árón Taylor-Smith": "Aron Taylor-Smith", "Nicolas Hamilton": "Nic Hamilton", "Rick Parfitt Jr.": "Rick Parfitt"},
     2023: {"Árón Taylor-Smith": "Aron Taylor-Smith", "Nicolas Hamilton": "Nic Hamilton", "Robert Huff": "Rob Huff", "Daryl DeLeon": "Daryl Deleon"},
     2024: {"Daryl DeLeon": "Daryl Deleon"},
     2025: {"Daryl DeLeon": "Daryl Deleon"},
@@ -236,10 +240,23 @@ def merge_times_and_teams_from_results_json(root, year, rounds, merge_positions=
     results_rounds = load_results_json_rounds(root, year)
     if not results_rounds:
         return
+    def _norm_venue(v):
+        return expand_venue((v or "").strip().upper()).lower().replace(" ", "").replace("-", "")
+    def _venue_compatible(v1, v2):
+        n1, n2 = _norm_venue(v1), _norm_venue(v2)
+        return n1 == n2 or n1.startswith(n2) or n2.startswith(n1)
+    by_venue = {_norm_venue(r.get("venue", "")): r for r in results_rounds if r.get("venue")}
     by_round = {r["round"]: r for r in results_rounds if "round" in r}
     for round_obj in rounds:
         round_num = round_obj.get("round")
-        src = by_round.get(round_num)
+        excel_venue = round_obj.get("venue", "")
+        round_src = by_round.get(round_num)
+        # Prefer round-number match when venues are compatible (handles "Thruxton" vs "Thruxton 2")
+        # Fall back to venue-name match when round numbers differ (handles 2023/2024 calendar reordering)
+        if round_src and _venue_compatible(round_src.get("venue", ""), excel_venue):
+            src = round_src
+        else:
+            src = by_venue.get(_norm_venue(excel_venue)) or round_src
         if not src:
             continue
         src_races = src.get("races") or []
@@ -253,6 +270,12 @@ def merge_times_and_teams_from_results_json(root, year, rounds, merge_positions=
                 race["fullRaceUrl"] = src_race["fullRaceUrl"]
             src_results = src_race.get("results") or []
             by_driver = {_normalize_driver_name(r.get("driver")): r for r in src_results}
+            # Also index by alias names so e.g. "Rob Collard" finds "Robert Collard"
+            aliases = DRIVER_NAME_ALIASES.get(year, {})
+            for excel_name, scraper_name in aliases.items():
+                entry = by_driver.get(_normalize_driver_name(scraper_name))
+                if entry:
+                    by_driver[_normalize_driver_name(excel_name)] = entry
             is_race1 = race_idx == 0
             for res in race.get("results") or []:
                 key = _normalize_driver_name(res.get("driver"))
@@ -373,27 +396,28 @@ def compute_progression(rounds):
 
 
 def _format_gap(gap):
-    """Format gap from leader for display: '+X.XXX' or None."""
+    """Format gap from leader for display: '+X.XXX' (always 3 decimal places) or None."""
     if gap is None or (isinstance(gap, str) and not gap.strip()):
         return None
-    s = str(gap).strip()
-    return s if s.startswith("+") else f"+{s}"
+    s = str(gap).strip().lstrip("+").rstrip("s")
+    try:
+        return f"+{float(s):.3f}"
+    except ValueError:
+        return f"+{s}"
 
 def add_display_times_to_rounds(rounds):
     """
     Set displayTime on each result so the app can show it without calculation.
-    P1: leader's full time (time or bestLap). P2+: '+X.XXX' (gap from leader).
+    P1: '0.000'. P2+: '+X.XXX' (gap from leader).
     """
     for round_obj in rounds:
         for race in round_obj.get("races") or []:
             results = race.get("results") or []
             if not results:
                 continue
-            first = results[0]
-            leader_display = (first.get("time") or "").strip() or (first.get("bestLap") or "").strip() or "—"
             for i, res in enumerate(results):
                 if i == 0:
-                    res["displayTime"] = leader_display
+                    res["displayTime"] = "0.000"
                 else:
                     res["displayTime"] = _format_gap(res.get("gap")) or "—"
 
@@ -517,6 +541,34 @@ def main():
         rounds = build_rounds_from_driver_sheet(header_d, data_d, round_dates, cell_rows=cell_rows, year=year)
         # Optionally enrich with time/gap/team from results JSON (no pos/points overwrite)
         merge_times_and_teams_from_results_json(root, year, rounds, merge_positions=False)
+        # Fill in missing team names from two sources:
+        # 1. Scraped results (year-wide name→team from all classified finishers)
+        # 2. DRIVER_LOOKUP fallback (static per-year lookup for known drivers)
+        scraped_team_lookup = {}
+        scraped_rounds = load_results_json_rounds(root, year) or []
+        for sr in scraped_rounds:
+            for srace in sr.get("races") or []:
+                for sres in srace.get("results") or []:
+                    name = _normalize_driver_name(sres.get("driver"))
+                    team = (sres.get("team") or "").strip()
+                    if name and team and name not in scraped_team_lookup:
+                        scraped_team_lookup[name] = team
+        # Also add alias entries so Excel names resolve to scraped teams
+        for excel_name, scraper_name in (DRIVER_NAME_ALIASES.get(year) or {}).items():
+            scraped_entry = scraped_team_lookup.get(_normalize_driver_name(scraper_name))
+            if scraped_entry:
+                scraped_team_lookup[_normalize_driver_name(excel_name)] = scraped_entry
+        static_lookup = DRIVER_LOOKUP.get(year, {})
+        for rnd in rounds:
+            for race in rnd.get("races") or []:
+                for res in race.get("results") or []:
+                    if not res.get("team"):
+                        key = _normalize_driver_name(res.get("driver", ""))
+                        team = scraped_team_lookup.get(key, "")
+                        if not team:
+                            team, _, _ = static_lookup.get(res.get("driver", ""), ("", "", None))
+                        if team:
+                            res["team"] = team
         add_display_times_to_rounds(rounds)
 
         # Single source of truth: driver totals from rounds (chart and Drivers tab use same figures)

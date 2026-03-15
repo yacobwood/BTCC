@@ -56,6 +56,17 @@ DRIVER_LOOKUP = {
         "Chris Stockton": ("Power Maxed Racing", "28", None),
         "Daniel Welch": ("STP Racing with Sopp & Sopp", "12", None),
     },
+    2020: {
+        "Jade Edwards": ("BTC Racing", "99", None),
+        "Jac Constable": ("Power Maxed Car Care Racing", "96", None),
+    },
+    2021: {
+        "Jade Edwards": ("BTC Racing", "99", None),
+    },
+    2022: {
+        "Jade Edwards": ("Rich Energy BTC Racing", "99", None),
+        "Carl Boardley": ("Rich Energy BTC Racing", "29", None),
+    },
 }
 
 def repo_root():

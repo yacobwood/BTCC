@@ -181,38 +181,51 @@ OUT_FILE = Path(__file__).parent.parent / "data" / f"results{YEAR}.json"
 def extract_races(page) -> list[dict]:
     """
     btcc.net results pages use a tab-based layout where Race 1/2/3 tables
-    are all in the DOM but hidden. They are identifiable because their first
-    header row contains 'Best' (practice/qualifying tables don't).
-    The tab links use hrefs like #Race1, #Race2, #Race3 — use those to pair
-    table order to label.
+    are all in the DOM but hidden. Tab links use hrefs like #Race1, #Race2, #Race3.
+    Strategy 1: use href IDs to find the exact section containing each race table —
+    avoids the Qualifying table being counted as Race 1 when scanning by index.
+    Strategy 2 (fallback): scan tables with 'Best' AND 'Gap' in header row (excludes
+    qualifying which has Best but not Gap).
     """
     return page.evaluate("""() => {
-        // Find the Race 1/2/3 tab links in order
         const tabLinks = Array.from(document.querySelectorAll('a[href*="#Race"]'))
             .filter(a => /^Race\\s+[123]$/i.test(a.textContent.trim()));
 
-        // Find all tables whose first row header includes 'Best' (race result marker)
+        const extractRows = (table) =>
+            Array.from(table.querySelectorAll('tr'))
+                .map(tr => Array.from(tr.querySelectorAll('td, th')).map(c => c.textContent.trim()))
+                .filter(r => r.length >= 4);
+
+        // Strategy 1: find each race section by its tab href ID
+        if (tabLinks.length >= 3) {
+            const byId = [];
+            for (const link of tabLinks) {
+                const id = link.getAttribute('href').replace('#', '');
+                const section = document.getElementById(id);
+                if (!section) break;
+                const table = section.querySelector('table');
+                if (!table) break;
+                byId.push({ label: link.textContent.trim(), rows: extractRows(table) });
+            }
+            if (byId.length >= 3) return byId;
+        }
+
+        // Strategy 2: tables with both 'Best' and 'Gap' headers (excludes qualifying)
         const raceTables = Array.from(document.querySelectorAll('table')).filter(t => {
             const firstRow = t.querySelector('tr');
             if (!firstRow) return false;
-            return /best/i.test(firstRow.textContent);
+            const text = firstRow.textContent;
+            return /best/i.test(text) && /gap/i.test(text);
         });
 
-        const results = [];
-        // Pair by index: first race table → Race 1, etc.
         const labels = tabLinks.length >= 3
             ? tabLinks.map(a => a.textContent.trim())
             : ['Race 1', 'Race 2', 'Race 3'];
 
-        raceTables.forEach((table, i) => {
-            const label = labels[i] || ('Race ' + (i + 1));
-            const rows = Array.from(table.querySelectorAll('tr')).map(tr =>
-                Array.from(tr.querySelectorAll('td, th')).map(c => c.textContent.trim())
-            ).filter(r => r.length >= 4);
-            results.push({ label, rows });
-        });
-
-        return results;
+        return raceTables.map((table, i) => ({
+            label: labels[i] || ('Race ' + (i + 1)),
+            rows: extractRows(table),
+        }));
     }""")
 
 
