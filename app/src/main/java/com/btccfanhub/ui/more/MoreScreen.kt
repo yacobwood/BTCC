@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -108,6 +109,7 @@ fun MoreScreen(
                 "history" to Icons.Default.History,
                 "directions_car" to Icons.Default.DirectionsCar,
                 "eco" to Icons.Default.Eco,
+                "leaderboard" to Icons.Default.Leaderboard,
             )
 
             pages.filter { it.id != "new-to-btcc" }.forEach { page ->
