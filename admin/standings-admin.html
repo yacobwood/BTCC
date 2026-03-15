@@ -735,7 +735,7 @@ async function runScraper(workflow, key) {
   } catch (e) {
     setStatus(key, 'fail', '✗ ' + e.message);
   }
-  btn.disabled = false; btn.textContent = 'RUN ▶';
+  if (!runningTimestamps[key]) { btn.disabled = false; btn.textContent = 'RUN ▶'; }
 }
 
 async function fetchLastRun(workflow) {
