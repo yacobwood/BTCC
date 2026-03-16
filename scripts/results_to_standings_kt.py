@@ -13,6 +13,13 @@ KT_DIR = REPO / "app/src/main/java/com/btccfanhub/data"
 POINTS = {1: 25, 2: 20, 3: 16, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8, 9: 7, 10: 6,
           11: 5, 12: 4, 13: 3, 14: 2, 15: 1}
 
+# Load sponsor team name lookup: {year_str: {driver_name: team_name}}
+_team_map_path = DATA_DIR / "team_map.json"
+TEAM_MAP: dict[str, dict[str, str]] = {}
+if _team_map_path.exists():
+    raw = json.loads(_team_map_path.read_text())
+    TEAM_MAP = {k: v for k, v in raw.items() if k != "_note"}
+
 
 def normalise_name(name: str) -> str:
     """Title-case all-caps names like 'Tom INGRAM' → 'Tom Ingram'."""
@@ -29,12 +36,13 @@ def normalise_team(team: str) -> str:
     return t
 
 
-def compute(data: dict):
+def compute(data: dict, year: int):
     driver_points = defaultdict(int)
     driver_wins = defaultdict(int)
     driver_team: dict[str, str] = {}
     driver_car: dict[str, str] = {}
     team_points: dict[str, int] = defaultdict(int)
+    year_map = TEAM_MAP.get(str(year), {})
 
     for rnd in data["rounds"]:
         for race in rnd["races"]:
@@ -43,11 +51,15 @@ def compute(data: dict):
                 pos = r["pos"]
                 pts = POINTS.get(pos, 0)
                 driver_points[d] += pts
-                driver_team[d] = normalise_team(r.get("team", ""))
                 driver_car[d] = str(r.get("no", ""))
+                # Prefer sponsor team name from lookup; fall back to car model from results
+                driver_team[d] = year_map.get(d) or normalise_team(r.get("team", ""))
                 if pos == 1:
                     driver_wins[d] += 1
-                team_points[normalise_team(r.get("team", ""))] += pts
+
+    # Team points keyed by sponsor name
+    for d, pts in driver_points.items():
+        team_points[driver_team[d]] += pts
 
     drivers = sorted(driver_points.items(), key=lambda x: -x[1])
     teams = sorted(team_points.items(), key=lambda x: -x[1])
@@ -106,7 +118,7 @@ def main():
             print(f"  skip {year}: no results file")
             continue
         data = json.loads(path.read_text())
-        drivers, teams, driver_team, driver_car, driver_wins = compute(data)
+        drivers, teams, driver_team, driver_car, driver_wins = compute(data, year)
         kt = generate_kt(year, drivers, teams, driver_team, driver_car, driver_wins)
         out = KT_DIR / f"Standings{year}.kt"
         out.write_text(kt, encoding="utf-8")
