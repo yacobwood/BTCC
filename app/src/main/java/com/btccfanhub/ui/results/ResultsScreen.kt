@@ -828,28 +828,10 @@ private fun DriverRow(driver: DriverStanding) {
                 color      = MaterialTheme.colorScheme.onBackground,
             )
             if (driver.wins > 0 || driver.seconds > 0 || driver.thirds > 0) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (driver.wins > 0) Text(
-                        "${driver.wins}W",
-                        style         = MaterialTheme.typography.labelSmall,
-                        fontWeight    = FontWeight.ExtraBold,
-                        color         = BtccYellow,
-                        letterSpacing = 0.5.sp,
-                    )
-                    if (driver.seconds > 0) Text(
-                        "${driver.seconds}P2",
-                        style         = MaterialTheme.typography.labelSmall,
-                        fontWeight    = FontWeight.ExtraBold,
-                        color         = Color(0xFFB0B0B0),
-                        letterSpacing = 0.5.sp,
-                    )
-                    if (driver.thirds > 0) Text(
-                        "${driver.thirds}P3",
-                        style         = MaterialTheme.typography.labelSmall,
-                        fontWeight    = FontWeight.ExtraBold,
-                        color         = Color(0xFFCD7F32),
-                        letterSpacing = 0.5.sp,
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (driver.wins > 0) TrophyCount(driver.wins, Color(0xFFFFD700))
+                    if (driver.seconds > 0) TrophyCount(driver.seconds, Color(0xFFC0C0C0))
+                    if (driver.thirds > 0) TrophyCount(driver.thirds, Color(0xFFCD7F32))
                 }
             }
         }
@@ -864,6 +846,24 @@ private fun DriverRow(driver: DriverStanding) {
                 modifier = Modifier.size(18.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun TrophyCount(count: Int, tint: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        Icon(
+            Icons.Filled.EmojiEvents,
+            contentDescription = null,
+            tint     = tint,
+            modifier = Modifier.size(11.dp),
+        )
+        Text(
+            "$count",
+            style      = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.ExtraBold,
+            color      = tint,
+        )
     }
 }
 
