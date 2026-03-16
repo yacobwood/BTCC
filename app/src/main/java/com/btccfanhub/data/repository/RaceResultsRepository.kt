@@ -179,18 +179,19 @@ object RaceResultsRepository {
                             else -> pointsWithBonuses(pos, fl, lead, pole, isRace1)
                         }
                         DriverResult(
-                            position   = pos,
-                            number     = d.optInt("no", 0),
-                            driver     = d.optString("driver", ""),
-                            team       = d.optString("team", ""),
-                            laps       = d.optInt("laps", 0),
-                            time       = d.optString("time", ""),
-                            gap        = d.optString("gap", "").takeIf { it.isNotEmpty() },
-                            bestLap    = d.optString("bestLap", ""),
-                            points     = points,
-                            fastestLap = fl,
-                            leadLap    = lead,
-                            pole       = pole,
+                            position     = pos,
+                            number       = d.optInt("no", 0),
+                            driver       = d.optString("driver", ""),
+                            team         = d.optString("team", ""),
+                            laps         = d.optInt("laps", 0),
+                            time         = d.optString("time", ""),
+                            gap          = d.optString("gap", "").takeIf { it.isNotEmpty() },
+                            bestLap      = d.optString("bestLap", ""),
+                            points       = points,
+                            fastestLap   = fl,
+                            leadLap      = lead,
+                            pole         = pole,
+                            avgLapSpeed  = d.optString("avgLapSpeed", "").takeIf { it.isNotEmpty() },
                         )
                     },
                 )

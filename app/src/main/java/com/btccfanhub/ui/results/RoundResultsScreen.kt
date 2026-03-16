@@ -15,7 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Star
+import android.content.Context
 import com.btccfanhub.data.FavouriteDriverStore
+import com.btccfanhub.worker.NewsCheckWorker
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -206,6 +208,15 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
         }
         return
     }
+    val context = LocalContext.current
+    val useKm = remember {
+        context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
+    }
+    val maxAvgSpeedKmh = remember(race) {
+        race.results.mapNotNull { it.avgLapSpeed?.toDoubleOrNull() }.maxOrNull()
+    }
+
     val displayDate = race.date ?: roundDate
     LazyColumn(
         contentPadding      = PaddingValues(16.dp),
@@ -235,13 +246,45 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
             }
         }
         items(race.results) { result ->
-            DriverResultRow(result)
+            DriverResultRow(result, useKm = useKm, maxAvgSpeedKmh = maxAvgSpeedKmh)
+        }
+        item {
+            Row(
+                modifier            = Modifier.padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                listOf("FL" to "Fastest lap", "L" to "Led a lap", "P" to "Pole position", "BL" to "Best lap time").forEach { (badge, label) ->
+                    Row(
+                        verticalAlignment     = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            badge,
+                            fontSize   = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color      = BtccYellow,
+                            modifier   = Modifier
+                                .background(BtccYellow.copy(alpha = 0.15f), RoundedCornerShape(3.dp))
+                                .padding(horizontal = 4.dp, vertical = 1.dp),
+                        )
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = BtccTextSecondary,
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun DriverResultRow(result: DriverResult) {
+private fun DriverResultRow(
+    result: DriverResult,
+    useKm: Boolean = true,
+    maxAvgSpeedKmh: Double? = null,
+) {
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == result.driver
 
@@ -253,6 +296,8 @@ private fun DriverResultRow(result: DriverResult) {
     }
 
     val isLeader = result.position == 1
+    // Normalise bestLap: btcc.net older data omits the "0:" prefix for sub-minute laps
+    val bestLapDisplay = result.bestLap.let { if (it.isNotEmpty() && !it.contains(':')) "0:$it" else it }
     val displayTime = if (result.displayTime.isNotEmpty()) {
         result.displayTime
     } else {
@@ -260,6 +305,12 @@ private fun DriverResultRow(result: DriverResult) {
             isLeader -> result.time.takeIf { it.isNotEmpty() } ?: result.bestLap.takeIf { it.isNotEmpty() } ?: "—"
             else     -> result.gap?.let { if (it.startsWith("+")) it else "+$it" } ?: "—"
         }
+    }
+
+    val speedKmh       = result.avgLapSpeed?.toDoubleOrNull()
+    val isTopSpeed     = speedKmh != null && maxAvgSpeedKmh != null && speedKmh == maxAvgSpeedKmh
+    val speedDisplay   = speedKmh?.let {
+        if (useKm) "%.2f km/h".format(it) else "%.2f mph".format(it * 0.621371)
     }
 
     Row(
@@ -312,6 +363,42 @@ private fun DriverResultRow(result: DriverResult) {
                 fontSize   = 13.sp,
                 color      = if (isLeader) BtccYellow else MaterialTheme.colorScheme.onBackground,
             )
+            if (bestLapDisplay.isNotEmpty()) {
+                Text(
+                    "BL $bestLapDisplay",
+                    style    = MaterialTheme.typography.labelSmall,
+                    color    = if (result.fastestLap) BtccYellow else BtccTextSecondary,
+                    fontSize = 10.sp,
+                )
+            }
+            if (speedDisplay != null) {
+                Text(
+                    speedDisplay,
+                    style    = MaterialTheme.typography.labelSmall,
+                    color    = if (isTopSpeed) BtccYellow else BtccTextSecondary,
+                    fontSize = 10.sp,
+                )
+            }
+            val bonuses = buildList {
+                if (result.fastestLap) add("FL")
+                if (result.leadLap)    add("L")
+                if (result.pole)       add("P")
+            }
+            if (bonuses.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    bonuses.forEach { badge ->
+                        Text(
+                            badge,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color    = BtccYellow,
+                            modifier = Modifier
+                                .background(BtccYellow.copy(alpha = 0.15f), RoundedCornerShape(3.dp))
+                                .padding(horizontal = 4.dp, vertical = 1.dp),
+                        )
+                    }
+                }
+            }
             Text(
                 if (result.points > 0) "+${result.points} pts" else "0 pts",
                 style = MaterialTheme.typography.labelSmall,

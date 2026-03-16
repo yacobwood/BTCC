@@ -144,6 +144,7 @@ object SeasonRepository {
                             leadLap = d.optBoolean("leadLap", false) || d.optBoolean("l", false),
                             pole = d.optBoolean("pole", false) || d.optBoolean("p", false),
                             displayTime = d.optString("displayTime", ""),
+                            avgLapSpeed = d.optString("avgLapSpeed", "").takeIf { it.isNotEmpty() },
                         )
                     },
                 )

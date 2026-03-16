@@ -11,9 +11,10 @@ data class DriverResult(
     val bestLap: String,    // e.g. "1:08.011"
     val points: Int,
     val fastestLap: Boolean = false,  // F/FL in chart — +1 pt
-    val leadLap: Boolean = false,    // L in chart — +1 pt
-    val pole: Boolean = false,       // P in chart — +1 pt (Race 1 only)
-    val displayTime: String = "",   // precomputed: P1 full time, P2+ "+X.XXX" (no calculation on load)
+    val leadLap: Boolean = false,     // L in chart — +1 pt
+    val pole: Boolean = false,        // P in chart — +1 pt (Race 1 only)
+    val displayTime: String = "",     // precomputed: P1 full time, P2+ "+X.XXX" (no calculation on load)
+    val avgLapSpeed: String? = null,  // average race speed km/h e.g. "145.2", P1 only meaningful
 )
 
 data class RaceEntry(
