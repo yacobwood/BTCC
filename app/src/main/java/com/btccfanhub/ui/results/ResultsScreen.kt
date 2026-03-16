@@ -354,9 +354,9 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
                     // --- Historical seasons (2014–2025) ---
                     page == 0 && isHistorical ->
-                        DriverStandingsList(histDrivers, showLiveRound = 0, showPastBanner = true, bannerYear = selectedYear)
+                        DriverStandingsList(histDrivers, showLiveRound = 0, showPastBanner = false, bannerYear = selectedYear)
                     page == 1 && isHistorical && histTeams != null ->
-                        TeamStandingsList(histTeams, showPastBanner = true, bannerYear = selectedYear)
+                        TeamStandingsList(histTeams, showPastBanner = false, bannerYear = selectedYear)
                     page == 1 && isHistorical ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text("Team standings not available.", color = BtccTextSecondary, textAlign = TextAlign.Center)
