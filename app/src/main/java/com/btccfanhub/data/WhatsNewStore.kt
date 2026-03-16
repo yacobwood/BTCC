@@ -69,7 +69,8 @@ object WhatsNewStore {
             "Accurate race gaps"
         ),
         22 to listOf(
-            "Improve teams pages"
+            "Improve teams pages",
+            "Added New to BTCC page"
         )
     )
 
