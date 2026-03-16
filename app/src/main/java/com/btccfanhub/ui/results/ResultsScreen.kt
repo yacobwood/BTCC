@@ -827,14 +827,30 @@ private fun DriverRow(driver: DriverStanding) {
                 fontWeight = FontWeight.ExtraBold,
                 color      = MaterialTheme.colorScheme.onBackground,
             )
-            if (driver.wins > 0) {
-                Text(
-                    "${driver.wins}W",
-                    style         = MaterialTheme.typography.labelSmall,
-                    fontWeight    = FontWeight.ExtraBold,
-                    color         = BtccYellow,
-                    letterSpacing = 0.5.sp,
-                )
+            if (driver.wins > 0 || driver.seconds > 0 || driver.thirds > 0) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (driver.wins > 0) Text(
+                        "${driver.wins}W",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = BtccYellow,
+                        letterSpacing = 0.5.sp,
+                    )
+                    if (driver.seconds > 0) Text(
+                        "${driver.seconds}P2",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = Color(0xFFB0B0B0),
+                        letterSpacing = 0.5.sp,
+                    )
+                    if (driver.thirds > 0) Text(
+                        "${driver.thirds}P3",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = Color(0xFFCD7F32),
+                        letterSpacing = 0.5.sp,
+                    )
+                }
             }
         }
         IconButton(

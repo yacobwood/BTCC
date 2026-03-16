@@ -6,224 +6,288 @@
       "name": "Colin Turkington",
       "team": "West Surrey Racing",
       "points": 320,
-      "wins": 5
+      "wins": 5,
+      "seconds": 3,
+      "thirds": 0
     },
     {
       "position": 2,
       "name": "Andrew Jordan",
       "team": "West Surrey Racing",
       "points": 317,
-      "wins": 6
+      "wins": 6,
+      "seconds": 3,
+      "thirds": 2
     },
     {
       "position": 3,
       "name": "Dan Cammish",
       "team": "Halfords Yuasa Racing",
       "points": 318,
-      "wins": 2
+      "wins": 2,
+      "seconds": 5,
+      "thirds": 7
     },
     {
       "position": 4,
       "name": "Josh Cook",
       "team": "BTC Racing",
       "points": 278,
-      "wins": 3
+      "wins": 3,
+      "seconds": 3,
+      "thirds": 1
     },
     {
       "position": 5,
       "name": "Rory Butcher",
       "team": "Motorbase Performance",
       "points": 265,
-      "wins": 3
+      "wins": 3,
+      "seconds": 2,
+      "thirds": 1
     },
     {
       "position": 6,
       "name": "Tom Ingram",
       "team": "Speedworks Motorsport",
       "points": 245,
-      "wins": 4
+      "wins": 4,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 7,
       "name": "Jason Plato",
       "team": "Power Maxed Racing",
       "points": 237,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 8,
       "name": "Ashley Sutton",
       "team": "Adrian Flux Subaru Racing",
       "points": 233,
-      "wins": 1
+      "wins": 1,
+      "seconds": 2,
+      "thirds": 3
     },
     {
       "position": 9,
       "name": "Matt Neal",
       "team": "Halfords Yuasa Racing",
       "points": 232,
-      "wins": 0
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 3
     },
     {
       "position": 10,
       "name": "Tom Chilton",
       "team": "Motorbase Performance",
       "points": 200,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 3
     },
     {
       "position": 11,
       "name": "Tom Oliphant",
       "team": "West Surrey Racing",
       "points": 178,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 12,
       "name": "Adam Morgan",
       "team": "WIX Racing",
       "points": 155,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 3
     },
     {
       "position": 13,
       "name": "Sam Tordoff",
       "team": "Team Hard",
       "points": 147,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 2
     },
     {
       "position": 14,
       "name": "Chris Smiley",
       "team": "Team Hard",
       "points": 132,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 2
     },
     {
       "position": 15,
       "name": "Jake Hill",
       "team": "BTC Racing",
       "points": 131,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 16,
       "name": "Rob Collard",
       "team": "",
       "points": 118,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 17,
       "name": "Stephen Jelley",
       "team": "Team Parker Racing",
       "points": 105,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 18,
       "name": "Aiden Moffat",
       "team": "Laser Tools Racing",
       "points": 89,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 19,
       "name": "Ollie Jackson",
       "team": "",
       "points": 81,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 20,
       "name": "Senna Proctor",
       "team": "",
       "points": 49,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 21,
       "name": "Jack Goff",
       "team": "AmD Tuning with Cobra Exhausts",
       "points": 47,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 22,
       "name": "Bobby Thompson",
       "team": "",
       "points": 35,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 23,
       "name": "Matt Simpson",
       "team": "",
       "points": 33,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 24,
       "name": "Mike Bushell",
       "team": "",
       "points": 26,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 25,
       "name": "Michael Caine",
       "team": "",
       "points": 16,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 26,
       "name": "Michael Crees",
       "team": "",
       "points": 11,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 27,
       "name": "Mark Blundell",
       "team": "",
       "points": 5,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 28,
       "name": "Daniel Rowbottom",
       "team": "BTC Racing",
       "points": 5,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 29,
       "name": "Carl Boardley",
       "team": "",
       "points": 5,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 30,
       "name": "Rob Smith",
       "team": "",
       "points": 2,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 31,
       "name": "Sam Osborne",
       "team": "",
       "points": 2,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 32,
       "name": "Nicolas Hamilton",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     }
   ],
   "teams": [

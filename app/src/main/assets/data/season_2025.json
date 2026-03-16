@@ -6,203 +6,261 @@
       "name": "Tom Ingram",
       "team": "Vertu",
       "points": 462,
-      "wins": 7
+      "wins": 8,
+      "seconds": 8,
+      "thirds": 3
     },
     {
       "position": 2,
       "name": "Ashley Sutton",
       "team": "NAPA Racing UK",
-      "points": 426,
-      "wins": 5
+      "points": 428,
+      "wins": 7,
+      "seconds": 7,
+      "thirds": 5
     },
     {
       "position": 3,
       "name": "Dan Cammish",
       "team": "NAPA Racing UK",
       "points": 307,
-      "wins": 3
+      "wins": 4,
+      "seconds": 4,
+      "thirds": 3
     },
     {
       "position": 4,
       "name": "Jake Hill",
       "team": "Laser Tools Racing",
-      "points": 294,
-      "wins": 3
+      "points": 295,
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 2
     },
     {
       "position": 5,
       "name": "Daniel Rowbottom",
       "team": "NAPA Racing UK",
-      "points": 276,
-      "wins": 3
+      "points": 277,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 5
     },
     {
       "position": 6,
       "name": "Adam Morgan",
       "team": "Vertu",
       "points": 241,
-      "wins": 0
+      "wins": 4,
+      "seconds": 4,
+      "thirds": 1
     },
     {
       "position": 7,
       "name": "Tom Chilton",
       "team": "Vertu",
       "points": 230,
-      "wins": 2
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 2
     },
     {
       "position": 8,
       "name": "Charles Rainford",
       "team": "LKQ Euro Car Parts Racing",
       "points": 179,
-      "wins": 1
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 0
     },
     {
       "position": 9,
       "name": "Gordon Shedden",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 177,
-      "wins": 1
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 2
     },
     {
       "position": 10,
       "name": "Senna Proctor",
       "team": "Vertu",
       "points": 167,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 3
     },
     {
       "position": 11,
       "name": "Aiden Moffat",
       "team": "LKQ Euro Car Parts Racing",
-      "points": 165,
-      "wins": 0
+      "points": 166,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 12,
       "name": "Josh Cook",
       "team": "TOYOTA GAZOO Racing UK",
-      "points": 190,
-      "wins": 1
+      "points": 160,
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 2
     },
     {
       "position": 13,
       "name": "Daryl DeLeon",
       "team": "WSR",
       "points": 149,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 14,
       "name": "Chris Smiley",
       "team": "Restart Racing",
       "points": 140,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 15,
       "name": "Daniel Lloyd",
       "team": "Restart Racing",
       "points": 128,
-      "wins": 1
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 16,
       "name": "Sam Osborne",
       "team": "NAPA Racing UK",
       "points": 108,
-      "wins": 1
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 17,
       "name": "Árón Taylor-Smith",
       "team": "TOYOTA GAZOO Racing UK",
-      "points": 118,
-      "wins": 0
+      "points": 103,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 18,
       "name": "Mikey Doble",
       "team": "Power Maxed Racing",
-      "points": 105,
-      "wins": 1
+      "points": 100,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 19,
       "name": "James Dorlin",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 47,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 20,
       "name": "Dexter Patterson",
       "team": "ROKiT Racing",
       "points": 42,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 21,
       "name": "Ronan Pearson",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 29,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 22,
       "name": "Max Buxton",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 8,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 23,
       "name": "Max Hall",
       "team": "ROKiT Racing",
       "points": 7,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 24,
       "name": "Stephen Jelley",
       "team": "ROKiT Racing",
       "points": 7,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 25,
       "name": "Michael Crees",
       "team": "Vertu",
       "points": 5,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 26,
       "name": "Finn Leslie",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 4,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 27,
       "name": "Nick Halstead",
       "team": "Power Maxed Racing",
       "points": 4,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 28,
       "name": "Nicolas Hamilton",
       "team": "Powder Monkey Racing",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 29,
       "name": "Ryan Bensley",
       "team": "Vertu",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     }
   ],
   "teams": [

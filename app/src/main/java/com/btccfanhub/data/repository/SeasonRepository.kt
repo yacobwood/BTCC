@@ -97,6 +97,8 @@ object SeasonRepository {
                 car = o.optString("car", ""),
                 points = o.optInt("points", 0),
                 wins = o.optInt("wins", 0),
+                seconds = o.optInt("seconds", 0),
+                thirds = o.optInt("thirds", 0),
             )
         }
     }

@@ -6,252 +6,324 @@
       "name": "Gordon Shedden",
       "team": "Halfords Yuasa Racing",
       "points": 308,
-      "wins": 4
+      "wins": 4,
+      "seconds": 4,
+      "thirds": 2
     },
     {
       "position": 2,
       "name": "Sam Tordoff",
       "team": "West Surrey Racing",
       "points": 306,
-      "wins": 2
+      "wins": 2,
+      "seconds": 6,
+      "thirds": 1
     },
     {
       "position": 3,
       "name": "Mat Jackson",
       "team": "Motorbase Performance",
       "points": 292,
-      "wins": 5
+      "wins": 5,
+      "seconds": 3,
+      "thirds": 1
     },
     {
       "position": 4,
       "name": "Colin Turkington",
       "team": "West Surrey Racing",
       "points": 292,
-      "wins": 5
+      "wins": 5,
+      "seconds": 2,
+      "thirds": 3
     },
     {
       "position": 5,
       "name": "Rob Collard",
       "team": "",
       "points": 278,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 6,
       "name": "Matt Neal",
       "team": "Halfords Yuasa Racing",
       "points": 274,
-      "wins": 3
+      "wins": 3,
+      "seconds": 2,
+      "thirds": 2
     },
     {
       "position": 7,
       "name": "Jason Plato",
       "team": "Team BMR",
       "points": 256,
-      "wins": 1
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 6
     },
     {
       "position": 8,
       "name": "Andrew Jordan",
       "team": "AmD Tuning with Cobra Exhausts",
       "points": 255,
-      "wins": 2
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 1
     },
     {
       "position": 9,
       "name": "Adam Morgan",
       "team": "WIX Racing",
       "points": 241,
-      "wins": 2
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 2
     },
     {
       "position": 10,
       "name": "Tom Ingram",
       "team": "Speedworks Motorsport",
       "points": 220,
-      "wins": 2
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 3
     },
     {
       "position": 11,
       "name": "Jack Goff",
       "team": "Halfords Yuasa Racing",
       "points": 193,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 12,
       "name": "Josh Cook",
       "team": "Power Maxed Racing",
       "points": 175,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 13,
       "name": "Ashley Sutton",
       "team": "Motorbase Performance",
       "points": 161,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 14,
       "name": "Aiden Moffat",
       "team": "Laser Tools Racing",
       "points": 138,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 15,
       "name": "Árón Smith",
       "team": "",
       "points": 132,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 16,
       "name": "Rob Austin",
       "team": "Exocet AlcoSense Racing",
       "points": 132,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 2
     },
     {
       "position": 17,
       "name": "Jake Hill",
       "team": "Eurotech Racing",
       "points": 83,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 18,
       "name": "Jeff Smith",
       "team": "Eurotech Racing",
       "points": 58,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 19,
       "name": "Hunter Abbott",
       "team": "AlcoSense Racing",
       "points": 38,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 20,
       "name": "Daniel Lloyd",
       "team": "",
       "points": 36,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 21,
       "name": "Martin Depper",
       "team": "Halfords Yuasa Racing",
       "points": 28,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 22,
       "name": "Dave Newsham",
       "team": "AmD Tuning with Cobra Exhausts",
       "points": 28,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 23,
       "name": "Dan Welch",
       "team": "",
       "points": 23,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 24,
       "name": "Michael Epps",
       "team": "",
       "points": 23,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 25,
       "name": "James Cole",
       "team": "Motorbase Performance",
       "points": 15,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 26,
       "name": "Ollie Jackson",
       "team": "",
       "points": 14,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 27,
       "name": "Warren Scott",
       "team": "Team BMR",
       "points": 7,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 28,
       "name": "Alex Martin",
       "team": "",
       "points": 3,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 29,
       "name": "Matt Simpson",
       "team": "",
       "points": 7,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 30,
       "name": "Chris Smiley",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 31,
       "name": "Stewart Lines",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 32,
       "name": "Kelvin Fletcher",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 33,
       "name": "Michael Caine",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 34,
       "name": "Andy Neate",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 35,
       "name": "Tony Gilham",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 36,
       "name": "Mark Howard",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     }
   ],
   "teams": [

@@ -6,154 +6,198 @@
       "name": "Jake Hill",
       "team": "Laser Tools Racing with MB Motorsport",
       "points": 421,
-      "wins": 8
+      "wins": 8,
+      "seconds": 3,
+      "thirds": 5
     },
     {
       "position": 2,
       "name": "Tom Ingram",
       "team": "Bristol Street Motors",
       "points": 413,
-      "wins": 6
+      "wins": 6,
+      "seconds": 5,
+      "thirds": 4
     },
     {
       "position": 3,
       "name": "Ashley Sutton",
       "team": "NAPA Racing UK",
       "points": 365,
-      "wins": 3
+      "wins": 3,
+      "seconds": 5,
+      "thirds": 6
     },
     {
       "position": 4,
       "name": "Colin Turkington",
       "team": "BMW",
       "points": 346,
-      "wins": 5
+      "wins": 5,
+      "seconds": 4,
+      "thirds": 2
     },
     {
       "position": 5,
       "name": "Dan Cammish",
       "team": "NAPA Racing UK",
       "points": 346,
-      "wins": 1
+      "wins": 1,
+      "seconds": 5,
+      "thirds": 3
     },
     {
       "position": 6,
       "name": "Josh Cook",
       "team": "LKQ Euro Car Parts with SYNETIQ",
       "points": 327,
-      "wins": 2
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 5
     },
     {
       "position": 7,
       "name": "Árón Taylor-Smith",
       "team": "",
       "points": 224,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 8,
       "name": "Adam Morgan",
       "team": "BMW",
       "points": 201,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 9,
       "name": "Rob Huff",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 195,
-      "wins": 2
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 10,
       "name": "Tom Chilton",
       "team": "Bristol Street Motors",
       "points": 187,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 11,
       "name": "Daniel Rowbottom",
       "team": "NAPA Racing UK",
       "points": 186,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 12,
       "name": "Mikey Doble",
       "team": "Evans Halshaw Power Maxed Racing",
       "points": 148,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 13,
       "name": "Aiden Moffat",
       "team": "LKQ Euro Car Parts with SYNETIQ",
       "points": 143,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 14,
       "name": "Andrew Watson",
       "team": "TOYOTA GAZOO Racing UK",
       "points": 120,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 15,
       "name": "Sam Osborne",
       "team": "NAPA Racing UK",
       "points": 93,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 16,
       "name": "Ronan Pearson",
       "team": "Bristol Street Motors",
       "points": 77,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 17,
       "name": "Chris Smiley",
       "team": "Restart Racing",
       "points": 70,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 18,
       "name": "Daryl DeLeon",
       "team": "",
       "points": 48,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 19,
       "name": "Dan Zelos",
       "team": "Bristol Street Motors",
       "points": 44,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 20,
       "name": "Bobby Thompson",
       "team": "Zeus Cloud Racing with WSR",
       "points": 34,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 21,
       "name": "Scott Sumpton",
       "team": "Restart Racing",
       "points": 20,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 22,
       "name": "Nick Halstead",
       "team": "Bristol Street Motors",
       "points": 7,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     }
   ],
   "teams": [

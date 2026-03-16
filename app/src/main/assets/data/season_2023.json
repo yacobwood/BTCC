@@ -6,217 +6,279 @@
       "name": "Ashley Sutton",
       "team": "NAPA Racing UK",
       "points": 446,
-      "wins": 12
+      "wins": 12,
+      "seconds": 6,
+      "thirds": 2
     },
     {
       "position": 2,
       "name": "Tom Ingram",
       "team": "Bristol Street Motors with EXCELR8",
       "points": 400,
-      "wins": 2
+      "wins": 2,
+      "seconds": 8,
+      "thirds": 7
     },
     {
       "position": 3,
       "name": "Jake Hill",
       "team": "BTC Racing",
       "points": 373,
-      "wins": 6
+      "wins": 6,
+      "seconds": 5,
+      "thirds": 1
     },
     {
       "position": 4,
       "name": "Colin Turkington",
       "team": "West Surrey Racing",
       "points": 312,
-      "wins": 4
+      "wins": 4,
+      "seconds": 0,
+      "thirds": 3
     },
     {
       "position": 5,
       "name": "Josh Cook",
       "team": "BTC Racing",
       "points": 268,
-      "wins": 0
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 3
     },
     {
       "position": 6,
       "name": "Dan Cammish",
       "team": "NAPA Racing UK",
       "points": 253,
-      "wins": 3
+      "wins": 3,
+      "seconds": 1,
+      "thirds": 2
     },
     {
       "position": 7,
       "name": "Daniel Rowbottom",
       "team": "BTC Racing",
       "points": 226,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 3
     },
     {
       "position": 8,
       "name": "Ricky Collard",
       "team": "Laser Tools Racing",
       "points": 217,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 9,
       "name": "Adam Morgan",
       "team": "WIX Racing",
       "points": 199,
-      "wins": 0
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 2
     },
     {
       "position": 10,
       "name": "Rory Butcher",
       "team": "Motorbase Performance",
       "points": 173,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 11,
       "name": "Árón Taylor-Smith",
       "team": "",
       "points": 165,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 12,
       "name": "Stephen Jelley",
       "team": "",
       "points": 141,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 2
     },
     {
       "position": 13,
       "name": "Daniel Lloyd",
       "team": "Team Hard",
       "points": 111,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 14,
       "name": "Tom Chilton",
       "team": "Motorbase Performance",
       "points": 102,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 15,
       "name": "Andrew Watson",
       "team": "Ciceley Motorsport",
       "points": 93,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 16,
       "name": "Aiden Moffat",
       "team": "Laser Tools Racing",
       "points": 87,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 17,
       "name": "Bobby Thompson",
       "team": "Team Hard",
       "points": 104,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
     },
     {
       "position": 18,
       "name": "Ronan Pearson",
       "team": "",
       "points": 69,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 19,
       "name": "Sam Osborne",
       "team": "AmD Tuning with Cobra Exhausts",
       "points": 65,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 20,
       "name": "Mikey Doble",
       "team": "",
       "points": 63,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 21,
       "name": "George Gamble",
       "team": "Team Hard",
       "points": 65,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 22,
       "name": "Dexter Patterson",
       "team": "Laser Tools Racing",
       "points": 41,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 23,
       "name": "Michael Crees",
       "team": "",
       "points": 13,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 24,
       "name": "Nicolas Hamilton",
       "team": "",
       "points": 10,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 25,
       "name": "Daryl DeLeon",
       "team": "Team Hard",
       "points": 6,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 26,
       "name": "Robert Huff",
       "team": "",
       "points": 5,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 27,
       "name": "James Gornall",
       "team": "",
       "points": 1,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 28,
       "name": "Jack Butel",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 29,
       "name": "Will Powell",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 30,
       "name": "Nick Halstead",
       "team": "",
       "points": 10,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 31,
       "name": "Jade Edwards",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     }
   ],
   "teams": [

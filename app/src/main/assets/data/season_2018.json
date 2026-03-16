@@ -6,280 +6,360 @@
       "name": "Colin Turkington",
       "team": "West Surrey Racing",
       "points": 294,
-      "wins": 1
+      "wins": 1,
+      "seconds": 6,
+      "thirds": 3
     },
     {
       "position": 2,
       "name": "Tom Ingram",
       "team": "Speedworks Motorsport",
       "points": 277,
-      "wins": 3
+      "wins": 3,
+      "seconds": 2,
+      "thirds": 4
     },
     {
       "position": 3,
       "name": "Tom Chilton",
       "team": "Motorbase Performance",
       "points": 255,
-      "wins": 1
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 2
     },
     {
       "position": 4,
       "name": "Ashley Sutton",
       "team": "Adrian Flux Subaru Racing",
       "points": 256,
-      "wins": 6
+      "wins": 6,
+      "seconds": 2,
+      "thirds": 0
     },
     {
       "position": 5,
       "name": "Andrew Jordan",
       "team": "Team Dynamics",
       "points": 234,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 4
     },
     {
       "position": 6,
       "name": "Josh Cook",
       "team": "BTC Norlin Racing",
       "points": 235,
-      "wins": 2
+      "wins": 2,
+      "seconds": 4,
+      "thirds": 0
     },
     {
       "position": 7,
       "name": "Adam Morgan",
       "team": "WIX Racing",
       "points": 232,
-      "wins": 3
+      "wins": 3,
+      "seconds": 3,
+      "thirds": 0
     },
     {
       "position": 8,
       "name": "Jack Goff",
       "team": "Motorbase Performance",
       "points": 208,
-      "wins": 2
+      "wins": 2,
+      "seconds": 2,
+      "thirds": 1
     },
     {
       "position": 9,
       "name": "Matt Neal",
       "team": "Halfords Yuasa Racing",
       "points": 201,
-      "wins": 2
+      "wins": 2,
+      "seconds": 3,
+      "thirds": 1
     },
     {
       "position": 10,
       "name": "Dan Cammish",
       "team": "Halfords Yuasa Racing",
       "points": 216,
-      "wins": 2
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 4
     },
     {
       "position": 11,
       "name": "Sam Tordoff",
       "team": "Team JCT600 with GardX",
       "points": 202,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 12,
       "name": "Senna Proctor",
       "team": "",
       "points": 169,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 2
     },
     {
       "position": 13,
       "name": "Chris Smiley",
       "team": "Team Hard",
       "points": 155,
-      "wins": 1
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 14,
       "name": "Rob Austin",
       "team": "BTC Norlin Racing",
       "points": 123,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 2
     },
     {
       "position": 15,
       "name": "Matt Simpson",
       "team": "",
       "points": 112,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 16,
       "name": "Aiden Moffat",
       "team": "Laser Tools Racing",
       "points": 117,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 2
     },
     {
       "position": 17,
       "name": "Rory Butcher",
       "team": "Motorbase Performance",
       "points": 99,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 18,
       "name": "Daniel Lloyd",
       "team": "Team Hard",
       "points": 80,
-      "wins": 1
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 19,
       "name": "Rob Collard",
       "team": "",
       "points": 86,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 20,
       "name": "Brett Smith",
       "team": "",
       "points": 70,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 21,
       "name": "James Cole",
       "team": "",
       "points": 67,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 22,
       "name": "Tom Oliphant",
       "team": "West Surrey Racing",
       "points": 62,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 23,
       "name": "Ollie Jackson",
       "team": "",
       "points": 54,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 24,
       "name": "Mike Bushell",
       "team": "",
       "points": 62,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 25,
       "name": "Ricky Collard",
       "team": "Laser Tools Racing",
       "points": 46,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 1
     },
     {
       "position": 26,
       "name": "Jake Hill",
       "team": "BTC Norlin Racing",
       "points": 29,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 27,
       "name": "Jason Plato",
       "team": "Power Maxed Racing",
       "points": 25,
-      "wins": 0
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
     },
     {
       "position": 28,
       "name": "Bobby Thompson",
       "team": "",
       "points": 17,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 29,
       "name": "Tom Boardman",
       "team": "",
       "points": 14,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 30,
       "name": "Ant Whorton-Eales",
       "team": "",
       "points": 6,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 31,
       "name": "James Nash",
       "team": "",
       "points": 6,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 32,
       "name": "Stephen Jelley",
       "team": "Team Parker Racing",
       "points": 4,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 33,
       "name": "Glynn Geddie",
       "team": "",
       "points": 1,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 34,
       "name": "Sam Smelt",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 35,
       "name": "Josh Price",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 36,
       "name": "Michael Caine",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 37,
       "name": "Daniel Welch",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 38,
       "name": "Ollie Pidgley",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 39,
       "name": "Ethan Hammerton",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     },
     {
       "position": 40,
       "name": "Josh Caygill",
       "team": "",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
     }
   ],
   "teams": [

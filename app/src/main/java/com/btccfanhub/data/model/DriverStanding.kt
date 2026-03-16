@@ -8,6 +8,8 @@ data class DriverStanding(
     val car: String,
     val points: Int,
     val wins: Int = 0,
+    val seconds: Int = 0,
+    val thirds: Int = 0,
 ) {
     /** Display string for team(s), e.g. "RCIB → CHROME" when driver moved mid-season. */
     val displayTeam: String
