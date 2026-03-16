@@ -71,6 +71,9 @@ object WhatsNewStore {
         22 to listOf(
             "Improve teams pages",
             "Added New to BTCC page"
+        ),
+        23 to listOf(
+            ""
         )
     )
 

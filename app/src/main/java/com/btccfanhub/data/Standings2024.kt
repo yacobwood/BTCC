@@ -40,8 +40,7 @@ object Standings2024 {
         TeamStanding(position =   6, name = "Evans Halshaw Power Maxed Racing", points = 375),
         TeamStanding(position =   7, name = "TOYOTA GAZOO Racing UK", points = 324),
         TeamStanding(position =   8, name = "Restart Racing", points = 90),
-        TeamStanding(position =   9, name = "Zeus Cloud Racing with WSR", points = 37),
-        TeamStanding(position =  10, name = "Duckhams Racing With Bartercard", points = 26),
-        TeamStanding(position =  11, name = "Duckhams Racing with Un-Limited Motorsport", points = 22),
+        TeamStanding(position =   9, name = "Duckhams Racing with Un-Limited Motorsport", points = 48),
+        TeamStanding(position =  10, name = "Zeus Cloud Racing with WSR", points = 37),
     )
 }

@@ -41,14 +41,13 @@ object Standings2025 {
     val teams: List<TeamStanding> = listOf(
         TeamStanding(position =   1, name = "NAPA Racing UK", points = 1197),
         TeamStanding(position =   2, name = "Vertu", points = 1170),
-        TeamStanding(position =   3, name = "TOYOTA GAZOO Racing UK", points = 478),
+        TeamStanding(position =   3, name = "TOYOTA GAZOO Racing UK", points = 585),
         TeamStanding(position =   4, name = "LKQ Euro Car Parts Racing", points = 348),
         TeamStanding(position =   5, name = "Laser Tools Racing", points = 310),
         TeamStanding(position =   6, name = "Restart Racing", points = 271),
         TeamStanding(position =   7, name = "WSR", points = 150),
-        TeamStanding(position =   8, name = "One Motorsport", points = 114),
-        TeamStanding(position =   9, name = "Power Maxed Racing", points = 113),
-        TeamStanding(position =  10, name = "ROKiT Racing", points = 49),
-        TeamStanding(position =  11, name = "Powder Monkey Racing", points = 0),
+        TeamStanding(position =   8, name = "Power Maxed Racing", points = 113),
+        TeamStanding(position =   9, name = "ROKiT Racing", points = 56),
+        TeamStanding(position =  10, name = "Powder Monkey Racing", points = 0),
     )
 }
