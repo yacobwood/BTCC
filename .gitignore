@@ -25,3 +25,4 @@ scraper/.venv/
 
 # Kotlin/IDE cache and error logs
 .kotlin/
+app/google-services.json
