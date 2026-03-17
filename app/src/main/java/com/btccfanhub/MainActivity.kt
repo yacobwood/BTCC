@@ -124,13 +124,17 @@ class MainActivity : ComponentActivity() {
             pendingResultsRound.intValue = round
             pendingOpenResults.intValue++
         }
-        // Deep link: btccfanhub://article/some-slug
+        // Deep link: btccfanhub://article/some-slug  OR  https://…vercel.app/news/some-slug
         if (intent?.action == Intent.ACTION_VIEW) {
             val uri = intent.data
-            if (uri?.scheme == "btccfanhub" && uri.host == "article") {
-                val slug = uri.pathSegments.firstOrNull()
-                if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
+            val slug = when {
+                uri?.scheme == "btccfanhub" && uri.host == "article" ->
+                    uri.pathSegments.firstOrNull()
+                uri?.scheme == "https" && uri.pathSegments.size >= 2 && uri.pathSegments[0] == "news" ->
+                    uri.pathSegments[1]
+                else -> null
             }
+            if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
         }
     }
 

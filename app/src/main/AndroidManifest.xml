@@ -38,6 +38,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="btccfanhub" android:host="article" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="btcc-website-c4cwgwkck-jake-woods-projects-dc08a07b.vercel.app"
+                    android:pathPrefix="/news/" />
+            </intent-filter>
         </activity>
 
 
