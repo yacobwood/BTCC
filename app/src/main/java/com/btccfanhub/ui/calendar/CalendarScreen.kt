@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.Constants
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.ui.theme.BtccBackground
@@ -95,7 +96,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                 Spacer(Modifier.height(12.dp))
             }
             if (nextRace != null) {
-                CountdownCard(race = nextRace, today = today, onClick = { onRaceClick(nextRace) })
+                CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
                 Spacer(Modifier.height(24.dp))
                 Text(
                     "ALL ROUNDS",
@@ -119,7 +120,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                     isNext = race == nextRace,
                     isPast = race.endDate < today,
                     isLast = index == races.lastIndex,
-                    onClick = { onRaceClick(race) },
+                    onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
                 )
             }
         }

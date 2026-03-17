@@ -28,6 +28,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.platform.LocalContext
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.DriverSeasonStats
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.ChampionshipProgressionComputer
@@ -186,7 +187,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             val canGoNewer = selectedYear < 2026
             IconButton(
                 onClick  = {
-                    if (canGoOlder) selectedYear -= 1
+                    if (canGoOlder) { selectedYear -= 1; Analytics.resultsYearChanged(selectedYear) }
                 },
                 enabled  = canGoOlder,
             ) {
@@ -217,6 +218,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                 onClick  = {
                     if (canGoNewer) {
                         selectedYear += 1
+                        Analytics.resultsYearChanged(selectedYear)
                         if (selectedYear == 2026 && seasonStarted && liveDrivers == null) {
                             scope.launch { refresh() }
                         }
@@ -249,10 +251,14 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                 edgePadding     = 0.dp,
                 scrollState     = tabScrollState,
             ) {
+                val tabNames = listOf("drivers", "teams", "results", "stats", "chart")
                 listOf("DRIVERS", "TEAMS", "RESULTS", "STATS", "CHART").forEachIndexed { index, label ->
                     Tab(
                         selected = pagerState.currentPage == index,
-                        onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        onClick  = {
+                            Analytics.resultsTabChanged(selectedYear, tabNames[index])
+                            scope.launch { pagerState.animateScrollToPage(index) }
+                        },
                         text = {
                             Text(
                                 label,

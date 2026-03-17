@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
 import com.btccfanhub.ui.theme.*
@@ -87,7 +88,7 @@ fun MoreScreen(
             MoreRow(
                 label = "New to BTCC?",
                 icon = Icons.Default.School,
-                onClick = { onInfoPageClick("new-to-btcc") },
+                onClick = { Analytics.moreItemClicked("new_to_btcc"); onInfoPageClick("new-to-btcc") },
             )
 
             HorizontalDivider(
@@ -116,7 +117,7 @@ fun MoreScreen(
                 MoreRow(
                     label = page.title,
                     icon = iconMap[page.icon] ?: Icons.Default.Info,
-                    onClick = { onInfoPageClick(page.id) },
+                    onClick = { Analytics.moreItemClicked(page.id); onInfoPageClick(page.id) },
                 )
                 Spacer(Modifier.height(4.dp))
             }
@@ -138,19 +139,19 @@ fun MoreScreen(
             MoreRow(
                 label = "Radio",
                 icon = Icons.Default.Radio,
-                onClick = onRadioClick,
+                onClick = { Analytics.moreItemClicked("radio"); onRadioClick() },
             )
             Spacer(Modifier.height(4.dp))
             MoreRow(
                 label = "Settings",
                 icon = Icons.Default.Settings,
-                onClick = onSettingsClick,
+                onClick = { Analytics.moreItemClicked("settings"); onSettingsClick() },
             )
             Spacer(Modifier.height(4.dp))
             MoreRow(
                 label = "Feedback & Bugs",
                 icon = Icons.Default.BugReport,
-                onClick = onBugReportClick,
+                onClick = { Analytics.moreItemClicked("feedback_bugs"); onBugReportClick() },
             )
 
             Spacer(Modifier.height(24.dp))

@@ -60,7 +60,6 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         composable(Screen.News.route) {
             NewsScreen(
                 onArticleClick = { article ->
-                    Analytics.articleRead(article.title)
                     ArticleHolder.current = article
                     navController.navigate(Screen.Article.route)
                 },

@@ -15,10 +15,27 @@ object Analytics {
         }
     }
 
-    fun articleRead(title: String) {
+    /** Article tapped from the news feed. position = "hero" | "grid" | "list" | "search" */
+    fun articleClicked(title: String, position: String) {
         fa.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
             param(FirebaseAnalytics.Param.CONTENT_TYPE, "article")
             param(FirebaseAnalytics.Param.ITEM_NAME, title.take(100))
+            param("position", position)
+        }
+    }
+
+    fun articleShared(title: String) {
+        fa.logEvent(FirebaseAnalytics.Event.SHARE) {
+            param(FirebaseAnalytics.Param.CONTENT_TYPE, "article")
+            param(FirebaseAnalytics.Param.ITEM_NAME, title.take(100))
+        }
+    }
+
+    /** depth = 25 | 50 | 75 | 100 */
+    fun articleScrollDepth(title: String, depthPercent: Int) {
+        fa.logEvent("article_scroll_depth") {
+            param(FirebaseAnalytics.Param.ITEM_NAME, title.take(100))
+            param("depth_percent", depthPercent.toLong())
         }
     }
 
@@ -35,9 +52,16 @@ object Analytics {
         }
     }
 
-    fun resultsYearViewed(year: Int) {
-        fa.logEvent("results_year_viewed") {
+    fun resultsYearChanged(year: Int) {
+        fa.logEvent("results_year_changed") {
             param("year", year.toLong())
+        }
+    }
+
+    fun resultsTabChanged(year: Int, tab: String) {
+        fa.logEvent("results_tab_changed") {
+            param("year", year.toLong())
+            param("tab", tab)
         }
     }
 
@@ -54,9 +78,41 @@ object Analytics {
         }
     }
 
-    fun driverDetailViewed(name: String) {
-        fa.logEvent("driver_detail_viewed") {
+    fun driverClicked(name: String) {
+        fa.logEvent("driver_clicked") {
             param("driver_name", name)
+        }
+    }
+
+    fun teamClicked(name: String) {
+        fa.logEvent("team_clicked") {
+            param("team_name", name)
+        }
+    }
+
+    fun favouriteToggled(name: String, added: Boolean) {
+        fa.logEvent("favourite_toggled") {
+            param("driver_name", name)
+            param("action", if (added) "added" else "removed")
+        }
+    }
+
+    fun newsSearched(query: String) {
+        fa.logEvent(FirebaseAnalytics.Event.SEARCH) {
+            param(FirebaseAnalytics.Param.SEARCH_TERM, query.take(100))
+        }
+    }
+
+    fun raceClicked(round: Int, venue: String) {
+        fa.logEvent("race_clicked") {
+            param("round", round.toLong())
+            param("venue", venue)
+        }
+    }
+
+    fun moreItemClicked(item: String) {
+        fa.logEvent("more_item_clicked") {
+            param("item", item)
         }
     }
 

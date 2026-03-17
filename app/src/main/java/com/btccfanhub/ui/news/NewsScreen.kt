@@ -46,6 +46,7 @@ import coil.compose.AsyncImage
 import com.btccfanhub.R
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.model.Article
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccNavy
@@ -88,6 +89,7 @@ fun NewsScreen(
 
     LaunchedEffect(searchQuery) {
         viewModel.search(searchQuery)
+        if (searchQuery.length >= 3) Analytics.newsSearched(searchQuery)
     }
 
     // Trigger loadMore when within 4 items of the end (not during search)
@@ -200,7 +202,7 @@ fun NewsScreen(
                                         items(ss.articles) { article ->
                                             CompactCard(
                                                 article = article,
-                                                onClick = { onArticleClick(article) },
+                                                onClick = { Analytics.articleClicked(article.title, "search"); onArticleClick(article) },
                                                 favouriteSurname = favSurname,
                                                 modifier = Modifier
                                                     .padding(horizontal = 16.dp)
@@ -219,7 +221,7 @@ fun NewsScreen(
                                         article = articles[0],
                                         onRefresh = { viewModel.load() },
                                         onSearchClick = { searchActive = true },
-                                        onClick = { onArticleClick(articles[0]) },
+                                        onClick = { Analytics.articleClicked(articles[0].title, "hero"); onArticleClick(articles[0]) },
                                     )
                                 }
                             }
@@ -233,12 +235,12 @@ fun NewsScreen(
                                     ) {
                                         GridCard(
                                             article = articles[1],
-                                            onClick = { onArticleClick(articles[1]) },
+                                            onClick = { Analytics.articleClicked(articles[1].title, "grid"); onArticleClick(articles[1]) },
                                             modifier = Modifier.weight(1f),
                                         )
                                         GridCard(
                                             article = articles[2],
-                                            onClick = { onArticleClick(articles[2]) },
+                                            onClick = { Analytics.articleClicked(articles[2].title, "grid"); onArticleClick(articles[2]) },
                                             modifier = Modifier.weight(1f),
                                         )
                                     }
@@ -262,7 +264,7 @@ fun NewsScreen(
                             items(remaining) { article ->
                                 CompactCard(
                                     article = article,
-                                    onClick = { onArticleClick(article) },
+                                    onClick = { Analytics.articleClicked(article.title, "list"); onArticleClick(article) },
                                     favouriteSurname = favSurname,
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp)

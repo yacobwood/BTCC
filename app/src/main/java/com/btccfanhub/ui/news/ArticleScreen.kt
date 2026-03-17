@@ -1,10 +1,13 @@
 package com.btccfanhub.ui.news
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color as AndroidColor
+import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.btccfanhub.data.Analytics
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
@@ -33,6 +36,7 @@ import com.btccfanhub.ui.theme.BtccYellow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+@SuppressLint("JavascriptInterface")
 @Composable
 fun ArticleScreen(onBack: () -> Unit) {
     val article = ArticleHolder.current
@@ -40,6 +44,17 @@ fun ArticleScreen(onBack: () -> Unit) {
     val imageUrls = remember { mutableStateOf<List<String>>(emptyList()) }
     var htmlToLoad by remember { mutableStateOf<String?>(null) }
     val loadGuard = remember { object { var loaded: String? = null } }
+
+    // Mutable holder so the JS interface always has the current title
+    val scrollDepthBridge = remember {
+        object {
+            var title: String = ""
+            @JavascriptInterface fun onDepth(percent: Int) {
+                Analytics.articleScrollDepth(title, percent)
+            }
+        }
+    }
+    LaunchedEffect(article) { scrollDepthBridge.title = article?.title ?: "" }
 
     LaunchedEffect(article) {
         if (article == null) {
@@ -126,6 +141,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                     settings.useWideViewPort = true
                     settings.loadWithOverviewMode = false
                     setBackgroundColor(AndroidColor.parseColor("#0B0C0F"))
+                    addJavascriptInterface(scrollDepthBridge, "AppScrollTracker")
                 }
             },
             update = { webView ->
@@ -156,6 +172,7 @@ fun ArticleScreen(onBack: () -> Unit) {
             if (article != null) {
                 IconButton(
                     onClick = {
+                        Analytics.articleShared(article.title)
                         val sendIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_SUBJECT, article.title)
@@ -460,6 +477,21 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           if (img.complete) { img.classList.add('loaded'); }
           else { img.addEventListener('load', function() { img.classList.add('loaded'); }); }
         });
+        (function() {
+          var fired = {};
+          window.addEventListener('scroll', function() {
+            var scrolled = window.pageYOffset + window.innerHeight;
+            var total = document.body.scrollHeight;
+            if (total <= window.innerHeight) return;
+            var pct = Math.floor(scrolled / total * 100);
+            [25, 50, 75, 100].forEach(function(t) {
+              if (pct >= t && !fired[t]) {
+                fired[t] = true;
+                if (window.AppScrollTracker) window.AppScrollTracker.onDepth(t);
+              }
+            });
+          }, { passive: true });
+        })();
       </script>
     </body>
     </html>

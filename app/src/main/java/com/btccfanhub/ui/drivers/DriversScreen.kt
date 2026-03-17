@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.FavouriteDriverStore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
@@ -134,8 +135,8 @@ fun DriversScreen() {
                 pagerState    = gridPagerState,
                 drivers       = drivers,
                 teams         = teams,
-                onDriverClick = { selectedDriver = it },
-                onTeamClick   = { selectedTeam = it },
+                onDriverClick = { Analytics.driverClicked(it.name); selectedDriver = it },
+                onTeamClick   = { Analytics.teamClicked(it.name); selectedTeam = it },
             )
         }
     }
@@ -351,7 +352,7 @@ private fun DriverCard(driver: Driver, onClick: () -> Unit) {
             }
         }
         IconButton(
-            onClick  = { FavouriteDriverStore.toggle(context, driver.name) },
+            onClick  = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
             modifier = Modifier.size(40.dp),
         ) {
             Icon(
@@ -449,7 +450,7 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
             },
             actions = {
                 IconButton(
-                    onClick   = { FavouriteDriverStore.toggle(context, driver.name) },
+                    onClick   = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
                     modifier  = Modifier.size(48.dp),
                 ) {
                     Icon(
