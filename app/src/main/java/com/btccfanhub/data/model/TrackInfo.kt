@@ -43,6 +43,5 @@ data class TrackInfo(
     val lng: Double = 0.0,
     val qualifyingRecord: LapRecord? = null,
     val raceRecord: LapRecord? = null,
-    val sessions: List<RaceSession> = emptyList(),
     val trackGuide: List<Sector> = emptyList(),
 )

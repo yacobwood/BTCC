@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
         FavouriteDriverStore.init(this)
         createNewsNotificationChannel()
         createRaceNotificationChannel()
+        createQualifyingNotificationChannel()
         if (FeatureFlagsStore.resultsNotifications.value) {
             createResultsNotificationChannel()
             scheduleResultsCheck()
@@ -134,7 +135,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun createNewsNotificationChannel() {
-        val prefs = getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(NewsCheckWorker.KEY_NOTIF_ENABLED, true)) return
         val channel = NotificationChannel(
             NewsCheckWorker.CHANNEL_ID,
@@ -153,7 +154,21 @@ class MainActivity : ComponentActivity() {
             "Race Alerts",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Notifications when BTCC sessions are about to start"
+            description = "Notifications when BTCC race sessions are about to start"
+        }
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channel)
+    }
+
+    private fun createQualifyingNotificationChannel() {
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(RaceNotificationWorker.KEY_QUALIFYING_NOTIF_ENABLED, true)) return
+        val channel = NotificationChannel(
+            RaceNotificationWorker.CHANNEL_ID_QUALIFYING,
+            "Qualifying Alerts",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Notifications when BTCC qualifying is about to start"
         }
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
@@ -180,7 +195,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun createResultsNotificationChannel() {
-        val prefs = getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true)) return
         val channel = NotificationChannel(
             ResultsCheckWorker.CHANNEL_ID,
@@ -243,7 +258,7 @@ private fun MainScreen(
         NotificationOnboardingScreen(
             onEnableNotifications = {
                 onRequestPermission()
-                val prefs = context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+                val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
                 prefs.edit().putBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true).apply()
                 val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 nm.createNotificationChannel(

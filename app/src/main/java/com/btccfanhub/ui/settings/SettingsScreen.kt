@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.BuildConfig
+import com.btccfanhub.Constants
 import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.ui.components.PillToggle
 import com.btccfanhub.ui.theme.*
@@ -27,13 +28,16 @@ import com.btccfanhub.worker.ResultsCheckWorker
 fun SettingsScreen(onBack: () -> Unit = {}) {
     val context = LocalContext.current
     val prefs = remember {
-        context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
     }
     var notificationsEnabled by remember {
         mutableStateOf(prefs.getBoolean(NewsCheckWorker.KEY_NOTIF_ENABLED, true))
     }
     var raceEnabled by remember {
         mutableStateOf(prefs.getBoolean(RaceNotificationWorker.KEY_RACE_NOTIF_ENABLED, true))
+    }
+    var qualifyingEnabled by remember {
+        mutableStateOf(prefs.getBoolean(RaceNotificationWorker.KEY_QUALIFYING_NOTIF_ENABLED, true))
     }
     var resultsEnabled by remember {
         mutableStateOf(prefs.getBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true))
@@ -159,6 +163,48 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                             )
                         } else {
                             nm.deleteNotificationChannel(RaceNotificationWorker.CHANNEL_ID)
+                        }
+                    },
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Qualifying alerts",
+                        color      = BtccTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 15.sp,
+                    )
+                    Text(
+                        "Get notified when qualifying is about to start",
+                        color    = BtccTextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                PillToggle(
+                    options = listOf("On", "Off"),
+                    selectedIndex = if (qualifyingEnabled) 0 else 1,
+                    onSelectionChanged = {
+                        qualifyingEnabled = it == 0
+                        prefs.edit().putBoolean(RaceNotificationWorker.KEY_QUALIFYING_NOTIF_ENABLED, it == 0).apply()
+                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        if (it == 0) {
+                            nm.createNotificationChannel(
+                                NotificationChannel(
+                                    RaceNotificationWorker.CHANNEL_ID_QUALIFYING,
+                                    "Qualifying Alerts",
+                                    NotificationManager.IMPORTANCE_HIGH,
+                                )
+                            )
+                        } else {
+                            nm.deleteNotificationChannel(RaceNotificationWorker.CHANNEL_ID_QUALIFYING)
                         }
                     },
                 )

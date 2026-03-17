@@ -1,10 +1,11 @@
 package com.btccfanhub.data.repository
 
+import com.btccfanhub.data.NetworkDiskCache
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.TeamStanding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
@@ -18,7 +19,7 @@ data class LiveStandings(
 
 object StandingsRepository {
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
     private val url =
         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/standings.json"
 
@@ -36,47 +37,52 @@ object StandingsRepository {
                 .url("$url?t=$now") // bust CDN cache
                 .build()
             val body = client.newCall(request).execute().use { it.body?.string() } ?: return@withContext null
-            val json = JSONObject(body)
-
-            val drivers = json.optJSONArray("standings")?.let { arr ->
-                (0 until arr.length()).map { i ->
-                    val d = arr.getJSONObject(i)
-                    DriverStanding(
-                        position = d.optInt("pos", i + 1),
-                        name = d.optString("driver", ""),
-                        team = d.optString("team", ""),
-                        teamSecondary = d.optString("teamSecondary", "").takeIf { it.isNotEmpty() },
-                        car = d.optString("car", ""),
-                        points = d.optInt("points", 0),
-                        wins = d.optInt("wins", 0),
-                    )
-                }
-            } ?: emptyList()
-
-            val teams = json.optJSONArray("teams")?.let { arr ->
-                (0 until arr.length()).map { i ->
-                    val t = arr.getJSONObject(i)
-                    TeamStanding(
-                        position = t.optInt("pos", i + 1),
-                        name     = t.optString("team", ""),
-                        points   = t.optInt("points", 0),
-                    )
-                }
-            } ?: emptyList()
-
-            val result = LiveStandings(
-                season = json.optString("season", "2026"),
-                round = json.optInt("round", 0),
-                venue = json.optString("venue", ""),
-                drivers = drivers,
-                teams = teams,
-            )
+            NetworkDiskCache.write("standings", body)
+            val result = parse(body)
             cache = result
             cacheTime = now
             result
         } catch (e: Exception) {
-            null // fall back to hardcoded data in ResultsScreen
+            cache ?: NetworkDiskCache.read("standings")?.let { runCatching { parse(it) }.getOrNull() }
         }
+    }
+
+    private fun parse(body: String): LiveStandings {
+        val json = JSONObject(body)
+
+        val drivers = json.optJSONArray("standings")?.let { arr ->
+            (0 until arr.length()).map { i ->
+                val d = arr.getJSONObject(i)
+                DriverStanding(
+                    position = d.optInt("pos", i + 1),
+                    name = d.optString("driver", ""),
+                    team = d.optString("team", ""),
+                    teamSecondary = d.optString("teamSecondary", "").takeIf { it.isNotEmpty() },
+                    car = d.optString("car", ""),
+                    points = d.optInt("points", 0),
+                    wins = d.optInt("wins", 0),
+                )
+            }
+        } ?: emptyList()
+
+        val teams = json.optJSONArray("teams")?.let { arr ->
+            (0 until arr.length()).map { i ->
+                val t = arr.getJSONObject(i)
+                TeamStanding(
+                    position = t.optInt("pos", i + 1),
+                    name     = t.optString("team", ""),
+                    points   = t.optInt("points", 0),
+                )
+            }
+        } ?: emptyList()
+
+        return LiveStandings(
+            season = json.optString("season", "2026"),
+            round = json.optInt("round", 0),
+            venue = json.optString("venue", ""),
+            drivers = drivers,
+            teams = teams,
+        )
     }
 
     fun invalidateCache() {

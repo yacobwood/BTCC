@@ -2,11 +2,11 @@ package com.btccfanhub.data
 
 import android.content.Context
 import com.btccfanhub.BuildConfig
+import com.btccfanhub.Constants
 
 object WhatsNewStore {
 
-    private const val PREFS_NAME        = "btcc_prefs"
-    private const val KEY_SEEN_VERSION  = "whats_new_seen_version"
+    private const val KEY_SEEN_VERSION = "whats_new_seen_version"
 
     /**
      * Changelog entries keyed by versionCode.
@@ -73,7 +73,8 @@ object WhatsNewStore {
             "Added New to BTCC page"
         ),
         23 to listOf(
-            ""
+            "Offline mode — calendar, standings, and news are now cached locally so the app works without connectivity",
+            "Qualifying alerts — get notified when qualifying sessions are about to start",
         )
     )
 
@@ -82,7 +83,7 @@ object WhatsNewStore {
 
     fun shouldShow(context: Context): Boolean {
         if (changes.isEmpty()) return false
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         val seen = prefs.getInt(KEY_SEEN_VERSION, 0)
         if (seen >= BuildConfig.VERSION_CODE) return false
         if (!prefs.getBoolean("onboarding_shown", false)) {
@@ -93,7 +94,7 @@ object WhatsNewStore {
     }
 
     fun markSeen(context: Context) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
             .putInt(KEY_SEEN_VERSION, BuildConfig.VERSION_CODE)
             .apply()

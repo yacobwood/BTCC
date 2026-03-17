@@ -8,11 +8,12 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.btccfanhub.Constants
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
+import com.btccfanhub.data.network.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
@@ -33,7 +34,7 @@ class ResultsCheckWorker(
             "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2026.json"
     }
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -54,7 +55,7 @@ class ResultsCheckWorker(
             val round  = latest.getInt("round")
             val venue  = latest.getString("venue")
 
-            val prefs     = context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+            val prefs     = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
             val lastRound = prefs.getInt(KEY_LAST_ROUND, -1)
             val enabled   = prefs.getBoolean(KEY_RESULTS_NOTIF_ENABLED, true)
 
@@ -75,7 +76,7 @@ class ResultsCheckWorker(
     }
 
     private fun ensureChannel() {
-        val prefs = context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(KEY_RESULTS_NOTIF_ENABLED, true)) return
 
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -11,6 +11,3 @@ val BtccCard       = Color(0xFF161828)
 val BtccTextPrimary    = Color(0xFFFFFFFF)
 val BtccTextSecondary  = Color(0xFF8B8FA8)
 val BtccOutline    = Color(0xFF2A2D44)
-
-// Keep alias so existing call-sites that still reference BtccRed compile
-val BtccRed = BtccYellow

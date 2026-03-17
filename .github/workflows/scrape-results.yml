@@ -1,6 +1,10 @@
 name: Scrape BTCC Results
 
 on:
+  schedule:
+    # Auto-run hourly on Sundays 13:00–17:00 UTC (Race 3 typically ends ~15:00–15:30 UTC/BST).
+    # The is_race_sunday guard step below skips non-race Sundays instantly.
+    - cron: "0 13-17 * * 0"
   workflow_dispatch:
     inputs:
       year:
@@ -22,30 +26,49 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Check race Sunday
+        id: raceday
+        run: python .github/scripts/is_race_weekend.py
+
       - name: Set up Python
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.is_race_sunday == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.is_race_sunday == 'true'
         run: |
           pip install -r scraper/requirements.txt
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
       - name: Scrape results
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.is_race_sunday == 'true'
         run: |
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
           python scraper/scrape_results.py $YEAR
 
       - name: Recompute standings from results
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.is_race_sunday == 'true'
         run: |
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
           python scraper/compute_standings.py $YEAR --write
 
       - name: Commit updated data
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.is_race_sunday == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"

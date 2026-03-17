@@ -1,15 +1,16 @@
 package com.btccfanhub.data.repository
 
+import com.btccfanhub.data.NetworkDiskCache
 import com.btccfanhub.data.model.RaceSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
 object ScheduleRepository {
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
     private val url = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json"
 
     private var cache: Map<Int, List<RaceSession>>? = null
@@ -23,32 +24,35 @@ object ScheduleRepository {
         try {
             val request = Request.Builder().url("$url?t=$now").build()
             val body = client.newCall(request).execute().use { it.body?.string() }
-                ?: return@withContext emptyMap()
-
-            val json = JSONObject(body)
-            val roundsArr = json.optJSONArray("rounds") ?: return@withContext emptyMap()
-
-            val result = mutableMapOf<Int, List<RaceSession>>()
-            for (i in 0 until roundsArr.length()) {
-                val r = roundsArr.getJSONObject(i)
-                val round = r.optInt("round", -1)
-                if (round == -1) continue
-                val sessionsArr = r.optJSONArray("sessions") ?: continue
-                result[round] = (0 until sessionsArr.length()).map { j ->
-                    val s = sessionsArr.getJSONObject(j)
-                    RaceSession(
-                        name = s.optString("name", ""),
-                        day  = s.optString("day", ""),
-                        time = s.optString("time", "TBA"),
-                    )
-                }
-            }
-
+                ?: return@withContext cache ?: emptyMap()
+            NetworkDiskCache.write("schedule", body)
+            val result = parse(body)
             cache = result
             cacheTime = now
             result
         } catch (e: Exception) {
-            cache ?: emptyMap()
+            cache ?: NetworkDiskCache.read("schedule")?.let { runCatching { parse(it) }.getOrNull() } ?: emptyMap()
         }
+    }
+
+    private fun parse(body: String): Map<Int, List<RaceSession>> {
+        val json = JSONObject(body)
+        val roundsArr = json.optJSONArray("rounds") ?: return emptyMap()
+        val result = mutableMapOf<Int, List<RaceSession>>()
+        for (i in 0 until roundsArr.length()) {
+            val r = roundsArr.getJSONObject(i)
+            val round = r.optInt("round", -1)
+            if (round == -1) continue
+            val sessionsArr = r.optJSONArray("sessions") ?: continue
+            result[round] = (0 until sessionsArr.length()).map { j ->
+                val s = sessionsArr.getJSONObject(j)
+                RaceSession(
+                    name = s.optString("name", ""),
+                    day  = s.optString("day", ""),
+                    time = s.optString("time", "TBA"),
+                )
+            }
+        }
+        return result
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Star
 import android.content.Context
+import com.btccfanhub.Constants
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.worker.NewsCheckWorker
 import androidx.compose.material3.*
@@ -49,25 +50,10 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
 
     LaunchedEffect(year, round) {
         loading = true
-        roundResult = if (year in 2014..2025) {
+        roundResult = if (year in 2004..2025) {
             SeasonRepository.getSeason(context, year)?.rounds?.find { it.round == round }
         } else {
-            val results = when (year) {
-                2014 -> RaceResultsRepository.getResults2014()
-                2015 -> RaceResultsRepository.getResults2015()
-                2016 -> RaceResultsRepository.getResults2016()
-                2017 -> RaceResultsRepository.getResults2017()
-                2018 -> RaceResultsRepository.getResults2018()
-                2019 -> RaceResultsRepository.getResults2019()
-                2020 -> RaceResultsRepository.getResults2020()
-                2021 -> RaceResultsRepository.getResults2021()
-                2022 -> RaceResultsRepository.getResults2022()
-                2023 -> RaceResultsRepository.getResults2023()
-                2024 -> RaceResultsRepository.getResults2024()
-                2025 -> RaceResultsRepository.getResults2025()
-                else -> RaceResultsRepository.getResults()
-            }
-            results.find { it.round == round }
+            RaceResultsRepository.getResults(year).find { it.round == round }
         }
         loading = false
     }
@@ -91,7 +77,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         fontSize      = 17.sp,
                         letterSpacing = 0.5.sp,
                     )
-                    val startRound = (round - 1) * 3 + 1
+                    val startRound = Constants.firstRaceNumberForRound(round)
                     val endRound   = startRound + 2
                     Text(
                         "ROUNDS $startRound–$endRound · ${roundResult?.date ?: ""}",
@@ -210,7 +196,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
     }
     val context = LocalContext.current
     val useKm = remember {
-        context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
             .getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
     }
     val maxAvgSpeedKmh = remember(race) {

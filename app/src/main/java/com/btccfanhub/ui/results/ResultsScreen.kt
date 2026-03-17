@@ -37,6 +37,7 @@ import com.btccfanhub.data.SeasonData
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.RoundResult
 import com.btccfanhub.data.model.TeamStanding
+import com.btccfanhub.Constants
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.RaceResultsRepository
 import com.btccfanhub.data.repository.SeasonRepository
@@ -65,7 +66,7 @@ import kotlinx.coroutines.launch
 fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     val context = LocalContext.current
 
-    // Single source of truth for 2014–2025: from Excel (assets/data/season_YYYY.json)
+    // Single source of truth for 2004–2025: from MSS/Excel (assets/data/season_YYYY.json)
     var seasonData by remember { mutableStateOf<SeasonData?>(null) }
 
     // Live 2026 data fetched from the network
@@ -102,25 +103,12 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         isRefreshing = false
     }
 
-    suspend fun loadResultsForYear(year: Int): List<RoundResult> = when (year) {
-        2014 -> RaceResultsRepository.getResults2014()
-        2015 -> RaceResultsRepository.getResults2015()
-        2016 -> RaceResultsRepository.getResults2016()
-        2017 -> RaceResultsRepository.getResults2017()
-        2018 -> RaceResultsRepository.getResults2018()
-        2019 -> RaceResultsRepository.getResults2019()
-        2020 -> RaceResultsRepository.getResults2020()
-        2021 -> RaceResultsRepository.getResults2021()
-        2022 -> RaceResultsRepository.getResults2022()
-        2023 -> RaceResultsRepository.getResults2023()
-        2024 -> RaceResultsRepository.getResults2024()
-        2025 -> RaceResultsRepository.getResults2025()
-        else -> RaceResultsRepository.getResults()
-    }
+    suspend fun loadResultsForYear(year: Int): List<RoundResult> =
+        RaceResultsRepository.getResults(year)
 
     suspend fun refreshResults(invalidate: Boolean = false) {
         resultsLoading = true
-        if (selectedYear in 2014..2025) {
+        if (selectedYear in 2004..2025) {
             if (invalidate) SeasonRepository.invalidateCache()
             val data = SeasonRepository.getSeason(context, selectedYear)
             seasonData = data
@@ -138,10 +126,10 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         if (today >= seasonStartDate) refresh()
     }
 
-    // Load results whenever selected year changes: 2014–2025 from assets (Excel), else network
+    // Load results whenever selected year changes: 2004–2025 from assets, else network
     LaunchedEffect(selectedYear) {
         resultsLoading = true
-        if (selectedYear in 2014..2025) {
+        if (selectedYear in 2004..2025) {
             val data = SeasonRepository.getSeason(context, selectedYear)
             seasonData = data
             currentRaceResults = data?.rounds ?: emptyList()
@@ -152,7 +140,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         resultsLoading = false
     }
 
-    // 2014–2025: single source of truth = season asset only (no Kotlin/network fallback)
+    // 2004–2025: single source of truth = season asset only (no Kotlin/network fallback)
     val histDrivers = when {
         seasonData != null -> seasonData!!.drivers
         selectedYear == 2026 -> Standings2026.drivers // 2026 before live load
@@ -194,7 +182,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             verticalAlignment     = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            val canGoOlder = selectedYear > 2014
+            val canGoOlder = selectedYear > 2004
             val canGoNewer = selectedYear < 2026
             IconButton(
                 onClick  = {
@@ -336,7 +324,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                 state    = pagerState,
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
-                val isHistorical = selectedYear in 2014..2025
+                val isHistorical = selectedYear in 2004..2025
                 when {
                     // --- Loading / error states (live only) ---
                     isLiveLoading ->
@@ -352,7 +340,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                             )
                         }
 
-                    // --- Historical seasons (2014–2025) ---
+                    // --- Historical seasons (2004–2025) ---
                     page == 0 && isHistorical ->
                         DriverStandingsList(histDrivers, showLiveRound = 0, showPastBanner = false, bannerYear = selectedYear)
                     page == 1 && isHistorical && histTeams != null ->
@@ -388,7 +376,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
                     // --- Season stats ---
                     page == 3 -> {
-                        val stats = if (selectedYear in 2014..2025 && !seasonData?.driverStats.isNullOrEmpty())
+                        val stats = if (selectedYear in 2004..2025 && !seasonData?.driverStats.isNullOrEmpty())
                             seasonData!!.driverStats
                         else
                             remember(currentRaceResults) { SeasonStatsComputer.compute(currentRaceResults) }
@@ -503,7 +491,7 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // Round badge
-        val startRound = (round.round - 1) * 3 + 1
+        val startRound = Constants.firstRaceNumberForRound(round.round)
         val endRound   = startRound + 2
         Box(
             modifier = Modifier

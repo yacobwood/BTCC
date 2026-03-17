@@ -7,11 +7,12 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.btccfanhub.Constants
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
+import com.btccfanhub.data.network.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 
@@ -24,7 +25,6 @@ class NewsCheckWorker(
         const val WORK_NAME        = "btcc_news_check"
         const val WORK_NAME_TEST   = "btcc_news_check_test"
         const val CHANNEL_ID       = "btcc_news_channel"
-        const val PREFS_NAME       = "btcc_prefs"
         const val KEY_LAST_ID      = "last_news_id"
         const val KEY_FORCE_NOTIFY   = "force_notify"
         const val KEY_NOTIF_ENABLED  = "notifications_enabled"
@@ -35,7 +35,7 @@ class NewsCheckWorker(
         private const val NOTIF_ID   = 1001
     }
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -60,7 +60,7 @@ class NewsCheckWorker(
                 .trim()
 
             val forceNotify    = inputData.getBoolean(KEY_FORCE_NOTIFY, false)
-            val prefs          = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val prefs          = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
             val lastId         = prefs.getInt(KEY_LAST_ID, -1)
             val notifEnabled   = prefs.getBoolean(KEY_NOTIF_ENABLED, true)
 

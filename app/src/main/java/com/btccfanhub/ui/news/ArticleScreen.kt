@@ -27,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.btccfanhub.data.ArticleHolder
 import com.btccfanhub.data.network.RssParser
+import com.btccfanhub.ui.components.ImageLightbox
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccYellow
 import kotlinx.coroutines.Dispatchers
@@ -177,54 +178,6 @@ fun ArticleScreen(onBack: () -> Unit) {
                 initialIndex = idx,
                 onDismiss = { lightboxIndex.value = null },
             )
-        }
-    }
-}
-
-@Composable
-private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: () -> Unit) {
-    val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .systemBarsPadding()
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-        ) { page ->
-            AsyncImage(
-                model = images[page],
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
-
-        if (images.size > 1) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 16.dp),
-                color = Color.Black.copy(alpha = 0.55f),
-                shape = MaterialTheme.shapes.small,
-            ) {
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${images.size}",
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                )
-            }
-        }
-
-        IconButton(
-            onClick = onDismiss,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp),
-        ) {
-            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
         }
     }
 }

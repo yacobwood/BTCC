@@ -3,7 +3,7 @@ package com.btccfanhub.data.repository
 import com.btccfanhub.data.model.DayForecast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.time.LocalDate
@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit
 
 object WeatherRepository {
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
 
     private data class CacheKey(val round: Int, val today: LocalDate)
     private data class CacheEntry(val data: List<DayForecast>, val time: Long)

@@ -14,7 +14,7 @@ Also clears bad 'displayTime' values on P1 entries (e.g. "0.000") so the
 app falls back to computing display time from 'time'/'gap'.
 
 Usage:
-  python3 scripts/merge_timing_into_season.py          # all years 2014-2025
+  python3 scripts/merge_timing_into_season.py          # all years 2004-2025
   python3 scripts/merge_timing_into_season.py 2023     # single year
   python3 scripts/merge_timing_into_season.py 2023 2024
 """
@@ -103,8 +103,8 @@ def merge_year(year: int):
 
 def main():
     args = sys.argv[1:]
-    years = [int(a) for a in args if a.isdigit() and 2014 <= int(a) <= 2025] \
-            if args else list(range(2014, 2026))
+    years = [int(a) for a in args if a.isdigit() and 2004 <= int(a) <= 2025] \
+            if args else list(range(2004, 2026))
     print(f'Merging timing into season files for: {years}')
     for y in years:
         merge_year(y)

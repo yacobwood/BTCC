@@ -13,6 +13,7 @@ import android.graphics.RectF
 import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
+import com.btccfanhub.Constants
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
 import com.btccfanhub.data.model.RaceSession
@@ -157,7 +158,7 @@ class CountdownWidget : AppWidgetProvider() {
 
             val isWeekend = today >= nextRace.startDate
             val daysUntil = ChronoUnit.DAYS.between(today, nextRace.startDate)
-            val rStart = (nextRace.round - 1) * 3 + 1
+            val rStart = Constants.firstRaceNumberForRound(nextRace.round)
             val rEnd   = nextRace.round * 3
             val dateString = "${nextRace.startDate.format(DAY_FMT)} - ${nextRace.endDate.format(DAY_FMT)} ${nextRace.endDate.format(MONTH_YEAR_FMT)}"
 

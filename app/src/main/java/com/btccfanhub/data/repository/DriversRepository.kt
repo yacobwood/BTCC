@@ -1,5 +1,6 @@
 package com.btccfanhub.data.repository
 
+import com.btccfanhub.data.NetworkDiskCache
 import com.btccfanhub.data.model.Driver
 import com.btccfanhub.data.model.GridData
 import com.btccfanhub.data.model.SeasonStat
@@ -7,7 +8,7 @@ import com.btccfanhub.data.model.Team
 import com.btccfanhub.data.model.TeamSeasonStat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,7 +18,7 @@ object DriversRepository {
     private const val URL =
         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/drivers.json"
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
 
     @Volatile private var cache: GridData? = null
     @Volatile private var cacheTime: Long = 0
@@ -33,12 +34,13 @@ object DriversRepository {
                     .header("User-Agent", "BTCCFanHub/1.0 Android")
                     .build()
             ).execute().body?.string() ?: return@withContext cache ?: GridData(emptyList(), emptyList())
+            NetworkDiskCache.write("drivers", body)
             val result = parse(body)
             cache = result
             cacheTime = now
             result
         } catch (e: Exception) {
-            cache ?: GridData(emptyList(), emptyList())
+            cache ?: NetworkDiskCache.read("drivers")?.let { runCatching { parse(it) }.getOrNull() } ?: GridData(emptyList(), emptyList())
         }
     }
 

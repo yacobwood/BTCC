@@ -2,7 +2,7 @@ package com.btccfanhub.data.repository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,7 +19,7 @@ object RadioRepository {
     private const val URL =
         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/radio.json"
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
 
     @Volatile private var cache: List<RadioStation>? = null
     @Volatile private var cacheTime: Long = 0

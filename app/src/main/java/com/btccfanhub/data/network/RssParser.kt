@@ -1,7 +1,7 @@
 package com.btccfanhub.data.network
 
+import com.btccfanhub.data.NetworkDiskCache
 import com.btccfanhub.data.model.Article
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 object RssParser {
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
     private val outputDateFormat = DateTimeFormatter.ofPattern("d MMM yyyy")
 
     fun fetchArticleById(id: Int): Article? {
@@ -37,6 +37,7 @@ object RssParser {
     }
 
     fun fetchArticles(page: Int = 1, perPage: Int = 20, search: String = ""): List<Article> {
+        val isMainFeed = page == 1 && search.isBlank()
         return try {
             val url = buildString {
                 append("https://www.btcc.net/wp-json/wp/v2/posts?per_page=$perPage&page=$page&_embed=1")
@@ -46,12 +47,17 @@ object RssParser {
                 .url(url)
                 .header("User-Agent", "BTCCFanHub/1.0 Android")
                 .build()
-            val json = client.newCall(request).execute().body?.string() ?: return emptyList()
+            val json = client.newCall(request).execute().body?.string()
+                ?: return if (isMainFeed) cachedArticles() else emptyList()
+            if (isMainFeed) NetworkDiskCache.write("news_page1", json)
             parseJson(json)
         } catch (e: Exception) {
-            emptyList()
+            if (isMainFeed) cachedArticles() else emptyList()
         }
     }
+
+    private fun cachedArticles(): List<Article> =
+        NetworkDiskCache.read("news_page1")?.let { runCatching { parseJson(it) }.getOrNull() } ?: emptyList()
 
     private fun parseJson(json: String): List<Article> {
         val articles = mutableListOf<Article>()
