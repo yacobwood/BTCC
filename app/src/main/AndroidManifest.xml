@@ -43,7 +43,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https"
-                    android:host="btcc-website-c4cwgwkck-jake-woods-projects-dc08a07b.vercel.app"
+                    android:host="btcchub.vercel.app"
                     android:pathPrefix="/news/" />
             </intent-filter>
         </activity>

@@ -174,7 +174,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                     onClick = {
                         Analytics.articleShared(article.title)
                         val slug = article.link.trimEnd('/').substringAfterLast('/')
-                        val appLink = "https://btcc-website-c4cwgwkck-jake-woods-projects-dc08a07b.vercel.app/news/$slug"
+                        val appLink = "https://btcchub.vercel.app/news/$slug"
                         val sendIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_SUBJECT, article.title)
