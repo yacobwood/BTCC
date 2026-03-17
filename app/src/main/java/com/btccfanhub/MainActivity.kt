@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
             val slug = when {
                 uri?.scheme == "btccfanhub" && uri.host == "article" ->
                     uri.pathSegments.firstOrNull()
-                uri?.scheme == "https" && uri.pathSegments.size >= 2 && uri.pathSegments[0] == "news" ->
+                uri?.scheme == "https" && uri.pathSegments.size >= 2 && uri.pathSegments[0] == Constants.SHARE_NEWS_PATH ->
                     uri.pathSegments[1]
                 else -> null
             }

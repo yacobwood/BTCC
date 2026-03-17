@@ -7,6 +7,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.btccfanhub.Constants
 import com.btccfanhub.data.Analytics
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalContext
@@ -174,7 +175,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                     onClick = {
                         Analytics.articleShared(article.title)
                         val slug = article.link.trimEnd('/').substringAfterLast('/')
-                        val appLink = "https://btcchub.vercel.app/news/$slug"
+                        val appLink = "${Constants.SHARE_BASE_URL}/${Constants.SHARE_NEWS_PATH}/$slug"
                         val sendIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_SUBJECT, article.title)
