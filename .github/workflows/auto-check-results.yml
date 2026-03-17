@@ -1,0 +1,42 @@
+name: Auto-check & Update BTCC Results
+
+on:
+  schedule:
+    - cron: '*/5 9-17 * * 0,6'  # Every 5 mins, Sat & Sun, 09:00-17:59 UTC (10:00-18:59 BST)
+  workflow_dispatch:
+
+concurrency:
+  group: auto-results
+  cancel-in-progress: true  # Cancel previous run if a new one starts
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r scraper/requirements.txt
+          sudo apt-get install -y libasound2t64
+          playwright install chromium --with-deps
+
+      - name: Check for new results & update
+        run: python scraper/auto_update.py
+
+      - name: Commit if data changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-update Round results [skip ci]"
+          file_pattern: |
+            data/results2026.json
+            data/standings.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
