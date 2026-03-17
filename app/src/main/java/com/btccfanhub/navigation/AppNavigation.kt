@@ -2,11 +2,13 @@ package com.btccfanhub.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.ArticleHolder
 import com.btccfanhub.data.FeatureFlagsStore
 import androidx.navigation.NavType
@@ -58,6 +60,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         composable(Screen.News.route) {
             NewsScreen(
                 onArticleClick = { article ->
+                    Analytics.articleRead(article.title)
                     ArticleHolder.current = article
                     navController.navigate(Screen.Article.route)
                 },
@@ -96,6 +99,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         ) { backStackEntry ->
             val year  = backStackEntry.arguments?.getInt("year")  ?: 2026
             val round = backStackEntry.arguments?.getInt("round") ?: return@composable
+            LaunchedEffect(year, round) { Analytics.roundResultsViewed(year, round) }
             RoundResultsScreen(year = year, round = round, onBack = { navController.popBackStack() })
         }
 
@@ -129,6 +133,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("round") { type = NavType.IntType }),
         ) { backStackEntry ->
             val round = backStackEntry.arguments?.getInt("round") ?: return@composable
+            LaunchedEffect(round) { Analytics.trackDetailViewed(round, "") }
             val flagLiveUpdates by FeatureFlagsStore.liveUpdates.collectAsState()
             TrackDetailScreen(
                 round = round,
@@ -144,6 +149,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("eventId") { type = NavType.IntType }),
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getInt("eventId") ?: return@composable
+            LaunchedEffect(eventId) { Analytics.liveTimingOpened(eventId) }
             LiveTimingScreen(eventId = eventId, onBack = { navController.popBackStack() })
         }
 
@@ -161,6 +167,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("pageId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val pageId = backStackEntry.arguments?.getString("pageId") ?: return@composable
+            LaunchedEffect(pageId) { Analytics.infoPageViewed(pageId) }
             InfoPageScreen(
                 pageId = pageId,
                 onBack = { navController.popBackStack() },

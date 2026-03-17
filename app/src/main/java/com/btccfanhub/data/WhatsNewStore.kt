@@ -73,10 +73,13 @@ object WhatsNewStore {
             "Added New to BTCC page"
         ),
         23 to listOf(
-            "Live timing — real-time classification with gaps, best laps and flag status during race weekends",
-            "Results back to 2004 — browse full race results for every season from 2004 to 2025",
-            "Offline mode — calendar, standings, and news are now cached locally so the app works without connectivity",
-            "Qualifying alerts — get notified when qualifying sessions are about to start",
+            "Live timing - real-time classification with gaps, best laps and flag status during race weekends",
+            "Results back to 2004 - browse full race results for every season from 2004 to 2025",
+            "Offline mode - calendar, standings, and news are now cached locally so the app works without connectivity",
+            "Qualifying alerts - get notified when qualifying sessions are about to start",
+        ),
+        24 to listOf(
+            ""
         )
     )
 
