@@ -23,6 +23,12 @@ keystore.properties
 # Python venv
 scraper/.venv/
 
+# Python cache
+__pycache__/
+
+# Node modules
+node_modules/
+
 # Kotlin/IDE cache and error logs
 .kotlin/
 app/google-services.json
