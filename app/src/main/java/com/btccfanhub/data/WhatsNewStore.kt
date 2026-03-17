@@ -79,7 +79,8 @@ object WhatsNewStore {
             "Qualifying alerts - get notified when qualifying sessions are about to start",
         ),
         24 to listOf(
-            "Share articles — share any news article and it opens directly in the app for other BTCCHub users",
+            "Share articles - share any news article and it opens directly in the app for other BTCCHub users",
+            "Does anyone actually read these???",
         )
     )
 
