@@ -177,7 +177,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                         val sendIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_SUBJECT, article.title)
-                            putExtra(Intent.EXTRA_TEXT, "${article.title}\n\nbtccfanhub://article/$slug")
+                            putExtra(Intent.EXTRA_TEXT, "${article.title}\n\n${article.link}\n\nOpen in BTCCHub app: btccfanhub://article/$slug")
                         }
                         context.startActivity(Intent.createChooser(sendIntent, "Share article"))
                     },
