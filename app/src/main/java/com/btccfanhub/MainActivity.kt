@@ -70,7 +70,8 @@ class MainActivity : ComponentActivity() {
     private val requestNotificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op */ }
 
-    private val pendingArticleId = mutableStateOf<Int?>(null)
+    private val pendingArticleId   = mutableStateOf<Int?>(null)
+    private val pendingArticleSlug = mutableStateOf<String?>(null)
     private val pendingOpenResults = mutableIntStateOf(0)
     private val pendingResultsRound = mutableIntStateOf(0)
 
@@ -98,6 +99,8 @@ class MainActivity : ComponentActivity() {
                 MainScreen(
                     pendingArticleId    = pendingArticleId.value,
                     onArticleIdConsumed = { pendingArticleId.value = null },
+                    pendingArticleSlug  = pendingArticleSlug.value,
+                    onArticleSlugConsumed = { pendingArticleSlug.value = null },
                     pendingOpenResults  = pendingOpenResults.intValue,
                     pendingResultsRound = pendingResultsRound.intValue,
                     onResultsConsumed   = { },
@@ -120,6 +123,14 @@ class MainActivity : ComponentActivity() {
             val round = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) ?: 0
             pendingResultsRound.intValue = round
             pendingOpenResults.intValue++
+        }
+        // Deep link: btccfanhub://article/some-slug
+        if (intent?.action == Intent.ACTION_VIEW) {
+            val uri = intent.data
+            if (uri?.scheme == "btccfanhub" && uri.host == "article") {
+                val slug = uri.pathSegments.firstOrNull()
+                if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
+            }
         }
     }
 
@@ -238,6 +249,8 @@ private data class NavItem(
 private fun MainScreen(
     pendingArticleId: Int? = null,
     onArticleIdConsumed: () -> Unit = {},
+    pendingArticleSlug: String? = null,
+    onArticleSlugConsumed: () -> Unit = {},
     pendingOpenResults: Int = 0,
     pendingResultsRound: Int = 0,
     onResultsConsumed: () -> Unit = {},
@@ -291,6 +304,19 @@ private fun MainScreen(
                 RssParser.fetchArticleById(pendingArticleId)
             }
             onArticleIdConsumed()
+            if (article != null) {
+                ArticleHolder.current = article
+                navController.navigate(Screen.Article.route) { launchSingleTop = true }
+            }
+        }
+    }
+
+    LaunchedEffect(pendingArticleSlug) {
+        if (pendingArticleSlug != null) {
+            val article = withContext(Dispatchers.IO) {
+                RssParser.fetchArticleBySlug(pendingArticleSlug)
+            }
+            onArticleSlugConsumed()
             if (article != null) {
                 ArticleHolder.current = article
                 navController.navigate(Screen.Article.route) { launchSingleTop = true }

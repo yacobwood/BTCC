@@ -36,6 +36,29 @@ object RssParser {
         }
     }
 
+    fun fetchArticleBySlug(slug: String): Article? {
+        return try {
+            val request = Request.Builder()
+                .url("https://www.btcc.net/wp-json/wp/v2/posts?slug=$slug&_embed=1")
+                .header("User-Agent", "BTCCFanHub/1.0 Android")
+                .build()
+            val json = client.newCall(request).execute().body?.string() ?: return null
+            val array = JSONArray(json)
+            if (array.length() == 0) return null
+            val post = array.getJSONObject(0)
+            val id          = post.getInt("id")
+            val title       = decodeEntities(post.getJSONObject("title").getString("rendered"))
+            val link        = post.getString("link")
+            val description = stripHtml(post.getJSONObject("excerpt").getString("rendered"))
+            val content     = post.getJSONObject("content").getString("rendered")
+            val pubDate     = formatDate(post.getString("date"))
+            val embedded    = post.optJSONObject("_embedded")
+            Article(id, title, link, description, pubDate, extractFeaturedImage(embedded), extractCategory(embedded), content)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun fetchArticles(page: Int = 1, perPage: Int = 20, search: String = ""): List<Article> {
         val isMainFeed = page == 1 && search.isBlank()
         return try {

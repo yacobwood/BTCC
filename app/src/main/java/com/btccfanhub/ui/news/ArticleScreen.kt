@@ -173,10 +173,11 @@ fun ArticleScreen(onBack: () -> Unit) {
                 IconButton(
                     onClick = {
                         Analytics.articleShared(article.title)
+                        val slug = article.link.trimEnd('/').substringAfterLast('/')
                         val sendIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_SUBJECT, article.title)
-                            putExtra(Intent.EXTRA_TEXT, "${article.title}\n\n${article.link}")
+                            putExtra(Intent.EXTRA_TEXT, "${article.title}\n\nbtccfanhub://article/$slug")
                         }
                         context.startActivity(Intent.createChooser(sendIntent, "Share article"))
                     },
