@@ -40,7 +40,9 @@ sealed class Screen(val route: String) {
     object RoundResults : Screen("round_results/{year}/{round}") {
         fun route(year: Int, round: Int) = "round_results/$year/$round"
     }
-    object LiveTiming : Screen("live_timing")
+    object LiveTiming : Screen("live_timing/{eventId}") {
+        fun route(eventId: Int) = "live_timing/$eventId"
+    }
     object FeatureFlags : Screen("feature_flags")
     object BugReport : Screen("bug_report")
     object More : Screen("more")
@@ -70,7 +72,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
                     navController.navigate(Screen.Track.route(race.round))
                 },
                 onLiveTimingClick = if (flagLiveUpdates) {
-                    { navController.navigate(Screen.LiveTiming.route) }
+                    { eventId -> navController.navigate(Screen.LiveTiming.route(eventId)) }
                 } else null,
             )
         }
@@ -132,21 +134,25 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
                 round = round,
                 onBack = { navController.popBackStack() },
                 onLiveTimingClick = if (flagLiveUpdates) {
-                    { navController.navigate(Screen.LiveTiming.route) }
+                    { eventId -> navController.navigate(Screen.LiveTiming.route(eventId)) }
                 } else null,
             )
         }
 
-        composable(Screen.LiveTiming.route) {
-            LiveTimingScreen(onBack = { navController.popBackStack() })
+        composable(
+            route = Screen.LiveTiming.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.IntType }),
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getInt("eventId") ?: return@composable
+            LiveTimingScreen(eventId = eventId, onBack = { navController.popBackStack() })
         }
 
         composable(Screen.More.route) {
             MoreScreen(
-                onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                onSettingsClick  = { navController.navigate(Screen.Settings.route) },
                 onBugReportClick = { navController.navigate(Screen.BugReport.route) },
-                onRadioClick = { navController.navigate(Screen.Radio.route) },
-                onInfoPageClick = { pageId -> navController.navigate(Screen.InfoPage.route(pageId)) },
+                onRadioClick     = { navController.navigate(Screen.Radio.route) },
+                onInfoPageClick  = { pageId -> navController.navigate(Screen.InfoPage.route(pageId)) },
             )
         }
 

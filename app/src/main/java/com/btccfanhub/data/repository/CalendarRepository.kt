@@ -1,5 +1,6 @@
 package com.btccfanhub.data.repository
 
+import com.btccfanhub.data.NetworkDiskCache
 import com.btccfanhub.data.model.CalendarData
 import com.btccfanhub.data.model.Corner
 import com.btccfanhub.data.model.LapRecord
@@ -8,7 +9,7 @@ import com.btccfanhub.data.model.Sector
 import com.btccfanhub.data.model.TrackInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,7 +20,7 @@ object CalendarRepository {
     private const val URL =
         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json"
 
-    private val client = OkHttpClient()
+    private val client = HttpClient.client
 
     @Volatile private var cache: CalendarData? = null
     @Volatile private var cacheTime: Long = 0
@@ -37,12 +38,13 @@ object CalendarRepository {
                     .header("User-Agent", "BTCCFanHub/1.0 Android")
                     .build()
             ).execute().body?.string() ?: return@withContext cache ?: EMPTY
+            NetworkDiskCache.write("calendar", body)
             val result = parse(body)
             cache = result
             cacheTime = now
             result
         } catch (e: Exception) {
-            cache ?: EMPTY
+            cache ?: NetworkDiskCache.read("calendar")?.let { runCatching { parse(it) }.getOrNull() } ?: EMPTY
         }
     }
 
@@ -76,7 +78,7 @@ object CalendarRepository {
                 LocalDate.parse(r.optString("endDate"))
             } catch (e: Exception) { continue }
 
-            races += Race(round, venue, startDate, endDate)
+            races += Race(round, venue, startDate, endDate, r.optInt("tslEventId", 0))
 
             val imagesArr = r.optJSONArray("raceImages") ?: JSONArray()
             val raceImages = (0 until imagesArr.length()).map { imagesArr.getString(it) }

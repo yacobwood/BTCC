@@ -30,7 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.btccfanhub.Constants
 import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.ui.components.ImageLightbox
 import com.btccfanhub.data.model.DayForecast
 import com.btccfanhub.data.model.Corner
 import com.btccfanhub.data.model.LapRecord
@@ -57,7 +59,7 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> Unit)? = null) {
+fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) -> Unit)? = null) {
     val today = LocalDate.now()
     val context = LocalContext.current
 
@@ -95,7 +97,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
     val daysUntil = ChronoUnit.DAYS.between(today, currentRace.startDate)
 
     val useKm = remember {
-        val prefs = context.getSharedPreferences(NewsCheckWorker.PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         prefs.getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
     }
 
@@ -115,7 +117,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
                 title = {
                     Column {
                         Text(
-                            "ROUNDS ${(round - 1) * 3 + 1}–${round * 3}",
+                            "ROUNDS ${Constants.firstRaceNumberForRound(round)}–${round * 3}",
                             style = MaterialTheme.typography.labelSmall,
                             color = BtccYellow,
                             fontWeight = FontWeight.ExtraBold,
@@ -229,8 +231,8 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
                 }
 
                 // ── Live timing (race weekend only) ────────────────────────────
-                if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate) && onLiveTimingClick != null) {
-                    LiveTimingButton(onLiveTimingClick)
+                if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate) && onLiveTimingClick != null && currentRace.tslEventId != 0) {
+                    LiveTimingButton { onLiveTimingClick(currentRace.tslEventId) }
                 }
 
                 // ── Weather forecast ─────────────────────────────────────────
@@ -363,54 +365,6 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: (() -> 
                 initialIndex = idx.coerceIn(0, allImages.lastIndex),
                 onDismiss = { lightboxIndex.value = null },
             )
-        }
-    }
-}
-
-@Composable
-private fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: () -> Unit) {
-    val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .systemBarsPadding()
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-        ) { page ->
-            AsyncImage(
-                model = images[page],
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
-        }
-
-        if (images.size > 1) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 16.dp),
-                color = Color.Black.copy(alpha = 0.55f),
-                shape = MaterialTheme.shapes.small,
-            ) {
-                Text(
-                    text = "${pagerState.currentPage + 1} / ${images.size}",
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                )
-            }
-        }
-
-        IconButton(
-            onClick = onDismiss,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp),
-        ) {
-            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
         }
     }
 }

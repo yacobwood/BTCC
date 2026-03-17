@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.Constants
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.ui.theme.BtccBackground
@@ -42,7 +43,7 @@ private fun formatDateRange(start: java.time.LocalDate, end: java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: (() -> Unit)? = null) {
+fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -> Unit)? = null) {
     val today = LocalDate.now()
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
     var liveTimingEnabled by remember { mutableStateOf(true) }
@@ -81,7 +82,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: (() -> U
             return@Column
         }
 
-        val isRaceWeekend = liveTimingEnabled && onLiveTimingClick != null && nextRace != null && today >= nextRace.startDate
+        val isRaceWeekend = liveTimingEnabled && onLiveTimingClick != null && nextRace != null && today >= nextRace.startDate && nextRace.tslEventId != 0
 
         // Fixed: yellow box + "ALL ROUNDS" heading (no scroll)
         Column(
@@ -90,7 +91,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: (() -> U
                 .padding(horizontal = 16.dp),
         ) {
             if (isRaceWeekend) {
-                LiveTimingCard(onClick = onLiveTimingClick!!)
+                LiveTimingCard(onClick = { onLiveTimingClick!!(nextRace!!.tslEventId) })
                 Spacer(Modifier.height(12.dp))
             }
             if (nextRace != null) {
@@ -149,7 +150,7 @@ private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                val startRound = (race.round - 1) * 3 + 1
+                val startRound = Constants.firstRaceNumberForRound(race.round)
                 val endRound   = startRound + 2
                 Text(
                     "ROUNDS $startRound–$endRound · NEXT RACE",
@@ -257,7 +258,7 @@ private fun TimelineRaceRow(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val rStart = (race.round - 1) * 3 + 1
+                    val rStart = Constants.firstRaceNumberForRound(race.round)
                     val rEnd   = rStart + 2
                     Text(
                         "Rounds $rStart–$rEnd",

@@ -7,4 +7,5 @@ data class Race(
     val venue: String,
     val startDate: LocalDate,
     val endDate: LocalDate,
+    val tslEventId: Int = 0,
 )

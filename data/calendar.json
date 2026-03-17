@@ -5,6 +5,7 @@
   "rounds": [
     {
       "round": 1,
+      "tslEventId": 261603,
       "venue": "Donington Park",
       "startDate": "2026-04-18",
       "endDate": "2026-04-19",
@@ -103,6 +104,7 @@
     },
     {
       "round": 2,
+      "tslEventId": 261903,
       "venue": "Brands Hatch Indy",
       "startDate": "2026-05-09",
       "endDate": "2026-05-10",
@@ -193,6 +195,7 @@
     },
     {
       "round": 3,
+      "tslEventId": 262103,
       "venue": "Snetterton",
       "startDate": "2026-05-23",
       "endDate": "2026-05-24",
@@ -305,6 +308,7 @@
     },
     {
       "round": 4,
+      "tslEventId": 262303,
       "venue": "Oulton Park",
       "startDate": "2026-06-06",
       "endDate": "2026-06-07",
@@ -422,6 +426,7 @@
     },
     {
       "round": 5,
+      "tslEventId": 263003,
       "venue": "Thruxton",
       "startDate": "2026-07-25",
       "endDate": "2026-07-26",
@@ -517,6 +522,7 @@
     },
     {
       "round": 6,
+      "tslEventId": 263203,
       "venue": "Knockhill",
       "startDate": "2026-08-08",
       "endDate": "2026-08-09",
@@ -608,6 +614,7 @@
     },
     {
       "round": 7,
+      "tslEventId": 263403,
       "venue": "Donington Park GP",
       "startDate": "2026-08-22",
       "endDate": "2026-08-23",
@@ -717,6 +724,7 @@
     },
     {
       "round": 8,
+      "tslEventId": 263603,
       "venue": "Croft",
       "startDate": "2026-09-05",
       "endDate": "2026-09-06",
@@ -823,6 +831,7 @@
     },
     {
       "round": 9,
+      "tslEventId": 263903,
       "venue": "Silverstone",
       "startDate": "2026-09-26",
       "endDate": "2026-09-27",
@@ -920,6 +929,7 @@
     },
     {
       "round": 10,
+      "tslEventId": 264103,
       "venue": "Brands Hatch GP",
       "startDate": "2026-10-10",
       "endDate": "2026-10-11",
