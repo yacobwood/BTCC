@@ -12,8 +12,8 @@ object NewsRepository {
         RssParser.fetchArticles(page = page, perPage = PER_PAGE)
     }
 
-    suspend fun searchArticles(query: String): List<Article> = withContext(Dispatchers.IO) {
-        RssParser.fetchArticles(page = 1, perPage = PER_PAGE, search = query)
+    suspend fun searchArticles(query: String, page: Int = 1): List<Article> = withContext(Dispatchers.IO) {
+        RssParser.fetchArticles(page = page, perPage = PER_PAGE, search = query)
     }
 
     /** Returns true if there may be more pages (fetched a full page). */

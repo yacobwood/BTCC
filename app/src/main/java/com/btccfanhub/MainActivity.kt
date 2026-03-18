@@ -12,10 +12,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -37,7 +41,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import android.widget.Toast
 import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.data.ConnectivityObserver
 import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.OnboardingStore
@@ -270,6 +276,7 @@ private fun MainScreen(
 
     val flagAds     by FeatureFlagsStore.adsEnabled.collectAsState()
     val flagWhatsNew by FeatureFlagsStore.whatsNew.collectAsState()
+    val isOnline    by ConnectivityObserver.isOnline.collectAsState()
 
     if (showOnboarding) {
         NotificationOnboardingScreen(
@@ -324,6 +331,8 @@ private fun MainScreen(
             if (article != null) {
                 ArticleHolder.current = article
                 navController.navigate(Screen.Article.route) { launchSingleTop = true }
+            } else {
+                Toast.makeText(context, "Article not found", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -418,8 +427,25 @@ private fun MainScreen(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            AppNavHost(navController = navController, newsScrollToTopTrigger = newsScrollTrigger)
+        Column(modifier = Modifier.padding(innerPadding)) {
+            if (!isOnline) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF444444)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        "No internet connection",
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                    )
+                }
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                AppNavHost(navController = navController, newsScrollToTopTrigger = newsScrollTrigger)
+            }
         }
     }
 }

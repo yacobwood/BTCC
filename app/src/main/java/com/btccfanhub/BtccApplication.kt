@@ -8,6 +8,7 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.size.Precision
+import com.btccfanhub.data.ConnectivityObserver
 import com.btccfanhub.data.NetworkDiskCache
 import java.io.File
 
@@ -16,6 +17,7 @@ class BtccApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         NetworkDiskCache.init(this)
+        ConnectivityObserver.init(this)
         copyBundledDriverImages()
     }
 

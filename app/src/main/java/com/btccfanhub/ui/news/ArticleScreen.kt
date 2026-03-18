@@ -485,7 +485,12 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           window.addEventListener('scroll', function() {
             var scrolled = window.pageYOffset + window.innerHeight;
             var total = document.body.scrollHeight;
-            if (total <= window.innerHeight) return;
+            if (total <= window.innerHeight) {
+              [25, 50, 75, 100].forEach(function(t) {
+                if (!fired[t]) { fired[t] = true; if (window.AppScrollTracker) window.AppScrollTracker.onDepth(t); }
+              });
+              return;
+            }
             var pct = Math.floor(scrolled / total * 100);
             [25, 50, 75, 100].forEach(function(t) {
               if (pct >= t && !fired[t]) {

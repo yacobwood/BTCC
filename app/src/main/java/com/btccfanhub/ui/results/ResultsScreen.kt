@@ -74,8 +74,10 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     var liveDrivers  by remember { mutableStateOf<List<DriverStanding>?>(null) }
     var liveTeams    by remember { mutableStateOf<List<TeamStanding>?>(null) }
     var liveRound    by remember { mutableIntStateOf(0) }
-    var isRefreshing by remember { mutableStateOf(false) }
-    var loadFailed   by remember { mutableStateOf(false) }
+    var isRefreshing    by remember { mutableStateOf(false) }
+    var loadFailed      by remember { mutableStateOf(false) }
+    var refreshFailed   by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var currentRaceResults by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
     var resultsLoading     by remember { mutableStateOf(false) }
@@ -100,6 +102,8 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             loadFailed  = false
         } else if (liveDrivers == null) {
             loadFailed = true
+        } else {
+            refreshFailed = true
         }
         isRefreshing = false
     }
@@ -125,6 +129,13 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     LaunchedEffect(Unit) {
         seasonStartDate = CalendarRepository.getCalendarData().seasonStartDate
         if (today >= seasonStartDate) refresh()
+    }
+
+    LaunchedEffect(refreshFailed) {
+        if (refreshFailed) {
+            snackbarHostState.showSnackbar("Couldn't refresh — showing last known standings")
+            refreshFailed = false
+        }
     }
 
     // Load results whenever selected year changes: 2004–2025 from assets, else network
@@ -156,6 +167,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     val show2026Drivers = selectedYear == 2026 && seasonStarted && liveDrivers != null
     val show2026Teams   = selectedYear == 2026 && seasonStarted && liveTeams != null
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -412,6 +424,11 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             }
         }
     }
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier  = Modifier.align(Alignment.BottomCenter),
+    )
+    } // end Box
 }
 
 @Composable

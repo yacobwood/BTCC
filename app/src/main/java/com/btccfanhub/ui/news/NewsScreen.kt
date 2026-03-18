@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccTextSecondary
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsScreen(
     onArticleClick: (Article) -> Unit,
@@ -61,6 +63,7 @@ fun NewsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val searchState by viewModel.searchState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val favName by FavouriteDriverStore.driver.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -103,6 +106,20 @@ fun NewsScreen(
     }
     LaunchedEffect(shouldLoadMore) {
         if (shouldLoadMore) viewModel.loadMore()
+    }
+
+    val shouldLoadMoreSearch by remember {
+        derivedStateOf {
+            if (searchQuery.isBlank()) return@derivedStateOf false
+            val ss = searchState
+            if (ss !is SearchState.Results || !ss.hasMore) return@derivedStateOf false
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val total = listState.layoutInfo.totalItemsCount
+            total > 0 && lastVisible >= total - 4
+        }
+    }
+    LaunchedEffect(shouldLoadMoreSearch) {
+        if (shouldLoadMoreSearch) viewModel.loadMoreSearch(searchQuery)
     }
 
     Box(modifier = Modifier.fillMaxSize().background(BtccBackground)) {
@@ -169,6 +186,11 @@ fun NewsScreen(
                         }
                     }
 
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh    = { viewModel.refresh() },
+                        modifier     = Modifier.weight(1f),
+                    ) {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
@@ -208,6 +230,36 @@ fun NewsScreen(
                                                     .padding(horizontal = 16.dp)
                                                     .padding(bottom = 10.dp),
                                             )
+                                        }
+                                        if (ss.isLoadingMore) {
+                                            item {
+                                                Box(
+                                                    Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                                    contentAlignment = Alignment.Center,
+                                                ) {
+                                                    CircularProgressIndicator(color = BtccYellow, strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                is SearchState.Error -> {
+                                    item {
+                                        Box(
+                                            Modifier.fillMaxWidth().padding(top = 64.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                            ) {
+                                                Text(ss.message, color = BtccTextSecondary)
+                                                Button(
+                                                    onClick = { viewModel.search(searchQuery) },
+                                                    colors = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
+                                                    shape = RoundedCornerShape(8.dp),
+                                                ) { Text("Retry", fontWeight = FontWeight.Bold) }
+                                            }
                                         }
                                     }
                                 }
@@ -288,6 +340,7 @@ fun NewsScreen(
                             }
                         }
                     }
+                    } // end PullToRefreshBox
                 }
             }
         }

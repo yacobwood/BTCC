@@ -49,11 +49,20 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
     var liveTimingEnabled by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        val cal = CalendarRepository.getCalendarData()
-        races = cal.rounds
-        liveTimingEnabled = cal.liveTimingEnabled
-        loading = false
+    var loadError by remember { mutableStateOf(false) }
+    var refreshKey by remember { mutableIntStateOf(0) }
+    LaunchedEffect(refreshKey) {
+        loading = true
+        loadError = false
+        try {
+            val cal = CalendarRepository.getCalendarData()
+            races = cal.rounds
+            liveTimingEnabled = cal.liveTimingEnabled
+        } catch (e: Exception) {
+            if (races.isEmpty()) loadError = true
+        } finally {
+            loading = false
+        }
     }
     val nextRace = races.firstOrNull { it.endDate >= today }
 
@@ -79,6 +88,22 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
         if (loading) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = BtccYellow)
+            }
+            return@Column
+        }
+        if (loadError) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text("Couldn't load calendar. Check your connection.", color = BtccTextSecondary)
+                    Button(
+                        onClick = { refreshKey++ },
+                        colors = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
+                        shape = RoundedCornerShape(8.dp),
+                    ) { Text("Retry", fontWeight = FontWeight.Bold) }
+                }
             }
             return@Column
         }

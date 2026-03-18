@@ -23,7 +23,12 @@ sealed class NewsState {
 sealed class SearchState {
     object Idle : SearchState()
     object Loading : SearchState()
-    data class Results(val articles: List<Article>) : SearchState()
+    data class Results(
+        val articles: List<Article>,
+        val isLoadingMore: Boolean = false,
+        val hasMore: Boolean = true,
+    ) : SearchState()
+    data class Error(val message: String) : SearchState()
 }
 
 class NewsViewModel : ViewModel() {
@@ -34,9 +39,14 @@ class NewsViewModel : ViewModel() {
     private val _searchState = MutableStateFlow<SearchState>(SearchState.Idle)
     val searchState: StateFlow<SearchState> = _searchState
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     private var currentPage = 1
     private var isLoadingMore = false
     private var searchJob: Job? = null
+    private var searchPage = 1
+    private var isLoadingMoreSearch = false
 
     init {
         load()
@@ -54,6 +64,24 @@ class NewsViewModel : ViewModel() {
                 NewsState.Success(
                     articles = articles,
                     hasMore  = NewsRepository.isFullPage(articles),
+                )
+            }
+        }
+    }
+
+    fun refresh() {
+        val current = _state.value as? NewsState.Success ?: return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val articles = NewsRepository.getArticles(page = 1)
+            _isRefreshing.value = false
+            if (articles.isNotEmpty()) {
+                currentPage = 1
+                isLoadingMore = false
+                _state.value = current.copy(
+                    articles      = articles,
+                    hasMore       = NewsRepository.isFullPage(articles),
+                    isLoadingMore = false,
                 )
             }
         }
@@ -79,6 +107,8 @@ class NewsViewModel : ViewModel() {
 
     fun search(query: String) {
         searchJob?.cancel()
+        searchPage = 1
+        isLoadingMoreSearch = false
         if (query.isBlank()) {
             _searchState.value = SearchState.Idle
             return
@@ -86,14 +116,44 @@ class NewsViewModel : ViewModel() {
         searchJob = viewModelScope.launch {
             delay(300)
             _searchState.value = SearchState.Loading
-            val results = NewsRepository.searchArticles(query)
-            val q = query.lowercase()
-            val ranked = results.sortedWith(compareByDescending<Article> {
-                it.title.lowercase().contains(q)
-            }.thenByDescending {
-                it.title.lowercase().startsWith(q)
-            })
-            _searchState.value = SearchState.Results(ranked)
+            try {
+                val results = NewsRepository.searchArticles(query, page = 1)
+                val q = query.lowercase()
+                val ranked = results.sortedWith(compareByDescending<Article> {
+                    it.title.lowercase().contains(q)
+                }.thenByDescending {
+                    it.title.lowercase().startsWith(q)
+                })
+                _searchState.value = SearchState.Results(
+                    articles = ranked,
+                    hasMore  = NewsRepository.isFullPage(results),
+                )
+            } catch (e: Exception) {
+                _searchState.value = SearchState.Error("Search failed. Check your connection.")
+            }
+        }
+    }
+
+    fun loadMoreSearch(query: String) {
+        val current = _searchState.value as? SearchState.Results ?: return
+        if (!current.hasMore || isLoadingMoreSearch) return
+        isLoadingMoreSearch = true
+        val nextPage = searchPage + 1
+        viewModelScope.launch {
+            _searchState.value = current.copy(isLoadingMore = true)
+            try {
+                val more = NewsRepository.searchArticles(query, page = nextPage)
+                searchPage = nextPage
+                _searchState.value = current.copy(
+                    articles      = current.articles + more,
+                    isLoadingMore = false,
+                    hasMore       = NewsRepository.isFullPage(more),
+                )
+            } catch (e: Exception) {
+                _searchState.value = current.copy(isLoadingMore = false)
+            } finally {
+                isLoadingMoreSearch = false
+            }
         }
     }
 
