@@ -1,5 +1,11 @@
 package com.btccfanhub.data.model
 
+data class TeamParticipation(
+    val name: String,
+    val car: String,
+    val races: Int? = null
+)
+
 data class SeasonStat(
     val year: Int,
     val team: String,
@@ -11,6 +17,7 @@ data class SeasonStat(
     val poles: Int = 0,
     val fastestLaps: Int = 0,
     val isChampion: Boolean = false,
+    val teams: List<TeamParticipation> = emptyList(),
 )
 
 data class Driver(

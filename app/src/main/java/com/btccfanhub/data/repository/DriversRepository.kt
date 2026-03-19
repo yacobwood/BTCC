@@ -63,6 +63,19 @@ object DriversRepository {
                 birthplace  = d.optString("birthplace", ""),
                 history     = (0 until histArr.length()).map { j ->
                     val h = histArr.getJSONObject(j)
+                    val teamsArr = h.optJSONArray("teams")
+                    val teams = if (teamsArr != null) {
+                        (0 until teamsArr.length()).map { k ->
+                            val t = teamsArr.getJSONObject(k)
+                            TeamParticipation(
+                                name  = t.optString("name"),
+                                car   = t.optString("car"),
+                                races = if (t.has("races")) t.optInt("races") else null
+                            )
+                        }
+                    } else {
+                        emptyList()
+                    }
                     SeasonStat(
                         year        = h.optInt("year"),
                         team        = h.optString("team"),
@@ -74,6 +87,7 @@ object DriversRepository {
                         poles       = h.optInt("poles"),
                         fastestLaps = h.optInt("fastestLaps"),
                         isChampion  = h.optBoolean("champion"),
+                        teams       = teams,
                     )
                 },
             )
