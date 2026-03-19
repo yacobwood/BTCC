@@ -5,6 +5,7 @@ import com.btccfanhub.data.model.Driver
 import com.btccfanhub.data.model.GridData
 import com.btccfanhub.data.model.SeasonStat
 import com.btccfanhub.data.model.Team
+import com.btccfanhub.data.model.TeamParticipation
 import com.btccfanhub.data.model.TeamSeasonStat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -74,7 +75,7 @@ object DriversRepository {
                             )
                         }
                     } else {
-                        emptyList()
+                        emptyList<TeamParticipation>()
                     }
                     SeasonStat(
                         year        = h.optInt("year"),
