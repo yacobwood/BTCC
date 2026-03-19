@@ -115,15 +115,19 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         contentColor     = BtccYellow,
                     ) {
                         races.forEachIndexed { index, race ->
+                            val tabLabel = when {
+                                race.label.equals("Qualifying Race", ignoreCase = true) -> "QUALI RACE"
+                                else -> race.label.uppercase()
+                            }
                             Tab(
                                 selected = pagerState.currentPage == index,
                                 onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
                                 text = {
                                     Text(
-                                        race.label.uppercase(),
+                                        tabLabel,
                                         fontWeight    = FontWeight.ExtraBold,
                                         fontSize      = 12.sp,
-                                        letterSpacing = 1.sp,
+                                        letterSpacing = 0.sp,
                                         color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
                                     )
                                 },
