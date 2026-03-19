@@ -1061,6 +1061,18 @@
           "year": 2025,
           "team": "Motor Parts Direct with Power Maxed Racing",
           "car": "Vauxhall Astra",
+          "teams": [
+            {
+              "name": "Motor Parts Direct with Power Maxed Racing",
+              "car": "Vauxhall Astra",
+              "races": 18
+            },
+            {
+              "name": "Motor Parts Direct with Power Maxed Racing",
+              "car": "Cupra León",
+              "races": 12
+            }
+          ],
           "pos": 27,
           "points": 4,
           "wins": 0,
@@ -1213,6 +1225,106 @@
           "poles": 0,
           "fastestLaps": 0,
           "champion": true
+        },
+        {
+          "year": 2011,
+          "team": "Honda Racing",
+          "car": "Honda Civic",
+          "pos": 3,
+          "points": 249,
+          "wins": 6,
+          "podiums": 13,
+          "poles": 4,
+          "fastestLaps": 2,
+          "champion": false
+        },
+        {
+          "year": 2010,
+          "team": "Honda Racing",
+          "car": "Honda Civic",
+          "pos": 3,
+          "points": 218,
+          "wins": 5,
+          "podiums": 12,
+          "poles": 4,
+          "fastestLaps": 4,
+          "champion": false
+        },
+        {
+          "year": 2009,
+          "team": "Team Dynamics / Cartridge World Carbon Zero Racing / Club SEAT",
+          "car": "Mercedes-Benz A-Class / Infiniti Q50",
+          "teams": [
+            {
+              "name": "Team Dynamics",
+              "car": "Honda Civic",
+              "races": 15
+            },
+            {
+              "name": "Cartridge World Carbon Zero Racing",
+              "car": "SEAT León",
+              "races": 9
+            },
+            {
+              "name": "Club SEAT",
+              "car": "SEAT León",
+              "races": 6
+            }
+          ],
+          "pos": 14,
+          "points": 34,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2008,
+          "team": "Team Halfords",
+          "car": "Honda Civic",
+          "pos": 7,
+          "points": 144,
+          "wins": 2,
+          "podiums": 4,
+          "poles": 4,
+          "fastestLaps": 1,
+          "champion": false
+        },
+        {
+          "year": 2007,
+          "team": "Team Halfords",
+          "car": "Honda Civic",
+          "pos": 3,
+          "points": 200,
+          "wins": 4,
+          "podiums": 10,
+          "poles": 5,
+          "fastestLaps": 5,
+          "champion": false
+        },
+        {
+          "year": 2006,
+          "team": "Team Halfords",
+          "car": "Honda Integra Type-R",
+          "pos": 4,
+          "points": 204,
+          "wins": 4,
+          "podiums": 10,
+          "poles": 5,
+          "fastestLaps": 7,
+          "champion": false
+        },
+        {
+          "year": 2001,
+          "team": "GR Motorsport",
+          "car": "Ford Focus",
+          "pos": 15,
+          "points": 30,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0,
+          "champion": false
         }
       ],
       "dateOfBirth": "1979-01-23",
@@ -1330,7 +1442,19 @@
         {
           "year": 2017,
           "team": "Team Parker Racing",
-          "car": "Ford Focus ST",
+          "car": "Ford Focus ST / MG 6 GT",
+          "teams": [
+            {
+              "name": "Team Parker Racing",
+              "car": "Ford Focus ST",
+              "races": 12
+            },
+            {
+              "name": "MG Racing RCIB Insurance",
+              "car": "MG 6 GT",
+              "races": 18
+            }
+          ],
           "pos": 18,
           "points": 75,
           "wins": 0,
@@ -1613,7 +1737,19 @@
         {
           "year": 2025,
           "team": "Motor Parts Direct with Power Maxed Racing",
-          "car": "Vauxhall Astra",
+          "car": "Vauxhall Astra / Cupra León",
+          "teams": [
+            {
+              "name": "Motor Parts Direct with Power Maxed Racing",
+              "car": "Vauxhall Astra",
+              "races": 18
+            },
+            {
+              "name": "Motor Parts Direct with Power Maxed Racing",
+              "car": "Cupra León",
+              "races": 12
+            }
+          ],
           "pos": 18,
           "points": 100,
           "wins": 1,
