@@ -1831,8 +1831,8 @@
       "points2025": 773,
       "founded": 2007,
       "base": "Huntingdon, Cambridgeshire",
-      "driversChampionships": 3,
-      "teamsChampionships": 1,
+      "driversChampionships": 2,
+      "teamsChampionships": 0,
       "history": [
         {
           "year": 2019,
@@ -1843,6 +1843,21 @@
           "year": 2020,
           "pos": 7,
           "points": 246
+        },
+        {
+          "year": 2021,
+          "pos": 6,
+          "points": 309
+        },
+        {
+          "year": 2022,
+          "pos": 2,
+          "points": 582
+        },
+        {
+          "year": 2023,
+          "pos": 3,
+          "points": 559
         },
         {
           "year": 2024,
