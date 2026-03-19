@@ -14,6 +14,9 @@ object RaceResultsRepository {
     /** BTCC points for positions 1–15 when JSON has no points (e.g. 2014–2023 data). */
     private val pointsByPosition = intArrayOf(20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 
+    /** Qualifying Race points scale (reg 1.6.2.a): 10,9,8,7,6,5,5,4,4,3,3,2,2,1,1. No bonus points. */
+    private val qualifyingRacePoints = intArrayOf(10, 9, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1)
+
     private fun pointsFromPosition(position: Int): Int =
         if (position in 1..15) pointsByPosition[position - 1] else 0
 
@@ -92,9 +95,11 @@ object RaceResultsRepository {
             val races = (0 until racesArr.length()).map { j ->
                 val race = racesArr.getJSONObject(j)
                 val resultsArr = race.optJSONArray("results") ?: org.json.JSONArray()
-                val isRace1 = (j == 0)
+                val label   = race.optString("label", "Race ${j + 1}")
+                val isQR    = label.equals("Qualifying Race", ignoreCase = true)
+                val isRace1 = label.equals("Race 1", ignoreCase = true)
                 RaceEntry(
-                    label       = race.optString("label", "Race ${j + 1}"),
+                    label       = label,
                     date        = race.optString("date", "").takeIf { it.isNotEmpty() },
                     fullRaceUrl = race.optString("fullRaceUrl", "").takeIf { it.isNotEmpty() },
                     results = (0 until resultsArr.length()).map { k ->
@@ -106,6 +111,7 @@ object RaceResultsRepository {
                         val pole = d.optBoolean("pole", false) || d.optBoolean("p", false)
                         val points = when {
                             rawPoints > 0 -> rawPoints
+                            isQR -> if (pos in 1..15) qualifyingRacePoints[pos - 1] else 0
                             else -> pointsWithBonuses(pos, fl, lead, pole, isRace1)
                         }
                         DriverResult(

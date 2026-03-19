@@ -188,6 +188,7 @@ private fun VideoExternalButton(
 
 @Composable
 private fun RaceResultsList(race: RaceEntry, roundDate: String) {
+    val isQualifyingRace = race.label.equals("Qualifying Race", ignoreCase = true)
     if (race.results.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No results available.", color = BtccTextSecondary)
@@ -239,7 +240,11 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
                 modifier            = Modifier.padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                listOf("FL" to "Fastest lap", "L" to "Led a lap", "P" to "Pole position", "BL" to "Best lap time").forEach { (badge, label) ->
+                val legendItems = if (isQualifyingRace)
+                    listOf("BL" to "Best lap time")
+                else
+                    listOf("FL" to "Fastest lap", "L" to "Led a lap", "P" to "Pole position", "BL" to "Best lap time")
+                legendItems.forEach { (badge, label) ->
                     Row(
                         verticalAlignment     = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
