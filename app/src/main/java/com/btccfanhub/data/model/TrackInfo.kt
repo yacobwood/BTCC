@@ -1,7 +1,7 @@
 package com.btccfanhub.data.model
 
 data class RaceSession(
-    val name: String,       // "Free Practice 1", "Qualifying", "Race 1", etc.
+    val name: String,       // "Free Practice", "Qualifying", "Race 1", etc.
     val day: String,        // "SAT" or "SUN"
     val time: String,       // "09:00" or "TBA"
 )

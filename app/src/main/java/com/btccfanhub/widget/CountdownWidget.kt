@@ -37,16 +37,13 @@ class CountdownWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                withTimeout(15_000L) {
-                    val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
-                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
-
+                withTimeout(10_000L) {
                     for (id in appWidgetIds) {
                         val opts = appWidgetManager.getAppWidgetOptions(id)
                         val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
                         val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
                         val theme = WidgetPrefs.getTheme(context, id)
-                        val views = buildViews(context, minW, minH, theme, calendar, schedule)
+                        val views = buildViews(context, minW, minH, theme)
                         appWidgetManager.updateAppWidget(id, views)
                     }
                 }
@@ -65,14 +62,11 @@ class CountdownWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                withTimeout(15_000L) {
-                    val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
-                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
-
+                withTimeout(10_000L) {
                     val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
                     val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
                     val theme = WidgetPrefs.getTheme(context, appWidgetId)
-                    val views = buildViews(context, minW, minH, theme, calendar, schedule)
+                    val views = buildViews(context, minW, minH, theme)
                     appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
             } finally {
@@ -102,8 +96,6 @@ class CountdownWidget : AppWidgetProvider() {
             minWidth: Int = 40,
             minHeight: Int = 40,
             theme: WidgetTheme = WidgetTheme.NAVY,
-            calendar: com.btccfanhub.data.model.CalendarData? = null,
-            schedule: Map<Int, List<RaceSession>>? = null,
         ): RemoteViews {
             val wide = minWidth >= 180
             val tall = minHeight >= 200
@@ -134,16 +126,12 @@ class CountdownWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
             val today = LocalDate.now()
+            val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
             val nextRace = calendar?.rounds?.firstOrNull { it.endDate >= today }
 
             if (nextRace == null) {
-                // Determine if we are pre-season (no data or future start) or post-season
-                val seasonOver = calendar != null && calendar.rounds.isNotEmpty() && today > (calendar.rounds.lastOrNull()?.endDate ?: today)
-                val label = if (seasonOver) "SEASON OVER" else "BTCC 2026"
-                val subText = if (seasonOver) "Season complete" else "Syncing..."
-
                 views.setTextViewText(R.id.widget_countdown, "")
-                views.setTextViewText(R.id.widget_countdown_label, label)
+                views.setTextViewText(R.id.widget_countdown_label, "SEASON\nOVER")
                 when (sizeClass) {
                     SizeClass.SMALL -> {
                         views.setTextViewText(R.id.widget_venue, "")
@@ -152,17 +140,17 @@ class CountdownWidget : AppWidgetProvider() {
                     }
                     SizeClass.WIDE -> {
                         views.setTextViewText(R.id.widget_round, "BTCC 2026")
-                        views.setTextViewText(R.id.widget_venue, subText)
+                        views.setTextViewText(R.id.widget_venue, "Season complete")
                         views.setTextViewText(R.id.widget_dates, "")
                     }
                     SizeClass.WIDE_TALL -> {
                         views.setTextViewText(R.id.widget_round, "BTCC 2026")
-                        views.setTextViewText(R.id.widget_venue, subText)
+                        views.setTextViewText(R.id.widget_venue, "Season complete")
                         views.setTextViewText(R.id.widget_dates, "")
                         views.setViewVisibility(R.id.widget_divider, View.GONE)
                         views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
                         views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
-                        views.setTextViewText(R.id.widget_no_schedule, if (seasonOver) "See you next season!" else "Checking for latest rounds...")
+                        views.setTextViewText(R.id.widget_no_schedule, "See you next season!")
                     }
                 }
                 return views
@@ -214,20 +202,6 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_dates, dateString)
                     views.setViewVisibility(R.id.widget_info_section, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_dates, if (minHeight >= 80) View.VISIBLE else View.GONE)
-
-                    val sessions = schedule?.get(nextRace.round)
-
-                    if (sessions != null && sessions.isNotEmpty()) {
-                        views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
-                        views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
-                        views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                        bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS)
-                        bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS)
-                    } else {
-                        views.setViewVisibility(R.id.widget_divider, View.GONE)
-                        views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
-                        views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
-                    }
                 }
 
                 SizeClass.WIDE_TALL -> {
@@ -235,6 +209,7 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_venue, nextRace.venue)
                     views.setTextViewText(R.id.widget_dates, dateString)
 
+                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
                     val sessions = schedule?.get(nextRace.round)
 
                     if (sessions != null && sessions.isNotEmpty()) {
@@ -276,9 +251,9 @@ class CountdownWidget : AppWidgetProvider() {
         }
 
         private fun abbreviate(name: String): String = when {
-            name.startsWith("Free Practice") -> name.replace("Free Practice", "FP").trim()
-            name.equals("Qualifying", ignoreCase = true) -> "Quali"
-            name.equals("Qualifying Race", ignoreCase = true) -> "Q-Race"
+            name.contains("Free Practice") -> name.replace("Free Practice", "FP")
+            name.contains("Qualifying Race") -> name.replace("Qualifying Race", "Quali Race")
+            name.contains("Qualifying") -> name.replace("Qualifying", "Quali")
             else -> name
         }
 

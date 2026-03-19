@@ -13,8 +13,6 @@ import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
 object CalendarRepository {
@@ -23,7 +21,6 @@ object CalendarRepository {
         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json"
 
     private val client = HttpClient.client
-    private val mutex = Mutex()
 
     @Volatile private var cache: CalendarData? = null
     @Volatile private var cacheTime: Long = 0
@@ -32,24 +29,22 @@ object CalendarRepository {
     private val EMPTY = CalendarData(LocalDate.of(2026, 4, 18), emptyList(), emptyMap())
 
     suspend fun getCalendarData(): CalendarData = withContext(Dispatchers.IO) {
-        mutex.withLock {
-            val now = System.currentTimeMillis()
-            cache?.takeIf { now - cacheTime < TTL }?.let { return@withLock it }
-            try {
-                val body = client.newCall(
-                    Request.Builder()
-                        .url("$URL?t=$now")
-                        .header("User-Agent", "BTCCFanHub/1.0 Android")
-                        .build()
-                ).execute().body?.string() ?: return@withLock cache ?: EMPTY
-                NetworkDiskCache.write("calendar", body)
-                val result = parse(body)
-                cache = result
-                cacheTime = now
-                result
-            } catch (e: Exception) {
-                cache ?: NetworkDiskCache.read("calendar")?.let { runCatching { parse(it) }.getOrNull() } ?: EMPTY
-            }
+        val now = System.currentTimeMillis()
+        cache?.takeIf { now - cacheTime < TTL }?.let { return@withContext it }
+        try {
+            val body = client.newCall(
+                Request.Builder()
+                    .url("$URL?t=$now")
+                    .header("User-Agent", "BTCCFanHub/1.0 Android")
+                    .build()
+            ).execute().body?.string() ?: return@withContext cache ?: EMPTY
+            NetworkDiskCache.write("calendar", body)
+            val result = parse(body)
+            cache = result
+            cacheTime = now
+            result
+        } catch (e: Exception) {
+            cache ?: NetworkDiskCache.read("calendar")?.let { runCatching { parse(it) }.getOrNull() } ?: EMPTY
         }
     }
 

@@ -119,9 +119,8 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                                 selected = pagerState.currentPage == index,
                                 onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
                                 text = {
-                                    val title = if (race.label.equals("Qualifying Race", ignoreCase = true)) "Q-Race" else race.label
                                     Text(
-                                        title.uppercase(),
+                                        race.label.uppercase(),
                                         fontWeight    = FontWeight.ExtraBold,
                                         fontSize      = 12.sp,
                                         letterSpacing = 1.sp,
