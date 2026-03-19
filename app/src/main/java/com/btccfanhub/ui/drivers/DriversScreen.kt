@@ -11,6 +11,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items as staggeredItems
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -49,6 +53,7 @@ import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.btccfanhub.ui.theme.*
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import java.io.File
@@ -216,6 +221,8 @@ private fun GridTabs(
 
 @Composable
 private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverClick: (Driver) -> Unit) {
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+    val pairs = if (isTablet) drivers.chunked(2) else drivers.map { listOf(it) }
     LazyColumn(
         modifier        = Modifier.fillMaxSize().padding(padding),
         contentPadding  = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
@@ -231,7 +238,16 @@ private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverC
                 modifier   = Modifier.padding(bottom = 4.dp, top = 12.dp),
             )
         }
-        items(drivers) { DriverCard(it, onClick = { onDriverClick(it) }) }
+        items(pairs) { pair ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                DriverCard(pair[0], modifier = Modifier.weight(1f), onClick = { onDriverClick(pair[0]) })
+                if (pair.size > 1) {
+                    DriverCard(pair[1], modifier = Modifier.weight(1f), onClick = { onDriverClick(pair[1]) })
+                } else if (isTablet) {
+                    Spacer(Modifier.weight(1f))
+                }
+            }
+        }
         item {
             Text(
                 "Full entry list published April 2026 · btcc.net",
@@ -249,29 +265,64 @@ private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverC
 
 @Composable
 private fun TeamsList(padding: PaddingValues, teams: List<Team>, onTeamClick: (Team) -> Unit) {
-    LazyColumn(
-        modifier        = Modifier.fillMaxSize().padding(padding),
-        contentPadding  = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        item {
-            Text(
-                "${teams.size} TEAMS",
-                style      = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color      = BtccTextSecondary,
-                letterSpacing = 2.sp,
-                modifier   = Modifier.padding(bottom = 4.dp, top = 12.dp),
-            )
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+    if (isTablet) {
+        LazyVerticalStaggeredGrid(
+            columns               = StaggeredGridCells.Fixed(2),
+            modifier              = Modifier.fillMaxSize().padding(padding),
+            contentPadding        = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalItemSpacing   = 10.dp,
+        ) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Text(
+                    "${teams.size} TEAMS",
+                    style         = MaterialTheme.typography.labelSmall,
+                    fontWeight    = FontWeight.ExtraBold,
+                    color         = BtccTextSecondary,
+                    letterSpacing = 2.sp,
+                    modifier      = Modifier.padding(bottom = 4.dp, top = 12.dp),
+                )
+            }
+            staggeredItems(teams) { team ->
+                TeamCard(team = team, onClick = { onTeamClick(team) })
+            }
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Text(
+                    "Full entry list published April 2026 · btcc.net",
+                    style    = MaterialTheme.typography.labelSmall,
+                    color    = BtccOutline,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
-        items(teams) { TeamCard(it, onClick = { onTeamClick(it) }) }
-        item {
-            Text(
-                "Full entry list published April 2026 · btcc.net",
-                style    = MaterialTheme.typography.labelSmall,
-                color    = BtccOutline,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+    } else {
+        LazyColumn(
+            modifier            = Modifier.fillMaxSize().padding(padding),
+            contentPadding      = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            item {
+                Text(
+                    "${teams.size} TEAMS",
+                    style         = MaterialTheme.typography.labelSmall,
+                    fontWeight    = FontWeight.ExtraBold,
+                    color         = BtccTextSecondary,
+                    letterSpacing = 2.sp,
+                    modifier      = Modifier.padding(bottom = 4.dp, top = 12.dp),
+                )
+            }
+            items(teams) { team ->
+                TeamCard(team = team, onClick = { onTeamClick(team) })
+            }
+            item {
+                Text(
+                    "Full entry list published April 2026 · btcc.net",
+                    style    = MaterialTheme.typography.labelSmall,
+                    color    = BtccOutline,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
     }
 }
@@ -281,13 +332,13 @@ private fun TeamsList(padding: PaddingValues, teams: List<Team>, onTeamClick: (T
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DriverCard(driver: Driver, onClick: () -> Unit) {
+private fun DriverCard(driver: Driver, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val context     = LocalContext.current
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == driver.name
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(BtccCard)
@@ -370,9 +421,9 @@ private fun DriverCard(driver: Driver, onClick: () -> Unit) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TeamCard(team: Team, onClick: () -> Unit) {
+private fun TeamCard(team: Team, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(BtccCard)
@@ -421,57 +472,26 @@ private fun TeamCard(team: Team, onClick: () -> Unit) {
 // Driver detail screen
 // ─────────────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
     val context     = LocalContext.current
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == driver.name
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BtccBackground),
     ) {
-        TopAppBar(
-            modifier = Modifier.height(56.dp),
-            title = {},
-            navigationIcon = {
-                IconButton(
-                    onClick   = onBack,
-                    modifier  = Modifier.size(48.dp),
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
-            },
-            actions = {
-                IconButton(
-                    onClick   = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
-                    modifier  = Modifier.size(48.dp),
-                ) {
-                    Icon(
-                        imageVector       = if (isFavourite) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                        contentDescription = if (isFavourite) "Unstar" else "Star",
-                        tint              = if (isFavourite) BtccYellow else BtccTextSecondary,
-                        modifier         = Modifier.size(28.dp),
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
-        )
         LazyColumn(
-            modifier       = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 28.dp),
+            modifier       = Modifier.fillMaxSize().statusBarsPadding(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 64.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // ── Header ──────────────────────────────────────────────────────
             item {
                 Column(
-                    modifier            = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    modifier            = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -569,6 +589,42 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                     )
                 }
             }
+        }
+
+        // Floating back button
+        IconButton(
+            onClick  = onBack,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(start = 8.dp, top = 8.dp)
+                .size(40.dp)
+                .background(Color.Black.copy(alpha = 0.45f), CircleShape),
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint     = Color.White,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+
+        // Floating star button
+        IconButton(
+            onClick   = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
+            modifier  = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(end = 8.dp, top = 8.dp)
+                .size(40.dp)
+                .background(Color.Black.copy(alpha = 0.45f), CircleShape),
+        ) {
+            Icon(
+                imageVector        = if (isFavourite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                contentDescription = if (isFavourite) "Unstar" else "Star",
+                tint               = if (isFavourite) BtccYellow else Color.White,
+                modifier           = Modifier.size(22.dp),
+            )
         }
     }
 }

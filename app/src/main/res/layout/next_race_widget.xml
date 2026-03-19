@@ -53,7 +53,7 @@
                 android:ellipsize="end"
                 android:text="Donington Park"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/widget_dates"

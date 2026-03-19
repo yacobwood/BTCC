@@ -98,7 +98,7 @@ class CountdownWidget : AppWidgetProvider() {
             theme: WidgetTheme = WidgetTheme.NAVY,
         ): RemoteViews {
             val wide = minWidth >= 180
-            val tall = minHeight >= 110
+            val tall = minHeight >= 200
             val sizeClass = when {
                 wide && tall -> SizeClass.WIDE_TALL
                 wide         -> SizeClass.WIDE

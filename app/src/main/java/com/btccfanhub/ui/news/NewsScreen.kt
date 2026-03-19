@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +66,10 @@ fun NewsScreen(
     val searchState by viewModel.searchState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val favName by FavouriteDriverStore.driver.collectAsState()
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex       = viewModel.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = viewModel.savedScrollOffset,
+    )
     val scope = rememberCoroutineScope()
     var searchActive by remember { mutableStateOf(false) }
     var searchQuery  by remember { mutableStateOf("") }
@@ -149,6 +153,14 @@ fun NewsScreen(
             is NewsState.Success -> {
                 val articles      = s.articles
                 val isLoadingMore = s.isLoadingMore
+                val isTablet      = LocalConfiguration.current.screenWidthDp >= 600
+                val navigateToArticle: (Article) -> Unit = { article ->
+                    viewModel.saveScrollPosition(
+                        listState.firstVisibleItemIndex,
+                        listState.firstVisibleItemScrollOffset,
+                    )
+                    onArticleClick(article)
+                }
 
                 Column(modifier = Modifier.fillMaxSize()) {
                     if (searchActive) {
@@ -224,7 +236,7 @@ fun NewsScreen(
                                         items(ss.articles) { article ->
                                             CompactCard(
                                                 article = article,
-                                                onClick = { Analytics.articleClicked(article.title, "search"); onArticleClick(article) },
+                                                onClick = { Analytics.articleClicked(article.title, "search"); navigateToArticle(article) },
                                                 favouriteSurname = favSurname,
                                                 modifier = Modifier
                                                     .padding(horizontal = 16.dp)
@@ -273,33 +285,35 @@ fun NewsScreen(
                                         article = articles[0],
                                         onRefresh = { viewModel.load() },
                                         onSearchClick = { searchActive = true },
-                                        onClick = { Analytics.articleClicked(articles[0].title, "hero"); onArticleClick(articles[0]) },
+                                        onClick = { Analytics.articleClicked(articles[0].title, "hero"); navigateToArticle(articles[0]) },
                                     )
                                 }
                             }
 
-                            if (articles.size >= 3) {
+                            // Grid cards: 4 on tablet, 2 on phone
+                            val gridCount    = if (isTablet) 4 else 2
+                            val gridArticles = articles.drop(1).take(gridCount)
+                            if (gridArticles.isNotEmpty()) {
                                 item {
                                     Spacer(Modifier.height(10.dp))
                                     Row(
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                                     ) {
-                                        GridCard(
-                                            article = articles[1],
-                                            onClick = { Analytics.articleClicked(articles[1].title, "grid"); onArticleClick(articles[1]) },
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        GridCard(
-                                            article = articles[2],
-                                            onClick = { Analytics.articleClicked(articles[2].title, "grid"); onArticleClick(articles[2]) },
-                                            modifier = Modifier.weight(1f),
-                                        )
+                                        gridArticles.forEachIndexed { i, article ->
+                                            GridCard(
+                                                article = article,
+                                                onClick = { Analytics.articleClicked(article.title, "grid"); navigateToArticle(article) },
+                                                modifier = Modifier.weight(1f),
+                                                height = if (isTablet) 150.dp else 180.dp,
+                                            )
+                                        }
                                     }
                                 }
                             }
 
-                            if (articles.size > 3) {
+                            val remaining = articles.drop(1 + gridArticles.size)
+                            if (remaining.isNotEmpty()) {
                                 item {
                                     Text(
                                         "MORE STORIES",
@@ -312,16 +326,43 @@ fun NewsScreen(
                                 }
                             }
 
-                            val remaining = if (articles.size > 3) articles.drop(3) else emptyList()
-                            items(remaining) { article ->
-                                CompactCard(
-                                    article = article,
-                                    onClick = { Analytics.articleClicked(article.title, "list"); onArticleClick(article) },
-                                    favouriteSurname = favSurname,
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp)
-                                        .padding(bottom = 10.dp),
-                                )
+                            if (isTablet) {
+                                // 2-column GridCard grid
+                                val pairs = remaining.chunked(2)
+                                items(pairs) { pair ->
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    ) {
+                                        GridCard(
+                                            article = pair[0],
+                                            onClick = { Analytics.articleClicked(pair[0].title, "list"); navigateToArticle(pair[0]) },
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                        if (pair.size > 1) {
+                                            GridCard(
+                                                article = pair[1],
+                                                onClick = { Analytics.articleClicked(pair[1].title, "list"); navigateToArticle(pair[1]) },
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                        } else {
+                                            Spacer(Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            } else {
+                                items(remaining) { article ->
+                                    CompactCard(
+                                        article = article,
+                                        onClick = { Analytics.articleClicked(article.title, "list"); navigateToArticle(article) },
+                                        favouriteSurname = favSurname,
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 10.dp),
+                                    )
+                                }
                             }
 
                             if (isLoadingMore) {
@@ -480,10 +521,10 @@ private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () 
 // Grid card — half-width, image on top with gradient title overlay
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun GridCard(article: Article, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun GridCard(article: Article, onClick: () -> Unit, modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 180.dp) {
     Box(
         modifier = modifier
-            .height(180.dp)
+            .height(height)
             .clip(RoundedCornerShape(12.dp))
             .background(BtccCard)
             .clickable { onClick() },

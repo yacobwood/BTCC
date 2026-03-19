@@ -48,6 +48,14 @@ class NewsViewModel : ViewModel() {
     private var searchPage = 1
     private var isLoadingMoreSearch = false
 
+    var savedScrollIndex  = 0
+    var savedScrollOffset = 0
+
+    fun saveScrollPosition(index: Int, offset: Int) {
+        savedScrollIndex  = index
+        savedScrollOffset = offset
+    }
+
     init {
         load()
     }

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.DriverSeasonStats
@@ -56,6 +57,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -65,7 +67,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
-    val context = LocalContext.current
+    val context  = LocalContext.current
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
     // Single source of truth for 2004–2025: from MSS/Excel (assets/data/season_YYYY.json)
     var seasonData by remember { mutableStateOf<SeasonData?>(null) }
@@ -172,6 +175,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         modifier = Modifier
             .fillMaxSize()
             .background(BtccBackground),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TopAppBar(
             windowInsets = WindowInsets(0),
@@ -189,6 +193,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
         // Year selector — arrow navigation
         Row(
             modifier = Modifier
+                .then(if (isTablet) Modifier else Modifier.widthIn(max = 680.dp))
                 .fillMaxWidth()
                 .background(BtccSurface)
                 .padding(horizontal = 8.dp, vertical = 2.dp),
@@ -247,84 +252,117 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             }
         }
 
-        // Tab row with horizontal scroll; fade only on side where there's more content
+        // Tab row: fixed-width (fills screen) on tablet, scrollable on phone
         val tabScrollState = rememberScrollState()
         val canScrollLeft  = tabScrollState.value > 0
         val canScrollRight = tabScrollState.maxValue > 0 && tabScrollState.value < tabScrollState.maxValue
+        val tabNames  = listOf("drivers", "teams", "results", "stats", "chart")
+        val tabLabels = listOf("DRIVERS", "TEAMS", "RESULTS", "STATS", "CHART")
         Box(
             modifier = Modifier
+                .then(if (isTablet) Modifier else Modifier.widthIn(max = 680.dp))
                 .fillMaxWidth()
                 .height(48.dp),
         ) {
-            PrimaryScrollableTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor   = BtccSurface,
-                contentColor     = BtccYellow,
-                edgePadding     = 0.dp,
-                scrollState     = tabScrollState,
-            ) {
-                val tabNames = listOf("drivers", "teams", "results", "stats", "chart")
-                listOf("DRIVERS", "TEAMS", "RESULTS", "STATS", "CHART").forEachIndexed { index, label ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick  = {
-                            Analytics.resultsTabChanged(selectedYear, tabNames[index])
-                            scope.launch { pagerState.animateScrollToPage(index) }
-                        },
-                        text = {
-                            Text(
-                                label,
-                                fontWeight    = FontWeight.ExtraBold,
-                                fontSize      = 12.sp,
-                                letterSpacing = 1.sp,
-                                color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+            val useFixedTabs = LocalConfiguration.current.screenWidthDp >= 400
+            if (useFixedTabs) {
+                PrimaryTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    containerColor   = BtccSurface,
+                    contentColor     = BtccYellow,
+                    modifier         = Modifier.fillMaxWidth(),
+                ) {
+                    tabLabels.forEachIndexed { index, label ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick  = {
+                                Analytics.resultsTabChanged(selectedYear, tabNames[index])
+                                scope.launch { pagerState.animateScrollToPage(index) }
+                            },
+                            text = {
+                                Text(
+                                    label,
+                                    fontWeight    = FontWeight.ExtraBold,
+                                    fontSize      = 12.sp,
+                                    letterSpacing = 1.sp,
+                                    color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                        )
+                    }
+                }
+            } else {
+                PrimaryScrollableTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    containerColor   = BtccSurface,
+                    contentColor     = BtccYellow,
+                    edgePadding      = 0.dp,
+                    scrollState      = tabScrollState,
+                ) {
+                    tabLabels.forEachIndexed { index, label ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick  = {
+                                Analytics.resultsTabChanged(selectedYear, tabNames[index])
+                                scope.launch { pagerState.animateScrollToPage(index) }
+                            },
+                            text = {
+                                Text(
+                                    label,
+                                    fontWeight    = FontWeight.ExtraBold,
+                                    fontSize      = 12.sp,
+                                    letterSpacing = 1.sp,
+                                    color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                        )
+                    }
+                }
+                if (canScrollLeft) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .width(32.dp)
+                            .fillMaxHeight()
+                            .background(
+                                Brush.horizontalGradient(
+                                    colorStops = arrayOf(
+                                        0f to BtccBackground,
+                                        1f to Color.Transparent,
+                                    ),
+                                ),
                             )
-                        },
+                            .pointerInteropFilter { false },
                     )
                 }
-            }
-            if (canScrollLeft) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .width(32.dp)
-                        .fillMaxHeight()
-                        .background(
-                            Brush.horizontalGradient(
-                                colorStops = arrayOf(
-                                    0f to BtccBackground,
-                                    1f to Color.Transparent,
+                if (canScrollRight) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(32.dp)
+                            .fillMaxHeight()
+                            .background(
+                                Brush.horizontalGradient(
+                                    colorStops = arrayOf(
+                                        0f to Color.Transparent,
+                                        1f to BtccBackground,
+                                    ),
                                 ),
-                            ),
-                        )
-                        .pointerInteropFilter { false },
-                )
-            }
-            if (canScrollRight) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .width(32.dp)
-                        .fillMaxHeight()
-                        .background(
-                            Brush.horizontalGradient(
-                                colorStops = arrayOf(
-                                    0f to Color.Transparent,
-                                    1f to BtccBackground,
-                                ),
-                            ),
-                        )
-                        .pointerInteropFilter { false },
-                )
+                            )
+                            .pointerInteropFilter { false },
+                    )
+                }
             }
         }
 
         val isLiveLoading = selectedYear == 2026 && isRefreshing && liveDrivers == null
         val isLiveFailed  = selectedYear == 2026 && loadFailed && liveDrivers == null
 
-        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f).then(if (isTablet) Modifier else Modifier.widthIn(max = 680.dp)).fillMaxWidth()) {
             PullToRefreshBox(
                 isRefreshing = isRefreshing || resultsLoading,
                 onRefresh    = {

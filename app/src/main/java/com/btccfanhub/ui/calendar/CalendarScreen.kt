@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -65,11 +66,13 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
         }
     }
     val nextRace = races.firstOrNull { it.endDate >= today }
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BtccBackground),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TopAppBar(
             windowInsets = WindowInsets(0),
@@ -113,6 +116,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
         // Fixed: yellow box + "ALL ROUNDS" heading (no scroll)
         Column(
             modifier = Modifier
+                .widthIn(max = 680.dp)
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
@@ -122,7 +126,16 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
             }
             if (nextRace != null) {
                 CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(20.dp))
+            }
+        }
+
+        // Scrollable: rounds list only
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight().widthIn(max = if (isTablet) 800.dp else 680.dp).fillMaxWidth(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
+        ) {
+            item {
                 Text(
                     "ALL ROUNDS",
                     style = MaterialTheme.typography.labelMedium,
@@ -132,19 +145,13 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
             }
-        }
-
-        // Scrollable: rounds list only
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
-        ) {
             itemsIndexed(races) { index, race ->
                 TimelineRaceRow(
                     race = race,
                     isNext = race == nextRace,
                     isPast = race.endDate < today,
                     isLast = index == races.lastIndex,
+                    today = if (isTablet) today else null,
                     onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
                 )
             }
@@ -239,6 +246,7 @@ private fun TimelineRaceRow(
     isNext: Boolean,
     isPast: Boolean,
     isLast: Boolean,
+    today: LocalDate? = null,
     onClick: () -> Unit = {},
 ) {
     val dotColor = when {
@@ -321,6 +329,54 @@ private fun TimelineRaceRow(
                     style = MaterialTheme.typography.bodySmall,
                     color = BtccTextSecondary.copy(alpha = textAlpha),
                 )
+            }
+
+            // Days to go (tablet only)
+            if (today != null) {
+                val daysUntil = ChronoUnit.DAYS.between(today, race.startDate)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                ) {
+                    when {
+                        isPast -> Text(
+                            "DONE",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = BtccTextSecondary.copy(alpha = 0.4f),
+                            letterSpacing = 0.5.sp,
+                        )
+                        daysUntil == 0L -> Text(
+                            "TODAY",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = BtccYellow,
+                            letterSpacing = 0.5.sp,
+                        )
+                        daysUntil == 1L -> Text(
+                            "TMW",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = BtccYellow,
+                            letterSpacing = 0.5.sp,
+                        )
+                        else -> {
+                            Text(
+                                "$daysUntil",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = textAlpha),
+                            )
+                            Text(
+                                "DAYS",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = BtccTextSecondary.copy(alpha = textAlpha),
+                                letterSpacing = 0.5.sp,
+                            )
+                        }
+                    }
+                }
             }
 
             // Chevron
