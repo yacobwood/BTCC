@@ -37,13 +37,16 @@ class CountdownWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                withTimeout(10_000L) {
+                withTimeout(15_000L) {
+                    val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
+                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
+
                     for (id in appWidgetIds) {
                         val opts = appWidgetManager.getAppWidgetOptions(id)
                         val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
                         val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
                         val theme = WidgetPrefs.getTheme(context, id)
-                        val views = buildViews(context, minW, minH, theme)
+                        val views = buildViews(context, minW, minH, theme, calendar, schedule)
                         appWidgetManager.updateAppWidget(id, views)
                     }
                 }
@@ -62,11 +65,14 @@ class CountdownWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                withTimeout(10_000L) {
+                withTimeout(15_000L) {
+                    val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
+                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
+
                     val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
                     val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
                     val theme = WidgetPrefs.getTheme(context, appWidgetId)
-                    val views = buildViews(context, minW, minH, theme)
+                    val views = buildViews(context, minW, minH, theme, calendar, schedule)
                     appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
             } finally {
@@ -96,6 +102,8 @@ class CountdownWidget : AppWidgetProvider() {
             minWidth: Int = 40,
             minHeight: Int = 40,
             theme: WidgetTheme = WidgetTheme.NAVY,
+            calendar: com.btccfanhub.data.model.CalendarData? = null,
+            schedule: Map<Int, List<RaceSession>>? = null,
         ): RemoteViews {
             val wide = minWidth >= 180
             val tall = minHeight >= 200
@@ -126,7 +134,6 @@ class CountdownWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
             val today = LocalDate.now()
-            val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
             val nextRace = calendar?.rounds?.firstOrNull { it.endDate >= today }
 
             if (nextRace == null) {
@@ -203,7 +210,6 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setViewVisibility(R.id.widget_info_section, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_dates, if (minHeight >= 80) View.VISIBLE else View.GONE)
 
-                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
                     val sessions = schedule?.get(nextRace.round)
 
                     if (sessions != null && sessions.isNotEmpty()) {
@@ -224,7 +230,6 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_venue, nextRace.venue)
                     views.setTextViewText(R.id.widget_dates, dateString)
 
-                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
                     val sessions = schedule?.get(nextRace.round)
 
                     if (sessions != null && sessions.isNotEmpty()) {

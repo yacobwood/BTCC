@@ -6,32 +6,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.btccfanhub.data.network.HttpClient
 import okhttp3.Request
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
 object ScheduleRepository {
 
     private val client = HttpClient.client
     private val url = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json"
+    private val mutex = Mutex()
 
     private var cache: Map<Int, List<RaceSession>>? = null
     private var cacheTime: Long = 0
     private const val CACHE_MS = 15 * 60 * 1000L // 15 min — short enough to pick up time updates on race day
 
     suspend fun getSchedule(): Map<Int, List<RaceSession>> = withContext(Dispatchers.IO) {
-        val now = System.currentTimeMillis()
-        if (cache != null && now - cacheTime < CACHE_MS) return@withContext cache!!
+        mutex.withLock {
+            val now = System.currentTimeMillis()
+            if (cache != null && now - cacheTime < CACHE_MS) return@withLock cache!!
 
-        try {
-            val request = Request.Builder().url("$url?t=$now").build()
-            val body = client.newCall(request).execute().use { it.body?.string() }
-                ?: return@withContext cache ?: emptyMap()
-            NetworkDiskCache.write("schedule", body)
-            val result = parse(body)
-            cache = result
-            cacheTime = now
-            result
-        } catch (e: Exception) {
-            cache ?: NetworkDiskCache.read("schedule")?.let { runCatching { parse(it) }.getOrNull() } ?: emptyMap()
+            try {
+                val request = Request.Builder().url("$url?t=$now").build()
+                val body = client.newCall(request).execute().use { it.body?.string() }
+                    ?: return@withLock cache ?: emptyMap()
+                NetworkDiskCache.write("schedule", body)
+                val result = parse(body)
+                cache = result
+                cacheTime = now
+                result
+            } catch (e: Exception) {
+                cache ?: NetworkDiskCache.read("schedule")?.let { runCatching { parse(it) }.getOrNull() }
+                ?: emptyMap()
+            }
         }
     }
 
