@@ -13,6 +13,7 @@ object RaceResultsRepository {
 
     /** BTCC points for positions 1–15 when JSON has no points (e.g. 2014–2023 data). */
     private val pointsByPosition = intArrayOf(20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+    private val pointsQualifyingRace = intArrayOf(10, 9, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1)
 
     private fun pointsFromPosition(position: Int): Int =
         if (position in 1..15) pointsByPosition[position - 1] else 0
@@ -24,8 +25,12 @@ object RaceResultsRepository {
         leadLap: Boolean,
         pole: Boolean,
         isRace1: Boolean,
+        isQualifyingRace: Boolean = false,
     ): Int {
-        var p = pointsFromPosition(position)
+        if (isQualifyingRace) {
+            return if (position in 1..15) pointsQualifyingRace[position - 1] else 0
+        }
+        var p = if (position in 1..15) pointsByPosition[position - 1] else 0
         if (fastestLap) p += 1
         if (leadLap) p += 1
         if (pole && isRace1) p += 1
@@ -92,9 +97,11 @@ object RaceResultsRepository {
             val races = (0 until racesArr.length()).map { j ->
                 val race = racesArr.getJSONObject(j)
                 val resultsArr = race.optJSONArray("results") ?: org.json.JSONArray()
-                val isRace1 = (j == 0)
+                val label = race.optString("label", "Race ${j + 1}")
+                val isRace1 = label.equals("Race 1", ignoreCase = true)
+                val isQualifyingRace = label.equals("Qualifying Race", ignoreCase = true)
                 RaceEntry(
-                    label       = race.optString("label", "Race ${j + 1}"),
+                    label       = label,
                     date        = race.optString("date", "").takeIf { it.isNotEmpty() },
                     fullRaceUrl = race.optString("fullRaceUrl", "").takeIf { it.isNotEmpty() },
                     results = (0 until resultsArr.length()).map { k ->
@@ -106,7 +113,7 @@ object RaceResultsRepository {
                         val pole = d.optBoolean("pole", false) || d.optBoolean("p", false)
                         val points = when {
                             rawPoints > 0 -> rawPoints
-                            else -> pointsWithBonuses(pos, fl, lead, pole, isRace1)
+                            else -> pointsWithBonuses(pos, fl, lead, pole, isRace1, isQualifyingRace)
                         }
                         DriverResult(
                             position     = pos,

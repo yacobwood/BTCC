@@ -251,7 +251,9 @@ class CountdownWidget : AppWidgetProvider() {
         }
 
         private fun abbreviate(name: String): String = when {
-            name.startsWith("Free Practice") -> name.replace("Free Practice", "FP")
+            name.startsWith("Free Practice") -> name.replace("Free Practice", "FP").trim()
+            name.equals("Qualifying", ignoreCase = true) -> "Quali"
+            name.equals("Qualifying Race", ignoreCase = true) -> "Q-Race"
             else -> name
         }
 
