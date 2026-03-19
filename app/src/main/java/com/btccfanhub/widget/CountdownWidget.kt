@@ -134,12 +134,13 @@ class CountdownWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
             val today = LocalDate.now()
-            val isInitial = calendar == null || calendar.rounds.isEmpty()
             val nextRace = calendar?.rounds?.firstOrNull { it.endDate >= today }
 
-            if (isInitial || nextRace == null) {
-                val label = if (isInitial) "LOADING" else "SEASON\nOVER"
-                val subText = if (isInitial) "Updating..." else "Season complete"
+            if (nextRace == null) {
+                // Determine if we are pre-season (no data or future start) or post-season
+                val seasonOver = calendar != null && calendar.rounds.isNotEmpty() && today > (calendar.rounds.lastOrNull()?.endDate ?: today)
+                val label = if (seasonOver) "SEASON OVER" else "BTCC 2026"
+                val subText = if (seasonOver) "Season complete" else "Syncing..."
 
                 views.setTextViewText(R.id.widget_countdown, "")
                 views.setTextViewText(R.id.widget_countdown_label, label)
@@ -161,7 +162,7 @@ class CountdownWidget : AppWidgetProvider() {
                         views.setViewVisibility(R.id.widget_divider, View.GONE)
                         views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
                         views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
-                        views.setTextViewText(R.id.widget_no_schedule, if (isInitial) "Checking for latest rounds..." else "See you next season!")
+                        views.setTextViewText(R.id.widget_no_schedule, if (seasonOver) "See you next season!" else "Checking for latest rounds...")
                     }
                 }
                 return views
