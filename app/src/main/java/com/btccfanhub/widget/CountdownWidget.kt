@@ -134,11 +134,15 @@ class CountdownWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
             val today = LocalDate.now()
+            val isInitial = calendar == null || calendar.rounds.isEmpty()
             val nextRace = calendar?.rounds?.firstOrNull { it.endDate >= today }
 
-            if (nextRace == null) {
+            if (isInitial || nextRace == null) {
+                val label = if (isInitial) "LOADING" else "SEASON\nOVER"
+                val subText = if (isInitial) "Updating..." else "Season complete"
+
                 views.setTextViewText(R.id.widget_countdown, "")
-                views.setTextViewText(R.id.widget_countdown_label, "SEASON\nOVER")
+                views.setTextViewText(R.id.widget_countdown_label, label)
                 when (sizeClass) {
                     SizeClass.SMALL -> {
                         views.setTextViewText(R.id.widget_venue, "")
@@ -147,17 +151,17 @@ class CountdownWidget : AppWidgetProvider() {
                     }
                     SizeClass.WIDE -> {
                         views.setTextViewText(R.id.widget_round, "BTCC 2026")
-                        views.setTextViewText(R.id.widget_venue, "Season complete")
+                        views.setTextViewText(R.id.widget_venue, subText)
                         views.setTextViewText(R.id.widget_dates, "")
                     }
                     SizeClass.WIDE_TALL -> {
                         views.setTextViewText(R.id.widget_round, "BTCC 2026")
-                        views.setTextViewText(R.id.widget_venue, "Season complete")
+                        views.setTextViewText(R.id.widget_venue, subText)
                         views.setTextViewText(R.id.widget_dates, "")
                         views.setViewVisibility(R.id.widget_divider, View.GONE)
                         views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
                         views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
-                        views.setTextViewText(R.id.widget_no_schedule, "See you next season!")
+                        views.setTextViewText(R.id.widget_no_schedule, if (isInitial) "Checking for latest rounds..." else "See you next season!")
                     }
                 }
                 return views
