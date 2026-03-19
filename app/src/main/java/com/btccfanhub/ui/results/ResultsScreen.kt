@@ -283,11 +283,9 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 Text(
                                     label,
                                     fontWeight    = FontWeight.ExtraBold,
-                                    fontSize      = 12.sp,
-                                    letterSpacing = 1.sp,
+                                    fontSize      = 11.sp,
+                                    letterSpacing = 0.sp,
                                     color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
                                 )
                             },
                         )
