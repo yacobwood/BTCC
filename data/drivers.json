@@ -237,11 +237,23 @@
         {
           "year": 2019,
           "team": "Laser Tools Racing",
-          "car": "Mercedes-Benz A-Class",
+          "car": "Mercedes / Infiniti",
+          "teams": [
+            {
+              "name": "Laser Tools Racing",
+              "car": "Mercedes-Benz A-Class",
+              "races": 15
+            },
+            {
+              "name": "Laser Tools Racing",
+              "car": "Infiniti Q50",
+              "races": 15
+            }
+          ],
           "pos": 18,
           "points": 89,
           "wins": 0,
-          "podiums": 1,
+          "podiums": 0,
           "poles": 0,
           "fastestLaps": 0
         },
@@ -295,6 +307,29 @@
           "car": "Chevrolet Cruze 4dr",
           "pos": 25,
           "points": 6,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2013,
+          "team": "Finesse Motorsport / PPCGB",
+          "car": "Chevrolet / Volkswagen",
+          "teams": [
+            {
+              "name": "Finesse Motorsport",
+              "car": "Chevrolet Cruze LT",
+              "races": 24
+            },
+            {
+              "name": "PPCGB/Kraftwerk Racing",
+              "car": "Volkswagen CC",
+              "races": 6
+            }
+          ],
+          "pos": 29,
+          "points": 3,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
@@ -1197,8 +1232,16 @@
           "team": "One Motorsport / Toyota",
           "car": "Honda Civic / Toyota Corolla",
           "teams": [
-            { "name": "One Motorsport", "car": "Honda Civic Type R", "races": 21 },
-            { "name": "Toyota Gazoo Racing UK", "car": "Toyota Corolla GR Sport", "races": 9 }
+            {
+              "name": "One Motorsport",
+              "car": "Honda Civic Type R",
+              "races": 21
+            },
+            {
+              "name": "Toyota Gazoo Racing UK",
+              "car": "Toyota Corolla GR Sport",
+              "races": 9
+            }
           ],
           "pos": 12,
           "points": 160,
