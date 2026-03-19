@@ -445,10 +445,10 @@ private fun LapRecordRow(label: String, record: LapRecord, useKm: Boolean) {
 
 @Composable
 private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate) {
-    // SAT = raceStartDate - 1, SUN = raceStartDate
+    // startDate is Saturday, endDate (Sunday) is +1
     val today = LocalDate.now()
-    val satDate = raceStartDate.minusDays(1)
-    val sunDate = raceStartDate
+    val satDate = raceStartDate
+    val sunDate = raceStartDate.plusDays(1)
 
     Column(
         modifier = Modifier

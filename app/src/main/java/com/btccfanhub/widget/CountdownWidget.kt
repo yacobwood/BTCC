@@ -202,6 +202,21 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_dates, dateString)
                     views.setViewVisibility(R.id.widget_info_section, View.VISIBLE)
                     views.setViewVisibility(R.id.widget_dates, if (minHeight >= 80) View.VISIBLE else View.GONE)
+
+                    val schedule = try { ScheduleRepository.getSchedule() } catch (_: Exception) { null }
+                    val sessions = schedule?.get(nextRace.round)
+
+                    if (sessions != null && sessions.isNotEmpty()) {
+                        views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
+                        bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS)
+                        bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS)
+                    } else {
+                        views.setViewVisibility(R.id.widget_divider, View.GONE)
+                        views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
+                        views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
+                    }
                 }
 
                 SizeClass.WIDE_TALL -> {
