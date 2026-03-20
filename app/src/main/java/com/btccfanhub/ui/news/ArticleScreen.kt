@@ -42,6 +42,10 @@ import kotlinx.coroutines.withContext
 fun ArticleScreen(onBack: () -> Unit) {
     val article = ArticleHolder.current
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(article) {
+        Analytics.screen("article${if (article != null) ":${article.title.take(50)}" else ""}")
+    }
     val imageUrls = remember { mutableStateOf<List<String>>(emptyList()) }
     var htmlToLoad by remember { mutableStateOf<String?>(null) }
     val loadGuard = remember { object { var loaded: String? = null } }

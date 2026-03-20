@@ -10,24 +10,34 @@ import com.configcat.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
 object FeatureFlagsStore {
 
     private const val PREFS_NAME = "feature_flags"
 
-    const val KEY_RADIO_TAB    = "radio_tab"
-    const val KEY_ADS          = "ads_enabled"
-    const val KEY_WHATS_NEW    = "whats_new"
+    const val KEY_RADIO_TAB             = "radio_tab"
+    const val KEY_ADS                   = "ads_enabled"
+    const val KEY_WHATS_NEW             = "whats_new"
     const val KEY_LIVE_UPDATES          = "live_updates"
     const val KEY_RESULTS_NOTIFICATIONS = "results_notifications"
     const val KEY_TRACK_WEATHER         = "track_weather"
+    const val KEY_WIDGET_RACE_WEEKEND   = "widget_race_weekend_test"
 
-    val radioTab              = MutableStateFlow(true)
-    val adsEnabled            = MutableStateFlow(true)
-    val whatsNew              = MutableStateFlow(true)
-    val liveUpdates           = MutableStateFlow(true)
-    val resultsNotifications  = MutableStateFlow(false)
-    val trackWeather          = MutableStateFlow(false)
+    val radioTab             = MutableStateFlow(true)
+    val adsEnabled           = MutableStateFlow(true)
+    val whatsNew             = MutableStateFlow(true)
+    val liveUpdates          = MutableStateFlow(true)
+    val resultsNotifications = MutableStateFlow(false)
+    val trackWeather         = MutableStateFlow(false)
+    val widgetRaceWeekendTest = MutableStateFlow(false)
+
+    /** When non-null, overrides LocalDate/LocalDateTime.now() throughout the app for testing. */
+    val testDateTimeOverride = MutableStateFlow<LocalDateTime?>(null)
+
+    fun setTestDateTime(dt: LocalDateTime?) {
+        testDateTimeOverride.value = dt
+    }
 
     private var prefs: android.content.SharedPreferences? = null
     private var user: User? = null
@@ -42,6 +52,7 @@ object FeatureFlagsStore {
         liveUpdates.value          = p.getBoolean(KEY_LIVE_UPDATES,           true)
         resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
         trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
+        widgetRaceWeekendTest.value = p.getBoolean(KEY_WIDGET_RACE_WEEKEND,   false)
 
         val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
         user = User.newBuilder().build(deviceId)
@@ -49,7 +60,14 @@ object FeatureFlagsStore {
 
         client = ConfigCatClient.get(BuildConfig.CONFIGCAT_SDK_KEY) { options ->
             options.pollingMode(PollingModes.autoPoll(60))
-            options.hooks().addOnConfigChanged { applyAll() }
+            options.hooks().addOnConfigChanged {
+                val prevWidgetTest = widgetRaceWeekendTest.value
+                applyAll()
+                // If the widget race weekend flag changed, push an immediate widget update
+                if (widgetRaceWeekendTest.value != prevWidgetTest) {
+                    refreshWidgets(context)
+                }
+            }
         }
     }
 
@@ -63,6 +81,29 @@ object FeatureFlagsStore {
         }
     }
 
+    /** Broadcasts an update to all CountdownWidget instances. */
+    fun refreshWidgets(context: Context) {
+        try {
+            val mgr = android.appwidget.AppWidgetManager.getInstance(context)
+            val ids = mgr.getAppWidgetIds(
+                android.content.ComponentName(context, com.btccfanhub.widget.CountdownWidget::class.java)
+            )
+            if (ids.isNotEmpty()) {
+                context.sendBroadcast(
+                    android.content.Intent(
+                        android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE,
+                        null,
+                        context,
+                        com.btccfanhub.widget.CountdownWidget::class.java,
+                    ).putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                )
+                Log.d("FeatureFlags", "Widget refresh broadcast sent for ${ids.size} widget(s)")
+            }
+        } catch (e: Exception) {
+            Log.e("FeatureFlags", "Widget refresh error: ${e.message}")
+        }
+    }
+
     private fun applyAll() {
         apply(KEY_RADIO_TAB,              client.getValue(Boolean::class.java, KEY_RADIO_TAB,              user, true))
         apply(KEY_ADS,                    client.getValue(Boolean::class.java, KEY_ADS,                    user, true))
@@ -70,18 +111,20 @@ object FeatureFlagsStore {
         apply(KEY_LIVE_UPDATES,           client.getValue(Boolean::class.java, KEY_LIVE_UPDATES,           user, true))
         apply(KEY_RESULTS_NOTIFICATIONS,  client.getValue(Boolean::class.java, KEY_RESULTS_NOTIFICATIONS,  user, false))
         apply(KEY_TRACK_WEATHER,          client.getValue(Boolean::class.java, KEY_TRACK_WEATHER,          user, false))
+        apply(KEY_WIDGET_RACE_WEEKEND,    client.getValue(Boolean::class.java, KEY_WIDGET_RACE_WEEKEND,    user, false))
         Log.d("FeatureFlags", "Flags applied for device: ${user?.identifier}")
     }
 
     private fun apply(key: String, value: Boolean) {
         prefs?.edit()?.putBoolean(key, value)?.apply()
         when (key) {
-            KEY_RADIO_TAB    -> radioTab.value    = value
-            KEY_ADS          -> adsEnabled.value  = value
-            KEY_WHATS_NEW    -> whatsNew.value    = value
+            KEY_RADIO_TAB             -> radioTab.value             = value
+            KEY_ADS                   -> adsEnabled.value           = value
+            KEY_WHATS_NEW             -> whatsNew.value             = value
             KEY_LIVE_UPDATES          -> liveUpdates.value          = value
             KEY_RESULTS_NOTIFICATIONS -> resultsNotifications.value = value
             KEY_TRACK_WEATHER         -> trackWeather.value          = value
+            KEY_WIDGET_RACE_WEEKEND   -> widgetRaceWeekendTest.value  = value
         }
     }
 

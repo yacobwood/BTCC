@@ -72,6 +72,8 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     val context  = LocalContext.current
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
+    LaunchedEffect(Unit) { Analytics.screen("results") }
+
     // Single source of truth for 2004–2025: from MSS/Excel (assets/data/season_YYYY.json)
     var seasonData by remember { mutableStateOf<SeasonData?>(null) }
 
@@ -488,7 +490,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 year = selectedYear,
                                 seasonStartDate = seasonStartDate,
                                 progression = seasonData?.progression,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
@@ -618,7 +620,8 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
             Text(
                 round.venue,
                 fontWeight = FontWeight.Bold,
-                style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge
+                style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 round.date,
@@ -1008,6 +1011,7 @@ private fun TeamRow(team: TeamStanding) {
             team.name,
             fontWeight = FontWeight.Bold,
             style      = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge,
+            color      = MaterialTheme.colorScheme.onBackground,
             modifier   = Modifier.weight(1f),
         )
         Text(
@@ -1061,8 +1065,9 @@ private fun SeasonStatsTab(
         stats.isEmpty() -> ResultsNotStarted(year = year, seasonStartDate = seasonStartDate)
         else -> {
             val showPoles = stats.any { it.poles > 0 }
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyColumn(
-                modifier            = modifier,
+                modifier            = Modifier.widthIn(max = if (isTablet) 900.dp else Dp.Unspecified).fillMaxWidth(),
                 contentPadding      = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(if (isTablet) 10.dp else 6.dp),
             ) {
@@ -1104,6 +1109,7 @@ private fun SeasonStatsTab(
                     DriverStatsRow(rank = index + 1, stat = stat, showPoles = showPoles)
                 }
             }
+            } // end Box
         }
     }
 }

@@ -113,6 +113,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
+                onFeatureFlagsClick = { navController.navigate(Screen.FeatureFlags.route) },
             )
         }
 

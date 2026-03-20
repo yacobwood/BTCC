@@ -3,6 +3,7 @@ package com.btccfanhub.ui.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,31 +12,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.FeatureFlagsStore
-import com.btccfanhub.ui.components.PillToggle
 import com.btccfanhub.ui.theme.*
-import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
-private val FLAG_ITEMS = listOf(
-    Triple(FeatureFlagsStore.KEY_RADIO_TAB,    "Radio tab",       "Show the Radio tab in the bottom nav"),
-    Triple(FeatureFlagsStore.KEY_ADS,          "Ads banner",      "Show the AdMob banner above the nav bar"),
-    Triple(FeatureFlagsStore.KEY_WHATS_NEW,    "What's New",      "Show the What's New dialog on launch"),
-    Triple(FeatureFlagsStore.KEY_LIVE_UPDATES,          "Live Updates",            "Show live timing buttons during race weekends"),
-    Triple(FeatureFlagsStore.KEY_RESULTS_NOTIFICATIONS, "Results Notifications",   "Enable results check worker and settings toggle"),
-    Triple(FeatureFlagsStore.KEY_TRACK_WEATHER,          "Track Weather",           "Show race weekend forecast on track detail screen"),
-)
-
-private val FLAG_FLOWS: Map<String, StateFlow<Boolean>> = mapOf(
-    FeatureFlagsStore.KEY_RADIO_TAB    to FeatureFlagsStore.radioTab,
-    FeatureFlagsStore.KEY_ADS          to FeatureFlagsStore.adsEnabled,
-    FeatureFlagsStore.KEY_WHATS_NEW    to FeatureFlagsStore.whatsNew,
-    FeatureFlagsStore.KEY_LIVE_UPDATES          to FeatureFlagsStore.liveUpdates,
-    FeatureFlagsStore.KEY_RESULTS_NOTIFICATIONS to FeatureFlagsStore.resultsNotifications,
-    FeatureFlagsStore.KEY_TRACK_WEATHER          to FeatureFlagsStore.trackWeather,
-)
+private val displayFmt = DateTimeFormatter.ofPattern("EEE d MMM yyyy  HH:mm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
+    val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var stagedDate by remember { mutableStateOf<LocalDate?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,15 +36,15 @@ fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
                 title = {
                     Column {
                         Text(
-                            "FEATURE FLAGS",
+                            "TEST MODE",
                             fontWeight    = FontWeight.Black,
                             fontSize      = 18.sp,
                             letterSpacing = 1.sp,
                         )
                         Text(
-                            "Internal use only",
-                            color    = BtccYellow,
-                            fontSize = 11.sp,
+                            "Race weekend simulation",
+                            color      = BtccYellow,
+                            fontSize   = 11.sp,
                             fontWeight = FontWeight.Medium,
                         )
                     }
@@ -74,48 +67,119 @@ fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Spacer(Modifier.height(8.dp))
 
-            FLAG_ITEMS.forEachIndexed { index, (key, label, description) ->
-                val flow = FLAG_FLOWS[key]!!
-                val enabled by flow.collectAsState()
+            Text(
+                "Simulate a specific date and time to test race weekend behaviour across the app and widget.",
+                color    = BtccTextSecondary,
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
+            )
 
+            // Current override display
+            if (testOverride != null) {
                 Row(
                     modifier          = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            label,
-                            color      = BtccTextPrimary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize   = 15.sp,
+                            "SIMULATED DATE/TIME",
+                            fontSize      = 10.sp,
+                            fontWeight    = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp,
+                            color         = BtccYellow,
                         )
                         Text(
-                            description,
-                            color    = BtccTextSecondary,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(top = 2.dp),
+                            testOverride!!.format(displayFmt),
+                            fontSize   = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color      = BtccTextPrimary,
+                            modifier   = Modifier.padding(top = 4.dp),
                         )
                     }
-                    PillToggle(
-                        options = listOf("On", "Off"),
-                        selectedIndex = if (enabled) 0 else 1,
-                        onSelectionChanged = { FeatureFlagsStore.set(key, it == 0) },
-                    )
+                    IconButton(onClick = { FeatureFlagsStore.setTestDateTime(null) }) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = BtccTextSecondary)
+                    }
                 }
-
-                if (index < FLAG_ITEMS.lastIndex) {
-                    HorizontalDivider(
-                        color    = BtccOutline,
-                        modifier = Modifier.padding(vertical = 16.dp),
-                    )
-                }
+                HorizontalDivider(color = BtccOutline)
             }
 
-            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = { showDatePicker = true },
+                colors  = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    if (testOverride != null) "Change date/time" else "Set date/time",
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            if (testOverride != null) {
+                OutlinedButton(
+                    onClick = { FeatureFlagsStore.setTestDateTime(null) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Clear — use real time", color = BtccTextSecondary)
+                }
+            }
         }
+    }
+
+    // Date picker
+    if (showDatePicker) {
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = (testOverride?.toLocalDate() ?: LocalDate.now())
+                .toEpochDay() * 86_400_000L,
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val millis = state.selectedDateMillis
+                    if (millis != null) {
+                        stagedDate = LocalDate.ofEpochDay(millis / 86_400_000L)
+                        showDatePicker = false
+                        showTimePicker = true
+                    }
+                }) { Text("Next") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            },
+        ) {
+            DatePicker(state = state)
+        }
+    }
+
+    // Time picker
+    if (showTimePicker) {
+        val existingTime = testOverride?.toLocalTime() ?: LocalTime.now()
+        val state = rememberTimePickerState(
+            initialHour   = existingTime.hour,
+            initialMinute = existingTime.minute,
+            is24Hour      = true,
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val date = stagedDate ?: LocalDate.now()
+                    FeatureFlagsStore.setTestDateTime(
+                        LocalDateTime.of(date, LocalTime.of(state.hour, state.minute))
+                    )
+                    showTimePicker = false
+                }) { Text("Set") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+            },
+            title = { Text("Pick time") },
+            text  = { TimePicker(state = state) },
+        )
     }
 }

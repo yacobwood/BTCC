@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.data.Analytics
 import androidx.compose.ui.window.Dialog
 import com.btccfanhub.ui.theme.*
 
@@ -82,7 +83,7 @@ fun WhatsNewDialog(
 
             // Dismiss button
             Button(
-                onClick  = onDismiss,
+                onClick  = { Analytics.whatsNewDismissed(); onDismiss() },
                 modifier = Modifier.fillMaxWidth(),
                 shape    = RoundedCornerShape(10.dp),
                 colors   = ButtonDefaults.buttonColors(

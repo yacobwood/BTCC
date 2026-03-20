@@ -121,4 +121,79 @@ object Analytics {
             param("enabled", if (enabled) "true" else "false")
         }
     }
+
+    /** type = "news" | "race" | "qualifying" | "results" */
+    fun notificationTypeToggled(type: String, enabled: Boolean) {
+        fa.logEvent("notification_type_toggled") {
+            param("type", type)
+            param("enabled", if (enabled) "true" else "false")
+        }
+    }
+
+    fun unitSystemChanged(unit: String) {
+        fa.logEvent("unit_system_changed") {
+            param("unit", unit)
+        }
+    }
+
+    fun bugReportCategorySelected(category: String) {
+        fa.logEvent("bug_report_category_selected") {
+            param("category", category)
+        }
+    }
+
+    fun bugReportSubmitted(category: String) {
+        fa.logEvent("bug_report_submitted") {
+            param("category", category)
+        }
+    }
+
+    fun onboardingAction(action: String) {
+        fa.logEvent("onboarding_action") {
+            param("action", action)
+        }
+    }
+
+    fun whatsNewDismissed() {
+        fa.logEvent("whats_new_dismissed") {}
+    }
+
+    fun navItemClicked(label: String) {
+        fa.logEvent("nav_item_clicked") {
+            param("label", label)
+        }
+    }
+
+    fun infoPageLinkClicked(pageId: String, linkUrl: String) {
+        fa.logEvent("info_page_link_clicked") {
+            param("page_id", pageId)
+            param("link_url", linkUrl.take(100))
+        }
+    }
+
+    fun raceTabClicked(venue: String, tab: String) {
+        fa.logEvent("race_tab_clicked") {
+            param("venue", venue)
+            param("tab", tab)
+        }
+    }
+
+    fun raceVideoClicked(venue: String, label: String) {
+        fa.logEvent("race_video_clicked") {
+            param("venue", venue)
+            param("label", label)
+        }
+    }
+
+    fun trackImageClicked(venue: String) {
+        fa.logEvent("track_image_clicked") {
+            param("venue", venue)
+        }
+    }
+
+    fun liveTimingCardClicked(venue: String) {
+        fa.logEvent("live_timing_card_clicked") {
+            param("venue", venue)
+        }
+    }
 }

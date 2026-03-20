@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.BuildConfig
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,6 +46,8 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
     var steps by remember { mutableStateOf("") }
     var submitState by remember { mutableStateOf(SubmitState.Idle) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) { Analytics.screen("bug_report") }
 
     if (submitState == SubmitState.Success) {
         SuccessScreen(onReturnToNews = onReturnToNews)
@@ -97,7 +100,7 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
                         CategoryChip(
                             label    = cat,
                             selected = selectedCategory == cat,
-                            onClick  = { selectedCategory = cat },
+                            onClick  = { Analytics.bugReportCategorySelected(cat); selectedCategory = cat },
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -110,7 +113,7 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
                         CategoryChip(
                             label    = cat,
                             selected = selectedCategory == cat,
-                            onClick  = { selectedCategory = cat },
+                            onClick  = { Analytics.bugReportCategorySelected(cat); selectedCategory = cat },
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -169,6 +172,7 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
 
             Button(
                 onClick = {
+                    Analytics.bugReportSubmitted(selectedCategory)
                     submitState = SubmitState.Loading
                     scope.launch {
                         submitState = submitReport(

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Laser Tools Racing: deep blue base matching the car -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#3D1400" />
+    <solid android:color="#0C1E6B" />
     <corners android:radius="16dp" />
 </shape>

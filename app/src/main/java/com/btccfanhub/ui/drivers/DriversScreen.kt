@@ -78,6 +78,8 @@ fun DriversScreen() {
     var gridData by remember { mutableStateOf<GridData?>(null) }
     var loading  by remember { mutableStateOf(true) }
 
+    LaunchedEffect(Unit) { Analytics.screen("drivers") }
+
     LaunchedEffect(Unit) {
         gridData = DriversRepository.fetchGrid()
         loading  = false
@@ -221,8 +223,14 @@ private fun GridTabs(
 
 @Composable
 private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverClick: (Driver) -> Unit) {
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
-    val pairs = if (isTablet) drivers.chunked(2) else drivers.map { listOf(it) }
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val columns = when {
+        screenWidth >= 840 -> 3
+        screenWidth >= 600 -> 2
+        else -> 1
+    }
+    val isTablet = screenWidth >= 600
+    val pairs = if (columns > 1) drivers.chunked(columns) else drivers.map { listOf(it) }
     LazyColumn(
         modifier        = Modifier.fillMaxSize().padding(padding),
         contentPadding  = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
@@ -240,10 +248,11 @@ private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverC
         }
         items(pairs) { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DriverCard(pair[0], modifier = Modifier.weight(1f), onClick = { onDriverClick(pair[0]) })
-                if (pair.size > 1) {
-                    DriverCard(pair[1], modifier = Modifier.weight(1f), onClick = { onDriverClick(pair[1]) })
-                } else if (isTablet) {
+                pair.forEachIndexed { i, driver ->
+                    DriverCard(driver, modifier = Modifier.weight(1f), onClick = { onDriverClick(driver) })
+                }
+                // Fill remaining slots with spacers
+                repeat(columns - pair.size) {
                     Spacer(Modifier.weight(1f))
                 }
             }
@@ -477,6 +486,9 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
     val context     = LocalContext.current
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == driver.name
+    val isTablet    = LocalConfiguration.current.screenWidthDp >= 600
+
+    LaunchedEffect(driver.name) { Analytics.screen("driver_detail:${driver.name}") }
 
     Box(
         modifier = Modifier
@@ -484,7 +496,10 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
             .background(BtccBackground),
     ) {
         LazyColumn(
-            modifier       = Modifier.fillMaxSize().statusBarsPadding(),
+            modifier       = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .then(if (isTablet) Modifier.widthIn(max = 720.dp).align(Alignment.TopCenter) else Modifier),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 64.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -636,6 +651,8 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
+    LaunchedEffect(team.name) { Analytics.screen("team_detail:${team.name}") }
+
     Box(
         modifier = Modifier
             .fillMaxSize()

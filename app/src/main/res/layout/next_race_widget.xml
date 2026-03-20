@@ -17,6 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:gravity="center_vertical"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
         android:paddingTop="8dp"
@@ -45,7 +46,7 @@
                     android:letterSpacing="0.08"
                     android:text="ROUND 1"
                     android:textColor="#F5C400"
-                    android:textSize="10sp"
+                    android:textSize="13sp"
                     android:textAllCaps="true" />
 
                 <TextView
@@ -58,7 +59,7 @@
                     android:ellipsize="end"
                     android:text="Donington Park"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/widget_dates"
@@ -67,7 +68,7 @@
                     android:layout_marginTop="3dp"
                     android:text="18 Apr – 19 Apr 2026"
                     android:textColor="#8A8D94"
-                    android:textSize="11sp" />
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
@@ -88,7 +89,7 @@
                     android:gravity="center"
                     android:text="42"
                     android:textColor="#FFFFFF"
-                    android:textSize="28sp"
+                    android:textSize="38sp"
                     android:lineSpacingMultiplier="0.9" />
 
                 <TextView
@@ -100,7 +101,7 @@
                     android:letterSpacing="0.05"
                     android:text="DAYS\nTO GO"
                     android:textColor="#8A8D94"
-                    android:textSize="8sp" />
+                    android:textSize="11sp" />
 
             </LinearLayout>
         </LinearLayout>
@@ -120,9 +121,8 @@
         <LinearLayout
             android:id="@+id/widget_schedule_row"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:orientation="horizontal"
             android:visibility="gone">
 

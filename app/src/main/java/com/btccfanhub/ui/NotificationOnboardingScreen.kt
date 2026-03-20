@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.ui.theme.*
 
 @Composable
@@ -24,6 +26,8 @@ fun NotificationOnboardingScreen(
     onEnableNotifications: () -> Unit,
     onSkip: () -> Unit,
 ) {
+    LaunchedEffect(Unit) { Analytics.screen("notification_onboarding") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -96,7 +100,7 @@ fun NotificationOnboardingScreen(
 
             // CTA
             Button(
-                onClick  = onEnableNotifications,
+                onClick  = { Analytics.onboardingAction("enable_notifications"); onEnableNotifications() },
                 modifier = Modifier.fillMaxWidth(),
                 shape    = RoundedCornerShape(12.dp),
                 colors   = ButtonDefaults.buttonColors(
@@ -115,7 +119,7 @@ fun NotificationOnboardingScreen(
             Spacer(Modifier.height(4.dp))
 
             TextButton(
-                onClick  = onSkip,
+                onClick  = { Analytics.onboardingAction("skip"); onSkip() },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(

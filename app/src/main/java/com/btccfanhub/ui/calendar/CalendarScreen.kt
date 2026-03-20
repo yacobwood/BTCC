@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.Constants
 import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.TestClock
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.ui.theme.BtccBackground
@@ -32,6 +33,7 @@ import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
+import com.btccfanhub.data.FeatureFlagsStore
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -46,12 +48,16 @@ private fun formatDateRange(start: java.time.LocalDate, end: java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -> Unit)? = null) {
-    val today = LocalDate.now()
+    // Recompose when the test clock override changes
+    val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val today = remember(testOverride) { TestClock.today() }
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
     var liveTimingEnabled by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf(false) }
     var refreshKey by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) { Analytics.screen("calendar") }
     LaunchedEffect(refreshKey) {
         loading = true
         loadError = false
@@ -113,47 +119,101 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
 
         val isRaceWeekend = liveTimingEnabled && onLiveTimingClick != null && nextRace != null && today >= nextRace.startDate && nextRace.tslEventId != 0
 
-        // Fixed: yellow box + "ALL ROUNDS" heading (no scroll)
-        Column(
-            modifier = Modifier
-                .widthIn(max = 680.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            if (isRaceWeekend) {
-                LiveTimingCard(onClick = { onLiveTimingClick!!(nextRace!!.tslEventId) })
-                Spacer(Modifier.height(12.dp))
+        if (isTablet) {
+            // ── Tablet: two-column layout ─────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                // Left column: live timing + countdown
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    if (isRaceWeekend) {
+                        LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
+                    }
+                    if (nextRace != null) {
+                        CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
+                    }
+                }
+                // Right column: rounds list
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    contentPadding = PaddingValues(bottom = 20.dp),
+                ) {
+                    item {
+                        Text(
+                            "ALL ROUNDS",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = BtccTextSecondary,
+                            letterSpacing = 2.sp,
+                            modifier = Modifier.padding(bottom = 12.dp, top = 4.dp),
+                        )
+                    }
+                    itemsIndexed(races) { index, race ->
+                        TimelineRaceRow(
+                            race = race,
+                            isNext = race == nextRace,
+                            isPast = race.endDate < today,
+                            isLast = index == races.lastIndex,
+                            today = today,
+                            onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
+                        )
+                    }
+                }
             }
-            if (nextRace != null) {
-                CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
-                Spacer(Modifier.height(20.dp))
+        } else {
+            // ── Phone: stacked layout ─────────────────────────────────────────
+            // Fixed: yellow box + "ALL ROUNDS" heading (no scroll)
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 680.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+            ) {
+                if (isRaceWeekend) {
+                    LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
+                    Spacer(Modifier.height(12.dp))
+                }
+                if (nextRace != null) {
+                    CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
+                    Spacer(Modifier.height(20.dp))
+                }
             }
-        }
 
-        // Scrollable: rounds list only
-        LazyColumn(
-            modifier = Modifier.fillMaxHeight().widthIn(max = if (isTablet) 800.dp else 680.dp).fillMaxWidth(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
-        ) {
-            item {
-                Text(
-                    "ALL ROUNDS",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = BtccTextSecondary,
-                    letterSpacing = 2.sp,
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-            }
-            itemsIndexed(races) { index, race ->
-                TimelineRaceRow(
-                    race = race,
-                    isNext = race == nextRace,
-                    isPast = race.endDate < today,
-                    isLast = index == races.lastIndex,
-                    today = if (isTablet) today else null,
-                    onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
-                )
+            // Scrollable: rounds list only
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
+            ) {
+                item {
+                    Text(
+                        "ALL ROUNDS",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = BtccTextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.padding(bottom = 12.dp),
+                    )
+                }
+                itemsIndexed(races) { index, race ->
+                    TimelineRaceRow(
+                        race = race,
+                        isNext = race == nextRace,
+                        isPast = race.endDate < today,
+                        isLast = index == races.lastIndex,
+                        today = null,
+                        onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
+                    )
+                }
             }
         }
     }
@@ -162,6 +222,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
 @Composable
 private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}) {
     val daysUntil = ChronoUnit.DAYS.between(today, race.startDate)
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
     Box(
         modifier = Modifier
@@ -212,22 +273,22 @@ private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 when (daysUntil) {
                     0L -> {
-                        Text("TODAY", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = BtccYellow)
+                        Text("TODAY", style = if (isTablet) MaterialTheme.typography.displaySmall else MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = BtccYellow)
                     }
                     1L -> {
-                        Text("TMW", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = BtccYellow)
+                        Text("TMW", style = if (isTablet) MaterialTheme.typography.displaySmall else MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = BtccYellow)
                     }
                     else -> {
                         Text(
                             "$daysUntil",
-                            style = MaterialTheme.typography.displayMedium,
+                            style = if (isTablet) MaterialTheme.typography.displayLarge else MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Black,
                             color = MaterialTheme.colorScheme.onBackground,
-                            lineHeight = 56.sp,
+                            lineHeight = if (isTablet) 72.sp else 56.sp,
                         )
                         Text(
                             "DAYS\nTO GO",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = if (isTablet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = BtccTextSecondary,
                             textAlign = TextAlign.Center,

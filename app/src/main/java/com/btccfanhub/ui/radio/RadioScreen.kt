@@ -2,6 +2,7 @@ package com.btccfanhub.ui.radio
 
 import android.content.Context
 import android.content.Intent
+import com.btccfanhub.data.Analytics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -36,6 +37,7 @@ fun RadioScreen() {
     val currentStation by RadioService.currentStation.collectAsState()
     var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
     LaunchedEffect(Unit) { stations = RadioRepository.getStations() }
+    LaunchedEffect(Unit) { Analytics.screen("radio") }
 
     Column(
         modifier = Modifier

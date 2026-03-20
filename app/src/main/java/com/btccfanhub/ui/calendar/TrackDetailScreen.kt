@@ -31,7 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.btccfanhub.Constants
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.TestClock
 import com.btccfanhub.ui.components.ImageLightbox
 import com.btccfanhub.data.model.DayForecast
 import com.btccfanhub.data.model.Corner
@@ -50,6 +52,7 @@ import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -60,10 +63,13 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) -> Unit)? = null) {
-    val today = LocalDate.now()
+    val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val today = remember(testOverride) { TestClock.today() }
     val context = LocalContext.current
 
     var info by remember { mutableStateOf<TrackInfo?>(null) }
+
+    LaunchedEffect(Unit) { Analytics.screen("track_detail:$round") }
     var race by remember { mutableStateOf<Race?>(null) }
     var sessions by remember { mutableStateOf<List<RaceSession>>(emptyList()) }
     var forecast by remember { mutableStateOf<List<DayForecast>?>(null) }
@@ -153,7 +159,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(220.dp)
-                            .clickable { lightboxIndex.value = 0 },
+                            .clickable { Analytics.trackImageClicked(trackInfo.venue); lightboxIndex.value = 0 },
                     ) {
                         AsyncImage(
                             model = trackInfo.imageUrl,
@@ -232,7 +238,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
 
                 // ── Live timing (race weekend only) ────────────────────────────
                 if (!today.isBefore(currentRace.startDate) && !today.isAfter(currentRace.endDate) && onLiveTimingClick != null && currentRace.tslEventId != 0) {
-                    LiveTimingButton { onLiveTimingClick(currentRace.tslEventId) }
+                    LiveTimingButton { Analytics.liveTimingOpened(currentRace.tslEventId); onLiveTimingClick(currentRace.tslEventId) }
                 }
 
                 // ── Weather forecast ─────────────────────────────────────────
@@ -286,31 +292,104 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                     TimetableCard(sessions = sessions, raceStartDate = currentRace.startDate)
                 }
 
-                // ── Circuit layout ─────────────────────────────────────────────
-                if (trackInfo.layoutImageUrl.isNotEmpty()) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                // ── Circuit layout + Track guide ──────────────────────────────
+                val isWide = LocalConfiguration.current.screenWidthDp >= 600
+                val hasLayout = trackInfo.layoutImageUrl.isNotEmpty()
+                val hasGuide = trackInfo.trackGuide.isNotEmpty()
+
+                if (hasLayout && hasGuide && isWide) {
+                    // Wide: float-right style — image top-right, first sector wraps alongside it,
+                    // remaining sectors flow full-width below.
+                    val allSectors = trackInfo.trackGuide
+                    val firstSector = allSectors.firstOrNull()
+                    val remainingSectors = if (allSectors.size > 1) allSectors.drop(1) else emptyList()
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BtccCard, RoundedCornerShape(12.dp))
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         Text(
-                            "CIRCUIT LAYOUT",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = BtccTextSecondary,
+                            "TRACK GUIDE",
+                            style         = MaterialTheme.typography.labelSmall,
+                            fontWeight    = FontWeight.ExtraBold,
+                            color         = BtccTextSecondary,
                             letterSpacing = 1.5.sp,
                         )
-                        AsyncImage(
-                            model = trackInfo.layoutImageUrl,
-                            contentDescription = "${trackInfo.venue} circuit layout",
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(BtccCard, RoundedCornerShape(12.dp))
-                                .clip(RoundedCornerShape(12.dp)),
-                        )
-                    }
-                }
 
-                // ── Track guide ─────────────────────────────────────────────────
-                if (trackInfo.trackGuide.isNotEmpty()) {
-                    TrackGuideCard(trackInfo.trackGuide)
+                        // First sector alongside the circuit image
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            // Left: first sector corners
+                            Column(
+                                modifier = Modifier.weight(0.55f),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                if (firstSector != null) {
+                                    Text(
+                                        firstSector.name.uppercase(),
+                                        style         = MaterialTheme.typography.labelSmall,
+                                        fontWeight    = FontWeight.ExtraBold,
+                                        letterSpacing = 1.sp,
+                                        color         = BtccYellow,
+                                    )
+                                    firstSector.corners.forEach { corner -> CornerRow(corner) }
+                                }
+                            }
+                            // Right: circuit image
+                            AsyncImage(
+                                model = trackInfo.layoutImageUrl,
+                                contentDescription = "${trackInfo.venue} circuit layout",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .weight(0.45f)
+                                    .heightIn(max = 280.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                            )
+                        }
+
+                        // Remaining sectors full-width below
+                        remainingSectors.forEachIndexed { index, sector ->
+                            HorizontalDivider(color = BtccOutline.copy(alpha = 0.5f))
+                            Text(
+                                sector.name.uppercase(),
+                                style         = MaterialTheme.typography.labelSmall,
+                                fontWeight    = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp,
+                                color         = BtccYellow,
+                            )
+                            sector.corners.forEach { corner -> CornerRow(corner) }
+                        }
+                    }
+                } else {
+                    if (hasLayout) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(
+                                "CIRCUIT LAYOUT",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = BtccTextSecondary,
+                                letterSpacing = 1.5.sp,
+                            )
+                            AsyncImage(
+                                model = trackInfo.layoutImageUrl,
+                                contentDescription = "${trackInfo.venue} circuit layout",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 320.dp)
+                                    .background(BtccCard, RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(12.dp)),
+                            )
+                        }
+                    }
+                    if (hasGuide) {
+                        TrackGuideCard(trackInfo.trackGuide)
+                    }
                 }
 
                 // ── Race photo gallery ─────────────────────────────────────────
@@ -338,7 +417,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                                         .width(220.dp)
                                         .height(130.dp)
                                         .clip(RoundedCornerShape(10.dp))
-                                        .clickable { lightboxIndex.value = lightboxIdx },
+                                        .clickable { Analytics.trackImageClicked(trackInfo.venue); lightboxIndex.value = lightboxIdx },
                                 )
                             }
                         }
@@ -446,7 +525,8 @@ private fun LapRecordRow(label: String, record: LapRecord, useKm: Boolean) {
 @Composable
 private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate) {
     // startDate is Saturday, endDate (Sunday) is +1
-    val today = LocalDate.now()
+    val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val today = remember(testOverride) { TestClock.today() }
     val satDate = raceStartDate
     val sunDate = raceStartDate.plusDays(1)
 

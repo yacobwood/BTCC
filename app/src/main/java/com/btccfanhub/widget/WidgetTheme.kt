@@ -14,16 +14,16 @@ enum class WidgetTheme(
     MIDNIGHT  ("Midnight",   R.drawable.widget_background_midnight,  0xFF0D1626L, 0xFF1A3558L),
     SLATE     ("Slate",      R.drawable.widget_background_slate,     0xFF1C1F2EL, 0xFF2E3A5CL),
 
-    // Team themes — team livery accent colour
-    NAPA      ("NAPA",       R.drawable.widget_background_napa,      0xFF1B4332L, 0xFFF5C400L), // NAPA yellow
-    VERTU     ("VERTU",      R.drawable.widget_background_vertu,     0xFF002147L, 0xFF2979CCL), // EXCELR8 blue
-    SPEEDWORKS("Speedworks", R.drawable.widget_background_speedworks,0xFF5C0A0AL, 0xFFCCCCCCL), // Toyota white
-    WSR       ("WSR",        R.drawable.widget_background_wsr,       0xFF0D1A35L, 0xFF3A6EC0L), // BMW blue
-    PMR       ("PMR",        R.drawable.widget_background_pmr,       0xFF3D1F00L, 0xFFFFB800L), // Audi/PMR gold
-    LASER     ("Laser",      R.drawable.widget_background_laser,     0xFF3D1400L, 0xFFFF6600L), // Laser orange
-    PLATO     ("Plato",      R.drawable.widget_background_plato,     0xFF101014L, 0xFF9A9A9AL), // AMG silver
-    ONE_MS    ("One MS",     R.drawable.widget_background_one,       0xFF4A0000L, 0xFFCC2200L), // Honda red
-    RESTART   ("Restart",    R.drawable.widget_background_restart,   0xFF00264DL, 0xFF00AADCL), // Hyundai cyan
+    // Team themes — unique livery per team
+    NAPA      ("NAPA",       R.drawable.widget_background_napa,      0xFF1A3A8FL, 0xFFF5C400L), // royal blue + yellow
+    VERTU     ("VERTU",      R.drawable.widget_background_vertu,     0xFF00736BL, 0xFFF26522L), // teal + orange
+    SPEEDWORKS("Speedworks", R.drawable.widget_background_speedworks,0xFFB01020L, 0xFFFFFFFFL), // Toyota red + white
+    WSR       ("WSR",        R.drawable.widget_background_wsr,       0xFF0A1628L, 0xFF1E6FE8L), // navy + BMW blue
+    PMR       ("PMR",        R.drawable.widget_background_pmr,       0xFF1A1A1AL, 0xFFFFCC00L), // charcoal + gold
+    LASER     ("Laser",      R.drawable.widget_background_laser,     0xFF0C1E6BL, 0xFFFFFFFFL), // deep blue + white
+    PLATO     ("Plato",      R.drawable.widget_background_plato,     0xFF0E0E0EL, 0xFF9B1FD4L), // black + purple (Cataclean camo)
+    ONE_MS    ("One MS",     R.drawable.widget_background_one,       0xFF0F0F0FL, 0xFFE8002DL), // black + red
+    RESTART   ("Restart",    R.drawable.widget_background_restart,   0xFF0B1A2EL, 0xFF00C8E8L), // navy + cyan
     ;
 
     companion object {

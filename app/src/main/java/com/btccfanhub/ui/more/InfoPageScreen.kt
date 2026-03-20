@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.model.ContentBlock
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
@@ -32,6 +33,7 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
     var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(pageId) {
+        Analytics.screen("info_page:$pageId")
         page = PagesRepository.getPage(pageId)
         if (page == null) {
             PagesRepository.getPagesFromAssets(context)
@@ -118,7 +120,7 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
 
             segments.forEach { segment ->
                 when (segment) {
-                    is ContentBlock -> BlockContent(segment, onPageClick)
+                    is ContentBlock -> BlockContent(segment, pageId, onPageClick)
                     is List<*> -> {
                         @Suppress("UNCHECKED_CAST")
                         val group = segment as List<ContentBlock>
@@ -131,7 +133,7 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
                             shape = RoundedCornerShape(8.dp),
                         ) {
                             Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
-                                group.forEach { block -> BlockContent(block, onPageClick) }
+                                group.forEach { block -> BlockContent(block, pageId, onPageClick) }
                             }
                         }
                     }
@@ -144,7 +146,7 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
 }
 
 @Composable
-private fun BlockContent(block: ContentBlock, onPageClick: (String) -> Unit) {
+private fun BlockContent(block: ContentBlock, pageId: String, onPageClick: (String) -> Unit) {
     when (block.type) {
         "heading" -> {
             Text(
@@ -181,7 +183,7 @@ private fun BlockContent(block: ContentBlock, onPageClick: (String) -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onPageClick(block.url) }
+                    .clickable { Analytics.infoPageLinkClicked(pageId, block.url); onPageClick(block.url) }
                     .padding(vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

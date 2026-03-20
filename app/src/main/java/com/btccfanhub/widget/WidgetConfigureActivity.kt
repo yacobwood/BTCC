@@ -225,7 +225,7 @@ private fun ThemeSwatch(
         ) {
             // Livery background painted with Canvas
             Canvas(modifier = Modifier.matchParentSize()) {
-                drawLivery(base, accent)
+                drawLivery(base, accent, theme)
             }
 
             // Widget content overlay
@@ -304,46 +304,153 @@ private fun ThemeSwatch(
 
 // ─── Livery drawing ───────────────────────────────────────────────────────────
 
-/**
- * Draws a racing-livery style background:
- *  • Base colour fills the whole card
- *  • A wide angled accent panel sweeps across the right third
- *  • A thin bright stripe sits along the leading edge of the panel
- */
-private fun DrawScope.drawLivery(base: Color, accent: Color) {
+private fun DrawScope.drawLivery(base: Color, accent: Color, theme: WidgetTheme = WidgetTheme.NAVY) {
     val w = size.width
     val h = size.height
-
-    // Base fill
     drawRect(color = base)
 
-    // Wide diagonal accent panel (right side)
-    val panelPath = Path().apply {
-        moveTo(w * 0.52f, 0f)
-        lineTo(w,         0f)
-        lineTo(w,         h)
-        lineTo(w * 0.22f, h)
-        close()
-    }
-    drawPath(panelPath, color = accent.copy(alpha = 0.22f))
+    when (theme) {
 
-    // Sharp leading-edge stripe
-    val stripePath = Path().apply {
-        moveTo(w * 0.52f, 0f)
-        lineTo(w * 0.56f, 0f)
-        lineTo(w * 0.26f, h)
-        lineTo(w * 0.22f, h)
-        close()
-    }
-    drawPath(stripePath, color = accent.copy(alpha = 0.80f))
+        WidgetTheme.VERTU -> {
+            // Teal base, orange right panel, thin navy inset stripe
+            val orange = Color(0xFFF26522)
+            val navy   = Color(0xFF002147)
+            drawPath(Path().apply {
+                moveTo(w * 0.72f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.44f, h); close()
+            }, color = orange.copy(alpha = 0.95f))
+            drawPath(Path().apply {
+                moveTo(w * 0.67f, 0f); lineTo(w * 0.69f, 0f); lineTo(w * 0.41f, h); lineTo(w * 0.39f, h); close()
+            }, color = navy.copy(alpha = 0.85f))
+        }
 
-    // Thin secondary stripe slightly inset
-    val stripe2 = Path().apply {
-        moveTo(w * 0.45f, 0f)
-        lineTo(w * 0.47f, 0f)
-        lineTo(w * 0.17f, h)
-        lineTo(w * 0.15f, h)
-        close()
+        WidgetTheme.NAPA -> {
+            // Royal blue base, bold yellow panel sweeping left-to-right across ~40% of right side
+            val yellow = Color(0xFFF5C400)
+            val darkBlue = Color(0xFF0F2560)
+            // Dark blue shadow band on far left
+            drawPath(Path().apply {
+                moveTo(0f, 0f); lineTo(w * 0.18f, 0f); lineTo(w * 0.05f, h); lineTo(0f, h); close()
+            }, color = darkBlue.copy(alpha = 0.60f))
+            // Large yellow panel on right
+            drawPath(Path().apply {
+                moveTo(w * 0.60f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.35f, h); close()
+            }, color = yellow.copy(alpha = 0.95f))
+            // Thin yellow leading stripe
+            drawPath(Path().apply {
+                moveTo(w * 0.55f, 0f); lineTo(w * 0.59f, 0f); lineTo(w * 0.34f, h); lineTo(w * 0.30f, h); close()
+            }, color = yellow.copy(alpha = 0.50f))
+        }
+
+        WidgetTheme.LASER -> {
+            // Deep blue base, two white diagonal stripes (matches Laser Tools car)
+            val white = Color.White
+            // Wide white stripe
+            drawPath(Path().apply {
+                moveTo(w * 0.50f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.38f, h); lineTo(w * 0.26f, h); close()
+            }, color = white.copy(alpha = 0.18f))
+            // Bright leading edge of stripe
+            drawPath(Path().apply {
+                moveTo(w * 0.50f, 0f); lineTo(w * 0.54f, 0f); lineTo(w * 0.30f, h); lineTo(w * 0.26f, h); close()
+            }, color = white.copy(alpha = 0.70f))
+            // Second narrower stripe
+            drawPath(Path().apply {
+                moveTo(w * 0.64f, 0f); lineTo(w * 0.67f, 0f); lineTo(w * 0.43f, h); lineTo(w * 0.40f, h); close()
+            }, color = white.copy(alpha = 0.45f))
+        }
+
+        WidgetTheme.PLATO -> {
+            // Cataclean camo: near-black base, purple + magenta diagonal bands
+            val purple  = Color(0xFF9B1FD4)
+            val magenta = Color(0xFFCC3399)
+            // Wide purple band
+            drawPath(Path().apply {
+                moveTo(w * 0.30f, 0f); lineTo(w * 0.55f, 0f); lineTo(w * 0.35f, h); lineTo(w * 0.10f, h); close()
+            }, color = purple.copy(alpha = 0.55f))
+            // Magenta accent stripe
+            drawPath(Path().apply {
+                moveTo(w * 0.55f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.42f, h); lineTo(w * 0.35f, h); close()
+            }, color = magenta.copy(alpha = 0.65f))
+            // Second purple band on right
+            drawPath(Path().apply {
+                moveTo(w * 0.72f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.55f, h); close()
+            }, color = purple.copy(alpha = 0.40f))
+            // Thin bright stripe
+            drawPath(Path().apply {
+                moveTo(w * 0.28f, 0f); lineTo(w * 0.31f, 0f); lineTo(w * 0.11f, h); lineTo(w * 0.08f, h); close()
+            }, color = magenta.copy(alpha = 0.80f))
+        }
+
+        WidgetTheme.SPEEDWORKS -> {
+            // Toyota red base, white diagonal slash
+            val white = Color.White
+            drawPath(Path().apply {
+                moveTo(w * 0.48f, 0f); lineTo(w * 0.60f, 0f); lineTo(w * 0.36f, h); lineTo(w * 0.24f, h); close()
+            }, color = white.copy(alpha = 0.15f))
+            drawPath(Path().apply {
+                moveTo(w * 0.48f, 0f); lineTo(w * 0.52f, 0f); lineTo(w * 0.28f, h); lineTo(w * 0.24f, h); close()
+            }, color = white.copy(alpha = 0.75f))
+            // Darker red shadow on far right
+            drawPath(Path().apply {
+                moveTo(w * 0.78f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.58f, h); close()
+            }, color = Color(0xFF7A0010).copy(alpha = 0.60f))
+        }
+
+        WidgetTheme.WSR -> {
+            // Dark navy base, BMW blue diagonal panel + thin light-blue stripe
+            val bmwBlue  = Color(0xFF1E6FE8)
+            val lightBlue = Color(0xFF5BA3FF)
+            drawPath(Path().apply {
+                moveTo(w * 0.62f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.38f, h); close()
+            }, color = bmwBlue.copy(alpha = 0.85f))
+            drawPath(Path().apply {
+                moveTo(w * 0.58f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.38f, h); lineTo(w * 0.34f, h); close()
+            }, color = lightBlue.copy(alpha = 0.70f))
+        }
+
+        WidgetTheme.PMR -> {
+            // Charcoal base, gold diagonal panel
+            val gold = Color(0xFFFFCC00)
+            drawPath(Path().apply {
+                moveTo(w * 0.65f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.40f, h); close()
+            }, color = gold.copy(alpha = 0.90f))
+            drawPath(Path().apply {
+                moveTo(w * 0.60f, 0f); lineTo(w * 0.64f, 0f); lineTo(w * 0.39f, h); lineTo(w * 0.35f, h); close()
+            }, color = gold.copy(alpha = 0.45f))
+        }
+
+        WidgetTheme.ONE_MS -> {
+            // Black base, bold red diagonal slash
+            val red = Color(0xFFE8002D)
+            drawPath(Path().apply {
+                moveTo(w * 0.55f, 0f); lineTo(w * 0.70f, 0f); lineTo(w * 0.46f, h); lineTo(w * 0.31f, h); close()
+            }, color = red.copy(alpha = 0.85f))
+            drawPath(Path().apply {
+                moveTo(w * 0.70f, 0f); lineTo(w * 0.73f, 0f); lineTo(w * 0.49f, h); lineTo(w * 0.46f, h); close()
+            }, color = red.copy(alpha = 0.40f))
+        }
+
+        WidgetTheme.RESTART -> {
+            // Dark navy base, cyan diagonal panel
+            val cyan = Color(0xFF00C8E8)
+            drawPath(Path().apply {
+                moveTo(w * 0.68f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.42f, h); close()
+            }, color = cyan.copy(alpha = 0.80f))
+            drawPath(Path().apply {
+                moveTo(w * 0.63f, 0f); lineTo(w * 0.67f, 0f); lineTo(w * 0.41f, h); lineTo(w * 0.37f, h); close()
+            }, color = cyan.copy(alpha = 0.50f))
+        }
+
+        else -> {
+            // Classic themes — subtle tonal accent diagonal
+            drawPath(Path().apply {
+                moveTo(w * 0.52f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.22f, h); close()
+            }, color = accent.copy(alpha = 0.22f))
+            drawPath(Path().apply {
+                moveTo(w * 0.52f, 0f); lineTo(w * 0.56f, 0f); lineTo(w * 0.26f, h); lineTo(w * 0.22f, h); close()
+            }, color = accent.copy(alpha = 0.80f))
+            drawPath(Path().apply {
+                moveTo(w * 0.45f, 0f); lineTo(w * 0.47f, 0f); lineTo(w * 0.17f, h); lineTo(w * 0.15f, h); close()
+            }, color = accent.copy(alpha = 0.35f))
+        }
     }
-    drawPath(stripe2, color = accent.copy(alpha = 0.35f))
 }

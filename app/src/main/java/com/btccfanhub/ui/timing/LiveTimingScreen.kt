@@ -1,6 +1,7 @@
 package com.btccfanhub.ui.timing
 
 import androidx.compose.foundation.background
+import com.btccfanhub.data.Analytics
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -34,6 +35,7 @@ fun LiveTimingScreen(eventId: Int, onBack: () -> Unit) {
     val loading  = session == null
 
     LaunchedEffect(Unit) {
+        Analytics.screen("live_timing:$eventId")
         client.connect()
     }
 

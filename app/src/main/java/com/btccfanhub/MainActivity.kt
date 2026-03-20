@@ -15,9 +15,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
@@ -30,6 +35,7 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +73,7 @@ import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
+import com.btccfanhub.widget.CountdownWidget
 import com.google.android.gms.ads.MobileAds
 import com.google.android.play.core.review.ReviewManagerFactory
 import java.util.concurrent.TimeUnit
@@ -80,6 +87,7 @@ class MainActivity : ComponentActivity() {
     private val pendingArticleSlug = mutableStateOf<String?>(null)
     private val pendingOpenResults = mutableIntStateOf(0)
     private val pendingResultsRound = mutableIntStateOf(0)
+    private val pendingLiveTimingEventId = mutableStateOf<Int?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +118,8 @@ class MainActivity : ComponentActivity() {
                     pendingOpenResults  = pendingOpenResults.intValue,
                     pendingResultsRound = pendingResultsRound.intValue,
                     onResultsConsumed   = { },
+                    pendingLiveTimingEventId = pendingLiveTimingEventId.value,
+                    onLiveTimingConsumed     = { pendingLiveTimingEventId.value = null },
                     onRequestPermission = { requestNewsNotificationPermission() },
                 )
             }
@@ -142,6 +152,9 @@ class MainActivity : ComponentActivity() {
             }
             if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
         }
+        // Widget tap during race weekend → open live timing
+        val liveTimingId = intent?.getIntExtra(CountdownWidget.EXTRA_LIVE_TIMING_EVENT_ID, -1) ?: -1
+        if (liveTimingId != -1) pendingLiveTimingEventId.value = liveTimingId
     }
 
     private fun maybeRequestInAppReview() {
@@ -264,9 +277,11 @@ private fun MainScreen(
     pendingOpenResults: Int = 0,
     pendingResultsRound: Int = 0,
     onResultsConsumed: () -> Unit = {},
+    pendingLiveTimingEventId: Int? = null,
+    onLiveTimingConsumed: () -> Unit = {},
     onRequestPermission: () -> Unit = {},
 ) {
-    val context       = LocalContext.current
+    val context = LocalContext.current
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -274,9 +289,9 @@ private fun MainScreen(
     var showOnboarding by remember { mutableStateOf(OnboardingStore.shouldShow(context)) }
     var showWhatsNew by remember { mutableStateOf(WhatsNewStore.shouldShow(context)) }
 
-    val flagAds     by FeatureFlagsStore.adsEnabled.collectAsState()
+    val flagAds by FeatureFlagsStore.adsEnabled.collectAsState()
     val flagWhatsNew by FeatureFlagsStore.whatsNew.collectAsState()
-    val isOnline    by ConnectivityObserver.isOnline.collectAsState()
+    val isOnline by ConnectivityObserver.isOnline.collectAsState()
 
     if (showOnboarding) {
         NotificationOnboardingScreen(
@@ -284,7 +299,8 @@ private fun MainScreen(
                 onRequestPermission()
                 val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
                 prefs.edit().putBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true).apply()
-                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val nm =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 nm.createNotificationChannel(
                     NotificationChannel(
                         ResultsCheckWorker.CHANNEL_ID,
@@ -353,6 +369,15 @@ private fun MainScreen(
         }
     }
 
+    LaunchedEffect(pendingLiveTimingEventId) {
+        if (pendingLiveTimingEventId != null) {
+            onLiveTimingConsumed()
+            navController.navigate(Screen.LiveTiming.route(pendingLiveTimingEventId)) {
+                launchSingleTop = true
+            }
+        }
+    }
+
     val showBottomBar = currentRoute == null ||
             (currentRoute != Screen.Article.route &&
                     currentRoute.startsWith("track/") != true &&
@@ -360,12 +385,50 @@ private fun MainScreen(
                     currentRoute != Screen.LiveTiming.route)
 
     val navItems = buildList {
-        add(NavItem(Screen.News,     "News",     Icons.Default.Home))
+        add(NavItem(Screen.News, "News", Icons.Default.Home))
         add(NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange))
-        add(NavItem(Screen.Drivers,  "Grid",     Icons.Default.Groups))
-        add(NavItem(Screen.Results,  "Results",  Icons.Default.EmojiEvents))
-        add(NavItem(Screen.More,     "More",     Icons.Default.MoreHoriz))
+        add(NavItem(Screen.Drivers, "Grid", Icons.Default.Groups))
+        add(NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents))
+        add(NavItem(Screen.More, "More", Icons.Default.MoreHoriz))
     }
+
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+
+    val navItemSelected: (NavItem) -> Boolean = { item ->
+        when (item.screen) {
+            Screen.Calendar -> currentRoute == Screen.Calendar.route || currentRoute == Screen.Track.route
+            Screen.Results -> currentRoute == Screen.Results.route || currentRoute == Screen.RoundResults.route
+            Screen.More -> currentRoute == Screen.More.route || currentRoute == Screen.Settings.route || currentRoute == Screen.BugReport.route || currentRoute == Screen.FeatureFlags.route
+            else -> currentRoute == item.screen.route
+        }
+    }
+
+    val onNavItemClick: (NavItem) -> Unit = { item ->
+        com.btccfanhub.data.Analytics.navItemClicked(item.label)
+        if (item.screen == Screen.News) newsScrollTrigger++
+        navController.navigate(item.screen.route) {
+            popUpTo(Screen.News.route)
+            launchSingleTop = true
+        }
+    }
+
+    if (showWhatsNew && flagWhatsNew) {
+        WhatsNewDialog(
+            changes = WhatsNewStore.changes,
+            onDismiss = {
+                WhatsNewStore.markSeen(context)
+                showWhatsNew = false
+            },
+        )
+    }
+
+    val navRailItemColors = NavigationRailItemDefaults.colors(
+        selectedIconColor = BtccYellow,
+        selectedTextColor = BtccYellow,
+        indicatorColor = BtccYellow.copy(alpha = 0.12f),
+        unselectedIconColor = BtccTextSecondary,
+        unselectedTextColor = BtccTextSecondary,
+    )
 
     val navItemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = BtccYellow,
@@ -375,76 +438,115 @@ private fun MainScreen(
         unselectedTextColor = BtccTextSecondary,
     )
 
-    if (showWhatsNew && flagWhatsNew) {
-        WhatsNewDialog(
-            changes   = WhatsNewStore.changes,
-            onDismiss = {
-                WhatsNewStore.markSeen(context)
-                showWhatsNew = false
-            },
-        )
-    }
-
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                Column(modifier = Modifier.navigationBarsPadding()) {
-                    if (flagAds) AdmobBanner()
-                    NavigationBar(
-                        containerColor = BtccSurface,
-                        tonalElevation = 0.dp,
-                    ) {
-                        navItems.forEach { item ->
-                            NavigationBarItem(
-                                icon = { Icon(item.icon, contentDescription = item.label) },
-                                label = {
-                                    Text(
-                                        item.label,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 10.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Clip,
-                                    )
-                                },
-                                selected = when (item.screen) {
-                                    Screen.Calendar -> currentRoute == Screen.Calendar.route || currentRoute == Screen.Track.route
-                                    Screen.Results  -> currentRoute == Screen.Results.route || currentRoute == Screen.RoundResults.route
-                                    Screen.More     -> currentRoute == Screen.More.route || currentRoute == Screen.Settings.route || currentRoute == Screen.BugReport.route || currentRoute == Screen.FeatureFlags.route
-                                    else            -> currentRoute == item.screen.route
-                                },
-                                colors = navItemColors,
-                                onClick = {
-                                    if (item.screen == Screen.News) newsScrollTrigger++
-                                    navController.navigate(item.screen.route) {
-                                        popUpTo(Screen.News.route)
-                                        launchSingleTop = true
-                                    }
-                                }
+    if (isTablet) {
+        // Tablet: side NavigationRail + content
+        Box(modifier = Modifier.fillMaxSize().background(BtccSurface)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+            ) {
+                NavigationRail(
+                    containerColor = BtccSurface,
+                    modifier = Modifier.fillMaxHeight(),
+                ) {
+                Spacer(modifier = Modifier.weight(1f))
+                navItems.forEach { item ->
+                    NavigationRailItem(
+                        icon = { Icon(item.icon, contentDescription = item.label) },
+                        label = {
+                            Text(
+                                item.label,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 10.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Clip,
                             )
+                        },
+                        selected = navItemSelected(item),
+                        colors = navRailItemColors,
+                        onClick = { onNavItemClick(item) },
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                if (!isOnline) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().background(Color(0xFF444444)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "No internet connection",
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                        )
+                    }
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    AppNavHost(
+                        navController = navController,
+                        newsScrollToTopTrigger = newsScrollTrigger
+                    )
+                }
+            }
+        }
+        } // end Box
+    } else {
+        // Phone: bottom NavigationBar
+        Scaffold(
+            bottomBar = {
+                if (showBottomBar) {
+                    Column(modifier = Modifier.navigationBarsPadding()) {
+                        if (flagAds) AdmobBanner()
+                        NavigationBar(
+                            containerColor = BtccSurface,
+                            tonalElevation = 0.dp,
+                        ) {
+                            navItems.forEach { item ->
+                                NavigationBarItem(
+                                    icon = { Icon(item.icon, contentDescription = item.label) },
+                                    label = {
+                                        Text(
+                                            item.label,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 10.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Clip,
+                                        )
+                                    },
+                                    selected = navItemSelected(item),
+                                    colors = navItemColors,
+                                    onClick = { onNavItemClick(item) },
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-    ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            if (!isOnline) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF444444)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        "No internet connection",
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
+                if (!isOnline) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().background(Color(0xFF444444)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "No internet connection",
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                        )
+                    }
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    AppNavHost(
+                        navController = navController,
+                        newsScrollToTopTrigger = newsScrollTrigger
                     )
                 }
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                AppNavHost(navController = navController, newsScrollToTopTrigger = newsScrollTrigger)
             }
         }
     }

@@ -65,6 +65,8 @@ fun NewsScreen(
     val state by viewModel.state.collectAsState()
     val searchState by viewModel.searchState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+    LaunchedEffect(Unit) { Analytics.screen("news") }
     val favName by FavouriteDriverStore.driver.collectAsState()
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex       = viewModel.savedScrollIndex,
@@ -154,6 +156,12 @@ fun NewsScreen(
                 val articles      = s.articles
                 val isLoadingMore = s.isLoadingMore
                 val isTablet      = LocalConfiguration.current.screenWidthDp >= 600
+                val screenW       = LocalConfiguration.current.screenWidthDp
+                val moreColumns   = when {
+                    screenW >= 840 -> 3
+                    isTablet       -> 2
+                    else           -> 2
+                }
                 val navigateToArticle: (Article) -> Unit = { article ->
                     viewModel.saveScrollPosition(
                         listState.firstVisibleItemIndex,
@@ -291,7 +299,11 @@ fun NewsScreen(
                             }
 
                             // Grid cards: 4 on tablet, 2 on phone
-                            val gridCount    = if (isTablet) 4 else 2
+                            val gridCount    = when {
+                                screenW >= 840 -> 6
+                                screenW >= 600 -> 4
+                                else           -> 2
+                            }
                             val gridArticles = articles.drop(1).take(gridCount)
                             if (gridArticles.isNotEmpty()) {
                                 item {
@@ -327,8 +339,8 @@ fun NewsScreen(
                             }
 
                             if (isTablet) {
-                                // 2-column GridCard grid
-                                val pairs = remaining.chunked(2)
+                                // 2-column GridCard grid on 7", 3-column on 10"
+                                val pairs = remaining.chunked(moreColumns)
                                 items(pairs) { pair ->
                                     Row(
                                         modifier = Modifier
@@ -336,18 +348,16 @@ fun NewsScreen(
                                             .padding(bottom = 10.dp),
                                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                                     ) {
-                                        GridCard(
-                                            article = pair[0],
-                                            onClick = { Analytics.articleClicked(pair[0].title, "list"); navigateToArticle(pair[0]) },
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        if (pair.size > 1) {
+                                        pair.forEachIndexed { idx, article ->
                                             GridCard(
-                                                article = pair[1],
-                                                onClick = { Analytics.articleClicked(pair[1].title, "list"); navigateToArticle(pair[1]) },
+                                                article = article,
+                                                onClick = { Analytics.articleClicked(article.title, "list"); navigateToArticle(article) },
                                                 modifier = Modifier.weight(1f),
+                                                height = 200.dp,
                                             )
-                                        } else {
+                                        }
+                                        // Fill empty slots in last row
+                                        repeat(moreColumns - pair.size) {
                                             Spacer(Modifier.weight(1f))
                                         }
                                     }
@@ -410,10 +420,11 @@ fun NewsScreen(
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun HeroCard(article: Article, onRefresh: () -> Unit, onSearchClick: () -> Unit, onClick: () -> Unit) {
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(340.dp)
+            .height(if (isTablet) 420.dp else 340.dp)
             .clickable { onClick() },
     ) {
         if (article.imageUrl != null) {

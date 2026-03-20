@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Star
 import android.content.Context
 import com.btccfanhub.Constants
+import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.worker.NewsCheckWorker
 import androidx.compose.material3.*
@@ -54,6 +55,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     val isTablet = configuration.screenWidthDp >= 600
 
     LaunchedEffect(year, round) {
+        Analytics.screen("round_results:$year:$round")
         loading = true
         roundResult = if (year in 2004..2025) {
             SeasonRepository.getSeason(context, year)?.rounds?.find { it.round == round }
@@ -127,7 +129,10 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                             }
                             Tab(
                                 selected = pagerState.currentPage == index,
-                                onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
+                                onClick  = {
+                                    Analytics.raceTabClicked(roundResult?.venue ?: "Round $round", race.label)
+                                    scope.launch { pagerState.animateScrollToPage(index) }
+                                },
                                 text = {
                                     Text(
                                         tabLabel,
@@ -149,6 +154,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                             RaceResultsList(
                                 race      = races[page],
                                 roundDate = roundResult?.date ?: "",
+                                venue     = roundResult?.venue ?: "",
                                 modifier  = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -163,6 +169,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
 private fun VideoExternalButton(
     text: String,
     url: String,
+    venue: String = "",
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -170,7 +177,10 @@ private fun VideoExternalButton(
         modifier = modifier
             .background(Color(0xFF1A0000), RoundedCornerShape(10.dp))
             .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+            .clickable {
+                Analytics.raceVideoClicked(venue, text)
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
             .padding(horizontal = 16.dp, vertical = if (LocalConfiguration.current.screenWidthDp >= 600) 16.dp else 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -200,7 +210,7 @@ private fun VideoExternalButton(
 }
 
 @Composable
-private fun RaceResultsList(race: RaceEntry, roundDate: String, modifier: Modifier = Modifier) {
+private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = "", modifier: Modifier = Modifier) {
     val isQualifyingRace = race.label.equals("Qualifying Race", ignoreCase = true)
     if (race.results.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -244,6 +254,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, modifier: Modifi
                 VideoExternalButton(
                     text     = "WATCH FULL RACE",
                     url      = race.fullRaceUrl,
+                    venue    = venue,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 6.dp),
