@@ -9,6 +9,7 @@ data class DriverSeasonStats(
     val wins: Int,
     val podiums: Int,
     val poles: Int,
+    val fastestLaps: Int,
     val dnfs: Int,
 )
 
@@ -21,13 +22,18 @@ object SeasonStatsComputer {
             var wins: Int = 0,
             var podiums: Int = 0,
             var poles: Int = 0,
+            var fastestLaps: Int = 0,
             var dnfs: Int = 0,
         )
 
         val map = LinkedHashMap<String, Acc>()
 
         for (round in rounds) {
-            round.polePosition?.let { driver ->
+            // Count poles from round-level polePosition string OR from Race 1 driver with pole=true
+            val poleSitter = round.polePosition
+                ?: round.races.firstOrNull { it.label.contains("1") }
+                    ?.results?.firstOrNull { it.pole }?.driver
+            poleSitter?.let { driver ->
                 map.getOrPut(driver) { Acc() }.poles++
             }
             for (race in round.races) {
@@ -40,6 +46,7 @@ object SeasonStatsComputer {
                         result.position in 2..3   -> acc.podiums++
                         result.position <= 0      -> acc.dnfs++
                     }
+                    if (result.fastestLap) acc.fastestLaps++
                 }
             }
         }
@@ -47,13 +54,14 @@ object SeasonStatsComputer {
         return map.entries
             .map { (driver, acc) ->
                 DriverSeasonStats(
-                    driver  = driver,
-                    team    = acc.team,
-                    races   = acc.races,
-                    wins    = acc.wins,
-                    podiums = acc.podiums,
-                    poles   = acc.poles,
-                    dnfs    = acc.dnfs,
+                    driver      = driver,
+                    team        = acc.team,
+                    races       = acc.races,
+                    wins        = acc.wins,
+                    podiums     = acc.podiums,
+                    poles       = acc.poles,
+                    fastestLaps = acc.fastestLaps,
+                    dnfs        = acc.dnfs,
                 )
             }
             .sortedWith(

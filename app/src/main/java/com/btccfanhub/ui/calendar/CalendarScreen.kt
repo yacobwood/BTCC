@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import com.btccfanhub.data.FeatureFlagsStore
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.launch
 
 private val dayFmt       = DateTimeFormatter.ofPattern("d")
 private val monthYearFmt = DateTimeFormatter.ofPattern("MMM yyyy")
@@ -54,14 +56,17 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     var races by remember { mutableStateOf<List<Race>>(emptyList()) }
     var liveTimingEnabled by remember { mutableStateOf(true) }
     var loading by remember { mutableStateOf(true) }
+    var isRefreshing by remember { mutableStateOf(false) }
     var loadError by remember { mutableStateOf(false) }
     var refreshKey by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { Analytics.screen("calendar") }
     LaunchedEffect(refreshKey) {
-        loading = true
+        loading = races.isEmpty()
         loadError = false
         try {
+            CalendarRepository.invalidateCache()
             val cal = CalendarRepository.getCalendarData()
             races = cal.rounds
             liveTimingEnabled = cal.liveTimingEnabled
@@ -69,10 +74,11 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
             if (races.isEmpty()) loadError = true
         } finally {
             loading = false
+            isRefreshing = false
         }
     }
     val nextRace = races.firstOrNull { it.endDate >= today }
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 840
 
     Column(
         modifier = Modifier
@@ -119,6 +125,11 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
 
         val isRaceWeekend = liveTimingEnabled && onLiveTimingClick != null && nextRace != null && today >= nextRace.startDate && nextRace.tslEventId != 0
 
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh    = { isRefreshing = true; refreshKey++ },
+            modifier     = Modifier.fillMaxSize(),
+        ) {
         if (isTablet) {
             // ── Tablet: two-column layout ─────────────────────────────────────
             Row(
@@ -171,29 +182,23 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                 }
             }
         } else {
-            // ── Phone: stacked layout ─────────────────────────────────────────
-            // Fixed: yellow box + "ALL ROUNDS" heading (no scroll)
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 680.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-            ) {
-                if (isRaceWeekend) {
-                    LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
-                    Spacer(Modifier.height(12.dp))
-                }
-                if (nextRace != null) {
-                    CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
-                    Spacer(Modifier.height(20.dp))
-                }
-            }
-
-            // Scrollable: rounds list only
+            // ── Phone: stacked layout — single LazyColumn with header ─────────
             LazyColumn(
-                modifier = Modifier.fillMaxHeight().widthIn(max = 680.dp).fillMaxWidth(),
+                modifier = Modifier.fillMaxSize().widthIn(max = 680.dp).fillMaxWidth(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
             ) {
+                if (isRaceWeekend) {
+                    item {
+                        LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
+                if (nextRace != null) {
+                    item {
+                        CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
+                        Spacer(Modifier.height(20.dp))
+                    }
+                }
                 item {
                     Text(
                         "ALL ROUNDS",
@@ -216,6 +221,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                 }
             }
         }
+        } // end PullToRefreshBox
     }
 }
 

@@ -466,10 +466,13 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
                     // --- Season stats ---
                     page == 3 -> {
-                        val stats = if (selectedYear in 2004..2025 && !seasonData?.driverStats.isNullOrEmpty())
-                            seasonData!!.driverStats
-                        else
-                            remember(currentRaceResults) { SeasonStatsComputer.compute(currentRaceResults) }
+                        // Always compute from rounds so poles + fastest laps are populated.
+                        // Fall back to JSON driverStats only if rounds data is empty.
+                        val stats = remember(currentRaceResults, seasonData) {
+                            val computed = SeasonStatsComputer.compute(currentRaceResults)
+                            if (computed.isNotEmpty()) computed
+                            else seasonData?.driverStats ?: emptyList()
+                        }
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                             SeasonStatsTab(
                                 stats = stats,
@@ -1065,6 +1068,7 @@ private fun SeasonStatsTab(
         stats.isEmpty() -> ResultsNotStarted(year = year, seasonStartDate = seasonStartDate)
         else -> {
             val showPoles = stats.any { it.poles > 0 }
+            val showFastestLaps = stats.any { it.fastestLaps > 0 }
             Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyColumn(
                 modifier            = Modifier.widthIn(max = if (isTablet) 900.dp else Dp.Unspecified).fillMaxWidth(),
@@ -1089,7 +1093,12 @@ private fun SeasonStatsTab(
                             letterSpacing = 1.sp,
                             modifier      = Modifier.weight(1f),
                         )
-                        val cols = if (showPoles) listOf("W", "POD", "POL", "DNF") else listOf("W", "POD", "DNF")
+                        val cols = buildList {
+                            add("W"); add("POD")
+                            if (showPoles) add("POL")
+                            if (showFastestLaps) add("FL")
+                            add("DNF")
+                        }
                         cols.forEach { col ->
                             val cellWidth = if (isTablet) 48.dp else 36.dp
                             Text(
@@ -1106,7 +1115,7 @@ private fun SeasonStatsTab(
                     }
                 }
                 itemsIndexed(stats) { index, stat ->
-                    DriverStatsRow(rank = index + 1, stat = stat, showPoles = showPoles)
+                    DriverStatsRow(rank = index + 1, stat = stat, showPoles = showPoles, showFastestLaps = showFastestLaps)
                 }
             }
             } // end Box
@@ -1115,7 +1124,7 @@ private fun SeasonStatsTab(
 }
 
 @Composable
-private fun DriverStatsRow(rank: Int, stat: DriverSeasonStats, showPoles: Boolean = true) {
+private fun DriverStatsRow(rank: Int, stat: DriverSeasonStats, showPoles: Boolean = true, showFastestLaps: Boolean = false) {
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == stat.driver
 
@@ -1158,6 +1167,9 @@ private fun DriverStatsRow(rank: Int, stat: DriverSeasonStats, showPoles: Boolea
         if (showPoles) {
             StatCell(value = stat.poles, highlight = stat.poles > 0, highlightColor = Color(0xFFC0C0C0), width = cellWidth)
         }
+        if (showFastestLaps) {
+            StatCell(value = stat.fastestLaps, highlight = stat.fastestLaps > 0, highlightColor = Color(0xFF9B59B6), width = cellWidth)
+        }
         StatCell(value = stat.dnfs,    highlight = stat.dnfs > 0,    highlightColor = Color(0xFFE3000B), width = cellWidth)
     }
 }
@@ -1175,3 +1187,4 @@ private fun StatCell(value: Int, highlight: Boolean, highlightColor: Color = Btc
         modifier   = Modifier.width(width),
     )
 }
+

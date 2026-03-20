@@ -58,13 +58,14 @@ object SeasonRepository {
         return (0 until arr.length()).map { i ->
             val o = arr.getJSONObject(i)
             DriverSeasonStats(
-                driver = o.optString("driver", ""),
-                team = o.optString("team", ""),
-                races = o.optInt("races", 0),
-                wins = o.optInt("wins", 0),
-                podiums = o.optInt("podiums", 0),
-                poles = o.optInt("poles", 0),
-                dnfs = o.optInt("dnfs", 0),
+                driver      = o.optString("driver", ""),
+                team        = o.optString("team", ""),
+                races       = o.optInt("races", 0),
+                wins        = o.optInt("wins", 0),
+                podiums     = o.optInt("podiums", 0),
+                poles       = o.optInt("poles", 0),
+                fastestLaps = o.optInt("fastestLaps", 0),
+                dnfs        = o.optInt("dnfs", 0),
             )
         }
     }

@@ -491,6 +491,7 @@ private fun MainScreen(
                         newsScrollToTopTrigger = newsScrollTrigger
                     )
                 }
+                if (flagAds) AdmobBanner()
             }
         }
         } // end Box
