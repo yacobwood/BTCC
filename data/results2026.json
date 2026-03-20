@@ -7,10 +7,6 @@
       "date": "18 Apr 2026",
       "races": [
         {
-          "label": "Qualifying Race",
-          "results": []
-        },
-        {
           "label": "Race 1",
           "results": []
         },
@@ -29,10 +25,6 @@
       "venue": "Brands Hatch Indy",
       "date": "09 May 2026",
       "races": [
-        {
-          "label": "Qualifying Race",
-          "results": []
-        },
         {
           "label": "Race 1",
           "results": []
@@ -53,10 +45,6 @@
       "date": "23 May 2026",
       "races": [
         {
-          "label": "Qualifying Race",
-          "results": []
-        },
-        {
           "label": "Race 1",
           "results": []
         },
@@ -75,10 +63,6 @@
       "venue": "Oulton Park",
       "date": "06 Jun 2026",
       "races": [
-        {
-          "label": "Qualifying Race",
-          "results": []
-        },
         {
           "label": "Race 1",
           "results": []
@@ -99,10 +83,6 @@
       "date": "25 Jul 2026",
       "races": [
         {
-          "label": "Qualifying Race",
-          "results": []
-        },
-        {
           "label": "Race 1",
           "results": []
         },
@@ -121,10 +101,6 @@
       "venue": "Knockhill",
       "date": "08 Aug 2026",
       "races": [
-        {
-          "label": "Qualifying Race",
-          "results": []
-        },
         {
           "label": "Race 1",
           "results": []
@@ -145,10 +121,6 @@
       "date": "22 Aug 2026",
       "races": [
         {
-          "label": "Qualifying Race",
-          "results": []
-        },
-        {
           "label": "Race 1",
           "results": []
         },
@@ -167,10 +139,6 @@
       "venue": "Croft",
       "date": "05 Sep 2026",
       "races": [
-        {
-          "label": "Qualifying Race",
-          "results": []
-        },
         {
           "label": "Race 1",
           "results": []
@@ -191,10 +159,6 @@
       "date": "26 Sep 2026",
       "races": [
         {
-          "label": "Qualifying Race",
-          "results": []
-        },
-        {
           "label": "Race 1",
           "results": []
         },
@@ -213,10 +177,6 @@
       "venue": "Brands Hatch GP",
       "date": "10 Oct 2026",
       "races": [
-        {
-          "label": "Qualifying Race",
-          "results": []
-        },
         {
           "label": "Race 1",
           "results": []
