@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.DriverProgressionSeries
@@ -91,6 +92,11 @@ fun ChampionshipProgressionChart(
     roundLabels: List<String> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
+    val configuration = LocalConfiguration.current
+    val isTablet      = configuration.screenWidthDp >= 600
+    val chartHeight   = if (isTablet) 320.dp else 240.dp
+    val yAxisWidth    = if (isTablet) 48.dp else 32.dp
+    val xAxisHeight   = if (isTablet) 44.dp else 36.dp
     if (series.isEmpty()) return
 
     val hiddenDrivers = remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -124,8 +130,8 @@ fun ChampionshipProgressionChart(
                 ) {
                     Column(
                         modifier = Modifier
-                            .width(Y_AXIS_WIDTH_DP)
-                            .height(CHART_HEIGHT_DP),
+                            .width(yAxisWidth)
+                            .height(chartHeight),
                         verticalArrangement = Arrangement.SpaceBetween,
                         horizontalAlignment = Alignment.End,
                     ) {
@@ -133,6 +139,7 @@ fun ChampionshipProgressionChart(
                             Text(
                                 text = "$tick",
                                 style = MaterialTheme.typography.labelSmall,
+                                fontSize = if (isTablet) 13.sp else 11.sp,
                                 color = BtccTextSecondary,
                                 fontWeight = FontWeight.Medium,
                             )
@@ -145,7 +152,7 @@ fun ChampionshipProgressionChart(
                         yMax = yMax,
                         modifier = Modifier
                             .weight(1f)
-                            .height(CHART_HEIGHT_DP),
+                            .height(chartHeight),
                     )
                 }
                 // X-axis labels: each R1, R2, ... centered under the chart's vertical lines (same padding as chart)
@@ -155,8 +162,8 @@ fun ChampionshipProgressionChart(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = Y_AXIS_WIDTH_DP)
-                            .height(X_AXIS_HEIGHT_DP),
+                            .padding(start = yAxisWidth)
+                            .height(xAxisHeight),
                     ) {
                         for (i in 0 until roundCount) {
                             val label = xLabelByRoundIndex[i] ?: continue
@@ -185,6 +192,7 @@ fun ChampionshipProgressionChart(
                                 Text(
                                     text = label,
                                     style = MaterialTheme.typography.labelSmall,
+                                    fontSize = if (isTablet) 13.sp else 11.sp,
                                     color = BtccTextSecondary,
                                     maxLines = 1,
                                     textAlign = TextAlign.Center,
@@ -199,8 +207,9 @@ fun ChampionshipProgressionChart(
         Text(
             "Tap a driver to show or hide their line on the chart",
             style = MaterialTheme.typography.labelMedium,
+            fontSize = if (isTablet) 14.sp else 12.sp,
             color = BtccTextSecondary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = if (isTablet) 10.dp else 6.dp),
         )
 
         // Select all / Deselect all toggle
@@ -223,13 +232,14 @@ fun ChampionshipProgressionChart(
             SelectAllChip(
                 label = "Hide all",
                 modifier = Modifier,
+                fontSize = if (isTablet) 16.sp else 14.sp,
                 onClick = { hiddenDrivers.value = allDriverNames },
                 enabled = !allHidden,
             )
         }
-
-        // Legend: tappable chips with checkbox; 2 per row for larger touch targets
-        val chipsPerRow = 2
+ 
+        // Legend: tappable chips with checkbox; 2-3 per row for larger touch targets
+        val chipsPerRow = if (configuration.screenWidthDp >= 900) 3 else 2
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -351,12 +361,14 @@ private fun ProgressionLineChart(
 private fun SelectAllChip(
     label: String,
     modifier: Modifier = Modifier,
+    fontSize: androidx.compose.ui.unit.TextUnit = 14.sp,
     onClick: () -> Unit,
     enabled: Boolean,
 ) {
     Text(
         text = label,
         style = MaterialTheme.typography.labelMedium,
+        fontSize = fontSize,
         color = if (enabled) BtccYellow else BtccTextSecondary,
         fontWeight = FontWeight.SemiBold,
         modifier = modifier
@@ -379,10 +391,11 @@ private fun LegendChip(
     isVisible: Boolean,
     onClick: () -> Unit,
 ) {
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
     val alpha = if (isVisible) 1f else 0.45f
     Row(
         modifier = modifier
-            .heightIn(min = 48.dp)
+            .heightIn(min = if (isTablet) 64.dp else 48.dp)
             .clickable(
                 role = Role.Button,
                 onClickLabel = if (isVisible) "Hide ${driver.split(" ").lastOrNull() ?: driver} from chart" else "Show ${driver.split(" ").lastOrNull() ?: driver} on chart",
@@ -405,18 +418,18 @@ private fun LegendChip(
             imageVector = if (isVisible) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
             contentDescription = if (isVisible) "Shown" else "Hidden",
             tint = if (isVisible) BtccYellow else BtccTextSecondary,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(if (isTablet) 28.dp else 22.dp),
         )
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = driver.split(" ").lastOrNull() ?: driver,
-                style = MaterialTheme.typography.bodyMedium,
+                style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha),
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = "$finalPoints pts",
-                style = MaterialTheme.typography.labelSmall,
+                style = if (isTablet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
                 color = BtccTextSecondary.copy(alpha = alpha),
             )
         }

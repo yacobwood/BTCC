@@ -24,9 +24,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.model.DriverResult
@@ -47,6 +50,8 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     var loading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
 
     LaunchedEffect(year, round) {
         loading = true
@@ -74,7 +79,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                     Text(
                         roundResult?.venue ?: "Round $round",
                         fontWeight    = FontWeight.Black,
-                        fontSize      = 17.sp,
+                        fontSize      = if (isTablet) 22.sp else 17.sp,
                         letterSpacing = 0.5.sp,
                     )
                     val startRound = Constants.firstRaceNumberForRound(round)
@@ -83,6 +88,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         "ROUNDS $startRound–$endRound · ${roundResult?.date ?: ""}",
                         style         = MaterialTheme.typography.labelSmall,
                         color         = BtccYellow,
+                        fontSize      = if (isTablet) 14.sp else 11.sp,
                         fontWeight    = FontWeight.ExtraBold,
                         letterSpacing = 1.sp,
                     )
@@ -126,7 +132,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                                     Text(
                                         tabLabel,
                                         fontWeight    = FontWeight.ExtraBold,
-                                        fontSize      = 12.sp,
+                                        fontSize      = if (isTablet) 18.sp else 12.sp,
                                         letterSpacing = 0.sp,
                                         color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
                                     )
@@ -139,10 +145,13 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         state    = pagerState,
                         modifier = Modifier.fillMaxSize(),
                     ) { page ->
-                        RaceResultsList(
-                            race      = races[page],
-                            roundDate = roundResult?.date ?: "",
-                        )
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                            RaceResultsList(
+                                race      = races[page],
+                                roundDate = roundResult?.date ?: "",
+                                modifier  = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                            )
+                        }
                     }
                 }
             }
@@ -162,7 +171,7 @@ private fun VideoExternalButton(
             .background(Color(0xFF1A0000), RoundedCornerShape(10.dp))
             .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
             .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = if (LocalConfiguration.current.screenWidthDp >= 600) 16.dp else 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -176,7 +185,7 @@ private fun VideoExternalButton(
             text,
             color         = Color.White,
             fontWeight    = FontWeight.ExtraBold,
-            fontSize      = 13.sp,
+            fontSize      = if (LocalConfiguration.current.screenWidthDp >= 600) 15.sp else 13.sp,
             letterSpacing = 1.sp,
             modifier      = Modifier.weight(1f),
         )
@@ -191,7 +200,7 @@ private fun VideoExternalButton(
 }
 
 @Composable
-private fun RaceResultsList(race: RaceEntry, roundDate: String) {
+private fun RaceResultsList(race: RaceEntry, roundDate: String, modifier: Modifier = Modifier) {
     val isQualifyingRace = race.label.equals("Qualifying Race", ignoreCase = true)
     if (race.results.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -209,9 +218,13 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
     }
 
     val displayDate = race.date ?: roundDate
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+
     LazyColumn(
+        modifier            = modifier,
         contentPadding      = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(if (isTablet) 10.dp else 6.dp),
     ) {
         if (displayDate.isNotEmpty()) {
             item {
@@ -219,6 +232,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
                     displayDate.uppercase(),
                     style         = MaterialTheme.typography.labelSmall,
                     color         = BtccTextSecondary,
+                    fontSize      = if (isTablet) 14.sp else 11.sp,
                     fontWeight    = FontWeight.Bold,
                     letterSpacing = 1.sp,
                     modifier      = Modifier.padding(bottom = 4.dp),
@@ -237,7 +251,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
             }
         }
         items(race.results) { result ->
-            DriverResultRow(result, useKm = useKm, maxAvgSpeedKmh = maxAvgSpeedKmh)
+            DriverResultRow(result, useKm = useKm, maxAvgSpeedKmh = maxAvgSpeedKmh, isTablet = isTablet)
         }
         item {
             Row(
@@ -265,6 +279,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String) {
                         Text(
                             label,
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = if (isTablet) 14.sp else 11.sp,
                             color = BtccTextSecondary,
                         )
                     }
@@ -279,6 +294,7 @@ private fun DriverResultRow(
     result: DriverResult,
     useKm: Boolean = true,
     maxAvgSpeedKmh: Double? = null,
+    isTablet: Boolean = false,
 ) {
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == result.driver
@@ -311,18 +327,18 @@ private fun DriverResultRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BtccCard, RoundedCornerShape(10.dp))
-            .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(10.dp)) else Modifier)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .background(BtccCard, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
+            .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(if (isTablet) 14.dp else 10.dp)) else Modifier)
+            .padding(horizontal = if (isTablet) 20.dp else 12.dp, vertical = if (isTablet) 16.dp else 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(if (isTablet) 20.dp else 12.dp),
     ) {
         Text(
             if (result.position > 0) "${result.position}" else "DNF",
-            style      = MaterialTheme.typography.titleMedium,
+            style      = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Black,
             color      = posColor,
-            modifier   = Modifier.width(32.dp),
+            modifier   = Modifier.width(if (isTablet) 48.dp else 32.dp),
             textAlign  = TextAlign.Center,
         )
         Column(modifier = Modifier.weight(1f)) {
@@ -335,12 +351,13 @@ private fun DriverResultRow(
                         Icons.Filled.Star,
                         contentDescription = null,
                         tint     = BtccYellow,
-                        modifier = Modifier.size(12.dp),
+                        modifier = Modifier.size(if (isTablet) 16.dp else 12.dp),
                     )
                 }
                 Text(
                     result.driver,
                     fontWeight = FontWeight.Bold,
+                    fontSize   = if (isTablet) 18.sp else 15.sp,
                     style      = MaterialTheme.typography.bodyMedium,
                     color      = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onBackground,
                 )
@@ -348,6 +365,7 @@ private fun DriverResultRow(
             Text(
                 result.team,
                 style = MaterialTheme.typography.bodySmall,
+                fontSize = if (isTablet) 14.sp else 12.sp,
                 color = BtccTextSecondary,
             )
         }
@@ -355,7 +373,7 @@ private fun DriverResultRow(
             Text(
                 displayTime,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize   = 13.sp,
+                fontSize   = if (isTablet) 16.sp else 13.sp,
                 color      = if (isLeader) BtccYellow else MaterialTheme.colorScheme.onBackground,
             )
             if (bestLapDisplay.isNotEmpty()) {
@@ -363,7 +381,7 @@ private fun DriverResultRow(
                     "BL $bestLapDisplay",
                     style    = MaterialTheme.typography.labelSmall,
                     color    = if (result.fastestLap) BtccYellow else BtccTextSecondary,
-                    fontSize = 10.sp,
+                    fontSize = if (isTablet) 12.sp else 10.sp,
                 )
             }
             if (speedDisplay != null) {
@@ -371,7 +389,7 @@ private fun DriverResultRow(
                     speedDisplay,
                     style    = MaterialTheme.typography.labelSmall,
                     color    = if (isTopSpeed) BtccYellow else BtccTextSecondary,
-                    fontSize = 10.sp,
+                    fontSize = if (isTablet) 12.sp else 10.sp,
                 )
             }
             val bonuses = buildList {

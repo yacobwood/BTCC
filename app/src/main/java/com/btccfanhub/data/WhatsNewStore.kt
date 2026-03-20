@@ -81,6 +81,10 @@ object WhatsNewStore {
         24 to listOf(
             "Share articles - share any news article and it opens directly in the app for other BTCCHub users",
             "Does anyone actually read these???",
+        ),
+        26 to listOf(
+            "2026 season — Qualifying Race support with correct points scale",
+            "Home screen widget — session schedule restored with improved layout",
         )
     )
 

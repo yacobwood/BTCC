@@ -7,6 +7,9 @@
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
 
+# SLF4J is a transitive dependency — suppress missing class warning
+-dontwarn org.slf4j.**
+
 # Strip debug logs in release
 -assumenosideeffects class android.util.Log {
     public static int d(...);

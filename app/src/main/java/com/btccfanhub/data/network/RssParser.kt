@@ -30,7 +30,7 @@ object RssParser {
             val content     = post.getJSONObject("content").getString("rendered")
             val pubDate     = formatDate(post.getString("date"))
             val embedded    = post.optJSONObject("_embedded")
-            Article(id, title, link, description, pubDate, extractFeaturedImage(embedded), extractCategory(embedded), content)
+            Article(id, title, link, description, pubDate, extractFeaturedImage(embedded, content), extractCategory(embedded), content)
         } catch (e: Exception) {
             null
         }
@@ -53,7 +53,7 @@ object RssParser {
             val content     = post.getJSONObject("content").getString("rendered")
             val pubDate     = formatDate(post.getString("date"))
             val embedded    = post.optJSONObject("_embedded")
-            Article(id, title, link, description, pubDate, extractFeaturedImage(embedded), extractCategory(embedded), content)
+            Article(id, title, link, description, pubDate, extractFeaturedImage(embedded, content), extractCategory(embedded), content)
         } catch (e: Exception) {
             null
         }
@@ -95,7 +95,7 @@ object RssParser {
                 val content = post.getJSONObject("content").getString("rendered")
                 val pubDate = formatDate(post.getString("date"))
                 val embedded = post.optJSONObject("_embedded")
-                val imageUrl = extractFeaturedImage(embedded)
+                val imageUrl = extractFeaturedImage(embedded, content)
                 val category = extractCategory(embedded)
                 articles.add(Article(id, title, link, description, pubDate, imageUrl, category, content))
             } catch (e: Exception) {
@@ -200,9 +200,15 @@ object RssParser {
         return byKey.values.toList()
     }
 
-    private fun extractFeaturedImage(embedded: JSONObject?): String? = try {
-        embedded?.getJSONArray("wp:featuredmedia")?.getJSONObject(0)?.getString("source_url")
-    } catch (e: Exception) { null }
+    private val imgSrcRegex = Regex("""<img[^>]+src=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+    private fun extractFeaturedImage(embedded: JSONObject?, content: String = ""): String? {
+        val fromMedia = try {
+            embedded?.getJSONArray("wp:featuredmedia")?.getJSONObject(0)?.getString("source_url")
+        } catch (e: Exception) { null }
+        if (!fromMedia.isNullOrEmpty()) return fromMedia
+        return imgSrcRegex.find(content)?.groupValues?.get(1)
+    }
 
     private fun extractCategory(embedded: JSONObject?): String = try {
         embedded?.getJSONArray("wp:term")?.getJSONArray(0)?.getJSONObject(0)?.getString("name") ?: ""

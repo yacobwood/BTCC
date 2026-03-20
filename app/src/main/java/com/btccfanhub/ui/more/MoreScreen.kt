@@ -1,5 +1,7 @@
 package com.btccfanhub.ui.more
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Leaderboard
@@ -152,6 +155,29 @@ fun MoreScreen(
                 label = "Feedback & Bugs",
                 icon = Icons.Default.BugReport,
                 onClick = { Analytics.moreItemClicked("feedback_bugs"); onBugReportClick() },
+            )
+
+            HorizontalDivider(
+                color = BtccOutline,
+                modifier = Modifier.padding(vertical = 16.dp),
+            )
+
+            Text(
+                "SUPPORT",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = BtccTextSecondary,
+                letterSpacing = 2.sp,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+
+            MoreRow(
+                label = "Buy me a coffee",
+                icon = Icons.Default.Coffee,
+                onClick = {
+                    Analytics.moreItemClicked("buy_me_a_coffee")
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/btcchub")))
+                },
             )
 
             Spacer(Modifier.height(24.dp))
