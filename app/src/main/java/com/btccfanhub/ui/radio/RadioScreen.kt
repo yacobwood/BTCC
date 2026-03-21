@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Radio
@@ -31,7 +32,7 @@ import com.btccfanhub.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RadioScreen() {
+fun RadioScreen(onBack: () -> Unit = {}) {
     val context        = LocalContext.current
     val isPlaying      by RadioService.isPlaying.collectAsState()
     val currentStation by RadioService.currentStation.collectAsState()
@@ -53,6 +54,15 @@ fun RadioScreen() {
                     fontSize      = 18.sp,
                     letterSpacing = 1.sp,
                 )
+            },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
         )

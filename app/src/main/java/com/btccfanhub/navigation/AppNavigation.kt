@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -103,7 +106,13 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         }
 
         composable(Screen.Radio.route) {
-            RadioScreen()
+            var navigatedBack by remember { mutableStateOf(false) }
+            RadioScreen(onBack = {
+                if (!navigatedBack) {
+                    navigatedBack = true
+                    navController.popBackStack()
+                }
+            })
         }
 
         composable(Screen.Article.route) {
@@ -111,20 +120,23 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         }
 
         composable(Screen.Settings.route) {
+            var navigatedBack by remember { mutableStateOf(false) }
             SettingsScreen(
-                onBack = { navController.popBackStack() },
+                onBack = { if (!navigatedBack) { navigatedBack = true; navController.popBackStack() } },
                 onFeatureFlagsClick = { navController.navigate(Screen.FeatureFlags.route) },
             )
         }
 
         composable(Screen.FeatureFlags.route) {
-            FeatureFlagsScreen(onBack = { navController.popBackStack() })
+            var navigatedBack by remember { mutableStateOf(false) }
+            FeatureFlagsScreen(onBack = { if (!navigatedBack) { navigatedBack = true; navController.popBackStack() } })
         }
 
         composable(Screen.BugReport.route) {
+            var navigatedBack by remember { mutableStateOf(false) }
             BugReportScreen(
-                onBack          = { navController.popBackStack() },
-                onReturnToNews  = { navController.popBackStack(Screen.News.route, inclusive = false) },
+                onBack         = { if (!navigatedBack) { navigatedBack = true; navController.popBackStack() } },
+                onReturnToNews = { navController.popBackStack(Screen.News.route, inclusive = false) },
             )
         }
 
@@ -155,10 +167,10 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
 
         composable(Screen.More.route) {
             MoreScreen(
-                onSettingsClick  = { navController.navigate(Screen.Settings.route) },
-                onBugReportClick = { navController.navigate(Screen.BugReport.route) },
-                onRadioClick     = { navController.navigate(Screen.Radio.route) },
-                onInfoPageClick  = { pageId -> navController.navigate(Screen.InfoPage.route(pageId)) },
+                onSettingsClick  = { navController.navigate(Screen.Settings.route) { launchSingleTop = true; popUpTo(Screen.More.route) { inclusive = false } } },
+                onBugReportClick = { navController.navigate(Screen.BugReport.route) { launchSingleTop = true; popUpTo(Screen.More.route) { inclusive = false } } },
+                onRadioClick     = { navController.navigate(Screen.Radio.route) { launchSingleTop = true; popUpTo(Screen.More.route) { inclusive = false } } },
+                onInfoPageClick  = { pageId -> navController.navigate(Screen.InfoPage.route(pageId)) { launchSingleTop = true; popUpTo(Screen.More.route) { inclusive = false } } },
             )
         }
 

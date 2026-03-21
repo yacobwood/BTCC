@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "399066588683",
+    "project_id": "btcchub-af77a",
+    "storage_bucket": "btcchub-af77a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399066588683:android:a13ca0da69478203a8c90e",
+        "android_client_info": {
+          "package_name": "com.btccfanhub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399066588683:android:fb7812c56b8a5c4ca8c90e",
+        "android_client_info": {
+          "package_name": "com.btccfanhub.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
