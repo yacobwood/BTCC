@@ -65,14 +65,18 @@ class NewsViewModel : ViewModel() {
         isLoadingMore = false
         viewModelScope.launch {
             _state.value = NewsState.Loading
-            val articles = NewsRepository.getArticles(page = 1)
-            _state.value = if (articles.isEmpty()) {
-                NewsState.Error("Couldn't load news. Check your connection.")
-            } else {
-                NewsState.Success(
-                    articles = articles,
-                    hasMore  = NewsRepository.isFullPage(articles),
-                )
+            try {
+                val articles = NewsRepository.getArticles(page = 1)
+                _state.value = if (articles.isEmpty()) {
+                    NewsState.Error("Couldn't load news. Check your connection.")
+                } else {
+                    NewsState.Success(
+                        articles = articles,
+                        hasMore  = NewsRepository.isFullPage(articles),
+                    )
+                }
+            } catch (e: Exception) {
+                _state.value = NewsState.Error("Couldn't load news. Check your connection.")
             }
         }
     }

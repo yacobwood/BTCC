@@ -129,8 +129,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                     NotificationManager.IMPORTANCE_DEFAULT,
                                 )
                             )
-                        } else {
-                            nm.deleteNotificationChannel(NewsCheckWorker.CHANNEL_ID)
                         }
                     },
                 )
@@ -172,8 +170,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                     NotificationManager.IMPORTANCE_HIGH,
                                 )
                             )
-                        } else {
-                            nm.deleteNotificationChannel(RaceNotificationWorker.CHANNEL_ID)
                         }
                     },
                 )
@@ -215,8 +211,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                     NotificationManager.IMPORTANCE_HIGH,
                                 )
                             )
-                        } else {
-                            nm.deleteNotificationChannel(RaceNotificationWorker.CHANNEL_ID_QUALIFYING)
                         }
                     },
                 )
@@ -261,8 +255,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                         NotificationManager.IMPORTANCE_HIGH,
                                     )
                                 )
-                            } else {
-                                nm.deleteNotificationChannel(ResultsCheckWorker.CHANNEL_ID)
                             }
                         },
                     )

@@ -557,24 +557,51 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
             val hasBirthplace = driver.birthplace.isNotEmpty()
             if (hasDob || hasBirthplace) {
                 item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(BtccCard, RoundedCornerShape(10.dp))
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        if (hasDob) {
-                            val dob    = LocalDate.parse(driver.dateOfBirth)
-                            val age    = Period.between(dob, LocalDate.now()).years
-                            val dobFmt = dob.format(DateTimeFormatter.ofPattern("d MMM yyyy"))
-                            PersonalStatRow(label = "Age", value = "$age  ·  $dobFmt")
+                    val isWide = LocalConfiguration.current.screenWidthDp >= 600
+                    val dob    = if (hasDob) runCatching { LocalDate.parse(driver.dateOfBirth) }.getOrNull() else null
+                    val ageStr = dob?.let {
+                        val age    = Period.between(it, LocalDate.now()).years
+                        val dobFmt = it.format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+                        "$age  ·  $dobFmt"
+                    }
+
+                    if (isWide && hasDob && hasBirthplace && ageStr != null) {
+                        // Side-by-side on wide screens
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(BtccCard, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            PersonalStatRow(
+                                label = "Age",
+                                value = ageStr,
+                                modifier = Modifier.weight(1f),
+                            )
+                            VerticalDivider(
+                                color = BtccOutline.copy(alpha = 0.4f),
+                                modifier = Modifier.height(32.dp).padding(horizontal = 16.dp),
+                            )
+                            PersonalStatRow(
+                                label = "Birthplace",
+                                value = driver.birthplace,
+                                modifier = Modifier.weight(1f),
+                            )
                         }
-                        if (hasDob && hasBirthplace) {
-                            HorizontalDivider(color = BtccOutline.copy(alpha = 0.4f), thickness = 0.5.dp)
-                        }
-                        if (hasBirthplace) {
-                            PersonalStatRow(label = "Birthplace", value = driver.birthplace)
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(BtccCard, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            if (ageStr != null) PersonalStatRow(label = "Age", value = ageStr)
+                            if (hasDob && hasBirthplace) {
+                                HorizontalDivider(color = BtccOutline.copy(alpha = 0.4f), thickness = 0.5.dp)
+                            }
+                            if (hasBirthplace) PersonalStatRow(label = "Birthplace", value = driver.birthplace)
                         }
                     }
                 }
@@ -1190,9 +1217,9 @@ private fun SeasonStatRow(stat: SeasonStat) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun PersonalStatRow(label: String, value: String) {
+private fun PersonalStatRow(label: String, value: String, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

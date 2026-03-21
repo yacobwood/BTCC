@@ -1,12 +1,15 @@
 package com.btccfanhub.data
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.provider.Settings
 import android.util.Log
 import com.btccfanhub.BuildConfig
+import com.btccfanhub.Constants
 import com.configcat.ConfigCatClient
 import com.configcat.PollingModes
 import com.configcat.User
+import com.btccfanhub.worker.NewsCheckWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
@@ -35,6 +38,9 @@ object FeatureFlagsStore {
     /** When non-null, overrides LocalDate/LocalDateTime.now() throughout the app for testing. */
     val testDateTimeOverride = MutableStateFlow<LocalDateTime?>(null)
 
+    /** Reactive unit preference — true = km, false = miles. */
+    val useKm = MutableStateFlow(false)
+
     fun setTestDateTime(dt: LocalDateTime?) {
         testDateTimeOverride.value = dt
     }
@@ -42,6 +48,8 @@ object FeatureFlagsStore {
     private var prefs: android.content.SharedPreferences? = null
     private var user: User? = null
     private lateinit var client: ConfigCatClient
+    // Held strongly so it isn't garbage-collected (SharedPreferences uses WeakReference)
+    private var unitPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     fun init(context: Context) {
         val p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -54,6 +62,16 @@ object FeatureFlagsStore {
         trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
         widgetRaceWeekendTest.value = p.getBoolean(KEY_WIDGET_RACE_WEEKEND,   false)
 
+        // Load unit preference from the app prefs (written by SettingsScreen)
+        val appPrefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        useKm.value = appPrefs.getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
+        // Store listener strongly — SharedPreferences only holds a WeakReference
+        unitPrefsListener = SharedPreferences.OnSharedPreferenceChangeListener { sp, key ->
+            if (key == NewsCheckWorker.KEY_UNIT_SYSTEM) {
+                useKm.value = sp.getString(key, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
+            }
+        }
+        appPrefs.registerOnSharedPreferenceChangeListener(unitPrefsListener)
         val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
         user = User.newBuilder().build(deviceId)
         Log.d("FeatureFlags", "Device ID: $deviceId")

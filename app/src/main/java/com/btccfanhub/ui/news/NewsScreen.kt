@@ -105,6 +105,7 @@ fun NewsScreen(
     val shouldLoadMore by remember {
         derivedStateOf {
             if (searchQuery.isNotBlank()) return@derivedStateOf false
+            if ((state as? NewsState.Success)?.hasMore != true) return@derivedStateOf false
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             val total = listState.layoutInfo.totalItemsCount
             total > 0 && lastVisible >= total - 4
@@ -670,6 +671,7 @@ private fun CompactCard(
                 article.title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 20.sp,

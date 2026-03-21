@@ -42,9 +42,9 @@ object ChampionshipProgressionComputer {
             }
         }
 
-        // Cumulative per driver
+        // Cumulative per driver — runningFold starts at 0 and includes all rounds
         val cumulativeByDriver = pointsPerRound.mapValues { (_, perRound) ->
-            perRound.runningReduce { acc, p -> acc + p }
+            perRound.runningFold(0) { acc, p -> acc + p }.drop(1)
         }
 
         val driversByPoints = cumulativeByDriver.entries

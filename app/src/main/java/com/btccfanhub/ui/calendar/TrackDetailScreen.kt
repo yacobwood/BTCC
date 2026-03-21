@@ -1,6 +1,5 @@
 package com.btccfanhub.ui.calendar
 
-import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,7 +49,6 @@ import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
-import com.btccfanhub.worker.NewsCheckWorker
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import java.time.LocalDate
@@ -102,10 +100,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
     val currentRace = race!!
     val daysUntil = ChronoUnit.DAYS.between(today, currentRace.startDate)
 
-    val useKm = remember {
-        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
-    }
+    val useKm by FeatureFlagsStore.useKm.collectAsState()
 
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
     // hero image is index 0, race images follow
@@ -451,6 +446,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
 @Composable
 private fun LapRecordsCard(records: List<LapRecord>, useKm: Boolean) {
     if (records.isEmpty()) return
+    val isWide = LocalConfiguration.current.screenWidthDp >= 600
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -466,23 +462,49 @@ private fun LapRecordsCard(records: List<LapRecord>, useKm: Boolean) {
             color = BtccTextSecondary,
             letterSpacing = 1.sp,
         )
-        records.forEachIndexed { index, record ->
-            LapRecordRow(
-                label = if (index == 0) "QUALIFYING" else "RACE",
-                record = record,
-                useKm = useKm
-            )
-            if (index < records.size - 1) {
-                HorizontalDivider(color = BtccOutline.copy(alpha = 0.5f))
+        if (isWide && records.size == 2) {
+            // Side-by-side on wide screens
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+            ) {
+                LapRecordRow(
+                    label = "QUALIFYING",
+                    record = records[0],
+                    useKm = useKm,
+                    modifier = Modifier.weight(1f),
+                )
+                VerticalDivider(
+                    color = BtccOutline.copy(alpha = 0.5f),
+                    modifier = Modifier.height(64.dp).padding(horizontal = 12.dp),
+                )
+                LapRecordRow(
+                    label = "RACE",
+                    record = records[1],
+                    useKm = useKm,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        } else {
+            records.forEachIndexed { index, record ->
+                LapRecordRow(
+                    label = if (index == 0) "QUALIFYING" else "RACE",
+                    record = record,
+                    useKm = useKm,
+                )
+                if (index < records.size - 1) {
+                    HorizontalDivider(color = BtccOutline.copy(alpha = 0.5f))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun LapRecordRow(label: String, record: LapRecord, useKm: Boolean) {
+private fun LapRecordRow(label: String, record: LapRecord, useKm: Boolean, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -524,11 +546,26 @@ private fun LapRecordRow(label: String, record: LapRecord, useKm: Boolean) {
 
 @Composable
 private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate) {
-    // startDate is Saturday, endDate (Sunday) is +1
     val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
     val today = remember(testOverride) { TestClock.today() }
-    val satDate = raceStartDate
-    val sunDate = raceStartDate.plusDays(1)
+
+    // Build a dynamic day→date mapping from the actual session day keys.
+    // Convention: the earliest day key maps to raceStartDate, each subsequent key is +1 day.
+    val dayKeys = remember(sessions) {
+        sessions.map { it.day }.distinct().sorted()
+    }
+    val dayDateMap = remember(dayKeys, raceStartDate) {
+        // Sort day keys by typical order: FRI < SAT < SUN
+        val order = listOf("FRI", "SAT", "SUN")
+        val sorted = dayKeys.sortedBy { order.indexOf(it).takeIf { i -> i >= 0 } ?: 99 }
+        // Anchor SAT to raceStartDate; FRI is -1, SUN is +1
+        val satIndex = sorted.indexOf("SAT")
+        if (satIndex >= 0) {
+            sorted.mapIndexed { i, key -> key to raceStartDate.plusDays((i - satIndex).toLong()) }.toMap()
+        } else {
+            sorted.mapIndexed { i, key -> key to raceStartDate.plusDays(i.toLong()) }.toMap()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -546,7 +583,8 @@ private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate)
         )
 
         val grouped = sessions.groupBy { it.day }
-        listOf("SAT" to satDate, "SUN" to sunDate).forEach { (dayKey, date) ->
+        dayKeys.forEach { dayKey ->
+            val date = dayDateMap[dayKey] ?: return@forEach
             val daySessions = grouped[dayKey] ?: return@forEach
             val isToday = today == date
 
@@ -605,7 +643,7 @@ private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate)
                 }
             }
 
-            if (dayKey == "SAT" && grouped.containsKey("SUN")) {
+            if (dayKey != dayKeys.last() && grouped.containsKey(dayKeys.getOrNull(dayKeys.indexOf(dayKey) + 1))) {
                 HorizontalDivider(color = BtccOutline)
             }
         }

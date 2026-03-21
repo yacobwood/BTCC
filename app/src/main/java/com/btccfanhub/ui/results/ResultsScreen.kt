@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -91,6 +92,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
     // Season start date from remote config (fallback: 2026-04-18)
     var seasonStartDate by remember { mutableStateOf(LocalDate.of(2026, 4, 18)) }
+    var firstRoundVenue by remember { mutableStateOf("") }
 
     val today         = LocalDate.now()
     val seasonStarted = today >= seasonStartDate
@@ -134,7 +136,9 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
     // Fetch season start date + live data on first composition
     LaunchedEffect(Unit) {
-        seasonStartDate = CalendarRepository.getCalendarData().seasonStartDate
+        val cal = CalendarRepository.getCalendarData()
+        seasonStartDate = cal.seasonStartDate
+        firstRoundVenue = cal.rounds.minByOrNull { it.round }?.venue ?: ""
         if (today >= seasonStartDate) refresh()
     }
 
@@ -435,7 +439,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                             )
                         }
                     page == 0 && selectedYear == 2026 && !seasonStarted ->
-                        SeasonNotStarted(seasonStartDate)
+                        SeasonNotStarted(seasonStartDate, firstRoundVenue)
                     page == 0 && selectedYear == 2026 ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = BtccYellow)
@@ -449,7 +453,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                             )
                         }
                     page == 1 && selectedYear == 2026 ->
-                        SeasonNotStarted(seasonStartDate)
+                        SeasonNotStarted(seasonStartDate, firstRoundVenue)
 
                     // --- Race results ---
                     page == 2 ->
@@ -578,7 +582,7 @@ private fun RaceResultsTab(
                     contentPadding      = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    itemsIndexed(completedRounds) { _, round ->
+                    items(completedRounds, key = { it.round }) { round ->
                         RoundResultCard(round = round, onClick = { onRoundClick(round.round) })
                     }
                 }
@@ -640,8 +644,10 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
 private val SEASON_DATE_FMT = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
 @Composable
-private fun SeasonNotStarted(seasonStartDate: LocalDate) {
-    val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
+private fun SeasonNotStarted(seasonStartDate: LocalDate, firstRoundVenue: String = "") {
+    val testOverride by com.btccfanhub.data.FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val today = remember(testOverride) { com.btccfanhub.data.TestClock.today() }
+    val daysUntil = ChronoUnit.DAYS.between(today, seasonStartDate).coerceAtLeast(0)
     val seasonDateLabel = seasonStartDate.format(SEASON_DATE_FMT)
 
     Box(
@@ -699,14 +705,16 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate) {
                     .padding(horizontal = 24.dp, vertical = 16.dp),
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "ROUND 1 · DONINGTON PARK",
-                        style         = MaterialTheme.typography.labelSmall,
-                        color         = BtccYellow,
-                        fontWeight    = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp,
-                    )
-                    Spacer(Modifier.height(6.dp))
+                    if (firstRoundVenue.isNotEmpty()) {
+                        Text(
+                            "ROUND 1 · ${firstRoundVenue.uppercase()}",
+                            style         = MaterialTheme.typography.labelSmall,
+                            color         = BtccYellow,
+                            fontWeight    = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                    }
                     Text(
                         seasonDateLabel,
                         style      = MaterialTheme.typography.titleLarge,
@@ -729,7 +737,9 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate) {
 
 @Composable
 private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
-    val daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), seasonStartDate).coerceAtLeast(0)
+    val testOverride by com.btccfanhub.data.FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val today = remember(testOverride) { com.btccfanhub.data.TestClock.today() }
+    val daysUntil = ChronoUnit.DAYS.between(today, seasonStartDate).coerceAtLeast(0)
     val seasonDateLabel = seasonStartDate.format(SEASON_DATE_FMT)
 
     Box(
@@ -788,14 +798,6 @@ private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
                         .padding(horizontal = 24.dp, vertical = 16.dp),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "ROUND 1 · DONINGTON PARK",
-                            style         = MaterialTheme.typography.labelSmall,
-                            color         = BtccYellow,
-                            fontWeight    = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp,
-                        )
-                        Spacer(Modifier.height(6.dp))
                         Text(
                             seasonDateLabel,
                             style      = MaterialTheme.typography.titleLarge,

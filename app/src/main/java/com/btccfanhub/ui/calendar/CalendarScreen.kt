@@ -78,6 +78,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
         }
     }
     val nextRace = races.firstOrNull { it.endDate >= today }
+    val seasonYear = remember(races) { races.firstOrNull()?.startDate?.year ?: 2026 }
     val isTablet = LocalConfiguration.current.screenWidthDp >= 840
 
     Column(
@@ -90,7 +91,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
             windowInsets = WindowInsets(0),
             title = {
                 Text(
-                    "2026 SEASON",
+                    "$seasonYear SEASON",
                     fontWeight = FontWeight.Black,
                     fontSize = 18.sp,
                     letterSpacing = 1.sp,

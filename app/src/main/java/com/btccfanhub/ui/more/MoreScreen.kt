@@ -32,7 +32,6 @@ import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
 import com.btccfanhub.ui.theme.*
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,18 +41,15 @@ fun MoreScreen(
     onRadioClick: () -> Unit,
     onInfoPageClick: (String) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var pages by remember { mutableStateOf<List<InfoPage>>(emptyList()) }
 
     LaunchedEffect(Unit) { Analytics.screen("more") }
 
     LaunchedEffect(Unit) {
-        scope.launch {
-            var list = PagesRepository.getPages()
-            if (list.isEmpty()) list = PagesRepository.getPagesFromAssets(context)
-            pages = list
-        }
+        var list = PagesRepository.getPages()
+        if (list.isEmpty()) list = PagesRepository.getPagesFromAssets(context)
+        pages = list
     }
 
     Scaffold(

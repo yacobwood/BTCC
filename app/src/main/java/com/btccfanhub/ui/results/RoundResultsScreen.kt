@@ -15,13 +15,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Star
-import android.content.Context
 import com.btccfanhub.Constants
 import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.FavouriteDriverStore
-import com.btccfanhub.worker.NewsCheckWorker
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +38,7 @@ import com.btccfanhub.data.repository.RaceResultsRepository
 import com.btccfanhub.data.repository.SeasonRepository
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
+import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     var roundResult by remember { mutableStateOf<com.btccfanhub.data.model.RoundResult?>(null) }
     var loading by remember { mutableStateOf(true) }
+    var loadError by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -57,17 +58,24 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     LaunchedEffect(year, round) {
         Analytics.screen("round_results:$year:$round")
         loading = true
-        roundResult = if (year in 2004..2025) {
-            SeasonRepository.getSeason(context, year)?.rounds?.find { it.round == round }
-        } else {
-            RaceResultsRepository.getResults(year).find { it.round == round }
+        loadError = false
+        try {
+            roundResult = if (year in 2004..2025) {
+                SeasonRepository.getSeason(context, year)?.rounds?.find { it.round == round }
+            } else {
+                RaceResultsRepository.getResults(year).find { it.round == round }
+            }
+        } catch (e: Exception) {
+            loadError = true
         }
         loading = false
     }
 
     val races = (roundResult?.races ?: emptyList()).filter { it.results.isNotEmpty() }
     val pageCount = races.size.coerceAtLeast(1)
-    val pagerState = rememberPagerState(pageCount = { pageCount })
+    var savedPage by rememberSaveable { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = savedPage, pageCount = { pageCount })
+    LaunchedEffect(pagerState.currentPage) { savedPage = pagerState.currentPage }
 
     Column(
         modifier = Modifier
@@ -108,6 +116,36 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
             when {
                 loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = BtccYellow)
+                }
+                loadError -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Text("Failed to load results.", color = BtccTextSecondary, textAlign = TextAlign.Center)
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    loading = true
+                                    loadError = false
+                                    try {
+                                        roundResult = if (year in 2004..2025) {
+                                            SeasonRepository.getSeason(context, year)?.rounds?.find { it.round == round }
+                                        } else {
+                                            RaceResultsRepository.getResults(year).find { it.round == round }
+                                        }
+                                    } catch (e: Exception) {
+                                        loadError = true
+                                    }
+                                    loading = false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BtccYellow,
+                                contentColor   = BtccNavy,
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                        ) { Text("Retry", fontWeight = FontWeight.Bold) }                    }
                 }
                 races.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
@@ -219,10 +257,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
         return
     }
     val context = LocalContext.current
-    val useKm = remember {
-        context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(NewsCheckWorker.KEY_UNIT_SYSTEM, NewsCheckWorker.UNIT_MILES) == NewsCheckWorker.UNIT_KM
-    }
+    val useKm by com.btccfanhub.data.FeatureFlagsStore.useKm.collectAsState()
     val maxAvgSpeedKmh = remember(race) {
         race.results.mapNotNull { it.avgLapSpeed?.toDoubleOrNull() }.maxOrNull()
     }

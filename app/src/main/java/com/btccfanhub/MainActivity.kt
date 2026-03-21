@@ -183,6 +183,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun createRaceNotificationChannel() {
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(RaceNotificationWorker.KEY_RACE_NOTIF_ENABLED, true)) return
         val channel = NotificationChannel(
             RaceNotificationWorker.CHANNEL_ID,
             "Race Alerts",
@@ -471,7 +473,7 @@ private fun MainScreen(
                 }
                 Spacer(modifier = Modifier.weight(1f))
             }
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 if (!isOnline) {
                     Box(
                         modifier = Modifier.fillMaxWidth().background(Color(0xFF444444)),
@@ -528,7 +530,7 @@ private fun MainScreen(
                 }
             }
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
+            Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 if (!isOnline) {
                     Box(
                         modifier = Modifier.fillMaxWidth().background(Color(0xFF444444)),
