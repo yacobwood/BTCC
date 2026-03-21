@@ -85,6 +85,12 @@ object WhatsNewStore {
         26 to listOf(
             "2026 season — Qualifying Race support with correct points scale",
             "Home screen widget — session schedule restored with improved layout",
+        ),
+        29 to listOf(
+            "Season stats — wins, poles and fastest laps now shown alongside podiums and DNFs",
+            "Lap records side by side — qualifying and race records shown next to each other on tablets",
+            "Pull to refresh — swipe down on the calendar to force a refresh",
+            "Bug fixes and performance improvements",
         )
     )
 
