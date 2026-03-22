@@ -113,7 +113,8 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
             Spacer(Modifier.height(24.dp))
 
             Text(
-                "NOTIFICATIONS",                style         = MaterialTheme.typography.labelSmall,
+                "NOTIFICATIONS",
+                style         = MaterialTheme.typography.labelSmall,
                 fontWeight    = FontWeight.ExtraBold,
                 color         = BtccTextSecondary,
                 letterSpacing = 2.sp,
