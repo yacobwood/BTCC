@@ -752,6 +752,7 @@ const GH_API = 'https://api.github.com';
 let pollTimer = null;
 let liveTickTimer = null;
 const runningTimestamps = {};
+const dispatchedAt = {}; // key -> ms timestamp when we dispatched
 
 function startLiveTick() {
   if (liveTickTimer) return;
@@ -789,6 +790,8 @@ async function runScraper(workflow, key) {
   const btn = document.querySelector(`#sc-${key} .btn-run`);
   btn.disabled = true; btn.textContent = 'QUEUING…';
   setStatus(key, 'running', '● Dispatching…');
+  // Record dispatch time so we ignore older completed runs
+  dispatchedAt[key] = Date.now();
   try {
     const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/dispatches`, {
       method: 'POST',
@@ -797,14 +800,15 @@ async function runScraper(workflow, key) {
     });
     if (r.status === 204) {
       setStatus(key, 'running', '● Queued…');
-      setTimeout(() => refreshAllStatus(), 8000);
     } else {
       const e = await r.json();
       setStatus(key, 'fail', '✗ ' + (e.message || r.status));
+      delete dispatchedAt[key];
       btn.disabled = false; btn.textContent = 'RUN ▶';
     }
   } catch (e) {
     setStatus(key, 'fail', '✗ ' + e.message);
+    delete dispatchedAt[key];
     btn.disabled = false; btn.textContent = 'RUN ▶';
   }
 }
@@ -846,28 +850,39 @@ async function refreshAllStatus() {
     { file: 'scrape-schedule.yml',  key: 'schedule' },
     { file: 'scrape-grid.yml',      key: 'grid' },
   ];
-  let anyRunning = false;
   for (const w of workflows) {
     const run = await fetchLastRun(w.file);
+    const dispatched = dispatchedAt[w.key];
+
     if (!run) {
-      const chip = document.getElementById('ss-' + w.key);
-      if (chip && !chip.classList.contains('st-running')) setStatus(w.key, '', '—');
+      // Only show — if we haven't dispatched this one
+      if (!dispatched) setStatus(w.key, '', '—');
       continue;
     }
+
+    const runCreated = new Date(run.created_at).getTime();
     const inProgress = run.status === 'in_progress' || run.status === 'queued' || run.status === 'waiting';
-    if (inProgress) anyRunning = true;
+
+    // If we dispatched but the API still shows an older completed run, stay in running state
+    if (dispatched && !inProgress && runCreated < dispatched - 5000) {
+      // New run hasn't appeared yet — keep showing running
+      continue;
+    }
+
     const ago = timeAgo(run.updated_at || run.created_at);
     if (inProgress) {
-      const runTs = new Date(run.created_at).getTime();
-      setStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running'), runTs);
+      setStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running'), runCreated);
     } else if (run.conclusion === 'success') {
+      delete dispatchedAt[w.key];
       setStatus(w.key, 'ok', '✓ ' + ago);
     } else {
+      delete dispatchedAt[w.key];
       setStatus(w.key, 'fail', '✗ ' + (run.conclusion || run.status) + ' · ' + ago);
     }
   }
+  // Always keep polling every 15s
   clearInterval(pollTimer);
-  if (anyRunning) pollTimer = setInterval(refreshAllStatus, 15000);
+  pollTimer = setInterval(refreshAllStatus, 15000);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
