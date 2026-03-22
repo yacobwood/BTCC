@@ -1,0 +1,39 @@
+name: Scrape BTCC Session Schedule
+
+on:
+  schedule:
+    # Nightly at 07:00 UTC — picks up any time updates btcc.net publish overnight
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r scraper/requirements.txt
+          sudo apt-get install -y libasound2t64
+          playwright install chromium --with-deps
+
+      - name: Scrape session schedule
+        run: python scraper/scrape_schedule.py
+
+      - name: Commit updated schedule
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update session schedule from btcc.net [skip ci]"
+          file_pattern: data/schedule.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
