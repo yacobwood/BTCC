@@ -454,6 +454,16 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     <button class="btn-run" onclick="runScraper('scrape-calendar.yml','calendar')">RUN ▶</button>
   </div>
 
+  <!-- Schedule scraper -->
+  <div class="scraper-card" id="sc-schedule">
+    <div class="scraper-head">
+      <div class="scraper-title">SCHEDULE</div>
+      <div class="scraper-status-chip" id="ss-schedule">—</div>
+    </div>
+    <div class="scraper-desc">Scrape practice, qualifying and race times from each circuit page on btcc.net. Runs nightly — trigger manually when times are first published.</div>
+    <button class="btn-run" onclick="runScraper('scrape-schedule.yml','schedule')">RUN ▶</button>
+  </div>
+
   <!-- Grid scraper -->
   <div class="scraper-card" id="sc-grid">
     <div class="scraper-head">
@@ -833,6 +843,7 @@ async function refreshAllStatus() {
     { file: 'scrape-results.yml',   key: 'results' },
     { file: 'scrape-standings.yml', key: 'standings' },
     { file: 'scrape-calendar.yml',  key: 'calendar' },
+    { file: 'scrape-schedule.yml',  key: 'schedule' },
     { file: 'scrape-grid.yml',      key: 'grid' },
   ];
   let anyRunning = false;
