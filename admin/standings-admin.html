@@ -485,6 +485,7 @@ function switchTab(name, el) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
+  location.hash = name;
 }
 
 // ── Standings data ──────────────────────────────────────────────────────────
@@ -889,6 +890,12 @@ async function refreshAllStatus() {
 if(getToken()) collapseToken();
 loadExisting();
 if(getToken()) refreshAllStatus();
+// Restore active tab from URL hash
+const savedTab = location.hash.replace('#', '');
+if (savedTab) {
+  const tabEl = document.querySelector(`.tab[onclick*="'${savedTab}'"]`);
+  if (tabEl) switchTab(savedTab, tabEl);
+}
 </script>
 </body>
 </html>
