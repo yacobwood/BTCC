@@ -48,7 +48,7 @@ def slug_for_venue(venue):
 def classify_activity(activity, championship, sessions_so_far):
     lower = activity.lower().strip()
     champ_lower = championship.lower().strip()
-    if "pit lane" in champ_lower or "pit lane" in lower:
+    if "pit lane" in champ_lower or "pit lane" in lower or "autograph" in champ_lower or "paddock" in champ_lower:
         return None
     if "free practice" in lower:
         return "Free Practice"
