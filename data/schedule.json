@@ -19,6 +19,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
@@ -40,6 +55,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
@@ -61,6 +91,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
         }
       ]
     },
@@ -82,6 +127,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:25"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:55"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
         }
       ]
     },
@@ -103,6 +163,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
@@ -124,6 +199,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "13:10"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "14:15"
         }
       ]
     },
@@ -145,6 +235,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
@@ -166,6 +271,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:10"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:15"
         }
       ]
     },
@@ -187,6 +307,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
         }
       ]
     },
@@ -208,6 +343,21 @@
           "name": "Qualifying Race",
           "day": "SAT",
           "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     }
