@@ -82,7 +82,7 @@ def scrape_circuit_page(page, slug, venue):
     let node = walker.nextNode();
     while (node) {
         const tag = node.tagName.toLowerCase();
-        if (['h1','h2','h3','h4','p','div','th'].includes(tag)) {
+        if (['h1','h2','h3','h4'].includes(tag)) {
             const txt = node.textContent.trim().toLowerCase();
             for (const [day, code] of Object.entries(dayMap)) {
                 if (txt.startsWith(day)) { currentDay = code; break; }
