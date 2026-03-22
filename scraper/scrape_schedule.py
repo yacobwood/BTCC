@@ -45,15 +45,18 @@ def slug_for_venue(venue):
     return VENUE_SLUG_MAP.get(venue.lower().strip())
 
 
-def classify_activity(activity, sessions_so_far):
+def classify_activity(activity, championship, sessions_so_far):
     lower = activity.lower().strip()
+    champ_lower = championship.lower().strip()
+    if "pit lane" in champ_lower or "pit lane" in lower:
+        return None
     if "free practice" in lower:
         return "Free Practice"
     if "qualifying race" in lower:
         return "Qualifying Race"
     if "qualifying" in lower:
         return "Qualifying"
-    if "race" in lower:
+    if not lower:
         race_num = sum(1 for s in sessions_so_far if s["name"].startswith("Race")) + 1
         if race_num <= 3:
             return f"Race {race_num}"
@@ -70,31 +73,34 @@ def scrape_circuit_page(page, slug, venue):
         print(f"  Failed to load {url}: {e}", file=sys.stderr)
         return []
 
-    rows = page.evaluate("""() => {
-        const results = [];
-        let currentDay = null;
-        const dayMap = { saturday: 'SAT', sunday: 'SUN', friday: 'FRI' };
-        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
-        let node = walker.nextNode();
-        while (node) {
-            const tag = node.tagName.toLowerCase();
-            if (['h1','h2','h3','h4','p','div','th'].includes(tag)) {
-                const txt = node.textContent.trim().toLowerCase();
-                for (const [day, code] of Object.entries(dayMap)) {
-                    if (txt.startsWith(day)) { currentDay = code; break; }
-                }
+    JS = """
+() => {
+    const results = [];
+    let currentDay = null;
+    const dayMap = { saturday: 'SAT', sunday: 'SUN', friday: 'FRI' };
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
+    let node = walker.nextNode();
+    while (node) {
+        const tag = node.tagName.toLowerCase();
+        if (['h1','h2','h3','h4','p','div','th'].includes(tag)) {
+            const txt = node.textContent.trim().toLowerCase();
+            for (const [day, code] of Object.entries(dayMap)) {
+                if (txt.startsWith(day)) { currentDay = code; break; }
             }
-            if (tag === 'tr' && currentDay) {
-                const cells = Array.from(node.querySelectorAll('td,th'))
-                    .map(c => c.textContent.replace(/\\s+/g, ' ').trim());
-                if (cells.length >= 3) {
-                    results.push({ day: currentDay, cells: cells });
-                }
-            }
-            node = walker.nextNode();
         }
-        return results;
-    }""")
+        if (tag === 'tr' && currentDay) {
+            const cells = Array.from(node.querySelectorAll('td,th'))
+                .map(c => c.textContent.replace(/\\s+/g, ' ').trim());
+            if (cells.length >= 2) {
+                results.push({ day: currentDay, cells: cells });
+            }
+        }
+        node = walker.nextNode();
+    }
+    return results;
+}
+"""
+    rows = page.evaluate(JS)
 
     sessions = []
     time_re = re.compile(r"(\d{1,2}):(\d{2})")
@@ -102,21 +108,28 @@ def scrape_circuit_page(page, slug, venue):
     for row in rows:
         day   = row["day"]
         cells = row["cells"]
-        if len(cells) < 3:
-            continue
-        time_cell    = cells[0]
-        activity     = cells[1]
-        championship = cells[2]
-
-        if not any(kw in championship.lower() for kw in BTCC_KEYWORDS):
+        if len(cells) < 2:
             continue
 
-        m = time_re.search(time_cell)
+        m = time_re.search(cells[0])
         if not m:
             continue
         time_str = f"{int(m.group(1)):02d}:{m.group(2)}"
 
-        name = classify_activity(activity, sessions)
+        # SAT: Time | Activity | Championship | Laps  -> btcc_idx == 2
+        # SUN: Time | Championship | Laps             -> btcc_idx == 1
+        btcc_idx = None
+        for idx in range(1, len(cells)):
+            if any(kw in cells[idx].lower() for kw in BTCC_KEYWORDS):
+                btcc_idx = idx
+                break
+        if btcc_idx is None:
+            continue
+
+        championship = cells[btcc_idx]
+        activity     = cells[btcc_idx - 1] if btcc_idx >= 2 else ""
+
+        name = classify_activity(activity, championship, sessions)
         if name is None:
             continue
 
