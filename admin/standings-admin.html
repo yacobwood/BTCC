@@ -485,7 +485,7 @@ function switchTab(name, el) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
-  location.hash = name;
+  sessionStorage.setItem('activeTab', name);
 }
 
 // ── Standings data ──────────────────────────────────────────────────────────
@@ -890,11 +890,12 @@ async function refreshAllStatus() {
 if(getToken()) collapseToken();
 loadExisting();
 if(getToken()) refreshAllStatus();
-// Restore active tab from URL hash
-const savedTab = location.hash.replace('#', '');
+// Restore active tab
+const savedTab = sessionStorage.getItem('activeTab');
 if (savedTab) {
-  const tabEl = document.querySelector(`.tab[onclick*="'${savedTab}'"]`);
-  if (tabEl) switchTab(savedTab, tabEl);
+  document.querySelectorAll('.tab').forEach(t => {
+    if (t.getAttribute('onclick').includes("'" + savedTab + "'")) switchTab(savedTab, t);
+  });
 }
 </script>
 </body>
