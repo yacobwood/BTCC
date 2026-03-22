@@ -65,47 +65,63 @@ def scrape_circuit_page(page, slug: str, venue: str) -> list[dict]:
         print(f"  ✗ Failed to load {url}: {e}", file=sys.stderr)
         return []
 
-    # Extract the full timetable text from the page
     text = page.inner_text("body")
+    # Collapse whitespace to single spaces — page often renders as one long line
+    text = re.sub(r"\s+", " ", text)
 
     sessions = []
-    current_day = None
 
-    for line in text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
+    # Pattern: optional time range or single time, then session name, then "Kwik Fit" / "BTCC"
+    # e.g. "10:35 – 11:15Free PracticeKwik Fit British Touring Car Championship"
+    # e.g. "15:05Qualifying RaceKwik Fit British Touring Car Championship13"
+    # e.g. "11:30Kwik Fit British Touring Car Championship18"  (Race 1/2/3 — no explicit name before)
 
-        # Detect day headers e.g. "Saturday, April 18" or "Sunday 19 April"
-        lower = line.lower()
-        for day_name, day_code in DAY_MAP.items():
-            if lower.startswith(day_name):
-                current_day = day_code
-                break
+    # Split on day headers to get SAT/SUN context
+    day_pattern = re.compile(
+        r"(Saturday|Sunday)[^A-Z]*?(?=Saturday|Sunday|$)",
+        re.IGNORECASE
+    )
 
-        if current_day is None:
-            continue
+    # Find all day sections
+    day_sections = []
+    for m in re.finditer(
+        r"(Saturday|Sunday)[\s,]*[A-Za-z]* ?\d+[^S]*?(?=Saturday|Sunday|$)",
+        text, re.IGNORECASE
+    ):
+        day_word = m.group(1).lower()
+        day_code = "SAT" if day_word == "saturday" else "SUN"
+        day_sections.append((day_code, m.group(0)))
 
-        # Look for lines containing a BTCC session — must have a time and "BTCC" keyword
-        is_btcc = any(kw in lower for kw in BTCC_KEYWORDS)
-        if not is_btcc:
-            continue
+    if not day_sections:
+        print(f"  ⚠ No day sections found on {url}")
+        return []
 
-        # Extract time — first HH:MM in the line
-        time_match = TIME_RE.search(line)
-        if not time_match:
-            continue
-        time_str = f"{int(time_match.group(1)):02d}:{time_match.group(2)}"
+    race_counter = 0
 
-        # Determine session name
-        name = classify_session(line)
-        if name is None:
-            continue
+    for day_code, section in day_sections:
+        # Find all BTCC entries in this section
+        # Match: time (HH:MM or HH:MM – HH:MM) + optional session name + BTCC keyword
+        entry_re = re.compile(
+            r"(\d{1,2}:\d{2})(?:\s*[–\-]\s*\d{1,2}:\d{2})?"  # time (range optional)
+            r"\s*([A-Za-z][^0-9]*?)"                            # activity text
+            r"(?=Kwik Fit|BTCC|British Touring Car)",
+            re.IGNORECASE
+        )
+        for m in entry_re.finditer(section):
+            time_str = m.group(1)
+            # Normalise to HH:MM
+            h, mi = time_str.split(":")
+            time_str = f"{int(h):02d}:{mi}"
+            activity = m.group(2).strip().rstrip("–- ")
 
-        # Avoid duplicates (same name + day)
-        if not any(s["name"] == name and s["day"] == current_day for s in sessions):
-            sessions.append({"name": name, "day": current_day, "time": time_str})
-            print(f"    {current_day} {time_str}  {name}")
+            name = classify_btcc_entry(activity, sessions)
+            if name is None:
+                continue
+
+            # Avoid duplicates
+            if not any(s["name"] == name and s["day"] == day_code for s in sessions):
+                sessions.append({"name": name, "day": day_code, "time": time_str})
+                print(f"    {day_code} {time_str}  {name}")
 
     if not sessions:
         print(f"  ⚠ No BTCC sessions found on {url}")
@@ -113,20 +129,51 @@ def scrape_circuit_page(page, slug: str, venue: str) -> list[dict]:
     return sessions
 
 
-def classify_session(line: str) -> str | None:
-    lower = line.lower()
+def classify_session(activity: str, following: str = "") -> str | None:
+    lower = activity.lower()
+    following_lower = following.lower()[:60]
+
     if "free practice" in lower:
         return "Free Practice"
     if "qualifying race" in lower:
         return "Qualifying Race"
     if "qualifying" in lower:
         return "Qualifying"
-    # Race 1/2/3 — look for "race" followed by a number, or just "race" on its own
+
+    # Race rows: activity is blank or just whitespace — look at what follows the BTCC keyword
+    # e.g. "11:30Kwik Fit British Touring Car Championship18" — this is a race
+    # Count how many races we've already added to determine Race 1/2/3
+    if not lower.strip() or "pit lane" in lower:
+        return None  # pit lane open notices, not sessions
+
+    # Explicit race number in activity
     race_match = re.search(r"\brace\s*(\d)\b", lower)
     if race_match:
         return f"Race {race_match.group(1)}"
-    if re.search(r"\brace\b", lower):
-        return "Race 1"  # fallback for single-race formats
+
+    return None
+
+
+# Track race counter per call to merge_schedule — reset per round
+_race_counter = 0
+
+
+def classify_btcc_entry(activity: str, sessions_so_far: list) -> str | None:
+    """Classify a BTCC timetable entry, counting races sequentially."""
+    lower = activity.lower().strip()
+
+    if "free practice" in lower:
+        return "Free Practice"
+    if "qualifying race" in lower:
+        return "Qualifying Race"
+    if "qualifying" in lower:
+        return "Qualifying"
+
+    # Blank activity = standalone race entry (just "Kwik Fit British Touring Car Championship")
+    race_num = sum(1 for s in sessions_so_far if s["name"].startswith("Race")) + 1
+    if race_num <= 3:
+        return f"Race {race_num}"
+
     return None
 
 
