@@ -21,6 +21,7 @@ import com.btccfanhub.BuildConfig
 import com.btccfanhub.Constants
 import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.ThemeStore
 import com.btccfanhub.ui.components.PillToggle
 import com.btccfanhub.ui.theme.*
 import com.btccfanhub.worker.NewsCheckWorker
@@ -34,6 +35,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
     val prefs = remember {
         context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
     }
+    val nm = remember { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     val testModeEnabled by FeatureFlagsStore.widgetRaceWeekendTest.collectAsState()
     var versionTapCount by remember { mutableIntStateOf(0) }
 
@@ -86,9 +88,32 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
         ) {
             Spacer(Modifier.height(8.dp))
 
+            // ── Appearance ────────────────────────────────────────────────
+            val isDark by ThemeStore.isDark.collectAsState()
             Text(
-                "NOTIFICATIONS",
+                "APPEARANCE",
                 style         = MaterialTheme.typography.labelSmall,
+                fontWeight    = FontWeight.ExtraBold,
+                color         = BtccTextSecondary,
+                letterSpacing = 2.sp,
+                modifier      = Modifier.padding(bottom = 12.dp),
+            )
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Theme", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                PillToggle(
+                    options = listOf("Dark", "Light"),
+                    selectedIndex = if (isDark) 0 else 1,
+                    onSelectionChanged = { ThemeStore.setDark(context, it == 0) },
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+
+            Text(
+                "NOTIFICATIONS",                style         = MaterialTheme.typography.labelSmall,
                 fontWeight    = FontWeight.ExtraBold,
                 color         = BtccTextSecondary,
                 letterSpacing = 2.sp,
@@ -120,7 +145,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                         notificationsEnabled = it == 0
                         Analytics.notificationTypeToggled("news", it == 0)
                         prefs.edit().putBoolean(NewsCheckWorker.KEY_NOTIF_ENABLED, it == 0).apply()
-                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         if (it == 0) {
                             nm.createNotificationChannel(
                                 NotificationChannel(
@@ -161,7 +185,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                         raceEnabled = it == 0
                         Analytics.notificationTypeToggled("race", it == 0)
                         prefs.edit().putBoolean(RaceNotificationWorker.KEY_RACE_NOTIF_ENABLED, it == 0).apply()
-                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         if (it == 0) {
                             nm.createNotificationChannel(
                                 NotificationChannel(
@@ -202,7 +225,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                         qualifyingEnabled = it == 0
                         Analytics.notificationTypeToggled("qualifying", it == 0)
                         prefs.edit().putBoolean(RaceNotificationWorker.KEY_QUALIFYING_NOTIF_ENABLED, it == 0).apply()
-                        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         if (it == 0) {
                             nm.createNotificationChannel(
                                 NotificationChannel(
@@ -246,7 +268,6 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                             resultsEnabled = it == 0
                             Analytics.notificationTypeToggled("results", it == 0)
                             prefs.edit().putBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, it == 0).apply()
-                            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                             if (it == 0) {
                                 nm.createNotificationChannel(
                                     NotificationChannel(

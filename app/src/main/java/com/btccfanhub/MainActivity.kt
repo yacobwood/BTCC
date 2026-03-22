@@ -41,10 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import android.widget.Toast
@@ -54,6 +56,7 @@ import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.data.FavouriteDriverStore
 import com.btccfanhub.data.OnboardingStore
 import com.btccfanhub.data.ReviewPromptStore
+import com.btccfanhub.data.ThemeStore
 import com.btccfanhub.data.WhatsNewStore
 import com.btccfanhub.data.network.RssParser
 import com.btccfanhub.ui.NotificationOnboardingScreen
@@ -91,10 +94,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MobileAds.initialize(this)
+        // Initialize MobileAds off the main thread — it's a slow call
+        lifecycleScope.launch(Dispatchers.IO) { MobileAds.initialize(this@MainActivity) }
         FeatureFlagsStore.init(this)
         lifecycleScope.launch(Dispatchers.IO) { FeatureFlagsStore.fetchRemote() }
         FavouriteDriverStore.init(this)
+        ThemeStore.init(this)
         createNewsNotificationChannel()
         createRaceNotificationChannel()
         createQualifyingNotificationChannel()
@@ -109,7 +114,13 @@ class MainActivity : ComponentActivity() {
         ReviewPromptStore.recordLaunch(this)
         maybeRequestInAppReview()
         setContent {
-            BTCCFanHubTheme {
+            val isDark by ThemeStore.isDark.collectAsState()
+            // Adjust status bar icon colour to match theme
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                isAppearanceLightStatusBars = !isDark
+                isAppearanceLightNavigationBars = !isDark
+            }
+            BTCCFanHubTheme(darkTheme = isDark) {
                 MainScreen(
                     pendingArticleId    = pendingArticleId.value,
                     onArticleIdConsumed = { pendingArticleId.value = null },
@@ -212,7 +223,12 @@ class MainActivity : ComponentActivity() {
 
     private fun scheduleNewsCheck() {
         val wm = WorkManager.getInstance(this)
-        val periodic = PeriodicWorkRequestBuilder<NewsCheckWorker>(15, TimeUnit.MINUTES).build()
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val periodic = PeriodicWorkRequestBuilder<NewsCheckWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
         wm.enqueueUniquePeriodicWork(
             NewsCheckWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
@@ -222,7 +238,12 @@ class MainActivity : ComponentActivity() {
 
     private fun scheduleRaceNotifications() {
         val wm = WorkManager.getInstance(this)
-        val periodic = PeriodicWorkRequestBuilder<RaceNotificationWorker>(15, TimeUnit.MINUTES).build()
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val periodic = PeriodicWorkRequestBuilder<RaceNotificationWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
         wm.enqueueUniquePeriodicWork(
             RaceNotificationWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
@@ -246,7 +267,12 @@ class MainActivity : ComponentActivity() {
 
     private fun scheduleResultsCheck() {
         val wm = WorkManager.getInstance(this)
-        val periodic = PeriodicWorkRequestBuilder<ResultsCheckWorker>(15, TimeUnit.MINUTES).build()
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val periodic = PeriodicWorkRequestBuilder<ResultsCheckWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
         wm.enqueueUniquePeriodicWork(
             ResultsCheckWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
