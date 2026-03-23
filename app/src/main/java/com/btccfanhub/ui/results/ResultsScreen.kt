@@ -897,11 +897,6 @@ private fun DriverRow(driver: DriverStanding) {
         2    -> Color(0xFFC0C0C0)
         3    -> Color(0xFFCD7F32)
         else -> MaterialTheme.colorScheme.onSurfaceVariant
-    } positionColor = when (driver.position) {
-        1    -> Color(0xFFFFD700)
-        2    -> Color(0xFFC0C0C0)
-        3    -> Color(0xFFCD7F32)
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600

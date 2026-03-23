@@ -32,15 +32,17 @@ import coil.compose.AsyncImage
 import com.btccfanhub.data.ArticleHolder
 import com.btccfanhub.data.network.RssParser
 import com.btccfanhub.ui.components.ImageLightbox
-import com.btccfanhub.ui.theme.BtccBackground
+import androidx.compose.material3.MaterialTheme
 import com.btccfanhub.ui.theme.BtccYellow
+import com.btccfanhub.data.ThemeStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @SuppressLint("JavascriptInterface")
 @Composable
 fun ArticleScreen(onBack: () -> Unit) {
-    val article = ArticleHolder.current
+    // Consume once on entry — clears the holder so the content string doesn't outlive this screen
+    val article = remember { ArticleHolder.consume() }
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(article) {
@@ -61,13 +63,22 @@ fun ArticleScreen(onBack: () -> Unit) {
     }
     LaunchedEffect(article) { scrollDepthBridge.title = article?.title ?: "" }
 
+    val isDark by ThemeStore.isDark.collectAsState()
+
     LaunchedEffect(article) {
         if (article == null) {
             htmlToLoad = "<html><body style='background:#0B0C0F;color:#fff;padding:16px'>No content available.</body></html>"
             return@LaunchedEffect
         }
 
-        val sanitised = sanitiseContent(article.content)
+        // List articles have content="" — fetch the full post before rendering
+        val fullContent = if (article.content.isBlank()) {
+            withContext(Dispatchers.IO) { RssParser.fetchArticleById(article.id)?.content } ?: ""
+        } else {
+            article.content
+        }
+
+        val sanitised = sanitiseContent(fullContent)
 
         val finalUrls: List<String>
         val finalContent: String
@@ -113,11 +124,16 @@ fun ArticleScreen(onBack: () -> Unit) {
             addVideoPoster(finalContent, article.imageUrl)
         } else finalContent
 
+        val withYoutube = replaceYouTubeIframes(withPosters)
+
         imageUrls.value = finalUrls
-        htmlToLoad = buildHtml(article.title, article.pubDate, withPosters, article.imageUrl)
+        htmlToLoad = buildHtml(article.title, article.pubDate, withYoutube, article.imageUrl, isDark)
     }
 
-    Box(Modifier.fillMaxSize().background(BtccBackground)) {
+    // Keep WebView instance alive across recompositions so it isn't recreated when html arrives
+    val webViewRef = remember { mutableStateOf<WebView?>(null) }
+
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         if (htmlToLoad == null) {
             CircularProgressIndicator(
                 color = BtccYellow,
@@ -125,18 +141,29 @@ fun ArticleScreen(onBack: () -> Unit) {
             )
         }
 
+        if (htmlToLoad != null) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
-                WebView(context).apply {
+                WebView(context).also { webViewRef.value = it }.apply {
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(
                             view: WebView,
                             request: WebResourceRequest,
                         ): Boolean {
-                            val uri = request.url
-                            if (uri?.scheme == "app-image") {
+                            val uri = request.url ?: return false
+                            if (uri.scheme == "app-image") {
                                 lightboxIndex.value = uri.host?.toIntOrNull() ?: 0
+                                return true
+                            }
+                            // Open all http/https links externally
+                            if (uri.scheme == "https" || uri.scheme == "http") {
+                                try {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, uri)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    )
+                                } catch (_: Exception) {}
                                 return true
                             }
                             return false
@@ -145,7 +172,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                     settings.javaScriptEnabled = true
                     settings.useWideViewPort = true
                     settings.loadWithOverviewMode = false
-                    setBackgroundColor(AndroidColor.parseColor("#0B0C0F"))
+                    setBackgroundColor(if (isDark) AndroidColor.parseColor("#0B0C0F") else AndroidColor.parseColor("#F4F5F9"))
                     addJavascriptInterface(scrollDepthBridge, "AppScrollTracker")
                 }
             },
@@ -157,6 +184,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                 }
             }
         )
+        } // end if (htmlToLoad != null)
 
         val context = LocalContext.current
         Row(
@@ -230,7 +258,14 @@ private fun prepareImages(sanitised: String): Pair<String, List<String>> {
         }
 
         if (src != null) {
-            val resolved = if (src.startsWith("http")) src else "https://www.btcc.net$src"
+                val resolved = when {
+                    src.startsWith("//") -> "https:$src"
+                    src.startsWith("http") -> src
+                        .replace("http://btcc.net/", "https://www.btcc.net/")
+                        .replace("https://btcc.net/", "https://www.btcc.net/")
+                        .replace("http://www.btcc.net/", "https://www.btcc.net/")
+                    else -> "https://www.btcc.net$src"
+                }
             if (!seenUrls.add(resolved)) return@replace ""  // exact duplicate
 
             // NGG "thumbs" variant (.../thumbs/thumbs-image.jpg) — original comes separately, skip
@@ -310,6 +345,35 @@ private fun deduplicateNggImages(urls: List<String>): List<String> {
     return byKey.values.toList()
 }
 
+// Replace YouTube iframes with a tappable thumbnail — tapping opens the YouTube app via a link
+private fun replaceYouTubeIframes(html: String): String {
+    val videoIdRegex = Regex(
+        """(?:youtube\.com/embed/|youtu\.be/)([A-Za-z0-9_\-]{11})""",
+        RegexOption.IGNORE_CASE
+    )
+    return Regex(
+        """<iframe\b[^>]*src=["']([^"']*(?:youtube\.com|youtu\.be)[^"']*)["'][^>]*>.*?</iframe>""",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+    ).replace(html) { match ->
+        val src = match.groupValues[1]
+        val videoId = videoIdRegex.find(src)?.groupValues?.get(1)
+        if (videoId != null) {
+            val thumb = "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
+            val watchUrl = "https://www.youtube.com/watch?v=$videoId"
+            """<a href="$watchUrl" style="display:block;position:relative;margin:12px 0;">
+              <img src="$thumb" style="width:100%;border-radius:8px;">
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                width:56px;height:56px;background:rgba(255,0,0,0.85);border-radius:50%;
+                display:flex;align-items:center;justify-content:center;">
+                <div style="width:0;height:0;border-top:10px solid transparent;
+                  border-bottom:10px solid transparent;border-left:18px solid white;
+                  margin-left:4px;"></div>
+              </div>
+            </a>"""
+        } else match.value
+    }
+}
+
 private fun addVideoPoster(html: String, posterUrl: String): String =
     Regex("""<video\b([^>]*)>""", RegexOption.IGNORE_CASE).replace(html) { match ->
         if (match.groupValues[1].contains("poster", ignoreCase = true)) match.value
@@ -325,7 +389,20 @@ private fun sanitiseContent(html: String): String =
         .replace(Regex("""\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*""""), "")
         .replace(Regex("""\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)='[^']*'"""), "")
 
-private fun buildHtml(title: String, pubDate: String, content: String, heroImageUrl: String? = null): String {
+private fun buildHtml(title: String, pubDate: String, content: String, heroImageUrl: String? = null, isDark: Boolean = true): String {
+    val bgColor       = if (isDark) "#0B0C0F" else "#F4F5F9"
+    val textColor     = if (isDark) "#FFFFFF"  else "#0A0B1A"
+    val secondaryText = if (isDark) "#8B949E"  else "#5A5E7A"
+    val headingColor  = if (isDark) "#FFFFFF"  else "#0A0B1A"
+    val blockquoteColor = if (isDark) "#8B949E" else "#5A5E7A"
+    val listBg        = if (isDark) "rgba(255,255,255,0.05)" else "rgba(0,0,0,0.04)"
+    val shimmer1      = if (isDark) "#1a1a1a"  else "#e0e0e0"
+    val shimmer2      = if (isDark) "#2a2a2a"  else "#ebebeb"
+    val videoBg       = if (isDark) "#1a1a1a"  else "#e0e0e0"
+    val tableBorder   = if (isDark) "#333"     else "#C0C3D0"
+    val tableHeadBg   = if (isDark) "rgba(255,255,255,0.1)" else "rgba(0,0,0,0.06)"
+    val tableEvenBg   = if (isDark) "rgba(255,255,255,0.04)" else "rgba(0,0,0,0.03)"
+    val heroGradientEnd = if (isDark) "rgba(11,12,15,0.95)" else "rgba(244,245,249,0.95)"
     val heroSection = if (heroImageUrl != null) """
         <div class="hero" style="background-image: url('$heroImageUrl');">
           <div class="hero-gradient"></div>
@@ -336,7 +413,7 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
         </div>
     """ else """
         <div style="padding: 80px 16px 0;">
-          <h1 class="article-title">$title</h1>
+          <h1 class="article-title" style="color:$textColor">$title</h1>
           <p class="article-date">$pubDate</p>
         </div>
     """
@@ -350,8 +427,8 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
         html { overflow-x: hidden; max-width: 100vw; }
         * { box-sizing: border-box; margin: 0; padding: 0; max-width: 100% !important; }
         body {
-          background-color: #0B0C0F;
-          color: #FFFFFF;
+          background-color: $bgColor;
+          color: $textColor;
           font-family: -apple-system, sans-serif;
           font-size: 16px;
           line-height: 1.7;
@@ -376,7 +453,7 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
             rgba(0,0,0,0.7) 0%,
             transparent 30%,
             transparent 50%,
-            rgba(11,12,15,0.95) 100%
+            $heroGradientEnd 100%
           );
         }
         .hero-text {
@@ -392,7 +469,7 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
         }
         .article-date {
           font-size: 13px;
-          color: #8B949E;
+          color: $secondaryText;
         }
         .divider {
           height: 2px;
@@ -403,13 +480,13 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
         .content { padding: 0 16px 16px; }
         ul, ol {
           padding-left: 1.5em;
-          background: rgba(255,255,255,0.05);
+          background: $listBg;
           border-left: 3px solid #FEBD02;
           border-radius: 6px;
           padding: 14px 14px 14px 28px;
           margin: 16px 0;
         }
-        li { margin-bottom: 8px; color: #ccc; }
+        li { margin-bottom: 8px; color: $secondaryText; }
         li:last-child { margin-bottom: 0; }
         @keyframes shimmer {
           0% { background-position: -200% 0; }
@@ -422,7 +499,7 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           margin: 12px 0;
           display: block;
           min-height: 120px;
-          background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+          background: linear-gradient(90deg, $shimmer1 25%, $shimmer2 50%, $shimmer1 75%);
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
         }
@@ -430,17 +507,17 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
         figure { width: 100% !important; }
         .wp-block-image, .wp-block-embed, .wp-block-gallery { width: 100% !important; }
         p { margin-bottom: 14px; }
-        h2, h3, h4 { margin: 20px 0 8px; color: #FFFFFF; }
+        h2, h3, h4 { margin: 20px 0 8px; color: $headingColor; }
         a { color: #FEBD02; text-decoration: none; }
         a[href^="app-image://"] { display: block; color: inherit; }
         blockquote {
           border-left: 3px solid #FEBD02;
           padding-left: 14px;
           margin: 16px 0;
-          color: #8B949E;
+          color: $blockquoteColor;
           font-style: italic;
         }
-        figcaption { font-size: 12px; color: #8B949E; margin-top: 4px; }
+        figcaption { font-size: 12px; color: $secondaryText; margin-top: 4px; }
         figure { margin: 12px 0; }
         .wp-block-image, .wp-block-embed { margin: 16px 0; }
         video {
@@ -449,7 +526,7 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           border-radius: 8px;
           margin: 12px 0;
           display: block;
-          background: #1a1a1a;
+          background: $videoBg;
         }
         table {
           width: 100% !important;
@@ -460,16 +537,16 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           display: block;
         }
         th, td {
-          border: 1px solid #333;
+          border: 1px solid $tableBorder;
           padding: 6px 8px;
           text-align: center;
           white-space: nowrap;
         }
         th {
-          background: rgba(255,255,255,0.1);
+          background: $tableHeadBg;
           font-weight: 700;
         }
-        tr:nth-child(even) { background: rgba(255,255,255,0.04); }
+        tr:nth-child(even) { background: $tableEvenBg; }
         iframe { width: 100% !important; max-width: 100% !important; border: none; }
       </style>
     </head>
