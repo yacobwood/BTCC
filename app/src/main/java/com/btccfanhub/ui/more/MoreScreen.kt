@@ -31,7 +31,15 @@ import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
-import com.btccfanhub.ui.theme.*
+import com.btccfanhub.ui.theme.BtccYellow
+
+private val iconMap = mapOf(
+    "info" to Icons.Default.Info,
+    "history" to Icons.Default.History,
+    "directions_car" to Icons.Default.DirectionsCar,
+    "eco" to Icons.Default.Eco,
+    "leaderboard" to Icons.Default.Leaderboard,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,81 +72,12 @@ fun MoreScreen(
                         letterSpacing = 1.sp,
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
-        containerColor = BtccBackground,
+        containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         val isWide = LocalConfiguration.current.screenWidthDp >= 600
-
-        // Shared section composables
-        @Composable
-        fun SectionHeader(text: String) {
-            Text(
-                text,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = BtccTextSecondary,
-                letterSpacing = 2.sp,
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-        }
-
-        val iconMap = mapOf(
-            "info" to Icons.Default.Info,
-            "history" to Icons.Default.History,
-            "directions_car" to Icons.Default.DirectionsCar,
-            "eco" to Icons.Default.Eco,
-            "leaderboard" to Icons.Default.Leaderboard,
-        )
-
-        @Composable
-        fun LeftColumn(columnModifier: Modifier = Modifier) {
-            Column(modifier = columnModifier.padding(horizontal = 16.dp)) {
-                Spacer(Modifier.height(8.dp))
-                SectionHeader("NEW HERE?")
-                MoreRow(
-                    label = "New to BTCC?",
-                    icon = Icons.Default.School,
-                    onClick = { Analytics.moreItemClicked("new_to_btcc"); onInfoPageClick("new-to-btcc") },
-                )
-                HorizontalDivider(color = BtccOutline, modifier = Modifier.padding(vertical = 16.dp))
-                SectionHeader("ABOUT BTCC")
-                pages.filter { !it.id.startsWith("btcc-") && it.id != "new-to-btcc" && it.id != "championships" }.forEach { page ->
-                    MoreRow(
-                        label = page.title,
-                        icon = iconMap[page.icon] ?: Icons.Default.Info,
-                        onClick = { Analytics.moreItemClicked(page.id); onInfoPageClick(page.id) },
-                    )
-                    Spacer(Modifier.height(4.dp))
-                }
-                Spacer(Modifier.height(24.dp))
-            }
-        }
-
-        @Composable
-        fun RightColumn(columnModifier: Modifier = Modifier) {
-            Column(modifier = columnModifier.padding(horizontal = 16.dp)) {
-                Spacer(Modifier.height(8.dp))
-                SectionHeader("APP")
-                MoreRow(label = "Radio", icon = Icons.Default.Radio, onClick = { Analytics.moreItemClicked("radio"); onRadioClick() })
-                Spacer(Modifier.height(4.dp))
-                MoreRow(label = "Settings", icon = Icons.Default.Settings, onClick = { Analytics.moreItemClicked("settings"); onSettingsClick() })
-                Spacer(Modifier.height(4.dp))
-                MoreRow(label = "Feedback & Bugs", icon = Icons.Default.BugReport, onClick = { Analytics.moreItemClicked("feedback_bugs"); onBugReportClick() })
-                HorizontalDivider(color = BtccOutline, modifier = Modifier.padding(vertical = 16.dp))
-                SectionHeader("SUPPORT")
-                MoreRow(
-                    label = "Buy me a coffee",
-                    icon = Icons.Default.Coffee,
-                    onClick = {
-                        Analytics.moreItemClicked("buy_me_a_coffee")
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/btcchub")))
-                    },
-                )
-                Spacer(Modifier.height(24.dp))
-            }
-        }
 
         if (isWide) {
             Row(
@@ -148,12 +87,22 @@ fun MoreScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalAlignment = Alignment.Top,
             ) {
-                LeftColumn(columnModifier = Modifier.weight(1f))
+                MoreLeftColumn(
+                    pages = pages,
+                    onInfoPageClick = onInfoPageClick,
+                    columnModifier = Modifier.weight(1f),
+                )
                 VerticalDivider(
-                    color = BtccOutline,
+                    color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.fillMaxHeight().padding(vertical = 8.dp),
                 )
-                RightColumn(columnModifier = Modifier.weight(1f))
+                MoreRightColumn(
+                    context = context,
+                    onRadioClick = onRadioClick,
+                    onSettingsClick = onSettingsClick,
+                    onBugReportClick = onBugReportClick,
+                    columnModifier = Modifier.weight(1f),
+                )
             }
         } else {
             Column(
@@ -162,11 +111,86 @@ fun MoreScreen(
                     .padding(padding)
                     .verticalScroll(rememberScrollState()),
             ) {
-                LeftColumn()
-                HorizontalDivider(color = BtccOutline, modifier = Modifier.padding(horizontal = 16.dp))
-                RightColumn()
+                MoreLeftColumn(pages = pages, onInfoPageClick = onInfoPageClick)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(horizontal = 16.dp))
+                MoreRightColumn(
+                    context = context,
+                    onRadioClick = onRadioClick,
+                    onSettingsClick = onSettingsClick,
+                    onBugReportClick = onBugReportClick,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun MoreSectionHeader(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.ExtraBold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        letterSpacing = 2.sp,
+        modifier = Modifier.padding(bottom = 12.dp),
+    )
+}
+
+@Composable
+private fun MoreLeftColumn(
+    pages: List<InfoPage>,
+    onInfoPageClick: (String) -> Unit,
+    columnModifier: Modifier = Modifier,
+) {
+    Column(modifier = columnModifier.padding(horizontal = 16.dp)) {
+        Spacer(Modifier.height(8.dp))
+        MoreSectionHeader("NEW HERE?")
+        MoreRow(
+            label = "New to BTCC?",
+            icon = Icons.Default.School,
+            onClick = { Analytics.moreItemClicked("new_to_btcc"); onInfoPageClick("new-to-btcc") },
+        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 16.dp))
+        MoreSectionHeader("ABOUT BTCC")
+        pages.filter { !it.id.startsWith("btcc-") && it.id != "new-to-btcc" && it.id != "championships" }.forEach { page ->
+            MoreRow(
+                label = page.title,
+                icon = iconMap[page.icon] ?: Icons.Default.Info,
+                onClick = { Analytics.moreItemClicked(page.id); onInfoPageClick(page.id) },
+            )
+            Spacer(Modifier.height(4.dp))
+        }
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun MoreRightColumn(
+    context: android.content.Context,
+    onRadioClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onBugReportClick: () -> Unit,
+    columnModifier: Modifier = Modifier,
+) {
+    Column(modifier = columnModifier.padding(horizontal = 16.dp)) {
+        Spacer(Modifier.height(8.dp))
+        MoreSectionHeader("APP")
+        MoreRow(label = "Radio", icon = Icons.Default.Radio, onClick = { Analytics.moreItemClicked("radio"); onRadioClick() })
+        Spacer(Modifier.height(4.dp))
+        MoreRow(label = "Settings", icon = Icons.Default.Settings, onClick = { Analytics.moreItemClicked("settings"); onSettingsClick() })
+        Spacer(Modifier.height(4.dp))
+        MoreRow(label = "Feedback & Bugs", icon = Icons.Default.BugReport, onClick = { Analytics.moreItemClicked("feedback_bugs"); onBugReportClick() })
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 16.dp))
+        MoreSectionHeader("SUPPORT")
+        MoreRow(
+            label = "Buy me a coffee",
+            icon = Icons.Default.Coffee,
+            onClick = {
+                Analytics.moreItemClicked("buy_me_a_coffee")
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/btcchub")))
+            },
+        )
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -188,7 +212,7 @@ private fun MoreRow(label: String, icon: ImageVector, onClick: () -> Unit) {
         Spacer(Modifier.width(16.dp))
         Text(
             label,
-            color = BtccTextPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp,
             modifier = Modifier.weight(1f),
@@ -196,7 +220,7 @@ private fun MoreRow(label: String, icon: ImageVector, onClick: () -> Unit) {
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = BtccTextSecondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

@@ -23,7 +23,7 @@ import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.model.ContentBlock
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
-import com.btccfanhub.ui.theme.*
+import com.btccfanhub.ui.theme.BtccYellow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +31,7 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
     val context = LocalContext.current
     var page by remember { mutableStateOf<InfoPage?>(null) }
     var loading by remember { mutableStateOf(true) }
+    var segments by remember { mutableStateOf<List<Any>>(emptyList()) }
 
     LaunchedEffect(pageId) {
         Analytics.screen("info_page:$pageId")
@@ -38,6 +39,28 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
         if (page == null) {
             PagesRepository.getPagesFromAssets(context)
             page = PagesRepository.getPage(pageId)
+        }
+        // Pre-process sections off the composition thread
+        val sections = page?.sections ?: emptyList()
+        segments = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            val result = mutableListOf<Any>()
+            var i = 0
+            while (i < sections.size) {
+                val block = sections[i]
+                if (block.type == "group-start") {
+                    val group = mutableListOf<com.btccfanhub.data.model.ContentBlock>()
+                    i++
+                    while (i < sections.size && sections[i].type != "group-end") {
+                        group.add(sections[i])
+                        i++
+                    }
+                    result.add(group.toList())
+                } else if (block.type != "group-end") {
+                    result.add(block)
+                }
+                i++
+            }
+            result.toList()
         }
         loading = false
     }
@@ -63,10 +86,10 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
-        containerColor = BtccBackground,
+        containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         if (loading) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -78,32 +101,13 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
         val info = page
         if (info == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Page not found", color = BtccTextSecondary)
+                Text("Page not found", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             return@Scaffold
         }
 
         // Pre-process: collect group-start..group-end ranges into sublists
-        val segments: List<Any> = remember(info.sections) {
-            val result = mutableListOf<Any>()
-            var i = 0
-            while (i < info.sections.size) {
-                val block = info.sections[i]
-                if (block.type == "group-start") {
-                    val group = mutableListOf<ContentBlock>()
-                    i++
-                    while (i < info.sections.size && info.sections[i].type != "group-end") {
-                        group.add(info.sections[i])
-                        i++
-                    }
-                    result.add(group.toList())
-                } else if (block.type != "group-end") {
-                    result.add(block)
-                }
-                i++
-            }
-            result
-        }
+        // (computed off the composition thread in LaunchedEffect above)
 
         Column(
             modifier = Modifier
@@ -128,8 +132,8 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 4.dp, bottom = 8.dp),
-                            colors = CardDefaults.cardColors(containerColor = BtccBackground),
-                            border = BorderStroke(1.dp, BtccOutline),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                             shape = RoundedCornerShape(8.dp),
                         ) {
                             Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
@@ -160,7 +164,7 @@ private fun BlockContent(block: ContentBlock, pageId: String, onPageClick: (Stri
         "subheading" -> {
             Text(
                 block.body,
-                color = BtccTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
                 letterSpacing = 0.8.sp,
@@ -189,7 +193,7 @@ private fun BlockContent(block: ContentBlock, pageId: String, onPageClick: (Stri
             ) {
                 Text(
                     block.body,
-                    color = BtccTextPrimary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
                     modifier = Modifier.weight(1f),
@@ -197,15 +201,15 @@ private fun BlockContent(block: ContentBlock, pageId: String, onPageClick: (Stri
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = BtccTextSecondary,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            HorizontalDivider(color = BtccOutline)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
         }
         else -> {
             Text(
                 block.body,
-                color = BtccTextPrimary,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 15.sp,
                 lineHeight = 24.sp,
                 modifier = Modifier.padding(bottom = 12.dp),

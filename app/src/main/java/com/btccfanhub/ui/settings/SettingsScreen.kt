@@ -23,7 +23,6 @@ import com.btccfanhub.data.FeatureFlagsStore
 import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.ThemeStore
 import com.btccfanhub.ui.components.PillToggle
-import com.btccfanhub.ui.theme.*
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
@@ -74,10 +73,10 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
-        containerColor = BtccBackground,
+        containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         Column(
             modifier = Modifier
@@ -94,7 +93,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 "APPEARANCE",
                 style         = MaterialTheme.typography.labelSmall,
                 fontWeight    = FontWeight.ExtraBold,
-                color         = BtccTextSecondary,
+                color         = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 2.sp,
                 modifier      = Modifier.padding(bottom = 12.dp),
             )
@@ -116,7 +115,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 "NOTIFICATIONS",
                 style         = MaterialTheme.typography.labelSmall,
                 fontWeight    = FontWeight.ExtraBold,
-                color         = BtccTextSecondary,
+                color         = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 2.sp,
                 modifier      = Modifier.padding(bottom = 12.dp),
             )
@@ -128,13 +127,13 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "News alerts",
-                        color      = BtccTextPrimary,
+                        color      = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
                         fontSize   = 15.sp,
                     )
                     Text(
                         "Get notified when a new BTCC article is published",
-                        color    = BtccTextSecondary,
+                        color    = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 2.dp),
                     )
@@ -168,13 +167,13 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "Race alerts",
-                        color      = BtccTextPrimary,
+                        color      = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
                         fontSize   = 15.sp,
                     )
                     Text(
                         "Get notified when a race session is about to start",
-                        color    = BtccTextSecondary,
+                        color    = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 2.dp),
                     )
@@ -208,13 +207,13 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "Qualifying alerts",
-                        color      = BtccTextPrimary,
+                        color      = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
                         fontSize   = 15.sp,
                     )
                     Text(
                         "Get notified when qualifying is about to start",
-                        color    = BtccTextSecondary,
+                        color    = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 2.dp),
                     )
@@ -251,13 +250,13 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             "Results alerts",
-                            color      = BtccTextPrimary,
+                            color      = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.SemiBold,
                             fontSize   = 15.sp,
                         )
                         Text(
                             "Get notified when new round results are published",
-                            color    = BtccTextSecondary,
+                            color    = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(top = 2.dp),
                         )
@@ -285,7 +284,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
             }
 
             HorizontalDivider(
-                color    = BtccOutline,
+                color    = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(vertical = 20.dp),
             )
 
@@ -293,7 +292,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 "UNIT DISPLAY",
                 style         = MaterialTheme.typography.labelSmall,
                 fontWeight    = FontWeight.ExtraBold,
-                color         = BtccTextSecondary,
+                color         = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 2.sp,
                 modifier      = Modifier.padding(bottom = 12.dp),
             )
@@ -305,13 +304,13 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         "Distance",
-                        color      = BtccTextPrimary,
+                        color      = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.SemiBold,
                         fontSize   = 15.sp,
                     )
                     Text(
                         "Unit used for circuit distances",
-                        color    = BtccTextSecondary,
+                        color    = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 2.dp),
                     )
@@ -334,13 +333,13 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
             }
 
             HorizontalDivider(
-                color    = BtccOutline,
+                color    = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(vertical = 20.dp),
             )
 
             Text(
                 "Version ${BuildConfig.VERSION_NAME}",
-                color    = BtccTextSecondary,
+                color    = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .fillMaxWidth()

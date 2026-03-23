@@ -29,10 +29,7 @@ import com.btccfanhub.data.Analytics
 import com.btccfanhub.data.TestClock
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.repository.CalendarRepository
-import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccNavy
-import com.btccfanhub.ui.theme.BtccOutline
-import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.data.FeatureFlagsStore
 import java.time.LocalDate
@@ -66,7 +63,8 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
         loading = races.isEmpty()
         loadError = false
         try {
-            CalendarRepository.invalidateCache()
+            // Only bust the cache on explicit pull-to-refresh (refreshKey > 0)
+            if (refreshKey > 0) CalendarRepository.invalidateCache()
             val cal = CalendarRepository.getCalendarData()
             races = cal.rounds
             liveTimingEnabled = cal.liveTimingEnabled
@@ -84,7 +82,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BtccBackground),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TopAppBar(
@@ -98,7 +96,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                 )
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = BtccBackground,
+                containerColor = MaterialTheme.colorScheme.background,
             ),
         )
         if (loading) {
@@ -113,7 +111,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Text("Couldn't load calendar. Check your connection.", color = BtccTextSecondary)
+                    Text("Couldn't load calendar. Check your connection.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Button(
                         onClick = { refreshKey++ },
                         colors = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
@@ -165,7 +163,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                             "ALL ROUNDS",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.ExtraBold,
-                            color = BtccTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             letterSpacing = 2.sp,
                             modifier = Modifier.padding(bottom = 12.dp, top = 4.dp),
                         )
@@ -205,7 +203,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                         "ALL ROUNDS",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.ExtraBold,
-                        color = BtccTextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         letterSpacing = 2.sp,
                         modifier = Modifier.padding(bottom = 12.dp),
                     )
@@ -271,7 +269,7 @@ private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}
                 Text(
                     formatDateRange(race.startDate, race.endDate),
                     style = MaterialTheme.typography.bodySmall,
-                    color = BtccTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -297,7 +295,7 @@ private fun CountdownCard(race: Race, today: LocalDate, onClick: () -> Unit = {}
                             "DAYS\nTO GO",
                             style = if (isTablet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = BtccTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             letterSpacing = 0.5.sp,
                         )
@@ -319,7 +317,7 @@ private fun TimelineRaceRow(
 ) {
     val dotColor = when {
         isNext -> BtccYellow
-        isPast -> BtccOutline
+        isPast -> MaterialTheme.colorScheme.outline
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
     val textAlpha = if (isPast) 0.4f else 1f
@@ -345,7 +343,7 @@ private fun TimelineRaceRow(
                     modifier = Modifier
                         .width(1.dp)
                         .height(64.dp)
-                        .background(BtccOutline.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                 )
             }
         }
@@ -365,7 +363,7 @@ private fun TimelineRaceRow(
                     Text(
                         "Rounds $rStart–$rEnd",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (isNext) BtccYellow else BtccTextSecondary.copy(alpha = textAlpha),
+                        color = if (isNext) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp,
                     )
@@ -395,7 +393,7 @@ private fun TimelineRaceRow(
                 Text(
                     formatDateRange(race.startDate, race.endDate),
                     style = MaterialTheme.typography.bodySmall,
-                    color = BtccTextSecondary.copy(alpha = textAlpha),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
                 )
             }
 
@@ -411,7 +409,7 @@ private fun TimelineRaceRow(
                             "DONE",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.ExtraBold,
-                            color = BtccTextSecondary.copy(alpha = 0.4f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                             letterSpacing = 0.5.sp,
                         )
                         daysUntil == 0L -> Text(
@@ -439,7 +437,7 @@ private fun TimelineRaceRow(
                                 "DAYS",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = BtccTextSecondary.copy(alpha = textAlpha),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
                                 letterSpacing = 0.5.sp,
                             )
                         }
@@ -451,7 +449,7 @@ private fun TimelineRaceRow(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = "View details",
-                tint = BtccTextSecondary.copy(alpha = textAlpha),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = textAlpha),
                 modifier = Modifier
                     .padding(start = 4.dp)
                     .size(14.dp),
