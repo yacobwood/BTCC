@@ -36,11 +36,7 @@ import com.btccfanhub.data.model.DriverResult
 import com.btccfanhub.data.model.RaceEntry
 import com.btccfanhub.data.repository.RaceResultsRepository
 import com.btccfanhub.data.repository.SeasonRepository
-import com.btccfanhub.ui.theme.BtccBackground
-import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccNavy
-import com.btccfanhub.ui.theme.BtccOutline
-import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
 import kotlinx.coroutines.launch
 
@@ -80,7 +76,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BtccBackground),
+            .background(MaterialTheme.colorScheme.background),
     ) {
         TopAppBar(
             windowInsets = WindowInsets(0),
@@ -109,7 +105,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -122,7 +118,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        Text("Failed to load results.", color = BtccTextSecondary, textAlign = TextAlign.Center)
+                        Text("Failed to load results.", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                         Button(
                             onClick = {
                                 scope.launch {
@@ -150,14 +146,14 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                 races.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         "No results available for this round.",
-                        color     = BtccTextSecondary,
+                        color     = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
                 }
                 else -> {
                     TabRow(
                         selectedTabIndex = pagerState.currentPage,
-                        containerColor   = BtccBackground,
+                        containerColor   = MaterialTheme.colorScheme.background,
                         contentColor     = BtccYellow,
                     ) {
                         races.forEachIndexed { index, race ->
@@ -177,7 +173,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                                         fontWeight    = FontWeight.ExtraBold,
                                         fontSize      = if (isTablet) 18.sp else 12.sp,
                                         letterSpacing = 0.sp,
-                                        color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                                        color = if (pagerState.currentPage == index) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 },
                             )
@@ -217,7 +213,25 @@ private fun VideoExternalButton(
             .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
             .clickable {
                 Analytics.raceVideoClicked(venue, text)
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                val uri = Uri.parse(url)
+                // Extract video ID to launch YouTube app directly
+                val videoId = uri.getQueryParameter("v")
+                    ?: uri.lastPathSegment?.takeIf { it.length == 11 }
+                val launched = if (videoId != null) {
+                    runCatching {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$videoId"))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                        true
+                    }.getOrDefault(false)
+                } else false
+                if (!launched) {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, uri)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
             }
             .padding(horizontal = 16.dp, vertical = if (LocalConfiguration.current.screenWidthDp >= 600) 16.dp else 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -252,12 +266,13 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
     val isQualifyingRace = race.label.equals("Qualifying Race", ignoreCase = true)
     if (race.results.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No results available.", color = BtccTextSecondary)
+            Text("No results available.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         return
     }
     val context = LocalContext.current
     val useKm by com.btccfanhub.data.FeatureFlagsStore.useKm.collectAsState()
+    val favourite by FavouriteDriverStore.driver.collectAsState()
     val maxAvgSpeedKmh = remember(race) {
         race.results.mapNotNull { it.avgLapSpeed?.toDoubleOrNull() }.maxOrNull()
     }
@@ -276,7 +291,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
                 Text(
                     displayDate.uppercase(),
                     style         = MaterialTheme.typography.labelSmall,
-                    color         = BtccTextSecondary,
+                    color         = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize      = if (isTablet) 14.sp else 11.sp,
                     fontWeight    = FontWeight.Bold,
                     letterSpacing = 1.sp,
@@ -297,7 +312,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
             }
         }
         items(race.results) { result ->
-            DriverResultRow(result, useKm = useKm, maxAvgSpeedKmh = maxAvgSpeedKmh, isTablet = isTablet)
+            DriverResultRow(result, useKm = useKm, maxAvgSpeedKmh = maxAvgSpeedKmh, isTablet = isTablet, favourite = favourite)
         }
         item {
             Row(
@@ -326,7 +341,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
                             label,
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = if (isTablet) 14.sp else 11.sp,
-                            color = BtccTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -341,15 +356,15 @@ private fun DriverResultRow(
     useKm: Boolean = true,
     maxAvgSpeedKmh: Double? = null,
     isTablet: Boolean = false,
+    favourite: String? = null,
 ) {
-    val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == result.driver
 
     val posColor = when (result.position) {
         1    -> Color(0xFFFFD700)
         2    -> Color(0xFFC0C0C0)
         3    -> Color(0xFFCD7F32)
-        else -> BtccOutline
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     val isLeader = result.position == 1
@@ -373,7 +388,7 @@ private fun DriverResultRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BtccCard, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
             .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(if (isTablet) 14.dp else 10.dp)) else Modifier)
             .padding(horizontal = if (isTablet) 20.dp else 12.dp, vertical = if (isTablet) 16.dp else 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -412,7 +427,7 @@ private fun DriverResultRow(
                 result.team,
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = if (isTablet) 14.sp else 12.sp,
-                color = BtccTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Column(horizontalAlignment = Alignment.End) {
@@ -426,7 +441,7 @@ private fun DriverResultRow(
                 Text(
                     "BL $bestLapDisplay",
                     style    = MaterialTheme.typography.labelSmall,
-                    color    = if (result.fastestLap) BtccYellow else BtccTextSecondary,
+                    color    = if (result.fastestLap) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = if (isTablet) 12.sp else 10.sp,
                 )
             }
@@ -434,7 +449,7 @@ private fun DriverResultRow(
                 Text(
                     speedDisplay,
                     style    = MaterialTheme.typography.labelSmall,
-                    color    = if (isTopSpeed) BtccYellow else BtccTextSecondary,
+                    color    = if (isTopSpeed) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = if (isTablet) 12.sp else 10.sp,
                 )
             }
@@ -461,7 +476,7 @@ private fun DriverResultRow(
             Text(
                 if (result.points > 0) "+${result.points} pts" else "0 pts",
                 style = MaterialTheme.typography.labelSmall,
-                color = BtccTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

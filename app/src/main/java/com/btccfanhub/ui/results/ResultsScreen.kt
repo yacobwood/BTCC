@@ -47,13 +47,8 @@ import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.RaceResultsRepository
 import com.btccfanhub.data.repository.SeasonRepository
 import com.btccfanhub.data.repository.StandingsRepository
-import com.btccfanhub.ui.theme.BtccBackground
-import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccNavy
-import com.btccfanhub.ui.theme.BtccOutline
-import com.btccfanhub.ui.theme.BtccSurface
 import com.btccfanhub.ui.theme.BtccYellow
-import com.btccfanhub.ui.theme.BtccTextSecondary
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -89,6 +84,18 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
     var currentRaceResults by remember { mutableStateOf<List<RoundResult>>(emptyList()) }
     var resultsLoading     by remember { mutableStateOf(false) }
+    var computedStats      by remember { mutableStateOf<List<com.btccfanhub.data.DriverSeasonStats>>(emptyList()) }
+
+    // Compute stats off the composition thread whenever results change
+    LaunchedEffect(currentRaceResults, seasonData) {
+        val rounds = currentRaceResults
+        val data   = seasonData
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            val computed = SeasonStatsComputer.compute(rounds)
+            if (computed.isNotEmpty()) computed
+            else data?.driverStats ?: emptyList()
+        }.also { computedStats = it }
+    }
 
     // Season start date from remote config (fallback: 2026-04-18)
     var seasonStartDate by remember { mutableStateOf(LocalDate.of(2026, 4, 18)) }
@@ -182,7 +189,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BtccBackground),
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TopAppBar(
@@ -195,7 +202,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     letterSpacing = 1.sp,
                 )
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
         )
 
         // Year selector — arrow navigation
@@ -203,7 +210,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             modifier = Modifier
                 .then(if (isTablet) Modifier else Modifier.widthIn(max = 680.dp))
                 .fillMaxWidth()
-                .background(BtccSurface)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 8.dp, vertical = 2.dp),
             verticalAlignment     = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -220,7 +227,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     Icons.Default.KeyboardArrowLeft,
                     contentDescription = "Older season",
                     modifier = Modifier.size(28.dp),
-                    tint = if (canGoOlder) MaterialTheme.colorScheme.onBackground else BtccOutline,
+                    tint = if (canGoOlder) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline,
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -235,7 +242,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     "SEASON",
                     style         = MaterialTheme.typography.labelSmall,
                     fontSize      = if (isTablet) 13.sp else 11.sp,
-                    color         = BtccTextSecondary,
+                    color         = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight    = FontWeight.ExtraBold,
                     letterSpacing = 2.sp,
                 )
@@ -256,7 +263,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                     Icons.Default.KeyboardArrowRight,
                     contentDescription = "Newer season",
                     modifier = Modifier.size(28.dp),
-                    tint = if (canGoNewer) MaterialTheme.colorScheme.onBackground else BtccOutline,
+                    tint = if (canGoNewer) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline,
                 )
             }
         }
@@ -273,11 +280,11 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                 .fillMaxWidth()
                 .height(if (isTablet) 64.dp else 48.dp),
         ) {
-            val useFixedTabs = LocalConfiguration.current.screenWidthDp >= 400
+            val useFixedTabs = isTablet
             if (useFixedTabs) {
                 PrimaryTabRow(
                     selectedTabIndex = pagerState.currentPage,
-                    containerColor   = BtccSurface,
+                    containerColor   = MaterialTheme.colorScheme.surface,
                     contentColor     = BtccYellow,
                     modifier         = Modifier.fillMaxWidth(),
                 ) {
@@ -294,7 +301,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                     fontWeight    = FontWeight.ExtraBold,
                                     fontSize      = if (isTablet) 16.sp else 11.sp,
                                     letterSpacing = 0.sp,
-                                    color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                                    color = if (pagerState.currentPage == index) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             },
                         )
@@ -303,7 +310,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
             } else {
                 PrimaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
-                    containerColor   = BtccSurface,
+                    containerColor   = MaterialTheme.colorScheme.surface,
                     contentColor     = BtccYellow,
                     edgePadding      = 0.dp,
                     scrollState      = tabScrollState,
@@ -321,7 +328,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                     fontWeight    = FontWeight.ExtraBold,
                                     fontSize      = if (isTablet) 16.sp else 12.sp,
                                     letterSpacing = 1.sp,
-                                    color = if (pagerState.currentPage == index) BtccYellow else BtccTextSecondary,
+                                    color = if (pagerState.currentPage == index) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
@@ -338,7 +345,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                             .background(
                                 Brush.horizontalGradient(
                                     colorStops = arrayOf(
-                                        0f to BtccBackground,
+                                        0f to MaterialTheme.colorScheme.background,
                                         1f to Color.Transparent,
                                     ),
                                 ),
@@ -356,7 +363,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 Brush.horizontalGradient(
                                     colorStops = arrayOf(
                                         0f to Color.Transparent,
-                                        1f to BtccBackground,
+                                        1f to MaterialTheme.colorScheme.background,
                                     ),
                                 ),
                             )
@@ -398,7 +405,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
                                 "Could not load standings.\nPull down to retry.",
-                                color     = BtccTextSecondary,
+                                color     = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -425,7 +432,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                         }
                     page == 1 && isHistorical ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Team standings not available.", color = BtccTextSecondary, textAlign = TextAlign.Center)
+                            Text("Team standings not available.", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                         }
 
                     // --- 2026 live ---
@@ -470,16 +477,9 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
 
                     // --- Season stats ---
                     page == 3 -> {
-                        // Always compute from rounds so poles + fastest laps are populated.
-                        // Fall back to JSON driverStats only if rounds data is empty.
-                        val stats = remember(currentRaceResults, seasonData) {
-                            val computed = SeasonStatsComputer.compute(currentRaceResults)
-                            if (computed.isNotEmpty()) computed
-                            else seasonData?.driverStats ?: emptyList()
-                        }
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                             SeasonStatsTab(
-                                stats = stats,
+                                stats = computedStats,
                                 loading = resultsLoading,
                                 year = selectedYear,
                                 seasonStartDate = seasonStartDate,
@@ -597,7 +597,7 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BtccCard, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = if (isTablet) 20.dp else 14.dp, vertical = if (isTablet) 18.dp else 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -634,7 +634,7 @@ private fun RoundResultCard(round: RoundResult, onClick: () -> Unit) {
                 round.date,
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = if (isTablet) 14.sp else 12.sp,
-                color = BtccTextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -692,7 +692,7 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate, firstRoundVenue: String
                 "The season kicks off at",
                 style     = MaterialTheme.typography.bodyMedium,
                 fontSize  = if (LocalConfiguration.current.screenWidthDp >= 600) 18.sp else 14.sp,
-                color     = BtccTextSecondary,
+                color     = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
 
@@ -700,7 +700,7 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate, firstRoundVenue: String
 
             Box(
                 modifier = Modifier
-                    .background(BtccCard, RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                     .border(1.dp, BtccYellow.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                     .padding(horizontal = 24.dp, vertical = 16.dp),
             ) {
@@ -726,7 +726,7 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate, firstRoundVenue: String
                         Text(
                             "$daysUntil days away",
                             style = MaterialTheme.typography.bodySmall,
-                            color = BtccTextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -784,7 +784,7 @@ private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
                 if (year != 2026) "Results will appear after each race weekend" else "The season kicks off at",
                 style     = MaterialTheme.typography.bodyMedium,
                 fontSize  = if (LocalConfiguration.current.screenWidthDp >= 600) 18.sp else 14.sp,
-                color     = BtccTextSecondary,
+                color     = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
 
@@ -793,7 +793,7 @@ private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
 
                 Box(
                     modifier = Modifier
-                        .background(BtccCard, RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                         .border(1.dp, BtccYellow.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 24.dp, vertical = 16.dp),
                 ) {
@@ -809,7 +809,7 @@ private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
                             Text(
                                 "$daysUntil days away",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = BtccTextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -870,7 +870,7 @@ private fun SeasonBanner(year: Int = 2025) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BtccCard, RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
             .border(1.dp, BtccYellow.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
             .padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
@@ -896,7 +896,12 @@ private fun DriverRow(driver: DriverStanding) {
         1    -> Color(0xFFFFD700)
         2    -> Color(0xFFC0C0C0)
         3    -> Color(0xFFCD7F32)
-        else -> BtccOutline
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    } positionColor = when (driver.position) {
+        1    -> Color(0xFFFFD700)
+        2    -> Color(0xFFC0C0C0)
+        3    -> Color(0xFFCD7F32)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
@@ -904,7 +909,7 @@ private fun DriverRow(driver: DriverStanding) {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = if (isTablet) 80.dp else 64.dp)
-            .background(BtccCard, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
             .then(
                 if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
                 else Modifier
@@ -933,7 +938,7 @@ private fun DriverRow(driver: DriverStanding) {
                     driver.displayTeam,
                     style    = MaterialTheme.typography.bodySmall,
                     fontSize = if (isTablet) 15.sp else 12.sp,
-                    color    = BtccTextSecondary,
+                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -959,7 +964,7 @@ private fun DriverRow(driver: DriverStanding) {
             Icon(
                 imageVector = if (isFavourite) Icons.Filled.Star else Icons.Outlined.Star,
                 contentDescription = if (isFavourite) "Remove favourite" else "Set as favourite",
-                tint     = if (isFavourite) BtccYellow else BtccTextSecondary,
+                tint     = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(if (isTablet) 24.dp else 18.dp),
             )
         }
@@ -991,7 +996,7 @@ private fun TeamRow(team: TeamStanding) {
         1    -> Color(0xFFFFD700)
         2    -> Color(0xFFC0C0C0)
         3    -> Color(0xFFCD7F32)
-        else -> BtccOutline
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
@@ -999,7 +1004,7 @@ private fun TeamRow(team: TeamStanding) {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = if (isTablet) 80.dp else 64.dp)
-            .background(BtccCard, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
             .padding(horizontal = if (isTablet) 20.dp else 14.dp, vertical = if (isTablet) 18.dp else 12.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -1034,7 +1039,7 @@ private fun RoundBanner(label: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BtccCard, RoundedCornerShape(if (isTablet) 12.dp else 10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(if (isTablet) 12.dp else 10.dp))
             .border(1.dp, Color(0xFF4CAF50).copy(alpha = 0.4f), RoundedCornerShape(if (isTablet) 12.dp else 10.dp))
             .padding(horizontal = if (isTablet) 20.dp else 14.dp, vertical = if (isTablet) 14.dp else 10.dp),
         contentAlignment = Alignment.Center,
@@ -1090,7 +1095,7 @@ private fun SeasonStatsTab(
                             "DRIVER",
                             style         = MaterialTheme.typography.labelSmall,
                             fontSize      = if (isTablet) 14.sp else 11.sp,
-                            color         = BtccTextSecondary,
+                            color         = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight    = FontWeight.ExtraBold,
                             letterSpacing = 1.sp,
                             modifier      = Modifier.weight(1f),
@@ -1107,7 +1112,7 @@ private fun SeasonStatsTab(
                                 col,
                                 style         = MaterialTheme.typography.labelSmall,
                                 fontSize      = if (isTablet) 13.sp else 11.sp,
-                                color         = BtccTextSecondary,
+                                color         = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight    = FontWeight.ExtraBold,
                                 letterSpacing = 0.5.sp,
                                 textAlign     = TextAlign.Center,
@@ -1134,7 +1139,7 @@ private fun DriverStatsRow(rank: Int, stat: DriverSeasonStats, showPoles: Boolea
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BtccCard, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(if (isTablet) 14.dp else 10.dp))
             .then(if (isFavourite) Modifier.border(1.dp, BtccYellow.copy(alpha = 0.5f), RoundedCornerShape(if (isTablet) 14.dp else 10.dp)) else Modifier)
             .padding(horizontal = if (isTablet) 20.dp else 14.dp, vertical = if (isTablet) 18.dp else 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1144,7 +1149,7 @@ private fun DriverStatsRow(rank: Int, stat: DriverSeasonStats, showPoles: Boolea
             style      = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Black,
             fontSize   = if (isTablet) 15.sp else 12.sp,
-            color      = BtccTextSecondary,
+            color      = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier   = Modifier.width(if (isTablet) 36.dp else 24.dp),
             textAlign  = TextAlign.Center,
         )
@@ -1160,7 +1165,7 @@ private fun DriverStatsRow(rank: Int, stat: DriverSeasonStats, showPoles: Boolea
                 stat.team,
                 style = MaterialTheme.typography.labelSmall,
                 fontSize = if (isTablet) 13.sp else 11.sp,
-                color = BtccTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         val cellWidth = if (isTablet) 48.dp else 36.dp
@@ -1184,7 +1189,7 @@ private fun StatCell(value: Int, highlight: Boolean, highlightColor: Color = Btc
         style      = MaterialTheme.typography.bodySmall,
         fontSize   = if (isTablet) 15.sp else 12.sp,
         fontWeight = if (highlight) FontWeight.ExtraBold else FontWeight.Normal,
-        color      = if (highlight) highlightColor else BtccTextSecondary,
+        color      = if (highlight) highlightColor else MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign  = TextAlign.Center,
         modifier   = Modifier.width(width),
     )
