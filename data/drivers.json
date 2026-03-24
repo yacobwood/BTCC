@@ -4,8 +4,8 @@
     {
       "number": 2,
       "name": "Daryl DeLeon",
-      "team": "West Surrey Racing",
-      "car": "BMW 330i M Sport",
+      "team": "",
+      "car": "",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/DeLeon-0Q3A0465.png",
       "nationality": "British",
       "bio": "Daryl DeLeon is a Filipino-British racing driver born on 2 August 2005 in Drogheda, Ireland. He began his motorsport career in karting at a young age, achieving over 150 wins and podiums before progressing into car racing. \n\nHe rose to prominence after winning the Radical SR1 Cup in 2022 and continued his success in endurance and Radical racing before stepping up to the British Touring Car Championship in 2023. DeLeon became the first Filipino driver to compete in the series and has since developed into a promising young talent. \n\nRacing for West Surrey Racing, he secured his first BTCC race win in 2025 at Brands Hatch and has also claimed pole positions and podium finishes. Known for his rapid progression and raw speed, DeLeon is widely regarded as one of the most exciting emerging drivers in touring car racing.",
@@ -51,7 +51,7 @@
       "number": 3,
       "name": "Tom Chilton",
       "team": "Team VERTU",
-      "car": "Hyundai i30 Fastback N",
+      "car": "Hyundai i30 Fastback N Performance",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Chilton-0H5A6995-e1745404581533.png",
       "nationality": "British",
       "bio": "Tom Chilton is a British touring car driver born on 15 March 1985 in Reigate, England. He made his debut in the British Touring Car Championship in 2002 at just 17 years old, becoming one of the youngest drivers in the series. Over his BTCC career, Chilton has taken multiple race wins and podiums, regularly finishing as a front-running contender.\n\nHe later competed in the World Touring Car Championship from 2012, where he achieved several victories and a best championship finish of fifth in 2013.\n\nKnown for his consistency and longevity in touring car racing, Chilton has raced for a variety of teams and manufacturers, including Honda, Vauxhall, Ford, and Chevrolet.",
@@ -162,8 +162,8 @@
     {
       "number": 16,
       "name": "Aiden Moffat",
-      "team": "West Surrey Racing",
-      "car": "BMW 330i M Sport",
+      "team": "LKQ Euro Car Parts Racing",
+      "car": "Audi S3 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Moffat-0H5A1849-cut-out-e1745924439983.png",
       "nationality": "Scottish",
       "bio": "Aiden Moffat is a Scottish racing driver born on 28 September 1996 in Dalkeith. He competes in the British Touring Car Championship and is known for his long-standing presence in the series and steady progression through the grid.\n\nMoffat made history in 2013 when he debuted in the BTCC aged just 16, becoming the youngest driver ever to start a race in the championship. Over the years, he has developed into a consistent competitor, achieving multiple race wins and podium finishes, with a best championship result of eighth in 2021.\n\nHe has raced for a variety of teams during his career, including his family-run Laser Tools Racing outfit, and has driven several different cars and manufacturers. Known for his adaptability, Moffat is one of the few drivers to have won BTCC races in both front-wheel-drive and rear-wheel-drive machinery.",
@@ -342,7 +342,7 @@
     {
       "number": 17,
       "name": "Dexter Patterson",
-      "team": "Power Maxed Racing",
+      "team": "LKQ Euro Car Parts Racing",
       "car": "Audi S3 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Patterson-0H5A6042-e1745404634252.png",
       "nationality": "British",
@@ -492,7 +492,7 @@
       "number": 25,
       "name": "Chris Smiley",
       "team": "Restart Racing",
-      "car": "Hyundai i30 Fastback N",
+      "car": "Hyundai i30 Fastback N Performance",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/04/Smiley-0H5A4657-e1745404716647.png",
       "nationality": "Northern Irish",
       "bio": "Chris Smiley is a Northern Irish racing driver born on 24 August 1995 in Larne, Northern Ireland. He began his career in karting before progressing through junior single-seater and touring car categories, quickly establishing himself as a competitive touring car talent.\n\nSmiley made his British Touring Car Championship debut in 2016 and has since raced for several teams, including BTC Racing. He achieved his first BTCC race win in 2020 at Silverstone, marking a major milestone in his career and confirming his pace at the front of the field.\n\nKnown for his aggressive but calculated driving style, Smiley has become a consistent podium contender in the BTCC and remains a respected competitor within the touring car paddock.",
@@ -593,7 +593,7 @@
       "number": 132,
       "name": "James Dorlin",
       "team": "Restart Racing",
-      "car": "Hyundai i30 Fastback N",
+      "car": "Hyundai i30 Fastback N Performance",
       "imageUrl": "",
       "nationality": "British",
       "bio": "James Dorlin is a British racing driver born on 22 May 1999 in Barnsley, England. He began his motorsport career in karting before progressing into junior saloon car racing, where he quickly emerged as a front-running talent.\n\nDorlin won the 2016 Ginetta Junior Championship, marking him out as one of the UK’s leading young prospects. He then moved into GT and endurance racing, including campaigns in the Porsche Carrera Cup GB and British GT, where he developed strong racecraft, consistency, and technical adaptability across different cars and race formats.\n\nIn 2025, Dorlin stepped up to the British Touring Car Championship, joining the BTCC grid after several successful seasons in GT machinery. His move represents a transition into one of the most competitive touring car series in the world.\n\nKnown for his smooth driving style and versatility, Dorlin is regarded as an adaptable racer aiming to establish himself quickly within the BTCC midfield and progress toward front-running results.",
@@ -615,7 +615,7 @@
       "number": 27,
       "name": "Dan Cammish",
       "team": "NAPA Racing UK",
-      "car": "Ford Focus",
+      "car": "Ford Focus Titanium Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Cammish-0H5A6728.png",
       "nationality": "British",
       "bio": "Dan Cammish is a British racing driver born on 10 February 1989 in Leeds, England. He began his career in karting before moving into single-seaters, where he won the British Formula Ford Championship in 2014 with a dominant season.\n\nCammish later transitioned into touring cars, joining the British Touring Car Championship in 2018 with Team Dynamics. He quickly established himself as a front-running driver, taking race wins, podiums, and pole positions, and becoming a consistent contender in both front-wheel-drive and rear-wheel-drive machinery.\n\nKnown for his smooth, precise driving style and strong qualifying pace, Cammish is widely regarded as one of the most technically skilled drivers on the BTCC grid.",
@@ -716,7 +716,7 @@
       "number": 32,
       "name": "Daniel Rowbottom",
       "team": "Plato Racing",
-      "car": "Mercedes-AMG A35",
+      "car": "Mercedes-AMG A35 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Rowbottom-0H5A7475.png",
       "nationality": "British",
       "bio": "Daniel Rowbottom is a British racing driver born on 10 October 1988 in Worcester, England. He began his motorsport career in karting before progressing through various club-level racing categories and saloon car series, steadily building experience in touring cars.\n\nRowbottom made his British Touring Car Championship debut in 2019 and quickly adapted to the highly competitive series. Driving for BTC Racing, he scored his first BTCC race win in 2021 at Croft, marking a breakthrough moment in his career.\n\nKnown for his determined and aggressive driving style, Rowbottom has developed into a consistent front-running competitor, regularly fighting for podiums and race wins in the BTCC.",
@@ -939,8 +939,8 @@
     {
       "number": 40,
       "name": "Árón Taylor-Smith",
-      "team": "Laser Tools Racing",
-      "car": "Toyota Corolla",
+      "team": "Speedworks Corolla Racing",
+      "car": "Toyota Corolla GR Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/TaylorSmith-0H5A7061.png",
       "nationality": "Northern Irish",
       "bio": "Árón Taylor-Smith is an Irish racing driver born on 30 June 1989 in Dublin, Ireland. He began his motorsport career in karting before moving into touring cars, progressing through the British and international touring car scene.\n\nTaylor-Smith made his British Touring Car Championship debut in 2011 and quickly built a reputation as a hard-fighting and determined racer. He has also competed in the World Touring Car Championship, gaining valuable experience on the global stage.\n\nOver his BTCC career, he has achieved multiple race wins and podiums, including standout performances in independent and overall classifications. Known for his aggressive yet controlled racing style, Taylor-Smith remains a consistent and experienced competitor in touring car racing.",
@@ -1118,8 +1118,8 @@
     {
       "number": 52,
       "name": "Gordon Shedden",
-      "team": "Laser Tools Racing",
-      "car": "Toyota Corolla",
+      "team": "Speedworks Corolla Racing",
+      "car": "Toyota Corolla GR Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Shedden-0H5A6436-e1745591902397.png",
       "nationality": "Scottish",
       "bio": "Gordon Shedden is a Scottish racing driver born on 15 February 1979 in Edinburgh. He is one of the most successful drivers in British Touring Car Championship history, having made his debut in 2001 and becoming a consistent front-runner across two decades.\n\nShedden won the BTCC Drivers’ Championship three times (2012, 2015, and 2016), all with Honda machinery under Team Dynamics. During this period, he was part of one of the most dominant eras for a manufacturer in the series.\n\nKnown for his smooth yet highly competitive driving style, Shedden has amassed numerous race wins and podiums throughout his career and is widely regarded as one of the modern greats of touring car racing in the UK.",
@@ -1492,7 +1492,7 @@
       "number": 77,
       "name": "Sam Osborne",
       "team": "NAPA Racing UK",
-      "car": "Ford Focus",
+      "car": "Ford Focus Titanium Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Osborne-0H5A7553-e1745404843375.png",
       "nationality": "British",
       "bio": "Sam Osborne is a British racing driver born on 29 April 1997 in Oxfordshire, England. He began his motorsport career in karting before progressing into junior racing categories, including the Renault Clio Cup UK, where he developed his touring car skills.\n\nOsborne made his British Touring Car Championship debut in 2020 and has since competed for Motorbase Performance and other BTCC teams. He has steadily built experience in the series, becoming a reliable midfield competitor known for consistency and clean racing.\n\nWhile still developing his front-running results, Osborne is recognised for his improving pace and strong racecraft as he continues to establish himself in one of the UK’s most competitive motorsport championships.",
@@ -1582,7 +1582,7 @@
       "number": 80,
       "name": "Tom Ingram",
       "team": "Team VERTU",
-      "car": "Hyundai i30 Fastback N",
+      "car": "Hyundai i30 Fastback N Performance",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Ingram-0H5A6913.png",
       "nationality": "British",
       "bio": "Tom Ingram is a British racing driver born on 15 June 1993 in High Wycombe, England. He began his career in karting before moving into the Ginetta Junior Championship, where he quickly established himself as a front-running talent.\n\nIngram progressed into touring cars through the BTCC support series, winning the Renault Clio Cup UK in 2014. He stepped up to the British Touring Car Championship in 2016 and rapidly became one of the series’ leading drivers, consistently fighting at the front of the grid.\n\nHe won the BTCC Drivers’ Championship in 2022 after a highly competitive season with Excelr8 Motorsport. Known for his smooth driving style, consistency, and strong tyre management, Ingram is widely regarded as one of the top modern touring car drivers in the UK.",
@@ -1728,7 +1728,7 @@
     {
       "number": 88,
       "name": "Mikey Doble",
-      "team": "Power Maxed Racing",
+      "team": "LKQ Euro Car Parts Racing",
       "car": "Audi S3 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-0H5A6257-e1745404879475.png",
       "nationality": "British",
@@ -1786,8 +1786,8 @@
     {
       "number": 99,
       "name": "Charles Rainford",
-      "team": "West Surrey Racing",
-      "car": "BMW 330i M Sport",
+      "team": "",
+      "car": "",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Rainford-0H5A1348-cut-out-e1745936759683.png",
       "nationality": "British",
       "bio": "Charles Rainford is a British racing driver born on 11 January 1998 in England. He progressed through grassroots motorsport and saloon car racing, building experience in competitive one-make and touring car categories before moving into higher-level circuit racing.\n\nRainford made his British Touring Car Championship debut in 2024, joining the grid as a rookie and gaining experience in one of the UK’s most competitive motorsport series. He has focused on developing consistency, racecraft, and adaptation to the high-intensity BTCC format.\n\nKnown as an emerging talent in touring cars, Rainford continues to build his reputation as he gains mileage and confidence against established front-running drivers.",
@@ -1811,7 +1811,7 @@
       "number": 116,
       "name": "Ashley Sutton",
       "team": "NAPA Racing UK",
-      "car": "Ford Focus",
+      "car": "Ford Focus Titanium Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Sutton-0H5A6649-e1745404951693.png",
       "nationality": "British",
       "bio": "Ashley Sutton is a British racing driver born on 15 January 1994 in Stoke-on-Trent, England. He began his motorsport career in karting before progressing into junior saloon car racing, quickly showing strong pace and racecraft.\n\nSutton made his British Touring Car Championship debut in 2016 and immediately impressed, winning the BTCC Drivers’ Championship in his rookie season. He went on to win further titles in 2020 and 2023, establishing himself as one of the most successful modern drivers in the series.\n\nKnown for his aggressive yet controlled driving style, adaptability, and ability to perform under pressure, Sutton has become a multiple-time BTCC champion and one of the standout talents in British touring car racing.",
@@ -2007,8 +2007,8 @@
     },
     {
       "name": "Team VERTU",
-      "car": "Hyundai i30 Fastback N",
-      "entries": 3,
+      "car": "Hyundai i30 Fastback N Performance",
+      "entries": 2,
       "bio": "Run by the award-winning EXCELR8 Motorsport, Team VERTU are backed by one of the UK's largest motor retail groups. EXCELR8 entered the BTCC in 2018 and rapidly grew into championship contenders, earning their first major drivers' titles in 2022 and 2025 when Tom Ingram claimed the Drivers' Championship.\n\nBased in Huntingdon, Cambridgeshire, the team have developed a fierce reputation for consistently fast and reliable Hyundai i30N Fastback machinery. Ingram remained their spearhead throughout their Hyundai era before the operation transitioned to new machinery for 2026.\n\nThe VERTU Motors sponsorship has given the squad significant commercial backing, and the team's data-led approach under team principal Justina Williams has seen them become one of the best-resourced teams on the grid. With multiple championship wins across different categories, EXCELR8's move into BTCC has been one of the success stories of the past decade.",
       "standing2025": 2,
       "points2025": 773,
@@ -2057,7 +2057,7 @@
     {
       "name": "Speedworks Corolla Racing",
       "car": "Toyota Corolla GR Sport",
-      "entries": 2,
+      "entries": 4,
       "bio": "Speedworks Motorsport are the team behind the Toyota Corolla GR Sport BTCC programme, and one of the most respected independent operations in British touring car racing. Founded in 2010 and based in Middlewich, Cheshire, they made their full-time BTCC debut in 2013 before growing steadily into title contenders.\n\nThe team's crowning moment came in 2022 when Tom Ingram, their long-serving lead driver, won the Drivers' Championship after years of consistent front-running. That title validated years of careful development and cemented Speedworks' standing as a major force in the series.\n\nRunning the Toyota Corolla GR Sport under the GR Sport Corolla Racing banner, Speedworks benefit from a strong manufacturer relationship with Toyota GB and are one of the few teams to develop and run their own car from the ground up. Their Middlewich base is home to a meticulous engineering operation that punches well above its weight relative to its size.",
       "standing2025": 0,
       "points2025": 0,
@@ -2125,7 +2125,7 @@
     },
     {
       "name": "West Surrey Racing",
-      "car": "BMW 330i M Sport",
+      "car": "BMW 330i M Sport LCI",
       "entries": 3,
       "bio": "West Surrey Racing are the most decorated and longest-running team in the BTCC. Founded in 1979 by Dick Bennetts, the Wokingham-based outfit have been a constant presence in British motorsport for over four decades, fielding cars for champions including Steve Soper, Will Hoy, James Thompson, Colin Turkington and Rob Collard.\n\nThe team's association with BMW stretches back many years and they are regarded as the factory BMW partner in the BTCC, running the iconic 330e M Sport and latterly the 128ti. Their engineering department is widely considered to be among the finest in the paddock and they have historically been the benchmark against which rival teams measure themselves.\n\nWith nine Drivers' Championship victories and five Teams' titles to their name, WSR's record is unmatched in the modern era of the championship. Colin Turkington alone won four titles with the team, making him the most successful driver in BTCC history. The team continues to attract blue-chip sponsorship and remains one of the best-funded and best-resourced operations in the series.",
       "standing2025": 3,
@@ -2198,7 +2198,7 @@
       ]
     },
     {
-      "name": "Power Maxed Racing",
+      "name": "LKQ Euro Car Parts Racing",
       "car": "Audi S3 Saloon",
       "entries": 3,
       "bio": "Power Maxed Racing are one of the most ambitious independent teams in the BTCC, based at their Coventry headquarters in the heart of the UK's motorsport corridor. Shaun Hollamby's team made their BTCC debut in 2010 and have spent subsequent years steadily building their technical capability.\n\nThe team have campaigned a variety of machinery over the years, most recently switching to the Audi S3 Saloon as part of the Goodyear-sponsored PMR programme. Their Coventry base houses an in-house engineering and fabrication department, allowing the team to react quickly to the demands of the BTCC's intensive race calendar.\n\nPower Maxed are known for nurturing young British talent and have given a number of drivers their first full-time BTCC opportunities. The team's stated ambition is to secure their first outright championship title, and they continue to develop their package in pursuit of that goal.",
@@ -2262,80 +2262,6 @@
       ]
     },
     {
-      "name": "Laser Tools Racing",
-      "car": "Toyota Corolla GR Sport",
-      "entries": 2,
-      "bio": "Laser Tools Racing are the title-sponsored entry run by Speedworks Motorsport, sharing infrastructure and engineering resource with Speedworks' own Toyota programme. The Laser Tools brand, a leading hand tool manufacturer, has become one of the most visible sponsorships in the BTCC paddock.\n\nThe partnership produced a landmark moment in 2021 when Aiden Moffat, a long-time Laser Tools driver, became a race winner and the squad won the Independents' Teams' trophy. Their most significant achievement came the same season when the combination of Moffat and Sutton brought home the Independents' Championship.\n\nFor 2026 the team continue to provide a competitive option for drivers running outside the major manufacturer rosters, fielding cars built and prepared by the Speedworks operation in Middlewich. The Laser Tools livery, instantly recognisable in yellow and black, remains one of the most consistent presences across the BTCC grid.",
-      "standing2025": 5,
-      "points2025": 319,
-      "founded": 2010,
-      "base": "Middlewich, Cheshire",
-      "driversChampionships": 1,
-      "teamsChampionships": 1,
-      "history": [
-        {
-          "year": 2014,
-          "pos": 17,
-          "points": 11
-        },
-        {
-          "year": 2015,
-          "pos": 12,
-          "points": 87
-        },
-        {
-          "year": 2016,
-          "pos": 9,
-          "points": 137
-        },
-        {
-          "year": 2017,
-          "pos": 12,
-          "points": 124
-        },
-        {
-          "year": 2018,
-          "pos": 13,
-          "points": 115
-        },
-        {
-          "year": 2019,
-          "pos": 13,
-          "points": 89
-        },
-        {
-          "year": 2020,
-          "pos": 3,
-          "points": 439
-        },
-        {
-          "year": 2021,
-          "pos": 1,
-          "points": 588
-        },
-        {
-          "year": 2022,
-          "pos": 10,
-          "points": 74
-        },
-        {
-          "year": 2023,
-          "pos": 6,
-          "points": 381
-        },
-        {
-          "year": 2024,
-          "pos": 6,
-          "points": 412
-        },
-        {
-          "year": 2025,
-          "pos": 5,
-          "points": 319
-        }
-      ]
-    },
-    {
       "name": "Plato Racing",
       "car": "Mercedes-AMG A35 Saloon",
       "entries": 2,
@@ -2350,7 +2276,7 @@
     },
     {
       "name": "One Motorsport",
-      "car": "Honda Civic Type R",
+      "car": "Honda Civic Type R (FK8)",
       "entries": 2,
       "bio": "One Motorsport are a professional BTCC outfit running Honda Civic Type R machinery from their base in Wantage, Oxfordshire. The team entered the series as an independent operation and have grown steadily, building expertise with the front-wheel-drive Honda platform over several seasons of competition.\n\nThe team focus on extracting maximum performance from the Civic Type R, widely regarded as one of the most driver-friendly cars in the BTCC, and have built a strong technical team around developing the chassis to suit the demands of Britain's circuits. Their Wantage workshop handles the full preparation and build of their race cars in-house.\n\nOne Motorsport have provided a platform for a number of drivers looking to establish or re-establish themselves in the top tier of British motorsport. The team's approach blends professional engineering standards with the agility of an independent team, allowing them to develop their package race by race through the season.",
       "standing2025": 9,
@@ -2374,7 +2300,7 @@
     },
     {
       "name": "Restart Racing",
-      "car": "Hyundai i30 Fastback N",
+      "car": "Hyundai i30 Fastback N Performance",
       "entries": 2,
       "bio": "Restart Racing carry forward a storied history in the modern BTCC, operating from their base in Didcot, Oxfordshire. The team were originally known as BTC Racing, later running as Rich Energy BTC Racing, before rebranding as Restart Racing ahead of their switch to Hyundai machinery.\n\nUnder their BTC Racing identity, the team became one of the series' top outfits, consistently challenging for race wins and podiums with drivers including Josh Cook and Jake Hill. The operation rebranded as Restart Racing ahead of their switch to Hyundai machinery for 2026, marking a new chapter in their professional development.\n\nFounded in 2000, the team have accumulated over two decades of BTCC experience and have never been far from the sharp end of the championship. For 2026 the Restart Racing brand represents a fresh identity, and the team are well-positioned to challenge at the front of the grid with experienced drivers and strong manufacturer support.",
       "standing2025": 4,

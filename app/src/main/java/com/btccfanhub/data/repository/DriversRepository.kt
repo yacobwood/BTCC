@@ -92,7 +92,7 @@ object DriversRepository {
                     )
                 },
             )
-        }
+        }.filter { it.team.isNotBlank() }
 
         val teamsArr = root.optJSONArray("teams") ?: JSONArray()
         val teams = (0 until teamsArr.length()).map { i ->
