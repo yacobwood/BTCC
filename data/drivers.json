@@ -2,52 +2,6 @@
   "season": 2026,
   "drivers": [
     {
-      "number": 2,
-      "name": "Daryl DeLeon",
-      "team": "",
-      "car": "",
-      "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/DeLeon-0Q3A0465.png",
-      "nationality": "British",
-      "bio": "Daryl DeLeon is a Filipino-British racing driver born on 2 August 2005 in Drogheda, Ireland. He began his motorsport career in karting at a young age, achieving over 150 wins and podiums before progressing into car racing. \n\nHe rose to prominence after winning the Radical SR1 Cup in 2022 and continued his success in endurance and Radical racing before stepping up to the British Touring Car Championship in 2023. DeLeon became the first Filipino driver to compete in the series and has since developed into a promising young talent. \n\nRacing for West Surrey Racing, he secured his first BTCC race win in 2025 at Brands Hatch and has also claimed pole positions and podium finishes. Known for his rapid progression and raw speed, DeLeon is widely regarded as one of the most exciting emerging drivers in touring car racing.",
-      "history": [
-        {
-          "year": 2025,
-          "team": "West Surrey Racing",
-          "car": "BMW 330e M Sport",
-          "pos": 13,
-          "points": 149,
-          "wins": 1,
-          "podiums": 2,
-          "poles": 2,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2024,
-          "team": "Duckhams Racing with Bartercard",
-          "car": "Cupra León",
-          "pos": 18,
-          "points": 48,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2023,
-          "team": "Team HARD",
-          "car": "Cupra León",
-          "pos": 25,
-          "points": 6,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        }
-      ],
-      "dateOfBirth": "2005-08-02",
-      "birthplace": "Drogheda, Ireland"
-    },
-    {
       "number": 3,
       "name": "Tom Chilton",
       "team": "Team VERTU",
@@ -1782,30 +1736,6 @@
       ],
       "dateOfBirth": "1998-12-08",
       "birthplace": "Caterham, Surrey"
-    },
-    {
-      "number": 99,
-      "name": "Charles Rainford",
-      "team": "",
-      "car": "",
-      "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Rainford-0H5A1348-cut-out-e1745936759683.png",
-      "nationality": "British",
-      "bio": "Charles Rainford is a British racing driver born on 11 January 1998 in England. He progressed through grassroots motorsport and saloon car racing, building experience in competitive one-make and touring car categories before moving into higher-level circuit racing.\n\nRainford made his British Touring Car Championship debut in 2024, joining the grid as a rookie and gaining experience in one of the UK’s most competitive motorsport series. He has focused on developing consistency, racecraft, and adaptation to the high-intensity BTCC format.\n\nKnown as an emerging talent in touring cars, Rainford continues to build his reputation as he gains mileage and confidence against established front-running drivers.",
-      "history": [
-        {
-          "year": 2025,
-          "team": "LKQ Euro Car Parts Racing with WSR",
-          "car": "BMW 330e M Sport",
-          "pos": 8,
-          "points": 179,
-          "wins": 1,
-          "podiums": 3,
-          "poles": 1,
-          "fastestLaps": 3
-        }
-      ],
-      "dateOfBirth": "1998-07-20",
-      "birthplace": "Horsham, Sussex"
     },
     {
       "number": 116,
