@@ -201,4 +201,27 @@ object Analytics {
             param("venue", venue)
         }
     }
+
+    fun merchItemTapped(itemId: String, sellerId: String, sellerType: String, sponsored: Boolean, affiliateMissing: Boolean) {
+        fa.logEvent("merch_item_tapped") {
+            param("item_id", itemId)
+            param("seller_id", sellerId)
+            param("seller_type", sellerType)
+            param("sponsored", if (sponsored) "true" else "false")
+            param("affiliate_missing", if (affiliateMissing) "true" else "false")
+        }
+    }
+
+    fun discountCodeCopied(sellerId: String, discountCode: String) {
+        fa.logEvent("discount_code_copied") {
+            param("seller_id", sellerId)
+            param("discount_code", discountCode.take(50))
+        }
+    }
+
+    fun merchSectionViewed(sectionTitle: String) {
+        fa.logEvent("merch_section_viewed") {
+            param("section_title", sectionTitle)
+        }
+    }
 }
