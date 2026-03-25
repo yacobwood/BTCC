@@ -521,6 +521,16 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     <button class="btn-run" onclick="runScraper('scrape-grid.yml','grid')">RUN ▶</button>
   </div>
 
+  <!-- Merch scraper -->
+  <div class="scraper-card" id="sc-merch">
+    <div class="scraper-head">
+      <div class="scraper-title">MERCH</div>
+      <div class="scraper-status-chip" id="ss-merch">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes product listings from team Shopify stores (EXCELR8/Vertu). Updates <strong>merch.json</strong> with real product titles, prices, images and availability — powers the Shop the Grid merch hub. Auto-runs daily at 06:00 UTC.</div>
+    <button class="btn-run" onclick="runScraper('scrape-merch.yml','merch')">RUN ▶</button>
+  </div>
+
   </div><!-- /scrapers-grid -->
 
   <button class="btn-refresh" onclick="refreshAllStatus()">↻ REFRESH STATUS</button>
@@ -901,6 +911,7 @@ async function refreshAllStatus() {
     { file: 'scrape-calendar.yml',  key: 'calendar' },
     { file: 'scrape-schedule.yml',  key: 'schedule' },
     { file: 'scrape-grid.yml',      key: 'grid' },
+    { file: 'scrape-merch.yml',     key: 'merch' },
   ];
   for (const w of workflows) {
     const run = await fetchLastRun(w.file);
