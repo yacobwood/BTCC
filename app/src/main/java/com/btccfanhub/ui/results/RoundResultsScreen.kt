@@ -260,7 +260,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
         return
     }
     val context = LocalContext.current
-    val useKm by com.btccfanhub.data.FeatureFlagsStore.useKm.collectAsState()
+    val useKm by com.btccfanhub.data.store.FeatureFlagsStore.useKm.collectAsState()
     val maxAvgSpeedKmh = remember(race) {
         race.results.mapNotNull { it.avgLapSpeed?.toDoubleOrNull() }.maxOrNull()
     }

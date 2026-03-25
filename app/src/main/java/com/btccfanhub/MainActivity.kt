@@ -406,7 +406,7 @@ private fun MainScreen(
     }
 
     val onNavItemClick: (NavItem) -> Unit = { item ->
-        com.btccfanhub.data.Analytics.navItemClicked(item.label)
+        com.btccfanhub.data.analytics.Analytics.navItemClicked(item.label)
         if (item.screen == Screen.News) newsScrollTrigger++
         navController.navigate(item.screen.route) {
             popUpTo(Screen.News.route)

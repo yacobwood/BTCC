@@ -185,7 +185,7 @@ object RssParser {
 
     // Each NGG image appears at multiple cached resolutions AND as an original.
     // Prefer original files (not in /cache/); if only cached exist, keep one per nggid.
-    private fun deduplicateNggImages(urls: List<String>): List<String> {
+    internal fun deduplicateNggImages(urls: List<String>): List<String> {
         val originals = urls.filter { "/cache/" !in it && "ngg0dyn" !in it }
         if (originals.isNotEmpty()) {
             return originals.distinctBy { it.substringAfterLast("/").substringBefore("?").lowercase() }
@@ -215,11 +215,11 @@ object RssParser {
     } catch (e: Exception) { "" }
 
     // "2026-02-27T10:02:57" → "27 Feb 2026"
-    private fun formatDate(date: String): String = try {
+    internal fun formatDate(date: String): String = try {
         LocalDate.parse(date.substring(0, 10)).format(outputDateFormat)
     } catch (e: Exception) { date }
 
-    private fun decodeEntities(text: String): String =
+    internal fun decodeEntities(text: String): String =
         text
             .replace("&amp;", "&")
             .replace("&lt;", "<")
@@ -236,6 +236,6 @@ object RssParser {
             .replace("&hellip;", "\u2026")
             .replace("&nbsp;", " ")
 
-    private fun stripHtml(html: String): String =
+    internal fun stripHtml(html: String): String =
         decodeEntities(html.replace(Regex("<[^>]+>"), "")).trim()
 }

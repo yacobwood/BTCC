@@ -645,7 +645,7 @@ private val SEASON_DATE_FMT = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
 @Composable
 private fun SeasonNotStarted(seasonStartDate: LocalDate, firstRoundVenue: String = "") {
-    val testOverride by com.btccfanhub.data.FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val testOverride by com.btccfanhub.data.store.FeatureFlagsStore.testDateTimeOverride.collectAsState()
     val today = remember(testOverride) { com.btccfanhub.data.TestClock.today() }
     val daysUntil = ChronoUnit.DAYS.between(today, seasonStartDate).coerceAtLeast(0)
     val seasonDateLabel = seasonStartDate.format(SEASON_DATE_FMT)
@@ -737,7 +737,7 @@ private fun SeasonNotStarted(seasonStartDate: LocalDate, firstRoundVenue: String
 
 @Composable
 private fun ResultsNotStarted(year: Int, seasonStartDate: LocalDate) {
-    val testOverride by com.btccfanhub.data.FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val testOverride by com.btccfanhub.data.store.FeatureFlagsStore.testDateTimeOverride.collectAsState()
     val today = remember(testOverride) { com.btccfanhub.data.TestClock.today() }
     val daysUntil = ChronoUnit.DAYS.between(today, seasonStartDate).coerceAtLeast(0)
     val seasonDateLabel = seasonStartDate.format(SEASON_DATE_FMT)

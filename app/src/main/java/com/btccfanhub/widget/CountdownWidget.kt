@@ -92,23 +92,6 @@ class CountdownWidget : AppWidgetProvider() {
 
         private val DAY_FMT        = DateTimeFormatter.ofPattern("d")
         private val MONTH_YEAR_FMT = DateTimeFormatter.ofPattern("MMM yyyy")
-        private val TIME_FMT       = DateTimeFormatter.ofPattern("HH:mm")
-        private val LONDON_ZONE    = ZoneId.of("Europe/London")
-
-        private fun localiseWidgetTime(timeStr: String, date: LocalDate, deviceZone: ZoneId): String {
-            if (timeStr == "TBA" || timeStr.isBlank()) return timeStr
-            return runCatching {
-                val londonDt = ZonedDateTime.of(date.atTime(LocalTime.parse(timeStr, TIME_FMT)), LONDON_ZONE)
-                val localDt = londonDt.withZoneSameInstant(deviceZone)
-                val dayDiff = ChronoUnit.DAYS.between(date, localDt.toLocalDate())
-                val suffix = when {
-                    dayDiff > 0 -> "+$dayDiff"
-                    dayDiff < 0 -> "$dayDiff"
-                    else -> ""
-                }
-                localDt.format(TIME_FMT) + suffix
-            }.getOrDefault(timeStr)
-        }
 
         const val EXTRA_LIVE_TIMING_EVENT_ID = "extra_live_timing_event_id"
 
@@ -385,12 +368,12 @@ class CountdownWidget : AppWidgetProvider() {
                 if (s.time == "TBA" || s.time.isBlank()) return@mapNotNull null
                 runCatching {
                     val date = dayDate(s.day)
-                    val t = LocalTime.parse(s.time, TIME_FMT)
+                    val t = LocalTime.parse(s.time, WIDGET_TIME_FMT)
                     // Test sessions are already in device local time; real sessions are UK time.
                     val deviceDt = if (isTestMode) {
                         date.atTime(t)
                     } else {
-                        ZonedDateTime.of(date.atTime(t), LONDON_ZONE)
+                        ZonedDateTime.of(date.atTime(t), WIDGET_LONDON_ZONE)
                             .withZoneSameInstant(deviceZone)
                             .toLocalDateTime()
                     }
@@ -437,13 +420,6 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setViewVisibility(timeIds[i], View.GONE)
                 }
             }
-        }
-
-        private fun abbreviate(name: String): String = when {
-            name.contains("Free Practice") -> name.replace("Free Practice", "FP")
-            name.contains("Qualifying Race") -> name.replace("Qualifying Race", "Quali Race")
-            name.contains("Qualifying") -> name.replace("Qualifying", "Quali")
-            else -> name
         }
 
         private fun buildLiveryBitmap(

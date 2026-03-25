@@ -17,11 +17,11 @@ object RaceResultsRepository {
     /** Qualifying Race points scale (reg 1.6.2.a): 10,9,8,7,6,5,5,4,4,3,3,2,2,1,1. No bonus points. */
     private val qualifyingRacePoints = intArrayOf(10, 9, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1)
 
-    private fun pointsFromPosition(position: Int): Int =
+    internal fun pointsFromPosition(position: Int): Int =
         if (position in 1..15) pointsByPosition[position - 1] else 0
 
     /** BTCC bonus points: fastest lap +1, lead lap +1, R1 pole +1. Used when JSON has no points. */
-    private fun pointsWithBonuses(
+    internal fun pointsWithBonuses(
         position: Int,
         fastestLap: Boolean,
         leadLap: Boolean,
@@ -68,7 +68,7 @@ object RaceResultsRepository {
     }
 
     /** 2023 chart order: DPN, BHI, SNE, THR, OUL, CRO, KNO, DPGP, SIL, BHGP. */
-    private fun reorder2023RoundsToChartOrder(rounds: List<RoundResult>): List<RoundResult> {
+    internal fun reorder2023RoundsToChartOrder(rounds: List<RoundResult>): List<RoundResult> {
         val order = listOf(
             "Donington Park",
             "Brands Hatch Indy",
