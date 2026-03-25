@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r scraper/requirements.txt
+          pip install -r tools/scraper/requirements.txt
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
@@ -42,11 +42,11 @@ jobs:
         run: |
           SEASON="${{ github.event.inputs.season }}"
           [ -z "$SEASON" ] && SEASON=2026
-          python scraper/scrape_calendar.py --season $SEASON
+          python tools/scraper/scrape_calendar.py --season $SEASON
 
       - name: Scrape grid (optional)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.merge_grid == 'true'
-        run: python scraper/scrape_grid.py --merge
+        run: python tools/scraper/scrape_grid.py --merge
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v5
