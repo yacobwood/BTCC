@@ -4,7 +4,7 @@
     {
       "id": "official-cap-2026",
       "title": "BTCC 2026 Official Cap",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-cap.webp",
+      "imageUrl": "https://picsum.photos/seed/btcc-cap/400/300",
       "price": "£19.99",
       "currency": "GBP",
       "sellerName": "Official BTCC Store",
@@ -19,7 +19,7 @@
     {
       "id": "official-tshirt-2026",
       "title": "BTCC 2026 Official T-Shirt",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-tshirt.webp",
+      "imageUrl": "https://picsum.photos/seed/btcc-tshirt/400/300",
       "price": "£24.99",
       "currency": "GBP",
       "sellerName": "Official BTCC Store",
@@ -34,7 +34,7 @@
     {
       "id": "official-hoodie-2026",
       "title": "BTCC 2026 Official Hoodie",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-hoodie.webp",
+      "imageUrl": "https://picsum.photos/seed/btcc-hoodie/400/300",
       "price": "£44.99",
       "currency": "GBP",
       "sellerName": "Official BTCC Store",
@@ -49,7 +49,7 @@
     {
       "id": "napa-team-cap",
       "title": "NAPA Racing UK Team Cap",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/napa-cap.webp",
+      "imageUrl": "https://picsum.photos/seed/napa-cap/400/300",
       "price": "£22.99",
       "currency": "GBP",
       "sellerName": "NAPA Racing UK",
@@ -64,7 +64,7 @@
     {
       "id": "napa-team-polo",
       "title": "NAPA Racing UK Team Polo",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/napa-polo.webp",
+      "imageUrl": "https://picsum.photos/seed/napa-polo/400/300",
       "price": "£34.99",
       "currency": "GBP",
       "sellerName": "NAPA Racing UK",
@@ -79,7 +79,7 @@
     {
       "id": "sutton-hoodie",
       "title": "Ashley Sutton #99 Hoodie",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/sutton-hoodie.webp",
+      "imageUrl": "https://picsum.photos/seed/sutton-hoodie/400/300",
       "price": "£39.99",
       "currency": "GBP",
       "sellerName": "NAPA Racing UK",
@@ -94,7 +94,7 @@
     {
       "id": "ingram-cap",
       "title": "Tom Ingram #80 Cap",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/ingram-cap.webp",
+      "imageUrl": "https://picsum.photos/seed/ingram-cap/400/300",
       "price": "£18.99",
       "currency": "GBP",
       "sellerName": "Vertu",
@@ -109,7 +109,7 @@
     {
       "id": "ingram-tshirt",
       "title": "Tom Ingram #80 T-Shirt",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/ingram-tshirt.webp",
+      "imageUrl": "https://picsum.photos/seed/ingram-tshirt/400/300",
       "price": "£24.99",
       "currency": "GBP",
       "sellerName": "Vertu",
@@ -124,7 +124,7 @@
     {
       "id": "ebay-diecast-honda",
       "title": "Honda Civic Type R BTCC 1:43 Diecast",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/diecast-honda.webp",
+      "imageUrl": "https://picsum.photos/seed/diecast-honda/400/300",
       "price": "£29.99",
       "currency": "GBP",
       "sellerName": "eBay Collectibles",
@@ -143,7 +143,7 @@
     {
       "id": "ebay-diecast-bmw",
       "title": "BMW 330e BTCC 1:43 Diecast",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/diecast-bmw.webp",
+      "imageUrl": "https://picsum.photos/seed/diecast-bmw/400/300",
       "price": "£34.99",
       "currency": "GBP",
       "sellerName": "eBay Collectibles",
@@ -162,7 +162,7 @@
     {
       "id": "amazon-btcc-book",
       "title": "BTCC: The Complete History Book",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-book.webp",
+      "imageUrl": "https://picsum.photos/seed/btcc-book/400/300",
       "price": "£16.99",
       "currency": "GBP",
       "sellerName": "Amazon",
@@ -179,7 +179,7 @@
     {
       "id": "pitlane-flag",
       "title": "BTCC Chequered Flag",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/chequered-flag.webp",
+      "imageUrl": "https://picsum.photos/seed/chequered-flag/400/300",
       "price": "£12.99",
       "currency": "GBP",
       "sellerName": "Pit-Lane Motorsport",
@@ -197,42 +197,42 @@
       "id": "official-btcc",
       "displayName": "Official BTCC Store",
       "sellerType": "official",
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/btcc-logo.webp",
+      "logoUrl": "https://picsum.photos/seed/btcc-logo/100/100",
       "discountCode": null
     },
     {
       "id": "napa-racing",
       "displayName": "NAPA Racing UK",
       "sellerType": "team",
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/napa-logo.webp",
+      "logoUrl": "https://picsum.photos/seed/napa-logo/100/100",
       "discountCode": "BTCCAPP10"
     },
     {
       "id": "vertu",
       "displayName": "Vertu",
       "sellerType": "team",
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/vertu-logo.webp",
+      "logoUrl": "https://picsum.photos/seed/vertu-logo/100/100",
       "discountCode": null
     },
     {
       "id": "ebay-collectibles",
       "displayName": "eBay Collectibles",
       "sellerType": "collectible",
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/ebay-logo.webp",
+      "logoUrl": "https://picsum.photos/seed/ebay-logo/100/100",
       "discountCode": null
     },
     {
       "id": "amazon",
       "displayName": "Amazon",
       "sellerType": "collectible",
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/amazon-logo.webp",
+      "logoUrl": "https://picsum.photos/seed/amazon-logo/100/100",
       "discountCode": null
     },
     {
       "id": "pitlane-motorsport",
       "displayName": "Pit-Lane Motorsport",
       "sellerType": "independent",
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/pitlane-logo.webp",
+      "logoUrl": "https://picsum.photos/seed/pitlane-logo/100/100",
       "discountCode": "FANHUB15"
     }
   ]
