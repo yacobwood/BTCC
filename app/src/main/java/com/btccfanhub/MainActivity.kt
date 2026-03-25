@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.ShoppingBag
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -293,6 +294,7 @@ private fun MainScreen(
 
     val flagAds by FeatureFlagsStore.adsEnabled.collectAsState()
     val flagWhatsNew by FeatureFlagsStore.whatsNew.collectAsState()
+    val flagMerchHub by FeatureFlagsStore.merchHubEnabled.collectAsState()
     val isOnline by ConnectivityObserver.isOnline.collectAsState()
 
     if (showOnboarding) {
@@ -391,6 +393,7 @@ private fun MainScreen(
         add(NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange))
         add(NavItem(Screen.Drivers, "Grid", Icons.Default.Groups))
         add(NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents))
+        if (flagMerchHub) add(NavItem(Screen.Shop, "Shop", Icons.Default.ShoppingBag))
         add(NavItem(Screen.More, "More", Icons.Default.MoreHoriz))
     }
 
@@ -401,6 +404,7 @@ private fun MainScreen(
             Screen.Calendar -> currentRoute == Screen.Calendar.route || currentRoute == Screen.Track.route
             Screen.Results -> currentRoute == Screen.Results.route || currentRoute == Screen.RoundResults.route
             Screen.More -> currentRoute == Screen.More.route || currentRoute == Screen.Settings.route || currentRoute == Screen.BugReport.route || currentRoute == Screen.FeatureFlags.route
+            Screen.Shop -> currentRoute == Screen.Shop.route
             else -> currentRoute == item.screen.route
         }
     }

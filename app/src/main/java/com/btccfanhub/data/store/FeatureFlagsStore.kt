@@ -26,6 +26,8 @@ object FeatureFlagsStore {
     const val KEY_RESULTS_NOTIFICATIONS = "results_notifications"
     const val KEY_TRACK_WEATHER         = "track_weather"
     const val KEY_WIDGET_RACE_WEEKEND   = "widget_race_weekend_test"
+    const val KEY_MERCH_HUB             = "merch_hub_enabled"
+    const val KEY_MERCH_FEED_URL        = "merch_feed_url"
 
     val radioTab             = MutableStateFlow(true)
     val adsEnabled           = MutableStateFlow(true)
@@ -34,6 +36,8 @@ object FeatureFlagsStore {
     val resultsNotifications = MutableStateFlow(false)
     val trackWeather         = MutableStateFlow(false)
     val widgetRaceWeekendTest = MutableStateFlow(false)
+    val merchHubEnabled      = MutableStateFlow(false)
+    val merchFeedUrl         = MutableStateFlow("")
 
     /** When non-null, overrides LocalDate/LocalDateTime.now() throughout the app for testing. */
     val testDateTimeOverride = MutableStateFlow<LocalDateTime?>(null)
@@ -61,6 +65,7 @@ object FeatureFlagsStore {
         resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
         trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
         widgetRaceWeekendTest.value = p.getBoolean(KEY_WIDGET_RACE_WEEKEND,   false)
+        merchHubEnabled.value      = p.getBoolean(KEY_MERCH_HUB,              false)
 
         // Load unit preference from the app prefs (written by SettingsScreen)
         val appPrefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
@@ -130,6 +135,8 @@ object FeatureFlagsStore {
         apply(KEY_RESULTS_NOTIFICATIONS,  client.getValue(Boolean::class.java, KEY_RESULTS_NOTIFICATIONS,  user, false))
         apply(KEY_TRACK_WEATHER,          client.getValue(Boolean::class.java, KEY_TRACK_WEATHER,          user, false))
         apply(KEY_WIDGET_RACE_WEEKEND,    client.getValue(Boolean::class.java, KEY_WIDGET_RACE_WEEKEND,    user, false))
+        apply(KEY_MERCH_HUB,              client.getValue(Boolean::class.java, KEY_MERCH_HUB,              user, false))
+        apply(KEY_MERCH_FEED_URL,         client.getValue(String::class.java,  KEY_MERCH_FEED_URL,         user, ""))
         Log.d("FeatureFlags", "Flags applied for device: ${user?.identifier}")
     }
 
@@ -143,6 +150,14 @@ object FeatureFlagsStore {
             KEY_RESULTS_NOTIFICATIONS -> resultsNotifications.value = value
             KEY_TRACK_WEATHER         -> trackWeather.value          = value
             KEY_WIDGET_RACE_WEEKEND   -> widgetRaceWeekendTest.value  = value
+            KEY_MERCH_HUB             -> merchHubEnabled.value       = value
+        }
+    }
+
+    private fun apply(key: String, value: String) {
+        prefs?.edit()?.putString(key, value)?.apply()
+        when (key) {
+            KEY_MERCH_FEED_URL -> merchFeedUrl.value = value
         }
     }
 
