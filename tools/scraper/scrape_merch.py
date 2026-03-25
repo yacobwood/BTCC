@@ -11,6 +11,7 @@ Usage:
 
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 
@@ -29,6 +30,96 @@ SHOPIFY_STORES = [
         "driver_ids": [80, 3],  # Ingram, Chilton
     },
 ]
+
+# Tayna.co.uk categories to scrape for NAPA Racing
+TAYNA_STORES = [
+    {
+        "base_url": "https://www.tayna.co.uk",
+        "categories": [
+            "/napa-racing/hats/",
+            "/napa-racing/t-shirts/",
+            "/napa-racing/polos/",
+            "/napa-racing/jackets/",
+            "/napa-racing/tracktops/",
+            "/napa-racing/gilets/",
+        ],
+        "seller_name": "NAPA Racing UK",
+        "seller_id": "napa",
+        "team_ids": ["NAPA Racing UK"],
+        "driver_ids": [116, 27, 77, 200],
+    },
+]
+
+
+def fetch_tayna_products(base_url, category_path):
+    """Scrape products from a Tayna.co.uk category page."""
+    url = base_url + category_path
+    resp = requests.get(url, headers={"User-Agent": "BTCCFanHub-Scraper/1.0"}, timeout=30)
+    resp.raise_for_status()
+    html = resp.text
+
+    products = []
+    # Find product links: <a href="/napa-racing/hats/nrme2170/">
+    # Product cards have pattern: link with product code, title, price
+    links = re.findall(r'href="(/napa-racing/[^"]+/([a-z0-9]+)/)"', html)
+    seen = set()
+    for link_path, code in links:
+        if code in seen or code in ("hats", "t-shirts", "polos", "jackets", "tracktops", "gilets"):
+            continue
+        seen.add(code)
+
+        # Fetch individual product page for details
+        try:
+            prod_resp = requests.get(base_url + link_path, headers={"User-Agent": "BTCCFanHub-Scraper/1.0"}, timeout=30)
+            prod_html = prod_resp.text
+
+            # Title from <h1>
+            title_match = re.search(r'<h1[^>]*>([^<]+)</h1>', prod_html)
+            title = title_match.group(1).strip() if title_match else code.upper()
+
+            # Price
+            price_match = re.search(r'£\s*([\d.]+)\s*inc\.\s*VAT.*?PRICE', prod_html, re.DOTALL)
+            price = f"£{price_match.group(1)}" if price_match else ""
+
+            # Image
+            img_match = re.search(r'(https://images\.tayna\.com/prod-images/[^"\']+)', prod_html)
+            image_url = img_match.group(1) if img_match else ""
+
+            # Clean up title — remove the product code suffix
+            title = re.sub(r'\s*-\s*NRME?\d+\s*$', '', title, flags=re.IGNORECASE).strip()
+
+            products.append({
+                "code": code,
+                "title": title,
+                "price": price,
+                "image_url": image_url,
+                "url": base_url + link_path,
+            })
+        except Exception as e:
+            print(f"    Warning: failed to fetch {link_path}: {e}")
+            continue
+
+    return products
+
+
+def tayna_product_to_merch_item(product, store_config):
+    """Convert a Tayna product to a merch feed item."""
+    return {
+        "id": f"{store_config['seller_id']}-{product['code']}",
+        "title": product["title"],
+        "imageUrl": product["image_url"],
+        "price": product["price"],
+        "currency": "GBP",
+        "sellerName": store_config["seller_name"],
+        "sellerType": "team",
+        "purchaseUrl": product["url"],
+        "affiliateParams": {},
+        "sponsored": False,
+        "driverIds": store_config["driver_ids"],
+        "teamIds": store_config["team_ids"],
+        "roundTags": [],
+        "_available": True,
+    }
 
 
 def fetch_shopify_products(base_url, collection=None):
@@ -126,6 +217,26 @@ def main():
             print(f"  Found {len(products)} products")
 
             items = [shopify_product_to_merch_item(p, store) for p in products]
+            total_scraped += len(items)
+
+            feed = merge_scraped_items(feed, items, store["seller_id"])
+            print(f"  Merged {len(items)} items for {store['seller_name']}")
+
+        except Exception as e:
+            print(f"  ERROR scraping {store['seller_name']}: {e}", file=sys.stderr)
+            continue
+
+    for store in TAYNA_STORES:
+        print(f"\nScraping {store['seller_name']} ({store['base_url']})...")
+        try:
+            all_products = []
+            for cat in store["categories"]:
+                print(f"  Category: {cat}")
+                products = fetch_tayna_products(store["base_url"], cat)
+                print(f"    Found {len(products)} products")
+                all_products.extend(products)
+
+            items = [tayna_product_to_merch_item(p, store) for p in all_products]
             total_scraped += len(items)
 
             feed = merge_scraped_items(feed, items, store["seller_id"])
