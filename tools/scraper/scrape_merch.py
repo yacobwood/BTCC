@@ -39,24 +39,9 @@ SHOPIFY_STORES = [
     },
 ]
 
-# Tayna.co.uk categories to scrape for NAPA Racing
-TAYNA_STORES = [
-    {
-        "base_url": "https://www.tayna.co.uk",
-        "categories": [
-            "/napa-racing/hats/",
-            "/napa-racing/t-shirts/",
-            "/napa-racing/polos/",
-            "/napa-racing/jackets/",
-            "/napa-racing/tracktops/",
-            "/napa-racing/gilets/",
-        ],
-        "seller_name": "NAPA Racing UK",
-        "seller_id": "napa",
-        "team_ids": ["NAPA Racing UK"],
-        "driver_ids": [116, 27, 77, 200],
-    },
-]
+# Tayna.co.uk - DISABLED (using category links instead of individual products)
+# To re-enable individual product scraping, uncomment TAYNA_STORES below
+TAYNA_STORES = []
 
 
 def fetch_tayna_products(base_url, category_path):
