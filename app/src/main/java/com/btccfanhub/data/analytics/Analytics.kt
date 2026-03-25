@@ -178,10 +178,15 @@ object Analytics {
         }
     }
 
-    fun raceVideoClicked(venue: String, label: String) {
-        fa.logEvent("race_video_clicked") {
+    fun videoFullRaceClicked(venue: String) {
+        fa.logEvent("video_full_race_clicked") {
             param("venue", venue)
-            param("label", label)
+        }
+    }
+
+    fun videoHighlightsClicked(venue: String) {
+        fa.logEvent("video_highlights_clicked") {
+            param("venue", venue)
         }
     }
 

@@ -219,7 +219,10 @@ private fun VideoExternalButton(
             .background(Color(0xFF1A0000), RoundedCornerShape(10.dp))
             .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
             .clickable {
-                Analytics.raceVideoClicked(venue, text)
+                if (text.contains("FULL RACE", ignoreCase = true))
+                    Analytics.videoFullRaceClicked(venue)
+                else
+                    Analytics.videoHighlightsClicked(venue)
                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
             }
             .padding(horizontal = 16.dp, vertical = if (LocalConfiguration.current.screenWidthDp >= 600) 16.dp else 12.dp),
