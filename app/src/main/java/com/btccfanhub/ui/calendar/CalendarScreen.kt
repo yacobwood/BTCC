@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.Constants
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.TestClock
 import com.btccfanhub.data.model.Race
 import com.btccfanhub.data.repository.CalendarRepository
@@ -34,7 +34,7 @@ import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.theme.BtccYellow
-import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.store.FeatureFlagsStore
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit

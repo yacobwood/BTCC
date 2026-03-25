@@ -1,4 +1,4 @@
-package com.btccfanhub.data
+package com.btccfanhub.data.analytics
 
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics

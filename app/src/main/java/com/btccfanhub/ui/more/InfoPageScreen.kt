@@ -1,5 +1,6 @@
 package com.btccfanhub.ui.more
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.model.ContentBlock
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
@@ -28,6 +29,8 @@ import com.btccfanhub.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> Unit = {}) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val context = LocalContext.current
     var page by remember { mutableStateOf<InfoPage?>(null) }
     var loading by remember { mutableStateOf(true) }

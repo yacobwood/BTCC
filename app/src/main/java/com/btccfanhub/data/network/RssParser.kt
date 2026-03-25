@@ -1,6 +1,6 @@
 package com.btccfanhub.data.network
 
-import com.btccfanhub.data.NetworkDiskCache
+import com.btccfanhub.data.store.NetworkDiskCache
 import com.btccfanhub.data.model.Article
 import okhttp3.Request
 import org.json.JSONArray

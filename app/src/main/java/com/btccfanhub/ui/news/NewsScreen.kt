@@ -46,9 +46,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.btccfanhub.R
-import com.btccfanhub.data.FavouriteDriverStore
+import com.btccfanhub.data.store.FavouriteDriverStore
 import com.btccfanhub.data.model.Article
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccNavy

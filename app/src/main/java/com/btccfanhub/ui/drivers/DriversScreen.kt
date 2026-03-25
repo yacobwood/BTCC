@@ -27,8 +27,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
-import com.btccfanhub.data.Analytics
-import com.btccfanhub.data.FavouriteDriverStore
+import com.btccfanhub.data.analytics.Analytics
+import com.btccfanhub.data.store.FavouriteDriverStore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import com.btccfanhub.data.model.Driver
@@ -483,6 +483,8 @@ private fun TeamCard(team: Team, modifier: Modifier = Modifier, onClick: () -> U
 
 @Composable
 private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val context     = LocalContext.current
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == driver.name
@@ -678,6 +680,8 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     LaunchedEffect(team.name) { Analytics.screen("team_detail:${team.name}") }
 
     Box(

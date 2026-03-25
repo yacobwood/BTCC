@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.btccfanhub.Constants
-import com.btccfanhub.data.Analytics
-import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.analytics.Analytics
+import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.data.TestClock
 import com.btccfanhub.ui.components.ImageLightbox
 import com.btccfanhub.data.model.DayForecast
@@ -67,6 +67,8 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) -> Unit)? = null) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
     val today = remember(testOverride) { TestClock.today() }
     val context = LocalContext.current

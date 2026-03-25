@@ -1,5 +1,6 @@
-package com.btccfanhub.data
+package com.btccfanhub.data.season
 
+import com.btccfanhub.data.DriverProgressionSeries
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.RoundResult
 import com.btccfanhub.data.model.TeamStanding

@@ -1,4 +1,4 @@
-package com.btccfanhub.data
+package com.btccfanhub.data.store
 
 import android.content.Context
 import com.btccfanhub.BuildConfig

@@ -2,6 +2,7 @@ package com.btccfanhub.ui.results
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,8 +17,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Star
 import com.btccfanhub.Constants
-import com.btccfanhub.data.Analytics
-import com.btccfanhub.data.FavouriteDriverStore
+import com.btccfanhub.data.analytics.Analytics
+import com.btccfanhub.data.store.FavouriteDriverStore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,6 +48,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     var roundResult by remember { mutableStateOf<com.btccfanhub.data.model.RoundResult?>(null) }
     var loading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf(false) }

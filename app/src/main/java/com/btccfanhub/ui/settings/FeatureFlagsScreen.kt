@@ -1,5 +1,6 @@
 package com.btccfanhub.ui.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -11,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.ui.theme.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,6 +24,8 @@ private val displayFmt = DateTimeFormatter.ofPattern("EEE d MMM yyyy  HH:mm")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
 
     var showDatePicker by remember { mutableStateOf(false) }

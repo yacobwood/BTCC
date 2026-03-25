@@ -9,7 +9,7 @@ import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.size.Precision
 import com.btccfanhub.data.ConnectivityObserver
-import com.btccfanhub.data.NetworkDiskCache
+import com.btccfanhub.data.store.NetworkDiskCache
 import java.io.File
 
 class BtccApplication : Application(), ImageLoaderFactory {

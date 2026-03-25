@@ -1,5 +1,6 @@
 package com.btccfanhub.ui.settings
 
+import androidx.activity.compose.BackHandler
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -19,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.BuildConfig
 import com.btccfanhub.Constants
-import com.btccfanhub.data.FeatureFlagsStore
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.store.FeatureFlagsStore
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.ui.components.PillToggle
 import com.btccfanhub.ui.theme.*
 import com.btccfanhub.worker.NewsCheckWorker
@@ -30,6 +31,8 @@ import com.btccfanhub.worker.ResultsCheckWorker
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val context = LocalContext.current
     val prefs = remember {
         context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)

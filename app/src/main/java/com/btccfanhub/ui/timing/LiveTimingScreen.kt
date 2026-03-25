@@ -1,7 +1,8 @@
 package com.btccfanhub.ui.timing
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -30,6 +31,8 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveTimingScreen(eventId: Int, onBack: () -> Unit) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val client  = remember(eventId) { TslSignalRClient(eventId) }
     val session by client.session.collectAsState()
     val loading  = session == null

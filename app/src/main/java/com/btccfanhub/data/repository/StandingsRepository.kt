@@ -1,6 +1,6 @@
 package com.btccfanhub.data.repository
 
-import com.btccfanhub.data.NetworkDiskCache
+import com.btccfanhub.data.store.NetworkDiskCache
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.TeamStanding
 import kotlinx.coroutines.Dispatchers

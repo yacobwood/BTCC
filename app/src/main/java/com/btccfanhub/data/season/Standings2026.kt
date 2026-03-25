@@ -1,4 +1,4 @@
-package com.btccfanhub.data
+package com.btccfanhub.data.season
 
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.TeamStanding

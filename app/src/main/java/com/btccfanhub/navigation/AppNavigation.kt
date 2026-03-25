@@ -8,9 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.ArticleHolder
-import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.store.FeatureFlagsStore
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.btccfanhub.ui.calendar.CalendarScreen
@@ -99,31 +99,31 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             val year  = backStackEntry.arguments?.getInt("year")  ?: 2026
             val round = backStackEntry.arguments?.getInt("round") ?: return@composable
             LaunchedEffect(year, round) { Analytics.roundResultsViewed(year, round) }
-            RoundResultsScreen(year = year, round = round, onBack = { navController.popBackStack() })
+            RoundResultsScreen(year = year, round = round, onBack = { navController.popBackStack(Screen.Results.route, inclusive = false) })
         }
 
         composable(Screen.Radio.route) {
-            RadioScreen()
+            RadioScreen(onBack = { navController.popBackStack(Screen.More.route, inclusive = false) })
         }
 
         composable(Screen.Article.route) {
-            ArticleScreen(onBack = { navController.popBackStack() })
+            ArticleScreen(onBack = { navController.popBackStack(Screen.News.route, inclusive = false) })
         }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStack(Screen.More.route, inclusive = false) },
                 onFeatureFlagsClick = { navController.navigate(Screen.FeatureFlags.route) },
             )
         }
 
         composable(Screen.FeatureFlags.route) {
-            FeatureFlagsScreen(onBack = { navController.popBackStack() })
+            FeatureFlagsScreen(onBack = { navController.popBackStack(Screen.Settings.route, inclusive = false) })
         }
 
         composable(Screen.BugReport.route) {
             BugReportScreen(
-                onBack          = { navController.popBackStack() },
+                onBack          = { navController.popBackStack(Screen.More.route, inclusive = false) },
                 onReturnToNews  = { navController.popBackStack(Screen.News.route, inclusive = false) },
             )
         }
@@ -137,7 +137,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             val flagLiveUpdates by FeatureFlagsStore.liveUpdates.collectAsState()
             TrackDetailScreen(
                 round = round,
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStack(Screen.Calendar.route, inclusive = false) },
                 onLiveTimingClick = if (flagLiveUpdates) {
                     { eventId -> navController.navigate(Screen.LiveTiming.route(eventId)) }
                 } else null,
@@ -150,7 +150,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getInt("eventId") ?: return@composable
             LaunchedEffect(eventId) { Analytics.liveTimingOpened(eventId) }
-            LiveTimingScreen(eventId = eventId, onBack = { navController.popBackStack() })
+            LiveTimingScreen(eventId = eventId, onBack = { navController.popBackStack(Screen.Calendar.route, inclusive = false) })
         }
 
         composable(Screen.More.route) {
@@ -170,7 +170,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             LaunchedEffect(pageId) { Analytics.infoPageViewed(pageId) }
             InfoPageScreen(
                 pageId = pageId,
-                onBack = { navController.popBackStack() },
+                onBack = { navController.popBackStack(Screen.More.route, inclusive = false) },
                 onPageClick = { targetId -> navController.navigate(Screen.InfoPage.route(targetId)) },
             )
         }

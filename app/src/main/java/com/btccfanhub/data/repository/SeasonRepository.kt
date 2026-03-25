@@ -2,8 +2,8 @@ package com.btccfanhub.data.repository
 
 import android.content.Context
 import com.btccfanhub.data.DriverProgressionSeries
-import com.btccfanhub.data.DriverSeasonStats
-import com.btccfanhub.data.SeasonData
+import com.btccfanhub.data.season.DriverSeasonStats
+import com.btccfanhub.data.season.SeasonData
 import com.btccfanhub.data.model.DriverResult
 import com.btccfanhub.data.model.DriverStanding
 import com.btccfanhub.data.model.RaceEntry

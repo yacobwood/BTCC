@@ -1,5 +1,6 @@
 package com.btccfanhub.ui.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.BuildConfig
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +41,8 @@ private enum class SubmitState { Idle, Loading, Success, Error }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     var selectedCategory by remember { mutableStateOf(categories[0]) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }

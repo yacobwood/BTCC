@@ -17,7 +17,7 @@ import android.widget.RemoteViews
 import com.btccfanhub.Constants
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
-import com.btccfanhub.data.FeatureFlagsStore
+import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.data.TestClock
 import com.btccfanhub.data.model.RaceSession
 import com.btccfanhub.data.repository.CalendarRepository
@@ -144,13 +144,15 @@ class CountdownWidget : AppWidgetProvider() {
 
             // Scale countdown text to fit the actual widget height
             val countdownSp = when {
-                minHeight < 90  -> 26f
-                minHeight < 130 -> 32f
+                minHeight < 80  -> 22f
+                minHeight < 110 -> 28f
+                minHeight < 140 -> 32f
                 else            -> 38f
             }
             val labelSp = when {
-                minHeight < 90  -> 9f
-                minHeight < 130 -> 11f
+                minHeight < 80  -> 8f
+                minHeight < 110 -> 10f
+                minHeight < 140 -> 11f
                 else            -> 13f
             }
             views.setTextViewTextSize(R.id.widget_countdown, TypedValue.COMPLEX_UNIT_SP, countdownSp)
@@ -275,7 +277,7 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_countdown, "$daysUntil")
                     views.setTextViewText(
                         R.id.widget_countdown_label,
-                        if (sizeClass == SizeClass.SMALL) "DAYS" else "DAYS\nTO GO",
+                        if (sizeClass == SizeClass.WIDE_TALL) "DAYS\nTO GO" else "DAYS",
                     )
                     views.setTextColor(R.id.widget_countdown, 0xFFFFFFFF.toInt())
                 }

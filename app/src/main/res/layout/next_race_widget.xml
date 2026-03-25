@@ -46,7 +46,9 @@
                     android:letterSpacing="0.08"
                     android:text="ROUND 1"
                     android:textColor="#F5C400"
-                    android:textSize="13sp"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:textAllCaps="true" />
 
                 <TextView
@@ -68,7 +70,9 @@
                     android:layout_marginTop="3dp"
                     android:text="18 Apr – 19 Apr 2026"
                     android:textColor="#8A8D94"
-                    android:textSize="14sp" />
+                    android:textSize="13sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
             </LinearLayout>
 

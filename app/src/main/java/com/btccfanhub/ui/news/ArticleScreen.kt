@@ -8,7 +8,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.btccfanhub.Constants
-import com.btccfanhub.data.Analytics
+import com.btccfanhub.data.analytics.Analytics
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
@@ -40,6 +40,8 @@ import kotlinx.coroutines.withContext
 @SuppressLint("JavascriptInterface")
 @Composable
 fun ArticleScreen(onBack: () -> Unit) {
+    var navigatingBack by remember { mutableStateOf(false) }
+    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val article = ArticleHolder.current
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
 
