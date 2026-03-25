@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -122,6 +123,7 @@ fun ShopTheGridScreen(
                             items(section.items) { merchItem ->
                                 MerchItemCard(
                                     item = merchItem,
+                                    modifier = Modifier.width(170.dp),
                                     onBuyClick = {
                                         viewModel.itemTapped(merchItem, context)
                                         onItemTap(merchItem)

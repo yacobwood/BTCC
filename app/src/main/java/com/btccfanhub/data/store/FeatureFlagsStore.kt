@@ -157,7 +157,11 @@ object FeatureFlagsStore {
     private fun apply(key: String, value: String) {
         prefs?.edit()?.putString(key, value)?.apply()
         when (key) {
-            KEY_MERCH_FEED_URL -> merchFeedUrl.value = value
+            KEY_MERCH_FEED_URL -> {
+                val changed = merchFeedUrl.value != value
+                merchFeedUrl.value = value
+                if (changed) com.btccfanhub.data.repository.MerchRepository.invalidateCache()
+            }
         }
     }
 
