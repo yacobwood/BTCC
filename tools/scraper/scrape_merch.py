@@ -59,45 +59,57 @@ def fetch_tayna_products(base_url, category_path):
     html = resp.text
 
     products = []
-    # Find product links: <a href="/napa-racing/hats/nrme2170/">
-    # Product cards have pattern: link with product code, title, price
-    links = re.findall(r'href="(/napa-racing/[^"]+/([a-z0-9]+)/)"', html)
+    # Extract product links with full titles from category page
+    # Pattern: href="/napa-racing/category/code/" ... title text
+    links = re.findall(
+        r'href="(/napa-racing/[^/]+/([a-z0-9]+)/)"[^>]*>\s*(?:<[^>]+>)*\s*([^<]+)',
+        html,
+    )
+
+    # Extract image URLs
+    images = re.findall(r'(https://images\.tayna\.com/prod-images/[^"\'>\s]+)', html)
+
+    # Extract prices (from rendered page, may need JS — try anyway)
+    prices = re.findall(r'£([\d.]+)', html)
+
     seen = set()
-    for link_path, code in links:
-        if code in seen or code in ("hats", "t-shirts", "polos", "jackets", "tracktops", "gilets"):
+    skip = {"hats", "t-shirts", "polos", "jackets", "tracktops", "gilets"}
+    img_idx = 0
+
+    for link_path, code, raw_title in links:
+        if code in seen or code in skip:
+            continue
+        title = raw_title.strip()
+        if not title or title in ("Specification", "More Info", "Reviews"):
             continue
         seen.add(code)
 
-        # Fetch individual product page for details
+        # Clean title — remove product code suffix like "- NRME2138"
+        title = re.sub(r'\s*-\s*NRME?\d+\s*$', '', title, flags=re.IGNORECASE).strip()
+        # Also remove size suffixes like "(XL)", "(3XL)", "(S)" etc
+        title = re.sub(r'\s*\([A-Z0-9]+\)\s*$', '', title).strip()
+
+        # Get image if available
+        image_url = images[img_idx] if img_idx < len(images) else ""
+        img_idx += 1
+
+        # Try to get price from product page (quick fetch)
+        price = ""
         try:
-            prod_resp = requests.get(base_url + link_path, headers={"User-Agent": "BTCCFanHub-Scraper/1.0"}, timeout=30)
-            prod_html = prod_resp.text
+            prod_resp = requests.get(base_url + link_path, headers={"User-Agent": "BTCCFanHub-Scraper/1.0"}, timeout=15)
+            price_match = re.search(r'£\s*([\d.]+)', prod_resp.text)
+            if price_match:
+                price = f"£{price_match.group(1)}"
+        except Exception:
+            pass
 
-            # Title from <h1>
-            title_match = re.search(r'<h1[^>]*>([^<]+)</h1>', prod_html)
-            title = title_match.group(1).strip() if title_match else code.upper()
-
-            # Price
-            price_match = re.search(r'£\s*([\d.]+)\s*inc\.\s*VAT.*?PRICE', prod_html, re.DOTALL)
-            price = f"£{price_match.group(1)}" if price_match else ""
-
-            # Image
-            img_match = re.search(r'(https://images\.tayna\.com/prod-images/[^"\']+)', prod_html)
-            image_url = img_match.group(1) if img_match else ""
-
-            # Clean up title — remove the product code suffix
-            title = re.sub(r'\s*-\s*NRME?\d+\s*$', '', title, flags=re.IGNORECASE).strip()
-
-            products.append({
-                "code": code,
-                "title": title,
-                "price": price,
-                "image_url": image_url,
-                "url": base_url + link_path,
-            })
-        except Exception as e:
-            print(f"    Warning: failed to fetch {link_path}: {e}")
-            continue
+        products.append({
+            "code": code,
+            "title": title,
+            "price": price,
+            "image_url": image_url,
+            "url": base_url + link_path,
+        })
 
     return products
 

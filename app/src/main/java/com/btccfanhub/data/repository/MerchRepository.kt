@@ -25,6 +25,7 @@ object MerchRepository {
     fun invalidateCache() {
         cache = null
         cacheTime = 0
+        NetworkDiskCache.write(CACHE_KEY, "")  // clear disk cache too
     }
 
     suspend fun fetchFeed(): MerchFeed = withContext(Dispatchers.IO) {
