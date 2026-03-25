@@ -52,8 +52,14 @@ import com.btccfanhub.ui.theme.BtccYellow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 private val dateFormat = DateTimeFormatter.ofPattern("d MMM yyyy")
 private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
@@ -544,28 +550,51 @@ private fun LapRecordRow(label: String, record: LapRecord, useKm: Boolean, modif
     }
 }
 
+private val londonZone = ZoneId.of("Europe/London")
+private val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
+
+private data class LocalisedSession(
+    val session: RaceSession,
+    val localDate: LocalDate,
+    val localTime: String,
+)
+
+private fun localiseSession(session: RaceSession, ukDate: LocalDate, deviceZone: ZoneId): LocalisedSession {
+    if (session.time == "TBA") return LocalisedSession(session, ukDate, "TBA")
+    return runCatching {
+        val londonDt = ZonedDateTime.of(LocalDateTime.of(ukDate, LocalTime.parse(session.time, timeFmt)), londonZone)
+        val localDt = londonDt.withZoneSameInstant(deviceZone)
+        LocalisedSession(session, localDt.toLocalDate(), localDt.format(timeFmt))
+    }.getOrElse { LocalisedSession(session, ukDate, session.time) }
+}
+
 @Composable
 private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate) {
     val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
     val today = remember(testOverride) { TestClock.today() }
+    val deviceZone = remember { ZoneId.systemDefault() }
+    val tzLabel = remember(deviceZone) {
+        ZonedDateTime.now(deviceZone).format(DateTimeFormatter.ofPattern("zzz"))
+    }
 
-    // Build a dynamic day→date mapping from the actual session day keys.
-    // Convention: the earliest day key maps to raceStartDate, each subsequent key is +1 day.
-    val dayKeys = remember(sessions) {
-        sessions.map { it.day }.distinct().sorted()
-    }
-    val dayDateMap = remember(dayKeys, raceStartDate) {
-        // Sort day keys by typical order: FRI < SAT < SUN
+    // Build UK date for each session day key, then localise each session to device timezone.
+    val localisedGroups = remember(sessions, raceStartDate, deviceZone) {
         val order = listOf("FRI", "SAT", "SUN")
-        val sorted = dayKeys.sortedBy { order.indexOf(it).takeIf { i -> i >= 0 } ?: 99 }
-        // Anchor SAT to raceStartDate; FRI is -1, SUN is +1
-        val satIndex = sorted.indexOf("SAT")
-        if (satIndex >= 0) {
-            sorted.mapIndexed { i, key -> key to raceStartDate.plusDays((i - satIndex).toLong()) }.toMap()
+        val dayKeys = sessions.map { it.day }.distinct().sortedBy { order.indexOf(it).takeIf { i -> i >= 0 } ?: 99 }
+        val satIndex = dayKeys.indexOf("SAT")
+        val dayDateMap = if (satIndex >= 0) {
+            dayKeys.mapIndexed { i, key -> key to raceStartDate.plusDays((i - satIndex).toLong()) }.toMap()
         } else {
-            sorted.mapIndexed { i, key -> key to raceStartDate.plusDays(i.toLong()) }.toMap()
+            dayKeys.mapIndexed { i, key -> key to raceStartDate.plusDays(i.toLong()) }.toMap()
         }
+        // Localise every session and re-group by the device-local date
+        sessions
+            .mapNotNull { s -> dayDateMap[s.day]?.let { ukDate -> localiseSession(s, ukDate, deviceZone) } }
+            .groupBy { it.localDate }
+            .entries
+            .sortedBy { it.key }
     }
+    val lastLocalDate = remember(localisedGroups) { localisedGroups.lastOrNull()?.key }
 
     Column(
         modifier = Modifier
@@ -574,19 +603,28 @@ private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            "WEEKEND TIMETABLE",
-            style         = MaterialTheme.typography.labelSmall,
-            fontWeight    = FontWeight.ExtraBold,
-            color         = BtccTextSecondary,
-            letterSpacing = 1.5.sp,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "WEEKEND TIMETABLE",
+                style         = MaterialTheme.typography.labelSmall,
+                fontWeight    = FontWeight.ExtraBold,
+                color         = BtccTextSecondary,
+                letterSpacing = 1.5.sp,
+            )
+            Text(
+                tzLabel,
+                style     = MaterialTheme.typography.labelSmall,
+                color     = BtccTextSecondary,
+            )
+        }
 
-        val grouped = sessions.groupBy { it.day }
-        dayKeys.forEach { dayKey ->
-            val date = dayDateMap[dayKey] ?: return@forEach
-            val daySessions = grouped[dayKey] ?: return@forEach
+        localisedGroups.forEach { (date, daySessions) ->
             val isToday = today == date
+            val dayLabel = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()).uppercase()
 
             // Day header
             Row(
@@ -594,7 +632,7 @@ private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate)
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    dayKey,
+                    dayLabel,
                     style         = MaterialTheme.typography.labelSmall,
                     fontWeight    = FontWeight.ExtraBold,
                     letterSpacing = 1.sp,
@@ -623,27 +661,27 @@ private fun TimetableCard(sessions: List<RaceSession>, raceStartDate: LocalDate)
             }
 
             // Sessions for this day
-            daySessions.forEach { session ->
+            daySessions.forEach { ls ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        session.name,
+                        ls.session.name,
                         style    = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.weight(1f),
                         color    = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
-                        session.time,
+                        ls.localTime,
                         style      = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
-                        color      = if (session.time == "TBA") BtccTextSecondary else MaterialTheme.colorScheme.onBackground,
+                        color      = if (ls.localTime == "TBA") BtccTextSecondary else MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }
 
-            if (dayKey != dayKeys.last() && grouped.containsKey(dayKeys.getOrNull(dayKeys.indexOf(dayKey) + 1))) {
+            if (date != lastLocalDate) {
                 HorizontalDivider(color = BtccOutline)
             }
         }

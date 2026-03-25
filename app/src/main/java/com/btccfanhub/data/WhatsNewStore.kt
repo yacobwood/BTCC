@@ -91,6 +91,9 @@ object WhatsNewStore {
             "Lap records side by side — qualifying and race records shown next to each other on tablets",
             "Pull to refresh — swipe down on the calendar to force a refresh",
             "Bug fixes and performance improvements",
+        ),
+        30 to listOf(
+            "Local times — session times in the timetable and widget now shown in your device's timezone, with days adjusted if you're in a distant timezone",
         )
     )
 

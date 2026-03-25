@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import com.btccfanhub.Constants
@@ -26,6 +27,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -87,6 +92,23 @@ class CountdownWidget : AppWidgetProvider() {
 
         private val DAY_FMT        = DateTimeFormatter.ofPattern("d")
         private val MONTH_YEAR_FMT = DateTimeFormatter.ofPattern("MMM yyyy")
+        private val TIME_FMT       = DateTimeFormatter.ofPattern("HH:mm")
+        private val LONDON_ZONE    = ZoneId.of("Europe/London")
+
+        private fun localiseWidgetTime(timeStr: String, date: LocalDate, deviceZone: ZoneId): String {
+            if (timeStr == "TBA" || timeStr.isBlank()) return timeStr
+            return runCatching {
+                val londonDt = ZonedDateTime.of(date.atTime(LocalTime.parse(timeStr, TIME_FMT)), LONDON_ZONE)
+                val localDt = londonDt.withZoneSameInstant(deviceZone)
+                val dayDiff = ChronoUnit.DAYS.between(date, localDt.toLocalDate())
+                val suffix = when {
+                    dayDiff > 0 -> "+$dayDiff"
+                    dayDiff < 0 -> "$dayDiff"
+                    else -> ""
+                }
+                localDt.format(TIME_FMT) + suffix
+            }.getOrDefault(timeStr)
+        }
 
         const val EXTRA_LIVE_TIMING_EVENT_ID = "extra_live_timing_event_id"
 
@@ -120,6 +142,20 @@ class CountdownWidget : AppWidgetProvider() {
                 buildLiveryBitmap(context, minWidth, minHeight, theme),
             )
 
+            // Scale countdown text to fit the actual widget height
+            val countdownSp = when {
+                minHeight < 90  -> 26f
+                minHeight < 130 -> 32f
+                else            -> 38f
+            }
+            val labelSp = when {
+                minHeight < 90  -> 9f
+                minHeight < 130 -> 11f
+                else            -> 13f
+            }
+            views.setTextViewTextSize(R.id.widget_countdown, TypedValue.COMPLEX_UNIT_SP, countdownSp)
+            views.setTextViewTextSize(R.id.widget_countdown_label, TypedValue.COMPLEX_UNIT_SP, labelSp)
+
             // For themes where the accent panel is bright, override muted grey text to white
             val needsWhiteMuted = theme in listOf(
                 WidgetTheme.VERTU, WidgetTheme.NAPA, WidgetTheme.LASER,
@@ -136,6 +172,7 @@ class CountdownWidget : AppWidgetProvider() {
                 }
             }
 
+            val deviceZone = ZoneId.systemDefault()
             val today = LocalDate.now()
             val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
             val nextRace = calendar?.rounds?.firstOrNull { it.endDate >= today }
@@ -209,7 +246,7 @@ class CountdownWidget : AppWidgetProvider() {
             } else {
                 schedule?.get(nextRace.round)
             }
-            val sessionInfo = if (isWeekend && sessions != null) nextSessionInfo(sessions, nextRace, if (testMode) LocalDate.now() else null) else null
+            val sessionInfo = if (isWeekend && sessions != null) nextSessionInfo(sessions, nextRace, if (testMode) LocalDate.now() else null, deviceZone) else null
 
             when {
                 isWeekend && sessionInfo != null -> {
@@ -276,8 +313,8 @@ class CountdownWidget : AppWidgetProvider() {
                             views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
                             views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
                             views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                            bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS)
-                            bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS)
+                            bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS, nextRace.startDate, deviceZone)
+                            bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS, nextRace.endDate, deviceZone)
                         } else {
                             views.setViewVisibility(R.id.widget_divider, View.GONE)
                             views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
@@ -303,8 +340,8 @@ class CountdownWidget : AppWidgetProvider() {
                             views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
                             views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
                             views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                            bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS)
-                            bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS)
+                            bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS, nextRace.startDate, deviceZone)
+                            bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS, nextRace.endDate, deviceZone)
                         } else {
                             views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
                             views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
@@ -326,26 +363,36 @@ class CountdownWidget : AppWidgetProvider() {
             sessions: List<RaceSession>,
             race: com.btccfanhub.data.model.Race,
             testDateOverride: LocalDate? = null,
+            deviceZone: ZoneId = ZoneId.systemDefault(),
         ): Triple<String, String, Boolean>? {
-            val now = java.time.LocalDateTime.now()
+            val now = LocalDateTime.now()
             val sessionDuration = java.time.Duration.ofMinutes(90)
-            val timeFmt = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+            val isTestMode = testDateOverride != null
 
             // In test mode, map all sessions to today so time comparisons work correctly.
             // Normally SAT → startDate, SUN → endDate.
             fun dayDate(day: String) = when {
-                testDateOverride != null -> testDateOverride
+                isTestMode             -> testDateOverride!!
                 day.uppercase() == "SUN" -> race.endDate
-                else -> race.startDate
+                else                   -> race.startDate
             }
 
-            data class SessionWithTime(val session: RaceSession, val start: java.time.LocalDateTime)
+            data class SessionWithTime(val session: RaceSession, val start: LocalDateTime)
 
             val timed = sessions.mapNotNull { s ->
                 if (s.time == "TBA" || s.time.isBlank()) return@mapNotNull null
                 runCatching {
-                    val t = java.time.LocalTime.parse(s.time, timeFmt)
-                    SessionWithTime(s, dayDate(s.day).atTime(t))
+                    val date = dayDate(s.day)
+                    val t = LocalTime.parse(s.time, TIME_FMT)
+                    // Test sessions are already in device local time; real sessions are UK time.
+                    val deviceDt = if (isTestMode) {
+                        date.atTime(t)
+                    } else {
+                        ZonedDateTime.of(date.atTime(t), LONDON_ZONE)
+                            .withZoneSameInstant(deviceZone)
+                            .toLocalDateTime()
+                    }
+                    SessionWithTime(s, deviceDt)
                 }.getOrNull()
             }.sortedBy { it.start }
 
@@ -362,7 +409,7 @@ class CountdownWidget : AppWidgetProvider() {
             val display = when {
                 minsUntil < 60  -> "${minsUntil}m"
                 minsUntil < 120 -> "${minsUntil / 60}h ${minsUntil % 60}m"
-                else            -> next.session.time
+                else            -> localiseWidgetTime(next.session.time, dayDate(next.session.day), deviceZone)
             }
             return Triple(abbreviate(next.session.name), display, false)
         }
@@ -372,12 +419,14 @@ class CountdownWidget : AppWidgetProvider() {
             sessions: List<RaceSession>,
             nameIds: IntArray,
             timeIds: IntArray,
+            sessionDate: LocalDate,
+            deviceZone: ZoneId,
         ) {
             for (i in nameIds.indices) {
                 if (i < sessions.size) {
                     val session = sessions[i]
                     views.setTextViewText(nameIds[i], abbreviate(session.name))
-                    views.setTextViewText(timeIds[i], session.time)
+                    views.setTextViewText(timeIds[i], localiseWidgetTime(session.time, sessionDate, deviceZone))
                     views.setTextColor(timeIds[i], 0xFFFFFFFF.toInt())
                     views.setViewVisibility(nameIds[i], View.VISIBLE)
                     views.setViewVisibility(timeIds[i], View.VISIBLE)
