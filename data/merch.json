@@ -332,122 +332,6 @@
       "roundTags": []
     },
     {
-      "id": "restart-cap",
-      "title": "Restart Racing Cap",
-      "imageUrl": "https://picsum.photos/seed/restart-cap/400/300",
-      "price": "£19.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25,
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "restart-polo",
-      "title": "Restart Racing Polo",
-      "imageUrl": "https://picsum.photos/seed/restart-polo/400/300",
-      "price": "£32.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/polo",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25,
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "smiley-cap",
-      "title": "Chris Smiley #25 Cap",
-      "imageUrl": "https://picsum.photos/seed/smiley-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/smiley-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "smiley-tee",
-      "title": "Chris Smiley #25 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/smiley-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/smiley-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "dorlin-cap",
-      "title": "James Dorlin #132 Cap",
-      "imageUrl": "https://picsum.photos/seed/dorlin-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/dorlin-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "dorlin-tee",
-      "title": "James Dorlin #132 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/dorlin-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/dorlin-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
       "id": "lkq-cap",
       "title": "LKQ Euro Car Parts Racing Cap",
       "imageUrl": "https://picsum.photos/seed/lkq-cap/400/300",
@@ -1141,6 +1025,166 @@
       ],
       "teamIds": [
         "NAPA Racing UK"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-polo",
+      "title": "Restart Racing Polo Shirt",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Lloyd-0H5A8789-scaled.jpg",
+      "price": "£40.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-polo-shirt/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-gilet",
+      "title": "Restart Racing Padded Gilet",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/0-0H5A8072-scaled.jpg",
+      "price": "£60.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-padded-gilet/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-jacket",
+      "title": "Restart Racing Waterproof Jacket",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Lloyd-0H5A9033-scaled.jpg",
+      "price": "£80.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-lightweight-waterproof-jacket/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-cap",
+      "title": "Restart Racing Baseball Cap",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/RR-0Q3A1375-1-scaled.jpg",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-baseball-cap/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-lanyard",
+      "title": "Restart Racing Lanyard",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8341-scaled.jpg",
+      "price": "£6.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-lanyard/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-keyring",
+      "title": "Restart Racing Keyring",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8342-scaled.jpg",
+      "price": "£5.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-keyring/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-bucket",
+      "title": "Restart Racing Bucket Hat",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8354-scaled-e1722251356664.jpg",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/shop-restart-racing/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-bobble",
+      "title": "Restart Racing Bobble Hat",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8359-scaled.jpg",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/shop-restart-racing/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
       ],
       "roundTags": []
     }
