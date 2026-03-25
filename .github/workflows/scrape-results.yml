@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check race Sunday
         id: raceday
@@ -34,7 +34,7 @@ jobs:
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.is_race_sunday == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -69,7 +69,7 @@ jobs:
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.is_race_sunday == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"
           file_pattern: |

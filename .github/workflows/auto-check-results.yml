@@ -16,9 +16,9 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -32,7 +32,7 @@ jobs:
         run: python tools/scraper/auto_update.py
 
       - name: Commit if data changed
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: auto-update Round results [skip ci]"
           file_pattern: |

@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Check race weekend
         id: raceday
@@ -34,7 +34,7 @@ jobs:
           github.event_name == 'workflow_dispatch' ||
           github.event.schedule == '0 */6 * * *' ||
           steps.raceday.outputs.is_race_weekend == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -67,7 +67,7 @@ jobs:
           github.event_name == 'workflow_dispatch' ||
           github.event.schedule == '0 */6 * * *' ||
           steps.raceday.outputs.is_race_weekend == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update standings [skip ci]"
           file_pattern: data/standings.json

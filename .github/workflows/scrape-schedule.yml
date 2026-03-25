@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -31,7 +31,7 @@ jobs:
         run: python tools/scraper/scrape_schedule.py
 
       - name: Commit updated schedule
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update session schedule from btcc.net [skip ci]"
           file_pattern: data/schedule.json
