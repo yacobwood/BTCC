@@ -38,9 +38,9 @@ fun MerchItemCard(item: MerchItem, onBuyClick: () -> Unit, modifier: Modifier = 
     Surface(
         color = BtccCard,
         shape = RoundedCornerShape(8.dp),
-        modifier = modifier.width(cardWidth).height(310.dp)
+        modifier = modifier
     ) {
-        Column(modifier = Modifier.padding(8.dp).fillMaxHeight()) {
+        Column(modifier = Modifier.padding(8.dp)) {
             AsyncImage(
                 model = item.imageUrl,
                 contentDescription = "${item.title} by ${item.sellerName}",
@@ -94,8 +94,6 @@ fun MerchItemCard(item: MerchItem, onBuyClick: () -> Unit, modifier: Modifier = 
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 2.dp)
             )
-
-            Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = onBuyClick,

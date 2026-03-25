@@ -2,15 +2,14 @@ package com.btccfanhub.ui.merch
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,14 +32,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.btccfanhub.ui.merch.components.MerchItemCard
 import com.btccfanhub.ui.merch.components.SellerCard
 import com.btccfanhub.ui.theme.BtccBackground
-import com.btccfanhub.ui.theme.BtccYellow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilteredMerchScreen(
     title: String,
-    filterType: String, // "team" or "driver"
-    filterValue: String, // team name or driver number
+    filterType: String,
+    filterValue: String,
     viewModel: MerchViewModel = viewModel(),
     onBack: () -> Unit,
 ) {
@@ -49,7 +47,6 @@ fun FilteredMerchScreen(
 
     LaunchedEffect(Unit) { viewModel.load() }
 
-    // Derive items reactively — re-evaluated whenever state changes
     val allItems = when (state) {
         is MerchUiState.Success, is MerchUiState.Error -> viewModel.getAllItems()
         else -> emptyList()
@@ -73,7 +70,7 @@ fun FilteredMerchScreen(
         else -> emptyList()
     }
 
-    androidx.compose.foundation.layout.Column(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BtccBackground)
@@ -89,16 +86,15 @@ fun FilteredMerchScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalItemSpacing = 8.dp,
         ) {
-            // Show seller card with discount code at top if available
             sellers.filter { it.discountCode != null }.forEach { seller ->
-                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
+                item(span = StaggeredGridItemSpan.FullLine) {
                     SellerCard(
                         seller = seller,
                         onDiscountCodeTap = { viewModel.discountCodeCopied(it, context) },
@@ -109,7 +105,6 @@ fun FilteredMerchScreen(
                 MerchItemCard(
                     item = merchItem,
                     onBuyClick = { viewModel.itemTapped(merchItem, context) },
-                    modifier = Modifier,
                 )
             }
         }

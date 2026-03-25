@@ -3,6 +3,7 @@ package com.btccfanhub.ui.merch.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -28,7 +29,8 @@ fun DriverInlineCard(
             items(items.take(4)) { item ->
                 MerchItemCard(
                     item = item,
-                    onBuyClick = { onItemTap(item) }
+                    onBuyClick = { onItemTap(item) },
+                    modifier = Modifier.width(170.dp),
                 )
             }
         }
