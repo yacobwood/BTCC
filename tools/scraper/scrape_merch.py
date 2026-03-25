@@ -27,7 +27,15 @@ SHOPIFY_STORES = [
         "seller_name": "Team VERTU",
         "seller_id": "vertu",
         "team_ids": ["Team VERTU"],
-        "driver_ids": [80, 3],  # Ingram, Chilton
+        "driver_ids": [80, 3],
+    },
+    {
+        "base_url": "https://shop.plato.racing",
+        "collection": None,
+        "seller_name": "Plato Racing",
+        "seller_id": "plato",
+        "team_ids": ["Plato Racing"],
+        "driver_ids": [32, 33],
     },
 ]
 
