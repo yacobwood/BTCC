@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-25T12:00:00Z",
+  "lastUpdated": "2026-03-25T21:09:23Z",
   "items": [
     {
       "id": "off-cap",
@@ -320,66 +320,6 @@
       ],
       "teamIds": [
         "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "vertu-cap",
-      "title": "Team VERTU Cap",
-      "imageUrl": "https://picsum.photos/seed/vertu-cap/400/300",
-      "price": "£19.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80,
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "vertu-polo",
-      "title": "Team VERTU Polo",
-      "imageUrl": "https://picsum.photos/seed/vertu-polo/400/300",
-      "price": "£32.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/polo",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80,
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "vertu-hoodie",
-      "title": "Team VERTU Hoodie",
-      "imageUrl": "https://picsum.photos/seed/vertu-hoodie/400/300",
-      "price": "£44.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/hoodie",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80,
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
       ],
       "roundTags": []
     },
@@ -1283,6 +1223,146 @@
       "sponsored": false,
       "driverIds": [],
       "teamIds": [],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-1-4-zip-jumper",
+      "title": "EXCELR8 2025 BTCC 1/4 Zip Jumper - Men's",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/chilton-0Q3A5582_1.jpg?v=1748516973",
+      "price": "£75.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-1-4-zip-jumper",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-1-4-zip-jumper-ladies",
+      "title": "EXCELR8 2025 BTCC 1/4 Zip Jumper - Ladies",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/WhatsAppImage2025-05-02at13.17.44.jpg?v=1746188921",
+      "price": "£75.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-1-4-zip-jumper-ladies",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-gilet",
+      "title": "EXCELR8 2025 BTCC Gilet",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e0Q3A4891.jpg?v=1744704263",
+      "price": "£85.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-gilet",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-softshell",
+      "title": "EXCELR8 2025 BTCC Softshell",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e-0Q3A5122_7d4b6060-ecb5-45ef-bbe0-484399a603f1.jpg?v=1744704403",
+      "price": "£95.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-softshell",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-gilet-ladies",
+      "title": "EXCELR8 2025 BTCC Gilet  - Ladies",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e0Q3A4891.jpg?v=1744704263",
+      "price": "£85.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-gilet-ladies",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-softshell-copy",
+      "title": "EXCELR8 2025 BTCC Softshell - Ladies",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e-0Q3A5122_7d4b6060-ecb5-45ef-bbe0-484399a603f1.jpg?v=1744704403",
+      "price": "£95.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-softshell-copy",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-junior-hoodie",
+      "title": "EXCELR8 2025 BTCC Junior Hoodie",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e-0Q3A1456.jpg?v=1750951247",
+      "price": "£50.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-junior-hoodie",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
       "roundTags": []
     }
   ],
