@@ -59,47 +59,34 @@ def fetch_tayna_products(base_url, category_path):
     html = resp.text
 
     products = []
-    # Extract product links with full titles from category page
-    # Pattern: href="/napa-racing/category/code/" ... title text
-    links = re.findall(
-        r'href="(/napa-racing/[^/]+/([a-z0-9]+)/)"[^>]*>\s*(?:<[^>]+>)*\s*([^<]+)',
+    seen = set()
+    skip = {"hats", "t-shirts", "polos", "jackets", "tracktops", "gilets", "napa-racing"}
+
+    entries = re.findall(
+        r'href="(/napa-racing/[^/]+/([a-z0-9]+)/)"[^>]*>\s*(?:<[^>]+>)*\s*([^<]{5,})',
         html,
     )
 
-    # Extract image URLs
-    images = re.findall(r'(https://images\.tayna\.com/prod-images/[^"\'>\s]+)', html)
-
-    # Extract prices (from rendered page, may need JS — try anyway)
-    prices = re.findall(r'£([\d.]+)', html)
-
-    seen = set()
-    skip = {"hats", "t-shirts", "polos", "jackets", "tracktops", "gilets"}
-    img_idx = 0
-
-    for link_path, code, raw_title in links:
+    for link_path, code, raw_title in entries:
         if code in seen or code in skip:
             continue
         title = raw_title.strip()
-        if not title or title in ("Specification", "More Info", "Reviews"):
+        if title in ("Specification", "More Info", "Reviews", "") or "&raquo;" in title:
             continue
         seen.add(code)
 
-        # Clean title — remove product code suffix like "- NRME2138"
         title = re.sub(r'\s*-\s*NRME?\d+\s*$', '', title, flags=re.IGNORECASE).strip()
-        # Also remove size suffixes like "(XL)", "(3XL)", "(S)" etc
         title = re.sub(r'\s*\([A-Z0-9]+\)\s*$', '', title).strip()
+        title = title.replace("&amp;", "&")
 
-        # Get image if available
-        image_url = images[img_idx] if img_idx < len(images) else ""
-        img_idx += 1
+        image_url = "https://images.tayna.com/prod-images/600/NAPA_RACING_2025/" + code.upper() + ".png"
 
-        # Try to get price from product page (quick fetch)
         price = ""
         try:
             prod_resp = requests.get(base_url + link_path, headers={"User-Agent": "BTCCFanHub-Scraper/1.0"}, timeout=15)
             price_match = re.search(r'£\s*([\d.]+)', prod_resp.text)
             if price_match:
-                price = f"£{price_match.group(1)}"
+                price = "£" + price_match.group(1)
         except Exception:
             pass
 
