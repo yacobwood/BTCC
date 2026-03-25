@@ -1,0 +1,239 @@
+{
+  "lastUpdated": "2026-03-25T12:00:00Z",
+  "items": [
+    {
+      "id": "official-cap-2026",
+      "title": "BTCC 2026 Official Cap",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-cap.webp",
+      "price": "£19.99",
+      "currency": "GBP",
+      "sellerName": "Official BTCC Store",
+      "sellerType": "official",
+      "purchaseUrl": "https://shop.btcc.net/cap",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": []
+    },
+    {
+      "id": "official-tshirt-2026",
+      "title": "BTCC 2026 Official T-Shirt",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-tshirt.webp",
+      "price": "£24.99",
+      "currency": "GBP",
+      "sellerName": "Official BTCC Store",
+      "sellerType": "official",
+      "purchaseUrl": "https://shop.btcc.net/tshirt",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": []
+    },
+    {
+      "id": "official-hoodie-2026",
+      "title": "BTCC 2026 Official Hoodie",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-hoodie.webp",
+      "price": "£44.99",
+      "currency": "GBP",
+      "sellerName": "Official BTCC Store",
+      "sellerType": "official",
+      "purchaseUrl": "https://shop.btcc.net/hoodie",
+      "affiliateParams": {},
+      "sponsored": true,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": [1, 2, 3]
+    },
+    {
+      "id": "napa-team-cap",
+      "title": "NAPA Racing UK Team Cap",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/napa-cap.webp",
+      "price": "£22.99",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://naparacinguk.com/shop/cap",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [2, 33],
+      "teamIds": ["NAPA Racing UK"],
+      "roundTags": []
+    },
+    {
+      "id": "napa-team-polo",
+      "title": "NAPA Racing UK Team Polo",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/napa-polo.webp",
+      "price": "£34.99",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://naparacinguk.com/shop/polo",
+      "affiliateParams": {},
+      "sponsored": true,
+      "driverIds": [2, 33],
+      "teamIds": ["NAPA Racing UK"],
+      "roundTags": [1]
+    },
+    {
+      "id": "sutton-hoodie",
+      "title": "Ashley Sutton #99 Hoodie",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/sutton-hoodie.webp",
+      "price": "£39.99",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://naparacinguk.com/shop/sutton-hoodie",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [99],
+      "teamIds": ["NAPA Racing UK"],
+      "roundTags": []
+    },
+    {
+      "id": "ingram-cap",
+      "title": "Tom Ingram #80 Cap",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/ingram-cap.webp",
+      "price": "£18.99",
+      "currency": "GBP",
+      "sellerName": "Vertu",
+      "sellerType": "team",
+      "purchaseUrl": "https://vertumotorsport.com/shop/ingram-cap",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [80],
+      "teamIds": ["Vertu"],
+      "roundTags": []
+    },
+    {
+      "id": "ingram-tshirt",
+      "title": "Tom Ingram #80 T-Shirt",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/ingram-tshirt.webp",
+      "price": "£24.99",
+      "currency": "GBP",
+      "sellerName": "Vertu",
+      "sellerType": "team",
+      "purchaseUrl": "https://vertumotorsport.com/shop/ingram-tshirt",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [80],
+      "teamIds": ["Vertu"],
+      "roundTags": []
+    },
+    {
+      "id": "ebay-diecast-honda",
+      "title": "Honda Civic Type R BTCC 1:43 Diecast",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/diecast-honda.webp",
+      "price": "£29.99",
+      "currency": "GBP",
+      "sellerName": "eBay Collectibles",
+      "sellerType": "collectible",
+      "purchaseUrl": "https://www.ebay.co.uk/itm/btcc-honda-civic-diecast",
+      "affiliateParams": {
+        "campid": "YOUR_EBAY_CAMP_ID",
+        "toolid": "YOUR_EBAY_TOOL_ID",
+        "customid": "btcc-app"
+      },
+      "sponsored": false,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": []
+    },
+    {
+      "id": "ebay-diecast-bmw",
+      "title": "BMW 330e BTCC 1:43 Diecast",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/diecast-bmw.webp",
+      "price": "£34.99",
+      "currency": "GBP",
+      "sellerName": "eBay Collectibles",
+      "sellerType": "collectible",
+      "purchaseUrl": "https://www.ebay.co.uk/itm/btcc-bmw-330e-diecast",
+      "affiliateParams": {
+        "campid": "YOUR_EBAY_CAMP_ID",
+        "toolid": "YOUR_EBAY_TOOL_ID",
+        "customid": "btcc-app"
+      },
+      "sponsored": false,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": []
+    },
+    {
+      "id": "amazon-btcc-book",
+      "title": "BTCC: The Complete History Book",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/btcc-book.webp",
+      "price": "£16.99",
+      "currency": "GBP",
+      "sellerName": "Amazon",
+      "sellerType": "collectible",
+      "purchaseUrl": "https://www.amazon.co.uk/dp/B0EXAMPLE",
+      "affiliateParams": {
+        "tag": "YOUR_AMAZON_TAG"
+      },
+      "sponsored": false,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": []
+    },
+    {
+      "id": "pitlane-flag",
+      "title": "BTCC Chequered Flag",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/chequered-flag.webp",
+      "price": "£12.99",
+      "currency": "GBP",
+      "sellerName": "Pit-Lane Motorsport",
+      "sellerType": "independent",
+      "purchaseUrl": "https://pitlanemotorsport.co.uk/btcc-flag",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [],
+      "teamIds": [],
+      "roundTags": []
+    }
+  ],
+  "sellers": [
+    {
+      "id": "official-btcc",
+      "displayName": "Official BTCC Store",
+      "sellerType": "official",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/btcc-logo.webp",
+      "discountCode": null
+    },
+    {
+      "id": "napa-racing",
+      "displayName": "NAPA Racing UK",
+      "sellerType": "team",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/napa-logo.webp",
+      "discountCode": "BTCCAPP10"
+    },
+    {
+      "id": "vertu",
+      "displayName": "Vertu",
+      "sellerType": "team",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/vertu-logo.webp",
+      "discountCode": null
+    },
+    {
+      "id": "ebay-collectibles",
+      "displayName": "eBay Collectibles",
+      "sellerType": "collectible",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/ebay-logo.webp",
+      "discountCode": null
+    },
+    {
+      "id": "amazon",
+      "displayName": "Amazon",
+      "sellerType": "collectible",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/amazon-logo.webp",
+      "discountCode": null
+    },
+    {
+      "id": "pitlane-motorsport",
+      "displayName": "Pit-Lane Motorsport",
+      "sellerType": "independent",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/assets/merch/logos/pitlane-logo.webp",
+      "discountCode": "FANHUB15"
+    }
+  ]
+}
