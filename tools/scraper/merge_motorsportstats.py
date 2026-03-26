@@ -97,6 +97,18 @@ def build_history_from_summary(summary: dict) -> list[dict]:
         if is_champion(champ_text):
             entry["champion"] = True
 
+        # Skip seasons with no meaningful data (0 points, no position, no stats)
+        has_stats = (
+            entry["pos"] > 0
+            or entry["points"] > 0
+            or entry["wins"] > 0
+            or entry["podiums"] > 0
+            or entry["poles"] > 0
+            or entry["fastestLaps"] > 0
+        )
+        if not has_stats:
+            continue
+
         history.append(entry)
 
     return history

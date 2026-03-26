@@ -941,6 +941,7 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
 
 @Composable
 private fun TeamSeasonStatRow(stat: TeamSeasonStat) {
+    if (stat.pos == 0 && stat.points == 0) return
     val posColor = when (stat.pos) {
         1    -> Color(0xFFFFD700)
         2    -> Color(0xFFC0C0C0)
@@ -976,10 +977,10 @@ private fun TeamSeasonStatRow(stat: TeamSeasonStat) {
                 )
             }
             Text(
-                "P${stat.pos}",
+                if (stat.pos > 0) "P${stat.pos}" else "—",
                 fontWeight = FontWeight.Black,
                 fontSize   = 16.sp,
-                color      = posColor,
+                color      = if (stat.pos > 0) posColor else BtccTextSecondary,
             )
         }
         // Points (right-aligned, muted)
@@ -1173,7 +1174,7 @@ private fun SeasonStatRow(stat: SeasonStat) {
                         color         = BtccYellow,
                     )
                 }
-            } else {
+            } else if (stat.pos > 0) {
                 Text(
                     "P${stat.pos}",
                     fontWeight = FontWeight.ExtraBold,
