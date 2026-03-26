@@ -255,7 +255,7 @@
       "thirds": 0
     },
     {
-      "position": 29,
+      "position": 30,
       "name": "Nicolas Hamilton",
       "team": "",
       "points": 0,
@@ -17101,7 +17101,7 @@
       "races": 30,
       "wins": 5,
       "podiums": 9,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 1
     },
     {
@@ -17110,8 +17110,8 @@
       "races": 30,
       "wins": 5,
       "podiums": 8,
-      "poles": 0,
-      "dnfs": 3
+      "poles": 3,
+      "dnfs": 2
     },
     {
       "driver": "Colin Turkington",
@@ -17119,7 +17119,7 @@
       "races": 30,
       "wins": 4,
       "podiums": 8,
-      "poles": 0,
+      "poles": 6,
       "dnfs": 1
     },
     {
@@ -17137,7 +17137,7 @@
       "races": 30,
       "wins": 3,
       "podiums": 6,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 5
     },
     {
@@ -17155,17 +17155,17 @@
       "races": 30,
       "wins": 2,
       "podiums": 9,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 4
     },
     {
       "driver": "Adam Morgan",
       "team": "BMW 330i M Sport",
-      "races": 30,
+      "races": 29,
       "wins": 2,
       "podiums": 4,
-      "poles": 0,
-      "dnfs": 4
+      "poles": 2,
+      "dnfs": 3
     },
     {
       "driver": "Senna Proctor",
@@ -17182,7 +17182,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 4,
-      "poles": 0,
+      "poles": 3,
       "dnfs": 2
     },
     {
@@ -17191,17 +17191,17 @@
       "races": 30,
       "wins": 1,
       "podiums": 4,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 1
     },
     {
       "driver": "Tom Oliphant",
       "team": "BMW 330i M Sport",
-      "races": 30,
+      "races": 29,
       "wins": 1,
       "podiums": 4,
-      "poles": 0,
-      "dnfs": 5
+      "poles": 1,
+      "dnfs": 4
     },
     {
       "driver": "Daniel Lloyd",
@@ -17224,11 +17224,11 @@
     {
       "driver": "Dan Cammish",
       "team": "Honda Civic Type R",
-      "races": 30,
+      "races": 3,
       "wins": 0,
       "podiums": 1,
       "poles": 0,
-      "dnfs": 27
+      "dnfs": 0
     },
     {
       "driver": "Jason Plato",
@@ -17350,11 +17350,11 @@
     {
       "driver": "Nicolas Hamilton",
       "team": "Cupra Leon",
-      "races": 30,
+      "races": 29,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 7
+      "dnfs": 6
     },
     {
       "driver": "Chris Smiley",

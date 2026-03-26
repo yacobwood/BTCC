@@ -9638,7 +9638,7 @@
       "wins": 8,
       "podiums": 16,
       "poles": 0,
-      "dnfs": 4
+      "dnfs": 2
     },
     {
       "driver": "Matt Neal",
@@ -9697,11 +9697,11 @@
     {
       "driver": "Árón Taylor-Smith",
       "team": "Redstone Racing",
-      "races": 28,
+      "races": 30,
       "wins": 1,
       "podiums": 2,
       "poles": 0,
-      "dnfs": 5
+      "dnfs": 7
     },
     {
       "driver": "Dave Newsham",
@@ -9805,10 +9805,10 @@
     {
       "driver": "Adam Morgan",
       "team": "Speedworks Motorsport",
-      "races": 26,
+      "races": 28,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 12
     },
     {
@@ -10163,7 +10163,7 @@
         68,
         68,
         68,
-        68
+        71
       ]
     },
     {
@@ -10179,7 +10179,7 @@
         3,
         3,
         3,
-        3
+        71
       ]
     },
     {

@@ -3,7 +3,7 @@
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_background_dark">
+    android:background="@drawable/widget_background">
 
     <!-- Livery background — filled programmatically via setImageViewBitmap -->
     <ImageView
@@ -46,7 +46,8 @@
                     android:textColor="#F5C400"
                     android:textSize="11sp"
                     android:maxLines="1"
-                    android:ellipsize="end" />
+                    android:ellipsize="end"
+                    android:text="ROUNDS 1 - 3" />
 
                 <TextView
                     android:id="@+id/widget_venue"
@@ -57,7 +58,8 @@
                     android:fontFamily="sans-serif-black"
                     android:maxLines="1"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:text="Donington Park" />
 
                 <TextView
                     android:id="@+id/widget_dates"
@@ -67,7 +69,8 @@
                     android:textColor="#8A8D94"
                     android:textSize="13sp"
                     android:maxLines="1"
-                    android:ellipsize="end" />
+                    android:ellipsize="end"
+                    android:text="18 - 19 Apr 2026" />
 
             </LinearLayout>
 
@@ -85,6 +88,7 @@
                     android:fontFamily="sans-serif-black"
                     android:gravity="center"
                     android:lineSpacingMultiplier="0.9"
+                    android:text="23"
                     android:textColor="#FFFFFF"
                     android:textSize="36sp" />
 
@@ -95,6 +99,7 @@
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center"
                     android:letterSpacing="0.05"
+                    android:text="DAYS\nTO GO"
                     android:textColor="#8A8D94"
                     android:textSize="13sp" />
 
@@ -140,8 +145,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/widget_sat_name1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
-                    <TextView android:id="@+id/widget_sat_time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_name1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="FP" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="10:35" android:textColor="#8A8D94" android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -149,8 +154,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/widget_sat_name2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
-                    <TextView android:id="@+id/widget_sat_time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_name2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="Quali" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="14:00" android:textColor="#8A8D94" android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -158,8 +163,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/widget_sat_name3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
-                    <TextView android:id="@+id/widget_sat_time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_name3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="Quali Race" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sat_time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="15:05" android:textColor="#8A8D94" android:textSize="13sp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -194,8 +199,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/widget_sun_name1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
-                    <TextView android:id="@+id/widget_sun_time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_name1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="Race 1" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="11:30" android:textColor="#8A8D94" android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -203,8 +208,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/widget_sun_name2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
-                    <TextView android:id="@+id/widget_sun_time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_name2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="Race 2" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="14:40" android:textColor="#8A8D94" android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -212,8 +217,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/widget_sun_name3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="13sp" />
-                    <TextView android:id="@+id/widget_sun_time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:textColor="#8A8D94" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_name3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:text="Race 3" android:textColor="#FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/widget_sun_time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="17:30" android:textColor="#8A8D94" android:textSize="13sp" />
                 </LinearLayout>
 
             </LinearLayout>

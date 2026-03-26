@@ -94,6 +94,15 @@ object WhatsNewStore {
         ),
         30 to listOf(
             "Local times — session times in the timetable and widget now shown in your device's timezone, with days adjusted if you're in a distant timezone",
+        ),
+        31 to listOf(
+            "Career stats — each driver page now shows a BTCC Career summary with total wins, podiums, poles, fastest laps and championship titles",
+            "Extended history — driver season history now goes back to their first BTCC season",
+            "Corrected standings — championship points across all seasons (2004–2025) updated to match official records",
+            "Bug fixes and performance improvements",
+        ),
+        32 to listOf(
+            "Widget - simplified sizing"
         )
     )
 

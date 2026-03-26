@@ -41,7 +41,7 @@
       "position": 5,
       "name": "Rory Butcher",
       "team": "Motorbase Performance",
-      "points": 265,
+      "points": 266,
       "wins": 3,
       "seconds": 2,
       "thirds": 1
@@ -245,7 +245,7 @@
       "thirds": 0
     },
     {
-      "position": 28,
+      "position": 27,
       "name": "Daniel Rowbottom",
       "team": "BTC Racing",
       "points": 5,
@@ -15748,7 +15748,7 @@
       "races": 30,
       "wins": 5,
       "podiums": 8,
-      "poles": 0,
+      "poles": 5,
       "dnfs": 0
     },
     {
@@ -15757,7 +15757,7 @@
       "races": 30,
       "wins": 4,
       "podiums": 4,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 1
     },
     {
@@ -15766,8 +15766,8 @@
       "races": 30,
       "wins": 3,
       "podiums": 7,
-      "poles": 0,
-      "dnfs": 2
+      "poles": 1,
+      "dnfs": 1
     },
     {
       "driver": "Rory Butcher",
@@ -15775,7 +15775,7 @@
       "races": 30,
       "wins": 3,
       "podiums": 6,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 2
     },
     {
@@ -15784,7 +15784,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 14,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 1
     },
     {
@@ -15793,7 +15793,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 6,
-      "poles": 0,
+      "poles": 3,
       "dnfs": 1
     },
     {
@@ -15802,7 +15802,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 5,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 3
     },
     {
@@ -15826,11 +15826,11 @@
     {
       "driver": "Jake Hill",
       "team": "Audi S3 Saloon",
-      "races": 30,
+      "races": 29,
       "wins": 1,
       "podiums": 2,
-      "poles": 0,
-      "dnfs": 6
+      "poles": 2,
+      "dnfs": 5
     },
     {
       "driver": "Stephen Jelley",
@@ -15874,7 +15874,7 @@
       "races": 30,
       "wins": 0,
       "podiums": 3,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 7
     },
     {
@@ -15902,7 +15902,7 @@
       "wins": 0,
       "podiums": 1,
       "poles": 0,
-      "dnfs": 2
+      "dnfs": 1
     },
     {
       "driver": "Bobby Thompson",
@@ -15952,11 +15952,11 @@
     {
       "driver": "Nicolas Hamilton",
       "team": "Ford Focus RS",
-      "races": 30,
+      "races": 24,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 11
+      "dnfs": 5
     },
     {
       "driver": "Daniel Rowbottom",
@@ -16100,7 +16100,7 @@
         188,
         227,
         228,
-        265
+        266
       ]
     },
     {

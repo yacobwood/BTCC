@@ -3,7 +3,7 @@
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_background_dark">
+    android:background="@drawable/widget_background">
 
     <!-- Livery background — filled programmatically via setImageViewBitmap -->
     <ImageView
@@ -39,6 +39,7 @@
             android:fontFamily="sans-serif-black"
             android:gravity="center"
             android:lineSpacingMultiplier="0.85"
+            android:text="23"
             android:textColor="#FFFFFF"
             android:textSize="36sp" />
 
@@ -49,6 +50,7 @@
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:letterSpacing="0.05"
+            android:text="DAYS"
             android:textColor="#8A8D94"
             android:textSize="9sp" />
 
@@ -61,6 +63,7 @@
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:maxLines="1"
+            android:text="DON"
             android:textColor="#F5C400"
             android:textSize="10sp" />
 

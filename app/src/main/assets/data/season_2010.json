@@ -7735,8 +7735,8 @@
       "races": 30,
       "wins": 5,
       "podiums": 12,
-      "poles": 1,
-      "dnfs": 4
+      "poles": 4,
+      "dnfs": 3
     },
     {
       "driver": "Tom Onslow-Cole",
@@ -7750,11 +7750,11 @@
     {
       "driver": "Tom Chilton",
       "team": "Team Aon",
-      "races": 28,
+      "races": 30,
       "wins": 3,
       "podiums": 7,
-      "poles": 4,
-      "dnfs": 2
+      "poles": 6,
+      "dnfs": 3
     },
     {
       "driver": "Steven Kane",
@@ -8198,7 +8198,7 @@
         0,
         0,
         0,
-        0
+        9
       ]
     },
     {

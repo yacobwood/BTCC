@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">BTCC Hub</string>
     <string name="countdown_widget_description">Resize me! Expand for race info and weekend schedule</string>
+    <string name="widget_small_description">Countdown and track</string>
+    <string name="widget_medium_description">Rounds, track name and countdown</string>
+    <string name="widget_large_description">Full schedule with race times</string>
 </resources>

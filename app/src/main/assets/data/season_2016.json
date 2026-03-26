@@ -32,7 +32,7 @@
       "position": 4,
       "name": "Colin Turkington",
       "team": "West Surrey Racing",
-      "points": 292,
+      "points": 289,
       "wins": 5,
       "seconds": 2,
       "thirds": 3
@@ -86,7 +86,7 @@
       "position": 10,
       "name": "Tom Ingram",
       "team": "Speedworks Motorsport",
-      "points": 220,
+      "points": 219,
       "wins": 2,
       "seconds": 1,
       "thirds": 3
@@ -113,7 +113,7 @@
       "position": 13,
       "name": "Ashley Sutton",
       "team": "Motorbase Performance",
-      "points": 161,
+      "points": 162,
       "wins": 1,
       "seconds": 0,
       "thirds": 1
@@ -17551,11 +17551,11 @@
     {
       "driver": "Colin Turkington",
       "team": "Subaru Levorg GT",
-      "races": 30,
+      "races": 27,
       "wins": 5,
       "podiums": 10,
-      "poles": 0,
-      "dnfs": 5
+      "poles": 7,
+      "dnfs": 2
     },
     {
       "driver": "Mat Jackson",
@@ -17572,7 +17572,7 @@
       "races": 30,
       "wins": 4,
       "podiums": 10,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 3
     },
     {
@@ -17599,7 +17599,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 6,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 6
     },
     {
@@ -17617,7 +17617,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 5,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 3
     },
     {
@@ -17653,8 +17653,8 @@
       "races": 30,
       "wins": 1,
       "podiums": 2,
-      "poles": 0,
-      "dnfs": 6
+      "poles": 2,
+      "dnfs": 5
     },
     {
       "driver": "Rob Austin",
@@ -17672,7 +17672,7 @@
       "wins": 0,
       "podiums": 2,
       "poles": 0,
-      "dnfs": 5
+      "dnfs": 4
     },
     {
       "driver": "Jack Goff",
@@ -17776,11 +17776,11 @@
     {
       "driver": "Chris Smiley",
       "team": "Toyota Avensis",
-      "races": 30,
+      "races": 15,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 16
+      "dnfs": 1
     },
     {
       "driver": "James Cole",
@@ -17803,11 +17803,11 @@
     {
       "driver": "Daniel Lloyd",
       "team": "Honda Civic Type R",
-      "races": 30,
+      "races": 9,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 23
+      "dnfs": 2
     },
     {
       "driver": "Dave Newsham",
@@ -17935,7 +17935,7 @@
         183,
         210,
         244,
-        292
+        289
       ]
     },
     {
@@ -18031,7 +18031,7 @@
         163,
         163,
         201,
-        220
+        219
       ]
     },
     {
@@ -18079,7 +18079,7 @@
         126,
         147,
         154,
-        161
+        162
       ]
     },
     {

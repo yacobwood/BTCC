@@ -8476,8 +8476,8 @@
       "races": 30,
       "wins": 6,
       "podiums": 13,
-      "poles": 2,
-      "dnfs": 2
+      "poles": 4,
+      "dnfs": 1
     },
     {
       "driver": "Jason Plato",
@@ -8521,7 +8521,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 3,
-      "poles": 1,
+      "poles": 2,
       "dnfs": 2
     },
     {
@@ -8698,11 +8698,11 @@
     {
       "driver": "Árón Taylor-Smith",
       "team": "888 Racing with Collins Contractors",
-      "races": 3,
+      "races": 888,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 1
+      "dnfs": 0
     },
     {
       "driver": "James Thompson",
@@ -8920,7 +8920,7 @@
         9,
         9,
         9,
-        9
+        61
       ]
     },
     {
@@ -8936,7 +8936,7 @@
         10,
         10,
         30,
-        52
+        61
       ]
     },
     {
@@ -8968,7 +8968,7 @@
         1,
         1,
         1,
-        1
+        31
       ]
     },
     {
@@ -8984,7 +8984,7 @@
         17,
         17,
         17,
-        30
+        31
       ]
     },
     {
@@ -9064,7 +9064,7 @@
         0,
         0,
         0,
-        0
+        12
       ]
     },
     {

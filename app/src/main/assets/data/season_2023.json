@@ -23,7 +23,7 @@
       "position": 3,
       "name": "Jake Hill",
       "team": "BTC Racing",
-      "points": 373,
+      "points": 372,
       "wins": 6,
       "seconds": 5,
       "thirds": 1
@@ -122,7 +122,7 @@
       "position": 14,
       "name": "Tom Chilton",
       "team": "Motorbase Performance",
-      "points": 102,
+      "points": 97,
       "wins": 1,
       "seconds": 0,
       "thirds": 0
@@ -15194,7 +15194,7 @@
       "races": 30,
       "wins": 12,
       "podiums": 20,
-      "poles": 0,
+      "poles": 10,
       "dnfs": 3
     },
     {
@@ -15203,7 +15203,7 @@
       "races": 30,
       "wins": 6,
       "podiums": 12,
-      "poles": 0,
+      "poles": 3,
       "dnfs": 0
     },
     {
@@ -15212,17 +15212,17 @@
       "races": 30,
       "wins": 4,
       "podiums": 7,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 3
     },
     {
       "driver": "Dan Cammish",
       "team": "Ford Focus ST MK.III",
-      "races": 30,
+      "races": 27,
       "wins": 3,
       "podiums": 6,
-      "poles": 0,
-      "dnfs": 6
+      "poles": 5,
+      "dnfs": 2
     },
     {
       "driver": "Tom Ingram",
@@ -15231,7 +15231,7 @@
       "wins": 2,
       "podiums": 17,
       "poles": 0,
-      "dnfs": 1
+      "dnfs": 0
     },
     {
       "driver": "Daniel Rowbottom",
@@ -15239,7 +15239,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 5,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 4
     },
     {
@@ -15258,7 +15258,7 @@
       "wins": 1,
       "podiums": 1,
       "poles": 0,
-      "dnfs": 4
+      "dnfs": 3
     },
     {
       "driver": "Josh Cook",
@@ -15275,8 +15275,8 @@
       "races": 30,
       "wins": 0,
       "podiums": 4,
-      "poles": 0,
-      "dnfs": 3
+      "poles": 2,
+      "dnfs": 2
     },
     {
       "driver": "Andrew Watson",
@@ -15290,11 +15290,11 @@
     {
       "driver": "Árón Taylor-Smith",
       "team": "Vauxhall Astra",
-      "races": 30,
+      "races": 29,
       "wins": 0,
       "podiums": 2,
       "poles": 0,
-      "dnfs": 6
+      "dnfs": 5
     },
     {
       "driver": "Bobby Thompson",
@@ -15330,7 +15330,7 @@
       "wins": 0,
       "podiums": 1,
       "poles": 0,
-      "dnfs": 3
+      "dnfs": 4
     },
     {
       "driver": "Sam Osborne",
@@ -15374,7 +15374,7 @@
       "races": 30,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 3
     },
     {
@@ -15389,11 +15389,11 @@
     {
       "driver": "Nicolas Hamilton",
       "team": "Cupra Leon",
-      "races": 30,
+      "races": 15,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 16
+      "dnfs": 1
     },
     {
       "driver": "Jack Butel",
@@ -15514,7 +15514,7 @@
         261,
         301,
         331,
-        373
+        372
       ]
     },
     {
@@ -15706,7 +15706,7 @@
         77,
         92,
         95,
-        102
+        97
       ]
     },
     {

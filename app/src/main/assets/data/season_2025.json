@@ -14269,7 +14269,7 @@
       "races": 30,
       "wins": 7,
       "podiums": 18,
-      "poles": 0,
+      "poles": 5,
       "dnfs": 1
     },
     {
@@ -14278,7 +14278,7 @@
       "races": 30,
       "wins": 5,
       "podiums": 17,
-      "poles": 0,
+      "poles": 3,
       "dnfs": 0
     },
     {
@@ -14287,7 +14287,7 @@
       "races": 30,
       "wins": 3,
       "podiums": 10,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 4
     },
     {
@@ -14296,17 +14296,17 @@
       "races": 30,
       "wins": 3,
       "podiums": 8,
-      "poles": 0,
-      "dnfs": 2
+      "poles": 1,
+      "dnfs": 1
     },
     {
       "driver": "Jake Hill",
       "team": "Laser Tools Racing",
-      "races": 30,
+      "races": 27,
       "wins": 3,
       "podiums": 7,
-      "poles": 0,
-      "dnfs": 4
+      "poles": 3,
+      "dnfs": 1
     },
     {
       "driver": "Tom Chilton",
@@ -14314,8 +14314,8 @@
       "races": 30,
       "wins": 2,
       "podiums": 6,
-      "poles": 0,
-      "dnfs": 6
+      "poles": 3,
+      "dnfs": 5
     },
     {
       "driver": "Josh Cook",
@@ -14341,8 +14341,8 @@
       "races": 30,
       "wins": 1,
       "podiums": 3,
-      "poles": 0,
-      "dnfs": 2
+      "poles": 1,
+      "dnfs": 1
     },
     {
       "driver": "Daryl DeLeon",
@@ -14365,11 +14365,11 @@
     {
       "driver": "Daniel Lloyd",
       "team": "Restart Racing",
-      "races": 30,
+      "races": 29,
       "wins": 1,
       "podiums": 1,
-      "poles": 0,
-      "dnfs": 4
+      "poles": 1,
+      "dnfs": 3
     },
     {
       "driver": "Sam Osborne",
@@ -14405,7 +14405,7 @@
       "wins": 0,
       "podiums": 1,
       "poles": 0,
-      "dnfs": 6
+      "dnfs": 4
     },
     {
       "driver": "Aiden Moffat",
@@ -14413,8 +14413,8 @@
       "races": 30,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
-      "dnfs": 1
+      "poles": 2,
+      "dnfs": 0
     },
     {
       "driver": "Dexter Patterson",
@@ -14423,7 +14423,7 @@
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 4
+      "dnfs": 3
     },
     {
       "driver": "Ronan Pearson",
@@ -14464,20 +14464,20 @@
     {
       "driver": "Nicolas Hamilton",
       "team": "Powder Monkey Racing",
-      "races": 30,
-      "wins": 0,
-      "podiums": 0,
-      "poles": 0,
-      "dnfs": 9
-    },
-    {
-      "driver": "Árón Taylor-Smith",
-      "team": "TOYOTA GAZOO Racing UK",
-      "races": 30,
+      "races": 28,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
       "dnfs": 7
+    },
+    {
+      "driver": "Árón Taylor-Smith",
+      "team": "TOYOTA GAZOO Racing UK",
+      "races": 29,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "dnfs": 6
     },
     {
       "driver": "James Dorlin",
@@ -14555,7 +14555,7 @@
         304,
         343,
         384,
-        426
+        428
       ]
     },
     {
@@ -14587,7 +14587,7 @@
         196,
         224,
         270,
-        294
+        295
       ]
     },
     {
@@ -14603,7 +14603,7 @@
         213,
         247,
         256,
-        276
+        277
       ]
     },
     {
@@ -14651,7 +14651,7 @@
         106,
         121,
         156,
-        190
+        160
       ]
     },
     {
@@ -14715,7 +14715,7 @@
         109,
         118,
         146,
-        165
+        166
       ]
     },
     {
@@ -14779,7 +14779,7 @@
         62,
         91,
         114,
-        118
+        103
       ]
     },
     {
@@ -14811,7 +14811,7 @@
         86,
         88,
         99,
-        105
+        100
       ]
     },
     {

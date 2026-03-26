@@ -113,7 +113,7 @@
       "position": 13,
       "name": "Aiden Moffat",
       "team": "LKQ Euro Car Parts with SYNETIQ",
-      "points": 143,
+      "points": 138,
       "wins": 1,
       "seconds": 1,
       "thirds": 0
@@ -10955,7 +10955,7 @@
       "races": 30,
       "wins": 8,
       "podiums": 16,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 1
     },
     {
@@ -10964,7 +10964,7 @@
       "races": 30,
       "wins": 6,
       "podiums": 15,
-      "poles": 0,
+      "poles": 7,
       "dnfs": 2
     },
     {
@@ -10973,7 +10973,7 @@
       "races": 30,
       "wins": 5,
       "podiums": 11,
-      "poles": 0,
+      "poles": 8,
       "dnfs": 1
     },
     {
@@ -10991,7 +10991,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 9,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 2
     },
     {
@@ -11009,7 +11009,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 9,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 0
     },
     {
@@ -11018,7 +11018,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 3,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 5
     },
     {
@@ -11069,20 +11069,20 @@
     {
       "driver": "Adam Morgan",
       "team": "Team BMW",
-      "races": 30,
+      "races": 29,
       "wins": 0,
       "podiums": 1,
-      "poles": 0,
-      "dnfs": 3
+      "poles": 1,
+      "dnfs": 2
     },
     {
       "driver": "Bobby Thompson",
       "team": "Zeus Cloud Racing with WSR",
-      "races": 30,
+      "races": 3,
       "wins": 0,
       "podiums": 1,
       "poles": 0,
-      "dnfs": 27
+      "dnfs": 0
     },
     {
       "driver": "Andrew Watson",
@@ -11108,7 +11108,7 @@
       "races": 30,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 4
     },
     {
@@ -11354,7 +11354,7 @@
         121,
         126,
         128,
-        143
+        138
       ]
     },
     {

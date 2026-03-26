@@ -14,7 +14,7 @@
       "position": 2,
       "name": "Colin Turkington",
       "team": "West Surrey Racing",
-      "points": 335,
+      "points": 336,
       "wins": 5,
       "seconds": 5,
       "thirds": 3
@@ -254,7 +254,7 @@
       "thirds": 0
     },
     {
-      "position": 29,
+      "position": 28,
       "name": "Nicolas Hamilton",
       "team": "",
       "points": 1,
@@ -15711,8 +15711,8 @@
       "races": 27,
       "wins": 5,
       "podiums": 13,
-      "poles": 0,
-      "dnfs": 3
+      "poles": 3,
+      "dnfs": 2
     },
     {
       "driver": "Ashley Sutton",
@@ -15720,7 +15720,7 @@
       "races": 27,
       "wins": 5,
       "podiums": 10,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 0
     },
     {
@@ -15729,7 +15729,7 @@
       "races": 27,
       "wins": 4,
       "podiums": 10,
-      "poles": 0,
+      "poles": 6,
       "dnfs": 1
     },
     {
@@ -15738,7 +15738,7 @@
       "races": 27,
       "wins": 3,
       "podiums": 11,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 3
     },
     {
@@ -15747,7 +15747,7 @@
       "races": 27,
       "wins": 3,
       "podiums": 8,
-      "poles": 0,
+      "poles": 3,
       "dnfs": 3
     },
     {
@@ -15756,8 +15756,8 @@
       "races": 27,
       "wins": 3,
       "podiums": 4,
-      "poles": 0,
-      "dnfs": 4
+      "poles": 3,
+      "dnfs": 3
     },
     {
       "driver": "Ollie Jackson",
@@ -15774,7 +15774,7 @@
       "races": 27,
       "wins": 1,
       "podiums": 4,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 1
     },
     {
@@ -15810,7 +15810,7 @@
       "races": 27,
       "wins": 0,
       "podiums": 3,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 1
     },
     {
@@ -15819,7 +15819,7 @@
       "races": 27,
       "wins": 0,
       "podiums": 1,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 1
     },
     {
@@ -15852,11 +15852,11 @@
     {
       "driver": "Bobby Thompson",
       "team": "Audi S3 Saloon",
-      "races": 27,
+      "races": 21,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
-      "dnfs": 10
+      "poles": 1,
+      "dnfs": 3
     },
     {
       "driver": "Aiden Moffat",
@@ -15864,8 +15864,8 @@
       "races": 27,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
-      "dnfs": 2
+      "poles": 2,
+      "dnfs": 1
     },
     {
       "driver": "Michael Crees",
@@ -15960,11 +15960,11 @@
     {
       "driver": "Nicolas Hamilton",
       "team": "Volkswagen CC",
-      "races": 27,
+      "races": 22,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 15
+      "dnfs": 10
     },
     {
       "driver": "Glynn Geddie",
@@ -16058,7 +16058,7 @@
         233,
         248,
         308,
-        335
+        336
       ]
     },
     {

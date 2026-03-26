@@ -99,24 +99,29 @@ object FeatureFlagsStore {
         }
     }
 
-    /** Broadcasts an update to all CountdownWidget instances. */
+    /** Broadcasts an update to all widget instances (Small, Medium, Large). */
     fun refreshWidgets(context: Context) {
         try {
             val mgr = android.appwidget.AppWidgetManager.getInstance(context)
-            val ids = mgr.getAppWidgetIds(
-                android.content.ComponentName(context, com.btccfanhub.widget.CountdownWidget::class.java)
+            val widgetClasses = listOf(
+                com.btccfanhub.widget.SmallWidget::class.java,
+                com.btccfanhub.widget.MediumWidget::class.java,
+                com.btccfanhub.widget.LargeWidget::class.java,
             )
-            if (ids.isNotEmpty()) {
-                context.sendBroadcast(
-                    android.content.Intent(
-                        android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE,
-                        null,
-                        context,
-                        com.btccfanhub.widget.CountdownWidget::class.java,
-                    ).putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                )
-                Log.d("FeatureFlags", "Widget refresh broadcast sent for ${ids.size} widget(s)")
+            for (cls in widgetClasses) {
+                val ids = mgr.getAppWidgetIds(android.content.ComponentName(context, cls))
+                if (ids.isNotEmpty()) {
+                    context.sendBroadcast(
+                        android.content.Intent(
+                            android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE,
+                            null,
+                            context,
+                            cls,
+                        ).putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                    )
+                }
             }
+            Log.d("FeatureFlags", "Widget refresh broadcast sent")
         } catch (e: Exception) {
             Log.e("FeatureFlags", "Widget refresh error: ${e.message}")
         }

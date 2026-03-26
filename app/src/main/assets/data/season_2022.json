@@ -59,7 +59,7 @@
       "position": 7,
       "name": "Gordon Shedden",
       "team": "Team Dynamics",
-      "points": 249,
+      "points": 248,
       "wins": 2,
       "seconds": 1,
       "thirds": 3
@@ -15687,7 +15687,7 @@
       "races": 30,
       "wins": 6,
       "podiums": 12,
-      "poles": 0,
+      "poles": 5,
       "dnfs": 0
     },
     {
@@ -15696,7 +15696,7 @@
       "races": 30,
       "wins": 5,
       "podiums": 9,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 0
     },
     {
@@ -15705,8 +15705,8 @@
       "races": 30,
       "wins": 3,
       "podiums": 13,
-      "poles": 0,
-      "dnfs": 1
+      "poles": 4,
+      "dnfs": 0
     },
     {
       "driver": "Colin Turkington",
@@ -15714,7 +15714,7 @@
       "races": 30,
       "wins": 3,
       "podiums": 12,
-      "poles": 0,
+      "poles": 4,
       "dnfs": 2
     },
     {
@@ -15723,7 +15723,7 @@
       "races": 30,
       "wins": 3,
       "podiums": 12,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 1
     },
     {
@@ -15732,7 +15732,7 @@
       "races": 30,
       "wins": 3,
       "podiums": 3,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 1
     },
     {
@@ -15741,7 +15741,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 6,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 4
     },
     {
@@ -15750,7 +15750,7 @@
       "races": 30,
       "wins": 1,
       "podiums": 9,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 1
     },
     {
@@ -15759,17 +15759,17 @@
       "races": 30,
       "wins": 1,
       "podiums": 4,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 1
     },
     {
       "driver": "Adam Morgan",
       "team": "BMW 330e M Sport",
-      "races": 30,
+      "races": 29,
       "wins": 1,
       "podiums": 2,
       "poles": 0,
-      "dnfs": 5
+      "dnfs": 4
     },
     {
       "driver": "George Gamble",
@@ -15828,11 +15828,11 @@
     {
       "driver": "Tom Chilton",
       "team": "Hyundai i30N",
-      "races": 30,
+      "races": 28,
       "wins": 0,
       "podiums": 0,
-      "poles": 0,
-      "dnfs": 7
+      "poles": 1,
+      "dnfs": 5
     },
     {
       "driver": "Árón Taylor-Smith",
@@ -15945,11 +15945,11 @@
     {
       "driver": "Tom Oliphant",
       "team": "Cupra Leon",
-      "races": 30,
+      "races": 3,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 27
+      "dnfs": 0
     },
     {
       "driver": "Will Powell",
@@ -16080,7 +16080,7 @@
         169,
         210,
         246,
-        249
+        248
       ]
     },
     {

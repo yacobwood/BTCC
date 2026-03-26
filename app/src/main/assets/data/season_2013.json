@@ -10641,10 +10641,10 @@
     {
       "driver": "Gordon Shedden",
       "team": "Honda Yuasa Racing Team",
-      "races": 28,
+      "races": 30,
       "wins": 5,
       "podiums": 18,
-      "poles": 1,
+      "poles": 3,
       "dnfs": 1
     },
     {
@@ -10671,8 +10671,8 @@
       "races": 30,
       "wins": 5,
       "podiums": 10,
-      "poles": 1,
-      "dnfs": 3
+      "poles": 3,
+      "dnfs": 2
     },
     {
       "driver": "Sam Tordoff",
@@ -10689,7 +10689,7 @@
       "races": 30,
       "wins": 0,
       "podiums": 1,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 4
     },
     {
@@ -11198,7 +11198,7 @@
         114,
         114,
         114,
-        114
+        152
       ]
     },
     {
@@ -11214,7 +11214,7 @@
         0,
         11,
         15,
-        38
+        152
       ]
     },
     {
@@ -11326,7 +11326,7 @@
         8,
         8,
         8,
-        8
+        32
       ]
     },
     {
@@ -11342,7 +11342,7 @@
         20,
         20,
         24,
-        24
+        32
       ]
     },
     {

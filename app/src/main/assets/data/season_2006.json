@@ -7413,11 +7413,11 @@
     {
       "driver": "Gordon Shedden",
       "team": "Team Halfords",
-      "races": 28,
+      "races": 30,
       "wins": 4,
       "podiums": 10,
-      "poles": 2,
-      "dnfs": 5
+      "poles": 5,
+      "dnfs": 6
     },
     {
       "driver": "Fabrizio Giovanardi",
@@ -7443,7 +7443,7 @@
       "races": 30,
       "wins": 0,
       "podiums": 5,
-      "poles": 1,
+      "poles": 4,
       "dnfs": 7
     },
     {

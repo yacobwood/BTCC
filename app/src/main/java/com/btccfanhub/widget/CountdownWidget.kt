@@ -34,7 +34,10 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-class CountdownWidget : AppWidgetProvider() {
+open class CountdownWidget : AppWidgetProvider() {
+
+    /** Subclasses override to lock the widget size. */
+    open fun fixedSize(): WidgetSize? = null
 
     override fun onUpdate(
         context: Context,
@@ -50,7 +53,8 @@ class CountdownWidget : AppWidgetProvider() {
                         val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
                         val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
                         val theme = WidgetPrefs.getTheme(context, id)
-                        val views = buildViews(context, minW, minH, theme)
+                        val size = fixedSize() ?: WidgetPrefs.getSize(context, id)
+                        val views = buildViews(context, minW, minH, theme, widgetSize = size)
                         appWidgetManager.updateAppWidget(id, views)
                     }
                 }
@@ -66,14 +70,21 @@ class CountdownWidget : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle,
     ) {
+        val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
+        val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
+        val theme = WidgetPrefs.getTheme(context, appWidgetId)
+        val size = fixedSize() ?: WidgetPrefs.getSize(context, appWidgetId)
+
+        // Build the livery bitmap synchronously — it's just Canvas drawing, very fast.
+        val liveryBmp = buildLiveryBitmap(context, minW, minH, theme)
+
+        // Build the rest of the views on a background thread but keep the
+        // livery ready so the widget is never blank/blurred.
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 withTimeout(10_000L) {
-                    val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
-                    val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
-                    val theme = WidgetPrefs.getTheme(context, appWidgetId)
-                    val views = buildViews(context, minW, minH, theme)
+                    val views = buildViews(context, minW, minH, theme, liveryBmp, widgetSize = size)
                     appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
             } finally {
@@ -86,7 +97,7 @@ class CountdownWidget : AppWidgetProvider() {
         appWidgetIds.forEach { WidgetPrefs.deleteTheme(context, it) }
     }
 
-    private enum class SizeClass { SMALL, WIDE, WIDE_TALL }
+    private enum class SizeClass { SMALL, MEDIUM, LARGE }
 
     companion object {
 
@@ -100,43 +111,53 @@ class CountdownWidget : AppWidgetProvider() {
         private val SUN_NAME_IDS = intArrayOf(R.id.widget_sun_name1, R.id.widget_sun_name2, R.id.widget_sun_name3)
         private val SUN_TIME_IDS = intArrayOf(R.id.widget_sun_time1, R.id.widget_sun_time2, R.id.widget_sun_time3)
 
+        /** Short venue names for the small widget. */
+        private val VENUE_SHORT = mapOf(
+            "Brands Hatch" to "BH",
+            "Donington Park" to "DON",
+            "Thruxton" to "THR",
+            "Oulton Park" to "OUL",
+            "Croft" to "CRO",
+            "Snetterton" to "SNE",
+            "Knockhill" to "KNO",
+            "Silverstone" to "SIL",
+        )
+
         internal suspend fun buildViews(
             context: Context,
             minWidth: Int = 40,
             minHeight: Int = 40,
             theme: WidgetTheme = WidgetTheme.NAVY,
+            prebuiltLivery: Bitmap? = null,
+            widgetSize: WidgetSize = WidgetSize.MEDIUM,
         ): RemoteViews {
-            val wide = minWidth >= 110  // anything wider than ~1.5 cells goes wide
-            val tall = minHeight >= 200
-            val sizeClass = when {
-                wide && tall -> SizeClass.WIDE_TALL
-                wide         -> SizeClass.WIDE
-                else         -> SizeClass.SMALL
+            val sizeClass = when (widgetSize) {
+                WidgetSize.SMALL  -> SizeClass.SMALL
+                WidgetSize.MEDIUM -> SizeClass.MEDIUM
+                WidgetSize.LARGE  -> SizeClass.LARGE
             }
 
             val layoutId = when (sizeClass) {
-                SizeClass.WIDE_TALL -> R.layout.next_race_weather_widget
-                SizeClass.WIDE      -> R.layout.next_race_widget
-                SizeClass.SMALL     -> R.layout.countdown_widget
+                SizeClass.LARGE  -> R.layout.next_race_weather_widget
+                SizeClass.MEDIUM -> R.layout.next_race_widget
+                SizeClass.SMALL  -> R.layout.countdown_widget
             }
             val views = RemoteViews(context.packageName, layoutId)
             views.setImageViewBitmap(
                 R.id.widget_livery,
-                buildLiveryBitmap(context, minWidth, minHeight, theme),
+                prebuiltLivery ?: buildLiveryBitmap(context, minWidth, minHeight, theme),
             )
 
-            // Scale countdown text to fit the actual widget height
-            val countdownSp = when {
-                minHeight < 80  -> 22f
-                minHeight < 110 -> 28f
-                minHeight < 140 -> 32f
-                else            -> 38f
+            // Scale countdown text based on chosen size
+            val countdownSp = when (sizeClass) {
+                SizeClass.SMALL  -> 36f
+                SizeClass.MEDIUM -> 38f
+                SizeClass.LARGE  -> 38f
             }
-            val labelSp = when {
-                minHeight < 80  -> 8f
-                minHeight < 110 -> 10f
-                minHeight < 140 -> 11f
-                else            -> 13f
+            val labelSp = when (sizeClass) {
+                SizeClass.SMALL  -> 9f
+                SizeClass.MEDIUM -> 11f
+                SizeClass.LARGE  -> 13f
             }
             views.setTextViewTextSize(R.id.widget_countdown, TypedValue.COMPLEX_UNIT_SP, countdownSp)
             views.setTextViewTextSize(R.id.widget_countdown_label, TypedValue.COMPLEX_UNIT_SP, labelSp)
@@ -150,8 +171,10 @@ class CountdownWidget : AppWidgetProvider() {
             if (needsWhiteMuted) {
                 val mutedWhite = 0xCCFFFFFF.toInt()
                 views.setTextColor(R.id.widget_countdown_label, mutedWhite)
-                views.setTextColor(R.id.widget_dates, mutedWhite)
                 if (sizeClass != SizeClass.SMALL) {
+                    views.setTextColor(R.id.widget_dates, mutedWhite)
+                }
+                if (sizeClass == SizeClass.LARGE) {
                     for (id in SAT_TIME_IDS) views.setTextColor(id, mutedWhite)
                     for (id in SUN_TIME_IDS) views.setTextColor(id, mutedWhite)
                 }
@@ -191,12 +214,12 @@ class CountdownWidget : AppWidgetProvider() {
                         views.setViewVisibility(R.id.widget_round, View.GONE)
                         views.setViewVisibility(R.id.widget_dates, View.GONE)
                     }
-                    SizeClass.WIDE -> {
+                    SizeClass.MEDIUM -> {
                         views.setTextViewText(R.id.widget_round, "BTCC 2026")
                         views.setTextViewText(R.id.widget_venue, "Season complete")
                         views.setTextViewText(R.id.widget_dates, "")
                     }
-                    SizeClass.WIDE_TALL -> {
+                    SizeClass.LARGE -> {
                         views.setTextViewText(R.id.widget_round, "BTCC 2026")
                         views.setTextViewText(R.id.widget_venue, "Season complete")
                         views.setTextViewText(R.id.widget_dates, "")
@@ -260,7 +283,7 @@ class CountdownWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_countdown, "$daysUntil")
                     views.setTextViewText(
                         R.id.widget_countdown_label,
-                        if (sizeClass == SizeClass.WIDE_TALL) "DAYS\nTO GO" else "DAYS",
+                        if (sizeClass == SizeClass.LARGE) "DAYS\nTO GO" else "DAYS",
                     )
                     views.setTextColor(R.id.widget_countdown, 0xFFFFFFFF.toInt())
                 }
@@ -268,18 +291,16 @@ class CountdownWidget : AppWidgetProvider() {
 
             when (sizeClass) {
                 SizeClass.SMALL -> {
-                    views.setTextViewText(R.id.widget_venue, nextRace.venue)
-                    views.setViewVisibility(R.id.widget_venue, if (minHeight >= 50) View.VISIBLE else View.GONE)
-                    if (minHeight >= 100) {
-                        views.setTextViewText(R.id.widget_round, "ROUNDS $rStart - $rEnd")
-                        views.setViewVisibility(R.id.widget_round, View.VISIBLE)
-                    } else {
-                        views.setViewVisibility(R.id.widget_round, View.GONE)
-                    }
+                    // Small: countdown + abbreviated track name
+                    val shortVenue = VENUE_SHORT[nextRace.venue] ?: nextRace.venue.take(3).uppercase()
+                    views.setTextViewText(R.id.widget_venue, shortVenue)
+                    views.setViewVisibility(R.id.widget_venue, View.VISIBLE)
+                    views.setViewVisibility(R.id.widget_round, View.GONE)
                     views.setViewVisibility(R.id.widget_dates, View.GONE)
                 }
 
-                SizeClass.WIDE -> {
+                SizeClass.MEDIUM -> {
+                    // Medium: rounds, track name, countdown
                     views.setTextViewText(R.id.widget_round, "ROUNDS $rStart - $rEnd")
                     views.setTextViewText(R.id.widget_venue, nextRace.venue)
                     views.setViewVisibility(R.id.widget_info_section, View.VISIBLE)
@@ -288,50 +309,43 @@ class CountdownWidget : AppWidgetProvider() {
                         val (_, _, isLive) = sessionInfo
                         views.setTextViewText(R.id.widget_dates, if (isLive) "ON NOW" else "UP NEXT")
                         views.setViewVisibility(R.id.widget_dates, View.VISIBLE)
-                        views.setViewVisibility(R.id.widget_divider, View.GONE)
-                        views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
-                        views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
                     } else {
-                        views.setTextViewText(R.id.widget_dates, dateString)
-                        views.setViewVisibility(R.id.widget_dates, if (minHeight >= 80) View.VISIBLE else View.GONE)
-                        if (sessions != null && sessions.isNotEmpty() && minHeight >= 130) {
-                            views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
-                            views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
-                            views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                            bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS, nextRace.startDate, deviceZone)
-                            bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS, nextRace.endDate, deviceZone)
-                        } else {
-                            views.setViewVisibility(R.id.widget_divider, View.GONE)
-                            views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
-                            views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                        }
+                        views.setViewVisibility(R.id.widget_dates, View.GONE)
                     }
+
+                    // No schedule grid in medium
+                    views.setViewVisibility(R.id.widget_divider, View.GONE)
+                    views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
+                    views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
                 }
 
-                SizeClass.WIDE_TALL -> {
+                SizeClass.LARGE -> {
+                    // Large: rounds, track name, dates, countdown, full schedule
                     views.setTextViewText(R.id.widget_round, "ROUNDS $rStart - $rEnd")
                     views.setTextViewText(R.id.widget_venue, nextRace.venue)
 
                     if (isWeekend && sessionInfo != null) {
                         val (_, _, isLive) = sessionInfo
                         views.setTextViewText(R.id.widget_dates, if (isLive) "ON NOW" else "UP NEXT")
-                        views.setViewVisibility(R.id.widget_dates, View.VISIBLE)
+                    } else {
+                        views.setTextViewText(R.id.widget_dates, dateString)
+                    }
+
+                    if (sessions != null && sessions.isNotEmpty() && !(isWeekend && sessionInfo != null)) {
+                        views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
+                        bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS, nextRace.startDate, deviceZone)
+                        bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS, nextRace.endDate, deviceZone)
+                    } else if (sessions == null || sessions.isEmpty()) {
+                        views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
+                        views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
+                        views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
+                    } else {
+                        // Race weekend with session info — no schedule grid needed
                         views.setViewVisibility(R.id.widget_divider, View.GONE)
                         views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
                         views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                    } else {
-                        views.setTextViewText(R.id.widget_dates, dateString)
-                        if (sessions != null && sessions.isNotEmpty()) {
-                            views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
-                            views.setViewVisibility(R.id.widget_schedule_row, View.VISIBLE)
-                            views.setViewVisibility(R.id.widget_no_schedule, View.GONE)
-                            bindSessions(views, sessions.filter { it.day == "SAT" }, SAT_NAME_IDS, SAT_TIME_IDS, nextRace.startDate, deviceZone)
-                            bindSessions(views, sessions.filter { it.day == "SUN" }, SUN_NAME_IDS, SUN_TIME_IDS, nextRace.endDate, deviceZone)
-                        } else {
-                            views.setViewVisibility(R.id.widget_divider, View.VISIBLE)
-                            views.setViewVisibility(R.id.widget_schedule_row, View.GONE)
-                            views.setViewVisibility(R.id.widget_no_schedule, View.VISIBLE)
-                        }
                     }
                 }
             }

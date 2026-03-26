@@ -609,6 +609,69 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                 }
             }
 
+            // ── Career stats ─────────────────────────────────────────────
+            if (driver.history.isNotEmpty()) {
+                val totalSeasons = driver.history.size
+                val totalWins    = driver.history.sumOf { it.wins }
+                val totalPodiums = driver.history.sumOf { it.podiums }
+                val totalPoles   = driver.history.sumOf { it.poles }
+                val totalFL      = driver.history.sumOf { it.fastestLaps }
+                val totalPoints  = driver.history.sumOf { it.points }
+                val championships = driver.history.count { it.isChampion }
+                val bestPos      = driver.history.filter { it.pos > 0 }.minOfOrNull { it.pos }
+
+                item {
+                    Text(
+                        "BTCC CAREER",
+                        style         = MaterialTheme.typography.labelSmall,
+                        fontWeight    = FontWeight.ExtraBold,
+                        color         = BtccTextSecondary,
+                        letterSpacing = 2.sp,
+                        modifier      = Modifier.padding(top = 4.dp),
+                    )
+                }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BtccCard, RoundedCornerShape(10.dp))
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        // Top row: big headline stats
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            CareerStatBox(value = totalSeasons.toString(), label = "Seasons")
+                            CareerStatBox(value = totalWins.toString(), label = "Wins", highlight = totalWins > 0)
+                            CareerStatBox(value = totalPodiums.toString(), label = "Podiums", highlight = totalPodiums > 0)
+                            CareerStatBox(value = totalPoles.toString(), label = "Poles", highlight = totalPoles > 0)
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(color = BtccOutline.copy(alpha = 0.3f), thickness = 0.5.dp)
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Bottom row: secondary stats
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            if (championships > 0) {
+                                CareerStatBox(value = championships.toString(), label = "Titles", highlight = true, isChamp = true)
+                            }
+                            CareerStatBox(value = totalFL.toString(), label = "Fast Laps", highlight = totalFL > 0)
+                            CareerStatBox(value = totalPoints.toString(), label = "Points")
+                            if (bestPos != null) {
+                                CareerStatBox(value = "P$bestPos", label = "Best Finish")
+                            }
+                        }
+                    }
+                }
+            }
+
             // ── Season history ───────────────────────────────────────────────
             if (driver.history.isNotEmpty()) {
                 item {
@@ -626,7 +689,7 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                 }
                 item {
                     Text(
-                        "Source: btcc.net",
+                        "Source: motorsportstats.com",
                         style    = MaterialTheme.typography.labelSmall,
                         color    = BtccOutline,
                         modifier = Modifier.padding(top = 2.dp),
@@ -1239,6 +1302,54 @@ private fun PersonalStatRow(label: String, value: String, modifier: Modifier = M
             style      = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
             color      = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Career stat box (used in the BTCC CAREER grid)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun CareerStatBox(
+    value: String,
+    label: String,
+    highlight: Boolean = false,
+    isChamp: Boolean = false,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (isChamp) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Icon(
+                    Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint     = BtccYellow,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    value,
+                    fontWeight = FontWeight.Black,
+                    fontSize   = 20.sp,
+                    color      = BtccYellow,
+                )
+            }
+        } else {
+            Text(
+                value,
+                fontWeight = FontWeight.Black,
+                fontSize   = 20.sp,
+                color      = if (highlight) BtccYellow else MaterialTheme.colorScheme.onBackground,
+            )
+        }
+        Text(
+            label,
+            style      = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
+            color      = BtccTextSecondary,
+            fontSize   = 10.sp,
         )
     }
 }

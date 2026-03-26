@@ -5,7 +5,7 @@
       "position": 1,
       "name": "Ashley Sutton",
       "team": "Adrian Flux Subaru Racing",
-      "points": 375,
+      "points": 372,
       "wins": 6,
       "seconds": 4,
       "thirds": 5
@@ -131,7 +131,7 @@
       "position": 15,
       "name": "Tom Chilton",
       "team": "Motorbase Performance",
-      "points": 103,
+      "points": 100,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -176,7 +176,7 @@
       "position": 20,
       "name": "Jake Hill",
       "team": "BTC Racing",
-      "points": 66,
+      "points": 63,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -293,7 +293,7 @@
       "position": 33,
       "name": "Daniel Lloyd",
       "team": "Team Hard",
-      "points": 5,
+      "points": 6,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -18072,7 +18072,7 @@
       "races": 30,
       "wins": 6,
       "podiums": 15,
-      "poles": 0,
+      "poles": 3,
       "dnfs": 2
     },
     {
@@ -18081,7 +18081,7 @@
       "races": 30,
       "wins": 4,
       "podiums": 13,
-      "poles": 0,
+      "poles": 1,
       "dnfs": 2
     },
     {
@@ -18090,7 +18090,7 @@
       "races": 30,
       "wins": 4,
       "podiums": 9,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 4
     },
     {
@@ -18100,7 +18100,7 @@
       "wins": 3,
       "podiums": 8,
       "poles": 0,
-      "dnfs": 2
+      "dnfs": 1
     },
     {
       "driver": "Andrew Jordan",
@@ -18126,7 +18126,7 @@
       "races": 30,
       "wins": 2,
       "podiums": 2,
-      "poles": 0,
+      "poles": 2,
       "dnfs": 5
     },
     {
@@ -18186,20 +18186,20 @@
     {
       "driver": "Adam Morgan",
       "team": "Mercedes-Benz A-Class",
-      "races": 30,
+      "races": 29,
       "wins": 0,
       "podiums": 4,
       "poles": 0,
-      "dnfs": 7
+      "dnfs": 6
     },
     {
       "driver": "Tom Chilton",
       "team": "Vauxhall Astra",
-      "races": 30,
+      "races": 27,
       "wins": 0,
       "podiums": 1,
-      "poles": 0,
-      "dnfs": 5
+      "poles": 1,
+      "dnfs": 2
     },
     {
       "driver": "Dave Newsham",
@@ -18249,11 +18249,11 @@
     {
       "driver": "Árón Taylor-Smith",
       "team": "MG6 GT",
-      "races": 30,
+      "races": 27,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 6
+      "dnfs": 3
     },
     {
       "driver": "Martin Depper",
@@ -18298,7 +18298,7 @@
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 4
+      "dnfs": 2
     },
     {
       "driver": "Ollie Jackson",
@@ -18312,11 +18312,11 @@
     {
       "driver": "Daniel Lloyd",
       "team": "MG6 GT",
-      "races": 30,
+      "races": 12,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 22
+      "dnfs": 4
     },
     {
       "driver": "Josh Price",
@@ -18352,7 +18352,7 @@
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 7
+      "dnfs": 6
     },
     {
       "driver": "Jeff Smith",
@@ -18366,11 +18366,11 @@
     {
       "driver": "Rory Butcher",
       "team": "Ford Focus ST MK.III",
-      "races": 30,
+      "races": 12,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
-      "dnfs": 19
+      "dnfs": 1
     },
     {
       "driver": "Brett Smith",
@@ -18414,7 +18414,7 @@
         261,
         312,
         341,
-        375
+        372
       ]
     },
     {
@@ -18638,7 +18638,7 @@
         77,
         82,
         82,
-        103
+        100
       ]
     },
     {
@@ -18702,7 +18702,7 @@
         60,
         60,
         60,
-        66
+        63
       ]
     },
     {
@@ -18926,7 +18926,7 @@
         5,
         5,
         5,
-        5
+        6
       ]
     },
     {

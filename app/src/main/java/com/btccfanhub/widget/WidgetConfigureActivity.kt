@@ -25,13 +25,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.ui.theme.BTCCFanHubTheme
-import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccYellow
 
 class WidgetConfigureActivity : ComponentActivity() {
@@ -51,23 +49,33 @@ class WidgetConfigureActivity : ComponentActivity() {
             return
         }
 
-        val current = WidgetPrefs.getTheme(this, appWidgetId)
+        val mgr = AppWidgetManager.getInstance(this)
+        val info = mgr.getAppWidgetInfo(appWidgetId)
+        val widgetSize = when (info?.provider?.className) {
+            SmallWidget::class.java.name -> WidgetSize.SMALL
+            LargeWidget::class.java.name -> WidgetSize.LARGE
+            else                         -> WidgetSize.MEDIUM
+        }
+
+        val currentTheme = WidgetPrefs.getTheme(this, appWidgetId)
 
         setContent {
             BTCCFanHubTheme {
                 ThemePicker(
-                    initial = current,
-                    onConfirm = { chosen ->
-                        WidgetPrefs.saveTheme(this, appWidgetId, chosen)
+                    initial = currentTheme,
+                    onConfirm = { chosenTheme ->
+                        WidgetPrefs.saveTheme(this, appWidgetId, chosenTheme)
+                        WidgetPrefs.saveSize(this, appWidgetId, widgetSize)
                         val appCtx = applicationContext
-                        val widgetId = appWidgetId
+                        val wId = appWidgetId
+                        val wSize = widgetSize
                         CoroutineScope(Dispatchers.IO).launch {
-                            val mgr = AppWidgetManager.getInstance(appCtx)
-                            val opts = mgr.getAppWidgetOptions(widgetId)
+                            val m = AppWidgetManager.getInstance(appCtx)
+                            val opts = m.getAppWidgetOptions(wId)
                             val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 330)
                             val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
-                            val views = CountdownWidget.buildViews(appCtx, minW, minH, chosen)
-                            mgr.updateAppWidget(widgetId, views)
+                            val views = CountdownWidget.buildViews(appCtx, minW, minH, chosenTheme, widgetSize = wSize)
+                            m.updateAppWidget(wId, views)
                         }
                         val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                         setResult(RESULT_OK, result)
@@ -89,7 +97,7 @@ private fun ThemePicker(
     var selected by remember { mutableStateOf(initial) }
 
     Column(
-        modifier            = Modifier
+        modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
             .padding(horizontal = 20.dp),
@@ -99,10 +107,10 @@ private fun ThemePicker(
 
         Text(
             "Widget Theme",
-            fontWeight    = FontWeight.Black,
-            fontSize      = 20.sp,
+            fontWeight = FontWeight.Black,
+            fontSize = 20.sp,
             letterSpacing = 1.sp,
-            color         = Color.White,
+            color = Color.White,
         )
 
         Spacer(Modifier.height(4.dp))
@@ -110,7 +118,7 @@ private fun ThemePicker(
         Text(
             "Choose a background colour",
             fontSize = 14.sp,
-            color    = Color(0xFF8A8D94),
+            color = Color(0xFF8A8D94),
         )
 
         Spacer(Modifier.height(20.dp))
@@ -141,18 +149,18 @@ private fun ThemePicker(
         Spacer(Modifier.height(12.dp))
 
         Button(
-            onClick  = { onConfirm(selected) },
+            onClick = { onConfirm(selected) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
-            shape  = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = BtccYellow),
         ) {
             Text(
                 "Add Widget",
                 fontWeight = FontWeight.Bold,
-                fontSize   = 16.sp,
-                color      = Color(0xFF0B0C0F),
+                fontSize = 16.sp,
+                color = Color(0xFF0B0C0F),
             )
         }
 
@@ -164,11 +172,11 @@ private fun ThemePicker(
 private fun SectionLabel(text: String) {
     Text(
         text,
-        fontSize      = 11.sp,
-        fontWeight    = FontWeight.Bold,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
         letterSpacing = 1.5.sp,
-        color         = Color(0xFF8A8D94),
-        modifier      = Modifier.fillMaxWidth(),
+        color = Color(0xFF8A8D94),
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 
@@ -179,15 +187,15 @@ private fun SwatchRow(
     onSelect: (WidgetTheme) -> Unit,
 ) {
     Row(
-        modifier              = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment     = Alignment.Top,
+        verticalAlignment = Alignment.Top,
     ) {
         themes.forEach { theme ->
             ThemeSwatch(
-                theme    = theme,
+                theme = theme,
                 selected = theme == selected,
-                onClick  = { onSelect(theme) },
+                onClick = { onSelect(theme) },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -202,16 +210,15 @@ private fun ThemeSwatch(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val base   = Color(theme.previewColor)
+    val base = Color(theme.previewColor)
     val accent = Color(theme.accentColor)
-    val shape  = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(8.dp)
 
     Column(
-        modifier            = modifier,
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-        // ── Livery preview card ──────────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -223,84 +230,40 @@ private fun ThemeSwatch(
                 )
                 .clickable(onClick = onClick),
         ) {
-            // Livery background painted with Canvas
             Canvas(modifier = Modifier.matchParentSize()) {
                 drawLivery(base, accent, theme)
             }
-
-            // Widget content overlay
             Row(
-                modifier          = Modifier
+                modifier = Modifier
                     .matchParentSize()
                     .padding(horizontal = 7.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Countdown
                 Column(
-                    modifier            = Modifier.weight(0.38f),
+                    modifier = Modifier.weight(0.38f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        "14",
-                        color      = Color.White,
-                        fontSize   = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        lineHeight = 18.sp,
-                    )
-                    Text(
-                        "DAYS\nTO GO",
-                        color      = Color.White.copy(alpha = 0.75f),
-                        fontSize   = 5.5.sp,
-                        lineHeight = 7.sp,
-                    )
+                    Text("14", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black, lineHeight = 18.sp)
+                    Text("DAYS\nTO GO", color = Color.White.copy(alpha = 0.75f), fontSize = 5.5.sp, lineHeight = 7.sp)
                 }
-
-                // Divider
-                Box(
-                    Modifier
-                        .width(0.5.dp)
-                        .fillMaxHeight(0.65f)
-                        .padding(vertical = 2.dp)
-                )
-
+                Box(Modifier.width(0.5.dp).fillMaxHeight(0.65f).padding(vertical = 2.dp))
                 Spacer(Modifier.width(5.dp))
-
-                // Info
                 Column(modifier = Modifier.weight(0.62f)) {
-                    Text(
-                        "ROUNDS 1–3",
-                        color         = BtccYellow,
-                        fontSize      = 4.5.sp,
-                        fontWeight    = FontWeight.Bold,
-                        letterSpacing = 0.2.sp,
-                    )
-                    Text(
-                        "Brands Hatch",
-                        color      = Color.White,
-                        fontSize   = 7.sp,
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = 8.5.sp,
-                        maxLines   = 1,
-                        overflow   = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        "5–6 Apr 2026",
-                        color    = Color.White.copy(alpha = 0.6f),
-                        fontSize = 4.5.sp,
-                    )
+                    Text("ROUNDS 1–3", color = BtccYellow, fontSize = 4.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.2.sp)
+                    Text("Brands Hatch", color = Color.White, fontSize = 7.sp, fontWeight = FontWeight.Bold, lineHeight = 8.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("5–6 Apr 2026", color = Color.White.copy(alpha = 0.6f), fontSize = 4.5.sp)
                 }
             }
         }
-
-        // Label
         Text(
             theme.label,
-            fontSize   = 11.sp,
+            fontSize = 11.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color      = if (selected) BtccYellow else Color(0xFF8A8D94),
+            color = if (selected) BtccYellow else Color(0xFF8A8D94),
         )
     }
 }
+
 
 // ─── Livery drawing ───────────────────────────────────────────────────────────
 
@@ -310,147 +273,60 @@ private fun DrawScope.drawLivery(base: Color, accent: Color, theme: WidgetTheme 
     drawRect(color = base)
 
     when (theme) {
-
         WidgetTheme.VERTU -> {
-            // Teal base, orange right panel, thin navy inset stripe
-            val orange = Color(0xFFF26522)
-            val navy   = Color(0xFF002147)
-            drawPath(Path().apply {
-                moveTo(w * 0.72f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.44f, h); close()
-            }, color = orange.copy(alpha = 0.95f))
-            drawPath(Path().apply {
-                moveTo(w * 0.67f, 0f); lineTo(w * 0.69f, 0f); lineTo(w * 0.41f, h); lineTo(w * 0.39f, h); close()
-            }, color = navy.copy(alpha = 0.85f))
+            val orange = Color(0xFFF26522); val navy = Color(0xFF002147)
+            drawPath(Path().apply { moveTo(w * 0.72f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.44f, h); close() }, color = orange.copy(alpha = 0.95f))
+            drawPath(Path().apply { moveTo(w * 0.67f, 0f); lineTo(w * 0.69f, 0f); lineTo(w * 0.41f, h); lineTo(w * 0.39f, h); close() }, color = navy.copy(alpha = 0.85f))
         }
-
         WidgetTheme.NAPA -> {
-            // Royal blue base, bold yellow panel sweeping left-to-right across ~40% of right side
-            val yellow = Color(0xFFF5C400)
-            val darkBlue = Color(0xFF0F2560)
-            // Dark blue shadow band on far left
-            drawPath(Path().apply {
-                moveTo(0f, 0f); lineTo(w * 0.18f, 0f); lineTo(w * 0.05f, h); lineTo(0f, h); close()
-            }, color = darkBlue.copy(alpha = 0.60f))
-            // Large yellow panel on right
-            drawPath(Path().apply {
-                moveTo(w * 0.60f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.35f, h); close()
-            }, color = yellow.copy(alpha = 0.95f))
-            // Thin yellow leading stripe
-            drawPath(Path().apply {
-                moveTo(w * 0.55f, 0f); lineTo(w * 0.59f, 0f); lineTo(w * 0.34f, h); lineTo(w * 0.30f, h); close()
-            }, color = yellow.copy(alpha = 0.50f))
+            val yellow = Color(0xFFF5C400); val darkBlue = Color(0xFF0F2560)
+            drawPath(Path().apply { moveTo(0f, 0f); lineTo(w * 0.18f, 0f); lineTo(w * 0.05f, h); lineTo(0f, h); close() }, color = darkBlue.copy(alpha = 0.60f))
+            drawPath(Path().apply { moveTo(w * 0.60f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.35f, h); close() }, color = yellow.copy(alpha = 0.95f))
+            drawPath(Path().apply { moveTo(w * 0.55f, 0f); lineTo(w * 0.59f, 0f); lineTo(w * 0.34f, h); lineTo(w * 0.30f, h); close() }, color = yellow.copy(alpha = 0.50f))
         }
-
         WidgetTheme.LASER -> {
-            // Deep blue base, two white diagonal stripes (matches Laser Tools car)
             val white = Color.White
-            // Wide white stripe
-            drawPath(Path().apply {
-                moveTo(w * 0.50f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.38f, h); lineTo(w * 0.26f, h); close()
-            }, color = white.copy(alpha = 0.18f))
-            // Bright leading edge of stripe
-            drawPath(Path().apply {
-                moveTo(w * 0.50f, 0f); lineTo(w * 0.54f, 0f); lineTo(w * 0.30f, h); lineTo(w * 0.26f, h); close()
-            }, color = white.copy(alpha = 0.70f))
-            // Second narrower stripe
-            drawPath(Path().apply {
-                moveTo(w * 0.64f, 0f); lineTo(w * 0.67f, 0f); lineTo(w * 0.43f, h); lineTo(w * 0.40f, h); close()
-            }, color = white.copy(alpha = 0.45f))
+            drawPath(Path().apply { moveTo(w * 0.50f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.38f, h); lineTo(w * 0.26f, h); close() }, color = white.copy(alpha = 0.18f))
+            drawPath(Path().apply { moveTo(w * 0.50f, 0f); lineTo(w * 0.54f, 0f); lineTo(w * 0.30f, h); lineTo(w * 0.26f, h); close() }, color = white.copy(alpha = 0.70f))
+            drawPath(Path().apply { moveTo(w * 0.64f, 0f); lineTo(w * 0.67f, 0f); lineTo(w * 0.43f, h); lineTo(w * 0.40f, h); close() }, color = white.copy(alpha = 0.45f))
         }
-
         WidgetTheme.PLATO -> {
-            // Cataclean camo: near-black base, purple + magenta diagonal bands
-            val purple  = Color(0xFF9B1FD4)
-            val magenta = Color(0xFFCC3399)
-            // Wide purple band
-            drawPath(Path().apply {
-                moveTo(w * 0.30f, 0f); lineTo(w * 0.55f, 0f); lineTo(w * 0.35f, h); lineTo(w * 0.10f, h); close()
-            }, color = purple.copy(alpha = 0.55f))
-            // Magenta accent stripe
-            drawPath(Path().apply {
-                moveTo(w * 0.55f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.42f, h); lineTo(w * 0.35f, h); close()
-            }, color = magenta.copy(alpha = 0.65f))
-            // Second purple band on right
-            drawPath(Path().apply {
-                moveTo(w * 0.72f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.55f, h); close()
-            }, color = purple.copy(alpha = 0.40f))
-            // Thin bright stripe
-            drawPath(Path().apply {
-                moveTo(w * 0.28f, 0f); lineTo(w * 0.31f, 0f); lineTo(w * 0.11f, h); lineTo(w * 0.08f, h); close()
-            }, color = magenta.copy(alpha = 0.80f))
+            val purple = Color(0xFF9B1FD4); val magenta = Color(0xFFCC3399)
+            drawPath(Path().apply { moveTo(w * 0.30f, 0f); lineTo(w * 0.55f, 0f); lineTo(w * 0.35f, h); lineTo(w * 0.10f, h); close() }, color = purple.copy(alpha = 0.55f))
+            drawPath(Path().apply { moveTo(w * 0.55f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.42f, h); lineTo(w * 0.35f, h); close() }, color = magenta.copy(alpha = 0.65f))
+            drawPath(Path().apply { moveTo(w * 0.72f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.55f, h); close() }, color = purple.copy(alpha = 0.40f))
+            drawPath(Path().apply { moveTo(w * 0.28f, 0f); lineTo(w * 0.31f, 0f); lineTo(w * 0.11f, h); lineTo(w * 0.08f, h); close() }, color = magenta.copy(alpha = 0.80f))
         }
-
         WidgetTheme.SPEEDWORKS -> {
-            // Toyota red base, white diagonal slash
             val white = Color.White
-            drawPath(Path().apply {
-                moveTo(w * 0.48f, 0f); lineTo(w * 0.60f, 0f); lineTo(w * 0.36f, h); lineTo(w * 0.24f, h); close()
-            }, color = white.copy(alpha = 0.15f))
-            drawPath(Path().apply {
-                moveTo(w * 0.48f, 0f); lineTo(w * 0.52f, 0f); lineTo(w * 0.28f, h); lineTo(w * 0.24f, h); close()
-            }, color = white.copy(alpha = 0.75f))
-            // Darker red shadow on far right
-            drawPath(Path().apply {
-                moveTo(w * 0.78f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.58f, h); close()
-            }, color = Color(0xFF7A0010).copy(alpha = 0.60f))
+            drawPath(Path().apply { moveTo(w * 0.48f, 0f); lineTo(w * 0.60f, 0f); lineTo(w * 0.36f, h); lineTo(w * 0.24f, h); close() }, color = white.copy(alpha = 0.15f))
+            drawPath(Path().apply { moveTo(w * 0.48f, 0f); lineTo(w * 0.52f, 0f); lineTo(w * 0.28f, h); lineTo(w * 0.24f, h); close() }, color = white.copy(alpha = 0.75f))
+            drawPath(Path().apply { moveTo(w * 0.78f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.58f, h); close() }, color = Color(0xFF7A0010).copy(alpha = 0.60f))
         }
-
         WidgetTheme.WSR -> {
-            // Dark navy base, BMW blue diagonal panel + thin light-blue stripe
-            val bmwBlue  = Color(0xFF1E6FE8)
-            val lightBlue = Color(0xFF5BA3FF)
-            drawPath(Path().apply {
-                moveTo(w * 0.62f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.38f, h); close()
-            }, color = bmwBlue.copy(alpha = 0.85f))
-            drawPath(Path().apply {
-                moveTo(w * 0.58f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.38f, h); lineTo(w * 0.34f, h); close()
-            }, color = lightBlue.copy(alpha = 0.70f))
+            val bmwBlue = Color(0xFF1E6FE8); val lightBlue = Color(0xFF5BA3FF)
+            drawPath(Path().apply { moveTo(w * 0.62f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.38f, h); close() }, color = bmwBlue.copy(alpha = 0.85f))
+            drawPath(Path().apply { moveTo(w * 0.58f, 0f); lineTo(w * 0.62f, 0f); lineTo(w * 0.38f, h); lineTo(w * 0.34f, h); close() }, color = lightBlue.copy(alpha = 0.70f))
         }
-
         WidgetTheme.PMR -> {
-            // Charcoal base, gold diagonal panel
             val gold = Color(0xFFFFCC00)
-            drawPath(Path().apply {
-                moveTo(w * 0.65f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.40f, h); close()
-            }, color = gold.copy(alpha = 0.90f))
-            drawPath(Path().apply {
-                moveTo(w * 0.60f, 0f); lineTo(w * 0.64f, 0f); lineTo(w * 0.39f, h); lineTo(w * 0.35f, h); close()
-            }, color = gold.copy(alpha = 0.45f))
+            drawPath(Path().apply { moveTo(w * 0.65f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.40f, h); close() }, color = gold.copy(alpha = 0.90f))
+            drawPath(Path().apply { moveTo(w * 0.60f, 0f); lineTo(w * 0.64f, 0f); lineTo(w * 0.39f, h); lineTo(w * 0.35f, h); close() }, color = gold.copy(alpha = 0.45f))
         }
-
         WidgetTheme.ONE_MS -> {
-            // Black base, bold red diagonal slash
             val red = Color(0xFFE8002D)
-            drawPath(Path().apply {
-                moveTo(w * 0.55f, 0f); lineTo(w * 0.70f, 0f); lineTo(w * 0.46f, h); lineTo(w * 0.31f, h); close()
-            }, color = red.copy(alpha = 0.85f))
-            drawPath(Path().apply {
-                moveTo(w * 0.70f, 0f); lineTo(w * 0.73f, 0f); lineTo(w * 0.49f, h); lineTo(w * 0.46f, h); close()
-            }, color = red.copy(alpha = 0.40f))
+            drawPath(Path().apply { moveTo(w * 0.55f, 0f); lineTo(w * 0.70f, 0f); lineTo(w * 0.46f, h); lineTo(w * 0.31f, h); close() }, color = red.copy(alpha = 0.85f))
+            drawPath(Path().apply { moveTo(w * 0.70f, 0f); lineTo(w * 0.73f, 0f); lineTo(w * 0.49f, h); lineTo(w * 0.46f, h); close() }, color = red.copy(alpha = 0.40f))
         }
-
         WidgetTheme.RESTART -> {
-            // Dark navy base, cyan diagonal panel
             val cyan = Color(0xFF00C8E8)
-            drawPath(Path().apply {
-                moveTo(w * 0.68f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.42f, h); close()
-            }, color = cyan.copy(alpha = 0.80f))
-            drawPath(Path().apply {
-                moveTo(w * 0.63f, 0f); lineTo(w * 0.67f, 0f); lineTo(w * 0.41f, h); lineTo(w * 0.37f, h); close()
-            }, color = cyan.copy(alpha = 0.50f))
+            drawPath(Path().apply { moveTo(w * 0.68f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.42f, h); close() }, color = cyan.copy(alpha = 0.80f))
+            drawPath(Path().apply { moveTo(w * 0.63f, 0f); lineTo(w * 0.67f, 0f); lineTo(w * 0.41f, h); lineTo(w * 0.37f, h); close() }, color = cyan.copy(alpha = 0.50f))
         }
-
         else -> {
-            // Classic themes — subtle tonal accent diagonal
-            drawPath(Path().apply {
-                moveTo(w * 0.52f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.22f, h); close()
-            }, color = accent.copy(alpha = 0.22f))
-            drawPath(Path().apply {
-                moveTo(w * 0.52f, 0f); lineTo(w * 0.56f, 0f); lineTo(w * 0.26f, h); lineTo(w * 0.22f, h); close()
-            }, color = accent.copy(alpha = 0.80f))
-            drawPath(Path().apply {
-                moveTo(w * 0.45f, 0f); lineTo(w * 0.47f, 0f); lineTo(w * 0.17f, h); lineTo(w * 0.15f, h); close()
-            }, color = accent.copy(alpha = 0.35f))
+            drawPath(Path().apply { moveTo(w * 0.52f, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(w * 0.22f, h); close() }, color = accent.copy(alpha = 0.22f))
+            drawPath(Path().apply { moveTo(w * 0.52f, 0f); lineTo(w * 0.56f, 0f); lineTo(w * 0.26f, h); lineTo(w * 0.22f, h); close() }, color = accent.copy(alpha = 0.80f))
+            drawPath(Path().apply { moveTo(w * 0.45f, 0f); lineTo(w * 0.47f, 0f); lineTo(w * 0.17f, h); lineTo(w * 0.15f, h); close() }, color = accent.copy(alpha = 0.35f))
         }
     }
 }
