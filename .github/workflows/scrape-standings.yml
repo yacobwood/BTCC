@@ -44,7 +44,7 @@ jobs:
           github.event.schedule == '0 */6 * * *' ||
           steps.raceday.outputs.is_race_weekend == 'true'
         run: |
-          pip install -r scraper/requirements.txt
+          pip install -r tools/scraper/requirements.txt
           # Ubuntu 24.04 renamed libasound2 → libasound2t64; install it first
           # so playwright's --with-deps resolves the virtual package correctly
           sudo apt-get install -y libasound2t64
@@ -60,7 +60,7 @@ jobs:
           if [ "${{ github.event.inputs.force }}" = "true" ]; then
             ARGS="--force"
           fi
-          python scraper/scrape_standings.py $ARGS
+          python tools/scraper/scrape_standings.py $ARGS
 
       - name: Commit updated standings
         if: |

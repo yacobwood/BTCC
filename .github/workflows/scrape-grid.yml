@@ -20,12 +20,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r scraper/requirements.txt requests Pillow
+          pip install -r tools/scraper/requirements.txt requests Pillow
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
       - name: Scrape grid
-        run: python scraper/scrape_grid.py --merge
+        run: python tools/scraper/scrape_grid.py --merge
 
       - name: Download and optimise driver images
         run: |

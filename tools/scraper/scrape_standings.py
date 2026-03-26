@@ -19,7 +19,7 @@ CURRENT_YEAR = 2026
 
 DRIVERS_URL = "https://btcc.net/standings/drivers/"
 TEAMS_URL   = "https://btcc.net/standings/teams/"
-OUT_FILE    = Path(__file__).parent.parent / "data" / "standings.json"
+OUT_FILE    = Path(__file__).parent.parent.parent / "data" / "standings.json"
 
 TABLE_SELECTOR = "#standingsShortcode table"
 

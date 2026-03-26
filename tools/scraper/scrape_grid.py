@@ -19,7 +19,7 @@ except ImportError:
     sys.exit(1)
 
 DRIVERS_URL = "https://btcc.net/drivers/"
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 GRID_JSON = DATA_DIR / "grid_scraped.json"
 DRIVERS_JSON = DATA_DIR / "drivers.json"
 

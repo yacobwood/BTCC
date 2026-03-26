@@ -23,12 +23,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r scraper/requirements.txt
+          pip install -r tools/scraper/requirements.txt
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
       - name: Scrape session schedule
-        run: python scraper/scrape_schedule.py
+        run: python tools/scraper/scrape_schedule.py
 
       - name: Commit updated schedule
         uses: stefanzweifel/git-auto-commit-action@v5

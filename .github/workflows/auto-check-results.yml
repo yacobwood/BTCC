@@ -24,12 +24,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r scraper/requirements.txt
+          pip install -r tools/scraper/requirements.txt
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
       - name: Check for new results & update
-        run: python scraper/auto_update.py
+        run: python tools/scraper/auto_update.py
 
       - name: Commit if data changed
         uses: stefanzweifel/git-auto-commit-action@v5
