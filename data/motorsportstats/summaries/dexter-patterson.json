@@ -1,0 +1,100 @@
+{
+  "name": "Dexter Patterson",
+  "slug": "dexter-patterson",
+  "url": "https://www.motorsportstats.com/driver/dexter-patterson/summary/series/british-touring-car-championship",
+  "highlights": {
+    "championships": {
+      "value": 0,
+      "total": 3
+    },
+    "wins": {
+      "value": 0,
+      "total": 90
+    },
+    "podiums": {
+      "value": 0,
+      "total": 90
+    },
+    "poles": {
+      "value": 0,
+      "total": 90
+    },
+    "starts": 90,
+    "fastest laps": 1,
+    "best finish": 6,
+    "best grid": 7,
+    "hat-trick": 0,
+    "retirements": 13
+  },
+  "statistics": {
+    "years: best championship position": "3",
+    "years: starts": "20",
+    "wins: win from pole": "0",
+    "wins: win & fastest lap": "0",
+    "wins: hat-trick": "0",
+    "wins: most wins in a season": "0",
+    "wins: win streak": "0",
+    "podiums: p2 finishes": "0",
+    "podiums: p3 finishes": "0",
+    "podiums: most podiums in a season": "0",
+    "podiums: podiums streak": "0",
+    "best finish: consecuctive finishes": "16.5",
+    "poles: most poles in a season": "0",
+    "poles: pole position streak": "0",
+    "front rows: best grid": "0",
+    "fastest laps: fastest laps streak": "1.11%",
+    "points: points finishes": "0.98",
+    "points: consecutive points": "31.11%",
+    "retirements: laps raced": "14.44%"
+  },
+  "seasons": [
+    {
+      "year": 2025,
+      "entrant": "ROKiT Racing with Un-Limited Motorsport",
+      "championshipPos": "20th",
+      "RS": 30,
+      "W": 0,
+      "PD": 0,
+      "PP": 0,
+      "FL": 1,
+      "BR": 9,
+      "BG": 9,
+      "AF": 15.46,
+      "AG": 16.8,
+      "P": 42,
+      "DNF": 3
+    },
+    {
+      "year": 2023,
+      "entrant": "Re.Beverages and Bartercard with Team HARD",
+      "championshipPos": "22nd",
+      "RS": 30,
+      "W": 0,
+      "PD": 0,
+      "PP": 0,
+      "FL": 0,
+      "BR": 6,
+      "BG": 12,
+      "AF": 15.69,
+      "AG": 17.97,
+      "P": 41,
+      "DNF": 1
+    },
+    {
+      "year": 2022,
+      "entrant": "Laser Tools Racing",
+      "championshipPos": "23rd",
+      "RS": 30,
+      "W": 0,
+      "PD": 0,
+      "PP": 0,
+      "FL": 0,
+      "BR": 14,
+      "BG": 7,
+      "AF": 18.9,
+      "AG": 22.03,
+      "P": 5,
+      "DNF": 9
+    }
+  ]
+}

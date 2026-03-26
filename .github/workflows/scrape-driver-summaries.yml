@@ -1,0 +1,50 @@
+name: Scrape Driver Summaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      driver:
+        description: "Single driver slug (e.g. tom-ingram). Leave empty for all."
+        type: string
+        default: ""
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r tools/scraper/requirements.txt
+          sudo apt-get install -y libasound2t64
+          playwright install chromium --with-deps
+
+      - name: Run scraper
+        run: |
+          ARGS=""
+          SLUG="${{ github.event.inputs.driver }}"
+          if [ -n "$SLUG" ]; then
+            ARGS="--driver $SLUG"
+          fi
+          python tools/scraper/scrape_driver_summary.py $ARGS
+
+      - name: Merge into drivers.json
+        run: python tools/scraper/merge_motorsportstats.py
+
+      - name: Commit updated summaries
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update driver summaries [skip ci]"
+          file_pattern: data/motorsportstats/summaries/** data/drivers.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"

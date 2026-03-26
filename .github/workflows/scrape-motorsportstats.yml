@@ -1,0 +1,71 @@
+name: Scrape Motorsport Stats
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "What to scrape"
+        type: choice
+        options:
+          - all
+          - drivers-only
+          - teams-only
+        default: all
+      single_slug:
+        description: "Single driver or team slug (e.g. tom-ingram or team-vertu). Leave empty for all."
+        type: string
+        default: ""
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r tools/scraper/requirements.txt
+          sudo apt-get install -y libasound2t64
+          playwright install chromium --with-deps
+
+      - name: Run scraper
+        run: |
+          ARGS=""
+          TARGET="${{ github.event.inputs.target || 'all' }}"
+          SLUG="${{ github.event.inputs.single_slug }}"
+
+          if [ "$TARGET" = "drivers-only" ]; then
+            if [ -n "$SLUG" ]; then
+              ARGS="--driver $SLUG"
+            else
+              ARGS="--drivers-only"
+            fi
+          elif [ "$TARGET" = "teams-only" ]; then
+            if [ -n "$SLUG" ]; then
+              ARGS="--team $SLUG"
+            else
+              ARGS="--teams-only"
+            fi
+          elif [ -n "$SLUG" ]; then
+            # Default: try as driver first
+            ARGS="--driver $SLUG"
+          fi
+
+          python tools/scraper/scrape_motorsportstats.py $ARGS
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update motorsportstats data [skip ci]"
+          file_pattern: data/motorsportstats/**
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
