@@ -1,0 +1,685 @@
+{
+  "name": "Restart Racing",
+  "slug": "restart-racing",
+  "url": "https://www.motorsportstats.com/team/restart-racing/results",
+  "series": [
+    {
+      "name": "British Touring Car Championship",
+      "seasons": [
+        {
+          "year": 2025,
+          "entrant": "Restart Racing",
+          "races": [
+            {
+              "venue": "DON",
+              "pos": "10",
+              "pts": "",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "8",
+              "pts": "",
+              "grid": "10",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "8",
+              "pts": "",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "9",
+              "pts": "",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "4",
+              "pts": "",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "5",
+              "pts": "",
+              "grid": "6",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "5",
+              "pts": "",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "4",
+              "pts": "",
+              "grid": "5",
+              "flags": [
+                "FL"
+              ]
+            },
+            {
+              "venue": "SNE",
+              "pos": "16",
+              "pts": "",
+              "grid": "2",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "11",
+              "pts": "",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "8",
+              "pts": "",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "9",
+              "pts": "",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "3",
+              "pts": "",
+              "grid": "2",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "14",
+              "pts": "",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "13",
+              "pts": "",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "9",
+              "pts": "",
+              "grid": "6",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "13",
+              "pts": "",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "0",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "12",
+              "pts": "",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "12",
+              "pts": "",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "11",
+              "pts": "",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "9",
+              "pts": "",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "10",
+              "pts": "",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "8",
+              "pts": "",
+              "grid": "10",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "1",
+              "pts": "",
+              "grid": "4",
+              "flags": [
+                "FL"
+              ]
+            },
+            {
+              "venue": "SIL",
+              "pos": "6",
+              "pts": "",
+              "grid": "1",
+              "flags": [
+                "PP"
+              ]
+            },
+            {
+              "venue": "SIL",
+              "pos": "17",
+              "pts": "",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "8",
+              "pts": "",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "11",
+              "pts": "",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "12",
+              "pts": "",
+              "grid": "11",
+              "flags": []
+            }
+          ],
+          "totalPoints": "0",
+          "championshipPos": ""
+        },
+        {
+          "year": 2024,
+          "entrant": "Restart Racing",
+          "races": [
+            {
+              "venue": "DON",
+              "pos": "15",
+              "pts": "",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "14",
+              "pts": "",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "16",
+              "pts": "",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "14",
+              "pts": "",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "17",
+              "pts": "",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "13",
+              "pts": "",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "18",
+              "pts": "",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "11",
+              "pts": "",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "17",
+              "pts": "",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "17",
+              "pts": "",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "16",
+              "pts": "",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "14",
+              "pts": "",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "13",
+              "pts": "",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "8",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "9",
+              "pts": "",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "15",
+              "pts": "",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "15",
+              "pts": "",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "11",
+              "pts": "",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "13",
+              "pts": "",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "13",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "11",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "13",
+              "pts": "",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "15",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "14",
+              "pts": "",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "13",
+              "pts": "",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "6",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "16",
+              "pts": "",
+              "grid": "1",
+              "flags": [
+                "PP"
+              ]
+            },
+            {
+              "venue": "BRH",
+              "pos": "13",
+              "pts": "",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "12",
+              "pts": "",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "16",
+              "pts": "",
+              "grid": "12",
+              "flags": []
+            }
+          ],
+          "totalPoints": "0",
+          "championshipPos": ""
+        },
+        {
+          "year": 2014,
+          "entrant": "Restart Racing",
+          "races": [
+            {
+              "venue": "BRH",
+              "pos": "7",
+              "pts": "10",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "13",
+              "pts": "6",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "5",
+              "pts": "11",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "9",
+              "pts": "10",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "8",
+              "pts": "8",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "9",
+              "pts": "14",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "7",
+              "pts": "9",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "14",
+              "pts": "2",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "7",
+              "pts": "14",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "12",
+              "pts": "9",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "8",
+              "pts": "13",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "1",
+              "pts": "29",
+              "grid": "1",
+              "flags": [
+                "PP"
+              ]
+            },
+            {
+              "venue": "CRO",
+              "pos": "7",
+              "pts": "9",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "14",
+              "pts": "3",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "8",
+              "pts": "15",
+              "grid": "13",
+              "flags": [
+                "FL"
+              ]
+            },
+            {
+              "venue": "SNE",
+              "pos": "5",
+              "pts": "21",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "8",
+              "pts": "13",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "1",
+              "pts": "26",
+              "grid": "1",
+              "flags": [
+                "PP"
+              ]
+            },
+            {
+              "venue": "KNO",
+              "pos": "8",
+              "pts": "13",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "15",
+              "pts": "2",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "8",
+              "pts": "14",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "ROC",
+              "pos": "4",
+              "pts": "19",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "ROC",
+              "pos": "6",
+              "pts": "13",
+              "grid": "4",
+              "flags": []
+            },
+            {
+              "venue": "ROC",
+              "pos": "2",
+              "pts": "21",
+              "grid": "1",
+              "flags": [
+                "FL",
+                "PP"
+              ]
+            },
+            {
+              "venue": "SIL",
+              "pos": "5",
+              "pts": "21",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "3",
+              "pts": "26",
+              "grid": "5",
+              "flags": [
+                "FL"
+              ]
+            },
+            {
+              "venue": "SIL",
+              "pos": "2",
+              "pts": "28",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "11",
+              "pts": "10",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "7",
+              "pts": "17",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "5",
+              "pts": "11",
+              "grid": "3",
+              "flags": []
+            }
+          ],
+          "totalPoints": "417",
+          "championshipPos": "5th"
+        }
+      ]
+    }
+  ]
+}

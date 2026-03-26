@@ -1,0 +1,1544 @@
+{
+  "name": "Bobby Thompson",
+  "slug": "bobby-thompson",
+  "url": "https://www.motorsportstats.com/driver/bobby-thompson/results",
+  "series": [
+    {
+      "name": "British Touring Car Championship",
+      "seasons": [
+        {
+          "year": 2024,
+          "entrant": "Zeus Cloud Racing with WSR",
+          "races": [
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "2",
+              "pts": "17",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "7",
+              "pts": "9",
+              "grid": "2",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "8",
+              "pts": "8",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            }
+          ],
+          "totalPoints": "34",
+          "championshipPos": "20th"
+        },
+        {
+          "year": 2023,
+          "entrant": "Autobrite Direct with Millers Oils",
+          "races": [
+            {
+              "venue": "DON",
+              "pos": "16",
+              "pts": "0",
+              "grid": "22",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "10",
+              "pts": "6",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "6",
+              "pts": "10",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "6",
+              "pts": "10",
+              "grid": "6",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "11",
+              "pts": "5",
+              "grid": "6",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "2",
+              "pts": "17",
+              "grid": "1",
+              "flags": [
+                "PP"
+              ]
+            },
+            {
+              "venue": "SNE",
+              "pos": "16",
+              "pts": "0",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "20",
+              "pts": "0",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "12",
+              "pts": "4",
+              "grid": "20",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "10",
+              "pts": "6",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "10",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "7",
+              "pts": "9",
+              "grid": "4",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "DNF",
+              "pts": "-10",
+              "grid": "26",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            }
+          ],
+          "totalPoints": "74",
+          "championshipPos": "17th"
+        },
+        {
+          "year": 2023,
+          "entrant": "Go-Fix with Autoaid Breakdown",
+          "races": [
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "5",
+              "pts": "11",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "22",
+              "pts": "-15",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "3",
+              "pts": "15",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "5",
+              "pts": "11",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "5",
+              "flags": []
+            }
+          ],
+          "totalPoints": "74",
+          "championshipPos": "17th"
+        },
+        {
+          "year": 2022,
+          "entrant": "Autobrite Direct with JourneyHero",
+          "races": [
+            {
+              "venue": "DON",
+              "pos": "12",
+              "pts": "0",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "7",
+              "pts": "9",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "10",
+              "pts": "6",
+              "grid": "3",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "16",
+              "pts": "0",
+              "grid": "19",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "11",
+              "pts": "5",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "3",
+              "pts": "15",
+              "grid": "2",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "17",
+              "pts": "0",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "16",
+              "pts": "2",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "12",
+              "pts": "4",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "15",
+              "pts": "1",
+              "grid": "19",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "14",
+              "pts": "2",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "12",
+              "pts": "4",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "14",
+              "pts": "2",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "12",
+              "pts": "4",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "12",
+              "pts": "4",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "20",
+              "pts": "0",
+              "grid": "28",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "14",
+              "pts": "2",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "17",
+              "pts": "0",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "14",
+              "pts": "2",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "15",
+              "pts": "1",
+              "grid": "23",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "12",
+              "pts": "4",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "23",
+              "pts": "0",
+              "grid": "12",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "11",
+              "pts": "5",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "9",
+              "pts": "7",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "14",
+              "pts": "2",
+              "grid": "9",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "7",
+              "pts": "9",
+              "grid": "6",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "9",
+              "pts": "7",
+              "grid": "7",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "2",
+              "flags": []
+            }
+          ],
+          "totalPoints": "99",
+          "championshipPos": "14th"
+        },
+        {
+          "year": 2020,
+          "entrant": "GKR TradePriceCars.com",
+          "races": [
+            {
+              "venue": "DON",
+              "pos": "11",
+              "pts": "5",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "17",
+              "pts": "0",
+              "grid": "11",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "15",
+              "pts": "1",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "14",
+              "pts": "2",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "12",
+              "pts": "4",
+              "grid": "26",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "14",
+              "pts": "2",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "10",
+              "pts": "6",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "18",
+              "pts": "0",
+              "grid": "1",
+              "flags": [
+                "PP"
+              ]
+            },
+            {
+              "venue": "KNO",
+              "pos": "18",
+              "pts": "0",
+              "grid": "20",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "DSQ",
+              "pts": "0",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "19",
+              "pts": "0",
+              "grid": "25",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "17",
+              "pts": "0",
+              "grid": "20",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "17",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "15",
+              "pts": "1",
+              "grid": "25",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "18",
+              "pts": "0",
+              "grid": "19",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "13",
+              "pts": "3",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "12",
+              "pts": "4",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "8",
+              "pts": "8",
+              "grid": "5",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "8",
+              "pts": "8",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "8",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            },
+            {
+              "venue": "",
+              "pos": "",
+              "pts": "",
+              "grid": "",
+              "flags": []
+            }
+          ],
+          "totalPoints": "44",
+          "championshipPos": "18th"
+        },
+        {
+          "year": 2019,
+          "entrant": "GKR Scaffolding with Autobrite Direct",
+          "races": [
+            {
+              "venue": "BRH",
+              "pos": "6",
+              "pts": "11",
+              "grid": "19",
+              "flags": [
+                "FL"
+              ]
+            },
+            {
+              "venue": "BRH",
+              "pos": "13",
+              "pts": "3",
+              "grid": "6",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "15",
+              "pts": "1",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "18",
+              "pts": "0",
+              "grid": "30",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "30",
+              "pts": "0",
+              "grid": "25",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "22",
+              "pts": "0",
+              "grid": "30",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "20",
+              "pts": "0",
+              "grid": "23",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "24",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "23",
+              "pts": "0",
+              "grid": "29",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "14",
+              "pts": "2",
+              "grid": "23",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "19",
+              "pts": "0",
+              "grid": "21",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "21",
+              "pts": "0",
+              "grid": "19",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "21",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "13",
+              "pts": "3",
+              "grid": "16",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "13",
+              "pts": "3",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "14",
+              "pts": "2",
+              "grid": "15",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "22",
+              "pts": "0",
+              "grid": "14",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "19",
+              "pts": "0",
+              "grid": "22",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "18",
+              "pts": "0",
+              "grid": "23",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "21",
+              "pts": "0",
+              "grid": "23",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "20",
+              "pts": "0",
+              "grid": "21",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "20",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "13",
+              "pts": "3",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "10",
+              "pts": "6",
+              "grid": "13",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "21",
+              "pts": "0",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "16",
+              "pts": "0",
+              "grid": "21",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "15",
+              "pts": "1",
+              "grid": "16",
+              "flags": []
+            }
+          ],
+          "totalPoints": "35",
+          "championshipPos": "22nd"
+        },
+        {
+          "year": 2018,
+          "entrant": "Team HARD with Trade Price Cars",
+          "races": [
+            {
+              "venue": "BRH",
+              "pos": "19",
+              "pts": "0",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "19",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "26",
+              "pts": "0",
+              "grid": "30",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "20",
+              "pts": "0",
+              "grid": "24",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "24",
+              "pts": "0",
+              "grid": "20",
+              "flags": []
+            },
+            {
+              "venue": "DON",
+              "pos": "20",
+              "pts": "0",
+              "grid": "24",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "26",
+              "pts": "0",
+              "grid": "30",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "20",
+              "pts": "0",
+              "grid": "26",
+              "flags": []
+            },
+            {
+              "venue": "THR",
+              "pos": "22",
+              "pts": "0",
+              "grid": "19",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "26",
+              "pts": "0",
+              "grid": "28",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "26",
+              "flags": []
+            },
+            {
+              "venue": "OUL",
+              "pos": "DNS",
+              "pts": "0",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "24",
+              "pts": "0",
+              "grid": "30",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "27",
+              "pts": "0",
+              "grid": "24",
+              "flags": []
+            },
+            {
+              "venue": "CRO",
+              "pos": "21",
+              "pts": "0",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "18",
+              "pts": "0",
+              "grid": "20",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "14",
+              "pts": "2",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "SNE",
+              "pos": "10",
+              "pts": "12",
+              "grid": "26",
+              "flags": []
+            },
+            {
+              "venue": "ROC",
+              "pos": "24",
+              "pts": "0",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "ROC",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "24",
+              "flags": []
+            },
+            {
+              "venue": "ROC",
+              "pos": "7",
+              "pts": "9",
+              "grid": "28",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "31",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "31",
+              "flags": []
+            },
+            {
+              "venue": "KNO",
+              "pos": "20",
+              "pts": "0",
+              "grid": "24",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "19",
+              "pts": "0",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "18",
+              "flags": []
+            },
+            {
+              "venue": "SIL",
+              "pos": "21",
+              "pts": "0",
+              "grid": "31",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "27",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "DNF",
+              "pts": "0",
+              "grid": "31",
+              "flags": []
+            },
+            {
+              "venue": "BRH",
+              "pos": "19",
+              "pts": "0",
+              "grid": "31",
+              "flags": []
+            }
+          ],
+          "totalPoints": "23",
+          "championshipPos": "28th"
+        }
+      ]
+    }
+  ]
+}
