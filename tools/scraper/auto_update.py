@@ -31,7 +31,7 @@ RACE_WEEKEND_DATES: dict[str, int] = {
     "2026-10-10": 10, "2026-10-11": 10,
 }
 
-RESULTS_FILE = Path(__file__).resolve().parent.parent / "data" / f"results{YEAR}.json"
+RESULTS_FILE = Path(__file__).resolve().parent.parent.parent / "data" / f"results{YEAR}.json"
 
 
 def result_count(rounds_data: list, round_num: int) -> int:

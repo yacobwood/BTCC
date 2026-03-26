@@ -175,7 +175,7 @@ ROUNDS = {
 }
 
 BASE_URL = "https://btcc.net/results/race-results"
-OUT_FILE = Path(__file__).parent.parent / "data" / f"results{YEAR}.json"
+OUT_FILE = Path(__file__).parent.parent.parent / "data" / f"results{YEAR}.json"
 
 
 def extract_races(page) -> list[dict]:

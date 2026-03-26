@@ -20,7 +20,7 @@ except ImportError:
     print("Install playwright: pip install playwright && playwright install chromium", file=sys.stderr)
     sys.exit(1)
 
-DATA_DIR      = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR      = Path(__file__).resolve().parent.parent.parent / "data"
 SCHEDULE_JSON = DATA_DIR / "schedule.json"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
 

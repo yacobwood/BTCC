@@ -21,7 +21,7 @@ except ImportError:
     sys.exit(1)
 
 CALENDAR_URL = "https://btcc.net/calendar/"
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
 SCHEDULE_JSON = DATA_DIR / "calendar_schedule.json"
 
