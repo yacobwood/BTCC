@@ -141,6 +141,14 @@ fun ArticleScreen(onBack: () -> Unit) {
                                 lightboxIndex.value = uri.host?.toIntOrNull() ?: 0
                                 return true
                             }
+                            if (uri?.scheme == "http" || uri?.scheme == "https") {
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    uri,
+                                )
+                                context.startActivity(intent)
+                                return true
+                            }
                             return false
                         }
                     }

@@ -20,7 +20,13 @@ object ConnectivityObserver {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
         cm.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) { _isOnline.value = true }
+            override fun onAvailable(network: Network) {
+                _isOnline.value = cm.getNetworkCapabilities(network)
+                    ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+            }
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                _isOnline.value = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            }
             override fun onLost(network: Network) {
                 _isOnline.value = cm.getNetworkCapabilities(cm.activeNetwork)
                     ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true

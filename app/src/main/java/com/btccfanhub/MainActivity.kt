@@ -75,6 +75,9 @@ import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
 import com.btccfanhub.widget.CountdownWidget
 import com.google.android.gms.ads.MobileAds
+import com.google.android.ump.ConsentInformation
+import com.google.android.ump.ConsentRequestParameters
+import com.google.android.ump.UserMessagingPlatform
 import com.google.android.play.core.review.ReviewManagerFactory
 import java.util.concurrent.TimeUnit
 
@@ -91,7 +94,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MobileAds.initialize(this)
+        val consentParams = ConsentRequestParameters.Builder().build()
+        val consentInfo = UserMessagingPlatform.getConsentInformation(this)
+        consentInfo.requestConsentInfoUpdate(this, consentParams,
+            {
+                if (consentInfo.isConsentFormAvailable &&
+                    consentInfo.consentStatus == ConsentInformation.ConsentStatus.REQUIRED
+                ) {
+                    UserMessagingPlatform.loadAndShowConsentFormIfRequired(this) {
+                        MobileAds.initialize(this)
+                    }
+                } else {
+                    MobileAds.initialize(this)
+                }
+            },
+            { MobileAds.initialize(this) }
+        )
         FeatureFlagsStore.init(this)
         lifecycleScope.launch(Dispatchers.IO) { FeatureFlagsStore.fetchRemote() }
         FavouriteDriverStore.init(this)
