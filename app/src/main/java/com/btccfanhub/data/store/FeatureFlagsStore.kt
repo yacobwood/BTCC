@@ -2,6 +2,7 @@ package com.btccfanhub.data.store
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.provider.Settings
 import android.util.Log
 import com.btccfanhub.Constants
 import com.btccfanhub.worker.NewsCheckWorker
@@ -52,6 +53,10 @@ object FeatureFlagsStore {
     // Held strongly so it isn't garbage-collected (SharedPreferences uses WeakReference)
     private var unitPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
+    /** The Android device ID — shown in Test Mode so you can add per-device overrides in the admin. */
+    var deviceId: String = "unknown"
+        private set
+
     fun init(context: Context) {
         val p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs = p
@@ -74,6 +79,8 @@ object FeatureFlagsStore {
             }
         }
         appPrefs.registerOnSharedPreferenceChangeListener(unitPrefsListener)
+        deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown"
+        Log.d("FeatureFlags", "Device ID: $deviceId")
     }
 
     /** Fetches the latest flags.json from GitHub and applies it. */
@@ -124,14 +131,23 @@ object FeatureFlagsStore {
 
     private fun applyAll(obj: JSONObject, context: Context?) {
         val prevWidgetTest = widgetRaceWeekendTest.value
-        apply(KEY_RADIO_TAB,             obj.optBoolean(KEY_RADIO_TAB,             true))
-        apply(KEY_ADS,                   obj.optBoolean(KEY_ADS,                   true))
-        apply(KEY_NATIVE_ADS,            obj.optBoolean(KEY_NATIVE_ADS,            true))
-        apply(KEY_WHATS_NEW,             obj.optBoolean(KEY_WHATS_NEW,             true))
-        apply(KEY_LIVE_UPDATES,          obj.optBoolean(KEY_LIVE_UPDATES,          true))
-        apply(KEY_RESULTS_NOTIFICATIONS, obj.optBoolean(KEY_RESULTS_NOTIFICATIONS, false))
-        apply(KEY_TRACK_WEATHER,         obj.optBoolean(KEY_TRACK_WEATHER,         false))
-        apply(KEY_WIDGET_RACE_WEEKEND,   obj.optBoolean(KEY_WIDGET_RACE_WEEKEND,   false))
+
+        // Per-device override merges on top of defaults
+        val override = obj.optJSONObject("overrides")?.optJSONObject(deviceId)
+
+        fun bool(key: String, default: Boolean): Boolean =
+            override?.optBoolean(key, obj.optBoolean(key, default)) ?: obj.optBoolean(key, default)
+
+        apply(KEY_RADIO_TAB,             bool(KEY_RADIO_TAB,             true))
+        apply(KEY_ADS,                   bool(KEY_ADS,                   true))
+        apply(KEY_NATIVE_ADS,            bool(KEY_NATIVE_ADS,            true))
+        apply(KEY_WHATS_NEW,             bool(KEY_WHATS_NEW,             true))
+        apply(KEY_LIVE_UPDATES,          bool(KEY_LIVE_UPDATES,          true))
+        apply(KEY_RESULTS_NOTIFICATIONS, bool(KEY_RESULTS_NOTIFICATIONS, false))
+        apply(KEY_TRACK_WEATHER,         bool(KEY_TRACK_WEATHER,         false))
+        apply(KEY_WIDGET_RACE_WEEKEND,   bool(KEY_WIDGET_RACE_WEEKEND,   false))
+
+        if (override != null) Log.d("FeatureFlags", "Per-device overrides applied for $deviceId")
         Log.d("FeatureFlags", "Flags applied")
         if (context != null && widgetRaceWeekendTest.value != prevWidgetTest) {
             refreshWidgets(context)

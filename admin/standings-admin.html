@@ -439,6 +439,79 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   min-height: 18px;
   margin-top: 4px;
 }
+.override-card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.override-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.override-id {
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Mono', monospace;
+  color: var(--yellow);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.btn-remove {
+  background: transparent;
+  border: 1px solid var(--outline);
+  color: var(--text-sec);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+.override-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.override-chip {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Mono', monospace;
+  color: var(--text-sec);
+}
+.override-chip.on  { border-color: var(--yellow); color: var(--yellow); }
+.override-chip.off { border-color: var(--red);    color: var(--red); }
+.new-override-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--outline-lo);
+}
+.new-override-toggle-row:last-child { border-bottom: none; }
+.new-override-label { font-size: 12px; color: var(--text-sec); }
+.new-override-controls { display: flex; gap: 6px; align-items: center; }
+.new-override-controls select {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -657,6 +730,26 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
   <button class="btn-primary" id="flags-savebtn" onclick="doSaveFlags()">SAVE FLAGS TO APP</button>
   <div id="flags-status"></div>
+
+  <!-- Per-device overrides -->
+  <div style="margin-top:28px">
+    <div class="section-label" style="margin-bottom:4px">DEVICE OVERRIDES</div>
+    <div class="section-note" style="margin-bottom:12px">Flags set here take priority over the global values for that device only.</div>
+
+    <div id="overrides-list"></div>
+
+    <!-- Add override form -->
+    <div class="flags-card" id="add-override-card" style="margin-top:10px">
+      <div style="margin-bottom:10px">
+        <div class="field-label">DEVICE ID</div>
+        <input type="text" id="new-override-id" placeholder="Paste device ID from app Test Mode" style="font-family:monospace;font-size:13px">
+      </div>
+      <div id="new-override-toggles">
+        <!-- populated by renderAddOverrideToggles() -->
+      </div>
+      <button class="btn-run" style="margin-top:10px;width:100%" onclick="addOverride()">ADD OVERRIDE</button>
+    </div>
+  </div>
 
 </div>
 </div><!-- /desktop-col flags -->
@@ -1125,6 +1218,8 @@ async function loadFlags() {
     }
   } catch(e) {}
   renderFlags();
+  renderOverridesList();
+  renderAddOverrideToggles();
 }
 
 async function doSaveFlags() {
@@ -1183,6 +1278,79 @@ async function doSaveFlags() {
     document.getElementById('flags-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`;
   }
   btn.disabled = false; btn.textContent = 'SAVE FLAGS TO APP';
+}
+
+// ── Per-device overrides ──────────────────────────────────────────────────────
+
+// overrides is a map of { deviceId: { flagKey: bool, ... } }
+// It lives inside flagValues under the key "overrides"
+
+function getOverrides() {
+  return (typeof flagValues.overrides === 'object' && flagValues.overrides !== null)
+    ? flagValues.overrides : {};
+}
+
+function renderOverridesList() {
+  const overrides = getOverrides();
+  const entries = Object.entries(overrides);
+  const el = document.getElementById('overrides-list');
+  if (entries.length === 0) {
+    el.innerHTML = '<div class="section-note" style="margin-bottom:8px">No device overrides yet.</div>';
+    return;
+  }
+  el.innerHTML = entries.map(([devId, flags]) => {
+    const chips = Object.entries(flags).map(([k, v]) =>
+      `<span class="override-chip ${v ? 'on' : 'off'}">${k}</span>`
+    ).join('');
+    return `
+      <div class="override-card">
+        <div class="override-head">
+          <div class="override-id" title="${devId}">${devId}</div>
+          <button class="btn-remove" onclick="removeOverride('${devId}')">REMOVE</button>
+        </div>
+        <div class="override-flags">${chips || '<span class="section-note">No flags set</span>'}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderAddOverrideToggles() {
+  document.getElementById('new-override-toggles').innerHTML = FLAG_DEFS.map(f => `
+    <div class="new-override-toggle-row">
+      <span class="new-override-label">${f.label}</span>
+      <div class="new-override-controls">
+        <select id="nof_${f.key}">
+          <option value="skip" selected>— (inherit global)</option>
+          <option value="true">ON</option>
+          <option value="false">OFF</option>
+        </select>
+      </div>
+    </div>`).join('');
+}
+
+function addOverride() {
+  const devId = document.getElementById('new-override-id').value.trim();
+  if (!devId) { alert('Enter a device ID first.'); return; }
+
+  const flags = {};
+  FLAG_DEFS.forEach(f => {
+    const val = document.getElementById('nof_' + f.key)?.value;
+    if (val === 'true')  flags[f.key] = true;
+    if (val === 'false') flags[f.key] = false;
+  });
+
+  if (!flagValues.overrides) flagValues.overrides = {};
+  flagValues.overrides[devId] = { ...(flagValues.overrides[devId] || {}), ...flags };
+
+  // Reset form
+  document.getElementById('new-override-id').value = '';
+  renderAddOverrideToggles();
+  renderOverridesList();
+}
+
+function removeOverride(devId) {
+  if (!flagValues.overrides) return;
+  delete flagValues.overrides[devId];
+  renderOverridesList();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

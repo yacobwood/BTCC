@@ -1,6 +1,7 @@
 package com.btccfanhub.ui.settings
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -9,6 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,13 +30,18 @@ private val displayFmt = DateTimeFormatter.ofPattern("EEE d MMM yyyy  HH:mm")
 fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
     var navigatingBack by remember { mutableStateOf(false) }
     BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
-    val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val testOverride      by FeatureFlagsStore.testDateTimeOverride.collectAsState()
+    val adsEnabled        by FeatureFlagsStore.adsEnabled.collectAsState()
+    val nativeAdsEnabled  by FeatureFlagsStore.nativeAdsEnabled.collectAsState()
+    val clipboard = LocalClipboardManager.current
+    var copied by remember { mutableStateOf(false) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var stagedDate by remember { mutableStateOf<LocalDate?>(null) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),
@@ -75,11 +84,94 @@ fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
         ) {
             Spacer(Modifier.height(8.dp))
 
+            // Device ID — tap to copy, paste into admin FLAGS tab to add an override
+            Text(
+                "DEVICE ID",
+                fontSize      = 10.sp,
+                fontWeight    = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                color         = BtccYellow,
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        clipboard.setText(AnnotatedString(FeatureFlagsStore.deviceId))
+                        copied = true
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    FeatureFlagsStore.deviceId,
+                    fontSize   = 13.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color      = BtccTextPrimary,
+                    modifier   = Modifier.weight(1f),
+                )
+                Text(
+                    if (copied) "Copied!" else "Tap to copy",
+                    fontSize = 11.sp,
+                    color    = if (copied) BtccYellow else BtccTextSecondary,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
+
+            HorizontalDivider(color = BtccOutline)
+
             Text(
                 "Simulate a specific date and time to test race weekend behaviour across the app and widget.",
                 color    = BtccTextSecondary,
                 fontSize = 13.sp,
                 lineHeight = 20.sp,
+            )
+
+            HorizontalDivider(color = BtccOutline)
+
+            Text(
+                "ADS",
+                fontSize      = 10.sp,
+                fontWeight    = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                color         = BtccYellow,
+            )
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Banner ad", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = BtccTextPrimary)
+                    Text("Bottom-of-screen AdMob banner", fontSize = 12.sp, color = BtccTextSecondary)
+                }
+                Switch(
+                    checked         = adsEnabled,
+                    onCheckedChange = { FeatureFlagsStore.set(FeatureFlagsStore.KEY_ADS, it) },
+                )
+            }
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("News feed ads", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = BtccTextPrimary)
+                    Text("Native ad cards in the news list", fontSize = 12.sp, color = BtccTextSecondary)
+                }
+                Switch(
+                    checked         = nativeAdsEnabled,
+                    onCheckedChange = { FeatureFlagsStore.set(FeatureFlagsStore.KEY_NATIVE_ADS, it) },
+                )
+            }
+
+            HorizontalDivider(color = BtccOutline)
+
+            Text(
+                "DATE SIMULATION",
+                fontSize      = 10.sp,
+                fontWeight    = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                color         = BtccYellow,
             )
 
             // Current override display
