@@ -1,7 +1,7 @@
 {
   "radio_tab": true,
   "banner_ad": true,
-  "newsfeed_ad": true,
+  "newsfeed_ad": false,
   "whats_new": true,
   "live_updates": true,
   "results_notifications": false,
