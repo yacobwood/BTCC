@@ -7,9 +7,5 @@
   "results_notifications": false,
   "track_weather": false,
   "widget_race_weekend_test": false,
-  "overrides": {
-    "c13aea3d68cfe9ba": {
-      "radio_tab": false
-    }
-  }
+  "overrides": {}
 }
