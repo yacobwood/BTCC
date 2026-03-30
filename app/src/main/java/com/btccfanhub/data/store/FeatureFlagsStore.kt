@@ -2,25 +2,26 @@ package com.btccfanhub.data.store
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.Settings
 import android.util.Log
-import com.btccfanhub.BuildConfig
 import com.btccfanhub.Constants
-import com.configcat.ConfigCatClient
-import com.configcat.PollingModes
-import com.configcat.User
 import com.btccfanhub.worker.NewsCheckWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import java.time.LocalDateTime
 
 object FeatureFlagsStore {
 
     private const val PREFS_NAME = "feature_flags"
+    private const val FLAGS_URL  =
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json"
 
     const val KEY_RADIO_TAB             = "radio_tab"
-    const val KEY_ADS                   = "ads_enabled"
+    const val KEY_ADS                   = "banner_ad"
+    const val KEY_NATIVE_ADS            = "newsfeed_ad"
     const val KEY_WHATS_NEW             = "whats_new"
     const val KEY_LIVE_UPDATES          = "live_updates"
     const val KEY_RESULTS_NOTIFICATIONS = "results_notifications"
@@ -29,6 +30,7 @@ object FeatureFlagsStore {
 
     val radioTab             = MutableStateFlow(true)
     val adsEnabled           = MutableStateFlow(true)
+    val nativeAdsEnabled     = MutableStateFlow(true)
     val whatsNew             = MutableStateFlow(true)
     val liveUpdates          = MutableStateFlow(true)
     val resultsNotifications = MutableStateFlow(false)
@@ -45,17 +47,17 @@ object FeatureFlagsStore {
         testDateTimeOverride.value = dt
     }
 
-    private var prefs: android.content.SharedPreferences? = null
-    private var user: User? = null
-    private lateinit var client: ConfigCatClient
+    private var prefs: SharedPreferences? = null
+    private val http = OkHttpClient()
     // Held strongly so it isn't garbage-collected (SharedPreferences uses WeakReference)
     private var unitPrefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     fun init(context: Context) {
         val p = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs            = p
+        prefs = p
         radioTab.value             = p.getBoolean(KEY_RADIO_TAB,              true)
         adsEnabled.value           = p.getBoolean(KEY_ADS,                    true)
+        nativeAdsEnabled.value     = p.getBoolean(KEY_NATIVE_ADS,             true)
         whatsNew.value             = p.getBoolean(KEY_WHATS_NEW,              true)
         liveUpdates.value          = p.getBoolean(KEY_LIVE_UPDATES,           true)
         resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
@@ -72,28 +74,21 @@ object FeatureFlagsStore {
             }
         }
         appPrefs.registerOnSharedPreferenceChangeListener(unitPrefsListener)
-        val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        user = User.newBuilder().build(deviceId)
-        Log.d("FeatureFlags", "Device ID: $deviceId")
-
-        client = ConfigCatClient.get(BuildConfig.CONFIGCAT_SDK_KEY) { options ->
-            options.pollingMode(PollingModes.autoPoll(60))
-            options.hooks().addOnConfigChanged {
-                val prevWidgetTest = widgetRaceWeekendTest.value
-                applyAll()
-                // If the widget race weekend flag changed, push an immediate widget update
-                if (widgetRaceWeekendTest.value != prevWidgetTest) {
-                    refreshWidgets(context)
-                }
-            }
-        }
     }
 
-    /** Force-fetches the latest config from ConfigCat and applies it. */
-    suspend fun fetchRemote() {
+    /** Fetches the latest flags.json from GitHub and applies it. */
+    suspend fun fetchRemote(context: Context? = null) {
         try {
-            withContext(Dispatchers.IO) { client.forceRefresh() }
-            applyAll()
+            val json = withContext(Dispatchers.IO) {
+                val req = Request.Builder()
+                    .url("$FLAGS_URL?t=${System.currentTimeMillis()}")
+                    .build()
+                http.newCall(req).execute().use { it.body?.string() }
+            } ?: return
+
+            val obj = JSONObject(json)
+            applyAll(obj, context)
+            Log.d("FeatureFlags", "Flags fetched from GitHub")
         } catch (e: Exception) {
             Log.e("FeatureFlags", "Fetch error: ${e.message}")
         }
@@ -127,15 +122,20 @@ object FeatureFlagsStore {
         }
     }
 
-    private fun applyAll() {
-        apply(KEY_RADIO_TAB,              client.getValue(Boolean::class.java, KEY_RADIO_TAB,              user, true))
-        apply(KEY_ADS,                    client.getValue(Boolean::class.java, KEY_ADS,                    user, true))
-        apply(KEY_WHATS_NEW,              client.getValue(Boolean::class.java, KEY_WHATS_NEW,              user, true))
-        apply(KEY_LIVE_UPDATES,           client.getValue(Boolean::class.java, KEY_LIVE_UPDATES,           user, true))
-        apply(KEY_RESULTS_NOTIFICATIONS,  client.getValue(Boolean::class.java, KEY_RESULTS_NOTIFICATIONS,  user, false))
-        apply(KEY_TRACK_WEATHER,          client.getValue(Boolean::class.java, KEY_TRACK_WEATHER,          user, false))
-        apply(KEY_WIDGET_RACE_WEEKEND,    client.getValue(Boolean::class.java, KEY_WIDGET_RACE_WEEKEND,    user, false))
-        Log.d("FeatureFlags", "Flags applied for device: ${user?.identifier}")
+    private fun applyAll(obj: JSONObject, context: Context?) {
+        val prevWidgetTest = widgetRaceWeekendTest.value
+        apply(KEY_RADIO_TAB,             obj.optBoolean(KEY_RADIO_TAB,             true))
+        apply(KEY_ADS,                   obj.optBoolean(KEY_ADS,                   true))
+        apply(KEY_NATIVE_ADS,            obj.optBoolean(KEY_NATIVE_ADS,            true))
+        apply(KEY_WHATS_NEW,             obj.optBoolean(KEY_WHATS_NEW,             true))
+        apply(KEY_LIVE_UPDATES,          obj.optBoolean(KEY_LIVE_UPDATES,          true))
+        apply(KEY_RESULTS_NOTIFICATIONS, obj.optBoolean(KEY_RESULTS_NOTIFICATIONS, false))
+        apply(KEY_TRACK_WEATHER,         obj.optBoolean(KEY_TRACK_WEATHER,         false))
+        apply(KEY_WIDGET_RACE_WEEKEND,   obj.optBoolean(KEY_WIDGET_RACE_WEEKEND,   false))
+        Log.d("FeatureFlags", "Flags applied")
+        if (context != null && widgetRaceWeekendTest.value != prevWidgetTest) {
+            refreshWidgets(context)
+        }
     }
 
     private fun apply(key: String, value: Boolean) {
@@ -143,11 +143,12 @@ object FeatureFlagsStore {
         when (key) {
             KEY_RADIO_TAB             -> radioTab.value             = value
             KEY_ADS                   -> adsEnabled.value           = value
+            KEY_NATIVE_ADS            -> nativeAdsEnabled.value     = value
             KEY_WHATS_NEW             -> whatsNew.value             = value
             KEY_LIVE_UPDATES          -> liveUpdates.value          = value
             KEY_RESULTS_NOTIFICATIONS -> resultsNotifications.value = value
-            KEY_TRACK_WEATHER         -> trackWeather.value          = value
-            KEY_WIDGET_RACE_WEEKEND   -> widgetRaceWeekendTest.value  = value
+            KEY_TRACK_WEATHER         -> trackWeather.value         = value
+            KEY_WIDGET_RACE_WEEKEND   -> widgetRaceWeekendTest.value = value
         }
     }
 

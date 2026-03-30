@@ -36,7 +36,7 @@ body {
   .tab-bar { display: none !important; }
   .desktop-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0;
     max-width: 1280px;
     margin: 0 auto;
@@ -369,6 +369,76 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   line-height: 1.5;
 }
 .scraper-info-note strong { color: var(--text); }
+
+/* ── Feature flag toggles ── */
+.flag-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--outline-lo);
+}
+.flag-row:last-child { border-bottom: none; }
+.flag-info { flex: 1; min-width: 0; padding-right: 16px; }
+.flag-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.flag-key {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-sec);
+  margin-top: 2px;
+  font-family: 'SF Mono', 'Fira Mono', monospace;
+}
+.toggle-wrap { flex-shrink: 0; }
+.toggle-wrap input[type=checkbox] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--outline);
+  cursor: pointer;
+  position: relative;
+  transition: background .2s;
+  border: none;
+  padding: 0;
+}
+.toggle-wrap input[type=checkbox]::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--text-sec);
+  transition: left .2s, background .2s;
+}
+.toggle-wrap input[type=checkbox]:checked {
+  background: var(--yellow);
+}
+.toggle-wrap input[type=checkbox]:checked::after {
+  left: 23px;
+  background: #000;
+}
+.flags-card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 14px;
+  padding: 4px 16px;
+  margin-bottom: 16px;
+}
+#flags-status {
+  text-align: center;
+  padding: 12px;
+  font-size: 13px;
+  min-height: 18px;
+  margin-top: 4px;
+}
 </style>
 </head>
 <body>
@@ -383,6 +453,7 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 <div class="tab-bar" style="position:sticky;top:57px;z-index:9;">
   <button class="tab active" onclick="switchTab('standings', this)">STANDINGS</button>
   <button class="tab" onclick="switchTab('scrapers', this)">SCRAPERS</button>
+  <button class="tab" onclick="switchTab('flags', this)">FLAGS</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════ TAB: STANDINGS ══════ -->
@@ -568,6 +639,27 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
 </div>
 </div><!-- /desktop-col scrapers -->
+
+<div class="desktop-col">
+<div class="desktop-col-title">Feature Flags</div>
+<div id="panel-flags" class="tab-panel">
+
+  <div class="section-note" style="margin-bottom:16px">Toggles are written to <strong>data/flags.json</strong> in the repo. The app fetches this on launch and every 60 seconds.</div>
+
+  <div class="data-loaded-banner" id="flags-banner">
+    <div class="data-loaded-dot"></div>
+    <span id="flags-banner-text">Loaded from GitHub</span>
+  </div>
+
+  <div class="flags-card" id="flags-list">
+    <!-- populated by JS -->
+  </div>
+
+  <button class="btn-primary" id="flags-savebtn" onclick="doSaveFlags()">SAVE FLAGS TO APP</button>
+  <div id="flags-status"></div>
+
+</div>
+</div><!-- /desktop-col flags -->
 </div><!-- /desktop-layout -->
 
 <script>
@@ -990,9 +1082,113 @@ async function refreshAllStatus() {
   pollTimer = setInterval(refreshAllStatus, 15000);
 }
 
+// ── Feature Flags ────────────────────────────────────────────────────────────
+const FLAGS_PATH = 'data/flags.json';
+const FLAGS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
+
+const FLAG_DEFS = [
+  { key: 'radio_tab',              label: 'Radio Tab',              desc: 'Show the Radio tab in the bottom nav' },
+  { key: 'banner_ad',              label: 'Banner Ad',              desc: 'AdMob banner above the bottom nav' },
+  { key: 'newsfeed_ad',            label: 'Newsfeed Ad',            desc: 'Native ad card in the news feed' },
+  { key: 'whats_new',              label: 'What\'s New',            desc: 'Show What\'s New on app launch' },
+  { key: 'live_updates',           label: 'Live Updates',           desc: 'Live Timing tab is visible' },
+  { key: 'results_notifications',  label: 'Results Notifications',  desc: 'Push notifications for race results' },
+  { key: 'track_weather',          label: 'Track Weather',          desc: 'Weather card on round detail screens' },
+  { key: 'widget_race_weekend_test', label: 'Widget Race Weekend',  desc: 'Force widgets into race-weekend mode for testing' },
+];
+
+let flagValues = {};
+let flagFileSha = null;
+
+function renderFlags() {
+  document.getElementById('flags-list').innerHTML = FLAG_DEFS.map(f => `
+    <div class="flag-row">
+      <div class="flag-info">
+        <div class="flag-name">${f.label}</div>
+        <div class="flag-key">${f.key}</div>
+      </div>
+      <div class="toggle-wrap">
+        <input type="checkbox" id="flag_${f.key}" ${flagValues[f.key] ? 'checked' : ''}
+          onchange="flagValues['${f.key}'] = this.checked">
+      </div>
+    </div>`).join('');
+}
+
+async function loadFlags() {
+  try {
+    const r = await fetch(FLAGS_RAW + '?t=' + Date.now());
+    if (r.ok) {
+      flagValues = await r.json();
+      const banner = document.getElementById('flags-banner');
+      document.getElementById('flags-banner-text').textContent = 'Loaded from GitHub';
+      banner.classList.add('visible');
+    }
+  } catch(e) {}
+  renderFlags();
+}
+
+async function doSaveFlags() {
+  const tok = getToken();
+  if (!tok) {
+    document.getElementById('flags-status').innerHTML = '<span class="err">Save your GitHub token first (on the Standings tab).</span>';
+    return;
+  }
+  const btn = document.getElementById('flags-savebtn');
+  btn.disabled = true; btn.textContent = 'SAVING…';
+  document.getElementById('flags-status').textContent = '';
+
+  // Collect current toggle values
+  FLAG_DEFS.forEach(f => {
+    flagValues[f.key] = document.getElementById('flag_' + f.key)?.checked ?? flagValues[f.key];
+  });
+
+  const content = JSON.stringify(flagValues, null, 2) + '\n';
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+
+  try {
+    // Get current SHA if we don't have it
+    if (!flagFileSha) {
+      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {
+        headers: { Authorization: 'token ' + tok },
+      });
+      if (meta.ok) {
+        const d = await meta.json();
+        flagFileSha = d.sha;
+      }
+    }
+
+    const body = {
+      message: 'Update feature flags via admin',
+      content: encoded,
+    };
+    if (flagFileSha) body.sha = flagFileSha;
+
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {
+      method: 'PUT',
+      headers: { Authorization: 'token ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (r.ok) {
+      const d = await r.json();
+      flagFileSha = d.content?.sha || null;
+      document.getElementById('flags-status').innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>';
+      document.getElementById('flags-banner-text').textContent = 'Saved to GitHub · just now';
+      document.getElementById('flags-banner').classList.add('visible');
+    } else {
+      const e = await r.json();
+      document.getElementById('flags-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`;
+    }
+  } catch(e) {
+    document.getElementById('flags-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`;
+  }
+  btn.disabled = false; btn.textContent = 'SAVE FLAGS TO APP';
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 if(getToken()) collapseToken();
 loadExisting();
+loadFlags();
 if(getToken()) refreshAllStatus();
 // Restore active tab
 const savedTab = sessionStorage.getItem('activeTab');

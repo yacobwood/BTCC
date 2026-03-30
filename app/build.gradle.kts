@@ -30,7 +30,6 @@ android {
         versionName = "1.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "CONFIGCAT_SDK_KEY", "\"${localProps["configcat.sdk.key"] ?: ""}\"")
     }
 
     signingConfigs {
@@ -90,8 +89,7 @@ dependencies {
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.youtube.player)
-    implementation(libs.configcat)
-    implementation(libs.play.review)
+implementation(libs.play.review)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
