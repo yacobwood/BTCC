@@ -7,5 +7,7 @@
   "results_notifications": false,
   "track_weather": false,
   "widget_race_weekend_test": false,
+  "merch_hub_enabled": false,
+  "merch_feed_url": "",
   "overrides": {}
 }
