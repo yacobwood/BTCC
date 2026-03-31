@@ -9,5 +9,7 @@
   "widget_race_weekend_test": false,
   "merch_hub_enabled": true,
   "merch_feed_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/merch.json",
-  "overrides": {}
+  "overrides": {},
+  "shop_home_premium": true,
+  "shop_home_standard": false
 }
