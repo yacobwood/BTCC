@@ -5,7 +5,7 @@
   "whats_new": true,
   "live_updates": true,
   "results_notifications": false,
-  "track_weather": true,
+  "track_weather": false,
   "widget_race_weekend_test": false,
   "merch_hub_enabled": true,
   "merch_feed_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/merch.json",
