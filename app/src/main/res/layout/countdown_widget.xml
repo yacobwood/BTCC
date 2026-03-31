@@ -18,7 +18,10 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="4dp">
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
 
         <TextView
             android:id="@+id/widget_round"
@@ -58,7 +61,7 @@
             android:id="@+id/widget_venue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"

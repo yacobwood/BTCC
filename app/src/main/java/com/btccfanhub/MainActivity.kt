@@ -62,6 +62,7 @@ import com.btccfanhub.navigation.AppNavHost
 import com.btccfanhub.navigation.Screen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.btccfanhub.ui.ads.AdmobBanner
@@ -111,7 +112,12 @@ class MainActivity : ComponentActivity() {
             { MobileAds.initialize(this) }
         )
         FeatureFlagsStore.init(this)
-        lifecycleScope.launch(Dispatchers.IO) { FeatureFlagsStore.fetchRemote() }
+        lifecycleScope.launch(Dispatchers.IO) {
+            while (true) {
+                FeatureFlagsStore.fetchRemote()
+                delay(60_000)
+            }
+        }
         FavouriteDriverStore.init(this)
         createNewsNotificationChannel()
         createRaceNotificationChannel()

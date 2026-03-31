@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.model.InfoPage
 import com.btccfanhub.data.repository.PagesRepository
+import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +43,7 @@ fun MoreScreen(
     onInfoPageClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
+    val radioTabEnabled by FeatureFlagsStore.radioTab.collectAsState()
     var pages by remember { mutableStateOf<List<InfoPage>>(emptyList()) }
 
     LaunchedEffect(Unit) { Analytics.screen("more") }
@@ -53,6 +55,7 @@ fun MoreScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),
@@ -121,7 +124,9 @@ fun MoreScreen(
             Column(modifier = columnModifier.padding(horizontal = 16.dp)) {
                 Spacer(Modifier.height(8.dp))
                 SectionHeader("APP")
-                MoreRow(label = "Radio", icon = Icons.Default.Radio, onClick = { Analytics.moreItemClicked("radio"); onRadioClick() })
+                if (radioTabEnabled) {
+                    MoreRow(label = "Radio", icon = Icons.Default.Radio, onClick = { Analytics.moreItemClicked("radio"); onRadioClick() })
+                }
                 Spacer(Modifier.height(4.dp))
                 MoreRow(label = "Settings", icon = Icons.Default.Settings, onClick = { Analytics.moreItemClicked("settings"); onSettingsClick() })
                 Spacer(Modifier.height(4.dp))

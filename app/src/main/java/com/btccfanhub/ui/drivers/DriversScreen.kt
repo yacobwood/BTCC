@@ -10,6 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -108,7 +109,9 @@ fun DriversScreen() {
         }
     }
 
-    val gridPagerState = rememberPagerState(pageCount = { 2 })
+    val gridPagerState   = rememberPagerState(pageCount = { 2 })
+    val driversListState = rememberLazyListState()
+    val teamsListState   = rememberLazyListState()
     var selectedDriver by remember { mutableStateOf<Driver?>(null) }
     var selectedTeam   by remember { mutableStateOf<Team?>(null) }
 
@@ -139,11 +142,13 @@ fun DriversScreen() {
         }
         else -> {
             GridTabs(
-                pagerState    = gridPagerState,
-                drivers       = drivers,
-                teams         = teams,
-                onDriverClick = { Analytics.driverClicked(it.name); selectedDriver = it },
-                onTeamClick   = { Analytics.teamClicked(it.name); selectedTeam = it },
+                pagerState       = gridPagerState,
+                drivers          = drivers,
+                teams            = teams,
+                driversListState = driversListState,
+                teamsListState   = teamsListState,
+                onDriverClick    = { Analytics.driverClicked(it.name); selectedDriver = it },
+                onTeamClick      = { Analytics.teamClicked(it.name); selectedTeam = it },
             )
         }
     }
@@ -159,6 +164,8 @@ private fun GridTabs(
     pagerState: PagerState,
     drivers: List<Driver>,
     teams: List<Team>,
+    driversListState: androidx.compose.foundation.lazy.LazyListState,
+    teamsListState: androidx.compose.foundation.lazy.LazyListState,
     onDriverClick: (Driver) -> Unit,
     onTeamClick: (Team) -> Unit,
 ) {
@@ -209,8 +216,8 @@ private fun GridTabs(
             modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
-                0 -> DriversList(PaddingValues(0.dp), drivers, onDriverClick)
-                1 -> TeamsList(PaddingValues(0.dp), teams, onTeamClick)
+                0 -> DriversList(PaddingValues(0.dp), drivers, driversListState, onDriverClick)
+                1 -> TeamsList(PaddingValues(0.dp), teams, teamsListState, onTeamClick)
                 else -> Unit
             }
         }
@@ -222,7 +229,7 @@ private fun GridTabs(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverClick: (Driver) -> Unit) {
+private fun DriversList(padding: PaddingValues, drivers: List<Driver>, listState: androidx.compose.foundation.lazy.LazyListState, onDriverClick: (Driver) -> Unit) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val columns = when {
         screenWidth >= 840 -> 3
@@ -232,6 +239,7 @@ private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverC
     val isTablet = screenWidth >= 600
     val pairs = if (columns > 1) drivers.chunked(columns) else drivers.map { listOf(it) }
     LazyColumn(
+        state           = listState,
         modifier        = Modifier.fillMaxSize().padding(padding),
         contentPadding  = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -273,7 +281,7 @@ private fun DriversList(padding: PaddingValues, drivers: List<Driver>, onDriverC
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TeamsList(padding: PaddingValues, teams: List<Team>, onTeamClick: (Team) -> Unit) {
+private fun TeamsList(padding: PaddingValues, teams: List<Team>, listState: androidx.compose.foundation.lazy.LazyListState, onTeamClick: (Team) -> Unit) {
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
     if (isTablet) {
         LazyVerticalStaggeredGrid(
@@ -307,6 +315,7 @@ private fun TeamsList(padding: PaddingValues, teams: List<Team>, onTeamClick: (T
         }
     } else {
         LazyColumn(
+            state               = listState,
             modifier            = Modifier.fillMaxSize().padding(padding),
             contentPadding      = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -834,20 +843,26 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
             item {
                 val tbc = team.entries - team.drivers.size
                 val totalSlots = team.drivers.size + tbc
+                val allSlots: List<@Composable (Modifier) -> Unit> =
+                    team.drivers.map<Driver, @Composable (Modifier) -> Unit> { driver -> { mod -> TeamDriverCard(driver = driver, avatarSize = 72, modifier = mod) } } +
+                    List<@Composable (Modifier) -> Unit>(tbc) { { mod -> TbcDriverCard(modifier = mod) } }
+
                 if (totalSlots >= 2) {
-                    // Side-by-side for 2+ total slots (confirmed or TBC)
-                    val avatarSize = if (totalSlots >= 3) 56 else 72
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    // 2-column grid — wraps into rows of 2
+                    val rows = allSlots.chunked(2)
+                    Column(
+                        modifier            = Modifier.padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        team.drivers.forEach { driver ->
-                            TeamDriverCard(driver = driver, avatarSize = avatarSize, modifier = Modifier.weight(1f))
-                        }
-                        repeat(tbc) {
-                            TbcDriverCard(avatarSize = avatarSize, modifier = Modifier.weight(1f))
+                        rows.forEach { row ->
+                            Row(
+                                modifier              = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                row.forEach { card -> card(Modifier.weight(1f)) }
+                                // Pad last row if odd number of slots
+                                if (row.size == 1) Spacer(Modifier.weight(1f))
+                            }
                         }
                     }
                 } else {
@@ -855,12 +870,7 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                         modifier            = Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        team.drivers.forEach { driver ->
-                            TeamDriverCard(driver = driver, modifier = Modifier.fillMaxWidth())
-                        }
-                        repeat(tbc) {
-                            TbcDriverCard(modifier = Modifier.fillMaxWidth())
-                        }
+                        allSlots.forEach { card -> card(Modifier.fillMaxWidth()) }
                     }
                 }
             }
@@ -1105,7 +1115,7 @@ private fun TeamDriverCard(driver: Driver, avatarSize: Int = 72, modifier: Modif
             avatarSize    = avatarSize,
         )
         Text(
-            driver.name,
+            driver.name.replace("-", "\u2011"),
             style      = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color      = if (isFavourite) BtccYellow else MaterialTheme.colorScheme.onBackground,

@@ -150,12 +150,12 @@ open class CountdownWidget : AppWidgetProvider() {
 
             // Scale countdown text based on chosen size
             val countdownSp = when (sizeClass) {
-                SizeClass.SMALL  -> 36f
+                SizeClass.SMALL  -> 30f
                 SizeClass.MEDIUM -> 38f
                 SizeClass.LARGE  -> 38f
             }
             val labelSp = when (sizeClass) {
-                SizeClass.SMALL  -> 9f
+                SizeClass.SMALL  -> 8f
                 SizeClass.MEDIUM -> 11f
                 SizeClass.LARGE  -> 13f
             }
@@ -182,7 +182,10 @@ open class CountdownWidget : AppWidgetProvider() {
 
             val deviceZone = ZoneId.systemDefault()
             val today = LocalDate.now()
-            val calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
+            var calendar = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
+            if (calendar == null || calendar.rounds.isEmpty()) {
+                calendar = CalendarRepository.getCalendarFromAssets(context)
+            }
             val nextRace = calendar?.rounds?.firstOrNull { it.endDate >= today }
 
             // Read test mode directly from SharedPreferences so it works even when the

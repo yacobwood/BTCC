@@ -102,7 +102,8 @@ object WhatsNewStore {
             "Bug fixes and performance improvements",
         ),
         32 to listOf(
-            "Widget - simplified sizing"
+            "Widget - simplified sizing",
+            "Bug fix - fixed no network error message appearing"
         )
     )
 

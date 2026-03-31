@@ -55,6 +55,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),
@@ -326,7 +327,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(
-                        if (testModeEnabled) Modifier.clickable {
+                        if (testModeEnabled || BuildConfig.DEBUG) Modifier.clickable {
                             versionTapCount++
                             if (versionTapCount >= 5) {
                                 versionTapCount = 0

@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -60,6 +61,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     var loadError by remember { mutableStateOf(false) }
     var refreshKey by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) { Analytics.screen("calendar") }
     LaunchedEffect(refreshKey) {
@@ -155,6 +157,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                 }
                 // Right column: rounds list
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
@@ -185,6 +188,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
         } else {
             // ── Phone: stacked layout — single LazyColumn with header ─────────
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize().widthIn(max = 680.dp).fillMaxWidth(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp),
             ) {

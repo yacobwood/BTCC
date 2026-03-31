@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -273,6 +274,7 @@ private fun RaceResultsList(race: RaceEntry, roundDate: String, venue: String = 
     val isTablet = configuration.screenWidthDp >= 600
 
     LazyColumn(
+        state               = rememberLazyListState(),
         modifier            = modifier,
         contentPadding      = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(if (isTablet) 10.dp else 6.dp),

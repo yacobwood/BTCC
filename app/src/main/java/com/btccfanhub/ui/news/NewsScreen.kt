@@ -6,8 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.animation.AnimatedVisibility
@@ -47,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.btccfanhub.R
 import com.btccfanhub.data.store.FavouriteDriverStore
+import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.data.model.Article
 import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.ui.theme.BtccBackground
@@ -54,6 +55,7 @@ import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccTextSecondary
+import com.btccfanhub.ui.ads.NativeAdItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,10 +70,21 @@ fun NewsScreen(
 
     LaunchedEffect(Unit) { Analytics.screen("news") }
     val favName by FavouriteDriverStore.driver.collectAsState()
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex       = viewModel.savedScrollIndex,
-        initialFirstVisibleItemScrollOffset = viewModel.savedScrollOffset,
-    )
+    val nativeAdsEnabled by FeatureFlagsStore.nativeAdsEnabled.collectAsState()
+    val listState = remember {
+        LazyListState(
+            firstVisibleItemIndex       = viewModel.savedScrollIndex,
+            firstVisibleItemScrollOffset = viewModel.savedScrollOffset,
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.saveScrollPosition(
+                listState.firstVisibleItemIndex,
+                listState.firstVisibleItemScrollOffset,
+            )
+        }
+    }
     val scope = rememberCoroutineScope()
     var searchActive by remember { mutableStateOf(false) }
     var searchQuery  by remember { mutableStateOf("") }
@@ -164,11 +177,23 @@ fun NewsScreen(
                     else           -> 2
                 }
                 val navigateToArticle: (Article) -> Unit = { article ->
-                    viewModel.saveScrollPosition(
-                        listState.firstVisibleItemIndex,
-                        listState.firstVisibleItemScrollOffset,
-                    )
                     onArticleClick(article)
+                }
+
+                val gridCount    = when {
+                    screenW >= 840 -> 6
+                    screenW >= 600 -> 4
+                    else           -> 2
+                }
+                val gridArticles = articles.drop(1).take(gridCount)
+                val remaining    = articles.drop(1 + gridArticles.size)
+                val feedItems: List<Any> = remember(remaining, nativeAdsEnabled) {
+                    buildList {
+                        remaining.forEachIndexed { index, article ->
+                            if (nativeAdsEnabled && index > 0 && index % 6 == 0) add("AD_$index")
+                            add(article)
+                        }
+                    }
                 }
 
                 Column(modifier = Modifier.fillMaxSize()) {
@@ -300,12 +325,6 @@ fun NewsScreen(
                             }
 
                             // Grid cards: 4 on tablet, 2 on phone
-                            val gridCount    = when {
-                                screenW >= 840 -> 6
-                                screenW >= 600 -> 4
-                                else           -> 2
-                            }
-                            val gridArticles = articles.drop(1).take(gridCount)
                             if (gridArticles.isNotEmpty()) {
                                 item {
                                     Spacer(Modifier.height(10.dp))
@@ -325,7 +344,6 @@ fun NewsScreen(
                                 }
                             }
 
-                            val remaining = articles.drop(1 + gridArticles.size)
                             if (remaining.isNotEmpty()) {
                                 item {
                                     Text(
@@ -364,15 +382,21 @@ fun NewsScreen(
                                     }
                                 }
                             } else {
-                                items(remaining) { article ->
-                                    CompactCard(
-                                        article = article,
-                                        onClick = { Analytics.articleClicked(article.title, "list"); navigateToArticle(article) },
-                                        favouriteSurname = favSurname,
-                                        modifier = Modifier
-                                            .padding(horizontal = 16.dp)
-                                            .padding(bottom = 10.dp),
-                                    )
+                                items(
+                                    feedItems,
+                                    key = { if (it is Article) "article_${(it as Article).id}" else it as String },
+                                ) { item ->
+                                    when (item) {
+                                        is Article -> CompactCard(
+                                            article = item,
+                                            onClick = { Analytics.articleClicked(item.title, "list"); navigateToArticle(item) },
+                                            favouriteSurname = favSurname,
+                                            modifier = Modifier
+                                                .padding(horizontal = 16.dp)
+                                                .padding(bottom = 10.dp),
+                                        )
+                                        else -> NativeAdItem()
+                                    }
                                 }
                             }
 

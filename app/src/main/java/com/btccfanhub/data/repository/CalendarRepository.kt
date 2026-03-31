@@ -1,5 +1,6 @@
 package com.btccfanhub.data.repository
 
+import android.content.Context
 import com.btccfanhub.data.store.NetworkDiskCache
 import com.btccfanhub.data.model.CalendarData
 import com.btccfanhub.data.model.Corner
@@ -46,6 +47,12 @@ object CalendarRepository {
         } catch (e: Exception) {
             cache ?: NetworkDiskCache.read("calendar")?.let { runCatching { parse(it) }.getOrNull() } ?: EMPTY
         }
+    }
+
+    suspend fun getCalendarFromAssets(context: Context): CalendarData = withContext(Dispatchers.IO) {
+        runCatching {
+            context.assets.open("calendar.json").bufferedReader().use { it.readText() }.let { parse(it) }
+        }.getOrDefault(EMPTY)
     }
 
     fun invalidateCache() {

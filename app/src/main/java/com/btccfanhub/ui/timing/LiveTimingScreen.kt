@@ -6,6 +6,7 @@ import com.btccfanhub.data.analytics.Analytics
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,6 +46,7 @@ fun LiveTimingScreen(eventId: Int, onBack: () -> Unit) {
     val flagColor = flagColor(session?.sessionFlag)
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),
@@ -121,7 +123,7 @@ fun LiveTimingScreen(eventId: Int, onBack: () -> Unit) {
 @Composable
 private fun ClassificationTable(session: TslSession, flagColor: Color, displayTime: String) {
     val fastestId = session.fastestLapId
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(state = rememberLazyListState(), modifier = Modifier.fillMaxSize()) {
 
         // Session info header
         item {

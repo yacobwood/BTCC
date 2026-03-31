@@ -58,6 +58,7 @@ fun BugReportScreen(onBack: () -> Unit = {}, onReturnToNews: () -> Unit = {}) {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),

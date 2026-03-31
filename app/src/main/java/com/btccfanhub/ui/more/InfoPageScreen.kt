@@ -37,15 +37,24 @@ fun InfoPageScreen(pageId: String, onBack: () -> Unit, onPageClick: (String) -> 
 
     LaunchedEffect(pageId) {
         Analytics.screen("info_page:$pageId")
-        page = PagesRepository.getPage(pageId)
-        if (page == null) {
-            PagesRepository.getPagesFromAssets(context)
-            page = PagesRepository.getPage(pageId)
+        // Fast path: show from in-memory cache or assets immediately
+        val instant = PagesRepository.getCachedPage(pageId)
+            ?: run {
+                PagesRepository.getPagesFromAssets(context)
+                PagesRepository.getCachedPage(pageId)
+            }
+        if (instant != null) {
+            page = instant
+            loading = false
         }
+        // Slow path: refresh from network, update silently
+        val fresh = PagesRepository.getPage(pageId)
+        page = fresh ?: page
         loading = false
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(0),

@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -97,6 +99,10 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     val today         = LocalDate.now()
     val seasonStarted = today >= seasonStartDate
     var selectedYear  by rememberSaveable { mutableIntStateOf(if (today >= LocalDate.of(2026, 4, 18)) 2026 else 2025) }
+    val driversListState  = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
+    val teamsListState    = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
+    val resultsListState  = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
+    val statsListState    = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
     val pagerState    = rememberPagerState(pageCount = { 5 })
     val scope         = rememberCoroutineScope()
 
@@ -411,6 +417,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 showLiveRound = 0,
                                 showPastBanner = false,
                                 bannerYear = selectedYear,
+                                state = driversListState,
                                 modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -420,6 +427,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 histTeams,
                                 showPastBanner = false,
                                 bannerYear = selectedYear,
+                                state = teamsListState,
                                 modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -435,6 +443,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 liveDrivers!!,
                                 showLiveRound = liveRound,
                                 showPastBanner = false,
+                                state = driversListState,
                                 modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -449,6 +458,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                             TeamStandingsList(
                                 liveTeams!!,
                                 showPastBanner = false,
+                                state = teamsListState,
                                 modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -464,6 +474,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 loading = resultsLoading,
                                 seasonStartDate = seasonStartDate,
                                 onRoundClick = { round -> onRoundClick(selectedYear, round) },
+                                state = resultsListState,
                                 modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -483,6 +494,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
                                 loading = resultsLoading,
                                 year = selectedYear,
                                 seasonStartDate = seasonStartDate,
+                                state = statsListState,
                                 modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
                             )
                         }
@@ -566,6 +578,7 @@ private fun RaceResultsTab(
     loading: Boolean,
     seasonStartDate: LocalDate,
     onRoundClick: (Int) -> Unit,
+    state: LazyListState = rememberLazyListState(),
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -578,6 +591,7 @@ private fun RaceResultsTab(
                 ResultsNotStarted(year, seasonStartDate)
             } else {
                 LazyColumn(
+                    state               = state,
                     modifier            = modifier,
                     contentPadding      = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -825,9 +839,11 @@ private fun DriverStandingsList(
     showLiveRound: Int,
     showPastBanner: Boolean,
     bannerYear: Int = 2025,
+    state: LazyListState = rememberLazyListState(),
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
+        state               = state,
         modifier            = modifier,
         contentPadding      = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -849,9 +865,11 @@ private fun TeamStandingsList(
     standings: List<TeamStanding>,
     showPastBanner: Boolean,
     bannerYear: Int = 2025,
+    state: LazyListState = rememberLazyListState(),
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
+        state               = state,
         modifier            = modifier,
         contentPadding      = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1060,6 +1078,7 @@ private fun SeasonStatsTab(
     loading: Boolean,
     year: Int = 2026,
     seasonStartDate: LocalDate = LocalDate.of(2026, 4, 18),
+    state: LazyListState = rememberLazyListState(),
     modifier: Modifier = Modifier,
 ) {
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
@@ -1073,6 +1092,7 @@ private fun SeasonStatsTab(
             val showFastestLaps = stats.any { it.fastestLaps > 0 }
             Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyColumn(
+                state               = state,
                 modifier            = Modifier.widthIn(max = if (isTablet) 900.dp else Dp.Unspecified).fillMaxWidth(),
                 contentPadding      = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(if (isTablet) 10.dp else 6.dp),

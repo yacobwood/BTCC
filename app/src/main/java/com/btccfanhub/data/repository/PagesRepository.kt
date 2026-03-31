@@ -39,6 +39,8 @@ object PagesRepository {
         }
     }
 
+    fun getCachedPage(id: String): InfoPage? = cache?.find { it.id == id }
+
     suspend fun getPage(id: String): InfoPage? = getPages().find { it.id == id }
 
     suspend fun getPagesFromAssets(context: Context): List<InfoPage> = withContext(Dispatchers.IO) {
