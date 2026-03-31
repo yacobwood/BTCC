@@ -706,6 +706,56 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     <button class="btn-run" onclick="runScraper('scrape-driver-summaries.yml','mss-summaries')">RUN ▶</button>
   </div>
 
+  <!-- Merch scraper -->
+  <div class="scraper-card" id="sc-merch">
+    <div class="scraper-head">
+      <div class="scraper-title">MERCH</div>
+      <div class="scraper-status-chip" id="ss-merch">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes product listings from team Shopify stores (EXCELR8/Vertu). Updates <strong>merch.json</strong> with real product titles, prices, images and availability — powers the Shop the Grid merch hub. Auto-runs daily at 06:00 UTC.</div>
+    <button class="btn-run" onclick="runScraper('scrape-merch.yml','merch')">RUN ▶</button>
+  </div>
+
+  <!-- Motorsport Stats (historical) -->
+  <div class="scraper-card" id="sc-mss-history">
+    <div class="scraper-head">
+      <div class="scraper-title">MSS HISTORY</div>
+      <div class="scraper-status-chip" id="ss-mss-history">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes historical race-by-race results (POS, PTS, GRID) for all drivers &amp; teams from motorsportstats.com. Updates <strong>data/motorsportstats/drivers/</strong> and <strong>teams/</strong>. Manual only.</div>
+    <div class="scraper-inputs">
+      <div>
+        <div class="field-label">TARGET</div>
+        <select id="si-mss-target" style="background:var(--surface);border:1px solid var(--outline);color:var(--text);padding:9px 10px;border-radius:10px;font-size:13px;">
+          <option value="all">All</option>
+          <option value="drivers-only">Drivers only</option>
+          <option value="teams-only">Teams only</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">SLUG (optional)</div>
+        <input type="text" id="si-mss-slug" placeholder="e.g. tom-ingram" style="width:140px;padding:9px 10px;font-size:13px;">
+      </div>
+    </div>
+    <button class="btn-run" onclick="runScraper('scrape-motorsportstats.yml','mss-history')">RUN ▶</button>
+  </div>
+
+  <!-- Motorsport Stats (summaries) -->
+  <div class="scraper-card" id="sc-mss-summaries">
+    <div class="scraper-head">
+      <div class="scraper-title">MSS SUMMARIES</div>
+      <div class="scraper-status-chip" id="ss-mss-summaries">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes career highlights &amp; per-season stats from motorsportstats.com summary pages, then merges into <strong>drivers.json</strong> (wins, podiums, poles, fastest laps, championship positions). Manual only.</div>
+    <div class="scraper-inputs">
+      <div>
+        <div class="field-label">DRIVER (optional)</div>
+        <input type="text" id="si-mss-driver" placeholder="e.g. tom-ingram" style="width:140px;padding:9px 10px;font-size:13px;">
+      </div>
+    </div>
+    <button class="btn-run" onclick="runScraper('scrape-driver-summaries.yml','mss-summaries')">RUN ▶</button>
+  </div>
+
   </div><!-- /scrapers-grid -->
 
   <button class="btn-refresh" onclick="refreshAllStatus()">↻ REFRESH STATUS</button>
@@ -1149,6 +1199,9 @@ async function refreshAllStatus() {
     { file: 'scrape-calendar.yml',  key: 'calendar' },
     { file: 'scrape-schedule.yml',  key: 'schedule' },
     { file: 'scrape-grid.yml',      key: 'grid' },
+    { file: 'scrape-motorsportstats.yml',  key: 'mss-history' },
+    { file: 'scrape-driver-summaries.yml', key: 'mss-summaries' },
+    { file: 'scrape-merch.yml',     key: 'merch' },
     { file: 'scrape-motorsportstats.yml',  key: 'mss-history' },
     { file: 'scrape-driver-summaries.yml', key: 'mss-summaries' },
   ];
