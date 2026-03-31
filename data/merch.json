@@ -1,5 +1,15 @@
 {
-  "lastUpdated": "2026-03-25T12:00:00Z",
+  "lastUpdated": "2026-03-25T22:20:04Z",
+  "featuredPartner": null,
+  "adSlots": [
+    {
+      "name": "Plato Racing",
+      "tagline": "Jason Plato's official team",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/plato.png",
+      "bannerImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/plato.png",
+      "linkUrl": "https://platoracing.com"
+    }
+  ],
   "items": [
     {
       "id": "off-cap",
@@ -63,419 +73,6 @@
       "sponsored": false,
       "driverIds": [],
       "teamIds": [],
-      "roundTags": []
-    },
-    {
-      "id": "napa-cap",
-      "title": "NAPA Racing UK Team Cap",
-      "imageUrl": "https://picsum.photos/seed/napa-cap/400/300",
-      "price": "£22.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/cap",
-      "affiliateParams": {},
-      "sponsored": true,
-      "driverIds": [
-        116,
-        27,
-        77,
-        200
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": [
-        1
-      ]
-    },
-    {
-      "id": "napa-polo",
-      "title": "NAPA Racing UK Team Polo",
-      "imageUrl": "https://picsum.photos/seed/napa-polo/400/300",
-      "price": "£34.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/polo",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        116,
-        27,
-        77,
-        200
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "napa-hoodie",
-      "title": "NAPA Racing UK Team Hoodie",
-      "imageUrl": "https://picsum.photos/seed/napa-hoodie/400/300",
-      "price": "£49.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/hoodie",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        116,
-        27,
-        77,
-        200
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "sutton-cap",
-      "title": "Ashley Sutton #116 Cap",
-      "imageUrl": "https://picsum.photos/seed/sutton-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/sutton-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        116
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "sutton-tee",
-      "title": "Ashley Sutton #116 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/sutton-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/sutton-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        116
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "sutton-hoodie",
-      "title": "Ashley Sutton #116 Hoodie",
-      "imageUrl": "https://picsum.photos/seed/sutton-hoodie/400/300",
-      "price": "£39.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/sutton-hoodie",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        116
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "cammish-cap",
-      "title": "Dan Cammish #27 Cap",
-      "imageUrl": "https://picsum.photos/seed/cammish-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/cammish-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        27
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "cammish-tee",
-      "title": "Dan Cammish #27 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/cammish-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/cammish-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        27
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "cammish-hoodie",
-      "title": "Dan Cammish #27 Hoodie",
-      "imageUrl": "https://picsum.photos/seed/cammish-hoodie/400/300",
-      "price": "£39.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/cammish-hoodie",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        27
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "osborne-cap",
-      "title": "Sam Osborne #77 Cap",
-      "imageUrl": "https://picsum.photos/seed/osborne-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/osborne-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        77
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "osborne-tee",
-      "title": "Sam Osborne #77 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/osborne-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/osborne-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        77
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "selby-cap",
-      "title": "Lewis Selby #200 Cap",
-      "imageUrl": "https://picsum.photos/seed/selby-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/selby-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        200
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "selby-tee",
-      "title": "Lewis Selby #200 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/selby-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "NAPA Racing UK",
-      "sellerType": "team",
-      "purchaseUrl": "https://naparacinguk.com/shop/selby-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        200
-      ],
-      "teamIds": [
-        "NAPA Racing UK"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "vertu-cap",
-      "title": "Team VERTU Cap",
-      "imageUrl": "https://picsum.photos/seed/vertu-cap/400/300",
-      "price": "£19.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80,
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "vertu-polo",
-      "title": "Team VERTU Polo",
-      "imageUrl": "https://picsum.photos/seed/vertu-polo/400/300",
-      "price": "£32.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/polo",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80,
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "vertu-hoodie",
-      "title": "Team VERTU Hoodie",
-      "imageUrl": "https://picsum.photos/seed/vertu-hoodie/400/300",
-      "price": "£44.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/hoodie",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80,
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "ingram-cap",
-      "title": "Tom Ingram #80 Cap",
-      "imageUrl": "https://picsum.photos/seed/ingram-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/ingram-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "ingram-tee",
-      "title": "Tom Ingram #80 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/ingram-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/ingram-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "ingram-hoodie",
-      "title": "Tom Ingram #80 Hoodie",
-      "imageUrl": "https://picsum.photos/seed/ingram-hoodie/400/300",
-      "price": "£39.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/ingram-hoodie",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        80
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "chilton-cap",
-      "title": "Tom Chilton #3 Cap",
-      "imageUrl": "https://picsum.photos/seed/chilton-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/chilton-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "chilton-tee",
-      "title": "Tom Chilton #3 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/chilton-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Team VERTU",
-      "sellerType": "team",
-      "purchaseUrl": "https://vertumotorsport.com/shop/chilton-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        3
-      ],
-      "teamIds": [
-        "Team VERTU"
-      ],
       "roundTags": []
     },
     {
@@ -745,122 +342,6 @@
       "roundTags": []
     },
     {
-      "id": "restart-cap",
-      "title": "Restart Racing Cap",
-      "imageUrl": "https://picsum.photos/seed/restart-cap/400/300",
-      "price": "£19.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25,
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "restart-polo",
-      "title": "Restart Racing Polo",
-      "imageUrl": "https://picsum.photos/seed/restart-polo/400/300",
-      "price": "£32.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/polo",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25,
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "smiley-cap",
-      "title": "Chris Smiley #25 Cap",
-      "imageUrl": "https://picsum.photos/seed/smiley-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/smiley-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "smiley-tee",
-      "title": "Chris Smiley #25 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/smiley-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/smiley-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        25
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "dorlin-cap",
-      "title": "James Dorlin #132 Cap",
-      "imageUrl": "https://picsum.photos/seed/dorlin-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/dorlin-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "dorlin-tee",
-      "title": "James Dorlin #132 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/dorlin-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Restart Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://restartracing.co.uk/shop/dorlin-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        132
-      ],
-      "teamIds": [
-        "Restart Racing"
-      ],
-      "roundTags": []
-    },
-    {
       "id": "lkq-cap",
       "title": "LKQ Euro Car Parts Racing Cap",
       "imageUrl": "https://picsum.photos/seed/lkq-cap/400/300",
@@ -1017,122 +498,6 @@
       "roundTags": []
     },
     {
-      "id": "plato-cap",
-      "title": "Plato Racing Cap",
-      "imageUrl": "https://picsum.photos/seed/plato-cap/400/300",
-      "price": "£19.99",
-      "currency": "GBP",
-      "sellerName": "Plato Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://platoracing.co.uk/shop/cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        32,
-        33
-      ],
-      "teamIds": [
-        "Plato Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "plato-polo",
-      "title": "Plato Racing Polo",
-      "imageUrl": "https://picsum.photos/seed/plato-polo/400/300",
-      "price": "£32.99",
-      "currency": "GBP",
-      "sellerName": "Plato Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://platoracing.co.uk/shop/polo",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        32,
-        33
-      ],
-      "teamIds": [
-        "Plato Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "rowbottom-cap",
-      "title": "Daniel Rowbottom #32 Cap",
-      "imageUrl": "https://picsum.photos/seed/rowbottom-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Plato Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://platoracing.co.uk/shop/rowbottom-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        32
-      ],
-      "teamIds": [
-        "Plato Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "rowbottom-tee",
-      "title": "Daniel Rowbottom #32 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/rowbottom-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Plato Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://platoracing.co.uk/shop/rowbottom-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        32
-      ],
-      "teamIds": [
-        "Plato Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "morgan-cap",
-      "title": "Adam Morgan #33 Cap",
-      "imageUrl": "https://picsum.photos/seed/morgan-cap/400/300",
-      "price": "£18.99",
-      "currency": "GBP",
-      "sellerName": "Plato Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://platoracing.co.uk/shop/morgan-cap",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        33
-      ],
-      "teamIds": [
-        "Plato Racing"
-      ],
-      "roundTags": []
-    },
-    {
-      "id": "morgan-tee",
-      "title": "Adam Morgan #33 T-Shirt",
-      "imageUrl": "https://picsum.photos/seed/morgan-tee/400/300",
-      "price": "£24.99",
-      "currency": "GBP",
-      "sellerName": "Plato Racing",
-      "sellerType": "team",
-      "purchaseUrl": "https://platoracing.co.uk/shop/morgan-tee",
-      "affiliateParams": {},
-      "sponsored": false,
-      "driverIds": [
-        33
-      ],
-      "teamIds": [
-        "Plato Racing"
-      ],
-      "roundTags": []
-    },
-    {
       "id": "one-cap",
       "title": "One Motorsport Cap",
       "imageUrl": "https://picsum.photos/seed/one-cap/400/300",
@@ -1284,6 +649,638 @@
       "driverIds": [],
       "teamIds": [],
       "roundTags": []
+    },
+    {
+      "id": "restart-polo",
+      "title": "Restart Racing Polo Shirt",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Lloyd-0H5A8789-scaled.jpg",
+      "price": "£40.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-polo-shirt/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-gilet",
+      "title": "Restart Racing Padded Gilet",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/0-0H5A8072-scaled.jpg",
+      "price": "£60.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-padded-gilet/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-jacket",
+      "title": "Restart Racing Waterproof Jacket",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Lloyd-0H5A9033-scaled.jpg",
+      "price": "£80.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-lightweight-waterproof-jacket/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-cap",
+      "title": "Restart Racing Baseball Cap",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/RR-0Q3A1375-1-scaled.jpg",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-baseball-cap/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-lanyard",
+      "title": "Restart Racing Lanyard",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8341-scaled.jpg",
+      "price": "£6.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-lanyard/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-keyring",
+      "title": "Restart Racing Keyring",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8342-scaled.jpg",
+      "price": "£5.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/product/restart-racing-keyring/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-bucket",
+      "title": "Restart Racing Bucket Hat",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8354-scaled-e1722251356664.jpg",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/shop-restart-racing/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "restart-bobble",
+      "title": "Restart Racing Bobble Hat",
+      "imageUrl": "https://www.restartracing.co.uk/wp-content/uploads/2024/07/Restart-Racing-8359-scaled.jpg",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Restart Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.harlequinteamwear.co.uk/shop-restart-racing/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        25,
+        132
+      ],
+      "teamIds": [
+        "Restart Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-1-4-zip-jumper",
+      "title": "EXCELR8 2025 BTCC 1/4 Zip Jumper - Men's",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/chilton-0Q3A5582_1.jpg?v=1748516973",
+      "price": "£75.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-1-4-zip-jumper",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-1-4-zip-jumper-ladies",
+      "title": "EXCELR8 2025 BTCC 1/4 Zip Jumper - Ladies",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/WhatsAppImage2025-05-02at13.17.44.jpg?v=1746188921",
+      "price": "£75.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-1-4-zip-jumper-ladies",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-gilet",
+      "title": "EXCELR8 2025 BTCC Gilet",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e0Q3A4891.jpg?v=1744704263",
+      "price": "£85.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-gilet",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-softshell",
+      "title": "EXCELR8 2025 BTCC Softshell",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e-0Q3A5122_7d4b6060-ecb5-45ef-bbe0-484399a603f1.jpg?v=1744704403",
+      "price": "£95.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-softshell",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-gilet-ladies",
+      "title": "EXCELR8 2025 BTCC Gilet  - Ladies",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e0Q3A4891.jpg?v=1744704263",
+      "price": "£85.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-gilet-ladies",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-softshell-copy",
+      "title": "EXCELR8 2025 BTCC Softshell - Ladies",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e-0Q3A5122_7d4b6060-ecb5-45ef-bbe0-484399a603f1.jpg?v=1744704403",
+      "price": "£95.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-softshell-copy",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "vertu-excelr8-2025-btcc-junior-hoodie",
+      "title": "EXCELR8 2025 BTCC Junior Hoodie",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0942/6350/9341/files/e-0Q3A1456.jpg?v=1750951247",
+      "price": "£50.00",
+      "currency": "GBP",
+      "sellerName": "Team VERTU",
+      "sellerType": "team",
+      "purchaseUrl": "https://excelr8motorsportshop.com/products/excelr8-2025-btcc-junior-hoodie",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        80,
+        3
+      ],
+      "teamIds": [
+        "Team VERTU"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-tee-1",
+      "title": "[Junior] Launch Drop Tee 01",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/JNR_PlatoRacing-Merch-Drop1-Shop-Tee1a.jpg?v=1773676582",
+      "price": "£24.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-tee-1",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-tee-02-copy",
+      "title": "[Junior] Launch Drop Tee 02",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/JNR_PlatoRacing-Merch-Drop1-Shop-Tee2a.jpg?v=1773676164",
+      "price": "£24.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-tee-02-copy",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-junior-launch-drop-hoodie-01",
+      "title": "[Junior] Launch Drop Hoodie 01",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/JNR_PlatoRacing-Merch-Drop1-Shop-Hoodie1a.jpg?v=1773675947",
+      "price": "£52.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/junior-launch-drop-hoodie-01",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-junior-launch-drop-hoodie-02",
+      "title": "[Junior] Launch Drop Hoodie 02",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/JNR_PlatoRacing-Merch-Drop1-Shop-Hoodie2a.jpg?v=1773676055",
+      "price": "£52.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/junior-launch-drop-hoodie-02",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-beanie-02",
+      "title": "Launch Drop Beanie 02",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/PlatoRacing-Merch-Drop1-Shop-Beanie2a.jpg?v=1773140728",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-beanie-02",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-beanie-01",
+      "title": "Launch Drop Beanie 01",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/PlatoRacing-Merch-Drop1-Shop-Beanie1a.jpg?v=1773140576",
+      "price": "£20.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-beanie-01",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-hoodie-02",
+      "title": "Launch Drop Hoodie 02",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/PlatoRacing-Merch-Drop1-Shop-Hoodie2a.jpg?v=1773140480",
+      "price": "£65.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-hoodie-02",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-hoodie-01",
+      "title": "Launch Drop Hoodie 01",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/PlatoRacing-Merch-Drop1-Shop-Hoodie1a_d1661dfa-131a-4219-8731-bc4401de20a6.jpg?v=1773139916",
+      "price": "£65.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-hoodie-01",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-tee-02",
+      "title": "Launch Drop Tee 02",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/PlatoRacing-Merch-Drop1-Shop-Tee2a.jpg?v=1773140441",
+      "price": "£35.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-tee-02",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "plato-launch-drop-tee-01",
+      "title": "Launch Drop Tee 01",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0994/1260/7321/files/PlatoRacing-Merch-Drop1-Shop-Tee1a.jpg?v=1773676465",
+      "price": "£35.00",
+      "currency": "GBP",
+      "sellerName": "Plato Racing",
+      "sellerType": "team",
+      "purchaseUrl": "https://shop.plato.racing/products/launch-drop-tee-01",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        32,
+        33
+      ],
+      "teamIds": [
+        "Plato Racing"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "napa-cat-gilets",
+      "title": "NAPA Racing Gilets",
+      "imageUrl": "https://images.tayna.com/subcat-images/gilets.jpg",
+      "price": "View Range",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.tayna.co.uk/napa-racing/gilets/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        116,
+        27,
+        77,
+        200
+      ],
+      "teamIds": [
+        "NAPA Racing UK"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "napa-cat-jackets",
+      "title": "NAPA Racing Jackets",
+      "imageUrl": "https://images.tayna.com/subcat-images/jackets.jpg",
+      "price": "View Range",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.tayna.co.uk/napa-racing/jackets/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        116,
+        27,
+        77,
+        200
+      ],
+      "teamIds": [
+        "NAPA Racing UK"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "napa-cat-tracktops",
+      "title": "NAPA Racing Tracktops",
+      "imageUrl": "https://images.tayna.com/subcat-images/tracktops.jpg",
+      "price": "View Range",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.tayna.co.uk/napa-racing/tracktops/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        116,
+        27,
+        77,
+        200
+      ],
+      "teamIds": [
+        "NAPA Racing UK"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "napa-cat-polos",
+      "title": "NAPA Racing Polos",
+      "imageUrl": "https://images.tayna.com/subcat-images/polos.jpg",
+      "price": "View Range",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.tayna.co.uk/napa-racing/polos/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        116,
+        27,
+        77,
+        200
+      ],
+      "teamIds": [
+        "NAPA Racing UK"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "napa-cat-t-shirts",
+      "title": "NAPA Racing T-Shirts",
+      "imageUrl": "https://images.tayna.com/subcat-images/tshirts.jpg",
+      "price": "View Range",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.tayna.co.uk/napa-racing/t-shirts/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        116,
+        27,
+        77,
+        200
+      ],
+      "teamIds": [
+        "NAPA Racing UK"
+      ],
+      "roundTags": []
+    },
+    {
+      "id": "napa-cat-hats",
+      "title": "NAPA Racing Hats",
+      "imageUrl": "https://images.tayna.com/subcat-images/hats.jpg",
+      "price": "View Range",
+      "currency": "GBP",
+      "sellerName": "NAPA Racing UK",
+      "sellerType": "team",
+      "purchaseUrl": "https://www.tayna.co.uk/napa-racing/hats/",
+      "affiliateParams": {},
+      "sponsored": false,
+      "driverIds": [
+        116,
+        27,
+        77,
+        200
+      ],
+      "teamIds": [
+        "NAPA Racing UK"
+      ],
+      "roundTags": []
     }
   ],
   "sellers": [
@@ -1298,14 +1295,14 @@
       "id": "napa-racing",
       "displayName": "NAPA Racing UK",
       "sellerType": "team",
-      "logoUrl": "https://picsum.photos/seed/napa-logo/100/100",
-      "discountCode": "BTCCAPP10"
+      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU5nOWvNq5UkKuNHMm-w0GbM_3t4HCc59qqQ&s",
+      "discountCode": null
     },
     {
       "id": "vertu",
       "displayName": "Team VERTU",
       "sellerType": "team",
-      "logoUrl": "https://picsum.photos/seed/vertu-logo/100/100",
+      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWmSRoYVttAGA-k7j4CtiMcvm4wgYZbyB38g&s",
       "discountCode": null
     },
     {
@@ -1326,7 +1323,7 @@
       "id": "restart",
       "displayName": "Restart Racing",
       "sellerType": "team",
-      "logoUrl": "https://picsum.photos/seed/restart-logo/100/100",
+      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDrFWb3TjPqMtGYSgZHeGSsMpLYIJFQqkGHg&s",
       "discountCode": null
     },
     {
@@ -1340,7 +1337,7 @@
       "id": "plato",
       "displayName": "Plato Racing",
       "sellerType": "team",
-      "logoUrl": "https://picsum.photos/seed/plato-logo/100/100",
+      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4g2lZZJinN6pElWZ0xv_nXSocyuUqItPaqA&s",
       "discountCode": null
     },
     {
@@ -1369,7 +1366,7 @@
       "displayName": "Pit-Lane Motorsport",
       "sellerType": "independent",
       "logoUrl": "https://picsum.photos/seed/pitlane-logo/100/100",
-      "discountCode": "FANHUB15"
+      "discountCode": null
     }
   ]
 }
