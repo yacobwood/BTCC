@@ -778,6 +778,18 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     <!-- populated by JS -->
   </div>
 
+  <div class="flags-card" style="margin-top:12px">
+    <div class="flag-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div class="flag-info">
+        <div class="flag-name">Merch Feed URL</div>
+        <div class="flag-key">merch_feed_url</div>
+      </div>
+      <input type="text" id="flag_merch_feed_url" placeholder="https://…"
+        style="width:100%;box-sizing:border-box;background:#1a1b1f;border:1px solid #333;border-radius:6px;padding:8px 10px;color:#fff;font-size:13px;"
+        oninput="flagValues['merch_feed_url'] = this.value">
+    </div>
+  </div>
+
   <button class="btn-primary" id="flags-savebtn" onclick="doSaveFlags()">SAVE FLAGS TO APP</button>
   <div id="flags-status"></div>
 
@@ -1241,6 +1253,7 @@ const FLAG_DEFS = [
   { key: 'results_notifications',  label: 'Results Notifications',  desc: 'Push notifications for race results' },
   { key: 'track_weather',          label: 'Track Weather',          desc: 'Weather card on round detail screens' },
   { key: 'widget_race_weekend_test', label: 'Widget Race Weekend',  desc: 'Force widgets into race-weekend mode for testing' },
+  { key: 'merch_hub_enabled',        label: 'Merch Hub',            desc: 'Show the Shop tab in the app' },
 ];
 
 let flagValues = {};
@@ -1258,6 +1271,8 @@ function renderFlags() {
           onchange="flagValues['${f.key}'] = this.checked">
       </div>
     </div>`).join('');
+  const urlInput = document.getElementById('flag_merch_feed_url');
+  if (urlInput) urlInput.value = flagValues['merch_feed_url'] || '';
 }
 
 async function loadFlags() {
