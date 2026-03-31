@@ -29,11 +29,24 @@ data class Seller(
     val discountCode: String?,                      // null if no discount code
 )
 
+/**
+ * A paid featured-partner slot shown on the shop home page.
+ */
+data class FeaturedPartner(
+    val name: String,
+    val tagline: String,
+    val logoUrl: String,
+    val bannerImageUrl: String,
+    val linkUrl: String,
+)
+
 /** Top-level feed response. */
 data class MerchFeed(
     val lastUpdated: String,                        // ISO-8601
     val items: List<MerchItem>,
     val sellers: List<Seller>,
+    val featuredPartner: FeaturedPartner? = null,
+    val adSlots: List<FeaturedPartner> = emptyList(), // index 0 = top (premium), index 1 = bottom (standard)
 )
 
 /** A named section of items shown in the hub. */

@@ -27,6 +27,7 @@ import com.btccfanhub.ui.settings.BugReportScreen
 import com.btccfanhub.ui.settings.FeatureFlagsScreen
 import com.btccfanhub.ui.settings.SettingsScreen
 import com.btccfanhub.ui.merch.ShopTheGridScreen
+import com.btccfanhub.ui.merch.ShopBrowseScreen
 import com.btccfanhub.ui.merch.FilteredMerchScreen
 import com.btccfanhub.ui.timing.LiveTimingScreen
 
@@ -51,6 +52,9 @@ sealed class Screen(val route: String) {
     object BugReport : Screen("bug_report")
     object More : Screen("more")
     object Shop : Screen("shop")
+    object ShopBrowse : Screen("shop_browse/{browseType}") {
+        fun route(browseType: String) = "shop_browse/$browseType"
+    }
     object ShopFiltered : Screen("shop/{filterType}/{filterValue}") {
         fun route(filterType: String, filterValue: String) = "shop/$filterType/${Uri.encode(filterValue)}"
     }
@@ -184,8 +188,23 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
 
         composable(Screen.Shop.route) {
             ShopTheGridScreen(
-                onTeamClick = { teamName -> navController.navigate(Screen.ShopFiltered.route("team", teamName)) },
+                onBrowseDriversClick = { navController.navigate(Screen.ShopBrowse.route("drivers")) },
+                onBrowseTeamsClick   = { navController.navigate(Screen.ShopBrowse.route("teams")) },
+                onTeamClick   = { teamName     -> navController.navigate(Screen.ShopFiltered.route("team", teamName)) },
                 onDriverClick = { driverNumber -> navController.navigate(Screen.ShopFiltered.route("driver", driverNumber.toString())) },
+            )
+        }
+
+        composable(
+            route = Screen.ShopBrowse.route,
+            arguments = listOf(navArgument("browseType") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val browseType = backStackEntry.arguments?.getString("browseType") ?: "drivers"
+            ShopBrowseScreen(
+                browseType = browseType,
+                onDriverClick = { driverNumber -> navController.navigate(Screen.ShopFiltered.route("driver", driverNumber.toString())) },
+                onTeamClick   = { teamName     -> navController.navigate(Screen.ShopFiltered.route("team", teamName)) },
+                onBack = { navController.popBackStack() },
             )
         }
 
@@ -203,7 +222,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
                 title = title,
                 filterType = filterType,
                 filterValue = filterValue,
-                onBack = { navController.popBackStack(Screen.Shop.route, inclusive = false) },
+                onBack = { navController.popBackStack() },
             )
         }
 

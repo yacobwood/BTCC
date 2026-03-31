@@ -1,5 +1,6 @@
 package com.btccfanhub.data.repository
 
+import com.btccfanhub.data.model.FeaturedPartner
 import com.btccfanhub.data.model.MerchFeed
 import com.btccfanhub.data.model.MerchItem
 import com.btccfanhub.data.model.Seller
@@ -105,7 +106,22 @@ object MerchRepository {
                 )
             }
 
-            MerchFeed(lastUpdated, items, sellers)
+            fun parsePartner(fp: JSONObject): FeaturedPartner? {
+                val name = fp.optString("name")
+                val linkUrl = fp.optString("linkUrl")
+                return if (name.isNotBlank() && linkUrl.isNotBlank())
+                    FeaturedPartner(name, fp.optString("tagline"), fp.optString("logoUrl"), fp.optString("bannerImageUrl"), linkUrl)
+                else null
+            }
+
+            val featuredPartner = root.optJSONObject("featuredPartner")?.let { parsePartner(it) }
+
+            val adSlotsArr = root.optJSONArray("adSlots")
+            val adSlots = if (adSlotsArr != null)
+                (0 until adSlotsArr.length()).mapNotNull { parsePartner(adSlotsArr.getJSONObject(it)) }
+            else emptyList()
+
+            MerchFeed(lastUpdated, items, sellers, featuredPartner, adSlots)
         }.getOrElse { e ->
             FirebaseCrashlytics.getInstance().recordException(e)
             MerchFeed("", emptyList(), emptyList())

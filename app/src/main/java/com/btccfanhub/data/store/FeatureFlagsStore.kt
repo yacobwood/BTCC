@@ -30,6 +30,8 @@ object FeatureFlagsStore {
     const val KEY_WIDGET_RACE_WEEKEND   = "widget_race_weekend_test"
     const val KEY_MERCH_HUB             = "merch_hub_enabled"
     const val KEY_MERCH_FEED_URL        = "merch_feed_url"
+    const val KEY_SHOP_PREMIUM_AD       = "shop_home_premium"
+    const val KEY_SHOP_STANDARD_AD      = "shop_home_standard"
 
     val radioTab             = MutableStateFlow(true)
     val adsEnabled           = MutableStateFlow(true)
@@ -41,6 +43,8 @@ object FeatureFlagsStore {
     val widgetRaceWeekendTest = MutableStateFlow(false)
     val merchHubEnabled      = MutableStateFlow(false)
     val merchFeedUrl         = MutableStateFlow("")
+    val shopPremiumAd        = MutableStateFlow(false)
+    val shopStandardAd       = MutableStateFlow(false)
 
     /** When non-null, overrides LocalDate/LocalDateTime.now() throughout the app for testing. */
     val testDateTimeOverride = MutableStateFlow<LocalDateTime?>(null)
@@ -73,6 +77,8 @@ object FeatureFlagsStore {
         trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
         widgetRaceWeekendTest.value = p.getBoolean(KEY_WIDGET_RACE_WEEKEND,   false)
         merchHubEnabled.value      = p.getBoolean(KEY_MERCH_HUB,              false)
+        shopPremiumAd.value        = p.getBoolean(KEY_SHOP_PREMIUM_AD,        false)
+        shopStandardAd.value       = p.getBoolean(KEY_SHOP_STANDARD_AD,       false)
 
         // Load unit preference from the app prefs (written by SettingsScreen)
         val appPrefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
@@ -156,6 +162,8 @@ object FeatureFlagsStore {
         apply(KEY_WIDGET_RACE_WEEKEND,   bool(KEY_WIDGET_RACE_WEEKEND,   false))
         apply(KEY_MERCH_HUB,             bool(KEY_MERCH_HUB,             false))
         apply(KEY_MERCH_FEED_URL,        str(KEY_MERCH_FEED_URL,         ""))
+        apply(KEY_SHOP_PREMIUM_AD,       bool(KEY_SHOP_PREMIUM_AD,       false))
+        apply(KEY_SHOP_STANDARD_AD,      bool(KEY_SHOP_STANDARD_AD,      false))
 
         if (override != null) Log.d("FeatureFlags", "Per-device overrides applied for $deviceId")
         Log.d("FeatureFlags", "Flags applied")
@@ -176,6 +184,8 @@ object FeatureFlagsStore {
             KEY_TRACK_WEATHER         -> trackWeather.value         = value
             KEY_WIDGET_RACE_WEEKEND   -> widgetRaceWeekendTest.value = value
             KEY_MERCH_HUB             -> merchHubEnabled.value       = value
+            KEY_SHOP_PREMIUM_AD       -> shopPremiumAd.value         = value
+            KEY_SHOP_STANDARD_AD      -> shopStandardAd.value        = value
         }
     }
 

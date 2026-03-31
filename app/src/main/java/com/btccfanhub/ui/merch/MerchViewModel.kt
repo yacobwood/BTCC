@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.btccfanhub.data.analytics.Analytics
+import com.btccfanhub.data.model.FeaturedPartner
 import com.btccfanhub.data.model.MerchFeed
 import com.btccfanhub.data.model.MerchItem
 import com.btccfanhub.data.model.MerchSection
@@ -19,10 +20,12 @@ import com.btccfanhub.data.repository.CalendarRepository
 import com.btccfanhub.data.repository.DriversRepository
 import com.btccfanhub.data.repository.MerchRepository
 import com.btccfanhub.data.repository.RaceResultsRepository
+import com.btccfanhub.data.store.FeatureFlagsStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -106,6 +109,9 @@ class MerchViewModel : ViewModel() {
 
     private var allItems: List<MerchItem> = emptyList()
     private var allSellers: List<Seller> = emptyList()
+    private val _allSellers = MutableStateFlow<List<Seller>>(emptyList())
+    val allSellersFlow: StateFlow<List<Seller>> = _allSellers.asStateFlow()
+
     private var _driverNames = MutableStateFlow<Map<Int, String>>(emptyMap())
     val driverNames: StateFlow<Map<Int, String>> = _driverNames.asStateFlow()
 
@@ -117,8 +123,19 @@ class MerchViewModel : ViewModel() {
     private var _sortedTeams = MutableStateFlow<List<String>>(emptyList())
     val sortedTeams: StateFlow<List<String>> = _sortedTeams.asStateFlow()
 
+    private val _adSlots = MutableStateFlow<List<FeaturedPartner>>(emptyList())
+    val adSlots: StateFlow<List<FeaturedPartner>> = _adSlots.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            FeatureFlagsStore.merchFeedUrl
+                .filter { it.isNotBlank() }
+                .collect { load() }
+        }
+    }
 
     fun refresh() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -128,6 +145,8 @@ class MerchViewModel : ViewModel() {
                 val feed = MerchRepository.fetchFeed()
                 allItems = feed.items
                 allSellers = feed.sellers
+                _allSellers.value = feed.sellers
+                _adSlots.value = feed.adSlots
 
                 val today = LocalDate.now()
                 val calendarData = try { CalendarRepository.getCalendarData() } catch (_: Exception) { null }
@@ -157,6 +176,8 @@ class MerchViewModel : ViewModel() {
                 val feed = MerchRepository.fetchFeed()
                 allItems = feed.items
                 allSellers = feed.sellers
+                _allSellers.value = feed.sellers
+                _adSlots.value = feed.adSlots
 
                 // Fetch driver/team data for names and championship order
                 try {
