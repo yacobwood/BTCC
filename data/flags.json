@@ -5,11 +5,11 @@
   "whats_new": true,
   "live_updates": true,
   "results_notifications": false,
-  "track_weather": false,
+  "track_weather": true,
   "widget_race_weekend_test": false,
   "merch_hub_enabled": true,
   "merch_feed_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/merch.json",
   "overrides": {},
-  "shop_home_premium": true,
+  "shop_home_premium": false,
   "shop_home_standard": true
 }
