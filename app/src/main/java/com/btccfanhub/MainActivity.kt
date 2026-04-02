@@ -74,6 +74,7 @@ import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
+import com.btccfanhub.receiver.TuesdayStandingsReceiver
 import com.btccfanhub.receiver.WeekendPreviewReceiver
 import com.btccfanhub.receiver.WeekendPreviewScheduler
 import com.btccfanhub.widget.CountdownWidget
@@ -93,6 +94,7 @@ class MainActivity : ComponentActivity() {
     private val pendingArticleSlug = mutableStateOf<String?>(null)
     private val pendingOpenResults = mutableIntStateOf(0)
     private val pendingResultsRound = mutableIntStateOf(0)
+    private val pendingResultsTab = mutableIntStateOf(0)
     private val pendingLiveTimingEventId = mutableStateOf<Int?>(null)
     private val pendingOpenTrack = mutableStateOf<Int?>(null)
 
@@ -145,6 +147,7 @@ class MainActivity : ComponentActivity() {
                     onArticleSlugConsumed = { pendingArticleSlug.value = null },
                     pendingOpenResults  = pendingOpenResults.intValue,
                     pendingResultsRound = pendingResultsRound.intValue,
+                    pendingResultsTab   = pendingResultsTab.intValue,
                     onResultsConsumed   = { },
                     pendingLiveTimingEventId = pendingLiveTimingEventId.value,
                     onLiveTimingConsumed     = { pendingLiveTimingEventId.value = null },
@@ -168,11 +171,24 @@ class MainActivity : ComponentActivity() {
         if (openResults) {
             val round = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) ?: 0
             pendingResultsRound.intValue = round
+            // Tuesday standings notification passes its round via a separate extra — open chart tab
+            val isTuesdayNotif = intent?.hasExtra(TuesdayStandingsReceiver.EXTRA_ROUND) == true
+            pendingResultsTab.intValue = if (isTuesdayNotif) TuesdayStandingsReceiver.RESULTS_TAB_CHART else 0
             pendingOpenResults.intValue++
         }
         // Deep link: btccfanhub://article/some-slug  OR  https://…vercel.app/news/some-slug
         if (intent?.action == Intent.ACTION_VIEW) {
             val uri = intent.data
+            // btccfanhub://standings/{round} — fires the Tuesday standings notification immediately (for testing)
+            if (uri?.scheme == "btccfanhub" && uri.host == "standings") {
+                val round = uri.pathSegments.firstOrNull()?.toIntOrNull()
+                if (round != null) {
+                    val testIntent = Intent(this, TuesdayStandingsReceiver::class.java).apply {
+                        putExtra(TuesdayStandingsReceiver.EXTRA_ROUND, round)
+                    }
+                    sendBroadcast(testIntent)
+                }
+            }
             // btccfanhub://preview/{round} — fires the weekend preview notification immediately (for testing)
             if (uri?.scheme == "btccfanhub" && uri.host == "preview") {
                 val round = uri.pathSegments.firstOrNull()?.toIntOrNull()
@@ -335,6 +351,7 @@ private fun MainScreen(
     onArticleSlugConsumed: () -> Unit = {},
     pendingOpenResults: Int = 0,
     pendingResultsRound: Int = 0,
+    pendingResultsTab: Int = 0,
     onResultsConsumed: () -> Unit = {},
     pendingLiveTimingEventId: Int? = null,
     onLiveTimingConsumed: () -> Unit = {},
@@ -347,6 +364,7 @@ private fun MainScreen(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     var newsScrollTrigger by remember { mutableIntStateOf(0) }
+    var resultsTab by remember { mutableIntStateOf(pendingResultsTab) }
     var showOnboarding by remember { mutableStateOf(OnboardingStore.shouldShow(context)) }
     var showWhatsNew by remember { mutableStateOf(WhatsNewStore.shouldShow(context)) }
 
@@ -416,6 +434,7 @@ private fun MainScreen(
 
     LaunchedEffect(pendingOpenResults) {
         if (pendingOpenResults > 0) {
+            resultsTab = pendingResultsTab
             if (pendingResultsRound > 0) {
                 navController.navigate(Screen.RoundResults.route(2026, pendingResultsRound)) {
                     popUpTo(Screen.News.route)
@@ -562,7 +581,8 @@ private fun MainScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     AppNavHost(
                         navController = navController,
-                        newsScrollToTopTrigger = newsScrollTrigger
+                        newsScrollToTopTrigger = newsScrollTrigger,
+                        initialResultsTab = resultsTab,
                     )
                 }
                 if (flagAds) AdmobBanner()
@@ -619,7 +639,8 @@ private fun MainScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     AppNavHost(
                         navController = navController,
-                        newsScrollToTopTrigger = newsScrollTrigger
+                        newsScrollToTopTrigger = newsScrollTrigger,
+                        initialResultsTab = resultsTab,
                     )
                 }
             }

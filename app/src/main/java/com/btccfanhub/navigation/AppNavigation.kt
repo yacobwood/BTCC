@@ -54,7 +54,7 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0) {
+fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0, initialResultsTab: Int = 0) {
     NavHost(navController = navController, startDestination = Screen.News.route) {
 
         composable(Screen.News.route) {
@@ -84,9 +84,12 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
         }
 
         composable(Screen.Results.route) {
-            ResultsScreen(onRoundClick = { year, round ->
-                navController.navigate(Screen.RoundResults.route(year, round))
-            })
+            ResultsScreen(
+                onRoundClick = { year, round ->
+                    navController.navigate(Screen.RoundResults.route(year, round))
+                },
+                initialTab = initialResultsTab,
+            )
         }
 
         composable(

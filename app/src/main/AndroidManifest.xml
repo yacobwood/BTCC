@@ -44,6 +44,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="btccfanhub" android:host="preview" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="btccfanhub" android:host="standings" />
+            </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -71,6 +77,10 @@
 
         <receiver
             android:name=".receiver.WeekendPreviewReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receiver.TuesdayStandingsReceiver"
             android:exported="false" />
 
         <receiver

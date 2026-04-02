@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
+fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, initialTab: Int = 0) {
     val context  = LocalContext.current
     val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
@@ -103,7 +103,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }) {
     val teamsListState    = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
     val resultsListState  = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
     val statsListState    = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
-    val pagerState    = rememberPagerState(pageCount = { 5 })
+    val pagerState    = rememberPagerState(initialPage = initialTab, pageCount = { 5 })
     val scope         = rememberCoroutineScope()
 
     suspend fun refresh(invalidate: Boolean = false) {

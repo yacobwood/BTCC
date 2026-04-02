@@ -1439,23 +1439,42 @@ async function loadNotifSchedule() {
     const now = new Date();
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
     data.rounds.forEach(r => {
+      // Friday preview
       const friday = fridayBefore(r.startDate);
       friday.setHours(15, 0, 0, 0);
-      const isPast = friday < now;
-      const statusColor = isPast ? 'var(--text-sec)' : 'var(--green)';
-      const statusLabel = isPast ? 'SENT' : 'SCHEDULED';
-      const deepLink = `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`;
+      const fridayPast = friday < now;
+      const fridayLink = `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`;
+
+      // Tuesday standings (round 2+)
+      let tuesdayHtml = '';
+      if (r.round >= 2) {
+        const sunday = new Date(r.endDate + 'T00:00:00');
+        const tuesday = new Date(sunday);
+        tuesday.setDate(tuesday.getDate() + 2);
+        tuesday.setHours(9, 0, 0, 0);
+        const tuesdayPast = tuesday < now;
+        const tuesdayLink = `intent://standings/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`;
+        tuesdayHtml = `
+          <div style="border-top:1px solid var(--outline);margin-top:10px;padding-top:10px;">
+            <div style="font-size:11px;color:var(--text-sec);margin-bottom:6px;">STANDINGS UPDATE · ${formatDate(tuesday)} at 9:00 AM</div>
+            <a href="${tuesdayLink}" style="display:inline-block;background:${tuesdayPast ? 'var(--surface)' : 'var(--yellow)'};color:${tuesdayPast ? 'var(--text-sec)' : '#000'};font-size:11px;font-weight:800;letter-spacing:1px;padding:8px 14px;border-radius:8px;text-decoration:none;">
+              ${tuesdayPast ? 'Re-test standings' : 'Test standings'}
+            </a>
+          </div>`;
+      }
+
       html += `
         <div style="background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <span style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--text-sec);">ROUND ${r.round}</span>
-            <span style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${statusColor};margin-left:auto;">${statusLabel}</span>
+            <span style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${fridayPast ? 'var(--text-sec)' : 'var(--green)'};margin-left:auto;">${fridayPast ? 'PAST' : 'UPCOMING'}</span>
           </div>
           <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">${r.venue}</div>
-          <div style="font-size:12px;color:var(--text-sec);margin-bottom:10px;">Fires ${formatDate(friday)} at 3:00 PM</div>
-          <a href="${deepLink}" style="display:inline-block;background:${isPast ? 'var(--surface)' : 'var(--yellow)'};color:${isPast ? 'var(--text-sec)' : '#000'};font-size:11px;font-weight:800;letter-spacing:1px;padding:8px 14px;border-radius:8px;text-decoration:none;">
-            ${isPast ? 'Re-test on device' : 'Test on device'}
+          <div style="font-size:12px;color:var(--text-sec);margin-bottom:10px;">RACE PREVIEW · ${formatDate(friday)} at 3:00 PM</div>
+          <a href="${fridayLink}" style="display:inline-block;background:${fridayPast ? 'var(--surface)' : 'var(--yellow)'};color:${fridayPast ? 'var(--text-sec)' : '#000'};font-size:11px;font-weight:800;letter-spacing:1px;padding:8px 14px;border-radius:8px;text-decoration:none;">
+            ${fridayPast ? 'Re-test preview' : 'Test preview'}
           </a>
+          ${tuesdayHtml}
         </div>`;
     });
     html += '</div>';
