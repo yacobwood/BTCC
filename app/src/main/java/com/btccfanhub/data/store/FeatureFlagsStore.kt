@@ -76,7 +76,7 @@ object FeatureFlagsStore {
         resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
         trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
         widgetRaceWeekendTest.value = p.getBoolean(KEY_WIDGET_RACE_WEEKEND,   false)
-        merchHubEnabled.value      = p.getBoolean(KEY_MERCH_HUB,              false)
+        merchHubEnabled.value      = p.getBoolean(KEY_MERCH_HUB,              true)
         shopPremiumAd.value        = p.getBoolean(KEY_SHOP_PREMIUM_AD,        false)
         shopStandardAd.value       = p.getBoolean(KEY_SHOP_STANDARD_AD,       false)
 
