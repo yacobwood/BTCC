@@ -324,7 +324,7 @@ fun NewsScreen(
                                 item {
                                     HeroCard(
                                         article = articles[0],
-                                        onRefresh = { viewModel.load() },
+                                        onRefresh = { Analytics.retryClicked("news_hero"); viewModel.load() },
                                         onSearchClick = { searchActive = true },
                                         onClick = { Analytics.articleClicked(articles[0].title, "hero"); navigateToArticle(articles[0]) },
                                     )

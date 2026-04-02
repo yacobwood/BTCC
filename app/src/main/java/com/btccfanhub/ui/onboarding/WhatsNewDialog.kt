@@ -23,7 +23,7 @@ fun WhatsNewDialog(
     onDismiss: () -> Unit,
 ) {
     LaunchedEffect(Unit) { Analytics.whatsNewShown() }
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = { Analytics.whatsNewDismissed(); onDismiss() }) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
