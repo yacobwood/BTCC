@@ -74,6 +74,7 @@ import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
+import com.btccfanhub.worker.WeekendPreviewWorker
 import com.btccfanhub.widget.CountdownWidget
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentInformation
@@ -92,6 +93,7 @@ class MainActivity : ComponentActivity() {
     private val pendingOpenResults = mutableIntStateOf(0)
     private val pendingResultsRound = mutableIntStateOf(0)
     private val pendingLiveTimingEventId = mutableStateOf<Int?>(null)
+    private val pendingOpenTrack = mutableStateOf<Int?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,6 +130,7 @@ class MainActivity : ComponentActivity() {
         }
         scheduleNewsCheck()
         scheduleRaceNotifications()
+        scheduleWeekendPreview()
         handleNotificationIntent(intent)
         enableEdgeToEdge()
         ReviewPromptStore.recordLaunch(this)
@@ -144,6 +147,8 @@ class MainActivity : ComponentActivity() {
                     onResultsConsumed   = { },
                     pendingLiveTimingEventId = pendingLiveTimingEventId.value,
                     onLiveTimingConsumed     = { pendingLiveTimingEventId.value = null },
+                    pendingOpenTrack         = pendingOpenTrack.value,
+                    onTrackConsumed          = { pendingOpenTrack.value = null },
                     onRequestPermission = { requestNewsNotificationPermission() },
                 )
             }
@@ -175,6 +180,12 @@ class MainActivity : ComponentActivity() {
                 else -> null
             }
             if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
+        }
+        // Weekend preview notification → open track detail
+        val openTrack = intent?.getBooleanExtra(WeekendPreviewWorker.EXTRA_OPEN_TRACK, false) == true
+        if (openTrack) {
+            val round = intent?.getIntExtra(WeekendPreviewWorker.EXTRA_TRACK_ROUND, -1) ?: -1
+            if (round != -1) pendingOpenTrack.value = round
         }
         // Widget tap during race weekend → open live timing
         val liveTimingId = intent?.getIntExtra(CountdownWidget.EXTRA_LIVE_TIMING_EVENT_ID, -1) ?: -1
@@ -268,6 +279,16 @@ class MainActivity : ComponentActivity() {
         nm.createNotificationChannel(channel)
     }
 
+    private fun scheduleWeekendPreview() {
+        val wm = WorkManager.getInstance(this)
+        val periodic = PeriodicWorkRequestBuilder<WeekendPreviewWorker>(15, TimeUnit.MINUTES).build()
+        wm.enqueueUniquePeriodicWork(
+            WeekendPreviewWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodic,
+        )
+    }
+
     private fun scheduleResultsCheck() {
         val wm = WorkManager.getInstance(this)
         val periodic = PeriodicWorkRequestBuilder<ResultsCheckWorker>(15, TimeUnit.MINUTES).build()
@@ -305,6 +326,8 @@ private fun MainScreen(
     onResultsConsumed: () -> Unit = {},
     pendingLiveTimingEventId: Int? = null,
     onLiveTimingConsumed: () -> Unit = {},
+    pendingOpenTrack: Int? = null,
+    onTrackConsumed: () -> Unit = {},
     onRequestPermission: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -399,6 +422,16 @@ private fun MainScreen(
         if (pendingLiveTimingEventId != null) {
             onLiveTimingConsumed()
             navController.navigate(Screen.LiveTiming.route(pendingLiveTimingEventId)) {
+                launchSingleTop = true
+            }
+        }
+    }
+
+    LaunchedEffect(pendingOpenTrack) {
+        if (pendingOpenTrack != null) {
+            onTrackConsumed()
+            navController.navigate(Screen.Track.route(pendingOpenTrack)) {
+                popUpTo(Screen.News.route)
                 launchSingleTop = true
             }
         }
