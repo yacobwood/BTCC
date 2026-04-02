@@ -74,7 +74,8 @@ import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
-import com.btccfanhub.worker.WeekendPreviewWorker
+import com.btccfanhub.receiver.WeekendPreviewReceiver
+import com.btccfanhub.receiver.WeekendPreviewScheduler
 import com.btccfanhub.widget.CountdownWidget
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentInformation
@@ -182,9 +183,9 @@ class MainActivity : ComponentActivity() {
             if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
         }
         // Weekend preview notification → open track detail
-        val openTrack = intent?.getBooleanExtra(WeekendPreviewWorker.EXTRA_OPEN_TRACK, false) == true
+        val openTrack = intent?.getBooleanExtra(WeekendPreviewReceiver.EXTRA_OPEN_TRACK, false) == true
         if (openTrack) {
-            val round = intent?.getIntExtra(WeekendPreviewWorker.EXTRA_TRACK_ROUND, -1) ?: -1
+            val round = intent?.getIntExtra(WeekendPreviewReceiver.EXTRA_TRACK_ROUND, -1) ?: -1
             if (round != -1) pendingOpenTrack.value = round
         }
         // Widget tap during race weekend → open live timing
@@ -280,13 +281,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun scheduleWeekendPreview() {
-        val wm = WorkManager.getInstance(this)
-        val periodic = PeriodicWorkRequestBuilder<WeekendPreviewWorker>(15, TimeUnit.MINUTES).build()
-        wm.enqueueUniquePeriodicWork(
-            WeekendPreviewWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodic,
-        )
+        lifecycleScope.launch {
+            WeekendPreviewScheduler.schedule(this@MainActivity)
+        }
     }
 
     private fun scheduleResultsCheck() {
