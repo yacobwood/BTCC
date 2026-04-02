@@ -58,11 +58,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import java.io.File
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.btccfanhub.ui.merch.MerchViewModel
-import com.btccfanhub.ui.merch.components.DriverInlineCard
-import com.btccfanhub.ui.merch.components.TeamInlineCard
-import com.btccfanhub.data.store.FeatureFlagsStore
 
 // Driver, Team, SeasonStat, GridData defined in data/model/GridData.kt
 
@@ -426,7 +421,7 @@ private fun DriverCard(driver: Driver, modifier: Modifier = Modifier, onClick: (
             }
         }
         IconButton(
-            onClick  = { val adding = !isFavourite; Analytics.favouriteToggled(driver.name, adding); if (adding) Analytics.setFavouriteDriverProperty(driver.name); FavouriteDriverStore.toggle(context, driver.name) },
+            onClick  = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
             modifier = Modifier.size(40.dp),
         ) {
             Icon(
@@ -710,23 +705,6 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
                     )
                 }
             }
-
-            // ── Merch inline card ────────────────────────────────────────────
-            item {
-                val flagMerchHub by FeatureFlagsStore.merchHubEnabled.collectAsState()
-                if (flagMerchHub) {
-                    val merchViewModel: MerchViewModel = viewModel()
-                    val driverItems = remember(driver.number) { merchViewModel.getDriverItems(driver.number) }
-                    if (driverItems.isNotEmpty()) {
-                        DriverInlineCard(
-                            driverName = driver.name,
-                            items = driverItems,
-                            onItemTap = { item -> merchViewModel.itemTapped(item, context) },
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
-                }
-            }
         }
 
         // Floating back button
@@ -749,7 +727,7 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
 
         // Floating star button
         IconButton(
-            onClick   = { val adding = !isFavourite; Analytics.favouriteToggled(driver.name, adding); if (adding) Analytics.setFavouriteDriverProperty(driver.name); FavouriteDriverStore.toggle(context, driver.name) },
+            onClick   = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
             modifier  = Modifier
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
@@ -1010,24 +988,6 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
                             )
                             TeamSeasonStatRow(stat)
                         }
-                    }
-                }
-            }
-
-            // ── Merch inline card ────────────────────────────────────────────
-            item {
-                val flagMerchHubTeam by FeatureFlagsStore.merchHubEnabled.collectAsState()
-                if (flagMerchHubTeam) {
-                    val teamMerchViewModel: MerchViewModel = viewModel()
-                    val teamItems = remember(team.name) { teamMerchViewModel.getTeamItems(team.name) }
-                    if (teamItems.isNotEmpty()) {
-                        val ctx = LocalContext.current
-                        TeamInlineCard(
-                            teamName = team.name,
-                            items = teamItems,
-                            onItemTap = { item -> teamMerchViewModel.itemTapped(item, ctx) },
-                            modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp),
-                        )
                     }
                 }
             }

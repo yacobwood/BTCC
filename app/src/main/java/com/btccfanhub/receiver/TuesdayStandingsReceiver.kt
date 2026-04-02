@@ -9,7 +9,6 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
-import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.worker.ResultsCheckWorker
 
 class TuesdayStandingsReceiver : BroadcastReceiver() {
@@ -28,7 +27,6 @@ class TuesdayStandingsReceiver : BroadcastReceiver() {
         if (round == -1) return
 
         ensureChannel(context)
-        Analytics.notificationDelivered("tuesday_standings")
 
         val tapIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP

@@ -97,13 +97,8 @@ fun RadioScreen(onBack: () -> Unit = {}) {
                     station     = station,
                     isPlaying   = stationActive,
                     onToggle    = {
-                        if (stationActive) {
-                            Analytics.radioStationStopped(station.name)
-                            stopRadio(context)
-                        } else {
-                            Analytics.radioStationPlayed(station.name)
-                            playRadio(context, station)
-                        }
+                        if (stationActive) stopRadio(context)
+                        else playRadio(context, station)
                     },
                 )
             }

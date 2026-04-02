@@ -9,7 +9,6 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
-import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.worker.RaceNotificationWorker
 
 class RaceSessionReceiver : BroadcastReceiver() {
@@ -38,16 +37,8 @@ class RaceSessionReceiver : BroadcastReceiver() {
         }
         ensureChannel(context, channelId, isQualifying, isFreePractice)
 
-        val notifType = when {
-            isFreePractice -> "free_practice"
-            isQualifying   -> "qualifying"
-            else           -> "race"
-        }
-        Analytics.notificationDelivered(notifType, venue)
-
         val tapIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra("notif_type", notifType)
         }
         val pending = PendingIntent.getActivity(
             context,

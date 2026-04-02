@@ -109,7 +109,6 @@ def build_history_from_summary(summary: dict) -> list[dict]:
         if not has_stats:
             continue
 
-
         history.append(entry)
 
     return history

@@ -28,10 +28,6 @@ object FeatureFlagsStore {
     const val KEY_RESULTS_NOTIFICATIONS = "results_notifications"
     const val KEY_TRACK_WEATHER         = "track_weather"
     const val KEY_WIDGET_RACE_WEEKEND   = "widget_race_weekend_test"
-    const val KEY_MERCH_HUB             = "merch_hub_enabled"
-    const val KEY_MERCH_FEED_URL        = "merch_feed_url"
-    const val KEY_SHOP_PREMIUM_AD       = "shop_home_premium"
-    const val KEY_SHOP_STANDARD_AD      = "shop_home_standard"
 
     val radioTab             = MutableStateFlow(true)
     val adsEnabled           = MutableStateFlow(true)
@@ -41,10 +37,6 @@ object FeatureFlagsStore {
     val resultsNotifications = MutableStateFlow(false)
     val trackWeather         = MutableStateFlow(false)
     val widgetRaceWeekendTest = MutableStateFlow(false)
-    val merchHubEnabled      = MutableStateFlow(false)
-    val merchFeedUrl         = MutableStateFlow("")
-    val shopPremiumAd        = MutableStateFlow(false)
-    val shopStandardAd       = MutableStateFlow(false)
 
     /** When non-null, overrides LocalDate/LocalDateTime.now() throughout the app for testing. */
     val testDateTimeOverride = MutableStateFlow<LocalDateTime?>(null)
@@ -76,9 +68,6 @@ object FeatureFlagsStore {
         resultsNotifications.value = p.getBoolean(KEY_RESULTS_NOTIFICATIONS,  false)
         trackWeather.value         = p.getBoolean(KEY_TRACK_WEATHER,          false)
         widgetRaceWeekendTest.value = p.getBoolean(KEY_WIDGET_RACE_WEEKEND,   false)
-        merchHubEnabled.value      = p.getBoolean(KEY_MERCH_HUB,              false)
-        shopPremiumAd.value        = p.getBoolean(KEY_SHOP_PREMIUM_AD,        false)
-        shopStandardAd.value       = p.getBoolean(KEY_SHOP_STANDARD_AD,       false)
 
         // Load unit preference from the app prefs (written by SettingsScreen)
         val appPrefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
@@ -149,9 +138,6 @@ object FeatureFlagsStore {
         fun bool(key: String, default: Boolean): Boolean =
             override?.optBoolean(key, obj.optBoolean(key, default)) ?: obj.optBoolean(key, default)
 
-        fun str(key: String, default: String): String =
-            override?.optString(key, obj.optString(key, default)) ?: obj.optString(key, default)
-
         apply(KEY_RADIO_TAB,             bool(KEY_RADIO_TAB,             true))
         apply(KEY_ADS,                   bool(KEY_ADS,                   true))
         apply(KEY_NATIVE_ADS,            bool(KEY_NATIVE_ADS,            true))
@@ -160,10 +146,6 @@ object FeatureFlagsStore {
         apply(KEY_RESULTS_NOTIFICATIONS, bool(KEY_RESULTS_NOTIFICATIONS, false))
         apply(KEY_TRACK_WEATHER,         bool(KEY_TRACK_WEATHER,         false))
         apply(KEY_WIDGET_RACE_WEEKEND,   bool(KEY_WIDGET_RACE_WEEKEND,   false))
-        apply(KEY_MERCH_HUB,             bool(KEY_MERCH_HUB,             false))
-        apply(KEY_MERCH_FEED_URL,        str(KEY_MERCH_FEED_URL,         ""))
-        apply(KEY_SHOP_PREMIUM_AD,       bool(KEY_SHOP_PREMIUM_AD,       false))
-        apply(KEY_SHOP_STANDARD_AD,      bool(KEY_SHOP_STANDARD_AD,      false))
 
         if (override != null) Log.d("FeatureFlags", "Per-device overrides applied for $deviceId")
         Log.d("FeatureFlags", "Flags applied")
@@ -183,20 +165,6 @@ object FeatureFlagsStore {
             KEY_RESULTS_NOTIFICATIONS -> resultsNotifications.value = value
             KEY_TRACK_WEATHER         -> trackWeather.value         = value
             KEY_WIDGET_RACE_WEEKEND   -> widgetRaceWeekendTest.value = value
-            KEY_MERCH_HUB             -> merchHubEnabled.value       = value
-            KEY_SHOP_PREMIUM_AD       -> shopPremiumAd.value         = value
-            KEY_SHOP_STANDARD_AD      -> shopStandardAd.value        = value
-        }
-    }
-
-    private fun apply(key: String, value: String) {
-        prefs?.edit()?.putString(key, value)?.apply()
-        when (key) {
-            KEY_MERCH_FEED_URL -> {
-                val changed = merchFeedUrl.value != value
-                merchFeedUrl.value = value
-                if (changed) com.btccfanhub.data.repository.MerchRepository.invalidateCache()
-            }
         }
     }
 
