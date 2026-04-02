@@ -22,15 +22,23 @@ import java.time.temporal.TemporalAdjusters
 
 object WeekendPreviewScheduler {
 
-    private val FRIDAY_TIME  = LocalTime.of(15, 0) // 3:00 PM Friday
-    private val TUESDAY_TIME = LocalTime.of(9, 0)  // 9:00 AM Tuesday
+    private val FRIDAY_TIME  = LocalTime.of(15, 0)
+    private val TUESDAY_TIME = LocalTime.of(9, 0)
     private val TIME_FMT     = DateTimeFormatter.ofPattern("HH:mm")
+    private const val KEY_LAST_SCHEDULED = "alarm_scheduler_last_run"
+    private const val THROTTLE_MS = 24 * 60 * 60 * 1000L // 24 hours
 
-    suspend fun schedule(context: Context) = withContext(Dispatchers.IO) {
+    suspend fun schedule(context: Context, force: Boolean = false) = withContext(Dispatchers.IO) {
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        val lastRun = prefs.getLong(KEY_LAST_SCHEDULED, 0L)
+        if (!force && System.currentTimeMillis() - lastRun < THROTTLE_MS) return@withContext
+
         val calendar = runCatching { CalendarRepository.getCalendarData() }.getOrNull() ?: return@withContext
         val schedule = runCatching { ScheduleRepository.getSchedule() }.getOrNull() ?: emptyMap()
         val am  = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val now = LocalDateTime.now()
+
+        prefs.edit().putLong(KEY_LAST_SCHEDULED, System.currentTimeMillis()).apply()
 
         calendar.rounds.forEach { round ->
             scheduleFridayPreview(context, am, now, round)

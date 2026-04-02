@@ -131,6 +131,7 @@ class MainActivity : ComponentActivity() {
             createResultsNotificationChannel()
             scheduleResultsCheck()
         }
+        cancelLegacyRaceWorker()
         scheduleNewsCheck()
         scheduleWeekendPreview() // also schedules race session + Tuesday standings alarms
         handleNotificationIntent(intent)
@@ -306,6 +307,16 @@ class MainActivity : ComponentActivity() {
         }
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
+    }
+
+    private fun cancelLegacyRaceWorker() {
+        // RaceNotificationWorker was replaced by exact alarms in WeekendPreviewScheduler.
+        // Cancel any still-running WorkManager job from older installs to prevent duplicates.
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("legacy_race_worker_cancelled", false)) {
+            WorkManager.getInstance(this).cancelUniqueWork(RaceNotificationWorker.WORK_NAME)
+            prefs.edit().putBoolean("legacy_race_worker_cancelled", true).apply()
+        }
     }
 
     private fun scheduleWeekendPreview() {
