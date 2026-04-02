@@ -52,7 +52,7 @@ object WeekendPreviewScheduler {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMs, pending)
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMs, pending)
         }
     }
 }
