@@ -6,9 +6,14 @@
 <title>BTCC Fan Hub · Admin</title>
 <script>
 (async function() {
-  const HASH = '92407f755cc340c390c56c0e2d0e5312d79143032b321bce85f993cec4f1383b';
-  const KEY  = 'btcc_admin_auth';
-  if (sessionStorage.getItem(KEY) === HASH) return;
+  const HASH         = '92407f755cc340c390c56c0e2d0e5312d79143032b321bce85f993cec4f1383b';
+  const SESSION_KEY  = 'btcc_admin_auth';
+  const ATTEMPTS_KEY = 'btcc_admin_attempts';
+  const LOCKOUT_KEY  = 'btcc_admin_lockout';
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_MS   = 30 * 60 * 1000; // 30 minutes
+
+  if (sessionStorage.getItem(SESSION_KEY) === HASH) return;
 
   document.documentElement.style.visibility = 'hidden';
 
@@ -16,6 +21,9 @@
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
+
+  function getAttempts() { return parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10); }
+  function getLockoutUntil() { return parseInt(localStorage.getItem(LOCKOUT_KEY) || '0', 10); }
 
   const overlay = document.createElement('div');
   overlay.innerHTML = `
@@ -34,22 +42,89 @@
   document.documentElement.appendChild(overlay);
   document.documentElement.style.visibility = 'visible';
 
-  async function attempt() {
-    const val = document.getElementById('pw-input').value;
-    if (!val) return;
-    const hash = await sha256(val);
-    if (hash === HASH) {
-      sessionStorage.setItem(KEY, HASH);
-      overlay.remove();
-    } else {
-      document.getElementById('pw-error').textContent = 'Incorrect password';
-      document.getElementById('pw-input').value = '';
-      document.getElementById('pw-input').focus();
-    }
+  const input  = () => document.getElementById('pw-input');
+  const btn    = () => document.getElementById('pw-btn');
+  const errEl  = () => document.getElementById('pw-error');
+
+  function setLocked(until) {
+    input().disabled = true;
+    btn().disabled   = true;
+    btn().style.opacity = '0.4';
+    btn().style.cursor  = 'not-allowed';
+
+    const tick = setInterval(() => {
+      const remaining = Math.ceil((until - Date.now()) / 1000);
+      if (remaining <= 0) {
+        clearInterval(tick);
+        localStorage.setItem(ATTEMPTS_KEY, '0');
+        localStorage.removeItem(LOCKOUT_KEY);
+        input().disabled = false;
+        btn().disabled   = false;
+        btn().style.opacity = '1';
+        btn().style.cursor  = 'pointer';
+        errEl().textContent = '';
+        input().focus();
+      } else {
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        errEl().textContent = `Too many attempts. Try again in ${m}:${String(s).padStart(2,'0')}`;
+      }
+    }, 1000);
   }
 
-  document.getElementById('pw-btn').addEventListener('click', attempt);
-  document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+  // Check existing lockout on load
+  const existingLockout = getLockoutUntil();
+  if (existingLockout > Date.now()) setLocked(existingLockout);
+
+  let cooldown = false;
+
+  async function attempt() {
+    if (cooldown || input().disabled) return;
+    const val = input().value;
+    if (!val) return;
+
+    const lockoutUntil = getLockoutUntil();
+    if (lockoutUntil > Date.now()) { setLocked(lockoutUntil); return; }
+
+    const hash = await sha256(val);
+    if (hash === HASH) {
+      sessionStorage.setItem(SESSION_KEY, HASH);
+      localStorage.setItem(ATTEMPTS_KEY, '0');
+      localStorage.removeItem(LOCKOUT_KEY);
+      overlay.remove();
+      return;
+    }
+
+    const attempts = getAttempts() + 1;
+    localStorage.setItem(ATTEMPTS_KEY, attempts);
+    input().value = '';
+
+    if (attempts >= MAX_ATTEMPTS) {
+      const until = Date.now() + LOCKOUT_MS;
+      localStorage.setItem(LOCKOUT_KEY, until);
+      setLocked(until);
+      return;
+    }
+
+    // Progressive delay: 2s, 4s, 8s, 16s before MAX_ATTEMPTS
+    const delaySec = Math.pow(2, attempts);
+    const remaining = MAX_ATTEMPTS - attempts;
+    errEl().textContent = `Incorrect password — wait ${delaySec}s (${remaining} attempt${remaining === 1 ? '' : 's'} left)`;
+    cooldown = true;
+    btn().disabled  = true;
+    btn().style.opacity = '0.4';
+
+    setTimeout(() => {
+      cooldown = false;
+      btn().disabled = false;
+      btn().style.opacity = '1';
+      errEl().textContent = `Incorrect password (${remaining} attempt${remaining === 1 ? '' : 's'} left)`;
+      input().focus();
+    }, delaySec * 1000);
+  }
+
+  btn().addEventListener('click', attempt);
+  input().addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
 })();
 </script>
 <style>
