@@ -478,8 +478,12 @@ private fun MainScreen(
                 popUpTo(Screen.News.route)
                 launchSingleTop = true
             }
-            navController.navigate(Screen.Track.route(pendingOpenTrack)) {
-                launchSingleTop = true
+            // On tablet the track detail is shown inline in the master-detail panel;
+            // navigating to Screen.Track would open a redundant full-screen page.
+            if (!isTablet) {
+                navController.navigate(Screen.Track.route(pendingOpenTrack)) {
+                    launchSingleTop = true
+                }
             }
         }
     }

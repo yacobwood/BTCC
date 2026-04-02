@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.key
 import com.btccfanhub.Constants
 import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.TestClock
@@ -82,6 +83,10 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     val nextRace = races.firstOrNull { it.endDate >= today }
     val seasonYear = remember(races) { races.firstOrNull()?.startDate?.year ?: 2026 }
     val isTablet = LocalConfiguration.current.screenWidthDp >= 840
+    var selectedRound by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(nextRace) {
+        if (isTablet && selectedRound == null) selectedRound = nextRace?.round
+    }
 
     Column(
         modifier = Modifier
@@ -134,35 +139,28 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
             modifier     = Modifier.fillMaxSize(),
         ) {
         if (isTablet) {
-            // ── Tablet: two-column layout ─────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                // Left column: live timing + countdown
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(top = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    if (isRaceWeekend) {
-                        LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
-                    }
-                    if (nextRace != null) {
-                        CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
-                    }
-                }
-                // Right column: rounds list
+            // ── Tablet: master-detail layout ──────────────────────────────────
+            Row(modifier = Modifier.fillMaxSize()) {
+                // Left pane: countdown + rounds list
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
-                        .weight(1f)
+                        .width(360.dp)
                         .fillMaxHeight(),
-                    contentPadding = PaddingValues(bottom = 20.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp, top = 4.dp),
                 ) {
+                    if (isRaceWeekend) {
+                        item {
+                            LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
+                            Spacer(Modifier.height(12.dp))
+                        }
+                    }
+                    if (nextRace != null) {
+                        item {
+                            CountdownCard(race = nextRace, today = today, onClick = { selectedRound = nextRace.round })
+                            Spacer(Modifier.height(20.dp))
+                        }
+                    }
                     item {
                         Text(
                             "ALL ROUNDS",
@@ -170,7 +168,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                             fontWeight = FontWeight.ExtraBold,
                             color = BtccTextSecondary,
                             letterSpacing = 2.sp,
-                            modifier = Modifier.padding(bottom = 12.dp, top = 4.dp),
+                            modifier = Modifier.padding(bottom = 12.dp),
                         )
                     }
                     itemsIndexed(races) { index, race ->
@@ -179,9 +177,33 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                             isNext = race == nextRace,
                             isPast = race.endDate < today,
                             isLast = index == races.lastIndex,
+                            isSelected = race.round == selectedRound,
                             today = today,
-                            onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
+                            onClick = { Analytics.raceClicked(race.round, race.venue); selectedRound = race.round },
                         )
+                    }
+                }
+
+                // Divider
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight()
+                        .background(BtccOutline.copy(alpha = 0.3f))
+                )
+
+                // Right pane: track detail
+                Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    val roundToShow = selectedRound
+                    if (roundToShow != null) {
+                        key(roundToShow) {
+                            TrackDetailScreen(
+                                round = roundToShow,
+                                showBackButton = false,
+                                onBack = {},
+                                onLiveTimingClick = onLiveTimingClick,
+                            )
+                        }
                     }
                 }
             }
@@ -318,6 +340,7 @@ private fun TimelineRaceRow(
     isNext: Boolean,
     isPast: Boolean,
     isLast: Boolean,
+    isSelected: Boolean = false,
     today: LocalDate? = null,
     onClick: () -> Unit = {},
 ) {
@@ -328,7 +351,14 @@ private fun TimelineRaceRow(
     }
     val textAlpha = if (isPast) 0.4f else 1f
 
-    Row(modifier = Modifier.fillMaxWidth().clickable { onClick() }) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) BtccYellow.copy(alpha = 0.07f) else Color.Transparent)
+            .clickable { onClick() }
+            .padding(horizontal = 4.dp, vertical = 6.dp),
+    ) {
         // Timeline column
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

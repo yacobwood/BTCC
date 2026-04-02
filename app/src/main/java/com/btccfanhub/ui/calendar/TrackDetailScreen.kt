@@ -68,7 +68,7 @@ private val shortDateFormat = DateTimeFormatter.ofPattern("d MMM")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) -> Unit)? = null) {
+fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) -> Unit)? = null, showBackButton: Boolean = true) {
     var navigatingBack by remember { mutableStateOf(false) }
     BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val testOverride by FeatureFlagsStore.testDateTimeOverride.collectAsState()
@@ -142,12 +142,14 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        )
+                    if (showBackButton) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
@@ -370,6 +372,48 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                             sector.corners.forEach { corner -> CornerRow(corner) }
                         }
                     }
+                    if (trackInfo.youtubeUrl.isNotEmpty()) {
+                        val uriHandler = LocalUriHandler.current
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(com.btccfanhub.ui.theme.BtccCard)
+                                .clickable { uriHandler.openUri(trackInfo.youtubeUrl) }
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFFFF0000)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    Icons.Filled.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Circuit guide",
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    "Watch on YouTube",
+                                    fontSize = 12.sp,
+                                    color = BtccTextSecondary,
+                                    modifier = Modifier.padding(top = 2.dp),
+                                )
+                            }
+                        }
+                    }
                 } else {
                     if (hasLayout) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -390,6 +434,48 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                                     .background(BtccCard, RoundedCornerShape(12.dp))
                                     .clip(RoundedCornerShape(12.dp)),
                             )
+                        }
+                    }
+                    if (trackInfo.youtubeUrl.isNotEmpty()) {
+                        val uriHandler = LocalUriHandler.current
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(com.btccfanhub.ui.theme.BtccCard)
+                                .clickable { uriHandler.openUri(trackInfo.youtubeUrl) }
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFFFF0000)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    Icons.Filled.PlayArrow,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Circuit guide",
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    "Watch on YouTube",
+                                    fontSize = 12.sp,
+                                    color = BtccTextSecondary,
+                                    modifier = Modifier.padding(top = 2.dp),
+                                )
+                            }
                         }
                     }
                     if (hasGuide) {
@@ -434,50 +520,6 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
 
                 // ── BTCC fact ──────────────────────────────────────────────────
                 InfoCard(title = "BTCC AT ${trackInfo.venue.uppercase()}", body = trackInfo.btccFact, highlight = true)
-
-                // ── YouTube circuit guide ──────────────────────────────────────
-                if (trackInfo.youtubeUrl.isNotEmpty()) {
-                    val uriHandler = LocalUriHandler.current
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(com.btccfanhub.ui.theme.BtccCard)
-                            .clickable { uriHandler.openUri(trackInfo.youtubeUrl) }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFFF0000)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                Icons.Filled.PlayArrow,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Circuit guide",
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                "Watch on YouTube",
-                                fontSize = 12.sp,
-                                color = BtccTextSecondary,
-                                modifier = Modifier.padding(top = 2.dp),
-                            )
-                        }
-                    }
-                }
 
                 Spacer(Modifier.height(8.dp))
                 } // end inner Column
