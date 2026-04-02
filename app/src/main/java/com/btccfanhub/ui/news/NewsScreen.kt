@@ -437,7 +437,7 @@ fun NewsScreen(
                 .padding(end = 16.dp, bottom = 16.dp),
         ) {
             SmallFloatingActionButton(
-                onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                onClick = { Analytics.scrollToTop("news"); scope.launch { listState.animateScrollToItem(0) } },
                 containerColor = BtccYellow,
                 contentColor   = BtccNavy,
             ) {

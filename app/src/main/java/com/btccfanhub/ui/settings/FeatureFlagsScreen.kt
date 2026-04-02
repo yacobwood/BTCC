@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.ui.theme.*
 import java.time.LocalDate
@@ -30,6 +31,7 @@ private val displayFmt = DateTimeFormatter.ofPattern("EEE d MMM yyyy  HH:mm")
 fun FeatureFlagsScreen(onBack: () -> Unit = {}) {
     var navigatingBack by remember { mutableStateOf(false) }
     BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    LaunchedEffect(Unit) { Analytics.screen("feature_flags") }
     val testOverride      by FeatureFlagsStore.testDateTimeOverride.collectAsState()
     val adsEnabled        by FeatureFlagsStore.adsEnabled.collectAsState()
     val nativeAdsEnabled  by FeatureFlagsStore.nativeAdsEnabled.collectAsState()

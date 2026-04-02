@@ -300,4 +300,10 @@ object Analytics {
     fun searchClosed() {
         fa.logEvent("search_closed") {}
     }
+
+    fun scrollToTop(screen: String) {
+        fa.logEvent("scroll_to_top") {
+            param("screen", screen)
+        }
+    }
 }
