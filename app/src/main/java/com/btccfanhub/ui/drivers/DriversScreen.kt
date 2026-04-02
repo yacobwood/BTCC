@@ -426,7 +426,7 @@ private fun DriverCard(driver: Driver, modifier: Modifier = Modifier, onClick: (
             }
         }
         IconButton(
-            onClick  = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
+            onClick  = { val adding = !isFavourite; Analytics.favouriteToggled(driver.name, adding); if (adding) Analytics.setFavouriteDriverProperty(driver.name); FavouriteDriverStore.toggle(context, driver.name) },
             modifier = Modifier.size(40.dp),
         ) {
             Icon(
@@ -749,7 +749,7 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
 
         // Floating star button
         IconButton(
-            onClick   = { Analytics.favouriteToggled(driver.name, !isFavourite); FavouriteDriverStore.toggle(context, driver.name) },
+            onClick   = { val adding = !isFavourite; Analytics.favouriteToggled(driver.name, adding); if (adding) Analytics.setFavouriteDriverProperty(driver.name); FavouriteDriverStore.toggle(context, driver.name) },
             modifier  = Modifier
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()

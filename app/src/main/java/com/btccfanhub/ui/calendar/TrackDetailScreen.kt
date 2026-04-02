@@ -379,7 +379,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(com.btccfanhub.ui.theme.BtccCard)
-                                .clickable { uriHandler.openUri(trackInfo.youtubeUrl) }
+                                .clickable { Analytics.youtubeCircuitGuideClicked(trackInfo.venue); uriHandler.openUri(trackInfo.youtubeUrl) }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -443,7 +443,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(com.btccfanhub.ui.theme.BtccCard)
-                                .clickable { uriHandler.openUri(trackInfo.youtubeUrl) }
+                                .clickable { Analytics.youtubeCircuitGuideClicked(trackInfo.venue); uriHandler.openUri(trackInfo.youtubeUrl) }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp),

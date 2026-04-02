@@ -224,4 +224,49 @@ object Analytics {
             param("section_title", sectionTitle)
         }
     }
+
+    fun youtubeCircuitGuideClicked(venue: String) {
+        fa.logEvent("youtube_circuit_guide_clicked") {
+            param("venue", venue)
+        }
+    }
+
+    fun radioStationPlayed(stationName: String) {
+        fa.logEvent("radio_station_played") {
+            param("station_name", stationName)
+        }
+    }
+
+    fun radioStationStopped(stationName: String) {
+        fa.logEvent("radio_station_stopped") {
+            param("station_name", stationName)
+        }
+    }
+
+    /** Fired when a notification is actually delivered to the device. */
+    fun notificationDelivered(type: String, venue: String = "") {
+        fa.logEvent("notification_delivered") {
+            param("type", type)
+            if (venue.isNotEmpty()) param("venue", venue)
+        }
+    }
+
+    /** Fired when the user taps a notification to open the app. */
+    fun notificationOpened(type: String) {
+        fa.logEvent("notification_opened") {
+            param("type", type)
+        }
+    }
+
+    fun lightboxImageViewed(venue: String, imageIndex: Int) {
+        fa.logEvent("lightbox_image_viewed") {
+            param("venue", venue)
+            param("image_index", imageIndex.toLong())
+        }
+    }
+
+    /** Sets a Firebase user property so audiences can be segmented by favourite driver. */
+    fun setFavouriteDriverProperty(name: String) {
+        fa.setUserProperty("favourite_driver", name.take(36))
+    }
 }
