@@ -31,32 +31,13 @@ body {
   padding-bottom: 40px;
 }
 
-/* ── Desktop layout ── */
+/* ── Layout — tabs on all screen sizes ── */
+.desktop-layout { display: contents; }
+.desktop-col { display: contents; }
+.desktop-col-title { display: none; }
+
 @media (min-width: 900px) {
-  .tab-bar { display: none !important; }
-  .desktop-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 0;
-    max-width: 1280px;
-    margin: 0 auto;
-  }
-  .desktop-col {
-    padding: 28px 32px;
-    border-right: 1px solid var(--outline);
-  }
-  .desktop-col:last-child { border-right: none; }
-  .desktop-col-title {
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 2.5px;
-    color: var(--text-sec);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--outline);
-  }
-  .tab-panel { display: block !important; padding: 0; max-width: none; margin: 0; }
+  .tab-panel { max-width: 760px; margin: 0 auto; padding: 28px 32px; }
   .scrapers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -64,12 +45,6 @@ body {
   }
   .scrapers-grid .scraper-card { margin-bottom: 0; }
   .scraper-info-note { margin-bottom: 20px; }
-}
-@media (max-width: 899px) {
-  .desktop-layout { display: contents; }
-  .desktop-col { display: contents; }
-  .desktop-col-title { display: none; }
-  .scrapers-grid { display: contents; }
 }
 
 .app-header {
