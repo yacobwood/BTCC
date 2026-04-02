@@ -24,9 +24,13 @@ import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.ui.components.PillToggle
 import com.btccfanhub.ui.theme.*
+import com.btccfanhub.receiver.WeekendPreviewReceiver
+import com.btccfanhub.receiver.WeekendPreviewScheduler
+import com.btccfanhub.receiver.TuesdayStandingsReceiver
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +38,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
     var navigatingBack by remember { mutableStateOf(false) }
     BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val prefs = remember {
         context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -52,6 +57,15 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
     }
     var resultsEnabled by remember {
         mutableStateOf(prefs.getBoolean(ResultsCheckWorker.KEY_RESULTS_NOTIF_ENABLED, true))
+    }
+    var freePracticeEnabled by remember {
+        mutableStateOf(prefs.getBoolean(RaceNotificationWorker.KEY_FREE_PRACTICE_NOTIF_ENABLED, true))
+    }
+    var weekendPreviewEnabled by remember {
+        mutableStateOf(prefs.getBoolean(WeekendPreviewReceiver.KEY_WEEKEND_PREVIEW_ENABLED, true))
+    }
+    var tuesdayStandingsEnabled by remember {
+        mutableStateOf(prefs.getBoolean(TuesdayStandingsReceiver.KEY_TUESDAY_STANDINGS_ENABLED, true))
     }
 
     Scaffold(
@@ -175,6 +189,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                 )
                             )
                         }
+                        scope.launch { WeekendPreviewScheduler.schedule(context, force = true) }
                     },
                 )
             }
@@ -216,6 +231,39 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                 )
                             )
                         }
+                        scope.launch { WeekendPreviewScheduler.schedule(context, force = true) }
+                    },
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Free practice alerts",
+                        color      = BtccTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 15.sp,
+                    )
+                    Text(
+                        "Get notified when free practice is about to start",
+                        color    = BtccTextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                PillToggle(
+                    options = listOf("On", "Off"),
+                    selectedIndex = if (freePracticeEnabled) 0 else 1,
+                    onSelectionChanged = {
+                        freePracticeEnabled = it == 0
+                        Analytics.notificationTypeToggled("free_practice", it == 0)
+                        prefs.edit().putBoolean(RaceNotificationWorker.KEY_FREE_PRACTICE_NOTIF_ENABLED, it == 0).apply()
+                        scope.launch { WeekendPreviewScheduler.schedule(context, force = true) }
                     },
                 )
             }
@@ -264,6 +312,70 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                     )
                 }
 
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Race weekend preview",
+                        color      = BtccTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 15.sp,
+                    )
+                    Text(
+                        "Friday reminder before each race weekend",
+                        color    = BtccTextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                PillToggle(
+                    options = listOf("On", "Off"),
+                    selectedIndex = if (weekendPreviewEnabled) 0 else 1,
+                    onSelectionChanged = {
+                        weekendPreviewEnabled = it == 0
+                        Analytics.notificationTypeToggled("weekend_preview", it == 0)
+                        prefs.edit().putBoolean(WeekendPreviewReceiver.KEY_WEEKEND_PREVIEW_ENABLED, it == 0).apply()
+                        scope.launch { WeekendPreviewScheduler.schedule(context, force = true) }
+                    },
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Standings update",
+                        color      = BtccTextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 15.sp,
+                    )
+                    Text(
+                        "Tuesday reminder to check standings after each round",
+                        color    = BtccTextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                }
+                PillToggle(
+                    options = listOf("On", "Off"),
+                    selectedIndex = if (tuesdayStandingsEnabled) 0 else 1,
+                    onSelectionChanged = {
+                        tuesdayStandingsEnabled = it == 0
+                        Analytics.notificationTypeToggled("tuesday_standings", it == 0)
+                        prefs.edit().putBoolean(TuesdayStandingsReceiver.KEY_TUESDAY_STANDINGS_ENABLED, it == 0).apply()
+                        scope.launch { WeekendPreviewScheduler.schedule(context, force = true) }
+                    },
+                )
             }
 
             HorizontalDivider(

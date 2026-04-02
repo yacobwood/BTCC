@@ -27,10 +27,12 @@ class RaceNotificationWorker(
 
     companion object {
         const val WORK_NAME   = "btcc_race_notification"
-        const val CHANNEL_ID            = "btcc_race_channel"
-        const val CHANNEL_ID_QUALIFYING = "btcc_qualifying_channel"
-        const val KEY_RACE_NOTIF_ENABLED        = "race_notifications_enabled"
-        const val KEY_QUALIFYING_NOTIF_ENABLED  = "qualifying_notifications_enabled"
+        const val CHANNEL_ID                = "btcc_race_channel"
+        const val CHANNEL_ID_QUALIFYING     = "btcc_qualifying_channel"
+        const val CHANNEL_ID_FREE_PRACTICE  = "btcc_free_practice_channel"
+        const val KEY_RACE_NOTIF_ENABLED            = "race_notifications_enabled"
+        const val KEY_QUALIFYING_NOTIF_ENABLED      = "qualifying_notifications_enabled"
+        const val KEY_FREE_PRACTICE_NOTIF_ENABLED   = "free_practice_notifications_enabled"
         private const val NOTIF_BASE_ID  = 2000
         // Notify if session starts within next 20 min, or started up to 5 min ago
         private const val WINDOW_BEFORE_MIN = 20L

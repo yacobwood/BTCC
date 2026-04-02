@@ -38,6 +38,7 @@ object WeekendPreviewScheduler {
         val am  = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val now = LocalDateTime.now()
 
+        cancelAll(context, am)
         prefs.edit().putLong(KEY_LAST_SCHEDULED, System.currentTimeMillis()).apply()
 
         calendar.rounds.forEach { round ->
@@ -91,15 +92,16 @@ object WeekendPreviewScheduler {
         val prefs        = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         val raceEnabled  = prefs.getBoolean(RaceNotificationWorker.KEY_RACE_NOTIF_ENABLED, true)
         val qualEnabled  = prefs.getBoolean(RaceNotificationWorker.KEY_QUALIFYING_NOTIF_ENABLED, true)
+        val fpEnabled    = prefs.getBoolean(RaceNotificationWorker.KEY_FREE_PRACTICE_NOTIF_ENABLED, true)
 
         sessions.forEachIndexed { index, session ->
             if (session.time == "TBA") return@forEachIndexed
-            // Skip Free Practice
-            if (session.name.equals("Free Practice", ignoreCase = true)) return@forEachIndexed
 
-            val isQualifying = session.name.contains("qualifying", ignoreCase = true)
+            val isFreePractice = session.name.equals("Free Practice", ignoreCase = true)
+            val isQualifying   = session.name.contains("qualifying", ignoreCase = true)
+            if (isFreePractice && !fpEnabled) return@forEachIndexed
             if (isQualifying && !qualEnabled) return@forEachIndexed
-            if (!isQualifying && !raceEnabled) return@forEachIndexed
+            if (!isFreePractice && !isQualifying && !raceEnabled) return@forEachIndexed
 
             val sessionDate: LocalDate = when (session.day) {
                 "SAT" -> round.startDate
@@ -115,6 +117,7 @@ object WeekendPreviewScheduler {
                 putExtra(RaceSessionReceiver.EXTRA_VENUE, round.venue)
                 putExtra(RaceSessionReceiver.EXTRA_SESSION_NAME, session.name)
                 putExtra(RaceSessionReceiver.EXTRA_IS_QUALIFYING, isQualifying)
+                putExtra(RaceSessionReceiver.EXTRA_IS_FREE_PRACTICE, isFreePractice)
             }
             // Request code: 200 + round*10 + session index (avoids collision with other alarms)
             val reqCode = 200 + round.round * 10 + index
@@ -122,6 +125,19 @@ object WeekendPreviewScheduler {
                 AlarmManager.RTC_WAKEUP, triggerAt.toEpochMs(),
                 PendingIntent.getBroadcast(context, reqCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
             )
+        }
+    }
+
+    private fun cancelAll(context: Context, am: AlarmManager) {
+        for (round in 1..15) {
+            am.cancel(PendingIntent.getBroadcast(context, round,
+                Intent(context, WeekendPreviewReceiver::class.java), PendingIntent.FLAG_IMMUTABLE))
+            am.cancel(PendingIntent.getBroadcast(context, round + 100,
+                Intent(context, TuesdayStandingsReceiver::class.java), PendingIntent.FLAG_IMMUTABLE))
+            for (i in 0..5) {
+                am.cancel(PendingIntent.getBroadcast(context, 200 + round * 10 + i,
+                    Intent(context, RaceSessionReceiver::class.java), PendingIntent.FLAG_IMMUTABLE))
+            }
         }
     }
 

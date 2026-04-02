@@ -14,23 +14,28 @@ import com.btccfanhub.worker.RaceNotificationWorker
 class RaceSessionReceiver : BroadcastReceiver() {
 
     companion object {
-        const val EXTRA_ROUND        = "session_round"
-        const val EXTRA_VENUE        = "session_venue"
-        const val EXTRA_SESSION_NAME = "session_name"
-        const val EXTRA_IS_QUALIFYING = "session_is_qualifying"
+        const val EXTRA_ROUND             = "session_round"
+        const val EXTRA_VENUE             = "session_venue"
+        const val EXTRA_SESSION_NAME      = "session_name"
+        const val EXTRA_IS_QUALIFYING     = "session_is_qualifying"
+        const val EXTRA_IS_FREE_PRACTICE  = "session_is_free_practice"
         private const val NOTIF_BASE_ID = 5000
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val round        = intent.getIntExtra(EXTRA_ROUND, -1)
-        val venue        = intent.getStringExtra(EXTRA_VENUE) ?: return
-        val sessionName  = intent.getStringExtra(EXTRA_SESSION_NAME) ?: return
-        val isQualifying = intent.getBooleanExtra(EXTRA_IS_QUALIFYING, false)
+        val round           = intent.getIntExtra(EXTRA_ROUND, -1)
+        val venue           = intent.getStringExtra(EXTRA_VENUE) ?: return
+        val sessionName     = intent.getStringExtra(EXTRA_SESSION_NAME) ?: return
+        val isQualifying    = intent.getBooleanExtra(EXTRA_IS_QUALIFYING, false)
+        val isFreePractice  = intent.getBooleanExtra(EXTRA_IS_FREE_PRACTICE, false)
         if (round == -1) return
 
-        val channelId = if (isQualifying) RaceNotificationWorker.CHANNEL_ID_QUALIFYING
-                        else RaceNotificationWorker.CHANNEL_ID
-        ensureChannel(context, channelId, isQualifying)
+        val channelId = when {
+            isFreePractice -> RaceNotificationWorker.CHANNEL_ID_FREE_PRACTICE
+            isQualifying   -> RaceNotificationWorker.CHANNEL_ID_QUALIFYING
+            else           -> RaceNotificationWorker.CHANNEL_ID
+        }
+        ensureChannel(context, channelId, isQualifying, isFreePractice)
 
         val tapIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -56,15 +61,16 @@ class RaceSessionReceiver : BroadcastReceiver() {
         nm.notify(NOTIF_BASE_ID + round * 10 + sessionName.hashCode().and(0xF), notification)
     }
 
-    private fun ensureChannel(context: Context, channelId: String, isQualifying: Boolean) {
+    private fun ensureChannel(context: Context, channelId: String, isQualifying: Boolean, isFreePractice: Boolean) {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (nm.getNotificationChannel(channelId) != null) return
-        val name = if (isQualifying) "Qualifying Alerts" else "Race Alerts"
-        val desc = if (isQualifying) "Notifications when BTCC qualifying is about to start"
-                   else "Notifications when BTCC race sessions are about to start"
+        val (name, desc, importance) = when {
+            isFreePractice -> Triple("Free Practice Alerts", "Notifications when BTCC free practice is about to start", NotificationManager.IMPORTANCE_DEFAULT)
+            isQualifying   -> Triple("Qualifying Alerts", "Notifications when BTCC qualifying is about to start", NotificationManager.IMPORTANCE_HIGH)
+            else           -> Triple("Race Alerts", "Notifications when BTCC race sessions are about to start", NotificationManager.IMPORTANCE_HIGH)
+        }
         nm.createNotificationChannel(
-            NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_HIGH)
-                .apply { description = desc }
+            NotificationChannel(channelId, name, importance).apply { description = desc }
         )
     }
 }

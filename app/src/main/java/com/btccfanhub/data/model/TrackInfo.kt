@@ -44,4 +44,5 @@ data class TrackInfo(
     val qualifyingRecord: LapRecord? = null,
     val raceRecord: LapRecord? = null,
     val trackGuide: List<Sector> = emptyList(),
+    val youtubeUrl: String = "",
 )

@@ -127,6 +127,7 @@ class MainActivity : ComponentActivity() {
         createNewsNotificationChannel()
         createRaceNotificationChannel()
         createQualifyingNotificationChannel()
+        createFreePracticeNotificationChannel()
         if (FeatureFlagsStore.resultsNotifications.value) {
             createResultsNotificationChannel()
             scheduleResultsCheck()
@@ -285,14 +286,18 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun scheduleRaceNotifications() {
-        val wm = WorkManager.getInstance(this)
-        val periodic = PeriodicWorkRequestBuilder<RaceNotificationWorker>(15, TimeUnit.MINUTES).build()
-        wm.enqueueUniquePeriodicWork(
-            RaceNotificationWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodic,
-        )
+    private fun createFreePracticeNotificationChannel() {
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(RaceNotificationWorker.KEY_FREE_PRACTICE_NOTIF_ENABLED, true)) return
+        val channel = NotificationChannel(
+            RaceNotificationWorker.CHANNEL_ID_FREE_PRACTICE,
+            "Free Practice Alerts",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Notifications when BTCC free practice is about to start"
+        }
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channel)
     }
 
     private fun createResultsNotificationChannel() {
