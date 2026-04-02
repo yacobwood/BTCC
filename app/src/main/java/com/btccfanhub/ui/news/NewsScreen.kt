@@ -56,6 +56,9 @@ import com.btccfanhub.ui.theme.BtccNavy
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.ads.NativeAdItem
+import com.btccfanhub.ui.merch.MerchViewModel
+import com.btccfanhub.ui.merch.MerchUiState
+import com.btccfanhub.ui.merch.components.RaceWeekendBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +66,7 @@ fun NewsScreen(
     onArticleClick: (Article) -> Unit,
     scrollToTopTrigger: Int = 0,
     viewModel: NewsViewModel = viewModel(),
+    onShopClick: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val searchState by viewModel.searchState.collectAsState()
@@ -313,6 +317,24 @@ fun NewsScreen(
                             }
                         } else {
                             // ── Normal layout ─────────────────────────────────
+
+                            // ── Race Weekend Merch Banner ─────────────────────
+                            item {
+                                val flagMerchHubNews by FeatureFlagsStore.merchHubEnabled.collectAsState()
+                                if (flagMerchHubNews) {
+                                    val merchVm: MerchViewModel = viewModel()
+                                    LaunchedEffect(Unit) { merchVm.load() }
+                                    val merchState by merchVm.uiState.collectAsState()
+                                    val showBanner = (merchState as? MerchUiState.Success)?.showRaceWeekendBanner == true
+                                    if (showBanner) {
+                                        RaceWeekendBanner(
+                                            onClick = onShopClick,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                        )
+                                    }
+                                }
+                            }
+
                             if (articles.isNotEmpty()) {
                                 item {
                                     HeroCard(

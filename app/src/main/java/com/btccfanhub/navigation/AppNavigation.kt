@@ -26,6 +26,9 @@ import com.btccfanhub.ui.more.MoreScreen
 import com.btccfanhub.ui.settings.BugReportScreen
 import com.btccfanhub.ui.settings.FeatureFlagsScreen
 import com.btccfanhub.ui.settings.SettingsScreen
+import com.btccfanhub.ui.merch.ShopTheGridScreen
+import com.btccfanhub.ui.merch.ShopBrowseScreen
+import com.btccfanhub.ui.merch.FilteredMerchScreen
 import com.btccfanhub.ui.timing.LiveTimingScreen
 
 sealed class Screen(val route: String) {
@@ -48,6 +51,13 @@ sealed class Screen(val route: String) {
     object FeatureFlags : Screen("feature_flags")
     object BugReport : Screen("bug_report")
     object More : Screen("more")
+    object Shop : Screen("shop")
+    object ShopBrowse : Screen("shop_browse/{browseType}") {
+        fun route(browseType: String) = "shop_browse/$browseType"
+    }
+    object ShopFiltered : Screen("shop/{filterType}/{filterValue}") {
+        fun route(filterType: String, filterValue: String) = "shop/$filterType/${Uri.encode(filterValue)}"
+    }
     object InfoPage : Screen("info_page/{pageId}") {
         fun route(pageId: String) = "info_page/$pageId"
     }
@@ -64,6 +74,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
                     navController.navigate(Screen.Article.route)
                 },
                 scrollToTopTrigger = newsScrollToTopTrigger,
+                onShopClick = { navController.navigate(Screen.Shop.route) { popUpTo(Screen.News.route); launchSingleTop = true } },
             )
         }
 
@@ -175,6 +186,46 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
                 pageId = pageId,
                 onBack = { navController.popBackStack(Screen.More.route, inclusive = false) },
                 onPageClick = { targetId -> navController.navigate(Screen.InfoPage.route(targetId)) },
+            )
+        }
+
+        composable(Screen.Shop.route) {
+            ShopTheGridScreen(
+                onBrowseDriversClick = { navController.navigate(Screen.ShopBrowse.route("drivers")) },
+                onBrowseTeamsClick   = { navController.navigate(Screen.ShopBrowse.route("teams")) },
+                onTeamClick   = { teamName     -> navController.navigate(Screen.ShopFiltered.route("team", teamName)) },
+                onDriverClick = { driverNumber -> navController.navigate(Screen.ShopFiltered.route("driver", driverNumber.toString())) },
+            )
+        }
+
+        composable(
+            route = Screen.ShopBrowse.route,
+            arguments = listOf(navArgument("browseType") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val browseType = backStackEntry.arguments?.getString("browseType") ?: "drivers"
+            ShopBrowseScreen(
+                browseType = browseType,
+                onDriverClick = { driverNumber -> navController.navigate(Screen.ShopFiltered.route("driver", driverNumber.toString())) },
+                onTeamClick   = { teamName     -> navController.navigate(Screen.ShopFiltered.route("team", teamName)) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = Screen.ShopFiltered.route,
+            arguments = listOf(
+                navArgument("filterType") { type = NavType.StringType },
+                navArgument("filterValue") { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val filterType = backStackEntry.arguments?.getString("filterType") ?: return@composable
+            val filterValue = backStackEntry.arguments?.getString("filterValue") ?: return@composable
+            val title = if (filterType == "driver") "Driver #$filterValue Gear" else filterValue
+            FilteredMerchScreen(
+                title = title,
+                filterType = filterType,
+                filterValue = filterValue,
+                onBack = { navController.popBackStack() },
             )
         }
 

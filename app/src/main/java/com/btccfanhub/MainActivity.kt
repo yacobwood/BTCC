@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.ShoppingBag
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -167,12 +168,18 @@ class MainActivity : ComponentActivity() {
 
     private fun handleNotificationIntent(intent: Intent?) {
         val id = intent?.getIntExtra(NewsCheckWorker.EXTRA_ARTICLE_ID, -1) ?: -1
-        if (id != -1) pendingArticleId.value = id
+        if (id != -1) {
+            com.btccfanhub.data.analytics.Analytics.notificationOpened("news")
+            pendingArticleId.value = id
+        }
         val openResults = intent?.getBooleanExtra(ResultsCheckWorker.EXTRA_OPEN_RESULTS, false) == true
         if (openResults) {
+            val tab = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_TAB, 0) ?: 0
+            val notifType = if (tab == TuesdayStandingsReceiver.RESULTS_TAB_CHART) "tuesday_standings" else "results"
+            com.btccfanhub.data.analytics.Analytics.notificationOpened(notifType)
             val round = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) ?: 0
             pendingResultsRound.intValue = round
-            pendingResultsTab.intValue = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_TAB, 0) ?: 0
+            pendingResultsTab.intValue = tab
             pendingOpenResults.intValue++
         }
         // Deep link: btccfanhub://article/some-slug  OR  https://…vercel.app/news/some-slug
@@ -212,15 +219,24 @@ class MainActivity : ComponentActivity() {
             }
             if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
         }
+        // Race/qualifying/free-practice notification → type passed via notif_type extra
+        val raceNotifType = intent?.getStringExtra("notif_type")
+        if (raceNotifType != null) {
+            com.btccfanhub.data.analytics.Analytics.notificationOpened(raceNotifType)
+        }
         // Weekend preview notification → open track detail
         val openTrack = intent?.getBooleanExtra(WeekendPreviewReceiver.EXTRA_OPEN_TRACK, false) == true
         if (openTrack) {
+            com.btccfanhub.data.analytics.Analytics.notificationOpened("weekend_preview")
             val round = intent?.getIntExtra(WeekendPreviewReceiver.EXTRA_TRACK_ROUND, -1) ?: -1
             if (round != -1) pendingOpenTrack.value = round
         }
         // Widget tap during race weekend → open live timing
         val liveTimingId = intent?.getIntExtra(CountdownWidget.EXTRA_LIVE_TIMING_EVENT_ID, -1) ?: -1
-        if (liveTimingId != -1) pendingLiveTimingEventId.value = liveTimingId
+        if (liveTimingId != -1) {
+            com.btccfanhub.data.analytics.Analytics.notificationOpened("widget_live_timing")
+            pendingLiveTimingEventId.value = liveTimingId
+        }
     }
 
     private fun maybeRequestInAppReview() {
@@ -383,6 +399,7 @@ private fun MainScreen(
 
     val flagAds by FeatureFlagsStore.adsEnabled.collectAsState()
     val flagWhatsNew by FeatureFlagsStore.whatsNew.collectAsState()
+    val flagMerchHub by FeatureFlagsStore.merchHubEnabled.collectAsState()
     val isOnline by ConnectivityObserver.isOnline.collectAsState()
 
     if (showOnboarding) {
@@ -501,6 +518,7 @@ private fun MainScreen(
         add(NavItem(Screen.Calendar, "Calendar", Icons.Default.DateRange))
         add(NavItem(Screen.Drivers, "Grid", Icons.Default.Groups))
         add(NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents))
+        if (flagMerchHub) add(NavItem(Screen.Shop, "Shop", Icons.Default.ShoppingBag))
         add(NavItem(Screen.More, "More", Icons.Default.MoreHoriz))
     }
 
@@ -509,6 +527,7 @@ private fun MainScreen(
             Screen.Calendar -> currentRoute == Screen.Calendar.route || currentRoute == Screen.Track.route
             Screen.Results -> currentRoute == Screen.Results.route || currentRoute == Screen.RoundResults.route
             Screen.More -> currentRoute == Screen.More.route || currentRoute == Screen.Settings.route || currentRoute == Screen.BugReport.route || currentRoute == Screen.FeatureFlags.route
+            Screen.Shop -> currentRoute == Screen.Shop.route
             else -> currentRoute == item.screen.route
         }
     }
