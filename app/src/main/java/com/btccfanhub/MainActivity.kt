@@ -471,6 +471,8 @@ private fun MainScreen(
         }
     }
 
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+
     LaunchedEffect(pendingOpenTrack) {
         if (pendingOpenTrack != null) {
             onTrackConsumed()
@@ -501,8 +503,6 @@ private fun MainScreen(
         add(NavItem(Screen.Results, "Results", Icons.Default.EmojiEvents))
         add(NavItem(Screen.More, "More", Icons.Default.MoreHoriz))
     }
-
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
     val navItemSelected: (NavItem) -> Boolean = { item ->
         when (item.screen) {

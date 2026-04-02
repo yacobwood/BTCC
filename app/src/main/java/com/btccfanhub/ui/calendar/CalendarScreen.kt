@@ -86,6 +86,15 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     var selectedRound by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(nextRace) {
         if (isTablet && selectedRound == null) selectedRound = nextRace?.round
+        // Scroll so the countdown card is visible with ~1 past race above it for context
+        if (nextRace != null && races.isNotEmpty()) {
+            val nextRaceIndex = races.indexOf(nextRace)
+            val hasLiveTiming = liveTimingEnabled && onLiveTimingClick != null &&
+                    today >= nextRace.startDate && nextRace.tslEventId != 0
+            val headerCount = 1 + if (hasLiveTiming) 1 else 0 // ALL ROUNDS label + optional LiveTimingCard
+            val scrollTo = (headerCount + nextRaceIndex - 1).coerceAtLeast(0)
+            listState.animateScrollToItem(scrollTo)
+        }
     }
 
     Column(
@@ -155,12 +164,6 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                             Spacer(Modifier.height(12.dp))
                         }
                     }
-                    if (nextRace != null) {
-                        item {
-                            CountdownCard(race = nextRace, today = today, onClick = { selectedRound = nextRace.round })
-                            Spacer(Modifier.height(20.dp))
-                        }
-                    }
                     item {
                         Text(
                             "ALL ROUNDS",
@@ -172,15 +175,20 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                         )
                     }
                     itemsIndexed(races) { index, race ->
-                        TimelineRaceRow(
-                            race = race,
-                            isNext = race == nextRace,
-                            isPast = race.endDate < today,
-                            isLast = index == races.lastIndex,
-                            isSelected = race.round == selectedRound,
-                            today = today,
-                            onClick = { Analytics.raceClicked(race.round, race.venue); selectedRound = race.round },
-                        )
+                        if (race == nextRace) {
+                            CountdownCard(race = race, today = today, onClick = { Analytics.raceClicked(race.round, race.venue); selectedRound = race.round })
+                            Spacer(Modifier.height(12.dp))
+                        } else {
+                            TimelineRaceRow(
+                                race = race,
+                                isNext = false,
+                                isPast = race.endDate < today,
+                                isLast = index == races.lastIndex,
+                                isSelected = race.round == selectedRound,
+                                today = today,
+                                onClick = { Analytics.raceClicked(race.round, race.venue); selectedRound = race.round },
+                            )
+                        }
                     }
                 }
 
@@ -220,12 +228,6 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                         Spacer(Modifier.height(12.dp))
                     }
                 }
-                if (nextRace != null) {
-                    item {
-                        CountdownCard(race = nextRace, today = today, onClick = { Analytics.raceClicked(nextRace.round, nextRace.venue); onRaceClick(nextRace) })
-                        Spacer(Modifier.height(20.dp))
-                    }
-                }
                 item {
                     Text(
                         "ALL ROUNDS",
@@ -237,14 +239,19 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                     )
                 }
                 itemsIndexed(races) { index, race ->
-                    TimelineRaceRow(
-                        race = race,
-                        isNext = race == nextRace,
-                        isPast = race.endDate < today,
-                        isLast = index == races.lastIndex,
-                        today = null,
-                        onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
-                    )
+                    if (race == nextRace) {
+                        CountdownCard(race = race, today = today, onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) })
+                        Spacer(Modifier.height(12.dp))
+                    } else {
+                        TimelineRaceRow(
+                            race = race,
+                            isNext = false,
+                            isPast = race.endDate < today,
+                            isLast = index == races.lastIndex,
+                            today = null,
+                            onClick = { Analytics.raceClicked(race.round, race.venue); onRaceClick(race) },
+                        )
+                    }
                 }
             }
         }
