@@ -31,8 +31,8 @@ class TuesdayStandingsReceiver : BroadcastReceiver() {
         val tapIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(ResultsCheckWorker.EXTRA_OPEN_RESULTS, true)
-            putExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) // 0 = go to standings screen, not a specific round
-            putExtra(EXTRA_ROUND, round)
+            putExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0)
+            putExtra(ResultsCheckWorker.EXTRA_RESULTS_TAB, RESULTS_TAB_CHART)
         }
         val pending = PendingIntent.getActivity(
             context,

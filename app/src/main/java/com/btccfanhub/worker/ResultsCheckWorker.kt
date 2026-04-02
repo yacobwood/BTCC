@@ -29,6 +29,7 @@ class ResultsCheckWorker(
         const val KEY_RESULTS_NOTIF_ENABLED = "results_notifications_enabled"
         const val EXTRA_OPEN_RESULTS = "open_results"
         const val EXTRA_RESULTS_ROUND = "results_round"
+        const val EXTRA_RESULTS_TAB = "results_tab"
         private const val NOTIF_ID = 1002
         private const val RESULTS_URL =
             "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results2026.json"
@@ -99,6 +100,7 @@ class ResultsCheckWorker(
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(EXTRA_OPEN_RESULTS, true)
             putExtra(EXTRA_RESULTS_ROUND, round)
+            putExtra(EXTRA_RESULTS_TAB, 4) // CHART tab
         }
         val pending = PendingIntent.getActivity(
             context, NOTIF_ID, intent,

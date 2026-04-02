@@ -170,9 +170,7 @@ class MainActivity : ComponentActivity() {
         if (openResults) {
             val round = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) ?: 0
             pendingResultsRound.intValue = round
-            // Tuesday standings notification passes its round via a separate extra — open chart tab
-            val isTuesdayNotif = intent?.hasExtra(TuesdayStandingsReceiver.EXTRA_ROUND) == true
-            pendingResultsTab.intValue = if (isTuesdayNotif) TuesdayStandingsReceiver.RESULTS_TAB_CHART else 0
+            pendingResultsTab.intValue = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_TAB, 0) ?: 0
             pendingOpenResults.intValue++
         }
         // Deep link: btccfanhub://article/some-slug  OR  https://…vercel.app/news/some-slug
