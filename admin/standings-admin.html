@@ -527,6 +527,7 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   <button class="tab active" onclick="switchTab('standings', this)">STANDINGS</button>
   <button class="tab" onclick="switchTab('scrapers', this)">SCRAPERS</button>
   <button class="tab" onclick="switchTab('flags', this)">FLAGS</button>
+  <button class="tab" onclick="switchTab('notifications', this)">NOTIFS</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════ TAB: STANDINGS ══════ -->
@@ -815,6 +816,21 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
 </div>
 </div><!-- /desktop-col flags -->
+
+<!-- ══════════════════════════════════════════════════ TAB: NOTIFICATIONS ══════ -->
+<div class="desktop-col">
+<div class="desktop-col-title">Notifications</div>
+<div id="panel-notifications" class="tab-panel">
+
+  <div class="section-note" style="margin-bottom:16px;">
+    Friday 3pm preview notifications scheduled for each race weekend. Tap <strong>Test on device</strong> to fire the notification immediately — opens via deep link on your phone.
+  </div>
+
+  <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
+
+</div>
+</div><!-- /desktop-col notifications -->
+
 </div><!-- /desktop-layout -->
 
 <script>
@@ -1422,6 +1438,75 @@ function removeOverride(devId) {
   delete flagValues.overrides[devId];
   renderOverridesList();
 }
+
+// ── Notifications schedule ───────────────────────────────────────────────────
+const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fridayBefore(dateStr) {
+  // dateStr is the Saturday startDate e.g. "2026-04-18"
+  const d = new Date(dateStr + 'T00:00:00');
+  // Go back until we hit Friday (day 5)
+  while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
+  return d;
+}
+
+function formatDate(d) {
+  return `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+async function loadNotifSchedule() {
+  const el = document.getElementById('notif-list');
+  try {
+    const res = await fetch(CALENDAR_URL + '?t=' + Date.now());
+    const data = await res.json();
+    const now = new Date();
+    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+    data.rounds.forEach(r => {
+      const friday = fridayBefore(r.startDate);
+      friday.setHours(15, 0, 0, 0);
+      const isPast = friday < now;
+      const statusColor = isPast ? 'var(--text-sec)' : 'var(--green)';
+      const statusLabel = isPast ? 'SENT' : 'SCHEDULED';
+      const deepLink = `btccfanhub://preview/${r.round}`;
+      html += `
+        <div style="background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--text-sec);">ROUND ${r.round}</span>
+            <span style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${statusColor};margin-left:auto;">${statusLabel}</span>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">${r.venue}</div>
+          <div style="font-size:12px;color:var(--text-sec);margin-bottom:10px;">Fires ${formatDate(friday)} at 3:00 PM</div>
+          <a href="${deepLink}" style="display:inline-block;background:${isPast ? 'var(--surface)' : 'var(--yellow)'};color:${isPast ? 'var(--text-sec)' : '#000'};font-size:11px;font-weight:800;letter-spacing:1px;padding:8px 14px;border-radius:8px;text-decoration:none;">
+            ${isPast ? 'Re-test on device' : 'Test on device'}
+          </a>
+        </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);font-size:13px;">Failed to load calendar</div>';
+  }
+}
+
+// Load when tab is first opened
+const _origSwitchTab = switchTab;
+// patch switchTab to lazy-load notifications
+window._notifLoaded = false;
+const _patchedSwitchTab = function(name, el) {
+  _origSwitchTab(name, el);
+  if (name === 'notifications' && !window._notifLoaded) {
+    window._notifLoaded = true;
+    loadNotifSchedule();
+  }
+};
+window.switchTab = _patchedSwitchTab;
+// Rewrite onclick handlers to use patched version
+document.querySelectorAll('.tab').forEach(t => {
+  const match = t.getAttribute('onclick').match(/'([^']+)'/);
+  if (match) t.setAttribute('onclick', `switchTab('${match[1]}', this)`);
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 if(getToken()) collapseToken();

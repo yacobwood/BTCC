@@ -173,6 +173,21 @@ class MainActivity : ComponentActivity() {
         // Deep link: btccfanhub://article/some-slug  OR  https://…vercel.app/news/some-slug
         if (intent?.action == Intent.ACTION_VIEW) {
             val uri = intent.data
+            // btccfanhub://preview/{round} — fires the weekend preview notification immediately (for testing)
+            if (uri?.scheme == "btccfanhub" && uri.host == "preview") {
+                val round = uri.pathSegments.firstOrNull()?.toIntOrNull()
+                if (round != null) {
+                    val testIntent = Intent(this, com.btccfanhub.receiver.WeekendPreviewReceiver::class.java).apply {
+                        putExtra(com.btccfanhub.receiver.WeekendPreviewReceiver.EXTRA_ROUND, round)
+                    }
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val calData = runCatching { com.btccfanhub.data.repository.CalendarRepository.getCalendarData() }.getOrNull()
+                        val venue = calData?.rounds?.firstOrNull { it.round == round }?.venue ?: "Unknown"
+                        testIntent.putExtra(com.btccfanhub.receiver.WeekendPreviewReceiver.EXTRA_VENUE, venue)
+                        sendBroadcast(testIntent)
+                    }
+                }
+            }
             val slug = when {
                 uri?.scheme == "btccfanhub" && uri.host == "article" ->
                     uri.pathSegments.firstOrNull()
