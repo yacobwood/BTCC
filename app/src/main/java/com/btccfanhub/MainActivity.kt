@@ -132,8 +132,7 @@ class MainActivity : ComponentActivity() {
             scheduleResultsCheck()
         }
         scheduleNewsCheck()
-        scheduleRaceNotifications()
-        scheduleWeekendPreview()
+        scheduleWeekendPreview() // also schedules race session + Tuesday standings alarms
         handleNotificationIntent(intent)
         enableEdgeToEdge()
         ReviewPromptStore.recordLaunch(this)
