@@ -43,7 +43,7 @@ class WeekendPreviewReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Race weekend ahead! 🏁")
+            .setContentTitle("Race weekend ahead!")
             .setContentText("Round $round at $venue starts tomorrow. Get ready for this weekend's racing!")
             .setAutoCancel(true)
             .setContentIntent(pending)
