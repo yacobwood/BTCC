@@ -440,6 +440,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                     .fillMaxWidth()
                     .then(
                         if (testModeEnabled || BuildConfig.DEBUG) Modifier.clickable {
+                            Analytics.moreItemClicked("feature_flags")
                             versionTapCount++
                             if (versionTapCount >= 5) {
                                 versionTapCount = 0

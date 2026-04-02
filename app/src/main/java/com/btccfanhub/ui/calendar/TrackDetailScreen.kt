@@ -92,6 +92,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
 
         val ti = cal.trackInfoMap[round]
         val r = cal.rounds.find { it.round == round }
+        if (r != null) Analytics.trackDetailViewed(round, r.venue)
         if (ti != null && r != null && ti.lat != 0.0 && FeatureFlagsStore.trackWeather.value) {
             forecastLoading = true
             forecast = WeatherRepository.getForecast(round, ti.lat, ti.lng, r.startDate, r.endDate)

@@ -107,7 +107,10 @@ fun NewsScreen(
     }
 
     LaunchedEffect(searchActive) {
-        if (searchActive) focusRequester.requestFocus()
+        if (searchActive) {
+            focusRequester.requestFocus()
+            Analytics.searchOpened()
+        }
     }
 
     LaunchedEffect(searchQuery) {
@@ -162,7 +165,7 @@ fun NewsScreen(
                     ) {
                         Text(s.message, color = BtccTextSecondary)
                         Button(
-                            onClick = { viewModel.load() },
+                            onClick = { Analytics.retryClicked("news"); viewModel.load() },
                             colors = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
                             shape = RoundedCornerShape(8.dp),
                         ) { Text("Retry", fontWeight = FontWeight.Bold) }
@@ -230,7 +233,7 @@ fun NewsScreen(
                                     Icon(Icons.Default.Search, contentDescription = null, tint = BtccTextSecondary)
                                 },
                             )
-                            IconButton(onClick = { searchActive = false; searchQuery = ""; viewModel.clearSearch() }) {
+                            IconButton(onClick = { Analytics.searchClosed(); searchActive = false; searchQuery = ""; viewModel.clearSearch() }) {
                                 Icon(Icons.Default.Close, contentDescription = "Close search", tint = BtccTextSecondary)
                             }
                         }
@@ -238,7 +241,7 @@ fun NewsScreen(
 
                     PullToRefreshBox(
                         isRefreshing = isRefreshing,
-                        onRefresh    = { viewModel.refresh() },
+                        onRefresh    = { Analytics.pullToRefresh("news"); viewModel.refresh() },
                         modifier     = Modifier.weight(1f),
                     ) {
                     LazyColumn(
@@ -305,7 +308,7 @@ fun NewsScreen(
                                             ) {
                                                 Text(ss.message, color = BtccTextSecondary)
                                                 Button(
-                                                    onClick = { viewModel.search(searchQuery) },
+                                                    onClick = { Analytics.retryClicked("news_search"); viewModel.search(searchQuery) },
                                                     colors = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
                                                     shape = RoundedCornerShape(8.dp),
                                                 ) { Text("Retry", fontWeight = FontWeight.Bold) }

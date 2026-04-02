@@ -116,12 +116,6 @@ object Analytics {
         }
     }
 
-    fun notificationToggled(enabled: Boolean) {
-        fa.logEvent("notification_toggled") {
-            param("enabled", if (enabled) "true" else "false")
-        }
-    }
-
     /** type = "news" | "race" | "qualifying" | "results" */
     fun notificationTypeToggled(type: String, enabled: Boolean) {
         fa.logEvent("notification_type_toggled") {
@@ -291,5 +285,19 @@ object Analytics {
         fa.logEvent("pull_to_refresh") {
             param("screen", screen)
         }
+    }
+
+    fun retryClicked(screen: String) {
+        fa.logEvent("retry_clicked") {
+            param("screen", screen)
+        }
+    }
+
+    fun searchOpened() {
+        fa.logEvent("search_opened") {}
+    }
+
+    fun searchClosed() {
+        fa.logEvent("search_closed") {}
     }
 }

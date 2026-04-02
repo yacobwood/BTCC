@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters
 import com.btccfanhub.Constants
 import com.btccfanhub.MainActivity
 import com.btccfanhub.R
+import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.network.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -117,6 +118,7 @@ class ResultsCheckWorker(
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .build()
 
+        Analytics.notificationDelivered("results", venue)
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.notify(NOTIF_ID, notification)
     }

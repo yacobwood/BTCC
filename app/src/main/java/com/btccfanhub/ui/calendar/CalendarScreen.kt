@@ -131,7 +131,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                 ) {
                     Text("Couldn't load calendar. Check your connection.", color = BtccTextSecondary)
                     Button(
-                        onClick = { refreshKey++ },
+                        onClick = { Analytics.retryClicked("calendar"); refreshKey++ },
                         colors = ButtonDefaults.buttonColors(containerColor = BtccYellow, contentColor = BtccNavy),
                         shape = RoundedCornerShape(8.dp),
                     ) { Text("Retry", fontWeight = FontWeight.Bold) }

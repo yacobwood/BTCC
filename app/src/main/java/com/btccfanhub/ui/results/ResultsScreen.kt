@@ -379,6 +379,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
             PullToRefreshBox(
                 isRefreshing = isRefreshing || resultsLoading,
                 onRefresh    = {
+                    Analytics.pullToRefresh("results")
                     scope.launch {
                         if (pagerState.currentPage in 2..4) {
                             refreshResults(invalidate = true)

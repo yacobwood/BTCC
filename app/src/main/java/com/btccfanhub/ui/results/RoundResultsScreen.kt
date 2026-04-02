@@ -134,6 +134,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                         Text("Failed to load results.", color = BtccTextSecondary, textAlign = TextAlign.Center)
                         Button(
                             onClick = {
+                                Analytics.retryClicked("round_results")
                                 scope.launch {
                                     loading = true
                                     loadError = false
