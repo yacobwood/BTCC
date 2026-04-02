@@ -4,6 +4,129 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>BTCC Fan Hub · Admin</title>
+<script>
+(async function() {
+  const HASH         = '92407f755cc340c390c56c0e2d0e5312d79143032b321bce85f993cec4f1383b';
+  const SESSION_KEY  = 'btcc_admin_auth';
+  const ATTEMPTS_KEY = 'btcc_admin_attempts';
+  const LOCKOUT_KEY  = 'btcc_admin_lockout';
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_MS   = 30 * 60 * 1000; // 30 minutes
+
+  if (sessionStorage.getItem(SESSION_KEY) === HASH) return;
+
+  document.documentElement.style.visibility = 'hidden';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function getAttempts() { return parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10); }
+  function getLockoutUntil() { return parseInt(localStorage.getItem(LOCKOUT_KEY) || '0', 10); }
+
+  const overlay = document.createElement('div');
+  overlay.innerHTML = `
+    <div style="position:fixed;inset:0;background:#080912;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+      <div style="background:#0F1122;border:1px solid #2A2D44;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;margin:16px;">
+        <div style="font-size:11px;font-weight:900;letter-spacing:2.5px;color:#8B8FA8;margin-bottom:20px;">BTCC FAN HUB · ADMIN</div>
+        <input id="pw-input" type="password" placeholder="Password" autofocus
+          style="width:100%;background:#080912;border:1px solid #2A2D44;color:#fff;padding:12px 14px;border-radius:10px;font-size:16px;outline:none;margin-bottom:10px;box-sizing:border-box;" />
+        <div id="pw-error" style="color:#E3000B;font-size:12px;min-height:18px;margin-bottom:10px;"></div>
+        <button id="pw-btn"
+          style="width:100%;background:#FEBD02;color:#000;font-size:13px;font-weight:800;letter-spacing:1px;padding:13px;border:none;border-radius:10px;cursor:pointer;">
+          UNLOCK
+        </button>
+      </div>
+    </div>`;
+  document.documentElement.appendChild(overlay);
+  document.documentElement.style.visibility = 'visible';
+
+  const input  = () => document.getElementById('pw-input');
+  const btn    = () => document.getElementById('pw-btn');
+  const errEl  = () => document.getElementById('pw-error');
+
+  function setLocked(until) {
+    input().disabled = true;
+    btn().disabled   = true;
+    btn().style.opacity = '0.4';
+    btn().style.cursor  = 'not-allowed';
+
+    const tick = setInterval(() => {
+      const remaining = Math.ceil((until - Date.now()) / 1000);
+      if (remaining <= 0) {
+        clearInterval(tick);
+        localStorage.setItem(ATTEMPTS_KEY, '0');
+        localStorage.removeItem(LOCKOUT_KEY);
+        input().disabled = false;
+        btn().disabled   = false;
+        btn().style.opacity = '1';
+        btn().style.cursor  = 'pointer';
+        errEl().textContent = '';
+        input().focus();
+      } else {
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        errEl().textContent = `Too many attempts. Try again in ${m}:${String(s).padStart(2,'0')}`;
+      }
+    }, 1000);
+  }
+
+  // Check existing lockout on load
+  const existingLockout = getLockoutUntil();
+  if (existingLockout > Date.now()) setLocked(existingLockout);
+
+  let cooldown = false;
+
+  async function attempt() {
+    if (cooldown || input().disabled) return;
+    const val = input().value;
+    if (!val) return;
+
+    const lockoutUntil = getLockoutUntil();
+    if (lockoutUntil > Date.now()) { setLocked(lockoutUntil); return; }
+
+    const hash = await sha256(val);
+    if (hash === HASH) {
+      sessionStorage.setItem(SESSION_KEY, HASH);
+      localStorage.setItem(ATTEMPTS_KEY, '0');
+      localStorage.removeItem(LOCKOUT_KEY);
+      overlay.remove();
+      return;
+    }
+
+    const attempts = getAttempts() + 1;
+    localStorage.setItem(ATTEMPTS_KEY, attempts);
+    input().value = '';
+
+    if (attempts >= MAX_ATTEMPTS) {
+      const until = Date.now() + LOCKOUT_MS;
+      localStorage.setItem(LOCKOUT_KEY, until);
+      setLocked(until);
+      return;
+    }
+
+    // Progressive delay: 2s, 4s, 8s, 16s before MAX_ATTEMPTS
+    const delaySec = Math.pow(2, attempts);
+    const remaining = MAX_ATTEMPTS - attempts;
+    errEl().textContent = `Incorrect password — wait ${delaySec}s (${remaining} attempt${remaining === 1 ? '' : 's'} left)`;
+    cooldown = true;
+    btn().disabled  = true;
+    btn().style.opacity = '0.4';
+
+    setTimeout(() => {
+      cooldown = false;
+      btn().disabled = false;
+      btn().style.opacity = '1';
+      errEl().textContent = `Incorrect password (${remaining} attempt${remaining === 1 ? '' : 's'} left)`;
+      input().focus();
+    }, delaySec * 1000);
+  }
+
+  btn().addEventListener('click', attempt);
+  input().addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+})();
+</script>
 <style>
 :root {
   --bg:        #080912;
@@ -31,32 +154,13 @@ body {
   padding-bottom: 40px;
 }
 
-/* ── Desktop layout ── */
+/* ── Layout — tabs on all screen sizes ── */
+.desktop-layout { display: contents; }
+.desktop-col { display: contents; }
+.desktop-col-title { display: none; }
+
 @media (min-width: 900px) {
-  .tab-bar { display: none !important; }
-  .desktop-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-    max-width: 1280px;
-    margin: 0 auto;
-  }
-  .desktop-col {
-    padding: 28px 32px;
-    border-right: 1px solid var(--outline);
-  }
-  .desktop-col:last-child { border-right: none; }
-  .desktop-col-title {
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 2.5px;
-    color: var(--text-sec);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--outline);
-  }
-  .tab-panel { display: block !important; padding: 0; max-width: none; margin: 0; }
+  .tab-panel { max-width: 760px; margin: 0 auto; padding: 28px 32px; }
   .scrapers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -64,12 +168,6 @@ body {
   }
   .scrapers-grid .scraper-card { margin-bottom: 0; }
   .scraper-info-note { margin-bottom: 20px; }
-}
-@media (max-width: 899px) {
-  .desktop-layout { display: contents; }
-  .desktop-col { display: contents; }
-  .desktop-col-title { display: none; }
-  .scrapers-grid { display: contents; }
 }
 
 .app-header {
@@ -527,6 +625,7 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   <button class="tab active" onclick="switchTab('standings', this)">STANDINGS</button>
   <button class="tab" onclick="switchTab('scrapers', this)">SCRAPERS</button>
   <button class="tab" onclick="switchTab('flags', this)">FLAGS</button>
+  <button class="tab" onclick="switchTab('notifications', this)">NOTIFS</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════ TAB: STANDINGS ══════ -->
@@ -815,6 +914,21 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
 </div>
 </div><!-- /desktop-col flags -->
+
+<!-- ══════════════════════════════════════════════════ TAB: NOTIFICATIONS ══════ -->
+<div class="desktop-col">
+<div class="desktop-col-title">Notifications</div>
+<div id="panel-notifications" class="tab-panel">
+
+  <div class="section-note" style="margin-bottom:16px;">
+    All notifications scheduled for the 2026 season. Tap <strong>Test</strong> on your phone to fire immediately.
+  </div>
+
+  <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
+
+</div>
+</div><!-- /desktop-col notifications -->
+
 </div><!-- /desktop-layout -->
 
 <script>
@@ -1254,6 +1368,8 @@ const FLAG_DEFS = [
   { key: 'track_weather',          label: 'Track Weather',          desc: 'Weather card on round detail screens' },
   { key: 'widget_race_weekend_test', label: 'Widget Race Weekend',  desc: 'Force widgets into race-weekend mode for testing' },
   { key: 'merch_hub_enabled',        label: 'Merch Hub',            desc: 'Show the Shop tab in the app' },
+  { key: 'shop_home_premium',        label: 'Shop Premium Ad',      desc: 'Show the premium ad slot on the shop home page' },
+  { key: 'shop_home_standard',       label: 'Shop Standard Ad',     desc: 'Show the standard ad slot on the shop home page' },
 ];
 
 let flagValues = {};
@@ -1421,10 +1537,180 @@ function removeOverride(devId) {
   renderOverridesList();
 }
 
+// ── Notifications schedule ───────────────────────────────────────────────────
+const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
+const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fridayBefore(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
+  return d;
+}
+
+function formatDate(d) {
+  return `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function sessionDateTime(startDate, endDate, day, time) {
+  const base = day === 'SAT' ? startDate : endDate;
+  const [h, m] = time.split(':').map(Number);
+  const d = new Date(base + 'T00:00:00');
+  d.setHours(h, m - 15, 0, 0); // 15 min before
+  return d;
+}
+
+async function loadNotifSchedule() {
+  const el = document.getElementById('notif-list');
+  try {
+    const t = Date.now();
+    const [calRes, schRes] = await Promise.all([
+      fetch(CALENDAR_URL + '?t=' + t),
+      fetch(SCHEDULE_URL + '?t=' + t),
+    ]);
+    const data = await calRes.json();
+    const scheduleData = await schRes.json();
+
+    // Build round→sessions map
+    const scheduleMap = {};
+    (scheduleData.rounds || []).forEach(r => { scheduleMap[r.round] = r.sessions || []; });
+    const now = new Date();
+
+    // Build flat list of all notifications sorted chronologically
+    const notifs = [];
+    data.rounds.forEach(r => {
+      // Friday preview
+      const friday = fridayBefore(r.startDate);
+      friday.setHours(15, 0, 0, 0);
+      notifs.push({
+        date: new Date(friday),
+        type: 'preview',
+        round: r.round,
+        venue: r.venue,
+        label: 'Race Weekend Preview',
+        timeStr: '3:00 PM',
+        link: `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`,
+        color: 'var(--yellow)',
+      });
+
+      // Race sessions (excluding Free Practice)
+      const sessions = scheduleMap[r.round] || [];
+      sessions.forEach(s => {
+        if (s.time === 'TBA') return;
+        if (s.name === 'Free Practice') return;
+        const isQual = s.name.toLowerCase().includes('qualifying');
+        const notifDate = sessionDateTime(r.startDate, r.endDate, s.day, s.time);
+        const [h, m] = s.time.split(':').map(Number);
+        const notifTime = `${String(h).padStart(2,'0')}:${String(m < 15 ? m + 45 : m - 15).padStart(2,'0')} ${h < 12 || (h === 12 && m < 15) ? 'AM' : 'PM'}`;
+        notifs.push({
+          date: notifDate,
+          type: isQual ? 'qualifying' : 'race',
+          round: r.round,
+          venue: r.venue,
+          label: s.name,
+          timeStr: notifTime,
+          link: null, // no test deep link for sessions
+          color: isQual ? '#A78BFA' : '#F87171',
+        });
+      });
+
+      // Tuesday standings (round 2+)
+      if (r.round >= 2) {
+        const tuesday = new Date(r.endDate + 'T00:00:00');
+        tuesday.setDate(tuesday.getDate() + 2);
+        tuesday.setHours(9, 0, 0, 0);
+        notifs.push({
+          date: new Date(tuesday),
+          type: 'standings',
+          round: r.round,
+          venue: r.venue,
+          label: 'Standings Update',
+          timeStr: '9:00 AM',
+          link: `intent://standings/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`,
+          color: '#5B9CF6',
+        });
+      }
+    });
+    notifs.sort((a, b) => a.date - b.date);
+
+    // Group by month
+    const byMonth = {};
+    notifs.forEach(n => {
+      const key = `${n.date.getFullYear()}-${n.date.getMonth()}`;
+      if (!byMonth[key]) byMonth[key] = { label: `${MONTH_NAMES[n.date.getMonth()]} ${n.date.getFullYear()}`, items: [] };
+      byMonth[key].items.push(n);
+    });
+
+    // Count totals
+    const total = notifs.length;
+    const sent  = notifs.filter(n => n.date < now).length;
+
+    let html = `
+      <div style="display:flex;gap:16px;margin-bottom:20px;">
+        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:var(--text);">${total}</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">TOTAL</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:var(--text-sec);">${sent}</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">SENT</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:var(--green);">${total - sent}</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">UPCOMING</div>
+        </div>
+      </div>`;
+
+    Object.values(byMonth).forEach(month => {
+      html += `<div style="font-size:10px;font-weight:900;letter-spacing:2px;color:var(--text-sec);text-transform:uppercase;margin:20px 0 8px;">${month.label}</div>`;
+      month.items.forEach(n => {
+        const past = n.date < now;
+        const dot  = `<span style="width:8px;height:8px;border-radius:50%;background:${past ? 'var(--outline)' : n.color};flex-shrink:0;margin-top:3px;display:inline-block;"></span>`;
+        html += `
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--outline-lo);">
+            ${dot}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:700;color:${past ? 'var(--text-sec)' : 'var(--text)'};">${DAY_NAMES[n.date.getDay()]} ${n.date.getDate()} · ${n.timeStr}</span>
+                <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:${past ? 'var(--outline)' : n.color};text-transform:uppercase;">${n.label}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-sec);margin-top:1px;">Round ${n.round} · ${n.venue}</div>
+            </div>
+            ${n.link ? `<a href="${n.link}" style="flex-shrink:0;background:${past ? 'var(--surface)' : n.color};color:${past ? 'var(--text-sec)' : '#000'};font-size:10px;font-weight:800;letter-spacing:0.5px;padding:6px 10px;border-radius:7px;text-decoration:none;white-space:nowrap;">Test</a>` : `<span style="flex-shrink:0;font-size:10px;color:var(--outline);padding:6px 10px;">AUTO</span>`}
+          </div>`;
+      });
+    });
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);font-size:13px;">Failed to load calendar</div>';
+  }
+}
+
+// Load when tab is first opened
+const _origSwitchTab = switchTab;
+// patch switchTab to lazy-load notifications
+window._notifLoaded = false;
+const _patchedSwitchTab = function(name, el) {
+  _origSwitchTab(name, el);
+  if (name === 'notifications' && !window._notifLoaded) {
+    window._notifLoaded = true;
+    loadNotifSchedule();
+  }
+};
+window.switchTab = _patchedSwitchTab;
+// Rewrite onclick handlers to use patched version
+document.querySelectorAll('.tab').forEach(t => {
+  const match = t.getAttribute('onclick').match(/'([^']+)'/);
+  if (match) t.setAttribute('onclick', `switchTab('${match[1]}', this)`);
+});
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 if(getToken()) collapseToken();
 loadExisting();
 loadFlags();
+loadNotifSchedule();
 if(getToken()) refreshAllStatus();
 // Restore active tab
 const savedTab = sessionStorage.getItem('activeTab');

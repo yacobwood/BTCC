@@ -32,3 +32,7 @@ node_modules/
 # Kotlin/IDE cache and error logs
 .kotlin/
 app/google-services.json
+
+# React Native / Expo (kept on react-native branch, not main)
+rn/
+ios/

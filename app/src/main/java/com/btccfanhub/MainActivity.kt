@@ -75,6 +75,9 @@ import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.worker.NewsCheckWorker
 import com.btccfanhub.worker.RaceNotificationWorker
 import com.btccfanhub.worker.ResultsCheckWorker
+import com.btccfanhub.receiver.TuesdayStandingsReceiver
+import com.btccfanhub.receiver.WeekendPreviewReceiver
+import com.btccfanhub.receiver.WeekendPreviewScheduler
 import com.btccfanhub.widget.CountdownWidget
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentInformation
@@ -92,7 +95,9 @@ class MainActivity : ComponentActivity() {
     private val pendingArticleSlug = mutableStateOf<String?>(null)
     private val pendingOpenResults = mutableIntStateOf(0)
     private val pendingResultsRound = mutableIntStateOf(0)
+    private val pendingResultsTab = mutableIntStateOf(0)
     private val pendingLiveTimingEventId = mutableStateOf<Int?>(null)
+    private val pendingOpenTrack = mutableStateOf<Int?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,12 +128,14 @@ class MainActivity : ComponentActivity() {
         createNewsNotificationChannel()
         createRaceNotificationChannel()
         createQualifyingNotificationChannel()
+        createFreePracticeNotificationChannel()
         if (FeatureFlagsStore.resultsNotifications.value) {
             createResultsNotificationChannel()
             scheduleResultsCheck()
         }
+        cancelLegacyRaceWorker()
         scheduleNewsCheck()
-        scheduleRaceNotifications()
+        scheduleWeekendPreview() // also schedules race session + Tuesday standings alarms
         handleNotificationIntent(intent)
         enableEdgeToEdge()
         ReviewPromptStore.recordLaunch(this)
@@ -142,9 +149,12 @@ class MainActivity : ComponentActivity() {
                     onArticleSlugConsumed = { pendingArticleSlug.value = null },
                     pendingOpenResults  = pendingOpenResults.intValue,
                     pendingResultsRound = pendingResultsRound.intValue,
+                    pendingResultsTab   = pendingResultsTab.intValue,
                     onResultsConsumed   = { },
                     pendingLiveTimingEventId = pendingLiveTimingEventId.value,
                     onLiveTimingConsumed     = { pendingLiveTimingEventId.value = null },
+                    pendingOpenTrack         = pendingOpenTrack.value,
+                    onTrackConsumed          = { pendingOpenTrack.value = null },
                     onRequestPermission = { requestNewsNotificationPermission() },
                 )
             }
@@ -163,11 +173,37 @@ class MainActivity : ComponentActivity() {
         if (openResults) {
             val round = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_ROUND, 0) ?: 0
             pendingResultsRound.intValue = round
+            pendingResultsTab.intValue = intent?.getIntExtra(ResultsCheckWorker.EXTRA_RESULTS_TAB, 0) ?: 0
             pendingOpenResults.intValue++
         }
         // Deep link: btccfanhub://article/some-slug  OR  https://…vercel.app/news/some-slug
         if (intent?.action == Intent.ACTION_VIEW) {
             val uri = intent.data
+            // btccfanhub://standings/{round} — fires the Tuesday standings notification immediately (for testing)
+            if (uri?.scheme == "btccfanhub" && uri.host == "standings") {
+                val round = uri.pathSegments.firstOrNull()?.toIntOrNull()
+                if (round != null) {
+                    val testIntent = Intent(this, TuesdayStandingsReceiver::class.java).apply {
+                        putExtra(TuesdayStandingsReceiver.EXTRA_ROUND, round)
+                    }
+                    sendBroadcast(testIntent)
+                }
+            }
+            // btccfanhub://preview/{round} — fires the weekend preview notification immediately (for testing)
+            if (uri?.scheme == "btccfanhub" && uri.host == "preview") {
+                val round = uri.pathSegments.firstOrNull()?.toIntOrNull()
+                if (round != null) {
+                    val testIntent = Intent(this, com.btccfanhub.receiver.WeekendPreviewReceiver::class.java).apply {
+                        putExtra(com.btccfanhub.receiver.WeekendPreviewReceiver.EXTRA_ROUND, round)
+                    }
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val calData = runCatching { com.btccfanhub.data.repository.CalendarRepository.getCalendarData() }.getOrNull()
+                        val venue = calData?.rounds?.firstOrNull { it.round == round }?.venue ?: "Unknown"
+                        testIntent.putExtra(com.btccfanhub.receiver.WeekendPreviewReceiver.EXTRA_VENUE, venue)
+                        sendBroadcast(testIntent)
+                    }
+                }
+            }
             val slug = when {
                 uri?.scheme == "btccfanhub" && uri.host == "article" ->
                     uri.pathSegments.firstOrNull()
@@ -176,6 +212,12 @@ class MainActivity : ComponentActivity() {
                 else -> null
             }
             if (!slug.isNullOrBlank()) pendingArticleSlug.value = slug
+        }
+        // Weekend preview notification → open track detail
+        val openTrack = intent?.getBooleanExtra(WeekendPreviewReceiver.EXTRA_OPEN_TRACK, false) == true
+        if (openTrack) {
+            val round = intent?.getIntExtra(WeekendPreviewReceiver.EXTRA_TRACK_ROUND, -1) ?: -1
+            if (round != -1) pendingOpenTrack.value = round
         }
         // Widget tap during race weekend → open live timing
         val liveTimingId = intent?.getIntExtra(CountdownWidget.EXTRA_LIVE_TIMING_EVENT_ID, -1) ?: -1
@@ -245,14 +287,18 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun scheduleRaceNotifications() {
-        val wm = WorkManager.getInstance(this)
-        val periodic = PeriodicWorkRequestBuilder<RaceNotificationWorker>(15, TimeUnit.MINUTES).build()
-        wm.enqueueUniquePeriodicWork(
-            RaceNotificationWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodic,
-        )
+    private fun createFreePracticeNotificationChannel() {
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean(RaceNotificationWorker.KEY_FREE_PRACTICE_NOTIF_ENABLED, true)) return
+        val channel = NotificationChannel(
+            RaceNotificationWorker.CHANNEL_ID_FREE_PRACTICE,
+            "Free Practice Alerts",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Notifications when BTCC free practice is about to start"
+        }
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channel)
     }
 
     private fun createResultsNotificationChannel() {
@@ -267,6 +313,22 @@ class MainActivity : ComponentActivity() {
         }
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
+    }
+
+    private fun cancelLegacyRaceWorker() {
+        // RaceNotificationWorker was replaced by exact alarms in WeekendPreviewScheduler.
+        // Cancel any still-running WorkManager job from older installs to prevent duplicates.
+        val prefs = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("legacy_race_worker_cancelled", false)) {
+            WorkManager.getInstance(this).cancelUniqueWork(RaceNotificationWorker.WORK_NAME)
+            prefs.edit().putBoolean("legacy_race_worker_cancelled", true).apply()
+        }
+    }
+
+    private fun scheduleWeekendPreview() {
+        lifecycleScope.launch {
+            WeekendPreviewScheduler.schedule(this@MainActivity)
+        }
     }
 
     private fun scheduleResultsCheck() {
@@ -303,9 +365,12 @@ private fun MainScreen(
     onArticleSlugConsumed: () -> Unit = {},
     pendingOpenResults: Int = 0,
     pendingResultsRound: Int = 0,
+    pendingResultsTab: Int = 0,
     onResultsConsumed: () -> Unit = {},
     pendingLiveTimingEventId: Int? = null,
     onLiveTimingConsumed: () -> Unit = {},
+    pendingOpenTrack: Int? = null,
+    onTrackConsumed: () -> Unit = {},
     onRequestPermission: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -313,6 +378,7 @@ private fun MainScreen(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     var newsScrollTrigger by remember { mutableIntStateOf(0) }
+    var resultsTab by remember { mutableIntStateOf(pendingResultsTab) }
     var showOnboarding by remember { mutableStateOf(OnboardingStore.shouldShow(context)) }
     var showWhatsNew by remember { mutableStateOf(WhatsNewStore.shouldShow(context)) }
 
@@ -383,6 +449,7 @@ private fun MainScreen(
 
     LaunchedEffect(pendingOpenResults) {
         if (pendingOpenResults > 0) {
+            resultsTab = pendingResultsTab
             if (pendingResultsRound > 0) {
                 navController.navigate(Screen.RoundResults.route(2026, pendingResultsRound)) {
                     popUpTo(Screen.News.route)
@@ -406,6 +473,25 @@ private fun MainScreen(
         }
     }
 
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+
+    LaunchedEffect(pendingOpenTrack) {
+        if (pendingOpenTrack != null) {
+            onTrackConsumed()
+            navController.navigate(Screen.Calendar.route) {
+                popUpTo(Screen.News.route)
+                launchSingleTop = true
+            }
+            // On tablet the track detail is shown inline in the master-detail panel;
+            // navigating to Screen.Track would open a redundant full-screen page.
+            if (!isTablet) {
+                navController.navigate(Screen.Track.route(pendingOpenTrack)) {
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
+
     val showBottomBar = currentRoute == null ||
             (currentRoute != Screen.Article.route &&
                     currentRoute.startsWith("track/") != true &&
@@ -420,8 +506,6 @@ private fun MainScreen(
         if (flagMerchHub) add(NavItem(Screen.Shop, "Shop", Icons.Default.ShoppingBag))
         add(NavItem(Screen.More, "More", Icons.Default.MoreHoriz))
     }
-
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
     val navItemSelected: (NavItem) -> Boolean = { item ->
         when (item.screen) {
@@ -518,7 +602,8 @@ private fun MainScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     AppNavHost(
                         navController = navController,
-                        newsScrollToTopTrigger = newsScrollTrigger
+                        newsScrollToTopTrigger = newsScrollTrigger,
+                        initialResultsTab = resultsTab,
                     )
                 }
                 if (flagAds) AdmobBanner()
@@ -575,7 +660,8 @@ private fun MainScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     AppNavHost(
                         navController = navController,
-                        newsScrollToTopTrigger = newsScrollTrigger
+                        newsScrollToTopTrigger = newsScrollTrigger,
+                        initialResultsTab = resultsTab,
                     )
                 }
             }

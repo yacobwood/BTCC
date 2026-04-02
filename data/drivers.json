@@ -1879,7 +1879,7 @@
     },
     {
       "number": 200,
-      "name": "Lewis Selby",
+        "name": "Lewis Selby",
       "team": "NAPA Racing UK",
       "car": "Ford Focus Titanium Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Selby-0H5A6861-e1745404956.png",
@@ -1948,7 +1948,9 @@
           "pos": 1,
           "points": 775
         }
-      ]
+      ],
+      "dateOfBirth": "1980-07-18",
+      "birthplace": "Aylesbury, Buckinghamshire"
     },
     {
       "name": "Team VERTU",

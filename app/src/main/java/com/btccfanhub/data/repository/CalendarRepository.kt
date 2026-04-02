@@ -136,6 +136,7 @@ object CalendarRepository {
                 qualifyingRecord = lapRecord(r.optJSONObject("qualifyingRecord")),
                 raceRecord       = lapRecord(r.optJSONObject("raceRecord")),
                 trackGuide       = sectors,
+                youtubeUrl       = r.optString("youtubeUrl"),
             )
         }
 
