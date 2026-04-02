@@ -798,7 +798,7 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 <div id="panel-notifications" class="tab-panel">
 
   <div class="section-note" style="margin-bottom:16px;">
-    Friday 3pm preview notifications scheduled for each race weekend. Tap <strong>Test on device</strong> to fire the notification immediately — opens via deep link on your phone.
+    All notifications scheduled for the 2026 season. Tap <strong>Test</strong> on your phone to fire immediately.
   </div>
 
   <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
@@ -1437,47 +1437,88 @@ async function loadNotifSchedule() {
     const res = await fetch(CALENDAR_URL + '?t=' + Date.now());
     const data = await res.json();
     const now = new Date();
-    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+
+    // Build flat list of all notifications sorted chronologically
+    const notifs = [];
     data.rounds.forEach(r => {
-      // Friday preview
       const friday = fridayBefore(r.startDate);
       friday.setHours(15, 0, 0, 0);
-      const fridayPast = friday < now;
-      const fridayLink = `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`;
-
-      // Tuesday standings (round 2+)
-      let tuesdayHtml = '';
+      notifs.push({
+        date: new Date(friday),
+        type: 'preview',
+        round: r.round,
+        venue: r.venue,
+        label: 'Race Weekend Preview',
+        time: '3:00 PM',
+        link: `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`,
+        color: 'var(--yellow)',
+      });
       if (r.round >= 2) {
-        const sunday = new Date(r.endDate + 'T00:00:00');
-        const tuesday = new Date(sunday);
+        const tuesday = new Date(r.endDate + 'T00:00:00');
         tuesday.setDate(tuesday.getDate() + 2);
         tuesday.setHours(9, 0, 0, 0);
-        const tuesdayPast = tuesday < now;
-        const tuesdayLink = `intent://standings/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`;
-        tuesdayHtml = `
-          <div style="border-top:1px solid var(--outline);margin-top:10px;padding-top:10px;">
-            <div style="font-size:11px;color:var(--text-sec);margin-bottom:6px;">STANDINGS UPDATE · ${formatDate(tuesday)} at 9:00 AM</div>
-            <a href="${tuesdayLink}" style="display:inline-block;background:${tuesdayPast ? 'var(--surface)' : 'var(--yellow)'};color:${tuesdayPast ? 'var(--text-sec)' : '#000'};font-size:11px;font-weight:800;letter-spacing:1px;padding:8px 14px;border-radius:8px;text-decoration:none;">
-              ${tuesdayPast ? 'Re-test standings' : 'Test standings'}
-            </a>
-          </div>`;
+        notifs.push({
+          date: new Date(tuesday),
+          type: 'standings',
+          round: r.round,
+          venue: r.venue,
+          label: 'Standings Update',
+          time: '9:00 AM',
+          link: `intent://standings/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`,
+          color: '#5B9CF6',
+        });
       }
-
-      html += `
-        <div style="background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <span style="font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--text-sec);">ROUND ${r.round}</span>
-            <span style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${fridayPast ? 'var(--text-sec)' : 'var(--green)'};margin-left:auto;">${fridayPast ? 'PAST' : 'UPCOMING'}</span>
-          </div>
-          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">${r.venue}</div>
-          <div style="font-size:12px;color:var(--text-sec);margin-bottom:10px;">RACE PREVIEW · ${formatDate(friday)} at 3:00 PM</div>
-          <a href="${fridayLink}" style="display:inline-block;background:${fridayPast ? 'var(--surface)' : 'var(--yellow)'};color:${fridayPast ? 'var(--text-sec)' : '#000'};font-size:11px;font-weight:800;letter-spacing:1px;padding:8px 14px;border-radius:8px;text-decoration:none;">
-            ${fridayPast ? 'Re-test preview' : 'Test preview'}
-          </a>
-          ${tuesdayHtml}
-        </div>`;
     });
-    html += '</div>';
+    notifs.sort((a, b) => a.date - b.date);
+
+    // Group by month
+    const byMonth = {};
+    notifs.forEach(n => {
+      const key = `${n.date.getFullYear()}-${n.date.getMonth()}`;
+      if (!byMonth[key]) byMonth[key] = { label: `${MONTH_NAMES[n.date.getMonth()]} ${n.date.getFullYear()}`, items: [] };
+      byMonth[key].items.push(n);
+    });
+
+    // Count totals
+    const total = notifs.length;
+    const sent  = notifs.filter(n => n.date < now).length;
+
+    let html = `
+      <div style="display:flex;gap:16px;margin-bottom:20px;">
+        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:var(--text);">${total}</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">TOTAL</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:var(--text-sec);">${sent}</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">SENT</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;font-weight:900;color:var(--green);">${total - sent}</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">UPCOMING</div>
+        </div>
+      </div>`;
+
+    Object.values(byMonth).forEach(month => {
+      html += `<div style="font-size:10px;font-weight:900;letter-spacing:2px;color:var(--text-sec);text-transform:uppercase;margin:20px 0 8px;">${month.label}</div>`;
+      month.items.forEach(n => {
+        const past = n.date < now;
+        const dot  = `<span style="width:8px;height:8px;border-radius:50%;background:${past ? 'var(--outline)' : n.color};flex-shrink:0;margin-top:3px;display:inline-block;"></span>`;
+        html += `
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--outline-lo);">
+            ${dot}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:700;color:${past ? 'var(--text-sec)' : 'var(--text)'};">${DAY_NAMES[n.date.getDay()]} ${n.date.getDate()} · ${n.time}</span>
+                <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:${past ? 'var(--outline)' : n.color};text-transform:uppercase;">${n.label}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-sec);margin-top:1px;">Round ${n.round} · ${n.venue}</div>
+            </div>
+            <a href="${n.link}" style="flex-shrink:0;background:${past ? 'var(--surface)' : n.color};color:${past ? 'var(--text-sec)' : '#000'};font-size:10px;font-weight:800;letter-spacing:0.5px;padding:6px 10px;border-radius:7px;text-decoration:none;white-space:nowrap;">Test</a>
+          </div>`;
+      });
+    });
+
     el.innerHTML = html;
   } catch(e) {
     el.innerHTML = '<div style="color:var(--red);font-size:13px;">Failed to load calendar</div>';
