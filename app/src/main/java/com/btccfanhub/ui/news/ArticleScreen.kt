@@ -142,6 +142,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                                 return true
                             }
                             if (uri?.scheme == "http" || uri?.scheme == "https") {
+                                Analytics.articleExternalLinkClicked(article?.title ?: "", uri.toString())
                                 val intent = android.content.Intent(
                                     android.content.Intent.ACTION_VIEW,
                                     uri,
@@ -211,6 +212,7 @@ fun ArticleScreen(onBack: () -> Unit) {
                 images = imageUrls.value,
                 initialIndex = idx,
                 onDismiss = { lightboxIndex.value = null },
+                onPageChanged = { page -> Analytics.lightboxImageViewed(article?.title?.take(50) ?: "", page) },
             )
         }
     }

@@ -79,7 +79,12 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
     val pageCount = races.size.coerceAtLeast(1)
     var savedPage by rememberSaveable { mutableIntStateOf(0) }
     val pagerState = rememberPagerState(initialPage = savedPage, pageCount = { pageCount })
-    LaunchedEffect(pagerState.currentPage) { savedPage = pagerState.currentPage }
+    LaunchedEffect(pagerState.currentPage) {
+        savedPage = pagerState.currentPage
+        if (races.isNotEmpty()) {
+            Analytics.raceTabClicked(roundResult?.venue ?: "Round $round", races[pagerState.currentPage].label)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -171,10 +176,7 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                             }
                             Tab(
                                 selected = pagerState.currentPage == index,
-                                onClick  = {
-                                    Analytics.raceTabClicked(roundResult?.venue ?: "Round $round", race.label)
-                                    scope.launch { pagerState.animateScrollToPage(index) }
-                                },
+                                onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
                                 text = {
                                     Text(
                                         tabLabel,

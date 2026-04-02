@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.btccfanhub.data.analytics.Analytics
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.Dialog
 import com.btccfanhub.ui.theme.*
 
@@ -21,6 +22,7 @@ fun WhatsNewDialog(
     changes: List<String>,
     onDismiss: () -> Unit,
 ) {
+    LaunchedEffect(Unit) { Analytics.whatsNewShown() }
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier

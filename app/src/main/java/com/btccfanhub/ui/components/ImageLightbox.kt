@@ -15,6 +15,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,8 +25,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 @Composable
-fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: () -> Unit) {
+fun ImageLightbox(images: List<String>, initialIndex: Int, onDismiss: () -> Unit, onPageChanged: (Int) -> Unit = {}) {
     val pagerState = rememberPagerState(initialPage = initialIndex) { images.size }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { page -> onPageChanged(page) }
+    }
     Box(
         Modifier
             .fillMaxSize()

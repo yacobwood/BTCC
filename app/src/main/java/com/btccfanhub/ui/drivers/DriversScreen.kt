@@ -197,7 +197,7 @@ private fun GridTabs(
                 listOf("DRIVERS", "TEAMS").forEachIndexed { index, label ->
                     Tab(
                         selected = pagerState.currentPage == index,
-                        onClick  = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        onClick  = { Analytics.gridTabSwitched(label.lowercase()); scope.launch { pagerState.animateScrollToPage(index) } },
                         text = {
                             Text(
                                 label,

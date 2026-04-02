@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -111,7 +112,10 @@ fun NewsScreen(
 
     LaunchedEffect(searchQuery) {
         viewModel.search(searchQuery)
-        if (searchQuery.length >= 3) Analytics.newsSearched(searchQuery)
+        if (searchQuery.length >= 3) {
+            delay(1000) // debounce — only fires if query unchanged for 1s
+            Analytics.newsSearched(searchQuery)
+        }
     }
 
     // Trigger loadMore when within 4 items of the end (not during search)

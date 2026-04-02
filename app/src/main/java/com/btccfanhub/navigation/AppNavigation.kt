@@ -136,7 +136,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("round") { type = NavType.IntType }),
         ) { backStackEntry ->
             val round = backStackEntry.arguments?.getInt("round") ?: return@composable
-            LaunchedEffect(round) { Analytics.trackDetailViewed(round, "") }
+            // screen() + trackDetailViewed() are fired from within TrackDetailScreen itself
             val flagLiveUpdates by FeatureFlagsStore.liveUpdates.collectAsState()
             TrackDetailScreen(
                 round = round,
@@ -152,7 +152,7 @@ fun AppNavHost(navController: NavHostController, newsScrollToTopTrigger: Int = 0
             arguments = listOf(navArgument("eventId") { type = NavType.IntType }),
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getInt("eventId") ?: return@composable
-            LaunchedEffect(eventId) { Analytics.liveTimingOpened(eventId) }
+            // liveTimingOpened() is fired from the call site (LiveTimingButton / card click)
             LiveTimingScreen(eventId = eventId, onBack = { navController.popBackStack(Screen.Calendar.route, inclusive = false) })
         }
 

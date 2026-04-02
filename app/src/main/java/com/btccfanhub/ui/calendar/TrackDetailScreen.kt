@@ -534,6 +534,7 @@ fun TrackDetailScreen(round: Int, onBack: () -> Unit, onLiveTimingClick: ((Int) 
                 images = allImages,
                 initialIndex = idx.coerceIn(0, allImages.lastIndex),
                 onDismiss = { lightboxIndex.value = null },
+                onPageChanged = { page -> Analytics.lightboxImageViewed(trackInfo.venue, page) },
             )
         }
     }

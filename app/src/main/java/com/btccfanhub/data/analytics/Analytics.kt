@@ -269,4 +269,27 @@ object Analytics {
     fun setFavouriteDriverProperty(name: String) {
         fa.setUserProperty("favourite_driver", name.take(36))
     }
+
+    fun whatsNewShown() {
+        fa.logEvent("whats_new_shown") {}
+    }
+
+    fun gridTabSwitched(tab: String) {
+        fa.logEvent("grid_tab_switched") {
+            param("tab", tab)
+        }
+    }
+
+    fun articleExternalLinkClicked(articleTitle: String, url: String) {
+        fa.logEvent("article_external_link_clicked") {
+            param(FirebaseAnalytics.Param.ITEM_NAME, articleTitle.take(100))
+            param("url", url.take(100))
+        }
+    }
+
+    fun pullToRefresh(screen: String) {
+        fa.logEvent("pull_to_refresh") {
+            param("screen", screen)
+        }
+    }
 }

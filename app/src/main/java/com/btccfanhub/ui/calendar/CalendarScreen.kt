@@ -144,7 +144,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
 
         PullToRefreshBox(
             isRefreshing = isRefreshing,
-            onRefresh    = { isRefreshing = true; refreshKey++ },
+            onRefresh    = { isRefreshing = true; refreshKey++; Analytics.pullToRefresh("calendar") },
             modifier     = Modifier.fillMaxSize(),
         ) {
         if (isTablet) {
