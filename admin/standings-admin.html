@@ -1444,7 +1444,7 @@ async function loadNotifSchedule() {
       const isPast = friday < now;
       const statusColor = isPast ? 'var(--text-sec)' : 'var(--green)';
       const statusLabel = isPast ? 'SENT' : 'SCHEDULED';
-      const deepLink = `btccfanhub://preview/${r.round}`;
+      const deepLink = `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`;
       html += `
         <div style="background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
