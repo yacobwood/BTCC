@@ -32,7 +32,7 @@ object WeekendPreviewScheduler {
 
     private fun scheduleFridayPreview(
         context: Context, am: AlarmManager, now: LocalDateTime,
-        round: com.btccfanhub.data.model.RaceRound,
+        round: com.btccfanhub.data.model.Race,
     ) {
         val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(WeekendPreviewReceiver.KEY_WEEKEND_PREVIEW_ENABLED, true)) return
@@ -54,7 +54,7 @@ object WeekendPreviewScheduler {
 
     private fun scheduleTuesdayStandings(
         context: Context, am: AlarmManager, now: LocalDateTime,
-        round: com.btccfanhub.data.model.RaceRound,
+        round: com.btccfanhub.data.model.Race,
     ) {
         val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(TuesdayStandingsReceiver.KEY_TUESDAY_STANDINGS_ENABLED, true)) return
