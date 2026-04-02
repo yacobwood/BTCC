@@ -442,8 +442,11 @@ private fun MainScreen(
     LaunchedEffect(pendingOpenTrack) {
         if (pendingOpenTrack != null) {
             onTrackConsumed()
-            navController.navigate(Screen.Track.route(pendingOpenTrack)) {
+            navController.navigate(Screen.Calendar.route) {
                 popUpTo(Screen.News.route)
+                launchSingleTop = true
+            }
+            navController.navigate(Screen.Track.route(pendingOpenTrack)) {
                 launchSingleTop = true
             }
         }
