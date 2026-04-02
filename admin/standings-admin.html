@@ -4,6 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>BTCC Fan Hub · Admin</title>
+<script>
+(async function() {
+  const HASH = '92407f755cc340c390c56c0e2d0e5312d79143032b321bce85f993cec4f1383b';
+  const KEY  = 'btcc_admin_auth';
+  if (sessionStorage.getItem(KEY) === HASH) return;
+
+  document.documentElement.style.visibility = 'hidden';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  const overlay = document.createElement('div');
+  overlay.innerHTML = `
+    <div style="position:fixed;inset:0;background:#080912;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+      <div style="background:#0F1122;border:1px solid #2A2D44;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;margin:16px;">
+        <div style="font-size:11px;font-weight:900;letter-spacing:2.5px;color:#8B8FA8;margin-bottom:20px;">BTCC FAN HUB · ADMIN</div>
+        <input id="pw-input" type="password" placeholder="Password" autofocus
+          style="width:100%;background:#080912;border:1px solid #2A2D44;color:#fff;padding:12px 14px;border-radius:10px;font-size:16px;outline:none;margin-bottom:10px;box-sizing:border-box;" />
+        <div id="pw-error" style="color:#E3000B;font-size:12px;min-height:18px;margin-bottom:10px;"></div>
+        <button id="pw-btn"
+          style="width:100%;background:#FEBD02;color:#000;font-size:13px;font-weight:800;letter-spacing:1px;padding:13px;border:none;border-radius:10px;cursor:pointer;">
+          UNLOCK
+        </button>
+      </div>
+    </div>`;
+  document.documentElement.appendChild(overlay);
+  document.documentElement.style.visibility = 'visible';
+
+  async function attempt() {
+    const val = document.getElementById('pw-input').value;
+    if (!val) return;
+    const hash = await sha256(val);
+    if (hash === HASH) {
+      sessionStorage.setItem(KEY, HASH);
+      overlay.remove();
+    } else {
+      document.getElementById('pw-error').textContent = 'Incorrect password';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  document.getElementById('pw-btn').addEventListener('click', attempt);
+  document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+})();
+</script>
 <style>
 :root {
   --bg:        #080912;
