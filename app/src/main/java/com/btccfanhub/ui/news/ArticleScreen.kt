@@ -34,15 +34,19 @@ import com.btccfanhub.data.network.RssParser
 import com.btccfanhub.ui.components.ImageLightbox
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccYellow
+import androidx.compose.ui.platform.LocalConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @SuppressLint("JavascriptInterface")
 @Composable
-fun ArticleScreen(onBack: () -> Unit) {
+fun ArticleScreen(onBack: () -> Unit, showBackButton: Boolean = true) {
     var navigatingBack by remember { mutableStateOf(false) }
-    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    if (showBackButton) {
+        BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    }
     val article = ArticleHolder.current
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
     val lightboxIndex = remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(article) {
@@ -116,22 +120,23 @@ fun ArticleScreen(onBack: () -> Unit) {
         } else finalContent
 
         imageUrls.value = finalUrls
-        htmlToLoad = buildHtml(article.title, article.pubDate, withPosters, article.imageUrl)
+        htmlToLoad = buildHtml(article.title, article.pubDate, withPosters, article.imageUrl, isTablet)
     }
 
     Box(Modifier.fillMaxSize().background(BtccBackground)) {
-        if (htmlToLoad == null) {
-            CircularProgressIndicator(
-                color = BtccYellow,
-                modifier = Modifier.size(36.dp).align(Alignment.Center),
-            )
-        }
+        var webViewReady by remember { mutableStateOf(false) }
+        // Reset ready state when article changes so the overlay covers the flash
+        LaunchedEffect(article) { webViewReady = false }
 
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
                 WebView(context).apply {
                     webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            webViewReady = true
+                        }
                         override fun shouldOverrideUrlLoading(
                             view: WebView,
                             request: WebResourceRequest,
@@ -169,6 +174,16 @@ fun ArticleScreen(onBack: () -> Unit) {
             }
         )
 
+        // Cover the WebView until it has rendered content — prevents the black flash
+        if (!webViewReady) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(BtccBackground),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = BtccYellow, strokeWidth = 2.dp, modifier = Modifier.size(28.dp))
+            }
+        }
+
         val context = LocalContext.current
         Row(
             modifier = Modifier
@@ -179,11 +194,13 @@ fun ArticleScreen(onBack: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.background(Color.Black.copy(alpha = 0.4f), CircleShape),
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+            if (showBackButton) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.4f), CircleShape),
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                }
             }
             if (article != null) {
                 IconButton(
@@ -337,7 +354,7 @@ private fun sanitiseContent(html: String): String =
         .replace(Regex("""\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*""""), "")
         .replace(Regex("""\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)='[^']*'"""), "")
 
-private fun buildHtml(title: String, pubDate: String, content: String, heroImageUrl: String? = null): String {
+private fun buildHtml(title: String, pubDate: String, content: String, heroImageUrl: String? = null, twoColumnImages: Boolean = false): String {
     val heroSection = if (heroImageUrl != null) """
         <div class="hero" style="background-image: url('$heroImageUrl');">
           <div class="hero-gradient"></div>
@@ -445,6 +462,29 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
         h2, h3, h4 { margin: 20px 0 8px; color: #FFFFFF; }
         a { color: #FEBD02; text-decoration: none; }
         a[href^="app-image://"] { display: block; color: inherit; }
+        ${if (twoColumnImages) """
+        /* Tablet: 2-column image gallery grid */
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin: 16px 0;
+        }
+        .gallery-grid a {
+          display: block;
+          overflow: hidden;
+          border-radius: 8px;
+        }
+        .gallery-grid img {
+          width: 100% !important;
+          height: auto !important;
+          margin: 0 !important;
+          border-radius: 8px;
+          display: block;
+          object-fit: cover;
+          aspect-ratio: 4/3;
+        }
+        """ else ""}
         blockquote {
           border-left: 3px solid #FEBD02;
           padding-left: 14px;
@@ -496,6 +536,27 @@ private fun buildHtml(title: String, pubDate: String, content: String, heroImage
           if (img.complete) { img.classList.add('loaded'); }
           else { img.addEventListener('load', function() { img.classList.add('loaded'); }); }
         });
+        ${if (twoColumnImages) """
+        // Collect all gallery image links and move them into a 2-column grid
+        (function() {
+          var content = document.querySelector('.content');
+          if (!content) return;
+          var links = content.querySelectorAll('a[href^="app-image://"]');
+          if (links.length < 2) return;
+          var grid = document.createElement('div');
+          grid.className = 'gallery-grid';
+          links.forEach(function(link) {
+            var parent = link.parentNode;
+            link.parentNode.removeChild(link);
+            grid.appendChild(link);
+            // Clean up empty parent wrappers (p, figure, div)
+            if (parent && parent !== content && parent.children.length === 0 && parent.textContent.trim() === '') {
+              parent.parentNode.removeChild(parent);
+            }
+          });
+          content.appendChild(grid);
+        })();
+        """ else ""}
         (function() {
           var fired = {};
           window.addEventListener('scroll', function() {

@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import android.content.res.Configuration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
@@ -51,12 +53,16 @@ import com.btccfanhub.data.store.FavouriteDriverStore
 import com.btccfanhub.data.store.FeatureFlagsStore
 import com.btccfanhub.data.model.Article
 import com.btccfanhub.data.analytics.Analytics
+import com.btccfanhub.data.ArticleHolder
+import com.btccfanhub.ui.components.DetailPlaceholder
 import com.btccfanhub.ui.theme.BtccBackground
 import com.btccfanhub.ui.theme.BtccCard
 import com.btccfanhub.ui.theme.BtccNavy
+import com.btccfanhub.ui.theme.BtccOutline
 import com.btccfanhub.ui.theme.BtccYellow
 import com.btccfanhub.ui.theme.BtccTextSecondary
 import com.btccfanhub.ui.ads.NativeAdItem
+import androidx.compose.ui.platform.testTag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,8 +93,8 @@ fun NewsScreen(
         }
     }
     val scope = rememberCoroutineScope()
-    var searchActive by remember { mutableStateOf(false) }
-    var searchQuery  by remember { mutableStateOf("") }
+    var searchActive by rememberSaveable { mutableStateOf(false) }
+    var searchQuery  by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
 
     val favSurname = remember(favName) {
@@ -114,7 +120,10 @@ fun NewsScreen(
     }
 
     LaunchedEffect(searchQuery) {
-        viewModel.search(searchQuery)
+        // Only search if the query actually changed (not on recomposition)
+        if (searchQuery != viewModel.lastSearchQuery) {
+            viewModel.search(searchQuery)
+        }
         if (searchQuery.length >= 3) {
             delay(1000) // debounce — only fires if query unchanged for 1s
             Analytics.newsSearched(searchQuery)
@@ -149,6 +158,10 @@ fun NewsScreen(
         if (shouldLoadMoreSearch) viewModel.loadMoreSearch(searchQuery)
     }
 
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+    var selectedArticle by remember { mutableStateOf<Article?>(null) }
+
+    val masterContent: @Composable () -> Unit = {
     Box(modifier = Modifier.fillMaxSize().background(BtccBackground)) {
         when (val s = state) {
             is NewsState.Loading -> {
@@ -176,21 +189,25 @@ fun NewsScreen(
             is NewsState.Success -> {
                 val articles      = s.articles
                 val isLoadingMore = s.isLoadingMore
-                val isTablet      = LocalConfiguration.current.screenWidthDp >= 600
                 val screenW       = LocalConfiguration.current.screenWidthDp
                 val moreColumns   = when {
                     screenW >= 840 -> 3
-                    isTablet       -> 2
-                    else           -> 2
+                    screenW >= 600 -> 2
+                    else              -> 2
                 }
                 val navigateToArticle: (Article) -> Unit = { article ->
-                    onArticleClick(article)
+                    if (isTablet) {
+                        selectedArticle = article
+                        ArticleHolder.current = article
+                    } else {
+                        onArticleClick(article)
+                    }
                 }
 
                 val gridCount    = when {
-                    screenW >= 840 -> 6
-                    screenW >= 600 -> 4
-                    else           -> 2
+                    screenW >= 840 -> 4
+                    screenW >= 600 -> 3
+                    else              -> 2
                 }
                 val gridArticles = articles.drop(1).take(gridCount)
                 val remaining    = articles.drop(1 + gridArticles.size)
@@ -203,6 +220,7 @@ fun NewsScreen(
                     }
                 }
 
+                Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     if (searchActive) {
                         Row(
@@ -344,7 +362,7 @@ fun NewsScreen(
                                                 article = article,
                                                 onClick = { Analytics.articleClicked(article.title, "grid"); navigateToArticle(article) },
                                                 modifier = Modifier.weight(1f),
-                                                height = if (isTablet) 150.dp else 180.dp,
+                                                height = if (screenW >= 840) 200.dp else if (screenW >= 600) 180.dp else 180.dp,
                                             )
                                         }
                                     }
@@ -364,8 +382,7 @@ fun NewsScreen(
                                 }
                             }
 
-                            if (isTablet) {
-                                // 2-column GridCard grid on 7", 3-column on 10"
+                            if (screenW >= 600) {
                                 val pairs = remaining.chunked(moreColumns)
                                 items(pairs) { pair ->
                                     Row(
@@ -425,25 +442,42 @@ fun NewsScreen(
                     }
                     } // end PullToRefreshBox
                 }
+                AnimatedVisibility(
+                    visible = showScrollToTop,
+                    enter = fadeIn() + scaleIn(initialScale = 0.8f),
+                    exit  = fadeOut() + scaleOut(targetScale = 0.8f),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = 16.dp),
+                ) {
+                    SmallFloatingActionButton(
+                        onClick = { Analytics.scrollToTop("news"); scope.launch { listState.animateScrollToItem(0) } },
+                        containerColor = BtccYellow,
+                        contentColor   = BtccNavy,
+                    ) {
+                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Scroll to top")
+                    }
+                }
+                } // end Box wrapper
             }
         }
+    }
+    } // end masterContent lambda
 
-        AnimatedVisibility(
-            visible = showScrollToTop,
-            enter = fadeIn() + scaleIn(initialScale = 0.8f),
-            exit  = fadeOut() + scaleOut(targetScale = 0.8f),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 16.dp),
-        ) {
-            SmallFloatingActionButton(
-                onClick = { Analytics.scrollToTop("news"); scope.launch { listState.animateScrollToItem(0) } },
-                containerColor = BtccYellow,
-                contentColor   = BtccNavy,
-            ) {
-                Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Scroll to top")
-            }
+    if (isTablet) {
+        if (selectedArticle != null) {
+            // ── Tablet with article selected: full-screen article ─────────
+            ArticleScreen(
+                onBack = { selectedArticle = null },
+                showBackButton = true,
+            )
+        } else {
+            // ── Tablet with no article: full-width feed ───────────────────
+            masterContent()
         }
+    } else {
+        // ── Phone: existing layout unchanged ──────────────────────────────
+        masterContent()
     }
 }
 

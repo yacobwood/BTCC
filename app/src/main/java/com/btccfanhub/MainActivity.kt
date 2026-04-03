@@ -432,6 +432,8 @@ private fun MainScreen(
         return
     }
 
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+
     LaunchedEffect(pendingArticleId) {
         if (pendingArticleId != null) {
             val article = withContext(Dispatchers.IO) {
@@ -440,7 +442,15 @@ private fun MainScreen(
             onArticleIdConsumed()
             if (article != null) {
                 ArticleHolder.current = article
-                navController.navigate(Screen.Article.route) { launchSingleTop = true }
+                if (isTablet) {
+                    // On tablet, navigate to News — the master-detail layout will show the article inline
+                    navController.navigate(Screen.News.route) {
+                        popUpTo(Screen.News.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                } else {
+                    navController.navigate(Screen.Article.route) { launchSingleTop = true }
+                }
             }
         }
     }
@@ -453,7 +463,15 @@ private fun MainScreen(
             onArticleSlugConsumed()
             if (article != null) {
                 ArticleHolder.current = article
-                navController.navigate(Screen.Article.route) { launchSingleTop = true }
+                if (isTablet) {
+                    // On tablet, navigate to News — the master-detail layout will show the article inline
+                    navController.navigate(Screen.News.route) {
+                        popUpTo(Screen.News.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                } else {
+                    navController.navigate(Screen.Article.route) { launchSingleTop = true }
+                }
             } else {
                 Toast.makeText(context, "Article not found", Toast.LENGTH_SHORT).show()
             }
@@ -463,12 +481,16 @@ private fun MainScreen(
     LaunchedEffect(pendingOpenResults) {
         if (pendingOpenResults > 0) {
             resultsTab = pendingResultsTab
-            if (pendingResultsRound > 0) {
+            if (pendingResultsRound > 0 && !isTablet) {
+                // Phone: navigate to the full-screen round results detail
                 navController.navigate(Screen.RoundResults.route(2026, pendingResultsRound)) {
                     popUpTo(Screen.News.route)
                     launchSingleTop = true
                 }
             } else {
+                // Tablet (with or without round) or phone without round:
+                // navigate to Results screen — on tablet the master-detail layout
+                // will show the round inline when ResultsScreen reads the pending state
                 navController.navigate(Screen.Results.route) {
                     popUpTo(Screen.News.route)
                     launchSingleTop = true
@@ -486,7 +508,6 @@ private fun MainScreen(
         }
     }
 
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
 
     LaunchedEffect(pendingOpenTrack) {
         if (pendingOpenTrack != null) {

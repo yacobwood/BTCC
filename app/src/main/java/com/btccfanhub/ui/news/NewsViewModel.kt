@@ -117,10 +117,14 @@ class NewsViewModel : ViewModel() {
         }
     }
 
+    var lastSearchQuery: String = ""
+        private set
+
     fun search(query: String) {
         searchJob?.cancel()
         searchPage = 1
         isLoadingMoreSearch = false
+        lastSearchQuery = query
         if (query.isBlank()) {
             _searchState.value = SearchState.Idle
             return

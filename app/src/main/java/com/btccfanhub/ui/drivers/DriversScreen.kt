@@ -32,6 +32,7 @@ import com.btccfanhub.data.analytics.Analytics
 import com.btccfanhub.data.store.FavouriteDriverStore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
+import android.content.res.Configuration
 import com.btccfanhub.data.model.Driver
 import com.btccfanhub.data.model.GridData
 import com.btccfanhub.data.model.SeasonStat
@@ -56,7 +57,9 @@ import coil.request.ImageRequest
 import com.btccfanhub.ui.theme.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import android.content.Context
+import com.btccfanhub.ui.components.DetailPlaceholder
 import java.io.File
 
 // Driver, Team, SeasonStat, GridData defined in data/model/GridData.kt
@@ -115,41 +118,75 @@ fun DriversScreen() {
     var selectedDriver by remember { mutableStateOf<Driver?>(null) }
     var selectedTeam   by remember { mutableStateOf<Team?>(null) }
 
-    when {
-        selectedDriver != null -> {
-            BackHandler { selectedDriver = null }
-            DriverDetailScreen(driver = selectedDriver!!, onBack = { selectedDriver = null })
-        }
-        selectedTeam != null -> {
-            BackHandler { selectedTeam = null }
-            TeamDetailScreen(team = selectedTeam!!, onBack = { selectedTeam = null })
-        }
-        loading -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(BtccBackground),
-            ) {
-                TopAppBar(
-                    windowInsets = WindowInsets(0),
-                    title  = { Text("2026 GRID", fontWeight = FontWeight.Black, fontSize = 18.sp, letterSpacing = 1.sp) },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
-                )
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = BtccYellow)
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+
+    val masterContent: @Composable () -> Unit = {
+        when {
+            loading -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(BtccBackground),
+                ) {
+                    TopAppBar(
+                        windowInsets = WindowInsets(0),
+                        title  = { Text("2026 GRID", fontWeight = FontWeight.Black, fontSize = 18.sp, letterSpacing = 1.sp) },
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),
+                    )
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = BtccYellow)
+                    }
                 }
             }
+            else -> {
+                GridTabs(
+                    pagerState       = gridPagerState,
+                    drivers          = drivers,
+                    teams            = teams,
+                    driversListState = driversListState,
+                    teamsListState   = teamsListState,
+                    onDriverClick    = { Analytics.driverClicked(it.name); selectedDriver = it; if (!isTablet) { /* phone: handled by when block below */ } else { selectedTeam = null } },
+                    onTeamClick      = { Analytics.teamClicked(it.name); selectedTeam = it; if (!isTablet) { /* phone: handled by when block below */ } else { selectedDriver = null } },
+                    inMasterPane     = false,
+                )
+            }
         }
-        else -> {
-            GridTabs(
-                pagerState       = gridPagerState,
-                drivers          = drivers,
-                teams            = teams,
-                driversListState = driversListState,
-                teamsListState   = teamsListState,
-                onDriverClick    = { Analytics.driverClicked(it.name); selectedDriver = it },
-                onTeamClick      = { Analytics.teamClicked(it.name); selectedTeam = it },
-            )
+    }
+
+    if (isTablet) {
+        when {
+            selectedDriver != null -> {
+                DriverDetailScreen(
+                    driver = selectedDriver!!,
+                    onBack = { selectedDriver = null },
+                    showBackButton = true,
+                )
+            }
+            selectedTeam != null -> {
+                TeamDetailScreen(
+                    team = selectedTeam!!,
+                    onBack = { selectedTeam = null },
+                    showBackButton = true,
+                )
+            }
+            else -> {
+                masterContent()
+            }
+        }
+    } else {
+        // ── Phone: existing BackHandler-based navigation ──────────────────
+        when {
+            selectedDriver != null -> {
+                BackHandler { selectedDriver = null }
+                DriverDetailScreen(driver = selectedDriver!!, onBack = { selectedDriver = null })
+            }
+            selectedTeam != null -> {
+                BackHandler { selectedTeam = null }
+                TeamDetailScreen(team = selectedTeam!!, onBack = { selectedTeam = null })
+            }
+            else -> {
+                masterContent()
+            }
         }
     }
 }
@@ -160,7 +197,7 @@ fun DriversScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun GridTabs(
+internal fun GridTabs(
     pagerState: PagerState,
     drivers: List<Driver>,
     teams: List<Team>,
@@ -168,6 +205,7 @@ private fun GridTabs(
     teamsListState: androidx.compose.foundation.lazy.LazyListState,
     onDriverClick: (Driver) -> Unit,
     onTeamClick: (Team) -> Unit,
+    inMasterPane: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -216,8 +254,8 @@ private fun GridTabs(
             modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
-                0 -> DriversList(PaddingValues(0.dp), drivers, driversListState, onDriverClick)
-                1 -> TeamsList(PaddingValues(0.dp), teams, teamsListState, onTeamClick)
+                0 -> DriversList(PaddingValues(0.dp), drivers, driversListState, onDriverClick, inMasterPane)
+                1 -> TeamsList(PaddingValues(0.dp), teams, teamsListState, onTeamClick, inMasterPane)
                 else -> Unit
             }
         }
@@ -229,14 +267,15 @@ private fun GridTabs(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DriversList(padding: PaddingValues, drivers: List<Driver>, listState: androidx.compose.foundation.lazy.LazyListState, onDriverClick: (Driver) -> Unit) {
+private fun DriversList(padding: PaddingValues, drivers: List<Driver>, listState: androidx.compose.foundation.lazy.LazyListState, onDriverClick: (Driver) -> Unit, inMasterPane: Boolean = false) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
+    val effectiveWidth = if (inMasterPane) 360 else screenWidth
     val columns = when {
-        screenWidth >= 840 -> 3
-        screenWidth >= 600 -> 2
+        effectiveWidth >= 840 -> 3
+        effectiveWidth >= 600 -> 2
         else -> 1
     }
-    val isTablet = screenWidth >= 600
+    val isTablet = effectiveWidth >= 600
     val pairs = if (columns > 1) drivers.chunked(columns) else drivers.map { listOf(it) }
     LazyColumn(
         state           = listState,
@@ -281,8 +320,8 @@ private fun DriversList(padding: PaddingValues, drivers: List<Driver>, listState
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TeamsList(padding: PaddingValues, teams: List<Team>, listState: androidx.compose.foundation.lazy.LazyListState, onTeamClick: (Team) -> Unit) {
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+private fun TeamsList(padding: PaddingValues, teams: List<Team>, listState: androidx.compose.foundation.lazy.LazyListState, onTeamClick: (Team) -> Unit, inMasterPane: Boolean = false) {
+    val isTablet = !inMasterPane && LocalConfiguration.current.screenWidthDp >= 600
     if (isTablet) {
         LazyVerticalStaggeredGrid(
             columns               = StaggeredGridCells.Fixed(2),
@@ -491,9 +530,11 @@ private fun TeamCard(team: Team, modifier: Modifier = Modifier, onClick: () -> U
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
+internal fun DriverDetailScreen(driver: Driver, onBack: () -> Unit, showBackButton: Boolean = true) {
     var navigatingBack by remember { mutableStateOf(false) }
-    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    if (showBackButton) {
+        BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    }
     val context     = LocalContext.current
     val favourite   by FavouriteDriverStore.driver.collectAsState()
     val isFavourite = favourite == driver.name
@@ -708,21 +749,23 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
         }
 
         // Floating back button
-        IconButton(
-            onClick  = onBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .statusBarsPadding()
-                .padding(start = 8.dp, top = 8.dp)
-                .size(40.dp)
-                .background(Color.Black.copy(alpha = 0.45f), CircleShape),
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint     = Color.White,
-                modifier = Modifier.size(22.dp),
-            )
+        if (showBackButton) {
+            IconButton(
+                onClick  = onBack,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .statusBarsPadding()
+                    .padding(start = 8.dp, top = 8.dp)
+                    .size(40.dp)
+                    .background(Color.Black.copy(alpha = 0.45f), CircleShape),
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint     = Color.White,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
         }
 
         // Floating star button
@@ -751,9 +794,11 @@ private fun DriverDetailScreen(driver: Driver, onBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
+internal fun TeamDetailScreen(team: Team, onBack: () -> Unit, showBackButton: Boolean = true) {
     var navigatingBack by remember { mutableStateOf(false) }
-    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    if (showBackButton) {
+        BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    }
     LaunchedEffect(team.name) { Analytics.screen("team_detail:${team.name}") }
 
     Box(
@@ -993,21 +1038,23 @@ private fun TeamDetailScreen(team: Team, onBack: () -> Unit) {
             }
         }
         // Back button overlaid top-left
-        IconButton(
-            onClick  = onBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .statusBarsPadding()
-                .padding(start = 8.dp, top = 8.dp)
-                .size(40.dp)
-                .background(Color.Black.copy(alpha = 0.45f), CircleShape),
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint     = Color.White,
-                modifier = Modifier.size(22.dp),
-            )
+        if (showBackButton) {
+            IconButton(
+                onClick  = onBack,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .statusBarsPadding()
+                    .padding(start = 8.dp, top = 8.dp)
+                    .size(40.dp)
+                    .background(Color.Black.copy(alpha = 0.45f), CircleShape),
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint     = Color.White,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
         }
     }
 }

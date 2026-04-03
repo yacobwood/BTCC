@@ -82,10 +82,11 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
     }
     val nextRace = races.firstOrNull { it.endDate >= today }
     val seasonYear = remember(races) { races.firstOrNull()?.startDate?.year ?: 2026 }
-    val isTablet = LocalConfiguration.current.screenWidthDp >= 840
+    val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+    val isWideScreen = LocalConfiguration.current.screenWidthDp >= 840
     var selectedRound by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(nextRace) {
-        if (isTablet && selectedRound == null) selectedRound = nextRace?.round
+        if (isWideScreen && selectedRound == null) selectedRound = nextRace?.round
         // Scroll so the countdown card is visible with ~1 past race above it for context
         if (nextRace != null && races.isNotEmpty()) {
             val nextRaceIndex = races.indexOf(nextRace)
@@ -147,15 +148,12 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
             onRefresh    = { isRefreshing = true; refreshKey++; Analytics.pullToRefresh("calendar") },
             modifier     = Modifier.fillMaxSize(),
         ) {
-        if (isTablet) {
-            // ── Tablet: master-detail layout ──────────────────────────────────
+        if (isTablet && isWideScreen) {
+            // ── Landscape tablet: master-detail split ─────────────────────────
             Row(modifier = Modifier.fillMaxSize()) {
-                // Left pane: countdown + rounds list
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier
-                        .width(360.dp)
-                        .fillMaxHeight(),
+                    modifier = Modifier.width(360.dp).fillMaxHeight(),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp, top = 4.dp),
                 ) {
                     if (isRaceWeekend) {
@@ -191,16 +189,7 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                         }
                     }
                 }
-
-                // Divider
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                        .background(BtccOutline.copy(alpha = 0.3f))
-                )
-
-                // Right pane: track detail
+                Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(BtccOutline.copy(alpha = 0.3f)))
                 Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                     val roundToShow = selectedRound
                     if (roundToShow != null) {
@@ -210,6 +199,57 @@ fun CalendarScreen(onRaceClick: (Race) -> Unit = {}, onLiveTimingClick: ((Int) -
                                 showBackButton = false,
                                 onBack = {},
                                 onLiveTimingClick = onLiveTimingClick,
+                            )
+                        }
+                    }
+                }
+            }
+        } else if (isTablet) {
+            // ── Portrait tablet: full-screen swap ─────────────────────────────
+            if (selectedRound != null) {
+                key(selectedRound) {
+                    TrackDetailScreen(
+                        round = selectedRound!!,
+                        showBackButton = true,
+                        onBack = { selectedRound = null },
+                        onLiveTimingClick = onLiveTimingClick,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 20.dp, top = 4.dp),
+                ) {
+                    if (isRaceWeekend) {
+                        item {
+                            LiveTimingCard(onClick = { Analytics.liveTimingCardClicked(nextRace!!.venue); onLiveTimingClick!!(nextRace.tslEventId) })
+                            Spacer(Modifier.height(12.dp))
+                        }
+                    }
+                    item {
+                        Text(
+                            "ALL ROUNDS",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = BtccTextSecondary,
+                            letterSpacing = 2.sp,
+                            modifier = Modifier.padding(bottom = 12.dp),
+                        )
+                    }
+                    itemsIndexed(races) { index, race ->
+                        if (race == nextRace) {
+                            CountdownCard(race = race, today = today, onClick = { Analytics.raceClicked(race.round, race.venue); selectedRound = race.round })
+                            Spacer(Modifier.height(12.dp))
+                        } else {
+                            TimelineRaceRow(
+                                race = race,
+                                isNext = false,
+                                isPast = race.endDate < today,
+                                isLast = index == races.lastIndex,
+                                isSelected = false,
+                                today = today,
+                                onClick = { Analytics.raceClicked(race.round, race.venue); selectedRound = race.round },
                             )
                         }
                     }

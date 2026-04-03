@@ -64,9 +64,18 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.key
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
+import android.content.res.Configuration
+import com.btccfanhub.ui.components.DetailPlaceholder
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import androidx.compose.ui.platform.testTag
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
@@ -105,6 +114,14 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
     val statsListState    = rememberSaveable(selectedYear, saver = LazyListState.Saver) { LazyListState() }
     val pagerState    = rememberPagerState(initialPage = initialTab, pageCount = { 5 })
     val scope         = rememberCoroutineScope()
+    var selectedRound by remember { mutableStateOf<Pair<Int,Int>?>(null) }
+    // Track the Y offset of the content area (below header+tabs) for the detail overlay
+    var contentTopPx by remember { mutableIntStateOf(0) }
+
+    // Clear the detail pane when navigating away from the Results tab
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage != 2) selectedRound = null
+    }
 
     suspend fun refresh(invalidate: Boolean = false) {
         isRefreshing = true
@@ -184,7 +201,8 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
     val show2026Drivers = selectedYear == 2026 && seasonStarted && liveDrivers != null
     val show2026Teams   = selectedYear == 2026 && seasonStarted && liveTeams != null
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // Shared master content used by both tablet and phone layouts
+    val masterContent: @Composable () -> Unit = {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -292,7 +310,13 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                             selected = pagerState.currentPage == index,
                             onClick  = {
                                 Analytics.resultsTabChanged(selectedYear, tabNames[index])
-                                scope.launch { pagerState.animateScrollToPage(index) }
+                                scope.launch {
+                                    if (index != 2 && selectedRound != null) {
+                                        selectedRound = null
+                                        kotlinx.coroutines.delay(50) // let pager re-measure at full width
+                                    }
+                                    pagerState.animateScrollToPage(index)
+                                }
                             },
                             text = {
                                 Text(
@@ -319,7 +343,13 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                             selected = pagerState.currentPage == index,
                             onClick  = {
                                 Analytics.resultsTabChanged(selectedYear, tabNames[index])
-                                scope.launch { pagerState.animateScrollToPage(index) }
+                                scope.launch {
+                                    if (index != 2 && selectedRound != null) {
+                                        selectedRound = null
+                                        kotlinx.coroutines.delay(50)
+                                    }
+                                    pagerState.animateScrollToPage(index)
+                                }
                             },
                             text = {
                                 Text(
@@ -375,7 +405,10 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
         val isLiveLoading = selectedYear == 2026 && isRefreshing && liveDrivers == null
         val isLiveFailed  = selectedYear == 2026 && loadFailed && liveDrivers == null
 
-        Box(modifier = Modifier.weight(1f).then(if (isTablet) Modifier else Modifier.widthIn(max = 680.dp)).fillMaxWidth()) {
+        Box(modifier = Modifier.weight(1f).then(if (isTablet) Modifier else Modifier.widthIn(max = 680.dp)).fillMaxWidth()
+            .onGloballyPositioned { contentTopPx = it.positionInRoot().y.toInt() }
+        ) {
+            // Pager content — always full width, never changes size
             PullToRefreshBox(
                 isRefreshing = isRefreshing || resultsLoading,
                 onRefresh    = {
@@ -419,7 +452,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                                 showPastBanner = false,
                                 bannerYear = selectedYear,
                                 state = driversListState,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     page == 1 && isHistorical && histTeams != null ->
@@ -429,7 +462,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                                 showPastBanner = false,
                                 bannerYear = selectedYear,
                                 state = teamsListState,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     page == 1 && isHistorical ->
@@ -445,7 +478,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                                 showLiveRound = liveRound,
                                 showPastBanner = false,
                                 state = driversListState,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     page == 0 && selectedYear == 2026 && !seasonStarted ->
@@ -460,7 +493,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                                 liveTeams!!,
                                 showPastBanner = false,
                                 state = teamsListState,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     page == 1 && selectedYear == 2026 ->
@@ -474,9 +507,15 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                                 results = currentRaceResults,
                                 loading = resultsLoading,
                                 seasonStartDate = seasonStartDate,
-                                onRoundClick = { round -> onRoundClick(selectedYear, round) },
+                                onRoundClick = { round ->
+                                    if (isTablet) {
+                                        selectedRound = Pair(selectedYear, round)
+                                    } else {
+                                        onRoundClick(selectedYear, round)
+                                    }
+                                },
                                 state = resultsListState,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
@@ -496,7 +535,7 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                                 year = selectedYear,
                                 seasonStartDate = seasonStartDate,
                                 state = statsListState,
-                                modifier = Modifier.widthIn(max = if (isTablet) 800.dp else Dp.Unspecified)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }
@@ -521,13 +560,39 @@ fun ResultsScreen(onRoundClick: (year: Int, round: Int) -> Unit = { _, _ -> }, i
                 }
             }
             }
+            } // end content Box
+    } // end Column
+    } // end masterContent lambda
+
+    if (isTablet) {
+        val roundToShow = selectedRound
+        if (roundToShow != null) {
+            // Full-screen round detail with back button
+            RoundResultsScreen(
+                year = roundToShow.first,
+                round = roundToShow.second,
+                onBack = { selectedRound = null },
+                showBackButton = true,
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxSize().testTag("results_master_pane")) {
+                masterContent()
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier  = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+        }
+    } else {
+        // ── Phone: existing layout unchanged ──────────────────────────────
+        Box(modifier = Modifier.fillMaxSize()) {
+            masterContent()
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier  = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
-    SnackbarHost(
-        hostState = snackbarHostState,
-        modifier  = Modifier.align(Alignment.BottomCenter),
-    )
-    } // end Box
 }
 
 @Composable

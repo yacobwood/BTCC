@@ -48,9 +48,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
+fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit, showBackButton: Boolean = true) {
     var navigatingBack by remember { mutableStateOf(false) }
-    BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    if (showBackButton) {
+        BackHandler { if (!navigatingBack) { navigatingBack = true; onBack() } }
+    }
     var roundResult by remember { mutableStateOf<com.btccfanhub.data.model.RoundResult?>(null) }
     var loading by remember { mutableStateOf(true) }
     var loadError by remember { mutableStateOf(false) }
@@ -114,8 +116,10 @@ fun RoundResultsScreen(year: Int = 2026, round: Int, onBack: () -> Unit) {
                 }
             },
             navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                if (showBackButton) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = BtccBackground),

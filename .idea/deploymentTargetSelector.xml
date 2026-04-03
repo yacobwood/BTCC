@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-02T14:05:43.685251Z">
+        <DropdownSelection timestamp="2026-04-03T17:46:16.431582Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=69e01549" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/jakewood/.android/avd/OnePlus_Nord_4_Custom.avd" />
             </handle>
           </Target>
         </DropdownSelection>
