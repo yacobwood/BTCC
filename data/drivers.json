@@ -1890,6 +1890,85 @@
       "history": []
     },
     {
+      "number": 28,
+      "name": "Nicolas Hamilton",
+      "team": "Draper Tools with EXCELR8",
+      "car": "Hyundai i30 Fastback N Performance",
+      "imageUrl": "",
+      "nationality": "British",
+      "bio": "Nicolas Hamilton is a British racing driver born on 28 March 1992 in Stevenage, Hertfordshire, and the half-brother of seven-time Formula One World Champion Lewis Hamilton. He is the first disabled driver to compete in the BTCC, racing with cerebral palsy, which affects his lower body and requires him to use hand controls on the throttle and brake.\n\nHamilton made his BTCC debut in 2015 with AmD Tuning.com as a guest driver, making five appearances in an Audi S3. He has returned to the series on multiple occasions since, racking up over 160 race starts and becoming one of the most recognisable faces in British motorsport.\n\nFor 2026, Hamilton secures his most competitive drive yet — joining the Excelr8 Motorsport setup backed by Draper Tools to race a Hyundai i30 Fastback N Performance alongside a team capable of fighting for wins.",
+      "dateOfBirth": "1992-03-28",
+      "birthplace": "Stevenage, Hertfordshire",
+      "history": [
+        {
+          "year": 2025,
+          "team": "Un-Limited Motorsport",
+          "car": "CUPRA Leon",
+          "pos": 28,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2023,
+          "team": "Go-Fix with Autoaid Breakdown",
+          "car": "CUPRA Leon",
+          "pos": 24,
+          "points": 10,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2022,
+          "team": "Yazoo with Safuu.com Racing",
+          "car": "CUPRA Leon",
+          "pos": 29,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2021,
+          "team": "ROKiT Racing with iQuoto Online Trading",
+          "car": "CUPRA Leon",
+          "pos": 30,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2020,
+          "team": "Team HARD",
+          "car": "Volkswagen CC",
+          "pos": 0,
+          "points": 1,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2019,
+          "team": "ROKiT Motorbase",
+          "car": "Ford Focus ST",
+          "pos": 0,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        }
+      ]
+    },
+    {
       "number": 2,
       "name": "Daryl De Leon",
       "team": "West Surrey Racing",
