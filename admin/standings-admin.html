@@ -936,23 +936,8 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     </div>
   </div>
 
-  <!-- Test channel buttons -->
-  <div style="margin-top:16px;">
-    <div class="section-label">TEST CHANNELS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('news','New article on BTCC.net','Test news notification')">News</button>
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('race','Race 1','Starting in 15 min · Round 1, Donington Park')">Race</button>
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('qualifying','Qualifying','Starting in 15 min · Round 1, Donington Park')">Qualifying</button>
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('free_practice','Free Practice','Starting in 15 min · Round 1, Donington Park')">Free Practice</button>
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('results','Round 1 results are in','Donington Park — tap to view')">Results</button>
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('weekend_preview','Race weekend starts tomorrow','Donington Park · Rounds 1–3')">Preview</button>
-      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('standings','Standings updated','Check the latest championship standings')">Standings</button>
-    </div>
-    <div id="fcm-test-status" style="font-size:12px;margin-top:10px;min-height:18px;color:var(--text-sec);"></div>
-  </div>
-
-  <div style="border-top:1px solid var(--outline-lo);margin:20px 0 16px;"></div>
-
+  <div id="fcm-test-status" style="font-size:12px;margin-top:4px;min-height:18px;color:var(--text-sec);"></div>
+  <div style="border-top:1px solid var(--outline-lo);margin:16px 0;"></div>
   <div class="section-note">All notifications scheduled for the 2026 season.</div>
   <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
 
@@ -1039,6 +1024,24 @@ function saveFcmTok(){
   localStorage.setItem('btcc_fcm_device_tok', v);
   document.getElementById('fcm-tok-input').value='';
   collapseFcmTok();
+}
+
+function testChannel(n) {
+  if (n.type === 'preview')   return 'weekend_preview';
+  if (n.type === 'standings') return 'standings';
+  if (n.type === 'qualifying') return 'qualifying';
+  if (n.type === 'race')      return 'race';
+  return n.type;
+}
+function testTitle(n) {
+  if (n.type === 'preview')   return `Race weekend ahead!`;
+  if (n.type === 'standings') return `How did Round ${n.round} shake up the standings?`;
+  return n.label;
+}
+function testBody(n) {
+  if (n.type === 'preview')   return `Round ${n.round} at ${n.venue} starts tomorrow. Get ready for this weekend\u2019s racing!`;
+  if (n.type === 'standings') return `Check the championship progression chart to see how the points changed.`;
+  return `Starting in 15 min \u00b7 Round ${n.round}, ${n.venue}`;
 }
 
 async function sendTestNotif(channel, title, body) {
@@ -1751,7 +1754,7 @@ async function loadNotifSchedule() {
               </div>
               <div style="font-size:12px;color:var(--text-sec);margin-top:1px;">Round ${n.round} · ${n.venue}</div>
             </div>
-            ${n.link ? `<a href="${n.link}" style="flex-shrink:0;background:${past ? 'var(--surface)' : n.color};color:${past ? 'var(--text-sec)' : '#000'};font-size:10px;font-weight:800;letter-spacing:0.5px;padding:6px 10px;border-radius:7px;text-decoration:none;white-space:nowrap;">Test</a>` : `<span style="flex-shrink:0;font-size:10px;color:var(--outline);padding:6px 10px;">AUTO</span>`}
+            <button onclick="sendTestNotif('${testChannel(n)}','${testTitle(n)}','${testBody(n)}')" style="flex-shrink:0;background:${past ? 'var(--surface)' : n.color};color:${past ? 'var(--text-sec)' : '#000'};font-size:10px;font-weight:800;letter-spacing:0.5px;padding:6px 10px;border-radius:7px;border:none;cursor:pointer;white-space:nowrap;">Test</button>
           </div>`;
       });
     });
