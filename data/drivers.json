@@ -1888,6 +1888,30 @@
       "dateOfBirth": "1980-07-18",
       "birthplace": "Aylesbury, Buckinghamshire",
       "history": []
+    },
+    {
+      "number": 2,
+      "name": "Daryl De Leon",
+      "team": "West Surrey Racing",
+      "car": "BMW 330e M Sport",
+      "imageUrl": "",
+      "nationality": "Irish",
+      "bio": "Daryl De Leon is an Irish racing driver born on 2 August 2005 in Drogheda, Ireland. He made a stunning debut in the British Touring Car Championship in 2025, joining West Surrey Racing to drive a BMW 330e M Sport.\n\nDe Leon made history as the first Filipino driver to win a BTCC race, taking victory at Brands Hatch Indy Circuit in 2025. He went on to dominate the Jack Sears Trophy — the award for drivers yet to score more than one podium in the series — claiming the title with two pole positions and a win across the season.\n\nHis impressive maiden campaign earned him a second season with WSR, where he will look to build on his promising start and challenge further up the overall drivers' championship standings.",
+      "dateOfBirth": "2005-08-02",
+      "birthplace": "Drogheda, Ireland",
+      "history": [
+        {
+          "year": 2025,
+          "team": "West Surrey Racing",
+          "car": "BMW 330e M Sport",
+          "pos": 13,
+          "points": 149,
+          "wins": 1,
+          "podiums": 2,
+          "poles": 2,
+          "fastestLaps": 0
+        }
+      ]
     }
   ],
   "teams": [
