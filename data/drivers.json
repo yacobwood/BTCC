@@ -1890,6 +1890,30 @@
       "history": []
     },
     {
+      "number": 99,
+      "name": "Charles Rainford",
+      "team": "West Surrey Racing",
+      "car": "BMW 330e M Sport",
+      "imageUrl": "",
+      "nationality": "British",
+      "bio": "Charles Rainford is a British racing driver born on 20 July 1998 in Horsham, West Sussex. After years competing in historic motorsport and the Porsche Carrera Cup GB — where he claimed the Pro-Am title in 2022 and finished runner-up overall in 2024 — Rainford stepped up to the BTCC with West Surrey Racing in 2025.\n\nHis debut season was nothing short of outstanding. He took a maiden BTCC win in just his sixth start at Brands Hatch Indy, added a pole position at Knockhill, and finished eighth in the Drivers' Championship. He was also voted the 2025 Fans' Choice Award winner.\n\nFor 2026, Rainford stays with WSR and is widely regarded as one of the most exciting young talents in British touring car racing, with genuine championship ambitions ahead.",
+      "dateOfBirth": "1998-07-20",
+      "birthplace": "Horsham, West Sussex",
+      "history": [
+        {
+          "year": 2025,
+          "team": "LKQ Euro Car Parts Racing with WSR",
+          "car": "BMW 330e M Sport",
+          "pos": 8,
+          "points": 179,
+          "wins": 1,
+          "podiums": 3,
+          "poles": 1,
+          "fastestLaps": 3
+        }
+      ]
+    },
+    {
       "number": 28,
       "name": "Nicolas Hamilton",
       "team": "Draper Tools with EXCELR8",
