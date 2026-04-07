@@ -920,10 +920,56 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 <div class="desktop-col-title">Notifications</div>
 <div id="panel-notifications" class="tab-panel">
 
-  <div class="section-note" style="margin-bottom:16px;">
-    All notifications scheduled for the 2026 season. Tap <strong>Test</strong> on your phone to fire immediately.
+  <!-- FCM server key -->
+  <div class="token-card" id="fcm-key-card" onclick="expandFcmKey()">
+    <div class="token-collapsed-row">
+      <div class="token-ok">FCM key loaded</div>
+      <div class="token-edit-hint">Tap to change</div>
+    </div>
+    <div class="token-body">
+      <div class="section-label">FCM SERVER KEY</div>
+      <div class="token-row" style="margin-top:8px">
+        <input type="password" id="fcm-key-input" placeholder="AAAA…" autocomplete="off" onclick="event.stopPropagation()">
+        <button class="btn-run" onclick="event.stopPropagation();saveFcmKey()" style="padding:0 18px;border-radius:10px">SAVE</button>
+      </div>
+      <div class="token-note">Firebase Cloud Messaging server key — stored in this browser only.</div>
+    </div>
   </div>
 
+  <!-- Device FCM token -->
+  <div class="token-card" id="fcm-tok-card" style="margin-top:10px;" onclick="expandFcmTok()">
+    <div class="token-collapsed-row">
+      <div class="token-ok">Device token loaded</div>
+      <div class="token-edit-hint">Tap to change</div>
+    </div>
+    <div class="token-body">
+      <div class="section-label">DEVICE TOKEN</div>
+      <div class="token-row" style="margin-top:8px">
+        <input type="text" id="fcm-tok-input" placeholder="Paste FCM token from app…" autocomplete="off" style="font-family:monospace;font-size:12px;" onclick="event.stopPropagation()">
+        <button class="btn-run" onclick="event.stopPropagation();saveFcmTok()" style="padding:0 18px;border-radius:10px">SAVE</button>
+      </div>
+      <div class="token-note">FCM registration token from the device. Find it in the app's Test Mode screen.</div>
+    </div>
+  </div>
+
+  <!-- Test channel buttons -->
+  <div style="margin-top:16px;">
+    <div class="section-label">TEST CHANNELS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('news','New article on BTCC.net','Test news notification')">News</button>
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('race','Race 1','Starting in 15 min · Round 1, Donington Park')">Race</button>
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('qualifying','Qualifying','Starting in 15 min · Round 1, Donington Park')">Qualifying</button>
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('free_practice','Free Practice','Starting in 15 min · Round 1, Donington Park')">Free Practice</button>
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('results','Round 1 results are in','Donington Park — tap to view')">Results</button>
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('weekend_preview','Race weekend starts tomorrow','Donington Park · Rounds 1–3')">Preview</button>
+      <button class="btn-run" style="font-size:11px;padding:7px 14px;" onclick="sendTestNotif('standings','Standings updated','Check the latest championship standings')">Standings</button>
+    </div>
+    <div id="fcm-test-status" style="font-size:12px;margin-top:10px;min-height:18px;color:var(--text-sec);"></div>
+  </div>
+
+  <div style="border-top:1px solid var(--outline-lo);margin:20px 0 16px;"></div>
+
+  <div class="section-note">All notifications scheduled for the 2026 season.</div>
   <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
 
 </div>
@@ -993,6 +1039,69 @@ function saveToken(){
   document.getElementById('tok').value='';
   collapseToken();
   refreshAllStatus();
+}
+
+// ── FCM test notifications ───────────────────────────────────────────────────
+function getFcmKey(){ return localStorage.getItem('btcc_fcm_key')||''; }
+function getFcmTok(){ return localStorage.getItem('btcc_fcm_device_tok')||''; }
+
+function collapseFcmKey(){ document.getElementById('fcm-key-card').classList.add('collapsed'); }
+function expandFcmKey(){
+  const card = document.getElementById('fcm-key-card');
+  if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
+}
+function saveFcmKey(){
+  const v = document.getElementById('fcm-key-input').value.trim();
+  if(!v) return;
+  localStorage.setItem('btcc_fcm_key', v);
+  document.getElementById('fcm-key-input').value='';
+  collapseFcmKey();
+}
+
+function collapseFcmTok(){ document.getElementById('fcm-tok-card').classList.add('collapsed'); }
+function expandFcmTok(){
+  const card = document.getElementById('fcm-tok-card');
+  if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
+}
+function saveFcmTok(){
+  const v = document.getElementById('fcm-tok-input').value.trim();
+  if(!v) return;
+  localStorage.setItem('btcc_fcm_device_tok', v);
+  document.getElementById('fcm-tok-input').value='';
+  collapseFcmTok();
+}
+
+async function sendTestNotif(channel, title, body) {
+  const key = getFcmKey();
+  const tok = getFcmTok();
+  const statusEl = document.getElementById('fcm-test-status');
+  if(!key){ statusEl.style.color='var(--red)'; statusEl.textContent='No FCM server key saved.'; return; }
+  if(!tok){ statusEl.style.color='var(--red)'; statusEl.textContent='No device token saved.'; return; }
+  statusEl.style.color='var(--text-sec)';
+  statusEl.textContent='Sending…';
+  try {
+    const res = await fetch('https://fcm.googleapis.com/fcm/send', {
+      method: 'POST',
+      headers: { 'Authorization': 'key=' + key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: tok,
+        notification: { title, body },
+        data: { channel },
+        android: { notification: { channel_id: channel } },
+      }),
+    });
+    const json = await res.json();
+    if(json.success === 1){
+      statusEl.style.color='var(--green)';
+      statusEl.textContent=`✓ ${channel} sent`;
+    } else {
+      statusEl.style.color='var(--red)';
+      statusEl.textContent='FCM error: ' + (json.results?.[0]?.error || JSON.stringify(json));
+    }
+  } catch(e) {
+    statusEl.style.color='var(--red)';
+    statusEl.textContent='Request failed: ' + e.message;
+  }
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -1708,6 +1817,8 @@ document.querySelectorAll('.tab').forEach(t => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 if(getToken()) collapseToken();
+if(getFcmKey()) collapseFcmKey();
+if(getFcmTok()) collapseFcmTok();
 loadExisting();
 loadFlags();
 loadNotifSchedule();
