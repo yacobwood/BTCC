@@ -1,0 +1,42 @@
+name: Send Test Notification
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Notification channel (news, race, qualifying, free_practice, results, weekend_preview, standings)'
+        required: true
+      title:
+        description: 'Notification title'
+        required: true
+      body:
+        description: 'Notification body'
+        required: true
+      device_token:
+        description: 'FCM device token'
+        required: true
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send FCM notification
+        run: |
+          curl -s -X POST https://fcm.googleapis.com/fcm/send \
+            -H "Authorization: key=${{ secrets.FCM_SERVER_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "to": "${{ inputs.device_token }}",
+              "notification": {
+                "title": "${{ inputs.title }}",
+                "body": "${{ inputs.body }}"
+              },
+              "data": {
+                "channel": "${{ inputs.channel }}"
+              },
+              "android": {
+                "notification": {
+                  "channel_id": "${{ inputs.channel }}"
+                }
+              }
+            }'

@@ -920,22 +920,6 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 <div class="desktop-col-title">Notifications</div>
 <div id="panel-notifications" class="tab-panel">
 
-  <!-- FCM server key -->
-  <div class="token-card" id="fcm-key-card" onclick="expandFcmKey()">
-    <div class="token-collapsed-row">
-      <div class="token-ok">FCM key loaded</div>
-      <div class="token-edit-hint">Tap to change</div>
-    </div>
-    <div class="token-body">
-      <div class="section-label">FCM SERVER KEY</div>
-      <div class="token-row" style="margin-top:8px">
-        <input type="password" id="fcm-key-input" placeholder="AAAA…" autocomplete="off" onclick="event.stopPropagation()">
-        <button class="btn-run" onclick="event.stopPropagation();saveFcmKey()" style="padding:0 18px;border-radius:10px">SAVE</button>
-      </div>
-      <div class="token-note">Firebase Cloud Messaging server key — stored in this browser only.</div>
-    </div>
-  </div>
-
   <!-- Device FCM token -->
   <div class="token-card" id="fcm-tok-card" style="margin-top:10px;" onclick="expandFcmTok()">
     <div class="token-collapsed-row">
@@ -1042,21 +1026,7 @@ function saveToken(){
 }
 
 // ── FCM test notifications ───────────────────────────────────────────────────
-function getFcmKey(){ return localStorage.getItem('btcc_fcm_key')||''; }
 function getFcmTok(){ return localStorage.getItem('btcc_fcm_device_tok')||''; }
-
-function collapseFcmKey(){ document.getElementById('fcm-key-card').classList.add('collapsed'); }
-function expandFcmKey(){
-  const card = document.getElementById('fcm-key-card');
-  if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
-}
-function saveFcmKey(){
-  const v = document.getElementById('fcm-key-input').value.trim();
-  if(!v) return;
-  localStorage.setItem('btcc_fcm_key', v);
-  document.getElementById('fcm-key-input').value='';
-  collapseFcmKey();
-}
 
 function collapseFcmTok(){ document.getElementById('fcm-tok-card').classList.add('collapsed'); }
 function expandFcmTok(){
@@ -1072,31 +1042,26 @@ function saveFcmTok(){
 }
 
 async function sendTestNotif(channel, title, body) {
-  const key = getFcmKey();
-  const tok = getFcmTok();
+  const ghTok = getToken();
+  const deviceTok = getFcmTok();
   const statusEl = document.getElementById('fcm-test-status');
-  if(!key){ statusEl.style.color='var(--red)'; statusEl.textContent='No FCM server key saved.'; return; }
-  if(!tok){ statusEl.style.color='var(--red)'; statusEl.textContent='No device token saved.'; return; }
+  if(!ghTok){ statusEl.style.color='var(--red)'; statusEl.textContent='No GitHub token saved.'; return; }
+  if(!deviceTok){ statusEl.style.color='var(--red)'; statusEl.textContent='No device token saved.'; return; }
   statusEl.style.color='var(--text-sec)';
   statusEl.textContent='Sending…';
   try {
-    const res = await fetch('https://fcm.googleapis.com/fcm/send', {
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
       method: 'POST',
-      headers: { 'Authorization': 'key=' + key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: tok,
-        notification: { title, body },
-        data: { channel },
-        android: { notification: { channel_id: channel } },
-      }),
+      headers: { Authorization: 'token ' + ghTok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main', inputs: { channel, title, body, device_token: deviceTok } }),
     });
-    const json = await res.json();
-    if(json.success === 1){
+    if(r.status === 204){
       statusEl.style.color='var(--green)';
-      statusEl.textContent=`✓ ${channel} sent`;
+      statusEl.textContent=`✓ ${channel} queued`;
     } else {
+      const e = await r.json();
       statusEl.style.color='var(--red)';
-      statusEl.textContent='FCM error: ' + (json.results?.[0]?.error || JSON.stringify(json));
+      statusEl.textContent='Error: ' + (e.message || r.status);
     }
   } catch(e) {
     statusEl.style.color='var(--red)';
@@ -1817,7 +1782,6 @@ document.querySelectorAll('.tab').forEach(t => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 if(getToken()) collapseToken();
-if(getFcmKey()) collapseFcmKey();
 if(getFcmTok()) collapseFcmTok();
 loadExisting();
 loadFlags();
