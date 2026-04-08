@@ -1993,6 +1993,52 @@
       ]
     },
     {
+      "number": 0,
+      "name": "Ricky Collard",
+      "team": "Team VERTU",
+      "car": "Hyundai i30 Fastback N Performance",
+      "imageUrl": "",
+      "nationality": "British",
+      "dateOfBirth": "1996-07-30",
+      "birthplace": "Surrey, England",
+      "bio": "Ricky Collard is a British racing driver born on 30 July 1996 in Surrey, the son of former BTCC driver Rob Collard. He made his BTCC debut in 2018 as a substitute for his injured father at West Surrey Racing, immediately impressing with a podium finish at Silverstone.\n\nAfter stepping away from touring cars to pursue GT racing, Collard returned to the BTCC in 2022 with Speedworks Motorsport aboard the Toyota Corolla, completing two full seasons and finishing a career-best 8th in the 2023 championship as the leading Toyota driver.\n\nIn 2024 Collard won the British GT Championship GT3 title alongside his father Rob in a Lamborghini Huracán for Barwell Motorsport — becoming one of the few father-and-son pairs to win the same championship. He returns to the BTCC for 2026 with the title-winning Team VERTU operation, the most competitive drive of his touring car career.",
+      "history": [
+        {
+          "year": 2023,
+          "team": "Toyota GAZOO Racing UK with Speedworks",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 8,
+          "points": 217,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2022,
+          "team": "Toyota GAZOO Racing UK with Speedworks",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 16,
+          "points": 81,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2018,
+          "team": "West Surrey Racing",
+          "car": "BMW 125i M Sport",
+          "pos": 25,
+          "points": 46,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
+        }
+      ]
+    },
+    {
       "number": 2,
       "name": "Daryl De Leon",
       "team": "West Surrey Racing",
@@ -2082,7 +2128,7 @@
     {
       "name": "Team VERTU",
       "car": "Hyundai i30 Fastback N Performance",
-      "entries": 3,
+      "entries": 4,
       "bio": "Run by the award-winning EXCELR8 Motorsport, Team VERTU are backed by one of the UK's largest motor retail groups. EXCELR8 entered the BTCC in 2018 and rapidly grew into championship contenders, earning their first major drivers' titles in 2022 and 2025 when Tom Ingram claimed the Drivers' Championship.\n\nBased in Huntingdon, Cambridgeshire, the team have developed a fierce reputation for consistently fast and reliable Hyundai i30N Fastback machinery. Ingram remained their spearhead throughout their Hyundai era before the operation transitioned to new machinery for 2026.\n\nThe VERTU Motors sponsorship has given the squad significant commercial backing, and the team's data-led approach under team principal Justina Williams has seen them become one of the best-resourced teams on the grid. With multiple championship wins across different categories, EXCELR8's move into BTCC has been one of the success stories of the past decade.",
       "standing2025": 2,
       "points2025": 773,
