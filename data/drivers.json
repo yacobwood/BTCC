@@ -2,6 +2,30 @@
   "season": 2026,
   "drivers": [
     {
+      "number": 2,
+      "name": "Daryl De Leon",
+      "team": "West Surrey Racing",
+      "car": "BMW 330i M Sport",
+      "imageUrl": "",
+      "nationality": "Filipino",
+      "bio": "Daryl De Leon is an Irish racing driver born on 2 August 2005 in Drogheda, Ireland. He made a stunning debut in the British Touring Car Championship in 2025, joining West Surrey Racing to drive a BMW 330e M Sport.\n\nDe Leon made history as the first Filipino driver to win a BTCC race, taking victory at Brands Hatch Indy Circuit in 2025. He went on to dominate the Jack Sears Trophy — the award for drivers yet to score more than one podium in the series — claiming the title with two pole positions and a win across the season.\n\nHis impressive maiden campaign earned him a second season with WSR, where he will look to build on his promising start and challenge further up the overall drivers' championship standings.",
+      "dateOfBirth": "2005-08-02",
+      "birthplace": "Drogheda, Ireland",
+      "history": [
+        {
+          "year": 2025,
+          "team": "West Surrey Racing",
+          "car": "BMW 330e M Sport",
+          "pos": 13,
+          "points": 149,
+          "wins": 1,
+          "podiums": 2,
+          "poles": 2,
+          "fastestLaps": 0
+        }
+      ]
+    },
+    {
       "number": 3,
       "name": "Tom Chilton",
       "team": "Team VERTU",
@@ -222,6 +246,64 @@
       ],
       "dateOfBirth": "1985-03-15",
       "birthplace": "Reigate, Surrey"
+    },
+    {
+      "number": 11,
+      "name": "Ricky Collard",
+      "team": "Team VERTU",
+      "car": "Hyundai i30N",
+      "imageUrl": "",
+      "nationality": "British",
+      "dateOfBirth": "1996-07-30",
+      "birthplace": "Surrey, England",
+      "bio": "Ricky Collard is a British racing driver born on 30 July 1996 in Surrey, the son of former BTCC driver Rob Collard. He made his BTCC debut in 2018 as a substitute for his injured father at West Surrey Racing, immediately impressing with a podium finish at Silverstone.\n\nAfter stepping away from touring cars to pursue GT racing, Collard returned to the BTCC in 2022 with Speedworks Motorsport aboard the Toyota Corolla, completing two full seasons and finishing a career-best 8th in the 2023 championship as the leading Toyota driver.\n\nIn 2024 Collard won the British GT Championship GT3 title alongside his father Rob in a Lamborghini Huracán for Barwell Motorsport — becoming one of the few father-and-son pairs to win the same championship. He returns to the BTCC for 2026 with the title-winning Team VERTU operation, the most competitive drive of his touring car career.",
+      "history": [
+        {
+          "year": 2023,
+          "team": "Toyota GAZOO Racing UK with Speedworks",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 8,
+          "points": 217,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2022,
+          "team": "Toyota GAZOO Racing UK with Speedworks",
+          "car": "Toyota Corolla GR Sport",
+          "pos": 16,
+          "points": 81,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2018,
+          "team": "West Surrey Racing",
+          "car": "BMW 125i M Sport",
+          "pos": 25,
+          "points": 46,
+          "wins": 0,
+          "podiums": 1,
+          "poles": 0,
+          "fastestLaps": 0
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "name": "Lewis Selby",
+      "team": "NAPA Racing UK",
+      "car": "Ford Focus Titanium",
+      "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Selby-0H5A6861-e1745404956.png",
+      "nationality": "British",
+      "bio": "Despite ironically standing at more than six foot, Lewis Selby has become synonymous for competing in MINIs, both classic and modern.\n\nWinning races in both the MINI Miglia Championship and MINI Se7en Challenge, Selby originally represented NAPA Racing at the 2022 edition of the Goodwood Festival of Speed before then going on to race a NAPA-branded car in the EnduroKA series.\n\nMaking the high-profile switch to the MINI CHALLENGE in 2023, Selby entered the JCW class with the backing of NAPA Racing UK and punched in a number of standout performances to eventually seal the coveted Directors Cup.\n\nContinuing to improve as each season has passed, the Buckinghamshire racer now takes on a brand-new challenge as he makes the step up to the BTCC.\n\nUndoubtedly set to be one to watch in 2026, Selby will be looking to utilise all of his experience in front-wheel-drive machinery to hit the ground running and challenge for honours in the Jack Sears Trophy, which is for drivers who are yet to score more than one podium in the series.",
+      "dateOfBirth": "1980-07-18",
+      "birthplace": "Aylesbury, Buckinghamshire",
+      "history": []
     },
     {
       "number": 16,
@@ -575,28 +657,6 @@
       "birthplace": "Larne, Northern Ireland"
     },
     {
-      "number": 132,
-      "name": "James Dorlin",
-      "team": "Restart Racing",
-      "car": "Hyundai i30N",
-      "imageUrl": "",
-      "nationality": "British",
-      "bio": "James Dorlin is a British racing driver born on 22 May 1999 in Barnsley, England. He began his motorsport career in karting before progressing into junior saloon car racing, where he quickly emerged as a front-running talent.\n\nDorlin won the 2016 Ginetta Junior Championship, marking him out as one of the UK’s leading young prospects. He then moved into GT and endurance racing, including campaigns in the Porsche Carrera Cup GB and British GT, where he developed strong racecraft, consistency, and technical adaptability across different cars and race formats.\n\nIn 2025, Dorlin stepped up to the British Touring Car Championship, joining the BTCC grid after several successful seasons in GT machinery. His move represents a transition into one of the most competitive touring car series in the world.\n\nKnown for his smooth driving style and versatility, Dorlin is regarded as an adaptable racer aiming to establish himself quickly within the BTCC midfield and progress toward front-running results.",
-      "history": [
-        {
-          "year": 2025,
-          "team": "TOYOTA GAZOO Racing UK with IAA",
-          "car": "Toyota Corolla GR Sport",
-          "pos": 19,
-          "points": 47,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        }
-      ]
-    },
-    {
       "number": 27,
       "name": "Dan Cammish",
       "team": "NAPA Racing UK",
@@ -696,6 +756,85 @@
       ],
       "dateOfBirth": "1989-09-26",
       "birthplace": "Harrogate, Yorkshire"
+    },
+    {
+      "number": 28,
+      "name": "Nicolas Hamilton",
+      "team": "Team VERTU",
+      "car": "Hyundai i30N",
+      "imageUrl": "",
+      "nationality": "British",
+      "bio": "Nicolas Hamilton is a British racing driver born on 28 March 1992 in Stevenage, Hertfordshire, and the half-brother of seven-time Formula One World Champion Lewis Hamilton. He is the first disabled driver to compete in the BTCC, racing with cerebral palsy, which affects his lower body and requires him to use hand controls on the throttle and brake.\n\nHamilton made his BTCC debut in 2015 with AmD Tuning.com as a guest driver, making five appearances in an Audi S3. He has returned to the series on multiple occasions since, racking up over 160 race starts and becoming one of the most recognisable faces in British motorsport.\n\nFor 2026, Hamilton secures his most competitive drive yet — joining the Excelr8 Motorsport setup backed by Draper Tools to race a Hyundai i30 Fastback N Performance alongside a team capable of fighting for wins.",
+      "dateOfBirth": "1992-03-28",
+      "birthplace": "Stevenage, Hertfordshire",
+      "history": [
+        {
+          "year": 2025,
+          "team": "Un-Limited Motorsport",
+          "car": "CUPRA Leon",
+          "pos": 28,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2023,
+          "team": "Go-Fix with Autoaid Breakdown",
+          "car": "CUPRA Leon",
+          "pos": 24,
+          "points": 10,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2022,
+          "team": "Yazoo with Safuu.com Racing",
+          "car": "CUPRA Leon",
+          "pos": 29,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2021,
+          "team": "ROKiT Racing with iQuoto Online Trading",
+          "car": "CUPRA Leon",
+          "pos": 30,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2020,
+          "team": "Team HARD",
+          "car": "Volkswagen CC",
+          "pos": 0,
+          "points": 1,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        },
+        {
+          "year": 2019,
+          "team": "ROKiT Motorbase",
+          "car": "Ford Focus ST",
+          "pos": 0,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0
+        }
+      ]
     },
     {
       "number": 32,
@@ -1751,6 +1890,30 @@
       "birthplace": "Caterham, Surrey"
     },
     {
+      "number": 99,
+      "name": "Charles Rainford",
+      "team": "West Surrey Racing",
+      "car": "BMW 330i M Sport",
+      "imageUrl": "",
+      "nationality": "British",
+      "bio": "Charles Rainford is a British racing driver born on 20 July 1998 in Horsham, West Sussex. After years competing in historic motorsport and the Porsche Carrera Cup GB — where he claimed the Pro-Am title in 2022 and finished runner-up overall in 2024 — Rainford stepped up to the BTCC with West Surrey Racing in 2025.\n\nHis debut season was nothing short of outstanding. He took a maiden BTCC win in just his sixth start at Brands Hatch Indy, added a pole position at Knockhill, and finished eighth in the Drivers' Championship. He was also voted the 2025 Fans' Choice Award winner.\n\nFor 2026, Rainford stays with WSR and is widely regarded as one of the most exciting young talents in British touring car racing, with genuine championship ambitions ahead.",
+      "dateOfBirth": "1998-07-20",
+      "birthplace": "Horsham, West Sussex",
+      "history": [
+        {
+          "year": 2025,
+          "team": "LKQ Euro Car Parts Racing with WSR",
+          "car": "BMW 330e M Sport",
+          "pos": 8,
+          "points": 179,
+          "wins": 1,
+          "podiums": 3,
+          "poles": 1,
+          "fastestLaps": 3
+        }
+      ]
+    },
+    {
       "number": 116,
       "name": "Ashley Sutton",
       "team": "NAPA Racing UK",
@@ -1878,186 +2041,23 @@
       "birthplace": "Bideford, Devon"
     },
     {
-      "number": 15,
-      "name": "Lewis Selby",
-      "team": "NAPA Racing UK",
-      "car": "Ford Focus Titanium",
-      "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Selby-0H5A6861-e1745404956.png",
-      "nationality": "British",
-      "bio": "Despite ironically standing at more than six foot, Lewis Selby has become synonymous for competing in MINIs, both classic and modern.\n\nWinning races in both the MINI Miglia Championship and MINI Se7en Challenge, Selby originally represented NAPA Racing at the 2022 edition of the Goodwood Festival of Speed before then going on to race a NAPA-branded car in the EnduroKA series.\n\nMaking the high-profile switch to the MINI CHALLENGE in 2023, Selby entered the JCW class with the backing of NAPA Racing UK and punched in a number of standout performances to eventually seal the coveted Directors Cup.\n\nContinuing to improve as each season has passed, the Buckinghamshire racer now takes on a brand-new challenge as he makes the step up to the BTCC.\n\nUndoubtedly set to be one to watch in 2026, Selby will be looking to utilise all of his experience in front-wheel-drive machinery to hit the ground running and challenge for honours in the Jack Sears Trophy, which is for drivers who are yet to score more than one podium in the series.",
-      "dateOfBirth": "1980-07-18",
-      "birthplace": "Aylesbury, Buckinghamshire",
-      "history": []
-    },
-    {
-      "number": 99,
-      "name": "Charles Rainford",
-      "team": "West Surrey Racing",
-      "car": "BMW 330i M Sport",
-      "imageUrl": "",
-      "nationality": "British",
-      "bio": "Charles Rainford is a British racing driver born on 20 July 1998 in Horsham, West Sussex. After years competing in historic motorsport and the Porsche Carrera Cup GB — where he claimed the Pro-Am title in 2022 and finished runner-up overall in 2024 — Rainford stepped up to the BTCC with West Surrey Racing in 2025.\n\nHis debut season was nothing short of outstanding. He took a maiden BTCC win in just his sixth start at Brands Hatch Indy, added a pole position at Knockhill, and finished eighth in the Drivers' Championship. He was also voted the 2025 Fans' Choice Award winner.\n\nFor 2026, Rainford stays with WSR and is widely regarded as one of the most exciting young talents in British touring car racing, with genuine championship ambitions ahead.",
-      "dateOfBirth": "1998-07-20",
-      "birthplace": "Horsham, West Sussex",
-      "history": [
-        {
-          "year": 2025,
-          "team": "LKQ Euro Car Parts Racing with WSR",
-          "car": "BMW 330e M Sport",
-          "pos": 8,
-          "points": 179,
-          "wins": 1,
-          "podiums": 3,
-          "poles": 1,
-          "fastestLaps": 3
-        }
-      ]
-    },
-    {
-      "number": 28,
-      "name": "Nicolas Hamilton",
-      "team": "Team VERTU",
+      "number": 132,
+      "name": "James Dorlin",
+      "team": "Restart Racing",
       "car": "Hyundai i30N",
       "imageUrl": "",
       "nationality": "British",
-      "bio": "Nicolas Hamilton is a British racing driver born on 28 March 1992 in Stevenage, Hertfordshire, and the half-brother of seven-time Formula One World Champion Lewis Hamilton. He is the first disabled driver to compete in the BTCC, racing with cerebral palsy, which affects his lower body and requires him to use hand controls on the throttle and brake.\n\nHamilton made his BTCC debut in 2015 with AmD Tuning.com as a guest driver, making five appearances in an Audi S3. He has returned to the series on multiple occasions since, racking up over 160 race starts and becoming one of the most recognisable faces in British motorsport.\n\nFor 2026, Hamilton secures his most competitive drive yet — joining the Excelr8 Motorsport setup backed by Draper Tools to race a Hyundai i30 Fastback N Performance alongside a team capable of fighting for wins.",
-      "dateOfBirth": "1992-03-28",
-      "birthplace": "Stevenage, Hertfordshire",
+      "bio": "James Dorlin is a British racing driver born on 22 May 1999 in Barnsley, England. He began his motorsport career in karting before progressing into junior saloon car racing, where he quickly emerged as a front-running talent.\n\nDorlin won the 2016 Ginetta Junior Championship, marking him out as one of the UK’s leading young prospects. He then moved into GT and endurance racing, including campaigns in the Porsche Carrera Cup GB and British GT, where he developed strong racecraft, consistency, and technical adaptability across different cars and race formats.\n\nIn 2025, Dorlin stepped up to the British Touring Car Championship, joining the BTCC grid after several successful seasons in GT machinery. His move represents a transition into one of the most competitive touring car series in the world.\n\nKnown for his smooth driving style and versatility, Dorlin is regarded as an adaptable racer aiming to establish himself quickly within the BTCC midfield and progress toward front-running results.",
       "history": [
         {
           "year": 2025,
-          "team": "Un-Limited Motorsport",
-          "car": "CUPRA Leon",
-          "pos": 28,
-          "points": 0,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2023,
-          "team": "Go-Fix with Autoaid Breakdown",
-          "car": "CUPRA Leon",
-          "pos": 24,
-          "points": 10,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2022,
-          "team": "Yazoo with Safuu.com Racing",
-          "car": "CUPRA Leon",
-          "pos": 29,
-          "points": 0,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2021,
-          "team": "ROKiT Racing with iQuoto Online Trading",
-          "car": "CUPRA Leon",
-          "pos": 30,
-          "points": 0,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2020,
-          "team": "Team HARD",
-          "car": "Volkswagen CC",
-          "pos": 0,
-          "points": 1,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2019,
-          "team": "ROKiT Motorbase",
-          "car": "Ford Focus ST",
-          "pos": 0,
-          "points": 0,
-          "wins": 0,
-          "podiums": 0,
-          "poles": 0,
-          "fastestLaps": 0
-        }
-      ]
-    },
-    {
-      "number": 11,
-      "name": "Ricky Collard",
-      "team": "Team VERTU",
-      "car": "Hyundai i30N",
-      "imageUrl": "",
-      "nationality": "British",
-      "dateOfBirth": "1996-07-30",
-      "birthplace": "Surrey, England",
-      "bio": "Ricky Collard is a British racing driver born on 30 July 1996 in Surrey, the son of former BTCC driver Rob Collard. He made his BTCC debut in 2018 as a substitute for his injured father at West Surrey Racing, immediately impressing with a podium finish at Silverstone.\n\nAfter stepping away from touring cars to pursue GT racing, Collard returned to the BTCC in 2022 with Speedworks Motorsport aboard the Toyota Corolla, completing two full seasons and finishing a career-best 8th in the 2023 championship as the leading Toyota driver.\n\nIn 2024 Collard won the British GT Championship GT3 title alongside his father Rob in a Lamborghini Huracán for Barwell Motorsport — becoming one of the few father-and-son pairs to win the same championship. He returns to the BTCC for 2026 with the title-winning Team VERTU operation, the most competitive drive of his touring car career.",
-      "history": [
-        {
-          "year": 2023,
-          "team": "Toyota GAZOO Racing UK with Speedworks",
+          "team": "TOYOTA GAZOO Racing UK with IAA",
           "car": "Toyota Corolla GR Sport",
-          "pos": 8,
-          "points": 217,
-          "wins": 0,
-          "podiums": 1,
-          "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2022,
-          "team": "Toyota GAZOO Racing UK with Speedworks",
-          "car": "Toyota Corolla GR Sport",
-          "pos": 16,
-          "points": 81,
+          "pos": 19,
+          "points": 47,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
-        },
-        {
-          "year": 2018,
-          "team": "West Surrey Racing",
-          "car": "BMW 125i M Sport",
-          "pos": 25,
-          "points": 46,
-          "wins": 0,
-          "podiums": 1,
-          "poles": 0,
-          "fastestLaps": 0
-        }
-      ]
-    },
-    {
-      "number": 2,
-      "name": "Daryl De Leon",
-      "team": "West Surrey Racing",
-      "car": "BMW 330i M Sport",
-      "imageUrl": "",
-      "nationality": "Filipino",
-      "bio": "Daryl De Leon is an Irish racing driver born on 2 August 2005 in Drogheda, Ireland. He made a stunning debut in the British Touring Car Championship in 2025, joining West Surrey Racing to drive a BMW 330e M Sport.\n\nDe Leon made history as the first Filipino driver to win a BTCC race, taking victory at Brands Hatch Indy Circuit in 2025. He went on to dominate the Jack Sears Trophy — the award for drivers yet to score more than one podium in the series — claiming the title with two pole positions and a win across the season.\n\nHis impressive maiden campaign earned him a second season with WSR, where he will look to build on his promising start and challenge further up the overall drivers' championship standings.",
-      "dateOfBirth": "2005-08-02",
-      "birthplace": "Drogheda, Ireland",
-      "history": [
-        {
-          "year": 2025,
-          "team": "West Surrey Racing",
-          "car": "BMW 330e M Sport",
-          "pos": 13,
-          "points": 149,
-          "wins": 1,
-          "podiums": 2,
-          "poles": 2,
           "fastestLaps": 0
         }
       ]
