@@ -255,7 +255,7 @@ class MainActivity : ComponentActivity() {
         val channel = NotificationChannel(
             NewsCheckWorker.CHANNEL_ID,
             "News Alerts",
-            NotificationManager.IMPORTANCE_DEFAULT,
+            NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description = "Notifications for new BTCC news articles"
         }
@@ -307,7 +307,7 @@ class MainActivity : ComponentActivity() {
         val channel = NotificationChannel(
             RaceNotificationWorker.CHANNEL_ID_FREE_PRACTICE,
             "Free Practice Alerts",
-            NotificationManager.IMPORTANCE_DEFAULT,
+            NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description = "Notifications when BTCC free practice is about to start"
         }

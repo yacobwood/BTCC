@@ -103,7 +103,7 @@ class NewsCheckWorker(
             .setContentText(title)
             .setAutoCancel(true)
             .setContentIntent(pending)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
 
         Analytics.notificationDelivered("news")

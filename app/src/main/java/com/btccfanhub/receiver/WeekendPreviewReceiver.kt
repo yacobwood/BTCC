@@ -49,7 +49,7 @@ class WeekendPreviewReceiver : BroadcastReceiver() {
             .setContentText("Round $round at $venue starts tomorrow. Get ready for this weekend's racing!")
             .setAutoCancel(true)
             .setContentIntent(pending)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
 
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -63,7 +63,7 @@ class WeekendPreviewReceiver : BroadcastReceiver() {
             NotificationChannel(
                 CHANNEL_ID,
                 "Race Weekend Preview",
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_HIGH,
             ).apply {
                 description = "Friday reminder before each BTCC race weekend"
             }

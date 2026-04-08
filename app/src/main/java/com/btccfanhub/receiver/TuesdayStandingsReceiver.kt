@@ -49,7 +49,7 @@ class TuesdayStandingsReceiver : BroadcastReceiver() {
             .setContentText("Check the championship progression chart to see how the points changed.")
             .setAutoCancel(true)
             .setContentIntent(pending)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
 
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -63,7 +63,7 @@ class TuesdayStandingsReceiver : BroadcastReceiver() {
             NotificationChannel(
                 CHANNEL_ID,
                 "Standings Update",
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_HIGH,
             ).apply {
                 description = "Tuesday reminder to check how the latest round affected the championship"
             }

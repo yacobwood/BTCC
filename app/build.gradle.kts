@@ -26,8 +26,8 @@ android {
         applicationId = "com.btccfanhub"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.4.2"
+        versionCode = 35
+        versionName = "1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

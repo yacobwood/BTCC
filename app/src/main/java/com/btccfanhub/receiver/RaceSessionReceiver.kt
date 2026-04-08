@@ -74,7 +74,7 @@ class RaceSessionReceiver : BroadcastReceiver() {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (nm.getNotificationChannel(channelId) != null) return
         val (name, desc, importance) = when {
-            isFreePractice -> Triple("Free Practice Alerts", "Notifications when BTCC free practice is about to start", NotificationManager.IMPORTANCE_DEFAULT)
+            isFreePractice -> Triple("Free Practice Alerts", "Notifications when BTCC free practice is about to start", NotificationManager.IMPORTANCE_HIGH)
             isQualifying   -> Triple("Qualifying Alerts", "Notifications when BTCC qualifying is about to start", NotificationManager.IMPORTANCE_HIGH)
             else           -> Triple("Race Alerts", "Notifications when BTCC race sessions are about to start", NotificationManager.IMPORTANCE_HIGH)
         }

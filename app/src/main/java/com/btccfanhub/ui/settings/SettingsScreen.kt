@@ -144,7 +144,7 @@ fun SettingsScreen(onBack: () -> Unit = {}, onFeatureFlagsClick: () -> Unit = {}
                                 NotificationChannel(
                                     NewsCheckWorker.CHANNEL_ID,
                                     "News Alerts",
-                                    NotificationManager.IMPORTANCE_DEFAULT,
+                                    NotificationManager.IMPORTANCE_HIGH,
                                 )
                             )
                         }
