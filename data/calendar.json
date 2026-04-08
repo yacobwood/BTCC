@@ -101,6 +101,38 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:35"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
       ]
     },
     {
@@ -192,6 +224,38 @@
               "description": "Final right-hander back onto the start/finish straight. A good exit is crucial for a run into Paddock Hill on the next lap."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:50"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
@@ -306,6 +370,38 @@
               "description": "Right-hander onto the pit straight. Exit speed here sets up the run down to Riches."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:40"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
         }
       ]
     },
@@ -426,6 +522,38 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:25"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:55"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
       ]
     },
     {
@@ -442,7 +570,7 @@
       "lengthMiles": "2.356 mi",
       "lengthKm": "3.792 km",
       "corners": 9,
-      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb\u2013Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
+      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb–Noble–Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
       "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
@@ -522,6 +650,38 @@
               "description": "Long right-hander before the pit straight. A good exit sets up a slipstream opportunity into Allard."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:25"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     },
@@ -615,6 +775,38 @@
               "description": "Right-hand complex leading back onto the start/finish straight."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:15"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
         }
       ]
     },
@@ -727,6 +919,38 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:35"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
       ]
     },
     {
@@ -835,6 +1059,38 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:15"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:10"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:15"
+        }
       ]
     },
     {
@@ -851,7 +1107,7 @@
       "lengthMiles": "3.666 mi",
       "lengthKm": "5.891 km",
       "corners": 8,
-      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts\u2013Becketts\u2013Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
+      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts–Becketts–Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
       "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead - or deficit - can completely shape the outcome.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
@@ -933,6 +1189,38 @@
               "description": "Right-hand corner back onto the start/finish straight. The final corner of the lap - a clean exit sets up the approach to Abbey."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:15"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
         }
       ]
     },
@@ -1045,6 +1333,38 @@
               "description": "Final right-hander back onto the start/finish straight. With the championship at stake, every tenth counts here."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:50"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     }
