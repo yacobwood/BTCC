@@ -2319,8 +2319,8 @@
     },
     {
       "name": "LKQ Euro Car Parts with Power Maxed Racing",
-      "car": "Audi S3 Saloon",
-      "entries": 3,
+      "car": "Audi A3 Saloon",
+      "entries": 2,
       "bio": "Power Maxed Racing are one of the most ambitious independent teams in the BTCC, based at their Coventry headquarters in the heart of the UK's motorsport corridor. Shaun Hollamby's team made their BTCC debut in 2010 and have spent subsequent years steadily building their technical capability.\n\nThe team have campaigned a variety of machinery over the years, most recently switching to the Audi S3 Saloon as part of the Goodyear-sponsored PMR programme. Their Coventry base houses an in-house engineering and fabrication department, allowing the team to react quickly to the demands of the BTCC's intensive race calendar.\n\nPower Maxed are known for nurturing young British talent and have given a number of drivers their first full-time BTCC opportunities. The team's stated ambition is to secure their first outright championship title, and they continue to develop their package in pursuit of that goal.",
       "standing2025": 8,
       "points2025": 190,
@@ -2395,30 +2395,6 @@
       "history": []
     },
     {
-      "name": "One Motorsport",
-      "car": "Honda Civic Type R (FK8)",
-      "entries": 2,
-      "bio": "One Motorsport are a professional BTCC outfit running Honda Civic Type R machinery from their base in Wantage, Oxfordshire. The team entered the series as an independent operation and have grown steadily, building expertise with the front-wheel-drive Honda platform over several seasons of competition.\n\nThe team focus on extracting maximum performance from the Civic Type R, widely regarded as one of the most driver-friendly cars in the BTCC, and have built a strong technical team around developing the chassis to suit the demands of Britain's circuits. Their Wantage workshop handles the full preparation and build of their race cars in-house.\n\nOne Motorsport have provided a platform for a number of drivers looking to establish or re-establish themselves in the top tier of British motorsport. The team's approach blends professional engineering standards with the agility of an independent team, allowing them to develop their package race by race through the season.",
-      "standing2025": 9,
-      "points2025": 156,
-      "founded": 2016,
-      "base": "Wantage, Oxfordshire",
-      "driversChampionships": 0,
-      "teamsChampionships": 0,
-      "history": [
-        {
-          "year": 2023,
-          "pos": 4,
-          "points": 426
-        },
-        {
-          "year": 2025,
-          "pos": 9,
-          "points": 156
-        }
-      ]
-    },
-    {
       "name": "Restart Racing",
       "car": "Hyundai i30 Fastback N Performance",
       "entries": 2,
@@ -2483,6 +2459,17 @@
       "entries": 2,
       "bio": "Laser Tools Racing with MB Motorsport are a competitive independent outfit campaigning Toyota Corolla GR Sport machinery in the BTCC. Backed by Laser Tools, one of the UK's leading hand tool suppliers, the team's partnership with MB Motorsport brings proven BTCC expertise to the operation.",
       "base": "United Kingdom"
+    },
+    {
+      "name": "Steel Seal with Power Maxed Racing",
+      "car": "Audi A3 Saloon",
+      "entries": 1,
+      "bio": "Steel Seal with Power Maxed Racing is the second BTCC entry run by Shaun Hollamby's Coventry-based Power Maxed Racing operation, carrying the Steel Seal head gasket repair brand as title sponsor. PMR have been a fixture in the BTCC since 2010, and their multi-car programme for 2026 reflects the team's growing ambition and commercial support.\n\nRunning Audi A3 Saloon machinery, the Steel Seal entry campaigns alongside their LKQ Euro Car Parts-backed sister car as part of a coordinated effort to score as many constructor points as possible across the season.",
+      "base": "Coventry, West Midlands",
+      "founded": 2010,
+      "driversChampionships": 0,
+      "teamsChampionships": 0,
+      "history": []
     }
   ]
 }
