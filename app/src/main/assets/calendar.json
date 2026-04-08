@@ -7,6 +7,7 @@
       "round": 1,
       "tslEventId": 261603,
       "venue": "Donington Park",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Qp3Vb4V0qDw",
       "startDate": "2026-04-18",
       "endDate": "2026-04-19",
       "location": "Castle Donington, Leicestershire",
@@ -100,12 +101,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:35"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
       ]
     },
     {
       "round": 2,
       "tslEventId": 261903,
       "venue": "Brands Hatch Indy",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_g7wYCscEw0",
       "startDate": "2026-05-09",
       "endDate": "2026-05-10",
       "location": "Fawkham, Kent",
@@ -191,12 +225,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:50"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
       ]
     },
     {
       "round": 3,
       "tslEventId": 262103,
       "venue": "Snetterton",
+      "youtubeUrl": "https://www.youtube.com/watch?v=T5kMZ-LGZe0",
       "startDate": "2026-05-23",
       "endDate": "2026-05-24",
       "location": "Attleborough, Norfolk",
@@ -304,12 +371,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:40"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
       ]
     },
     {
       "round": 4,
       "tslEventId": 262303,
       "venue": "Oulton Park",
+      "youtubeUrl": "https://www.youtube.com/watch?v=DW9kp8YwJOE",
       "startDate": "2026-06-06",
       "endDate": "2026-06-07",
       "location": "Little Budworth, Cheshire",
@@ -422,12 +522,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:25"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:55"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
       ]
     },
     {
       "round": 5,
       "tslEventId": 263003,
       "venue": "Thruxton",
+      "youtubeUrl": "https://www.youtube.com/watch?v=aI5u5fsVKWI",
       "startDate": "2026-07-25",
       "endDate": "2026-07-26",
       "location": "Andover, Hampshire",
@@ -437,7 +570,7 @@
       "lengthMiles": "2.356 mi",
       "lengthKm": "3.792 km",
       "corners": 9,
-      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb\u2013Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
+      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb–Noble–Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
       "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
@@ -518,12 +651,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:25"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
       ]
     },
     {
       "round": 6,
       "tslEventId": 263203,
       "venue": "Knockhill",
+      "youtubeUrl": "https://www.youtube.com/watch?v=a5DtpM9NQ_k",
       "startDate": "2026-08-08",
       "endDate": "2026-08-09",
       "location": "Dunfermline, Fife",
@@ -610,12 +776,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:15"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
       ]
     },
     {
       "round": 7,
       "tslEventId": 263403,
       "venue": "Donington Park GP",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_jA_1NJFLig",
       "startDate": "2026-08-22",
       "endDate": "2026-08-23",
       "location": "Castle Donington, Leicestershire",
@@ -720,12 +919,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:35"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
       ]
     },
     {
       "round": 8,
       "tslEventId": 263603,
       "venue": "Croft",
+      "youtubeUrl": "https://www.youtube.com/watch?v=M3lv_S1eqCw",
       "startDate": "2026-09-05",
       "endDate": "2026-09-06",
       "location": "Dalton-on-Tees, North Yorkshire",
@@ -827,12 +1059,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:15"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:10"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:15"
+        }
       ]
     },
     {
       "round": 9,
       "tslEventId": 263903,
       "venue": "Silverstone",
+      "youtubeUrl": "https://www.youtube.com/watch?v=KHVKEJbBowA",
       "startDate": "2026-09-26",
       "endDate": "2026-09-27",
       "location": "Towcester, Northamptonshire",
@@ -842,7 +1107,7 @@
       "lengthMiles": "3.666 mi",
       "lengthKm": "5.891 km",
       "corners": 8,
-      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts\u2013Becketts\u2013Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
+      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts–Becketts–Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
       "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead - or deficit - can completely shape the outcome.",
       "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
       "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
@@ -925,12 +1190,45 @@
             }
           ]
         }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:15"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
       ]
     },
     {
       "round": 10,
       "tslEventId": 264103,
       "venue": "Brands Hatch GP",
+      "youtubeUrl": "https://www.youtube.com/watch?v=7yNiW_O1ySg",
       "startDate": "2026-10-10",
       "endDate": "2026-10-11",
       "location": "Fawkham, Kent",
@@ -1035,6 +1333,38 @@
               "description": "Final right-hander back onto the start/finish straight. With the championship at stake, every tenth counts here."
             }
           ]
+        }
+      ],
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:50"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
         }
       ]
     }
