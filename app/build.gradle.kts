@@ -26,8 +26,8 @@ android {
         applicationId = "com.btccfanhub"
         minSdk = 26
         targetSdk = 36
-        versionCode = 35
-        versionName = "1.5.0"
+        versionCode = 37
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,6 +49,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
     lint {
