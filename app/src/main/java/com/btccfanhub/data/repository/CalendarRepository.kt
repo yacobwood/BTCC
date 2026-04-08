@@ -6,6 +6,7 @@ import com.btccfanhub.data.model.CalendarData
 import com.btccfanhub.data.model.Corner
 import com.btccfanhub.data.model.LapRecord
 import com.btccfanhub.data.model.Race
+import com.btccfanhub.data.model.RaceSession
 import com.btccfanhub.data.model.Sector
 import com.btccfanhub.data.model.TrackInfo
 import kotlinx.coroutines.Dispatchers
@@ -85,7 +86,17 @@ object CalendarRepository {
                 LocalDate.parse(r.optString("endDate"))
             } catch (e: Exception) { continue }
 
-            races += Race(round, venue, startDate, endDate, r.optInt("tslEventId", 0))
+            val sessionsArr = r.optJSONArray("sessions") ?: JSONArray()
+            val sessions = (0 until sessionsArr.length()).map { j ->
+                val s = sessionsArr.getJSONObject(j)
+                RaceSession(
+                    name = s.optString("name", ""),
+                    day  = s.optString("day", ""),
+                    time = s.optString("time", "TBA"),
+                )
+            }
+
+            races += Race(round, venue, startDate, endDate, r.optInt("tslEventId", 0), sessions)
 
             val imagesArr = r.optJSONArray("raceImages") ?: JSONArray()
             val raceImages = (0 until imagesArr.length()).map { imagesArr.getString(it) }

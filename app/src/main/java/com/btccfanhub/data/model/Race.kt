@@ -8,4 +8,5 @@ data class Race(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val tslEventId: Int = 0,
+    val sessions: List<RaceSession> = emptyList(),
 )
