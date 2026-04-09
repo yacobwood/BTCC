@@ -66,6 +66,14 @@ yarn-error.log
 # testing
 /coverage
 
+# Keystore — never commit
+*.jks
+keystore.properties
+
+# Python
+__pycache__/
+tools/scraper/.venv/
+
 # Yarn
 .yarn/*
 !.yarn/patches
