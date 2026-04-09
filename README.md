@@ -1,113 +1,97 @@
-# BTCC Fan Hub — Android App
+This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-Unofficial BTCC fan app for Android. Built with Kotlin and Jetpack Compose.
+# Getting Started
 
-- **Package:** `com.btccfanhub`
-- **Min SDK:** 26 · **Target SDK:** 36
-- **Current version:** 1.2.0 (versionCode 30)
+> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
----
+## Step 1: Start Metro
 
-## Features
+First, you will need to run **Metro**, the JavaScript build tool for React Native.
 
-- Live news feed from btcc.net with infinite scroll and search
-- Full race calendar with track guides, timetables and weather forecasts
-- Race results and championship standings — 2004 to present
-- Championship progression chart and season stats
-- Live timing during race weekends (TSL SignalR feed)
-- Home screen widget with countdown, session schedule and team themes
-- Push notifications for race sessions, qualifying and new results
-- BTCC radio stream
-- Favourite driver highlighting across grid, standings and results
+To start the Metro dev server, run the following command from the root of your React Native project:
 
----
+```sh
+# Using npm
+npm start
 
-## Architecture
-
-```
-app/src/main/java/com/btccfanhub/
-├── data/
-│   ├── analytics/      # Firebase Analytics wrapper
-│   ├── model/          # Data classes (Article, Race, RoundResult, …)
-│   ├── network/        # RssParser (WordPress REST API + HTML scraping)
-│   ├── repository/     # Data access — calendar, results, standings, weather, …
-│   ├── season/         # SeasonData, SeasonStatsComputer, Standings2026
-│   └── store/          # SharedPreferences stores (FeatureFlags, Favourites, …)
-├── navigation/         # AppNavigation (single-activity Compose nav)
-├── ui/
-│   ├── calendar/       # CalendarScreen, TrackDetailScreen
-│   ├── drivers/        # DriversScreen, DriverDetailScreen, TeamDetailScreen
-│   ├── more/           # MoreScreen, InfoPageScreen
-│   ├── news/           # NewsScreen, ArticleScreen
-│   ├── onboarding/     # NotificationOnboardingScreen, WhatsNewDialog
-│   ├── results/        # ResultsScreen, RoundResultsScreen, ChampionshipProgressionChart
-│   ├── settings/       # SettingsScreen, BugReportScreen, FeatureFlagsScreen
-│   ├── timing/         # LiveTimingScreen
-│   └── theme/          # Colours, typography
-├── widget/             # CountdownWidget, WidgetUtils, WidgetPrefs, WidgetTheme
-└── worker/             # WorkManager jobs — news, results, race notifications
+# OR using Yarn
+yarn start
 ```
 
----
+## Step 2: Build and run your app
 
-## Data Sources
+With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
 
-| Data | Source |
-|---|---|
-| News articles | WordPress REST API (`btcc.net/wp-json/wp/v2/posts`) |
-| Calendar & track info | GitHub (`yacobwood/BTCC/data/`) |
-| Race results (2004–present) | GitHub (`yacobwood/BTCC/data/results{year}.json`) |
-| Championship standings | GitHub (`yacobwood/BTCC/data/standings.json`) |
-| Driver/team grid | GitHub (`yacobwood/BTCC/data/grid.json`) |
-| Session schedule | GitHub (`yacobwood/BTCC/data/schedule.json`) |
-| Weather forecasts | Open-Meteo API |
-| Live timing | TSL Timing SignalR feed |
+### Android
 
----
+```sh
+# Using npm
+npm run android
 
-## Running Tests
-
-```bash
-./gradlew testDebugUnitTest
+# OR using Yarn
+yarn android
 ```
 
-121 unit tests covering all non-UI business logic — no Android runtime required.
+### iOS
 
-| Test class | What's covered |
-|---|---|
-| `ChampionshipProgressionComputerTest` | Cumulative points, round ordering, multi-race rounds |
-| `SeasonStatsComputerTest` | Wins / podiums / DNFs / poles / fastest laps, sort order |
-| `RaceResultsRepositoryTest` | Full 15-position points table, bonus points, 2023 round reorder |
-| `RssParserTest` | Date formatting, HTML entity decoding, HTML stripping, NGG image dedup |
-| `WidgetUtilsTest` | Session name abbreviation, timezone conversions (day rollover) |
-| `DriverStandingTest` | `displayTeam` computed property |
-| `ConstantsTest` | `firstRaceNumberForRound` |
+For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
 
----
+The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
 
-## Tools
-
-Python scripts used for data preparation live under `tools/`:
-
-- `tools/scraper/` — scrape results, standings and grid data from btcc.net
-- `tools/scripts/` — convert Excel/CSV exports to JSON, verify points totals
-
----
-
-## AdMob
-
-Real publisher IDs are configured in `local.properties` (not committed). The app uses a banner ad above the bottom navigation bar, hidden on article and detail screens.
-
----
-
-## Build & Release
-
-```bash
-# Debug APK
-./gradlew assembleDebug
-
-# Release bundle (requires keystore.properties)
-./gradlew bundleRelease
+```sh
+bundle install
 ```
 
-Keystore credentials are stored in `keystore.properties` (not committed).
+Then, and every time you update your native dependencies, run:
+
+```sh
+bundle exec pod install
+```
+
+For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+
+```sh
+# Using npm
+npm run ios
+
+# OR using Yarn
+yarn ios
+```
+
+If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+
+This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+
+## Step 3: Modify your app
+
+Now that you have successfully run the app, let's make changes!
+
+Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+
+When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+
+- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
+- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+
+## Congratulations! :tada:
+
+You've successfully run and modified your React Native App. :partying_face:
+
+### Now what?
+
+- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
+- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+
+# Troubleshooting
+
+If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+
+# Learn More
+
+To learn more about React Native, take a look at the following resources:
+
+- [React Native Website](https://reactnative.dev) - learn more about React Native.
+- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
+- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
+- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
+- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BTCC Hub</string>
+    <string name="countdown_widget_description">BTCC next race countdown</string>
+    <string name="widget_small_description">BTCC small countdown</string>
+    <string name="widget_medium_description">BTCC medium countdown</string>
+    <string name="widget_large_description">BTCC large countdown with schedule</string>
+</resources>
