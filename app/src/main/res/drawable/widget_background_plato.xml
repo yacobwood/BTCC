@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Cataclean/Plato: near-black base for the camo livery -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#0E0E0E" />
-    <corners android:radius="16dp" />
-</shape>
