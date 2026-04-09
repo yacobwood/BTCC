@@ -1,0 +1,355 @@
+{
+  "season": "2026",
+  "rounds": [
+    {
+      "round": 1,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:35"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:50"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:40"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:25"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:55"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:25"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:15"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:35"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:15"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:10"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:15"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:15"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:50"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:30"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ]
+    }
+  ]
+}
