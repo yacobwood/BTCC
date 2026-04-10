@@ -9,15 +9,18 @@ import {
   ActivityIndicator,
   RefreshControl,
   TextInput,
+  Keyboard,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
 import {Colors} from '../theme/colors';
 import {fetchArticles} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import styles from './NewsScreen.styles';
 import CachedImage, {prefetchImages} from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
+import AdBanner from '../components/AdBanner';
+import AdSearchBanner from '../components/AdSearchBanner';
 
 const logoImg = require('../assets/logo_long.png');
 
@@ -32,8 +35,11 @@ export default function NewsScreen({navigation}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const flatListRef = React.useRef(null);
+  const searchInputRef = React.useRef(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [searchKeyboardShown, setSearchKeyboardShown] = useState(false);
   const [error, setError] = useState(null);
 
   const load = useCallback(async (p = 1, append = false) => {
@@ -53,6 +59,7 @@ export default function NewsScreen({navigation}) {
       setPage(p);
     } catch (e) {
       if (!append) setError(e.message);
+      if (append) setHasMore(false);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -61,6 +68,22 @@ export default function NewsScreen({navigation}) {
   }, []);
 
   useEffect(() => { Analytics.screen('news'); }, []);
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, () => {
+      setKeyboardVisible(true);
+      if (searchActive) setSearchKeyboardShown(true);
+    });
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+    return () => { show.remove(); hide.remove(); };
+  }, [searchActive]);
+
+  useEffect(() => {
+    if (searchActive) {
+      setSearchKeyboardShown(false);
+    }
+  }, [searchActive]);
   useEffect(() => { load(); }, [load]);
 
   const onRefresh = useCallback(() => {
@@ -157,6 +180,7 @@ export default function NewsScreen({navigation}) {
         <View style={styles.searchBar}>
           <Icon name="search" size={20} color={Colors.textSecondary} />
           <TextInput
+            ref={searchInputRef}
             style={styles.searchInput}
             placeholder="Search news…"
             placeholderTextColor={Colors.textSecondary}
@@ -170,19 +194,9 @@ export default function NewsScreen({navigation}) {
           </TouchableOpacity>
         </View>
       )}
-      {/* Preloaded search ad — always mounted so it's ready instantly */}
-      <View style={searchActive && searchQuery.length < 2
-        ? {flex: 1, justifyContent: 'center', alignItems: 'center'}
-        : {height: 0, overflow: 'hidden'}}>
-        <BannerAd
-          unitId="ca-app-pub-2098489502774763/8563706368"
-          size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-          requestOptions={{requestNonPersonalizedAdsOnly: true}}
-          onAdFailedToLoad={() => {}}
-          onAdImpression={() => Analytics.adImpression('search')}
-          onAdOpened={() => Analytics.adClicked('search')}
-        />
-      </View>
+
+      <AdSearchBanner visible={searchActive && searchKeyboardShown && searchQuery.length < 2} />
+
       {(!searchActive || searchQuery.length >= 2) && (
       <FlatList
         ref={flatListRef}

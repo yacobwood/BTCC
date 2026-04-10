@@ -52,8 +52,11 @@ export default function DriversScreen({navigation}) {
   const teamsListRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
-    driversListRef.current?.scrollToOffset({offset: 0, animated: false});
-    teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
+    const t = setTimeout(() => {
+      driversListRef.current?.scrollToOffset({offset: 0, animated: false});
+      teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
+    }, 50);
+    return () => clearTimeout(t);
   }, []));
   const scrollX = useRef(new Animated.Value(0)).current;
   const indicatorX = scrollX.interpolate({

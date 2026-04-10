@@ -1,16 +1,20 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {useUnits} from '../store/units';
 import {Analytics} from '../utils/analytics';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function RoundResultsScreen({route, navigation}) {
   const {round, year} = route.params;
@@ -19,12 +23,25 @@ export default function RoundResultsScreen({route, navigation}) {
   const {useKm} = useUnits();
   const races = round.races || [];
 
+  const swipeRef = useRef(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  const TAB_WIDTH = SCREEN_WIDTH / races.length;
+  const indicatorX = scrollX.interpolate({
+    inputRange: [0, SCREEN_WIDTH * (races.length - 1)],
+    outputRange: [0, TAB_WIDTH * (races.length - 1)],
+    extrapolate: 'clamp',
+  });
+
   useEffect(() => { Analytics.roundResultsViewed(year, round.round); }, []);
-  const race = races[raceIndex];
-  const results = race?.results || [];
 
   const rStart = (round.round - 1) * 3 + 1;
   const rEnd = rStart + 2;
+
+  const goToRace = (i) => {
+    setRaceIndex(i);
+    swipeRef.current?.scrollTo({x: i * SCREEN_WIDTH, animated: true});
+  };
 
   const renderResult = ({item}) => {
     const isDNF = item.position === 0 || item.time === 'DNF' || item.time === 'Ret';
@@ -86,8 +103,8 @@ export default function RoundResultsScreen({route, navigation}) {
           {races.map((r, i) => (
             <TouchableOpacity
               key={i}
-              style={[styles.raceTab, raceIndex === i && styles.raceTabActive]}
-              onPress={() => setRaceIndex(i)}
+              style={styles.raceTab}
+              onPress={() => goToRace(i)}
               accessibilityRole="tab"
               accessibilityLabel={r.label}>
               <Text style={[styles.raceTabText, raceIndex === i && styles.raceTabTextActive]}>
@@ -95,22 +112,55 @@ export default function RoundResultsScreen({route, navigation}) {
               </Text>
             </TouchableOpacity>
           ))}
+          <Animated.View style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: TAB_WIDTH,
+            height: 2,
+            backgroundColor: Colors.yellow,
+            transform: [{translateX: indicatorX}],
+          }} />
         </View>
       )}
 
-      {race?.date && race.date !== round.date && (
-        <Text style={styles.raceDateLabel}>{race.date}</Text>
-      )}
-
-      <FlatList
-        data={results}
-        keyExtractor={(_, i) => String(i)}
-        renderItem={renderResult}
-        contentContainerStyle={{padding: 16, paddingBottom: 20}}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No results available</Text>
-        }
-      />
+      <Animated.ScrollView
+        ref={swipeRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        style={{flex: 1}}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {
+            useNativeDriver: true,
+            listener: (e) => {
+              const i = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+              if (i !== raceIndex) setRaceIndex(i);
+            },
+          }
+        )}>
+        {races.map((race, i) => {
+          const results = race?.results || [];
+          return (
+            <View key={i} style={{width: SCREEN_WIDTH, flex: 1}}>
+              {race?.date && race.date !== round.date && (
+                <Text style={styles.raceDateLabel}>{race.date}</Text>
+              )}
+              <FlatList
+                data={results}
+                keyExtractor={(_, idx) => String(idx)}
+                renderItem={renderResult}
+                contentContainerStyle={{padding: 16, paddingBottom: 20}}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>No results available</Text>
+                }
+              />
+            </View>
+          );
+        })}
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -142,7 +192,6 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.outline,
   },
   raceTab: {flex: 1, paddingVertical: 10, alignItems: 'center'},
-  raceTabActive: {borderBottomWidth: 2, borderBottomColor: Colors.yellow},
   raceTabText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700'},
   raceTabTextActive: {color: Colors.yellow},
   raceDateLabel: {

@@ -1,4 +1,4 @@
-import React, {useState, memo} from 'react';
+import React, {useState, useEffect, memo} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
 import Svg, {Polyline, Line, Text as SvgText} from 'react-native-svg';
 import {Colors} from '../theme/colors';
@@ -18,6 +18,14 @@ function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
     series.forEach(s => { m[s.name] = true; });
     return m;
   });
+
+  // Reset visibility when the year changes (series names change)
+  useEffect(() => {
+    const m = {};
+    series.forEach(s => { m[s.name] = true; });
+    setVisible(m);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawSeries]);
 
 
   const toggle = (name) => setVisible(prev => ({...prev, [name]: !prev[name]}));

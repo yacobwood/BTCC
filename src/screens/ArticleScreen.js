@@ -17,17 +17,22 @@ import {parseArticle} from '../api/parsers';
 
 export default function ArticleScreen({route, navigation}) {
   const {article: articleParam, slug} = route.params;
-  const [article, setArticle] = useState(articleParam || null);
+  // Guard against partial deserialization (e.g. app killed mid-article and state restored)
+  const validParam = articleParam && articleParam.content !== undefined ? articleParam : null;
+  const [article, setArticle] = useState(validParam || null);
   const insets = useSafeAreaInsets();
   const topPad = insets.top || 44;
 
   useEffect(() => {
-    if (!articleParam && slug) {
-      fetchArticleBySlug(slug).then(raw => {
+    // Fetch if no valid article: either no param, or param was restored without content
+    const needsFetch = !validParam;
+    const resolvedSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null);
+    if (needsFetch && resolvedSlug) {
+      fetchArticleBySlug(resolvedSlug).then(raw => {
         if (raw) setArticle(parseArticle(raw));
       }).catch(() => {});
     }
-  }, [slug, articleParam]);
+  }, []);
 
   useEffect(() => {
     if (article) Analytics.screen('article:' + article.title?.substring(0, 50));

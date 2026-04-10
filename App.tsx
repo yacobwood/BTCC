@@ -9,6 +9,7 @@ import {UnitsProvider} from './src/store/units';
 import {SettingsProvider} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
+import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import OnboardingDialog from './src/components/OnboardingDialog';
@@ -16,7 +17,7 @@ import WhatsNewDialog from './src/components/WhatsNewDialog';
 
 const ONBOARDING_KEY = 'onboarding_shown';
 const WHATS_NEW_KEY = 'whats_new_seen_version';
-const CURRENT_VERSION = 38;
+const CURRENT_VERSION = 39;
 
 export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -27,6 +28,7 @@ export default function App() {
     setCrashlyticsCollectionEnabled(crashlytics, true);
     setupNotificationChannels();
     maybeRequestReview();
+    runBackgroundPrefetch();
 
     const unsubscribe = onForegroundMessage(() => {});
 
