@@ -50,7 +50,7 @@ function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
   const plotH = chartH - padT - padB;
 
   const maxRounds = Math.max(...series.map(s => s.points.length), 1);
-  const maxPts = Math.max(...series.map(s => Math.max(...(s.points.length ? s.points : [0]))), 1);
+  const maxPts = Math.max(...series.map(s => Math.max(...s.points.filter(v => v !== null), 0)), 1);
 
   // Y-axis ticks every 50
   const yTicks = [];
@@ -76,22 +76,33 @@ function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
               R{i + 1}
             </SvgText>
           ))}
-          {/* Lines */}
+          {/* Lines — split into segments at null gaps (late-joining drivers) */}
           {series.map((s, si) => {
             if (visible[s.name] === false) return null;
             const color = CHART_COLORS[si % CHART_COLORS.length];
-            const pts = s.points.map((v, i) => `${x(i)},${y(v)}`).join(' ');
-            return (
+            // Build contiguous segments, skipping null entries
+            const segments = [];
+            let seg = [];
+            s.points.forEach((v, i) => {
+              if (v === null) {
+                if (seg.length > 1) segments.push(seg);
+                seg = [];
+              } else {
+                seg.push(`${x(i)},${y(v)}`);
+              }
+            });
+            if (seg.length > 1) segments.push(seg);
+            return segments.map((pts, segIdx) => (
               <Polyline
-                key={s.name}
-                points={pts}
+                key={`${s.name}-${segIdx}`}
+                points={pts.join(' ')}
                 fill="none"
                 stroke={color}
                 strokeWidth={1.5}
                 strokeLinejoin="round"
                 opacity={0.85}
               />
-            );
+            ));
           })}
         </Svg>
       </View>

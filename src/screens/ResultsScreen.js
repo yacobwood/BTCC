@@ -49,21 +49,23 @@ function computeSeasonStats(rounds) {
 
 function computeProgression(rounds) {
   const driverPoints = {};
+  const firstRound = {}; // round index when driver first appeared
   const series = {};
   const sortedRounds = [...rounds].sort((a, b) => a.round - b.round);
-  for (const round of sortedRounds) {
+  sortedRounds.forEach((round, roundIdx) => {
     for (const race of round.races) {
       for (const r of race.results) {
         if (!r.driver) continue;
         driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points;
+        if (firstRound[r.driver] === undefined) firstRound[r.driver] = roundIdx;
         if (!series[r.driver]) series[r.driver] = {name: r.driver, points: []};
       }
     }
-    // Snapshot after each round
+    // Snapshot after each round — null for rounds before driver's first appearance
     for (const name of Object.keys(series)) {
-      series[name].points.push(driverPoints[name] || 0);
+      series[name].points.push(roundIdx >= firstRound[name] ? (driverPoints[name] || 0) : null);
     }
-  }
+  });
   return Object.values(series).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0));
 }
 
