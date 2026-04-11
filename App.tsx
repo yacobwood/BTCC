@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {StatusBar} from 'react-native';
+import {StatusBar, AppState} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -130,6 +130,21 @@ export default function App() {
     maybeRequestReview();
     runBackgroundPrefetch();
 
+    // Consume any pending notifee background press (app was backgrounded/killed when tapped)
+    const consumePending = () => {
+      AsyncStorage.getItem('pending_notif_nav').then(val => {
+        if (val) {
+          AsyncStorage.removeItem('pending_notif_nav');
+          console.log('[NOTIF] pending notifee nav:', val);
+          navigateFromData(JSON.parse(val));
+        }
+      });
+    };
+    consumePending();
+    const appStateUnsub = AppState.addEventListener('change', state => {
+      if (state === 'active') consumePending();
+    });
+
     const unsubscribeFg = onForegroundMessage(() => {});
 
     // Notifee local notification tapped while app is in foreground
@@ -153,7 +168,7 @@ export default function App() {
       navigateFromData(message?.data as Record<string, string>);
     });
 
-    return () => { unsubscribeFg(); unsubscribeBg(); unsubscribeNotifee(); };
+    return () => { unsubscribeFg(); unsubscribeBg(); unsubscribeNotifee(); appStateUnsub.remove(); };
   }, []);
 
   return (
