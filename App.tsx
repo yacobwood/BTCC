@@ -1,9 +1,9 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {StatusBar} from 'react-native';
+import {StatusBar, Linking} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {createNavigationContainerRef, CommonActions} from '@react-navigation/native';
+import {createNavigationContainerRef} from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
 import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
@@ -23,32 +23,10 @@ export const navigationRef = createNavigationContainerRef();
 const calendar = require('./src/data/calendar.json');
 
 export function navigateToRound(round: string) {
-  const track = calendar.rounds.find((r: any) => r.round === parseInt(round, 10));
-  if (!track) return;
-
-  const doNav = () => {
-    console.log('[NOTIF] doNav called for round:', round, 'track:', track?.venue);
-    navigationRef.dispatch(
-      CommonActions.navigate({
-        name: 'Calendar',
-        params: {screen: 'TrackDetail', params: {track}},
-      } as never)
-    );
-  };
-
-  if (navigationRef.isReady()) {
-    doNav();
-  } else {
-    // Poll until ready (handles cold start where async resolution beats onReady)
-    const interval = setInterval(() => {
-      if (navigationRef.isReady()) {
-        clearInterval(interval);
-        doNav();
-      }
-    }, 50);
-    // Give up after 5 seconds
-    setTimeout(() => clearInterval(interval), 5000);
-  }
+  console.log('[NOTIF] navigateToRound:', round);
+  Linking.openURL(`btccfanhub://round/${round}`).catch(e =>
+    console.log('[NOTIF] Linking error:', e)
+  );
 }
 
 function PodcastChecker() {

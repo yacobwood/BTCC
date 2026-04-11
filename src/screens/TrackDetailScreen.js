@@ -20,6 +20,8 @@ import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
 
+const calendarData = require('../data/calendar.json');
+
 function formatDateRange(start, end) {
   if (!start || !end) return '';
   const s = new Date(start);
@@ -43,7 +45,10 @@ function roundLength(str) {
 }
 
 export default function TrackDetailScreen({route, navigation}) {
-  const {track} = route.params;
+  // Can receive full track object (normal nav) or just round number (deep link)
+  const track = route.params?.track ||
+    calendarData.rounds.find(r => r.round === parseInt(route.params?.round, 10));
+  if (!track) return null;
   const {useKm} = useUnits();
   const {track_weather, live_updates} = useFeatureFlags();
   const insets = useSafeAreaInsets();
