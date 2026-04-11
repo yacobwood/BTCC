@@ -385,11 +385,13 @@ export default function ResultsScreen({navigation}) {
           <Text style={[styles.driverName, {flex: 1}]}>{item.driver}</Text>
           <Text style={{color: Colors.yellow, fontSize: 18, fontWeight: '900'}}>{pct}%</Text>
         </View>
-        <View style={{flexDirection: 'row', height: 4, borderRadius: 2, backgroundColor: Colors.surface, overflow: 'hidden', marginBottom: 6, marginLeft: 48}}>
-          <View style={{flex: barWidth, backgroundColor: Colors.yellow, borderRadius: 2}} />
-          <View style={{flex: 1 - barWidth}} />
+        <View style={{marginLeft: 48}}>
+          <View style={{flexDirection: 'row', height: 4, borderRadius: 2, backgroundColor: Colors.surface, overflow: 'hidden', marginBottom: 6}}>
+            <View style={{flex: barWidth, backgroundColor: Colors.yellow, borderRadius: 2}} />
+            <View style={{flex: 1 - barWidth}} />
+          </View>
+          <Text style={styles.teamName}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
         </View>
-        <Text style={[styles.teamName, {marginLeft: 48}]}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
       </View>
     );
   };
