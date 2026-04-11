@@ -27,16 +27,13 @@ export function navigateToRound(round: string) {
   if (!track) return;
 
   const doNav = () => {
-    navigationRef.dispatch(CommonActions.navigate('Calendar' as never));
-    // Small delay lets the Calendar tab mount before pushing TrackDetail
-    setTimeout(() => {
-      navigationRef.dispatch(
-        CommonActions.navigate({
-          name: 'Calendar',
-          params: {screen: 'TrackDetail', params: {track}},
-        } as never)
-      );
-    }, 150);
+    console.log('[NOTIF] doNav called for round:', round, 'track:', track?.venue);
+    navigationRef.dispatch(
+      CommonActions.navigate({
+        name: 'Calendar',
+        params: {screen: 'TrackDetail', params: {track}},
+      } as never)
+    );
   };
 
   if (navigationRef.isReady()) {
@@ -126,14 +123,16 @@ export default function App() {
     // App opened from background by tapping a notification
     const messaging = getMessaging();
     const unsubscribeBg = onNotificationOpenedApp(messaging, message => {
+      console.log('[NOTIF] onNotificationOpenedApp:', JSON.stringify(message?.data));
       const round = message?.data?.round;
       if (round) navigateToRound(round);
     });
 
     // App launched cold by tapping a notification
     getInitialNotification(messaging).then(message => {
+      console.log('[NOTIF] getInitialNotification:', JSON.stringify(message?.data));
       const round = message?.data?.round;
-      if (round) navigateToRound(round); // queued if navigator not ready yet
+      if (round) navigateToRound(round);
     });
 
     return () => { unsubscribeFg(); unsubscribeBg(); };
