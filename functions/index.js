@@ -1,0 +1,179 @@
+const {onSchedule} = require('firebase-functions/v2/scheduler');
+const {getMessaging} = require('firebase-admin/messaging');
+const {initializeApp} = require('firebase-admin/app');
+
+initializeApp();
+
+const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
+const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
+
+// Session name → FCM topic
+const SESSION_TOPICS = {
+  'Free Practice': 'fp_alerts',
+  'Qualifying': 'qualifying_alerts',
+  'Qualifying Race': 'race_alerts',
+  'Race 1': 'race_alerts',
+  'Race 2': 'race_alerts',
+  'Race 3': 'race_alerts',
+};
+
+// Session name → Android notification channel
+const SESSION_CHANNELS = {
+  'Free Practice': 'free_practice',
+  'Qualifying': 'qualifying',
+  'Qualifying Race': 'race',
+  'Race 1': 'race',
+  'Race 2': 'race',
+  'Race 3': 'race',
+};
+
+/**
+ * Converts a session date + local UK time string to a UTC Date.
+ * Handles BST/GMT automatically via Intl.
+ */
+function sessionToUTC(dateStr, timeStr) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hour, minute] = timeStr.split(':').map(Number);
+
+  // Check what UTC offset London has at midday on this date
+  const midday = new Date(Date.UTC(year, month - 1, day, 12, 0));
+  const londonMiddayHour = parseInt(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      hour: '2-digit',
+      hour12: false,
+    }).format(midday),
+    10,
+  );
+  const ukOffset = londonMiddayHour - 12; // 0 = GMT, 1 = BST
+
+  return new Date(Date.UTC(year, month - 1, day, hour - ukOffset, minute));
+}
+
+/**
+ * Returns current time parts in Europe/London timezone.
+ */
+function getUKTimeParts(date) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    weekday: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date);
+  return {
+    weekday: parts.find(p => p.type === 'weekday')?.value,
+    hour: parseInt(parts.find(p => p.type === 'hour')?.value, 10),
+    minute: parseInt(parts.find(p => p.type === 'minute')?.value, 10),
+  };
+}
+
+/**
+ * Returns a YYYY-MM-DD string for the UK date offsetDays from the given date.
+ */
+function getUKDateString(date, offsetDays = 0) {
+  const d = new Date(date.getTime() + offsetDays * 24 * 60 * 60 * 1000);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d);
+}
+
+exports.sendSessionNotifications = onSchedule(
+  {schedule: 'every 5 minutes', timeZone: 'Europe/London'},
+  async () => {
+    const [calendar, schedule] = await Promise.all([
+      fetch(CALENDAR_URL).then(r => r.json()),
+      fetch(SCHEDULE_URL).then(r => r.json()),
+    ]);
+
+    const now = new Date();
+    const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
+    const windowMs = 2.5 * 60 * 1000; // ±2.5 min window = 5 min total
+
+    const scheduleByRound = {};
+    for (const r of schedule.rounds) {
+      scheduleByRound[r.round] = r.sessions;
+    }
+
+    const messaging = getMessaging();
+    const sends = [];
+
+    // ── Session alerts ────────────────────────────────────────────
+    for (const round of calendar.rounds) {
+      const sessions = scheduleByRound[round.round];
+      if (!sessions) continue;
+
+      for (const session of sessions) {
+        const dateStr = session.day === 'SAT' ? round.startDate : round.endDate;
+        const sessionUTC = sessionToUTC(dateStr, session.time);
+        const diff = Math.abs(sessionUTC.getTime() - target.getTime());
+
+        if (diff > windowMs) continue;
+
+        const topic = SESSION_TOPICS[session.name];
+        if (!topic) continue;
+
+        sends.push(
+          messaging.send({
+            topic,
+            notification: {
+              title: `${session.name} — Starting in 15 mins`,
+              body: `${session.name} at ${round.venue} is about to get underway`,
+            },
+            android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
+            apns: {payload: {aps: {sound: 'default'}}},
+          }),
+        );
+      }
+    }
+
+    // ── Friday 9am — race weekend preview ────────────────────────
+    const uk = getUKTimeParts(now);
+    if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute < 5) {
+      const tomorrowStr = getUKDateString(now, 1);
+      const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
+      if (round) {
+        const rStart = (round.round - 1) * 3 + 1;
+        sends.push(
+          messaging.send({
+            topic: 'weekend_preview',
+            notification: {
+              title: 'Race Weekend Tomorrow',
+              body: `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`,
+            },
+            android: {notification: {channelId: 'weekend_preview'}},
+            apns: {payload: {aps: {sound: 'default'}}},
+          }),
+        );
+      }
+    }
+
+    // ── Tuesday 9am — standings update ───────────────────────────
+    if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute < 5) {
+      const sundayStr = getUKDateString(now, -2); // Tuesday - 2 days = Sunday
+      const round = calendar.rounds.find(r => r.endDate === sundayStr);
+      if (round) {
+        const rStart = (round.round - 1) * 3 + 1;
+        sends.push(
+          messaging.send({
+            topic: 'standings_update',
+            notification: {
+              title: 'Standings Updated',
+              body: `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`,
+            },
+            android: {notification: {channelId: 'standings'}},
+            apns: {payload: {aps: {sound: 'default'}}},
+          }),
+        );
+      }
+    }
+
+    const results = await Promise.allSettled(sends);
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') console.error(`Send ${i} failed:`, r.reason);
+    });
+  },
+);

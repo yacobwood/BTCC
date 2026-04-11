@@ -51,11 +51,14 @@ function formatDate(raw) {
   }
 }
 
+const PAGE_SIZE = 20;
+
 export default function PodcastsScreen({navigation}) {
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState('All');
+  const [page, setPage] = useState(1);
   const {currentStation, isPlaying, play, stop} = useRadio();
 
   useEffect(() => {
@@ -78,6 +81,26 @@ export default function PodcastsScreen({navigation}) {
     episodes.filter(e => matchesSession(e.title, filter)),
     [episodes, filter]
   );
+
+  const visible = useMemo(() => {
+    const sliced = filtered.slice(0, page * PAGE_SIZE);
+    const result = [];
+    let lastMonth = null;
+    sliced.forEach(ep => {
+      const monthKey = ep.pubDate
+        ? new Date(ep.pubDate).toLocaleDateString('en-GB', {month: 'long', year: 'numeric'})
+        : null;
+      if (monthKey && monthKey !== lastMonth) {
+        result.push({type: 'header', key: `header-${monthKey}`, label: monthKey});
+        lastMonth = monthKey;
+      }
+      result.push({type: 'episode', key: ep.url, ...ep});
+    });
+    return result;
+  }, [filtered, page]);
+
+  const onFilterChange = (f) => { setFilter(f); setPage(1); };
+  const onLoadMore = () => { if (visible.length < filtered.length) setPage(p => p + 1); };
 
   const toggleEpisode = (episode) => {
     if (currentStation === episode.title && isPlaying) {
@@ -132,7 +155,7 @@ export default function PodcastsScreen({navigation}) {
             <TouchableOpacity
               key={f}
               style={[styles.chip, filter === f && styles.chipActive]}
-              onPress={() => setFilter(f)}
+              onPress={() => onFilterChange(f)}
               accessibilityRole="button"
               accessibilityLabel={`Filter by ${f}`}>
               <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>{f}</Text>
@@ -150,11 +173,15 @@ export default function PodcastsScreen({navigation}) {
         <View style={styles.center}><Text style={styles.emptyText}>Could not load episodes</Text></View>
       ) : (
         <FlatList
-          data={filtered}
-          keyExtractor={item => item.url}
-          renderItem={renderEpisode}
+          data={visible}
+          keyExtractor={item => item.key}
+          renderItem={({item}) => item.type === 'header'
+            ? <Text style={styles.monthHeader}>{item.label}</Text>
+            : renderEpisode({item})}
           contentContainerStyle={{padding: 16, paddingBottom: 20}}
           ListEmptyComponent={<Text style={styles.emptyText}>No episodes found</Text>}
+          onEndReached={onLoadMore}
+          onEndReachedThreshold={0.5}
         />
       )}
     </View>
@@ -182,4 +209,5 @@ const styles = StyleSheet.create({
   metaText: {color: Colors.textSecondary, fontSize: 11},
   liveDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.yellow},
   emptyText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 40},
+  monthHeader: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginTop: 16, marginBottom: 8},
 });

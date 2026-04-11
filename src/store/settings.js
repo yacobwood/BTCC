@@ -1,5 +1,22 @@
 import React, {createContext, useContext, useState, useCallback, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getMessaging, subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
+
+// Maps setting key → FCM topic name
+const TOPIC_MAP = {
+  raceAlerts: 'race_alerts',
+  qualifyingAlerts: 'qualifying_alerts',
+  fpAlerts: 'fp_alerts',
+  resultsAlerts: 'results_alerts',
+  weekendPreview: 'weekend_preview',
+  standingsUpdate: 'standings_update',
+};
+
+function syncTopic(topic, enabled) {
+  const messaging = getMessaging();
+  const fn = enabled ? subscribeToTopic : unsubscribeFromTopic;
+  fn(messaging, topic).catch(() => {});
+}
 
 const KEYS = {
   newsAlerts: 'setting_news_alerts',
@@ -36,12 +53,17 @@ export function SettingsProvider({children}) {
         if (val !== null) loaded[key] = val === 'true';
       }
       setSettings(loaded);
+      // Sync all FCM topic subscriptions to match stored settings
+      for (const [key, topic] of Object.entries(TOPIC_MAP)) {
+        syncTopic(topic, loaded[key]);
+      }
     })();
   }, []);
 
   const setSetting = useCallback((key, value) => {
     setSettings(prev => ({...prev, [key]: value}));
     if (KEYS[key]) AsyncStorage.setItem(KEYS[key], String(value)).catch(() => {});
+    if (TOPIC_MAP[key]) syncTopic(TOPIC_MAP[key], value);
   }, []);
 
   return (
