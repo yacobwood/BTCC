@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {StatusBar, Linking} from 'react-native';
+import {StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,6 +12,7 @@ import {RadioProvider} from './src/store/radio';
 import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
+import notifee, {EventType} from '@notifee/react-native';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage, checkForNewPodcast} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
@@ -22,11 +23,30 @@ export const navigationRef = createNavigationContainerRef();
 
 const calendar = require('./src/data/calendar.json');
 
+function navigateFromData(data: Record<string, string> | undefined) {
+  if (!data) return;
+  const go = () => {
+    if (data.round) {
+      console.log('[NOTIF] navigate → TrackDetail round:', data.round);
+      navigationRef.navigate('Calendar' as never, {screen: 'TrackDetail', params: {round: data.round}} as never);
+    } else if (data.slug) {
+      console.log('[NOTIF] navigate → Article slug:', data.slug);
+      navigationRef.navigate('News' as never, {screen: 'Article', params: {slug: data.slug}} as never);
+    }
+  };
+  if (navigationRef.isReady()) {
+    go();
+  } else {
+    const iv = setInterval(() => {
+      if (navigationRef.isReady()) { clearInterval(iv); go(); }
+    }, 100);
+    setTimeout(() => clearInterval(iv), 10000);
+  }
+}
+
+// Keep old name for any legacy call sites
 export function navigateToRound(round: string) {
-  console.log('[NOTIF] navigateToRound:', round);
-  Linking.openURL(`btccfanhub://round/${round}`).catch(e =>
-    console.log('[NOTIF] Linking error:', e)
-  );
+  navigateFromData({round});
 }
 
 function PodcastChecker() {
@@ -98,22 +118,28 @@ export default function App() {
 
     const unsubscribeFg = onForegroundMessage(() => {});
 
-    // App opened from background by tapping a notification
+    // Notifee local notification tapped while app is in foreground
+    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
+      if (type === EventType.PRESS) {
+        console.log('[NOTIF] notifee press:', JSON.stringify(detail.notification?.data));
+        navigateFromData(detail.notification?.data as Record<string, string>);
+      }
+    });
+
+    // App opened from background by tapping an FCM notification
     const messaging = getMessaging();
     const unsubscribeBg = onNotificationOpenedApp(messaging, message => {
       console.log('[NOTIF] onNotificationOpenedApp:', JSON.stringify(message?.data));
-      const round = message?.data?.round;
-      if (round) navigateToRound(round);
+      navigateFromData(message?.data as Record<string, string>);
     });
 
-    // App launched cold by tapping a notification
+    // App launched cold by tapping an FCM notification
     getInitialNotification(messaging).then(message => {
       console.log('[NOTIF] getInitialNotification:', JSON.stringify(message?.data));
-      const round = message?.data?.round;
-      if (round) navigateToRound(round);
+      navigateFromData(message?.data as Record<string, string>);
     });
 
-    return () => { unsubscribeFg(); unsubscribeBg(); };
+    return () => { unsubscribeFg(); unsubscribeBg(); unsubscribeNotifee(); };
   }, []);
 
   return (

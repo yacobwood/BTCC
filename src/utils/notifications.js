@@ -39,6 +39,7 @@ export function onForegroundMessage(callback) {
     await notifee.displayNotification({
       title: remoteMessage.notification?.title || 'BTCC Hub',
       body: remoteMessage.notification?.body || '',
+      data: remoteMessage.data || {},
       android: {channelId, smallIcon: 'ic_launcher', pressAction: {id: 'default'}},
     });
   });
