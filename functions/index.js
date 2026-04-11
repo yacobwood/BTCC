@@ -82,16 +82,36 @@ function getUKDateString(date, offsetDays = 0) {
 }
 
 exports.sendSessionNotifications = onSchedule(
-  {schedule: 'every 5 minutes', timeZone: 'Europe/London'},
+  {schedule: 'every 1 minutes', timeZone: 'Europe/London'},
   async () => {
-    const [calendar, schedule] = await Promise.all([
-      fetch(CALENDAR_URL).then(r => r.json()),
-      fetch(SCHEDULE_URL).then(r => r.json()),
-    ]);
-
     const now = new Date();
+    const uk = getUKTimeParts(now);
+    const todayStr = getUKDateString(now);
+    const tomorrowStr = getUKDateString(now, 1);
+    const yesterdayStr = getUKDateString(now, -1);
+    const sundayStr = getUKDateString(now, -2);
+
+    // Fetch calendar first for the early-exit check
+    const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+
+    // Only proceed on relevant days:
+    // - Saturday or Sunday of a race weekend (session alerts)
+    // - Friday before a race weekend at 09:00 (weekend preview)
+    // - Tuesday after a race weekend at 09:00 (standings update)
+    const isRaceDay = calendar.rounds.some(
+      r => r.startDate === todayStr || r.endDate === todayStr,
+    );
+    const isFridayBefore = uk.weekday === 'Friday' &&
+      calendar.rounds.some(r => r.startDate === tomorrowStr);
+    const isTuesdayAfter = uk.weekday === 'Tuesday' &&
+      calendar.rounds.some(r => r.endDate === sundayStr);
+
+    if (!isRaceDay && !isFridayBefore && !isTuesdayAfter) return;
+
+    const schedule = await fetch(SCHEDULE_URL).then(r => r.json());
+
     const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
-    const windowMs = 2.5 * 60 * 1000; // ±2.5 min window = 5 min total
+    const windowMs = 30 * 1000; // ±30 sec window
 
     const scheduleByRound = {};
     for (const r of schedule.rounds) {
@@ -131,9 +151,7 @@ exports.sendSessionNotifications = onSchedule(
     }
 
     // ── Friday 9am — race weekend preview ────────────────────────
-    const uk = getUKTimeParts(now);
-    if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute < 5) {
-      const tomorrowStr = getUKDateString(now, 1);
+    if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute === 0) {
       const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
       if (round) {
         const rStart = (round.round - 1) * 3 + 1;
@@ -152,8 +170,7 @@ exports.sendSessionNotifications = onSchedule(
     }
 
     // ── Tuesday 9am — standings update ───────────────────────────
-    if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute < 5) {
-      const sundayStr = getUKDateString(now, -2); // Tuesday - 2 days = Sunday
+    if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute === 0) {
       const round = calendar.rounds.find(r => r.endDate === sundayStr);
       if (round) {
         const rStart = (round.round - 1) * 3 + 1;
