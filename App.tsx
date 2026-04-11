@@ -43,7 +43,7 @@ function PodcastChecker() {
 
 const ONBOARDING_KEY = 'onboarding_shown';
 const WHATS_NEW_KEY = 'whats_new_seen_version';
-const CURRENT_VERSION = 39;
+const CURRENT_VERSION = 42;
 
 function AppDialogs() {
   const {whats_new} = useFeatureFlags();
