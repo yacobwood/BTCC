@@ -17,8 +17,8 @@ import {Analytics} from '../utils/analytics';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function RoundResultsScreen({route, navigation}) {
-  const {round, year} = route.params;
-  const [raceIndex, setRaceIndex] = useState(0);
+  const {round, year, initialRace} = route.params;
+  const [raceIndex, setRaceIndex] = useState(initialRace ?? 0);
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
   const races = round.races || [];

@@ -16,7 +16,12 @@ on:
         description: 'FCM device token'
         required: true
       data:
-        description: 'Extra data JSON (optional), e.g. {"round":"1"}'
+        description: |
+          Extra data JSON (optional). Deep-link targets:
+            Round/calendar:  {"type":"round","round":"1"}
+            News article:    {"type":"news","slug":"article-slug"}
+            Results:         {"type":"results","round":"1","year":"2026","race":"1"}
+            Podcasts:        {"type":"podcast"}
         required: false
         default: '{}'
 
