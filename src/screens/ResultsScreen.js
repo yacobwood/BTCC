@@ -18,7 +18,7 @@ import {fetchStandings, fetchResults} from '../api/client';
 import {parseStandings, parseResults} from '../api/parsers';
 import styles from './ResultsScreen.styles';
 import {useFavouriteDriver} from '../store/favouriteDriver';
-import {getSeasonData} from '../assets/seasonData';
+import {getSeasonData, WIN_STATS} from '../assets/seasonData';
 import ProgressionChart from '../components/ProgressionChart';
 import {Analytics} from '../utils/analytics';
 import {cacheRead, cacheWrite} from '../store/cache';
@@ -92,6 +92,7 @@ export default function ResultsScreen({navigation}) {
   const teamsListRef = useRef(null);
   const resultsListRef = useRef(null);
   const statsListRef = useRef(null);
+  const winPctListRef = useRef(null);
   const chartScrollRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
@@ -99,12 +100,13 @@ export default function ResultsScreen({navigation}) {
     teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
     resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
     statsListRef.current?.scrollToOffset({offset: 0, animated: false});
+    winPctListRef.current?.scrollToOffset({offset: 0, animated: false});
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
   }, []));
-  const TAB_WIDTH = SCREEN_WIDTH / 5;
+  const TAB_WIDTH = SCREEN_WIDTH / 6;
   const indicatorX = scrollX.interpolate({
-    inputRange: [0, SCREEN_WIDTH * 4],
-    outputRange: [0, TAB_WIDTH * 4],
+    inputRange: [0, SCREEN_WIDTH * 5],
+    outputRange: [0, TAB_WIDTH * 5],
     extrapolate: 'clamp',
   });
 
@@ -372,7 +374,27 @@ export default function ResultsScreen({navigation}) {
     </View>
   );
 
-  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'CHART'];
+  const renderWinPctRow = ({item, index}) => {
+    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : null;
+    const pct = (item.winPct * 100).toFixed(1);
+    const barWidth = item.winPct / WIN_STATS[0].winPct;
+    return (
+      <View style={[styles.standingRow, {flexDirection: 'column', gap: 0}]}>
+        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 8}}>
+          <Text style={[styles.pos, {fontSize: medal ? 18 : 15}]}>{medal || index + 1}</Text>
+          <Text style={[styles.driverName, {flex: 1}]}>{item.driver}</Text>
+          <Text style={{color: Colors.yellow, fontSize: 18, fontWeight: '900'}}>{pct}%</Text>
+        </View>
+        <View style={{flexDirection: 'row', height: 4, borderRadius: 2, backgroundColor: Colors.surface, overflow: 'hidden', marginBottom: 6, marginLeft: 48}}>
+          <View style={{flex: barWidth, backgroundColor: Colors.yellow, borderRadius: 2}} />
+          <View style={{flex: 1 - barWidth}} />
+        </View>
+        <Text style={[styles.teamName, {marginLeft: 48}]}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
+      </View>
+    );
+  };
+
+  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'CHART', 'WIN %'];
   const hasData = results.some(r => r.races.some(race => race.results.length > 0));
 
   const renderTabContent = (t) => {
@@ -477,6 +499,22 @@ export default function ResultsScreen({navigation}) {
             />
           </ScrollView>
         );
+      case 5:
+        return (
+          <FlatList
+            ref={winPctListRef}
+            data={WIN_STATS}
+            keyExtractor={item => item.driver}
+            renderItem={renderWinPctRow}
+            contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            ListHeaderComponent={
+              <View style={{marginBottom: 4}}>
+                <Text style={{color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginBottom: 2}}>ALL-TIME WIN %</Text>
+                <Text style={{color: Colors.textSecondary, fontSize: 11, marginBottom: 12}}>Min. 30 starts · 2004–2025</Text>
+              </View>
+            }
+          />
+        );
       default:
         return null;
     }
@@ -485,7 +523,7 @@ export default function ResultsScreen({navigation}) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>STANDINGS</Text>
+        <Text style={styles.headerTitle}>HISTORY</Text>
       </View>
 
       <View style={styles.yearRow}>

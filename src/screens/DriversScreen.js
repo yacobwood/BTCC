@@ -17,7 +17,6 @@ import {Colors} from '../theme/colors';
 import {fetchDrivers} from '../api/client';
 import {parseGrid} from '../api/parsers';
 import {getDriverImage} from '../assets/driverImages';
-import {WIN_STATS} from '../assets/seasonData';
 import {useFocusEffect} from '@react-navigation/native';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
@@ -39,7 +38,7 @@ function DriverAvatar({number, imageUrl, size = 58}) {
   );
 }
 
-const TABS = ['DRIVERS', 'TEAMS', 'STATS'];
+const TABS = ['DRIVERS', 'TEAMS'];
 const TAB_WIDTH = SCREEN_WIDTH / TABS.length;
 
 export default function DriversScreen({navigation}) {
@@ -51,20 +50,18 @@ export default function DriversScreen({navigation}) {
   const swipeRef = useRef(null);
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
-  const statsListRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
     const t = setTimeout(() => {
       driversListRef.current?.scrollToOffset({offset: 0, animated: false});
       teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
-      statsListRef.current?.scrollToOffset({offset: 0, animated: false});
     }, 50);
     return () => clearTimeout(t);
   }, []));
   const scrollX = useRef(new Animated.Value(0)).current;
   const indicatorX = scrollX.interpolate({
-    inputRange: [0, SCREEN_WIDTH, SCREEN_WIDTH * 2],
-    outputRange: [0, TAB_WIDTH, TAB_WIDTH * 2],
+    inputRange: [0, SCREEN_WIDTH],
+    outputRange: [0, TAB_WIDTH],
     extrapolate: 'clamp',
   });
 
@@ -175,28 +172,6 @@ export default function DriversScreen({navigation}) {
     </TouchableOpacity>
   );
 
-  const renderStatRow = ({item, index}) => {
-    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : null;
-    const pct = (item.winPct * 100).toFixed(1);
-    const barWidth = item.winPct / WIN_STATS[0].winPct; // relative to leader
-    return (
-      <View style={styles.statRow}>
-        <Text style={styles.statPos}>{medal || `${index + 1}`}</Text>
-        <View style={{flex: 1}}>
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6}}>
-            <Text style={styles.statName}>{item.driver}</Text>
-            <Text style={styles.statPct}>{pct}%</Text>
-          </View>
-          <View style={styles.barTrack}>
-            <View style={[styles.barFill, {flex: barWidth}]} />
-            <View style={{flex: 1 - barWidth}} />
-          </View>
-          <Text style={styles.statSub}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -238,7 +213,7 @@ export default function DriversScreen({navigation}) {
             useNativeDriver: true,
             listener: (e) => {
               const newTab = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-              if (newTab !== tab) { setTab(newTab); }
+              if (newTab !== tab) setTab(newTab);
             },
           }
         )}
@@ -268,24 +243,6 @@ export default function DriversScreen({navigation}) {
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
             ListHeaderComponent={
               <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
-            }
-            ItemSeparatorComponent={() => <View style={{height: 10}} />}
-          />
-        </View>
-        <View style={{width: SCREEN_WIDTH, flex: 1}}>
-          <FlatList
-            ref={statsListRef}
-            data={WIN_STATS}
-            keyExtractor={item => item.driver}
-            renderItem={renderStatRow}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
-            ListHeaderComponent={
-              <View style={{marginBottom: 12}}>
-                <Text style={styles.countLabel}>ALL-TIME WIN %</Text>
-                <Text style={[styles.countLabel, {letterSpacing: 0, fontWeight: '500', marginTop: 2}]}>
-                  Min. 30 race starts · 2004–2025
-                </Text>
-              </View>
             }
             ItemSeparatorComponent={() => <View style={{height: 10}} />}
           />
@@ -355,11 +312,4 @@ const styles = StyleSheet.create({
   smallAvatar: {width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', marginRight: 8, overflow: 'hidden'},
   smallAvatarImg: {width: 28, height: 28, borderRadius: 14},
   teamDriverName: {color: '#fff', fontSize: 13, fontWeight: '600'},
-  statRow: {flexDirection: 'row', alignItems: 'flex-start', backgroundColor: Colors.card, borderRadius: 12, padding: 14, gap: 12},
-  statPos: {width: 28, textAlign: 'center', fontSize: 16, fontWeight: '900', color: '#fff', lineHeight: 22},
-  statName: {color: '#fff', fontSize: 14, fontWeight: '700'},
-  statPct: {color: Colors.yellow, fontSize: 16, fontWeight: '900'},
-  barTrack: {flexDirection: 'row', height: 4, borderRadius: 2, backgroundColor: Colors.surface, overflow: 'hidden', marginBottom: 6},
-  barFill: {backgroundColor: Colors.yellow, borderRadius: 2},
-  statSub: {color: Colors.textSecondary, fontSize: 11},
 });

@@ -172,7 +172,7 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="News" component={NewsStack} />
           <Tab.Screen name="Calendar" component={CalendarStack} />
           <Tab.Screen name="Grid" component={DriversStack} />
-          <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false}} />
+          <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'History'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
         {banner_ad && (
