@@ -74,6 +74,12 @@ keystore.properties
 __pycache__/
 tools/scraper/.venv/
 
+# VSCode
+.vscode/
+
+# Stale directories
+/BTCCFanHub/
+
 # Yarn
 .yarn/*
 !.yarn/patches
