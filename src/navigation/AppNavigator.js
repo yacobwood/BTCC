@@ -135,6 +135,7 @@ const linking = {
       },
       Calendar: {
         screens: {
+          TrackDetail: 'round/:round',
           LiveTiming: 'live-timing/:eventId',
         },
       },
@@ -183,7 +184,7 @@ function AppContent({adBannerRef}) {
   );
 }
 
-export default function AppNavigator() {
+export default function AppNavigator({navigationRef}) {
   const adBannerRef = useRef(null);
   const prevTabRef = useRef(0);
 
@@ -195,7 +196,7 @@ export default function AppNavigator() {
   };
 
   return (
-    <NavigationContainer linking={linking} onStateChange={handleStateChange}>
+    <NavigationContainer ref={navigationRef} linking={linking} onStateChange={handleStateChange}>
       <AppContent adBannerRef={adBannerRef} />
     </NavigationContainer>
   );

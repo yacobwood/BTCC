@@ -15,6 +15,10 @@ on:
       device_token:
         description: 'FCM device token'
         required: true
+      data:
+        description: 'Extra data JSON (optional), e.g. {"round":"1"}'
+        required: false
+        default: '{}'
 
 jobs:
   send:
@@ -29,12 +33,13 @@ jobs:
           const admin = require('./node_modules/firebase-admin');
           const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
           admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+          const extraData = JSON.parse(process.env.EXTRA_DATA || '{}');
           admin.messaging().send({
             token: process.env.DEVICE_TOKEN,
             notification: { title: process.env.TITLE, body: process.env.BODY },
             android: { notification: { channelId: process.env.CHANNEL } },
             apns: { payload: { aps: { sound: 'default' } } },
-            data: { channel: process.env.CHANNEL },
+            data: { channel: process.env.CHANNEL, ...extraData },
           }).then(r => { console.log('Sent:', r); process.exit(0); })
             .catch(e => { console.error('Error:', e.message); process.exit(1); });
           EOF
@@ -44,3 +49,4 @@ jobs:
           CHANNEL: ${{ inputs.channel }}
           TITLE: ${{ inputs.title }}
           BODY: ${{ inputs.body }}
+          EXTRA_DATA: ${{ inputs.data }}

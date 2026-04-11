@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {createNavigationContainerRef} from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
 import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
@@ -13,8 +14,20 @@ import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage, checkForNewPodcast} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
+import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import WhatsNewDialog from './src/components/WhatsNewDialog';
+
+export const navigationRef = createNavigationContainerRef();
+
+const calendar = require('./src/data/calendar.json');
+
+function navigateToRound(round) {
+  const track = calendar.rounds.find((r: any) => r.round === parseInt(round, 10));
+  if (!track || !navigationRef.isReady()) return;
+  navigationRef.navigate('Calendar' as never);
+  navigationRef.navigate('Calendar', {screen: 'TrackDetail', params: {track}} as never);
+}
 
 function PodcastChecker() {
   const {settings} = useSettings();
@@ -83,8 +96,25 @@ export default function App() {
     maybeRequestReview();
     runBackgroundPrefetch();
 
-    const unsubscribe = onForegroundMessage(() => {});
-    return unsubscribe;
+    const unsubscribeFg = onForegroundMessage(() => {});
+
+    // App opened from background by tapping a notification
+    const messaging = getMessaging();
+    const unsubscribeBg = onNotificationOpenedApp(messaging, message => {
+      const round = message?.data?.round;
+      if (round) navigateToRound(round);
+    });
+
+    // App launched cold by tapping a notification
+    getInitialNotification(messaging).then(message => {
+      const round = message?.data?.round;
+      if (round) {
+        // Delay to allow navigator to mount
+        setTimeout(() => navigateToRound(round), 500);
+      }
+    });
+
+    return () => { unsubscribeFg(); unsubscribeBg(); };
   }, []);
 
   return (
@@ -96,7 +126,7 @@ export default function App() {
           <RadioProvider>
             <PodcastChecker />
             <StatusBar barStyle="light-content" backgroundColor="#020255" />
-            <AppNavigator />
+            <AppNavigator navigationRef={navigationRef} />
             <AppDialogs />
           </RadioProvider>
         </SettingsProvider>

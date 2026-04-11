@@ -166,6 +166,7 @@ exports.sendSessionNotifications = onSchedule(
             },
             android: {notification: {channelId: 'weekend_preview'}},
             apns: {payload: {aps: {sound: 'default'}}},
+            data: {type: 'round', round: String(round.round)},
           }),
         );
       }
