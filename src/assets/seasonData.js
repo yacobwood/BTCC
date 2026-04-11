@@ -27,3 +27,36 @@ const seasons = {
 export function getSeasonData(year) {
   return seasons[year] || null;
 }
+
+// Computed once at module load — all data is bundled so this is synchronous.
+// Returns drivers ranked by win%, filtered to >= MIN_STARTS to exclude
+// drivers with a handful of lucky wins inflating their percentage.
+const MIN_STARTS = 30;
+
+export const WIN_STATS = (() => {
+  const map = {}; // driver -> {wins, starts, seasons: Set}
+  for (const season of Object.values(seasons)) {
+    for (const round of season.rounds || []) {
+      for (const race of round.races || []) {
+        for (const result of race.results || []) {
+          const name = result.driver || result.name;
+          if (!name) continue;
+          if (!map[name]) map[name] = {wins: 0, starts: 0, seasons: new Set()};
+          map[name].starts++;
+          if (result.pos === 1) map[name].wins++;
+          if (season.season) map[name].seasons.add(season.season);
+        }
+      }
+    }
+  }
+  return Object.entries(map)
+    .filter(([, s]) => s.starts >= MIN_STARTS)
+    .map(([driver, s]) => ({
+      driver,
+      wins: s.wins,
+      starts: s.starts,
+      winPct: s.wins / s.starts,
+      seasons: s.seasons.size,
+    }))
+    .sort((a, b) => b.winPct - a.winPct);
+})();
