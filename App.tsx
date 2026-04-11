@@ -22,32 +22,35 @@ export const navigationRef = createNavigationContainerRef();
 
 const calendar = require('./src/data/calendar.json');
 
-// Holds a pending navigation action until the navigator is ready
-let pendingRound: string | null = null;
-
 export function navigateToRound(round: string) {
   const track = calendar.rounds.find((r: any) => r.round === parseInt(round, 10));
   if (!track) return;
-  if (navigationRef.isReady()) {
-    navigationRef.dispatch(
-      CommonActions.navigate({
-        name: 'Calendar',
-        params: {
-          screen: 'TrackDetail',
-          params: {track},
-        },
-      })
-    );
-  } else {
-    pendingRound = round;
-  }
-}
 
-export function flushPendingNavigation() {
-  if (pendingRound) {
-    const r = pendingRound;
-    pendingRound = null;
-    navigateToRound(r);
+  const doNav = () => {
+    navigationRef.dispatch(CommonActions.navigate('Calendar' as never));
+    // Small delay lets the Calendar tab mount before pushing TrackDetail
+    setTimeout(() => {
+      navigationRef.dispatch(
+        CommonActions.navigate({
+          name: 'Calendar',
+          params: {screen: 'TrackDetail', params: {track}},
+        } as never)
+      );
+    }, 150);
+  };
+
+  if (navigationRef.isReady()) {
+    doNav();
+  } else {
+    // Poll until ready (handles cold start where async resolution beats onReady)
+    const interval = setInterval(() => {
+      if (navigationRef.isReady()) {
+        clearInterval(interval);
+        doNav();
+      }
+    }, 50);
+    // Give up after 5 seconds
+    setTimeout(() => clearInterval(interval), 5000);
   }
 }
 
@@ -145,7 +148,7 @@ export default function App() {
           <RadioProvider>
             <PodcastChecker />
             <StatusBar barStyle="light-content" backgroundColor="#020255" />
-            <AppNavigator navigationRef={navigationRef} onReady={flushPendingNavigation} />
+            <AppNavigator navigationRef={navigationRef} />
             <AppDialogs />
           </RadioProvider>
         </SettingsProvider>
