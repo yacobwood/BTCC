@@ -1069,6 +1069,7 @@ function testTitle(n) {
 function testBody(n) {
   if (n.type === 'preview')   return `Round ${n.round} at ${n.venue} starts tomorrow. Get ready for this weekend\u2019s racing!`;
   if (n.type === 'standings') return `Check the championship progression chart to see how the points changed.`;
+  if (n.type === 'race' && n.raceNum) return `Starting in 15 min \u00b7 Race ${n.raceNum} of ${n.totalRaces} \u00b7 ${n.venue}`;
   return `Starting in 15 min \u00b7 Round ${n.round}, ${n.venue}`;
 }
 
@@ -1695,6 +1696,29 @@ async function loadNotifSchedule() {
     (scheduleData.rounds || []).forEach(r => { scheduleMap[r.round] = r.sessions || []; });
     const now = new Date();
 
+    // Pre-calculate sequential race numbers (Race 1/2/3 only, not Qualifying Race)
+    let raceCounter = 0;
+    const raceNumMap = {}; // key: `${round}-${sessionName}`
+    const totalRaces = data.rounds.reduce((acc, r) => {
+      const sessions = scheduleMap[r.round] || [];
+      return acc + sessions.filter(s => {
+        const isFP = s.name === 'Free Practice';
+        const isQual = !isFP && s.name.toLowerCase().includes('qualifying');
+        return !isFP && !isQual;
+      }).length;
+    }, 0);
+    data.rounds.forEach(r => {
+      const sessions = scheduleMap[r.round] || [];
+      sessions.forEach(s => {
+        const isFP = s.name === 'Free Practice';
+        const isQual = !isFP && s.name.toLowerCase().includes('qualifying');
+        if (!isFP && !isQual) {
+          raceCounter++;
+          raceNumMap[`${r.round}-${s.name}`] = raceCounter;
+        }
+      });
+    });
+
     // Build flat list of all notifications sorted chronologically
     const notifs = [];
     data.rounds.forEach(r => {
@@ -1732,6 +1756,8 @@ async function loadNotifSchedule() {
           timeStr: notifTime,
           link: null,
           color,
+          raceNum: raceNumMap[`${r.round}-${s.name}`] || null,
+          totalRaces,
         });
       });
 
