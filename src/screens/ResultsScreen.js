@@ -390,8 +390,8 @@ export default function ResultsScreen({navigation}) {
             <View style={{flex: barWidth, backgroundColor: Colors.yellow, borderRadius: 2}} />
             <View style={{flex: 1 - barWidth}} />
           </View>
-          <Text style={styles.teamName}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
         </View>
+        <Text style={[styles.teamName, {marginTop: 4}]}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
       </View>
     );
   };
