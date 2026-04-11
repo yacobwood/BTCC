@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
@@ -43,6 +43,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import InfoPageScreen from '../screens/InfoPageScreen';
 import BugReportScreen from '../screens/BugReportScreen';
 import RadioScreen from '../screens/RadioScreen';
+import PodcastsScreen from '../screens/PodcastsScreen';
 import AdBanner from '../components/AdBanner';
 
 const Tab = createBottomTabNavigator();
@@ -109,6 +110,7 @@ function MoreStack() {
       <Stack.Screen name="InfoPage" component={InfoPageScreen} />
       <Stack.Screen name="BugReport" component={BugReportScreen} />
       <Stack.Screen name="Radio" component={RadioScreen} />
+      <Stack.Screen name="Podcasts" component={PodcastsScreen} />
     </Stack.Navigator>
   );
 }
@@ -139,7 +141,7 @@ const linking = {
   },
 };
 
-function AppContent() {
+function AppContent({adBannerRef}) {
   const {bottom} = useSafeAreaInsets();
   return (
     <View style={{flex: 1}}>
@@ -171,16 +173,26 @@ function AppContent() {
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
         <View style={{paddingBottom: bottom}}>
-          <AdBanner />
+          <AdBanner ref={adBannerRef} />
         </View>
       </View>
   );
 }
 
 export default function AppNavigator() {
+  const adBannerRef = useRef(null);
+  const prevTabRef = useRef(0);
+
+  const handleStateChange = (state) => {
+    if (state?.index !== undefined && state.index !== prevTabRef.current) {
+      prevTabRef.current = state.index;
+      adBannerRef.current?.load();
+    }
+  };
+
   return (
-    <NavigationContainer linking={linking}>
-      <AppContent />
+    <NavigationContainer linking={linking} onStateChange={handleStateChange}>
+      <AppContent adBannerRef={adBannerRef} />
     </NavigationContainer>
   );
 }

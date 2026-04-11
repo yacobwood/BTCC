@@ -11,5 +11,7 @@
   "merch_feed_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/merch.json",
   "overrides": {},
   "shop_home_premium": true,
-  "shop_home_standard": true
+  "shop_home_standard": true,
+  "podcasts_enabled": true,
+  "podcast_last_episode_url": ""
 }

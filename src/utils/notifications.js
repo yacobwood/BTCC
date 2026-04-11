@@ -1,6 +1,7 @@
 import {getMessaging, getToken, onMessage, requestPermission} from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import {Platform, PermissionsAndroid} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'news', name: 'News Alerts', importance: AndroidImportance.HIGH});
@@ -10,6 +11,7 @@ export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'results', name: 'Results Alerts', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'weekend_preview', name: 'Weekend Preview', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'standings', name: 'Standings Update', importance: AndroidImportance.HIGH});
+  await notifee.createChannel({id: 'podcasts', name: 'Podcast Alerts', importance: AndroidImportance.DEFAULT});
 }
 
 export async function requestNotificationPermission() {
@@ -47,4 +49,37 @@ export async function showLocalNotification(title, body, channelId = 'news', dat
     title, body, data,
     android: {channelId, smallIcon: 'ic_launcher', pressAction: {id: 'default'}},
   });
+}
+
+const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
+const RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
+const LAST_PODCAST_KEY = 'last_podcast_url';
+
+export async function checkForNewPodcast(podcastAlertsEnabled) {
+  if (!podcastAlertsEnabled) return;
+  try {
+    const [flagsRes, rssRes, lastUrl] = await Promise.all([
+      fetch(FLAGS_URL).then(r => r.json()),
+      fetch(RSS_URL, {headers: {'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'}}).then(r => r.text()),
+      AsyncStorage.getItem(LAST_PODCAST_KEY).catch(() => null),
+    ]);
+
+    if (!flagsRes.podcasts_enabled) return;
+
+    // Parse latest episode
+    const match = /<item>([\s\S]*?)<\/item>/.exec(rssRes);
+    if (!match) return;
+    const block = match[1];
+    const title = (/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title>([\s\S]*?)<\/title>/.exec(block) || [])[1]?.trim() || '';
+    const url = /enclosure[^>]+url="([^"]+)"/.exec(block)?.[1] || '';
+    if (!url || url === lastUrl) return;
+
+    await AsyncStorage.setItem(LAST_PODCAST_KEY, url);
+    await showLocalNotification(
+      'New BTCC Podcast',
+      title,
+      'podcasts',
+      {type: 'podcast', url}
+    );
+  } catch {}
 }

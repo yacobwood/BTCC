@@ -6,10 +6,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.MediaPlayer
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.DefaultLoadControl
 import com.btccfanhub.MainActivity
 
 class RadioService : Service() {
@@ -24,7 +26,7 @@ class RadioService : Service() {
         var stationName = ""; private set
     }
 
-    private var player: MediaPlayer? = null
+    private var player: ExoPlayer? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -48,23 +50,44 @@ class RadioService : Service() {
 
     private fun startPlaying(url: String, name: String) {
         player?.release()
-        player = MediaPlayer().apply {
-            setAudioAttributes(AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .setUsage(AudioAttributes.USAGE_MEDIA).build())
-            setDataSource(url)
-            setOnPreparedListener { start() }
-            setOnErrorListener { _, _, _ -> stopPlaying(); true }
-            prepareAsync()
-        }
-        isPlaying = true; stationName = name
+
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                1000,  // min buffer before playback starts
+                5000,  // max buffer
+                500,   // buffer required to start playback
+                500    // buffer required to resume after rebuffer
+            )
+            .build()
+
+        player = ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
+            .build()
+            .apply {
+                setMediaItem(MediaItem.fromUri(url))
+                addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_ENDED || state == Player.STATE_IDLE) {
+                            stopPlaying()
+                        }
+                    }
+                })
+                prepare()
+                playWhenReady = true
+            }
+
+        isPlaying = true
+        stationName = name
         startForeground(NOTIF_ID, buildNotification(name))
     }
 
     private fun stopPlaying() {
-        player?.release(); player = null
-        isPlaying = false; stationName = ""
-        stopForeground(STOP_FOREGROUND_REMOVE); stopSelf()
+        player?.release()
+        player = null
+        isPlaying = false
+        stationName = ""
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) { stopPlaying(); super.onTaskRemoved(rootIntent) }
@@ -77,8 +100,8 @@ class RadioService : Service() {
         val stop = PendingIntent.getService(this, 0,
             Intent(this, RadioService::class.java).apply { action = ACTION_STOP }, PendingIntent.FLAG_IMMUTABLE)
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("BTCC Hub \u00b7 Radio")
-            .setContentText("Live \u00b7 $name")
+            .setContentTitle("BTCC Hub · Radio")
+            .setContentText("Live · $name")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(open)
             .addAction(android.R.drawable.ic_media_pause, "Stop", stop)

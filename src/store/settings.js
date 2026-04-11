@@ -9,6 +9,7 @@ const KEYS = {
   resultsAlerts: 'setting_results_alerts',
   weekendPreview: 'setting_weekend_preview',
   standingsUpdate: 'setting_standings_update',
+  podcastAlerts: 'setting_podcast_alerts',
 };
 
 const defaults = {
@@ -19,6 +20,7 @@ const defaults = {
   resultsAlerts: true,
   weekendPreview: true,
   standingsUpdate: true,
+  podcastAlerts: true,
 };
 
 const SettingsContext = createContext({settings: defaults, setSetting: () => {}});

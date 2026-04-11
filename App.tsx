@@ -6,14 +6,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppNavigator from './src/navigation/AppNavigator';
 import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
-import {SettingsProvider} from './src/store/settings';
+import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
+import {FeatureFlagsProvider} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
-import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
+import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage, checkForNewPodcast} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import WhatsNewDialog from './src/components/WhatsNewDialog';
+
+function PodcastChecker() {
+  const {settings} = useSettings();
+  useEffect(() => {
+    checkForNewPodcast(settings.podcastAlerts);
+  }, [settings.podcastAlerts]);
+  return null;
+}
 
 const ONBOARDING_KEY = 'onboarding_shown';
 const WHATS_NEW_KEY = 'whats_new_seen_version';
@@ -72,10 +81,12 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
+    <FeatureFlagsProvider>
     <FavouriteDriverProvider>
       <UnitsProvider>
         <SettingsProvider>
           <RadioProvider>
+            <PodcastChecker />
             <StatusBar barStyle="light-content" backgroundColor="#020255" />
             <AppNavigator />
             <OnboardingDialog visible={showOnboarding} onAllow={handleOnboardingAllow} onSkip={handleOnboardingSkip} />
@@ -84,6 +95,7 @@ export default function App() {
         </SettingsProvider>
       </UnitsProvider>
     </FavouriteDriverProvider>
+    </FeatureFlagsProvider>
     </SafeAreaProvider>
   );
 }

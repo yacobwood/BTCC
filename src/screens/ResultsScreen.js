@@ -552,19 +552,12 @@ export default function ResultsScreen({navigation}) {
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {
-            useNativeDriver: true,
-            listener: (e) => {
-              const newTab = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-              if (newTab !== tab) {
-                setTab(newTab);
-                markTabRendered(newTab);
-              }
-            },
-          }
+          {useNativeDriver: true}
         )}
         onMomentumScrollEnd={(e) => {
           const newTab = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+          setTab(newTab);
+          markTabRendered(newTab);
           Analytics.resultsTabChanged(year, tabs[newTab].toLowerCase());
         }}>
         {tabs.map((_, i) => (

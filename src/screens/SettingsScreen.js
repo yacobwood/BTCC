@@ -11,11 +11,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useUnits} from '../store/units';
 import {useSettings} from '../store/settings';
+import {useFeatureFlags} from '../store/featureFlags';
 import {Analytics} from '../utils/analytics';
 
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
   const {useKm, toggleUnits} = useUnits();
+  const {podcasts_enabled} = useFeatureFlags();
 
   useEffect(() => { Analytics.screen('settings'); }, []);
 
@@ -72,6 +74,14 @@ export default function SettingsScreen({navigation}) {
           value={settings.standingsUpdate}
           onToggle={(v) => { Analytics.notificationTypeToggled('standingsUpdate', v); setSetting('standingsUpdate', v); }}
         />
+        {podcasts_enabled && (
+          <SettingRow
+            label="Podcast alerts"
+            description="Get notified when a new BTCC podcast or interview is released"
+            value={settings.podcastAlerts}
+            onToggle={(v) => { Analytics.notificationTypeToggled('podcastAlerts', v); setSetting('podcastAlerts', v); }}
+          />
+        )}
 
         <View style={styles.divider} />
         <Text style={styles.sectionTitle}>UNIT DISPLAY</Text>
