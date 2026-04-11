@@ -938,6 +938,16 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
   <div id="fcm-test-status" style="font-size:12px;margin-top:4px;min-height:18px;color:var(--text-sec);"></div>
   <div style="border-top:1px solid var(--outline-lo);margin:16px 0;"></div>
+
+  <!-- Manual test buttons -->
+  <div class="section-label" style="margin-bottom:10px;">MANUAL TESTS</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+    <button onclick="sendTestNotif('news','New BTCC Article','A new article has been published on btcc.net')" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;">News</button>
+    <button onclick="sendTestNotif('results','Race Results Published','The results from the latest round are now available')" style="background:#F87171;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;">Results</button>
+    <button onclick="sendTestNotif('podcasts','New BTCC Podcast','A new episode has just been released')" style="background:#C084FC;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;">Podcast</button>
+  </div>
+
+  <div style="border-top:1px solid var(--outline-lo);margin:16px 0;"></div>
   <div class="section-note">All notifications scheduled for the 2026 season.</div>
   <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
 
@@ -1027,10 +1037,11 @@ function saveFcmTok(){
 }
 
 function testChannel(n) {
-  if (n.type === 'preview')   return 'weekend_preview';
-  if (n.type === 'standings') return 'standings';
+  if (n.type === 'preview')    return 'weekend_preview';
+  if (n.type === 'standings')  return 'standings';
   if (n.type === 'qualifying') return 'qualifying';
-  if (n.type === 'race')      return 'race';
+  if (n.type === 'fp')         return 'free_practice';
+  if (n.type === 'race')       return 'race';
   return n.type;
 }
 function testTitle(n) {
@@ -1672,24 +1683,26 @@ async function loadNotifSchedule() {
         color: 'var(--yellow)',
       });
 
-      // Race sessions (excluding Free Practice)
+      // Race sessions
       const sessions = scheduleMap[r.round] || [];
       sessions.forEach(s => {
         if (s.time === 'TBA') return;
-        if (s.name === 'Free Practice') return;
-        const isQual = s.name.toLowerCase().includes('qualifying');
+        const isFP   = s.name === 'Free Practice';
+        const isQual = !isFP && s.name.toLowerCase().includes('qualifying');
+        const type   = isFP ? 'fp' : isQual ? 'qualifying' : 'race';
+        const color  = isFP ? '#34D399' : isQual ? '#A78BFA' : '#F87171';
         const notifDate = sessionDateTime(r.startDate, r.endDate, s.day, s.time);
         const [h, m] = s.time.split(':').map(Number);
         const notifTime = `${String(h).padStart(2,'0')}:${String(m < 15 ? m + 45 : m - 15).padStart(2,'0')} ${h < 12 || (h === 12 && m < 15) ? 'AM' : 'PM'}`;
         notifs.push({
           date: notifDate,
-          type: isQual ? 'qualifying' : 'race',
+          type,
           round: r.round,
           venue: r.venue,
           label: s.name,
           timeStr: notifTime,
-          link: null, // no test deep link for sessions
-          color: isQual ? '#A78BFA' : '#F87171',
+          link: null,
+          color,
         });
       });
 

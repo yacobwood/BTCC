@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       channel:
-        description: 'Notification channel (news, race, qualifying, free_practice, results, weekend_preview, standings)'
+        description: 'Notification channel (news, race, qualifying, free_practice, results, weekend_preview, standings, podcasts)'
         required: true
       title:
         description: 'Notification title'
@@ -20,23 +20,25 @@ jobs:
   send:
     runs-on: ubuntu-latest
     steps:
-      - name: Send FCM notification
+      - name: Send FCM notification (v1 API)
         run: |
-          curl -s -X POST https://fcm.googleapis.com/fcm/send \
-            -H "Authorization: key=${{ secrets.FCM_SERVER_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "to": "${{ inputs.device_token }}",
-              "notification": {
-                "title": "${{ inputs.title }}",
-                "body": "${{ inputs.body }}"
-              },
-              "data": {
-                "channel": "${{ inputs.channel }}"
-              },
-              "android": {
-                "notification": {
-                  "channel_id": "${{ inputs.channel }}"
-                }
-              }
-            }'
+          npm install -g firebase-admin 2>/dev/null || true
+          node - <<'EOF'
+          const admin = require('firebase-admin');
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+          admin.messaging().send({
+            token: process.env.DEVICE_TOKEN,
+            notification: { title: process.env.TITLE, body: process.env.BODY },
+            android: { notification: { channelId: process.env.CHANNEL } },
+            apns: { payload: { aps: { sound: 'default' } } },
+            data: { channel: process.env.CHANNEL },
+          }).then(r => { console.log('Sent:', r); process.exit(0); })
+            .catch(e => { console.error('Error:', e); process.exit(1); });
+          EOF
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DEVICE_TOKEN: ${{ inputs.device_token }}
+          CHANNEL: ${{ inputs.channel }}
+          TITLE: ${{ inputs.title }}
+          BODY: ${{ inputs.body }}
