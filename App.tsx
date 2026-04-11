@@ -12,8 +12,8 @@ import {RadioProvider} from './src/store/radio';
 import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
-import {getSeasonData} from './src/assets/seasonData';
 import notifee, {EventType} from '@notifee/react-native';
+import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage, checkForNewPodcast} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
@@ -24,43 +24,13 @@ export const navigationRef = createNavigationContainerRef();
 
 const calendar = require('./src/data/calendar.json');
 
-function navigateFromData(data: Record<string, string> | undefined) {
-  if (!data) return;
-  const go = () => {
-    const {type, round, year, race, slug} = data;
-    if ((type === 'round' || (!type && round)) && round) {
-      console.log('[NOTIF] navigate → TrackDetail round:', round);
-      navigationRef.navigate('Calendar' as never, {screen: 'TrackDetail', params: {round}} as never);
-    } else if (type === 'news' && slug) {
-      console.log('[NOTIF] navigate → Article slug:', slug);
-      navigationRef.navigate('News' as never, {screen: 'Article', params: {slug}} as never);
-    } else if (type === 'results' && round) {
-      const y = parseInt(year, 10) || new Date().getFullYear();
-      const season = getSeasonData(y);
-      const roundObj = season?.rounds?.find((r: any) => r.round === parseInt(round, 10));
-      if (roundObj) {
-        const initialRace = race ? parseInt(race, 10) - 1 : 0;
-        console.log('[NOTIF] navigate → RoundResults round:', round, 'race:', initialRace);
-        navigationRef.navigate('Results' as never, {screen: 'RoundResults', params: {round: roundObj, year: y, initialRace}} as never);
-      }
-    } else if (type === 'podcast') {
-      console.log('[NOTIF] navigate → Podcasts');
-      navigationRef.navigate('More' as never, {screen: 'Podcasts'} as never);
-    }
-  };
-  if (navigationRef.isReady()) {
-    go();
-  } else {
-    const iv = setInterval(() => {
-      if (navigationRef.isReady()) { clearInterval(iv); go(); }
-    }, 100);
-    setTimeout(() => clearInterval(iv), 10000);
-  }
+function _navigate(data: Record<string, string> | undefined) {
+  navigateFromData(navigationRef as any, data);
 }
 
 // Keep old name for any legacy call sites
 export function navigateToRound(round: string) {
-  navigateFromData({round});
+  _navigate({round});
 }
 
 function PodcastChecker() {
@@ -136,7 +106,7 @@ export default function App() {
       notifee.getInitialNotification().then(initial => {
         if (initial?.notification?.data) {
           console.log('[NOTIF] notifee initial:', JSON.stringify(initial.notification.data));
-          navigateFromData(initial.notification.data as Record<string, string>);
+          _navigate(initial.notification.data as Record<string, string>);
         }
       }).catch(() => {});
     };
@@ -151,7 +121,7 @@ export default function App() {
     const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS) {
         console.log('[NOTIF] notifee press:', JSON.stringify(detail.notification?.data));
-        navigateFromData(detail.notification?.data as Record<string, string>);
+        _navigate(detail.notification?.data as Record<string, string>);
       }
     });
 
@@ -159,13 +129,13 @@ export default function App() {
     const messaging = getMessaging();
     const unsubscribeBg = onNotificationOpenedApp(messaging, message => {
       console.log('[NOTIF] onNotificationOpenedApp:', JSON.stringify(message?.data));
-      navigateFromData(message?.data as Record<string, string>);
+      _navigate(message?.data as Record<string, string>);
     });
 
     // App launched cold by tapping an FCM notification
     getInitialNotification(messaging).then(message => {
       console.log('[NOTIF] getInitialNotification:', JSON.stringify(message?.data));
-      navigateFromData(message?.data as Record<string, string>);
+      _navigate(message?.data as Record<string, string>);
     });
 
     return () => { unsubscribeFg(); unsubscribeBg(); unsubscribeNotifee(); appStateUnsub.remove(); };
