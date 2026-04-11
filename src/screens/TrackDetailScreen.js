@@ -18,6 +18,7 @@ import {fetchWeather, weatherDescription, weatherIcon} from '../utils/weather';
 import CachedImage from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
+import {useFeatureFlags} from '../store/featureFlags';
 
 function formatDateRange(start, end) {
   if (!start || !end) return '';
@@ -44,6 +45,7 @@ function roundLength(str) {
 export default function TrackDetailScreen({route, navigation}) {
   const {track} = route.params;
   const {useKm} = useUnits();
+  const {track_weather, live_updates} = useFeatureFlags();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || StatusBar.currentHeight || 0;
   const rStart = firstRaceNumber(track.round);
@@ -64,12 +66,13 @@ export default function TrackDetailScreen({route, navigation}) {
   useEffect(() => { Analytics.trackDetailViewed(track.round, track.venue); }, []);
 
   useEffect(() => {
+    if (!track_weather) return;
     if (track.lat && track.lng && track.startDate && track.endDate) {
       fetchWeather(track.lat, track.lng, track.startDate, track.endDate).then(w => {
         if (w) setWeather(w);
       });
     }
-  }, [track.lat, track.lng, track.startDate, track.endDate]);
+  }, [track.lat, track.lng, track.startDate, track.endDate, track_weather]);
 
   // Build flat list sections: hero, sticky title, then all content blocks
   const {data, stickyIndex} = useMemo(() => {
@@ -87,8 +90,8 @@ export default function TrackDetailScreen({route, navigation}) {
     // Stats
     items.push({type: 'stats'});
 
-    // Live Timing button (race weekend only)
-    if (isRaceWeekend) items.push({type: 'liveTiming'});
+    // Live Timing button (race weekend only, feature-flagged)
+    if (isRaceWeekend && live_updates) items.push({type: 'liveTiming'});
 
     // About
     if (track.about) items.push({type: 'about'});
@@ -108,8 +111,8 @@ export default function TrackDetailScreen({route, navigation}) {
       items.push({type: 'schedule'});
     }
 
-    // Weather forecast
-    if (weather && weather.length > 0) {
+    // Weather forecast (feature-flagged)
+    if (track_weather && weather && weather.length > 0) {
       items.push({type: 'weatherHeader'});
       items.push({type: 'weather'});
     }
@@ -135,7 +138,7 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     return {data: items, stickyIndex: titleIdx};
-  }, [track, sessions, weather, isRaceWeekend]);
+  }, [track, sessions, weather, isRaceWeekend, track_weather, live_updates]);
 
   const renderItem = ({item}) => {
     switch (item.type) {

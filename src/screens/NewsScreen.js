@@ -21,10 +21,12 @@ import CachedImage, {prefetchImages} from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import AdBanner from '../components/AdBanner';
 import AdSearchBanner from '../components/AdSearchBanner';
+import {useFeatureFlags} from '../store/featureFlags';
 
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
+  const {search_ad} = useFeatureFlags();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -195,7 +197,7 @@ export default function NewsScreen({navigation}) {
         </View>
       )}
 
-      <AdSearchBanner visible={searchActive && searchKeyboardShown && searchQuery.length < 2} />
+      <AdSearchBanner visible={search_ad && searchActive && searchKeyboardShown && searchQuery.length < 2} />
 
       {(!searchActive || searchQuery.length >= 2) && (
       <FlatList

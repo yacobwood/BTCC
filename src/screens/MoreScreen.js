@@ -25,7 +25,7 @@ const iconMap = {
 };
 
 export default function MoreScreen({navigation}) {
-  const {podcasts_enabled} = useFeatureFlags();
+  const {radio_tab, podcasts_enabled} = useFeatureFlags();
   const [pages, setPages] = useState([]);
   const scrollRef = useRef(null);
 
@@ -77,7 +77,7 @@ export default function MoreScreen({navigation}) {
 
         {/* App section */}
         <Text style={styles.sectionTitle}>APP</Text>
-        <MoreRow label="Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('radio'); navigation.navigate('Radio'); }} />
+        {radio_tab && <MoreRow label="Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('radio'); navigation.navigate('Radio'); }} />}
         {podcasts_enabled && <MoreRow label="Podcasts & Interviews" icon="mic" onPress={() => { Analytics.moreItemClicked('podcasts'); navigation.navigate('Podcasts'); }} />}
         <MoreRow label="Settings" icon="settings" onPress={() => { Analytics.moreItemClicked('settings'); navigation.navigate('Settings'); }} />
         <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />

@@ -45,6 +45,7 @@ import BugReportScreen from '../screens/BugReportScreen';
 import RadioScreen from '../screens/RadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
 import AdBanner from '../components/AdBanner';
+import {useFeatureFlags} from '../store/featureFlags';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -143,6 +144,7 @@ const linking = {
 
 function AppContent({adBannerRef}) {
   const {bottom} = useSafeAreaInsets();
+  const {banner_ad} = useFeatureFlags();
   return (
     <View style={{flex: 1}}>
       <Tab.Navigator
@@ -172,9 +174,11 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
-        <View style={{paddingBottom: bottom}}>
-          <AdBanner ref={adBannerRef} />
-        </View>
+        {banner_ad && (
+          <View style={{paddingBottom: bottom}}>
+            <AdBanner ref={adBannerRef} />
+          </View>
+        )}
       </View>
   );
 }
