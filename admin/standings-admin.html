@@ -955,7 +955,6 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
       <button onclick="sendResultsTest()" style="background:#F87171;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">Results</button>
       <input id="test-results-round" type="number" placeholder="round" min="1" max="30" value="1" style="width:70px;padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
       <input id="test-results-year" type="number" placeholder="year" value="2025" style="width:80px;padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
-      <input id="test-results-race" type="number" placeholder="race" min="1" max="3" value="1" style="width:65px;padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
     </div>
 
     <!-- Podcast -->
@@ -1110,8 +1109,7 @@ function sendNewsTest() {
 function sendResultsTest() {
   const round = document.getElementById('test-results-round').value;
   const year  = document.getElementById('test-results-year').value;
-  const race  = document.getElementById('test-results-race').value;
-  sendTestNotif('results', 'Race Results Published', 'The results from the latest round are now available', {type: 'results', round, year, race});
+  sendTestNotif('results', 'Race Results Published', 'The results from the latest round are now available', {type: 'results', round, year});
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
