@@ -41,11 +41,11 @@ function navigateFromData(data: Record<string, string> | undefined) {
       if (roundObj) {
         const initialRace = race ? parseInt(race, 10) - 1 : 0;
         console.log('[NOTIF] navigate → RoundResults round:', round, 'race:', initialRace);
-        navigationRef.navigate('RoundResults' as never, {round: roundObj, year: y, initialRace} as never);
+        navigationRef.navigate('Results' as never, {screen: 'RoundResults', params: {round: roundObj, year: y, initialRace}} as never);
       }
     } else if (type === 'podcast') {
       console.log('[NOTIF] navigate → Podcasts');
-      navigationRef.navigate('Podcasts' as never);
+      navigationRef.navigate('More' as never, {screen: 'Podcasts'} as never);
     }
   };
   if (navigationRef.isReady()) {
