@@ -4,6 +4,7 @@ import {getMessaging, subscribeToTopic, unsubscribeFromTopic} from '@react-nativ
 
 // Maps setting key → FCM topic name
 const TOPIC_MAP = {
+  newsAlerts: 'news_alerts',
   raceAlerts: 'race_alerts',
   qualifyingAlerts: 'qualifying_alerts',
   fpAlerts: 'fp_alerts',

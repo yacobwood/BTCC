@@ -1,11 +1,13 @@
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {getMessaging} = require('firebase-admin/messaging');
+const {getFirestore} = require('firebase-admin/firestore');
 const {initializeApp} = require('firebase-admin/app');
 
 initializeApp();
 
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
+const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug';
 
 // Session name → FCM topic
 const SESSION_TOPICS = {
@@ -186,6 +188,41 @@ exports.sendSessionNotifications = onSchedule(
           }),
         );
       }
+    }
+
+    // ── News alerts ───────────────────────────────────────────────
+    try {
+      const db = getFirestore();
+      const stateRef = db.collection('state').doc('news');
+      const [articles, stateSnap] = await Promise.all([
+        fetch(NEWS_URL).then(r => r.json()),
+        stateRef.get(),
+      ]);
+      const latest = articles?.[0];
+      if (latest) {
+        const lastId = stateSnap.exists ? stateSnap.data().lastId : null;
+        if (latest.id !== lastId) {
+          await stateRef.set({lastId: latest.id});
+          if (lastId !== null) {
+            // Don't notify on first run — just record the baseline
+            sends.push(
+              messaging.send({
+                topic: 'news_alerts',
+                notification: {
+                  title: 'New BTCC Article',
+                  body: latest.title?.rendered?.replace(/&#\d+;/g, c =>
+                    String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || 'A new article has been published',
+                },
+                android: {notification: {channelId: 'news'}},
+                apns: {payload: {aps: {sound: 'default'}}},
+                data: {type: 'news', slug: latest.slug || ''},
+              }),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.error('News check failed:', e);
     }
 
     const results = await Promise.allSettled(sends);
