@@ -38,7 +38,10 @@ jobs:
           const admin = require('./node_modules/firebase-admin');
           const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
           admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-          const extraData = JSON.parse(process.env.EXTRA_DATA || '{}');
+          console.log('EXTRA_DATA raw:', JSON.stringify(process.env.EXTRA_DATA));
+          let extraData = {};
+          try { extraData = JSON.parse(process.env.EXTRA_DATA || '{}'); } catch(e) { console.error('EXTRA_DATA parse failed:', e.message); }
+          console.log('extraData parsed:', JSON.stringify(extraData));
           admin.messaging().send({
             token: process.env.DEVICE_TOKEN,
             notification: { title: process.env.TITLE, body: process.env.BODY },
