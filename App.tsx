@@ -30,10 +30,10 @@ function navigateFromData(data: Record<string, string> | undefined) {
     const {type, round, year, race, slug} = data;
     if ((type === 'round' || (!type && round)) && round) {
       console.log('[NOTIF] navigate → TrackDetail round:', round);
-      navigationRef.navigate('TrackDetail' as never, {round} as never);
+      navigationRef.navigate('Calendar' as never, {screen: 'TrackDetail', params: {round}} as never);
     } else if (type === 'news' && slug) {
       console.log('[NOTIF] navigate → Article slug:', slug);
-      navigationRef.navigate('Article' as never, {slug} as never);
+      navigationRef.navigate('News' as never, {screen: 'Article', params: {slug}} as never);
     } else if (type === 'results' && round) {
       const y = parseInt(year, 10) || new Date().getFullYear();
       const season = getSeasonData(y);
