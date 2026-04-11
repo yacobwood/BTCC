@@ -30,10 +30,10 @@ function navigateFromData(data: Record<string, string> | undefined) {
     const {type, round, year, race, slug} = data;
     if ((type === 'round' || (!type && round)) && round) {
       console.log('[NOTIF] navigate → TrackDetail round:', round);
-      navigationRef.navigate('Calendar' as never, {screen: 'TrackDetail', params: {round}} as never);
+      navigationRef.navigate('TrackDetail' as never, {round} as never);
     } else if (type === 'news' && slug) {
       console.log('[NOTIF] navigate → Article slug:', slug);
-      navigationRef.navigate('News' as never, {screen: 'Article', params: {slug}} as never);
+      navigationRef.navigate('Article' as never, {slug} as never);
     } else if (type === 'results' && round) {
       const y = parseInt(year, 10) || new Date().getFullYear();
       const season = getSeasonData(y);
@@ -41,11 +41,11 @@ function navigateFromData(data: Record<string, string> | undefined) {
       if (roundObj) {
         const initialRace = race ? parseInt(race, 10) - 1 : 0;
         console.log('[NOTIF] navigate → RoundResults round:', round, 'race:', initialRace);
-        navigationRef.navigate('Results' as never, {screen: 'RoundResults', params: {round: roundObj, year: y, initialRace}} as never);
+        navigationRef.navigate('RoundResults' as never, {round: roundObj, year: y, initialRace} as never);
       }
     } else if (type === 'podcast') {
       console.log('[NOTIF] navigate → Podcasts');
-      navigationRef.navigate('More' as never, {screen: 'Podcasts'} as never);
+      navigationRef.navigate('Podcasts' as never);
     }
   };
   if (navigationRef.isReady()) {
