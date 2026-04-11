@@ -184,7 +184,7 @@ function AppContent({adBannerRef}) {
   );
 }
 
-export default function AppNavigator({navigationRef}) {
+export default function AppNavigator({navigationRef, onReady}) {
   const adBannerRef = useRef(null);
   const prevTabRef = useRef(0);
 
@@ -196,7 +196,7 @@ export default function AppNavigator({navigationRef}) {
   };
 
   return (
-    <NavigationContainer ref={navigationRef} linking={linking} onStateChange={handleStateChange}>
+    <NavigationContainer ref={navigationRef} linking={linking} onReady={onReady} onStateChange={handleStateChange}>
       <AppContent adBannerRef={adBannerRef} />
     </NavigationContainer>
   );

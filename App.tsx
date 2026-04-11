@@ -22,11 +22,28 @@ export const navigationRef = createNavigationContainerRef();
 
 const calendar = require('./src/data/calendar.json');
 
-function navigateToRound(round) {
+// Holds a pending navigation action until the navigator is ready
+let pendingRound: string | null = null;
+
+export function navigateToRound(round: string) {
   const track = calendar.rounds.find((r: any) => r.round === parseInt(round, 10));
-  if (!track || !navigationRef.isReady()) return;
-  navigationRef.navigate('Calendar' as never);
-  navigationRef.navigate('Calendar', {screen: 'TrackDetail', params: {track}} as never);
+  if (!track) return;
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('Calendar' as never);
+    setTimeout(() => {
+      navigationRef.navigate('Calendar', {screen: 'TrackDetail', params: {track}} as never);
+    }, 50);
+  } else {
+    pendingRound = round;
+  }
+}
+
+export function flushPendingNavigation() {
+  if (pendingRound) {
+    const r = pendingRound;
+    pendingRound = null;
+    navigateToRound(r);
+  }
 }
 
 function PodcastChecker() {
@@ -108,10 +125,7 @@ export default function App() {
     // App launched cold by tapping a notification
     getInitialNotification(messaging).then(message => {
       const round = message?.data?.round;
-      if (round) {
-        // Delay to allow navigator to mount
-        setTimeout(() => navigateToRound(round), 500);
-      }
+      if (round) navigateToRound(round); // queued if navigator not ready yet
     });
 
     return () => { unsubscribeFg(); unsubscribeBg(); };
@@ -126,7 +140,7 @@ export default function App() {
           <RadioProvider>
             <PodcastChecker />
             <StatusBar barStyle="light-content" backgroundColor="#020255" />
-            <AppNavigator navigationRef={navigationRef} />
+            <AppNavigator navigationRef={navigationRef} onReady={flushPendingNavigation} />
             <AppDialogs />
           </RadioProvider>
         </SettingsProvider>
