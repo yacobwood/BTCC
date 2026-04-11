@@ -20,11 +20,13 @@ jobs:
   send:
     runs-on: ubuntu-latest
     steps:
+      - name: Install firebase-admin
+        run: npm install firebase-admin
+
       - name: Send FCM notification (v1 API)
         run: |
-          npm install -g firebase-admin 2>/dev/null || true
           node - <<'EOF'
-          const admin = require('firebase-admin');
+          const admin = require('./node_modules/firebase-admin');
           const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
           admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
           admin.messaging().send({
@@ -34,7 +36,7 @@ jobs:
             apns: { payload: { aps: { sound: 'default' } } },
             data: { channel: process.env.CHANNEL },
           }).then(r => { console.log('Sent:', r); process.exit(0); })
-            .catch(e => { console.error('Error:', e); process.exit(1); });
+            .catch(e => { console.error('Error:', e.message); process.exit(1); });
           EOF
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
