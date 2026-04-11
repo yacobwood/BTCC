@@ -3,7 +3,7 @@ import {StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {createNavigationContainerRef} from '@react-navigation/native';
+import {createNavigationContainerRef, CommonActions} from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
 import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
@@ -29,10 +29,15 @@ export function navigateToRound(round: string) {
   const track = calendar.rounds.find((r: any) => r.round === parseInt(round, 10));
   if (!track) return;
   if (navigationRef.isReady()) {
-    navigationRef.navigate('Calendar' as never);
-    setTimeout(() => {
-      navigationRef.navigate('Calendar', {screen: 'TrackDetail', params: {track}} as never);
-    }, 50);
+    navigationRef.dispatch(
+      CommonActions.navigate({
+        name: 'Calendar',
+        params: {
+          screen: 'TrackDetail',
+          params: {track},
+        },
+      })
+    );
   } else {
     pendingRound = round;
   }
