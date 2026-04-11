@@ -130,19 +130,19 @@ export default function App() {
     maybeRequestReview();
     runBackgroundPrefetch();
 
-    // Consume any pending notifee background press (app was backgrounded/killed when tapped)
-    const consumePending = () => {
-      AsyncStorage.getItem('pending_notif_nav').then(val => {
-        if (val) {
-          AsyncStorage.removeItem('pending_notif_nav');
-          console.log('[NOTIF] pending notifee nav:', val);
-          navigateFromData(JSON.parse(val));
+    // Handle notifee notification press (background or killed state).
+    // notifee.getInitialNotification() stores the press natively — no AsyncStorage race condition.
+    const consumeNotifeePress = () => {
+      notifee.getInitialNotification().then(initial => {
+        if (initial?.notification?.data) {
+          console.log('[NOTIF] notifee initial:', JSON.stringify(initial.notification.data));
+          navigateFromData(initial.notification.data as Record<string, string>);
         }
-      });
+      }).catch(() => {});
     };
-    consumePending();
+    consumeNotifeePress();
     const appStateUnsub = AppState.addEventListener('change', state => {
-      if (state === 'active') consumePending();
+      if (state === 'active') consumeNotifeePress();
     });
 
     const unsubscribeFg = onForegroundMessage(() => {});
