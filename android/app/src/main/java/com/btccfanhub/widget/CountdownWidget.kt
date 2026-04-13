@@ -25,7 +25,7 @@ open class CountdownWidget : AppWidgetProvider() {
         val p = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try { withTimeout(10_000L) {
-                val cal = fetchCal()
+                val cal = fetchCal(ctx)
                 for (id in ids) {
                     val o = mgr.getAppWidgetOptions(id)
                     val w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
@@ -77,23 +77,32 @@ open class CountdownWidget : AppWidgetProvider() {
         }
         return v
     }
-    private fun fetchCal(): Cal? = try {
-        val body = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
-        val rounds = JSONObject(body).optJSONArray("rounds")
-        val today = LocalDate.now()
-        var result: Cal? = null
-        if (rounds != null) for (i in 0 until rounds.length()) {
-            val r = rounds.getJSONObject(i)
-            val end = LocalDate.parse(r.optString("endDate"))
-            if (end >= today) {
-                val rnd = r.optInt("round", 1); val rs = (rnd - 1) * 3 + 1
-                val start = LocalDate.parse(r.optString("startDate"))
-                val df = DateTimeFormatter.ofPattern("d"); val mf = DateTimeFormatter.ofPattern("MMM yyyy")
-                result = Cal(r.optString("venue"), start, "${start.format(df)} - ${end.format(df)} ${end.format(mf)}", rs, rs + 2, r.optInt("tslEventId", 0))
-                break
+    private fun fetchCal(ctx: Context): Cal? {
+        val prefs = ctx.getSharedPreferences("widget_cache", Context.MODE_PRIVATE)
+        val body = try {
+            val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+            prefs.edit().putString("calendar_json", text).apply()
+            text
+        } catch (_: Exception) {
+            prefs.getString("calendar_json", null)
+        } ?: return null
+        return try {
+            val rounds = JSONObject(body).optJSONArray("rounds")
+            val today = LocalDate.now()
+            var result: Cal? = null
+            if (rounds != null) for (i in 0 until rounds.length()) {
+                val r = rounds.getJSONObject(i)
+                val end = LocalDate.parse(r.optString("endDate"))
+                if (end >= today) {
+                    val rnd = r.optInt("round", 1); val rs = (rnd - 1) * 3 + 1
+                    val start = LocalDate.parse(r.optString("startDate"))
+                    val df = DateTimeFormatter.ofPattern("d"); val mf = DateTimeFormatter.ofPattern("MMM yyyy")
+                    result = Cal(r.optString("venue"), start, "${start.format(df)} - ${end.format(df)} ${end.format(mf)}", rs, rs + 2, r.optInt("tslEventId", 0))
+                    break
+                }
             }
-        }
-        result
-    } catch (_: Exception) { null }
+            result
+        } catch (_: Exception) { null }
+    }
     data class Cal(val venue: String, val start: LocalDate, val dates: String, val rs: Int, val re: Int, val eventId: Int)
 }
