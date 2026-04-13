@@ -53,6 +53,9 @@ yarn-error.log
 **/fastlane/screenshots
 **/fastlane/test_output
 
+# Hub news draft — local testing only
+data/hub_news_draft.json
+
 # Bundle artifacts
 *.jsbundle
 android/app/src/main/assets/index.android.bundle
