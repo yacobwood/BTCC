@@ -27,7 +27,7 @@ import {useSettings} from '../store/settings';
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
-  const {search_ad} = useFeatureFlags();
+  const {search_ad, hub_news_enabled} = useFeatureFlags();
   const {settings} = useSettings();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +48,8 @@ export default function NewsScreen({navigation}) {
 
   const hubPreviewRef = React.useRef(settings.hubPreview);
   useEffect(() => { hubPreviewRef.current = settings.hubPreview; }, [settings.hubPreview]);
+  const hubNewsEnabledRef = React.useRef(hub_news_enabled);
+  useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
 
   const load = useCallback(async (p = 1, append = false) => {
     try {
@@ -55,13 +57,13 @@ export default function NewsScreen({navigation}) {
       setError(null);
       const [raw, hubPosts] = await Promise.all([
         fetchArticles(p),
-        p === 1 && !append ? fetchHubPosts(hubPreviewRef.current) : Promise.resolve(null),
+        p === 1 && !append && hubNewsEnabledRef.current ? fetchHubPosts(hubPreviewRef.current) : Promise.resolve(null),
       ]);
       const parsed = raw.map(parseArticle);
       if (append) {
         setArticles(prev => [...prev, ...parsed]);
       } else {
-        const merged = [...hubPosts, ...parsed].sort((a, b) => {
+        const merged = [...(hubPosts || []), ...parsed].sort((a, b) => {
           const da = new Date(a.sortDate || a.pubDate || 0);
           const db = new Date(b.sortDate || b.pubDate || 0);
           return db - da;

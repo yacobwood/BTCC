@@ -15,5 +15,6 @@
   "podcasts_enabled": true,
   "podcast_last_episode_url": "",
   "search_ad": true,
-  "debug_mode": false
+  "debug_mode": false,
+  "hub_news_enabled": true
 }
