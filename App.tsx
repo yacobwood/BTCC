@@ -16,6 +16,7 @@ import notifee, {EventType} from '@notifee/react-native';
 import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage, checkForNewPodcast} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
+import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import WhatsNewDialog from './src/components/WhatsNewDialog';
@@ -43,7 +44,7 @@ function PodcastChecker() {
 
 const ONBOARDING_KEY = 'onboarding_shown';
 const WHATS_NEW_KEY = 'whats_new_seen_version';
-const CURRENT_VERSION = 43;
+const CURRENT_VERSION = 44;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -93,6 +94,7 @@ function AppDialogs() {
 
 export default function App() {
   useEffect(() => {
+    MobileAds().initialize();
     const crashlytics = getCrashlytics();
     setCrashlyticsCollectionEnabled(crashlytics, true);
     setupNotificationChannels();

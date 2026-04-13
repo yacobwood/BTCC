@@ -33,7 +33,7 @@ export default function WhatsNewDialog({visible, onDismiss, versionCode = 35}) {
       <View style={styles.overlay}>
         <View style={styles.card}>
           <Text style={styles.title}>What's New</Text>
-          <Text style={styles.version}>Version 2.3.0</Text>
+          <Text style={styles.version}>Version {versionCode}</Text>
           <FlatList
             data={changes}
             keyExtractor={(_, i) => String(i)}
