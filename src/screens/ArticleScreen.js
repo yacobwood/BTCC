@@ -151,7 +151,7 @@ function buildHtml(article, topPad) {
       th { background:rgba(255,255,255,0.08); font-weight:700; color:#fff; }
       tr:nth-child(even) { background:rgba(255,255,255,0.03); }
       td { color:#ccc; }
-      .source-line { margin-top:24px; padding-top:16px; border-top:1px solid #2A2D44; font-size:12px; color:#8B949E; }
+      .source-line { margin-top:24px; padding-top:16px; border-top:1px solid #2A2D44; font-size:12px; color:#8B949E; word-break:break-all; }
       .source-line a { color:#8B949E; text-decoration:underline; }
     </style>
   </head><body>
