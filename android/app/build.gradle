@@ -90,8 +90,8 @@ android {
         applicationId "com.btccfanhub"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 42
-        versionName "2.2.0"
+        versionCode 43
+        versionName "2.3.0"
     }
     signingConfigs {
         debug {

@@ -1,9 +1,12 @@
 import React, {useState, useEffect, useMemo} from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
+
+const CACHE_KEY = 'podcasts_episodes';
 
 const RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
@@ -62,20 +65,60 @@ export default function PodcastsScreen({navigation}) {
   const {currentStation, isPlaying, play, stop} = useRadio();
 
   useEffect(() => {
+    if (!loading) return;
     Analytics.screen('podcasts');
-    (async () => {
+    let cancelled = false;
+    let task;
+
+    const run = async () => {
+      // 1. Show cached episodes immediately — no spinner if we have data
       try {
-        const res = await fetch(RSS_URL, {
-          headers: {'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'},
-        });
-        const xml = await res.text();
-        setEpisodes(parseRSS(xml));
-      } catch (e) {
-        setError(true);
+        const raw = await AsyncStorage.getItem(CACHE_KEY);
+        if (raw && !cancelled) {
+          setEpisodes(JSON.parse(raw));
+          setLoading(false);
+        }
+      } catch {}
+
+      // 2. Wait for screen transition to finish before network + parse
+      await new Promise(resolve => {
+        task = InteractionManager.runAfterInteractions(resolve);
+      });
+      if (cancelled) return;
+
+      // 3. Fetch fresh data
+      let fetched = false;
+      for (const headers of [
+        {},
+        {'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'},
+      ]) {
+        if (fetched || cancelled) break;
+        try {
+          const res = await fetch(RSS_URL, {headers});
+          if (!res.ok) continue;
+          const xml = await res.text();
+          if (cancelled) break;
+          const fresh = parseRSS(xml);
+          if (fresh.length === 0) continue;
+          fetched = true;
+          if (!cancelled) {
+            setEpisodes(fresh);
+            setError(false);
+          }
+          AsyncStorage.setItem(CACHE_KEY, JSON.stringify(fresh)).catch(() => {});
+        } catch {}
       }
-      setLoading(false);
-    })();
-  }, []);
+      if (!fetched && !cancelled) setError(true);
+      if (!cancelled) setLoading(false);
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+      task?.cancel();
+    };
+  }, [loading]);
 
   const filtered = useMemo(() =>
     episodes.filter(e => matchesSession(e.title, filter)),
@@ -170,7 +213,15 @@ export default function PodcastsScreen({navigation}) {
       {loading ? (
         <View style={styles.center}><ActivityIndicator color={Colors.yellow} size="large" /></View>
       ) : error ? (
-        <View style={styles.center}><Text style={styles.emptyText}>Could not load episodes</Text></View>
+        <View style={styles.center}>
+          <Icon name="wifi-off" size={40} color={Colors.outline} />
+          <Text style={[styles.emptyText, {marginTop: 12}]}>Could not load episodes</Text>
+          <TouchableOpacity
+            style={{marginTop: 16, paddingHorizontal: 20, paddingVertical: 10, backgroundColor: Colors.surface, borderRadius: 20, borderWidth: 1, borderColor: Colors.outline}}
+            onPress={() => { setError(false); setLoading(true); }}>
+            <Text style={{color: '#fff', fontSize: 13, fontWeight: '700'}}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
           data={visible}

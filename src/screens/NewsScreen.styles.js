@@ -118,6 +118,14 @@ export default StyleSheet.create({
   },
   compactTitle: {color: '#fff', fontSize: 14, fontWeight: '700', lineHeight: 18},
   compactDate: {color: Colors.textSecondary, fontSize: 11, marginTop: 4},
+  sourceBadge: {
+    alignSelf: 'flex-start',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    marginBottom: 4,
+  },
+  sourceBadgeText: {fontSize: 9, fontWeight: '800', letterSpacing: 0.5},
 
   // Error / retry
   errorText: {color: Colors.textSecondary, fontSize: 14},

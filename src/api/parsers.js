@@ -9,7 +9,7 @@ export function parseArticle(post) {
   const embedded = post._embedded;
   const imageUrl = extractFeaturedImage(embedded, content);
   const category = extractCategory(embedded);
-  return {id, title, link, description, pubDate, imageUrl, category, content};
+  return {id, title, link, description, pubDate, imageUrl, category, content, source: 'btcc.net'};
 }
 
 function extractFeaturedImage(embedded, content = '') {
@@ -73,6 +73,8 @@ export function parseCalendar(json) {
     lengthMiles: r.lengthMiles || '',
     lengthKm: r.lengthKm || '',
     corners: r.corners || 0,
+    cornersLeft: r.cornersLeft ?? null,
+    cornersRight: r.cornersRight ?? null,
     about: r.about || '',
     btccFact: r.btccFact || '',
     imageUrl: r.imageUrl || '',

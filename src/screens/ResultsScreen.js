@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Animated,
   Dimensions,
   InteractionManager,
 } from 'react-native';
@@ -18,7 +17,7 @@ import {fetchStandings, fetchResults} from '../api/client';
 import {parseStandings, parseResults} from '../api/parsers';
 import styles from './ResultsScreen.styles';
 import {useFavouriteDriver} from '../store/favouriteDriver';
-import {getSeasonData, WIN_STATS} from '../assets/seasonData';
+import {getSeasonData} from '../assets/seasonData';
 import ProgressionChart from '../components/ProgressionChart';
 import {Analytics} from '../utils/analytics';
 import {cacheRead, cacheWrite} from '../store/cache';
@@ -84,15 +83,12 @@ export default function ResultsScreen({navigation}) {
   const [refreshing, setRefreshing] = useState(false);
   const [bundledStats, setBundledStats] = useState(null);
   const [bundledProgression, setBundledProgression] = useState(null);
-  const [renderedTabs, setRenderedTabs] = useState(() => new Set([0]));
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const swipeRef = useRef(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
   const resultsListRef = useRef(null);
   const statsListRef = useRef(null);
-  const winPctListRef = useRef(null);
   const chartScrollRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
@@ -100,96 +96,95 @@ export default function ResultsScreen({navigation}) {
     teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
     resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
     statsListRef.current?.scrollToOffset({offset: 0, animated: false});
-    winPctListRef.current?.scrollToOffset({offset: 0, animated: false});
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
   }, []));
-  const TAB_WIDTH = SCREEN_WIDTH / 6;
-  const indicatorX = scrollX.interpolate({
-    inputRange: [0, SCREEN_WIDTH * 5],
-    outputRange: [0, TAB_WIDTH * 5],
-    extrapolate: 'clamp',
-  });
 
-  const markTabRendered = (i) => {
-    setRenderedTabs(prev => {
-      if (prev.has(i)) return prev;
-      const next = new Set(prev);
-      next.add(i);
-      return next;
-    });
-  };
+  const TAB_WIDTH = SCREEN_WIDTH / 5;
 
   const goToTab = (i) => {
     setTab(i);
-    markTabRendered(i);
-    swipeRef.current?.scrollTo({x: i * SCREEN_WIDTH, animated: true});
+    setShowScrollTop(false);
     Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
   };
 
+  const onListScroll = (e) => setShowScrollTop(e.nativeEvent.contentOffset.y > 400);
+
+  const scrollToTop = () => {
+    Analytics.scrollToTop('results');
+    driversListRef.current?.scrollToOffset({offset: 0, animated: true});
+    teamsListRef.current?.scrollToOffset({offset: 0, animated: true});
+    resultsListRef.current?.scrollToOffset({offset: 0, animated: true});
+    statsListRef.current?.scrollToOffset({offset: 0, animated: true});
+    chartScrollRef.current?.scrollTo({y: 0, animated: true});
+    setShowScrollTop(false);
+  };
+
+  // Synchronously apply all state for a bundled year in one batch — no flash
+  const applyBundledYear = useCallback((y) => {
+    const season = getSeasonData(y);
+    if (season) {
+      const drivers = (season.drivers || []).map((d, i) => ({
+        position: d.position || i + 1,
+        name: d.name || '',
+        team: d.team || '',
+        car: d.car || '',
+        points: d.points || 0,
+        wins: d.wins || 0,
+        seconds: d.seconds || 0,
+        thirds: d.thirds || 0,
+      }));
+      const teams = (season.teams || []).map((t, i) => ({
+        position: t.position || i + 1,
+        name: t.name || t.team || '',
+        points: t.points || 0,
+      }));
+      setStandings({season: String(y), round: 0, venue: '', drivers, teams});
+      setBundledStats(season.driverStats || null);
+      setBundledProgression(season.progression || null);
+      setResults(season.rounds ? season.rounds.map((r, i) => ({
+        round: r.round || i + 1,
+        venue: r.venue || '',
+        date: r.date || '',
+        polePosition: r.polePosition || null,
+        races: (r.races || []).map((race, j) => ({
+          label: race.label || `Race ${j + 1}`,
+          date: race.date || null,
+          fullRaceUrl: race.fullRaceUrl || null,
+          results: (race.results || []).map(d => ({
+            position: d.pos || 0,
+            number: d.no || 0,
+            driver: d.driver || '',
+            team: d.team || '',
+            laps: d.laps || 0,
+            time: d.time || '',
+            gap: d.gap || null,
+            bestLap: d.bestLap || '',
+            points: d.points || 0,
+            fastestLap: d.fl || d.fastestLap || false,
+            leadLap: d.l || d.leadLap || false,
+            pole: d.p || d.pole || false,
+            avgLapSpeed: d.avgLapSpeed || null,
+          })),
+        })),
+      })) : []);
+    } else {
+      setStandings(null);
+      setBundledStats(null);
+      setBundledProgression(null);
+      setResults([]);
+    }
+    setLoading(false);
+  }, []);
+
   const load = useCallback(async (y = year) => {
-    // Load bundled standings instantly (no loading spinner)
+    // Bundled years handled by applyBundledYear — called synchronously in button handlers
     if (y >= 2004 && y <= 2025) {
-      const season = getSeasonData(y);
-      if (season) {
-        const drivers = (season.drivers || []).map((d, i) => ({
-          position: d.position || i + 1,
-          name: d.name || '',
-          team: d.team || '',
-          car: d.car || '',
-          points: d.points || 0,
-          wins: d.wins || 0,
-          seconds: d.seconds || 0,
-          thirds: d.thirds || 0,
-        }));
-        const teams = (season.teams || []).map((t, i) => ({
-          position: t.position || i + 1,
-          name: t.name || t.team || '',
-          points: t.points || 0,
-        }));
-        setStandings({season: String(y), round: 0, venue: '', drivers, teams});
-      } else {
-        setStandings(null);
-      }
+      applyBundledYear(y);
+      return;
     }
 
-    // Load results
-    if (y >= 2004 && y <= 2025) {
-      const season = getSeasonData(y);
-      // Store bundled stats and progression as single source of truth
-      setBundledStats(season?.driverStats || null);
-      setBundledProgression(season?.progression || null);
-      if (season?.rounds) {
-        setResults(season.rounds.map((r, i) => ({
-          round: r.round || i + 1,
-          venue: r.venue || '',
-          date: r.date || '',
-          polePosition: r.polePosition || null,
-          races: (r.races || []).map((race, j) => ({
-            label: race.label || `Race ${j + 1}`,
-            date: race.date || null,
-            fullRaceUrl: race.fullRaceUrl || null,
-            results: (race.results || []).map(d => ({
-              position: d.pos || 0,
-              number: d.no || 0,
-              driver: d.driver || '',
-              team: d.team || '',
-              laps: d.laps || 0,
-              time: d.time || '',
-              gap: d.gap || null,
-              bestLap: d.bestLap || '',
-              points: d.points || 0,
-              fastestLap: d.fl || d.fastestLap || false,
-              leadLap: d.l || d.leadLap || false,
-              pole: d.p || d.pole || false,
-              avgLapSpeed: d.avgLapSpeed || null,
-            })),
-          })),
-        })));
-      }
-      setLoading(false);
-    } else {
-      // 2026: stale-while-revalidate from cache, then fetch
-      setBundledStats(null);
+    // 2026: stale-while-revalidate from cache, then fetch
+    setBundledStats(null);
       setBundledProgression(null);
 
       const [cachedResults, cachedStandings] = await Promise.all([
@@ -216,13 +211,18 @@ export default function ResultsScreen({navigation}) {
           cacheWrite('standings', raw);
         }
       } catch {}
-    }
     setLoading(false);
     setRefreshing(false);
   }, [year, seasonStarted]);
 
   useEffect(() => { Analytics.screen('results'); }, []);
   useEffect(() => {
+    // Bundled years (2004-2025) are synchronous — load immediately to avoid flash
+    if (year >= 2004 && year <= 2025) {
+      load(year);
+      return;
+    }
+    // Live year: defer until after navigation animation completes
     const task = InteractionManager.runAfterInteractions(() => { load(year); });
     return () => task.cancel();
   }, [year]);
@@ -374,27 +374,7 @@ export default function ResultsScreen({navigation}) {
     </View>
   );
 
-  const renderWinPctRow = ({item, index}) => {
-    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : null;
-    const pct = (item.winPct * 100).toFixed(1);
-    const barWidth = item.winPct / WIN_STATS[0].winPct;
-    return (
-      <View style={[styles.standingRow, {flexDirection: 'column', gap: 0, alignItems: 'stretch'}]}>
-        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 8}}>
-          <Text style={[styles.pos, {fontSize: medal ? 18 : 15}]}>{medal || index + 1}</Text>
-          <Text style={[styles.driverName, {flex: 1}]}>{item.driver}</Text>
-          <Text style={{color: Colors.yellow, fontSize: 18, fontWeight: '900'}}>{pct}%</Text>
-        </View>
-        <View style={{flexDirection: 'row', height: 4, borderRadius: 2, backgroundColor: Colors.surface, overflow: 'hidden', marginBottom: 6, marginLeft: 48}}>
-          <View style={{flex: barWidth, backgroundColor: Colors.yellow, borderRadius: 2}} />
-          <View style={{flex: 1 - barWidth}} />
-        </View>
-        <Text style={[styles.teamName, {marginLeft: 48}]}>{item.wins}W from {item.starts} starts · {item.seasons} season{item.seasons !== 1 ? 's' : ''}</Text>
-      </View>
-    );
-  };
-
-  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'CHART', 'WIN %'];
+  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'CHART'];
   const hasData = results.some(r => r.races.some(race => race.results.length > 0));
 
   const renderTabContent = (t) => {
@@ -440,6 +420,8 @@ export default function ResultsScreen({navigation}) {
             keyExtractor={(_, i) => String(i)}
             renderItem={renderDriverStanding}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            onScroll={onListScroll}
+            scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
             ListHeaderComponent={liveRound > 0 ? <Text style={styles.roundInfo}>After Round {liveRound}</Text> : null}
             ListEmptyComponent={<Text style={styles.emptyText}>No standings available for {year}</Text>}
@@ -453,6 +435,8 @@ export default function ResultsScreen({navigation}) {
             keyExtractor={(_, i) => String(i)}
             renderItem={renderTeamStanding}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            onScroll={onListScroll}
+            scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
             ListEmptyComponent={<Text style={styles.emptyText}>No team standings available for {year}</Text>}
           />
@@ -465,6 +449,8 @@ export default function ResultsScreen({navigation}) {
             keyExtractor={item => String(item.round)}
             renderItem={renderRound}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            onScroll={onListScroll}
+            scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
             ListEmptyComponent={<Text style={styles.emptyText}>No results available for {year}</Text>}
           />
@@ -477,6 +463,8 @@ export default function ResultsScreen({navigation}) {
             keyExtractor={(item) => item.name}
             renderItem={renderStat}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            onScroll={onListScroll}
+            scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
             ListHeaderComponent={statsHeader}
             ListEmptyComponent={<Text style={styles.emptyText}>No stats available for {year}</Text>}
@@ -491,29 +479,13 @@ export default function ResultsScreen({navigation}) {
           );
         }
         return (
-          <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20}}>
+          <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20}} onScroll={onListScroll} scrollEventThrottle={100}>
             <ProgressionChart
               series={progression}
               roundLabels={results.filter(r => r.races.some(race => race.results.length > 0)).sort((a, b) => a.round - b.round).map(r => r.venue)}
               isFavourite={isFavourite}
             />
           </ScrollView>
-        );
-      case 5:
-        return (
-          <FlatList
-            ref={winPctListRef}
-            data={WIN_STATS}
-            keyExtractor={item => item.driver}
-            renderItem={renderWinPctRow}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
-            ListHeaderComponent={
-              <View style={{marginBottom: 4}}>
-                <Text style={{color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginBottom: 2}}>ALL-TIME WIN %</Text>
-                <Text style={{color: Colors.textSecondary, fontSize: 11, marginBottom: 12}}>Min. 30 starts · 2004–2025</Text>
-              </View>
-            }
-          />
         );
       default:
         return null;
@@ -532,9 +504,12 @@ export default function ResultsScreen({navigation}) {
           onPress={() => {
             const newYear = year - 1;
             Analytics.resultsYearChanged(newYear);
-            setLoading(true);
-            setRenderedTabs(new Set([tab]));
-            setYear(y => y - 1);
+            if (newYear >= 2004 && newYear <= 2025) {
+              applyBundledYear(newYear);
+            } else {
+              setLoading(true);
+            }
+            setYear(newYear);
           }}
           accessibilityLabel="Previous season"
           accessibilityRole="button">
@@ -549,9 +524,12 @@ export default function ResultsScreen({navigation}) {
           onPress={() => {
             const newYear = year + 1;
             Analytics.resultsYearChanged(newYear);
-            setLoading(true);
-            setRenderedTabs(new Set([tab]));
-            setYear(y => y + 1);
+            if (newYear >= 2004 && newYear <= 2025) {
+              applyBundledYear(newYear);
+            } else {
+              setLoading(true);
+            }
+            setYear(newYear);
           }}
           accessibilityLabel="Next season"
           accessibilityRole="button">
@@ -570,40 +548,27 @@ export default function ResultsScreen({navigation}) {
             <Text style={[styles.tabText, tab === i && styles.tabTextActive]}>{label}</Text>
           </TouchableOpacity>
         ))}
-        <Animated.View style={{
+        <View style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           width: TAB_WIDTH,
           height: 2,
           backgroundColor: Colors.yellow,
-          transform: [{translateX: indicatorX}],
+          transform: [{translateX: TAB_WIDTH * tab}],
         }} />
       </View>
 
-      <Animated.ScrollView
-        ref={swipeRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={{flex: 1}}
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {useNativeDriver: true}
-        )}
-        onMomentumScrollEnd={(e) => {
-          const newTab = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-          setTab(newTab);
-          markTabRendered(newTab);
-          Analytics.resultsTabChanged(year, tabs[newTab].toLowerCase());
-        }}>
-        {tabs.map((_, i) => (
-          <View key={i} style={{width: SCREEN_WIDTH, flex: 1}}>
-            {renderedTabs.has(i) ? renderTabContent(i) : null}
-          </View>
-        ))}
-      </Animated.ScrollView>
+      {renderTabContent(tab)}
+      {showScrollTop && (
+        <TouchableOpacity
+          style={styles.scrollTopFab}
+          onPress={scrollToTop}
+          accessibilityLabel="Scroll to top"
+          accessibilityRole="button">
+          <Icon name="keyboard-arrow-up" size={24} color={Colors.navy} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

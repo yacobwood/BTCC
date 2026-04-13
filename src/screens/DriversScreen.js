@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Animated,
   Dimensions,
 } from 'react-native';
 
@@ -47,7 +46,6 @@ export default function DriversScreen({navigation}) {
   const [tab, setTab] = useState(0);
   const {isFavourite, toggle: toggleFav} = useFavouriteDriver();
 
-  const swipeRef = useRef(null);
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
 
@@ -58,16 +56,9 @@ export default function DriversScreen({navigation}) {
     }, 50);
     return () => clearTimeout(t);
   }, []));
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const indicatorX = scrollX.interpolate({
-    inputRange: [0, SCREEN_WIDTH],
-    outputRange: [0, TAB_WIDTH],
-    extrapolate: 'clamp',
-  });
 
   const goToTab = (i) => {
     setTab(i);
-    swipeRef.current?.scrollTo({x: i * SCREEN_WIDTH, animated: true});
     Analytics.gridTabSwitched(TABS[i].toLowerCase());
   };
 
@@ -190,64 +181,41 @@ export default function DriversScreen({navigation}) {
             </Text>
           </TouchableOpacity>
         ))}
-        <Animated.View style={{
+        <View style={{
           position: 'absolute',
           bottom: 0,
           left: 0,
           width: TAB_WIDTH,
           height: 2,
           backgroundColor: Colors.yellow,
-          transform: [{translateX: indicatorX}],
+          transform: [{translateX: TAB_WIDTH * tab}],
         }} />
       </View>
-      <Animated.ScrollView
-        ref={swipeRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={{flex: 1}}
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {
-            useNativeDriver: true,
-            listener: (e) => {
-              const newTab = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-              if (newTab !== tab) setTab(newTab);
-            },
+      {tab === 0 ? (
+        <FlatList
+          ref={driversListRef}
+          data={drivers}
+          keyExtractor={item => String(item.number)}
+          renderItem={renderDriver}
+          contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          ListHeaderComponent={
+            <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
           }
-        )}
-        onMomentumScrollEnd={(e) => {
-          const newTab = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-          Analytics.gridTabSwitched(TABS[newTab].toLowerCase());
-        }}>
-        <View style={{width: SCREEN_WIDTH, flex: 1}}>
-          <FlatList
-            ref={driversListRef}
-            data={drivers}
-            keyExtractor={item => String(item.number)}
-            renderItem={renderDriver}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
-            ListHeaderComponent={
-              <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
-            }
-            ItemSeparatorComponent={() => <View style={{height: 8}} />}
-          />
-        </View>
-        <View style={{width: SCREEN_WIDTH, flex: 1}}>
-          <FlatList
-            ref={teamsListRef}
-            data={teams}
-            keyExtractor={item => item.name}
-            renderItem={renderTeam}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
-            ListHeaderComponent={
-              <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
-            }
-            ItemSeparatorComponent={() => <View style={{height: 10}} />}
-          />
-        </View>
-      </Animated.ScrollView>
+          ItemSeparatorComponent={() => <View style={{height: 8}} />}
+        />
+      ) : (
+        <FlatList
+          ref={teamsListRef}
+          data={teams}
+          keyExtractor={item => item.name}
+          renderItem={renderTeam}
+          contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          ListHeaderComponent={
+            <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
+          }
+          ItemSeparatorComponent={() => <View style={{height: 10}} />}
+        />
+      )}
     </View>
   );
 }

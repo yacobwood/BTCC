@@ -5,6 +5,7 @@ const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/fl
 const defaults = {
   podcasts_enabled: false,
   podcast_last_episode_url: '',
+  debug_mode: false,
 };
 
 const FeatureFlagsContext = createContext(defaults);

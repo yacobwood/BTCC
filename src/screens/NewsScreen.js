@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchArticles} from '../api/client';
+import {fetchArticles, fetchHubPosts} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import styles from './NewsScreen.styles';
 import CachedImage, {prefetchImages} from '../components/CachedImage';
@@ -22,11 +22,13 @@ import {Analytics} from '../utils/analytics';
 import AdBanner from '../components/AdBanner';
 import AdSearchBanner from '../components/AdSearchBanner';
 import {useFeatureFlags} from '../store/featureFlags';
+import {useSettings} from '../store/settings';
 
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
   const {search_ad} = useFeatureFlags();
+  const {settings} = useSettings();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,14 +50,22 @@ export default function NewsScreen({navigation}) {
     try {
       if (p === 1 && !append) setLoading(true);
       setError(null);
-      const raw = await fetchArticles(p);
+      const [raw, hubPosts] = await Promise.all([
+        fetchArticles(p),
+        p === 1 && !append ? fetchHubPosts(settings.hubPreview) : Promise.resolve(null),
+      ]);
       const parsed = raw.map(parseArticle);
-      // Prefetch images in background
-      prefetchImages(parsed.map(a => a.imageUrl).filter(Boolean));
       if (append) {
         setArticles(prev => [...prev, ...parsed]);
       } else {
-        setArticles(parsed);
+        // Merge hub posts with WP articles, sorted newest first
+        const merged = [...hubPosts, ...parsed].sort((a, b) => {
+          const da = new Date(a.pubDate || 0);
+          const db = new Date(b.pubDate || 0);
+          return db - da;
+        });
+        setArticles(merged);
+        prefetchImages(merged.map(a => a.imageUrl).filter(Boolean));
       }
       setHasMore(parsed.length >= 20);
       setPage(p);
@@ -67,7 +77,7 @@ export default function NewsScreen({navigation}) {
       setRefreshing(false);
       setLoadingMore(false);
     }
-  }, []);
+  }, [settings.hubPreview]);
 
   useEffect(() => { Analytics.screen('news'); }, []);
   useEffect(() => {
@@ -241,6 +251,18 @@ export default function NewsScreen({navigation}) {
   );
 }
 
+// ── Source Badge ─────────────────────────────────────────────────
+function SourceBadge({source}) {
+  const isHub = source === 'btcc hub';
+  return (
+    <View style={[styles.sourceBadge, {backgroundColor: isHub ? 'rgba(254,189,2,0.15)' : 'rgba(255,255,255,0.1)'}]}>
+      <Text style={[styles.sourceBadgeText, {color: isHub ? Colors.yellow : Colors.textSecondary}]}>
+        {isHub ? 'BTCC HUB' : 'BTCC.NET'}
+      </Text>
+    </View>
+  );
+}
+
 // ── Hero Card ────────────────────────────────────────────────────
 function HeroCard({article, onPress, onRefresh, onSearchClick}) {
   return (
@@ -291,6 +313,7 @@ function GridRow({articles, onPress}) {
           )}
           <View style={styles.gridOverlay} />
           <View style={styles.gridContent}>
+            <SourceBadge source={article.source} />
             <Text style={styles.gridTitle} numberOfLines={3}>{article.title}</Text>
             <Text style={styles.gridDate}>{article.pubDate}</Text>
           </View>
@@ -308,9 +331,12 @@ function CompactCard({article, onPress}) {
         <CachedImage uri={article.imageUrl} style={styles.compactImage} />
       )}
       <View style={styles.compactContent}>
-        {article.category ? (
-          <Text style={styles.compactCategory}>{article.category.toUpperCase()}</Text>
-        ) : null}
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2}}>
+          <SourceBadge source={article.source} />
+          {article.category ? (
+            <Text style={styles.compactCategory}>{article.category.toUpperCase()}</Text>
+          ) : null}
+        </View>
         <Text style={styles.compactTitle} numberOfLines={3}>{article.title}</Text>
         <Text style={styles.compactDate}>{article.pubDate}</Text>
       </View>

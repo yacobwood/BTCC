@@ -14,5 +14,6 @@
   "shop_home_standard": false,
   "podcasts_enabled": true,
   "podcast_last_episode_url": "",
-  "search_ad": true
+  "search_ad": true,
+  "debug_mode": false
 }

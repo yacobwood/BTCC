@@ -7,7 +7,7 @@
       "sections": [
         {
           "type": "text",
-          "body": "Welcome to the British Touring Car Championship — the UK's most exciting motorsport series. Pick a topic below to dive deep into the rules, the cars and the strategy behind every race."
+          "body": "Welcome to the British Touring Car Championship, the UK's most exciting motorsport series. Pick a topic below to dive deep into the rules, the cars and the strategy behind every race."
         },
         {
           "type": "link",
@@ -64,15 +64,19 @@
         },
         {
           "type": "text",
-          "body": "Official Qualifying runs in two groups of roughly equal size. Group 1 consists of drivers who finished in odd-numbered positions in free practice; Group 2 the even-numbered finishers. Each group gets 15 minutes on track. Both groups' lap times are then combined and ranked — the fastest overall time wins pole for the Qualifying Race."
+          "body": "Official Qualifying runs in two groups of roughly equal size. Group 1 consists of drivers who finished in odd-numbered positions in free practice; Group 2 the even-numbered finishers. Each group gets 15 minutes on track. Both groups' lap times are then combined and ranked, with the fastest overall time winning pole for the Qualifying Race."
         },
         {
           "type": "text",
-          "body": "From the second Championship Meeting of the season onwards, TTB boost is restricted in qualifying based on championship standings — so the championship leader is already fighting a disadvantage in their qualifying group."
+          "body": "From the second Championship Meeting of the season onwards, TTB boost is restricted in qualifying based on championship standings, so the championship leader is already fighting a disadvantage in their qualifying group."
         },
         {
           "type": "text",
-          "body": "Parc Fermé begins at the start of qualifying and runs through to the end of the Qualifying Race. Teams cannot make setup changes during this window — only tyre swaps if wet weather forces a compound change are permitted."
+          "body": "Parc Fermé begins at the start of qualifying and runs through to the end of the Qualifying Race. Teams cannot make setup changes during this window. Only tyre swaps if wet weather forces a compound change are permitted."
+        },
+        {
+          "type": "callout",
+          "body": "If it rains between the two qualifying groups, one group may run in dry conditions and the other in wet. Because lap times are combined, drivers in the wet group face a significant natural disadvantage through no fault of their own. This quirk means qualifying luck and the group you happen to be placed in can have an outsized impact on the Race 1 grid."
         },
         {
           "type": "heading",
@@ -80,7 +84,7 @@
         },
         {
           "type": "text",
-          "body": "The Qualifying Race is approximately half the distance of a Sunday Championship Round — usually around 15 minutes of racing. It awards its own points in the Drivers' Championship on a 10–9–8–7–6–5–5–4–4–3–3–2–2–1–1 scale for the top 15 finishers. No fastest lap or race leader bonus points are awarded."
+          "body": "The Qualifying Race is approximately half the distance of a Sunday Championship Round, usually around 15 minutes of racing. It awards its own points in the Drivers' Championship on a 10–9–8–7–6–5–5–4–4–3–3–2–2–1–1 scale for the top 15 finishers. No fastest lap or race leader bonus points are awarded."
         },
         {
           "type": "text",
@@ -100,7 +104,7 @@
         },
         {
           "type": "text",
-          "body": "Race 2 is identical in format to Race 1 — same distance, same points, same bonus points. The key strategic wrinkle is the compound rule: drivers who finished in the top three of Race 1 must start Race 2 on the hardest dry compound available to them. This is designed to level the playing field and mix up the strategy."
+          "body": "Race 2 is identical in format to Race 1: same distance, same points, same bonus points. The key strategic wrinkle is the compound rule: drivers who finished in the top three of Race 1 must start Race 2 on the hardest dry compound available to them. This is designed to level the playing field and mix up the strategy."
         },
         {
           "type": "heading",
@@ -108,11 +112,15 @@
         },
         {
           "type": "text",
-          "body": "Race 3's grid is the most unpredictable part of a BTCC weekend. After Race 2 finishes, a random number between 6 and 12 is drawn by someone nominated by the Administrator. That number of positions from the Race 2 result are reversed at the front of the grid. So if 9 is drawn, the Race 2 top nine all swap order — the Race 2 winner starts 9th, 2nd place starts 8th, 3rd starts 7th, and so on, all the way down until 9th starts from pole. Positions 10 and below follow the normal Race 2 order."
+          "body": "Race 3's grid is the most unpredictable part of a BTCC weekend. After Race 2 finishes, a random number between 6 and 12 is drawn by someone nominated by the Administrator. That number of positions from the Race 2 result are reversed at the front of the grid. So if 9 is drawn, the Race 2 top nine all swap order: the Race 2 winner starts 9th, 2nd place starts 8th, 3rd starts 7th, and so on, all the way down until 9th starts from pole. Positions 10 and below follow the normal Race 2 order."
         },
         {
           "type": "text",
-          "body": "Nobody — including the teams — knows the number until after Race 2. Drivers outside the reversed positions may receive a time penalty from Race 2 that affects their grid slot, and in some cases a penalty may move them in or out of the reversal zone. The grid for Race 3 is officially published as soon as possible after the draw."
+          "body": "Nobody, including the teams, knows the number until after Race 2. Drivers outside the reversed positions may receive a time penalty from Race 2 that affects their grid slot, and in some cases a penalty may move them in or out of the reversal zone. The grid for Race 3 is officially published as soon as possible after the draw."
+        },
+        {
+          "type": "callout",
+          "body": "The draw happens live in front of the crowd after Race 2. Teams only find out where their driver starts Race 3 at the same moment as everyone else. A driver who romped to victory in Race 2 could find themselves starting 12th. It is deliberately chaotic and one of the most entertaining moments of any BTCC round."
         },
         {
           "type": "heading",
@@ -128,7 +136,7 @@
         },
         {
           "type": "text",
-          "body": "If a race is stopped by red flags, the outcome depends on how far it had progressed. If less than 50% of the race distance had been completed, the BTCC Clerk may declare the race null and void — no points awarded. Between 50% and 75% complete, half points are awarded. If more than 75% complete when stopped, full points are awarded and the race is not usually restarted. Between 2 laps and 75%, the race can be restarted from the current running order with the remaining distance adjusted."
+          "body": "If a race is stopped by red flags, the outcome depends on how far it had progressed. If less than 50% of the race distance had been completed, the BTCC Clerk may declare the race null and void, with no points awarded. Between 50% and 75% complete, half points are awarded. If more than 75% complete when stopped, full points are awarded and the race is not usually restarted. Between 2 laps and 75%, the race can be restarted from the current running order with the remaining distance adjusted."
         },
         {
           "type": "heading",
@@ -136,7 +144,7 @@
         },
         {
           "type": "text",
-          "body": "Most circuits run one formation lap before the race start. At shorter circuits — Brands Hatch Indy, Knockhill and Silverstone National — two formation laps are run, giving drivers more time to warm tyres and brakes. Drivers who cannot make their grid position during the formation lap must start from the back."
+          "body": "Most circuits run one formation lap before the race start. At shorter circuits (Brands Hatch Indy, Knockhill and Silverstone National) two formation laps are run, giving drivers more time to warm tyres and brakes. Drivers who cannot make their grid position during the formation lap must start from the back."
         }
       ]
     },
@@ -175,7 +183,7 @@
         },
         {
           "type": "text",
-          "body": "Every Sunday race offers two additional bonus points on top of the finishing position points. One point goes to the driver who sets the fastest lap of the race. If two drivers share identical lap times, both receive the point. One point goes to any driver who leads the race — it does not matter for how long or how many times; one point per driver per race regardless. These bonus points apply in the Drivers' Championship only, not in Manufacturers', Teams', Independents or Jack Sears."
+          "body": "Every Sunday race offers two additional bonus points on top of the finishing position points. One point goes to the driver who sets the fastest lap of the race. If two drivers share identical lap times, both receive the point. One point goes to any driver who leads the race. It does not matter for how long or how many times; one point per driver per race regardless. These bonus points apply in the Drivers' Championship only, not in Manufacturers', Teams', Independents or Jack Sears."
         },
         {
           "type": "heading",
@@ -191,7 +199,7 @@
         },
         {
           "type": "text",
-          "body": "All three of these championships use the same 20–17–15... base scale. No fastest lap or race leader bonus points. The Qualifying Race does not count. For Manufacturers' and Teams', each organisation nominates a maximum of two cars per race (declared at least 30 minutes before the Qualifying Session). Only those nominated cars score — the best two finishers from the same team or marque. For the Independents Teams' Championship, only the highest-placed car from each independent team scores per race."
+          "body": "All three of these championships use the same 20–17–15... base scale. No fastest lap or race leader bonus points. The Qualifying Race does not count. For Manufacturers' and Teams', each organisation nominates a maximum of two cars per race (declared at least 30 minutes before the Qualifying Session). Only those nominated cars score: the best two finishers from the same team or marque. For the Independents Teams' Championship, only the highest-placed car from each independent team scores per race."
         },
         {
           "type": "heading",
@@ -199,7 +207,7 @@
         },
         {
           "type": "text",
-          "body": "The Jack Sears Trophy uses the same 20–17–15... scale as the Independents' Trophy — no fastest lap or race leader bonuses, and the Qualifying Race does not count. A trophy is also presented to the leading Jack Sears driver across all three Sunday races at each individual meeting."
+          "body": "The Jack Sears Trophy uses the same 20–17–15... scale as the Independents' Trophy. There are no fastest lap or race leader bonuses, and the Qualifying Race does not count. A trophy is also presented to the leading Jack Sears driver across all three Sunday races at each individual meeting."
         },
         {
           "type": "heading",
@@ -215,7 +223,7 @@
         },
         {
           "type": "text",
-          "body": "If a race is stopped between 50% and 75% of its full distance, half points are awarded across all championships. If the leader has completed less than 50% of the race distance when it is stopped, the BTCC Clerk may declare the race null and void — no points awarded to anyone. Reduced-length races that run to a shorter distance at the Clerk's discretion but complete fully still attract full points."
+          "body": "If a race is stopped between 50% and 75% of its full distance, half points are awarded across all championships. If the leader has completed less than 50% of the race distance when it is stopped, the BTCC Clerk may declare the race null and void, with no points awarded to anyone. Reduced-length races that run to a shorter distance at the Clerk's discretion but complete fully still attract full points."
         },
         {
           "type": "heading",
@@ -223,7 +231,7 @@
         },
         {
           "type": "text",
-          "body": "Championship points can be deducted as a penalty. Engine changes beyond the permitted allocation cost a driver 5 points for the first excess engine, 10 for the second, 15 for the third, and so on — deductions can send a driver into negative points. Driving standards violations can trigger the 'Strike' system: Strike 1 adds a 3-place grid penalty, Strike 2 a 5-place penalty, Strike 3 sends the driver to the back of the grid and deducts 3 points. A fourth Strike means a race ban, and on a seventh Strike the driver is excluded from the Championship."
+          "body": "Championship points can be deducted as a penalty. Engine changes beyond the permitted allocation cost a driver 5 points for the first excess engine, 10 for the second, 15 for the third, and so on, and deductions can send a driver into negative points. Driving standards violations can trigger the 'Strike' system: Strike 1 adds a 3-place grid penalty, Strike 2 a 5-place penalty, Strike 3 sends the driver to the back of the grid and deducts 3 points. A fourth Strike means a race ban, and on a seventh Strike the driver is excluded from the Championship."
         }
       ]
     },
@@ -234,7 +242,7 @@
       "sections": [
         {
           "type": "text",
-          "body": "Every BTCC car is built to the Next Generation Touring Car (NGTC) specification, introduced in 2011. The concept is simple: every car uses identical core components so that the competition is decided by driver skill, team preparation and tyre strategy — not by who has the biggest engineering budget."
+          "body": "Every BTCC car is built to the Next Generation Touring Car (NGTC) specification, introduced in 2011. The concept is simple: every car uses identical core components so that the competition is decided by driver skill, team preparation and tyre strategy, rather than who has the biggest engineering budget."
         },
         {
           "type": "heading",
@@ -242,7 +250,7 @@
         },
         {
           "type": "text",
-          "body": "Regardless of what body shell a car wears — Honda Civic, Toyota Corolla, Vauxhall Astra, or anything else — every NGTC car shares the same front and rear subframes, suspension geometry, Xtrac 6-speed sequential gearbox, Cosworth engine control unit (ECU), brake system, 18-inch alloy wheels and shock absorbers. Teams source these components from TOCA-approved suppliers."
+          "body": "Regardless of what body shell a car wears (Honda Civic, Toyota Corolla, Vauxhall Astra, or anything else), every NGTC car shares the same front and rear subframes, suspension geometry, Xtrac 6-speed sequential gearbox, Cosworth engine control unit (ECU), brake system, 18-inch alloy wheels and shock absorbers. Teams source these components from TOCA-approved suppliers."
         },
         {
           "type": "heading",
@@ -250,7 +258,7 @@
         },
         {
           "type": "text",
-          "body": "Teams supply their own engine, but it must be a 2.0-litre turbocharged direct-injection four-cylinder unit. Output typically exceeds 350 bhp. Engines are sealed at the start of the season by the BTCC Chief Scrutineer and may only be opened under official supervision. Each registered driver is allocated a maximum of two engines for the entire season. Exceeding that allocation triggers championship points deductions — 5 points for the first extra engine, scaling up for each subsequent one. If a sump is damaged in a race incident, it may be replaced and resealed without counting as a new engine."
+          "body": "Teams supply their own engine, but it must be a 2.0-litre turbocharged direct-injection four-cylinder unit. Output typically exceeds 350 bhp. Engines are sealed at the start of the season by the BTCC Chief Scrutineer and may only be opened under official supervision. Each registered driver is allocated a maximum of two engines for the entire season. Exceeding that allocation triggers championship points deductions: 5 points for the first extra engine, scaling up for each subsequent one. If a sump is damaged in a race incident, it may be replaced and resealed without counting as a new engine."
         },
         {
           "type": "heading",
@@ -258,7 +266,7 @@
         },
         {
           "type": "text",
-          "body": "From 2025 all BTCC cars run on 100% sustainable fossil-free fuel, supplied exclusively by Haltermann Carless UK Ltd. No other fuel is permitted at any venue. Teams purchase their fuel allocation in advance — it is not available to buy at circuits. At least 3 litres must remain in the tank at the end of every qualifying session and every race."
+          "body": "From 2025 all BTCC cars run on 100% sustainable fossil-free fuel, supplied exclusively by Haltermann Carless UK Ltd. No other fuel is permitted at any venue. Teams purchase their fuel allocation in advance and it is not available to buy at circuits. At least 3 litres must remain in the tank at the end of every qualifying session and every race."
         },
         {
           "type": "heading",
@@ -266,7 +274,7 @@
         },
         {
           "type": "text",
-          "body": "BTCC cars have carried hybrid power since 2022, making it the first major touring car championship to adopt the technology. The system stores energy under braking and releases it as an additional power surge on the straights. Drivers deploy it via a button on the steering wheel. The hybrid operates independently of the TTB boost restriction system — TTB specifically governs turbo boost deployment, while the hybrid is managed by a separate Cosworth system."
+          "body": "BTCC cars have carried hybrid power since 2022, making it the first major touring car championship to adopt the technology. The system stores energy under braking and releases it as an additional power surge on the straights. Drivers deploy it via a button on the steering wheel. The hybrid operates independently of the TTB boost restriction system. TTB specifically governs turbo boost deployment, while the hybrid is managed by a separate Cosworth system."
         },
         {
           "type": "heading",
@@ -325,11 +333,11 @@
         },
         {
           "type": "text",
-          "body": "All BTCC tyres are 265/660R18 in size. There are four compounds: Soft (White sidewall, product code TC 03A2), Medium (Yellow sidewall, TC 03B3), Hard (Red sidewall, TC 03C3), and Wet (Blue sidewall, RM9000). The colour coding is on the sidewall of the tyre — so from the grandstand you can see exactly which compound every car is running."
+          "body": "All BTCC tyres are 265/660R18 in size. There are four compounds: Soft (White sidewall, product code TC 03A2), Medium (Yellow sidewall, TC 03B3), Hard (Red sidewall, TC 03C3), and Wet (Blue sidewall, RM9000). The colour coding is on the sidewall of the tyre, so from the grandstand you can see exactly which compound every car is running."
         },
         {
           "type": "text",
-          "body": "Wet tyres are directional and come in separate left-hand and right-hand versions. Slick tyres must have no tread grooves — only small depth-marker holes moulded by the manufacturer are permitted."
+          "body": "Wet tyres are directional and come in separate left-hand and right-hand versions. Slick tyres must have no tread grooves. Only small depth-marker holes moulded by the manufacturer are permitted."
         },
         {
           "type": "heading",
@@ -349,7 +357,7 @@
         },
         {
           "type": "text",
-          "body": "To count as 'used', the Option tyres must be fitted for the entire running period — from the formation lap onwards to the chequered flag. You cannot change to Option tyres mid-race (except in wet-to-dry conditions under specific regulations)."
+          "body": "To count as 'used', the Option tyres must be fitted for the entire running period, from the formation lap onwards to the chequered flag. You cannot change to Option tyres mid-race (except in wet-to-dry conditions under specific regulations)."
         },
         {
           "type": "heading",
@@ -357,7 +365,11 @@
         },
         {
           "type": "text",
-          "body": "Teams must declare which race they intend to run the Option tyre in, at least 10 minutes before the pit lane opens for that race. The declaration is treated as confidential by TOCA and is only made public once the pit lane has closed. This means rival teams do not know your strategy until cars are already leaving the pits — a genuine hidden-information element."
+          "body": "Teams must declare which race they intend to run the Option tyre in, at least 10 minutes before the pit lane opens for that race. The declaration is treated as confidential by TOCA and is only made public once the pit lane has closed. This means rival teams do not know your strategy until cars are already leaving the pits, making it a genuine hidden-information element."
+        },
+        {
+          "type": "callout",
+          "body": "Teams study each other's tyre choices obsessively on the grid and in the pit lane. Because the declaration is sealed, spotters and engineers will watch rival cars leave the garage to try and read which compound is fitted from the sidewall colour. It is one of the most genuine pieces of hidden strategy in any racing series."
         },
         {
           "type": "heading",
@@ -365,7 +377,11 @@
         },
         {
           "type": "text",
-          "body": "Drivers who finish in the top three of Race 1 must start Race 2 on the hardest compound available to them. If the Option tyre is their only remaining softer compound, they may not use it in Race 2 — they must wait for Race 3. This is specifically designed to slow down the championship frontrunners and create mixed strategies at the sharp end of the grid."
+          "body": "Drivers who finish in the top three of Race 1 must start Race 2 on the hardest compound available to them. If the Option tyre is their only remaining softer compound, they may not use it in Race 2 and must wait for Race 3. This is specifically designed to slow down the championship frontrunners and create mixed strategies at the sharp end of the grid."
+        },
+        {
+          "type": "callout",
+          "body": "This rule can force a Race 1 winner onto old hard tyres for Race 2 while a rival on fresh Options closes rapidly. Combined with the TTB reset, winning Race 1 can be a double penalty going into Race 2."
         },
         {
           "type": "heading",
@@ -373,7 +389,7 @@
         },
         {
           "type": "text",
-          "body": "Wet (grooved/blue) tyres may be used in any session and there is no limit on the number of sets available — up to 3 sets per meeting are supplied by Goodyear, with more purchasable in advance. If a driver declares Option tyres but cannot use them due to adverse weather, those tyres must be run in the next available race at the same event. If a driver starts on wet tyres but switches to slicks during the race, the Option tyre rules apply to the dry portion of the race."
+          "body": "Wet (grooved/blue) tyres may be used in any session and there is no limit on the number of sets available. Up to 3 sets per meeting are supplied by Goodyear, with more purchasable in advance. If a driver declares Option tyres but cannot use them due to adverse weather, those tyres must be run in the next available race at the same event. If a driver starts on wet tyres but switches to slicks during the race, the Option tyre rules apply to the dry portion of the race."
         },
         {
           "type": "heading",
@@ -381,7 +397,7 @@
         },
         {
           "type": "text",
-          "body": "Tyre warming devices — blankets, hot-air guns or any other means of artificially raising tyre temperature — are strictly prohibited. Hot air scrapers must stop at least 30 minutes before any session starts. Pressure and temperature sensors fitted inside wheels are also banned. Tyres must only be inflated with air or nitrogen."
+          "body": "Tyre warming devices (blankets, hot-air guns or any other means of artificially raising tyre temperature) are strictly prohibited. Hot air scrapers must stop at least 30 minutes before any session starts. Pressure and temperature sensors fitted inside wheels are also banned. Tyres must only be inflated with air or nitrogen."
         },
         {
           "type": "heading",
@@ -432,39 +448,39 @@
         },
         {
           "type": "text",
-          "body": "TTB allocations for the 2026 season are based on championship position and scaled as follows. Each row shows: position — minimum deployment speed — seconds of boost per lap (qualifying) — race laps with boost available at A-circuits — race laps at B-circuits."
+          "body": "TTB allocations for the 2026 season are based on championship position and scaled as follows. Each row shows: position, minimum deployment speed, qualifying boost (secs/lap), race laps at A-circuits, and race laps at B-circuits."
         },
         {
           "type": "text",
-          "body": "1st: 140 kph — 2 secs/lap — 3 laps (A) / 1 lap (B)"
+          "body": "1st: 140 kph, 2 secs/lap, 3 laps (A), 1 lap (B)"
         },
         {
           "type": "text",
-          "body": "2nd: 135 kph — 3 secs/lap — 4 laps (A) / 2 laps (B)"
+          "body": "2nd: 135 kph, 3 secs/lap, 4 laps (A), 2 laps (B)"
         },
         {
           "type": "text",
-          "body": "3rd: 130 kph — 5 secs/lap — 5 laps (A) / 3 laps (B)"
+          "body": "3rd: 130 kph, 5 secs/lap, 5 laps (A), 3 laps (B)"
         },
         {
           "type": "text",
-          "body": "4th: 125 kph — 7 secs/lap — 6 laps (A) / 4 laps (B)"
+          "body": "4th: 125 kph, 7 secs/lap, 6 laps (A), 4 laps (B)"
         },
         {
           "type": "text",
-          "body": "5th: 120 kph — 9 secs/lap — 7 laps (A) / 5 laps (B)"
+          "body": "5th: 120 kph, 9 secs/lap, 7 laps (A), 5 laps (B)"
         },
         {
           "type": "text",
-          "body": "6th: 115 kph — 11 secs/lap — 8 laps (A) / 6 laps (B)"
+          "body": "6th: 115 kph, 11 secs/lap, 8 laps (A), 6 laps (B)"
         },
         {
           "type": "text",
-          "body": "7th: 110 kph — 15 secs/lap — 10 laps (A) / 8 laps (B)"
+          "body": "7th: 110 kph, 15 secs/lap, 10 laps (A), 8 laps (B)"
         },
         {
           "type": "text",
-          "body": "8th and below: 105 kph — 20 secs/lap — 12 laps (A) / 10 laps (B)"
+          "body": "8th and below: 105 kph, 20 secs/lap, 12 laps (A), 10 laps (B)"
         },
         {
           "type": "heading",
@@ -472,7 +488,7 @@
         },
         {
           "type": "text",
-          "body": "B-circuits are Brands Hatch (Indy), Knockhill and Silverstone (National). All other circuits on the calendar are A-circuits. B-circuits are shorter, meaning races have more total laps — but drivers receive fewer absolute TTB laps there. This means the championship leader (already restricted to 1 boost lap at B-circuits) must manage every activation extremely carefully at the short venues."
+          "body": "B-circuits are Brands Hatch (Indy), Knockhill and Silverstone (National). All other circuits on the calendar are A-circuits. B-circuits are shorter, meaning races have more total laps, but drivers receive fewer absolute TTB laps there. This means the championship leader (already restricted to 1 boost lap at B-circuits) must manage every activation extremely carefully at the short venues."
         },
         {
           "type": "heading",
@@ -484,7 +500,7 @@
         },
         {
           "type": "text",
-          "body": "Drivers who attempt to use boost in these restricted periods will find the ECU refuses to deploy it — the system is automated, not honour-based."
+          "body": "Drivers who attempt to use boost in these restricted periods will find the ECU refuses to deploy it. The system is automated, not honour-based."
         },
         {
           "type": "heading",
@@ -495,12 +511,16 @@
           "body": "For Race 1, TTB is based on the Drivers' Championship standings entering that meeting. For Race 2, TTB is recalculated based on the Race 1 finishing order at that event. For Race 3, it is recalculated based on the Race 2 finishing order. This means a driver who wins Race 1 will carry heavier restrictions into Race 2, even if they started the weekend much further back in the championship. It also means a backmarker who finishes Race 1 in 8th will carry maximum TTB into Race 2."
         },
         {
+          "type": "callout",
+          "body": "A driver can arrive at a round 10th in the championship with full boost available, win Race 1, and immediately face the same heavy restrictions as the championship leader in Race 2. The system resets fresh each race, so every result has an instant consequence."
+        },
+        {
           "type": "heading",
           "body": "Qualifying and the Qualifying Race"
         },
         {
           "type": "text",
-          "body": "TTB in qualifying sessions and the Qualifying Race is time-based (seconds per lap), not lap-count based. The system is applied from the second Championship Meeting of the season onwards — at the opening round, all drivers have equal TTB in qualifying. From the second meeting, championship standings reduce the leader's qualifying boost."
+          "body": "TTB in qualifying sessions and the Qualifying Race is time-based (seconds per lap), not lap-count based. The system is applied from the second Championship Meeting of the season onwards. At the opening round, all drivers have equal TTB in qualifying. From the second meeting, championship standings reduce the leader's qualifying boost."
         },
         {
           "type": "heading",
@@ -516,7 +536,7 @@
         },
         {
           "type": "text",
-          "body": "Results from guest drivers — those permitted to enter a round without championship registration — are ignored for the purposes of TTB calculation. A substitute driver stepping in for an absent registered driver inherits that driver's TTB allocation at the time of substitution."
+          "body": "Results from guest drivers (those permitted to enter a round without championship registration) are ignored for the purposes of TTB calculation. A substitute driver stepping in for an absent registered driver inherits that driver's TTB allocation at the time of substitution."
         },
         {
           "type": "heading",
@@ -524,7 +544,7 @@
         },
         {
           "type": "text",
-          "body": "The BTCC Administrator has the right to alter the TTB scale at any point during the season for sporting or technical reasons. Changes are issued via a Championship Bulletin, normally with at least 12 hours' notice — though this can be reduced in exceptional circumstances. The TTB scale is reviewed annually and may differ from season to season."
+          "body": "The BTCC Administrator has the right to alter the TTB scale at any point during the season for sporting or technical reasons. Changes are issued via a Championship Bulletin, normally with at least 12 hours' notice, though this can be reduced in exceptional circumstances. The TTB scale is reviewed annually and may differ from season to season."
         }
       ]
     },
@@ -535,7 +555,7 @@
       "sections": [
         {
           "type": "text",
-          "body": "The Jack Sears Trophy is the BTCC's third-tier driver competition, sitting alongside the main Drivers' Championship and the Independents' Trophy. It is one of the most exciting places to watch in the paddock — the best place to spot tomorrow's BTCC frontrunners."
+          "body": "The Jack Sears Trophy is the BTCC's third-tier driver competition, sitting alongside the main Drivers' Championship and the Independents' Trophy. It is one of the most exciting places to watch in the paddock and the best place to spot tomorrow's BTCC frontrunners."
         },
         {
           "type": "heading",
@@ -543,7 +563,7 @@
         },
         {
           "type": "text",
-          "body": "Jack Sears was crowned the first-ever BTCC Champion in 1958. The inaugural season ended with Sears and Tommy Sopwith level on points. To decide the title, they contested two five-lap races in identical Riley saloons at Brands Hatch. Sears won by just 1.6 seconds over the two runs. He went on to win the championship again in 1963 with a Ford Cortina. The trophy bearing his name was introduced to honour drivers early in their careers — just as he was when he first lifted the championship."
+          "body": "Jack Sears was crowned the first-ever BTCC Champion in 1958. The inaugural season ended with Sears and Tommy Sopwith level on points. To decide the title, they contested two five-lap races in identical Riley saloons at Brands Hatch. Sears won by just 1.6 seconds over the two runs. He went on to win the championship again in 1963 with a Ford Cortina. The trophy bearing his name was introduced to honour drivers early in their careers, just as he was when he first lifted the championship."
         },
         {
           "type": "heading",
@@ -555,7 +575,7 @@
         },
         {
           "type": "text",
-          "body": "There is an important nuance: drivers who received a podium position via post-race judicial proceedings — where they were not physically on the podium at the circuit at the time — remain eligible. The rule applies to actual podium presentations, not retroactively awarded positions."
+          "body": "There is an important nuance: drivers who received a podium position via post-race judicial proceedings (where they were not physically on the podium at the circuit at the time) remain eligible. The rule applies to actual podium presentations, not retroactively awarded positions."
         },
         {
           "type": "text",
@@ -579,7 +599,7 @@
         },
         {
           "type": "text",
-          "body": "At the end of each Championship Meeting, a separate meeting trophy is awarded to the Jack Sears Trophy driver who scored the most points across all three Sunday races at that event. This is presented on the podium after Race 3. Points ties at a meeting are resolved in the same way as the season championship — most wins, then most second places, and so on."
+          "body": "At the end of each Championship Meeting, a separate meeting trophy is awarded to the Jack Sears Trophy driver who scored the most points across all three Sunday races at that event. This is presented on the podium after Race 3. Points ties at a meeting are resolved in the same way as the season championship: most wins, then most second places, and so on."
         },
         {
           "type": "heading",
@@ -587,7 +607,7 @@
         },
         {
           "type": "text",
-          "body": "The driver with the most cumulative Jack Sears Trophy points at the end of all 10 rounds wins the annual trophy. The same tiebreaker rules as the Drivers' Championship apply. Once won, a driver can no longer compete for the Jack Sears Trophy in future seasons — only the first win counts."
+          "body": "The driver with the most cumulative Jack Sears Trophy points at the end of all 10 rounds wins the annual trophy. The same tiebreaker rules as the Drivers' Championship apply. Once won, a driver can no longer compete for the Jack Sears Trophy in future seasons. Only the first win counts."
         },
         {
           "type": "heading",
@@ -595,7 +615,7 @@
         },
         {
           "type": "text",
-          "body": "The Jack Sears Trophy has a strong track record of identifying future BTCC champions. Many of the drivers who have won it have gone on to challenge — and win — the main Drivers' title within a few seasons. At any BTCC round, the JST battle is often the most overtaking-filled, unpredictable part of the race, as newer drivers push hard with less to lose and maximum TTB boost available to them."
+          "body": "The Jack Sears Trophy has a strong track record of identifying future BTCC champions. Many of the drivers who have won it have gone on to challenge and win the main Drivers' title within a few seasons. At any BTCC round, the JST battle is often the most overtaking-filled, unpredictable part of the race, as newer drivers push hard with less to lose and maximum TTB boost available to them."
         }
       ]
     },
@@ -630,7 +650,7 @@
         },
         {
           "type": "text",
-          "body": "Awarded to the car brand (e.g. Honda, Toyota, Vauxhall). Only the best two nominated cars from each manufacturer count per race — and no fastest lap or leading lap bonuses apply. Qualifying Race points do NOT count here."
+          "body": "Awarded to the car brand (e.g. Honda, Toyota, Vauxhall). Only the best two nominated cars from each manufacturer count per race, and no fastest lap or leading lap bonuses apply. Qualifying Race points do NOT count here."
         },
         {
           "type": "heading",
@@ -654,7 +674,7 @@
         },
         {
           "type": "text",
-          "body": "Named after the first-ever BTCC champion, the Jack Sears Trophy is for drivers who have not previously won it and have not scored more than one outright podium finish prior to the current season. It's the best place to find tomorrow's stars — many of today's frontrunners competed for it early in their careers. Points follow the Independents' Trophy scale (no fastest lap or leading lap bonuses, and no Qualifying Race points). A trophy is also awarded to the leading Jack Sears driver across all three races at each individual meeting."
+          "body": "Named after the first-ever BTCC champion, the Jack Sears Trophy is for drivers who have not previously won it and have not scored more than one outright podium finish prior to the current season. It's the best place to find tomorrow's stars, as many of today's frontrunners competed for it early in their careers. Points follow the Independents' Trophy scale (no fastest lap or leading lap bonuses, and no Qualifying Race points). A trophy is also awarded to the leading Jack Sears driver across all three races at each individual meeting."
         },
         {
           "type": "group-start"
@@ -665,7 +685,7 @@
         },
         {
           "type": "text",
-          "body": "Jack Sears was crowned the first-ever BTCC Champion in 1958. The inaugural season ended with Sears and Tommy Sopwith level on points. To decide the title, they contested two five-lap races in identical Riley saloons at Brands Hatch. Sears won by just 1.6 seconds over the two runs. He went on to win the championship again in 1963 with a Ford Cortina. The trophy bearing his name was introduced to honour drivers early in their careers — just as he was when he first lifted the championship."
+          "body": "Jack Sears was crowned the first-ever BTCC Champion in 1958. The inaugural season ended with Sears and Tommy Sopwith level on points. To decide the title, they contested two five-lap races in identical Riley saloons at Brands Hatch. Sears won by just 1.6 seconds over the two runs. He went on to win the championship again in 1963 with a Ford Cortina. The trophy bearing his name was introduced to honour drivers early in their careers, just as he was when he first lifted the championship."
         },
         {
           "type": "subheading",
@@ -677,7 +697,7 @@
         },
         {
           "type": "text",
-          "body": "There is an important nuance: drivers who received a podium position via post-race judicial proceedings — where they were not physically on the podium at the circuit at the time — remain eligible. The rule applies to actual podium presentations, not retroactively awarded positions."
+          "body": "There is an important nuance: drivers who received a podium position via post-race judicial proceedings (where they were not physically on the podium at the circuit at the time) remain eligible. The rule applies to actual podium presentations, not retroactively awarded positions."
         },
         {
           "type": "text",
@@ -701,7 +721,7 @@
         },
         {
           "type": "text",
-          "body": "At the end of each Championship Meeting, a separate meeting trophy is awarded to the Jack Sears Trophy driver who scored the most points across all three Sunday races at that event. This is presented on the podium after Race 3. Points ties at a meeting are resolved in the same way as the season championship — most wins, then most second places, and so on."
+          "body": "At the end of each Championship Meeting, a separate meeting trophy is awarded to the Jack Sears Trophy driver who scored the most points across all three Sunday races at that event. This is presented on the podium after Race 3. Points ties at a meeting are resolved in the same way as the season championship: most wins, then most second places, and so on."
         },
         {
           "type": "subheading",
@@ -709,7 +729,7 @@
         },
         {
           "type": "text",
-          "body": "The driver with the most cumulative Jack Sears Trophy points at the end of all 10 rounds wins the annual trophy. The same tiebreaker rules as the Drivers' Championship apply. Once won, a driver can no longer compete for the Jack Sears Trophy in future seasons — only the first win counts."
+          "body": "The driver with the most cumulative Jack Sears Trophy points at the end of all 10 rounds wins the annual trophy. The same tiebreaker rules as the Drivers' Championship apply. Once won, a driver can no longer compete for the Jack Sears Trophy in future seasons. Only the first win counts."
         },
         {
           "type": "subheading",
@@ -717,7 +737,7 @@
         },
         {
           "type": "text",
-          "body": "The Jack Sears Trophy has a strong track record of identifying future BTCC champions. Many of the drivers who have won it have gone on to challenge — and win — the main Drivers' title within a few seasons. At any BTCC round, the JST battle is often the most overtaking-filled, unpredictable part of the race, as newer drivers push hard with less to lose and maximum TTB boost available to them."
+          "body": "The Jack Sears Trophy has a strong track record of identifying future BTCC champions. Many of the drivers who have won it have gone on to challenge and win the main Drivers' title within a few seasons. At any BTCC round, the JST battle is often the most overtaking-filled, unpredictable part of the race, as newer drivers push hard with less to lose and maximum TTB boost available to them."
         },
         {
           "type": "group-end"
@@ -731,7 +751,7 @@
       "sections": [
         {
           "type": "text",
-          "body": "The British Touring Car Championship is one of the best-loved, most illustrious and famous motor racing championships in the world. Only Formula 1 and America's NASCAR stock car series have longer histories – since its inception in 1958, it has attracted and captivated millions of fans around the world."
+          "body": "The British Touring Car Championship is one of the best-loved, most illustrious and famous motor racing championships in the world. Only Formula 1 and America's NASCAR stock car series have longer histories. Since its inception in 1958, it has attracted and captivated millions of fans around the world."
         },
         {
           "type": "text",
@@ -739,7 +759,7 @@
         },
         {
           "type": "text",
-          "body": "Traditional, great British names such as Jaguar, Austin, Ford, Mini, Lotus, Sunbeam and Triumph – often with top international stars, including Formula 1 drivers, at the wheel – were all winners in the first 20 years, each aware of the importance of using the BTCC to showcase their latest models."
+          "body": "Traditional, great British names such as Jaguar, Austin, Ford, Mini, Lotus, Sunbeam and Triumph (often with top international stars, including Formula 1 drivers, at the wheel) were all winners in the first 20 years, each aware of the importance of using the BTCC to showcase their latest models."
         },
         {
           "type": "heading",
@@ -767,7 +787,7 @@
         },
         {
           "type": "text",
-          "body": "Key to the BTCC's enduring success has been the potential for independently-run teams to face off against major manufacturers on a level playing field without the need for factory support. The consistently close competition is testament to carefully formulated sporting and technical regulations, allowing any number of entrants on the capacity grid to experience success – regardless of car body styles or engineering philosophy."
+          "body": "Key to the BTCC's enduring success has been the potential for independently-run teams to face off against major manufacturers on a level playing field without the need for factory support. The consistently close competition is testament to carefully formulated sporting and technical regulations, allowing any number of entrants on the capacity grid to experience success, regardless of car body styles or engineering philosophy."
         },
         {
           "type": "heading",
@@ -783,7 +803,7 @@
         },
         {
           "type": "text",
-          "body": "From 2025, cars have the same power-boost output as 2024 with the additional power surge coming solely via turbo boost. The cars are also 55 kilogrammes lighter and nimbler as a result. For 2026, a new qualifying format was introduced: two 15-minute group sessions on Saturday followed by a Qualifying Race that awards its own championship points and sets the Race 1 grid — adding an extra layer of strategy to every race weekend."
+          "body": "From 2025, cars have the same power-boost output as 2024 with the additional power surge coming solely via turbo boost. The cars are also 55 kilogrammes lighter and nimbler as a result. For 2026, a new qualifying format was introduced: two 15-minute group sessions on Saturday followed by a Qualifying Race that awards its own championship points and sets the Race 1 grid, adding an extra layer of strategy to every race weekend."
         }
       ]
     },
@@ -794,7 +814,7 @@
       "sections": [
         {
           "type": "heading",
-          "body": "1958 – The Beginning"
+          "body": "1958: The Beginning"
         },
         {
           "type": "text",
@@ -802,11 +822,11 @@
         },
         {
           "type": "text",
-          "body": "The very first race counting towards the 1958 points table was actually staged at Brands Hatch on Boxing Day 1957, won by Tommy Sopwith driving an Equipe Endeavour 3.4-litre Jaguar. That inaugural season ended in dramatic fashion – Sopwith and Jack Sears tied on points, resolved by a pair of five-lap races in identical Rileys. Sears was crowned the first Champion by just 1.6 seconds."
+          "body": "The very first race counting towards the 1958 points table was actually staged at Brands Hatch on Boxing Day 1957, won by Tommy Sopwith driving an Equipe Endeavour 3.4-litre Jaguar. That inaugural season ended in dramatic fashion: Sopwith and Jack Sears tied on points, resolved by a pair of five-lap races in identical Rileys. Sears was crowned the first Champion by just 1.6 seconds."
         },
         {
           "type": "heading",
-          "body": "The Sixties – Muscle Cars & Cortinas"
+          "body": "The Sixties: Muscle Cars & Cortinas"
         },
         {
           "type": "text",
@@ -814,7 +834,7 @@
         },
         {
           "type": "heading",
-          "body": "The Seventies – Rising Costs & Japanese Influence"
+          "body": "The Seventies: Rising Costs & Japanese Influence"
         },
         {
           "type": "text",
@@ -822,15 +842,15 @@
         },
         {
           "type": "heading",
-          "body": "The Eighties – Sierra vs M3"
+          "body": "The Eighties: Sierra vs M3"
         },
         {
           "type": "text",
-          "body": "Andy Rouse established a reputation for first-class race car preparation as well as driving talent, winning four championships. The Ford Sierra RS500 Turbo and BMW M3 – two of the BTCC's most iconic cars – ruled their respective classes. Frank Sytner and the Prodrive BMW M3 won the overall title in 1988."
+          "body": "Andy Rouse established a reputation for first-class race car preparation as well as driving talent, winning four championships. The Ford Sierra RS500 Turbo and BMW M3, two of the BTCC's most iconic cars, ruled their respective classes. Frank Sytner and the Prodrive BMW M3 won the overall title in 1988."
         },
         {
           "type": "heading",
-          "body": "The Nineties – The Golden Era"
+          "body": "The Nineties: The Golden Era"
         },
         {
           "type": "text",
@@ -1122,15 +1142,15 @@
         },
         {
           "type": "text",
-          "body": "Lead — by placing sustainability at the forefront of operations through meaningful communication, competition and education."
+          "body": "Lead: placing sustainability at the forefront of operations through meaningful communication, competition and education."
         },
         {
           "type": "text",
-          "body": "Track — by monitoring and honestly reporting on progress and continuous improvements across all areas of the championship."
+          "body": "Track: monitoring and honestly reporting on progress and continuous improvements across all areas of the championship."
         },
         {
           "type": "text",
-          "body": "Race to Carbon Neutral — through proactive approaches to reducing, reusing, recycling, minimising waste and carbon output."
+          "body": "Race to Carbon Neutral: proactive approaches to reducing, reusing, recycling, minimising waste and carbon output."
         }
       ]
     }

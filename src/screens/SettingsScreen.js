@@ -14,12 +14,13 @@ import {useUnits} from '../store/units';
 import {useSettings} from '../store/settings';
 import {useFeatureFlags} from '../store/featureFlags';
 import {Analytics} from '../utils/analytics';
+import {version} from '../../package.json';
 import {getFCMToken} from '../utils/notifications';
 
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
   const {useKm, toggleUnits} = useUnits();
-  const {podcasts_enabled} = useFeatureFlags();
+  const {podcasts_enabled, debug_mode} = useFeatureFlags();
   const [fcmToken, setFcmToken] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -124,18 +125,28 @@ export default function SettingsScreen({navigation}) {
           </View>
         </View>
 
-        <View style={styles.divider} />
-        <Text style={styles.sectionTitle}>DEBUG</Text>
-        <TouchableOpacity style={styles.tokenRow} onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device token">
-          <View style={{flex: 1}}>
-            <Text style={styles.settingLabel}>Device Token</Text>
-            <Text style={styles.tokenText} numberOfLines={1}>{fcmToken || 'Loading…'}</Text>
-          </View>
-          <Icon name={copied ? 'check' : 'content-copy'} size={18} color={copied ? Colors.yellow : Colors.textSecondary} />
-        </TouchableOpacity>
+        {debug_mode && (
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>DEBUG</Text>
+            <SettingRow
+              label="Hub news preview"
+              description="Load posts from hub_news_draft.json instead of live"
+              value={settings.hubPreview}
+              onToggle={(v) => setSetting('hubPreview', v)}
+            />
+            <TouchableOpacity style={styles.tokenRow} onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device token">
+              <View style={{flex: 1}}>
+                <Text style={styles.settingLabel}>Device Token</Text>
+                <Text style={styles.tokenText} numberOfLines={1}>{fcmToken || 'Loading…'}</Text>
+              </View>
+              <Icon name={copied ? 'check' : 'content-copy'} size={18} color={copied ? Colors.yellow : Colors.textSecondary} />
+            </TouchableOpacity>
+          </>
+        )}
 
         <View style={styles.divider} />
-        <Text style={styles.versionText}>Version 2.0.0</Text>
+        <Text style={styles.versionText}>Version {version}</Text>
       </ScrollView>
     </View>
   );

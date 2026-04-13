@@ -44,6 +44,8 @@ import InfoPageScreen from '../screens/InfoPageScreen';
 import BugReportScreen from '../screens/BugReportScreen';
 import RadioScreen from '../screens/RadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
+import RecordsScreen from '../screens/RecordsScreen';
+import PartnersScreen from '../screens/PartnersScreen';
 import AdBanner from '../components/AdBanner';
 import {useFeatureFlags} from '../store/featureFlags';
 
@@ -53,6 +55,7 @@ const Stack = createNativeStackNavigator();
 const screenOptions = {
   headerShown: false,
   contentStyle: {backgroundColor: Colors.background},
+  animation: 'none',
 };
 
 function NewsStack() {
@@ -112,6 +115,8 @@ function MoreStack() {
       <Stack.Screen name="BugReport" component={BugReportScreen} />
       <Stack.Screen name="Radio" component={RadioScreen} />
       <Stack.Screen name="Podcasts" component={PodcastsScreen} />
+      <Stack.Screen name="Records" component={RecordsScreen} />
+      <Stack.Screen name="Partners" component={PartnersScreen} />
     </Stack.Navigator>
   );
 }

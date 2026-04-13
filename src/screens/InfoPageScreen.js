@@ -56,6 +56,13 @@ export default function InfoPageScreen({route, navigation}) {
               return section.url ? (
                 <Image key={i} source={{uri: section.url}} style={styles.image} resizeMode="cover" />
               ) : null;
+            case 'callout':
+              return (
+                <View key={i} style={styles.callout}>
+                  <Text style={styles.calloutLabel}>TALKING POINT</Text>
+                  <Text style={styles.calloutText}>{section.body}</Text>
+                </View>
+              );
             case 'link':
               const isInternal = section.url && !section.url.startsWith('http');
               return (
@@ -105,4 +112,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   linkCardText: {flex: 1, color: '#fff', fontSize: 15, fontWeight: '600'},
+  callout: {backgroundColor: 'rgba(254,189,2,0.08)', borderLeftWidth: 3, borderLeftColor: Colors.yellow, borderRadius: 8, padding: 14, marginBottom: 16},
+  calloutLabel: {color: Colors.yellow, fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 6},
+  calloutText: {color: '#fff', fontSize: 14, lineHeight: 22},
 });

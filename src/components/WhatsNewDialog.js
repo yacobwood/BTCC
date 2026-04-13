@@ -4,10 +4,15 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 
 const CHANGELOG = {
+  43: [
+  'All time stats are now available. Find them in the more menu',
+  ],
   42: [
-    'Podcasts — listen to BTCC radio commentary and race reviews',
-    'Podcast alerts — get notified when a new episode drops',
-    'Notification deep-links — tapping a race or news alert now takes you straight to the right screen',
+    'Podcasts & Interviews — listen to BTCC commentary and race reviews',
+    'All-Time Driver Records — win %, podium %, points per start and more',
+    'Partners & Sponsors page',
+    'Back to top button on History screen',
+    'Track pages now show left & right corner counts',
   ],
   35: [
     'React Native rewrite — same features, cross-platform ready',
@@ -28,7 +33,7 @@ export default function WhatsNewDialog({visible, onDismiss, versionCode = 35}) {
       <View style={styles.overlay}>
         <View style={styles.card}>
           <Text style={styles.title}>What's New</Text>
-          <Text style={styles.version}>Version 2.2.0</Text>
+          <Text style={styles.version}>Version 2.3.0</Text>
           <FlatList
             data={changes}
             keyExtractor={(_, i) => String(i)}

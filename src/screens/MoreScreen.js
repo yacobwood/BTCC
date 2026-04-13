@@ -67,25 +67,27 @@ export default function MoreScreen({navigation}) {
 
         <View style={styles.divider} />
 
+        {/* App section */}
+        <Text style={styles.sectionTitle}>APP</Text>
+        {radio_tab && <MoreRow label="Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('radio'); navigation.navigate('Radio'); }} />}
+        {podcasts_enabled && <MoreRow label="Podcasts & Interviews" icon="mic" onPress={() => { Analytics.moreItemClicked('podcasts'); navigation.navigate('Podcasts'); }} />}
+        <MoreRow label="All-Time Records" icon="emoji-events" onPress={() => { Analytics.moreItemClicked('records'); navigation.navigate('Records'); }} />
+        <MoreRow label="Settings" icon="settings" onPress={() => { Analytics.moreItemClicked('settings'); navigation.navigate('Settings'); }} />
+
+        <View style={styles.divider} />
+
         {/* About BTCC pages */}
         <Text style={styles.sectionTitle}>ABOUT BTCC</Text>
         {pages.filter(p => p.id !== 'new-to-btcc' && !p.id.startsWith('btcc-') && p.id !== 'championships').map(p => (
           <MoreRow key={p.id} label={p.title} icon={iconMap[p.icon] || 'info'} onPress={() => { Analytics.moreItemClicked(p.id); openPage(p); }} />
         ))}
-
-        <View style={styles.divider} />
-
-        {/* App section */}
-        <Text style={styles.sectionTitle}>APP</Text>
-        {radio_tab && <MoreRow label="Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('radio'); navigation.navigate('Radio'); }} />}
-        {podcasts_enabled && <MoreRow label="Podcasts & Interviews" icon="mic" onPress={() => { Analytics.moreItemClicked('podcasts'); navigation.navigate('Podcasts'); }} />}
-        <MoreRow label="Settings" icon="settings" onPress={() => { Analytics.moreItemClicked('settings'); navigation.navigate('Settings'); }} />
-        <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
+        <MoreRow label="Partners & Sponsors" icon="business" onPress={() => { Analytics.moreItemClicked('partners'); navigation.navigate('Partners'); }} />
 
         <View style={styles.divider} />
 
         {/* Support */}
         <Text style={styles.sectionTitle}>SUPPORT</Text>
+        <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
         <MoreRow label="Buy me a coffee" icon="local-cafe" onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://buymeacoffee.com/btcchub'); }} />
       </ScrollView>
     </View>

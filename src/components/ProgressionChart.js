@@ -12,7 +12,10 @@ const CHART_COLORS = [
 const screenWidth = Dimensions.get('window').width;
 
 function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
-  const series = rawSeries.filter((s, i, arr) => arr.findIndex(x => x.name === s.name) === i);
+  // Deduplicate and prepend a R0 origin point (0 pts) so all lines start from the bottom-left
+  const series = rawSeries
+    .filter((s, i, arr) => arr.findIndex(x => x.name === s.name) === i)
+    .map(s => ({...s, points: [0, ...s.points]}));
   const [visible, setVisible] = useState(() => {
     const m = {};
     series.forEach(s => { m[s.name] = true; });
@@ -70,10 +73,10 @@ function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
               <SvgText x={padL - 6} y={y(v) + 4} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{v}</SvgText>
             </React.Fragment>
           ))}
-          {/* X-axis labels */}
-          {Array.from({length: maxRounds}, (_, i) => (
+          {/* X-axis labels — skip index 0 (R0 origin point, no label) */}
+          {Array.from({length: maxRounds}, (_, i) => i === 0 ? null : (
             <SvgText key={i} x={x(i)} y={chartH - 4} fill={Colors.textSecondary} fontSize={8} textAnchor="middle">
-              R{i + 1}
+              R{i}
             </SvgText>
           ))}
           {/* Lines — split into segments at null gaps (late-joining drivers) */}

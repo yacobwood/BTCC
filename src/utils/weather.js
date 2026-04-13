@@ -26,6 +26,16 @@ export function weatherIcon(code) {
   return WMO_ICONS[code] || 'cloud';
 }
 
+export function weatherIconColor(code) {
+  if (code === 0 || code === 1) return '#F5C842'; // sunny — warm amber
+  if (code === 2)               return '#A0B4C8'; // partly cloudy — light blue-grey
+  if (code === 3)               return '#7A8FA0'; // overcast — mid grey-blue
+  if (code === 45 || code === 48) return '#8A9BAA'; // fog
+  if (code >= 71 && code <= 75) return '#B0C8E0'; // snow — pale blue
+  if (code === 95 || code === 96 || code === 99) return '#9B7ED8'; // thunder — purple
+  return '#5BA3FF'; // rain/drizzle/showers — blue
+}
+
 const MAX_FORECAST_DAYS = 16;
 
 export async function fetchWeather(lat, lng, startDate, endDate) {

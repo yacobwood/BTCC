@@ -1,11 +1,10 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Animated,
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -16,6 +15,21 @@ import {Analytics} from '../utils/analytics';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
+// Build a map of driver -> grid position for a given race index.
+// Race 1 grid = qualifying race finishing order (index 0).
+// Race 2 grid = Race 1 finishing order (index 1).
+// Race 3 grid = unknown (random reversal draw not stored).
+function buildGridMap(races, raceIndex) {
+  if (raceIndex === 0 || raceIndex > 2) return null;
+  const sourceRace = races[raceIndex - 1];
+  if (!sourceRace?.results?.length) return null;
+  const map = {};
+  sourceRace.results.forEach((r, i) => {
+    if (r.driver && r.position > 0) map[r.driver] = i + 1;
+  });
+  return Object.keys(map).length ? map : null;
+}
+
 export default function RoundResultsScreen({route, navigation}) {
   const {round, year, initialRace} = route.params;
   const [raceIndex, setRaceIndex] = useState(initialRace ?? 0);
@@ -23,15 +37,7 @@ export default function RoundResultsScreen({route, navigation}) {
   const {useKm} = useUnits();
   const races = round.races || [];
 
-  const swipeRef = useRef(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
-
   const TAB_WIDTH = SCREEN_WIDTH / races.length;
-  const indicatorX = scrollX.interpolate({
-    inputRange: [0, SCREEN_WIDTH * (races.length - 1)],
-    outputRange: [0, TAB_WIDTH * (races.length - 1)],
-    extrapolate: 'clamp',
-  });
 
   useEffect(() => { Analytics.roundResultsViewed(year, round.round); }, []);
 
@@ -40,21 +46,25 @@ export default function RoundResultsScreen({route, navigation}) {
 
   const goToRace = (i) => {
     setRaceIndex(i);
-    swipeRef.current?.scrollTo({x: i * SCREEN_WIDTH, animated: true});
   };
 
-  const renderResult = ({item}) => {
+  const makeRenderResult = (gridMap) => ({item}) => {
     const isDNF = item.position === 0 || item.time === 'DNF' || item.time === 'Ret';
+    const isDNS = isDNF && item.laps === 0;
+    const posLabel = isDNS ? 'DNS' : isDNF ? 'DNF' : item.position;
     const fav = isFavourite(item.driver);
     const posColor = item.position === 1 ? '#FFD700'
       : item.position === 2 ? '#C0C0C0'
       : item.position === 3 ? '#CD7F32'
       : '#fff';
 
+    const gridPos = gridMap?.[item.driver];
+    const delta = (gridPos != null && !isDNF) ? gridPos - item.position : null;
+
     return (
-      <View style={[styles.resultRow, isDNF && styles.resultRowDNF, fav && styles.resultRowFav]} accessibilityLabel={`Position ${isDNF ? 'DNF' : item.position}, ${item.driver}, ${item.points} points`}>
+      <View style={[styles.resultRow, isDNF && styles.resultRowDNF, fav && styles.resultRowFav]} accessibilityLabel={`Position ${posLabel}, ${item.driver}, ${item.points} points`}>
         <Text style={[styles.pos, {color: isDNF ? Colors.textSecondary : posColor}]}>
-          {isDNF ? 'DNF' : item.position}
+          {posLabel}
         </Text>
         <View style={{flex: 1}}>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
@@ -66,7 +76,22 @@ export default function RoundResultsScreen({route, navigation}) {
             {item.leadLap && <Badge text="L" color={Colors.yellow} />}
             {item.pole && <Badge text="P" color={Colors.yellow} />}
           </View>
-          <Text style={styles.teamName}>{item.team}</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+            <Text style={styles.teamName}>{item.team}</Text>
+            {delta !== null && delta !== 0 && (
+              <View style={styles.deltaRow}>
+                <Icon
+                  name={delta > 0 ? 'arrow-upward' : 'arrow-downward'}
+                  size={10}
+                  color={delta > 0 ? '#4ADE80' : '#F87171'}
+                />
+                <Text style={[styles.deltaText, {color: delta > 0 ? '#4ADE80' : '#F87171'}]}>
+                  {Math.abs(delta)}
+                </Text>
+              </View>
+            )}
+            {delta === 0 && <Text style={styles.deltaFlat}>—</Text>}
+          </View>
         </View>
         <View style={styles.rightCol}>
           <Text style={[styles.timeText, item.position === 1 && {color: Colors.yellow}]}>
@@ -112,55 +137,40 @@ export default function RoundResultsScreen({route, navigation}) {
               </Text>
             </TouchableOpacity>
           ))}
-          <Animated.View style={{
+          <View style={{
             position: 'absolute',
             bottom: 0,
             left: 0,
             width: TAB_WIDTH,
             height: 2,
             backgroundColor: Colors.yellow,
-            transform: [{translateX: indicatorX}],
+            transform: [{translateX: TAB_WIDTH * raceIndex}],
           }} />
         </View>
       )}
 
-      <Animated.ScrollView
-        ref={swipeRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={{flex: 1}}
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {
-            useNativeDriver: true,
-            listener: (e) => {
-              const i = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-              if (i !== raceIndex) setRaceIndex(i);
-            },
-          }
-        )}>
-        {races.map((race, i) => {
-          const results = race?.results || [];
-          return (
-            <View key={i} style={{width: SCREEN_WIDTH, flex: 1}}>
-              {race?.date && race.date !== round.date && (
-                <Text style={styles.raceDateLabel}>{race.date}</Text>
-              )}
-              <FlatList
-                data={results}
-                keyExtractor={(_, idx) => String(idx)}
-                renderItem={renderResult}
-                contentContainerStyle={{padding: 16, paddingBottom: 20}}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No results available</Text>
-                }
-              />
-            </View>
-          );
-        })}
-      </Animated.ScrollView>
+      {(() => {
+        const race = races[raceIndex];
+        const results = race?.results || [];
+        const gridMap = buildGridMap(races, raceIndex);
+        return (
+          <View style={{flex: 1}}>
+            {race?.date && race.date !== round.date && (
+              <Text style={styles.raceDateLabel}>{race.date}</Text>
+            )}
+            <FlatList
+              key={raceIndex}
+              data={results}
+              keyExtractor={(_, idx) => String(idx)}
+              renderItem={makeRenderResult(gridMap)}
+              contentContainerStyle={{padding: 16, paddingBottom: 20}}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No results available</Text>
+              }
+            />
+          </View>
+        );
+      })()}
     </View>
   );
 }
@@ -215,7 +225,10 @@ const styles = StyleSheet.create({
   resultRowFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'},
   pos: {fontSize: 18, fontWeight: '900', width: 36, textAlign: 'center', marginRight: 8},
   driverName: {color: '#fff', fontSize: 14, fontWeight: '700'},
-  teamName: {color: Colors.textSecondary, fontSize: 11, marginTop: 1},
+  teamName: {color: Colors.textSecondary, fontSize: 11},
+  deltaRow: {flexDirection: 'row', alignItems: 'center', gap: 1},
+  deltaText: {fontSize: 10, fontWeight: '800'},
+  deltaFlat: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},
   rightCol: {alignItems: 'flex-end', marginLeft: 8},
   timeText: {color: '#fff', fontSize: 13, fontWeight: '700'},
   detailText: {color: Colors.textSecondary, fontSize: 10, marginTop: 1},

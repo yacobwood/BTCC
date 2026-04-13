@@ -28,6 +28,7 @@ const KEYS = {
   weekendPreview: 'setting_weekend_preview',
   standingsUpdate: 'setting_standings_update',
   podcastAlerts: 'setting_podcast_alerts',
+  hubPreview: 'setting_hub_preview',
 };
 
 const defaults = {
@@ -39,6 +40,7 @@ const defaults = {
   weekendPreview: true,
   standingsUpdate: true,
   podcastAlerts: true,
+  hubPreview: false,
 };
 
 const SettingsContext = createContext({settings: defaults, setSetting: () => {}});

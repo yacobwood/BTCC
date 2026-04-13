@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
-import {fetchWeather, weatherDescription, weatherIcon} from '../utils/weather';
+import {fetchWeather, weatherDescription, weatherIcon, weatherIconColor} from '../utils/weather';
 import CachedImage from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
@@ -170,7 +170,17 @@ export default function TrackDetailScreen({route, navigation}) {
         return (
           <View style={styles.statsRow}>
             <StatBox label="Length" value={useKm ? roundLength(track.lengthKm) : roundLength(track.lengthMiles)} />
-            <StatBox label="Corners" value={String(track.corners)} />
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{track.corners}</Text>
+              <Text style={styles.statLabel}>Corners</Text>
+              {(track.cornersLeft != null && track.cornersRight != null) && (
+                <Text style={styles.cornerSplit}>
+                  <Text style={styles.cornerSplitLeft}>{track.cornersLeft}L</Text>
+                  <Text style={styles.cornerSplitDot}> · </Text>
+                  <Text style={styles.cornerSplitRight}>{track.cornersRight}R</Text>
+                </Text>
+              )}
+            </View>
             {track.firstBtccYear ? (
               <StatBox label="First BTCC" value={String(track.firstBtccYear)} />
             ) : null}
@@ -292,7 +302,7 @@ export default function TrackDetailScreen({route, navigation}) {
               return (
                 <View key={i} style={styles.weatherDay}>
                   <Text style={styles.weatherDayLabel}>{dayName}</Text>
-                  <Icon name={weatherIcon(day.weatherCode)} size={26} color={Colors.yellow} />
+                  <Icon name={weatherIcon(day.weatherCode)} size={26} color={weatherIconColor(day.weatherCode)} />
                   <Text style={styles.weatherDesc}>{weatherDescription(day.weatherCode)}</Text>
                   <View style={styles.weatherTemps}>
                     <Text style={styles.weatherTemp}>{day.tempMax}°</Text>
@@ -489,11 +499,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.outline,
   },
   statValue: {color: Colors.yellow, fontSize: 16, fontWeight: '900'},
   statLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700', marginTop: 3, letterSpacing: 0.5},
+
+  // Corner split inside stat box
+  cornerSplit: {marginTop: 5, textAlign: 'center'},
+  cornerSplitLeft: {color: '#5BA3FF', fontSize: 12, fontWeight: '800'},
+  cornerSplitDot: {color: Colors.textSecondary, fontSize: 12},
+  cornerSplitRight: {color: '#4ADE80', fontSize: 12, fontWeight: '800'},
 
   // Cards
   card: {backgroundColor: Colors.card, borderRadius: 10, padding: 14, marginTop: 12},

@@ -9,7 +9,7 @@ import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
 import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
-import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
+import {FeatureFlagsProvider} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import notifee, {EventType} from '@notifee/react-native';
@@ -43,10 +43,9 @@ function PodcastChecker() {
 
 const ONBOARDING_KEY = 'onboarding_shown';
 const WHATS_NEW_KEY = 'whats_new_seen_version';
-const CURRENT_VERSION = 42;
+const CURRENT_VERSION = 43;
 
 function AppDialogs() {
-  const {whats_new} = useFeatureFlags();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
 
@@ -87,7 +86,7 @@ function AppDialogs() {
   return (
     <>
       <OnboardingDialog visible={showOnboarding} onAllow={handleOnboardingAllow} onSkip={handleOnboardingSkip} />
-      <WhatsNewDialog visible={whats_new && showWhatsNew} onDismiss={handleWhatsNewDismiss} versionCode={CURRENT_VERSION} />
+      <WhatsNewDialog visible={showWhatsNew} onDismiss={handleWhatsNewDismiss} versionCode={CURRENT_VERSION} />
     </>
   );
 }

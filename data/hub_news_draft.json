@@ -1,0 +1,14 @@
+{
+  "posts": [
+    {
+      "id": "hub-draft-1",
+      "title": "Draft post title",
+      "description": "Draft post preview text.",
+      "content": "Draft post content goes here.",
+      "imageUrl": null,
+      "category": "App",
+      "pubDate": "2026-04-13",
+      "link": null
+    }
+  ]
+}
