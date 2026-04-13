@@ -8,6 +8,7 @@ initializeApp();
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
 const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug';
+const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
 // Session name → FCM topic
 const SESSION_TOPICS = {
@@ -224,6 +225,39 @@ exports.sendSessionNotifications = onSchedule(
       }
     } catch (e) {
       console.error('News check failed:', e);
+    }
+
+    // ── Hub news alerts ───────────────────────────────────────────
+    try {
+      const db = getFirestore();
+      const hubStateRef = db.collection('state').doc('hub_news');
+      const [hubData, hubSnap] = await Promise.all([
+        fetch(HUB_NEWS_URL).then(r => r.json()),
+        hubStateRef.get(),
+      ]);
+      const latestHub = hubData?.posts?.[0];
+      if (latestHub) {
+        const lastHubId = hubSnap.exists ? hubSnap.data().lastId : null;
+        if (String(latestHub.id) !== String(lastHubId)) {
+          await hubStateRef.set({lastId: String(latestHub.id)});
+          if (lastHubId !== null) {
+            sends.push(
+              messaging.send({
+                topic: 'news_alerts',
+                notification: {
+                  title: latestHub.title || 'New Post',
+                  body: latestHub.description || 'A new post has been published on BTCC Hub',
+                },
+                android: {notification: {channelId: 'news'}},
+                apns: {payload: {aps: {sound: 'default'}}},
+                data: {type: 'hub', id: String(latestHub.id)},
+              }),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Hub news check failed:', e);
     }
 
     const results = await Promise.allSettled(sends);

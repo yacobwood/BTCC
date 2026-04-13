@@ -46,22 +46,24 @@ export default function NewsScreen({navigation}) {
   const [searchKeyboardShown, setSearchKeyboardShown] = useState(false);
   const [error, setError] = useState(null);
 
+  const hubPreviewRef = React.useRef(settings.hubPreview);
+  useEffect(() => { hubPreviewRef.current = settings.hubPreview; }, [settings.hubPreview]);
+
   const load = useCallback(async (p = 1, append = false) => {
     try {
       if (p === 1 && !append) setLoading(true);
       setError(null);
       const [raw, hubPosts] = await Promise.all([
         fetchArticles(p),
-        p === 1 && !append ? fetchHubPosts(settings.hubPreview) : Promise.resolve(null),
+        p === 1 && !append ? fetchHubPosts(hubPreviewRef.current) : Promise.resolve(null),
       ]);
       const parsed = raw.map(parseArticle);
       if (append) {
         setArticles(prev => [...prev, ...parsed]);
       } else {
-        // Merge hub posts with WP articles, sorted newest first
         const merged = [...hubPosts, ...parsed].sort((a, b) => {
-          const da = new Date(a.pubDate || 0);
-          const db = new Date(b.pubDate || 0);
+          const da = new Date(a.sortDate || a.pubDate || 0);
+          const db = new Date(b.sortDate || b.pubDate || 0);
           return db - da;
         });
         setArticles(merged);
@@ -77,6 +79,13 @@ export default function NewsScreen({navigation}) {
       setRefreshing(false);
       setLoadingMore(false);
     }
+  }, []);
+
+  // Reload when preview mode is toggled
+  useEffect(() => {
+    hubPreviewRef.current = settings.hubPreview;
+    load(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.hubPreview]);
 
   useEffect(() => { Analytics.screen('news'); }, []);
@@ -96,7 +105,7 @@ export default function NewsScreen({navigation}) {
       setSearchKeyboardShown(false);
     }
   }, [searchActive]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('news');
@@ -253,11 +262,11 @@ export default function NewsScreen({navigation}) {
 
 // ── Source Badge ─────────────────────────────────────────────────
 function SourceBadge({source}) {
-  const isHub = source === 'btcc hub';
+  const isBtccNet = source === 'btcc.net';
   return (
-    <View style={[styles.sourceBadge, {backgroundColor: isHub ? 'rgba(254,189,2,0.15)' : 'rgba(255,255,255,0.1)'}]}>
-      <Text style={[styles.sourceBadgeText, {color: isHub ? Colors.yellow : Colors.textSecondary}]}>
-        {isHub ? 'BTCC HUB' : 'BTCC.NET'}
+    <View style={[styles.sourceBadge, {backgroundColor: isBtccNet ? 'rgba(254,189,2,0.15)' : 'rgba(59,130,246,0.15)'}]}>
+      <Text style={[styles.sourceBadgeText, {color: isBtccNet ? Colors.yellow : '#3B82F6'}]}>
+        {isBtccNet ? 'BTCC.NET' : source.toUpperCase()}
       </Text>
     </View>
   );
@@ -285,9 +294,12 @@ function HeroCard({article, onPress, onRefresh, onSearchClick}) {
         </View>
         {/* Bottom text */}
         <View style={styles.heroBottom}>
-          {article.category ? (
-            <Text style={styles.heroCategory}>{article.category.toUpperCase()}</Text>
-          ) : null}
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6}}>
+            {article.category ? (
+              <Text style={styles.heroCategory}>{article.category.toUpperCase()}</Text>
+            ) : null}
+            <SourceBadge source={article.source} />
+          </View>
           <Text style={styles.heroTitle} numberOfLines={3}>{article.title}</Text>
           <Text style={styles.heroDate}>{article.pubDate}</Text>
         </View>
@@ -313,7 +325,12 @@ function GridRow({articles, onPress}) {
           )}
           <View style={styles.gridOverlay} />
           <View style={styles.gridContent}>
-            <SourceBadge source={article.source} />
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4}}>
+              {article.category ? (
+                <Text style={styles.compactCategory}>{article.category.toUpperCase()}</Text>
+              ) : null}
+              <SourceBadge source={article.source} />
+            </View>
             <Text style={styles.gridTitle} numberOfLines={3}>{article.title}</Text>
             <Text style={styles.gridDate}>{article.pubDate}</Text>
           </View>
@@ -332,10 +349,10 @@ function CompactCard({article, onPress}) {
       )}
       <View style={styles.compactContent}>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2}}>
-          <SourceBadge source={article.source} />
           {article.category ? (
             <Text style={styles.compactCategory}>{article.category.toUpperCase()}</Text>
           ) : null}
+          <SourceBadge source={article.source} />
         </View>
         <Text style={styles.compactTitle} numberOfLines={3}>{article.title}</Text>
         <Text style={styles.compactDate}>{article.pubDate}</Text>

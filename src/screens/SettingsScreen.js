@@ -147,6 +147,9 @@ export default function SettingsScreen({navigation}) {
 
         <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
+        <TouchableOpacity onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device ID">
+          <Text style={styles.versionText} numberOfLines={1}>Device ID: {fcmToken || 'Loading…'}</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

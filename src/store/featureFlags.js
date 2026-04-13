@@ -1,4 +1,5 @@
 import React, {createContext, useContext, useState, useEffect} from 'react';
+import {getMessaging, getToken} from '@react-native-firebase/messaging';
 
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
 
@@ -14,10 +15,21 @@ export function FeatureFlagsProvider({children}) {
   const [flags, setFlags] = useState(defaults);
 
   useEffect(() => {
-    fetch(FLAGS_URL)
-      .then(r => r.json())
-      .then(data => setFlags(prev => ({...prev, ...data})))
-      .catch(() => {});
+    (async () => {
+      try {
+        const data = await fetch(FLAGS_URL).then(r => r.json());
+        const {overrides = {}, ...globalFlags} = data;
+
+        // Apply per-device overrides if this device has any
+        let deviceOverrides = {};
+        try {
+          const token = await getToken(getMessaging());
+          if (token && overrides[token]) deviceOverrides = overrides[token];
+        } catch {}
+
+        setFlags(prev => ({...prev, ...globalFlags, ...deviceOverrides}));
+      } catch {}
+    })();
   }, []);
 
   return (

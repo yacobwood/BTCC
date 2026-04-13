@@ -1,9 +1,11 @@
 import {cacheWrite, cacheRead} from '../store/cache';
+import {formatDate} from './parsers';
 
 const BASE_GITHUB = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data';
 const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
 
 const BUNDLED_CALENDAR = require('../data/calendar.json');
+const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 
 async function fetchJson(url, cacheKey) {
   const t = Date.now();
@@ -62,20 +64,24 @@ export async function fetchArticles(page = 1, perPage = 20, search = '') {
 }
 
 export async function fetchHubPosts(preview = false) {
-  const file = preview ? 'hub_news_draft.json' : 'hub_news.json';
   const cacheKey = preview ? null : 'hub_news';
   try {
-    const data = await fetchJson(`${BASE_GITHUB}/${file}`, cacheKey);
+    const data = preview ? BUNDLED_HUB_DRAFT : await fetchJson(`${BASE_GITHUB}/hub_news.json`, cacheKey);
     return (data.posts || []).map(p => ({
       id: p.id,
       title: p.title || '',
       link: p.link || null,
       description: p.description || '',
-      pubDate: p.pubDate || '',
+      sortDate: p.pubDate || '',
+      pubDate: formatDate(p.pubDate || ''),
       imageUrl: p.imageUrl || null,
       category: p.category || '',
-      content: p.content || '',
-      source: 'btcc hub',
+      content: [
+        p.content || '',
+        ...(Array.isArray(p.images) ? p.images.map(u => `<img src="${u}" />`) : []),
+      ].filter(Boolean).join('\n'),
+      source: p.source || 'btcc hub',
+      sourceUrl: p.sourceUrl || null,
     }));
   } catch {
     return [];

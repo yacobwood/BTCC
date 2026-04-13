@@ -5,11 +5,12 @@ export function parseArticle(post) {
   const link = post.link || '';
   const description = stripHtml(post.excerpt?.rendered || '');
   const content = post.content?.rendered || '';
-  const pubDate = formatDate(post.date || '');
+  const sortDate = post.date || '';
+  const pubDate = formatDate(sortDate);
   const embedded = post._embedded;
   const imageUrl = extractFeaturedImage(embedded, content);
   const category = extractCategory(embedded);
-  return {id, title, link, description, pubDate, imageUrl, category, content, source: 'btcc.net'};
+  return {id, title, link, description, pubDate, sortDate, imageUrl, category, content, source: 'btcc.net'};
 }
 
 function extractFeaturedImage(embedded, content = '') {
