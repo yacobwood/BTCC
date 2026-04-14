@@ -52,7 +52,7 @@ jobs:
           admin.messaging().send({
             token: process.env.DEVICE_TOKEN,
             notification,
-            android: { priority: 'high', notification: { channelId: process.env.CHANNEL } },
+            android: { priority: 'high', notification: { channelId: process.env.CHANNEL, ...(imageUrl ? { imageUrl } : {}) } },
             apns: { payload: { aps: { sound: 'default', ...(imageUrl ? { 'mutable-content': 1 } : {}) } } },
             data: { channel: process.env.CHANNEL, ...extraData },
           }).then(r => { console.log('Sent:', r); process.exit(0); })
