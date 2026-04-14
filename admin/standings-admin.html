@@ -945,13 +945,11 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
 
     <!-- News -->
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button onclick="sendNewsTest()" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">News</button>
-        <input id="test-news-slug" type="text" placeholder="article-slug" style="flex:1;padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
-      </div>
-      <input id="test-news-title" type="text" placeholder="Notification title (e.g. article headline)" style="padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
-      <input id="test-news-image" type="text" placeholder="Image URL (optional)" style="padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="sendNewsTest()" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">News</button>
+      <input id="test-news-slug" type="text" placeholder="article-slug" style="flex:1;padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
+      <input id="test-news-title" type="hidden">
+      <input id="test-news-image" type="hidden">
     </div>
 
     <!-- Results -->
