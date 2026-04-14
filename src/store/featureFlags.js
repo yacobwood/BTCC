@@ -8,6 +8,7 @@ const defaults = {
   podcast_last_episode_url: '',
   debug_mode: false,
   hub_news_enabled: true,
+  live_timing_in_app: false,
 };
 
 const FeatureFlagsContext = createContext(defaults);

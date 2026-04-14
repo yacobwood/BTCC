@@ -6,7 +6,7 @@ const fa = () => { if (!_fa) _fa = getAnalytics(); return _fa; };
 export const Analytics = {
   screen: (name) => logEvent(fa(), 'screen_view', {screen_name: name}),
 
-  articleClicked: (title, position) => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position}),
+  articleClicked: (title, position, source) => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position, ...(source ? {source} : {})}),
   articleShared: (title) => logEvent(fa(),'share', {content_type: 'article', item_id: title?.substring(0, 100) || ''}),
   articleScrollDepth: (title, depth) => logEvent(fa(),'article_scroll_depth', {item_name: title?.substring(0, 100), depth_percent: depth}),
   articleExternalLinkClicked: (title, url) => logEvent(fa(),'article_external_link_clicked', {item_name: title?.substring(0, 100), url: url?.substring(0, 100)}),
@@ -36,6 +36,9 @@ export const Analytics = {
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
 
   bugReportSubmitted: (category) => logEvent(fa(),'bug_report_submitted', {category}),
+
+  roadmapVoted: (itemId) => logEvent(fa(),'roadmap_voted', {item_id: itemId}),
+  roadmapIdeaSubmitted: () => logEvent(fa(),'roadmap_idea_submitted'),
 
   pullToRefresh: (screen) => logEvent(fa(),'pull_to_refresh', {screen}),
   retryClicked: (screen) => logEvent(fa(),'retry_clicked', {screen}),

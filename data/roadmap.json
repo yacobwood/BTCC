@@ -1,0 +1,34 @@
+{
+  "planned": [
+    {
+      "id": "live-timing-in-app",
+      "title": "Live Timing In-App",
+      "description": "View live TSL timing directly inside the app without jumping to a browser.",
+      "status": "in-progress"
+    },
+    {
+      "id": "qualifying-race-results",
+      "title": "Qualifying Race Results",
+      "description": "Dedicated results and points tracking for the new 2026 Qualifying Race session.",
+      "status": "planned"
+    },
+    {
+      "id": "tyre-guide",
+      "title": "Tyre Compound Guide",
+      "description": "Visual guide to the Goodyear tyre compounds, colour coding, and the option tyre rule.",
+      "status": "planned"
+    },
+    {
+      "id": "championships-guide",
+      "title": "The Championships Explained",
+      "description": "A guide to all 6 BTCC championships - who qualifies, how points work, and what each title means.",
+      "status": "planned"
+    },
+    {
+      "id": "ios-app",
+      "title": "iOS App",
+      "description": "Bring BTCC Fan Hub to iPhone and iPad.",
+      "status": "planned"
+    }
+  ]
+}

@@ -46,6 +46,7 @@ import RadioScreen from '../screens/RadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
+import RoadmapScreen from '../screens/RoadmapScreen';
 import AdBanner from '../components/AdBanner';
 import {useFeatureFlags} from '../store/featureFlags';
 
@@ -117,6 +118,7 @@ function MoreStack() {
       <Stack.Screen name="Podcasts" component={PodcastsScreen} />
       <Stack.Screen name="Records" component={RecordsScreen} />
       <Stack.Screen name="Partners" component={PartnersScreen} />
+      <Stack.Screen name="Roadmap" component={RoadmapScreen} />
     </Stack.Navigator>
   );
 }

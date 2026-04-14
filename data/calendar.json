@@ -1,1392 +1,1394 @@
 {
-  "season": 2026,
-  "seasonStartDate": "2026-04-18",
-  "liveTimingEnabled": true,
-  "rounds": [
-    {
-      "round": 1,
-      "tslEventId": 261603,
-      "venue": "Donington Park",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Qp3Vb4V0qDw",
-      "startDate": "2026-04-18",
-      "endDate": "2026-04-19",
-      "location": "Castle Donington, Leicestershire",
-      "country": "England",
-      "lat": 52.8306,
-      "lng": -1.3764,
-      "lengthMiles": "1.957 mi",
-      "lengthKm": "3.149 km",
-      "corners": 10,
-      "about": "One of Britain's most historic circuits, dating back to 1931. The National layout features the infamous Craner Curves - a sweeping downhill chicane that rewards commitment - alongside the Old Hairpin and the fast Schwantz Curve. The circuit also hosted a famous Formula 1 European Grand Prix in 1993, remembered for Ayrton Senna's extraordinary opening lap.",
-      "btccFact": "Donington opens the BTCC season almost every year, meaning the winner of the first race here is often considered the early championship favourite.",
-      "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Start-0H5A6101-scaled.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/2-Donington-Park-1.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/04/start-0H5A1735-scaled-e1745785780179.jpg",
-        "https://btcc.net/wp-content/uploads/2025/04/sutton-0H5A6349-scaled-e1745765754484.jpg",
-        "https://btcc.net/wp-content/uploads/2025/04/Cammish-0Q3A6409-scaled-e1745684861454.jpg",
-        "https://btcc.net/wp-content/uploads/2025/04/podium0H5A5174-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/04/Cammish-0Q3A5960-scaled.jpg"
-      ],
-      "firstBtccYear": 1977,
-      "qualifyingRecord": {
-        "driver": "Ash Sutton",
-        "time": "1:07.570",
-        "speed": "106.39 mph",
-        "year": 2023
-      },
-      "raceRecord": {
-        "driver": "Ash Sutton",
-        "time": "1:08.011",
-        "speed": "104.75 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
+      "season": 2026,
+      "seasonStartDate": "2026-04-18",
+      "liveTimingEnabled": true,
+      "rounds": [
             {
-              "number": "T1",
-              "name": "Redgate",
-              "overtaking": true,
-              "description": "Sharp right-hander at the end of the start/finish straight. The prime overtaking zone on lap one and throughout the race."
+                  "round": 1,
+                  "tslEventId": 261603,
+                  "venue": "Donington Park",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=Qp3Vb4V0qDw",
+                  "startDate": "2026-04-18",
+                  "endDate": "2026-04-19",
+                  "location": "Castle Donington, Leicestershire",
+                  "country": "England",
+                  "lat": 52.8306,
+                  "lng": -1.3764,
+                  "lengthMiles": "1.957 mi",
+                  "lengthKm": "3.149 km",
+                  "corners": 10,
+                  "about": "One of Britain's most historic circuits, dating back to 1931. The National layout features the infamous Craner Curves - a sweeping downhill chicane that rewards commitment - alongside the Old Hairpin and the fast Schwantz Curve. The circuit also hosted a famous Formula 1 European Grand Prix in 1993, remembered for Ayrton Senna's extraordinary opening lap.",
+                  "btccFact": "Donington opens the BTCC season almost every year, meaning the winner of the first race here is often considered the early championship favourite.",
+                  "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Start-0H5A6101-scaled.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/2-Donington-Park-1.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/04/start-0H5A1735-scaled-e1745785780179.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/04/sutton-0H5A6349-scaled-e1745765754484.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/04/Cammish-0Q3A6409-scaled-e1745684861454.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/04/podium0H5A5174-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/04/Cammish-0Q3A5960-scaled.jpg"
+                  ],
+                  "firstBtccYear": 1977,
+                  "qualifyingRecord": {
+                        "driver": "Ash Sutton",
+                        "time": "1:07.570",
+                        "speed": "106.39 mph",
+                        "year": 2023
+                  },
+                  "raceRecord": {
+                        "driver": "Ash Sutton",
+                        "time": "1:08.011",
+                        "speed": "104.75 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Redgate",
+                                          "overtaking": true,
+                                          "description": "The slowest corner on the circuit and the prime overtaking spot. Heavy braking from the start/finish straight into this 90-degree right-hander. A good exit is crucial as it carries speed all the way down to Hollywood."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Hollywood",
+                                          "description": "A fast right-hand kink that is really just a launch pad for the Craner Curves. Positioning here is everything as drivers run wide to set up the perfect entry into one of the most iconic corner sequences in British motorsport."
+                                    },
+                                    {
+                                          "number": "T3-4",
+                                          "name": "Craner Curves",
+                                          "description": "Donington's signature section, a sweeping downhill left-hand sequence taken at high speed. Flat out in BTCC, it demands total commitment and is stunning to watch from the banks. Any error here is very costly."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Old Hairpin",
+                                          "overtaking": true,
+                                          "description": "A tight right-hander at the foot of the hill with heavy braking. One of the best overtaking opportunities on the lap as drivers can dive down the inside. A strong exit sets up the run through Schwantz and McLeans."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T6",
+                                          "name": "Schwantz Curve",
+                                          "description": "A sweeping uphill left-hander named after MotoGP legend Kevin Schwantz. Taken nearly flat in BTCC, drivers try to straighten it as much as possible to set up the heavy braking for McLeans."
+                                    },
+                                    {
+                                          "number": "T7",
+                                          "name": "McLeans",
+                                          "overtaking": true,
+                                          "description": "Heavy braking into this right-hander at the top of the hill. A late apex is key to get on the power early and carry speed up towards Coppice. Another genuine overtaking opportunity."
+                                    },
+                                    {
+                                          "number": "T8",
+                                          "name": "Coppice",
+                                          "description": "The most important corner on the circuit as it feeds the longest straight. The apex is blind over a crest, making it one of the trickiest to get right. Getting on the throttle early here is critical for lap time."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T9-10",
+                                          "name": "Goddard's Chicane",
+                                          "overtaking": true,
+                                          "description": "The final obstacle before the start/finish straight, a right-left chicane with heavy braking. Drivers flick through the two apexes and get back on the power as early as possible. A last-chance overtaking spot and a great viewing area for fans."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:35"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:30"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:40"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:30"
+                        }
+                  ],
+                  "cornersLeft": 4,
+                  "cornersRight": 6
             },
             {
-              "number": "T2",
-              "name": "Hollywood",
-              "description": "Fast right-hand kink through the trees, taken flat out. Sets up the entry into Craner Curves."
+                  "round": 2,
+                  "tslEventId": 261903,
+                  "venue": "Brands Hatch Indy",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=_g7wYCscEw0",
+                  "startDate": "2026-05-09",
+                  "endDate": "2026-05-10",
+                  "location": "Fawkham, Kent",
+                  "country": "England",
+                  "lat": 51.3569,
+                  "lng": 0.2631,
+                  "lengthMiles": "1.208 mi",
+                  "lengthKm": "1.944 km",
+                  "corners": 9,
+                  "about": "The short, intense Indy loop of the legendary Brands Hatch circuit. Paddock Hill Bend is one of the most famous corners in British motorsport - blind, downhill, and off-camber - providing spectacular action on the opening lap. The tight Druids hairpin and Clark Curve create close-quarters racing throughout the field.",
+                  "btccFact": "The BTCC visits Brands Hatch twice each season - on the shorter Indy circuit in spring and the full Grand Prix layout for the season finale in October.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2025-brands-hatch-indy/Rainford-0Q3A3551.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/750x625.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/05/Cook-0H5A4404-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Doble-0H5A4021-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Cook-0H5A5155-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Hill-0Q3A1643-scaled-e1748079457751.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Cammish-0H5A8317-scaled-e1748620603557.jpg"
+                  ],
+                  "firstBtccYear": 1958,
+                  "qualifyingRecord": {
+                        "driver": "Jake Hill",
+                        "time": "46.493s",
+                        "speed": "94.54 mph",
+                        "year": 2025
+                  },
+                  "raceRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "47.157s",
+                        "speed": "92.53 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Paddock Hill Bend",
+                                          "overtaking": true,
+                                          "description": "One of the most iconic corners in British motorsport. A fast right-hander where drivers crest the hill blind before dropping steeply downhill. The braking point varies by car as the weight shifts over the rise, making it a spectacular overtaking spot on the opening lap."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Druids",
+                                          "overtaking": true,
+                                          "description": "A tight 180-degree hairpin at the top of the hill with heavy braking. The prime overtaking spot at Brands Hatch as drivers can dive down the inside. Getting the car rotated and on the power early is key to a clean exit back down the hill."
+                                    },
+                                    {
+                                          "number": "T3",
+                                          "name": "Graham Hill Bend",
+                                          "description": "A left-hander on the descent from Druids where the entry is taken flat out before the brakes go on. Brands Hatch has few long straights so getting on the power here as early as possible for the run to Surtees is important."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T4",
+                                          "name": "Surtees",
+                                          "description": "A fast left-hand kink that is nearly flat in BTCC. Smooth inputs are critical here as any over-braking transfers too much weight to the front and causes the rear to step out at high speed. The apex has a small kink in the kerb that marks the correct turn-in point."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "McLaren",
+                                          "description": "A fast right-hander that flows from Surtees and acts as the braking zone into Clearways. Drivers let the car run wide here before getting it positioned for the entry to the final complex."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T6-8",
+                                          "name": "Clearways",
+                                          "description": "The most important complex on the circuit as it feeds the start/finish straight. A long sweeping right-hander that tightens up, making it tricky to avoid understeer on the exit. Getting back on the throttle early is crucial for lap time as the car carries speed all the way round to Paddock."
+                                    },
+                                    {
+                                          "number": "T9",
+                                          "name": "Clark Curve",
+                                          "description": "The final flick back onto the start/finish straight. Drivers hug the inside to take the shortest line and arrive at Paddock Hill as quickly as possible. A great spot to watch as the cars sweep through side by side."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:50"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:30"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:45"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:30"
+                        }
+                  ],
+                  "cornersLeft": 3,
+                  "cornersRight": 6
             },
             {
-              "number": "T3-4",
-              "name": "Craner Curves",
-              "description": "Iconic downhill sweeping left-hand sequence. One of the most thrilling corners in British motorsport - requires full commitment at high speed."
+                  "round": 3,
+                  "tslEventId": 262103,
+                  "venue": "Snetterton",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=T5kMZ-LGZe0",
+                  "startDate": "2026-05-23",
+                  "endDate": "2026-05-24",
+                  "location": "Attleborough, Norfolk",
+                  "country": "England",
+                  "lat": 52.462,
+                  "lng": 0.9467,
+                  "lengthMiles": "2.969 mi",
+                  "lengthKm": "4.779 km",
+                  "corners": 11,
+                  "about": "Built on a former Second World War airfield in the flat Norfolk countryside, Snetterton is one of the longest circuits on the BTCC calendar. The Bentley Straight offers tyre-testing high-speed running, while technical sections like the Senna Chicane and Coram Corner reward smooth, committed driving. Setup compromise between straight-line speed and mechanical grip is key.",
+                  "btccFact": "Snetterton's long straights mean it's one of the circuits where power advantage makes the biggest difference - teams running higher-powered cars often shine here.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2025-snetterton/Hall-5L0A0145.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/6-Snetterton.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/05/Doble-0Q3A8800-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Morgan-33-0H5A8454-scaled-e1748081530691.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Doble-0H5A4603-scaled-e1748201877564.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/05/Hill-0H5A1809-scaled-e1748426133523.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/04/NAPA_Snetterton_Testing-2-scaled.jpg"
+                  ],
+                  "firstBtccYear": 1959,
+                  "qualifyingRecord": {
+                        "driver": "Dan Cammish",
+                        "time": "1:53.750",
+                        "speed": "94.62 mph",
+                        "year": 2025
+                  },
+                  "raceRecord": {
+                        "driver": "Ash Sutton",
+                        "time": "1:54.871",
+                        "speed": "91.06 mph",
+                        "year": 2023
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Riches",
+                                          "description": "A high-speed double-apex right-hander that opens the lap. Drivers need to be delicate on the brakes to avoid upsetting the rear. Both apex kerbs are steep and old-school, so the fastest BTCC drivers carry as much speed as possible without touching them."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Montreal",
+                                          "overtaking": true,
+                                          "description": "The tightest corner on the circuit and the prime overtaking spot. Heavy braking into this right-hand hairpin with the apex clipping point about three-quarters of the way round. A clean exit onto the following straight is vital for momentum through the middle section."
+                                    },
+                                    {
+                                          "number": "T3",
+                                          "name": "Palmer",
+                                          "description": "A long left-hander that only needs a light lift or gentle brake in BTCC. Smooth inputs are key as any harsh movement will unsettle the rear. Drivers can run the kerb through the middle of the corner to carry maximum speed into the back section."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T4",
+                                          "name": "Agostini",
+                                          "overtaking": true,
+                                          "description": "A left-hand hairpin with similar technique to Montreal. Late braking is important here with the apex clipping point about three-quarters of the way round. A good exit matters as it sets up the approach to Hamilton."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Hamilton",
+                                          "description": "A medium-speed left-hander that only needs a soft brake or a lift in most BTCC cars. A large block on the inside kerb prevents cutting the corner. Visibility is good through the corner so drivers can pick up the exit kerb early and get back on the power."
+                                    },
+                                    {
+                                          "number": "T6",
+                                          "name": "Oggies",
+                                          "description": "A slow right-hander where drivers need to get the car to the left quickly after Hamilton to allow braking in a straight line. The apex sits roughly halfway along the inside kerb. The corner opens on exit, rewarding patience and a late turn-in."
+                                    },
+                                    {
+                                          "number": "T7",
+                                          "name": "Williams",
+                                          "description": "One of the most important corners on the circuit as it feeds the long Bentley Straight. A medium-fast right-hander needing only a soft brake or a lift. Any extra speed carried out of Williams is carried all the way down the straight, making it critical for lap time."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T8",
+                                          "name": "Brundle / Nelson",
+                                          "overtaking": true,
+                                          "description": "The most technically demanding section at Snetterton. Drivers brake hard at the end of the Bentley Straight into Brundle, then brake again into the slow Nelson right-hander while the car is still turning. Keeping the car to the left between the two corners is key to a good exit. A real overtaking opportunity for the brave."
+                                    },
+                                    {
+                                          "number": "T9",
+                                          "name": "Bomb Hole",
+                                          "description": "A medium-high-speed right-hander with a significant camber change that can be nearly flat in BTCC. The camber pulls the car round on entry but releases it on exit, which can catch drivers out with oversteer. A great spectator corner."
+                                    },
+                                    {
+                                          "number": "T10",
+                                          "name": "Coram",
+                                          "description": "The most challenging corner at Snetterton. A long, fast right-hand arc of almost 180 degrees that is flat at entry before drivers must brake while the car is already turning. Getting this right takes experience. Staying to the right after the apex sets up Murrays and a good run onto the pit straight."
+                                    },
+                                    {
+                                          "number": "T11",
+                                          "name": "Murrays",
+                                          "description": "The final corner and one of the most important on the circuit. A slow left-hander that feeds directly onto the pit straight. Getting on the power as early as possible here is critical as the speed carries all the way down to Riches on the next lap."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:40"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:30"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:30"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:20"
+                        }
+                  ],
+                  "cornersLeft": 4,
+                  "cornersRight": 7
             },
             {
-              "number": "T5",
-              "name": "Old Hairpin",
-              "overtaking": true,
-              "description": "Tight right-hand hairpin at the bottom of the hill. A classic late-braking overtaking spot with a wide entry."
+                  "round": 4,
+                  "tslEventId": 262303,
+                  "venue": "Oulton Park",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=DW9kp8YwJOE",
+                  "startDate": "2026-06-06",
+                  "endDate": "2026-06-07",
+                  "location": "Little Budworth, Cheshire",
+                  "country": "England",
+                  "lat": 53.1787,
+                  "lng": -2.612,
+                  "lengthMiles": "2.231 mi",
+                  "lengthKm": "3.590 km",
+                  "corners": 13,
+                  "about": "A consistent driver favourite. Set in the rolling Cheshire countryside, Oulton Park combines sweeping fast corners with elevation changes that put the car through its paces. Cascades is a breathtaking flat-out downhill right-hander, while the Knickerbrook complex and the Lodge chicane reward precision. It's the type of track that exposes both talent and machinery.",
+                  "btccFact": "Oulton Park has produced some of the most memorable BTCC moments of recent seasons, with its undulating nature leading to unpredictable results and dramatic incidents.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2025-oulton-park/Hill-0Q3A8357.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/4-Oulton-Park-1.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/07/Ingram-0Q3A3136-scaled-e1753783962919.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/Jelley-0Q3A9321-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/DeLeon-0H5A1821-1-e1752251919622.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/Smiley-Morgan-Deleon-Sutton-0H5A2139-scaled-e1752223838566.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/Hill-0Q3A9688-scaled-e1752051499535.jpg"
+                  ],
+                  "firstBtccYear": 1960,
+                  "qualifyingRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "1:23.856",
+                        "speed": "96.72 mph",
+                        "year": 2025
+                  },
+                  "raceRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "1:24.052",
+                        "speed": "95.57 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Old Hall",
+                                          "description": "Right-hander off the start/finish straight. Tight and technical - a frequent overtaking spot on lap one.",
+                                          "overtaking": true
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Dentons",
+                                          "description": "Right-hand kink that leads downhill into the Cascades section."
+                                    },
+                                    {
+                                          "number": "T3",
+                                          "name": "Cascades",
+                                          "description": "Fast left-hander dropping steeply downhill. One of the most spectacular corners on the calendar - taken at high speed with limited visibility."
+                                    },
+                                    {
+                                          "number": "T4",
+                                          "name": "Island Bend",
+                                          "description": "Tight left-hand hairpin at the bottom of the hill. Heavy braking and a wide entry make it a key overtaking zone.",
+                                          "overtaking": true
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T5",
+                                          "name": "Shell Oils",
+                                          "description": "Right-hander climbing back uphill."
+                                    },
+                                    {
+                                          "number": "T6",
+                                          "name": "Brittens",
+                                          "description": "Left-hand chicane that rewards precision and a late apex."
+                                    },
+                                    {
+                                          "number": "T7",
+                                          "name": "Hislops",
+                                          "description": "Right-hand bend feeding onto the run to Knickerbrook."
+                                    },
+                                    {
+                                          "number": "T8",
+                                          "name": "Knickerbrook",
+                                          "description": "Left-hand chicane complex with a tricky change of direction. Gets the car unsettled."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T9",
+                                          "name": "Druids",
+                                          "description": "Left-hander that sets up the braking zone for Lodge."
+                                    },
+                                    {
+                                          "number": "T10-11",
+                                          "name": "Lodge",
+                                          "description": "Right-left chicane. A hard braking zone with overtaking possible into the right-hander.",
+                                          "overtaking": true
+                                    },
+                                    {
+                                          "number": "T12",
+                                          "name": "Deer Leap",
+                                          "description": "Right-hand kink over a crest - the car goes light and the rear steps out."
+                                    },
+                                    {
+                                          "number": "T13",
+                                          "name": "Clay Hill",
+                                          "description": "Left-hander on the descent back to the pit straight. A good exit is vital for a run into Old Hall."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:30"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "12:25"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:55"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:20"
+                        }
+                  ],
+                  "cornersLeft": 5,
+                  "cornersRight": 8
+            },
+            {
+                  "round": 5,
+                  "tslEventId": 263003,
+                  "venue": "Thruxton",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=aI5u5fsVKWI",
+                  "startDate": "2026-07-25",
+                  "endDate": "2026-07-26",
+                  "location": "Andover, Hampshire",
+                  "country": "England",
+                  "lat": 51.2075,
+                  "lng": -1.6007,
+                  "lengthMiles": "2.356 mi",
+                  "lengthKm": "3.792 km",
+                  "corners": 9,
+                  "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb\u2013Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
+                  "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/07/Cook-0H5A7560-scaled-e1753397162433.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/Ingram-0H5A6509-1.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/doble-0Q3A9324-1.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/Rainford-0Q3A4157-1-e1752682089797.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/07/sutton-0Q3A9385-scaled-e1751448841991.jpg"
+                  ],
+                  "firstBtccYear": 1968,
+                  "qualifyingRecord": {
+                        "driver": "Dan Cammish",
+                        "time": "1:15.201",
+                        "speed": "112.79 mph",
+                        "year": 2020
+                  },
+                  "raceRecord": {
+                        "driver": "Ash Sutton",
+                        "time": "1:15.254",
+                        "speed": "112.71 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Allard",
+                                          "description": "Right-hand kink taken flat out off the start/finish straight."
+                                    },
+                                    {
+                                          "number": "T2-3",
+                                          "name": "Campbell/Cobb",
+                                          "description": "Fast right-left sweeping complex taken at enormous speed. One of the most demanding sequences in the BTCC - tyre wear here is critical."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T4",
+                                          "name": "Segrave",
+                                          "description": "Right-hand kink linking the high-speed Campbell/Cobb section to Noble."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Noble",
+                                          "description": "Fast left-hander that feeds into the Church complex at high speed."
+                                    },
+                                    {
+                                          "number": "T6",
+                                          "name": "Church",
+                                          "description": "Fast right-hand sweeper. Taken in a high gear - commitment through here defines the lap."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T7",
+                                          "name": "Club",
+                                          "description": "Right-hand hairpin and the main overtaking zone. The only heavy braking point on the lap.",
+                                          "overtaking": true
+                                    },
+                                    {
+                                          "number": "T8",
+                                          "name": "Woodham Hill",
+                                          "description": "Left-hander climbing uphill. A tricky corner that punishes entry speed."
+                                    },
+                                    {
+                                          "number": "T9",
+                                          "name": "Goodwood",
+                                          "description": "Long right-hander before the pit straight. A good exit sets up a slipstream opportunity into Allard."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:25"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:45"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:40"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:30"
+                        }
+                  ],
+                  "cornersLeft": 3,
+                  "cornersRight": 6
+            },
+            {
+                  "round": 6,
+                  "tslEventId": 263203,
+                  "venue": "Knockhill",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=a5DtpM9NQ_k",
+                  "startDate": "2026-08-08",
+                  "endDate": "2026-08-09",
+                  "location": "Dunfermline, Fife",
+                  "country": "Scotland",
+                  "lat": 56.1313,
+                  "lng": -3.509,
+                  "lengthMiles": "1.270 mi",
+                  "lengthKm": "2.045 km",
+                  "corners": 9,
+                  "about": "Scotland's National Motorsport Centre, tucked into the Fife hills. Compact and technically demanding, Knockhill is unlike any other circuit on the calendar - the undulating gradient means cars are constantly loaded and unloaded through corners, making the rear of a touring car particularly lively. The blind crest at Clark's Corner demands total commitment.",
+                  "btccFact": "The Knockhill crowd is famously passionate, and the circuit's compact nature means fans can see virtually the entire lap from the hillside spectator banks - making it a fantastic atmosphere for a race meeting.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/knockhill-2024/1-DJI_20240812121003_0175_D-1.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/knockhill-2020-03.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/08/Release_start-0Q3A1361-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Ingram-0H5A8227-scaled-e1756658215859.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Osborne-0Q3A7340-scaled-e1756654415631.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Cammish-0H5A6429-scaled-e1756648705691.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Action-0H5A3520-scaled.jpg"
+                  ],
+                  "firstBtccYear": 1992,
+                  "qualifyingRecord": {
+                        "driver": "Rory Butcher",
+                        "time": "50.451s",
+                        "speed": "90.40 mph",
+                        "year": 2019
+                  },
+                  "raceRecord": {
+                        "driver": "Ashley Sutton",
+                        "time": "50.876s",
+                        "speed": "89.65 mph",
+                        "year": 2020
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Duffus Dip",
+                                          "description": "Right-hander dropping steeply downhill into a compression. The car is heavily loaded on entry."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Leslie's",
+                                          "overtaking": true,
+                                          "description": "Left-hand hairpin at the lowest point of the circuit. The tightest corner on the track and the primary overtaking zone."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T3-4",
+                                          "name": "Chicane",
+                                          "description": "Left-right chicane on the climb back uphill. Disrupts the car's rhythm and rewards smooth inputs."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Clark's",
+                                          "description": "Blind right-hander over a crest. One of the most daunting corners on the BTCC calendar - total commitment required with zero visibility over the top."
+                                    },
+                                    {
+                                          "number": "T6",
+                                          "name": "Hislop's",
+                                          "description": "Right-hand bend on the approach to the final sector."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T7",
+                                          "name": "McIntyre's",
+                                          "overtaking": true,
+                                          "description": "Right-hand hairpin. A heavy braking zone and the best overtaking opportunity in the final sector."
+                                    },
+                                    {
+                                          "number": "T8-9",
+                                          "name": "Taylor's",
+                                          "description": "Right-hand complex leading back onto the start/finish straight."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:30"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:15"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:15"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:20"
+                        }
+                  ],
+                  "cornersLeft": 3,
+                  "cornersRight": 6
+            },
+            {
+                  "round": 7,
+                  "tslEventId": 263403,
+                  "venue": "Donington Park GP",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=_jA_1NJFLig",
+                  "startDate": "2026-08-22",
+                  "endDate": "2026-08-23",
+                  "location": "Castle Donington, Leicestershire",
+                  "country": "England",
+                  "lat": 52.8306,
+                  "lng": -1.3764,
+                  "lengthMiles": "2.500 mi",
+                  "lengthKm": "4.023 km",
+                  "corners": 12,
+                  "about": "The full Grand Prix layout extends the National circuit with the Melbourne Loop and the Foggy/Goddards complex, significantly increasing lap length and introducing additional technical challenge. The extra section adds meaningful overtaking opportunities and changes the strategic picture for tyre management. It last hosted a Formula 1 race in 1993.",
+                  "btccFact": "Donington GP provides a fascinating contrast with Round 1 at the same venue - drivers who struggled on the National loop earlier in the season can find the extra GP section suits their driving style far better.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2024-donington-park-gp/Morgan-.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2022/11/Donington-GP-detailed-map-1.png",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/08/Chilton-0Q3A4225-scaled-e1756572398593.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Ingram-0Q3A7130-scaled-e1756567883972.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Proctor-0Q3A6761-scaled-e1756548987153.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Hill-1-0H5A7167-scaled-e1756474426795.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Chilton-0H5A4432.jpg"
+                  ],
+                  "firstBtccYear": 1986,
+                  "qualifyingRecord": {
+                        "driver": "Ashley Sutton",
+                        "time": "1:33.154",
+                        "speed": "96.12 mph",
+                        "year": 2023
+                  },
+                  "raceRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "1:33.621",
+                        "speed": "95.64 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Redgate",
+                                          "overtaking": true,
+                                          "description": "The slowest corner on the circuit and the prime overtaking spot. Heavy braking from the start/finish straight into this 90-degree right-hander. A good exit is crucial as it carries speed all the way down to Hollywood."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Hollywood",
+                                          "description": "A fast right-hand kink that is really just a launch pad for the Craner Curves. Positioning here is everything as drivers run wide to set up the perfect entry into one of the most iconic corner sequences in British motorsport."
+                                    },
+                                    {
+                                          "number": "T3-4",
+                                          "name": "Craner Curves",
+                                          "description": "Donington's signature section, a sweeping downhill left-hand sequence taken at high speed. Flat out in BTCC, it demands total commitment and is stunning to watch from the banks. Any error here is very costly."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Old Hairpin",
+                                          "overtaking": true,
+                                          "description": "A tight right-hander at the foot of the hill with heavy braking. One of the best overtaking opportunities on the lap as drivers can dive down the inside. A strong exit sets up the run through Schwantz and McLeans."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T6",
+                                          "name": "Schwantz Curve",
+                                          "description": "A sweeping uphill left-hander named after MotoGP legend Kevin Schwantz. Taken nearly flat in BTCC, drivers try to straighten it as much as possible to set up the heavy braking for McLeans."
+                                    },
+                                    {
+                                          "number": "T7",
+                                          "name": "McLeans",
+                                          "overtaking": true,
+                                          "description": "Heavy braking into this right-hander at the top of the hill. A late apex is key to get on the power early and carry speed up towards Coppice. Another genuine overtaking opportunity."
+                                    },
+                                    {
+                                          "number": "T8",
+                                          "name": "Coppice",
+                                          "description": "The most important corner on the circuit as it feeds the longest straight. The apex is blind over a crest, making it one of the trickiest to get right. Getting on the throttle early here is critical for lap time."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T9-10",
+                                          "name": "Fogarty Esses",
+                                          "description": "Right-left chicane on the run down to the Melbourne Hairpin. Same complex as the final corner on the National layout, but here it feeds into the GP extension."
+                                    },
+                                    {
+                                          "number": "T11",
+                                          "name": "Melbourne Hairpin",
+                                          "overtaking": true,
+                                          "description": "Tight right-hand hairpin added by the GP extension. A heavy braking zone and major overtaking opportunity."
+                                    },
+                                    {
+                                          "number": "T12-13",
+                                          "name": "Goddards",
+                                          "overtaking": true,
+                                          "description": "Tight left-hand chicane complex, the final braking zone before the pit straight."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:35"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:30"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:40"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:30"
+                        }
+                  ],
+                  "cornersLeft": 5,
+                  "cornersRight": 7
+            },
+            {
+                  "round": 8,
+                  "tslEventId": 263603,
+                  "venue": "Croft",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=M3lv_S1eqCw",
+                  "startDate": "2026-09-05",
+                  "endDate": "2026-09-06",
+                  "location": "Dalton-on-Tees, North Yorkshire",
+                  "country": "England",
+                  "lat": 54.4497,
+                  "lng": -1.5574,
+                  "lengthMiles": "2.127 mi",
+                  "lengthKm": "3.424 km",
+                  "corners": 13,
+                  "about": "A classic British club circuit with roots going back to the 1960s, built on a former RAF airfield in North Yorkshire. Croft combines fast sections with tight chicanes and the iconic Tower Hairpin - one of the best overtaking spots on the calendar. Its relative geographical isolation gives it a distinct, grassroots motorsport atmosphere.",
+                  "btccFact": "Tower Hairpin at Croft is consistently one of the best places for late-braking overtakes in the BTCC, and it regularly produces race-defining moments.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2025-croft/Ingram-start-DG5_0722.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/5-Croft-1.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/09/Plato-0H5A4492-scaled-e1758724319601.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/09/Hill-0Q3A4314-scaled-e1758718770643.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/09/Cosworth-0Q3A0458-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/08/Goodyear-0H5A4463-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2024/07/Croft-A27I9730-scaled.jpg"
+                  ],
+                  "firstBtccYear": 1968,
+                  "qualifyingRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "1:20.522",
+                        "speed": "95.85 mph",
+                        "year": 2025
+                  },
+                  "raceRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "1:21.374",
+                        "speed": "94.24 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Clervaux",
+                                          "description": "Fast right-hander at the end of the start/finish straight. A brave entry is rewarded."
+                                    },
+                                    {
+                                          "number": "T2-3",
+                                          "name": "Hawthorn",
+                                          "description": "Left-right chicane. Unsettles the car and rewards smooth inputs."
+                                    },
+                                    {
+                                          "number": "T4",
+                                          "name": "Tower Bend",
+                                          "description": "Right-hander leading into the Tower complex."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T5",
+                                          "name": "Tower Hairpin",
+                                          "description": "Tight right-hand hairpin. One of the best overtaking spots on the entire BTCC calendar - heavy braking from high speed.",
+                                          "overtaking": true
+                                    },
+                                    {
+                                          "number": "T6-8",
+                                          "name": "Jim Clark Esses",
+                                          "description": "Right-left S-curves. A fast, flowing sequence that demands rhythm and precision."
+                                    },
+                                    {
+                                          "number": "T9",
+                                          "name": "Sunny In",
+                                          "description": "Right-hander entering the Sunny complex."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T10",
+                                          "name": "Sunny Out",
+                                          "description": "Right-hander exiting the complex."
+                                    },
+                                    {
+                                          "number": "T11",
+                                          "name": "Complex",
+                                          "description": "Right-hand bend leading towards Barcroft."
+                                    },
+                                    {
+                                          "number": "T12",
+                                          "name": "Barcroft",
+                                          "description": "Right-hand hairpin. A late-braking zone with overtaking possible.",
+                                          "overtaking": true
+                                    },
+                                    {
+                                          "number": "T13",
+                                          "name": "Chicane",
+                                          "description": "Final chicane before the pit straight. A good exit sets up a run into Clervaux."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:15"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "12:10"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:30"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:15"
+                        }
+                  ],
+                  "cornersLeft": 5,
+                  "cornersRight": 8
+            },
+            {
+                  "round": 9,
+                  "tslEventId": 263903,
+                  "venue": "Silverstone",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=KHVKEJbBowA",
+                  "startDate": "2026-09-26",
+                  "endDate": "2026-09-27",
+                  "location": "Towcester, Northamptonshire",
+                  "country": "England",
+                  "lat": 52.0713,
+                  "lng": -1.0228,
+                  "lengthMiles": "3.666 mi",
+                  "lengthKm": "5.891 km",
+                  "corners": 8,
+                  "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts\u2013Becketts\u2013Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
+                  "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead - or deficit - can completely shape the outcome.",
+                  "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/10/Rainford-0Q3A3688-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0H5A1979-scaled-e1760521629921.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/10/Doble-0H5A3840-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/09/Hill-0Q3A4314-scaled-e1758718770643.jpg",
+                        "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg"
+                  ],
+                  "firstBtccYear": 1959,
+                  "qualifyingRecord": {
+                        "driver": "Daryl DeLeon",
+                        "time": "56.734s",
+                        "speed": "105.43 mph",
+                        "year": 2025
+                  },
+                  "raceRecord": {
+                        "driver": "Tom Ingram",
+                        "time": "56.875s",
+                        "speed": "105.43 mph",
+                        "year": 2025
+                  },
+                  "trackGuide": [
+                        {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Abbey",
+                                          "overtaking": true,
+                                          "description": "Fast right-hander at the end of the start/finish straight. A key overtaking zone under braking."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Farm",
+                                          "description": "Right-hand curve linking Abbey to Village. Taken at speed - carries momentum into the next section."
+                                    },
+                                    {
+                                          "number": "T3",
+                                          "name": "Village",
+                                          "description": "Right-hander leading into The Loop. Sets up the braking zone for the slowest corner on the lap."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                    {
+                                          "number": "T4",
+                                          "name": "The Loop",
+                                          "overtaking": true,
+                                          "description": "Tight left-hand hairpin - the slowest point on the lap. A prime overtaking spot; late braking rewards the brave."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Aintree",
+                                          "description": "Left-hand exit of The Loop complex. A clean exit here is crucial for carrying speed down Wellington Straight."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T6",
+                                          "name": "Brooklands",
+                                          "overtaking": true,
+                                          "description": "Right-hander at the end of Wellington Straight. Heavy braking from high speed - overtaking is common here."
+                                    },
+                                    {
+                                          "number": "T7",
+                                          "name": "Luffield",
+                                          "description": "Long right-hand sweeper. Traction on exit is crucial for the run onto the pit straight."
+                                    },
+                                    {
+                                          "number": "T8",
+                                          "name": "Woodcote",
+                                          "description": "Right-hand corner back onto the start/finish straight. The final corner of the lap - a clean exit sets up the approach to Abbey."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:15"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:15"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:30"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:20"
+                        }
+                  ],
+                  "cornersLeft": 3,
+                  "cornersRight": 5
+            },
+            {
+                  "round": 10,
+                  "tslEventId": 264103,
+                  "venue": "Brands Hatch GP",
+                  "youtubeUrl": "https://www.youtube.com/watch?v=7yNiW_O1ySg",
+                  "startDate": "2026-10-10",
+                  "endDate": "2026-10-11",
+                  "location": "Fawkham, Kent",
+                  "country": "England",
+                  "lat": 51.3569,
+                  "lng": 0.2631,
+                  "lengthMiles": "2.430 mi",
+                  "lengthKm": "3.908 km",
+                  "corners": 11,
+                  "about": "The season finale. The full Grand Prix circuit adds Hawthorns, Westfield, Dingle Dell, and Stirlings to the Indy loop, creating one of the most spectacular circuits in Britain. Paddock Hill Bend on the opening lap of the finale race has been the scene of some of the most dramatic championship-deciding moments in BTCC history.",
+                  "btccFact": "A Brands Hatch GP BTCC finale is one of the highlights of the British motorsport calendar. With reverse-grid races and three separate races across the weekend, the championship result is rarely decided until the very last lap.",
+                  "imageUrl": "https://images.msv.com/high-res/3d7fe3f3-a748-4e98-b366-bc93bb51e3ed.jpg",
+                  "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/10-Brands-GP.jpg",
+                  "raceImages": [
+                        "https://btcc.net/wp-content/uploads/2025/10/Doble-0H5A4603-scaled-e1760695111593.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0Q3A1132-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/10/Rainford-00Q3A3662-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/10/doble-0H5A6139-scaled.jpg",
+                        "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0H5A1821-scaled.jpg"
+                  ],
+                  "firstBtccYear": 1960,
+                  "qualifyingRecord": {
+                        "driver": "Charles Rainford",
+                        "time": "1:28.919",
+                        "speed": "99.41 mph",
+                        "year": 2025
+                  },
+                  "raceRecord": {
+                        "driver": "Ashley Sutton",
+                        "time": "1:30.244",
+                        "speed": "97.06 mph",
+                        "year": 2023
+                  },
+                  "trackGuide": [
+                       {
+                              "sector": "Sector 1",
+                              "corners": [
+                                    {
+                                          "number": "T1",
+                                          "name": "Paddock Hill Bend",
+                                          "overtaking": true,
+                                          "description": "One of the most iconic corners in British motorsport. A fast right-hander where drivers crest the hill blind before dropping steeply downhill. The braking point varies by car as the weight shifts over the rise, making it a spectacular overtaking spot on the opening lap."
+                                    },
+                                    {
+                                          "number": "T2",
+                                          "name": "Druids",
+                                          "overtaking": true,
+                                          "description": "A tight 180-degree hairpin at the top of the hill with heavy braking. The prime overtaking spot at Brands Hatch as drivers can dive down the inside. Getting the car rotated and on the power early is key to a clean exit back down the hill."
+                                    },
+                                    {
+                                          "number": "T3",
+                                          "name": "Graham Hill Bend",
+                                          "description": "A left-hander on the descent from Druids where the entry is taken flat out before the brakes go on. Brands Hatch has few long straights so getting on the power here as early as possible for the run to Surtees is important."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 2",
+                              "corners": [
+                                       {
+                                          "number": "T4",
+                                          "name": "Surtees",
+                                          "description": "A fast left-hand kink that is nearly flat in BTCC. Smooth inputs are critical here as any over-braking transfers too much weight to the front and causes the rear to step out at high speed. The apex has a small kink in the kerb that marks the correct turn-in point."
+                                    },
+                                    {
+                                          "number": "T5",
+                                          "name": "Hawthorn",
+                                          "description": "Fast right-hander heading into the GP extension. One of the quickest corners on the layout - full commitment required."
+                                    },
+                                    {
+                                          "number": "T6",
+                                          "name": "Westfield",
+                                          "description": "Right-hander dropping downhill. The car is unsettled by the gradient change."
+                                    },
+                                    {
+                                          "number": "T7",
+                                          "name": "Dingle Dell",
+                                          "description": "High-speed dip through a compression. The car bottoms out - unsettling even in a straight line."
+                                    },
+                                    {
+                                          "number": "T8",
+                                          "name": "Dingle Dell Corner",
+                                          "description": "Right-hander climbing back out of the dell."
+                                    }
+                              ]
+                        },
+                        {
+                              "sector": "Sector 3",
+                              "corners": [
+                                    {
+                                          "number": "T9",
+                                          "name": "Stirlings",
+                                          "description": "Left-hand bend named after Stirling Moss, rejoining the Indy loop. A key corner for exit speed onto Cooper Straight."
+                                    },
+                                    {
+                                          "number": "T10",
+                                          "name": "Clearways",
+                                          "description": "The most important complex on the circuit as it feeds the start/finish straight. A long sweeping right-hander that tightens up, making it tricky to avoid understeer on the exit. Getting back on the throttle early is crucial for lap time as the car carries speed all the way round to Paddock."
+                                    },
+                                    {
+                                          "number": "T11",
+                                          "name": "Clark Curve",
+                                          "description": "The final flick back onto the start/finish straight. Drivers hug the inside to take the shortest line and arrive at Paddock Hill as quickly as possible. A great spot to watch as the cars sweep through side by side."
+                                    }
+                              ]
+                        }
+                  ],
+                  "sessions": [
+                        {
+                              "name": "Free Practice",
+                              "day": "SAT",
+                              "time": "10:50"
+                        },
+                        {
+                              "name": "Qualifying",
+                              "day": "SAT",
+                              "time": "14:00"
+                        },
+                        {
+                              "name": "Qualifying Race",
+                              "day": "SAT",
+                              "time": "15:05"
+                        },
+                        {
+                              "name": "Race 1",
+                              "day": "SUN",
+                              "time": "11:30"
+                        },
+                        {
+                              "name": "Race 2",
+                              "day": "SUN",
+                              "time": "14:45"
+                        },
+                        {
+                              "name": "Race 3",
+                              "day": "SUN",
+                              "time": "17:30"
+                        }
+                  ],
+                  "cornersLeft": 4,
+                  "cornersRight": 7
             }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T6",
-              "name": "Schwantz Curve",
-              "description": "Sweeping uphill left-hander named after MotoGP legend Kevin Schwantz. High commitment required as the car loads up through the long arc."
-            },
-            {
-              "number": "T7",
-              "name": "McLeans",
-              "overtaking": true,
-              "description": "Right-hander at the end of Starkey's Straight. Heavy braking zone with overtaking possible on the inside."
-            },
-            {
-              "number": "T8",
-              "name": "Coppice",
-              "description": "Fast right-hand bend taken in a high gear. Rewards bravery - a late apex sets up the run to the final corner."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T9-10",
-              "name": "Fogarty Esses",
-              "overtaking": true,
-              "description": "Right-left chicane complex, the final braking zone before the pit straight. Named after Carl Fogarty - last chance to make a pass each lap."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:35"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:40"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "cornersLeft": 4,
-      "cornersRight": 6
-    },
-    {
-      "round": 2,
-      "tslEventId": 261903,
-      "venue": "Brands Hatch Indy",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_g7wYCscEw0",
-      "startDate": "2026-05-09",
-      "endDate": "2026-05-10",
-      "location": "Fawkham, Kent",
-      "country": "England",
-      "lat": 51.3569,
-      "lng": 0.2631,
-      "lengthMiles": "1.208 mi",
-      "lengthKm": "1.944 km",
-      "corners": 9,
-      "about": "The short, intense Indy loop of the legendary Brands Hatch circuit. Paddock Hill Bend is one of the most famous corners in British motorsport - blind, downhill, and off-camber - providing spectacular action on the opening lap. The tight Druids hairpin and Clark Curve create close-quarters racing throughout the field.",
-      "btccFact": "The BTCC visits Brands Hatch twice each season - on the shorter Indy circuit in spring and the full Grand Prix layout for the season finale in October.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2025-brands-hatch-indy/Rainford-0Q3A3551.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/750x625.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/05/Cook-0H5A4404-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Doble-0H5A4021-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Cook-0H5A5155-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Hill-0Q3A1643-scaled-e1748079457751.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Cammish-0H5A8317-scaled-e1748620603557.jpg"
-      ],
-      "firstBtccYear": 1958,
-      "qualifyingRecord": {
-        "driver": "Jake Hill",
-        "time": "46.493s",
-        "speed": "94.54 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "47.157s",
-        "speed": "92.53 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Paddock Hill Bend",
-              "description": "Iconic blind right-hander dropping steeply downhill with off-camber exit. One of the most famous corners in British motorsport - spectacular on the opening lap."
-            },
-            {
-              "number": "T2",
-              "name": "Druids",
-              "overtaking": true,
-              "description": "Tight left-hand hairpin at the top of the hill. The prime overtaking spot - heavy braking and a wide entry invite late moves."
-            },
-            {
-              "number": "T3",
-              "name": "Graham Hill Bend",
-              "description": "Right-hander on the descent from Druids. Getting this right is key to carrying speed onto Cooper Straight."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T4",
-              "name": "Surtees",
-              "description": "Fast left-hand kink at the bottom of the hill. The dip loads the car as it turns in - deceptively quick."
-            },
-            {
-              "number": "T5",
-              "name": "McLaren",
-              "description": "Right-hander before Pilgrims Drop. Smooth inputs required to set up the run into Clearways."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T6-8",
-              "name": "Clearways",
-              "description": "Long right-hand sweeping complex. Commitment through here sets up exit speed onto the pit straight."
-            },
-            {
-              "number": "T9",
-              "name": "Clark Curve",
-              "description": "Final right-hander back onto the start/finish straight. A good exit is crucial for a run into Paddock Hill on the next lap."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:50"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:45"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "cornersLeft": 3,
-      "cornersRight": 6
-    },
-    {
-      "round": 3,
-      "tslEventId": 262103,
-      "venue": "Snetterton",
-      "youtubeUrl": "https://www.youtube.com/watch?v=T5kMZ-LGZe0",
-      "startDate": "2026-05-23",
-      "endDate": "2026-05-24",
-      "location": "Attleborough, Norfolk",
-      "country": "England",
-      "lat": 52.462,
-      "lng": 0.9467,
-      "lengthMiles": "2.969 mi",
-      "lengthKm": "4.779 km",
-      "corners": 11,
-      "about": "Built on a former Second World War airfield in the flat Norfolk countryside, Snetterton is one of the longest circuits on the BTCC calendar. The Bentley Straight offers tyre-testing high-speed running, while technical sections like the Senna Chicane and Coram Corner reward smooth, committed driving. Setup compromise between straight-line speed and mechanical grip is key.",
-      "btccFact": "Snetterton's long straights mean it's one of the circuits where power advantage makes the biggest difference - teams running higher-powered cars often shine here.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2025-snetterton/Hall-5L0A0145.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/6-Snetterton.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/05/Doble-0Q3A8800-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Morgan-33-0H5A8454-scaled-e1748081530691.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Doble-0H5A4603-scaled-e1748201877564.jpg",
-        "https://btcc.net/wp-content/uploads/2025/05/Hill-0H5A1809-scaled-e1748426133523.jpg",
-        "https://btcc.net/wp-content/uploads/2025/04/NAPA_Snetterton_Testing-2-scaled.jpg"
-      ],
-      "firstBtccYear": 1959,
-      "qualifyingRecord": {
-        "driver": "Dan Cammish",
-        "time": "1:53.750",
-        "speed": "94.62 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Ash Sutton",
-        "time": "1:54.871",
-        "speed": "91.06 mph",
-        "year": 2023
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Riches",
-              "overtaking": true,
-              "description": "Right-hander at the end of the long Bentley Straight. Heavy braking zone and a prime overtaking opportunity."
-            },
-            {
-              "number": "T2",
-              "name": "Montreal",
-              "overtaking": true,
-              "description": "Tight right-hand hairpin named after the Canadian GP circuit. Slow speed and a wide entry make this another key overtaking spot."
-            },
-            {
-              "number": "T3",
-              "name": "Palmer",
-              "description": "Right-hander that feeds onto the back section of the circuit."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T4",
-              "name": "Agostini",
-              "description": "Right-hand bend leading into Hamilton."
-            },
-            {
-              "number": "T5",
-              "name": "Hamilton",
-              "description": "Left-hander that completes the complex before the run to the back straight."
-            },
-            {
-              "number": "T6",
-              "name": "Oggies",
-              "description": "Right-hand corner heading into the Williams section."
-            },
-            {
-              "number": "T7",
-              "name": "Williams",
-              "description": "Right-hander leading onto the long Bentley Straight. Exit speed here is critical for straight-line performance."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T8",
-              "name": "Nelson",
-              "overtaking": true,
-              "description": "Right-hander at the end of the back straight. A braking zone with overtaking possible on the inside."
-            },
-            {
-              "number": "T9",
-              "name": "Bomb Hole",
-              "description": "Left-hand dip through a compression. The car bottoms out, making it tricky under braking."
-            },
-            {
-              "number": "T10",
-              "name": "Coram",
-              "description": "Long, fast right-hand sweeper. One of the most demanding corners on the calendar - rewards commitment and a precise line."
-            },
-            {
-              "number": "T11",
-              "name": "Murrays",
-              "description": "Right-hander onto the pit straight. Exit speed here sets up the run down to Riches."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:40"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:30"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:20"
-        }
-      ],
-      "cornersLeft": 4,
-      "cornersRight": 7
-    },
-    {
-      "round": 4,
-      "tslEventId": 262303,
-      "venue": "Oulton Park",
-      "youtubeUrl": "https://www.youtube.com/watch?v=DW9kp8YwJOE",
-      "startDate": "2026-06-06",
-      "endDate": "2026-06-07",
-      "location": "Little Budworth, Cheshire",
-      "country": "England",
-      "lat": 53.1787,
-      "lng": -2.612,
-      "lengthMiles": "2.231 mi",
-      "lengthKm": "3.590 km",
-      "corners": 13,
-      "about": "A consistent driver favourite. Set in the rolling Cheshire countryside, Oulton Park combines sweeping fast corners with elevation changes that put the car through its paces. Cascades is a breathtaking flat-out downhill right-hander, while the Knickerbrook complex and the Lodge chicane reward precision. It's the type of track that exposes both talent and machinery.",
-      "btccFact": "Oulton Park has produced some of the most memorable BTCC moments of recent seasons, with its undulating nature leading to unpredictable results and dramatic incidents.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2025-oulton-park/Hill-0Q3A8357.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/4-Oulton-Park-1.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/07/Ingram-0Q3A3136-scaled-e1753783962919.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/Jelley-0Q3A9321-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/DeLeon-0H5A1821-1-e1752251919622.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/Smiley-Morgan-Deleon-Sutton-0H5A2139-scaled-e1752223838566.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/Hill-0Q3A9688-scaled-e1752051499535.jpg"
-      ],
-      "firstBtccYear": 1960,
-      "qualifyingRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:23.856",
-        "speed": "96.72 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:24.052",
-        "speed": "95.57 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Old Hall",
-              "description": "Right-hander off the start/finish straight. Tight and technical - a frequent overtaking spot on lap one.",
-              "overtaking": true
-            },
-            {
-              "number": "T2",
-              "name": "Dentons",
-              "description": "Right-hand kink that leads downhill into the Cascades section."
-            },
-            {
-              "number": "T3",
-              "name": "Cascades",
-              "description": "Fast left-hander dropping steeply downhill. One of the most spectacular corners on the calendar - taken at high speed with limited visibility."
-            },
-            {
-              "number": "T4",
-              "name": "Island Bend",
-              "description": "Tight left-hand hairpin at the bottom of the hill. Heavy braking and a wide entry make it a key overtaking zone.",
-              "overtaking": true
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T5",
-              "name": "Shell Oils",
-              "description": "Right-hander climbing back uphill."
-            },
-            {
-              "number": "T6",
-              "name": "Brittens",
-              "description": "Left-hand chicane that rewards precision and a late apex."
-            },
-            {
-              "number": "T7",
-              "name": "Hislops",
-              "description": "Right-hand bend feeding onto the run to Knickerbrook."
-            },
-            {
-              "number": "T8",
-              "name": "Knickerbrook",
-              "description": "Left-hand chicane complex with a tricky change of direction. Gets the car unsettled."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T9",
-              "name": "Druids",
-              "description": "Left-hander that sets up the braking zone for Lodge."
-            },
-            {
-              "number": "T10-11",
-              "name": "Lodge",
-              "description": "Right-left chicane. A hard braking zone with overtaking possible into the right-hander.",
-              "overtaking": true
-            },
-            {
-              "number": "T12",
-              "name": "Deer Leap",
-              "description": "Right-hand kink over a crest - the car goes light and the rear steps out."
-            },
-            {
-              "number": "T13",
-              "name": "Clay Hill",
-              "description": "Left-hander on the descent back to the pit straight. A good exit is vital for a run into Old Hall."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:30"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "12:25"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:55"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:20"
-        }
-      ],
-      "cornersLeft": 5,
-      "cornersRight": 8
-    },
-    {
-      "round": 5,
-      "tslEventId": 263003,
-      "venue": "Thruxton",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aI5u5fsVKWI",
-      "startDate": "2026-07-25",
-      "endDate": "2026-07-26",
-      "location": "Andover, Hampshire",
-      "country": "England",
-      "lat": 51.2075,
-      "lng": -1.6007,
-      "lengthMiles": "2.356 mi",
-      "lengthKm": "3.792 km",
-      "corners": 9,
-      "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb\u2013Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
-      "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/07/Cook-0H5A7560-scaled-e1753397162433.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/Ingram-0H5A6509-1.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/doble-0Q3A9324-1.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/Rainford-0Q3A4157-1-e1752682089797.jpg",
-        "https://btcc.net/wp-content/uploads/2025/07/sutton-0Q3A9385-scaled-e1751448841991.jpg"
-      ],
-      "firstBtccYear": 1968,
-      "qualifyingRecord": {
-        "driver": "Dan Cammish",
-        "time": "1:15.201",
-        "speed": "112.79 mph",
-        "year": 2020
-      },
-      "raceRecord": {
-        "driver": "Ash Sutton",
-        "time": "1:15.254",
-        "speed": "112.71 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Allard",
-              "description": "Right-hand kink taken flat out off the start/finish straight."
-            },
-            {
-              "number": "T2-3",
-              "name": "Campbell/Cobb",
-              "description": "Fast right-left sweeping complex taken at enormous speed. One of the most demanding sequences in the BTCC - tyre wear here is critical."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T4",
-              "name": "Segrave",
-              "description": "Right-hand kink linking the high-speed Campbell/Cobb section to Noble."
-            },
-            {
-              "number": "T5",
-              "name": "Noble",
-              "description": "Fast left-hander that feeds into the Church complex at high speed."
-            },
-            {
-              "number": "T6",
-              "name": "Church",
-              "description": "Fast right-hand sweeper. Taken in a high gear - commitment through here defines the lap."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T7",
-              "name": "Club",
-              "description": "Right-hand hairpin and the main overtaking zone. The only heavy braking point on the lap.",
-              "overtaking": true
-            },
-            {
-              "number": "T8",
-              "name": "Woodham Hill",
-              "description": "Left-hander climbing uphill. A tricky corner that punishes entry speed."
-            },
-            {
-              "number": "T9",
-              "name": "Goodwood",
-              "description": "Long right-hander before the pit straight. A good exit sets up a slipstream opportunity into Allard."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:25"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:45"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:40"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "cornersLeft": 3,
-      "cornersRight": 6
-    },
-    {
-      "round": 6,
-      "tslEventId": 263203,
-      "venue": "Knockhill",
-      "youtubeUrl": "https://www.youtube.com/watch?v=a5DtpM9NQ_k",
-      "startDate": "2026-08-08",
-      "endDate": "2026-08-09",
-      "location": "Dunfermline, Fife",
-      "country": "Scotland",
-      "lat": 56.1313,
-      "lng": -3.509,
-      "lengthMiles": "1.270 mi",
-      "lengthKm": "2.045 km",
-      "corners": 9,
-      "about": "Scotland's National Motorsport Centre, tucked into the Fife hills. Compact and technically demanding, Knockhill is unlike any other circuit on the calendar - the undulating gradient means cars are constantly loaded and unloaded through corners, making the rear of a touring car particularly lively. The blind crest at Clark's Corner demands total commitment.",
-      "btccFact": "The Knockhill crowd is famously passionate, and the circuit's compact nature means fans can see virtually the entire lap from the hillside spectator banks - making it a fantastic atmosphere for a race meeting.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/knockhill-2024/1-DJI_20240812121003_0175_D-1.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/knockhill-2020-03.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/08/Release_start-0Q3A1361-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Ingram-0H5A8227-scaled-e1756658215859.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Osborne-0Q3A7340-scaled-e1756654415631.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Cammish-0H5A6429-scaled-e1756648705691.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Action-0H5A3520-scaled.jpg"
-      ],
-      "firstBtccYear": 1992,
-      "qualifyingRecord": {
-        "driver": "Rory Butcher",
-        "time": "50.451s",
-        "speed": "90.40 mph",
-        "year": 2019
-      },
-      "raceRecord": {
-        "driver": "Ashley Sutton",
-        "time": "50.876s",
-        "speed": "89.65 mph",
-        "year": 2020
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Duffus Dip",
-              "description": "Right-hander dropping steeply downhill into a compression. The car is heavily loaded on entry."
-            },
-            {
-              "number": "T2",
-              "name": "Leslie's",
-              "overtaking": true,
-              "description": "Left-hand hairpin at the lowest point of the circuit. The tightest corner on the track and the primary overtaking zone."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T3-4",
-              "name": "Chicane",
-              "description": "Left-right chicane on the climb back uphill. Disrupts the car's rhythm and rewards smooth inputs."
-            },
-            {
-              "number": "T5",
-              "name": "Clark's",
-              "description": "Blind right-hander over a crest. One of the most daunting corners on the BTCC calendar - total commitment required with zero visibility over the top."
-            },
-            {
-              "number": "T6",
-              "name": "Hislop's",
-              "description": "Right-hand bend on the approach to the final sector."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T7",
-              "name": "McIntyre's",
-              "overtaking": true,
-              "description": "Right-hand hairpin. A heavy braking zone and the best overtaking opportunity in the final sector."
-            },
-            {
-              "number": "T8-9",
-              "name": "Taylor's",
-              "description": "Right-hand complex leading back onto the start/finish straight."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:30"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:15"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:15"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:20"
-        }
-      ],
-      "cornersLeft": 3,
-      "cornersRight": 6
-    },
-    {
-      "round": 7,
-      "tslEventId": 263403,
-      "venue": "Donington Park GP",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_jA_1NJFLig",
-      "startDate": "2026-08-22",
-      "endDate": "2026-08-23",
-      "location": "Castle Donington, Leicestershire",
-      "country": "England",
-      "lat": 52.8306,
-      "lng": -1.3764,
-      "lengthMiles": "2.500 mi",
-      "lengthKm": "4.023 km",
-      "corners": 12,
-      "about": "The full Grand Prix layout extends the National circuit with the Melbourne Loop and the Foggy/Goddards complex, significantly increasing lap length and introducing additional technical challenge. The extra section adds meaningful overtaking opportunities and changes the strategic picture for tyre management. It last hosted a Formula 1 race in 1993.",
-      "btccFact": "Donington GP provides a fascinating contrast with Round 1 at the same venue - drivers who struggled on the National loop earlier in the season can find the extra GP section suits their driving style far better.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2024-donington-park-gp/Morgan-.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2022/11/Donington-GP-detailed-map-1.png",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/08/Chilton-0Q3A4225-scaled-e1756572398593.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Ingram-0Q3A7130-scaled-e1756567883972.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Proctor-0Q3A6761-scaled-e1756548987153.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Hill-1-0H5A7167-scaled-e1756474426795.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Chilton-0H5A4432.jpg"
-      ],
-      "firstBtccYear": 1986,
-      "qualifyingRecord": {
-        "driver": "Ashley Sutton",
-        "time": "1:33.154",
-        "speed": "96.12 mph",
-        "year": 2023
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:33.621",
-        "speed": "95.64 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Redgate",
-              "overtaking": true,
-              "description": "Sharp right-hander at the end of the start/finish straight. Same as the National circuit - prime overtaking zone."
-            },
-            {
-              "number": "T2",
-              "name": "Hollywood",
-              "description": "Fast right-hand kink through the trees, taken flat out."
-            },
-            {
-              "number": "T3-4",
-              "name": "Craner Curves",
-              "description": "Iconic downhill sweeping left-hand sequence. Full commitment at high speed."
-            },
-            {
-              "number": "T5",
-              "name": "Old Hairpin",
-              "overtaking": true,
-              "description": "Tight right-hand hairpin. A classic late-braking overtaking spot."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T6",
-              "name": "Schwantz Curve",
-              "description": "Sweeping uphill left-hander named after Kevin Schwantz. High commitment required."
-            },
-            {
-              "number": "T7",
-              "name": "McLeans",
-              "overtaking": true,
-              "description": "Right-hander at the end of Starkey's Straight. Heavy braking zone."
-            },
-            {
-              "number": "T8",
-              "name": "Coppice",
-              "description": "Fast right-hand bend. On the GP layout this leads into the Fogarty Esses rather than straight to the start/finish."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T9-10",
-              "name": "Fogarty Esses",
-              "description": "Right-left chicane on the run down to the Melbourne Hairpin. Same complex as the final corner on the National layout, but here it feeds into the GP extension."
-            },
-            {
-              "number": "T11",
-              "name": "Melbourne Hairpin",
-              "overtaking": true,
-              "description": "Tight right-hand hairpin added by the GP extension. A heavy braking zone and major overtaking opportunity."
-            },
-            {
-              "number": "T12-13",
-              "name": "Goddards",
-              "overtaking": true,
-              "description": "Tight left-hand chicane complex, the final braking zone before the pit straight."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:35"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:40"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "cornersLeft": 5,
-      "cornersRight": 7
-    },
-    {
-      "round": 8,
-      "tslEventId": 263603,
-      "venue": "Croft",
-      "youtubeUrl": "https://www.youtube.com/watch?v=M3lv_S1eqCw",
-      "startDate": "2026-09-05",
-      "endDate": "2026-09-06",
-      "location": "Dalton-on-Tees, North Yorkshire",
-      "country": "England",
-      "lat": 54.4497,
-      "lng": -1.5574,
-      "lengthMiles": "2.127 mi",
-      "lengthKm": "3.424 km",
-      "corners": 13,
-      "about": "A classic British club circuit with roots going back to the 1960s, built on a former RAF airfield in North Yorkshire. Croft combines fast sections with tight chicanes and the iconic Tower Hairpin - one of the best overtaking spots on the calendar. Its relative geographical isolation gives it a distinct, grassroots motorsport atmosphere.",
-      "btccFact": "Tower Hairpin at Croft is consistently one of the best places for late-braking overtakes in the BTCC, and it regularly produces race-defining moments.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2025-croft/Ingram-start-DG5_0722.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/5-Croft-1.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/09/Plato-0H5A4492-scaled-e1758724319601.jpg",
-        "https://btcc.net/wp-content/uploads/2025/09/Hill-0Q3A4314-scaled-e1758718770643.jpg",
-        "https://btcc.net/wp-content/uploads/2025/09/Cosworth-0Q3A0458-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/08/Goodyear-0H5A4463-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2024/07/Croft-A27I9730-scaled.jpg"
-      ],
-      "firstBtccYear": 1968,
-      "qualifyingRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:20.522",
-        "speed": "95.85 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:21.374",
-        "speed": "94.24 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Clervaux",
-              "description": "Fast right-hander at the end of the start/finish straight. A brave entry is rewarded."
-            },
-            {
-              "number": "T2-3",
-              "name": "Hawthorn",
-              "description": "Left-right chicane. Unsettles the car and rewards smooth inputs."
-            },
-            {
-              "number": "T4",
-              "name": "Tower Bend",
-              "description": "Right-hander leading into the Tower complex."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T5",
-              "name": "Tower Hairpin",
-              "description": "Tight right-hand hairpin. One of the best overtaking spots on the entire BTCC calendar - heavy braking from high speed.",
-              "overtaking": true
-            },
-            {
-              "number": "T6-8",
-              "name": "Jim Clark Esses",
-              "description": "Right-left S-curves. A fast, flowing sequence that demands rhythm and precision."
-            },
-            {
-              "number": "T9",
-              "name": "Sunny In",
-              "description": "Right-hander entering the Sunny complex."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T10",
-              "name": "Sunny Out",
-              "description": "Right-hander exiting the complex."
-            },
-            {
-              "number": "T11",
-              "name": "Complex",
-              "description": "Right-hand bend leading towards Barcroft."
-            },
-            {
-              "number": "T12",
-              "name": "Barcroft",
-              "description": "Right-hand hairpin. A late-braking zone with overtaking possible.",
-              "overtaking": true
-            },
-            {
-              "number": "T13",
-              "name": "Chicane",
-              "description": "Final chicane before the pit straight. A good exit sets up a run into Clervaux."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:15"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "12:10"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:30"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:15"
-        }
-      ],
-      "cornersLeft": 5,
-      "cornersRight": 8
-    },
-    {
-      "round": 9,
-      "tslEventId": 263903,
-      "venue": "Silverstone",
-      "youtubeUrl": "https://www.youtube.com/watch?v=KHVKEJbBowA",
-      "startDate": "2026-09-26",
-      "endDate": "2026-09-27",
-      "location": "Towcester, Northamptonshire",
-      "country": "England",
-      "lat": 52.0713,
-      "lng": -1.0228,
-      "lengthMiles": "3.666 mi",
-      "lengthKm": "5.891 km",
-      "corners": 8,
-      "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts\u2013Becketts\u2013Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
-      "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead - or deficit - can completely shape the outcome.",
-      "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/10/Rainford-0Q3A3688-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0H5A1979-scaled-e1760521629921.jpg",
-        "https://btcc.net/wp-content/uploads/2025/10/Doble-0H5A3840-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/09/Hill-0Q3A4314-scaled-e1758718770643.jpg",
-        "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg"
-      ],
-      "firstBtccYear": 1959,
-      "qualifyingRecord": {
-        "driver": "Daryl DeLeon",
-        "time": "56.734s",
-        "speed": "105.43 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "56.875s",
-        "speed": "105.43 mph",
-        "year": 2025
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Abbey",
-              "overtaking": true,
-              "description": "Fast right-hander at the end of the start/finish straight. A key overtaking zone under braking."
-            },
-            {
-              "number": "T2",
-              "name": "Farm",
-              "description": "Right-hand curve linking Abbey to Village. Taken at speed - carries momentum into the next section."
-            },
-            {
-              "number": "T3",
-              "name": "Village",
-              "description": "Right-hander leading into The Loop. Sets up the braking zone for the slowest corner on the lap."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T4",
-              "name": "The Loop",
-              "overtaking": true,
-              "description": "Tight left-hand hairpin - the slowest point on the lap. A prime overtaking spot; late braking rewards the brave."
-            },
-            {
-              "number": "T5",
-              "name": "Aintree",
-              "description": "Left-hand exit of The Loop complex. A clean exit here is crucial for carrying speed down Wellington Straight."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T6",
-              "name": "Brooklands",
-              "overtaking": true,
-              "description": "Right-hander at the end of Wellington Straight. Heavy braking from high speed - overtaking is common here."
-            },
-            {
-              "number": "T7",
-              "name": "Luffield",
-              "description": "Long right-hand sweeper. Traction on exit is crucial for the run onto the pit straight."
-            },
-            {
-              "number": "T8",
-              "name": "Woodcote",
-              "description": "Right-hand corner back onto the start/finish straight. The final corner of the lap - a clean exit sets up the approach to Abbey."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:15"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:15"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:30"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:20"
-        }
-      ],
-      "cornersLeft": 3,
-      "cornersRight": 5
-    },
-    {
-      "round": 10,
-      "tslEventId": 264103,
-      "venue": "Brands Hatch GP",
-      "youtubeUrl": "https://www.youtube.com/watch?v=7yNiW_O1ySg",
-      "startDate": "2026-10-10",
-      "endDate": "2026-10-11",
-      "location": "Fawkham, Kent",
-      "country": "England",
-      "lat": 51.3569,
-      "lng": 0.2631,
-      "lengthMiles": "2.430 mi",
-      "lengthKm": "3.908 km",
-      "corners": 11,
-      "about": "The season finale. The full Grand Prix circuit adds Hawthorns, Westfield, Dingle Dell, and Stirlings to the Indy loop, creating one of the most spectacular circuits in Britain. Paddock Hill Bend on the opening lap of the finale race has been the scene of some of the most dramatic championship-deciding moments in BTCC history.",
-      "btccFact": "A Brands Hatch GP BTCC finale is one of the highlights of the British motorsport calendar. With reverse-grid races and three separate races across the weekend, the championship result is rarely decided until the very last lap.",
-      "imageUrl": "https://images.msv.com/high-res/3d7fe3f3-a748-4e98-b366-bc93bb51e3ed.jpg",
-      "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/10-Brands-GP.jpg",
-      "raceImages": [
-        "https://btcc.net/wp-content/uploads/2025/10/Doble-0H5A4603-scaled-e1760695111593.jpg",
-        "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0Q3A1132-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/10/Rainford-00Q3A3662-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/10/doble-0H5A6139-scaled.jpg",
-        "https://btcc.net/wp-content/uploads/2025/10/DeLeon-0H5A1821-scaled.jpg"
-      ],
-      "firstBtccYear": 1960,
-      "qualifyingRecord": {
-        "driver": "Charles Rainford",
-        "time": "1:28.919",
-        "speed": "99.41 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Ashley Sutton",
-        "time": "1:30.244",
-        "speed": "97.06 mph",
-        "year": 2023
-      },
-      "trackGuide": [
-        {
-          "sector": "Sector 1",
-          "corners": [
-            {
-              "number": "T1",
-              "name": "Paddock Hill Bend",
-              "description": "Iconic blind right-hander dropping steeply downhill. Even more dramatic on the GP layout with the championship on the line."
-            },
-            {
-              "number": "T2",
-              "name": "Druids",
-              "overtaking": true,
-              "description": "Tight left-hand hairpin at the top of the hill. Prime overtaking spot."
-            },
-            {
-              "number": "T3",
-              "name": "Graham Hill Bend",
-              "description": "Right-hander on the descent from Druids."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 2",
-          "corners": [
-            {
-              "number": "T4",
-              "name": "Surtees",
-              "description": "Fast left-hand kink at the bottom of the hill."
-            },
-            {
-              "number": "T5",
-              "name": "Hawthorn",
-              "description": "Fast right-hander heading into the GP extension. One of the quickest corners on the layout - full commitment required."
-            },
-            {
-              "number": "T6",
-              "name": "Westfield",
-              "description": "Right-hander dropping downhill. The car is unsettled by the gradient change."
-            },
-            {
-              "number": "T7",
-              "name": "Dingle Dell",
-              "description": "High-speed dip through a compression. The car bottoms out - unsettling even in a straight line."
-            },
-            {
-              "number": "T8",
-              "name": "Dingle Dell Corner",
-              "description": "Right-hander climbing back out of the dell."
-            }
-          ]
-        },
-        {
-          "sector": "Sector 3",
-          "corners": [
-            {
-              "number": "T9",
-              "name": "Stirlings",
-              "description": "Left-hand bend named after Stirling Moss, rejoining the Indy loop. A key corner for exit speed onto Cooper Straight."
-            },
-            {
-              "number": "T10",
-              "name": "Clearways",
-              "description": "Long right-hand sweeper. Commitment here sets up exit speed onto the pit straight."
-            },
-            {
-              "number": "T11",
-              "name": "Clark Curve",
-              "description": "Final right-hander back onto the start/finish straight. With the championship at stake, every tenth counts here."
-            }
-          ]
-        }
-      ],
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:50"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:45"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "cornersLeft": 4,
-      "cornersRight": 7
-    }
-  ]
+      ]
 }

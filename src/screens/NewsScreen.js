@@ -185,13 +185,13 @@ export default function NewsScreen({navigation}) {
   const renderItem = ({item}) => {
     switch (item.type) {
       case 'hero':
-        return <HeroCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'hero'); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
+        return <HeroCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'hero', item.article.source); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
       case 'grid':
-        return <GridRow articles={item.articles} onPress={(article) => { Analytics.articleClicked(article.title, 'grid'); openArticle(article); }} />;
+        return <GridRow articles={item.articles} onPress={(article) => { Analytics.articleClicked(article.title, 'grid', article.source); openArticle(article); }} />;
       case 'moreHeader':
         return <Text style={styles.moreHeader}>MORE STORIES</Text>;
       case 'compact':
-        return <CompactCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'list'); openArticle(item.article); }} />;
+        return <CompactCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source); openArticle(item.article); }} />;
       default:
         return null;
     }

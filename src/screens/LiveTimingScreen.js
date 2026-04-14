@@ -1,15 +1,27 @@
-import React, {useState} from 'react';
-import {View, Text, ActivityIndicator, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Linking} from 'react-native';
 import {WebView} from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
+import {useFeatureFlags} from '../store/featureFlags';
 
 export default function LiveTimingScreen({route, navigation}) {
   const {eventId} = route.params;
+  const {live_timing_in_app} = useFeatureFlags();
   const [loading, setLoading] = useState(true);
+  const url = `https://livetiming.tsl-timing.com/${eventId}`;
 
-  React.useEffect(() => { Analytics.screen('live_timing:' + eventId); }, []);
+  useEffect(() => { Analytics.screen('live_timing:' + eventId); }, []);
+
+  useEffect(() => {
+    if (!live_timing_in_app) {
+      Linking.openURL(url);
+      navigation.goBack();
+    }
+  }, [live_timing_in_app]);
+
+  if (!live_timing_in_app) return null;
 
   return (
     <View style={styles.container}>
@@ -25,7 +37,7 @@ export default function LiveTimingScreen({route, navigation}) {
         </View>
       )}
       <WebView
-        source={{uri: `https://livetiming.tsl-timing.com/${eventId}`}}
+        source={{uri: url}}
         onLoadEnd={() => setLoading(false)}
         style={styles.webview}
       />

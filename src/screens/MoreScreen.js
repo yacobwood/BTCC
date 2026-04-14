@@ -85,6 +85,11 @@ export default function MoreScreen({navigation}) {
 
         <View style={styles.divider} />
 
+        {/* Roadmap */}
+        <View style={styles.divider} />
+        <Text style={styles.sectionTitle}>COMMUNITY</Text>
+        <MoreRow label="Roadmap & Ideas" icon="rocket-launch" onPress={() => { Analytics.moreItemClicked('roadmap'); navigation.navigate('Roadmap'); }} />
+
         {/* Support */}
         <Text style={styles.sectionTitle}>SUPPORT</Text>
         <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
