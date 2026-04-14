@@ -200,7 +200,7 @@ export default function RoadmapScreen({navigation}) {
             <View key={item.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <StatusBadge status={item.status} />
-                {item.status !== 'rejected' && (
+                {item.status !== 'rejected' && item.status !== 'done' && (
                   <TouchableOpacity
                     style={[
                       styles.voteBtn,
