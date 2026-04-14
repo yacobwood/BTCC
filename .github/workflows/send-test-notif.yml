@@ -11,7 +11,8 @@ on:
         required: true
       body:
         description: 'Notification body'
-        required: true
+        required: false
+        default: ''
       device_token:
         description: 'FCM device token'
         required: true
