@@ -1,12 +1,6 @@
 {
   "planned": [
     {
-      "id": "7",
-      "title": "iOS App",
-      "description": "Add app to Apple store",
-      "status": "in-progress"
-    },
-    {
       "id": "1",
       "title": "Centralised Merch",
       "description": "A page with all drivers and teams merchandise",
@@ -48,6 +42,12 @@
       "description": "Enable the app in alot more countries",
       "status": "done",
       "doneAt": "2026-04-14"
+    },
+    {
+      "id": "8",
+      "title": "iOS App",
+      "description": "Add app to Apple store",
+      "status": "in-progress"
     }
   ]
 }
