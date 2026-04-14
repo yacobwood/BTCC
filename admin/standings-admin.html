@@ -1160,7 +1160,7 @@ async function sendPodcastTest() {
     const titleMatch = text.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
                        text.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
     const imageMatch = text.match(/<itunes:image[^>]+href="([^"]+)"/);
-    if (titleMatch?.[1]) title = titleMatch[1].trim();
+    if (titleMatch?.[1]) title = `Podcast: ${titleMatch[1].trim()}`;
     if (imageMatch?.[1]) imageUrl = imageMatch[1].trim();
   } catch(e) {
     console.warn('Could not fetch podcast RSS:', e.message);

@@ -294,7 +294,7 @@ exports.sendSessionNotifications = onSchedule(
               messaging.send({
                 topic: 'podcast_alerts',
                 notification: {
-                  title: latestTitle || 'New BTCC Podcast',
+                  title: latestTitle ? `Podcast: ${latestTitle}` : 'New BTCC Podcast',
                   body: '',
                   ...(artworkUrl ? {imageUrl: artworkUrl} : {}),
                 },
