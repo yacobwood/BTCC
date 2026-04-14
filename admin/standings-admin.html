@@ -1143,7 +1143,7 @@ async function sendNewsTest() {
     console.warn('Could not auto-fetch article metadata:', e.message);
   }
 
-  sendTestNotif('news', title, 'New article on btcc.net', {type: 'news', slug}, imageUrl);
+  sendTestNotif('news', title, '', {type: 'news', slug}, imageUrl);
 }
 
 function sendResultsTest() {

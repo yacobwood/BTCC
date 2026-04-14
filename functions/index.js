@@ -215,7 +215,7 @@ exports.sendSessionNotifications = onSchedule(
                 topic: 'news_alerts',
                 notification: {
                   title,
-                  body: 'New article on btcc.net',
+                  body: '',
                   ...(imageUrl ? {imageUrl} : {}),
                 },
                 android: {notification: {channelId: 'news', ...(imageUrl ? {imageUrl} : {})}},
