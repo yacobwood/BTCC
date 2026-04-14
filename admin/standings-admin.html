@@ -1114,11 +1114,37 @@ async function sendTestNotif(channel, title, body, data = {}, imageUrl = '') {
   }
 }
 
-function sendNewsTest() {
+async function sendNewsTest() {
   const slug = document.getElementById('test-news-slug').value.trim();
-  const title = document.getElementById('test-news-title').value.trim() || 'New BTCC Article';
-  const imageUrl = document.getElementById('test-news-image').value.trim();
   if (!slug) { alert('Enter an article slug first'); return; }
+  const statusEl = document.getElementById('fcm-test-status');
+  statusEl.style.color = 'var(--text-sec)';
+  statusEl.textContent = 'Fetching article…';
+
+  let title = document.getElementById('test-news-title').value.trim() || 'New BTCC Article';
+  let imageUrl = document.getElementById('test-news-image').value.trim();
+
+  try {
+    const res = await fetch(`https://www.btcc.net/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_fields=title,featured_media&_embed=wp:featuredmedia`);
+    const posts = await res.json();
+    if (posts?.[0]) {
+      const post = posts[0];
+      if (!document.getElementById('test-news-title').value.trim()) {
+        title = post.title?.rendered?.replace(/&#\d+;/g, c => String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || title;
+        document.getElementById('test-news-title').value = title;
+      }
+      if (!document.getElementById('test-news-image').value.trim()) {
+        const img = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+        if (img) {
+          imageUrl = img;
+          document.getElementById('test-news-image').value = img;
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('Could not auto-fetch article metadata:', e.message);
+  }
+
   sendTestNotif('news', title, 'New article on btcc.net', {type: 'news', slug}, imageUrl);
 }
 
