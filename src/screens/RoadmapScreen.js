@@ -75,7 +75,6 @@ export default function RoadmapScreen({navigation}) {
   const [votes, setVotes] = useState({});
   const [voted, setVoted] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [votingId, setVotingId] = useState(null);
   const [ideaText, setIdeaText] = useState('');
   const [ideaState, setIdeaState] = useState('idle');
 
@@ -106,18 +105,34 @@ export default function RoadmapScreen({navigation}) {
   };
 
   const onVote = async item => {
-    if (voted.includes(item.id) || votingId) return;
-    setVotingId(item.id);
+    const hasVoted = voted.includes(item.id);
+    const newVoted = hasVoted ? voted.filter(id => id !== item.id) : [...voted, item.id];
+    setVoted(newVoted);
+    setVotes(prev => ({...prev, [item.id]: Math.max(0, (prev[item.id] || 0) + (hasVoted ? -1 : 1))}));
+    await AsyncStorage.setItem('roadmap_voted', JSON.stringify(newVoted));
+    if (!hasVoted) Analytics.roadmapVoted(item.id);
+
     try {
       const deviceId = await getOrCreateDeviceId();
-      await submitVote(item.id, deviceId);
-      const newVoted = [...voted, item.id];
-      setVoted(newVoted);
-      setVotes(prev => ({...prev, [item.id]: (prev[item.id] || 0) + 1}));
-      await AsyncStorage.setItem('roadmap_voted', JSON.stringify(newVoted));
-      Analytics.roadmapVoted(item.id);
+      if (hasVoted) {
+        await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            writes: [{
+              transform: {
+                document: `projects/${PROJECT_ID}/databases/(default)/documents/roadmap_votes/${item.id}`,
+                fieldTransforms: [
+                  {fieldPath: 'count', increment: {integerValue: '-1'}},
+                ],
+              },
+            }],
+          }),
+        });
+      } else {
+        await submitVote(item.id, deviceId);
+      }
     } catch {}
-    setVotingId(null);
   };
 
   const onSubmitIdea = async () => {
@@ -171,30 +186,20 @@ export default function RoadmapScreen({navigation}) {
             <View key={item.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <StatusBadge status={item.status} />
-              </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              {!!item.description && (
-                <Text style={styles.cardDesc}>{item.description}</Text>
-              )}
-              <View style={styles.cardBottom}>
                 <TouchableOpacity
                   style={[
                     styles.voteBtn,
                     voted.includes(item.id) && styles.voteBtnActive,
                   ]}
                   onPress={() => onVote(item)}
-                  disabled={voted.includes(item.id) || !!votingId}
+                  disabled={false}
                   accessibilityRole="button"
                   accessibilityLabel={`Vote for ${item.title}, ${votes[item.id] || 0} votes`}>
-                  {votingId === item.id ? (
-                    <ActivityIndicator size="small" color={Colors.navy} />
-                  ) : (
-                    <Icon
-                      name="thumb-up"
-                      size={15}
-                      color={voted.includes(item.id) ? Colors.navy : Colors.yellow}
-                    />
-                  )}
+                  <Icon
+                    name="thumb-up"
+                    size={15}
+                    color={voted.includes(item.id) ? Colors.navy : Colors.yellow}
+                  />
                   <Text
                     style={[
                       styles.voteCount,
@@ -204,6 +209,10 @@ export default function RoadmapScreen({navigation}) {
                   </Text>
                 </TouchableOpacity>
               </View>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              {!!item.description && (
+                <Text style={styles.cardDesc}>{item.description}</Text>
+              )}
             </View>
           ))}
 
@@ -301,10 +310,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.outline,
   },
-  cardTop: {flexDirection: 'row', marginBottom: 10},
+  cardTop: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10},
   cardTitle: {color: '#fff', fontSize: 15, fontWeight: '700', marginBottom: 4},
   cardDesc: {color: Colors.textSecondary, fontSize: 13, lineHeight: 19, marginBottom: 12},
-  cardBottom: {flexDirection: 'row', justifyContent: 'flex-end'},
   voteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
