@@ -961,7 +961,7 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
 
     <!-- Podcast -->
     <div>
-      <button onclick="sendTestNotif('podcasts','New BTCC Podcast','A new episode has just been released',{type:'podcast'})" style="background:#C084FC;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;">Podcast</button>
+      <button onclick="sendPodcastTest()" style="background:#C084FC;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;">Podcast</button>
     </div>
 
   </div>
@@ -1144,6 +1144,29 @@ async function sendNewsTest() {
   }
 
   sendTestNotif('news', title, '', {type: 'news', slug}, imageUrl);
+}
+
+async function sendPodcastTest() {
+  const statusEl = document.getElementById('fcm-test-status');
+  statusEl.style.color = 'var(--text-sec)';
+  statusEl.textContent = 'Fetching latest episode…';
+
+  let title = 'New BTCC Podcast';
+  let imageUrl = '';
+
+  try {
+    const res = await fetch('https://rss.buzzsprout.com/1065916.rss');
+    const text = await res.text();
+    const titleMatch = text.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+                       text.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
+    const imageMatch = text.match(/<itunes:image[^>]+href="([^"]+)"/);
+    if (titleMatch?.[1]) title = titleMatch[1].trim();
+    if (imageMatch?.[1]) imageUrl = imageMatch[1].trim();
+  } catch(e) {
+    console.warn('Could not fetch podcast RSS:', e.message);
+  }
+
+  sendTestNotif('podcasts', title, '', {type: 'podcast'}, imageUrl);
 }
 
 function sendResultsTest() {
