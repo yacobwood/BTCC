@@ -9,6 +9,7 @@ const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
 const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug,featured_media,_links&_embed=wp:featuredmedia';
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
+const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
 // Session name → FCM topic
 const SESSION_TOPICS = {
@@ -263,6 +264,50 @@ exports.sendSessionNotifications = onSchedule(
       }
     } catch (e) {
       console.error('Hub news check failed:', e);
+    }
+
+    // ── Podcast alerts ────────────────────────────────────────────
+    try {
+      const db = getFirestore();
+      const podcastStateRef = db.collection('state').doc('podcast');
+      const [rssText, podcastSnap] = await Promise.all([
+        fetch(PODCAST_RSS_URL).then(r => r.text()),
+        podcastStateRef.get(),
+      ]);
+
+      // Parse first <item> from RSS
+      const guidMatch = rssText.match(/<guid[^>]*>(.*?)<\/guid>/);
+      const titleMatch = rssText.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+                         rssText.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
+      const imageMatch = rssText.match(/<itunes:image[^>]+href="([^"]+)"/);
+
+      const latestGuid = guidMatch?.[1]?.trim();
+      const latestTitle = titleMatch?.[1]?.trim();
+      const artworkUrl = imageMatch?.[1] || null;
+
+      if (latestGuid) {
+        const lastGuid = podcastSnap.exists ? podcastSnap.data().lastGuid : null;
+        if (latestGuid !== lastGuid) {
+          await podcastStateRef.set({lastGuid: latestGuid});
+          if (lastGuid !== null) {
+            sends.push(
+              messaging.send({
+                topic: 'podcast_alerts',
+                notification: {
+                  title: latestTitle || 'New BTCC Podcast',
+                  body: '',
+                  ...(artworkUrl ? {imageUrl: artworkUrl} : {}),
+                },
+                android: {notification: {channelId: 'podcasts', ...(artworkUrl ? {imageUrl: artworkUrl} : {})}},
+                apns: {payload: {aps: {sound: 'default', ...(artworkUrl ? {'mutable-content': 1} : {})}}},
+                data: {type: 'podcast'},
+              }),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Podcast check failed:', e);
     }
 
     const results = await Promise.allSettled(sends);
