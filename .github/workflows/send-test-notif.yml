@@ -24,6 +24,10 @@ on:
             Podcasts:        {"type":"podcast"}
         required: false
         default: '{}'
+      image_url:
+        description: 'Image URL to show in the notification (optional)'
+        required: false
+        default: ''
 
 jobs:
   send:
@@ -42,11 +46,14 @@ jobs:
           let extraData = {};
           try { extraData = JSON.parse(process.env.EXTRA_DATA || '{}'); } catch(e) { console.error('EXTRA_DATA parse failed:', e.message); }
           console.log('extraData parsed:', JSON.stringify(extraData));
+          const imageUrl = process.env.IMAGE_URL || '';
+          const notification = { title: process.env.TITLE, body: process.env.BODY };
+          if (imageUrl) notification.imageUrl = imageUrl;
           admin.messaging().send({
             token: process.env.DEVICE_TOKEN,
-            notification: { title: process.env.TITLE, body: process.env.BODY },
+            notification,
             android: { priority: 'high', notification: { channelId: process.env.CHANNEL } },
-            apns: { payload: { aps: { sound: 'default' } } },
+            apns: { payload: { aps: { sound: 'default', ...(imageUrl ? { 'mutable-content': 1 } : {}) } } },
             data: { channel: process.env.CHANNEL, ...extraData },
           }).then(r => { console.log('Sent:', r); process.exit(0); })
             .catch(e => { console.error('Error:', e.message); process.exit(1); });
@@ -58,3 +65,4 @@ jobs:
           TITLE: ${{ inputs.title }}
           BODY: ${{ inputs.body }}
           EXTRA_DATA: ${{ inputs.data }}
+          IMAGE_URL: ${{ inputs.image_url }}

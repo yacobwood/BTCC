@@ -945,9 +945,13 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
 
     <!-- News -->
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="sendNewsTest()" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">News</button>
-      <input id="test-news-slug" type="text" placeholder="article-slug" style="flex:1;padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="sendNewsTest()" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">News</button>
+        <input id="test-news-slug" type="text" placeholder="article-slug" style="flex:1;padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
+      </div>
+      <input id="test-news-title" type="text" placeholder="Notification title (e.g. article headline)" style="padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
+      <input id="test-news-image" type="text" placeholder="Image URL (optional)" style="padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
     </div>
 
     <!-- Results -->
@@ -1080,7 +1084,7 @@ function testBody(n) {
   return `Starting in 15 min \u00b7 Round ${n.round}, ${n.venue}`;
 }
 
-async function sendTestNotif(channel, title, body, data = {}) {
+async function sendTestNotif(channel, title, body, data = {}, imageUrl = '') {
   const ghTok = getToken();
   const deviceTok = getFcmTok();
   const statusEl = document.getElementById('fcm-test-status');
@@ -1089,10 +1093,12 @@ async function sendTestNotif(channel, title, body, data = {}) {
   statusEl.style.color='var(--text-sec)';
   statusEl.textContent='Sending…';
   try {
+    const inputs = { channel, title, body, device_token: deviceTok, data: JSON.stringify(data) };
+    if (imageUrl) inputs.image_url = imageUrl;
     const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
       method: 'POST',
       headers: { Authorization: 'token ' + ghTok, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ref: 'main', inputs: { channel, title, body, device_token: deviceTok, data: JSON.stringify(data) } }),
+      body: JSON.stringify({ ref: 'main', inputs }),
     });
     if(r.status === 204){
       statusEl.style.color='var(--green)';
@@ -1110,8 +1116,10 @@ async function sendTestNotif(channel, title, body, data = {}) {
 
 function sendNewsTest() {
   const slug = document.getElementById('test-news-slug').value.trim();
+  const title = document.getElementById('test-news-title').value.trim() || 'New BTCC Article';
+  const imageUrl = document.getElementById('test-news-image').value.trim();
   if (!slug) { alert('Enter an article slug first'); return; }
-  sendTestNotif('news', 'New BTCC Article', 'A new article has been published on btcc.net', {type: 'news', slug});
+  sendTestNotif('news', title, 'New article on btcc.net', {type: 'news', slug}, imageUrl);
 }
 
 function sendResultsTest() {
