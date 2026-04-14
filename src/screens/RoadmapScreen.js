@@ -90,7 +90,21 @@ export default function RoadmapScreen({navigation}) {
         fetch(ROADMAP_URL).then(r => r.json()),
         AsyncStorage.getItem('roadmap_voted').then(v => (v ? JSON.parse(v) : [])),
       ]);
-      const planned = data.planned || [];
+      const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+      const STATUS_ORDER = {'in-progress': 0, planned: 1, idea: 2, done: 3, rejected: 4};
+      const planned = (data.planned || [])
+        .filter(item => {
+          if (item.status === 'rejected') {
+            if (!item.rejectedAt) return false;
+            return new Date(item.rejectedAt).getTime() > twoWeeksAgo;
+          }
+          if (item.status === 'done') {
+            if (!item.doneAt) return false;
+            return new Date(item.doneAt).getTime() > twoWeeksAgo;
+          }
+          return true;
+        })
+        .sort((a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99));
       setItems(planned);
       setVoted(storedVoted);
 
@@ -186,32 +200,38 @@ export default function RoadmapScreen({navigation}) {
             <View key={item.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <StatusBadge status={item.status} />
-                <TouchableOpacity
-                  style={[
-                    styles.voteBtn,
-                    voted.includes(item.id) && styles.voteBtnActive,
-                  ]}
-                  onPress={() => onVote(item)}
-                  disabled={false}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Vote for ${item.title}, ${votes[item.id] || 0} votes`}>
-                  <Icon
-                    name="thumb-up"
-                    size={15}
-                    color={voted.includes(item.id) ? Colors.navy : Colors.yellow}
-                  />
-                  <Text
+                {item.status !== 'rejected' && (
+                  <TouchableOpacity
                     style={[
-                      styles.voteCount,
-                      voted.includes(item.id) && styles.voteCountActive,
-                    ]}>
-                    {votes[item.id] || 0}
-                  </Text>
-                </TouchableOpacity>
+                      styles.voteBtn,
+                      voted.includes(item.id) && styles.voteBtnActive,
+                    ]}
+                    onPress={() => onVote(item)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Vote for ${item.title}, ${votes[item.id] || 0} votes`}>
+                    <Icon
+                      name="thumb-up"
+                      size={15}
+                      color={voted.includes(item.id) ? Colors.navy : Colors.yellow}
+                    />
+                    <Text
+                      style={[
+                        styles.voteCount,
+                        voted.includes(item.id) && styles.voteCountActive,
+                      ]}>
+                      {votes[item.id] || 0}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
               <Text style={styles.cardTitle}>{item.title}</Text>
               {!!item.description && (
                 <Text style={styles.cardDesc}>{item.description}</Text>
+              )}
+              {item.status === 'rejected' && !!item.rejectReason && (
+                <View style={styles.rejectBox}>
+                  <Text style={styles.rejectText}>{item.rejectReason}</Text>
+                </View>
               )}
             </View>
           ))}
@@ -267,9 +287,11 @@ export default function RoadmapScreen({navigation}) {
 }
 
 const STATUS_META = {
-  planned: {label: 'Planned', color: Colors.textSecondary, border: Colors.outline},
+  idea: {label: 'Idea', color: Colors.textSecondary, border: Colors.outline},
+  planned: {label: 'Planned', color: '#60A5FA', border: '#60A5FA'},
   'in-progress': {label: 'In Progress', color: Colors.yellow, border: Colors.yellow},
   done: {label: 'Done', color: '#22C55E', border: '#22C55E'},
+  rejected: {label: 'Not Planned', color: '#EF4444', border: '#EF4444'},
 };
 
 function StatusBadge({status}) {
@@ -301,7 +323,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginBottom: 4,
   },
-  sectionSubtitle: {color: Colors.textSecondary, fontSize: 13, marginBottom: 16, lineHeight: 19},
+  sectionSubtitle: {color: '#fff', fontSize: 13, marginBottom: 16, lineHeight: 19},
   card: {
     backgroundColor: Colors.card,
     borderRadius: 12,
@@ -312,7 +334,7 @@ const styles = StyleSheet.create({
   },
   cardTop: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10},
   cardTitle: {color: '#fff', fontSize: 15, fontWeight: '700', marginBottom: 4},
-  cardDesc: {color: Colors.textSecondary, fontSize: 13, lineHeight: 19, marginBottom: 12},
+  cardDesc: {color: '#fff', fontSize: 13, lineHeight: 19, marginBottom: 12},
   voteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -366,4 +388,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submitText: {color: Colors.navy, fontSize: 15, fontWeight: '800'},
+  rejectBox: {
+    marginTop: 8,
+    padding: 10,
+    backgroundColor: 'rgba(239,68,68,0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.3)',
+  },
+  rejectText: {color: '#EF4444', fontSize: 12, lineHeight: 17},
 });

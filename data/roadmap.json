@@ -1,34 +1,53 @@
 {
   "planned": [
     {
-      "id": "live-timing-in-app",
-      "title": "Live Timing In-App",
-      "description": "View live TSL timing directly inside the app without jumping to a browser.",
+      "id": "7",
+      "title": "iOS App",
+      "description": "Add app to Apple store",
       "status": "in-progress"
     },
     {
-      "id": "qualifying-race-results",
-      "title": "Qualifying Race Results",
-      "description": "Dedicated results and points tracking for the new 2026 Qualifying Race session.",
+      "id": "1",
+      "title": "Centralised Merch",
+      "description": "A page with all drivers and teams merchandise",
       "status": "planned"
     },
     {
-      "id": "tyre-guide",
-      "title": "Tyre Compound Guide",
-      "description": "Visual guide to the Goodyear tyre compounds, colour coding, and the option tyre rule.",
-      "status": "planned"
+      "id": "2",
+      "title": "Wiki Style Season Table",
+      "description": "A race by race results table",
+      "status": "idea"
     },
     {
-      "id": "championships-guide",
-      "title": "The Championships Explained",
-      "description": "A guide to all 6 BTCC championships - who qualifies, how points work, and what each title means.",
-      "status": "planned"
+      "id": "3",
+      "title": "Live Video Footage Youtube Links",
+      "description": "Enable quick navigation to live race footage",
+      "status": "idea"
     },
     {
-      "id": "ios-app",
-      "title": "iOS App",
-      "description": "Bring BTCC Fan Hub to iPhone and iPad.",
-      "status": "planned"
+      "id": "4",
+      "title": "Practice & Qualifying Youtube Links",
+      "description": "Enable quick navigation to live Practice & Qualifying footage",
+      "status": "idea"
+    },
+    {
+      "id": "5",
+      "title": "No Spoilers Option",
+      "description": "Allow notification pauses",
+      "status": "idea"
+    },
+    {
+      "id": "6",
+      "title": "Light Mode",
+      "description": "Include a light mode in settings",
+      "status": "idea"
+    },
+    {
+      "id": "7",
+      "title": "Multi Country",
+      "description": "Enable the app in alot more countries",
+      "status": "done",
+      "doneAt": "2026-04-14"
     }
   ]
 }
