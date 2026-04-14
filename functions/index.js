@@ -7,7 +7,7 @@ initializeApp();
 
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
-const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug';
+const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug,featured_media&_embed=wp:featuredmedia';
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
 // Session name → FCM topic
@@ -207,16 +207,19 @@ exports.sendSessionNotifications = onSchedule(
           await stateRef.set({lastId: latest.id});
           if (lastId !== null) {
             // Don't notify on first run — just record the baseline
+            const title = latest.title?.rendered?.replace(/&#\d+;/g, c =>
+              String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || 'New BTCC Article';
+            const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
             sends.push(
               messaging.send({
                 topic: 'news_alerts',
                 notification: {
-                  title: 'New BTCC Article',
-                  body: latest.title?.rendered?.replace(/&#\d+;/g, c =>
-                    String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || 'A new article has been published',
+                  title,
+                  body: 'New article on btcc.net',
+                  ...(imageUrl ? {imageUrl} : {}),
                 },
                 android: {notification: {channelId: 'news'}},
-                apns: {payload: {aps: {sound: 'default'}}},
+                apns: {payload: {aps: {sound: 'default', 'mutable-content': 1}}},
                 data: {type: 'news', slug: latest.slug || ''},
               }),
             );
@@ -241,15 +244,17 @@ exports.sendSessionNotifications = onSchedule(
         if (String(latestHub.id) !== String(lastHubId)) {
           await hubStateRef.set({lastId: String(latestHub.id)});
           if (lastHubId !== null) {
+            const hubImageUrl = latestHub.heroImage || latestHub.images?.[0] || null;
             sends.push(
               messaging.send({
                 topic: 'news_alerts',
                 notification: {
                   title: latestHub.title || 'New Post',
-                  body: latestHub.description || 'A new post has been published on BTCC Hub',
+                  body: 'New post on BTCC Hub',
+                  ...(hubImageUrl ? {imageUrl: hubImageUrl} : {}),
                 },
                 android: {notification: {channelId: 'news'}},
-                apns: {payload: {aps: {sound: 'default'}}},
+                apns: {payload: {aps: {sound: 'default', 'mutable-content': 1}}},
                 data: {type: 'hub', id: String(latestHub.id)},
               }),
             );

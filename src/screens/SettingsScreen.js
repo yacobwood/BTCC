@@ -16,6 +16,7 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {Analytics} from '../utils/analytics';
 import {version} from '../../package.json';
 import {getFCMToken} from '../utils/notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
@@ -135,18 +136,16 @@ export default function SettingsScreen({navigation}) {
               value={settings.hubPreview}
               onToggle={(v) => setSetting('hubPreview', v)}
             />
-            <TouchableOpacity style={styles.tokenRow} onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device token">
-              <View style={{flex: 1}}>
-                <Text style={styles.settingLabel}>Device Token</Text>
-                <Text style={styles.tokenText} numberOfLines={1}>{fcmToken || 'Loading…'}</Text>
-              </View>
-              <Icon name={copied ? 'check' : 'content-copy'} size={18} color={copied ? Colors.yellow : Colors.textSecondary} />
-            </TouchableOpacity>
           </>
         )}
 
         <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
+        {!!fcmToken && (
+          <TouchableOpacity onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device ID">
+            <Text style={styles.deviceIdText}>ID: {fcmToken}</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
@@ -209,6 +208,7 @@ const styles = StyleSheet.create({
   pillText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '700'},
   pillTextActive: {color: Colors.navy},
   versionText: {color: Colors.textSecondary, fontSize: 12, marginTop: 12},
+  deviceIdText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 4},
   tokenRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12},
   tokenText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 2},
 });

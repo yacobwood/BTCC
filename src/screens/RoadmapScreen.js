@@ -12,28 +12,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
+import {getFCMToken} from '../utils/notifications';
 
 const ROADMAP_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/roadmap.json';
 const PROJECT_ID = 'btcchub-af77a';
 const API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
 const FS_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xqeyanjk';
-
-function generateDeviceId() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-}
-
-async function getOrCreateDeviceId() {
-  let id = await AsyncStorage.getItem('roadmap_device_id');
-  if (!id) {
-    id = generateDeviceId();
-    await AsyncStorage.setItem('roadmap_device_id', id);
-  }
-  return id;
-}
 
 async function fetchVoteCount(itemId) {
   try {
@@ -127,7 +112,7 @@ export default function RoadmapScreen({navigation}) {
     if (!hasVoted) Analytics.roadmapVoted(item.id);
 
     try {
-      const deviceId = await getOrCreateDeviceId();
+      const deviceId = await getFCMToken();
       if (hasVoted) {
         await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
           method: 'POST',
