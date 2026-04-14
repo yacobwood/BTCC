@@ -1123,7 +1123,7 @@ async function sendNewsTest() {
   let imageUrl = document.getElementById('test-news-image').value.trim();
 
   try {
-    const res = await fetch(`https://www.btcc.net/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_fields=title,featured_media&_embed=wp:featuredmedia`);
+    const res = await fetch(`https://www.btcc.net/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_fields=title,featured_media,_links&_embed=wp:featuredmedia`);
     const posts = await res.json();
     if (posts?.[0]) {
       const post = posts[0];
