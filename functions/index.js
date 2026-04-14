@@ -250,7 +250,7 @@ exports.sendSessionNotifications = onSchedule(
                 topic: 'news_alerts',
                 notification: {
                   title: latestHub.title || 'New Post',
-                  body: 'New post on BTCC Hub',
+                  body: '',
                   ...(hubImageUrl ? {imageUrl: hubImageUrl} : {}),
                 },
                 android: {notification: {channelId: 'news', ...(hubImageUrl ? {imageUrl: hubImageUrl} : {})}},
