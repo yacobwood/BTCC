@@ -35,12 +35,21 @@ export function onForegroundMessage(callback) {
   const messaging = getMessaging();
   return onMessage(messaging, async remoteMessage => {
     callback(remoteMessage);
-    const channelId = remoteMessage.data?.channel || 'news';
+    const {notification, data} = remoteMessage;
+    const channelId = data?.channel || 'news';
+    const imageUrl = notification?.android?.imageUrl || notification?.imageUrl || null;
     await notifee.displayNotification({
-      title: remoteMessage.notification?.title || 'BTCC Hub',
-      body: remoteMessage.notification?.body || '',
-      data: remoteMessage.data || {},
-      android: {channelId, smallIcon: 'ic_launcher', pressAction: {id: 'default'}},
+      title: notification?.title || 'BTCC Hub',
+      body: notification?.body || '',
+      data: data || {},
+      android: {
+        channelId,
+        smallIcon: 'ic_launcher',
+        pressAction: {id: 'default'},
+        ...(imageUrl ? {
+          style: {type: 2, picture: imageUrl, title: notification?.title || 'BTCC Hub', summary: notification?.body || ''},
+        } : {}),
+      },
     });
   });
 }

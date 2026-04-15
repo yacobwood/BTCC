@@ -9,7 +9,23 @@ const TrackPlayer = Platform.OS === 'ios' ? require('react-native-track-player')
 if (Platform.OS === 'android') {
   const messaging = getMessaging();
   setBackgroundMessageHandler(messaging, async remoteMessage => {
-    // Background messages handled by system tray
+    const {notification, data} = remoteMessage;
+    if (!notification?.title) return;
+    const channelId = data?.channel || 'news';
+    const imageUrl = notification.android?.imageUrl || notification.imageUrl || null;
+    await notifee.displayNotification({
+      title: notification.title,
+      body: notification.body || '',
+      data: data || {},
+      android: {
+        channelId,
+        smallIcon: 'ic_launcher',
+        pressAction: {id: 'default'},
+        ...(imageUrl ? {
+          style: {type: 2, picture: imageUrl, title: notification.title, summary: notification.body || ''},
+        } : {}),
+      },
+    });
   });
 }
 
