@@ -1,5 +1,5 @@
 import {getMessaging, getToken, onMessage, requestPermission} from '@react-native-firebase/messaging';
-import notifee, {AndroidImportance} from '@notifee/react-native';
+import notifee, {AndroidImportance, AndroidStyle} from '@notifee/react-native';
 import {Platform, PermissionsAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -47,7 +47,7 @@ export function onForegroundMessage(callback) {
         smallIcon: 'ic_launcher',
         pressAction: {id: 'default'},
         ...(imageUrl ? {
-          style: {type: 2, picture: imageUrl, title: notification?.title || 'BTCC Hub', summary: notification?.body || ''},
+          style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl},
         } : {}),
       },
     });

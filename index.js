@@ -1,6 +1,6 @@
 import {AppRegistry, Platform} from 'react-native';
 import {getMessaging, setBackgroundMessageHandler} from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
+import notifee, {AndroidStyle} from '@notifee/react-native';
 import App from './App';
 import {name as appName} from './app.json';
 
@@ -22,7 +22,7 @@ if (Platform.OS === 'android') {
         smallIcon: 'ic_launcher',
         pressAction: {id: 'default'},
         ...(imageUrl ? {
-          style: {type: 2, picture: imageUrl, title: notification.title, summary: notification.body || ''},
+          style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl},
         } : {}),
       },
     });
