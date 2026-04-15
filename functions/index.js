@@ -214,14 +214,9 @@ exports.sendSessionNotifications = onSchedule(
             sends.push(
               messaging.send({
                 topic: 'news_alerts',
-                notification: {
-                  title,
-                  body: '',
-                  ...(imageUrl ? {imageUrl} : {}),
-                },
-                android: {notification: {channelId: 'news', ...(imageUrl ? {imageUrl} : {})}},
-                apns: {payload: {aps: {sound: 'default', 'mutable-content': 1}}},
-                data: {type: 'news', slug: latest.slug || ''},
+                android: {priority: 'high'},
+                apns: {payload: {aps: {contentAvailable: true}}},
+                data: {type: 'news', slug: latest.slug || '', channel: 'news', title, ...(imageUrl ? {imageUrl} : {})},
               }),
             );
           }
@@ -246,17 +241,13 @@ exports.sendSessionNotifications = onSchedule(
           await hubStateRef.set({lastId: String(latestHub.id)});
           if (lastHubId !== null) {
             const hubImageUrl = latestHub.heroImage || latestHub.images?.[0] || null;
+            const hubTitle = latestHub.title || 'New Post';
             sends.push(
               messaging.send({
                 topic: 'news_alerts',
-                notification: {
-                  title: latestHub.title || 'New Post',
-                  body: '',
-                  ...(hubImageUrl ? {imageUrl: hubImageUrl} : {}),
-                },
-                android: {notification: {channelId: 'news', ...(hubImageUrl ? {imageUrl: hubImageUrl} : {})}},
-                apns: {payload: {aps: {sound: 'default', 'mutable-content': 1}}},
-                data: {type: 'hub', id: String(latestHub.id)},
+                android: {priority: 'high'},
+                apns: {payload: {aps: {contentAvailable: true}}},
+                data: {type: 'hub', id: String(latestHub.id), channel: 'news', title: hubTitle, ...(hubImageUrl ? {imageUrl: hubImageUrl} : {})},
               }),
             );
           }
@@ -290,17 +281,13 @@ exports.sendSessionNotifications = onSchedule(
         if (latestGuid !== lastGuid) {
           await podcastStateRef.set({lastGuid: latestGuid});
           if (lastGuid !== null) {
+            const podTitle = latestTitle ? `Podcast: ${latestTitle}` : 'New BTCC Podcast';
             sends.push(
               messaging.send({
                 topic: 'podcast_alerts',
-                notification: {
-                  title: latestTitle ? `Podcast: ${latestTitle}` : 'New BTCC Podcast',
-                  body: '',
-                  ...(artworkUrl ? {imageUrl: artworkUrl} : {}),
-                },
-                android: {notification: {channelId: 'podcasts', ...(artworkUrl ? {imageUrl: artworkUrl} : {})}},
-                apns: {payload: {aps: {sound: 'default', ...(artworkUrl ? {'mutable-content': 1} : {})}}},
-                data: {type: 'podcast'},
+                android: {priority: 'high'},
+                apns: {payload: {aps: {contentAvailable: true}}},
+                data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
               }),
             );
           }

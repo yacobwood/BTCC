@@ -48,14 +48,13 @@ jobs:
           try { extraData = JSON.parse(process.env.EXTRA_DATA || '{}'); } catch(e) { console.error('EXTRA_DATA parse failed:', e.message); }
           console.log('extraData parsed:', JSON.stringify(extraData));
           const imageUrl = process.env.IMAGE_URL || '';
-          const notification = { title: process.env.TITLE, body: process.env.BODY };
-          if (imageUrl) notification.imageUrl = imageUrl;
+          const data = { channel: process.env.CHANNEL, title: process.env.TITLE, ...extraData };
+          if (imageUrl) data.imageUrl = imageUrl;
           admin.messaging().send({
             token: process.env.DEVICE_TOKEN,
-            notification,
-            android: { priority: 'high', notification: { channelId: process.env.CHANNEL, ...(imageUrl ? { imageUrl } : {}) } },
-            apns: { payload: { aps: { sound: 'default', ...(imageUrl ? { 'mutable-content': 1 } : {}) } } },
-            data: { channel: process.env.CHANNEL, ...extraData },
+            android: { priority: 'high' },
+            apns: { payload: { aps: { contentAvailable: true } } },
+            data,
           }).then(r => { console.log('Sent:', r); process.exit(0); })
             .catch(e => { console.error('Error:', e.message); process.exit(1); });
           EOF

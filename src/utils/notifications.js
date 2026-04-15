@@ -35,20 +35,19 @@ export function onForegroundMessage(callback) {
   const messaging = getMessaging();
   return onMessage(messaging, async remoteMessage => {
     callback(remoteMessage);
-    const {notification, data} = remoteMessage;
-    const channelId = data?.channel || 'news';
-    const imageUrl = notification?.android?.imageUrl || notification?.imageUrl || null;
+    const {data} = remoteMessage;
+    if (!data?.title) return;
+    const channelId = data.channel || 'news';
+    const imageUrl = data.imageUrl || null;
     await notifee.displayNotification({
-      title: notification?.title || 'BTCC Hub',
-      body: notification?.body || '',
-      data: data || {},
+      title: data.title,
+      body: '',
+      data,
       android: {
         channelId,
         smallIcon: 'ic_launcher',
         pressAction: {id: 'default'},
-        ...(imageUrl ? {
-          style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl},
-        } : {}),
+        ...(imageUrl ? {style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
       },
     });
   });
