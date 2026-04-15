@@ -9,11 +9,7 @@
   "widget_race_weekend_test": false,
   "merch_hub_enabled": false,
   "merch_feed_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/merch.json",
-  "overrides": {
-    "fMVl9Eb9ROOteLh59EgeLl:APA91bESSnbZYD75AdmxbmJNGwxbkWwpoAL0zlHT1d1IliTu3c-wlpkI_ey9wZVS8lSgwY0wqPCKaO2DufFjFhlwACOZR-gvs76rqe_cinnDmKFc5_FihK4": {
-      "banner_ad": false
-    }
-  },
+  "overrides": {},
   "shop_home_premium": false,
   "shop_home_standard": false,
   "podcasts_enabled": true,
