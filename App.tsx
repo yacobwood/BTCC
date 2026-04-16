@@ -19,7 +19,7 @@ import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-fir
 import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
-import WhatsNewDialog from './src/components/WhatsNewDialog';
+import UpdateDialog from './src/components/UpdateDialog';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -43,35 +43,28 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
-const WHATS_NEW_KEY = 'whats_new_seen_version';
-const CURRENT_VERSION = 44;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showWhatsNew, setShowWhatsNew] = useState(false);
+  const [showUpdate, setShowUpdate] = useState(false);
+  const {update_available} = useFeatureFlags();
 
   useEffect(() => {
     (async () => {
       const onboardingShown = await AsyncStorage.getItem(ONBOARDING_KEY);
-      if (!onboardingShown) {
-        await AsyncStorage.setItem(WHATS_NEW_KEY, String(CURRENT_VERSION));
-        setShowOnboarding(true);
-      } else {
-        const seenVersion = parseInt(await AsyncStorage.getItem(WHATS_NEW_KEY) || '0', 10);
-        if (seenVersion < CURRENT_VERSION) {
-          setShowWhatsNew(true);
-        }
-      }
+      if (!onboardingShown) setShowOnboarding(true);
       RNBootSplash.hide({fade: true});
     })();
   }, []);
+
+  useEffect(() => {
+    if (update_available) setShowUpdate(true);
+  }, [update_available]);
 
   const handleOnboardingAllow = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     setShowOnboarding(false);
     requestNotificationPermission();
-    const seenVersion = parseInt(await AsyncStorage.getItem(WHATS_NEW_KEY) || '0', 10);
-    if (seenVersion < CURRENT_VERSION) setShowWhatsNew(true);
   };
 
   const handleOnboardingSkip = async () => {
@@ -79,15 +72,10 @@ function AppDialogs() {
     setShowOnboarding(false);
   };
 
-  const handleWhatsNewDismiss = async () => {
-    await AsyncStorage.setItem(WHATS_NEW_KEY, String(CURRENT_VERSION));
-    setShowWhatsNew(false);
-  };
-
   return (
     <>
       <OnboardingDialog visible={showOnboarding} onAllow={handleOnboardingAllow} onSkip={handleOnboardingSkip} />
-      <WhatsNewDialog visible={showWhatsNew} onDismiss={handleWhatsNewDismiss} versionCode={CURRENT_VERSION} />
+      <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
     </>
   );
 }
