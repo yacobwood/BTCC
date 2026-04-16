@@ -9,7 +9,7 @@ import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
 import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
-import {FeatureFlagsProvider} from './src/store/featureFlags';
+import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import notifee, {EventType} from '@notifee/react-native';
@@ -44,10 +44,12 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
+const VERSION_CODE = 47;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
+  const {update_available, update_min_version} = useFeatureFlags();
 
   useEffect(() => {
     (async () => {
@@ -57,9 +59,15 @@ function AppDialogs() {
     })();
   }, []);
 
+  // Play Store check (works on production installs)
   useEffect(() => {
     InAppUpdate.checkUpdate().then((result: any) => { if (result?.updateAvailability === 1) setShowUpdate(true); }).catch(() => {});
   }, []);
+
+  // Flag-based override for testing (set update_available + update_min_version: 1000 in device overrides)
+  useEffect(() => {
+    if (update_available && update_min_version > VERSION_CODE) setShowUpdate(true);
+  }, [update_available, update_min_version]);
 
   const handleOnboardingAllow = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
