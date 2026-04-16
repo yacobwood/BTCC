@@ -47,7 +47,7 @@ export function onForegroundMessage(callback) {
         channelId,
         smallIcon: 'ic_launcher',
         pressAction: {id: 'default'},
-        ...(imageUrl ? {style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
+        ...(imageUrl ? {largeIcon: imageUrl, style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
       },
     });
   });
