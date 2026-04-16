@@ -23,6 +23,7 @@
     "react": "19.2.3",
     "react-native": "0.84.1",
     "react-native-bootsplash": "^7.2.0",
+    "react-native-device-info": "^15.0.2",
     "react-native-google-mobile-ads": "^16.3.1",
     "react-native-in-app-review": "^4.4.2",
     "react-native-pager-view": "^8.0.0",
@@ -31,7 +32,8 @@
     "react-native-svg": "^15.15.4",
     "react-native-track-player": "^4.1.2",
     "react-native-vector-icons": "^10.3.0",
-    "react-native-webview": "^13.16.1"
+    "react-native-webview": "^13.16.1",
+    "sp-react-native-in-app-updates": "^1.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
