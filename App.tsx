@@ -9,7 +9,7 @@ import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
 import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
-import {FeatureFlagsProvider} from './src/store/featureFlags';
+import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import notifee, {EventType} from '@notifee/react-native';
