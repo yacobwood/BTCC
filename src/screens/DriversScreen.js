@@ -132,34 +132,21 @@ export default function DriversScreen({navigation}) {
       style={styles.teamCard}
       activeOpacity={0.8}
       onPress={() => { Analytics.teamClicked(item.name); navigation.navigate('TeamDetail', {team: item}); }}
-      accessibilityLabel={`${item.name}, ${item.entries} cars`}
+      accessibilityLabel={item.name}
       accessibilityRole="button">
-      <View style={styles.teamHeader}>
-        <View style={{flex: 1}}>
-          <Text style={styles.teamName}>{item.name}</Text>
-          <Text style={styles.teamCar}>{item.car || 'Car TBC'}</Text>
-        </View>
-        <View style={styles.entriesBadge}>
-          <Text style={styles.entriesText}>
-            {item.entries} {item.entries === 1 ? 'car' : 'cars'}
-          </Text>
-        </View>
+      <View style={styles.teamImageArea}>
+        {item.cardBgUrl ? (
+          <Image source={{uri: item.cardBgUrl}} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        ) : (
+          <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
+        )}
+        {item.carImageUrl ? (
+          <Image source={{uri: item.carImageUrl}} style={styles.teamCarImage} resizeMode="contain" />
+        ) : null}
       </View>
-      <View style={styles.divider} />
-      {item.drivers.map(d => {
-        const dFav = isFavourite(d.name);
-        return (
-          <View key={d.number} style={styles.teamDriverRow}>
-            <View style={styles.smallAvatar}>
-              <DriverAvatar number={d.number} imageUrl={d.imageUrl} size={28} />
-            </View>
-            {dFav && <Icon name="star" size={12} color={Colors.yellow} style={{marginRight: 4}} />}
-            <Text style={[styles.teamDriverName, dFav && {color: Colors.yellow, fontWeight: '700'}]}>
-              #{d.number} {d.name}
-            </Text>
-          </View>
-        );
-      })}
+      <View style={styles.teamFooter}>
+        <Text style={styles.teamName}>{item.name}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -209,11 +196,12 @@ export default function DriversScreen({navigation}) {
           data={teams}
           keyExtractor={item => item.name}
           renderItem={renderTeam}
-          contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          numColumns={2}
+          columnWrapperStyle={{gap: 10}}
+          contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}
           ListHeaderComponent={
             <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
           }
-          ItemSeparatorComponent={() => <View style={{height: 10}} />}
         />
       )}
     </View>
@@ -269,15 +257,10 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   carText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
-  teamCard: {backgroundColor: Colors.card, borderRadius: 12, padding: 16},
-  teamHeader: {flexDirection: 'row', alignItems: 'center'},
-  teamName: {color: '#fff', fontSize: 15, fontWeight: '800'},
-  teamCar: {color: Colors.textSecondary, fontSize: 13, marginTop: 2},
-  entriesBadge: {backgroundColor: Colors.surface, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4},
-  entriesText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '700'},
+  teamCard: {flex: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
+  teamImageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
+  teamCarImage: {width: '100%', height: '85%'},
+  teamFooter: {padding: 10},
+  teamName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   divider: {height: 1, backgroundColor: 'rgba(42,45,68,0.5)', marginVertical: 12},
-  teamDriverRow: {flexDirection: 'row', alignItems: 'center', marginBottom: 6},
-  smallAvatar: {width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', marginRight: 8, overflow: 'hidden'},
-  smallAvatarImg: {width: 28, height: 28, borderRadius: 14},
-  teamDriverName: {color: '#fff', fontSize: 13, fontWeight: '600'},
 });

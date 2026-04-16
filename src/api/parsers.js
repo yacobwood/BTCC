@@ -141,6 +141,7 @@ export function parseGrid(json) {
     standing2025: t.standing2025 || 0,
     points2025: t.points2025 || 0,
     carImageUrl: t.carImageUrl || '',
+    cardBgUrl: t.cardBgUrl || '',
     founded: t.founded || 0,
     base: t.base || '',
     driversChampionships: t.driversChampionships || 0,

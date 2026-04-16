@@ -2123,7 +2123,9 @@
         }
       ],
       "dateOfBirth": "1980-07-18",
-      "birthplace": "Aylesbury, Buckinghamshire"
+      "birthplace": "Aylesbury, Buckinghamshire",
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-Napa400-x-400-Napa-Ash-_-Dan-C.jpg",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/sutton-2.png"
     },
     {
       "name": "Team VERTU",
@@ -2172,7 +2174,9 @@
           "pos": 2,
           "points": 773
         }
-      ]
+      ],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-Vertu-400-x-400-Vertu.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Ingram-2.png"
     },
     {
       "name": "Speedworks Corolla Racing",
@@ -2241,7 +2245,9 @@
           "pos": 5,
           "points": 266
         }
-      ]
+      ],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2025/08/Team-driver-graphics-toyota-gazoo-racing400-x-400-toyota-gazoo.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Cook-2.png"
     },
     {
       "name": "West Surrey Racing",
@@ -2315,7 +2321,9 @@
           "pos": 3,
           "points": 462
         }
-      ]
+      ],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-WSR-racing400-x-400-WSR.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/De-Leon-1.png"
     },
     {
       "name": "LKQ Euro Car Parts with Power Maxed Racing",
@@ -2379,7 +2387,9 @@
           "pos": 8,
           "points": 190
         }
-      ]
+      ],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-LKQ400-x-400-LKQ.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-OS100883-cut-out.png"
     },
     {
       "name": "Cataclean Plato Racing",
@@ -2392,7 +2402,9 @@
       "base": "Kidlington, Oxfordshire",
       "driversChampionships": 0,
       "teamsChampionships": 0,
-      "history": []
+      "history": [],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-plato-racing400-x-400-plato-racing.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Scaled-Cutouts-Rowbottom.png"
     },
     {
       "name": "Restart Racing",
@@ -2451,14 +2463,18 @@
           "pos": 4,
           "points": 386
         }
-      ]
+      ],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/04/Team-driver-graphics-restart-racing400-x-400-restart-racing.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/04/Smiley-2.png"
     },
     {
       "name": "Laser Tools Racing with MB Motorsport",
       "car": "Toyota Corolla GR Sport",
       "entries": 2,
       "bio": "Laser Tools Racing with MB Motorsport are a competitive independent outfit campaigning Toyota Corolla GR Sport machinery in the BTCC. Backed by Laser Tools, one of the UK's leading hand tool suppliers, the team's partnership with MB Motorsport brings proven BTCC expertise to the operation.",
-      "base": "United Kingdom"
+      "base": "United Kingdom",
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-laser-tools400-x-400-laser-tools.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Taylor-Smith-3.png"
     },
     {
       "name": "Steel Seal with Power Maxed Racing",
@@ -2469,7 +2485,9 @@
       "founded": 2010,
       "driversChampionships": 0,
       "teamsChampionships": 0,
-      "history": []
+      "history": [],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-power-maxed-racing-new-colours400-x-400-PMR-dexter.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Patterson.png"
     }
   ]
 }
