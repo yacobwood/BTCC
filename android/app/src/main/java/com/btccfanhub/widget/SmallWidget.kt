@@ -104,8 +104,8 @@ class SmallWidget : AppWidgetProvider() {
                     views.setTextViewText(R.id.widget_days_label, "")
                 }
                 days == 1L -> {
-                    views.setTextViewText(R.id.widget_days, "TMW")
-                    views.setTextViewText(R.id.widget_days_label, "")
+                    views.setTextViewText(R.id.widget_days, "1")
+                    views.setTextViewText(R.id.widget_days_label, "DAY")
                 }
                 else -> {
                     views.setTextViewText(R.id.widget_days, "$days")
