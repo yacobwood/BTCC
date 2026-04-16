@@ -167,8 +167,8 @@ function AppContent({adBannerRef}) {
               backgroundColor: Colors.surface,
               borderTopColor: Colors.outline,
               borderTopWidth: 1,
-              paddingBottom: 0,
-              height: 56,
+              paddingBottom: banner_ad ? 0 : bottom,
+              height: 56 + (banner_ad ? 0 : bottom),
             },
             tabBarLabelStyle: {
               fontSize: 11,

@@ -3,7 +3,7 @@ package com.btccfanhub.widget
 import android.content.Context
 
 object WidgetPrefs {
-    private const val PREFS_NAME = "com.btccfanhub.widget.prefs"
+    const val PREFS_NAME = "com.btccfanhub.widget.prefs"
     private const val KEY_THEME  = "theme_"
     private const val KEY_SIZE   = "size_"
 

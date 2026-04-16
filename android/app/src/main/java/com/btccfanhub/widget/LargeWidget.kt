@@ -30,7 +30,7 @@ class LargeWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try { withTimeout(25_000L) {
-                val cal = fetchCalendar()
+                val cal = fetchCalendar(context)
                 val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
                 val sessions = cal?.sessions
                 for (id in appWidgetIds) {
@@ -57,7 +57,7 @@ class LargeWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try { withTimeout(25_000L) {
-                val cal = fetchCalendar()
+                val cal = fetchCalendar(context)
                 val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
                 val sessions = cal?.sessions
                 appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, cal, sessions, weather, minW, minH, theme))
@@ -224,31 +224,40 @@ class LargeWidget : AppWidgetProvider() {
         else -> "☁"
     }
 
-    private fun fetchCalendar(): CalInfo? = try {
-        val body = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
-        val rounds = JSONObject(body).optJSONArray("rounds") ?: return null
-        val today = LocalDate.now()
-        var result: CalInfo? = null
-        for (i in 0 until rounds.length()) {
-            val r = rounds.getJSONObject(i)
-            if (LocalDate.parse(r.optString("endDate")) >= today) {
-                val round = r.optInt("round", 1)
-                val rStart = (round - 1) * 3 + 1
-                val startDate = LocalDate.parse(r.optString("startDate"))
-                val endDate = LocalDate.parse(r.optString("endDate"))
-                val dayFmt = DateTimeFormatter.ofPattern("d")
-                val monthYearFmt = DateTimeFormatter.ofPattern("MMM yyyy")
-                val sessArr = r.optJSONArray("sessions")
-                val sess = if (sessArr != null) (0 until sessArr.length()).map { j ->
-                    val s = sessArr.getJSONObject(j)
-                    Sess(s.optString("name"), s.optString("day"), s.optString("time", "TBA"))
-                } else emptyList()
-                result = CalInfo(r.optString("venue"), startDate, endDate, "${startDate.format(dayFmt)} - ${endDate.format(dayFmt)} ${endDate.format(monthYearFmt)}", rStart, rStart + 2, round, r.optInt("tslEventId", 0), sess, r.optDouble("lat", 0.0), r.optDouble("lng", 0.0))
-                break
+    private fun fetchCalendar(context: Context): CalInfo? {
+        val prefs = context.getSharedPreferences(WidgetPrefs.PREFS_NAME, Context.MODE_PRIVATE)
+        val body = try {
+            val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+            prefs.edit().putString("calendar_json", text).apply()
+            text
+        } catch (_: Exception) {
+            prefs.getString("calendar_json", null)
+        } ?: return null
+        return try {
+            val rounds = JSONObject(body).optJSONArray("rounds") ?: return null
+            val today = LocalDate.now()
+            var result: CalInfo? = null
+            for (i in 0 until rounds.length()) {
+                val r = rounds.getJSONObject(i)
+                if (LocalDate.parse(r.optString("endDate")) >= today) {
+                    val round = r.optInt("round", 1)
+                    val rStart = (round - 1) * 3 + 1
+                    val startDate = LocalDate.parse(r.optString("startDate"))
+                    val endDate = LocalDate.parse(r.optString("endDate"))
+                    val dayFmt = DateTimeFormatter.ofPattern("d")
+                    val monthYearFmt = DateTimeFormatter.ofPattern("MMM yyyy")
+                    val sessArr = r.optJSONArray("sessions")
+                    val sess = if (sessArr != null) (0 until sessArr.length()).map { j ->
+                        val s = sessArr.getJSONObject(j)
+                        Sess(s.optString("name"), s.optString("day"), s.optString("time", "TBA"))
+                    } else emptyList()
+                    result = CalInfo(r.optString("venue"), startDate, endDate, "${startDate.format(dayFmt)} - ${endDate.format(dayFmt)} ${endDate.format(monthYearFmt)}", rStart, rStart + 2, round, r.optInt("tslEventId", 0), sess, r.optDouble("lat", 0.0), r.optDouble("lng", 0.0))
+                    break
+                }
             }
-        }
-        result
-    } catch (_: Exception) { null }
+            result
+        } catch (_: Exception) { null }
+    }
 
     data class CalInfo(val venue: String, val startDate: LocalDate, val endDate: LocalDate, val dateRange: String, val rStart: Int, val rEnd: Int, val round: Int, val eventId: Int = 0, val sessions: List<Sess> = emptyList(), val lat: Double = 0.0, val lng: Double = 0.0)
     data class Sess(val name: String, val day: String, val time: String)

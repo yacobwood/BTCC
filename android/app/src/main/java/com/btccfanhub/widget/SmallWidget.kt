@@ -26,7 +26,7 @@ class SmallWidget : AppWidgetProvider() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 withTimeout(10_000L) {
-                    val cal = fetchNextRace()
+                    val cal = fetchNextRace(context)
                     for (id in appWidgetIds) {
                         val opts = appWidgetManager.getAppWidgetOptions(id)
                         val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
@@ -54,7 +54,7 @@ class SmallWidget : AppWidgetProvider() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 withTimeout(10_000L) {
-                    val cal = fetchNextRace()
+                    val cal = fetchNextRace(context)
                     val views = buildViews(context, cal, minW, minH, theme)
                     appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
@@ -129,9 +129,16 @@ class SmallWidget : AppWidgetProvider() {
         return views
     }
 
-    private fun fetchNextRace(): Triple<LocalDate, String, Int>? {
+    private fun fetchNextRace(context: Context): Triple<LocalDate, String, Int>? {
+        val prefs = context.getSharedPreferences(WidgetPrefs.PREFS_NAME, Context.MODE_PRIVATE)
+        val body = try {
+            val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+            prefs.edit().putString("calendar_json", text).apply()
+            text
+        } catch (_: Exception) {
+            prefs.getString("calendar_json", null)
+        } ?: return null
         return try {
-            val body = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
             val rounds = JSONObject(body).optJSONArray("rounds") ?: return null
             val today = LocalDate.now()
             for (i in 0 until rounds.length()) {
