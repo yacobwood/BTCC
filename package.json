@@ -1,6 +1,6 @@
 {
   "name": "BTCCFanHub",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -25,6 +25,7 @@
     "react-native-bootsplash": "^7.2.0",
     "react-native-google-mobile-ads": "^16.3.1",
     "react-native-in-app-review": "^4.4.2",
+    "react-native-in-app-update": "^1.0.1",
     "react-native-pager-view": "^8.0.0",
     "react-native-safe-area-context": "^5.7.0",
     "react-native-screens": "^4.24.0",

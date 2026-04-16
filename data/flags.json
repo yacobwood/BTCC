@@ -17,7 +17,5 @@
   "search_ad": true,
   "debug_mode": false,
   "hub_news_enabled": true,
-  "live_timing_in_app": false,
-  "update_available": true,
-  "update_min_version": 47
+  "live_timing_in_app": false
 }

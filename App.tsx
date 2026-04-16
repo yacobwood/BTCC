@@ -9,7 +9,7 @@ import {FavouriteDriverProvider} from './src/store/favouriteDriver';
 import {UnitsProvider} from './src/store/units';
 import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
-import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
+import {FeatureFlagsProvider} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import notifee, {EventType} from '@notifee/react-native';
@@ -20,6 +20,7 @@ import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
+import InAppUpdate from 'react-native-in-app-update';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -43,12 +44,10 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
-const VERSION_CODE = 47;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
-  const {update_available, update_min_version} = useFeatureFlags();
 
   useEffect(() => {
     (async () => {
@@ -59,8 +58,8 @@ function AppDialogs() {
   }, []);
 
   useEffect(() => {
-    if (update_available && update_min_version > VERSION_CODE) setShowUpdate(true);
-  }, [update_available, update_min_version]);
+    InAppUpdate.checkUpdate().then((result: any) => { if (result?.updateAvailability === 1) setShowUpdate(true); }).catch(() => {});
+  }, []);
 
   const handleOnboardingAllow = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
