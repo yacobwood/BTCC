@@ -1554,6 +1554,7 @@ const FLAG_DEFS = [
   { key: 'live_timing_in_app',        label: 'Live Timing In-App',   desc: 'Show TSL live timing in a WebView (off = opens in browser)' },
   { key: 'debug_mode',               label: 'Debug Mode',           desc: 'Show the Debug section in app Settings (use per-device override to enable for your device only)' },
   { key: 'update_available',         label: 'Update Available',     desc: 'Force update modal — also set update_min_version: 1000 in device override to test' },
+  { key: 'update_min_version',       label: 'Update Min Version',   desc: 'Min versionCode to require update (set to 1000 in device override to test)', type: 'number' },
 ];
 
 let flagValues = {};
@@ -1567,8 +1568,10 @@ function renderFlags() {
         <div class="flag-key">${f.key}</div>
       </div>
       <div class="toggle-wrap">
-        <input type="checkbox" id="flag_${f.key}" ${flagValues[f.key] ? 'checked' : ''}
-          onchange="flagValues['${f.key}'] = this.checked">
+        ${f.type === 'number'
+          ? `<input type="number" id="flag_${f.key}" value="${flagValues[f.key] ?? ''}" style="width:80px;padding:4px 8px;border-radius:6px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;text-align:right;" onchange="flagValues['${f.key}'] = Number(this.value)">`
+          : `<input type="checkbox" id="flag_${f.key}" ${flagValues[f.key] ? 'checked' : ''} onchange="flagValues['${f.key}'] = this.checked">`
+        }
       </div>
     </div>`).join('');
   const urlInput = document.getElementById('flag_merch_feed_url');
@@ -1686,11 +1689,14 @@ function renderAddOverrideToggles() {
     <div class="new-override-toggle-row">
       <span class="new-override-label">${f.label}</span>
       <div class="new-override-controls">
-        <select id="nof_${f.key}">
+        ${f.type === 'number'
+          ? `<input type="number" id="nof_${f.key}" placeholder="— (inherit global)" style="width:120px;padding:4px 8px;border-radius:6px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;">`
+          : `<select id="nof_${f.key}">
           <option value="skip" selected>— (inherit global)</option>
           <option value="true">ON</option>
           <option value="false">OFF</option>
-        </select>
+        </select>`
+        }
       </div>
     </div>`).join('');
 }
@@ -1701,9 +1707,14 @@ function addOverride() {
 
   const flags = {};
   FLAG_DEFS.forEach(f => {
-    const val = document.getElementById('nof_' + f.key)?.value;
-    if (val === 'true')  flags[f.key] = true;
-    if (val === 'false') flags[f.key] = false;
+    const el = document.getElementById('nof_' + f.key);
+    if (!el) return;
+    if (f.type === 'number') {
+      if (el.value !== '') flags[f.key] = Number(el.value);
+    } else {
+      if (el.value === 'true')  flags[f.key] = true;
+      if (el.value === 'false') flags[f.key] = false;
+    }
   });
 
   if (!flagValues.overrides) flagValues.overrides = {};
