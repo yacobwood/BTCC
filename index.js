@@ -14,8 +14,8 @@ if (Platform.OS === 'android') {
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
     await notifee.displayNotification({
-      title: data.title,
-      body: '',
+      title: channelId === 'podcasts' ? 'New Podcast' : 'New Article',
+      body: data.title,
       data,
       android: {
         channelId,

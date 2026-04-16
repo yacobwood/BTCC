@@ -11,7 +11,7 @@ export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'results', name: 'Results Alerts', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'weekend_preview', name: 'Weekend Preview', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'standings', name: 'Standings Update', importance: AndroidImportance.HIGH});
-  await notifee.createChannel({id: 'podcasts', name: 'Podcast Alerts', importance: AndroidImportance.DEFAULT});
+  await notifee.createChannel({id: 'podcasts', name: 'Podcast Alerts', importance: AndroidImportance.HIGH});
 }
 
 export async function requestNotificationPermission() {
@@ -40,8 +40,8 @@ export function onForegroundMessage(callback) {
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
     await notifee.displayNotification({
-      title: data.title,
-      body: '',
+      title: channelId === 'podcasts' ? 'New Podcast' : 'New Article',
+      body: data.title,
       data,
       android: {
         channelId,

@@ -281,7 +281,7 @@ exports.sendSessionNotifications = onSchedule(
         if (latestGuid !== lastGuid) {
           await podcastStateRef.set({lastGuid: latestGuid});
           if (lastGuid !== null) {
-            const podTitle = latestTitle ? `Podcast: ${latestTitle}` : 'New BTCC Podcast';
+            const podTitle = latestTitle || 'New BTCC Podcast';
             sends.push(
               messaging.send({
                 topic: 'podcast_alerts',
