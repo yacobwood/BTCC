@@ -20,7 +20,7 @@ import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
-import SpInAppUpdates, {IAUUpdateKind} from 'sp-react-native-in-app-updates';
+import SpInAppUpdates from 'sp-react-native-in-app-updates';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -59,10 +59,12 @@ function AppDialogs() {
     })();
   }, []);
 
-  // Play Store check (works on production installs)
+  // Play Store check (only works on production Play Store installs)
   useEffect(() => {
-    const inAppUpdates = new SpInAppUpdates(false);
-    inAppUpdates.checkNeedsUpdate().then((result: any) => { if (result?.shouldUpdate) setShowUpdate(true); }).catch(() => {});
+    try {
+      const inAppUpdates = new SpInAppUpdates(false);
+      inAppUpdates.checkNeedsUpdate().then((result: any) => { if (result?.shouldUpdate) setShowUpdate(true); }).catch(() => {});
+    } catch {}
   }, []);
 
   // Flag-based override for testing (set update_available + update_min_version: 1000 in device overrides)
