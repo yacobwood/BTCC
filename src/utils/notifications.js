@@ -11,6 +11,8 @@ export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'results', name: 'Results Alerts', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'weekend_preview', name: 'Weekend Preview', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'standings', name: 'Standings Update', importance: AndroidImportance.HIGH});
+  // Delete and recreate to force importance upgrade on existing installs
+  await notifee.deleteChannel('podcasts');
   await notifee.createChannel({id: 'podcasts', name: 'Podcast Alerts', importance: AndroidImportance.HIGH});
 }
 
