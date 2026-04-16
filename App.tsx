@@ -43,11 +43,12 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
+const VERSION_CODE = 47;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
-  const {update_available} = useFeatureFlags();
+  const {update_available, update_min_version} = useFeatureFlags();
 
   useEffect(() => {
     (async () => {
@@ -58,8 +59,8 @@ function AppDialogs() {
   }, []);
 
   useEffect(() => {
-    if (update_available) setShowUpdate(true);
-  }, [update_available]);
+    if (update_available && update_min_version > VERSION_CODE) setShowUpdate(true);
+  }, [update_available, update_min_version]);
 
   const handleOnboardingAllow = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
