@@ -1,5 +1,28 @@
 {
   "posts": [
+        {
+      "id": "hub-prod-2",
+      "title": "A Day in the Paddock at Donington Park",
+      "description": "We headed into the paddock at Donington Park ahead of the 2026 season opener and despite the relentless rain, it was absolutely worth it.",
+      "content": "<p>We headed into the paddock at Donington Park ahead of the 2026 season opener and despite the relentless rain, it was absolutely worth it.</p><p>Our first stop was the Legends area, where we started talking to a member of the 2Mater Racing team. He was so welcoming, patiently walking us through the car, explaining the series and before long, inviting me to take a seat inside!</p><p>Sitting in a Classic touring car is unlike anything else. The seat wraps around your ribs so you're not going anywhere. Remarkably comfortable for such a compact car, though getting in and out is another story entirely. At 6ft 2, it's a genuine challenge. But it was what he said next that really put things in perspective. For safety certification, drivers must prove they can exit from either side of the car in under ten seconds. Looking to your right and seeing half the door panel boxed off with a gear stick poking through the top, that feels like an almost impossible ask.</p><p>The numbers are equally impressive. 130bhp, just over 500kg and 0-60 in around 2.8 seconds! The Legends are on track both Saturday and Sunday.</p><p>Beyond the cars, 2Mater Racing carry an even more important story. The team race to raise money for the Motor Neurone Disease Association (MNDA). A cause that became deeply personal after the charity helped save a loved one last year. If you're in the paddock this weekend, do yourself a favour and stop by.</p><p>Moving across to the BTCC paddock, most garages were closed up as teams made their final preparations for the weekend. After grabbing some photos in the new Cataclean Plato Racing section, Nic Hamilton emerged from the Team VERTU garage and graciously stopped for a photo.</p><p>The paddock is open to all this weekend.</p>",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417161815.jpg",
+      "images": [
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417161815.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417161709.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417161803.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417161845.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417161246.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417164253.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417163641.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417163905.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417163731.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417163717.jpg",
+        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-17/IMG20260417164114.jpg"
+      ],
+      "pubDate": "2026-04-17T20:20:00",
+      "category": "Paddock",
+      "source": "btcc-hub"
+    },
     {
       "id": "hub-prod-1",
       "title": "BTCC Season Launch snaps",
