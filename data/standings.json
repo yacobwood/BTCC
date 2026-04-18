@@ -83,31 +83,31 @@
     },
     {
       "pos": 11,
-      "driver": "Ricky Collard",
+      "driver": "Dexter Patterson",
       "car": "11",
-      "class": "M",
+      "class": "I",
       "points": 3,
       "wins": 0
     },
     {
       "pos": 12,
-      "driver": "Lewis Selby",
+      "driver": "\u00c1r\u00f3n Taylor-Smith",
       "car": "15",
-      "class": "M",
-      "points": 2,
-      "wins": 0
-    },
-    {
-      "pos": 13,
-      "driver": "Dexter Patterson",
-      "car": "17",
       "class": "I",
       "points": 2,
       "wins": 0
     },
     {
+      "pos": 13,
+      "driver": "Ricky Collard",
+      "car": "17",
+      "class": "M",
+      "points": 2,
+      "wins": 0
+    },
+    {
       "pos": 14,
-      "driver": "Max Buxton",
+      "driver": "Dan Cammish",
       "car": "19",
       "class": "M",
       "points": 1,
@@ -123,15 +123,15 @@
     },
     {
       "pos": 16,
-      "driver": "Dan Cammish",
+      "driver": "James Dorlin",
       "car": "27",
-      "class": "M",
+      "class": "I",
       "points": 0,
       "wins": 0
     },
     {
       "pos": 17,
-      "driver": "Nic Hamilton",
+      "driver": "Lewis Selby",
       "car": "28",
       "class": "M",
       "points": 0,
@@ -139,15 +139,15 @@
     },
     {
       "pos": 18,
-      "driver": "\u00c1r\u00f3n Taylor-Smith",
+      "driver": "Sam Osborne",
       "car": "50",
-      "class": "I",
+      "class": "M",
       "points": 0,
       "wins": 0
     },
     {
       "pos": 19,
-      "driver": "Sam Osborne",
+      "driver": "Nic Hamilton",
       "car": "77",
       "class": "M",
       "points": 0,
@@ -155,7 +155,7 @@
     },
     {
       "pos": 20,
-      "driver": "Ashley Sutton",
+      "driver": "Max Buxton",
       "car": "116",
       "class": "M",
       "points": 0,
@@ -163,9 +163,9 @@
     },
     {
       "pos": 21,
-      "driver": "James Dorlin",
+      "driver": "Ashley Sutton",
       "car": "132",
-      "class": "I",
+      "class": "M",
       "points": 0,
       "wins": 0
     }
