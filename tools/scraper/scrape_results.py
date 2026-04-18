@@ -180,37 +180,35 @@ OUT_FILE = Path(__file__).parent.parent.parent / "data" / f"results{YEAR}.json"
 
 def extract_races(page) -> list[dict]:
     """
-    btcc.net results pages use a tab-based layout where Race 1/2/3 tables
-    are all in the DOM but hidden. Tab links use hrefs like #Race1, #Race2, #Race3.
-    Strategy 1: use href IDs to find the exact section containing each race table —
-    avoids the Qualifying table being counted as Race 1 when scanning by index.
-    Strategy 2 (fallback): scan tables with 'Best' AND 'Gap' in header row (excludes
-    qualifying which has Best but not Gap).
+    btcc.net results pages use a tab-based layout where race tables are in the DOM.
+    From 2026 there are 4 races: Qualifying Race, Race 1, Race 2, Race 3.
+    Strategy 1: find all tab links (including Qualifying Race) by href ID.
+    Strategy 2 (fallback): scan all tables with 'Best' AND 'Gap' headers.
     """
     return page.evaluate("""() => {
-        const tabLinks = Array.from(document.querySelectorAll('a[href*="#Race"]'))
-            .filter(a => /^Race\\s+[123]$/i.test(a.textContent.trim()));
-
         const extractRows = (table) =>
             Array.from(table.querySelectorAll('tr'))
                 .map(tr => Array.from(tr.querySelectorAll('td, th')).map(c => c.textContent.trim()))
                 .filter(r => r.length >= 4);
 
-        // Strategy 1: find each race section by its tab href ID
+        // Strategy 1: find all race tab links (Qualifying Race + Race 1/2/3)
+        const tabLinks = Array.from(document.querySelectorAll('a[href^="#"]'))
+            .filter(a => /^(qualifying\\s+race|race\\s+[123])$/i.test(a.textContent.trim()));
+
         if (tabLinks.length >= 3) {
             const byId = [];
             for (const link of tabLinks) {
                 const id = link.getAttribute('href').replace('#', '');
                 const section = document.getElementById(id);
-                if (!section) break;
+                if (!section) continue;
                 const table = section.querySelector('table');
-                if (!table) break;
+                if (!table) continue;
                 byId.push({ label: link.textContent.trim(), rows: extractRows(table) });
             }
             if (byId.length >= 3) return byId;
         }
 
-        // Strategy 2: tables with both 'Best' and 'Gap' headers (excludes qualifying)
+        // Strategy 2: all tables with both 'Best' and 'Gap' headers
         const raceTables = Array.from(document.querySelectorAll('table')).filter(t => {
             const firstRow = t.querySelector('tr');
             if (!firstRow) return false;
@@ -229,7 +227,12 @@ def extract_races(page) -> list[dict]:
     }""")
 
 
-def parse_rows(rows: list[list[str]]) -> list[dict]:
+# BTCC points scales (position -> points)
+POINTS_QUALIFYING = {1: 10, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}
+POINTS_RACE       = {1: 20, 2: 17, 3: 15, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8, 9: 7, 10: 6, 11: 5, 12: 4, 13: 3, 14: 2, 15: 1}
+
+
+def parse_rows(rows: list[list[str]], race_label: str = "") -> list[dict]:
     """Convert raw table rows into DriverResult dicts, skipping header rows."""
     results = []
     for cells in rows:
@@ -263,29 +266,28 @@ def parse_rows(rows: list[list[str]]) -> list[dict]:
                 time_raw = ""
                 gap_raw  = cells[4 + offset] if len(cells) > 4 + offset else ""
                 best_lap = cells[5 + offset] if len(cells) > 5 + offset else ""
-                pts_raw  = "0"
             elif cols_after_team == 3:
-                # Medium: Laps, Gap, Best — no Time or Pts columns
+                # Medium: Laps, Gap, Best — no Time
                 laps_raw = cells[4 + offset] if len(cells) > 4 + offset else "0"
                 time_raw = ""
                 gap_raw  = cells[5 + offset] if len(cells) > 5 + offset else ""
                 best_lap = cells[6 + offset] if len(cells) > 6 + offset else ""
-                pts_raw  = "0"
             else:
-                # Long: Laps, Time, Gap, Best, Pts
+                # Long: Laps, Time, Gap, Best[, Pts ignored]
                 laps_raw = cells[4 + offset] if len(cells) > 4 + offset else "0"
                 time_raw = cells[5 + offset] if len(cells) > 5 + offset else ""
                 gap_raw  = cells[6 + offset] if len(cells) > 6 + offset else ""
                 best_lap = cells[7 + offset] if len(cells) > 7 + offset else ""
-                pts_raw  = cells[8 + offset] if len(cells) > 8 + offset else "0"
         except (IndexError, ValueError):
             continue
 
         if not driver:
             continue
 
-        laps   = int(re.sub(r"[^\d]", "", laps_raw) or "0")
-        points = int(re.sub(r"[^\d]", "", pts_raw) or "0")
+        laps = int(re.sub(r"[^\d]", "", laps_raw) or "0")
+        # Compute points from position using the correct BTCC scale for this race type
+        pts_table = POINTS_QUALIFYING if "qualifying" in race_label.lower() else POINTS_RACE
+        points = pts_table.get(pos, 0) if pos > 0 else 0
 
         if not is_dnf_pos and any("dnf" in str(x).lower() for x in [laps_raw, time_raw]):
             pos = 0
@@ -322,14 +324,19 @@ def scrape_round(page, info: dict) -> dict:
     raw_races = extract_races(page)
     print(f"  Found {len(raw_races)} race section(s): {[r['label'] for r in raw_races]}")
 
-    # Ensure we always have labels Race 1/2/3 in order
-    label_map = {r["label"].strip(): r for r in raw_races}
+    # Build label list: include Qualifying Race if present, then Race 1/2/3
+    label_map = {r["label"].strip().lower(): r for r in raw_races}
+    expected = []
+    if any("qualifying" in k for k in label_map):
+        expected.append("Qualifying Race")
+    expected += ["Race 1", "Race 2", "Race 3"]
+
     races = []
-    for label in ["Race 1", "Race 2", "Race 3"]:
-        section = label_map.get(label)
+    for label in expected:
+        section = label_map.get(label.lower())
         if section:
             print(f"  {label}: {len(section['rows'])} rows")
-            results = parse_rows(section["rows"])
+            results = parse_rows(section["rows"], label)
         else:
             print(f"  {label}: NOT FOUND")
             results = []

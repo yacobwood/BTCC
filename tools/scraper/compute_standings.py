@@ -7,7 +7,8 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-POINTS = {1: 25, 2: 20, 3: 16, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8, 9: 7, 10: 6, 11: 5, 12: 4, 13: 3, 14: 2, 15: 1}
+POINTS_QUALIFYING = {1: 10, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}
+POINTS_RACE       = {1: 20, 2: 17, 3: 15, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8, 9: 7, 10: 6, 11: 5, 12: 4, 13: 3, 14: 2, 15: 1}
 
 # Repo root (parent of scraper/)
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -27,10 +28,11 @@ def compute(year: int, data: dict):
         last_round = rnd["round"]
         last_venue = rnd.get("venue", "")
         for race in rnd["races"]:
+            pts_table = POINTS_QUALIFYING if "qualifying" in race.get("label", "").lower() else POINTS_RACE
             for r in race["results"]:
                 d = r["driver"]
                 pos = r["pos"]
-                pts = POINTS.get(pos, 0)
+                pts = pts_table.get(pos, 0) if pos > 0 else 0
                 driver_points[d] += pts
                 driver_team[d] = r.get("team", "")
                 driver_car[d] = str(r.get("no", ""))
