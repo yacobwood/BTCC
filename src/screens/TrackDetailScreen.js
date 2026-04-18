@@ -19,6 +19,9 @@ import CachedImage from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
+import {fetchStandings, fetchResults} from '../api/client';
+import {parseResults} from '../api/parsers';
+import {cacheRead} from '../store/cache';
 
 const calendarData = require('../data/calendar.json');
 
@@ -63,6 +66,8 @@ export default function TrackDetailScreen({route, navigation}) {
 
   const sessions = track.sessions || [];
   const [weather, setWeather] = useState(null);
+  const [racesFinished, setRacesFinished] = useState(false);
+  const [currentRoundData, setCurrentRoundData] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const HERO_H = track.imageUrl ? 220 : 0;
   const titlePaddingTop = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [12, statusBarHeight + 12], extrapolate: 'clamp'});
@@ -78,6 +83,35 @@ export default function TrackDetailScreen({route, navigation}) {
       });
     }
   }, [track.lat, track.lng, track.startDate, track.endDate, track_weather]);
+
+  // Check whether standings have been updated (i.e. at least one race has finished this weekend)
+  useEffect(() => {
+    if (!isRaceWeekend) return;
+    const hasPoints = raw => (raw?.standings || []).some(d => d.points > 0);
+
+    const applyFinished = () => {
+      setRacesFinished(true);
+      // Fetch results so we can navigate directly to RoundResults without flash
+      cacheRead('results_2026').then(cached => {
+        const parsed = parseResults(cached);
+        const found = parsed.find(r => r.round === track.round);
+        if (found) setCurrentRoundData(found);
+      });
+      fetchResults(2026).then(raw => {
+        const parsed = parseResults(raw);
+        const found = parsed.find(r => r.round === track.round);
+        if (found) setCurrentRoundData(found);
+      }).catch(() => {});
+    };
+
+    // Check cache instantly, then confirm with network
+    cacheRead('standings').then(cached => {
+      if (hasPoints(cached)) applyFinished();
+    });
+    fetchStandings().then(raw => {
+      if (hasPoints(raw)) applyFinished();
+    }).catch(() => {});
+  }, [isRaceWeekend, track.round]);
 
   // Build flat list sections: hero, sticky title, then all content blocks
   const {data, stickyIndex} = useMemo(() => {
@@ -95,8 +129,8 @@ export default function TrackDetailScreen({route, navigation}) {
     // Stats
     items.push({type: 'stats'});
 
-    // Live Timing button (race weekend only, feature-flagged)
-    if (isRaceWeekend && live_updates) items.push({type: 'liveTiming'});
+    // Live Timing / Results button
+    if ((isRaceWeekend && live_updates) || racesFinished) items.push({type: 'liveTiming'});
 
     // About
     if (track.about) items.push({type: 'about'});
@@ -143,7 +177,7 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     return {data: items, stickyIndex: titleIdx};
-  }, [track, sessions, weather, isRaceWeekend, track_weather, live_updates]);
+  }, [track, sessions, weather, isRaceWeekend, track_weather, live_updates, racesFinished]);
 
   const renderItem = ({item}) => {
     switch (item.type) {
@@ -189,16 +223,38 @@ export default function TrackDetailScreen({route, navigation}) {
 
       case 'liveTiming':
         return (
-          <TouchableOpacity
-            style={styles.liveTimingBtn}
-            activeOpacity={0.8}
-            onPress={() => { Analytics.liveTimingOpened(track.venue); navigation.navigate('LiveTiming', {eventId: track.tslEventId}); }}
-            accessibilityLabel="Open live timing"
-            accessibilityRole="button">
-            <View style={styles.liveDot} />
-            <Text style={styles.liveTimingText}>LIVE TIMING</Text>
-            <Icon name="chevron-right" size={18} color="#E3000B" />
-          </TouchableOpacity>
+          <View style={{gap: 8}}>
+            {isRaceWeekend && live_updates && (
+              <TouchableOpacity
+                style={styles.liveTimingBtn}
+                activeOpacity={0.8}
+                onPress={() => { Analytics.liveTimingOpened(track.venue); navigation.navigate('LiveTiming', {eventId: track.tslEventId}); }}
+                accessibilityLabel="Open live timing"
+                accessibilityRole="button">
+                <View style={styles.liveDot} />
+                <Text style={styles.liveTimingText}>LIVE TIMING</Text>
+                <Icon name="chevron-right" size={18} color="#E3000B" />
+              </TouchableOpacity>
+            )}
+            {racesFinished && (
+              <TouchableOpacity
+                style={[styles.liveTimingBtn, {borderColor: Colors.yellow}]}
+                activeOpacity={0.8}
+                onPress={() => {
+                  if (currentRoundData) {
+                    navigation.navigate('Results', {screen: 'RoundResults', params: {round: currentRoundData, year: 2026, initialRace: 0, origin: 'calendar'}});
+                  } else {
+                    navigation.navigate('Results', {screen: 'ResultsList', params: {openRound: track.round, openYear: 2026}});
+                  }
+                }}
+                accessibilityLabel="View race results"
+                accessibilityRole="button">
+                <Icon name="emoji-events" size={16} color={Colors.yellow} style={{marginRight: 8}} />
+                <Text style={[styles.liveTimingText, {color: Colors.yellow}]}>RESULTS</Text>
+                <Icon name="chevron-right" size={18} color={Colors.yellow} />
+              </TouchableOpacity>
+            )}
+          </View>
         );
 
       case 'about':

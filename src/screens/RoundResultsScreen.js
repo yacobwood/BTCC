@@ -31,7 +31,8 @@ function buildGridMap(races, raceIndex) {
 }
 
 export default function RoundResultsScreen({route, navigation}) {
-  const {round, year, initialRace} = route.params;
+  const {round, year, initialRace, origin} = route.params;
+  const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
   const [raceIndex, setRaceIndex] = useState(initialRace ?? 0);
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
@@ -114,7 +115,7 @@ export default function RoundResultsScreen({route, navigation}) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{padding: 4}} accessibilityLabel="Go back" accessibilityRole="button">
+        <TouchableOpacity onPress={handleBack} style={{padding: 4}} accessibilityLabel="Go back" accessibilityRole="button">
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={{flex: 1, marginLeft: 12}}>

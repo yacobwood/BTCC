@@ -68,10 +68,10 @@ function computeProgression(rounds) {
   return Object.values(series).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0));
 }
 
-export default function ResultsScreen({navigation}) {
+export default function ResultsScreen({navigation, route}) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const seasonStart = new Date('2026-04-18');
+  const seasonStart = new Date(2026, 3, 18); // April 18 2026 local midnight
   const seasonStarted = today >= seasonStart;
 
   const [year, setYear] = useState(seasonStarted ? 2026 : 2025);
@@ -216,6 +216,25 @@ export default function ResultsScreen({navigation}) {
   }, [year, seasonStarted]);
 
   useEffect(() => { Analytics.screen('results'); }, []);
+
+  // Auto-open a specific round when navigated here with openRound param
+  useFocusEffect(useCallback(() => {
+    const openRound = route?.params?.openRound;
+    const openYear = route?.params?.openYear;
+    if (!openRound) return;
+    // If the year doesn't match, switch it — the load useEffect will reload results
+    if (openYear && openYear !== year) {
+      navigation.setParams({openRound: undefined, openYear: undefined});
+      setYear(openYear);
+      return;
+    }
+    if (loading || results.length === 0) return;
+    const found = results.find(r => r.round === openRound);
+    if (found) {
+      navigation.setParams({openRound: undefined, openYear: undefined});
+      navigation.navigate('RoundResults', {round: found, year, initialRace: 0});
+    }
+  }, [route?.params?.openRound, route?.params?.openYear, loading, results, year]));
   useEffect(() => {
     // Bundled years (2004-2025) are synchronous — load immediately to avoid flash
     if (year >= 2004 && year <= 2025) {

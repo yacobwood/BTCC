@@ -67,10 +67,8 @@ open class CountdownWidget : AppWidgetProvider() {
             val wknd = LocalDate.now() >= cal.start
             when {
                 wknd -> { v.setTextViewText(R.id.widget_days, "RACE"); v.setTextViewText(R.id.widget_days_label, "WEEKEND") }
-                days <= 0L -> { v.setTextViewText(R.id.widget_days, "TODAY"); v.setTextViewText(R.id.widget_days_label, "DAY
-TO GO") }
-                days == 1L -> { v.setTextViewText(R.id.widget_days, "1"); v.setTextViewText(R.id.widget_days_label, "DAY
-TO GO") }
+                days <= 0L -> { v.setTextViewText(R.id.widget_days, "TODAY"); v.setTextViewText(R.id.widget_days_label, "DAY\nTO GO") }
+                days == 1L -> { v.setTextViewText(R.id.widget_days, "1"); v.setTextViewText(R.id.widget_days_label, "DAY\nTO GO") }
                 else -> { v.setTextViewText(R.id.widget_days, "$days"); v.setTextViewText(R.id.widget_days_label, "DAYS") }
             }
         } else {
