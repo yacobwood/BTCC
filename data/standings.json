@@ -3,46 +3,94 @@
   "standings": [
     {
       "pos": 1,
-      "driver": "Mikey Doble",
-      "car": "88",
-      "class": "I",
-      "points": 27,
+      "driver": "Ashley Sutton",
+      "car": "116",
+      "class": "M",
+      "points": 40,
       "wins": 1
     },
     {
       "pos": 2,
+      "driver": "Dan Cammish",
+      "car": "27",
+      "class": "M",
+      "points": 32,
+      "wins": 0
+    },
+    {
+      "pos": 3,
       "driver": "Charles Rainford",
       "car": "99",
+      "class": "I",
+      "points": 31,
+      "wins": 0
+    },
+    {
+      "pos": 4,
+      "driver": "Gordon Shedden",
+      "car": "52",
+      "class": "I",
+      "points": 30,
+      "wins": 0
+    },
+    {
+      "pos": 5,
+      "driver": "Mikey Doble",
+      "car": "88",
+      "class": "I",
+      "points": 29,
+      "wins": 1
+    },
+    {
+      "pos": 6,
+      "driver": "Aiden Moffat",
+      "car": "16",
+      "class": "I",
+      "points": 27,
+      "wins": 0
+    },
+    {
+      "pos": 7,
+      "driver": "Dexter Patterson",
+      "car": "17",
       "class": "I",
       "points": 21,
       "wins": 0
     },
     {
-      "pos": 3,
-      "driver": "Ashley Sutton",
-      "car": "116",
+      "pos": 8,
+      "driver": "Adam Morgan",
+      "car": "33",
       "class": "M",
       "points": 18,
       "wins": 0
     },
     {
-      "pos": 4,
-      "driver": "Dan Cammish",
-      "car": "27",
-      "class": "M",
-      "points": 15,
+      "pos": 9,
+      "driver": "\u00c1r\u00f3n Taylor-Smith",
+      "car": "50",
+      "class": "I",
+      "points": 16,
       "wins": 0
     },
     {
-      "pos": 5,
-      "driver": "Gordon Shedden",
-      "car": "52",
+      "pos": 10,
+      "driver": "Daryl De Leon",
+      "car": "2",
       "class": "I",
       "points": 15,
       "wins": 0
     },
     {
-      "pos": 6,
+      "pos": 11,
+      "driver": "Tom Chilton",
+      "car": "3",
+      "class": "M",
+      "points": 15,
+      "wins": 0
+    },
+    {
+      "pos": 12,
       "driver": "Daniel Rowbottom",
       "car": "32",
       "class": "M",
@@ -50,47 +98,23 @@
       "wins": 0
     },
     {
-      "pos": 7,
-      "driver": "Aiden Moffat",
-      "car": "16",
-      "class": "I",
+      "pos": 13,
+      "driver": "Josh Cook",
+      "car": "66",
+      "class": "M",
       "points": 14,
       "wins": 0
     },
     {
-      "pos": 8,
-      "driver": "Dexter Patterson",
-      "car": "17",
-      "class": "I",
-      "points": 12,
-      "wins": 0
-    },
-    {
-      "pos": 9,
-      "driver": "Tom Chilton",
-      "car": "3",
+      "pos": 14,
+      "driver": "Ricky Collard",
+      "car": "11",
       "class": "M",
-      "points": 12,
+      "points": 10,
       "wins": 0
     },
     {
-      "pos": 10,
-      "driver": "\u00c1r\u00f3n Taylor-Smith",
-      "car": "50",
-      "class": "I",
-      "points": 11,
-      "wins": 0
-    },
-    {
-      "pos": 11,
-      "driver": "Adam Morgan",
-      "car": "33",
-      "class": "M",
-      "points": 11,
-      "wins": 0
-    },
-    {
-      "pos": 12,
+      "pos": 15,
       "driver": "Tom Ingram",
       "car": "80",
       "class": "M",
@@ -98,23 +122,15 @@
       "wins": 0
     },
     {
-      "pos": 13,
-      "driver": "Josh Cook",
-      "car": "66",
-      "class": "M",
-      "points": 8,
-      "wins": 0
-    },
-    {
-      "pos": 14,
-      "driver": "Daryl De Leon",
-      "car": "2",
+      "pos": 16,
+      "driver": "Chris Smiley",
+      "car": "22",
       "class": "I",
-      "points": 4,
+      "points": 5,
       "wins": 0
     },
     {
-      "pos": 15,
+      "pos": 17,
       "driver": "James Dorlin",
       "car": "132",
       "class": "I",
@@ -122,7 +138,7 @@
       "wins": 0
     },
     {
-      "pos": 16,
+      "pos": 18,
       "driver": "Sam Osborne",
       "car": "77",
       "class": "M",
@@ -130,27 +146,11 @@
       "wins": 0
     },
     {
-      "pos": 17,
-      "driver": "Ricky Collard",
-      "car": "11",
-      "class": "M",
-      "points": 2,
-      "wins": 0
-    },
-    {
-      "pos": 18,
+      "pos": 19,
       "driver": "Lewis Selby",
       "car": "15",
       "class": "M",
-      "points": 1,
-      "wins": 0
-    },
-    {
-      "pos": 19,
-      "driver": "Chris Smiley",
-      "car": "22",
-      "class": "I",
-      "points": 1,
+      "points": 2,
       "wins": 0
     },
     {
@@ -173,56 +173,56 @@
   "teams": [
     {
       "pos": 1,
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 30,
+      "team": "NAPA Racing UK",
+      "points": 67,
       "wins": 0
     },
     {
       "pos": 2,
-      "team": "NAPA Racing UK",
-      "points": 30,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "points": 46,
       "wins": 0
     },
     {
       "pos": 3,
       "team": "WSR",
-      "points": 19,
+      "points": 40,
       "wins": 0
     },
     {
       "pos": 4,
       "team": "Laser Tools Racing with MB Motorsport",
-      "points": 19,
+      "points": 40,
       "wins": 0
     },
     {
       "pos": 5,
       "team": "Cataclean Plato Racing",
-      "points": 11,
+      "points": 19,
       "wins": 0
     },
     {
       "pos": 6,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 9,
+      "points": 18,
       "wins": 0
     },
     {
       "pos": 7,
-      "team": "Team VERTU",
-      "points": 7,
+      "team": "Restart Racing",
+      "points": 12,
       "wins": 0
     },
     {
       "pos": 8,
-      "team": "Restart Racing",
-      "points": 5,
+      "team": "Team VERTU",
+      "points": 11,
       "wins": 0
     },
     {
       "pos": 9,
       "team": "Speedworks Corolla Racing",
-      "points": 1,
+      "points": 8,
       "wins": 0
     }
   ]
