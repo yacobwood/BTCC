@@ -1,6 +1,12 @@
 {
   "stations": [
     {
+      "name": "TOCA Live Radio",
+      "tagline": "Official BTCC Radio",
+      "streamUrl": "https://d2ktlibtvvj8vp.cloudfront.net/trace_toca/6/prog_index.m3u8",
+      "coverage": "Live circuit-side commentary from Ian Titchmarsh & Alan Hyde"
+    },
+    {
       "name": "talkSPORT",
       "tagline": "UK Sports Radio",
       "streamUrl": "https://radio.talksport.com/stream",
