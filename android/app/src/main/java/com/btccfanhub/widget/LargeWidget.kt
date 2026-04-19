@@ -38,9 +38,17 @@ class LargeWidget : AppWidgetProvider() {
                     val minW = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
                     val minH = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
                     val theme = WidgetPrefs.getTheme(context, id)
-                    appWidgetManager.updateAppWidget(id, buildViews(context, cal, sessions, weather, minW, minH, theme))
+                    try {
+                        appWidgetManager.updateAppWidget(id, buildViews(context, cal, sessions, weather, minW, minH, theme))
+                    } catch (_: Exception) {
+                        appWidgetManager.updateAppWidget(id, fallbackViews(context, appWidgetManager, id))
+                    }
                 }
-            } } finally { pending.finish() }
+            } } catch (_: Exception) {
+                for (id in appWidgetIds) {
+                    try { appWidgetManager.updateAppWidget(id, fallbackViews(context, appWidgetManager, id)) } catch (_: Exception) {}
+                }
+            } finally { pending.finish() }
         }
     }
 
@@ -60,8 +68,14 @@ class LargeWidget : AppWidgetProvider() {
                 val cal = fetchCalendar(context)
                 val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
                 val sessions = cal?.sessions
-                appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, cal, sessions, weather, minW, minH, theme))
-            } } finally { pending.finish() }
+                try {
+                    appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, cal, sessions, weather, minW, minH, theme))
+                } catch (_: Exception) {
+                    appWidgetManager.updateAppWidget(appWidgetId, fallbackViews(context, appWidgetManager, appWidgetId))
+                }
+            } } catch (_: Exception) {
+                try { appWidgetManager.updateAppWidget(appWidgetId, fallbackViews(context, appWidgetManager, appWidgetId)) } catch (_: Exception) {}
+            } finally { pending.finish() }
         }
     }
 

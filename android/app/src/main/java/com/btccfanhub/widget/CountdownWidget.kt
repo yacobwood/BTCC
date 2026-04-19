@@ -31,9 +31,11 @@ open class CountdownWidget : AppWidgetProvider() {
                     val w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
                     val h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
                     val t = WidgetPrefs.getTheme(ctx, id)
-                    mgr.updateAppWidget(id, build(ctx, cal, w, h, t))
+                    try {
+                        mgr.updateAppWidget(id, build(ctx, cal, w, h, t))
+                    } catch (_: Exception) {}
                 }
-            } } finally { p.finish() }
+            } } catch (_: Exception) {} finally { p.finish() }
         }
     }
     override fun onAppWidgetOptionsChanged(ctx: Context, mgr: AppWidgetManager, id: Int, o: Bundle) {
