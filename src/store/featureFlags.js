@@ -4,6 +4,7 @@ import {getMessaging, getToken} from '@react-native-firebase/messaging';
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
 
 const defaults = {
+  radio_tab: true,
   podcasts_enabled: false,
   podcast_last_episode_url: '',
   debug_mode: false,
