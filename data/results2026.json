@@ -705,7 +705,239 @@
         },
         {
           "label": "Race 3",
-          "results": []
+          "results": [
+            {
+              "pos": 1,
+              "no": 116,
+              "driver": "Ashley SUTTON",
+              "team": "NAPA Racing UK",
+              "laps": 18,
+              "time": "20:51.143",
+              "gap": "",
+              "bestLap": "1:08.624",
+              "points": 20
+            },
+            {
+              "pos": 2,
+              "no": 80,
+              "driver": "Tom INGRAM",
+              "team": "Team VERTU",
+              "laps": 18,
+              "time": "20:53.331",
+              "gap": "2.188",
+              "bestLap": "1:08.078",
+              "points": 17
+            },
+            {
+              "pos": 3,
+              "no": 11,
+              "driver": "Ricky COLLARD",
+              "team": "Team VERTU",
+              "laps": 18,
+              "time": "20:58.361",
+              "gap": "7.218",
+              "bestLap": "1:08.683",
+              "points": 15
+            },
+            {
+              "pos": 4,
+              "no": 16,
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "laps": 18,
+              "time": "21:00.184",
+              "gap": "9.041",
+              "bestLap": "1:08.823",
+              "points": 13
+            },
+            {
+              "pos": 5,
+              "no": 99,
+              "driver": "Charles RAINFORD",
+              "team": "WSR",
+              "laps": 18,
+              "time": "21:01.027",
+              "gap": "9.884",
+              "bestLap": "1:09.108",
+              "points": 11
+            },
+            {
+              "pos": 6,
+              "no": 17,
+              "driver": "Dexter PATTERSON",
+              "team": "Steel Seal with Power Maxed Racing",
+              "laps": 18,
+              "time": "21:04.161",
+              "gap": "13.018",
+              "bestLap": "1:08.999",
+              "points": 10
+            },
+            {
+              "pos": 7,
+              "no": 22,
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "laps": 18,
+              "time": "21:05.319",
+              "gap": "14.176",
+              "bestLap": "1:08.608",
+              "points": 9
+            },
+            {
+              "pos": 8,
+              "no": 33,
+              "driver": "Adam MORGAN",
+              "team": "Cataclean Plato Racing",
+              "laps": 18,
+              "time": "21:05.920",
+              "gap": "14.777",
+              "bestLap": "1:09.086",
+              "points": 8
+            },
+            {
+              "pos": 9,
+              "no": 77,
+              "driver": "Sam OSBORNE",
+              "team": "NAPA Racing UK",
+              "laps": 18,
+              "time": "21:06.090",
+              "gap": "14.947",
+              "bestLap": "1:08.680",
+              "points": 7
+            },
+            {
+              "pos": 10,
+              "no": 27,
+              "driver": "Dan CAMMISH",
+              "team": "NAPA Racing UK",
+              "laps": 18,
+              "time": "21:08.038",
+              "gap": "16.895",
+              "bestLap": "1:08.698",
+              "points": 6
+            },
+            {
+              "pos": 11,
+              "no": 32,
+              "driver": "Daniel ROWBOTTOM",
+              "team": "Cataclean Plato Racing",
+              "laps": 18,
+              "time": "21:11.153",
+              "gap": "20.010",
+              "bestLap": "1:08.712",
+              "points": 5
+            },
+            {
+              "pos": 12,
+              "no": 52,
+              "driver": "Gordon SHEDDEN",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "laps": 18,
+              "time": "21:11.352",
+              "gap": "20.209",
+              "bestLap": "1:09.331",
+              "points": 4
+            },
+            {
+              "pos": 13,
+              "no": 50,
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "laps": 18,
+              "time": "21:11.402",
+              "gap": "20.259",
+              "bestLap": "1:09.243",
+              "points": 3
+            },
+            {
+              "pos": 14,
+              "no": 2,
+              "driver": "Daryl DE LEON",
+              "team": "WSR",
+              "laps": 18,
+              "time": "21:12.421",
+              "gap": "21.278",
+              "bestLap": "1:09.052",
+              "points": 2
+            },
+            {
+              "pos": 15,
+              "no": 132,
+              "driver": "James DORLIN",
+              "team": "Restart Racing",
+              "laps": 18,
+              "time": "21:12.618",
+              "gap": "21.475",
+              "bestLap": "1:08.862",
+              "points": 1
+            },
+            {
+              "pos": 16,
+              "no": 19,
+              "driver": "Max BUXTON",
+              "team": "Speedworks Corolla Racing",
+              "laps": 18,
+              "time": "21:20.712",
+              "gap": "29.569",
+              "bestLap": "1:09.408",
+              "points": 0
+            },
+            {
+              "pos": 17,
+              "no": 15,
+              "driver": "Lewis SELBY",
+              "team": "NAPA Racing UK",
+              "laps": 18,
+              "time": "21:40.449",
+              "gap": "49.306",
+              "bestLap": "1:08.171",
+              "points": 0
+            },
+            {
+              "pos": 18,
+              "no": 28,
+              "driver": "Nicolas HAMILTON",
+              "team": "Team VERTU",
+              "laps": 18,
+              "time": "21:41.697",
+              "gap": "50.554",
+              "bestLap": "1:09.615",
+              "points": 0
+            },
+            {
+              "pos": 19,
+              "no": 88,
+              "driver": "Mikey DOBLE",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "laps": 17,
+              "time": "21:17.930",
+              "gap": "1 Lap",
+              "bestLap": "1:08.280",
+              "points": 0
+            },
+            {
+              "pos": 0,
+              "no": 66,
+              "driver": "Josh COOK",
+              "team": "Speedworks Corolla Racing",
+              "laps": 15,
+              "time": "18:35.709",
+              "gap": "3 Laps",
+              "bestLap": "1:08.381",
+              "points": 0
+            },
+            {
+              "pos": 0,
+              "no": 3,
+              "driver": "Tom CHILTON",
+              "team": "Team VERTU",
+              "laps": 6,
+              "time": "9:07.341",
+              "gap": "12 Laps",
+              "bestLap": "1:09.687",
+              "points": 0
+            }
+          ]
         }
       ]
     },
