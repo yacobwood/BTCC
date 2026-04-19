@@ -180,6 +180,7 @@ export default function DriversScreen({navigation}) {
       </View>
       {tab === 0 ? (
         <FlatList
+          key="drivers"
           ref={driversListRef}
           data={drivers}
           keyExtractor={item => String(item.number)}
@@ -192,6 +193,7 @@ export default function DriversScreen({navigation}) {
         />
       ) : (
         <FlatList
+          key="teams"
           ref={teamsListRef}
           data={teams}
           keyExtractor={item => item.name}
