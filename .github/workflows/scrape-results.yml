@@ -2,9 +2,10 @@ name: Scrape BTCC Results
 
 on:
   schedule:
-    # Auto-run hourly on Sundays 13:00–17:00 UTC (Race 3 typically ends ~15:00–15:30 UTC/BST).
-    # The is_race_sunday guard step below skips non-race Sundays instantly.
-    - cron: "0 13-17 * * 0"
+    # Saturday: run hourly 15:00–18:00 UTC to catch the Qualifying Race (~15:05 BST start).
+    - cron: "0 15-18 * * 6"
+    # Sunday: run hourly 10:00–18:00 UTC to catch Race 1 (~10:30 BST), Race 2 (~13:40 BST), Race 3 (~16:30 BST).
+    - cron: "0 10-18 * * 0"
   workflow_dispatch:
     inputs:
       year:
@@ -26,14 +27,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
-      - name: Check race Sunday
+      - name: Check race weekend
         id: raceday
         run: python .github/scripts/is_race_weekend.py
 
       - name: Set up Python
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_sunday == 'true'
+          steps.raceday.outputs.is_race_weekend == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -41,7 +42,7 @@ jobs:
       - name: Install dependencies
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_sunday == 'true'
+          steps.raceday.outputs.is_race_weekend == 'true'
         run: |
           pip install -r tools/scraper/requirements.txt
           sudo apt-get install -y libasound2t64
@@ -50,7 +51,7 @@ jobs:
       - name: Scrape results
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_sunday == 'true'
+          steps.raceday.outputs.is_race_weekend == 'true'
         run: |
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
@@ -59,7 +60,7 @@ jobs:
       - name: Recompute standings from results
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_sunday == 'true'
+          steps.raceday.outputs.is_race_weekend == 'true'
         run: |
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
@@ -68,7 +69,7 @@ jobs:
       - name: Commit updated data
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_sunday == 'true'
+          steps.raceday.outputs.is_race_weekend == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"
