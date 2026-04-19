@@ -191,9 +191,22 @@ def extract_races(page) -> list[dict]:
                 .map(tr => Array.from(tr.querySelectorAll('td, th')).map(c => c.textContent.trim()))
                 .filter(r => r.length >= 4);
 
-        // Strategy 1: find all race tab links (Qualifying Race + Race 1/2/3)
+        // Normalise a tab label: map any variant of qualifying race to canonical form
+        const normaliseLabel = (text) => {
+            const t = text.trim();
+            // "Qualifying Race" or "Qualifying" (when it's a race, not the session)
+            // btcc.net may call it "Qualifying Race" or just "Qualifying"
+            if (/^qualifying\\s+race$/i.test(t)) return 'Qualifying Race';
+            if (/^qualifying$/i.test(t)) return 'Qualifying Race';
+            if (/^race\\s+1$/i.test(t)) return 'Race 1';
+            if (/^race\\s+2$/i.test(t)) return 'Race 2';
+            if (/^race\\s+3$/i.test(t)) return 'Race 3';
+            return t;
+        };
+
+        // Strategy 1: find all race tab links
         const tabLinks = Array.from(document.querySelectorAll('a[href^="#"]'))
-            .filter(a => /^(qualifying\\s+race|race\\s+[123])$/i.test(a.textContent.trim()));
+            .filter(a => /^(qualifying(\\s+race)?|race\\s+[123])$/i.test(a.textContent.trim()));
 
         if (tabLinks.length >= 3) {
             const byId = [];
@@ -203,7 +216,7 @@ def extract_races(page) -> list[dict]:
                 if (!section) continue;
                 const table = section.querySelector('table');
                 if (!table) continue;
-                byId.push({ label: link.textContent.trim(), rows: extractRows(table) });
+                byId.push({ label: normaliseLabel(link.textContent), rows: extractRows(table) });
             }
             if (byId.length >= 3) return byId;
         }
@@ -217,8 +230,8 @@ def extract_races(page) -> list[dict]:
         });
 
         const labels = tabLinks.length >= 3
-            ? tabLinks.map(a => a.textContent.trim())
-            : ['Race 1', 'Race 2', 'Race 3'];
+            ? tabLinks.map(a => normaliseLabel(a.textContent))
+            : ['Qualifying Race', 'Race 1', 'Race 2', 'Race 3'];
 
         return raceTables.map((table, i) => ({
             label: labels[i] || ('Race ' + (i + 1)),

@@ -7,7 +7,7 @@
       "date": "18 Apr 2026",
       "races": [
         {
-          "label": "Race 1",
+          "label": "Qualifying Race",
           "results": [
             {
               "pos": 1,
@@ -18,7 +18,7 @@
               "time": "15:07.947",
               "gap": "",
               "bestLap": "1:08.649",
-              "points": 20
+              "points": 10
             },
             {
               "pos": 2,
@@ -29,7 +29,7 @@
               "time": "15:07.971",
               "gap": "0.024",
               "bestLap": "1:08.236",
-              "points": 17
+              "points": 9
             },
             {
               "pos": 3,
@@ -40,7 +40,7 @@
               "time": "15:08.257",
               "gap": "0.310",
               "bestLap": "1:08.713",
-              "points": 15
+              "points": 8
             },
             {
               "pos": 4,
@@ -51,7 +51,7 @@
               "time": "15:09.249",
               "gap": "1.302",
               "bestLap": "1:08.624",
-              "points": 13
+              "points": 7
             },
             {
               "pos": 5,
@@ -62,7 +62,7 @@
               "time": "15:09.952",
               "gap": "2.005",
               "bestLap": "1:08.744",
-              "points": 11
+              "points": 6
             },
             {
               "pos": 6,
@@ -73,7 +73,7 @@
               "time": "15:11.455",
               "gap": "3.508",
               "bestLap": "1:08.818",
-              "points": 10
+              "points": 5
             },
             {
               "pos": 7,
@@ -84,7 +84,7 @@
               "time": "15:12.665",
               "gap": "4.718",
               "bestLap": "1:09.028",
-              "points": 9
+              "points": 4
             },
             {
               "pos": 8,
@@ -95,7 +95,7 @@
               "time": "15:12.955",
               "gap": "5.008",
               "bestLap": "1:08.868",
-              "points": 8
+              "points": 3
             },
             {
               "pos": 9,
@@ -106,7 +106,7 @@
               "time": "15:17.551",
               "gap": "9.604",
               "bestLap": "1:09.104",
-              "points": 7
+              "points": 2
             },
             {
               "pos": 10,
@@ -117,7 +117,7 @@
               "time": "15:18.793",
               "gap": "10.846",
               "bestLap": "1:08.948",
-              "points": 6
+              "points": 1
             },
             {
               "pos": 11,
@@ -128,7 +128,7 @@
               "time": "15:19.116",
               "gap": "11.169",
               "bestLap": "1:09.045",
-              "points": 5
+              "points": 0
             },
             {
               "pos": 12,
@@ -139,7 +139,7 @@
               "time": "15:19.378",
               "gap": "11.431",
               "bestLap": "1:09.022",
-              "points": 4
+              "points": 0
             },
             {
               "pos": 13,
@@ -150,7 +150,7 @@
               "time": "15:19.514",
               "gap": "11.567",
               "bestLap": "1:08.996",
-              "points": 3
+              "points": 0
             },
             {
               "pos": 14,
@@ -161,7 +161,7 @@
               "time": "15:19.741",
               "gap": "11.794",
               "bestLap": "1:08.984",
-              "points": 2
+              "points": 0
             },
             {
               "pos": 15,
@@ -172,7 +172,7 @@
               "time": "15:20.651",
               "gap": "12.704",
               "bestLap": "1:08.968",
-              "points": 1
+              "points": 0
             },
             {
               "pos": 16,
@@ -243,7 +243,7 @@
           ]
         },
         {
-          "label": "Race 2",
+          "label": "Race 1",
           "results": [
             {
               "pos": 1,
@@ -477,6 +477,10 @@
               "points": 0
             }
           ]
+        },
+        {
+          "label": "Race 2",
+          "results": []
         },
         {
           "label": "Race 3",
