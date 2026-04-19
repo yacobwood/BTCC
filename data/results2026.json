@@ -252,7 +252,7 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "laps": 21,
               "time": "26:01.652",
-              "gap": "1.468",
+              "gap": "",
               "bestLap": "1:08.351",
               "points": 20
             },
@@ -263,96 +263,96 @@
               "team": "NAPA Racing UK",
               "laps": 21,
               "time": "26:03.401",
-              "gap": "3.217",
+              "gap": "1.749",
               "bestLap": "1:07.944",
               "points": 17
             },
             {
               "pos": 3,
-              "no": 33,
-              "driver": "Adam MORGAN",
-              "team": "Cataclean Plato Racing",
-              "laps": 21,
-              "time": "26:05.427",
-              "gap": "5.243",
-              "bestLap": "1:08.835",
-              "points": 15
-            },
-            {
-              "pos": 4,
               "no": 99,
               "driver": "Charles RAINFORD",
               "team": "WSR",
               "laps": 21,
               "time": "26:07.044",
-              "gap": "6.860",
+              "gap": "5.392",
               "bestLap": "1:08.246",
-              "points": 13
+              "points": 15
             },
             {
-              "pos": 5,
+              "pos": 4,
               "no": 27,
               "driver": "Dan CAMMISH",
               "team": "NAPA Racing UK",
               "laps": 21,
               "time": "26:07.928",
-              "gap": "7.744",
+              "gap": "6.276",
               "bestLap": "1:08.755",
-              "points": 11
+              "points": 13
             },
             {
-              "pos": 6,
+              "pos": 5,
               "no": 52,
               "driver": "Gordon SHEDDEN",
               "team": "Laser Tools Racing with MB Motorsport",
               "laps": 21,
               "time": "26:09.053",
-              "gap": "8.869",
+              "gap": "7.401",
               "bestLap": "1:08.928",
-              "points": 10
+              "points": 11
             },
             {
-              "pos": 7,
+              "pos": 6,
               "no": 16,
               "driver": "Aiden MOFFAT",
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "laps": 21,
               "time": "26:09.345",
-              "gap": "9.161",
+              "gap": "7.693",
               "bestLap": "1:08.654",
-              "points": 9
+              "points": 10
             },
             {
-              "pos": 8,
+              "pos": 7,
               "no": 17,
               "driver": "Dexter PATTERSON",
               "team": "Steel Seal with Power Maxed Racing",
               "laps": 21,
               "time": "26:09.754",
-              "gap": "9.570",
+              "gap": "8.102",
               "bestLap": "1:09.026",
-              "points": 8
+              "points": 9
             },
             {
-              "pos": 9,
+              "pos": 8,
               "no": 50,
               "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "laps": 21,
               "time": "26:09.832",
-              "gap": "9.648",
+              "gap": "8.180",
               "bestLap": "1:09.054",
-              "points": 7
+              "points": 8
             },
             {
-              "pos": 10,
+              "pos": 9,
               "no": 3,
               "driver": "Tom CHILTON",
               "team": "Team VERTU",
               "laps": 21,
               "time": "26:10.069",
-              "gap": "9.885",
+              "gap": "8.417",
               "bestLap": "1:08.748",
+              "points": 7
+            },
+            {
+              "pos": 10,
+              "no": 33,
+              "driver": "Adam MORGAN",
+              "team": "Cataclean Plato Racing",
+              "laps": 21,
+              "time": "26:10.427",
+              "gap": "8.775",
+              "bestLap": "1:08.835",
               "points": 6
             },
             {
@@ -362,7 +362,7 @@
               "team": "Cataclean Plato Racing",
               "laps": 21,
               "time": "26:13.319",
-              "gap": "13.135",
+              "gap": "11.667",
               "bestLap": "1:08.291",
               "points": 5
             },
@@ -373,7 +373,7 @@
               "team": "WSR",
               "laps": 21,
               "time": "26:13.807",
-              "gap": "13.623",
+              "gap": "12.155",
               "bestLap": "1:08.966",
               "points": 4
             },
@@ -384,7 +384,7 @@
               "team": "Restart Racing",
               "laps": 21,
               "time": "26:15.028",
-              "gap": "14.844",
+              "gap": "13.376",
               "bestLap": "1:09.457",
               "points": 3
             },
@@ -395,7 +395,7 @@
               "team": "NAPA Racing UK",
               "laps": 21,
               "time": "26:15.268",
-              "gap": "15.084",
+              "gap": "13.616",
               "bestLap": "1:09.442",
               "points": 2
             },
@@ -406,7 +406,7 @@
               "team": "NAPA Racing UK",
               "laps": 21,
               "time": "26:15.684",
-              "gap": "15.500",
+              "gap": "14.032",
               "bestLap": "1:09.249",
               "points": 1
             },
@@ -417,7 +417,7 @@
               "team": "Restart Racing",
               "laps": 21,
               "time": "26:15.812",
-              "gap": "15.628",
+              "gap": "14.160",
               "bestLap": "1:09.149",
               "points": 0
             },
@@ -428,7 +428,7 @@
               "team": "Team VERTU",
               "laps": 21,
               "time": "26:22.783",
-              "gap": "22.599",
+              "gap": "21.131",
               "bestLap": "1:09.646",
               "points": 0
             },
@@ -439,19 +439,8 @@
               "team": "Speedworks Corolla Racing",
               "laps": 21,
               "time": "26:23.001",
-              "gap": "22.817",
+              "gap": "21.349",
               "bestLap": "1:09.693",
-              "points": 0
-            },
-            {
-              "pos": 0,
-              "no": 80,
-              "driver": "Tom INGRAM",
-              "team": "Team VERTU",
-              "laps": 21,
-              "time": "DSQ",
-              "gap": "",
-              "bestLap": "1:08.158",
               "points": 0
             },
             {
