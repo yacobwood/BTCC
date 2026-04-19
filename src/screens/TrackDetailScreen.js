@@ -61,8 +61,17 @@ export default function TrackDetailScreen({route, navigation}) {
   const dateRange = formatDateRange(track.startDate, track.endDate);
 
   const today = new Date();
-  const isRaceWeekend = !!track.tslEventId && track.startDate && track.endDate
-    && today >= new Date(track.startDate) && today <= new Date(track.endDate);
+  today.setHours(0, 0, 0, 0);
+  const parseLocalDate = str => {
+    if (!str) return null;
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const trackStart = parseLocalDate(track.startDate);
+  const trackEnd = parseLocalDate(track.endDate);
+  const isRaceWeekend = !!track.tslEventId && trackStart && trackEnd
+    && today >= trackStart && today <= trackEnd;
+  const isPastRaceWeekend = !!track.tslEventId && trackEnd && today > trackEnd;
 
   const sessions = track.sessions || [];
   const [weather, setWeather] = useState(null);
@@ -86,7 +95,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
   // Check whether standings have been updated (i.e. at least one race has finished this weekend)
   useEffect(() => {
-    if (!isRaceWeekend) return;
+    if (!isRaceWeekend && !isPastRaceWeekend) return;
     const hasPoints = raw => (raw?.standings || []).some(d => d.points > 0);
 
     const applyFinished = () => {
@@ -111,7 +120,7 @@ export default function TrackDetailScreen({route, navigation}) {
     fetchStandings().then(raw => {
       if (hasPoints(raw)) applyFinished();
     }).catch(() => {});
-  }, [isRaceWeekend, track.round]);
+  }, [isRaceWeekend, isPastRaceWeekend, track.round]);
 
   // Build flat list sections: hero, sticky title, then all content blocks
   const {data, stickyIndex} = useMemo(() => {
@@ -130,7 +139,7 @@ export default function TrackDetailScreen({route, navigation}) {
     items.push({type: 'stats'});
 
     // Live Timing / Results button
-    if ((isRaceWeekend && live_updates) || racesFinished) items.push({type: 'liveTiming'});
+    if ((isRaceWeekend && live_updates) || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
 
     // About
     if (track.about) items.push({type: 'about'});
@@ -177,7 +186,7 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     return {data: items, stickyIndex: titleIdx};
-  }, [track, sessions, weather, isRaceWeekend, track_weather, live_updates, racesFinished]);
+  }, [track, sessions, weather, isRaceWeekend, isPastRaceWeekend, track_weather, live_updates, racesFinished]);
 
   const renderItem = ({item}) => {
     switch (item.type) {
@@ -236,7 +245,7 @@ export default function TrackDetailScreen({route, navigation}) {
                 <Icon name="chevron-right" size={18} color="#E3000B" />
               </TouchableOpacity>
             )}
-            {racesFinished && (
+            {(racesFinished || isPastRaceWeekend) && (
               <TouchableOpacity
                 style={[styles.liveTimingBtn, {borderColor: Colors.yellow}]}
                 activeOpacity={0.8}
