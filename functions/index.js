@@ -214,8 +214,12 @@ exports.sendSessionNotifications = onSchedule(
             sends.push(
               messaging.send({
                 topic: 'news_alerts',
-                android: {priority: 'high'},
-                apns: {payload: {aps: {contentAvailable: true}}},
+                notification: {
+                  title: 'New Article',
+                  body: title,
+                },
+                android: {priority: 'high', notification: {channelId: 'news'}},
+                apns: {payload: {aps: {sound: 'default'}}},
                 data: {type: 'news', slug: latest.slug || '', channel: 'news', title, ...(imageUrl ? {imageUrl} : {})},
               }),
             );
@@ -245,8 +249,12 @@ exports.sendSessionNotifications = onSchedule(
             sends.push(
               messaging.send({
                 topic: 'news_alerts',
-                android: {priority: 'high'},
-                apns: {payload: {aps: {contentAvailable: true}}},
+                notification: {
+                  title: 'New Post',
+                  body: hubTitle,
+                },
+                android: {priority: 'high', notification: {channelId: 'news'}},
+                apns: {payload: {aps: {sound: 'default'}}},
                 data: {type: 'hub', id: String(latestHub.id), channel: 'news', title: hubTitle, ...(hubImageUrl ? {imageUrl: hubImageUrl} : {})},
               }),
             );
@@ -285,8 +293,12 @@ exports.sendSessionNotifications = onSchedule(
             sends.push(
               messaging.send({
                 topic: 'podcast_alerts',
-                android: {priority: 'high'},
-                apns: {payload: {aps: {contentAvailable: true}}},
+                notification: {
+                  title: 'New Podcast',
+                  body: podTitle,
+                },
+                android: {priority: 'high', notification: {channelId: 'podcasts'}},
+                apns: {payload: {aps: {sound: 'default'}}},
                 data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
               }),
             );

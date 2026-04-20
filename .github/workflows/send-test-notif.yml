@@ -52,8 +52,9 @@ jobs:
           if (imageUrl) data.imageUrl = imageUrl;
           admin.messaging().send({
             token: process.env.DEVICE_TOKEN,
-            android: { priority: 'high' },
-            apns: { payload: { aps: { contentAvailable: true } } },
+            notification: { title: process.env.TITLE, body: process.env.BODY || '' },
+            android: { priority: 'high', notification: { channelId: process.env.CHANNEL } },
+            apns: { payload: { aps: { sound: 'default' } } },
             data,
           }).then(r => { console.log('Sent:', r); process.exit(0); })
             .catch(e => { console.error('Error:', e.message); process.exit(1); });
