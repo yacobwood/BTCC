@@ -14,46 +14,90 @@ const TOCA_FALLBACK_URL = 'https://btcc.net/live/live-audio/';
 const STATION_NAME = 'TOCA Live Radio';
 const TIMEOUT_MS = 15000;
 
-// Injected into ALL frames (main + iframes) BEFORE page scripts run.
-// The Cre8Media player lives inside an iframe — injectedJavaScriptForMainFrameOnly={false}
-// ensures this runs there too.
+// Comprehensive stream URL interceptor — covers all known ways a player can set audio src:
+//   1. audio.src = url               (src setter)
+//   2. audio.setAttribute('src',url) (setAttribute)
+//   3. new Audio(url)                (constructor — bypasses src setter!)
+//   4. static <audio src="url">      (HTML attribute, polled via currentSrc)
+//   5. XHR / fetch to a stream URL
 const INJECT_JS = `(function() {
   var sent = false;
   function send(url) {
     if (sent || !url || typeof url !== 'string') return;
+    if (url.indexOf('blob:') === 0) return; // MSE blob URLs can't be replayed natively
     var l = url.toLowerCase();
-    // Skip obvious non-audio assets
     if (/\\.(js|css|png|jpg|gif|svg|woff2?|ico|xml|html)(\\?|$)/.test(l)) return;
-    if (/google|facebook|gtm|doubleclick|exactmetrics|wpengine|gravatar|wp-json|admin-ajax/.test(l)) return;
-    // Capture: .m3u8, .mp3/.aac/.ogg, /stream /listen /live /radio /audio path segments, port streams
-    // OR any URL from known streaming CDN domains
-    if (/\\.m3u8|\\.(mp3|aac|ogg|flac)(\\?|$)|radiojar|streamguys|tritondigital|shoutcast|icecast|ice\\.|\\/(?:stream|listen|live|radio|audio)(\\.|\\/|\\?|$)|:[89]\\d{3}\\//.test(l)) {
-      sent = true;
-      window.ReactNativeWebView.postMessage(JSON.stringify({type:'stream',url:url}));
-    }
+    if (/google|facebook|gtm|doubleclick|exactmetrics|gravatar|wp-json|admin-ajax|wp-content\\/(?:plugins|themes)/.test(l)) return;
+    sent = true;
+    window.ReactNativeWebView.postMessage(JSON.stringify({type:'stream',url:url}));
   }
-  // XHR
-  var xhrOpen = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function(m,u){ try{send(String(u));}catch(e){} return xhrOpen.apply(this,arguments); };
-  // fetch
-  var origFetch = window.fetch;
-  window.fetch = function(i,o){ try{send(typeof i==='string'?i:(i&&i.url?i.url:''));}catch(e){} return origFetch.apply(this,arguments); };
-  // HTMLMediaElement.src (audio.src = url)
+
+  // 1. HTMLMediaElement.src setter (audio.src = url)
   try {
-    var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
-    if(d&&d.set) Object.defineProperty(HTMLMediaElement.prototype,'src',{
-      set:function(v){try{send(v);}catch(e){} return d.set.call(this,v);},
-      get:d.get, configurable:true
+    var dSrc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
+    if(dSrc&&dSrc.set) Object.defineProperty(HTMLMediaElement.prototype,'src',{
+      set:function(v){try{send(v);}catch(e){} return dSrc.set.call(this,v);},
+      get:dSrc.get, configurable:true
     });
   } catch(e){}
-  // Element.setAttribute (audio.setAttribute('src', url) and <source src="">)
+
+  // 2. Element.setAttribute (audio.setAttribute('src',url) and <source src="">)
   try {
     var origSetAttr = Element.prototype.setAttribute;
     Element.prototype.setAttribute = function(name,value){
-      try{ if(name==='src') send(value); }catch(e){}
+      try{ if(name==='src'||name==='data-src') send(value); }catch(e){}
       return origSetAttr.apply(this,arguments);
     };
   } catch(e){}
+
+  // 3. Audio constructor — new Audio(url) bypasses the src setter entirely
+  try {
+    var OrigAudio = window.Audio;
+    if(OrigAudio) {
+      function PatchedAudio(url) {
+        try{ if(url) send(url); }catch(e){}
+        return new OrigAudio(url);
+      }
+      PatchedAudio.prototype = OrigAudio.prototype;
+      window.Audio = PatchedAudio;
+    }
+  } catch(e){}
+
+  // 4. Poll audio/video elements for currentSrc (catches static HTML src attributes
+  //    set during HTML parsing — those never fire JS property setters)
+  var polls = 0;
+  var poll = setInterval(function(){
+    if(sent||++polls>60){clearInterval(poll);return;}
+    try{
+      document.querySelectorAll('audio,video').forEach(function(el){
+        var u=el.currentSrc||el.src;
+        if(u&&u.indexOf('http')===0) send(u);
+        el.querySelectorAll('source').forEach(function(s){if(s.src&&s.src.indexOf('http')===0)send(s.src);});
+      });
+    }catch(e){}
+  },500);
+
+  // 5. XHR — for players that fetch audio data directly
+  var xhrOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(m,u){
+    try{
+      var l=String(u).toLowerCase();
+      if(/\\.m3u8|\\.(mp3|aac|ogg)(\\?|$)|radiojar|streamguys|tritondigital|shoutcast|icecast|\\/(?:stream|listen|live\\.)(\\?|$)/.test(l)) send(String(u));
+    }catch(e){}
+    return xhrOpen.apply(this,arguments);
+  };
+
+  // 6. fetch — same as above
+  var origFetch = window.fetch;
+  window.fetch = function(i,o){
+    try{
+      var u=typeof i==='string'?i:(i&&i.url?i.url:'');
+      var l=u.toLowerCase();
+      if(/\\.m3u8|\\.(mp3|aac|ogg)(\\?|$)|radiojar|streamguys|tritondigital|shoutcast|icecast|\\/(?:stream|listen|live\\.)(\\?|$)/.test(l)) send(u);
+    }catch(e){}
+    return origFetch.apply(this,arguments);
+  };
+
   true;
 })();`;
 
