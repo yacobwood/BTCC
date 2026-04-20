@@ -503,6 +503,7 @@ export default function ResultsScreen({navigation, route}) {
           <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20}} onScroll={onListScroll} scrollEventThrottle={100}>
             <ProgressionChart
               series={progression}
+              totalRounds={results.length}
               roundLabels={results.filter(r => r.races.some(race => race.results.length > 0)).sort((a, b) => a.round - b.round).map(r => r.venue)}
               isFavourite={isFavourite}
             />
