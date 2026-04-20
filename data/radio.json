@@ -1,6 +1,12 @@
 {
   "stations": [
     {
+      "name": "TOCA Live Radio",
+      "tagline": "Official BTCC Broadcast",
+      "streamUrl": "http://s8.voscast.com:8185/btccstream",
+      "coverage": "Live commentary and coverage during BTCC race weekends"
+    },
+    {
       "name": "talkSPORT",
       "tagline": "UK Sports Radio",
       "streamUrl": "https://radio.talksport.com/stream",
