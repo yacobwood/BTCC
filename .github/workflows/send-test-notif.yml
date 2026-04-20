@@ -39,9 +39,16 @@ jobs:
 
       - name: Debug secret
         run: |
-          echo "Secret length: ${#FIREBASE_SERVICE_ACCOUNT}"
-          echo "First 20 chars: ${FIREBASE_SERVICE_ACCOUNT:0:20}"
-          node -e "try { const j = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT); console.log('Parsed OK, project_id:', j.project_id); } catch(e) { console.log('Parse FAILED:', e.message); }"
+          node -e "
+            const j = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+            console.log('project_id:', j.project_id);
+            console.log('client_email:', j.client_email);
+            console.log('type:', j.type);
+            console.log('private_key starts with:', j.private_key?.substring(0, 30));
+            console.log('private_key ends with:', j.private_key?.slice(-30));
+            console.log('private_key length:', j.private_key?.length);
+            console.log('has newlines:', j.private_key?.includes('\\n'));
+          "
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
@@ -68,7 +75,7 @@ jobs:
             apns: { payload: { aps: { sound: 'default' } } },
             data,
           }).then(r => { console.log('Sent:', r); process.exit(0); })
-            .catch(e => { console.error('Error:', e.message); process.exit(1); });
+            .catch(e => { console.error('Error:', e.message); console.error('Code:', e.code); console.error('Full:', JSON.stringify(e, Object.getOwnPropertyNames(e))); process.exit(1); });
           EOF
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
