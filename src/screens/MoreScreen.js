@@ -69,7 +69,7 @@ export default function MoreScreen({navigation}) {
 
         {/* App section */}
         <Text style={styles.sectionTitle}>APP</Text>
-        <MoreRow label="TOCA Live Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('toca_live_radio'); Linking.openURL('https://btcc.net/live/live-audio/'); }} />
+        <MoreRow label="TOCA Live Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('toca_live_radio'); navigation.navigate('TocaRadio'); }} />
         {radio_tab && <MoreRow label="Radio" icon="wifi-tethering" onPress={() => { Analytics.moreItemClicked('radio'); navigation.navigate('Radio'); }} />}
         {podcasts_enabled && <MoreRow label="Podcasts & Interviews" icon="mic" onPress={() => { Analytics.moreItemClicked('podcasts'); navigation.navigate('Podcasts'); }} />}
         <MoreRow label="All-Time Records" icon="emoji-events" onPress={() => { Analytics.moreItemClicked('records'); navigation.navigate('Records'); }} />

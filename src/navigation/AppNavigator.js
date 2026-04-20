@@ -43,6 +43,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import InfoPageScreen from '../screens/InfoPageScreen';
 import BugReportScreen from '../screens/BugReportScreen';
 import RadioScreen from '../screens/RadioScreen';
+import TocaRadioScreen from '../screens/TocaRadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
@@ -119,6 +120,7 @@ function MoreStack() {
       <Stack.Screen name="Records" component={RecordsScreen} />
       <Stack.Screen name="Partners" component={PartnersScreen} />
       <Stack.Screen name="Roadmap" component={RoadmapScreen} />
+      <Stack.Screen name="TocaRadio" component={TocaRadioScreen} />
     </Stack.Navigator>
   );
 }
