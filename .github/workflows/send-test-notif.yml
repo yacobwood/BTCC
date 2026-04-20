@@ -37,11 +37,22 @@ jobs:
       - name: Install firebase-admin
         run: npm install firebase-admin
 
+      - name: Debug secret
+        run: |
+          echo "Secret length: ${#FIREBASE_SERVICE_ACCOUNT}"
+          echo "First 20 chars: ${FIREBASE_SERVICE_ACCOUNT:0:20}"
+          node -e "try { const j = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT); console.log('Parsed OK, project_id:', j.project_id); } catch(e) { console.log('Parse FAILED:', e.message); }"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
       - name: Send FCM notification (v1 API)
         run: |
           node - <<'EOF'
           const admin = require('./node_modules/firebase-admin');
-          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
+          console.log('SA length:', raw.length, 'starts with:', raw.substring(0, 5));
+          const serviceAccount = JSON.parse(raw);
+          console.log('Parsed project_id:', serviceAccount.project_id);
           admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
           console.log('EXTRA_DATA raw:', JSON.stringify(process.env.EXTRA_DATA));
           let extraData = {};
