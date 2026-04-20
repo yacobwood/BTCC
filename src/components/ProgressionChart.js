@@ -11,7 +11,7 @@ const CHART_COLORS = [
 
 const screenWidth = Dimensions.get('window').width;
 
-function ProgressionChart({series: rawSeries, roundLabels, totalRounds, isFavourite}) {
+function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
   // Deduplicate and prepend a R0 origin point (0 pts) so all lines start from the bottom-left
   const series = rawSeries
     .filter((s, i, arr) => arr.findIndex(x => x.name === s.name) === i)
@@ -52,17 +52,14 @@ function ProgressionChart({series: rawSeries, roundLabels, totalRounds, isFavour
   const plotW = chartW - padL - padR;
   const plotH = chartH - padT - padB;
 
-  const dataRounds = Math.max(...series.map(s => s.points.length), 1);
-  // axisRounds: total rounds in the season (+1 for the prepended origin point)
-  // Falls back to dataRounds so historical years without totalRounds still work
-  const axisRounds = totalRounds ? totalRounds + 1 : dataRounds;
+  const maxRounds = Math.max(...series.map(s => s.points.length), 1);
   const maxPts = Math.max(...series.map(s => Math.max(...s.points.filter(v => v !== null), 0)), 1);
 
   // Y-axis ticks every 50
   const yTicks = [];
   for (let v = 0; v <= maxPts + 50; v += 50) yTicks.push(v);
 
-  const x = (i) => padL + (i / (axisRounds - 1 || 1)) * plotW;
+  const x = (i) => padL + (i / (maxRounds - 1 || 1)) * plotW;
   const y = (v) => padT + plotH - (v / (yTicks[yTicks.length - 1] || 1)) * plotH;
 
   return (
@@ -77,7 +74,7 @@ function ProgressionChart({series: rawSeries, roundLabels, totalRounds, isFavour
             </React.Fragment>
           ))}
           {/* X-axis labels — skip index 0 (R0 origin point, no label) */}
-          {Array.from({length: axisRounds}, (_, i) => i === 0 ? null : (
+          {Array.from({length: maxRounds}, (_, i) => i === 0 ? null : (
             <SvgText key={i} x={x(i)} y={chartH - 4} fill={Colors.textSecondary} fontSize={8} textAnchor="middle">
               R{i}
             </SvgText>

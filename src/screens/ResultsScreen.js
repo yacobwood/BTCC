@@ -50,9 +50,7 @@ function computeProgression(rounds) {
   const driverPoints = {};
   const firstRound = {}; // round index when driver first appeared
   const series = {};
-  const sortedRounds = [...rounds]
-    .sort((a, b) => a.round - b.round)
-    .filter(r => r.races.some(race => race.results.length > 0));
+  const sortedRounds = [...rounds].sort((a, b) => a.round - b.round);
   sortedRounds.forEach((round, roundIdx) => {
     for (const race of round.races) {
       for (const r of race.results) {
@@ -503,7 +501,6 @@ export default function ResultsScreen({navigation, route}) {
           <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20}} onScroll={onListScroll} scrollEventThrottle={100}>
             <ProgressionChart
               series={progression}
-              totalRounds={results.length}
               roundLabels={results.filter(r => r.races.some(race => race.results.length > 0)).sort((a, b) => a.round - b.round).map(r => r.venue)}
               isFavourite={isFavourite}
             />
