@@ -6,7 +6,11 @@ import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
 
-const TOCA_URL = 'https://btcc.net/live/live-audio/';
+// The btcc.net page embeds the Cre8Media player in an iframe from this URL.
+// Android cannot inject JS into iframes, so we target the iframe URL directly
+// for the hidden sniffer WebView. The fallback shows the btcc.net parent page.
+const TOCA_URL = 'https://www.cre8media.net/btccaudio/';
+const TOCA_FALLBACK_URL = 'https://btcc.net/live/live-audio/';
 const STATION_NAME = 'TOCA Live Radio';
 const TIMEOUT_MS = 15000;
 
@@ -160,7 +164,7 @@ export default function TocaRadioScreen({navigation}) {
       {phase === 'fallback' && (
         <WebView
           ref={webviewRef}
-          source={{uri: TOCA_URL}}
+          source={{uri: TOCA_FALLBACK_URL}}
           injectedJavaScriptBeforeContentLoaded={INJECT_JS}
           injectedJavaScriptForMainFrameOnly={false}
           onMessage={onMessage}
