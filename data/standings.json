@@ -38,7 +38,7 @@
       "driver": "Gordon Shedden",
       "car": "52",
       "class": "I",
-      "points": 34,
+      "points": 32,
       "wins": 0
     },
     {
@@ -83,6 +83,14 @@
     },
     {
       "pos": 11,
+      "driver": "\u00c1r\u00f3n Taylor-Smith",
+      "car": "50",
+      "class": "I",
+      "points": 20,
+      "wins": 0
+    },
+    {
+      "pos": 12,
       "driver": "Daniel Rowbottom",
       "car": "32",
       "class": "M",
@@ -90,19 +98,11 @@
       "wins": 0
     },
     {
-      "pos": 12,
-      "driver": "\u00c1r\u00f3n Taylor-Smith",
-      "car": "50",
-      "class": "I",
-      "points": 19,
-      "wins": 0
-    },
-    {
       "pos": 13,
       "driver": "Daryl De Leon",
       "car": "2",
       "class": "I",
-      "points": 17,
+      "points": 18,
       "wins": 0
     },
     {
