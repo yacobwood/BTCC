@@ -50,7 +50,9 @@ function computeProgression(rounds) {
   const driverPoints = {};
   const firstRound = {}; // round index when driver first appeared
   const series = {};
-  const sortedRounds = [...rounds].sort((a, b) => a.round - b.round);
+  const sortedRounds = [...rounds]
+    .sort((a, b) => a.round - b.round)
+    .filter(r => r.races.some(race => race.results.length > 0));
   sortedRounds.forEach((round, roundIdx) => {
     for (const race of round.races) {
       for (const r of race.results) {
