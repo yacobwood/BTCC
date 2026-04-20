@@ -10,18 +10,20 @@ const TOCA_URL = 'https://btcc.net/live/live-audio/';
 const STATION_NAME = 'TOCA Live Radio';
 const TIMEOUT_MS = 15000;
 
-// Injected into the hidden WebView — intercepts XHR, fetch, and audio src
-// to sniff the stream URL before the user ever sees a web player.
+// Injected into ALL frames (main + iframes) BEFORE page scripts run.
+// The Cre8Media player lives inside an iframe — injectedJavaScriptForMainFrameOnly={false}
+// ensures this runs there too.
 const INJECT_JS = `(function() {
   var sent = false;
   function send(url) {
     if (sent || !url || typeof url !== 'string') return;
     var l = url.toLowerCase();
-    // Ignore obvious non-audio resources
-    if (/\\.(js|css|png|jpg|gif|svg|woff2?|ico|json|xml|html)(\\?|$)/.test(l)) return;
-    if (/google|facebook|gtm|doubleclick|analytics|cdn\\.jsdelivr|unpkg\\.com/.test(l)) return;
-    // Match common live-stream URL patterns
-    if (/\\.m3u8|\\.(mp3|aac|ogg|flac)(\\?|$)|\\/(?:stream|listen|live|radio|audio)(\\.|\\/|\\?|$)|:\\d{4}\\/(?!\\d{4})/.test(l)) {
+    // Skip obvious non-audio assets
+    if (/\\.(js|css|png|jpg|gif|svg|woff2?|ico|xml|html)(\\?|$)/.test(l)) return;
+    if (/google|facebook|gtm|doubleclick|exactmetrics|wpengine|gravatar|wp-json|admin-ajax/.test(l)) return;
+    // Capture: .m3u8, .mp3/.aac/.ogg, /stream /listen /live /radio /audio path segments, port streams
+    // OR any URL from known streaming CDN domains
+    if (/\\.m3u8|\\.(mp3|aac|ogg|flac)(\\?|$)|radiojar|streamguys|tritondigital|shoutcast|icecast|ice\\.|\\/(?:stream|listen|live|radio|audio)(\\.|\\/|\\?|$)|:[89]\\d{3}\\//.test(l)) {
       sent = true;
       window.ReactNativeWebView.postMessage(JSON.stringify({type:'stream',url:url}));
     }
@@ -32,13 +34,21 @@ const INJECT_JS = `(function() {
   // fetch
   var origFetch = window.fetch;
   window.fetch = function(i,o){ try{send(typeof i==='string'?i:(i&&i.url?i.url:''));}catch(e){} return origFetch.apply(this,arguments); };
-  // HTMLMediaElement.src property
+  // HTMLMediaElement.src (audio.src = url)
   try {
     var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');
     if(d&&d.set) Object.defineProperty(HTMLMediaElement.prototype,'src',{
       set:function(v){try{send(v);}catch(e){} return d.set.call(this,v);},
       get:d.get, configurable:true
     });
+  } catch(e){}
+  // Element.setAttribute (audio.setAttribute('src', url) and <source src="">)
+  try {
+    var origSetAttr = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function(name,value){
+      try{ if(name==='src') send(value); }catch(e){}
+      return origSetAttr.apply(this,arguments);
+    };
   } catch(e){}
   true;
 })();`;
@@ -117,7 +127,8 @@ export default function TocaRadioScreen({navigation}) {
           <WebView
             ref={webviewRef}
             source={{uri: TOCA_URL}}
-            injectedJavaScript={INJECT_JS}
+            injectedJavaScriptBeforeContentLoaded={INJECT_JS}
+            injectedJavaScriptForMainFrameOnly={false}
             onMessage={onMessage}
             mediaPlaybackRequiresUserAction={false}
             allowsInlineMediaPlayback
@@ -147,17 +158,16 @@ export default function TocaRadioScreen({navigation}) {
 
       {/* Fallback — show the web player if URL couldn't be captured */}
       {phase === 'fallback' && (
-        <>
-          <WebView
-            ref={webviewRef}
-            source={{uri: TOCA_URL}}
-            injectedJavaScript={INJECT_JS}
-            onMessage={onMessage}
-            mediaPlaybackRequiresUserAction={false}
-            allowsInlineMediaPlayback
-            style={{flex: 1}}
-          />
-        </>
+        <WebView
+          ref={webviewRef}
+          source={{uri: TOCA_URL}}
+          injectedJavaScriptBeforeContentLoaded={INJECT_JS}
+          injectedJavaScriptForMainFrameOnly={false}
+          onMessage={onMessage}
+          mediaPlaybackRequiresUserAction={false}
+          allowsInlineMediaPlayback
+          style={{flex: 1}}
+        />
       )}
 
       {/* Error — shouldn't normally reach here but just in case */}
