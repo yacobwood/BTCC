@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install firebase-admin
-        run: npm install firebase-admin
+        run: npm install firebase-admin@12
 
       - name: Debug secret
         run: |
