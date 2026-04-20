@@ -21,3 +21,6 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// Provide RN location explicitly so library build scripts don't need to call node
+ext.REACT_NATIVE_NODE_MODULES_DIR = file("../node_modules/react-native")

@@ -38,7 +38,7 @@
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This identifier will be used to show you personalised ads.</string>
 	<key>RCTNewArchEnabled</key>
-	<false/>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>

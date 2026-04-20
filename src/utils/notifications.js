@@ -29,15 +29,19 @@ export async function requestNotificationPermission() {
 export async function getFCMToken() {
   try {
     const messaging = getMessaging();
-    return await getToken(messaging);
-  } catch { return null; }
+    const token = await getToken(messaging);
+    console.log('[FCM] Device token:', token);
+    return token;
+  } catch (e) { console.log('[FCM] Token error:', e); return null; }
 }
 
 export function onForegroundMessage(callback) {
   const messaging = getMessaging();
   return onMessage(messaging, async remoteMessage => {
     callback(remoteMessage);
-    const {data} = remoteMessage;
+    const {data, notification} = remoteMessage;
+    // If a notification payload is present, the system already shows it — skip notifee
+    if (notification) return;
     if (!data?.title) return;
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;

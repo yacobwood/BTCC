@@ -2,7 +2,7 @@ import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   Image,
   TouchableOpacity,
   StyleSheet,
@@ -51,8 +51,8 @@ export default function DriversScreen({navigation}) {
 
   useFocusEffect(useCallback(() => {
     const t = setTimeout(() => {
-      driversListRef.current?.scrollToOffset({offset: 0, animated: false});
-      teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
+      driversListRef.current?.scrollTo({y: 0, animated: false});
+      teamsListRef.current?.scrollTo({y: 0, animated: false});
     }, 50);
     return () => clearTimeout(t);
   }, []));
@@ -129,6 +129,7 @@ export default function DriversScreen({navigation}) {
 
   const renderTeam = ({item}) => (
     <TouchableOpacity
+      key={item.name}
       style={styles.teamCard}
       activeOpacity={0.8}
       onPress={() => { Analytics.teamClicked(item.name); navigation.navigate('TeamDetail', {team: item}); }}
@@ -178,34 +179,31 @@ export default function DriversScreen({navigation}) {
           transform: [{translateX: TAB_WIDTH * tab}],
         }} />
       </View>
-      {tab === 0 ? (
-        <FlatList
-          key="drivers"
+      <View style={{flex: 1}}>
+        <ScrollView
           ref={driversListRef}
-          data={drivers}
-          keyExtractor={item => String(item.number)}
-          renderItem={renderDriver}
-          contentContainerStyle={{padding: 16, paddingBottom: 20}}
-          ListHeaderComponent={
-            <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
-          }
-          ItemSeparatorComponent={() => <View style={{height: 8}} />}
-        />
-      ) : (
-        <FlatList
-          key="teams"
+          style={[StyleSheet.absoluteFill, {zIndex: tab === 0 ? 1 : 0, backgroundColor: Colors.background}]}
+          pointerEvents={tab === 0 ? 'auto' : 'none'}
+          contentContainerStyle={{padding: 16, paddingBottom: 20}}>
+          <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
+          {drivers.map((item, i) => (
+            <View key={String(item.number)}>
+              {i > 0 && <View style={{height: 8}} />}
+              {renderDriver({item})}
+            </View>
+          ))}
+        </ScrollView>
+        <ScrollView
           ref={teamsListRef}
-          data={teams}
-          keyExtractor={item => item.name}
-          renderItem={renderTeam}
-          numColumns={2}
-          columnWrapperStyle={{gap: 10}}
-          contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}
-          ListHeaderComponent={
-            <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
-          }
-        />
-      )}
+          style={[StyleSheet.absoluteFill, {zIndex: tab === 1 ? 1 : 0, backgroundColor: Colors.background}]}
+          pointerEvents={tab === 1 ? 'auto' : 'none'}
+          contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}>
+          <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
+          <View style={styles.teamsGrid}>
+            {teams.map(item => renderTeam({item}))}
+          </View>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -259,10 +257,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   carText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
-  teamCard: {flex: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
+  teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
   teamImageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
   teamCarImage: {width: '100%', height: '85%'},
   teamFooter: {padding: 10},
   teamName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   divider: {height: 1, backgroundColor: 'rgba(42,45,68,0.5)', marginVertical: 12},
+
+  teamsGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
 });

@@ -12,6 +12,10 @@
             <certificates src="system" />
         </trust-anchors>
     </domain-config>
+    <!-- Allow cleartext for Voscast Icecast radio stream (HTTP only, no HTTPS on port 8185) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">voscast.com</domain>
+    </domain-config>
     <!-- Allow cleartext for Metro dev server -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>

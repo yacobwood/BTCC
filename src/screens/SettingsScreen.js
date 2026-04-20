@@ -16,6 +16,8 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {Analytics} from '../utils/analytics';
 import {version} from '../../package.json';
 import {getFCMToken} from '../utils/notifications';
+import {navigateFromData} from '../utils/notifNavigation';
+import {navigationRef} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({navigation}) {
@@ -136,6 +138,17 @@ export default function SettingsScreen({navigation}) {
               value={settings.hubPreview}
               onToggle={(v) => setSetting('hubPreview', v)}
             />
+            <Text style={[styles.settingDesc, {marginTop: 12, marginBottom: 8}]}>Deep-link tests</Text>
+            {[
+              {label: 'Podcast', data: {type: 'podcast'}},
+              {label: 'News', data: {type: 'news', slug: 'btcc-2026-season-preview'}},
+              {label: 'Round 1', data: {type: 'round', round: '1'}},
+              {label: 'Results R1', data: {type: 'results', round: '1', year: '2026'}},
+            ].map(({label, data}) => (
+              <TouchableOpacity key={label} style={styles.debugBtn} onPress={() => navigateFromData(navigationRef, data)}>
+                <Text style={styles.debugBtnText}>{label}</Text>
+              </TouchableOpacity>
+            ))}
           </>
         )}
 
@@ -209,6 +222,8 @@ const styles = StyleSheet.create({
   pillTextActive: {color: Colors.navy},
   versionText: {color: Colors.textSecondary, fontSize: 12, marginTop: 12},
   deviceIdText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 4},
+  debugBtn: {paddingVertical: 8, paddingHorizontal: 12, backgroundColor: Colors.surface, borderRadius: 8, marginBottom: 8, alignSelf: 'flex-start'},
+  debugBtnText: {color: Colors.yellow, fontSize: 13, fontWeight: '600'},
   tokenRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12},
   tokenText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 2},
 });

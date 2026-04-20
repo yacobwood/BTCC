@@ -6,12 +6,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.DefaultLoadControl
 import com.btccfanhub.MainActivity
 
 class RadioService : Service() {
@@ -26,7 +26,7 @@ class RadioService : Service() {
         var stationName = ""; private set
     }
 
-    private var player: ExoPlayer? = null
+    private var player: MediaPlayer? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -49,32 +49,28 @@ class RadioService : Service() {
     }
 
     private fun startPlaying(url: String, name: String) {
+        Log.d("RadioService", "startPlaying: url=$url name=$name")
         player?.release()
 
-        val loadControl = DefaultLoadControl.Builder()
-            .setBufferDurationsMs(
-                1000,  // min buffer before playback starts
-                5000,  // max buffer
-                500,   // buffer required to start playback
-                500    // buffer required to resume after rebuffer
+        player = MediaPlayer().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
             )
-            .build()
-
-        player = ExoPlayer.Builder(this)
-            .setLoadControl(loadControl)
-            .build()
-            .apply {
-                setMediaItem(MediaItem.fromUri(url))
-                addListener(object : Player.Listener {
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_ENDED || state == Player.STATE_IDLE) {
-                            stopPlaying()
-                        }
-                    }
-                })
-                prepare()
-                playWhenReady = true
+            setOnPreparedListener { mp ->
+                Log.d("RadioService", "onPrepared, starting playback")
+                mp.start()
             }
+            setOnErrorListener { _, what, extra ->
+                Log.e("RadioService", "onError: what=$what extra=$extra")
+                stopPlaying()
+                true
+            }
+            setDataSource(url)
+            prepareAsync()
+        }
 
         isPlaying = true
         stationName = name
