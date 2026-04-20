@@ -30,10 +30,10 @@ describe('setupNotificationChannels', () => {
     );
   });
 
-  it('creates channel with id "podcasts" at DEFAULT importance', async () => {
+  it('creates channel with id "podcasts" at HIGH importance', async () => {
     await setupNotificationChannels();
     expect(notifee.createChannel).toHaveBeenCalledWith(
-      expect.objectContaining({id: 'podcasts', importance: AndroidImportance.DEFAULT}),
+      expect.objectContaining({id: 'podcasts', importance: AndroidImportance.HIGH}),
     );
   });
 
@@ -161,17 +161,15 @@ describe('onForegroundMessage', () => {
 
     onForegroundMessage(jest.fn());
 
+    // Data-only message (no notification key) — notifee handles the display
     const remoteMessage = {
-      notification: {title: 'Race starting!', body: 'Race 1 at Donington'},
-      data: {channel: 'race', type: 'round', round: '1'},
+      data: {channel: 'race', type: 'round', round: '1', title: 'Race starting!'},
     };
     await capturedHandler(remoteMessage);
 
     expect(notifee.displayNotification).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'Race starting!',
-        body: 'Race 1 at Donington',
-        data: {channel: 'race', type: 'round', round: '1'},
+        data: remoteMessage.data,
         android: expect.objectContaining({channelId: 'race'}),
       }),
     );
@@ -185,7 +183,8 @@ describe('onForegroundMessage', () => {
     });
 
     onForegroundMessage(jest.fn());
-    await capturedHandler({notification: {title: 'News', body: ''}, data: {}});
+    // Data-only message with a title but no channel
+    await capturedHandler({data: {title: 'News headline'}});
 
     expect(notifee.displayNotification).toHaveBeenCalledWith(
       expect.objectContaining({

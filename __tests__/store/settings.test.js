@@ -7,7 +7,7 @@ import {SettingsProvider, useSettings} from '../../src/store/settings';
 const ALL_DEFAULT_ON = {
   newsAlerts: true, raceAlerts: true, qualifyingAlerts: true,
   fpAlerts: true, resultsAlerts: true, weekendPreview: true,
-  standingsUpdate: true, podcastAlerts: true,
+  standingsUpdate: true, podcastAlerts: true, hubPreview: false,
 };
 
 const TOPIC_MAP = {

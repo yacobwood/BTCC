@@ -52,6 +52,7 @@ jest.mock('@notifee/react-native', () => ({
   __esModule: true,
   default: {
     createChannel:          jest.fn(() => Promise.resolve('channel-id')),
+    deleteChannel:          jest.fn(() => Promise.resolve()),
     displayNotification:    jest.fn(() => Promise.resolve()),
     onForegroundEvent:      jest.fn(() => jest.fn()),  // returns unsubscribe fn
     onBackgroundEvent:      jest.fn(),
@@ -80,7 +81,7 @@ jest.mock('react-native-bootsplash', () => ({
 // ── react-native-google-mobile-ads ────────────────────────────────────────────
 jest.mock('react-native-google-mobile-ads', () => ({
   __esModule: true,
-  default: {initialize: jest.fn()},
+  default: jest.fn(() => ({initialize: jest.fn(() => Promise.resolve())})),
   BannerAd: 'BannerAd',
   BannerAdSize: {BANNER: 'BANNER', MEDIUM_RECTANGLE: 'MEDIUM_RECTANGLE'},
   TestIds: {BANNER: 'ca-app-pub-test/banner'},
