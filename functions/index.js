@@ -218,8 +218,8 @@ exports.sendSessionNotifications = onSchedule(
                   title: 'New Article',
                   body: title,
                 },
-                android: {priority: 'high', notification: {channelId: 'news'}},
-                apns: {payload: {aps: {sound: 'default'}}},
+                android: {priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
+                apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600)}, payload: {aps: {sound: 'default'}}},
                 data: {type: 'news', slug: latest.slug || '', channel: 'news', title, ...(imageUrl ? {imageUrl} : {})},
               }),
             );
@@ -253,8 +253,8 @@ exports.sendSessionNotifications = onSchedule(
                   title: 'New Post',
                   body: hubTitle,
                 },
-                android: {priority: 'high', notification: {channelId: 'news'}},
-                apns: {payload: {aps: {sound: 'default'}}},
+                android: {priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
+                apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600)}, payload: {aps: {sound: 'default'}}},
                 data: {type: 'hub', id: String(latestHub.id), channel: 'news', title: hubTitle, ...(hubImageUrl ? {imageUrl: hubImageUrl} : {})},
               }),
             );
@@ -297,8 +297,8 @@ exports.sendSessionNotifications = onSchedule(
                   title: 'New Podcast',
                   body: podTitle,
                 },
-                android: {priority: 'high', notification: {channelId: 'podcasts'}},
-                apns: {payload: {aps: {sound: 'default'}}},
+                android: {priority: 'high', ttl: 3600000, notification: {channelId: 'podcasts'}},
+                apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600)}, payload: {aps: {sound: 'default'}}},
                 data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
               }),
             );
