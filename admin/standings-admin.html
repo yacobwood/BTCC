@@ -1077,7 +1077,10 @@ function timeAgo(iso) {
   if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
   return Math.floor(secs / 86400) + 'd ago';
 }
-function nowIso() { return new Date().toISOString().slice(0,16).replace('T','T'); }
+function nowIso() {
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 function getToken() { return localStorage.getItem('btcc_tok') || ''; }
 
 // ── Token card ───────────────────────────────────────────────────────────────
