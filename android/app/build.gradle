@@ -64,16 +64,17 @@ react {
     autolinkLibrariesWithApp()
 }
 
-// Run JS tests before every release bundle
-tasks.whenTaskAdded { task ->
-    if (task.name == 'bundleReleaseJsAndAssets') {
-        task.dependsOn 'runJsTests'
-    }
-}
-
+// Run JS tests before every release bundle (always executes, never cached)
 task runJsTests(type: Exec) {
     commandLine '/Users/jakewood/.nvm/versions/node/v23.5.0/bin/npx', 'jest', '--no-coverage', '--passWithNoTests'
     workingDir '../../'
+    outputs.upToDateWhen { false }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleRelease') {
+        task.dependsOn 'runJsTests'
+    }
 }
 
 /**
