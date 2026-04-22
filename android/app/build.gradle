@@ -64,6 +64,18 @@ react {
     autolinkLibrariesWithApp()
 }
 
+// Run JS tests before every release bundle
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleReleaseJsAndAssets') {
+        task.dependsOn 'runJsTests'
+    }
+}
+
+task runJsTests(type: Exec) {
+    commandLine '/Users/jakewood/.nvm/versions/node/v23.5.0/bin/npx', 'jest', '--no-coverage', '--passWithNoTests'
+    workingDir '../../'
+}
+
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
@@ -96,8 +108,8 @@ android {
         applicationId "com.btccfanhub"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 52
-        versionName "2.8.2"
+        versionCode 53
+        versionName "2.9.0"
     }
     signingConfigs {
         debug {
