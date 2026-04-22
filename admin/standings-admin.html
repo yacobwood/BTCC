@@ -1031,10 +1031,7 @@ select.input { cursor: pointer; }
       <div class="field-label">SOURCE URL <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional)</span></div>
       <input type="text" id="hn-source-url" placeholder="https://…">
     </div>
-    <div class="field-group">
-      <div class="field-label">PUB DATE</div>
-      <input type="text" id="hn-pubdate" placeholder="2026-04-17T20:00:00">
-    </div>
+    <input type="hidden" id="hn-pubdate">
 
     <div class="field-group">
       <div class="field-label">STATUS</div>
@@ -1993,7 +1990,7 @@ function editArticle(articleId) {
   renderCategorySelect(p.category || '');
   document.getElementById('hn-source').value = p.source || '';
   document.getElementById('hn-source-url').value = p.sourceUrl || '';
-  document.getElementById('hn-pubdate').value = p.pubDate || nowIso();
+  document.getElementById('hn-pubdate').value = p.pubDate || '';
   previewDeviceIds = [...(p.previewDeviceIds || [])];
   setArticleStatus(p.status || 'published');
   if (p.scheduledAt) document.getElementById('hn-scheduled-at').value = p.scheduledAt;
@@ -2016,8 +2013,8 @@ function cancelEdit() {
   renderCategorySelect('');
   previewDeviceIds = [];
   renderPreviewDeviceList();
-  setArticleStatus('published');
   document.getElementById('hn-scheduled-at').value = '';
+  setArticleStatus('published');
   document.getElementById('hn-source').value = '';
   document.getElementById('hn-source-url').value = '';
   document.getElementById('hn-pubdate').value = nowIso();
@@ -2030,6 +2027,7 @@ async function quickPublish(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
   if (!p) return;
   p.status = 'published';
+  p.pubDate = new Date().toISOString();
   delete p.scheduledAt; delete p.previewDeviceIds;
   await saveHubNews('Publish article: ' + p.title);
 }
@@ -2059,18 +2057,25 @@ async function publishArticle() {
     if (!confirm('No preview devices added — this draft will be invisible to everyone. Continue?')) return;
   }
 
+  const scheduledAt = document.getElementById('hn-scheduled-at').value.trim();
+  // Derive pubDate: scheduled → use scheduledAt; published → now (preserve existing if editing); draft → blank
+  const existingPubDate = editId ? (hubNewsPosts.find(p => p.id === editId)?.pubDate || '') : '';
+  const pubDate = currentArticleStatus === 'scheduled' ? scheduledAt
+    : currentArticleStatus === 'published' ? (existingPubDate || new Date().toISOString())
+    : '';
+
   const article = {
     id: editId || 'hub-' + Date.now(),
     title,
     status: currentArticleStatus,
-    ...(currentArticleStatus === 'scheduled' ? { scheduledAt: document.getElementById('hn-scheduled-at').value.trim() } : {}),
+    ...(currentArticleStatus === 'scheduled' ? { scheduledAt } : {}),
     ...(currentArticleStatus === 'draft'     ? { previewDeviceIds: [...previewDeviceIds] } : {}),
     description: document.getElementById('hn-desc').value.trim(),
     content,
     imageUrl: document.getElementById('hn-image').value.trim(),
     images,
     category: getSelectedCategory(),
-    pubDate: document.getElementById('hn-pubdate').value.trim() || new Date().toISOString(),
+    pubDate,
     source: document.getElementById('hn-source').value.trim(),
     sourceUrl: document.getElementById('hn-source-url').value.trim() || null,
   };
