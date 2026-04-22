@@ -37,11 +37,13 @@ function extractCategory(embedded) {
 }
 
 export function formatDate(date) {
+  if (!date) return '';
   try {
     const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
     return d.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
   } catch {
-    return date;
+    return '';
   }
 }
 
