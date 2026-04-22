@@ -43,7 +43,7 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
-const VERSION_CODE = 52;
+const VERSION_CODE = 53;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
