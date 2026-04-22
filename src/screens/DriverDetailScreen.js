@@ -208,6 +208,7 @@ export default function DriverDetailScreen({route, navigation}) {
                       {season2026.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{season2026.wins} W</Text></View>}
                       {season2026.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{season2026.podiums} P</Text></View>}
                       {season2026.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{season2026.fastestLaps} FL</Text></View>}
+                      {season2026.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{season2026.dnfs} DNF</Text></View>}
                     </View>
                   )}
                 </View>
@@ -238,6 +239,7 @@ export default function DriverDetailScreen({route, navigation}) {
                       {h.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{h.podiums} P</Text></View>}
                       {h.poles > 0 && <View style={styles.badgePole}><Text style={styles.badgePoleText}>{h.poles} PL</Text></View>}
                       {h.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{h.fastestLaps} FL</Text></View>}
+                      {h.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{h.dnfs} DNF</Text></View>}
                     </View>
                   </View>
                 );
@@ -251,7 +253,9 @@ export default function DriverDetailScreen({route, navigation}) {
                   <Text style={{color: '#5BA3FF'}}>PL</Text>
                   <Text style={styles.legendLabel}> Poles  </Text>
                   <Text style={{color: '#A855F7'}}>FL</Text>
-                  <Text style={styles.legendLabel}> Fastest Laps</Text>
+                  <Text style={styles.legendLabel}> Fastest Laps  </Text>
+                  <Text style={{color: '#ff4444'}}>DNF</Text>
+                  <Text style={styles.legendLabel}> Did Not Finish</Text>
                 </Text>
               </View>
             </>
@@ -365,6 +369,8 @@ const styles = StyleSheet.create({
   badgePoleText: {color: '#5BA3FF', fontSize: 11, fontWeight: '700'},
   badgeFL: {backgroundColor: 'rgba(168,85,247,0.15)', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3},
   badgeFLText: {color: '#A855F7', fontSize: 11, fontWeight: '800'},
+  badgeDNF: {backgroundColor: 'rgba(255,68,68,0.15)', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3},
+  badgeDNFText: {color: '#ff4444', fontSize: 11, fontWeight: '700'},
 
   // In progress badge
   inProgressBadge: {backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3},
