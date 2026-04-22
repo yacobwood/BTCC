@@ -1,5 +1,6 @@
 import {cacheWrite, cacheRead} from '../store/cache';
 import {formatDate} from './parsers';
+import {getStableDeviceId} from '../utils/deviceId';
 
 const BASE_GITHUB = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data';
 const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
@@ -78,8 +79,9 @@ export async function fetchArticles(page = 1, perPage = 20, search = '') {
   }
 }
 
-export async function fetchHubPosts(deviceToken = null) {
+export async function fetchHubPosts() {
   try {
+    const deviceId = await getStableDeviceId();
     // No cache — hub news is author-managed and must reflect deletes/publishes immediately
     const res = await fetch(`${BASE_GITHUB}/hub_news.json?t=${Date.now()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -90,7 +92,7 @@ export async function fetchHubPosts(deviceToken = null) {
         const status = p.status || 'published';
         if (status === 'published') return true;
         if (status === 'scheduled') return p.scheduledAt && new Date(p.scheduledAt).getTime() <= now;
-        if (status === 'draft') return deviceToken && Array.isArray(p.previewDeviceIds) && p.previewDeviceIds.includes(deviceToken);
+        if (status === 'draft') return deviceId && Array.isArray(p.previewDeviceIds) && p.previewDeviceIds.includes(deviceId);
         return false;
       })
       .map(p => ({

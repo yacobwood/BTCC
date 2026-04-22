@@ -23,8 +23,6 @@ import AdBanner from '../components/AdBanner';
 import AdSearchBanner from '../components/AdSearchBanner';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
-import {getMessaging, getToken} from '@react-native-firebase/messaging';
-
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
@@ -49,10 +47,6 @@ export default function NewsScreen({navigation}) {
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
-  const deviceTokenRef = React.useRef(null);
-  useEffect(() => {
-    getToken(getMessaging()).then(t => { deviceTokenRef.current = t; }).catch(() => {});
-  }, []);
 
   const load = useCallback(async (p = 1, append = false) => {
     try {
@@ -60,7 +54,7 @@ export default function NewsScreen({navigation}) {
       setError(null);
       const [raw, hubPosts] = await Promise.all([
         fetchArticles(p),
-        p === 1 && !append && hubNewsEnabledRef.current ? fetchHubPosts(deviceTokenRef.current) : Promise.resolve(null),
+        p === 1 && !append && hubNewsEnabledRef.current ? fetchHubPosts() : Promise.resolve(null),
       ]);
       const parsed = raw.map(parseArticle);
       if (append) {

@@ -864,12 +864,12 @@ select.input { cursor: pointer; }
       <div class="token-edit-hint">Tap to change</div>
     </div>
     <div class="token-body">
-      <div class="section-label">DEVICE TOKEN</div>
+      <div class="section-label">DEVICE ID</div>
       <div class="input-row" style="margin-top:8px">
-        <input type="text" id="fcm-tok-input" placeholder="Paste FCM token from app…" autocomplete="off" style="font-family:monospace;font-size:12px" onclick="event.stopPropagation()">
+        <input type="text" id="fcm-tok-input" placeholder="Paste Device ID from app…" autocomplete="off" style="font-family:monospace;font-size:12px" onclick="event.stopPropagation()">
         <button class="btn-run" onclick="event.stopPropagation();saveFcmTok()" style="padding:0 18px">SAVE</button>
       </div>
-      <div class="token-note">Find this in the app's Test Mode screen (Settings → Test Mode).</div>
+      <div class="token-note">Find this in the app under Settings → tap the Device ID at the bottom.</div>
     </div>
   </div>
   <div id="fcm-test-status" style="font-size:12px;min-height:18px;color:var(--text-sec);margin-bottom:12px;text-align:center;"></div>
@@ -1053,10 +1053,10 @@ select.input { cursor: pointer; }
     <div id="status-draft-fields" style="display:none">
       <div class="field-group">
         <div class="field-label">PREVIEW DEVICES</div>
-        <div class="section-note" style="margin-bottom:10px">Only these device FCM tokens will see this draft in the app.</div>
+        <div class="section-note" style="margin-bottom:10px">Only these device IDs will see this draft in the app.</div>
         <div id="draft-device-list"></div>
         <div class="input-row" style="margin-top:8px">
-          <input type="text" id="hn-preview-device-input" placeholder="Paste FCM token…" style="font-family:monospace;font-size:12px">
+          <input type="text" id="hn-preview-device-input" placeholder="Paste Device ID from app…" style="font-family:monospace;font-size:12px">
           <button class="btn-run" onclick="addPreviewDevice()" style="padding:0 16px">ADD</button>
         </div>
         <div id="draft-known-devices" style="margin-top:10px"></div>

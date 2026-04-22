@@ -19,21 +19,22 @@ import {getFCMToken} from '../utils/notifications';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getStableDeviceId} from '../utils/deviceId';
 
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
   const {useKm, toggleUnits} = useUnits();
   const {podcasts_enabled, debug_mode} = useFeatureFlags();
-  const [fcmToken, setFcmToken] = useState('');
+  const [stableDeviceId, setStableDeviceId] = useState('');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    getFCMToken().then(t => { if (t) setFcmToken(t); });
+    getStableDeviceId().then(id => { if (id) setStableDeviceId(id); });
   }, []);
 
   const copyToken = () => {
-    if (!fcmToken) return;
-    Clipboard.setString(fcmToken);
+    if (!stableDeviceId) return;
+    Clipboard.setString(stableDeviceId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -154,9 +155,9 @@ export default function SettingsScreen({navigation}) {
 
         <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
-        {!!fcmToken && (
+        {!!stableDeviceId && (
           <TouchableOpacity onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device ID">
-            <Text style={styles.deviceIdText}>ID: {fcmToken}</Text>
+            <Text style={styles.deviceIdText}>{copied ? '✓ Copied' : `Device ID: ${stableDeviceId}`}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
