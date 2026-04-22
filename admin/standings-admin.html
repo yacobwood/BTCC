@@ -525,29 +525,30 @@ select.input { cursor: pointer; }
 .scraper-card {
   background: var(--card);
   border: 1px solid var(--outline-lo);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .scraper-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
   gap: 8px;
 }
 .scraper-title { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: var(--yellow); }
-.scraper-status-chip { font-size: 11px; font-weight: 700; color: var(--text-sec); min-width: 60px; text-align: right; }
+.scraper-status-chip { font-size: 11px; font-weight: 700; color: var(--text-sec); }
 .st-running { color: var(--yellow); }
 .st-ok      { color: var(--green); }
 .st-fail    { color: var(--red); }
-.scraper-desc { font-size: 12px; color: var(--text-sec); line-height: 1.5; margin-bottom: 10px; }
-.scraper-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.scraper-inputs { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; flex: 1; }
+.scraper-desc { font-size: 12px; color: var(--text-sec); line-height: 1.4; }
+.scraper-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.scraper-inputs { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; flex: 1; }
 .scraper-inputs .field-group { margin-bottom: 0; }
-.scraper-inputs input[type=number] { width: 80px; padding: 9px 10px; font-size: 13px; }
-.scraper-inputs input[type=text]   { width: 140px; padding: 9px 10px; font-size: 13px; }
-.scraper-inputs select.input       { width: 130px; padding: 9px 10px; font-size: 13px; }
+.scraper-inputs input[type=number] { width: 72px; padding: 7px 8px; font-size: 12px; }
+.scraper-inputs input[type=text]   { width: 130px; padding: 7px 8px; font-size: 12px; }
+.scraper-inputs select.input       { width: 120px; padding: 7px 8px; font-size: 12px; }
 .scraper-info-note {
   background: var(--surface);
   border: 1px solid var(--outline);
@@ -1089,7 +1090,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">RESULTS</div>
       <div class="scraper-status-chip" id="ss-results">—</div>
     </div>
-    <div class="scraper-desc">Scrapes race results from btcc.net and recomputes driver &amp; team standings. Updates <strong>results2026.json</strong> and <strong>standings.json</strong>. Auto-runs hourly on race Sundays 13:00–17:00 UTC.</div>
+    <div class="scraper-desc">Race results → <strong>results{year}.json</strong> + <strong>standings.json</strong>. Auto: race Sundays 13–17 UTC.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group"><div class="field-label">YEAR</div><input type="number" id="si-year" value="2026" min="2014" max="2030"></div>
@@ -1104,7 +1105,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">STANDINGS</div>
       <div class="scraper-status-chip" id="ss-standings">—</div>
     </div>
-    <div class="scraper-desc">Scrapes live driver &amp; team standings from btcc.net. Updates <strong>standings.json</strong>. Auto-runs every 6h, every 15 min on race weekends.</div>
+    <div class="scraper-desc">Live standings → <strong>standings.json</strong>. Auto: every 6h, every 15 min race weekends.</div>
     <div class="scraper-footer">
       <button class="btn-run" onclick="runScraper('scrape-standings.yml','standings')">RUN ▶</button>
     </div>
@@ -1115,7 +1116,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">CALENDAR</div>
       <div class="scraper-status-chip" id="ss-calendar">—</div>
     </div>
-    <div class="scraper-desc">Scrapes round dates, venues and locations. Updates <strong>calendar.json</strong>. Auto-runs daily at 09:00 UTC.</div>
+    <div class="scraper-desc">Round dates &amp; venues → <strong>calendar.json</strong>. Auto: daily 09:00 UTC.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group"><div class="field-label">SEASON</div><input type="number" id="si-season" value="2026" min="2020" max="2030"></div>
@@ -1129,7 +1130,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">SCHEDULE</div>
       <div class="scraper-status-chip" id="ss-schedule">—</div>
     </div>
-    <div class="scraper-desc">Scrapes session times (FP, Qualifying, Races) from btcc.net circuit pages. Updates <strong>schedule.json</strong>. Auto-runs nightly at 07:00 UTC.</div>
+    <div class="scraper-desc">Session times (FP, Qual, Race) → <strong>schedule.json</strong>. Auto: nightly 07:00 UTC.</div>
     <div class="scraper-footer">
       <button class="btn-run" onclick="runScraper('scrape-schedule.yml','schedule')">RUN ▶</button>
     </div>
@@ -1140,7 +1141,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">GRID</div>
       <div class="scraper-status-chip" id="ss-grid">—</div>
     </div>
-    <div class="scraper-desc">Scrapes driver names, car numbers and team info. Updates <strong>drivers.json</strong> and downloads driver portraits. Manual trigger only.</div>
+    <div class="scraper-desc">Driver names, numbers &amp; portraits → <strong>drivers.json</strong>. Manual only.</div>
     <div class="scraper-footer">
       <button class="btn-run" onclick="runScraper('scrape-grid.yml','grid')">RUN ▶</button>
     </div>
@@ -1151,7 +1152,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">MERCH</div>
       <div class="scraper-status-chip" id="ss-merch">—</div>
     </div>
-    <div class="scraper-desc">Scrapes product listings from team Shopify stores (EXCELR8/Vertu). Updates <strong>merch.json</strong>. Auto-runs daily at 06:00 UTC.</div>
+    <div class="scraper-desc">Team Shopify listings → <strong>merch.json</strong>. Auto: daily 06:00 UTC.</div>
     <div class="scraper-footer">
       <button class="btn-run" onclick="runScraper('scrape-merch.yml','merch')">RUN ▶</button>
     </div>
@@ -1162,7 +1163,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">MSS HISTORY</div>
       <div class="scraper-status-chip" id="ss-mss-history">—</div>
     </div>
-    <div class="scraper-desc">Scrapes historical race-by-race results (POS, PTS, GRID) from motorsportstats.com. Updates <strong>data/motorsportstats/</strong> drivers &amp; teams. Manual only.</div>
+    <div class="scraper-desc">Historical race-by-race results → <strong>data/motorsportstats/</strong>. Manual only.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group">
@@ -1184,7 +1185,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">MSS SUMMARIES</div>
       <div class="scraper-status-chip" id="ss-mss-summaries">—</div>
     </div>
-    <div class="scraper-desc">Scrapes career highlights &amp; per-season stats from motorsportstats.com summary pages, merging into <strong>drivers.json</strong>. Manual only.</div>
+    <div class="scraper-desc">Career highlights &amp; per-season stats → <strong>drivers.json</strong>. Manual only.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group"><div class="field-label">DRIVER</div><input type="text" id="si-mss-driver" placeholder="e.g. tom-ingram"></div>
