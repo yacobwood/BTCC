@@ -80,7 +80,10 @@ export async function fetchArticles(page = 1, perPage = 20, search = '') {
 
 export async function fetchHubPosts(deviceToken = null) {
   try {
-    const data = await fetchJson(`${BASE_GITHUB}/hub_news.json`, 'hub_news');
+    // No cache — hub news is author-managed and must reflect deletes/publishes immediately
+    const res = await fetch(`${BASE_GITHUB}/hub_news.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
     const now = Date.now();
     return (data.posts || [])
       .filter(p => {
