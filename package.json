@@ -1,6 +1,6 @@
 {
   "name": "BTCCFanHub",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -15,6 +15,7 @@
     "@react-native-firebase/analytics": "^24.0.0",
     "@react-native-firebase/app": "^24.0.0",
     "@react-native-firebase/crashlytics": "^24.0.0",
+    "@react-native-firebase/database": "^24.0.0",
     "@react-native-firebase/messaging": "^24.0.0",
     "@react-native/new-app-screen": "0.84.1",
     "@react-navigation/bottom-tabs": "^7.15.9",

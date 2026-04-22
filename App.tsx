@@ -140,7 +140,7 @@ export default function App() {
         <SettingsProvider>
           <RadioProvider>
             <PodcastChecker />
-            <StatusBar barStyle="light-content" backgroundColor="#020255" />
+            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
             <AppNavigator navigationRef={navigationRef} />
             <AppDialogs />
           </RadioProvider>

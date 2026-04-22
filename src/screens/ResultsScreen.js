@@ -20,6 +20,7 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getSeasonData} from '../assets/seasonData';
 import ProgressionChart from '../components/ProgressionChart';
 import {Analytics} from '../utils/analytics';
+import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite} from '../store/cache';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -295,7 +296,7 @@ export default function ResultsScreen({navigation, route}) {
         <View style={{flex: 1}}>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
             {fav && <Icon name="star" size={12} color={Colors.yellow} />}
-            <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>{item.name}</Text>
+            <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>{formatDriverName(item.name)}</Text>
           </View>
           <Text style={styles.teamName}>{item.team}</Text>
         </View>
@@ -371,7 +372,7 @@ export default function ResultsScreen({navigation, route}) {
       <View style={[styles.standingRow, fav && {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'}]} accessibilityLabel={`Position ${index + 1}, ${item.name}, ${item.wins} wins`}>
         <Text style={[styles.pos, {fontSize: 16}]}>{index + 1}</Text>
         <View style={{flex: 1}}>
-          <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>{item.name}</Text>
+          <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>{formatDriverName(item.name)}</Text>
           <Text style={styles.teamName}>{item.team}</Text>
         </View>
         <Text style={[styles.statCol, {color: Colors.yellow}]}>{item.wins}</Text>

@@ -1,3 +1,9 @@
+// Rewrite a btcc.net image URL to a smaller WordPress-generated thumbnail
+function thumbUrl(url, size = '150x150') {
+  if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
+  return url.replace(/(\.[a-z]+)$/i, `-${size}$1`);
+}
+
 // Parse WordPress post into Article
 export function parseArticle(post) {
   const id = post.id;
@@ -81,6 +87,7 @@ export function parseCalendar(json) {
     imageUrl: r.imageUrl || '',
     layoutImageUrl: r.layoutImageUrl || '',
     raceImages: r.raceImages || [],
+    youtubeUrls: r.youtubeUrls || [],
     firstBtccYear: r.firstBtccYear || null,
     qualifyingRecord: r.qualifyingRecord || null,
     raceRecord: r.raceRecord || null,
@@ -148,6 +155,10 @@ export function parseGrid(json) {
     teamsChampionships: t.teamsChampionships || 0,
     drivers: drivers.filter(d => d.team === t.name),
   }));
+  // Attach each team's cardBgUrl to its drivers
+  const teamBgMap = {};
+  teams.forEach(t => { teamBgMap[t.name] = t.cardBgUrl; });
+  drivers.forEach(d => { d.cardBgUrl = teamBgMap[d.team] || ''; });
   return {drivers, teams};
 }
 

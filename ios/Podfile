@@ -19,6 +19,8 @@ end
 pod 'GoogleUtilities', :modular_headers => true
 pod 'GoogleDataTransport', :modular_headers => true
 pod 'nanopb', :modular_headers => true
+pod 'leveldb-library', :modular_headers => true
+pod 'FirebaseAppCheckInterop', :modular_headers => true
 
 target 'BTCCFanHub' do
   config = use_native_modules!

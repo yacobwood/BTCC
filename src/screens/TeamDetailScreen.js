@@ -4,15 +4,20 @@ import {
   Text,
   ScrollView,
   Image,
+  ImageBackground,
   TouchableOpacity,
   StyleSheet,
+  Dimensions,
 } from 'react-native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 import {getDriverImage} from '../assets/driverImages';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
+import {formatDriverName} from '../utils/driverName';
 
 export default function TeamDetailScreen({route, navigation}) {
   const {team} = route.params;
@@ -25,8 +30,13 @@ export default function TeamDetailScreen({route, navigation}) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{paddingBottom: 30}}>
         {team.carImageUrl ? (
-          <Image source={{uri: team.carImageUrl}} style={[styles.carImage, {marginTop: insets.top + 50}]} resizeMode="contain" accessibilityLabel={`${team.name} car`} />
-        ) : <View style={{height: insets.top + 50}} />}
+          <ImageBackground
+            source={team.cardBgUrl ? {uri: team.cardBgUrl} : undefined}
+            style={[styles.carImageBg, {marginTop: insets.top + 8}]}
+            resizeMode="stretch">
+            <Image source={{uri: team.carImageUrl}} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} />
+          </ImageBackground>
+        ) : <View style={{height: insets.top + 8}} />}
 
         <View style={styles.content}>
           <Text style={styles.teamName}>{team.name}</Text>
@@ -45,36 +55,38 @@ export default function TeamDetailScreen({route, navigation}) {
           ) : null}
 
           <Text style={styles.sectionTitle}>DRIVERS</Text>
-          {team.drivers.map(d => {
-            const fav = isFavourite(d.name);
-            return (
-              <TouchableOpacity
-                key={d.number}
-                style={[styles.driverRow, fav && styles.driverRowFav]}
-                onPress={() => navigation.navigate('DriverDetail', {driver: d})}
-                accessibilityLabel={d.name}
-                accessibilityRole="button">
-                <View style={styles.driverAvatar}>
-                  {(() => {
-                    const bundled = getDriverImage(d.number);
-                    if (bundled) return <Image source={bundled} style={styles.driverAvatarImg} />;
-                    if (d.imageUrl) return <Image source={{uri: d.imageUrl}} style={styles.driverAvatarImg} />;
-                    return <Icon name="person" size={20} color={Colors.textSecondary} />;
-                  })()}
-                </View>
-                <View style={{flex: 1}}>
-                  <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-                    {fav && <Icon name="star" size={12} color={Colors.yellow} />}
-                    <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>
-                      #{d.number} {d.name}
-                    </Text>
+          <View style={styles.driversGrid}>
+            {team.drivers.map(d => {
+              const fav = isFavourite(d.name);
+              const bundled = getDriverImage(d.number);
+              const blackNumber = [2,16,17,88,99].includes(d.number);
+              return (
+                <TouchableOpacity
+                  key={d.number}
+                  style={[styles.driverCard, fav && styles.driverCardFav]}
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate('DriverDetail', {driver: d})}
+                  accessibilityLabel={d.name}
+                  accessibilityRole="button">
+                  <ImageBackground
+                    source={team.cardBgUrl ? {uri: team.cardBgUrl} : undefined}
+                    style={styles.driverImageArea}
+                    resizeMode="stretch">
+                    <Text style={[styles.driverNumberBg, blackNumber && {color: '#000'}]}>{d.number}</Text>
+                    {bundled ? (
+                      <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
+                    ) : d.imageUrl ? (
+                      <Image source={{uri: d.imageUrl.replace(/(\.[a-z]+)$/i, '-300x300$1')}} style={styles.driverPhoto} resizeMode="contain" />
+                    ) : null}
+                    {fav && <View style={styles.favBadge}><Icon name="star" size={12} color={Colors.yellow} /></View>}
+                  </ImageBackground>
+                  <View style={styles.driverFooter}>
+                    <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(d.name)}</Text>
                   </View>
-                  <Text style={styles.driverNat}>{d.nationality}</Text>
-                </View>
-                <Icon name="chevron-right" size={20} color={fav ? Colors.yellow : Colors.textSecondary} />
-              </TouchableOpacity>
-            );
-          })}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
           {(team.driversChampionships > 0 || team.teamsChampionships > 0) && (
             <>
@@ -116,7 +128,8 @@ function StatBox({label, value}) {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
-  carImage: {width: '100%', height: 200},
+  carImageBg: {width: '100%', aspectRatio: 2},
+  carImage: {width: '100%', flex: 1, transform: [{scale: 1.15}]},
   content: {padding: 16},
   teamName: {color: '#fff', fontSize: 24, fontWeight: '900'},
   teamCar: {color: Colors.textSecondary, fontSize: 14, marginTop: 4},
@@ -127,22 +140,15 @@ const styles = StyleSheet.create({
   card: {backgroundColor: Colors.card, borderRadius: 10, padding: 14, marginTop: 12},
   bioText: {color: Colors.textSecondary, fontSize: 14, lineHeight: 22},
   sectionTitle: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginTop: 24, marginBottom: 12},
-  driverRow: {
-    flexDirection: 'row',
-    backgroundColor: Colors.card,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  driverRowFav: {
-    borderWidth: 1,
-    borderColor: 'rgba(254,189,2,0.5)',
-  },
-  driverAvatar: {width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', marginRight: 12, overflow: 'hidden'},
-  driverAvatarImg: {width: 40, height: 64, position: 'absolute', top: 0},
-  driverName: {color: '#fff', fontSize: 14, fontWeight: '700'},
-  driverNat: {color: Colors.textSecondary, fontSize: 12},
+  driversGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
+  driverCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
+  driverCardFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'},
+  driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
+  driverPhoto: {width: '100%', height: '85%'},
+  driverNumberBg: {position: 'absolute', top: -10, right: 5, fontSize: 90, fontWeight: '900', color: '#fff', lineHeight: 100},
+  favBadge: {position: 'absolute', top: 8, right: 8},
+  driverFooter: {padding: 10},
+  driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   champRow: {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4},
   champLabel: {color: Colors.textSecondary, fontSize: 13},
   champValue: {color: Colors.yellow, fontSize: 14, fontWeight: '800'},

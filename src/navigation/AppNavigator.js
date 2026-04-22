@@ -48,6 +48,7 @@ import PodcastsScreen from '../screens/PodcastsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
+import ChatScreen from '../screens/ChatScreen';
 import AdBanner from '../components/AdBanner';
 import {useFeatureFlags} from '../store/featureFlags';
 
@@ -129,6 +130,7 @@ const tabIcons = {
   News: 'article',
   Calendar: 'date-range',
   Grid: 'groups',
+  Chat: 'chat-bubble',
   Results: 'emoji-events',
   More: 'more-horiz',
 };
@@ -154,7 +156,7 @@ const linking = {
 
 function AppContent({adBannerRef}) {
   const {bottom} = useSafeAreaInsets();
-  const {banner_ad} = useFeatureFlags();
+  const {banner_ad, live_chat} = useFeatureFlags();
   return (
     <View style={{flex: 1}}>
       <Tab.Navigator
@@ -181,6 +183,7 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="News" component={NewsStack} />
           <Tab.Screen name="Calendar" component={CalendarStack} />
           <Tab.Screen name="Grid" component={DriversStack} />
+          {live_chat && <Tab.Screen name="Chat" component={ChatScreen} />}
           <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'History'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>

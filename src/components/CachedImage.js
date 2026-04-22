@@ -2,9 +2,21 @@ import React, {useState} from 'react';
 import {Image, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// Simple wrapper that uses React Native's built-in Image with prefetch support
-// Image component already caches on Android (OkHttp disk cache)
-export default function CachedImage({uri, style, resizeMode = 'cover', ...props}) {
+// WordPress thumbnail sizes generated on upload
+const WP_SIZES = [150, 300, 768, 1024];
+
+// Return the smallest WordPress thumbnail >= targetPx, or the original URL
+function wpThumb(uri, targetPx) {
+  if (!uri || !uri.includes('btcc.net/wp-content/uploads/')) return uri;
+  const size = WP_SIZES.find(s => s >= targetPx) || null;
+  if (!size) return uri;
+  return uri.replace(/(\.[a-z]+)$/i, `-${size}x${size}$1`);
+}
+
+// Simple wrapper that uses React Native's built-in Image with prefetch support.
+// Pass `targetWidth` to automatically request the smallest adequate WP thumbnail.
+export default function CachedImage({uri, style, resizeMode = 'cover', targetWidth, ...props}) {
+  const [src, setSrc] = useState(() => targetWidth ? wpThumb(uri, targetWidth) : uri);
   const [errored, setErrored] = useState(false);
 
   if (!uri || errored) {
@@ -17,10 +29,13 @@ export default function CachedImage({uri, style, resizeMode = 'cover', ...props}
 
   return (
     <Image
-      source={{uri, cache: 'force-cache'}}
+      source={{uri: src, cache: 'force-cache'}}
       style={style}
       resizeMode={resizeMode}
-      onError={() => setErrored(true)}
+      onError={() => {
+        // If thumbnail 404s, fall back to the original URL
+        if (src !== uri) { setSrc(uri); } else { setErrored(true); }
+      }}
       {...props}
     />
   );

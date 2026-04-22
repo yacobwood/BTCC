@@ -1,6 +1,8 @@
 const {onSchedule} = require('firebase-functions/v2/scheduler');
+const {onValueCreated} = require('firebase-functions/v2/database');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getFirestore} = require('firebase-admin/firestore');
+const {getDatabase} = require('firebase-admin/database');
 const {initializeApp} = require('firebase-admin/app');
 
 initializeApp();
@@ -193,37 +195,40 @@ exports.sendSessionNotifications = onSchedule(
       }
     }
 
+    const db = getFirestore();
+
     // ── News alerts ───────────────────────────────────────────────
     try {
-      const db = getFirestore();
-      const stateRef = db.collection('state').doc('news');
-      const [articles, stateSnap] = await Promise.all([
-        fetch(NEWS_URL).then(r => r.json()),
-        stateRef.get(),
-      ]);
+      const articles = await fetch(NEWS_URL).then(r => r.json());
       const latest = articles?.[0];
       if (latest) {
-        const lastId = stateSnap.exists ? stateSnap.data().lastId : null;
-        if (latest.id !== lastId) {
-          await stateRef.set({lastId: latest.id});
-          if (lastId !== null) {
-            // Don't notify on first run — just record the baseline
-            const title = latest.title?.rendered?.replace(/&#\d+;/g, c =>
-              String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || 'New BTCC Article';
-            const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
-            sends.push(
-              messaging.send({
-                topic: 'news_alerts',
-                notification: {
-                  title: 'New Article',
-                  body: title,
-                },
-                android: {priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
-                apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600)}, payload: {aps: {sound: 'default'}}},
-                data: {type: 'news', slug: latest.slug || '', channel: 'news', title, ...(imageUrl ? {imageUrl} : {})},
-              }),
-            );
+        const stateRef = db.collection('state').doc('news');
+        let shouldNotify = false;
+        let notifyPayload = null;
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(stateRef);
+          const lastId = snap.exists ? snap.data().lastId : null;
+          if (latest.id !== lastId) {
+            tx.set(stateRef, {lastId: latest.id});
+            if (lastId !== null) {
+              shouldNotify = true;
+              const title = latest.title?.rendered?.replace(/&#\d+;/g, c =>
+                String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || 'New BTCC Article';
+              const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
+              notifyPayload = {title, imageUrl, slug: latest.slug || ''};
+            }
           }
+        });
+        if (shouldNotify && notifyPayload) {
+          sends.push(
+            messaging.send({
+              topic: 'news_alerts',
+              notification: {title: 'New Article', body: notifyPayload.title},
+              android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
+              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`}, payload: {aps: {sound: 'default'}}},
+              data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
+            }),
+          );
         }
       }
     } catch (e) {
@@ -232,33 +237,37 @@ exports.sendSessionNotifications = onSchedule(
 
     // ── Hub news alerts ───────────────────────────────────────────
     try {
-      const db = getFirestore();
-      const hubStateRef = db.collection('state').doc('hub_news');
-      const [hubData, hubSnap] = await Promise.all([
-        fetch(HUB_NEWS_URL).then(r => r.json()),
-        hubStateRef.get(),
-      ]);
+      const hubData = await fetch(HUB_NEWS_URL).then(r => r.json());
       const latestHub = hubData?.posts?.[0];
       if (latestHub) {
-        const lastHubId = hubSnap.exists ? hubSnap.data().lastId : null;
-        if (String(latestHub.id) !== String(lastHubId)) {
-          await hubStateRef.set({lastId: String(latestHub.id)});
-          if (lastHubId !== null) {
-            const hubImageUrl = latestHub.heroImage || latestHub.images?.[0] || null;
-            const hubTitle = latestHub.title || 'New Post';
-            sends.push(
-              messaging.send({
-                topic: 'news_alerts',
-                notification: {
-                  title: 'New Post',
-                  body: hubTitle,
-                },
-                android: {priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
-                apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600)}, payload: {aps: {sound: 'default'}}},
-                data: {type: 'hub', id: String(latestHub.id), channel: 'news', title: hubTitle, ...(hubImageUrl ? {imageUrl: hubImageUrl} : {})},
-              }),
-            );
+        const hubStateRef = db.collection('state').doc('hub_news');
+        let shouldNotify = false;
+        let notifyPayload = null;
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(hubStateRef);
+          const lastHubId = snap.exists ? snap.data().lastId : null;
+          if (String(latestHub.id) !== String(lastHubId)) {
+            tx.set(hubStateRef, {lastId: String(latestHub.id)});
+            if (lastHubId !== null) {
+              shouldNotify = true;
+              notifyPayload = {
+                title: latestHub.title || 'New Post',
+                imageUrl: latestHub.heroImage || latestHub.images?.[0] || null,
+                id: String(latestHub.id),
+              };
+            }
           }
+        });
+        if (shouldNotify && notifyPayload) {
+          sends.push(
+            messaging.send({
+              topic: 'news_alerts',
+              notification: {title: 'New Post', body: notifyPayload.title},
+              android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
+              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default'}}},
+              data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
+            }),
+          );
         }
       }
     } catch (e) {
@@ -267,42 +276,40 @@ exports.sendSessionNotifications = onSchedule(
 
     // ── Podcast alerts ────────────────────────────────────────────
     try {
-      const db = getFirestore();
-      const podcastStateRef = db.collection('state').doc('podcast');
-      const [rssText, podcastSnap] = await Promise.all([
-        fetch(PODCAST_RSS_URL).then(r => r.text()),
-        podcastStateRef.get(),
-      ]);
-
-      // Parse first <item> from RSS
+      const rssText = await fetch(PODCAST_RSS_URL).then(r => r.text());
       const guidMatch = rssText.match(/<guid[^>]*>(.*?)<\/guid>/);
       const titleMatch = rssText.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
                          rssText.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
       const imageMatch = rssText.match(/<itunes:image[^>]+href="([^"]+)"/);
-
       const latestGuid = guidMatch?.[1]?.trim();
       const latestTitle = titleMatch?.[1]?.trim();
       const artworkUrl = imageMatch?.[1] || null;
 
       if (latestGuid) {
-        const lastGuid = podcastSnap.exists ? podcastSnap.data().lastGuid : null;
-        if (latestGuid !== lastGuid) {
-          await podcastStateRef.set({lastGuid: latestGuid});
-          if (lastGuid !== null) {
-            const podTitle = latestTitle || 'New BTCC Podcast';
-            sends.push(
-              messaging.send({
-                topic: 'podcast_alerts',
-                notification: {
-                  title: 'New Podcast',
-                  body: podTitle,
-                },
-                android: {priority: 'high', ttl: 3600000, notification: {channelId: 'podcasts'}},
-                apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600)}, payload: {aps: {sound: 'default'}}},
-                data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
-              }),
-            );
+        const podcastStateRef = db.collection('state').doc('podcast');
+        let shouldNotify = false;
+        let podTitle = null;
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(podcastStateRef);
+          const lastGuid = snap.exists ? snap.data().lastGuid : null;
+          if (latestGuid !== lastGuid) {
+            tx.set(podcastStateRef, {lastGuid: latestGuid});
+            if (lastGuid !== null) {
+              shouldNotify = true;
+              podTitle = latestTitle || 'New BTCC Podcast';
+            }
           }
+        });
+        if (shouldNotify && podTitle) {
+          sends.push(
+            messaging.send({
+              topic: 'podcast_alerts',
+              notification: {title: 'New Podcast', body: podTitle},
+              android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000, notification: {channelId: 'podcasts'}},
+              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`}, payload: {aps: {sound: 'default'}}},
+              data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
+            }),
+          );
         }
       }
     } catch (e) {
@@ -313,5 +320,25 @@ exports.sendSessionNotifications = onSchedule(
     results.forEach((r, i) => {
       if (r.status === 'rejected') console.error(`Send ${i} failed:`, r.reason);
     });
+  },
+);
+
+// Trim live chat to last 200 messages when a new one is written
+exports.trimChat = onValueCreated(
+  {ref: '/chat/messages/{msgId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
+  async () => {
+    try {
+      const ref = getDatabase('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app').ref('/chat/messages');
+      const snap = await ref.orderByChild('timestamp').once('value');
+      const keys = [];
+      snap.forEach(c => keys.push(c.key));
+      if (keys.length > 200) {
+        const updates = {};
+        keys.slice(0, keys.length - 200).forEach(k => { updates[k] = null; });
+        await ref.update(updates);
+      }
+    } catch (e) {
+      console.error('trimChat failed:', e);
+    }
   },
 );

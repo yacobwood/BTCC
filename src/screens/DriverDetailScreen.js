@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   Image,
+  ImageBackground,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
@@ -12,7 +13,9 @@ import {Colors} from '../theme/colors';
 import {getDriverImage} from '../assets/driverImages';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
+import {formatDriverName} from '../utils/driverName';
 import {fetchResults} from '../api/client';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 function formatDob(dateStr) {
   if (!dateStr) return null;
@@ -36,6 +39,7 @@ export default function DriverDetailScreen({route, navigation}) {
   const {driver} = route.params;
   const {isFavourite, toggle: toggleFav} = useFavouriteDriver();
   const fav = isFavourite(driver.name);
+  const insets = useSafeAreaInsets();
 
   const [season2026, setSeason2026] = useState(null);
 
@@ -44,16 +48,16 @@ export default function DriverDetailScreen({route, navigation}) {
   useEffect(() => {
     if (!driver.team || (driver.history || []).some(h => h.year === 2026)) return;
     fetchResults(2026).then(data => {
-      let wins = 0, podiums = 0, points = 0, fastestLaps = 0;
+      let wins = 0, podiums = 0, points = 0, fastestLaps = 0, poles = 0;
       for (const round of (data.rounds || [])) {
         for (const race of (round.races || [])) {
           const results = race.results || [];
-          const entry = results.find(r => r.driver === driver.name);
+          const entry = results.find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
           if (!entry) continue;
           if (entry.pos === 1) wins++;
           if (entry.pos <= 3) podiums++;
           points += entry.points || 0;
-          // Fastest lap: driver with shortest bestLap time in the race
+          if (entry.pole) poles++;
           const times = results.map(r => r.bestLap).filter(Boolean);
           if (times.length > 0) {
             const fastest = times.slice().sort()[0];
@@ -61,19 +65,22 @@ export default function DriverDetailScreen({route, navigation}) {
           }
         }
       }
-      setSeason2026({wins, podiums, points, fastestLaps});
+      setSeason2026({wins, podiums, points, fastestLaps, poles});
     }).catch(() => {});
   }, [driver.name, driver.team]);
 
   const history = driver.history || [];
+  // Whether 2026 is a live season (not yet in history JSON)
+  const has2026InHistory = history.some(h => h.year === 2026);
+  const live = (!has2026InHistory && season2026) ? season2026 : null;
 
-  // Career stats
-  const totalSeasons = history.length;
-  const totalWins = history.reduce((s, h) => s + h.wins, 0);
-  const totalPodiums = history.reduce((s, h) => s + h.podiums, 0);
-  const totalPoles = history.reduce((s, h) => s + h.poles, 0);
-  const totalFL = history.reduce((s, h) => s + h.fastestLaps, 0);
-  const totalPoints = history.reduce((s, h) => s + h.points, 0);
+  // Career stats — merge live 2026 on top of historical data
+  const totalSeasons = history.length + (live ? 1 : 0);
+  const totalWins = history.reduce((s, h) => s + h.wins, 0) + (live?.wins || 0);
+  const totalPodiums = history.reduce((s, h) => s + h.podiums, 0) + (live?.podiums || 0);
+  const totalPoles = history.reduce((s, h) => s + h.poles, 0) + (live?.poles || 0);
+  const totalFL = history.reduce((s, h) => s + h.fastestLaps, 0) + (live?.fastestLaps || 0);
+  const totalPoints = history.reduce((s, h) => s + h.points, 0) + (live?.points || 0);
   const championships = history.filter(h => h.isChampion).length;
   const bestPos = history.filter(h => h.pos > 0).reduce((best, h) => Math.min(best, h.pos), 999);
 
@@ -86,37 +93,32 @@ export default function DriverDetailScreen({route, navigation}) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{paddingBottom: 30}}>
         {/* Header */}
-        <View style={styles.headerSection}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatarWrap}>
-              {bundledImg ? (
-                <Image source={bundledImg} style={styles.avatarImg} resizeMode="cover" accessibilityLabel={`Photo of ${driver.name}`} />
-              ) : driver.imageUrl ? (
-                <Image source={{uri: driver.imageUrl}} style={styles.avatarImg} resizeMode="cover" accessibilityLabel={`Photo of ${driver.name}`} />
-              ) : (
-                <Icon name="person" size={48} color={Colors.textSecondary} />
-              )}
-            </View>
-            <View style={styles.numberBadge}>
-              <Text style={styles.numberText}>{driver.number}</Text>
+        <ImageBackground
+          source={driver.cardBgUrl ? {uri: driver.cardBgUrl} : undefined}
+          style={styles.headerBg}
+          resizeMode="stretch">
+          <Text style={[styles.headerNumber, [2,16,17,88,99].includes(driver.number) && {color: '#000'}]}>{driver.number}</Text>
+          {bundledImg ? (
+            <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
+          ) : driver.imageUrl ? (
+            <Image source={{uri: driver.imageUrl.replace(/(\.[a-z]+)$/i, '-300x300$1')}} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
+          ) : null}
+        </ImageBackground>
+        <View style={styles.headerFooter}>
+          <View style={{flex: 1}}>
+            <Text style={styles.name}>{formatDriverName(driver.name)}</Text>
+            <View style={styles.chipsRow}>
+              <Chip text={driver.nationality} />
+              {driver.team ? <Chip text={driver.team} /> : null}
+              {driver.car ? <Chip text={driver.car} /> : null}
             </View>
           </View>
-
-          <Text style={styles.name}>{driver.name}</Text>
-
-          <TouchableOpacity onPress={() => { Analytics.favouriteToggled(driver.name, !fav); toggleFav(driver.name); }} style={{marginTop: 4}} accessibilityLabel={`${fav ? 'Remove from' : 'Add to'} favourites`} accessibilityRole="button">
-            <Icon
-              name={fav ? 'star' : 'star-outline'}
-              size={28}
-              color={fav ? Colors.yellow : Colors.textSecondary}
-            />
+          <TouchableOpacity
+            onPress={() => { Analytics.favouriteToggled(driver.name, !fav); toggleFav(driver.name); }}
+            accessibilityLabel={`${fav ? 'Remove from' : 'Add to'} favourites`}
+            accessibilityRole="button">
+            <Icon name={fav ? 'star' : 'star-outline'} size={28} color={fav ? Colors.yellow : Colors.textSecondary} />
           </TouchableOpacity>
-
-          <View style={styles.chipsRow}>
-            <Chip text={driver.nationality} />
-            {driver.team ? <Chip text={driver.team} /> : null}
-            {driver.car ? <Chip text={driver.car} /> : null}
-          </View>
         </View>
 
         <View style={styles.content}>
@@ -254,7 +256,7 @@ export default function DriverDetailScreen({route, navigation}) {
       </ScrollView>
 
       <TouchableOpacity
-        style={styles.backBtn}
+        style={[styles.backBtn, {top: insets.top + 8}]}
         onPress={() => navigation.goBack()}
         accessibilityLabel="Go back"
         accessibilityRole="button">
@@ -287,39 +289,30 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
 
   // Header
-  headerSection: {alignItems: 'center', paddingTop: 80, paddingBottom: 16},
-  avatarContainer: {
-    width: 100,
-    height: 100,
-  },
-  avatarWrap: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    overflow: 'hidden',
-    backgroundColor: Colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarImg: {width: 100, height: 160, position: 'absolute', top: 0},
-  numberBadge: {
+  headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
+  headerNumber: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.navy,
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 2,
-    borderColor: Colors.background,
-    minWidth: 24,
-    alignItems: 'center',
+    top: -10,
+    right: 5,
+    fontSize: 180,
+    fontWeight: '900',
+    color: '#fff',
+    lineHeight: 200,
   },
-  numberText: {color: '#fff', fontSize: 11, fontWeight: '900'},
-  name: {color: '#fff', fontSize: 22, fontWeight: '900', marginTop: 12},
-  chipsRow: {flexDirection: 'row', marginTop: 8, gap: 8, flexWrap: 'wrap', justifyContent: 'center', paddingHorizontal: 16},
-  chip: {backgroundColor: Colors.card, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4},
-  chipText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '600'},
+  headerPhoto: {width: '100%', height: '90%'},
+  headerFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: Colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
+  },
+  name: {color: '#fff', fontSize: 20, fontWeight: '900'},
+  chipsRow: {flexDirection: 'row', marginTop: 6, gap: 6, flexWrap: 'wrap'},
+  chip: {backgroundColor: Colors.card, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3},
+  chipText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
 
   // Content
   content: {padding: 16},

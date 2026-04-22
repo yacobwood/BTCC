@@ -2,7 +2,8 @@
   "project_info": {
     "project_number": "399066588683",
     "project_id": "btcchub-af77a",
-    "storage_bucket": "btcchub-af77a.firebasestorage.app"
+    "storage_bucket": "btcchub-af77a.firebasestorage.app",
+    "firebase_url": "https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app"
   },
   "client": [
     {

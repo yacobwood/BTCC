@@ -4,12 +4,13 @@ import {getMessaging, getToken} from '@react-native-firebase/messaging';
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
 
 const defaults = {
-  radio_tab: true,
+  radio_tab: false,
   podcasts_enabled: false,
   podcast_last_episode_url: '',
   debug_mode: false,
   hub_news_enabled: true,
   live_timing_in_app: false,
+  live_chat: false,
 };
 
 const FeatureFlagsContext = createContext(defaults);

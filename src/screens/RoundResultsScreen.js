@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {useUnits} from '../store/units';
 import {Analytics} from '../utils/analytics';
+import {formatDriverName} from '../utils/driverName';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -71,7 +73,7 @@ export default function RoundResultsScreen({route, navigation}) {
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
             {fav && <Icon name="star" size={11} color={Colors.yellow} />}
             <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>
-              {item.driver}
+              {formatDriverName(item.driver)}
             </Text>
             {item.fastestLap && <Badge text="FL" color="#A855F7" />}
             {item.leadLap && <Badge text="L" color={Colors.yellow} />}
@@ -165,6 +167,18 @@ export default function RoundResultsScreen({route, navigation}) {
               keyExtractor={(_, idx) => String(idx)}
               renderItem={makeRenderResult(gridMap)}
               contentContainerStyle={{padding: 16, paddingBottom: 20}}
+              ListHeaderComponent={race?.fullRaceUrl ? (
+                <TouchableOpacity
+                  style={styles.youtubeBtn}
+                  activeOpacity={0.8}
+                  onPress={() => Linking.openURL(race.fullRaceUrl)}
+                  accessibilityLabel="Watch full race on YouTube"
+                  accessibilityRole="button">
+                  <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
+                  <Text style={styles.youtubeBtnText}>Watch Full Race</Text>
+                  <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
+                </TouchableOpacity>
+              ) : null}
               ListEmptyComponent={
                 <Text style={styles.emptyText}>No results available</Text>
               }
@@ -238,4 +252,16 @@ const styles = StyleSheet.create({
   badgeText: {fontSize: 10, fontWeight: '800'},
   pointsText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600', marginTop: 2},
   emptyText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 40},
+  youtubeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,0,0,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,0,0,0.25)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
 });

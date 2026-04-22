@@ -10,6 +10,7 @@ import {
   StatusBar,
   Dimensions,
   Animated,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -22,8 +23,17 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {fetchStandings, fetchResults} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
+import {formatDriverName} from '../utils/driverName';
 
 const calendarData = require('../data/calendar.json');
+
+// Parse "M:SS.mmm" lap time to seconds, returns null on failure
+function lapTimeSecs(str) {
+  if (!str) return null;
+  const m = str.match(/^(\d+):(\d+\.\d+)$/);
+  if (!m) return null;
+  return parseInt(m[1], 10) * 60 + parseFloat(m[2]);
+}
 
 function formatDateRange(start, end) {
   if (!start || !end) return '';
@@ -77,6 +87,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const [weather, setWeather] = useState(null);
   const [racesFinished, setRacesFinished] = useState(false);
   const [currentRoundData, setCurrentRoundData] = useState(null);
+  const [liveRaceRecord, setLiveRaceRecord] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const HERO_H = track.imageUrl ? 220 : 0;
   const titlePaddingTop = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [12, statusBarHeight + 12], extrapolate: 'clamp'});
@@ -85,7 +96,7 @@ export default function TrackDetailScreen({route, navigation}) {
   useEffect(() => { Analytics.trackDetailViewed(track.round, track.venue); }, []);
 
   useEffect(() => {
-    if (!track_weather) return;
+    if (!track_weather || isPastRaceWeekend) return;
     if (track.lat && track.lng && track.startDate && track.endDate) {
       fetchWeather(track.lat, track.lng, track.startDate, track.endDate).then(w => {
         if (w) setWeather(w);
@@ -98,18 +109,37 @@ export default function TrackDetailScreen({route, navigation}) {
     if (!isRaceWeekend && !isPastRaceWeekend) return;
     const hasPoints = raw => (raw?.standings || []).some(d => d.points > 0);
 
+    const applyRoundData = (found) => {
+      if (!found) return;
+      setCurrentRoundData(found);
+      // Check if any race best lap beats the stored race record
+      const storedSecs = lapTimeSecs(track.raceRecord?.time);
+      let best = null;
+      found.races.forEach(race => {
+        race.results.forEach(r => {
+          if (!r.bestLap) return;
+          const secs = lapTimeSecs(r.bestLap);
+          if (secs === null) return;
+          if (storedSecs === null || secs < storedSecs) {
+            if (!best || secs < lapTimeSecs(best.time)) {
+              best = {driver: r.driver, time: r.bestLap, year: 2026};
+            }
+          }
+        });
+      });
+      if (best) setLiveRaceRecord({...best, driver: formatDriverName(best.driver)});
+    };
+
     const applyFinished = () => {
       setRacesFinished(true);
       // Fetch results so we can navigate directly to RoundResults without flash
       cacheRead('results_2026').then(cached => {
         const parsed = parseResults(cached);
-        const found = parsed.find(r => r.round === track.round);
-        if (found) setCurrentRoundData(found);
+        applyRoundData(parsed.find(r => r.round === track.round));
       });
       fetchResults(2026).then(raw => {
         const parsed = parseResults(raw);
-        const found = parsed.find(r => r.round === track.round);
-        if (found) setCurrentRoundData(found);
+        applyRoundData(parsed.find(r => r.round === track.round));
       }).catch(() => {});
     };
 
@@ -179,12 +209,6 @@ export default function TrackDetailScreen({route, navigation}) {
       });
     }
 
-    // Race photos carousel
-    if (track.raceImages?.length > 0) {
-      items.push({type: 'photosHeader'});
-      items.push({type: 'photoCarousel'});
-    }
-
     return {data: items, stickyIndex: titleIdx};
   }, [track, sessions, weather, isRaceWeekend, isPastRaceWeekend, track_weather, live_updates, racesFinished]);
 
@@ -193,7 +217,7 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'hero':
         return (
           <View style={styles.heroWrap}>
-            <CachedImage uri={track.imageUrl} style={styles.heroImg} accessibilityLabel={`${track.venue} circuit`} />
+            <CachedImage uri={track.imageUrl} style={styles.heroImg} targetWidth={768} accessibilityLabel={`${track.venue} circuit`} />
           </View>
         );
 
@@ -263,6 +287,23 @@ export default function TrackDetailScreen({route, navigation}) {
                 <Icon name="chevron-right" size={18} color={Colors.yellow} />
               </TouchableOpacity>
             )}
+            {(racesFinished || isPastRaceWeekend) && ['Race 1', 'Race 2', 'Race 3'].map((label, i) => {
+              const url = track.youtubeUrls?.[i];
+              if (!url) return null;
+              return (
+                <TouchableOpacity
+                  key={label}
+                  style={styles.youtubeBtn}
+                  activeOpacity={0.8}
+                  onPress={() => Linking.openURL(url)}
+                  accessibilityLabel={`Watch ${label} on YouTube`}
+                  accessibilityRole="button">
+                  <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
+                  <Text style={styles.youtubeBtnText}>{label}</Text>
+                  <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
+                </TouchableOpacity>
+              );
+            })}
           </View>
         );
 
@@ -288,10 +329,10 @@ export default function TrackDetailScreen({route, navigation}) {
         return (
           <View style={styles.recordsRow}>
             {track.qualifyingRecord && (
-              <RecordCard label="Qualifying" record={track.qualifyingRecord} useKm={useKm} />
+              <RecordCard label="Qualifying" record={track.qualifyingRecord} useKm={useKm} trackLengthMiles={track.lengthMiles} />
             )}
-            {track.raceRecord && (
-              <RecordCard label="Race" record={track.raceRecord} useKm={useKm} />
+            {(liveRaceRecord || track.raceRecord) && (
+              <RecordCard label="Race" record={liveRaceRecord || track.raceRecord} useKm={useKm} trackLengthMiles={track.lengthMiles} />
             )}
           </View>
         );
@@ -401,6 +442,7 @@ export default function TrackDetailScreen({route, navigation}) {
             uri={track.layoutImageUrl}
             style={styles.layoutImg}
             resizeMode="contain"
+            targetWidth={300}
             accessibilityLabel="Circuit layout map"
           />
         );
@@ -448,20 +490,29 @@ function StatBox({label, value}) {
   );
 }
 
-function RecordCard({label, record, useKm}) {
+function RecordCard({label, record, useKm, trackLengthMiles}) {
   const speed = (() => {
-    if (!record.speed) return '';
-    const match = record.speed.match(/^([\d.]+)\s*mph$/i);
-    if (!match) return record.speed;
-    const mph = parseFloat(match[1]);
+    // Prefer stored speed, fall back to calculating from lap time + track length
+    const storedMph = (() => {
+      if (!record.speed) return null;
+      const m = record.speed.match(/^([\d.]+)\s*mph$/i);
+      return m ? parseFloat(m[1]) : null;
+    })();
+    const mph = storedMph ?? (() => {
+      const secs = lapTimeSecs(record.time);
+      const lenMatch = trackLengthMiles?.match(/^([\d.]+)/);
+      if (!secs || !lenMatch) return null;
+      return (parseFloat(lenMatch[1]) / secs) * 3600;
+    })();
+    if (!mph) return '';
     return useKm ? `${(mph * 1.60934).toFixed(2)} km/h` : `${mph.toFixed(2)} mph`;
   })();
   return (
     <View style={[styles.card, {flex: 1, marginHorizontal: 4}]}>
       <Text style={styles.recordLabel}>{label}</Text>
       <Text style={styles.recordTime}>{record.time}</Text>
-      <Text style={styles.recordDriver}>{record.driver} ({record.year})</Text>
-      <Text style={styles.recordSpeed}>Avg {speed}</Text>
+      <Text style={styles.recordDriver}>{formatDriverName(record.driver)} ({record.year})</Text>
+      {speed ? <Text style={styles.recordSpeed}>Avg {speed}</Text> : null}
     </View>
   );
 }
@@ -668,4 +719,16 @@ const styles = StyleSheet.create({
   },
   liveDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: '#E3000B'},
   liveTimingText: {flex: 1, color: '#E3000B', fontSize: 13, fontWeight: '800', letterSpacing: 1},
+  youtubeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,0,0,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,0,0,0.25)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
 });

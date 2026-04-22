@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   Image,
+  ImageBackground,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -19,6 +20,12 @@ import {getDriverImage} from '../assets/driverImages';
 import {useFocusEffect} from '@react-navigation/native';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
+import {formatDriverName} from '../utils/driverName';
+
+function thumbUrl(url, size = '150x150') {
+  if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
+  return url.replace(/(\.[a-z]+)$/i, `-${size}$1`);
+}
 
 function DriverAvatar({number, imageUrl, size = 58}) {
   const bundled = getDriverImage(number);
@@ -28,7 +35,7 @@ function DriverAvatar({number, imageUrl, size = 58}) {
     return <View style={wrapStyle}><Image source={bundled} style={imgStyle} resizeMode="cover" /></View>;
   }
   if (imageUrl) {
-    return <View style={wrapStyle}><Image source={{uri: imageUrl}} style={imgStyle} resizeMode="cover" /></View>;
+    return <View style={wrapStyle}><Image source={{uri: thumbUrl(imageUrl)}} style={imgStyle} resizeMode="cover" /></View>;
   }
   return (
     <View style={[wrapStyle, {justifyContent: 'center', alignItems: 'center'}]}>
@@ -86,6 +93,7 @@ export default function DriversScreen({navigation}) {
 
   const renderDriver = ({item}) => {
     const fav = isFavourite(item.name);
+    const bundled = getDriverImage(item.number);
     return (
       <TouchableOpacity
         style={[styles.driverCard, fav && styles.driverCardFav]}
@@ -93,36 +101,25 @@ export default function DriversScreen({navigation}) {
         onPress={() => { Analytics.driverClicked(item.name); navigation.navigate('DriverDetail', {driver: item}); }}
         accessibilityLabel={`${item.name}, ${item.team}, number ${item.number}`}
         accessibilityRole="button">
-        <View style={styles.avatarWrap}>
-          <DriverAvatar number={item.number} imageUrl={item.imageUrl} size={58} />
-          <View style={styles.numberBadge}>
-            <Text style={styles.numberText}>{item.number}</Text>
-          </View>
-        </View>
-        <View style={styles.driverInfo}>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-            {fav && <Icon name="star" size={13} color={Colors.yellow} />}
-            <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>{item.name}</Text>
-          </View>
-          {item.team ? <Text style={styles.driverTeam}>{item.team}</Text> : null}
-          {item.car ? (
-            <View style={styles.carBadge}>
-              <Text style={styles.carText}>{item.car}</Text>
-            </View>
+        <ImageBackground
+          source={item.cardBgUrl ? {uri: item.cardBgUrl} : undefined}
+          style={styles.driverImageArea}
+          resizeMode="stretch">
+          <Text style={[styles.driverNumberBg, [2,16,17,88,99].includes(item.number) && {color: '#000'}]}>{item.number}</Text>
+          {bundled ? (
+            <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
+          ) : item.imageUrl ? (
+            <Image source={{uri: thumbUrl(item.imageUrl, '300x300')}} style={styles.driverPhoto} resizeMode="contain" />
           ) : null}
+          {fav && (
+            <View style={styles.favBadge}>
+              <Icon name="star" size={12} color={Colors.yellow} />
+            </View>
+          )}
+        </ImageBackground>
+        <View style={styles.driverFooter}>
+          <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
         </View>
-        <TouchableOpacity
-          style={{padding: 8}}
-          onPress={() => { Analytics.favouriteToggled(item.name, !isFavourite(item.name)); if (!isFavourite(item.name)) Analytics.setFavouriteDriverProperty(item.name); toggleFav(item.name); }}
-          hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-          accessibilityLabel={`${fav ? 'Remove' : 'Add'} ${item.name} as favourite`}
-          accessibilityRole="button">
-          <Icon
-            name={fav ? 'star' : 'star-outline'}
-            size={22}
-            color={fav ? Colors.yellow : Colors.textSecondary}
-          />
-        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -137,12 +134,12 @@ export default function DriversScreen({navigation}) {
       accessibilityRole="button">
       <View style={styles.teamImageArea}>
         {item.cardBgUrl ? (
-          <Image source={{uri: item.cardBgUrl}} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <Image source={{uri: item.cardBgThumbUrl || item.cardBgUrl}} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
         {item.carImageUrl ? (
-          <Image source={{uri: item.carImageUrl}} style={styles.teamCarImage} resizeMode="contain" />
+          <Image source={{uri: item.carThumbUrl || item.carImageUrl}} style={styles.teamCarImage} resizeMode="contain" />
         ) : null}
       </View>
       <View style={styles.teamFooter}>
@@ -186,12 +183,13 @@ export default function DriversScreen({navigation}) {
           pointerEvents={tab === 0 ? 'auto' : 'none'}
           contentContainerStyle={{padding: 16, paddingBottom: 20}}>
           <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
-          {drivers.map((item, i) => (
-            <View key={String(item.number)}>
-              {i > 0 && <View style={{height: 8}} />}
-              {renderDriver({item})}
-            </View>
-          ))}
+          <View style={styles.driversGrid}>
+            {drivers.map(item => (
+              <View key={String(item.number)} style={styles.driverGridItem}>
+                {renderDriver({item})}
+              </View>
+            ))}
+          </View>
         </ScrollView>
         <ScrollView
           ref={teamsListRef}
@@ -218,45 +216,24 @@ const styles = StyleSheet.create({
   tabText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '800', letterSpacing: 1},
   tabTextActive: {color: Colors.yellow},
   countLabel: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginBottom: 8},
-  driverCard: {
-    flexDirection: 'row',
-    backgroundColor: Colors.card,
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-  },
-  driverCardFav: {
-    borderWidth: 1,
-    borderColor: 'rgba(254,189,2,0.5)',
-  },
-  avatarWrap: {position: 'relative'},
-  avatar: {width: 58, height: 58, borderRadius: 29},
-  avatarPlaceholder: {backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center'},
-  numberBadge: {
+  driversGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
+  driverGridItem: {width: (SCREEN_WIDTH - 32 - 10) / 2},
+  driverCard: {borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
+  driverCardFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'},
+  driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
+  driverPhoto: {width: '100%', height: '85%'},
+  driverNumberBg: {
     position: 'absolute',
-    bottom: -2,
-    right: -2,
-    backgroundColor: Colors.navy,
-    borderRadius: 10,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderWidth: 1.5,
-    borderColor: Colors.background,
+    top: -10,
+    right: 5,
+    fontSize: 90,
+    fontWeight: '900',
+    color: '#fff',
+    lineHeight: 100,
   },
-  numberText: {color: '#fff', fontSize: 10, fontWeight: '900'},
-  driverInfo: {flex: 1, marginLeft: 12},
-  driverName: {color: '#fff', fontSize: 16, fontWeight: '700'},
-  driverTeam: {color: Colors.textSecondary, fontSize: 13},
-  carBadge: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: Colors.outline,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginTop: 6,
-  },
-  carText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
+  favBadge: {position: 'absolute', top: 8, right: 8},
+  driverFooter: {padding: 10},
+  driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
   teamImageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
   teamCarImage: {width: '100%', height: '85%'},

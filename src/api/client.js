@@ -8,20 +8,26 @@ const BUNDLED_CALENDAR = require('../data/calendar.json');
 const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 
 async function fetchJson(url, cacheKey) {
-  const t = Date.now();
-  const sep = url.includes('?') ? '&' : '?';
+  // Return cached data immediately if available, refresh in background
+  if (cacheKey) {
+    const cached = await cacheRead(cacheKey);
+    if (cached) {
+      // Refresh cache in background without blocking
+      fetch(url)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) cacheWrite(cacheKey, data); })
+        .catch(() => {});
+      return cached;
+    }
+  }
+  // No cache yet — fetch and wait
   try {
-    const res = await fetch(`${url}${sep}t=${t}`);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (cacheKey) cacheWrite(cacheKey, data);
     return data;
   } catch (e) {
-    // Fallback to cache on network error
-    if (cacheKey) {
-      const cached = await cacheRead(cacheKey);
-      if (cached) return cached;
-    }
     throw e;
   }
 }
@@ -46,10 +52,19 @@ export async function fetchResults(year = 2026) {
 export async function fetchArticles(page = 1, perPage = 20, search = '') {
   let url = `${BASE_WP}/posts?per_page=${perPage}&page=${page}&_embed=1`;
   if (search) url += `&search=${encodeURIComponent(search)}`;
-  const t = Date.now();
   const cacheKey = search ? null : `news_p${page}`;
+  if (cacheKey) {
+    const cached = await cacheRead(cacheKey);
+    if (cached) {
+      fetch(url)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) cacheWrite(cacheKey, data); })
+        .catch(() => {});
+      return cached;
+    }
+  }
   try {
-    const res = await fetch(`${url}&t=${t}`);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (cacheKey) cacheWrite(cacheKey, data);

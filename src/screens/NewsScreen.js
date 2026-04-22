@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -279,7 +279,7 @@ function HeroCard({article, onPress, onRefresh, onSearchClick}) {
   return (
     <TouchableOpacity style={styles.hero} activeOpacity={0.9} onPress={onPress} accessibilityLabel={`Featured article: ${article.title}`} accessibilityRole="button">
       {article.imageUrl && (
-        <CachedImage uri={article.imageUrl} style={styles.heroImage} />
+        <CachedImage uri={article.imageUrl} style={styles.heroImage} targetWidth={768} />
       )}
       <View style={styles.heroGradient}>
         {/* Top bar with logo */}
@@ -323,7 +323,7 @@ function GridRow({articles, onPress}) {
           accessibilityLabel={article.title}
           accessibilityRole="button">
           {article.imageUrl && (
-            <CachedImage uri={article.imageUrl} style={styles.gridImage} />
+            <CachedImage uri={article.imageUrl} style={styles.gridImage} targetWidth={300} />
           )}
           <View style={styles.gridOverlay} />
           <View style={styles.gridContent}>
@@ -347,7 +347,7 @@ function CompactCard({article, onPress}) {
   return (
     <TouchableOpacity style={styles.compactCard} activeOpacity={0.8} onPress={onPress} accessibilityLabel={article.title} accessibilityRole="button">
       {article.imageUrl && (
-        <CachedImage uri={article.imageUrl} style={styles.compactImage} />
+        <CachedImage uri={article.imageUrl} style={styles.compactImage} targetWidth={150} />
       )}
       <View style={styles.compactContent}>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2}}>
