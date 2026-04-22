@@ -14,10 +14,11 @@
   "shop_home_standard": false,
   "podcasts_enabled": true,
   "podcast_last_episode_url": "",
-  "search_ad": true,
+  "search_ad": false,
   "debug_mode": false,
   "hub_news_enabled": true,
   "live_timing_in_app": false,
   "update_available": true,
-  "update_min_version": 52
+  "update_min_version": 52,
+  "live_chat": false
 }
