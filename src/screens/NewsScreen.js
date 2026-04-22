@@ -80,12 +80,6 @@ export default function NewsScreen({navigation}) {
     }
   }, []);
 
-  // Reload when preview mode is toggled
-  useEffect(() => {
-    hubPreviewRef.current = settings.hubPreview;
-    load(1);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.hubPreview]);
 
   useEffect(() => { Analytics.screen('news'); }, []);
   useEffect(() => {
