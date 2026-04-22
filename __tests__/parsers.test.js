@@ -23,8 +23,17 @@ describe('formatDate', () => {
     expect(result).toMatch(/3 Apr 2026/);
   });
 
-  test('returns input on invalid date', () => {
-    expect(formatDate('not-a-date')).toBe('Invalid Date');
+  test('returns empty string on invalid date', () => {
+    expect(formatDate('not-a-date')).toBe('');
+  });
+
+  test('returns empty string for empty input', () => {
+    expect(formatDate('')).toBe('');
+  });
+
+  test('returns empty string for null/undefined', () => {
+    expect(formatDate(null)).toBe('');
+    expect(formatDate(undefined)).toBe('');
   });
 });
 

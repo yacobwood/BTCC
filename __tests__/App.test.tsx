@@ -5,6 +5,21 @@
 // Stub out side-effect-heavy utils so this smoke test stays fast
 jest.mock('../src/utils/backgroundPrefetch', () => ({runBackgroundPrefetch: jest.fn()}));
 jest.mock('../src/utils/notifNavigation',    () => ({navigateFromData: jest.fn()}));
+jest.mock('@react-native-firebase/database', () => {
+  const ref = {
+    orderByChild: jest.fn().mockReturnThis(),
+    limitToLast: jest.fn().mockReturnThis(),
+    on: jest.fn(),
+    off: jest.fn(),
+    once: jest.fn(() => Promise.resolve({val: () => ({})})),
+    push: jest.fn(() => Promise.resolve()),
+    update: jest.fn(() => Promise.resolve()),
+    remove: jest.fn(() => Promise.resolve()),
+  };
+  const db = jest.fn(() => ({ref: jest.fn(() => ref)}));
+  db.ServerValue = {TIMESTAMP: 'TIMESTAMP'};
+  return db;
+});
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
