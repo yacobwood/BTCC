@@ -55,7 +55,7 @@ export default function DriverDetailScreen({route, navigation}) {
           const entry = results.find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
           if (!entry) continue;
           if (entry.pos === 1) wins++;
-          if (entry.pos <= 3) podiums++;
+          if (entry.pos >= 1 && entry.pos <= 3) podiums++;
           points += entry.points || 0;
           if (entry.pole) poles++;
           const times = results.map(r => r.bestLap).filter(Boolean);
