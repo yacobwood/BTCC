@@ -11,7 +11,7 @@
   const ATTEMPTS_KEY = 'btcc_admin_attempts';
   const LOCKOUT_KEY  = 'btcc_admin_lockout';
   const MAX_ATTEMPTS = 5;
-  const LOCKOUT_MS   = 30 * 60 * 1000; // 30 minutes
+  const LOCKOUT_MS   = 30 * 60 * 1000;
 
   if (sessionStorage.getItem(SESSION_KEY) === HASH) return;
 
@@ -47,102 +47,81 @@
   const errEl  = () => document.getElementById('pw-error');
 
   function setLocked(until) {
-    input().disabled = true;
-    btn().disabled   = true;
-    btn().style.opacity = '0.4';
-    btn().style.cursor  = 'not-allowed';
-
+    input().disabled = true; btn().disabled = true;
+    btn().style.opacity = '0.4'; btn().style.cursor = 'not-allowed';
     const tick = setInterval(() => {
       const remaining = Math.ceil((until - Date.now()) / 1000);
       if (remaining <= 0) {
         clearInterval(tick);
         localStorage.setItem(ATTEMPTS_KEY, '0');
         localStorage.removeItem(LOCKOUT_KEY);
-        input().disabled = false;
-        btn().disabled   = false;
-        btn().style.opacity = '1';
-        btn().style.cursor  = 'pointer';
-        errEl().textContent = '';
-        input().focus();
+        input().disabled = false; btn().disabled = false;
+        btn().style.opacity = '1'; btn().style.cursor = 'pointer';
+        errEl().textContent = ''; input().focus();
       } else {
-        const m = Math.floor(remaining / 60);
-        const s = remaining % 60;
+        const m = Math.floor(remaining / 60), s = remaining % 60;
         errEl().textContent = `Too many attempts. Try again in ${m}:${String(s).padStart(2,'0')}`;
       }
     }, 1000);
   }
 
-  // Check existing lockout on load
   const existingLockout = getLockoutUntil();
   if (existingLockout > Date.now()) setLocked(existingLockout);
 
   let cooldown = false;
-
   async function attempt() {
     if (cooldown || input().disabled) return;
     const val = input().value;
     if (!val) return;
-
     const lockoutUntil = getLockoutUntil();
     if (lockoutUntil > Date.now()) { setLocked(lockoutUntil); return; }
-
     const hash = await sha256(val);
     if (hash === HASH) {
       sessionStorage.setItem(SESSION_KEY, HASH);
       localStorage.setItem(ATTEMPTS_KEY, '0');
       localStorage.removeItem(LOCKOUT_KEY);
-      overlay.remove();
-      return;
+      overlay.remove(); return;
     }
-
     const attempts = getAttempts() + 1;
     localStorage.setItem(ATTEMPTS_KEY, attempts);
     input().value = '';
-
     if (attempts >= MAX_ATTEMPTS) {
       const until = Date.now() + LOCKOUT_MS;
       localStorage.setItem(LOCKOUT_KEY, until);
-      setLocked(until);
-      return;
+      setLocked(until); return;
     }
-
-    // Progressive delay: 2s, 4s, 8s, 16s before MAX_ATTEMPTS
     const delaySec = Math.pow(2, attempts);
     const remaining = MAX_ATTEMPTS - attempts;
     errEl().textContent = `Incorrect password — wait ${delaySec}s (${remaining} attempt${remaining === 1 ? '' : 's'} left)`;
-    cooldown = true;
-    btn().disabled  = true;
-    btn().style.opacity = '0.4';
-
+    cooldown = true; btn().disabled = true; btn().style.opacity = '0.4';
     setTimeout(() => {
-      cooldown = false;
-      btn().disabled = false;
-      btn().style.opacity = '1';
+      cooldown = false; btn().disabled = false; btn().style.opacity = '1';
       errEl().textContent = `Incorrect password (${remaining} attempt${remaining === 1 ? '' : 's'} left)`;
       input().focus();
     }, delaySec * 1000);
   }
-
   btn().addEventListener('click', attempt);
   input().addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
 })();
 </script>
 <style>
 :root {
-  --bg:        #080912;
-  --surface:   #0F1122;
-  --card:      #161828;
-  --outline:   #2A2D44;
-  --outline-lo:#1A1C2E;
-  --yellow:    #FEBD02;
+  --bg:         #080912;
+  --surface:    #0F1122;
+  --card:       #161828;
+  --outline:    #2A2D44;
+  --outline-lo: #1A1C2E;
+  --yellow:     #FEBD02;
   --yellow-dim: rgba(254,189,2,0.12);
-  --red:       #E3000B;
-  --navy:      #020255;
-  --text:      #FFFFFF;
-  --text-sec:  #8B8FA8;
-  --green:     #4CAF50;
-  --green-dim: rgba(76,175,80,0.12);
-  --red-dim:   rgba(227,0,11,0.12);
+  --red:        #E3000B;
+  --navy:       #020255;
+  --text:       #FFFFFF;
+  --text-sec:   #8B8FA8;
+  --green:      #4CAF50;
+  --green-dim:  rgba(76,175,80,0.12);
+  --red-dim:    rgba(227,0,11,0.12);
+  --blue:       #5B9CF6;
+  --purple:     #A78BFA;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
@@ -151,25 +130,10 @@ body {
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100dvh;
-  padding-bottom: 40px;
+  padding-bottom: 60px;
 }
 
-/* ── Layout — tabs on all screen sizes ── */
-.desktop-layout { display: contents; }
-.desktop-col { display: contents; }
-.desktop-col-title { display: none; }
-
-@media (min-width: 900px) {
-  .tab-panel { max-width: 760px; margin: 0 auto; padding: 28px 32px; }
-  .scrapers-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .scrapers-grid .scraper-card { margin-bottom: 0; }
-  .scraper-info-note { margin-bottom: 20px; }
-}
-
+/* ── Header ── */
 .app-header {
   background: var(--navy);
   padding: 14px 16px 12px;
@@ -181,8 +145,7 @@ body {
   top: 0;
   z-index: 10;
 }
-.header-wordmark { flex: 1; display: flex; align-items: center; }
-.header-logo { height: 28px; width: auto; display: block; }
+.header-logo { height: 26px; width: auto; }
 .header-badge {
   background: var(--yellow-dim);
   border: 1px solid rgba(254,189,2,0.3);
@@ -192,94 +155,57 @@ body {
   letter-spacing: 1.5px;
   padding: 3px 8px;
   border-radius: 20px;
+  margin-left: auto;
 }
+
+/* ── Tab bar ── */
 .tab-bar {
   display: flex;
   background: var(--surface);
-  border-bottom: 1px solid var(--outline);
-  padding: 0 4px;
+  border-bottom: 2px solid var(--outline);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 53px;
+  z-index: 9;
 }
+.tab-bar::-webkit-scrollbar { display: none; }
 .tab {
-  flex: 1;
-  padding: 12px 8px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 800;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 16px 8px;
+  font-size: 9px;
+  font-weight: 900;
   letter-spacing: 1.5px;
   color: var(--text-sec);
   cursor: pointer;
   border: none;
   background: transparent;
   border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
   transition: color .15s, border-color .15s;
   -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
 }
+.tab svg { width: 18px; height: 18px; fill: currentColor; }
 .tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
-.tab-panel { display: none; padding: 16px; max-width: 560px; margin: 0 auto; }
-.tab-panel.active { display: block; }
-</style>
-<style>
-.token-card {
-  background: var(--card);
-  border: 1px solid var(--outline);
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 20px;
-}
-.token-card .section-label { margin-bottom: 8px; }
-.token-row { display: flex; gap: 8px; }
-.token-row input { flex: 1; }
-.token-note { font-size: 11px; color: var(--text-sec); margin-top: 8px; }
-.token-ok { font-size: 11px; color: var(--green); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-.token-ok::before { content: '●'; font-size: 8px; }
-.token-card.collapsed { padding: 10px 14px; cursor: pointer; }
-.token-card.collapsed .token-body { display: none; }
-.token-collapsed-row { display: none; align-items: center; gap: 8px; }
-.token-card.collapsed .token-collapsed-row { display: flex; }
-.token-collapsed-row .token-ok { margin: 0; }
-.token-edit-hint { font-size: 11px; color: var(--text-sec); margin-left: auto; }
 
+/* ── Panels ── */
+.tab-panel { display: none; padding: 16px; max-width: 640px; margin: 0 auto; }
+.tab-panel.active { display: block; }
+
+/* ── Typography ── */
 .section-label {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 2px;
   color: var(--text-sec);
   text-transform: uppercase;
 }
-.section-note { font-size: 12px; color: var(--text-sec); margin-bottom: 12px; }
-
-/* data-loaded banner */
-.data-loaded-banner {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  background: var(--green-dim);
-  border: 1px solid rgba(76,175,80,0.25);
-  border-radius: 10px;
-  padding: 9px 12px;
-  margin-bottom: 16px;
-  font-size: 12px;
-  color: var(--green);
-  font-weight: 600;
-}
-.data-loaded-banner.visible { display: flex; }
-.data-loaded-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-
-input[type=text],
-input[type=number],
-input[type=password] {
-  background: var(--surface);
-  border: 1px solid var(--outline);
-  color: var(--text);
-  padding: 11px 12px;
-  border-radius: 10px;
-  font-size: 15px;
-  width: 100%;
-  -webkit-appearance: none;
-  transition: border-color .15s;
-}
-input:focus { outline: none; border-color: var(--yellow); }
-input::placeholder { color: var(--text-sec); opacity: 0.5; }
+.section-note { font-size: 12px; color: var(--text-sec); line-height: 1.5; }
 .field-label {
   font-size: 10px;
   font-weight: 800;
@@ -289,76 +215,82 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   text-transform: uppercase;
 }
 
-.list-section-header {
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 20px 0 10px;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
-.list-section-header .section-label { flex: 1; }
-.list-section-header .section-note { margin: 0; font-size: 11px; }
+.card-header .section-label { flex: 1; }
 
-.entry-card {
+/* ── Stat grid (dashboard) ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stat-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.stat-card {
   background: var(--card);
   border: 1px solid var(--outline-lo);
   border-radius: 12px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.entry-pos {
-  color: var(--yellow);
-  font-weight: 900;
-  font-size: 14px;
-  width: 22px;
+  padding: 14px 12px;
   text-align: center;
-  flex-shrink: 0;
 }
-.entry-info { flex: 1; min-width: 0; }
-.entry-name {
+.stat-value { font-size: 26px; font-weight: 900; line-height: 1; }
+.stat-label { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; color: var(--text-sec); margin-top: 4px; text-transform: uppercase; }
+
+/* ── Inputs ── */
+input[type=text],
+input[type=number],
+input[type=password],
+textarea,
+select.input {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  color: var(--text);
+  padding: 11px 12px;
+  border-radius: 10px;
   font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 100%;
+  -webkit-appearance: none;
+  transition: border-color .15s;
+  font-family: inherit;
 }
-.entry-sub {
-  font-size: 11px;
-  color: var(--text-sec);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 1px;
-}
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+input:focus, textarea:focus, select.input:focus { outline: none; border-color: var(--yellow); }
+input::placeholder, textarea::placeholder { color: var(--text-sec); opacity: 0.5; }
+select.input { cursor: pointer; }
+.input-row { display: flex; gap: 8px; }
+.input-row input, .input-row select.input { flex: 1; min-width: 0; }
+.field-group { margin-bottom: 12px; }
 
-/* stat inputs row */
-.stat-inputs { display: flex; gap: 6px; flex-shrink: 0; }
-.stat-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.stat-col-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: var(--text-sec); text-transform: uppercase; }
-.stat-input { width: 52px; }
-.stat-input input { padding: 7px 4px; text-align: center; font-size: 13px; font-weight: 700; }
-.pts-input { width: 68px; flex-shrink: 0; }
-.pts-input input { padding: 8px 6px; text-align: center; font-size: 14px; font-weight: 700; }
-
+/* ── Buttons ── */
 .btn-primary {
   width: 100%;
   background: var(--yellow);
   color: #000;
   border: none;
-  padding: 15px;
+  padding: 14px;
   border-radius: 12px;
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 1.5px;
-  margin-top: 20px;
   cursor: pointer;
   min-height: 48px;
   -webkit-tap-highlight-color: transparent;
   transition: opacity .15s;
 }
-.btn-primary:disabled { opacity: 0.35; }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-ghost {
   width: 100%;
   background: transparent;
@@ -374,168 +306,190 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   min-height: 46px;
   -webkit-tap-highlight-color: transparent;
 }
-#status {
+.btn-ghost:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-run {
+  background: var(--yellow);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  min-height: 42px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.btn-run:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-sm {
+  background: transparent;
+  border: 1px solid var(--outline);
+  color: var(--text-sec);
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-danger {
+  background: var(--red-dim);
+  border: 1px solid rgba(227,0,11,0.3);
+  color: var(--red);
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Status / banners ── */
+.status-line {
   text-align: center;
-  padding: 12px;
+  padding: 10px;
   font-size: 13px;
   min-height: 18px;
   margin-top: 4px;
 }
 .ok  { color: var(--green); }
 .err { color: var(--red); }
+.banner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.banner.visible { display: flex; }
+.banner-green { background: var(--green-dim); border: 1px solid rgba(76,175,80,0.25); color: var(--green); }
+.banner-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.divider { border: none; border-top: 1px solid var(--outline-lo); margin: 20px 0; }
 
+/* ── Token card ── */
+.token-card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.token-card.collapsed { padding: 10px 16px; cursor: pointer; }
+.token-card.collapsed .token-body { display: none; }
+.token-collapsed-row { display: none; align-items: center; gap: 8px; }
+.token-card.collapsed .token-collapsed-row { display: flex; }
+.token-ok { font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 5px; }
+.token-ok::before { content: '●'; font-size: 8px; }
+.token-edit-hint { font-size: 11px; color: var(--text-sec); margin-left: auto; }
+.token-note { font-size: 11px; color: var(--text-sec); margin-top: 8px; }
+
+/* ── Standings ── */
+.list-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 10px;
+}
+.list-section-header .section-label { flex: 1; }
+.entry-card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.entry-pos { color: var(--yellow); font-weight: 900; font-size: 14px; width: 22px; text-align: center; flex-shrink: 0; }
+.entry-info { flex: 1; min-width: 0; }
+.entry-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entry-sub { font-size: 11px; color: var(--text-sec); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-inputs { display: flex; gap: 6px; flex-shrink: 0; }
+.stat-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.stat-col-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: var(--text-sec); }
+.stat-input { width: 52px; }
+.stat-input input { padding: 7px 4px; text-align: center; font-size: 13px; font-weight: 700; }
+.pts-input { width: 68px; flex-shrink: 0; }
+.pts-input input { padding: 8px 6px; text-align: center; font-size: 14px; font-weight: 700; }
+
+/* ── Scrapers ── */
 .scraper-card {
   background: var(--card);
   border: 1px solid var(--outline-lo);
   border-radius: 14px;
-  padding: 16px;
+  padding: 14px 16px;
   margin-bottom: 10px;
 }
 .scraper-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 6px;
+  gap: 8px;
 }
 .scraper-title { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: var(--yellow); }
-.scraper-status-chip { font-size: 11px; font-weight: 700; color: var(--text-sec); min-height: 20px; }
+.scraper-status-chip { font-size: 11px; font-weight: 700; color: var(--text-sec); min-width: 60px; text-align: right; }
 .st-running { color: var(--yellow); }
 .st-ok      { color: var(--green); }
 .st-fail    { color: var(--red); }
-.scraper-desc { font-size: 12px; color: var(--text-sec); line-height: 1.5; margin-bottom: 12px; }
-.scraper-inputs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.scraper-inputs .field-label { margin-bottom: 0; }
-.check-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-sec);
-  cursor: pointer;
-}
-.check-label input[type=checkbox] {
-  width: 18px; height: 18px;
-  accent-color: var(--yellow);
-  cursor: pointer;
-  border-radius: 4px;
-}
-.scraper-inputs input[type=number] { width: 80px; padding: 9px 10px; font-size: 14px; }
-.btn-run {
-  background: var(--yellow);
-  color: #000;
-  border: none;
-  padding: 11px 22px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  min-height: 44px;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity .15s;
-}
-.btn-run:disabled { opacity: 0.35; }
-.btn-refresh {
-  width: 100%;
-  background: transparent;
-  border: 1px solid var(--outline);
-  color: var(--text-sec);
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  margin-top: 6px;
-  min-height: 44px;
-  -webkit-tap-highlight-color: transparent;
-}
+.scraper-desc { font-size: 12px; color: var(--text-sec); line-height: 1.5; margin-bottom: 10px; }
+.scraper-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.scraper-inputs { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; flex: 1; }
+.scraper-inputs .field-group { margin-bottom: 0; }
+.scraper-inputs input[type=number] { width: 80px; padding: 9px 10px; font-size: 13px; }
+.scraper-inputs input[type=text]   { width: 140px; padding: 9px 10px; font-size: 13px; }
+.scraper-inputs select.input       { width: 130px; padding: 9px 10px; font-size: 13px; }
 .scraper-info-note {
   background: var(--surface);
   border: 1px solid var(--outline);
   border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 11px;
+  padding: 10px 14px;
+  font-size: 12px;
   color: var(--text-sec);
   margin-bottom: 16px;
   line-height: 1.5;
 }
 .scraper-info-note strong { color: var(--text); }
 
-/* ── Feature flag toggles ── */
+/* ── Feature flags ── */
 .flag-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 0;
+  padding: 13px 0;
   border-bottom: 1px solid var(--outline-lo);
 }
 .flag-row:last-child { border-bottom: none; }
-.flag-info { flex: 1; min-width: 0; padding-right: 16px; }
-.flag-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-}
-.flag-key {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--text-sec);
-  margin-top: 2px;
-  font-family: 'SF Mono', 'Fira Mono', monospace;
-}
-.toggle-wrap { flex-shrink: 0; }
+.flag-info { flex: 1; min-width: 0; padding-right: 14px; }
+.flag-name { font-size: 13px; font-weight: 700; }
+.flag-key { font-size: 10px; letter-spacing: 1px; color: var(--text-sec); margin-top: 2px; font-family: 'SF Mono','Fira Mono',monospace; }
+.flag-desc { font-size: 11px; color: var(--text-sec); margin-top: 2px; line-height: 1.4; }
 .toggle-wrap input[type=checkbox] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 48px;
-  height: 28px;
-  border-radius: 14px;
-  background: var(--outline);
-  cursor: pointer;
-  position: relative;
-  transition: background .2s;
-  border: none;
-  padding: 0;
+  appearance: none; -webkit-appearance: none;
+  width: 46px; height: 27px; border-radius: 14px;
+  background: var(--outline); cursor: pointer;
+  position: relative; transition: background .2s;
+  border: none; padding: 0; flex-shrink: 0;
 }
 .toggle-wrap input[type=checkbox]::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--text-sec);
+  content: ''; position: absolute;
+  top: 3px; left: 3px; width: 21px; height: 21px;
+  border-radius: 50%; background: var(--text-sec);
   transition: left .2s, background .2s;
 }
-.toggle-wrap input[type=checkbox]:checked {
-  background: var(--yellow);
-}
-.toggle-wrap input[type=checkbox]:checked::after {
-  left: 23px;
-  background: #000;
-}
+.toggle-wrap input[type=checkbox]:checked { background: var(--yellow); }
+.toggle-wrap input[type=checkbox]:checked::after { left: 22px; background: #000; }
 .flags-card {
   background: var(--card);
   border: 1px solid var(--outline-lo);
   border-radius: 14px;
   padding: 4px 16px;
-  margin-bottom: 16px;
-}
-#flags-status {
-  text-align: center;
-  padding: 12px;
-  font-size: 13px;
-  min-height: 18px;
-  margin-top: 4px;
+  margin-bottom: 12px;
 }
 .override-card {
   background: var(--card);
@@ -544,97 +498,145 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
   padding: 12px 14px;
   margin-bottom: 8px;
 }
-.override-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.override-id {
-  font-size: 12px;
-  font-family: 'SF Mono', 'Fira Mono', monospace;
-  color: var(--yellow);
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  min-width: 0;
-}
-.btn-remove {
-  background: transparent;
-  border: 1px solid var(--outline);
-  color: var(--text-sec);
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-left: 10px;
-}
-.override-flags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.override-chip {
-  background: var(--surface);
-  border: 1px solid var(--outline);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  font-family: 'SF Mono', 'Fira Mono', monospace;
-  color: var(--text-sec);
-}
+.override-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.override-id { font-size: 12px; font-family: 'SF Mono','Fira Mono',monospace; color: var(--yellow); font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.override-flags { display: flex; flex-wrap: wrap; gap: 6px; }
+.override-chip { background: var(--surface); border: 1px solid var(--outline); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; font-family: 'SF Mono','Fira Mono',monospace; color: var(--text-sec); }
 .override-chip.on  { border-color: var(--yellow); color: var(--yellow); }
 .override-chip.off { border-color: var(--red);    color: var(--red); }
-.new-override-toggle-row {
+.new-override-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--outline-lo); }
+.new-override-row:last-child { border-bottom: none; }
+.new-override-label { font-size: 12px; color: var(--text-sec); }
+.new-override-controls select { background: var(--surface); border: 1px solid var(--outline); color: var(--text); padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+/* ── Notifications ── */
+.notif-type-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--text-sec);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.notif-type-btn.active { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+
+/* ── Hub News ── */
+.hub-article-card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.hub-article-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+  background: var(--surface);
+}
+.hub-article-body { padding: 12px 14px; }
+.hub-article-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.hub-article-meta { font-size: 11px; color: var(--text-sec); }
+.hub-article-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+/* ── Dashboard health dots ── */
+.health-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--outline-lo);
+  gap: 10px;
 }
-.new-override-toggle-row:last-child { border-bottom: none; }
-.new-override-label { font-size: 12px; color: var(--text-sec); }
-.new-override-controls { display: flex; gap: 6px; align-items: center; }
-.new-override-controls select {
-  background: var(--surface);
-  border: 1px solid var(--outline);
-  color: var(--text);
-  padding: 5px 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
+.health-row:last-child { border-bottom: none; }
+.health-dot {
+  width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+}
+.health-name { flex: 1; font-size: 13px; font-weight: 600; }
+.health-sub  { font-size: 11px; color: var(--text-sec); }
+.health-status { font-size: 11px; font-weight: 700; text-align: right; }
+
+/* Desktop 2-col */
+@media (min-width: 900px) {
+  .tab-panel { max-width: 760px; padding: 24px 32px; }
+  .scrapers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .scrapers-grid .scraper-card { margin-bottom: 0; }
 }
 </style>
 </head>
 <body>
 
 <header class="app-header">
-  <div class="header-wordmark">
-    <img src="../Logo%20Long.png" alt="BTCC Fan Hub" class="header-logo">
-  </div>
+  <img src="../Logo%20Long.png" alt="BTCC Fan Hub" class="header-logo">
   <div class="header-badge">ADMIN</div>
 </header>
 
-<div class="tab-bar" style="position:sticky;top:57px;z-index:9;">
-  <button class="tab active" onclick="switchTab('standings', this)">STANDINGS</button>
-  <button class="tab" onclick="switchTab('scrapers', this)">SCRAPERS</button>
-  <button class="tab" onclick="switchTab('flags', this)">FLAGS</button>
-  <button class="tab" onclick="switchTab('notifications', this)">NOTIFS</button>
+<div class="tab-bar" id="tab-bar">
+  <button class="tab active" onclick="switchTab('dashboard',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    DASH
+  </button>
+  <button class="tab" onclick="switchTab('standings',this)">
+    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/></svg>
+    STANDINGS
+  </button>
+  <button class="tab" onclick="switchTab('flags',this)">
+    <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+    FLAGS
+  </button>
+  <button class="tab" onclick="switchTab('notifications',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+    NOTIFS
+  </button>
+  <button class="tab" onclick="switchTab('hubnews',this)">
+    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h12v2H6zm0 4h8v2H6z"/></svg>
+    HUB NEWS
+  </button>
+  <button class="tab" onclick="switchTab('scrapers',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    SCRAPERS
+  </button>
 </div>
 
-<!-- ══════════════════════════════════════════════════ TAB: STANDINGS ══════ -->
-<div class="desktop-layout">
-<div class="desktop-col">
-<div class="desktop-col-title">Standings</div>
-<div id="panel-standings" class="tab-panel active">
+<!-- ══════════════════════════════ DASHBOARD ══════ -->
+<div id="panel-dashboard" class="tab-panel active">
 
-  <!-- Token -->
+  <div id="dash-standing-summary" style="margin-bottom:12px">
+    <div class="stat-grid stat-grid-3">
+      <div class="stat-card"><div class="stat-value" id="ds-round" style="color:var(--yellow)">—</div><div class="stat-label">Round</div></div>
+      <div class="stat-card"><div class="stat-value" id="ds-drivers">—</div><div class="stat-label">Drivers</div></div>
+      <div class="stat-card"><div class="stat-value" id="ds-updated" style="color:var(--text-sec);font-size:16px">—</div><div class="stat-label">Standings Age</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">SCRAPER HEALTH</div><button class="btn-sm" onclick="refreshAllStatus()">Refresh</button></div>
+    <div id="dash-health">
+      <div class="section-note">Loading…</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">FEATURE FLAGS</div><button class="btn-sm" onclick="switchTabByName('flags')">Edit</button></div>
+    <div id="dash-flags">
+      <div class="section-note">Loading…</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">HUB NEWS</div><button class="btn-sm" onclick="switchTabByName('hubnews')">Manage</button></div>
+    <div id="dash-news"><div class="section-note">Loading…</div></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ STANDINGS ══════ -->
+<div id="panel-standings" class="tab-panel">
+
   <div class="token-card" id="token-card" onclick="expandToken()">
     <div class="token-collapsed-row">
       <div class="token-ok">Token loaded</div>
@@ -642,542 +644,410 @@ input::placeholder { color: var(--text-sec); opacity: 0.5; }
     </div>
     <div class="token-body">
       <div class="section-label">GITHUB TOKEN</div>
-      <div class="token-row" style="margin-top:8px">
+      <div class="input-row" style="margin-top:8px">
         <input type="password" id="tok" placeholder="ghp_…" autocomplete="off" onclick="event.stopPropagation()">
-        <button class="btn-run" onclick="event.stopPropagation();saveToken()" style="padding:0 18px;border-radius:10px">SAVE</button>
+        <button class="btn-run" onclick="event.stopPropagation();saveToken()" style="padding:0 18px">SAVE</button>
       </div>
       <div class="token-note">Stored in this browser only — never sent anywhere except GitHub.</div>
     </div>
-    <div id="tok-status"></div>
   </div>
 
-  <!-- Data loaded banner -->
-  <div class="data-loaded-banner" id="data-banner">
-    <div class="data-loaded-dot"></div>
+  <div class="banner banner-green" id="data-banner">
+    <div class="banner-dot"></div>
     <span id="data-banner-text">Loaded from GitHub</span>
   </div>
 
-  <!-- Round info -->
   <div style="display:flex;gap:10px;margin-bottom:4px">
-    <div style="flex:1">
-      <div class="field-label">ROUND</div>
-      <input type="number" id="round-num" min="0" max="30" placeholder="0" style="text-align:center">
-    </div>
-    <div style="flex:2">
-      <div class="field-label">VENUE</div>
-      <input type="text" id="round-venue" placeholder="e.g. Donington Park">
-    </div>
+    <div style="flex:1"><div class="field-label">ROUND</div><input type="number" id="round-num" min="0" max="30" placeholder="0" style="text-align:center"></div>
+    <div style="flex:2"><div class="field-label">VENUE</div><input type="text" id="round-venue" placeholder="e.g. Donington Park"></div>
   </div>
 
-  <!-- Drivers -->
   <div class="list-section-header" style="margin-top:20px">
     <div class="section-label">DRIVERS</div>
-    <div class="section-note">0 pts hidden · auto-sorts</div>
+    <div class="section-note" style="font-size:11px">0 pts hidden · auto-sorts</div>
   </div>
   <div id="drv-list"></div>
 
-  <!-- Teams -->
   <div class="list-section-header">
     <div class="section-label">TEAMS</div>
-    <div class="section-note">0 pts hidden</div>
+    <div class="section-note" style="font-size:11px">0 pts hidden</div>
   </div>
   <div id="team-list"></div>
 
   <button class="btn-primary" id="savebtn" onclick="doSave()">SAVE TO APP</button>
   <button class="btn-ghost" id="resetbtn" onclick="doReset()">RESET — CLEAR ALL 2026 DATA</button>
-  <div id="status"></div>
+  <div id="status" class="status-line"></div>
 
 </div>
-</div><!-- /desktop-col standings -->
 
-<div class="desktop-col">
-<div class="desktop-col-title">Scrapers</div>
-<div id="panel-scrapers" class="tab-panel">
-
-  <div class="scraper-info-note">
-    Triggers GitHub Actions workflows remotely. Token must have <strong>repo + workflow</strong> scopes.
-  </div>
-
-  <div class="scrapers-grid">
-
-  <!-- Results scraper -->
-  <div class="scraper-card" id="sc-results">
-    <div class="scraper-head">
-      <div class="scraper-title">RESULTS</div>
-      <div class="scraper-status-chip" id="ss-results">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes race results from btcc.net and recomputes driver &amp; team standings. Updates <strong>results2026.json</strong> and <strong>standings.json</strong> — powers the Results and Standings screens in the app. Auto-runs hourly on race Sundays 13:00–17:00 UTC.</div>
-    <div class="scraper-inputs">
-      <div>
-        <div class="field-label">YEAR</div>
-        <input type="number" id="si-year" value="2026" min="2014" max="2030">
-      </div>
-      <div>
-        <div class="field-label">ROUND (optional)</div>
-        <input type="number" id="si-round" placeholder="all" min="1" max="30" style="width:80px">
-      </div>
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-results.yml','results')">RUN ▶</button>
-  </div>
-
-  <!-- Standings scraper -->
-  <div class="scraper-card" id="sc-standings">
-    <div class="scraper-head">
-      <div class="scraper-title">STANDINGS</div>
-      <div class="scraper-status-chip" id="ss-standings">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes live driver &amp; team standings directly from btcc.net. Updates <strong>standings.json</strong> — powers the Standings screen. Auto-runs every 6h, and every 15 min on race weekends (Sat/Sun 09:00–18:00 UTC).</div>
-    <button class="btn-run" onclick="runScraper('scrape-standings.yml','standings')">RUN ▶</button>
-  </div>
-
-  <!-- Calendar scraper -->
-  <div class="scraper-card" id="sc-calendar">
-    <div class="scraper-head">
-      <div class="scraper-title">CALENDAR</div>
-      <div class="scraper-status-chip" id="ss-calendar">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes round dates, venues and locations from btcc.net. Updates <strong>calendar.json</strong> — powers the Calendar screen and round cards. Auto-runs daily at 09:00 UTC.</div>
-    <div class="scraper-inputs">
-      <div class="field-label">SEASON</div>
-      <input type="number" id="si-season" value="2026" min="2020" max="2030">
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-calendar.yml','calendar')">RUN ▶</button>
-  </div>
-
-  <!-- Schedule scraper -->
-  <div class="scraper-card" id="sc-schedule">
-    <div class="scraper-head">
-      <div class="scraper-title">SCHEDULE</div>
-      <div class="scraper-status-chip" id="ss-schedule">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes session times (Free Practice, Qualifying, Qualifying Race, Race 1–3) from each circuit page on btcc.net. Updates <strong>schedule.json</strong> — powers the session timetable on each round's detail screen. Auto-runs nightly at 07:00 UTC.</div>
-    <button class="btn-run" onclick="runScraper('scrape-schedule.yml','schedule')">RUN ▶</button>
-  </div>
-
-  <!-- Grid scraper -->
-  <div class="scraper-card" id="sc-grid">
-    <div class="scraper-head">
-      <div class="scraper-title">GRID</div>
-      <div class="scraper-status-chip" id="ss-grid">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes driver names, car numbers and team info from btcc.net. Updates <strong>drivers.json</strong> and downloads driver portrait images — powers the Drivers screen and driver cards throughout the app. Manual trigger only.</div>
-    <button class="btn-run" onclick="runScraper('scrape-grid.yml','grid')">RUN ▶</button>
-  </div>
-
-
-  <!-- Motorsport Stats (historical) -->
-  <div class="scraper-card" id="sc-mss-history">
-    <div class="scraper-head">
-      <div class="scraper-title">MSS HISTORY</div>
-      <div class="scraper-status-chip" id="ss-mss-history">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes historical race-by-race results (POS, PTS, GRID) for all drivers &amp; teams from motorsportstats.com. Updates <strong>data/motorsportstats/drivers/</strong> and <strong>teams/</strong>. Manual only.</div>
-    <div class="scraper-inputs">
-      <div>
-        <div class="field-label">TARGET</div>
-        <select id="si-mss-target" style="background:var(--surface);border:1px solid var(--outline);color:var(--text);padding:9px 10px;border-radius:10px;font-size:13px;">
-          <option value="all">All</option>
-          <option value="drivers-only">Drivers only</option>
-          <option value="teams-only">Teams only</option>
-        </select>
-      </div>
-      <div>
-        <div class="field-label">SLUG (optional)</div>
-        <input type="text" id="si-mss-slug" placeholder="e.g. tom-ingram" style="width:140px;padding:9px 10px;font-size:13px;">
-      </div>
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-motorsportstats.yml','mss-history')">RUN ▶</button>
-  </div>
-
-  <!-- Motorsport Stats (summaries) -->
-  <div class="scraper-card" id="sc-mss-summaries">
-    <div class="scraper-head">
-      <div class="scraper-title">MSS SUMMARIES</div>
-      <div class="scraper-status-chip" id="ss-mss-summaries">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes career highlights &amp; per-season stats from motorsportstats.com summary pages, then merges into <strong>drivers.json</strong> (wins, podiums, poles, fastest laps, championship positions). Manual only.</div>
-    <div class="scraper-inputs">
-      <div>
-        <div class="field-label">DRIVER (optional)</div>
-        <input type="text" id="si-mss-driver" placeholder="e.g. tom-ingram" style="width:140px;padding:9px 10px;font-size:13px;">
-      </div>
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-driver-summaries.yml','mss-summaries')">RUN ▶</button>
-  </div>
-
-  <!-- Merch scraper -->
-  <div class="scraper-card" id="sc-merch">
-    <div class="scraper-head">
-      <div class="scraper-title">MERCH</div>
-      <div class="scraper-status-chip" id="ss-merch">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes product listings from team Shopify stores (EXCELR8/Vertu). Updates <strong>merch.json</strong> with real product titles, prices, images and availability — powers the Shop the Grid merch hub. Auto-runs daily at 06:00 UTC.</div>
-    <button class="btn-run" onclick="runScraper('scrape-merch.yml','merch')">RUN ▶</button>
-  </div>
-
-  <!-- Motorsport Stats (historical) -->
-  <div class="scraper-card" id="sc-mss-history">
-    <div class="scraper-head">
-      <div class="scraper-title">MSS HISTORY</div>
-      <div class="scraper-status-chip" id="ss-mss-history">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes historical race-by-race results (POS, PTS, GRID) for all drivers &amp; teams from motorsportstats.com. Updates <strong>data/motorsportstats/drivers/</strong> and <strong>teams/</strong>. Manual only.</div>
-    <div class="scraper-inputs">
-      <div>
-        <div class="field-label">TARGET</div>
-        <select id="si-mss-target" style="background:var(--surface);border:1px solid var(--outline);color:var(--text);padding:9px 10px;border-radius:10px;font-size:13px;">
-          <option value="all">All</option>
-          <option value="drivers-only">Drivers only</option>
-          <option value="teams-only">Teams only</option>
-        </select>
-      </div>
-      <div>
-        <div class="field-label">SLUG (optional)</div>
-        <input type="text" id="si-mss-slug" placeholder="e.g. tom-ingram" style="width:140px;padding:9px 10px;font-size:13px;">
-      </div>
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-motorsportstats.yml','mss-history')">RUN ▶</button>
-  </div>
-
-  <!-- Motorsport Stats (summaries) -->
-  <div class="scraper-card" id="sc-mss-summaries">
-    <div class="scraper-head">
-      <div class="scraper-title">MSS SUMMARIES</div>
-      <div class="scraper-status-chip" id="ss-mss-summaries">—</div>
-    </div>
-    <div class="scraper-desc">Scrapes career highlights &amp; per-season stats from motorsportstats.com summary pages, then merges into <strong>drivers.json</strong> (wins, podiums, poles, fastest laps, championship positions). Manual only.</div>
-    <div class="scraper-inputs">
-      <div>
-        <div class="field-label">DRIVER (optional)</div>
-        <input type="text" id="si-mss-driver" placeholder="e.g. tom-ingram" style="width:140px;padding:9px 10px;font-size:13px;">
-      </div>
-    </div>
-    <button class="btn-run" onclick="runScraper('scrape-driver-summaries.yml','mss-summaries')">RUN ▶</button>
-  </div>
-
-  </div><!-- /scrapers-grid -->
-
-  <button class="btn-refresh" onclick="refreshAllStatus()">↻ REFRESH STATUS</button>
-
-</div>
-</div><!-- /desktop-col scrapers -->
-
-<div class="desktop-col">
-<div class="desktop-col-title">Feature Flags</div>
+<!-- ══════════════════════════════ FLAGS ══════ -->
 <div id="panel-flags" class="tab-panel">
 
-  <div class="section-note" style="margin-bottom:16px">Toggles are written to <strong>data/flags.json</strong> in the repo. The app fetches this on launch and every 60 seconds.</div>
+  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/flags.json</strong>. The app fetches on launch and every 60s.</div>
 
-  <div class="data-loaded-banner" id="flags-banner">
-    <div class="data-loaded-dot"></div>
+  <div class="banner banner-green" id="flags-banner">
+    <div class="banner-dot"></div>
     <span id="flags-banner-text">Loaded from GitHub</span>
   </div>
 
-  <div class="flags-card" id="flags-list">
-    <!-- populated by JS -->
-  </div>
+  <div class="flags-card" id="flags-list"></div>
 
-  <div class="flags-card" style="margin-top:12px">
+  <div class="flags-card" style="margin-top:10px">
     <div class="flag-row" style="flex-direction:column;align-items:flex-start;gap:6px">
       <div class="flag-info">
         <div class="flag-name">Merch Feed URL</div>
         <div class="flag-key">merch_feed_url</div>
       </div>
       <input type="text" id="flag_merch_feed_url" placeholder="https://…"
-        style="width:100%;box-sizing:border-box;background:#1a1b1f;border:1px solid #333;border-radius:6px;padding:8px 10px;color:#fff;font-size:13px;"
         oninput="flagValues['merch_feed_url'] = this.value">
     </div>
   </div>
 
   <button class="btn-primary" id="flags-savebtn" onclick="doSaveFlags()">SAVE FLAGS TO APP</button>
-  <div id="flags-status"></div>
+  <div id="flags-status" class="status-line"></div>
 
-  <!-- Per-device overrides -->
-  <div style="margin-top:28px">
-    <div class="section-label" style="margin-bottom:4px">DEVICE OVERRIDES</div>
-    <div class="section-note" style="margin-bottom:12px">Flags set here take priority over the global values for that device only.</div>
+  <hr class="divider">
+  <div class="section-label" style="margin-bottom:4px">DEVICE OVERRIDES</div>
+  <div class="section-note" style="margin-bottom:14px">Flag values set here override globals for that device only.</div>
+  <div id="overrides-list"></div>
 
-    <div id="overrides-list"></div>
-
-    <!-- Add override form -->
-    <div class="flags-card" id="add-override-card" style="margin-top:10px">
-      <div style="margin-bottom:10px">
-        <div class="field-label">DEVICE ID</div>
-        <input type="text" id="new-override-id" placeholder="Paste device ID from app Test Mode" style="font-family:monospace;font-size:13px">
-      </div>
-      <div id="new-override-toggles">
-        <!-- populated by renderAddOverrideToggles() -->
-      </div>
-      <button class="btn-run" style="margin-top:10px;width:100%" onclick="addOverride()">ADD OVERRIDE</button>
+  <div class="card" id="add-override-card" style="margin-top:10px">
+    <div class="section-label" style="margin-bottom:10px">ADD OVERRIDE</div>
+    <div class="field-group">
+      <div class="field-label">DEVICE ID</div>
+      <input type="text" id="new-override-id" placeholder="Paste device ID from app Test Mode" style="font-family:monospace;font-size:12px">
     </div>
+    <div id="new-override-toggles"></div>
+    <button class="btn-run" style="margin-top:12px;width:100%" onclick="addOverride()">ADD OVERRIDE</button>
   </div>
 
 </div>
-</div><!-- /desktop-col flags -->
 
-<!-- ══════════════════════════════════════════════════ TAB: NOTIFICATIONS ══════ -->
-<div class="desktop-col">
-<div class="desktop-col-title">Notifications</div>
+<!-- ══════════════════════════════ NOTIFICATIONS ══════ -->
 <div id="panel-notifications" class="tab-panel">
 
-  <!-- Device FCM token -->
-  <div class="token-card" id="fcm-tok-card" style="margin-top:10px;" onclick="expandFcmTok()">
+  <div class="token-card" id="fcm-tok-card" onclick="expandFcmTok()">
     <div class="token-collapsed-row">
       <div class="token-ok">Device token loaded</div>
       <div class="token-edit-hint">Tap to change</div>
     </div>
     <div class="token-body">
       <div class="section-label">DEVICE TOKEN</div>
-      <div class="token-row" style="margin-top:8px">
-        <input type="text" id="fcm-tok-input" placeholder="Paste FCM token from app…" autocomplete="off" style="font-family:monospace;font-size:12px;" onclick="event.stopPropagation()">
-        <button class="btn-run" onclick="event.stopPropagation();saveFcmTok()" style="padding:0 18px;border-radius:10px">SAVE</button>
+      <div class="input-row" style="margin-top:8px">
+        <input type="text" id="fcm-tok-input" placeholder="Paste FCM token from app…" autocomplete="off" style="font-family:monospace;font-size:12px" onclick="event.stopPropagation()">
+        <button class="btn-run" onclick="event.stopPropagation();saveFcmTok()" style="padding:0 18px">SAVE</button>
       </div>
-      <div class="token-note">FCM registration token from the device. Find it in the app's Test Mode screen.</div>
+      <div class="token-note">Find this in the app's Test Mode screen (Settings → Test Mode).</div>
+    </div>
+  </div>
+  <div id="fcm-test-status" style="font-size:12px;min-height:18px;color:var(--text-sec);margin-bottom:12px;text-align:center;"></div>
+
+  <!-- Quick tests -->
+  <div class="card">
+    <div class="section-label" style="margin-bottom:12px">QUICK TEST</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="sendNewsTest()" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;min-width:70px;">News</button>
+        <input id="test-news-slug" type="text" placeholder="article-slug" style="flex:1;padding:9px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--text);">
+        <input id="test-news-title" type="hidden">
+        <input id="test-news-image" type="hidden">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button onclick="sendResultsTest()" style="background:#F87171;color:#000;font-size:11px;font-weight:800;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;min-width:70px;">Results</button>
+        <input id="test-results-round" type="number" placeholder="round" min="1" max="30" value="1" style="width:70px;padding:9px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--text);">
+        <input id="test-results-year" type="number" placeholder="year" value="2026" style="width:80px;padding:9px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--text);">
+      </div>
+      <div>
+        <button onclick="sendPodcastTest()" style="background:#C084FC;color:#000;font-size:11px;font-weight:800;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;min-width:70px;">Podcast</button>
+      </div>
     </div>
   </div>
 
-  <div id="fcm-test-status" style="font-size:12px;margin-top:4px;min-height:18px;color:var(--text-sec);"></div>
-  <div style="border-top:1px solid var(--outline-lo);margin:16px 0;"></div>
+  <!-- Custom notification -->
+  <div class="card">
+    <div class="section-label" style="margin-bottom:12px">CUSTOM NOTIFICATION</div>
 
-  <!-- Manual test buttons -->
-  <div class="section-label" style="margin-bottom:10px;">MANUAL TESTS</div>
-
-  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-
-    <!-- News -->
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="sendNewsTest()" style="background:#5B9CF6;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">News</button>
-      <input id="test-news-slug" type="text" placeholder="article-slug" style="flex:1;padding:7px 10px;font-size:12px;font-family:monospace;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
-      <input id="test-news-title" type="hidden">
-      <input id="test-news-image" type="hidden">
+    <div class="field-group">
+      <div class="field-label">CHANNEL</div>
+      <select class="input" id="custom-channel">
+        <option value="news">news</option>
+        <option value="results">results</option>
+        <option value="race">race</option>
+        <option value="qualifying">qualifying</option>
+        <option value="free_practice">free_practice</option>
+        <option value="weekend_preview">weekend_preview</option>
+        <option value="standings">standings</option>
+        <option value="podcasts">podcasts</option>
+        <option value="general">general</option>
+      </select>
     </div>
 
-    <!-- Results -->
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <button onclick="sendResultsTest()" style="background:#F87171;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">Results</button>
-      <input id="test-results-round" type="number" placeholder="round" min="1" max="30" value="1" style="width:70px;padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
-      <input id="test-results-year" type="number" placeholder="year" value="2025" style="width:80px;padding:7px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);">
+    <div class="field-group">
+      <div class="field-label">TITLE</div>
+      <input type="text" id="custom-title" placeholder="Notification title">
     </div>
 
-    <!-- Podcast -->
-    <div>
-      <button onclick="sendPodcastTest()" style="background:#C084FC;color:#000;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;">Podcast</button>
+    <div class="field-group">
+      <div class="field-label">BODY</div>
+      <input type="text" id="custom-body" placeholder="Short message (optional)">
     </div>
 
+    <div class="field-group">
+      <div class="field-label">IMAGE URL <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional)</span></div>
+      <input type="text" id="custom-image" placeholder="https://…">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">DEEPLINK <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional)</span></div>
+      <select class="input" id="custom-deeplink-preset" onchange="onDeeplinkPreset(this.value)" style="margin-bottom:6px">
+        <option value="">— Select a screen —</option>
+        <option value="standings">Standings tab</option>
+        <option value="results">Results tab</option>
+        <option value="drivers">Drivers tab</option>
+        <option value="calendar">Calendar tab</option>
+        <option value="more">More tab</option>
+        <option value="chat">Live Chat</option>
+        <option value="custom">Custom URL…</option>
+      </select>
+      <input type="text" id="custom-deeplink" placeholder="btccfanhub://…" style="font-family:monospace;font-size:12px">
+    </div>
+
+    <button class="btn-primary" onclick="sendCustomNotif()" style="margin-top:4px">SEND NOTIFICATION</button>
   </div>
 
-  <div style="border-top:1px solid var(--outline-lo);margin:16px 0;"></div>
-  <div class="section-note">All notifications scheduled for the 2026 season.</div>
-  <div id="notif-list"><div style="color:var(--text-sec);font-size:13px;">Loading calendar…</div></div>
+  <hr class="divider">
+  <div class="section-note" style="margin-bottom:14px">All scheduled notifications for the 2026 season.</div>
+  <div id="notif-list"><div class="section-note">Loading calendar…</div></div>
 
 </div>
-</div><!-- /desktop-col notifications -->
 
-</div><!-- /desktop-layout -->
+<!-- ══════════════════════════════ HUB NEWS ══════ -->
+<div id="panel-hubnews" class="tab-panel">
+
+  <div class="banner banner-green" id="hubnews-banner">
+    <div class="banner-dot"></div>
+    <span id="hubnews-banner-text">Loaded from GitHub</span>
+  </div>
+
+  <!-- Create article -->
+  <div class="card" id="hubnews-create-card">
+    <div class="card-header">
+      <div class="section-label" id="hubnews-form-title">NEW ARTICLE</div>
+      <button class="btn-sm" onclick="cancelEdit()">Cancel</button>
+    </div>
+
+    <input type="hidden" id="hn-edit-id">
+
+    <div class="field-group">
+      <div class="field-label">TITLE</div>
+      <input type="text" id="hn-title" placeholder="Article headline">
+    </div>
+    <div class="field-group">
+      <div class="field-label">DESCRIPTION <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(short summary shown in feed)</span></div>
+      <textarea id="hn-desc" rows="2" placeholder="One or two sentences…"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">CONTENT <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(HTML supported)</span></div>
+      <textarea id="hn-content" rows="6" placeholder="&lt;p&gt;Full article body…&lt;/p&gt;"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">MAIN IMAGE URL</div>
+      <input type="text" id="hn-image" placeholder="https://…" oninput="updateImagePreview(this.value)">
+      <img id="hn-image-preview" style="display:none;width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:8px;background:var(--surface)">
+    </div>
+    <div class="field-group">
+      <div class="field-label">EXTRA IMAGES <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(one URL per line)</span></div>
+      <textarea id="hn-images" rows="3" placeholder="https://…&#10;https://…"></textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1" class="field-group">
+        <div class="field-label">CATEGORY</div>
+        <input type="text" id="hn-category" placeholder="e.g. Paddock">
+      </div>
+      <div style="flex:1" class="field-group">
+        <div class="field-label">SOURCE</div>
+        <input type="text" id="hn-source" placeholder="e.g. btcc-hub">
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">SOURCE URL <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional)</span></div>
+      <input type="text" id="hn-source-url" placeholder="https://…">
+    </div>
+    <div class="field-group">
+      <div class="field-label">PUB DATE</div>
+      <input type="text" id="hn-pubdate" placeholder="2026-04-17T20:00:00">
+    </div>
+
+    <button class="btn-primary" onclick="publishArticle()" id="hn-publish-btn">PUBLISH ARTICLE</button>
+    <div id="hubnews-status" class="status-line"></div>
+  </div>
+
+  <!-- Existing articles -->
+  <div>
+    <div class="section-label" style="margin:20px 0 12px">PUBLISHED ARTICLES</div>
+    <div id="hubnews-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ SCRAPERS ══════ -->
+<div id="panel-scrapers" class="tab-panel">
+
+  <div class="scraper-info-note">
+    Triggers GitHub Actions workflows. Token must have <strong>repo + workflow</strong> scopes.
+  </div>
+
+  <div class="scrapers-grid">
+
+  <div class="scraper-card" id="sc-results">
+    <div class="scraper-head">
+      <div class="scraper-title">RESULTS</div>
+      <div class="scraper-status-chip" id="ss-results">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes race results from btcc.net and recomputes driver &amp; team standings. Updates <strong>results2026.json</strong> and <strong>standings.json</strong>. Auto-runs hourly on race Sundays 13:00–17:00 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group"><div class="field-label">YEAR</div><input type="number" id="si-year" value="2026" min="2014" max="2030"></div>
+        <div class="field-group"><div class="field-label">ROUND</div><input type="number" id="si-round" placeholder="all" min="1" max="30"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-results.yml','results')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-standings">
+    <div class="scraper-head">
+      <div class="scraper-title">STANDINGS</div>
+      <div class="scraper-status-chip" id="ss-standings">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes live driver &amp; team standings from btcc.net. Updates <strong>standings.json</strong>. Auto-runs every 6h, every 15 min on race weekends.</div>
+    <div class="scraper-footer">
+      <button class="btn-run" onclick="runScraper('scrape-standings.yml','standings')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-calendar">
+    <div class="scraper-head">
+      <div class="scraper-title">CALENDAR</div>
+      <div class="scraper-status-chip" id="ss-calendar">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes round dates, venues and locations. Updates <strong>calendar.json</strong>. Auto-runs daily at 09:00 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group"><div class="field-label">SEASON</div><input type="number" id="si-season" value="2026" min="2020" max="2030"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-calendar.yml','calendar')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-schedule">
+    <div class="scraper-head">
+      <div class="scraper-title">SCHEDULE</div>
+      <div class="scraper-status-chip" id="ss-schedule">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes session times (FP, Qualifying, Races) from btcc.net circuit pages. Updates <strong>schedule.json</strong>. Auto-runs nightly at 07:00 UTC.</div>
+    <div class="scraper-footer">
+      <button class="btn-run" onclick="runScraper('scrape-schedule.yml','schedule')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-grid">
+    <div class="scraper-head">
+      <div class="scraper-title">GRID</div>
+      <div class="scraper-status-chip" id="ss-grid">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes driver names, car numbers and team info. Updates <strong>drivers.json</strong> and downloads driver portraits. Manual trigger only.</div>
+    <div class="scraper-footer">
+      <button class="btn-run" onclick="runScraper('scrape-grid.yml','grid')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-merch">
+    <div class="scraper-head">
+      <div class="scraper-title">MERCH</div>
+      <div class="scraper-status-chip" id="ss-merch">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes product listings from team Shopify stores (EXCELR8/Vertu). Updates <strong>merch.json</strong>. Auto-runs daily at 06:00 UTC.</div>
+    <div class="scraper-footer">
+      <button class="btn-run" onclick="runScraper('scrape-merch.yml','merch')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-mss-history">
+    <div class="scraper-head">
+      <div class="scraper-title">MSS HISTORY</div>
+      <div class="scraper-status-chip" id="ss-mss-history">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes historical race-by-race results (POS, PTS, GRID) from motorsportstats.com. Updates <strong>data/motorsportstats/</strong> drivers &amp; teams. Manual only.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group">
+          <div class="field-label">TARGET</div>
+          <select class="input" id="si-mss-target" style="width:130px;padding:9px 10px;font-size:13px">
+            <option value="all">All</option>
+            <option value="drivers-only">Drivers only</option>
+            <option value="teams-only">Teams only</option>
+          </select>
+        </div>
+        <div class="field-group"><div class="field-label">SLUG</div><input type="text" id="si-mss-slug" placeholder="e.g. tom-ingram"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-motorsportstats.yml','mss-history')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-mss-summaries">
+    <div class="scraper-head">
+      <div class="scraper-title">MSS SUMMARIES</div>
+      <div class="scraper-status-chip" id="ss-mss-summaries">—</div>
+    </div>
+    <div class="scraper-desc">Scrapes career highlights &amp; per-season stats from motorsportstats.com summary pages, merging into <strong>drivers.json</strong>. Manual only.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group"><div class="field-label">DRIVER</div><input type="text" id="si-mss-driver" placeholder="e.g. tom-ingram"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-driver-summaries.yml','mss-summaries')">RUN ▶</button>
+    </div>
+  </div>
+
+  </div><!-- /scrapers-grid -->
+
+  <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
+
+</div>
 
 <script>
-// ── Tab switching ───────────────────────────────────────────────────────────
+const REPO   = 'yacobwood/BTCC';
+const GH_API = 'https://api.github.com';
+const GIST_ID = '7a2af0a9690d24cab8eb608dd4c5ba42';
+const FILE    = 'btcc-standings.json';
+
+// ── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
   sessionStorage.setItem('activeTab', name);
+  if (name === 'notifications' && !window._notifLoaded) {
+    window._notifLoaded = true;
+    loadNotifSchedule();
+  }
+  if (name === 'hubnews' && !window._hubnewsLoaded) {
+    window._hubnewsLoaded = true;
+    loadHubNews();
+  }
+  if (name === 'dashboard') refreshDashboard();
 }
 
-// ── Standings data ──────────────────────────────────────────────────────────
-const GIST_ID = '7a2af0a9690d24cab8eb608dd4c5ba42';
-const FILE    = 'btcc-standings.json';
-
-const DRIVERS = [
-  {name:'Jake Hill',         team:'West Surrey Racing'},
-  {name:'Daryl DeLeon',      team:'West Surrey Racing'},
-  {name:'Charles Rainford',  team:'West Surrey Racing'},
-  {name:'Tom Chilton',       team:'EXCELR8 Motorsport'},
-  {name:'Aiden Moffat',      team:'EXCELR8 Motorsport'},
-  {name:'Mikey Doble',       team:'EXCELR8 Motorsport'},
-  {name:'Tom Ingram',        team:'Team VERTU'},
-  {name:'Senna Proctor',     team:'Team VERTU'},
-  {name:'Ashley Sutton',     team:'NAPA Racing UK'},
-  {name:'Dan Cammish',       team:'NAPA Racing UK'},
-  {name:'Sam Osborne',       team:'NAPA Racing UK'},
-  {name:'Gordon Shedden',    team:'Laser Tools Racing'},
-  {name:'Árón Taylor-Smith', team:'Laser Tools Racing'},
-  {name:'Daniel Rowbottom',  team:'Plato Racing'},
-  {name:'Adam Morgan',       team:'Ciceley Motorsport'},
-  {name:'Josh Cook',         team:'One Motorsport'},
-  {name:'Nic Hamilton',      team:'Un-limited Motorsport'},
-  {name:'Dexter Patterson',  team:'Power Maxed Racing'},
-  {name:'Nick Halstead',     team:'Power Maxed Racing'},
-  {name:'Daniel Lloyd',      team:'Restart Racing'},
-];
-
-const TEAMS = [
-  'NAPA Racing UK','Team VERTU','West Surrey Racing',
-  'Restart Racing','Laser Tools Racing','Toyota Gazoo Racing UK',
-  'WSR','Power Maxed Racing','One Motorsport',
-  'Un-limited Motorsport','Ciceley Motorsport',
-];
-
-let drvPts  = {};
-let drvWins = {};
-let teamPts = {};
-
-// ── Token ───────────────────────────────────────────────────────────────────
-function getToken(){ return localStorage.getItem('btcc_tok')||''; }
-function collapseToken(){ document.getElementById('token-card').classList.add('collapsed'); }
-function expandToken(){
-  const card = document.getElementById('token-card');
-  if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
-}
-function saveToken(){
-  const v = document.getElementById('tok').value.trim();
-  if(!v) return;
-  localStorage.setItem('btcc_tok', v);
-  document.getElementById('tok').value='';
-  collapseToken();
-  refreshAllStatus();
+function switchTabByName(name) {
+  const btn = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes("'" + name + "'"));
+  if (btn) switchTab(name, btn);
 }
 
-// ── FCM test notifications ───────────────────────────────────────────────────
-function getFcmTok(){ return localStorage.getItem('btcc_fcm_device_tok')||''; }
-
-function collapseFcmTok(){ document.getElementById('fcm-tok-card').classList.add('collapsed'); }
-function expandFcmTok(){
-  const card = document.getElementById('fcm-tok-card');
-  if(card.classList.contains('collapsed')) card.classList.remove('collapsed');
-}
-function saveFcmTok(){
-  const v = document.getElementById('fcm-tok-input').value.trim();
-  if(!v) return;
-  localStorage.setItem('btcc_fcm_device_tok', v);
-  document.getElementById('fcm-tok-input').value='';
-  collapseFcmTok();
-}
-
+// ── Helpers ──────────────────────────────────────────────────────────────────
 function htmlEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-function sendTestNotifFromBtn(btn) {
-  const d = btn.dataset;
-  sendTestNotif(d.channel, d.title, d.body, JSON.parse(d.extra));
-}
-function testChannel(n) {
-  if (n.type === 'preview')    return 'weekend_preview';
-  if (n.type === 'standings')  return 'standings';
-  if (n.type === 'qualifying') return 'qualifying';
-  if (n.type === 'fp')         return 'free_practice';
-  if (n.type === 'race')       return 'race';
-  return n.type;
-}
-function testTitle(n) {
-  if (n.type === 'preview')   return `Race weekend ahead!`;
-  if (n.type === 'standings') return `How did Round ${n.round} shake up the standings?`;
-  return n.label;
-}
-function testBody(n) {
-  if (n.type === 'preview')   return `Round ${n.round} at ${n.venue} starts tomorrow. Get ready for this weekend\u2019s racing!`;
-  if (n.type === 'standings') return `Check the championship progression chart to see how the points changed.`;
-  if (n.type === 'race' && n.raceNum) return `Starting in 15 min \u00b7 Race ${n.raceNum} of ${n.totalRaces} \u00b7 ${n.venue}`;
-  return `Starting in 15 min \u00b7 Round ${n.round}, ${n.venue}`;
-}
-
-async function sendTestNotif(channel, title, body, data = {}, imageUrl = '') {
-  const ghTok = getToken();
-  const deviceTok = getFcmTok();
-  const statusEl = document.getElementById('fcm-test-status');
-  if(!ghTok){ statusEl.style.color='var(--red)'; statusEl.textContent='No GitHub token saved.'; return; }
-  if(!deviceTok){ statusEl.style.color='var(--red)'; statusEl.textContent='No device token saved.'; return; }
-  statusEl.style.color='var(--text-sec)';
-  statusEl.textContent='Sending…';
-  try {
-    const inputs = { channel, title, body, device_token: deviceTok, data: JSON.stringify(data) };
-    if (imageUrl) inputs.image_url = imageUrl;
-    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
-      method: 'POST',
-      headers: { Authorization: 'token ' + ghTok, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ref: 'main', inputs }),
-    });
-    if(r.status === 204){
-      statusEl.style.color='var(--green)';
-      statusEl.textContent=`✓ ${channel} queued`;
-    } else {
-      const e = await r.json();
-      statusEl.style.color='var(--red)';
-      statusEl.textContent='Error: ' + (e.message || r.status);
-    }
-  } catch(e) {
-    statusEl.style.color='var(--red)';
-    statusEl.textContent='Request failed: ' + e.message;
-  }
-}
-
-async function sendNewsTest() {
-  const slug = document.getElementById('test-news-slug').value.trim();
-  if (!slug) { alert('Enter an article slug first'); return; }
-  const statusEl = document.getElementById('fcm-test-status');
-  statusEl.style.color = 'var(--text-sec)';
-  statusEl.textContent = 'Fetching article…';
-
-  let title = document.getElementById('test-news-title').value.trim() || 'New BTCC Article';
-  let imageUrl = document.getElementById('test-news-image').value.trim();
-
-  try {
-    const res = await fetch(`https://www.btcc.net/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_fields=title,featured_media,_links&_embed=wp:featuredmedia`);
-    const posts = await res.json();
-    if (posts?.[0]) {
-      const post = posts[0];
-      if (!document.getElementById('test-news-title').value.trim()) {
-        title = post.title?.rendered?.replace(/&#\d+;/g, c => String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || title;
-        document.getElementById('test-news-title').value = title;
-      }
-      if (!document.getElementById('test-news-image').value.trim()) {
-        const img = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
-        if (img) {
-          imageUrl = img;
-          document.getElementById('test-news-image').value = img;
-        }
-      }
-    }
-  } catch(e) {
-    console.warn('Could not auto-fetch article metadata:', e.message);
-  }
-
-  sendTestNotif('news', title, '', {type: 'news', slug}, imageUrl);
-}
-
-async function sendPodcastTest() {
-  const statusEl = document.getElementById('fcm-test-status');
-  statusEl.style.color = 'var(--text-sec)';
-  statusEl.textContent = 'Fetching latest episode…';
-
-  let title = 'New BTCC Podcast';
-  let imageUrl = '';
-
-  try {
-    const res = await fetch('https://rss.buzzsprout.com/1065916.rss');
-    const text = await res.text();
-    const titleMatch = text.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
-                       text.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
-    const imageMatch = text.match(/<itunes:image[^>]+href="([^"]+)"/);
-    if (titleMatch?.[1]) title = `Podcast: ${titleMatch[1].trim()}`;
-    if (imageMatch?.[1]) imageUrl = imageMatch[1].trim();
-  } catch(e) {
-    console.warn('Could not fetch podcast RSS:', e.message);
-  }
-
-  sendTestNotif('podcasts', title, '', {type: 'podcast'}, imageUrl);
-}
-
-function sendResultsTest() {
-  const round = document.getElementById('test-results-round').value;
-  const year  = document.getElementById('test-results-year').value;
-  sendTestNotif('results', 'Race Results Published', 'The results from the latest round are now available', {type: 'results', round, year});
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-function id(name){ return name.replace(/[^a-zA-Z0-9]/g,'_'); }
-
+function id(name) { return name.replace(/[^a-zA-Z0-9]/g,'_'); }
 function timeAgo(iso) {
   const secs = Math.floor((Date.now() - new Date(iso)) / 1000);
   if (secs < 60) return secs + 's ago';
@@ -1185,208 +1055,170 @@ function timeAgo(iso) {
   if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
   return Math.floor(secs / 86400) + 'd ago';
 }
+function nowIso() { return new Date().toISOString().slice(0,16).replace('T','T'); }
+function getToken() { return localStorage.getItem('btcc_tok') || ''; }
 
-// ── Render drivers ──────────────────────────────────────────────────────────
-function renderDrivers(){
-  const sorted = [...DRIVERS].sort((a,b)=>(drvPts[b.name]||0)-(drvPts[a.name]||0));
-  document.getElementById('drv-list').innerHTML = sorted.map((d,i)=>`
+// ── Token card ───────────────────────────────────────────────────────────────
+function collapseToken() { document.getElementById('token-card').classList.add('collapsed'); }
+function expandToken() { document.getElementById('token-card').classList.remove('collapsed'); }
+function saveToken() {
+  const v = document.getElementById('tok').value.trim();
+  if (!v) return;
+  localStorage.setItem('btcc_tok', v);
+  document.getElementById('tok').value = '';
+  collapseToken();
+  refreshAllStatus();
+}
+function getFcmTok() { return localStorage.getItem('btcc_fcm_device_tok') || ''; }
+function collapseFcmTok() { document.getElementById('fcm-tok-card').classList.add('collapsed'); }
+function expandFcmTok() { document.getElementById('fcm-tok-card').classList.remove('collapsed'); }
+function saveFcmTok() {
+  const v = document.getElementById('fcm-tok-input').value.trim();
+  if (!v) return;
+  localStorage.setItem('btcc_fcm_device_tok', v);
+  document.getElementById('fcm-tok-input').value = '';
+  collapseFcmTok();
+}
+
+// ── Standings data ───────────────────────────────────────────────────────────
+const DRIVERS = [
+  {name:'Jake Hill',          team:'West Surrey Racing'},
+  {name:'Daryl DeLeon',       team:'West Surrey Racing'},
+  {name:'Charles Rainford',   team:'West Surrey Racing'},
+  {name:'Tom Chilton',        team:'EXCELR8 Motorsport'},
+  {name:'Aiden Moffat',       team:'EXCELR8 Motorsport'},
+  {name:'Mikey Doble',        team:'EXCELR8 Motorsport'},
+  {name:'Tom Ingram',         team:'Team VERTU'},
+  {name:'Senna Proctor',      team:'Team VERTU'},
+  {name:'Ashley Sutton',      team:'NAPA Racing UK'},
+  {name:'Dan Cammish',        team:'NAPA Racing UK'},
+  {name:'Sam Osborne',        team:'NAPA Racing UK'},
+  {name:'Gordon Shedden',     team:'Laser Tools Racing'},
+  {name:'Árón Taylor-Smith',  team:'Laser Tools Racing'},
+  {name:'Daniel Rowbottom',   team:'Plato Racing'},
+  {name:'Adam Morgan',        team:'Ciceley Motorsport'},
+  {name:'Josh Cook',          team:'One Motorsport'},
+  {name:'Nic Hamilton',       team:'Un-limited Motorsport'},
+  {name:'Dexter Patterson',   team:'Power Maxed Racing'},
+  {name:'Nick Halstead',      team:'Power Maxed Racing'},
+  {name:'Daniel Lloyd',       team:'Restart Racing'},
+];
+const TEAMS = [
+  'NAPA Racing UK','Team VERTU','West Surrey Racing',
+  'Restart Racing','Laser Tools Racing','Toyota Gazoo Racing UK',
+  'WSR','Power Maxed Racing','One Motorsport',
+  'Un-limited Motorsport','Ciceley Motorsport',
+];
+
+let drvPts = {}, drvWins = {}, teamPts = {};
+
+function renderDrivers() {
+  const sorted = [...DRIVERS].sort((a,b) => (drvPts[b.name]||0) - (drvPts[a.name]||0));
+  document.getElementById('drv-list').innerHTML = sorted.map((d,i) => `
     <div class="entry-card" id="card_${id(d.name)}">
       <span class="entry-pos" id="pos_${id(d.name)}">${i+1}</span>
-      <div class="entry-info">
-        <div class="entry-name">${d.name}</div>
-        <div class="entry-sub">${d.team}</div>
-      </div>
+      <div class="entry-info"><div class="entry-name">${d.name}</div><div class="entry-sub">${d.team}</div></div>
       <div class="stat-inputs">
         <div class="stat-col">
           <div class="stat-col-label">W</div>
-          <div class="stat-input">
-            <input type="number" min="0" max="99" placeholder="0"
-              value="${drvWins[d.name]||''}"
-              oninput="onDrvWinsChange('${d.name}',this.value)"
-              id="dw_${id(d.name)}">
-          </div>
+          <div class="stat-input"><input type="number" min="0" max="99" placeholder="0" value="${drvWins[d.name]||''}" oninput="onDrvWinsChange('${d.name}',this.value)" id="dw_${id(d.name)}"></div>
         </div>
         <div class="stat-col">
           <div class="stat-col-label">PTS</div>
-          <div class="pts-input">
-            <input type="number" min="0" max="9999" placeholder="0"
-              value="${drvPts[d.name]||''}"
-              oninput="onDrvChange('${d.name}',this.value)"
-              id="di_${id(d.name)}">
-          </div>
+          <div class="pts-input"><input type="number" min="0" max="9999" placeholder="0" value="${drvPts[d.name]||''}" oninput="onDrvChange('${d.name}',this.value)" id="di_${id(d.name)}"></div>
         </div>
       </div>
     </div>`).join('');
 }
-
-function onDrvChange(name, val){
-  drvPts[name] = parseInt(val)||0;
-  const sorted = [...DRIVERS].sort((a,b)=>(drvPts[b.name]||0)-(drvPts[a.name]||0));
-  sorted.forEach((d,i)=>{
-    const el = document.getElementById(`pos_${id(d.name)}`);
-    if(el) el.textContent = i+1;
-  });
-}
-
-function onDrvWinsChange(name, val){
-  drvWins[name] = parseInt(val)||0;
-}
-
-// ── Render teams ─────────────────────────────────────────────────────────────
-function renderTeams(){
-  const sorted = [...TEAMS].sort((a,b)=>(teamPts[b]||0)-(teamPts[a]||0));
-  document.getElementById('team-list').innerHTML = sorted.map((t,i)=>`
+function renderTeams() {
+  const sorted = [...TEAMS].sort((a,b) => (teamPts[b]||0) - (teamPts[a]||0));
+  document.getElementById('team-list').innerHTML = sorted.map((t,i) => `
     <div class="entry-card">
       <span class="entry-pos" id="tpos_${id(t)}">${i+1}</span>
       <div class="entry-info"><div class="entry-name">${t}</div></div>
-      <div class="pts-input">
-        <input type="number" min="0" max="99999" placeholder="0"
-          value="${teamPts[t]||''}"
-          oninput="onTeamChange('${t}',this.value)"
-          id="ti_${id(t)}">
-      </div>
+      <div class="pts-input"><input type="number" min="0" max="99999" placeholder="0" value="${teamPts[t]||''}" oninput="onTeamChange('${t}',this.value)" id="ti_${id(t)}"></div>
     </div>`).join('');
 }
-
-function onTeamChange(name, val){
+function onDrvChange(name, val) {
+  drvPts[name] = parseInt(val)||0;
+  const sorted = [...DRIVERS].sort((a,b) => (drvPts[b.name]||0) - (drvPts[a.name]||0));
+  sorted.forEach((d,i) => { const el = document.getElementById('pos_'+id(d.name)); if(el) el.textContent = i+1; });
+}
+function onDrvWinsChange(name, val) { drvWins[name] = parseInt(val)||0; }
+function onTeamChange(name, val) {
   teamPts[name] = parseInt(val)||0;
-  const sorted = [...TEAMS].sort((a,b)=>(teamPts[b]||0)-(teamPts[a]||0));
-  sorted.forEach((t,i)=>{
-    const el = document.getElementById(`tpos_${id(t)}`);
-    if(el) el.textContent = i+1;
-  });
+  const sorted = [...TEAMS].sort((a,b) => (teamPts[b]||0) - (teamPts[a]||0));
+  sorted.forEach((t,i) => { const el = document.getElementById('tpos_'+id(t)); if(el) el.textContent = i+1; });
 }
 
-// ── Load existing ────────────────────────────────────────────────────────────
 const STANDINGS_RAW = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/standings.json';
-
-async function loadExisting(){
-  try{
-    const r = await fetch(STANDINGS_RAW+'?t='+Date.now());
+async function loadExisting() {
+  try {
+    const r = await fetch(STANDINGS_RAW + '?t=' + Date.now());
     const data = await r.json();
-    (data.standings||[]).forEach(d=>{
-      drvPts[d.driver||d.name]  = d.points||0;
-      drvWins[d.driver||d.name] = d.wins||0;
-    });
-    (data.teams||[]).forEach(t=>{ teamPts[t.team||t.name]=t.points||0; });
-
-    // populate round fields
-    if(data.round) document.getElementById('round-num').value = data.round;
-    if(data.venue) document.getElementById('round-venue').value = data.venue;
-
-    // show loaded banner
+    (data.standings||[]).forEach(d => { drvPts[d.driver||d.name] = d.points||0; drvWins[d.driver||d.name] = d.wins||0; });
+    (data.teams||[]).forEach(t => { teamPts[t.team||t.name] = t.points||0; });
+    if (data.round) document.getElementById('round-num').value = data.round;
+    if (data.venue) document.getElementById('round-venue').value = data.venue;
     const updated = data.updated ? timeAgo(data.updated) : 'unknown';
-    const banner = document.getElementById('data-banner');
-    document.getElementById('data-banner-text').textContent =
-      `Loaded from GitHub · updated ${updated}`;
-    banner.classList.add('visible');
-  }catch(e){}
-  renderDrivers();
-  renderTeams();
+    document.getElementById('data-banner-text').textContent = `Loaded from GitHub · updated ${updated}`;
+    document.getElementById('data-banner').classList.add('visible');
+    // dashboard
+    document.getElementById('ds-round').textContent = data.round || '—';
+    document.getElementById('ds-drivers').textContent = (data.standings||[]).length || '—';
+    document.getElementById('ds-updated').textContent = data.updated ? timeAgo(data.updated) : '—';
+  } catch(e) {}
+  renderDrivers(); renderTeams();
 }
 
-// ── Save ─────────────────────────────────────────────────────────────────────
-async function doSave(){
+async function doSave() {
   const tok = getToken();
-  if(!tok){
-    document.getElementById('status').innerHTML='<span class="err">Save your GitHub token above first.</span>';
-    return;
-  }
+  if (!tok) { document.getElementById('status').innerHTML = '<span class="err">Save your GitHub token first.</span>'; return; }
   const btn = document.getElementById('savebtn');
-  btn.disabled=true; btn.textContent='SAVING…';
-  document.getElementById('status').textContent='';
-
+  btn.disabled = true; btn.textContent = 'SAVING…';
+  document.getElementById('status').textContent = '';
   const round = parseInt(document.getElementById('round-num').value)||0;
   const venue = document.getElementById('round-venue').value.trim();
-
-  const drivers = [...DRIVERS]
-    .map(d=>({
-      name: d.name,
-      team: d.team,
-      points: parseInt(document.getElementById('di_'+id(d.name))?.value)||0,
-      wins:   parseInt(document.getElementById('dw_'+id(d.name))?.value)||0,
-    }))
-    .filter(d=>d.points>0)
-    .sort((a,b)=>b.points-a.points)
-    .map((d,i)=>({pos:i+1,...d}));
-
-  const teams = [...TEAMS]
-    .map(name=>({name, points: parseInt(document.getElementById('ti_'+id(name))?.value)||0}))
-    .filter(t=>t.points>0)
-    .sort((a,b)=>b.points-a.points)
-    .map((t,i)=>({pos:i+1,...t}));
-
-  const payload = {
-    season:'2026',
-    round,
-    venue,
-    updated: new Date().toISOString(),
-    standings: drivers.map(d=>({pos:d.pos, driver:d.name, team:d.team, points:d.points, wins:d.wins})),
-    teams: teams.map(t=>({pos:t.pos, team:t.name, points:t.points})),
-  };
-
-  try{
-    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-      method:'PATCH',
-      headers:{'Authorization':'token '+tok,'Content-Type':'application/json'},
-      body: JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}}),
-    });
-    if(r.ok){
-      document.getElementById('status').innerHTML='<span class="ok">Saved ✓ — app updates within a minute.</span>';
-      document.getElementById('data-banner-text').textContent = 'Saved to GitHub · just now';
-      document.getElementById('data-banner').classList.add('visible');
-    } else {
-      const e=await r.json();
-      document.getElementById('status').innerHTML=`<span class="err">GitHub error: ${e.message}</span>`;
-    }
-  }catch(e){
-    document.getElementById('status').innerHTML=`<span class="err">Network error: ${e.message}</span>`;
-  }
-  btn.disabled=false; btn.textContent='SAVE TO APP';
+  const drivers = [...DRIVERS].map(d => ({name:d.name,team:d.team,points:parseInt(document.getElementById('di_'+id(d.name))?.value)||0,wins:parseInt(document.getElementById('dw_'+id(d.name))?.value)||0})).filter(d => d.points > 0).sort((a,b) => b.points - a.points).map((d,i) => ({pos:i+1,...d}));
+  const teams = [...TEAMS].map(name => ({name,points:parseInt(document.getElementById('ti_'+id(name))?.value)||0})).filter(t => t.points > 0).sort((a,b) => b.points - a.points).map((t,i) => ({pos:i+1,...t}));
+  const payload = {season:'2026',round,venue,updated:new Date().toISOString(),standings:drivers.map(d=>({pos:d.pos,driver:d.name,team:d.team,points:d.points,wins:d.wins})),teams:teams.map(t=>({pos:t.pos,team:t.name,points:t.points}))};
+  try {
+    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {method:'PATCH',headers:{Authorization:'token '+tok,'Content-Type':'application/json'},body:JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}})});
+    if (r.ok) { document.getElementById('status').innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>'; }
+    else { const e = await r.json(); document.getElementById('status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
+  } catch(e) { document.getElementById('status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
+  btn.disabled = false; btn.textContent = 'SAVE TO APP';
 }
 
-// ── Reset ─────────────────────────────────────────────────────────────────────
-async function doReset(){
+async function doReset() {
   const tok = getToken();
-  if(!tok){
-    document.getElementById('status').innerHTML='<span class="err">Save your GitHub token first.</span>';
-    return;
-  }
-  if(!confirm('Clear all 2026 standings from the app?')) return;
+  if (!tok) { document.getElementById('status').innerHTML = '<span class="err">Save your GitHub token first.</span>'; return; }
+  if (!confirm('Clear all 2026 standings from the app?')) return;
   const btn = document.getElementById('resetbtn');
-  btn.disabled=true; btn.textContent='RESETTING…';
-  document.getElementById('status').textContent='';
-
-  const payload = { season:'2026', round:0, venue:'', updated:new Date().toISOString(), standings:[], teams:[] };
-  try{
-    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-      method:'PATCH',
-      headers:{'Authorization':'token '+tok,'Content-Type':'application/json'},
-      body: JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}}),
-    });
-    if(r.ok){
-      drvPts={}; drvWins={}; teamPts={};
-      document.getElementById('round-num').value='';
-      document.getElementById('round-venue').value='';
-      renderDrivers(); renderTeams();
-      document.getElementById('status').innerHTML='<span class="ok">Reset ✓ — app 2026 tab shows "No Standings Yet".</span>';
-    } else {
-      const e=await r.json();
-      document.getElementById('status').innerHTML=`<span class="err">GitHub error: ${e.message}</span>`;
-    }
-  }catch(e){
-    document.getElementById('status').innerHTML=`<span class="err">Network error: ${e.message}</span>`;
-  }
-  btn.disabled=false; btn.textContent='RESET — CLEAR ALL 2026 DATA';
+  btn.disabled = true; btn.textContent = 'RESETTING…';
+  const payload = {season:'2026',round:0,venue:'',updated:new Date().toISOString(),standings:[],teams:[]};
+  try {
+    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {method:'PATCH',headers:{Authorization:'token '+tok,'Content-Type':'application/json'},body:JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}})});
+    if (r.ok) { drvPts={}; drvWins={}; teamPts={}; document.getElementById('round-num').value=''; document.getElementById('round-venue').value=''; renderDrivers(); renderTeams(); document.getElementById('status').innerHTML='<span class="ok">Reset ✓</span>'; }
+    else { const e = await r.json(); document.getElementById('status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
+  } catch(e) { document.getElementById('status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
+  btn.disabled = false; btn.textContent = 'RESET — CLEAR ALL 2026 DATA';
 }
 
-// ── Scrapers ──────────────────────────────────────────────────────────────────
-const REPO   = 'yacobwood/BTCC';
-const GH_API = 'https://api.github.com';
-let pollTimer = null;
-let liveTickTimer = null;
-const runningTimestamps = {};
-const dispatchedAt = {}; // key -> ms timestamp when we dispatched
+// ── Scrapers ─────────────────────────────────────────────────────────────────
+let pollTimer = null, liveTickTimer = null;
+const runningTimestamps = {}, dispatchedAt = {};
+
+const SCRAPER_WORKFLOWS = [
+  {file:'scrape-results.yml',          key:'results'},
+  {file:'scrape-standings.yml',        key:'standings'},
+  {file:'scrape-calendar.yml',         key:'calendar'},
+  {file:'scrape-schedule.yml',         key:'schedule'},
+  {file:'scrape-grid.yml',             key:'grid'},
+  {file:'scrape-merch.yml',            key:'merch'},
+  {file:'scrape-motorsportstats.yml',  key:'mss-history'},
+  {file:'scrape-driver-summaries.yml', key:'mss-summaries'},
+];
 
 function startLiveTick() {
   if (liveTickTimer) return;
@@ -1397,9 +1229,8 @@ function startLiveTick() {
       if (!el || !el.classList.contains('st-running')) { delete runningTimestamps[key]; continue; }
       any = true;
       const secs = Math.floor((Date.now() - ts) / 1000);
-      const timeStr = secs < 60 ? secs + 's' : Math.floor(secs / 60) + 'm ' + (secs % 60) + 's';
-      const prefix = el.textContent.split('·')[0].trimEnd();
-      el.textContent = prefix + ' · ' + timeStr;
+      const timeStr = secs < 60 ? secs + 's' : Math.floor(secs/60) + 'm ' + (secs%60) + 's';
+      el.textContent = '● Running · ' + timeStr;
     }
     if (!any) { clearInterval(liveTickTimer); liveTickTimer = null; }
   }, 1000);
@@ -1407,159 +1238,109 @@ function startLiveTick() {
 
 function scraperInputs(workflow) {
   if (workflow === 'scrape-results.yml') {
-    const inputs = { year: String(document.getElementById('si-year').value || 2026) };
+    const inputs = {year: String(document.getElementById('si-year').value || 2026)};
     const round = document.getElementById('si-round').value;
     if (round) inputs.round = String(round);
     return inputs;
   }
-  if (workflow === 'scrape-calendar.yml') {
-    return { season: String(document.getElementById('si-season').value || 2026) };
-  }
+  if (workflow === 'scrape-calendar.yml') return {season: String(document.getElementById('si-season').value || 2026)};
   if (workflow === 'scrape-motorsportstats.yml') {
-    const inputs = { target: document.getElementById('si-mss-target').value || 'all' };
+    const inputs = {target: document.getElementById('si-mss-target').value || 'all'};
     const slug = document.getElementById('si-mss-slug').value.trim();
     if (slug) inputs.single_slug = slug;
     return inputs;
   }
   if (workflow === 'scrape-driver-summaries.yml') {
     const slug = document.getElementById('si-mss-driver').value.trim();
-    return slug ? { driver: slug } : {};
+    return slug ? {driver: slug} : {};
   }
   return {};
 }
 
 async function runScraper(workflow, key) {
   const tok = getToken();
-  if (!tok) { setStatus(key, 'fail', '✗ Save your token first'); return; }
-  const btn = document.querySelector(`#sc-${key} .btn-run`);
+  if (!tok) { setScraperStatus(key, 'fail', '✗ Save token first'); return; }
+  const btn = document.querySelector('#sc-' + key + ' .btn-run');
   btn.disabled = true; btn.textContent = 'QUEUING…';
-  setStatus(key, 'running', '● Dispatching…');
-  // Record dispatch time so we ignore older completed runs
+  setScraperStatus(key, 'running', '● Dispatching…');
   dispatchedAt[key] = Date.now();
   try {
     const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/dispatches`, {
-      method: 'POST',
-      headers: { Authorization: 'token ' + tok, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ref: 'main', inputs: scraperInputs(workflow) }),
+      method:'POST', headers:{Authorization:'token '+tok,'Content-Type':'application/json'},
+      body: JSON.stringify({ref:'main', inputs: scraperInputs(workflow)}),
     });
-    if (r.status === 204) {
-      setStatus(key, 'running', '● Queued…');
-    } else {
-      const e = await r.json();
-      setStatus(key, 'fail', '✗ ' + (e.message || r.status));
-      delete dispatchedAt[key];
-      btn.disabled = false; btn.textContent = 'RUN ▶';
-    }
-  } catch (e) {
-    setStatus(key, 'fail', '✗ ' + e.message);
-    delete dispatchedAt[key];
-    btn.disabled = false; btn.textContent = 'RUN ▶';
-  }
+    if (r.status === 204) { setScraperStatus(key, 'running', '● Queued…'); }
+    else { const e = await r.json(); setScraperStatus(key, 'fail', '✗ ' + (e.message || r.status)); delete dispatchedAt[key]; btn.disabled = false; btn.textContent = 'RUN ▶'; }
+  } catch(e) { setScraperStatus(key, 'fail', '✗ ' + e.message); delete dispatchedAt[key]; btn.disabled = false; btn.textContent = 'RUN ▶'; }
 }
 
 async function fetchLastRun(workflow) {
-  const tok = getToken();
-  if (!tok) return null;
+  const tok = getToken(); if (!tok) return null;
   try {
-    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/runs?per_page=1`, {
-      headers: { Authorization: 'token ' + tok },
-    });
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/runs?per_page=1`, {headers:{Authorization:'token '+tok}});
     if (!r.ok) return null;
     const d = await r.json();
     return d.workflow_runs?.[0] || null;
   } catch { return null; }
 }
 
-function setStatus(key, type, msg, ts) {
+function setScraperStatus(key, type, msg, ts) {
   const el = document.getElementById('ss-' + key);
   if (!el) return;
   el.className = 'scraper-status-chip' + (type === 'running' ? ' st-running' : type === 'ok' ? ' st-ok' : type === 'fail' ? ' st-fail' : '');
   el.textContent = msg;
   const btn = document.querySelector('#sc-' + key + ' .btn-run');
   if (btn) btn.disabled = (type === 'running');
-  if (type === 'running') {
-    if (!runningTimestamps[key]) runningTimestamps[key] = ts || Date.now();
-    else if (ts) runningTimestamps[key] = ts;
-    startLiveTick();
-  } else {
-    delete runningTimestamps[key];
-  }
+  if (type === 'running') { if (!runningTimestamps[key]) runningTimestamps[key] = ts || Date.now(); else if (ts) runningTimestamps[key] = ts; startLiveTick(); }
+  else { delete runningTimestamps[key]; }
 }
+
+const scraperRunCache = {}; // key -> {status, ago}
 
 async function refreshAllStatus() {
-  const workflows = [
-    { file: 'scrape-results.yml',   key: 'results' },
-    { file: 'scrape-standings.yml', key: 'standings' },
-    { file: 'scrape-calendar.yml',  key: 'calendar' },
-    { file: 'scrape-schedule.yml',  key: 'schedule' },
-    { file: 'scrape-grid.yml',      key: 'grid' },
-    { file: 'scrape-motorsportstats.yml',  key: 'mss-history' },
-    { file: 'scrape-driver-summaries.yml', key: 'mss-summaries' },
-    { file: 'scrape-merch.yml',     key: 'merch' },
-    { file: 'scrape-motorsportstats.yml',  key: 'mss-history' },
-    { file: 'scrape-driver-summaries.yml', key: 'mss-summaries' },
-  ];
-  for (const w of workflows) {
+  for (const w of SCRAPER_WORKFLOWS) {
     const run = await fetchLastRun(w.file);
     const dispatched = dispatchedAt[w.key];
-
-    if (!run) {
-      // Only show — if we haven't dispatched this one
-      if (!dispatched) setStatus(w.key, '', '—');
-      continue;
-    }
-
+    if (!run) { if (!dispatched) setScraperStatus(w.key, '', '—'); continue; }
     const runCreated = new Date(run.created_at).getTime();
     const inProgress = run.status === 'in_progress' || run.status === 'queued' || run.status === 'waiting';
-
-    // If we dispatched but the API still shows an older completed run, stay in running state
-    if (dispatched && !inProgress && runCreated < dispatched - 5000) {
-      // New run hasn't appeared yet — keep showing running
-      continue;
-    }
-
+    if (dispatched && !inProgress && runCreated < dispatched - 5000) continue;
     const ago = timeAgo(run.updated_at || run.created_at);
-    if (inProgress) {
-      setStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running'), runCreated);
-    } else if (run.conclusion === 'success') {
-      delete dispatchedAt[w.key];
-      setStatus(w.key, 'ok', '✓ ' + ago);
-    } else {
-      delete dispatchedAt[w.key];
-      setStatus(w.key, 'fail', '✗ ' + (run.conclusion || run.status) + ' · ' + ago);
-    }
+    scraperRunCache[w.key] = {status: run.conclusion || run.status, ago};
+    if (inProgress) { setScraperStatus(w.key, 'running', '● ' + (run.status === 'queued' ? 'Queued' : 'Running'), runCreated); }
+    else if (run.conclusion === 'success') { delete dispatchedAt[w.key]; setScraperStatus(w.key, 'ok', '✓ ' + ago); }
+    else { delete dispatchedAt[w.key]; setScraperStatus(w.key, 'fail', '✗ ' + (run.conclusion || run.status) + ' · ' + ago); }
   }
-  // Always keep polling every 15s
   clearInterval(pollTimer);
   pollTimer = setInterval(refreshAllStatus, 15000);
+  updateDashHealth();
 }
 
-// ── Feature Flags ────────────────────────────────────────────────────────────
+// ── Feature Flags ─────────────────────────────────────────────────────────────
 const FLAGS_PATH = 'data/flags.json';
 const FLAGS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
 
 const FLAG_DEFS = [
-  { key: 'radio_tab',              label: 'Radio Tab',              desc: 'Show the Radio tab in the bottom nav' },
-  { key: 'banner_ad',              label: 'Banner Ad',              desc: 'AdMob banner above the bottom nav' },
-  { key: 'search_ad',              label: 'Search Ad',              desc: 'AdMob ad shown when news search is open' },
-  { key: 'podcasts_enabled',       label: 'Podcasts',               desc: 'Show Podcasts & Interviews in the More tab' },
-  { key: 'live_updates',           label: 'Live Updates',           desc: 'Live Timing tab is visible' },
-  { key: 'results_notifications',  label: 'Results Notifications',  desc: 'Push notifications for race results' },
-  { key: 'track_weather',          label: 'Track Weather',          desc: 'Weather card on round detail screens' },
-  { key: 'widget_race_weekend_test', label: 'Widget Race Weekend',  desc: 'Force widgets into race-weekend mode for testing' },
-  { key: 'merch_hub_enabled',        label: 'Merch Hub',            desc: 'Show the Shop tab in the app' },
-  { key: 'shop_home_premium',        label: 'Shop Premium Ad',      desc: 'Show the premium ad slot on the shop home page' },
-  { key: 'shop_home_standard',       label: 'Shop Standard Ad',     desc: 'Show the standard ad slot on the shop home page' },
-  { key: 'hub_news_enabled',          label: 'Hub News',             desc: 'Show custom hub posts in the news feed' },
-  { key: 'live_timing_in_app',        label: 'Live Timing In-App',   desc: 'Show TSL live timing in a WebView (off = opens in browser)' },
-  { key: 'live_chat',                 label: 'Live Chat',            desc: 'Show the Live Chat tab in the bottom nav' },
-  { key: 'debug_mode',               label: 'Debug Mode',           desc: 'Show the Debug section in app Settings (use per-device override to enable for your device only)' },
-  { key: 'update_available',         label: 'Update Available',     desc: 'Force update modal — also set update_min_version: 1000 in device override to test' },
-  { key: 'update_min_version',       label: 'Update Min Version',   desc: 'Min versionCode to require update (set to 1000 in device override to test)', type: 'number' },
+  {key:'radio_tab',               label:'Radio Tab',              desc:'Show the Radio tab in the bottom nav'},
+  {key:'banner_ad',               label:'Banner Ad',              desc:'AdMob banner above the bottom nav'},
+  {key:'search_ad',               label:'Search Ad',              desc:'AdMob ad shown when news search is open'},
+  {key:'podcasts_enabled',        label:'Podcasts',               desc:'Show Podcasts & Interviews in the More tab'},
+  {key:'live_updates',            label:'Live Updates',           desc:'Live Timing tab is visible'},
+  {key:'results_notifications',   label:'Results Notifications',  desc:'Push notifications for race results'},
+  {key:'track_weather',           label:'Track Weather',          desc:'Weather card on round detail screens'},
+  {key:'widget_race_weekend_test',label:'Widget Race Weekend',    desc:'Force widgets into race-weekend mode for testing'},
+  {key:'merch_hub_enabled',       label:'Merch Hub',              desc:'Show the Shop tab in the app'},
+  {key:'shop_home_premium',       label:'Shop Premium Ad',        desc:'Show the premium ad slot on the shop home page'},
+  {key:'shop_home_standard',      label:'Shop Standard Ad',       desc:'Show the standard ad slot on the shop home page'},
+  {key:'hub_news_enabled',        label:'Hub News',               desc:'Show custom hub posts in the news feed'},
+  {key:'live_timing_in_app',      label:'Live Timing In-App',     desc:'Show TSL live timing in a WebView (off = opens in browser)'},
+  {key:'live_chat',               label:'Live Chat',              desc:'Show the Live Chat tab in the bottom nav'},
+  {key:'debug_mode',              label:'Debug Mode',             desc:'Show the Debug section in Settings'},
+  {key:'update_available',        label:'Update Available',       desc:'Force update modal'},
+  {key:'update_min_version',      label:'Update Min Version',     desc:'Min versionCode to require update', type:'number'},
 ];
 
-let flagValues = {};
-let flagFileSha = null;
+let flagValues = {}, flagFileSha = null;
 
 function renderFlags() {
   document.getElementById('flags-list').innerHTML = FLAG_DEFS.map(f => `
@@ -1567,16 +1348,18 @@ function renderFlags() {
       <div class="flag-info">
         <div class="flag-name">${f.label}</div>
         <div class="flag-key">${f.key}</div>
+        <div class="flag-desc">${f.desc}</div>
       </div>
       <div class="toggle-wrap">
         ${f.type === 'number'
-          ? `<input type="number" id="flag_${f.key}" value="${flagValues[f.key] ?? ''}" style="width:80px;padding:4px 8px;border-radius:6px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;text-align:right;" onchange="flagValues['${f.key}'] = Number(this.value)">`
+          ? `<input type="number" id="flag_${f.key}" value="${flagValues[f.key] ?? ''}" style="width:80px;padding:5px 8px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:13px;text-align:right" onchange="flagValues['${f.key}'] = Number(this.value)">`
           : `<input type="checkbox" id="flag_${f.key}" ${flagValues[f.key] ? 'checked' : ''} onchange="flagValues['${f.key}'] = this.checked">`
         }
       </div>
     </div>`).join('');
   const urlInput = document.getElementById('flag_merch_feed_url');
   if (urlInput) urlInput.value = flagValues['merch_feed_url'] || '';
+  updateDashFlags();
 }
 
 async function loadFlags() {
@@ -1584,119 +1367,61 @@ async function loadFlags() {
     const r = await fetch(FLAGS_RAW + '?t=' + Date.now());
     if (r.ok) {
       flagValues = await r.json();
-      const banner = document.getElementById('flags-banner');
       document.getElementById('flags-banner-text').textContent = 'Loaded from GitHub';
-      banner.classList.add('visible');
+      document.getElementById('flags-banner').classList.add('visible');
     }
   } catch(e) {}
-  renderFlags();
-  renderOverridesList();
-  renderAddOverrideToggles();
+  renderFlags(); renderOverridesList(); renderAddOverrideToggles();
 }
 
 async function doSaveFlags() {
   const tok = getToken();
-  if (!tok) {
-    document.getElementById('flags-status').innerHTML = '<span class="err">Save your GitHub token first (on the Standings tab).</span>';
-    return;
-  }
+  if (!tok) { document.getElementById('flags-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
   const btn = document.getElementById('flags-savebtn');
   btn.disabled = true; btn.textContent = 'SAVING…';
   document.getElementById('flags-status').textContent = '';
-
-  // Collect current toggle values
-  FLAG_DEFS.forEach(f => {
-    flagValues[f.key] = document.getElementById('flag_' + f.key)?.checked ?? flagValues[f.key];
-  });
-
+  FLAG_DEFS.forEach(f => { if (f.type !== 'number') flagValues[f.key] = document.getElementById('flag_' + f.key)?.checked ?? flagValues[f.key]; });
   const content = JSON.stringify(flagValues, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
-
   try {
-    // Get current SHA if we don't have it
     if (!flagFileSha) {
-      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {
-        headers: { Authorization: 'token ' + tok },
-      });
-      if (meta.ok) {
-        const d = await meta.json();
-        flagFileSha = d.sha;
-      }
+      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {headers:{Authorization:'token '+tok}});
+      if (meta.ok) flagFileSha = (await meta.json()).sha;
     }
-
-    const body = {
-      message: 'Update feature flags via admin',
-      content: encoded,
-    };
+    const body = {message:'Update feature flags via admin', content: encoded};
     if (flagFileSha) body.sha = flagFileSha;
-
-    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {
-      method: 'PUT',
-      headers: { Authorization: 'token ' + tok, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
     if (r.ok) {
-      const d = await r.json();
-      flagFileSha = d.content?.sha || null;
+      const d = await r.json(); flagFileSha = d.content?.sha || null;
       document.getElementById('flags-status').innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>';
       document.getElementById('flags-banner-text').textContent = 'Saved to GitHub · just now';
       document.getElementById('flags-banner').classList.add('visible');
-    } else {
-      const e = await r.json();
-      document.getElementById('flags-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`;
-    }
-  } catch(e) {
-    document.getElementById('flags-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`;
-  }
+    } else { const e = await r.json(); document.getElementById('flags-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
+  } catch(e) { document.getElementById('flags-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
   btn.disabled = false; btn.textContent = 'SAVE FLAGS TO APP';
 }
 
-// ── Per-device overrides ──────────────────────────────────────────────────────
-
-// overrides is a map of { deviceId: { flagKey: bool, ... } }
-// It lives inside flagValues under the key "overrides"
-
-function getOverrides() {
-  return (typeof flagValues.overrides === 'object' && flagValues.overrides !== null)
-    ? flagValues.overrides : {};
-}
+function getOverrides() { return (typeof flagValues.overrides === 'object' && flagValues.overrides) ? flagValues.overrides : {}; }
 
 function renderOverridesList() {
   const overrides = getOverrides();
   const entries = Object.entries(overrides);
   const el = document.getElementById('overrides-list');
-  if (entries.length === 0) {
-    el.innerHTML = '<div class="section-note" style="margin-bottom:8px">No device overrides yet.</div>';
-    return;
-  }
+  if (!entries.length) { el.innerHTML = '<div class="section-note" style="margin-bottom:8px">No device overrides yet.</div>'; return; }
   el.innerHTML = entries.map(([devId, flags]) => {
-    const chips = Object.entries(flags).map(([k, v]) =>
-      `<span class="override-chip ${v ? 'on' : 'off'}">${k}</span>`
-    ).join('');
-    return `
-      <div class="override-card">
-        <div class="override-head">
-          <div class="override-id" title="${devId}">${devId}</div>
-          <button class="btn-remove" onclick="removeOverride('${devId}')">REMOVE</button>
-        </div>
-        <div class="override-flags">${chips || '<span class="section-note">No flags set</span>'}</div>
-      </div>`;
+    const chips = Object.entries(flags).map(([k,v]) => `<span class="override-chip ${v ? 'on' : 'off'}">${k}</span>`).join('');
+    return `<div class="override-card"><div class="override-head"><div class="override-id" title="${devId}">${devId}</div><button class="btn-sm" onclick="removeOverride('${devId}')">Remove</button></div><div class="override-flags">${chips || '<span class="section-note">No flags</span>'}</div></div>`;
   }).join('');
 }
 
 function renderAddOverrideToggles() {
   document.getElementById('new-override-toggles').innerHTML = FLAG_DEFS.map(f => `
-    <div class="new-override-toggle-row">
+    <div class="new-override-row">
       <span class="new-override-label">${f.label}</span>
       <div class="new-override-controls">
         ${f.type === 'number'
-          ? `<input type="number" id="nof_${f.key}" placeholder="— (inherit global)" style="width:120px;padding:4px 8px;border-radius:6px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;">`
-          : `<select id="nof_${f.key}">
-          <option value="skip" selected>— (inherit global)</option>
-          <option value="true">ON</option>
-          <option value="false">OFF</option>
-        </select>`
+          ? `<input type="number" id="nof_${f.key}" placeholder="inherit" style="width:100px;padding:4px 8px;border-radius:6px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px">`
+          : `<select id="nof_${f.key}"><option value="skip" selected>— inherit</option><option value="true">ON</option><option value="false">OFF</option></select>`
         }
       </div>
     </div>`).join('');
@@ -1705,26 +1430,16 @@ function renderAddOverrideToggles() {
 function addOverride() {
   const devId = document.getElementById('new-override-id').value.trim();
   if (!devId) { alert('Enter a device ID first.'); return; }
-
   const flags = {};
   FLAG_DEFS.forEach(f => {
-    const el = document.getElementById('nof_' + f.key);
-    if (!el) return;
-    if (f.type === 'number') {
-      if (el.value !== '') flags[f.key] = Number(el.value);
-    } else {
-      if (el.value === 'true')  flags[f.key] = true;
-      if (el.value === 'false') flags[f.key] = false;
-    }
+    const el = document.getElementById('nof_' + f.key); if (!el) return;
+    if (f.type === 'number') { if (el.value !== '') flags[f.key] = Number(el.value); }
+    else { if (el.value === 'true') flags[f.key] = true; if (el.value === 'false') flags[f.key] = false; }
   });
-
   if (!flagValues.overrides) flagValues.overrides = {};
-  flagValues.overrides[devId] = { ...(flagValues.overrides[devId] || {}), ...flags };
-
-  // Reset form
+  flagValues.overrides[devId] = {...(flagValues.overrides[devId]||{}), ...flags};
   document.getElementById('new-override-id').value = '';
-  renderAddOverrideToggles();
-  renderOverridesList();
+  renderAddOverrideToggles(); renderOverridesList();
 }
 
 function removeOverride(devId) {
@@ -1733,10 +1448,88 @@ function removeOverride(devId) {
   renderOverridesList();
 }
 
-// ── Notifications schedule ───────────────────────────────────────────────────
+// ── Notifications ─────────────────────────────────────────────────────────────
+async function sendTestNotif(channel, title, body, data = {}, imageUrl = '') {
+  const ghTok = getToken(), deviceTok = getFcmTok();
+  const statusEl = document.getElementById('fcm-test-status');
+  if (!ghTok) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'No GitHub token.'; return; }
+  if (!deviceTok) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'No device token.'; return; }
+  statusEl.style.color = 'var(--text-sec)'; statusEl.textContent = 'Sending…';
+  try {
+    const inputs = {channel, title, body, device_token: deviceTok, data: JSON.stringify(data)};
+    if (imageUrl) inputs.image_url = imageUrl;
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
+      method:'POST', headers:{Authorization:'token '+ghTok,'Content-Type':'application/json'},
+      body: JSON.stringify({ref:'main', inputs}),
+    });
+    if (r.status === 204) { statusEl.style.color = 'var(--green)'; statusEl.textContent = '✓ ' + channel + ' queued'; }
+    else { const e = await r.json(); statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Error: ' + (e.message || r.status); }
+  } catch(e) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Request failed: ' + e.message; }
+}
+
+async function sendNewsTest() {
+  const slug = document.getElementById('test-news-slug').value.trim();
+  if (!slug) { alert('Enter an article slug first'); return; }
+  const statusEl = document.getElementById('fcm-test-status');
+  statusEl.style.color = 'var(--text-sec)'; statusEl.textContent = 'Fetching article…';
+  let title = document.getElementById('test-news-title').value.trim() || 'New BTCC Article';
+  let imageUrl = document.getElementById('test-news-image').value.trim();
+  try {
+    const res = await fetch(`https://www.btcc.net/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_fields=title,featured_media,_links&_embed=wp:featuredmedia`);
+    const posts = await res.json();
+    if (posts?.[0]) {
+      const post = posts[0];
+      if (!document.getElementById('test-news-title').value.trim()) { title = post.title?.rendered?.replace(/&#\d+;/g, c => String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || title; document.getElementById('test-news-title').value = title; }
+      if (!document.getElementById('test-news-image').value.trim()) { const img = post._embedded?.['wp:featuredmedia']?.[0]?.source_url; if (img) { imageUrl = img; document.getElementById('test-news-image').value = img; } }
+    }
+  } catch(e) {}
+  sendTestNotif('news', title, '', {type:'news', slug}, imageUrl);
+}
+
+async function sendPodcastTest() {
+  const statusEl = document.getElementById('fcm-test-status');
+  statusEl.style.color = 'var(--text-sec)'; statusEl.textContent = 'Fetching latest episode…';
+  let title = 'New BTCC Podcast', imageUrl = '';
+  try {
+    const res = await fetch('https://rss.buzzsprout.com/1065916.rss');
+    const text = await res.text();
+    const titleMatch = text.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) || text.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
+    const imageMatch = text.match(/<itunes:image[^>]+href="([^"]+)"/);
+    if (titleMatch?.[1]) title = `Podcast: ${titleMatch[1].trim()}`;
+    if (imageMatch?.[1]) imageUrl = imageMatch[1].trim();
+  } catch(e) {}
+  sendTestNotif('podcasts', title, '', {type:'podcast'}, imageUrl);
+}
+
+function sendResultsTest() {
+  const round = document.getElementById('test-results-round').value;
+  const year  = document.getElementById('test-results-year').value;
+  sendTestNotif('results', 'Race Results Published', 'The results from the latest round are now available', {type:'results', round, year});
+}
+
+function onDeeplinkPreset(val) {
+  const input = document.getElementById('custom-deeplink');
+  if (!val || val === 'custom') { input.value = ''; input.focus(); return; }
+  const map = {standings:'btccfanhub://standings', results:'btccfanhub://results', drivers:'btccfanhub://drivers', calendar:'btccfanhub://calendar', more:'btccfanhub://more', chat:'btccfanhub://chat'};
+  input.value = map[val] || '';
+}
+
+async function sendCustomNotif() {
+  const channel   = document.getElementById('custom-channel').value;
+  const title     = document.getElementById('custom-title').value.trim();
+  const body      = document.getElementById('custom-body').value.trim();
+  const imageUrl  = document.getElementById('custom-image').value.trim();
+  const deeplink  = document.getElementById('custom-deeplink').value.trim();
+  if (!title) { alert('Title is required'); return; }
+  const data = {};
+  if (deeplink) data.deeplink = deeplink;
+  await sendTestNotif(channel, title, body, data, imageUrl);
+}
+
+// ── Notification schedule ─────────────────────────────────────────────────────
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
-const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function fridayBefore(dateStr) {
@@ -1744,205 +1537,307 @@ function fridayBefore(dateStr) {
   while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
   return d;
 }
-
-function formatDate(d) {
-  return `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
-}
-
 function sessionDateTime(startDate, endDate, day, time) {
   const base = day === 'SAT' ? startDate : endDate;
   const [h, m] = time.split(':').map(Number);
   const d = new Date(base + 'T00:00:00');
-  d.setHours(h, m - 15, 0, 0); // 15 min before
+  d.setHours(h, m - 15, 0, 0);
   return d;
+}
+function testChannel(n) {
+  if (n.type === 'preview')    return 'weekend_preview';
+  if (n.type === 'standings')  return 'standings';
+  if (n.type === 'qualifying') return 'qualifying';
+  if (n.type === 'fp')         return 'free_practice';
+  return n.type;
+}
+function testTitle(n) {
+  if (n.type === 'preview')   return 'Race weekend ahead!';
+  if (n.type === 'standings') return `How did Round ${n.round} shake up the standings?`;
+  return n.label;
+}
+function testBody(n) {
+  if (n.type === 'preview')   return `Round ${n.round} at ${n.venue} starts tomorrow. Get ready!`;
+  if (n.type === 'standings') return 'Check the championship progression chart to see how the points changed.';
+  if (n.type === 'race' && n.raceNum) return `Starting in 15 min · Race ${n.raceNum} of ${n.totalRaces} · ${n.venue}`;
+  return `Starting in 15 min · Round ${n.round}, ${n.venue}`;
 }
 
 async function loadNotifSchedule() {
   const el = document.getElementById('notif-list');
   try {
     const t = Date.now();
-    const [calRes, schRes] = await Promise.all([
-      fetch(CALENDAR_URL + '?t=' + t),
-      fetch(SCHEDULE_URL + '?t=' + t),
-    ]);
-    const data = await calRes.json();
-    const scheduleData = await schRes.json();
-
-    // Build round→sessions map
+    const [calRes, schRes] = await Promise.all([fetch(CALENDAR_URL+'?t='+t), fetch(SCHEDULE_URL+'?t='+t)]);
+    const data = await calRes.json(), scheduleData = await schRes.json();
     const scheduleMap = {};
-    (scheduleData.rounds || []).forEach(r => { scheduleMap[r.round] = r.sessions || []; });
+    (scheduleData.rounds||[]).forEach(r => { scheduleMap[r.round] = r.sessions||[]; });
     const now = new Date();
-
-    // Pre-calculate sequential race numbers (Race 1/2/3 only, not Qualifying Race)
     let raceCounter = 0;
-    const raceNumMap = {}; // key: `${round}-${sessionName}`
-    const totalRaces = data.rounds.reduce((acc, r) => {
-      const sessions = scheduleMap[r.round] || [];
-      return acc + sessions.filter(s => {
-        const isFP = s.name === 'Free Practice';
-        const isQual = !isFP && s.name.toLowerCase().includes('qualifying');
-        return !isFP && !isQual;
-      }).length;
-    }, 0);
-    data.rounds.forEach(r => {
-      const sessions = scheduleMap[r.round] || [];
-      sessions.forEach(s => {
-        const isFP = s.name === 'Free Practice';
-        const isQual = !isFP && s.name.toLowerCase().includes('qualifying');
-        if (!isFP && !isQual) {
-          raceCounter++;
-          raceNumMap[`${r.round}-${s.name}`] = raceCounter;
-        }
-      });
-    });
+    const raceNumMap = {};
+    const totalRaces = data.rounds.reduce((acc,r) => { const s = scheduleMap[r.round]||[]; return acc + s.filter(s => { const isFP = s.name === 'Free Practice'; return !isFP && !s.name.toLowerCase().includes('qualifying'); }).length; }, 0);
+    data.rounds.forEach(r => { (scheduleMap[r.round]||[]).forEach(s => { const isFP = s.name==='Free Practice', isQ = !isFP && s.name.toLowerCase().includes('qualifying'); if (!isFP && !isQ) { raceCounter++; raceNumMap[`${r.round}-${s.name}`] = raceCounter; } }); });
 
-    // Build flat list of all notifications sorted chronologically
     const notifs = [];
     data.rounds.forEach(r => {
-      // Friday preview
-      const friday = fridayBefore(r.startDate);
-      friday.setHours(15, 0, 0, 0);
-      notifs.push({
-        date: new Date(friday),
-        type: 'preview',
-        round: r.round,
-        venue: r.venue,
-        label: 'Race Weekend Preview',
-        timeStr: '3:00 PM',
-        link: `intent://preview/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`,
-        color: 'var(--yellow)',
-      });
-
-      // Race sessions
-      const sessions = scheduleMap[r.round] || [];
-      sessions.forEach(s => {
+      const fri = fridayBefore(r.startDate); fri.setHours(15,0,0,0);
+      notifs.push({date:new Date(fri),type:'preview',round:r.round,venue:r.venue,label:'Race Weekend Preview',timeStr:'3:00 PM',color:'var(--yellow)'});
+      (scheduleMap[r.round]||[]).forEach(s => {
         if (s.time === 'TBA') return;
-        const isFP   = s.name === 'Free Practice';
-        const isQual = !isFP && s.name.toLowerCase().includes('qualifying');
-        const type   = isFP ? 'fp' : isQual ? 'qualifying' : 'race';
-        const color  = isFP ? '#34D399' : isQual ? '#A78BFA' : '#F87171';
-        const notifDate = sessionDateTime(r.startDate, r.endDate, s.day, s.time);
+        const isFP = s.name==='Free Practice', isQual = !isFP && s.name.toLowerCase().includes('qualifying');
+        const type  = isFP ? 'fp' : isQual ? 'qualifying' : 'race';
+        const color = isFP ? '#34D399' : isQual ? '#A78BFA' : '#F87171';
         const [h, m] = s.time.split(':').map(Number);
-        const notifTime = `${String(h).padStart(2,'0')}:${String(m < 15 ? m + 45 : m - 15).padStart(2,'0')} ${h < 12 || (h === 12 && m < 15) ? 'AM' : 'PM'}`;
-        notifs.push({
-          date: notifDate,
-          type,
-          round: r.round,
-          venue: r.venue,
-          label: s.name,
-          timeStr: notifTime,
-          link: null,
-          color,
-          raceNum: raceNumMap[`${r.round}-${s.name}`] || null,
-          totalRaces,
-        });
+        const notifTime = `${String(h).padStart(2,'0')}:${String(m<15?m+45:m-15).padStart(2,'0')} ${h<12||(h===12&&m<15)?'AM':'PM'}`;
+        notifs.push({date:sessionDateTime(r.startDate,r.endDate,s.day,s.time),type,round:r.round,venue:r.venue,label:s.name,timeStr:notifTime,color,raceNum:raceNumMap[`${r.round}-${s.name}`]||null,totalRaces});
       });
-
-      // Tuesday standings (round 2+)
       if (r.round >= 2) {
-        const tuesday = new Date(r.endDate + 'T00:00:00');
-        tuesday.setDate(tuesday.getDate() + 2);
-        tuesday.setHours(9, 0, 0, 0);
-        notifs.push({
-          date: new Date(tuesday),
-          type: 'standings',
-          round: r.round,
-          venue: r.venue,
-          label: 'Standings Update',
-          timeStr: '9:00 AM',
-          link: `intent://standings/${r.round}#Intent;scheme=btccfanhub;package=com.btccfanhub;end`,
-          color: '#5B9CF6',
-        });
+        const tue = new Date(r.endDate+'T00:00:00'); tue.setDate(tue.getDate()+2); tue.setHours(9,0,0,0);
+        notifs.push({date:new Date(tue),type:'standings',round:r.round,venue:r.venue,label:'Standings Update',timeStr:'9:00 AM',color:'#5B9CF6'});
       }
     });
-    notifs.sort((a, b) => a.date - b.date);
+    notifs.sort((a,b) => a.date - b.date);
 
-    // Group by month
     const byMonth = {};
-    notifs.forEach(n => {
-      const key = `${n.date.getFullYear()}-${n.date.getMonth()}`;
-      if (!byMonth[key]) byMonth[key] = { label: `${MONTH_NAMES[n.date.getMonth()]} ${n.date.getFullYear()}`, items: [] };
-      byMonth[key].items.push(n);
-    });
+    notifs.forEach(n => { const k = `${n.date.getFullYear()}-${n.date.getMonth()}`; if (!byMonth[k]) byMonth[k] = {label:`${MONTH_NAMES[n.date.getMonth()]} ${n.date.getFullYear()}`,items:[]}; byMonth[k].items.push(n); });
 
-    // Count totals
-    const total = notifs.length;
-    const sent  = notifs.filter(n => n.date < now).length;
-
-    let html = `
-      <div style="display:flex;gap:16px;margin-bottom:20px;">
-        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
-          <div style="font-size:28px;font-weight:900;color:var(--text);">${total}</div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">TOTAL</div>
-        </div>
-        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
-          <div style="font-size:28px;font-weight:900;color:var(--text-sec);">${sent}</div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">SENT</div>
-        </div>
-        <div style="flex:1;background:var(--card);border:1px solid var(--outline);border-radius:12px;padding:14px;text-align:center;">
-          <div style="font-size:28px;font-weight:900;color:var(--green);">${total - sent}</div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text-sec);margin-top:2px;">UPCOMING</div>
-        </div>
-      </div>`;
+    const total = notifs.length, sent = notifs.filter(n => n.date < now).length;
+    let html = `<div class="stat-grid stat-grid-3" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--text-sec)">${sent}</div><div class="stat-label">Sent</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${total-sent}</div><div class="stat-label">Upcoming</div></div>
+    </div>`;
 
     Object.values(byMonth).forEach(month => {
-      html += `<div style="font-size:10px;font-weight:900;letter-spacing:2px;color:var(--text-sec);text-transform:uppercase;margin:20px 0 8px;">${month.label}</div>`;
+      html += `<div class="section-label" style="margin:20px 0 8px">${month.label}</div>`;
       month.items.forEach(n => {
         const past = n.date < now;
-        const dot  = `<span style="width:8px;height:8px;border-radius:50%;background:${past ? 'var(--outline)' : n.color};flex-shrink:0;margin-top:3px;display:inline-block;"></span>`;
-        html += `
-          <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--outline-lo);">
-            ${dot}
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
-                <span style="font-size:13px;font-weight:700;color:${past ? 'var(--text-sec)' : 'var(--text)'};">${DAY_NAMES[n.date.getDay()]} ${n.date.getDate()} · ${n.timeStr}</span>
-                <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:${past ? 'var(--outline)' : n.color};text-transform:uppercase;">${n.label}</span>
-              </div>
-              <div style="font-size:12px;color:var(--text-sec);margin-top:1px;">Round ${n.round} · ${n.venue}</div>
+        html += `<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--outline-lo);">
+          <span style="width:8px;height:8px;border-radius:50%;background:${past?'var(--outline)':n.color};flex-shrink:0;margin-top:4px;display:inline-block;"></span>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:13px;font-weight:700;color:${past?'var(--text-sec)':'var(--text)'};">${DAY_NAMES[n.date.getDay()]} ${n.date.getDate()} · ${n.timeStr}</span>
+              <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:${past?'var(--outline)':n.color};text-transform:uppercase">${n.label}</span>
             </div>
-            <button onclick="sendTestNotifFromBtn(this)" data-channel="${htmlEsc(testChannel(n))}" data-title="${htmlEsc(testTitle(n))}" data-body="${htmlEsc(testBody(n))}" data-extra="${htmlEsc(JSON.stringify({type:'round',round:String(n.round)}))}" style="flex-shrink:0;background:${past ? 'var(--surface)' : n.color};color:${past ? 'var(--text-sec)' : '#000'};font-size:10px;font-weight:800;letter-spacing:0.5px;padding:6px 10px;border-radius:7px;border:none;cursor:pointer;white-space:nowrap;">Test</button>
-          </div>`;
+            <div style="font-size:12px;color:var(--text-sec);margin-top:1px">Round ${n.round} · ${n.venue}</div>
+          </div>
+          <button onclick="sendTestNotifFromBtn(this)" data-channel="${htmlEsc(testChannel(n))}" data-title="${htmlEsc(testTitle(n))}" data-body="${htmlEsc(testBody(n))}" data-extra="${htmlEsc(JSON.stringify({type:'round',round:String(n.round)}))}" style="flex-shrink:0;background:${past?'var(--surface)':n.color};color:${past?'var(--text-sec)':'#000'};font-size:10px;font-weight:800;padding:6px 10px;border-radius:7px;border:none;cursor:pointer;white-space:nowrap">Test</button>
+        </div>`;
       });
     });
-
     el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = '<div style="color:var(--red);font-size:13px;">Failed to load calendar</div>';
-  }
+  } catch(e) { el.innerHTML = '<div style="color:var(--red);font-size:13px">Failed to load calendar</div>'; }
 }
 
-// Load when tab is first opened
-const _origSwitchTab = switchTab;
-// patch switchTab to lazy-load notifications
-window._notifLoaded = false;
-const _patchedSwitchTab = function(name, el) {
-  _origSwitchTab(name, el);
-  if (name === 'notifications' && !window._notifLoaded) {
-    window._notifLoaded = true;
-    loadNotifSchedule();
+function sendTestNotifFromBtn(btn) {
+  const d = btn.dataset;
+  sendTestNotif(d.channel, d.title, d.body, JSON.parse(d.extra));
+}
+
+// ── Hub News ──────────────────────────────────────────────────────────────────
+const HUB_NEWS_PATH = 'data/hub_news.json';
+const HUB_NEWS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
+let hubNewsPosts = [], hubNewsFileSha = null;
+
+async function loadHubNews() {
+  try {
+    const r = await fetch(HUB_NEWS_RAW + '?t=' + Date.now());
+    if (r.ok) {
+      const data = await r.json();
+      hubNewsPosts = data.posts || [];
+      document.getElementById('hubnews-banner-text').textContent = `Loaded from GitHub · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
+      document.getElementById('hubnews-banner').classList.add('visible');
+    }
+  } catch(e) {}
+  renderHubNewsList();
+  updateDashNews();
+  // Pre-fill pubdate
+  document.getElementById('hn-pubdate').value = nowIso();
+}
+
+function renderHubNewsList() {
+  const el = document.getElementById('hubnews-list');
+  if (!hubNewsPosts.length) { el.innerHTML = '<div class="section-note">No articles yet. Create one above.</div>'; return; }
+  el.innerHTML = hubNewsPosts.map(p => `
+    <div class="hub-article-card">
+      ${p.imageUrl ? `<img class="hub-article-thumb" src="${htmlEsc(p.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="hub-article-body">
+        <div class="hub-article-title">${htmlEsc(p.title)}</div>
+        <div class="hub-article-meta">${p.category ? htmlEsc(p.category) + ' · ' : ''}${p.pubDate ? new Date(p.pubDate).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : ''} · ${p.id}</div>
+        <div class="hub-article-actions">
+          <button class="btn-sm" onclick="editArticle('${htmlEsc(p.id)}')">Edit</button>
+          <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateImagePreview(url) {
+  const img = document.getElementById('hn-image-preview');
+  if (url) { img.src = url; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+}
+
+function editArticle(articleId) {
+  const p = hubNewsPosts.find(x => x.id === articleId);
+  if (!p) return;
+  document.getElementById('hn-edit-id').value = p.id;
+  document.getElementById('hn-title').value = p.title || '';
+  document.getElementById('hn-desc').value = p.description || '';
+  document.getElementById('hn-content').value = p.content || '';
+  document.getElementById('hn-image').value = p.imageUrl || '';
+  updateImagePreview(p.imageUrl || '');
+  document.getElementById('hn-images').value = (p.images || []).join('\n');
+  document.getElementById('hn-category').value = p.category || '';
+  document.getElementById('hn-source').value = p.source || '';
+  document.getElementById('hn-source-url').value = p.sourceUrl || '';
+  document.getElementById('hn-pubdate').value = p.pubDate || nowIso();
+  document.getElementById('hubnews-form-title').textContent = 'EDIT ARTICLE';
+  document.getElementById('hn-publish-btn').textContent = 'SAVE CHANGES';
+  document.getElementById('hubnews-create-card').scrollIntoView({behavior:'smooth'});
+}
+
+function cancelEdit() {
+  document.getElementById('hn-edit-id').value = '';
+  document.getElementById('hn-title').value = '';
+  document.getElementById('hn-desc').value = '';
+  document.getElementById('hn-content').value = '';
+  document.getElementById('hn-image').value = '';
+  updateImagePreview('');
+  document.getElementById('hn-images').value = '';
+  document.getElementById('hn-category').value = '';
+  document.getElementById('hn-source').value = '';
+  document.getElementById('hn-source-url').value = '';
+  document.getElementById('hn-pubdate').value = nowIso();
+  document.getElementById('hubnews-form-title').textContent = 'NEW ARTICLE';
+  document.getElementById('hn-publish-btn').textContent = 'PUBLISH ARTICLE';
+  document.getElementById('hubnews-status').textContent = '';
+}
+
+async function deleteArticle(articleId) {
+  if (!confirm('Delete this article? This cannot be undone.')) return;
+  hubNewsPosts = hubNewsPosts.filter(p => p.id !== articleId);
+  await saveHubNews('Delete article ' + articleId);
+}
+
+async function publishArticle() {
+  const title = document.getElementById('hn-title').value.trim();
+  if (!title) { alert('Title is required.'); return; }
+  const editId = document.getElementById('hn-edit-id').value.trim();
+  const imagesRaw = document.getElementById('hn-images').value.trim();
+  const images = imagesRaw ? imagesRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
+  const article = {
+    id: editId || 'hub-' + Date.now(),
+    title,
+    description: document.getElementById('hn-desc').value.trim(),
+    content: document.getElementById('hn-content').value.trim(),
+    imageUrl: document.getElementById('hn-image').value.trim(),
+    images,
+    category: document.getElementById('hn-category').value.trim(),
+    pubDate: document.getElementById('hn-pubdate').value.trim() || new Date().toISOString(),
+    source: document.getElementById('hn-source').value.trim(),
+    sourceUrl: document.getElementById('hn-source-url').value.trim() || null,
+  };
+  if (editId) {
+    const idx = hubNewsPosts.findIndex(p => p.id === editId);
+    if (idx >= 0) hubNewsPosts[idx] = article; else hubNewsPosts.unshift(article);
+  } else {
+    hubNewsPosts.unshift(article);
   }
-};
-window.switchTab = _patchedSwitchTab;
-// Rewrite onclick handlers to use patched version
-document.querySelectorAll('.tab').forEach(t => {
-  const match = t.getAttribute('onclick').match(/'([^']+)'/);
-  if (match) t.setAttribute('onclick', `switchTab('${match[1]}', this)`);
-});
+  await saveHubNews(editId ? 'Update hub article' : 'Add hub article: ' + title);
+}
+
+async function saveHubNews(commitMessage) {
+  const tok = getToken();
+  if (!tok) { document.getElementById('hubnews-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
+  const btn = document.getElementById('hn-publish-btn');
+  btn.disabled = true; btn.textContent = 'SAVING…';
+  document.getElementById('hubnews-status').textContent = '';
+  const content = JSON.stringify({posts: hubNewsPosts}, null, 2) + '\n';
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  try {
+    if (!hubNewsFileSha) {
+      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers:{Authorization:'token '+tok}});
+      if (meta.ok) hubNewsFileSha = (await meta.json()).sha;
+    }
+    const body = {message: commitMessage, content: encoded};
+    if (hubNewsFileSha) body.sha = hubNewsFileSha;
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (r.ok) {
+      const d = await r.json(); hubNewsFileSha = d.content?.sha || null;
+      document.getElementById('hubnews-status').innerHTML = '<span class="ok">Saved ✓</span>';
+      document.getElementById('hubnews-banner-text').textContent = `Saved · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
+      document.getElementById('hubnews-banner').classList.add('visible');
+      cancelEdit(); renderHubNewsList(); updateDashNews();
+    } else { const e = await r.json(); document.getElementById('hubnews-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
+  } catch(e) { document.getElementById('hubnews-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
+  btn.disabled = false; btn.textContent = document.getElementById('hn-edit-id').value ? 'SAVE CHANGES' : 'PUBLISH ARTICLE';
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function updateDashHealth() {
+  const el = document.getElementById('dash-health');
+  const rows = SCRAPER_WORKFLOWS.map(w => {
+    const statusEl = document.getElementById('ss-' + w.key);
+    const txt = statusEl ? statusEl.textContent : '—';
+    const cls = statusEl ? statusEl.className : '';
+    const color = cls.includes('st-ok') ? 'var(--green)' : cls.includes('st-fail') ? 'var(--red)' : cls.includes('st-running') ? 'var(--yellow)' : 'var(--outline)';
+    return `<div class="health-row">
+      <div class="health-dot" style="background:${color}"></div>
+      <div class="health-name">${w.key.toUpperCase().replace(/-/g,' ')}</div>
+      <div class="health-status" style="color:${color}">${htmlEsc(txt)}</div>
+    </div>`;
+  });
+  el.innerHTML = rows.join('');
+}
+
+function updateDashFlags() {
+  const el = document.getElementById('dash-flags');
+  const on = FLAG_DEFS.filter(f => f.type !== 'number' && flagValues[f.key]);
+  const off = FLAG_DEFS.filter(f => f.type !== 'number' && !flagValues[f.key]);
+  el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+    ${on.map(f => `<span style="background:var(--yellow-dim);border:1px solid rgba(254,189,2,0.3);color:var(--yellow);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700">${f.label}</span>`).join('')}
+    ${off.length > on.length ? `<span style="color:var(--text-sec);font-size:11px;align-self:center">+${off.length} off</span>` : ''}
+  </div>`;
+}
+
+function updateDashNews() {
+  const el = document.getElementById('dash-news');
+  if (!hubNewsPosts.length) { el.innerHTML = '<div class="section-note">No articles published.</div>'; return; }
+  const latest = hubNewsPosts[0];
+  el.innerHTML = `<div style="display:flex;gap:12px;align-items:center">
+    ${latest.imageUrl ? `<img src="${htmlEsc(latest.imageUrl)}" style="width:60px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" loading="lazy">` : ''}
+    <div style="min-width:0">
+      <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${htmlEsc(latest.title)}</div>
+      <div style="font-size:11px;color:var(--text-sec);margin-top:2px">${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''} published</div>
+    </div>
+  </div>`;
+}
+
+async function refreshDashboard() {
+  updateDashHealth();
+  updateDashFlags();
+  updateDashNews();
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-if(getToken()) collapseToken();
-if(getFcmTok()) collapseFcmTok();
+if (getToken())   collapseToken();
+if (getFcmTok())  collapseFcmTok();
 loadExisting();
 loadFlags();
 loadNotifSchedule();
-if(getToken()) refreshAllStatus();
-// Restore active tab
+window._notifLoaded = true;
+if (getToken()) refreshAllStatus();
+
 const savedTab = sessionStorage.getItem('activeTab');
 if (savedTab) {
-  document.querySelectorAll('.tab').forEach(t => {
-    if (t.getAttribute('onclick').includes("'" + savedTab + "'")) switchTab(savedTab, t);
-  });
+  const btn = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes("'" + savedTab + "'"));
+  if (btn) switchTab(savedTab, btn);
+} else {
+  refreshDashboard();
 }
+
+// Lazy-load hub news when tab opened
+window._hubnewsLoaded = false;
 </script>
 </body>
 </html>
