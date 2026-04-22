@@ -100,7 +100,7 @@ export async function fetchHubPosts() {
         title: p.title || '',
         link: p.link || null,
         description: p.description || '',
-        sortDate: p.pubDate || '',
+        sortDate: p.pubDate || new Date().toISOString(),
         pubDate: formatDate(p.pubDate || ''),
         imageUrl: p.imageUrl || null,
         category: p.category || '',
