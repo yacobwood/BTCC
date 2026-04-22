@@ -2245,7 +2245,7 @@ async function handleImageFiles(files) {
   for (const file of arr) {
     const placeholderIdx = sessionImages.length;
     const localUrl = URL.createObjectURL(file);
-    sessionImages.push({ url: localUrl, uploading: true, isMain: sessionImages.length === 0 && !document.getElementById('hn-image').value });
+    sessionImages.push({ url: localUrl, uploading: true, isMain: false, inGallery: false });
     renderImgGrid();
     try {
       statusEl.textContent = `Uploading ${done + 1} / ${arr.length}…`;
@@ -2255,7 +2255,7 @@ async function handleImageFiles(files) {
       const dims   = await getImageDimensions(blob);
       const url = await uploadImageToGitHub(blob);
       URL.revokeObjectURL(localUrl);
-      sessionImages[placeholderIdx] = { url, uploading: false, isMain: sessionImages[placeholderIdx].isMain, inGallery: !sessionImages[placeholderIdx].isMain, dims };
+      sessionImages[placeholderIdx] = { url, uploading: false, isMain: false, inGallery: false, dims };
       done++;
       statusEl.style.color = 'var(--green)';
       statusEl.textContent = `✓ ${done}/${arr.length} uploaded · ${origKb}KB → ${newKb}KB · ${dims.w}×${dims.h}`;
@@ -2281,7 +2281,8 @@ function renderImgGrid() {
       ${!img.uploading ? `
       ${img.dims ? `<div style="font-size:9px;font-weight:700;color:var(--text-sec);text-align:center;padding:3px 0;background:var(--outline-lo)">${img.dims.w}×${img.dims.h}</div>` : ''}
       <div class="img-thumb-actions">
-        <button class="${img.isMain ? 'active' : ''}" onclick="setMainImage(${i})" title="Set as hero image">★ Main</button>
+        <button class="${img.isMain ? 'active' : ''}" onclick="setMainImage(${i})" title="Set as hero image">★ Hero</button>
+        <button class="${img.inGallery ? 'active' : ''}" onclick="toggleGallery(${i})" title="Add/remove from gallery">⊞ Gallery</button>
         <button class="ins" onclick="insertImageInQuill('${htmlEsc(img.url)}')" title="Insert at cursor in content">↩ Insert</button>
         <button onclick="removeSessionImage(${i})" title="Remove">✕</button>
       </div>` : ''}
@@ -2294,9 +2295,14 @@ function setMainImage(i) {
   syncImageFields();
 }
 
+function toggleGallery(i) {
+  sessionImages[i].inGallery = !sessionImages[i].inGallery;
+  renderImgGrid();
+  syncImageFields();
+}
+
 function removeSessionImage(i) {
   sessionImages.splice(i, 1);
-  if (sessionImages.length && !sessionImages.some(img => img.isMain)) sessionImages[0].isMain = true;
   renderImgGrid();
   syncImageFields();
 }
@@ -2311,7 +2317,7 @@ function insertImageInQuill(url) {
 function syncImageFields() {
   const mainImg = sessionImages.find(img => img.isMain && !img.uploading);
   document.getElementById('hn-image').value = mainImg ? mainImg.url : '';
-  const gallery = sessionImages.filter(img => !img.uploading && !img.isMain).map(img => img.url);
+  const gallery = sessionImages.filter(img => !img.uploading && img.inGallery).map(img => img.url);
   document.getElementById('hn-images').value = gallery.join('\n');
 }
 
@@ -2347,8 +2353,8 @@ function initQuill() {
         const range = quill.getSelection(true) || { index: quill.getLength() };
         quill.insertEmbed(range.index, 'image', url, 'user');
         quill.setSelection(range.index + 1, 0);
-        // Also add to session grid
-        sessionImages.push({ url, isMain: false, inGallery: false, uploading: false });
+        // Add to grid so user can optionally tag as hero/gallery
+        sessionImages.push({ url, isMain: false, inGallery: false, uploading: false, dims });
         renderImgGrid();
       } catch(e) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Upload failed: ' + e.message; }
     };
