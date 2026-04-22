@@ -43,7 +43,8 @@
           "wins": 2,
           "podiums": 6,
           "poles": 3,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 6
         },
         {
           "year": 2024,
@@ -142,7 +143,8 @@
           "wins": 2,
           "podiums": 3,
           "poles": 2,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 2
         },
         {
           "year": 2010,
@@ -153,7 +155,8 @@
           "wins": 3,
           "podiums": 7,
           "poles": 6,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 2
         },
         {
           "year": 2009,
@@ -164,7 +167,8 @@
           "wins": 0,
           "podiums": 3,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         },
         {
           "year": 2008,
@@ -175,7 +179,8 @@
           "wins": 1,
           "podiums": 4,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         },
         {
           "year": 2007,
@@ -186,7 +191,8 @@
           "wins": 0,
           "podiums": 6,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 5
         },
         {
           "year": 2006,
@@ -197,7 +203,8 @@
           "wins": 0,
           "podiums": 5,
           "poles": 4,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 7
         },
         {
           "year": 2005,
@@ -208,7 +215,8 @@
           "wins": 4,
           "podiums": 9,
           "poles": 4,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 2
         },
         {
           "year": 2004,
@@ -219,7 +227,8 @@
           "wins": 2,
           "podiums": 5,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2003,
@@ -334,7 +343,8 @@
           "wins": 1,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 7
         },
         {
           "year": 2023,
@@ -503,7 +513,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 4
         },
         {
           "year": 2023,
@@ -549,7 +560,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         }
       ],
       "dateOfBirth": "2005-08-14",
@@ -584,7 +596,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2021,
@@ -674,7 +687,8 @@
           "wins": 3,
           "podiums": 10,
           "poles": 4,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 4
         },
         {
           "year": 2024,
@@ -777,7 +791,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         },
         {
           "year": 2023,
@@ -865,7 +880,8 @@
           "wins": 0,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 3
         },
         {
           "year": 2023,
@@ -933,7 +949,8 @@
           "wins": 0,
           "podiums": 5,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 3
         },
         {
           "year": 2024,
@@ -1065,7 +1082,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 1,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 4
         },
         {
           "year": 2012,
@@ -1076,7 +1094,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 12
         }
       ],
       "dateOfBirth": "1990-07-11",
@@ -1100,7 +1119,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 6
         },
         {
           "year": 2024,
@@ -1199,7 +1219,8 @@
           "wins": 0,
           "podiums": 4,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2012,
@@ -1210,7 +1231,8 @@
           "wins": 1,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2011,
@@ -1221,7 +1243,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         }
       ],
       "dateOfBirth": "1992-06-01",
@@ -1245,7 +1268,8 @@
           "wins": 1,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2022,
@@ -1324,7 +1348,8 @@
           "wins": 5,
           "podiums": 18,
           "poles": 3,
-          "fastestLaps": 6
+          "fastestLaps": 6,
+          "dnfs": 1
         },
         {
           "year": 2012,
@@ -1336,7 +1361,8 @@
           "podiums": 16,
           "poles": 0,
           "fastestLaps": 8,
-          "champion": true
+          "champion": true,
+          "dnfs": 4
         },
         {
           "year": 2011,
@@ -1347,7 +1373,8 @@
           "wins": 6,
           "podiums": 13,
           "poles": 4,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 2
         },
         {
           "year": 2010,
@@ -1358,7 +1385,8 @@
           "wins": 5,
           "podiums": 12,
           "poles": 4,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 4
         },
         {
           "year": 2009,
@@ -1386,7 +1414,8 @@
               "car": "SEAT Le\u00f3n",
               "races": 6
             }
-          ]
+          ],
+          "dnfs": 4
         },
         {
           "year": 2008,
@@ -1397,7 +1426,8 @@
           "wins": 2,
           "podiums": 4,
           "poles": 4,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2007,
@@ -1408,7 +1438,8 @@
           "wins": 4,
           "podiums": 10,
           "poles": 5,
-          "fastestLaps": 6
+          "fastestLaps": 6,
+          "dnfs": 10
         },
         {
           "year": 2006,
@@ -1419,7 +1450,8 @@
           "wins": 4,
           "podiums": 10,
           "poles": 5,
-          "fastestLaps": 9
+          "fastestLaps": 9,
+          "dnfs": 5
         },
         {
           "year": 2001,
@@ -1477,7 +1509,8 @@
           "wins": 2,
           "podiums": 9,
           "poles": 2,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -1623,7 +1656,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -1714,7 +1748,8 @@
           "wins": 6,
           "podiums": 15,
           "poles": 7,
-          "fastestLaps": 10
+          "fastestLaps": 10,
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -1872,7 +1907,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -1909,7 +1945,8 @@
           "wins": 1,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 2
         }
       ]
     },
@@ -1942,7 +1979,8 @@
           "wins": 3,
           "podiums": 14,
           "poles": 0,
-          "fastestLaps": 6
+          "fastestLaps": 6,
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -2058,7 +2096,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         }
       ]
     }
