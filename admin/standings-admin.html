@@ -884,7 +884,8 @@ select.input { cursor: pointer; }
     <div style="display:flex;gap:8px">
       <div style="flex:1" class="field-group">
         <div class="field-label">CATEGORY</div>
-        <input type="text" id="hn-category" placeholder="e.g. Paddock">
+        <select class="input" id="hn-category-select" onchange="onCategorySelect(this.value)"></select>
+        <input type="text" id="hn-category-new" placeholder="New category name…" style="display:none;margin-top:6px">
       </div>
       <div style="flex:1" class="field-group">
         <div class="field-label">SOURCE</div>
@@ -1674,9 +1675,49 @@ async function loadHubNews() {
     }
   } catch(e) {}
   renderHubNewsList();
+  renderCategorySelect('');
   updateDashNews();
   // Pre-fill pubdate
   document.getElementById('hn-pubdate').value = nowIso();
+}
+
+const DEFAULT_CATEGORIES = ['Paddock','Photos','Feature','Race Weekend','Interview','News'];
+
+function getHubCategories() {
+  const fromPosts = hubNewsPosts.map(p => p.category).filter(Boolean);
+  return [...new Set([...DEFAULT_CATEGORIES, ...fromPosts])].sort();
+}
+
+function renderCategorySelect(selected) {
+  const cats = getHubCategories();
+  const sel = document.getElementById('hn-category-select');
+  sel.innerHTML = cats.map(c => `<option value="${htmlEsc(c)}" ${c === selected ? 'selected' : ''}>${htmlEsc(c)}</option>`).join('') +
+    `<option value="__new__">+ Add new category…</option>`;
+  const newInput = document.getElementById('hn-category-new');
+  if (selected && !cats.includes(selected)) {
+    sel.innerHTML += `<option value="${htmlEsc(selected)}" selected>${htmlEsc(selected)}</option>`;
+  }
+  newInput.style.display = 'none';
+  newInput.value = '';
+}
+
+function onCategorySelect(val) {
+  const newInput = document.getElementById('hn-category-new');
+  if (val === '__new__') {
+    newInput.style.display = 'block';
+    newInput.focus();
+  } else {
+    newInput.style.display = 'none';
+    newInput.value = '';
+  }
+}
+
+function getSelectedCategory() {
+  const sel = document.getElementById('hn-category-select');
+  if (sel.value === '__new__') {
+    return document.getElementById('hn-category-new').value.trim();
+  }
+  return sel.value;
 }
 
 function renderHubNewsList() {
@@ -1712,7 +1753,7 @@ function editArticle(articleId) {
   document.getElementById('hn-image').value = p.imageUrl || '';
   updateImagePreview(p.imageUrl || '');
   document.getElementById('hn-images').value = (p.images || []).join('\n');
-  document.getElementById('hn-category').value = p.category || '';
+  renderCategorySelect(p.category || '');
   document.getElementById('hn-source').value = p.source || '';
   document.getElementById('hn-source-url').value = p.sourceUrl || '';
   document.getElementById('hn-pubdate').value = p.pubDate || nowIso();
@@ -1729,7 +1770,7 @@ function cancelEdit() {
   document.getElementById('hn-image').value = '';
   updateImagePreview('');
   document.getElementById('hn-images').value = '';
-  document.getElementById('hn-category').value = '';
+  renderCategorySelect('');
   document.getElementById('hn-source').value = '';
   document.getElementById('hn-source-url').value = '';
   document.getElementById('hn-pubdate').value = nowIso();
@@ -1759,7 +1800,7 @@ async function publishArticle() {
     content,
     imageUrl: document.getElementById('hn-image').value.trim(),
     images,
-    category: document.getElementById('hn-category').value.trim(),
+    category: getSelectedCategory(),
     pubDate: document.getElementById('hn-pubdate').value.trim() || new Date().toISOString(),
     source: document.getElementById('hn-source').value.trim(),
     sourceUrl: document.getElementById('hn-source-url').value.trim() || null,
