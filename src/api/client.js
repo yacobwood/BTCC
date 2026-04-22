@@ -78,26 +78,34 @@ export async function fetchArticles(page = 1, perPage = 20, search = '') {
   }
 }
 
-export async function fetchHubPosts(preview = false) {
-  const cacheKey = preview ? null : 'hub_news';
+export async function fetchHubPosts(deviceToken = null) {
   try {
-    const data = preview ? BUNDLED_HUB_DRAFT : await fetchJson(`${BASE_GITHUB}/hub_news.json`, cacheKey);
-    return (data.posts || []).map(p => ({
-      id: p.id,
-      title: p.title || '',
-      link: p.link || null,
-      description: p.description || '',
-      sortDate: p.pubDate || '',
-      pubDate: formatDate(p.pubDate || ''),
-      imageUrl: p.imageUrl || null,
-      category: p.category || '',
-      content: [
-        p.content || '',
-        ...(Array.isArray(p.images) ? p.images.map(u => `<img src="${u}" />`) : []),
-      ].filter(Boolean).join('\n'),
-      source: p.source || 'btcc hub',
-      sourceUrl: p.sourceUrl || null,
-    }));
+    const data = await fetchJson(`${BASE_GITHUB}/hub_news.json`, 'hub_news');
+    const now = Date.now();
+    return (data.posts || [])
+      .filter(p => {
+        const status = p.status || 'published';
+        if (status === 'published') return true;
+        if (status === 'scheduled') return p.scheduledAt && new Date(p.scheduledAt).getTime() <= now;
+        if (status === 'draft') return deviceToken && Array.isArray(p.previewDeviceIds) && p.previewDeviceIds.includes(deviceToken);
+        return false;
+      })
+      .map(p => ({
+        id: p.id,
+        title: p.title || '',
+        link: p.link || null,
+        description: p.description || '',
+        sortDate: p.pubDate || '',
+        pubDate: formatDate(p.pubDate || ''),
+        imageUrl: p.imageUrl || null,
+        category: p.category || '',
+        content: [
+          p.content || '',
+          ...(Array.isArray(p.images) ? p.images.map(u => `<img src="${u}" />`) : []),
+        ].filter(Boolean).join('\n'),
+        source: p.source || 'btcc hub',
+        sourceUrl: p.sourceUrl || null,
+      }));
   } catch {
     return [];
   }

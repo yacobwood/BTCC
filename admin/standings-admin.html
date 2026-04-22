@@ -612,6 +612,34 @@ select.input { cursor: pointer; }
 }
 .notif-type-btn.active { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
 
+/* ── Status selector ── */
+.status-btn-row { display: flex; gap: 8px; }
+.status-btn {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  color: var(--text-sec);
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.status-btn.active-pub  { border-color: var(--green);  color: var(--green);  background: var(--green-dim); }
+.status-btn.active-sch  { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+.status-btn.active-dft  { border-color: var(--blue);   color: var(--blue);   background: rgba(91,156,246,0.1); }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  border-radius: 20px; padding: 2px 9px;
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+}
+.badge-pub { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(76,175,80,0.3); }
+.badge-sch { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(254,189,2,0.3); }
+.badge-dft { background: rgba(91,156,246,0.1); color: var(--blue); border: 1px solid rgba(91,156,246,0.3); }
+
 /* ── Hub News ── */
 .hub-article-card {
   background: var(--card);
@@ -975,6 +1003,36 @@ select.input { cursor: pointer; }
     <div class="field-group">
       <div class="field-label">PUB DATE</div>
       <input type="text" id="hn-pubdate" placeholder="2026-04-17T20:00:00">
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">STATUS</div>
+      <div class="status-btn-row">
+        <button class="status-btn active-pub" id="sbtn-published" onclick="setArticleStatus('published')">● Live</button>
+        <button class="status-btn" id="sbtn-scheduled" onclick="setArticleStatus('scheduled')">◷ Schedule</button>
+        <button class="status-btn" id="sbtn-draft" onclick="setArticleStatus('draft')">◎ Draft</button>
+      </div>
+    </div>
+
+    <div id="status-scheduled-fields" style="display:none">
+      <div class="field-group">
+        <div class="field-label">PUBLISH AT</div>
+        <input type="text" id="hn-scheduled-at" placeholder="2026-04-25T09:00">
+        <div class="section-note" style="margin-top:6px">App shows the article automatically once this time passes.</div>
+      </div>
+    </div>
+
+    <div id="status-draft-fields" style="display:none">
+      <div class="field-group">
+        <div class="field-label">PREVIEW DEVICES</div>
+        <div class="section-note" style="margin-bottom:10px">Only these device FCM tokens will see this draft in the app.</div>
+        <div id="draft-device-list"></div>
+        <div class="input-row" style="margin-top:8px">
+          <input type="text" id="hn-preview-device-input" placeholder="Paste FCM token…" style="font-family:monospace;font-size:12px">
+          <button class="btn-run" onclick="addPreviewDevice()" style="padding:0 16px">ADD</button>
+        </div>
+        <div id="draft-known-devices" style="margin-top:10px"></div>
+      </div>
     </div>
 
     <button class="btn-primary" onclick="publishArticle()" id="hn-publish-btn">PUBLISH ARTICLE</button>
@@ -1757,6 +1815,71 @@ async function loadHubNews() {
   document.getElementById('hn-pubdate').value = nowIso();
 }
 
+// ── Article status ────────────────────────────────────────────────────────────
+let currentArticleStatus = 'published';
+let previewDeviceIds = [];
+
+function setArticleStatus(status) {
+  currentArticleStatus = status;
+  document.getElementById('sbtn-published').className = 'status-btn' + (status === 'published' ? ' active-pub' : '');
+  document.getElementById('sbtn-scheduled').className = 'status-btn' + (status === 'scheduled' ? ' active-sch' : '');
+  document.getElementById('sbtn-draft').className     = 'status-btn' + (status === 'draft'     ? ' active-dft' : '');
+  document.getElementById('status-scheduled-fields').style.display = status === 'scheduled' ? '' : 'none';
+  document.getElementById('status-draft-fields').style.display     = status === 'draft'     ? '' : 'none';
+  const btn = document.getElementById('hn-publish-btn');
+  btn.textContent = status === 'scheduled' ? 'SCHEDULE ARTICLE' : status === 'draft' ? 'SAVE DRAFT' : 'PUBLISH ARTICLE';
+  btn.style.background = status === 'draft' ? 'var(--blue)' : status === 'scheduled' ? '' : '';
+  if (status === 'draft') renderKnownDevices();
+  if (status === 'scheduled' && !document.getElementById('hn-scheduled-at').value) {
+    // default to pubdate + 1 day
+    const d = new Date(); d.setDate(d.getDate() + 1);
+    const p = n => String(n).padStart(2,'0');
+    document.getElementById('hn-scheduled-at').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T09:00`;
+  }
+}
+
+function addPreviewDevice() {
+  const input = document.getElementById('hn-preview-device-input');
+  const val = input.value.trim();
+  if (!val || previewDeviceIds.includes(val)) { input.focus(); return; }
+  previewDeviceIds.push(val);
+  input.value = '';
+  renderPreviewDeviceList();
+}
+
+function removePreviewDevice(token) {
+  previewDeviceIds = previewDeviceIds.filter(t => t !== token);
+  renderPreviewDeviceList();
+}
+
+function renderPreviewDeviceList() {
+  const el = document.getElementById('draft-device-list');
+  if (!previewDeviceIds.length) { el.innerHTML = '<div class="section-note" style="margin-bottom:4px">No devices added yet.</div>'; return; }
+  el.innerHTML = previewDeviceIds.map(t => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border:1px solid var(--outline-lo);border-radius:8px;margin-bottom:6px">
+      <span style="flex:1;font-family:monospace;font-size:11px;color:var(--blue);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${htmlEsc(t)}</span>
+      <button class="btn-sm" onclick="removePreviewDevice('${htmlEsc(t)}')">✕</button>
+    </div>`).join('');
+}
+
+function renderKnownDevices() {
+  const el = document.getElementById('draft-known-devices');
+  const overrides = getOverrides();
+  const known = Object.keys(overrides);
+  if (!known.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="section-note" style="margin-bottom:6px">Quick-add from known devices:</div>` +
+    known.map(t => `
+      <button onclick="quickAddDevice('${htmlEsc(t)}')" style="display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--outline);border-radius:8px;padding:7px 10px;font-family:monospace;font-size:11px;color:var(--text-sec);cursor:pointer;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        + ${htmlEsc(t)}
+      </button>`).join('');
+}
+
+function quickAddDevice(token) {
+  if (!previewDeviceIds.includes(token)) previewDeviceIds.push(token);
+  renderPreviewDeviceList();
+  renderKnownDevices();
+}
+
 const DEFAULT_CATEGORIES = ['Paddock','Photos','Feature','Race Weekend','Interview','News'];
 
 function getHubCategories() {
@@ -1799,18 +1922,33 @@ function getSelectedCategory() {
 function renderHubNewsList() {
   const el = document.getElementById('hubnews-list');
   if (!hubNewsPosts.length) { el.innerHTML = '<div class="section-note">No articles yet. Create one above.</div>'; return; }
-  el.innerHTML = hubNewsPosts.map(p => `
+  el.innerHTML = hubNewsPosts.map(p => {
+    const status = p.status || 'published';
+    const badgeClass = status === 'published' ? 'badge-pub' : status === 'scheduled' ? 'badge-sch' : 'badge-dft';
+    const badgeLabel = status === 'published' ? '● LIVE' : status === 'scheduled' ? '◷ SCHEDULED' : '◎ DRAFT';
+    const statusSub = status === 'scheduled' && p.scheduledAt
+      ? `Publishes ${new Date(p.scheduledAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`
+      : status === 'draft' && p.previewDeviceIds?.length
+      ? `${p.previewDeviceIds.length} preview device${p.previewDeviceIds.length > 1 ? 's' : ''}`
+      : '';
+    return `
     <div class="hub-article-card">
       ${p.imageUrl ? `<img class="hub-article-thumb" src="${htmlEsc(p.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : ''}
       <div class="hub-article-body">
-        <div class="hub-article-title">${htmlEsc(p.title)}</div>
-        <div class="hub-article-meta">${p.category ? htmlEsc(p.category) + ' · ' : ''}${p.pubDate ? new Date(p.pubDate).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : ''} · ${p.id}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
+          <span class="status-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <div class="hub-article-meta">${p.category ? htmlEsc(p.category) + ' · ' : ''}${p.pubDate ? new Date(p.pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : ''}${statusSub ? ' · ' + statusSub : ''}</div>
         <div class="hub-article-actions">
+          ${status !== 'published' ? `<button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublish('${htmlEsc(p.id)}')">Publish Now</button>` : ''}
+          ${status === 'published' ? `<button class="btn-sm" onclick="quickUnpublish('${htmlEsc(p.id)}')">Unpublish</button>` : ''}
           <button class="btn-sm" onclick="editArticle('${htmlEsc(p.id)}')">Edit</button>
           <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}')">Delete</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function editArticle(articleId) {
@@ -1825,8 +1963,12 @@ function editArticle(articleId) {
   document.getElementById('hn-source').value = p.source || '';
   document.getElementById('hn-source-url').value = p.sourceUrl || '';
   document.getElementById('hn-pubdate').value = p.pubDate || nowIso();
+  previewDeviceIds = [...(p.previewDeviceIds || [])];
+  setArticleStatus(p.status || 'published');
+  if (p.scheduledAt) document.getElementById('hn-scheduled-at').value = p.scheduledAt;
+  renderPreviewDeviceList();
   document.getElementById('hubnews-form-title').textContent = 'EDIT ARTICLE';
-  document.getElementById('hn-publish-btn').textContent = 'SAVE CHANGES';
+  document.getElementById('hn-publish-btn').textContent = p.status === 'draft' ? 'SAVE DRAFT' : p.status === 'scheduled' ? 'SCHEDULE ARTICLE' : 'SAVE CHANGES';
   document.getElementById('hubnews-create-card').scrollIntoView({behavior:'smooth'});
 }
 
@@ -1841,12 +1983,31 @@ function cancelEdit() {
   document.getElementById('hn-images').value = '';
   document.getElementById('img-upload-status').textContent = '';
   renderCategorySelect('');
+  previewDeviceIds = [];
+  renderPreviewDeviceList();
+  setArticleStatus('published');
+  document.getElementById('hn-scheduled-at').value = '';
   document.getElementById('hn-source').value = '';
   document.getElementById('hn-source-url').value = '';
   document.getElementById('hn-pubdate').value = nowIso();
   document.getElementById('hubnews-form-title').textContent = 'NEW ARTICLE';
   document.getElementById('hn-publish-btn').textContent = 'PUBLISH ARTICLE';
   document.getElementById('hubnews-status').textContent = '';
+}
+
+async function quickPublish(articleId) {
+  const p = hubNewsPosts.find(x => x.id === articleId);
+  if (!p) return;
+  p.status = 'published';
+  delete p.scheduledAt; delete p.previewDeviceIds;
+  await saveHubNews('Publish article: ' + p.title);
+}
+
+async function quickUnpublish(articleId) {
+  const p = hubNewsPosts.find(x => x.id === articleId);
+  if (!p || !confirm('Unpublish this article? It will become a draft.')) return;
+  p.status = 'draft';
+  await saveHubNews('Unpublish article: ' + p.title);
 }
 
 async function deleteArticle(articleId) {
@@ -1863,9 +2024,16 @@ async function publishArticle() {
   const images = imagesRaw ? imagesRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
   const rawContent = quill ? quill.root.innerHTML : '';
   const content = rawContent === '<p><br></p>' ? '' : rawContent;
+  if (currentArticleStatus === 'draft' && !previewDeviceIds.length) {
+    if (!confirm('No preview devices added — this draft will be invisible to everyone. Continue?')) return;
+  }
+
   const article = {
     id: editId || 'hub-' + Date.now(),
     title,
+    status: currentArticleStatus,
+    ...(currentArticleStatus === 'scheduled' ? { scheduledAt: document.getElementById('hn-scheduled-at').value.trim() } : {}),
+    ...(currentArticleStatus === 'draft'     ? { previewDeviceIds: [...previewDeviceIds] } : {}),
     description: document.getElementById('hn-desc').value.trim(),
     content,
     imageUrl: document.getElementById('hn-image').value.trim(),
