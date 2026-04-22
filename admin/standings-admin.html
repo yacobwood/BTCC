@@ -2058,11 +2058,11 @@ async function publishArticle() {
   }
 
   const scheduledAt = document.getElementById('hn-scheduled-at').value.trim();
-  // Derive pubDate: scheduled → use scheduledAt; published → now (preserve existing if editing); draft → blank
+  // Derive pubDate: scheduled → scheduledAt; published → now (preserve existing); draft → preserve existing or set now
   const existingPubDate = editId ? (hubNewsPosts.find(p => p.id === editId)?.pubDate || '') : '';
   const pubDate = currentArticleStatus === 'scheduled' ? scheduledAt
-    : currentArticleStatus === 'published' ? (existingPubDate || new Date().toISOString())
-    : '';
+    : currentArticleStatus === 'published' ? (existingPubDate || nowIso())
+    : (existingPubDate || nowIso());
 
   const article = {
     id: editId || 'hub-' + Date.now(),
