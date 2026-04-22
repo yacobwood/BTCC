@@ -7,7 +7,8 @@
       "car": "116",
       "class": "M",
       "points": 61,
-      "wins": 2
+      "wins": 2,
+      "team": "NAPA Racing UK"
     },
     {
       "pos": 2,
@@ -15,7 +16,8 @@
       "car": "99",
       "class": "I",
       "points": 43,
-      "wins": 0
+      "wins": 0,
+      "team": "WSR"
     },
     {
       "pos": 3,
@@ -23,7 +25,8 @@
       "car": "16",
       "class": "I",
       "points": 40,
-      "wins": 0
+      "wins": 0,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
       "pos": 4,
@@ -31,7 +34,8 @@
       "car": "27",
       "class": "M",
       "points": 38,
-      "wins": 0
+      "wins": 0,
+      "team": "NAPA Racing UK"
     },
     {
       "pos": 5,
@@ -39,7 +43,8 @@
       "car": "52",
       "class": "I",
       "points": 32,
-      "wins": 0
+      "wins": 0,
+      "team": "Laser Tools Racing with MB Motorsport"
     },
     {
       "pos": 6,
@@ -47,7 +52,8 @@
       "car": "17",
       "class": "I",
       "points": 31,
-      "wins": 0
+      "wins": 0,
+      "team": "Steel Seal with Power Maxed Racing"
     },
     {
       "pos": 7,
@@ -55,7 +61,8 @@
       "car": "88",
       "class": "I",
       "points": 29,
-      "wins": 1
+      "wins": 1,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
       "pos": 8,
@@ -63,7 +70,8 @@
       "car": "80",
       "class": "M",
       "points": 27,
-      "wins": 0
+      "wins": 0,
+      "team": "Team VERTU"
     },
     {
       "pos": 9,
@@ -71,7 +79,8 @@
       "car": "11",
       "class": "M",
       "points": 26,
-      "wins": 0
+      "wins": 0,
+      "team": "Team VERTU"
     },
     {
       "pos": 10,
@@ -79,7 +88,8 @@
       "car": "33",
       "class": "M",
       "points": 26,
-      "wins": 0
+      "wins": 0,
+      "team": "Cataclean Plato Racing"
     },
     {
       "pos": 11,
@@ -87,7 +97,8 @@
       "car": "50",
       "class": "I",
       "points": 20,
-      "wins": 0
+      "wins": 0,
+      "team": "Laser Tools Racing with MB Motorsport"
     },
     {
       "pos": 12,
@@ -95,7 +106,8 @@
       "car": "32",
       "class": "M",
       "points": 20,
-      "wins": 0
+      "wins": 0,
+      "team": "Cataclean Plato Racing"
     },
     {
       "pos": 13,
@@ -103,7 +115,8 @@
       "car": "2",
       "class": "I",
       "points": 18,
-      "wins": 0
+      "wins": 0,
+      "team": "WSR"
     },
     {
       "pos": 14,
@@ -111,7 +124,8 @@
       "car": "3",
       "class": "M",
       "points": 15,
-      "wins": 0
+      "wins": 0,
+      "team": "Team VERTU"
     },
     {
       "pos": 15,
@@ -119,7 +133,8 @@
       "car": "22",
       "class": "I",
       "points": 14,
-      "wins": 0
+      "wins": 0,
+      "team": "Restart Racing"
     },
     {
       "pos": 16,
@@ -127,7 +142,8 @@
       "car": "66",
       "class": "M",
       "points": 14,
-      "wins": 0
+      "wins": 0,
+      "team": "Speedworks Corolla Racing"
     },
     {
       "pos": 17,
@@ -135,7 +151,8 @@
       "car": "77",
       "class": "M",
       "points": 9,
-      "wins": 0
+      "wins": 0,
+      "team": "NAPA Racing UK"
     },
     {
       "pos": 18,
@@ -143,7 +160,8 @@
       "car": "132",
       "class": "I",
       "points": 5,
-      "wins": 0
+      "wins": 0,
+      "team": "Restart Racing"
     },
     {
       "pos": 19,
@@ -151,7 +169,8 @@
       "car": "15",
       "class": "M",
       "points": 2,
-      "wins": 0
+      "wins": 0,
+      "team": "NAPA Racing UK"
     },
     {
       "pos": 20,
@@ -159,7 +178,8 @@
       "car": "19",
       "class": "M",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "team": "Speedworks Corolla Racing"
     },
     {
       "pos": 21,
@@ -167,7 +187,8 @@
       "car": "28",
       "class": "M",
       "points": 0,
-      "wins": 0
+      "wins": 0,
+      "team": "Team VERTU"
     }
   ],
   "teams": [
