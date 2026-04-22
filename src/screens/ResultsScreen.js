@@ -71,6 +71,19 @@ function computeProgression(rounds) {
   return Object.values(series).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0));
 }
 
+// Build a driver-name → team map from race results to fill gaps in standings
+function buildTeamMap(rounds) {
+  const map = {};
+  for (const round of rounds) {
+    for (const race of round.races || []) {
+      for (const r of race.results || []) {
+        if (r.driver && r.team && !map[r.driver]) map[r.driver] = r.team;
+      }
+    }
+  }
+  return map;
+}
+
 export default function ResultsScreen({navigation, route}) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -196,8 +209,14 @@ export default function ResultsScreen({navigation, route}) {
         y === 2026 && seasonStarted ? cacheRead('standings') : Promise.resolve(null),
       ]);
       if (cachedResults) {
-        setResults(parseResults(cachedResults));
-        if (cachedStandings) setStandings(parseStandings(cachedStandings));
+        const parsedResults = parseResults(cachedResults);
+        setResults(parsedResults);
+        if (cachedStandings) {
+          const s = parseStandings(cachedStandings);
+          const teamMap = buildTeamMap(parsedResults);
+          s.drivers = s.drivers.map(d => ({...d, team: d.team || teamMap[d.name] || ''}));
+          setStandings(s);
+        }
         setLoading(false);
       } else {
         setStandings(null);
@@ -206,12 +225,16 @@ export default function ResultsScreen({navigation, route}) {
 
       try {
         const resRaw = await fetchResults(y);
-        setResults(parseResults(resRaw));
+        const parsedResults = parseResults(resRaw);
+        setResults(parsedResults);
         cacheWrite(`results_${y}`, resRaw);
 
         if (y === 2026 && seasonStarted) {
           const raw = await fetchStandings();
-          setStandings(parseStandings(raw));
+          const s = parseStandings(raw);
+          const teamMap = buildTeamMap(parsedResults);
+          s.drivers = s.drivers.map(d => ({...d, team: d.team || teamMap[d.name] || ''}));
+          setStandings(s);
           cacheWrite('standings', raw);
         }
       } catch {}
