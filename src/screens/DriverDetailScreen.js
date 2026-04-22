@@ -48,7 +48,7 @@ export default function DriverDetailScreen({route, navigation}) {
   useEffect(() => {
     if (!driver.team || (driver.history || []).some(h => h.year === 2026)) return;
     fetchResults(2026).then(data => {
-      let wins = 0, podiums = 0, points = 0, fastestLaps = 0, poles = 0;
+      let wins = 0, podiums = 0, points = 0, fastestLaps = 0, poles = 0, dnfs = 0;
       for (const round of (data.rounds || [])) {
         for (const race of (round.races || [])) {
           const results = race.results || [];
@@ -56,6 +56,7 @@ export default function DriverDetailScreen({route, navigation}) {
           if (!entry) continue;
           if (entry.pos === 1) wins++;
           if (entry.pos >= 1 && entry.pos <= 3) podiums++;
+          if (entry.pos === 0) dnfs++;
           points += entry.points || 0;
           if (entry.pole) poles++;
           const times = results.map(r => r.bestLap).filter(Boolean);
@@ -65,7 +66,7 @@ export default function DriverDetailScreen({route, navigation}) {
           }
         }
       }
-      setSeason2026({wins, podiums, points, fastestLaps, poles});
+      setSeason2026({wins, podiums, points, fastestLaps, poles, dnfs});
     }).catch(() => {});
   }, [driver.name, driver.team]);
 
@@ -81,6 +82,7 @@ export default function DriverDetailScreen({route, navigation}) {
   const totalPoles = history.reduce((s, h) => s + h.poles, 0) + (live?.poles || 0);
   const totalFL = history.reduce((s, h) => s + h.fastestLaps, 0) + (live?.fastestLaps || 0);
   const totalPoints = history.reduce((s, h) => s + h.points, 0) + (live?.points || 0);
+  const totalDNFs = history.reduce((s, h) => s + (h.dnfs || 0), 0) + (live?.dnfs || 0);
   const championships = history.filter(h => h.isChampion).length;
   const bestPos = history.filter(h => h.pos > 0).reduce((best, h) => Math.min(best, h.pos), 999);
 
@@ -168,11 +170,7 @@ export default function DriverDetailScreen({route, navigation}) {
                   <View style={styles.careerDivider} />
                   <CareerStat label="Points" value={totalPoints} />
                   <View style={styles.careerDivider} />
-                  {bestPos < 999
-                    ? <CareerStat label="Best Finish" value={`P${bestPos}`} />
-                    : <View style={styles.careerStatBox} />}
-                  {championships > 0 && <>
-                    <View style={styles.careerDivider} />
+                  {championships > 0 ? (
                     <View style={styles.careerStatBox}>
                       <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
                         <Icon name="emoji-events" size={16} color={Colors.yellow} />
@@ -180,7 +178,13 @@ export default function DriverDetailScreen({route, navigation}) {
                       </View>
                       <Text style={styles.careerStatLabel}>{championships === 1 ? 'Title' : 'Titles'}</Text>
                     </View>
-                  </>}
+                  ) : bestPos < 999 ? (
+                    <CareerStat label="Best Finish" value={`P${bestPos}`} />
+                  ) : (
+                    <View style={styles.careerStatBox} />
+                  )}
+                  <View style={styles.careerDivider} />
+                  <CareerStat label="DNFs" value={totalDNFs} />
                 </View>
               </View>
 
