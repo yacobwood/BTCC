@@ -177,6 +177,7 @@ export default function ResultsScreen({navigation, route}) {
       setResults([]);
     }
     setLoading(false);
+    setRefreshing(false);
   }, []);
 
   const load = useCallback(async (y = year) => {
