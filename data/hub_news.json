@@ -1,25 +1,6 @@
 {
   "posts": [
     {
-      "id": "hub-1776868110052",
-      "title": "BTCC Hub Test",
-      "status": "draft",
-      "previewDeviceIds": [
-        "cbn-y2XMTAmKB1lDaZRvw8:APA91bG4vEBGIVyd5jcXuAz8XpdEyZQbsAWx9oc853Y7W2OAA3heZZfThn3_xx1M9I1r0mQSIwdACRIY5LxoUYcyfsNmJXsbuoBcgjcuxEi7QL6wVllKM5w"
-      ],
-      "description": "BTCC Hub Test",
-      "content": "<p>BTCC Hub <strong>Test</strong></p><p><img src=\"https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-22/hub-1776868069974.webp\"></p><p><br></p><p>BTCC Hub Test</p><p><br></p><p><img src=\"https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-22/hub-1776868070971.webp\"></p>",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-22/hub-1776868068954.webp",
-      "images": [
-        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-22/hub-1776868069974.webp",
-        "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/2026-04-22/hub-1776868070971.webp"
-      ],
-      "category": "Feature",
-      "pubDate": "",
-      "source": "btcc-hub",
-      "sourceUrl": "www.google.com"
-    },
-    {
       "id": "hub-prod-2",
       "title": "A Day in the Paddock at Donington Park",
       "description": "We headed into the paddock at Donington Park ahead of the 2026 season opener and despite the relentless rain, it was absolutely worth it.",
