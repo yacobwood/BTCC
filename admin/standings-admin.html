@@ -367,6 +367,22 @@ select.input { cursor: pointer; }
   cursor: pointer;
 }
 
+/* ── Resize presets ── */
+.resize-btn {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  color: var(--text-sec);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.resize-btn.active { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+.resize-btn .resize-dim { font-size: 10px; font-weight: 600; opacity: 0.7; margin-left: 3px; }
+
 /* ── Image uploader ── */
 .upload-zone {
   border: 2px dashed var(--outline);
@@ -969,13 +985,28 @@ select.input { cursor: pointer; }
     <!-- Image uploader -->
     <div class="field-group">
       <div class="field-label">IMAGES</div>
+      <!-- Resize presets -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="resize-presets">
+        <button class="resize-btn active" data-w="1200" onclick="setResizePreset(this)">Full <span class="resize-dim">1200px</span></button>
+        <button class="resize-btn" data-w="800"  onclick="setResizePreset(this)">Large <span class="resize-dim">800px</span></button>
+        <button class="resize-btn" data-w="600"  onclick="setResizePreset(this)">Medium <span class="resize-dim">600px</span></button>
+        <button class="resize-btn" data-w="400"  onclick="setResizePreset(this)">Small <span class="resize-dim">400px</span></button>
+        <button class="resize-btn" data-w="0"    onclick="setResizePreset(this)">Custom…</button>
+      </div>
+      <div id="resize-custom" style="display:none;margin-bottom:8px">
+        <div class="input-row" style="align-items:center;gap:8px">
+          <input type="number" id="resize-custom-w" placeholder="Width px" min="50" max="4000" style="width:120px">
+          <span style="color:var(--text-sec);font-size:12px">× auto height</span>
+        </div>
+      </div>
+
       <div class="upload-zone" id="img-upload-zone"
         onclick="document.getElementById('img-file-input').click()"
         ondragover="event.preventDefault();this.classList.add('drag-over')"
         ondragleave="this.classList.remove('drag-over')"
         ondrop="event.preventDefault();this.classList.remove('drag-over');handleImageFiles(event.dataTransfer.files)">
         <div class="upload-zone-label">Tap to upload · or drag &amp; drop</div>
-        <div class="upload-zone-sub">Auto-compressed to WebP · max 1200px</div>
+        <div class="upload-zone-sub">Auto-compressed to WebP · <span id="upload-size-hint">max 1200px</span></div>
         <input type="file" id="img-file-input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files);this.value=''">
       </div>
       <div class="img-upload-status" id="img-upload-status"></div>
@@ -2126,7 +2157,40 @@ async function refreshDashboard() {
 }
 
 // ── Image upload ──────────────────────────────────────────────────────────────
-let sessionImages = []; // [{url, isMain, inGallery}]
+let sessionImages = [];
+let currentMaxWidth = 1200;
+
+function setResizePreset(btn) {
+  document.querySelectorAll('.resize-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const w = parseInt(btn.dataset.w);
+  const customDiv = document.getElementById('resize-custom');
+  const hint = document.getElementById('upload-size-hint');
+  if (w === 0) {
+    customDiv.style.display = '';
+    hint.textContent = 'custom size';
+    const customInput = document.getElementById('resize-custom-w');
+    currentMaxWidth = parseInt(customInput.value) || 800;
+    customInput.oninput = () => {
+      currentMaxWidth = parseInt(customInput.value) || 800;
+      hint.textContent = `max ${currentMaxWidth}px`;
+    };
+  } else {
+    customDiv.style.display = 'none';
+    currentMaxWidth = w;
+    hint.textContent = `max ${w}px`;
+  }
+} // [{url, isMain, inGallery}]
+
+function getImageDimensions(blob) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(blob);
+    img.onload = () => { URL.revokeObjectURL(url); resolve({w: img.naturalWidth, h: img.naturalHeight}); };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve({w: 0, h: 0}); };
+    img.src = url;
+  });
+}
 
 function compressImage(file, maxWidth = 1200, quality = 0.82) {
   return new Promise((resolve, reject) => {
@@ -2180,15 +2244,16 @@ async function handleImageFiles(files) {
     renderImgGrid();
     try {
       statusEl.textContent = `Uploading ${done + 1} / ${arr.length}…`;
-      const blob = await compressImage(file);
+      const blob = await compressImage(file, currentMaxWidth);
       const origKb = Math.round(file.size / 1024);
       const newKb  = Math.round(blob.size / 1024);
+      const dims   = await getImageDimensions(blob);
       const url = await uploadImageToGitHub(blob);
       URL.revokeObjectURL(localUrl);
-      sessionImages[placeholderIdx] = { url, uploading: false, isMain: sessionImages[placeholderIdx].isMain, inGallery: !sessionImages[placeholderIdx].isMain };
+      sessionImages[placeholderIdx] = { url, uploading: false, isMain: sessionImages[placeholderIdx].isMain, inGallery: !sessionImages[placeholderIdx].isMain, dims };
       done++;
       statusEl.style.color = 'var(--green)';
-      statusEl.textContent = `✓ ${done}/${arr.length} uploaded · ${origKb}KB → ${newKb}KB`;
+      statusEl.textContent = `✓ ${done}/${arr.length} uploaded · ${origKb}KB → ${newKb}KB · ${dims.w}×${dims.h}`;
     } catch(e) {
       URL.revokeObjectURL(localUrl);
       sessionImages.splice(placeholderIdx, 1);
@@ -2209,6 +2274,7 @@ function renderImgGrid() {
       <img src="${htmlEsc(img.url)}" loading="lazy">
       ${img.uploading ? '<div class="img-uploading-bar"></div>' : ''}
       ${!img.uploading ? `
+      ${img.dims ? `<div style="font-size:9px;font-weight:700;color:var(--text-sec);text-align:center;padding:3px 0;background:var(--outline-lo)">${img.dims.w}×${img.dims.h}</div>` : ''}
       <div class="img-thumb-actions">
         <button class="${img.isMain ? 'active' : ''}" onclick="setMainImage(${i})" title="Set as hero image">★ Main</button>
         <button class="ins" onclick="insertImageInQuill('${htmlEsc(img.url)}')" title="Insert at cursor in content">↩ Insert</button>
@@ -2266,11 +2332,12 @@ function initQuill() {
       const statusEl = document.getElementById('img-upload-status');
       statusEl.style.color = 'var(--text-sec)'; statusEl.textContent = 'Compressing…';
       try {
-        const blob = await compressImage(file);
+        const blob = await compressImage(file, currentMaxWidth);
         statusEl.textContent = 'Uploading…';
         const url = await uploadImageToGitHub(blob);
         const origKb = Math.round(file.size / 1024), newKb = Math.round(blob.size / 1024);
-        statusEl.style.color = 'var(--green)'; statusEl.textContent = `✓ Uploaded · ${origKb}KB → ${newKb}KB`;
+        const dims = await getImageDimensions(blob);
+        statusEl.style.color = 'var(--green)'; statusEl.textContent = `✓ Uploaded · ${origKb}KB → ${newKb}KB · ${dims.w}×${dims.h}`;
         // Insert into editor
         const range = quill.getSelection(true) || { index: quill.getLength() };
         quill.insertEmbed(range.index, 'image', url, 'user');
