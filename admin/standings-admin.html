@@ -1839,7 +1839,6 @@ async function loadHubNews() {
   renderHubNewsList();
   renderCategorySelect('');
   updateDashNews();
-  // Pre-fill pubdate
   document.getElementById('hn-pubdate').value = nowIso();
 }
 
@@ -2027,7 +2026,7 @@ async function quickPublish(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
   if (!p) return;
   p.status = 'published';
-  p.pubDate = new Date().toISOString();
+  p.pubDate = nowIso();
   delete p.scheduledAt; delete p.previewDeviceIds;
   await saveHubNews('Publish article: ' + p.title);
 }
@@ -2058,7 +2057,7 @@ async function publishArticle() {
   }
 
   const scheduledAt = document.getElementById('hn-scheduled-at').value.trim();
-  // Derive pubDate: scheduled → scheduledAt; published → now (preserve existing); draft → preserve existing or set now
+  // Derive pubDate
   const existingPubDate = editId ? (hubNewsPosts.find(p => p.id === editId)?.pubDate || '') : '';
   const pubDate = currentArticleStatus === 'scheduled' ? scheduledAt
     : currentArticleStatus === 'published' ? (existingPubDate || nowIso())
@@ -2079,6 +2078,7 @@ async function publishArticle() {
     source: document.getElementById('hn-source').value.trim(),
     sourceUrl: document.getElementById('hn-source-url').value.trim() || null,
   };
+
   if (editId) {
     const idx = hubNewsPosts.findIndex(p => p.id === editId);
     if (idx >= 0) hubNewsPosts[idx] = article; else hubNewsPosts.unshift(article);
