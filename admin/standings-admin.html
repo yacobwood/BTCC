@@ -367,6 +367,72 @@ select.input { cursor: pointer; }
   cursor: pointer;
 }
 
+/* ── Image uploader ── */
+.upload-zone {
+  border: 2px dashed var(--outline);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--yellow);
+  background: var(--yellow-dim);
+}
+.upload-zone-label { font-size: 13px; color: var(--text-sec); }
+.upload-zone-sub   { font-size: 11px; color: var(--text-sec); opacity: 0.6; margin-top: 4px; }
+.img-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.img-thumb-card {
+  background: var(--card);
+  border: 1px solid var(--outline-lo);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+.img-thumb-card.is-main { border-color: var(--yellow); }
+.img-thumb-card img { width: 100%; height: 90px; object-fit: cover; display: block; background: var(--surface); }
+.img-thumb-actions {
+  padding: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.img-thumb-actions button {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  color: var(--text-sec);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.img-thumb-actions button.active { border-color: var(--yellow); color: var(--yellow); }
+.img-thumb-actions button.ins { border-color: var(--blue); color: var(--blue); }
+.img-uploading-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--yellow);
+  animation: progress-pulse 1s ease-in-out infinite;
+}
+@keyframes progress-pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+.img-upload-status {
+  font-size: 11px;
+  min-height: 16px;
+  color: var(--text-sec);
+  margin-top: 6px;
+  text-align: center;
+}
+
 /* ── Status / banners ── */
 .status-line {
   text-align: center;
@@ -872,15 +938,25 @@ select.input { cursor: pointer; }
       <div class="field-label">CONTENT</div>
       <div id="hn-content-editor"></div>
     </div>
+    <!-- Image uploader -->
     <div class="field-group">
-      <div class="field-label">MAIN IMAGE URL</div>
-      <input type="text" id="hn-image" placeholder="https://…" oninput="updateImagePreview(this.value)">
-      <img id="hn-image-preview" style="display:none;width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:8px;background:var(--surface)">
+      <div class="field-label">IMAGES</div>
+      <div class="upload-zone" id="img-upload-zone"
+        onclick="document.getElementById('img-file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');handleImageFiles(event.dataTransfer.files)">
+        <div class="upload-zone-label">Tap to upload · or drag &amp; drop</div>
+        <div class="upload-zone-sub">Auto-compressed to WebP · max 1200px</div>
+        <input type="file" id="img-file-input" accept="image/*" multiple style="display:none" onchange="handleImageFiles(this.files);this.value=''">
+      </div>
+      <div class="img-upload-status" id="img-upload-status"></div>
+      <div class="img-grid" id="img-grid"></div>
     </div>
-    <div class="field-group">
-      <div class="field-label">EXTRA IMAGES <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(one URL per line)</span></div>
-      <textarea id="hn-images" rows="3" placeholder="https://…&#10;https://…"></textarea>
-    </div>
+
+    <!-- Hidden fields populated by image manager -->
+    <input type="hidden" id="hn-image">
+    <input type="hidden" id="hn-images">
     <div style="display:flex;gap:8px">
       <div style="flex:1" class="field-group">
         <div class="field-label">CATEGORY</div>
@@ -1737,12 +1813,6 @@ function renderHubNewsList() {
     </div>`).join('');
 }
 
-function updateImagePreview(url) {
-  const img = document.getElementById('hn-image-preview');
-  if (url) { img.src = url; img.style.display = 'block'; }
-  else { img.style.display = 'none'; }
-}
-
 function editArticle(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
   if (!p) return;
@@ -1750,9 +1820,7 @@ function editArticle(articleId) {
   document.getElementById('hn-title').value = p.title || '';
   document.getElementById('hn-desc').value = p.description || '';
   if (quill) { quill.root.innerHTML = p.content || ''; }
-  document.getElementById('hn-image').value = p.imageUrl || '';
-  updateImagePreview(p.imageUrl || '');
-  document.getElementById('hn-images').value = (p.images || []).join('\n');
+  loadImagesIntoGrid(p.imageUrl || '', p.images || []);
   renderCategorySelect(p.category || '');
   document.getElementById('hn-source').value = p.source || '';
   document.getElementById('hn-source-url').value = p.sourceUrl || '';
@@ -1767,9 +1835,11 @@ function cancelEdit() {
   document.getElementById('hn-title').value = '';
   document.getElementById('hn-desc').value = '';
   if (quill) { quill.root.innerHTML = ''; }
+  sessionImages = [];
+  renderImgGrid();
   document.getElementById('hn-image').value = '';
-  updateImagePreview('');
   document.getElementById('hn-images').value = '';
+  document.getElementById('img-upload-status').textContent = '';
   renderCategorySelect('');
   document.getElementById('hn-source').value = '';
   document.getElementById('hn-source-url').value = '';
@@ -1887,19 +1957,162 @@ async function refreshDashboard() {
   updateDashNews();
 }
 
+// ── Image upload ──────────────────────────────────────────────────────────────
+let sessionImages = []; // [{url, isMain, inGallery}]
+
+function compressImage(file, maxWidth = 1200, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objUrl);
+      const ratio = Math.min(1, maxWidth / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * ratio);
+      const h = Math.round(img.naturalHeight * ratio);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Compression failed')), 'image/webp', quality);
+    };
+    img.onerror = reject;
+    img.src = objUrl;
+  });
+}
+
+async function uploadImageToGitHub(blob) {
+  const tok = getToken();
+  if (!tok) throw new Error('No GitHub token saved.');
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  const dateStr = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  const path = `data/hub_images/${dateStr}/hub-${Date.now()}.webp`;
+  const buf = await blob.arrayBuffer();
+  let binary = '';
+  new Uint8Array(buf).forEach(b => binary += String.fromCharCode(b));
+  const r = await fetch(`${GH_API}/repos/${REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: { Authorization: 'token ' + tok, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'Upload hub image', content: btoa(binary) }),
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.message || r.status); }
+  return `https://raw.githubusercontent.com/${REPO}/main/${path}`;
+}
+
+async function handleImageFiles(files) {
+  const statusEl = document.getElementById('img-upload-status');
+  const arr = Array.from(files);
+  if (!arr.length) return;
+  statusEl.style.color = 'var(--text-sec)';
+  statusEl.textContent = `Compressing ${arr.length} image${arr.length > 1 ? 's' : ''}…`;
+
+  let done = 0, failed = 0;
+  for (const file of arr) {
+    const placeholderIdx = sessionImages.length;
+    const localUrl = URL.createObjectURL(file);
+    sessionImages.push({ url: localUrl, uploading: true, isMain: sessionImages.length === 0 && !document.getElementById('hn-image').value });
+    renderImgGrid();
+    try {
+      statusEl.textContent = `Uploading ${done + 1} / ${arr.length}…`;
+      const blob = await compressImage(file);
+      const origKb = Math.round(file.size / 1024);
+      const newKb  = Math.round(blob.size / 1024);
+      const url = await uploadImageToGitHub(blob);
+      URL.revokeObjectURL(localUrl);
+      sessionImages[placeholderIdx] = { url, uploading: false, isMain: sessionImages[placeholderIdx].isMain, inGallery: !sessionImages[placeholderIdx].isMain };
+      done++;
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = `✓ ${done}/${arr.length} uploaded · ${origKb}KB → ${newKb}KB`;
+    } catch(e) {
+      URL.revokeObjectURL(localUrl);
+      sessionImages.splice(placeholderIdx, 1);
+      failed++;
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = `Upload failed: ${e.message}`;
+    }
+    renderImgGrid();
+    syncImageFields();
+  }
+}
+
+function renderImgGrid() {
+  const grid = document.getElementById('img-grid');
+  if (!sessionImages.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = sessionImages.map((img, i) => `
+    <div class="img-thumb-card ${img.isMain ? 'is-main' : ''}" id="imgcard-${i}">
+      <img src="${htmlEsc(img.url)}" loading="lazy">
+      ${img.uploading ? '<div class="img-uploading-bar"></div>' : ''}
+      ${!img.uploading ? `
+      <div class="img-thumb-actions">
+        <button class="${img.isMain ? 'active' : ''}" onclick="setMainImage(${i})" title="Set as hero image">★ Main</button>
+        <button class="ins" onclick="insertImageInQuill('${htmlEsc(img.url)}')" title="Insert at cursor in content">↩ Insert</button>
+        <button onclick="removeSessionImage(${i})" title="Remove">✕</button>
+      </div>` : ''}
+    </div>`).join('');
+}
+
+function setMainImage(i) {
+  sessionImages.forEach((img, idx) => { img.isMain = (idx === i); });
+  renderImgGrid();
+  syncImageFields();
+}
+
+function removeSessionImage(i) {
+  sessionImages.splice(i, 1);
+  if (sessionImages.length && !sessionImages.some(img => img.isMain)) sessionImages[0].isMain = true;
+  renderImgGrid();
+  syncImageFields();
+}
+
+function insertImageInQuill(url) {
+  if (!quill) return;
+  const range = quill.getSelection(true) || { index: quill.getLength() };
+  quill.insertEmbed(range.index, 'image', url, 'user');
+  quill.setSelection(range.index + 1, 0);
+}
+
+function syncImageFields() {
+  const mainImg = sessionImages.find(img => img.isMain && !img.uploading);
+  document.getElementById('hn-image').value = mainImg ? mainImg.url : '';
+  const gallery = sessionImages.filter(img => !img.uploading && !img.isMain).map(img => img.url);
+  document.getElementById('hn-images').value = gallery.join('\n');
+}
+
+function loadImagesIntoGrid(imageUrl, imagesArr) {
+  sessionImages = [];
+  if (imageUrl) sessionImages.push({ url: imageUrl, isMain: true, inGallery: false, uploading: false });
+  (imagesArr || []).forEach(url => { if (url && url !== imageUrl) sessionImages.push({ url, isMain: false, inGallery: true, uploading: false }); });
+  renderImgGrid();
+}
+
 // ── Quill rich-text editor ────────────────────────────────────────────────────
 let quill = null;
 
 function initQuill() {
   if (quill) return;
 
-  // Custom image-by-URL handler
-  function imageUrlHandler() {
-    const url = prompt('Image URL:');
-    if (!url) return;
-    const range = quill.getSelection(true);
-    quill.insertEmbed(range.index, 'image', url, 'user');
-    quill.setSelection(range.index + 1, 0);
+  // Image handler: file picker → compress → upload → insert
+  function imageUploadHandler() {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = async () => {
+      const file = input.files?.[0]; if (!file) return;
+      const statusEl = document.getElementById('img-upload-status');
+      statusEl.style.color = 'var(--text-sec)'; statusEl.textContent = 'Compressing…';
+      try {
+        const blob = await compressImage(file);
+        statusEl.textContent = 'Uploading…';
+        const url = await uploadImageToGitHub(blob);
+        const origKb = Math.round(file.size / 1024), newKb = Math.round(blob.size / 1024);
+        statusEl.style.color = 'var(--green)'; statusEl.textContent = `✓ Uploaded · ${origKb}KB → ${newKb}KB`;
+        // Insert into editor
+        const range = quill.getSelection(true) || { index: quill.getLength() };
+        quill.insertEmbed(range.index, 'image', url, 'user');
+        quill.setSelection(range.index + 1, 0);
+        // Also add to session grid
+        sessionImages.push({ url, isMain: false, inGallery: false, uploading: false });
+        renderImgGrid();
+      } catch(e) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Upload failed: ' + e.message; }
+    };
+    input.click();
   }
 
   quill = new Quill('#hn-content-editor', {
@@ -1914,7 +2127,7 @@ function initQuill() {
           ['link', 'image'],
           ['clean'],
         ],
-        handlers: { image: imageUrlHandler },
+        handlers: { image: imageUploadHandler },
       },
     },
   });
