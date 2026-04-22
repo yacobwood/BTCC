@@ -137,6 +137,7 @@ export function parseGrid(json) {
         podiums: h.podiums || 0,
         poles: h.poles || 0,
         fastestLaps: h.fastestLaps || 0,
+        dnfs: h.dnfs || 0,
         isChampion: h.champion || false,
       })),
     }));
