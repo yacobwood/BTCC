@@ -1968,7 +1968,8 @@
           "wins": 5,
           "podiums": 17,
           "poles": 3,
-          "fastestLaps": 7
+          "fastestLaps": 7,
+          "dnfs": 0
         },
         {
           "year": 2024,
@@ -1992,7 +1993,8 @@
           "podiums": 20,
           "poles": 10,
           "fastestLaps": 12,
-          "champion": true
+          "champion": true,
+          "dnfs": 3
         },
         {
           "year": 2022,
@@ -2003,7 +2005,8 @@
           "wins": 3,
           "podiums": 12,
           "poles": 1,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 1
         },
         {
           "year": 2021,
@@ -2015,7 +2018,8 @@
           "podiums": 9,
           "poles": 1,
           "fastestLaps": 5,
-          "champion": true
+          "champion": true,
+          "dnfs": 1
         },
         {
           "year": 2020,
@@ -2027,7 +2031,8 @@
           "podiums": 10,
           "poles": 2,
           "fastestLaps": 10,
-          "champion": true
+          "champion": true,
+          "dnfs": 0
         },
         {
           "year": 2019,
@@ -2038,7 +2043,8 @@
           "wins": 1,
           "podiums": 6,
           "poles": 3,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 1
         },
         {
           "year": 2018,
@@ -2049,7 +2055,8 @@
           "wins": 6,
           "podiums": 8,
           "poles": 3,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 1
         },
         {
           "year": 2017,
@@ -2061,7 +2068,8 @@
           "podiums": 15,
           "poles": 3,
           "fastestLaps": 4,
-          "champion": true
+          "champion": true,
+          "dnfs": 2
         },
         {
           "year": 2016,
@@ -2072,7 +2080,8 @@
           "wins": 1,
           "podiums": 2,
           "poles": 2,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 5
         }
       ],
       "dateOfBirth": "1994-07-15",
