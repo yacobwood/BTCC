@@ -8,7 +8,7 @@
       "car": "BMW 330i M Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/De-Leon-17512-cut-out.png",
       "nationality": "Filipino",
-      "bio": "Daryl De Leon is an Irish racing driver born on 2 August 2005 in Drogheda, Ireland. He made a stunning debut in the British Touring Car Championship in 2025, joining West Surrey Racing to drive a BMW 330e M Sport.\n\nDe Leon made history as the first Filipino driver to win a BTCC race, taking victory at Brands Hatch Indy Circuit in 2025. He went on to dominate the Jack Sears Trophy \u2014 the award for drivers yet to score more than one podium in the series \u2014 claiming the title with two pole positions and a win across the season.\n\nHis impressive maiden campaign earned him a second season with WSR, where he will look to build on his promising start and challenge further up the overall drivers' championship standings.",
+      "bio": "Daryl De Leon is an Irish racing driver born on 2 August 2005 in Drogheda, Ireland. He made a stunning debut in the British Touring Car Championship in 2025, joining West Surrey Racing to drive a BMW 330e M Sport.\n\nDe Leon made history as the first Filipino driver to win a BTCC race, taking victory at Brands Hatch Indy Circuit in 2025. He went on to dominate the Jack Sears Trophy - the award for drivers yet to score more than one podium in the series - claiming the title with two pole positions and a win across the season.\n\nHis impressive maiden campaign earned him a second season with WSR, where he will look to build on his promising start and challenge further up the overall drivers' championship standings.",
       "dateOfBirth": "2005-08-02",
       "birthplace": "Drogheda, Ireland",
       "history": [
@@ -20,8 +20,9 @@
           "points": 149,
           "wins": 1,
           "podiums": 2,
-          "poles": 2,
-          "fastestLaps": 0
+          "poles": 3,
+          "fastestLaps": 0,
+          "dnfs": 3
         }
       ]
     },
@@ -44,7 +45,7 @@
           "podiums": 6,
           "poles": 3,
           "fastestLaps": 3,
-          "dnfs": 6
+          "dnfs": 5
         },
         {
           "year": 2024,
@@ -55,7 +56,8 @@
           "wins": 1,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2023,
@@ -66,7 +68,8 @@
           "wins": 1,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2022,
@@ -77,7 +80,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2021,
@@ -88,7 +92,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 2
         },
         {
           "year": 2020,
@@ -99,7 +104,8 @@
           "wins": 0,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2019,
@@ -110,7 +116,8 @@
           "wins": 1,
           "podiums": 5,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2018,
@@ -121,7 +128,8 @@
           "wins": 1,
           "podiums": 6,
           "poles": 2,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 1
         },
         {
           "year": 2017,
@@ -132,7 +140,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 1,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 2
         },
         {
           "year": 2011,
@@ -156,7 +165,7 @@
           "podiums": 7,
           "poles": 6,
           "fastestLaps": 4,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2009,
@@ -216,7 +225,7 @@
           "podiums": 9,
           "poles": 4,
           "fastestLaps": 2,
-          "dnfs": 2
+          "dnfs": 1
         },
         {
           "year": 2004,
@@ -239,7 +248,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2002,
@@ -250,7 +260,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 8
         }
       ],
       "dateOfBirth": "1985-03-15",
@@ -265,7 +276,7 @@
       "nationality": "British",
       "dateOfBirth": "1996-07-30",
       "birthplace": "Surrey, England",
-      "bio": "Ricky Collard is a British racing driver born on 30 July 1996 in Surrey, the son of former BTCC driver Rob Collard. He made his BTCC debut in 2018 as a substitute for his injured father at West Surrey Racing, immediately impressing with a podium finish at Silverstone.\n\nAfter stepping away from touring cars to pursue GT racing, Collard returned to the BTCC in 2022 with Speedworks Motorsport aboard the Toyota Corolla, completing two full seasons and finishing a career-best 8th in the 2023 championship as the leading Toyota driver.\n\nIn 2024 Collard won the British GT Championship GT3 title alongside his father Rob in a Lamborghini Hurac\u00e1n for Barwell Motorsport \u2014 becoming one of the few father-and-son pairs to win the same championship. He returns to the BTCC for 2026 with the title-winning Team VERTU operation, the most competitive drive of his touring car career.",
+      "bio": "Ricky Collard is a British racing driver born on 30 July 1996 in Surrey, the son of former BTCC driver Rob Collard. He made his BTCC debut in 2018 as a substitute for his injured father at West Surrey Racing, immediately impressing with a podium finish at Silverstone.\n\nAfter stepping away from touring cars to pursue GT racing, Collard returned to the BTCC in 2022 with Speedworks Motorsport aboard the Toyota Corolla, completing two full seasons and finishing a career-best 8th in the 2023 championship as the leading Toyota driver.\n\nIn 2024 Collard won the British GT Championship GT3 title alongside his father Rob in a Lamborghini Huracán for Barwell Motorsport - becoming one of the few father-and-son pairs to win the same championship. He returns to the BTCC for 2026 with the title-winning Team VERTU operation, the most competitive drive of his touring car career.",
       "history": [
         {
           "year": 2023,
@@ -332,7 +343,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 0
         },
         {
           "year": 2024,
@@ -355,7 +367,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2022,
@@ -366,7 +379,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         },
         {
           "year": 2021,
@@ -377,7 +391,8 @@
           "wins": 1,
           "podiums": 4,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2020,
@@ -388,7 +403,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2019,
@@ -411,7 +427,8 @@
               "car": "Infiniti Q50",
               "races": 15
             }
-          ]
+          ],
+          "dnfs": 1
         },
         {
           "year": 2018,
@@ -422,7 +439,8 @@
           "wins": 1,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2017,
@@ -433,7 +451,8 @@
           "wins": 2,
           "podiums": 2,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2016,
@@ -444,7 +463,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 3
         },
         {
           "year": 2015,
@@ -455,7 +475,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 4
         },
         {
           "year": 2014,
@@ -466,7 +487,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2013,
@@ -489,7 +511,8 @@
               "car": "Volkswagen CC",
               "races": 6
             }
-          ]
+          ],
+          "dnfs": 0
         }
       ],
       "dateOfBirth": "1996-09-28",
@@ -507,25 +530,26 @@
         {
           "year": 2025,
           "team": "ROKiT Racing with Un-Limited Motorsport",
-          "car": "Cupra Le\u00f3n",
+          "car": "Cupra León",
           "pos": 20,
           "points": 42,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 4
+          "dnfs": 3
         },
         {
           "year": 2023,
           "team": "Re.Beverages and Bartercard with Team HARD",
-          "car": "Cupra Le\u00f3n",
+          "car": "Cupra León",
           "pos": 22,
           "points": 41,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2022,
@@ -536,7 +560,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 9
         }
       ],
       "dateOfBirth": "2005-03-16",
@@ -549,7 +574,7 @@
       "car": "Toyota Corolla GR Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/08/Buxton-0Q3A3970-cut-out.png",
       "nationality": "British",
-      "bio": "Max Buxton is a British racing driver who has competed in junior touring car categories and has progressed through UK saloon car racing on his path into higher-level competition.\n\nHe has made appearances in the British Touring Car Championship paddock environment, gaining experience in one of the UK\u2019s most competitive motorsport series.\n\nBuxton is regarded as an emerging talent within British motorsport, continuing to develop his racecraft and consistency as he builds his career in touring cars.",
+      "bio": "Max Buxton is a British racing driver who has competed in junior touring car categories and has progressed through UK saloon car racing on his path into higher-level competition.\n\nHe has made appearances in the British Touring Car Championship paddock environment, gaining experience in one of the UK’s most competitive motorsport series.\n\nBuxton is regarded as an emerging talent within British motorsport, continuing to develop his racecraft and consistency as he builds his career in touring cars.",
       "history": [
         {
           "year": 2025,
@@ -585,19 +610,20 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 4
         },
         {
           "year": 2024,
           "team": "Restart Racing",
-          "car": "Cupra Le\u00f3n",
+          "car": "Cupra León",
           "pos": 17,
           "points": 70,
           "wins": 0,
           "podiums": 0,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 4
+          "dnfs": 5
         },
         {
           "year": 2021,
@@ -608,7 +634,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2020,
@@ -619,7 +646,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2019,
@@ -630,7 +658,8 @@
           "wins": 0,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 7
         },
         {
           "year": 2018,
@@ -641,7 +670,8 @@
           "wins": 1,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 4
         },
         {
           "year": 2017,
@@ -652,7 +682,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2016,
@@ -663,7 +694,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 0
         }
       ],
       "dateOfBirth": "1991-04-18",
@@ -699,7 +731,8 @@
           "wins": 1,
           "podiums": 9,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 0
         },
         {
           "year": 2023,
@@ -710,7 +743,8 @@
           "wins": 3,
           "podiums": 6,
           "poles": 5,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 2
         },
         {
           "year": 2022,
@@ -721,7 +755,8 @@
           "wins": 1,
           "podiums": 4,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2021,
@@ -732,7 +767,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 0
         },
         {
           "year": 2020,
@@ -743,7 +779,8 @@
           "wins": 4,
           "podiums": 10,
           "poles": 6,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 1
         },
         {
           "year": 2019,
@@ -754,7 +791,8 @@
           "wins": 2,
           "podiums": 14,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 1
         },
         {
           "year": 2018,
@@ -765,7 +803,8 @@
           "wins": 2,
           "podiums": 7,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         }
       ],
       "dateOfBirth": "1989-09-26",
@@ -778,7 +817,7 @@
       "car": "Hyundai i30N",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Hamilton-0Q3A1568-cut-out.png",
       "nationality": "British",
-      "bio": "Nicolas Hamilton is a British racing driver born on 28 March 1992 in Stevenage, Hertfordshire, and the half-brother of seven-time Formula One World Champion Lewis Hamilton. He is the first disabled driver to compete in the BTCC, racing with cerebral palsy, which affects his lower body and requires him to use hand controls on the throttle and brake.\n\nHamilton made his BTCC debut in 2015 with AmD Tuning.com as a guest driver, making five appearances in an Audi S3. He has returned to the series on multiple occasions since, racking up over 160 race starts and becoming one of the most recognisable faces in British motorsport.\n\nFor 2026, Hamilton secures his most competitive drive yet \u2014 joining the Excelr8 Motorsport setup backed by Draper Tools to race a Hyundai i30 Fastback N Performance alongside a team capable of fighting for wins.",
+      "bio": "Nicolas Hamilton is a British racing driver born on 28 March 1992 in Stevenage, Hertfordshire, and the half-brother of seven-time Formula One World Champion Lewis Hamilton. He is the first disabled driver to compete in the BTCC, racing with cerebral palsy, which affects his lower body and requires him to use hand controls on the throttle and brake.\n\nHamilton made his BTCC debut in 2015 with AmD Tuning.com as a guest driver, making five appearances in an Audi S3. He has returned to the series on multiple occasions since, racking up over 160 race starts and becoming one of the most recognisable faces in British motorsport.\n\nFor 2026, Hamilton secures his most competitive drive yet - joining the Excelr8 Motorsport setup backed by Draper Tools to race a Hyundai i30 Fastback N Performance alongside a team capable of fighting for wins.",
       "dateOfBirth": "1992-03-28",
       "birthplace": "Stevenage, Hertfordshire",
       "history": [
@@ -792,7 +831,7 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 6
+          "dnfs": 7
         },
         {
           "year": 2023,
@@ -803,7 +842,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2022,
@@ -814,7 +854,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 9
         },
         {
           "year": 2021,
@@ -825,7 +866,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         },
         {
           "year": 2020,
@@ -836,7 +878,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 10
         },
         {
           "year": 2019,
@@ -847,7 +890,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         }
       ]
     },
@@ -869,7 +913,8 @@
           "wins": 3,
           "podiums": 8,
           "poles": 1,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 1
         },
         {
           "year": 2024,
@@ -892,7 +937,8 @@
           "wins": 1,
           "podiums": 5,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2022,
@@ -903,7 +949,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 4
         },
         {
           "year": 2021,
@@ -914,7 +961,8 @@
           "wins": 1,
           "podiums": 4,
           "poles": 3,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 2
         },
         {
           "year": 2019,
@@ -925,7 +973,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         }
       ],
       "dateOfBirth": "1989-02-18",
@@ -961,7 +1010,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -972,7 +1022,8 @@
           "wins": 0,
           "podiums": 4,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2022,
@@ -983,7 +1034,8 @@
           "wins": 1,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2021,
@@ -994,7 +1046,8 @@
           "wins": 2,
           "podiums": 4,
           "poles": 2,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2020,
@@ -1005,7 +1058,8 @@
           "wins": 1,
           "podiums": 3,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2019,
@@ -1016,7 +1070,8 @@
           "wins": 0,
           "podiums": 4,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 7
         },
         {
           "year": 2018,
@@ -1027,7 +1082,8 @@
           "wins": 3,
           "podiums": 6,
           "poles": 3,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 4
         },
         {
           "year": 2017,
@@ -1038,7 +1094,8 @@
           "wins": 0,
           "podiums": 4,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 6
         },
         {
           "year": 2016,
@@ -1049,7 +1106,8 @@
           "wins": 2,
           "podiums": 5,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 3
         },
         {
           "year": 2015,
@@ -1060,7 +1118,8 @@
           "wins": 1,
           "podiums": 7,
           "poles": 3,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 0
         },
         {
           "year": 2014,
@@ -1071,7 +1130,8 @@
           "wins": 1,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 5
         },
         {
           "year": 2013,
@@ -1083,7 +1143,7 @@
           "podiums": 1,
           "poles": 1,
           "fastestLaps": 2,
-          "dnfs": 4
+          "dnfs": 3
         },
         {
           "year": 2012,
@@ -1103,12 +1163,12 @@
     },
     {
       "number": 50,
-      "name": "\u00c1r\u00f3n Taylor-Smith",
+      "name": "Árón Taylor-Smith",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "Toyota Corolla GR Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Taylor-Smith-0Q3A4452-cut-out.png",
       "nationality": "Northern Irish",
-      "bio": "\u00c1r\u00f3n Taylor-Smith is an Irish racing driver born on 30 June 1989 in Dublin, Ireland. He began his motorsport career in karting before moving into touring cars, progressing through the British and international touring car scene.\n\nTaylor-Smith made his British Touring Car Championship debut in 2011 and quickly built a reputation as a hard-fighting and determined racer. He has also competed in the World Touring Car Championship, gaining valuable experience on the global stage.\n\nOver his BTCC career, he has achieved multiple race wins and podiums, including standout performances in independent and overall classifications. Known for his aggressive yet controlled racing style, Taylor-Smith remains a consistent and experienced competitor in touring car racing.",
+      "bio": "Árón Taylor-Smith is an Irish racing driver born on 30 June 1989 in Dublin, Ireland. He began his motorsport career in karting before moving into touring cars, progressing through the British and international touring car scene.\n\nTaylor-Smith made his British Touring Car Championship debut in 2011 and quickly built a reputation as a hard-fighting and determined racer. He has also competed in the World Touring Car Championship, gaining valuable experience on the global stage.\n\nOver his BTCC career, he has achieved multiple race wins and podiums, including standout performances in independent and overall classifications. Known for his aggressive yet controlled racing style, Taylor-Smith remains a consistent and experienced competitor in touring car racing.",
       "history": [
         {
           "year": 2025,
@@ -1131,7 +1191,8 @@
           "wins": 0,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 0
         },
         {
           "year": 2023,
@@ -1142,29 +1203,32 @@
           "wins": 0,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 5
         },
         {
           "year": 2022,
           "team": "Yazoo with Safuu.com Racing",
-          "car": "Cupra Le\u00f3n",
+          "car": "Cupra León",
           "pos": 21,
           "points": 38,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2021,
           "team": "Team HARD. with HUB Financial Solutions",
-          "car": "Cupra Le\u00f3n",
+          "car": "Cupra León",
           "pos": 20,
           "points": 33,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2017,
@@ -1175,7 +1239,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2016,
@@ -1186,7 +1251,8 @@
           "wins": 1,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 5
         },
         {
           "year": 2015,
@@ -1197,7 +1263,8 @@
           "wins": 0,
           "podiums": 3,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2014,
@@ -1208,7 +1275,8 @@
           "wins": 2,
           "podiums": 3,
           "poles": 2,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 3
         },
         {
           "year": 2013,
@@ -1232,7 +1300,7 @@
           "podiums": 2,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 5
+          "dnfs": 7
         },
         {
           "year": 2011,
@@ -1257,7 +1325,7 @@
       "car": "Toyota Corolla GR Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Shedden-0Q3A5000-cut-out.png",
       "nationality": "Scottish",
-      "bio": "Gordon Shedden is a Scottish racing driver born on 15 February 1979 in Edinburgh. He is one of the most successful drivers in British Touring Car Championship history, having made his debut in 2001 and becoming a consistent front-runner across two decades.\n\nShedden won the BTCC Drivers\u2019 Championship three times (2012, 2015, and 2016), all with Honda machinery under Team Dynamics. During this period, he was part of one of the most dominant eras for a manufacturer in the series.\n\nKnown for his smooth yet highly competitive driving style, Shedden has amassed numerous race wins and podiums throughout his career and is widely regarded as one of the modern greats of touring car racing in the UK.",
+      "bio": "Gordon Shedden is a Scottish racing driver born on 15 February 1979 in Edinburgh. He is one of the most successful drivers in British Touring Car Championship history, having made his debut in 2001 and becoming a consistent front-runner across two decades.\n\nShedden won the BTCC Drivers’ Championship three times (2012, 2015, and 2016), all with Honda machinery under Team Dynamics. During this period, he was part of one of the most dominant eras for a manufacturer in the series.\n\nKnown for his smooth yet highly competitive driving style, Shedden has amassed numerous race wins and podiums throughout his career and is widely regarded as one of the modern greats of touring car racing in the UK.",
       "history": [
         {
           "year": 2025,
@@ -1269,7 +1337,7 @@
           "podiums": 3,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 1
         },
         {
           "year": 2022,
@@ -1280,7 +1348,8 @@
           "wins": 2,
           "podiums": 6,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 4
         },
         {
           "year": 2021,
@@ -1291,7 +1360,8 @@
           "wins": 2,
           "podiums": 9,
           "poles": 2,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 4
         },
         {
           "year": 2017,
@@ -1302,7 +1372,8 @@
           "wins": 3,
           "podiums": 8,
           "poles": 0,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 2
         },
         {
           "year": 2016,
@@ -1314,7 +1385,8 @@
           "podiums": 10,
           "poles": 4,
           "fastestLaps": 3,
-          "champion": true
+          "champion": true,
+          "dnfs": 3
         },
         {
           "year": 2015,
@@ -1326,7 +1398,8 @@
           "podiums": 11,
           "poles": 2,
           "fastestLaps": 6,
-          "champion": true
+          "champion": true,
+          "dnfs": 2
         },
         {
           "year": 2014,
@@ -1337,7 +1410,8 @@
           "wins": 3,
           "podiums": 11,
           "poles": 0,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 2
         },
         {
           "year": 2013,
@@ -1362,7 +1436,7 @@
           "poles": 0,
           "fastestLaps": 8,
           "champion": true,
-          "dnfs": 4
+          "dnfs": 2
         },
         {
           "year": 2011,
@@ -1374,7 +1448,7 @@
           "podiums": 13,
           "poles": 4,
           "fastestLaps": 2,
-          "dnfs": 2
+          "dnfs": 1
         },
         {
           "year": 2010,
@@ -1386,7 +1460,7 @@
           "podiums": 12,
           "poles": 4,
           "fastestLaps": 4,
-          "dnfs": 4
+          "dnfs": 3
         },
         {
           "year": 2009,
@@ -1406,12 +1480,12 @@
             },
             {
               "name": "Cartridge World Carbon Zero Racing",
-              "car": "SEAT Le\u00f3n",
+              "car": "SEAT León",
               "races": 9
             },
             {
               "name": "Club SEAT",
-              "car": "SEAT Le\u00f3n",
+              "car": "SEAT León",
               "races": 6
             }
           ],
@@ -1451,7 +1525,7 @@
           "podiums": 10,
           "poles": 5,
           "fastestLaps": 9,
-          "dnfs": 5
+          "dnfs": 6
         },
         {
           "year": 2001,
@@ -1462,7 +1536,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 0
         }
       ],
       "dateOfBirth": "1979-01-23",
@@ -1483,7 +1558,7 @@
           "car": "Honda Civic / Toyota Corolla",
           "pos": 12,
           "points": 84,
-          "wins": 1,
+          "wins": 0,
           "podiums": 2,
           "poles": 0,
           "fastestLaps": 0,
@@ -1498,7 +1573,8 @@
               "car": "Toyota Corolla GR Sport",
               "races": 9
             }
-          ]
+          ],
+          "dnfs": 3
         },
         {
           "year": 2024,
@@ -1521,7 +1597,8 @@
           "wins": 0,
           "podiums": 5,
           "poles": 0,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 2
         },
         {
           "year": 2022,
@@ -1532,7 +1609,8 @@
           "wins": 5,
           "podiums": 9,
           "poles": 4,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 0
         },
         {
           "year": 2021,
@@ -1543,7 +1621,8 @@
           "wins": 5,
           "podiums": 8,
           "poles": 3,
-          "fastestLaps": 7
+          "fastestLaps": 7,
+          "dnfs": 2
         },
         {
           "year": 2020,
@@ -1554,7 +1633,8 @@
           "wins": 3,
           "podiums": 4,
           "poles": 3,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 3
         },
         {
           "year": 2019,
@@ -1565,7 +1645,8 @@
           "wins": 3,
           "podiums": 7,
           "poles": 1,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 2
         },
         {
           "year": 2018,
@@ -1576,7 +1657,8 @@
           "wins": 2,
           "podiums": 6,
           "poles": 3,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 3
         },
         {
           "year": 2017,
@@ -1599,7 +1681,8 @@
               "car": "MG 6 GT",
               "races": 18
             }
-          ]
+          ],
+          "dnfs": 2
         },
         {
           "year": 2016,
@@ -1610,7 +1693,8 @@
           "wins": 0,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 2
         },
         {
           "year": 2015,
@@ -1621,7 +1705,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         }
       ],
       "dateOfBirth": "1992-02-22",
@@ -1634,7 +1719,7 @@
       "car": "Ford Focus Titanium",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Osborne-17552-cut-out.png",
       "nationality": "British",
-      "bio": "Sam Osborne is a British racing driver born on 29 April 1997 in Oxfordshire, England. He began his motorsport career in karting before progressing into junior racing categories, including the Renault Clio Cup UK, where he developed his touring car skills.\n\nOsborne made his British Touring Car Championship debut in 2020 and has since competed for Motorbase Performance and other BTCC teams. He has steadily built experience in the series, becoming a reliable midfield competitor known for consistency and clean racing.\n\nWhile still developing his front-running results, Osborne is recognised for his improving pace and strong racecraft as he continues to establish himself in one of the UK\u2019s most competitive motorsport championships.",
+      "bio": "Sam Osborne is a British racing driver born on 29 April 1997 in Oxfordshire, England. He began his motorsport career in karting before progressing into junior racing categories, including the Renault Clio Cup UK, where he developed his touring car skills.\n\nOsborne made his British Touring Car Championship debut in 2020 and has since competed for Motorbase Performance and other BTCC teams. He has steadily built experience in the series, becoming a reliable midfield competitor known for consistency and clean racing.\n\nWhile still developing his front-running results, Osborne is recognised for his improving pace and strong racecraft as he continues to establish himself in one of the UK’s most competitive motorsport championships.",
       "history": [
         {
           "year": 2025,
@@ -1645,7 +1730,8 @@
           "wins": 1,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2024,
@@ -1668,7 +1754,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2022,
@@ -1679,7 +1766,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2021,
@@ -1690,7 +1778,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         },
         {
           "year": 2020,
@@ -1701,7 +1790,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 8
         },
         {
           "year": 2019,
@@ -1712,7 +1802,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 8
         }
       ],
       "dateOfBirth": "1993-03-24",
@@ -1725,7 +1816,7 @@
       "car": "Hyundai i30N",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Ingram-0Q3A2056-cut-out.png",
       "nationality": "British",
-      "bio": "Tom Ingram is a British racing driver born on 15 June 1993 in High Wycombe, England. He began his career in karting before moving into the Ginetta Junior Championship, where he quickly established himself as a front-running talent.\n\nIngram progressed into touring cars through the BTCC support series, winning the Renault Clio Cup UK in 2014. He stepped up to the British Touring Car Championship in 2016 and rapidly became one of the series\u2019 leading drivers, consistently fighting at the front of the grid.\n\nHe won the BTCC Drivers\u2019 Championship in 2022 after a highly competitive season with Excelr8 Motorsport. Known for his smooth driving style, consistency, and strong tyre management, Ingram is widely regarded as one of the top modern touring car drivers in the UK.",
+      "bio": "Tom Ingram is a British racing driver born on 15 June 1993 in High Wycombe, England. He began his career in karting before moving into the Ginetta Junior Championship, where he quickly established himself as a front-running talent.\n\nIngram progressed into touring cars through the BTCC support series, winning the Renault Clio Cup UK in 2014. He stepped up to the British Touring Car Championship in 2016 and rapidly became one of the series’ leading drivers, consistently fighting at the front of the grid.\n\nHe won the BTCC Drivers’ Championship in 2022 after a highly competitive season with Excelr8 Motorsport. Known for his smooth driving style, consistency, and strong tyre management, Ingram is widely regarded as one of the top modern touring car drivers in the UK.",
       "history": [
         {
           "year": 2025,
@@ -1737,7 +1828,8 @@
           "podiums": 18,
           "poles": 5,
           "fastestLaps": 8,
-          "champion": true
+          "champion": true,
+          "dnfs": 1
         },
         {
           "year": 2024,
@@ -1749,7 +1841,7 @@
           "podiums": 15,
           "poles": 7,
           "fastestLaps": 10,
-          "dnfs": 2
+          "dnfs": 0
         },
         {
           "year": 2023,
@@ -1760,7 +1852,8 @@
           "wins": 2,
           "podiums": 17,
           "poles": 0,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 0
         },
         {
           "year": 2022,
@@ -1772,7 +1865,8 @@
           "podiums": 12,
           "poles": 5,
           "fastestLaps": 7,
-          "champion": true
+          "champion": true,
+          "dnfs": 0
         },
         {
           "year": 2021,
@@ -1783,18 +1877,20 @@
           "wins": 3,
           "podiums": 9,
           "poles": 0,
-          "fastestLaps": 3
+          "fastestLaps": 3,
+          "dnfs": 0
         },
         {
           "year": 2020,
-          "team": "Toyota Gazoo Racing UK\u00a0with Ginsters",
+          "team": "Toyota Gazoo Racing UK with Ginsters",
           "car": "Toyota Corolla",
           "pos": 4,
           "points": 326,
           "wins": 3,
           "podiums": 11,
           "poles": 2,
-          "fastestLaps": 4
+          "fastestLaps": 4,
+          "dnfs": 3
         },
         {
           "year": 2019,
@@ -1805,7 +1901,8 @@
           "wins": 4,
           "podiums": 4,
           "poles": 4,
-          "fastestLaps": 1
+          "fastestLaps": 1,
+          "dnfs": 1
         },
         {
           "year": 2018,
@@ -1816,7 +1913,8 @@
           "wins": 3,
           "podiums": 9,
           "poles": 0,
-          "fastestLaps": 5
+          "fastestLaps": 5,
+          "dnfs": 5
         },
         {
           "year": 2017,
@@ -1827,7 +1925,8 @@
           "wins": 4,
           "podiums": 9,
           "poles": 2,
-          "fastestLaps": 2
+          "fastestLaps": 2,
+          "dnfs": 4
         },
         {
           "year": 2016,
@@ -1838,7 +1937,8 @@
           "wins": 2,
           "podiums": 6,
           "poles": 4,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 6
         },
         {
           "year": 2015,
@@ -1849,7 +1949,8 @@
           "wins": 0,
           "podiums": 2,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2014,
@@ -1860,7 +1961,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 7
         }
       ],
       "dateOfBirth": "1993-08-20",
@@ -1873,12 +1975,12 @@
       "car": "Audi A3 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-0Q3A4800-cut-out.png",
       "nationality": "British",
-      "bio": "Mikey Doble is a British racing driver born on 12 September 1999 in London, England. He began his motorsport career in karting before progressing into saloon car racing, where he built experience in junior touring car categories and club-level championships.\n\nDoble made his British Touring Car Championship debut in 2023, stepping up into one of the UK\u2019s most competitive motorsport series. Since joining the BTCC, he has focused on developing consistency, racecraft, and pace against a highly experienced field of drivers.\n\nKnown for his steady progression and professionalism, Doble continues to establish himself in touring cars as he builds experience and works towards stronger midfield and front-running results.",
+      "bio": "Mikey Doble is a British racing driver born on 12 September 1999 in London, England. He began his motorsport career in karting before progressing into saloon car racing, where he built experience in junior touring car categories and club-level championships.\n\nDoble made his British Touring Car Championship debut in 2023, stepping up into one of the UK’s most competitive motorsport series. Since joining the BTCC, he has focused on developing consistency, racecraft, and pace against a highly experienced field of drivers.\n\nKnown for his steady progression and professionalism, Doble continues to establish himself in touring cars as he builds experience and works towards stronger midfield and front-running results.",
       "history": [
         {
           "year": 2025,
           "team": "Motor Parts Direct with Power Maxed Racing",
-          "car": "Vauxhall Astra / Cupra Le\u00f3n",
+          "car": "Vauxhall Astra / Cupra León",
           "teams": [
             {
               "name": "Motor Parts Direct with Power Maxed Racing",
@@ -1887,7 +1989,7 @@
             },
             {
               "name": "Motor Parts Direct with Power Maxed Racing",
-              "car": "Cupra Le\u00f3n",
+              "car": "Cupra León",
               "races": 12
             }
           ],
@@ -1896,7 +1998,8 @@
           "wins": 1,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 3
         },
         {
           "year": 2024,
@@ -1919,7 +2022,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 1,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         }
       ],
       "dateOfBirth": "1998-12-08",
@@ -1932,7 +2036,7 @@
       "car": "BMW 330i M Sport",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Rainford-0Q3A1830-cut-out.png",
       "nationality": "British",
-      "bio": "Charles Rainford is a British racing driver born on 20 July 1998 in Horsham, West Sussex. After years competing in historic motorsport and the Porsche Carrera Cup GB \u2014 where he claimed the Pro-Am title in 2022 and finished runner-up overall in 2024 \u2014 Rainford stepped up to the BTCC with West Surrey Racing in 2025.\n\nHis debut season was nothing short of outstanding. He took a maiden BTCC win in just his sixth start at Brands Hatch Indy, added a pole position at Knockhill, and finished eighth in the Drivers' Championship. He was also voted the 2025 Fans' Choice Award winner.\n\nFor 2026, Rainford stays with WSR and is widely regarded as one of the most exciting young talents in British touring car racing, with genuine championship ambitions ahead.",
+      "bio": "Charles Rainford is a British racing driver born on 20 July 1998 in Horsham, West Sussex. After years competing in historic motorsport and the Porsche Carrera Cup GB - where he claimed the Pro-Am title in 2022 and finished runner-up overall in 2024 - Rainford stepped up to the BTCC with West Surrey Racing in 2025.\n\nHis debut season was nothing short of outstanding. He took a maiden BTCC win in just his sixth start at Brands Hatch Indy, added a pole position at Knockhill, and finished eighth in the Drivers' Championship. He was also voted the 2025 Fans' Choice Award winner.\n\nFor 2026, Rainford stays with WSR and is widely regarded as one of the most exciting young talents in British touring car racing, with genuine championship ambitions ahead.",
       "dateOfBirth": "1998-07-20",
       "birthplace": "Horsham, West Sussex",
       "history": [
@@ -1957,7 +2061,7 @@
       "car": "Ford Focus Titanium",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/Sutton-0Q3A7729A-cut-out.png",
       "nationality": "British",
-      "bio": "Ashley Sutton is a British racing driver born on 15 January 1994 in Stoke-on-Trent, England. He began his motorsport career in karting before progressing into junior saloon car racing, quickly showing strong pace and racecraft.\n\nSutton made his British Touring Car Championship debut in 2016 and immediately impressed, winning the BTCC Drivers\u2019 Championship in his rookie season. He went on to win further titles in 2020 and 2023, establishing himself as one of the most successful modern drivers in the series.\n\nKnown for his aggressive yet controlled driving style, adaptability, and ability to perform under pressure, Sutton has become a multiple-time BTCC champion and one of the standout talents in British touring car racing.",
+      "bio": "Ashley Sutton is a British racing driver born on 15 January 1994 in Stoke-on-Trent, England. He began his motorsport career in karting before progressing into junior saloon car racing, quickly showing strong pace and racecraft.\n\nSutton made his British Touring Car Championship debut in 2016 and immediately impressed, winning the BTCC Drivers’ Championship in his rookie season. He went on to win further titles in 2020 and 2023, establishing himself as one of the most successful modern drivers in the series.\n\nKnown for his aggressive yet controlled driving style, adaptability, and ability to perform under pressure, Sutton has become a multiple-time BTCC champion and one of the standout talents in British touring car racing.",
       "history": [
         {
           "year": 2025,
@@ -2094,7 +2198,7 @@
       "car": "Hyundai i30N",
       "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Dorlin-0Q3A6024-cut-out.png",
       "nationality": "British",
-      "bio": "James Dorlin is a British racing driver born on 22 May 1999 in Barnsley, England. He began his motorsport career in karting before progressing into junior saloon car racing, where he quickly emerged as a front-running talent.\n\nDorlin won the 2016 Ginetta Junior Championship, marking him out as one of the UK\u2019s leading young prospects. He then moved into GT and endurance racing, including campaigns in the Porsche Carrera Cup GB and British GT, where he developed strong racecraft, consistency, and technical adaptability across different cars and race formats.\n\nIn 2025, Dorlin stepped up to the British Touring Car Championship, joining the BTCC grid after several successful seasons in GT machinery. His move represents a transition into one of the most competitive touring car series in the world.\n\nKnown for his smooth driving style and versatility, Dorlin is regarded as an adaptable racer aiming to establish himself quickly within the BTCC midfield and progress toward front-running results.",
+      "bio": "James Dorlin is a British racing driver born on 22 May 1999 in Barnsley, England. He began his motorsport career in karting before progressing into junior saloon car racing, where he quickly emerged as a front-running talent.\n\nDorlin won the 2016 Ginetta Junior Championship, marking him out as one of the UK’s leading young prospects. He then moved into GT and endurance racing, including campaigns in the Porsche Carrera Cup GB and British GT, where he developed strong racecraft, consistency, and technical adaptability across different cars and race formats.\n\nIn 2025, Dorlin stepped up to the British Touring Car Championship, joining the BTCC grid after several successful seasons in GT machinery. His move represents a transition into one of the most competitive touring car series in the world.\n\nKnown for his smooth driving style and versatility, Dorlin is regarded as an adaptable racer aiming to establish himself quickly within the BTCC midfield and progress toward front-running results.",
       "history": [
         {
           "year": 2025,

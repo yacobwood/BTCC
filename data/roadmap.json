@@ -48,6 +48,12 @@
       "title": "iOS App",
       "description": "Add app to Apple store",
       "status": "in-progress"
+    },
+    {
+      "id": "9",
+      "title": "Live chat",
+      "description": "Chat to fellow fans about the race",
+      "status": "idea"
     }
   ]
 }

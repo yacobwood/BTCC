@@ -17,6 +17,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 import {fetchWeather, weatherDescription, weatherIcon, weatherIconColor} from '../utils/weather';
 import CachedImage from '../components/CachedImage';
+import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
@@ -230,6 +231,9 @@ export default function TrackDetailScreen({route, navigation}) {
               {dateRange ? <Text style={styles.dateRange}>{dateRange}</Text> : null}
               <Text style={styles.location}>{track.location}</Text>
             </View>
+            {track.lat && track.lng && (
+              <UKMapPin lat={track.lat} lng={track.lng} height={90} />
+            )}
           </Animated.View>
         );
 
@@ -271,7 +275,7 @@ export default function TrackDetailScreen({route, navigation}) {
             )}
             {(racesFinished || isPastRaceWeekend) && (
               <TouchableOpacity
-                style={[styles.liveTimingBtn, {borderColor: Colors.yellow}]}
+                style={[styles.liveTimingBtn, {borderColor: Colors.yellow, backgroundColor: 'transparent'}]}
                 activeOpacity={0.8}
                 onPress={() => {
                   if (currentRoundData) {
@@ -287,23 +291,26 @@ export default function TrackDetailScreen({route, navigation}) {
                 <Icon name="chevron-right" size={18} color={Colors.yellow} />
               </TouchableOpacity>
             )}
-            {(racesFinished || isPastRaceWeekend) && ['Race 1', 'Race 2', 'Race 3'].map((label, i) => {
-              const url = track.youtubeUrls?.[i];
-              if (!url) return null;
-              return (
-                <TouchableOpacity
-                  key={label}
-                  style={styles.youtubeBtn}
-                  activeOpacity={0.8}
-                  onPress={() => Linking.openURL(url)}
-                  accessibilityLabel={`Watch ${label} on YouTube`}
-                  accessibilityRole="button">
-                  <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
-                  <Text style={styles.youtubeBtnText}>{label}</Text>
-                  <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
-                </TouchableOpacity>
-              );
-            })}
+            {(racesFinished || isPastRaceWeekend) && ['Race 1', 'Race 2', 'Race 3'].some((_, i) => track.youtubeUrls?.[i]) && (
+              <View style={styles.youtubeBtnRow}>
+                {['Race 1', 'Race 2', 'Race 3'].map((label, i) => {
+                  const url = track.youtubeUrls?.[i];
+                  if (!url) return null;
+                  return (
+                    <TouchableOpacity
+                      key={label}
+                      style={styles.youtubeBtn}
+                      activeOpacity={0.8}
+                      onPress={() => Linking.openURL(url)}
+                      accessibilityLabel={`Watch ${label} on YouTube`}
+                      accessibilityRole="button">
+                      <Icon name="play-circle-filled" size={14} color="#FF0000" />
+                      <Text style={styles.youtubeBtnText}>{label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
           </View>
         );
 
@@ -481,6 +488,9 @@ export default function TrackDetailScreen({route, navigation}) {
   );
 }
 
+const VB_RATIO = 210 / 270; // UKMapPin viewBox aspect ratio
+
+
 function StatBox({label, value}) {
   return (
     <View style={styles.statBox}>
@@ -577,9 +587,8 @@ const styles = StyleSheet.create({
   // Sticky title block
   titleBlock: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: Colors.background,
-    paddingTop: 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
@@ -719,16 +728,23 @@ const styles = StyleSheet.create({
   },
   liveDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: '#E3000B'},
   liveTimingText: {flex: 1, color: '#E3000B', fontSize: 13, fontWeight: '800', letterSpacing: 1},
+  youtubeBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
   youtubeBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(255,0,0,0.07)',
     borderWidth: 1,
     borderColor: 'rgba(255,0,0,0.25)',
     borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginTop: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    gap: 6,
   },
-  youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
+  youtubeBtnText: {color: '#fff', fontSize: 13, fontWeight: '700'},
 });

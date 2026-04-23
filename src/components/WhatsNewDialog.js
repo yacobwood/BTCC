@@ -8,14 +8,14 @@ const CHANGELOG = {
   'All time stats are now available. Find them in the more menu',
   ],
   42: [
-    'Podcasts & Interviews — listen to BTCC commentary and race reviews',
-    'All-Time Driver Records — win %, podium %, points per start and more',
+    'Podcasts & Interviews - listen to BTCC commentary and race reviews',
+    'All-Time Driver Records - win %, podium %, points per start and more',
     'Partners & Sponsors page',
     'Back to top button on History screen',
     'Track pages now show left & right corner counts',
   ],
   35: [
-    'React Native rewrite — same features, cross-platform ready',
+    'React Native rewrite - same features, cross-platform ready',
     'Improved performance and image loading',
     'Offline caching for calendar, standings, and news',
     'New championship progression chart with SVG',

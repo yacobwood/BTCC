@@ -56,11 +56,12 @@ function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
   const maxPts = Math.max(...series.map(s => Math.max(...s.points.filter(v => v !== null), 0)), 1);
 
   // Y-axis ticks every 50
+  const yMax = Math.ceil((maxPts + 1) / 50) * 50;
   const yTicks = [];
-  for (let v = 0; v <= maxPts + 50; v += 50) yTicks.push(v);
+  for (let v = 0; v <= yMax; v += 50) yTicks.push(v);
 
   const x = (i) => padL + (i / (maxRounds - 1 || 1)) * plotW;
-  const y = (v) => padT + plotH - (v / (yTicks[yTicks.length - 1] || 1)) * plotH;
+  const y = (v) => padT + plotH - (v / (yMax || 1)) * plotH;
 
   return (
     <View>

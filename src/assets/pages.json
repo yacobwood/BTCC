@@ -145,6 +145,22 @@
         {
           "type": "text",
           "body": "Most circuits run one formation lap before the race start. At shorter circuits (Brands Hatch Indy, Knockhill and Silverstone National) two formation laps are run, giving drivers more time to warm tyres and brakes. Drivers who cannot make their grid position during the formation lap must start from the back."
+        },
+        {
+          "type": "heading",
+          "body": "Safety Car Restarts"
+        },
+        {
+          "type": "text",
+          "body": "When the Safety Car pulls into the pit lane at the end of a Safety Car period, the lead driver does not have to wait until a fixed point to resume racing. Two 'Go' boards are positioned 20 metres apart on the pit straight. The lead car can begin racing at any point between the first and second board. This gives the leader a small strategic choice - attack early from the first board to maximise the gap, or hold back and pick the exact moment to pounce. Cars behind must react instantly, as racing resumes the moment the leader accelerates."
+        },
+        {
+          "type": "text",
+          "body": "To compensate for time lost running behind the Safety Car, laps are added to the race distance. The number of laps added matches the number of laps completed under Safety Car conditions, so the total racing time stays as close to the intended distance as possible."
+        },
+        {
+          "type": "callout",
+          "body": "The 20-metre window between the Go boards is one of the most overlooked details of a BTCC restart. A lead driver who hesitates, or whose rivals anticipate the acceleration perfectly, can lose ground in the blink of an eye - even before the first corner after the Safety Car comes in."
         }
       ]
     },
