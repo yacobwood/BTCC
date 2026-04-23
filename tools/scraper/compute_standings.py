@@ -18,6 +18,8 @@ DATA_DIR = REPO_ROOT / "data"
 def compute(year: int, data: dict):
     driver_points = defaultdict(int)
     driver_wins = defaultdict(int)
+    driver_seconds = defaultdict(int)
+    driver_thirds = defaultdict(int)
     driver_team = {}
     driver_car = {}
     team_points = defaultdict(int)
@@ -38,6 +40,10 @@ def compute(year: int, data: dict):
                 driver_car[d] = str(r.get("no", ""))
                 if pos == 1:
                     driver_wins[d] += 1
+                elif pos == 2:
+                    driver_seconds[d] += 1
+                elif pos == 3:
+                    driver_thirds[d] += 1
                 team_points[r.get("team", "")] += pts
 
     drivers = sorted(driver_points.items(), key=lambda x: -x[1])
@@ -52,6 +58,8 @@ def compute(year: int, data: dict):
                 "car": driver_car[name],
                 "points": pts,
                 "wins": driver_wins[name],
+                "seconds": driver_seconds[name],
+                "thirds": driver_thirds[name],
             }
             for i, (name, pts) in enumerate(drivers, 1)
         ],
