@@ -27,8 +27,9 @@ def compute(year: int, data: dict):
     last_venue = ""
 
     for rnd in data["rounds"]:
-        last_round = rnd["round"]
-        last_venue = rnd.get("venue", "")
+        if any(race.get("results") for race in rnd["races"]):
+            last_round = rnd["round"]
+            last_venue = rnd.get("venue", "")
         for race in rnd["races"]:
             is_qualifying = "qualifying" in race.get("label", "").lower()
             pts_table = POINTS_QUALIFYING if is_qualifying else POINTS_RACE
