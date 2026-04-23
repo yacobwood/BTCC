@@ -133,27 +133,7 @@ export default function NewsScreen({navigation}) {
     navigation.navigate('Article', {article});
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color={Colors.yellow} size="large" />
-      </View>
-    );
-  }
-
-  if (error && articles.length === 0) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={() => { Analytics.retryClicked('news'); load(); }} accessibilityLabel="Retry" accessibilityRole="button">
-          <Text style={styles.retryText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  // Build the list data structure — memoized so FlatList doesn't re-render
-  // every time unrelated state (keyboard visibility, scroll position, etc.) changes.
+  // Hooks must be declared before any early returns (Rules of Hooks).
   const listData = useMemo(() => {
     if (searchActive && searchQuery.length >= 2) {
       return searchResults.map(a => ({type: 'compact', article: a}));
@@ -185,6 +165,25 @@ export default function NewsScreen({navigation}) {
         return null;
     }
   }, [openArticle, onRefresh]);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={Colors.yellow} size="large" />
+      </View>
+    );
+  }
+
+  if (error && articles.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryBtn} onPress={() => { Analytics.retryClicked('news'); load(); }} accessibilityLabel="Retry" accessibilityRole="button">
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
