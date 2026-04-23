@@ -739,14 +739,55 @@ select.input { cursor: pointer; }
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
 <div id="panel-dashboard" class="tab-panel active">
 
+  <!-- ── Season at a glance ── -->
   <div id="dash-standing-summary" style="margin-bottom:12px">
     <div class="stat-grid stat-grid-3">
       <div class="stat-card"><div class="stat-value" id="ds-round" style="color:var(--yellow)">—</div><div class="stat-label">Round</div></div>
       <div class="stat-card"><div class="stat-value" id="ds-drivers">—</div><div class="stat-label">Drivers</div></div>
       <div class="stat-card"><div class="stat-value" id="ds-updated" style="color:var(--text-sec);font-size:16px">—</div><div class="stat-label">Standings Age</div></div>
     </div>
+    <div class="stat-grid stat-grid-3">
+      <div class="stat-card"><div class="stat-value" id="ds-teams" style="color:var(--blue)">—</div><div class="stat-label">Teams</div></div>
+      <div class="stat-card"><div class="stat-value" id="ds-races-run">—</div><div class="stat-label">Races Run</div></div>
+      <div class="stat-card"><div class="stat-value" id="ds-season">—</div><div class="stat-label">Season</div></div>
+    </div>
+    <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+      <div class="stat-card"><div class="stat-value" id="ds-manufacturer-count" style="color:var(--green);font-size:20px">—</div><div class="stat-label">Manufacturer Class</div></div>
+      <div class="stat-card"><div class="stat-value" id="ds-independent-count" style="color:var(--yellow);font-size:20px">—</div><div class="stat-label">Independent Class</div></div>
+    </div>
   </div>
 
+  <!-- ── Championship leader ── -->
+  <div class="card" id="dash-leader-card">
+    <div class="card-header"><div class="section-label">CHAMPIONSHIP LEADER</div><div id="ds-leader-updated" style="font-size:11px;color:var(--text-sec)"></div></div>
+    <div id="dash-leader"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- ── Top 5 drivers ── -->
+  <div class="card">
+    <div class="card-header"><div class="section-label">DRIVER STANDINGS — TOP 5</div><button class="btn-sm" onclick="switchTabByName('standings')">Edit</button></div>
+    <div id="dash-top5-drivers"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- ── Top 3 teams ── -->
+  <div class="card">
+    <div class="card-header"><div class="section-label">TEAM STANDINGS — TOP 3</div></div>
+    <div id="dash-top3-teams"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- ── Points gap analysis ── -->
+  <div class="card">
+    <div class="card-header"><div class="section-label">POINTS ANALYSIS</div></div>
+    <div id="dash-points-analysis"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- ── Recent results ── -->
+  <div class="card">
+    <div class="card-header"><div class="section-label">LAST ROUND RESULTS</div></div>
+    <div id="dash-last-round"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- ── Scraper health ── -->
   <div class="card">
     <div class="card-header"><div class="section-label">SCRAPER HEALTH</div><button class="btn-sm" onclick="refreshAllStatus()">Refresh</button></div>
     <div id="dash-health">
@@ -1342,6 +1383,8 @@ function onTeamChange(name, val) {
 }
 
 const STANDINGS_RAW = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/standings.json';
+const RESULTS_RAW_BASE = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/';
+
 async function loadExisting() {
   try {
     const r = await fetch(STANDINGS_RAW + '?t=' + Date.now());
@@ -1353,12 +1396,182 @@ async function loadExisting() {
     const updated = data.updated ? timeAgo(data.updated) : 'unknown';
     document.getElementById('data-banner-text').textContent = `Loaded from GitHub · updated ${updated}`;
     document.getElementById('data-banner').classList.add('visible');
-    // dashboard
+    // dashboard — basic stats
     document.getElementById('ds-round').textContent = data.round || '—';
     document.getElementById('ds-drivers').textContent = (data.standings||[]).length || '—';
     document.getElementById('ds-updated').textContent = data.updated ? timeAgo(data.updated) : '—';
-  } catch(e) {}
+    document.getElementById('ds-teams').textContent = (data.teams||[]).length || '—';
+    document.getElementById('ds-season').textContent = data.season || '—';
+    // class breakdown
+    const mfr = (data.standings||[]).filter(d => d.class === 'M').length;
+    const ind = (data.standings||[]).filter(d => d.class === 'I').length;
+    document.getElementById('ds-manufacturer-count').textContent = mfr || '—';
+    document.getElementById('ds-independent-count').textContent = ind || '—';
+    // championship leader card
+    renderLeaderCard(data);
+    // top 5 drivers
+    renderTop5Drivers(data);
+    // top 3 teams
+    renderTop3Teams(data);
+    // points analysis
+    renderPointsAnalysis(data);
+    // load results for last round & race count
+    loadResultsDashboard(data.season || new Date().getFullYear());
+  } catch(e) { console.error('loadExisting', e); }
   renderDrivers(); renderTeams();
+}
+
+function renderLeaderCard(data) {
+  const standings = data.standings || [];
+  if (!standings.length) { document.getElementById('dash-leader').innerHTML = '<div class="section-note">No data</div>'; return; }
+  const leader = standings[0];
+  const second = standings[1];
+  const gap = second ? leader.points - second.points : null;
+  const winsLabel = leader.wins === 1 ? 'win' : 'wins';
+  document.getElementById('dash-leader').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:4px 0 8px">
+      <div style="font-size:36px;font-weight:900;color:var(--yellow);line-height:1">P1</div>
+      <div>
+        <div style="font-size:20px;font-weight:800">${leader.driver||leader.name}</div>
+        <div style="font-size:12px;color:var(--text-sec);margin-top:2px">${leader.team||''}</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:28px;font-weight:900;color:var(--yellow)">${leader.points}</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px">points</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="background:var(--yellow-dim);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--yellow)">${leader.wins||0} ${winsLabel}</div>
+      ${gap !== null ? `<div style="background:var(--surface);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text-sec)">+${gap} over ${second.driver||second.name}</div>` : ''}
+    </div>`;
+}
+
+function renderTop5Drivers(data) {
+  const standings = (data.standings||[]).slice(0,5);
+  if (!standings.length) { document.getElementById('dash-top5-drivers').innerHTML = '<div class="section-note">No data</div>'; return; }
+  const max = standings[0].points || 1;
+  const rows = standings.map((d,i) => {
+    const pct = Math.round((d.points/max)*100);
+    const posColor = i === 0 ? 'var(--yellow)' : i <= 2 ? 'var(--text)' : 'var(--text-sec)';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--outline-lo)">
+      <div style="width:22px;text-align:center;font-weight:900;font-size:14px;color:${posColor}">${d.pos||i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.driver||d.name}</div>
+        <div style="height:4px;background:var(--outline);border-radius:2px;margin-top:4px"><div style="height:4px;background:${posColor};border-radius:2px;width:${pct}%"></div></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:14px;font-weight:900">${d.points}</div>
+        ${d.wins ? `<div style="font-size:10px;color:var(--yellow)">${d.wins}W</div>` : '<div style="font-size:10px;color:var(--text-sec)">0W</div>'}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('dash-top5-drivers').innerHTML = rows;
+}
+
+function renderTop3Teams(data) {
+  const teams = (data.teams||[]).slice(0,3);
+  if (!teams.length) { document.getElementById('dash-top3-teams').innerHTML = '<div class="section-note">No data</div>'; return; }
+  const max = teams[0].points || 1;
+  const posColors = ['var(--yellow)','var(--text)','var(--text-sec)'];
+  const rows = teams.map((t,i) => {
+    const pct = Math.round((t.points/max)*100);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--outline-lo)">
+      <div style="width:22px;text-align:center;font-weight:900;font-size:14px;color:${posColors[i]}">${t.pos||i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.team||t.name}</div>
+        <div style="height:4px;background:var(--outline);border-radius:2px;margin-top:4px"><div style="height:4px;background:${posColors[i]};border-radius:2px;width:${pct}%"></div></div>
+      </div>
+      <div style="font-size:14px;font-weight:900;flex-shrink:0">${t.points}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('dash-top3-teams').innerHTML = rows;
+}
+
+function renderPointsAnalysis(data) {
+  const standings = data.standings || [];
+  const teams = data.teams || [];
+  if (!standings.length) { document.getElementById('dash-points-analysis').innerHTML = '<div class="section-note">No data</div>'; return; }
+  const totalPts = standings.reduce((s,d) => s+d.points, 0);
+  const leaderPts = standings[0].points;
+  const leaderPct = totalPts ? Math.round(leaderPts/totalPts*100) : 0;
+  const withWins = standings.filter(d => d.wins > 0).length;
+  const totalWins = standings.reduce((s,d) => s+(d.wins||0), 0);
+  const gap12 = standings.length >= 2 ? leaderPts - standings[1].points : '—';
+  const gap13 = standings.length >= 3 ? leaderPts - standings[2].points : '—';
+  document.getElementById('dash-points-analysis').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:900;color:var(--yellow)">${gap12}</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px;margin-top:2px">P1 – P2 gap</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:900">${gap13}</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px;margin-top:2px">P1 – P3 gap</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:900;color:var(--green)">${withWins}</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Drivers with wins</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:900">${totalWins}</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Total race wins</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:900;color:var(--blue)">${leaderPct}%</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Leader's pts share</div>
+      </div>
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px">
+        <div style="font-size:20px;font-weight:900">${totalPts}</div>
+        <div style="font-size:10px;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Total pts awarded</div>
+      </div>
+    </div>`;
+}
+
+async function loadResultsDashboard(season) {
+  try {
+    const url = RESULTS_RAW_BASE + 'results' + season + '.json?t=' + Date.now();
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('not found');
+    const data = await r.json();
+    const rounds = data.rounds || [];
+    // count total races run
+    let totalRaces = 0;
+    let lastRound = null;
+    for (const rnd of rounds) {
+      for (const race of (rnd.races||[])) {
+        if ((race.results||[]).length > 0) {
+          totalRaces++;
+          lastRound = rnd;
+        }
+      }
+    }
+    document.getElementById('ds-races-run').textContent = totalRaces || '—';
+    // render last round
+    if (lastRound) renderLastRound(lastRound);
+    else document.getElementById('dash-last-round').innerHTML = '<div class="section-note">No race results yet</div>';
+  } catch(e) {
+    document.getElementById('ds-races-run').textContent = '—';
+    document.getElementById('dash-last-round').innerHTML = '<div class="section-note">Could not load results</div>';
+  }
+}
+
+function renderLastRound(rnd) {
+  const races = (rnd.races||[]).filter(rc => (rc.results||[]).length > 0);
+  if (!races.length) { document.getElementById('dash-last-round').innerHTML = '<div class="section-note">No results</div>'; return; }
+  const header = `<div style="font-size:13px;font-weight:800;margin-bottom:8px">Round ${rnd.round} · ${rnd.venue} <span style="color:var(--text-sec);font-weight:500">${rnd.date||''}</span></div>`;
+  const raceRows = races.map(rc => {
+    const top3 = (rc.results||[]).slice(0,3);
+    const podium = top3.map((res, i) => {
+      const medals = ['🥇','🥈','🥉'];
+      const name = (res.driver||'').replace(/([A-Z]+)$/, m => ' '+m).trim();
+      return `<span style="margin-right:10px;font-size:12px">${medals[i]} <strong>${name}</strong></span>`;
+    }).join('');
+    return `<div style="padding:6px 0;border-bottom:1px solid var(--outline-lo)">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-sec);margin-bottom:4px">${rc.label||''}</div>
+      <div>${podium}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('dash-last-round').innerHTML = header + raceRows;
 }
 
 async function doSave() {
