@@ -312,7 +312,7 @@ export default function ResultsScreen({navigation, route}) {
     return computeProgression(results);
   }, [results, bundledProgression]);
 
-  const renderDriverStanding = ({item}) => {
+  const renderDriverStanding = useCallback(({item}) => {
     const fav = isFavourite(item.name);
     return (
       <View style={[styles.standingRow, fav && {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'}]} accessibilityLabel={`Position ${item.position}, ${item.name}, ${item.points} points`}>
@@ -351,9 +351,9 @@ export default function ResultsScreen({navigation, route}) {
         </View>
       </View>
     );
-  };
+  }, [isFavourite]);
 
-  const renderTeamStanding = ({item}) => (
+  const renderTeamStanding = useCallback(({item}) => (
     <View style={styles.standingRow}>
       <Text style={[styles.pos, item.position === 1 && {color: '#FFD700'}, item.position === 2 && {color: '#C0C0C0'}, item.position === 3 && {color: '#CD7F32'}]}>{item.position}</Text>
       <Text style={[styles.driverName, {flex: 1}]}>{item.name}</Text>
@@ -362,9 +362,9 @@ export default function ResultsScreen({navigation, route}) {
         <Text style={styles.pointsLabel}>PTS</Text>
       </View>
     </View>
-  );
+  ), []);
 
-  const renderRound = ({item}) => {
+  const renderRound = useCallback(({item}) => {
     const hasResults = item.races.some(r => r.results.length > 0);
     const rStart = (item.round - 1) * 3 + 1;
     const rEnd = rStart + 2;
@@ -388,9 +388,9 @@ export default function ResultsScreen({navigation, route}) {
         )}
       </TouchableOpacity>
     );
-  };
+  }, [navigation, year]);
 
-  const renderStat = ({item, index}) => {
+  const renderStat = useCallback(({item, index}) => {
     const fav = isFavourite(item.name);
     return (
       <View style={[styles.standingRow, fav && {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'}]} accessibilityLabel={`Position ${index + 1}, ${item.name}, ${item.wins} wins`}>
@@ -406,7 +406,7 @@ export default function ResultsScreen({navigation, route}) {
         <Text style={[styles.statCol, {color: '#EF4444'}]}>{item.dnfs}</Text>
       </View>
     );
-  };
+  }, [isFavourite]);
 
   const statsHeader = () => (
     <View style={{flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 8, alignItems: 'center'}}>

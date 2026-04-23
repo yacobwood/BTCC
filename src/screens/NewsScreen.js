@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import {
   View,
   Text,
@@ -152,15 +152,15 @@ export default function NewsScreen({navigation}) {
     );
   }
 
-  // Build the list data structure
-  const hero = !searchActive && articles.length > 0 ? articles[0] : null;
-  const gridArticles = !searchActive ? articles.slice(1, 3) : []; // 2 grid cards
-  const remaining = !searchActive ? articles.slice(3) : [];
-
-  const buildListData = () => {
+  // Build the list data structure — memoized so FlatList doesn't re-render
+  // every time unrelated state (keyboard visibility, scroll position, etc.) changes.
+  const listData = useMemo(() => {
     if (searchActive && searchQuery.length >= 2) {
       return searchResults.map(a => ({type: 'compact', article: a}));
     }
+    const hero = articles.length > 0 ? articles[0] : null;
+    const gridArticles = articles.slice(1, 3);
+    const remaining = articles.slice(3);
     const data = [];
     if (hero) data.push({type: 'hero', article: hero});
     if (gridArticles.length > 0) data.push({type: 'grid', articles: gridArticles});
@@ -169,11 +169,9 @@ export default function NewsScreen({navigation}) {
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  };
+  }, [articles, searchActive, searchQuery, searchResults]);
 
-  const listData = buildListData();
-
-  const renderItem = ({item}) => {
+  const renderItem = useCallback(({item}) => {
     switch (item.type) {
       case 'hero':
         return <HeroCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'hero', item.article.source); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
@@ -186,7 +184,7 @@ export default function NewsScreen({navigation}) {
       default:
         return null;
     }
-  };
+  }, [openArticle, onRefresh]);
 
   return (
     <View style={styles.container}>
