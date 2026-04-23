@@ -373,7 +373,9 @@ export default function ResultsScreen({navigation, route}) {
         style={styles.roundCard}
         activeOpacity={0.8}
         disabled={!hasResults}
-        onPress={() => navigation.navigate('RoundResults', {round: item, year})}>
+        onPress={() => navigation.navigate('RoundResults', {round: item, year})}
+        accessibilityLabel={`Round ${rStart}–${rEnd}, ${item.venue}, ${item.date}${hasResults ? '' : ', results TBC'}`}
+        accessibilityRole="button">
         <View style={{backgroundColor: 'rgba(254,189,2,0.12)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, marginRight: 12, borderWidth: 1, borderColor: 'rgba(254,189,2,0.3)'}}>
           <Text style={{color: Colors.yellow, fontSize: 12, fontWeight: '800'}}>R{rStart}-{rEnd}</Text>
         </View>

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {DRIVER_RECORDS, ALL_TIME_RECORDS} from '../assets/seasonData';
+import {getDriverRecords, ALL_TIME_RECORDS} from '../assets/seasonData';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 
@@ -45,7 +45,7 @@ const COUNT_SORTS = [
 ];
 
 const SECTIONS = [
-  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004–2025', data: DRIVER_RECORDS},
+  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004–2025', get data() { return getDriverRecords(); }},
   {label: 'Totals', sorts: COUNT_SORTS, data: ALL_TIME_RECORDS},
 ];
 
@@ -53,13 +53,13 @@ export default function RecordsScreen({navigation}) {
   const [section, setSection] = useState(0);
   const [tab, setTab] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showMoreTabs, setShowMoreTabs] = useState(numTabs > 4);
   const {isFavourite} = useFavouriteDriver();
 
   const listRef = useRef(null);
   const tabRowRef = useRef(null);
 
   const numTabs = SECTIONS[section].sorts.length;
+  const [showMoreTabs, setShowMoreTabs] = useState(numTabs > 4);
   const tabWidth = SCREEN_WIDTH / Math.min(numTabs, 4);
 
   const goToSection = (s) => {

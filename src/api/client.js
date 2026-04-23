@@ -8,10 +8,14 @@ const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
 const BUNDLED_CALENDAR = require('../data/calendar.json');
 const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 
+// Stale-while-revalidate: serve from cache immediately, refresh in background.
+// If the cached entry is older than MAX_AGE_MS, treat as a cache miss so the
+// user never sees data more than an hour stale.
+const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+
 async function fetchJson(url, cacheKey) {
-  // Return cached data immediately if available, refresh in background
   if (cacheKey) {
-    const cached = await cacheRead(cacheKey);
+    const cached = await cacheRead(cacheKey, MAX_AGE_MS);
     if (cached) {
       // Refresh cache in background without blocking
       fetch(url)
@@ -55,7 +59,7 @@ export async function fetchArticles(page = 1, perPage = 20, search = '') {
   if (search) url += `&search=${encodeURIComponent(search)}`;
   const cacheKey = search ? null : `news_p${page}`;
   if (cacheKey) {
-    const cached = await cacheRead(cacheKey);
+    const cached = await cacheRead(cacheKey, MAX_AGE_MS);
     if (cached) {
       fetch(url)
         .then(r => r.ok ? r.json() : null)

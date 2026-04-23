@@ -309,17 +309,17 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
           <Text style={styles.commentText}>{item.text}</Text>
           <View style={styles.commentActions}>
             {!item.isReply && (
-              <TouchableOpacity onPress={() => { setReplyingTo({id: item.id, authorName: item.authorName}); inputRef.current?.focus(); }} style={styles.commentActionBtn}>
+              <TouchableOpacity onPress={() => { setReplyingTo({id: item.id, authorName: item.authorName}); inputRef.current?.focus(); }} style={styles.commentActionBtn} accessibilityLabel={`Reply to ${item.authorName}`} accessibilityRole="button">
                 <Text style={styles.commentActionText}>Reply</Text>
               </TouchableOpacity>
             )}
             {!isOwn && (
-              <TouchableOpacity onPress={() => handleFlag(item.id)} style={styles.commentActionBtn}>
+              <TouchableOpacity onPress={() => handleFlag(item.id)} style={styles.commentActionBtn} accessibilityLabel="Flag comment" accessibilityRole="button">
                 <Icon name="flag" size={13} color={Colors.textSecondary} />
               </TouchableOpacity>
             )}
             {isOwn && (
-              <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.commentActionBtn}>
+              <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.commentActionBtn} accessibilityLabel="Delete comment" accessibilityRole="button">
                 <Icon name="delete-outline" size={13} color={Colors.textSecondary} />
               </TouchableOpacity>
             )}
@@ -356,22 +356,23 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
                   maxLength={30}
                   returnKeyType="done"
                   onSubmitEditing={handleNameSet}
+                  accessibilityLabel="Display name"
                 />
-                <TouchableOpacity onPress={handleNameSet} style={styles.nameEditSave}>
+                <TouchableOpacity onPress={handleNameSet} style={styles.nameEditSave} accessibilityLabel="Save name" accessibilityRole="button">
                   <Text style={styles.nameEditSaveText}>Save</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setNameEditing(false); setNameInput(''); }}>
+                <TouchableOpacity onPress={() => { setNameEditing(false); setNameInput(''); }} accessibilityLabel="Cancel name edit" accessibilityRole="button">
                   <Icon name="close" size={18} color={Colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             ) : (
               <>
                 <Text style={styles.sheetTitle}>Comments ({(comments || []).length})</Text>
-                <TouchableOpacity onPress={() => { setNameInput(commenterName || ''); setNameEditing(true); }} style={styles.sheetNameBtn}>
+                <TouchableOpacity onPress={() => { setNameInput(commenterName || ''); setNameEditing(true); }} style={styles.sheetNameBtn} accessibilityLabel={`Edit display name: ${commenterName || 'Set name'}`} accessibilityRole="button">
                   <Icon name="edit" size={16} color={Colors.textSecondary} />
                   <Text style={styles.sheetNameText} numberOfLines={1}>{commenterName || 'Set name'}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={onClose} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                <TouchableOpacity onPress={onClose} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}} accessibilityLabel="Close comments" accessibilityRole="button">
                   <Icon name="close" size={22} color={Colors.textSecondary} />
                 </TouchableOpacity>
               </>
@@ -398,7 +399,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
           {replyingTo && (
             <View style={styles.replyingBar}>
               <Text style={styles.replyingText}>Replying to <Text style={{color: '#fff'}}>{replyingTo.authorName}</Text></Text>
-              <TouchableOpacity onPress={() => setReplyingTo(null)}>
+              <TouchableOpacity onPress={() => setReplyingTo(null)} accessibilityLabel="Cancel reply" accessibilityRole="button">
                 <Icon name="close" size={16} color={Colors.textSecondary} />
               </TouchableOpacity>
             </View>
@@ -418,12 +419,13 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
                 maxLength={30}
                 returnKeyType="done"
                 onSubmitEditing={handleNameSet}
+                accessibilityLabel="Choose a display name"
               />
               <View style={styles.namePromptBtns}>
-                <TouchableOpacity onPress={handleNameSkip} style={styles.nameSkipBtn}>
+                <TouchableOpacity onPress={handleNameSkip} style={styles.nameSkipBtn} accessibilityLabel="Skip name prompt" accessibilityRole="button">
                   <Text style={styles.nameSkipText}>Skip</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleNameSet} style={styles.nameSetBtn}>
+                <TouchableOpacity onPress={handleNameSet} style={styles.nameSetBtn} accessibilityLabel="Set display name" accessibilityRole="button">
                   <Text style={styles.nameSetText}>Set name</Text>
                 </TouchableOpacity>
               </View>
@@ -443,11 +445,14 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
                   multiline
                   maxLength={520}
                   returnKeyType="default"
+                  accessibilityLabel="Comment input"
                 />
                 <TouchableOpacity
                   onPress={handleSend}
                   disabled={!input.trim()}
-                  style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}>
+                  style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
+                  accessibilityLabel="Send comment"
+                  accessibilityRole="button">
                   <Icon name="send" size={20} color={input.trim() ? Colors.yellow : Colors.textSecondary} />
                 </TouchableOpacity>
               </View>
@@ -464,10 +469,10 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
             <Text style={styles.confirmTitle}>Delete comment</Text>
             <Text style={styles.confirmBody}>Are you sure you want to delete this comment?</Text>
             <View style={styles.confirmBtns}>
-              <TouchableOpacity style={styles.confirmCancel} onPress={() => setConfirmDeleteId(null)}>
+              <TouchableOpacity style={styles.confirmCancel} onPress={() => setConfirmDeleteId(null)} accessibilityLabel="Cancel delete" accessibilityRole="button">
                 <Text style={styles.confirmCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmDelete} onPress={confirmDelete}>
+              <TouchableOpacity style={styles.confirmDelete} onPress={confirmDelete} accessibilityLabel="Confirm delete comment" accessibilityRole="button">
                 <Text style={styles.confirmDeleteText}>Delete</Text>
               </TouchableOpacity>
             </View>

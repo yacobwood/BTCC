@@ -145,7 +145,7 @@ export default function NewsScreen({navigation}) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={() => { Analytics.retryClicked('news'); load(); }}>
+        <TouchableOpacity style={styles.retryBtn} onPress={() => { Analytics.retryClicked('news'); load(); }} accessibilityLabel="Retry" accessibilityRole="button">
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>

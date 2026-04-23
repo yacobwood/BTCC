@@ -56,13 +56,13 @@ describe('fetchDrivers', () => {
     expect(cacheWrite).toHaveBeenCalledWith('drivers', data);
   });
 
-  it('falls back to cache when fetch fails', async () => {
+  it('returns cached data immediately (stale-while-revalidate) even when fetch fails', async () => {
     global.fetch.mockResolvedValueOnce({ok: false});
     cacheRead.mockResolvedValueOnce({drivers: [{name: 'Cached Driver'}]});
 
     const result = await fetchDrivers();
 
-    expect(cacheRead).toHaveBeenCalledWith('drivers');
+    expect(cacheRead).toHaveBeenCalledWith('drivers', expect.any(Number));
     expect(result).toEqual({drivers: [{name: 'Cached Driver'}]});
   });
 

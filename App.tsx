@@ -20,6 +20,7 @@ import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -133,6 +134,7 @@ export default function App() {
   }, []);
 
   return (
+    <ErrorBoundary>
     <SafeAreaProvider>
     <FeatureFlagsProvider>
     <FavouriteDriverProvider>
@@ -149,5 +151,6 @@ export default function App() {
     </FavouriteDriverProvider>
     </FeatureFlagsProvider>
     </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
