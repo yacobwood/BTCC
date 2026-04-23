@@ -18,23 +18,13 @@
       "driver": "Charles RAINFORD",
       "team": "WSR",
       "car": "99",
-      "points": 42,
+      "points": 36,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
     },
     {
       "pos": 3,
-      "driver": "Aiden MOFFAT",
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "car": "16",
-      "points": 39,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 4,
       "driver": "Dan CAMMISH",
       "team": "NAPA Racing UK",
       "car": "27",
@@ -44,57 +34,37 @@
       "thirds": 0
     },
     {
+      "pos": 4,
+      "driver": "Aiden MOFFAT",
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "car": "16",
+      "points": 36,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
       "pos": 5,
       "driver": "Gordon SHEDDEN",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "52",
-      "points": 32,
+      "points": 30,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
     },
     {
       "pos": 6,
-      "driver": "Mikey DOBLE",
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "car": "88",
-      "points": 29,
-      "wins": 1,
+      "driver": "Dexter PATTERSON",
+      "team": "Steel Seal with Power Maxed Racing",
+      "car": "17",
+      "points": 28,
+      "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 7,
-      "driver": "Dexter PATTERSON",
-      "team": "Steel Seal with Power Maxed Racing",
-      "car": "17",
-      "points": 29,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 8,
-      "driver": "Tom INGRAM",
-      "team": "Team VERTU",
-      "car": "80",
-      "points": 26,
-      "wins": 0,
-      "seconds": 1,
-      "thirds": 0
-    },
-    {
-      "pos": 9,
-      "driver": "Adam MORGAN",
-      "team": "Cataclean Plato Racing",
-      "car": "33",
-      "points": 25,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 10,
       "driver": "Ricky COLLARD",
       "team": "Team VERTU",
       "car": "11",
@@ -104,17 +74,27 @@
       "thirds": 1
     },
     {
-      "pos": 11,
-      "driver": "Daniel ROWBOTTOM",
+      "pos": 8,
+      "driver": "Mikey DOBLE",
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "car": "88",
+      "points": 22,
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "pos": 9,
+      "driver": "Adam MORGAN",
       "team": "Cataclean Plato Racing",
-      "car": "32",
-      "points": 20,
+      "car": "33",
+      "points": 21,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
-      "pos": 12,
+      "pos": 10,
       "driver": "Daryl DE LEON",
       "team": "WSR",
       "car": "2",
@@ -124,7 +104,17 @@
       "thirds": 0
     },
     {
-      "pos": 13,
+      "pos": 11,
+      "driver": "Tom INGRAM",
+      "team": "Team VERTU",
+      "car": "80",
+      "points": 17,
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
+    },
+    {
+      "pos": 12,
       "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "50",
@@ -134,27 +124,7 @@
       "thirds": 0
     },
     {
-      "pos": 14,
-      "driver": "Tom CHILTON",
-      "team": "Team VERTU",
-      "car": "3",
-      "points": 15,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 15,
-      "driver": "Josh COOK",
-      "team": "Speedworks Corolla Racing",
-      "car": "66",
-      "points": 14,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 16,
+      "pos": 13,
       "driver": "Chris SMILEY",
       "team": "Restart Racing",
       "car": "22",
@@ -164,11 +134,41 @@
       "thirds": 0
     },
     {
-      "pos": 17,
+      "pos": 14,
+      "driver": "Tom CHILTON",
+      "team": "Team VERTU",
+      "car": "3",
+      "points": 10,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "pos": 15,
+      "driver": "Daniel ROWBOTTOM",
+      "team": "Cataclean Plato Racing",
+      "car": "32",
+      "points": 10,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "pos": 16,
       "driver": "Sam OSBORNE",
       "team": "NAPA Racing UK",
       "car": "77",
       "points": 9,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "pos": 17,
+      "driver": "Josh COOK",
+      "team": "Speedworks Corolla Racing",
+      "car": "66",
+      "points": 6,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -223,32 +223,32 @@
     {
       "pos": 2,
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 68
+      "points": 58
     },
     {
       "pos": 3,
-      "team": "Team VERTU",
-      "points": 64
+      "team": "WSR",
+      "points": 53
     },
     {
       "pos": 4,
-      "team": "WSR",
-      "points": 59
+      "team": "Team VERTU",
+      "points": 50
     },
     {
       "pos": 5,
       "team": "Laser Tools Racing with MB Motorsport",
-      "points": 48
+      "points": 46
     },
     {
       "pos": 6,
       "team": "Cataclean Plato Racing",
-      "points": 45
+      "points": 31
     },
     {
       "pos": 7,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 29
+      "points": 28
     },
     {
       "pos": 8,
@@ -258,7 +258,7 @@
     {
       "pos": 9,
       "team": "Speedworks Corolla Racing",
-      "points": 14
+      "points": 6
     }
   ]
 }
