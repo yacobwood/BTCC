@@ -471,7 +471,7 @@ export default function ResultsScreen({navigation, route}) {
             onScroll={onListScroll}
             scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
-            ListHeaderComponent={liveRound > 0 ? <Text style={styles.roundInfo}>After Round {liveRound}</Text> : null}
+            ListHeaderComponent={null}
             ListEmptyComponent={<Text style={styles.emptyText}>No standings available for {year}</Text>}
           />
         );
