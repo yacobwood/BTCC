@@ -30,7 +30,8 @@ def compute(year: int, data: dict):
         last_round = rnd["round"]
         last_venue = rnd.get("venue", "")
         for race in rnd["races"]:
-            pts_table = POINTS_QUALIFYING if "qualifying" in race.get("label", "").lower() else POINTS_RACE
+            is_qualifying = "qualifying" in race.get("label", "").lower()
+            pts_table = POINTS_QUALIFYING if is_qualifying else POINTS_RACE
             for r in race["results"]:
                 d = r["driver"]
                 pos = r["pos"]
@@ -38,12 +39,13 @@ def compute(year: int, data: dict):
                 driver_points[d] += pts
                 driver_team[d] = r.get("team", "")
                 driver_car[d] = str(r.get("no", ""))
-                if pos == 1:
-                    driver_wins[d] += 1
-                elif pos == 2:
-                    driver_seconds[d] += 1
-                elif pos == 3:
-                    driver_thirds[d] += 1
+                if not is_qualifying:
+                    if pos == 1:
+                        driver_wins[d] += 1
+                    elif pos == 2:
+                        driver_seconds[d] += 1
+                    elif pos == 3:
+                        driver_thirds[d] += 1
                 team_points[r.get("team", "")] += pts
 
     drivers = sorted(driver_points.items(), key=lambda x: -x[1])
