@@ -286,11 +286,12 @@ def parse_rows(rows: list[list[str]], race_label: str = "") -> list[dict]:
                 gap_raw  = cells[5 + offset] if len(cells) > 5 + offset else ""
                 best_lap = cells[6 + offset] if len(cells) > 6 + offset else ""
             else:
-                # Long: Laps, Time, Gap, Best[, Pts ignored]
+                # Long: Laps, Time, Gap, Best[, Pts]
                 laps_raw = cells[4 + offset] if len(cells) > 4 + offset else "0"
                 time_raw = cells[5 + offset] if len(cells) > 5 + offset else ""
                 gap_raw  = cells[6 + offset] if len(cells) > 6 + offset else ""
                 best_lap = cells[7 + offset] if len(cells) > 7 + offset else ""
+                pts_col  = cells[8 + offset] if len(cells) > 8 + offset else ""
         except (IndexError, ValueError):
             continue
 
@@ -298,12 +299,15 @@ def parse_rows(rows: list[list[str]], race_label: str = "") -> list[dict]:
             continue
 
         laps = int(re.sub(r"[^\d]", "", laps_raw) or "0")
-        # Compute points from position using the correct BTCC scale for this race type
+        # Use points from the website's Pts column when present (includes FL bonuses etc.),
+        # otherwise fall back to computing from position using the official BTCC scale.
         pts_table = POINTS_QUALIFYING if "qualifying" in race_label.lower() else POINTS_RACE
-        points = pts_table.get(pos, 0) if pos > 0 else 0
-
-        if not is_dnf_pos and any("dnf" in str(x).lower() for x in [laps_raw, time_raw]):
-            pos = 0
+        try:
+            points = int(re.sub(r"[^\d]", "", pts_col) or "") if pts_col.strip() else None
+        except (NameError, ValueError):
+            points = None
+        if points is None:
+            points = pts_table.get(pos, 0) if pos > 0 else 0
 
         results.append({
             "pos":     pos,

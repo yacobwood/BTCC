@@ -36,7 +36,12 @@ def compute(year: int, data: dict):
             for r in race["results"]:
                 d = r["driver"]
                 pos = r["pos"]
-                pts = pts_table.get(pos, 0) if pos > 0 else 0
+                # Prefer the points value stored by the scraper (read from the official
+                # website's Pts column, which includes fastest-lap bonuses etc.).
+                # Fall back to computing from position if not present.
+                pts = r.get("points") if r.get("points") is not None else (
+                    pts_table.get(pos, 0) if pos > 0 else 0
+                )
                 driver_points[d] += pts
                 driver_team[d] = r.get("team", "")
                 driver_car[d] = str(r.get("no", ""))
