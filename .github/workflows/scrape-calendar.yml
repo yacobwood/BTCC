@@ -42,7 +42,7 @@ jobs:
         run: |
           SEASON="${{ github.event.inputs.season }}"
           [ -z "$SEASON" ] && SEASON=2026
-          python tools/scraper/scrape_calendar.py --season $SEASON
+          python tools/scraper/scrape_calendar.py --season "$SEASON"
 
       - name: Scrape grid (optional)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.merge_grid == 'true'

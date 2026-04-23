@@ -1251,7 +1251,7 @@ function nowIso() {
   const d = new Date(), p = n => String(n).padStart(2,'0');
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
-function getToken() { return localStorage.getItem('btcc_tok') || ''; }
+function getToken() { return sessionStorage.getItem('btcc_tok') || ''; }
 
 // ── Token card ───────────────────────────────────────────────────────────────
 function collapseToken() { document.getElementById('token-card').classList.add('collapsed'); }
@@ -1259,18 +1259,18 @@ function expandToken() { document.getElementById('token-card').classList.remove(
 function saveToken() {
   const v = document.getElementById('tok').value.trim();
   if (!v) return;
-  localStorage.setItem('btcc_tok', v);
+  sessionStorage.setItem('btcc_tok', v);
   document.getElementById('tok').value = '';
   collapseToken();
   refreshAllStatus();
 }
-function getFcmTok() { return localStorage.getItem('btcc_fcm_device_tok') || ''; }
+function getFcmTok() { return sessionStorage.getItem('btcc_fcm_device_tok') || ''; }
 function collapseFcmTok() { document.getElementById('fcm-tok-card').classList.add('collapsed'); }
 function expandFcmTok() { document.getElementById('fcm-tok-card').classList.remove('collapsed'); }
 function saveFcmTok() {
   const v = document.getElementById('fcm-tok-input').value.trim();
   if (!v) return;
-  localStorage.setItem('btcc_fcm_device_tok', v);
+  sessionStorage.setItem('btcc_fcm_device_tok', v);
   document.getElementById('fcm-tok-input').value = '';
   collapseFcmTok();
 }
@@ -2547,6 +2547,12 @@ function initQuill() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+// Migrate any tokens previously stored in localStorage → sessionStorage, then remove from localStorage
+['btcc_tok', 'btcc_fcm_device_tok'].forEach(k => {
+  const v = localStorage.getItem(k);
+  if (v) { sessionStorage.setItem(k, v); localStorage.removeItem(k); }
+});
+
 if (getToken())   collapseToken();
 if (getFcmTok())  collapseFcmTok();
 loadExisting();
