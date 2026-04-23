@@ -463,7 +463,7 @@ export default function ResultsScreen({navigation, route}) {
           <FlatList
             ref={driversListRef}
             data={driverStandings}
-            keyExtractor={(_, i) => String(i)}
+            keyExtractor={(item) => item.name}
             renderItem={renderDriverStanding}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
             onScroll={onListScroll}
@@ -478,7 +478,7 @@ export default function ResultsScreen({navigation, route}) {
           <FlatList
             ref={teamsListRef}
             data={teamStandings}
-            keyExtractor={(_, i) => String(i)}
+            keyExtractor={(item) => item.name}
             renderItem={renderTeamStanding}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
             onScroll={onListScroll}

@@ -174,6 +174,8 @@ export function parseStandings(json) {
     car: d.car || '',
     points: d.points || 0,
     wins: d.wins || 0,
+    seconds: d.seconds || 0,
+    thirds: d.thirds || 0,
   }));
   const teams = (json.teams || []).map((t, i) => ({
     position: t.pos || i + 1,

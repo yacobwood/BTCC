@@ -14,7 +14,7 @@ const TOPIC_MAP = {
   newsAlerts: 'news_alerts', raceAlerts: 'race_alerts',
   qualifyingAlerts: 'qualifying_alerts', fpAlerts: 'fp_alerts',
   resultsAlerts: 'results_alerts', weekendPreview: 'weekend_preview',
-  standingsUpdate: 'standings_update',
+  standingsUpdate: 'standings_update', podcastAlerts: 'podcast_alerts',
 };
 
 function renderProvider() {
@@ -149,19 +149,34 @@ describe('SettingsProvider', () => {
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'fp_alerts');
     });
 
-    it('does NOT call topic sync for podcastAlerts (not in FCM TOPIC_MAP)', async () => {
+    it('calls unsubscribeFromTopic for podcastAlerts when disabled', async () => {
       let getHook;
       await act(async () => {
         getHook = renderProvider();
       });
-      const callsBefore = subscribeToTopic.mock.calls.length + unsubscribeFromTopic.mock.calls.length;
 
       await act(async () => {
         getHook().setSetting('podcastAlerts', false);
       });
 
-      const callsAfter = subscribeToTopic.mock.calls.length + unsubscribeFromTopic.mock.calls.length;
-      expect(callsAfter).toBe(callsBefore); // no extra calls
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'podcast_alerts');
+    });
+
+    it('calls subscribeToTopic for podcastAlerts when enabled', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_podcast_alerts') return Promise.resolve('false');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('podcastAlerts', true);
+      });
+
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'podcast_alerts');
     });
   });
 });

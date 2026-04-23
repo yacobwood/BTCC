@@ -11,6 +11,7 @@ const TOPIC_MAP = {
   resultsAlerts: 'results_alerts',
   weekendPreview: 'weekend_preview',
   standingsUpdate: 'standings_update',
+  podcastAlerts: 'podcast_alerts',
 };
 
 function syncTopic(topic, enabled) {

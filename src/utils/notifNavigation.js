@@ -33,6 +33,9 @@ export function navigateFromData(navigationRef, data) {
 
     } else if (type === 'podcast') {
       navigationRef.navigate('More', {screen: 'Podcasts'});
+
+    } else if (type === 'hub') {
+      navigationRef.navigate('News');
     }
   };
 

@@ -32,7 +32,7 @@ jobs:
           COUNT=$(python -c "import json; d=json.load(open('data/grid_scraped.json')) if __import__('os').path.exists('data/grid_scraped.json') else {}; print(len(d.get('drivers', [])))")
           echo "Scraped driver count: $COUNT"
           if [ "$COUNT" -gt 0 ]; then
-            python scripts/download_driver_images.py
+            python tools/scripts/download_driver_images.py
           else
             echo "No drivers scraped — skipping image download"
           fi

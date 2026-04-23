@@ -161,6 +161,22 @@ describe('navigateFromData', () => {
     });
   });
 
+  describe('hub news deeplinks', () => {
+    it('navigates to News tab for type="hub"', () => {
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'hub', id: '42', channel: 'news', title: 'Test post'});
+
+      expect(ref.navigate).toHaveBeenCalledWith('News');
+    });
+
+    it('navigates to News tab for type="hub" even without optional fields', () => {
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'hub'});
+
+      expect(ref.navigate).toHaveBeenCalledWith('News');
+    });
+  });
+
   describe('no-op cases', () => {
     it('does nothing for undefined data', () => {
       const ref = makeRef();
@@ -312,6 +328,13 @@ describe('notification tap integration scenarios', () => {
     navigateFromData(ref, {channel: 'podcasts', type: 'podcast'});
 
     expect(ref.navigate).toHaveBeenCalledWith('More', {screen: 'Podcasts'});
+  });
+
+  it('hub news notification → opens news tab', () => {
+    const ref = makeRef();
+    navigateFromData(ref, {channel: 'news', type: 'hub', id: '123', title: 'New post'});
+
+    expect(ref.navigate).toHaveBeenCalledWith('News');
   });
 
   it('notification with only channel (missing type/round) → no navigation', () => {
