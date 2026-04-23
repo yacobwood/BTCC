@@ -1200,42 +1200,6 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
-  <div class="scraper-card" id="sc-mss-history">
-    <div class="scraper-head">
-      <div class="scraper-title">MSS HISTORY</div>
-      <div class="scraper-status-chip" id="ss-mss-history">—</div>
-    </div>
-    <div class="scraper-desc">Historical race-by-race results → <strong>data/motorsportstats/</strong>. Manual only.</div>
-    <div class="scraper-footer">
-      <div class="scraper-inputs">
-        <div class="field-group">
-          <div class="field-label">TARGET</div>
-          <select class="input" id="si-mss-target" style="width:130px;padding:9px 10px;font-size:13px">
-            <option value="all">All</option>
-            <option value="drivers-only">Drivers only</option>
-            <option value="teams-only">Teams only</option>
-          </select>
-        </div>
-        <div class="field-group"><div class="field-label">SLUG</div><input type="text" id="si-mss-slug" placeholder="e.g. tom-ingram"></div>
-      </div>
-      <button class="btn-run" onclick="runScraper('scrape-motorsportstats.yml','mss-history')">RUN ▶</button>
-    </div>
-  </div>
-
-  <div class="scraper-card" id="sc-mss-summaries">
-    <div class="scraper-head">
-      <div class="scraper-title">MSS SUMMARIES</div>
-      <div class="scraper-status-chip" id="ss-mss-summaries">—</div>
-    </div>
-    <div class="scraper-desc">Career highlights &amp; per-season stats → <strong>drivers.json</strong>. Manual only.</div>
-    <div class="scraper-footer">
-      <div class="scraper-inputs">
-        <div class="field-group"><div class="field-label">DRIVER</div><input type="text" id="si-mss-driver" placeholder="e.g. tom-ingram"></div>
-      </div>
-      <button class="btn-run" onclick="runScraper('scrape-driver-summaries.yml','mss-summaries')">RUN ▶</button>
-    </div>
-  </div>
-
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
@@ -1619,8 +1583,6 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-schedule.yml',         key:'schedule'},
   {file:'scrape-grid.yml',             key:'grid'},
   {file:'scrape-merch.yml',            key:'merch'},
-  {file:'scrape-motorsportstats.yml',  key:'mss-history'},
-  {file:'scrape-driver-summaries.yml', key:'mss-summaries'},
 ];
 
 function startLiveTick() {
@@ -1647,16 +1609,6 @@ function scraperInputs(workflow) {
     return inputs;
   }
   if (workflow === 'scrape-calendar.yml') return {season: String(document.getElementById('si-season').value || 2026)};
-  if (workflow === 'scrape-motorsportstats.yml') {
-    const inputs = {target: document.getElementById('si-mss-target').value || 'all'};
-    const slug = document.getElementById('si-mss-slug').value.trim();
-    if (slug) inputs.single_slug = slug;
-    return inputs;
-  }
-  if (workflow === 'scrape-driver-summaries.yml') {
-    const slug = document.getElementById('si-mss-driver').value.trim();
-    return slug ? {driver: slug} : {};
-  }
   return {};
 }
 

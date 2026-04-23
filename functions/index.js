@@ -94,16 +94,17 @@ exports.sendSessionNotifications = onSchedule(
     const uk = getUKTimeParts(now);
     const todayStr = getUKDateString(now);
     const tomorrowStr = getUKDateString(now, 1);
-    const yesterdayStr = getUKDateString(now, -1);
     const sundayStr = getUKDateString(now, -2);
 
-    // Fetch calendar first for the early-exit check
+    const messaging = getMessaging();
+    const db = getFirestore();
+    const sends = [];
+
+    // ── Calendar-gated alerts (session, preview, standings) ───────
+    // Only fetch calendar + schedule on relevant days to avoid unnecessary
+    // network calls every minute when there's no race activity.
     const calendar = await fetch(CALENDAR_URL).then(r => r.json());
 
-    // Only proceed on relevant days:
-    // - Saturday or Sunday of a race weekend (session alerts)
-    // - Friday before a race weekend at 09:00 (weekend preview)
-    // - Tuesday after a race weekend at 09:00 (standings update)
     const isRaceDay = calendar.rounds.some(
       r => r.startDate === todayStr || r.endDate === todayStr,
     );
@@ -112,90 +113,85 @@ exports.sendSessionNotifications = onSchedule(
     const isTuesdayAfter = uk.weekday === 'Tuesday' &&
       calendar.rounds.some(r => r.endDate === sundayStr);
 
-    if (!isRaceDay && !isFridayBefore && !isTuesdayAfter) return;
+    if (isRaceDay || isFridayBefore || isTuesdayAfter) {
+      const schedule = await fetch(SCHEDULE_URL).then(r => r.json());
 
-    const schedule = await fetch(SCHEDULE_URL).then(r => r.json());
+      const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
+      const windowMs = 30 * 1000; // ±30 sec window
 
-    const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
-    const windowMs = 30 * 1000; // ±30 sec window
+      const scheduleByRound = {};
+      for (const r of schedule.rounds) {
+        scheduleByRound[r.round] = r.sessions;
+      }
 
-    const scheduleByRound = {};
-    for (const r of schedule.rounds) {
-      scheduleByRound[r.round] = r.sessions;
-    }
+      // ── Session alerts ──────────────────────────────────────────
+      for (const round of calendar.rounds) {
+        const sessions = scheduleByRound[round.round];
+        if (!sessions) continue;
 
-    const messaging = getMessaging();
-    const sends = [];
+        for (const session of sessions) {
+          const dateStr = session.day === 'SAT' ? round.startDate : round.endDate;
+          const sessionUTC = sessionToUTC(dateStr, session.time);
+          const diff = Math.abs(sessionUTC.getTime() - target.getTime());
 
-    // ── Session alerts ────────────────────────────────────────────
-    for (const round of calendar.rounds) {
-      const sessions = scheduleByRound[round.round];
-      if (!sessions) continue;
+          if (diff > windowMs) continue;
 
-      for (const session of sessions) {
-        const dateStr = session.day === 'SAT' ? round.startDate : round.endDate;
-        const sessionUTC = sessionToUTC(dateStr, session.time);
-        const diff = Math.abs(sessionUTC.getTime() - target.getTime());
+          const topic = SESSION_TOPICS[session.name];
+          if (!topic) continue;
 
-        if (diff > windowMs) continue;
+          sends.push(
+            messaging.send({
+              topic,
+              notification: {
+                title: `${session.name} — Starting in 15 mins`,
+                body: `${session.name} at ${round.venue} is about to get underway`,
+              },
+              android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
+              apns: {payload: {aps: {sound: 'default'}}},
+            }),
+          );
+        }
+      }
 
-        const topic = SESSION_TOPICS[session.name];
-        if (!topic) continue;
+      // ── Friday 9am — race weekend preview ──────────────────────
+      if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute === 0) {
+        const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
+        if (round) {
+          const rStart = (round.round - 1) * 3 + 1;
+          sends.push(
+            messaging.send({
+              topic: 'weekend_preview',
+              notification: {
+                title: 'Race Weekend Tomorrow',
+                body: `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`,
+              },
+              android: {notification: {channelId: 'weekend_preview'}},
+              apns: {payload: {aps: {sound: 'default'}}},
+              data: {type: 'round', round: String(round.round)},
+            }),
+          );
+        }
+      }
 
-        sends.push(
-          messaging.send({
-            topic,
-            notification: {
-              title: `${session.name} — Starting in 15 mins`,
-              body: `${session.name} at ${round.venue} is about to get underway`,
-            },
-            android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
-            apns: {payload: {aps: {sound: 'default'}}},
-          }),
-        );
+      // ── Tuesday 9am — standings update ─────────────────────────
+      if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute === 0) {
+        const round = calendar.rounds.find(r => r.endDate === sundayStr);
+        if (round) {
+          const rStart = (round.round - 1) * 3 + 1;
+          sends.push(
+            messaging.send({
+              topic: 'standings_update',
+              notification: {
+                title: 'Standings Updated',
+                body: `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`,
+              },
+              android: {notification: {channelId: 'standings'}},
+              apns: {payload: {aps: {sound: 'default'}}},
+            }),
+          );
+        }
       }
     }
-
-    // ── Friday 9am — race weekend preview ────────────────────────
-    if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute === 0) {
-      const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
-      if (round) {
-        const rStart = (round.round - 1) * 3 + 1;
-        sends.push(
-          messaging.send({
-            topic: 'weekend_preview',
-            notification: {
-              title: 'Race Weekend Tomorrow',
-              body: `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`,
-            },
-            android: {notification: {channelId: 'weekend_preview'}},
-            apns: {payload: {aps: {sound: 'default'}}},
-            data: {type: 'round', round: String(round.round)},
-          }),
-        );
-      }
-    }
-
-    // ── Tuesday 9am — standings update ───────────────────────────
-    if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute === 0) {
-      const round = calendar.rounds.find(r => r.endDate === sundayStr);
-      if (round) {
-        const rStart = (round.round - 1) * 3 + 1;
-        sends.push(
-          messaging.send({
-            topic: 'standings_update',
-            notification: {
-              title: 'Standings Updated',
-              body: `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`,
-            },
-            android: {notification: {channelId: 'standings'}},
-            apns: {payload: {aps: {sound: 'default'}}},
-          }),
-        );
-      }
-    }
-
-    const db = getFirestore();
 
     // ── News alerts ───────────────────────────────────────────────
     try {
