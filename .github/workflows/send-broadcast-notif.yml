@@ -59,6 +59,8 @@ jobs:
             'standings_update', 'podcast_alerts',
           ].map(t => `'${t}' in topics`).join(' || ');
 
+          const db = admin.firestore();
+
           // No top-level notification block — Android handles via Notifee (full-colour icon)
           // iOS gets the alert via apns.aps.alert
           admin.messaging().send({
@@ -66,8 +68,17 @@ jobs:
             android: { priority: 'high' },
             apns: { payload: { aps: { alert: { title: process.env.TITLE, body }, sound: 'default' } } },
             data,
-          }).then(r => { console.log('Sent:', r); process.exit(0); })
-            .catch(e => { console.error('Error:', e.message); process.exit(1); });
+          }).then(async r => {
+            console.log('Sent:', r);
+            await db.collection('push_history').add({
+              title: process.env.TITLE,
+              body,
+              channel: process.env.CHANNEL,
+              type: 'broadcast',
+              sentAt: new Date().toISOString(),
+            });
+            process.exit(0);
+          }).catch(e => { console.error('Error:', e.message); process.exit(1); });
           EOF
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

@@ -737,6 +737,18 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
     ROADMAP
   </button>
+  <button class="tab" onclick="switchTab('bugs',this);loadBugReports()">
+    <svg viewBox="0 0 24 24"><path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z"/></svg>
+    BUGS
+  </button>
+  <button class="tab" onclick="switchTab('pushhistory',this);loadPushHistory()">
+    <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+    HISTORY
+  </button>
+  <button class="tab" onclick="switchTab('results',this);loadResults()">
+    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+    RESULTS
+  </button>
 </div>
 
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
@@ -1255,6 +1267,47 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
+</div>
+
+<!-- ══════════════════════════════ BUGS ══════ -->
+<div id="panel-bugs" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <div class="section-label">BUG REPORTS &amp; FEEDBACK</div>
+      <button class="btn-sm" onclick="loadBugReports()">↻ REFRESH</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="bug-filter-row">
+      <button class="btn-sm bug-filter active" onclick="filterBugs('all',this)">All</button>
+      <button class="btn-sm bug-filter" onclick="filterBugs('Bug',this)">Bug</button>
+      <button class="btn-sm bug-filter" onclick="filterBugs('Crash',this)">Crash</button>
+      <button class="btn-sm bug-filter" onclick="filterBugs('UI Issue',this)">UI Issue</button>
+      <button class="btn-sm bug-filter" onclick="filterBugs('Feature Request',this)">Feature Request</button>
+      <button class="btn-sm bug-filter" onclick="filterBugs('Other',this)">Other</button>
+    </div>
+    <div id="bug-reports-list"><div class="section-note">Loading…</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ PUSH HISTORY ══════ -->
+<div id="panel-pushhistory" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <div class="section-label">PUSH HISTORY</div>
+      <button class="btn-sm" onclick="loadPushHistory()">↻ REFRESH</button>
+    </div>
+    <div id="push-history-list"><div class="section-note">Loading…</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ RESULTS ══════ -->
+<div id="panel-results" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <div class="section-label">RESULTS VIEWER</div>
+      <select class="input" id="results-year-select" onchange="loadResults()" style="max-width:100px;padding:6px 10px;font-size:13px"></select>
+    </div>
+    <div id="results-list"><div class="section-note">Loading…</div></div>
+  </div>
 </div>
 
 <script>
@@ -2678,6 +2731,9 @@ if (savedTab) {
   const btn = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes("'" + savedTab + "'"));
   if (btn) switchTab(savedTab, btn);
   if (savedTab === 'roadmap') loadRoadmap();
+  if (savedTab === 'bugs') loadBugReports();
+  if (savedTab === 'pushhistory') loadPushHistory();
+  if (savedTab === 'results') loadResults();
   if (savedTab === 'dashboard') refreshDashboard();
 } else {
   refreshDashboard();
@@ -2842,6 +2898,183 @@ async function saveRoadmap(silent) {
 
 function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════ BUG REPORTS ══════════════════════════════
+
+let allBugReports = [];
+let bugFilter = 'all';
+
+async function loadBugReports() {
+  document.getElementById('bug-reports-list').innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${FS_BASE_URL}/bug_reports?key=${FS_API_KEY}&pageSize=100`);
+    const d = await r.json();
+    allBugReports = (d.documents || []).map(doc => {
+      const f = doc.fields || {};
+      return {
+        id: doc.name.split('/').pop(),
+        category: f.category?.stringValue || 'Other',
+        title: f.title?.stringValue || '',
+        description: f.description?.stringValue || '',
+        steps: f.steps?.stringValue || '',
+        submittedAt: f.submittedAt?.stringValue || '',
+      };
+    }).sort((a,b) => b.submittedAt.localeCompare(a.submittedAt));
+    renderBugReports();
+  } catch(e) {
+    document.getElementById('bug-reports-list').innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
+  }
+}
+
+function filterBugs(cat, btn) {
+  bugFilter = cat;
+  document.querySelectorAll('.bug-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBugReports();
+}
+
+const BUG_CAT_COLORS = {Bug:'var(--red)',Crash:'var(--red)','UI Issue':'#60A5FA','Feature Request':'var(--yellow)',Other:'var(--text-sec)'};
+
+function renderBugReports() {
+  const list = bugFilter === 'all' ? allBugReports : allBugReports.filter(r => r.category === bugFilter);
+  const el = document.getElementById('bug-reports-list');
+  if (!list.length) { el.innerHTML = '<div class="section-note">No reports.</div>'; return; }
+  el.innerHTML = list.map(r => {
+    const col = BUG_CAT_COLORS[r.category] || 'var(--text-sec)';
+    const date = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '—';
+    return `<div style="background:var(--surface);border:1px solid var(--outline);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:${col};text-transform:uppercase">${escHtml(r.category)}</span>
+        <span style="color:var(--text-sec);font-size:11px;margin-left:auto">${date}</span>
+        <button class="btn-sm" style="color:var(--red);border-color:rgba(227,0,11,0.3)" onclick="deleteBugReport('${r.id}')">✗</button>
+      </div>
+      ${r.title ? `<div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(r.title)}</div>` : ''}
+      ${r.description ? `<div style="color:var(--text-sec);font-size:13px;line-height:1.5;margin-bottom:4px">${escHtml(r.description)}</div>` : ''}
+      ${r.steps ? `<div style="color:var(--text-sec);font-size:12px;margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;white-space:pre-wrap">${escHtml(r.steps)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function deleteBugReport(id) {
+  if (!confirm('Dismiss this report?')) return;
+  await fetch(`${FS_BASE_URL}/bug_reports/${id}?key=${FS_API_KEY}`, {method:'DELETE'});
+  loadBugReports();
+}
+
+// ══════════════════════════════ PUSH HISTORY ══════════════════════════════
+
+async function loadPushHistory() {
+  document.getElementById('push-history-list').innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${FS_BASE_URL}/push_history?key=${FS_API_KEY}&pageSize=50`);
+    const d = await r.json();
+    const docs = (d.documents || []).map(doc => {
+      const f = doc.fields || {};
+      return {
+        id: doc.name.split('/').pop(),
+        title: f.title?.stringValue || '',
+        body: f.body?.stringValue || '',
+        channel: f.channel?.stringValue || '',
+        type: f.type?.stringValue || 'broadcast',
+        sentAt: f.sentAt?.stringValue || '',
+      };
+    }).sort((a,b) => b.sentAt.localeCompare(a.sentAt));
+    const el = document.getElementById('push-history-list');
+    if (!docs.length) { el.innerHTML = '<div class="section-note">No notifications sent yet.</div>'; return; }
+    el.innerHTML = docs.map(n => {
+      const date = n.sentAt ? new Date(n.sentAt).toLocaleString() : '—';
+      const typeBadge = n.type === 'broadcast'
+        ? `<span style="font-size:10px;font-weight:800;color:var(--yellow);letter-spacing:1px">BROADCAST</span>`
+        : `<span style="font-size:10px;font-weight:800;color:#60A5FA;letter-spacing:1px">TEST</span>`;
+      return `<div style="background:var(--surface);border:1px solid var(--outline);border-radius:10px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          ${typeBadge}
+          <span style="color:var(--text-sec);font-size:11px;margin-left:auto">${date}</span>
+        </div>
+        <div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:2px">${escHtml(n.title)}</div>
+        ${n.body ? `<div style="color:var(--text-sec);font-size:13px">${escHtml(n.body)}</div>` : ''}
+        ${n.channel ? `<div style="color:var(--text-sec);font-size:11px;margin-top:4px">channel: ${escHtml(n.channel)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('push-history-list').innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════ RESULTS VIEWER ══════════════════════════════
+
+const RESULTS_YEARS = Array.from({length: new Date().getFullYear() - 2013}, (_, i) => 2026 - i);
+let resultsLoaded = false;
+
+function initResultsYearSelect() {
+  const sel = document.getElementById('results-year-select');
+  if (sel.options.length) return;
+  RESULTS_YEARS.forEach(y => {
+    const o = document.createElement('option'); o.value = y; o.textContent = y; sel.appendChild(o);
+  });
+}
+
+async function loadResults() {
+  initResultsYearSelect();
+  const year = document.getElementById('results-year-select').value || new Date().getFullYear();
+  document.getElementById('results-list').innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results${year}.json?t=${Date.now()}`);
+    if (!r.ok) { document.getElementById('results-list').innerHTML = '<div class="section-note">No results for this year yet.</div>'; return; }
+    const d = await r.json();
+    const rounds = d.rounds || [];
+    if (!rounds.length) { document.getElementById('results-list').innerHTML = '<div class="section-note">No rounds yet.</div>'; return; }
+    document.getElementById('results-list').innerHTML = rounds.map((round, ri) => {
+      const racesHtml = round.races.map(race => {
+        const rows = (race.results || []).map(res =>
+          `<tr>
+            <td style="padding:6px 8px;color:${res.pos <= 3 ? 'var(--yellow)' : 'var(--text)'};font-weight:${res.pos <= 3 ? '700':'400'}">${res.pos}</td>
+            <td style="padding:6px 8px;color:var(--text-sec);font-size:12px">${res.no}</td>
+            <td style="padding:6px 8px;color:var(--text);font-size:13px">${escHtml(res.driver)}</td>
+            <td style="padding:6px 8px;color:var(--text-sec);font-size:12px">${escHtml(res.car||'')}</td>
+            <td style="padding:6px 8px;color:var(--text-sec);font-size:12px;text-align:right">${res.points||0}pts</td>
+          </tr>`
+        ).join('');
+        return `<div style="margin-bottom:12px">
+          <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text-sec);margin-bottom:6px">${escHtml(race.label)}</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr style="border-bottom:1px solid var(--outline)">
+                <th style="padding:4px 8px;color:var(--text-sec);font-size:10px;font-weight:700;text-align:left">POS</th>
+                <th style="padding:4px 8px;color:var(--text-sec);font-size:10px;font-weight:700;text-align:left">NO</th>
+                <th style="padding:4px 8px;color:var(--text-sec);font-size:10px;font-weight:700;text-align:left">DRIVER</th>
+                <th style="padding:4px 8px;color:var(--text-sec);font-size:10px;font-weight:700;text-align:left">CAR</th>
+                <th style="padding:4px 8px;color:var(--text-sec);font-size:10px;font-weight:700;text-align:right">PTS</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+      }).join('');
+      const roundId = `round-body-${ri}`;
+      return `<div style="border:1px solid var(--outline);border-radius:10px;margin-bottom:10px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;background:var(--surface)" onclick="toggleRound('${roundId}',this)">
+          <span style="color:var(--yellow);font-size:11px;font-weight:800">RD ${round.round}</span>
+          <span style="color:var(--text);font-size:14px;font-weight:700;flex:1">${escHtml(round.venue)}</span>
+          <span style="color:var(--text-sec);font-size:12px">${escHtml(round.date||'')}</span>
+          <span style="color:var(--text-sec);font-size:14px" id="${roundId}-chevron">›</span>
+        </div>
+        <div id="${roundId}" style="display:none;padding:14px;border-top:1px solid var(--outline)">${racesHtml}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('results-list').innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
+  }
+}
+
+function toggleRound(id, header) {
+  const body = document.getElementById(id);
+  const chevron = document.getElementById(id + '-chevron');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chevron.textContent = open ? '˅' : '›';
+  header.style.borderRadius = open ? '10px 10px 0 0' : '10px';
 }
 
 

@@ -12,7 +12,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xqeyanjk';
+const FS_BASE = 'https://firestore.googleapis.com/v1/projects/btcchub-af77a/databases/(default)/documents';
+const FS_API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
 const categories = ['Bug', 'Crash', 'UI Issue', 'Feature Request', 'Other'];
 
 export default function BugReportScreen({navigation}) {
@@ -28,15 +29,17 @@ export default function BugReportScreen({navigation}) {
     if (!title.trim() && !description.trim()) return;
     setState('loading');
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch(`${FS_BASE}/bug_reports?key=${FS_API_KEY}`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', Accept: 'application/json'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          category,
-          title: title.trim(),
-          description: description.trim(),
-          steps: steps.trim(),
-          platform: 'React Native Android',
+          fields: {
+            category: {stringValue: category},
+            title: {stringValue: title.trim()},
+            description: {stringValue: description.trim()},
+            steps: {stringValue: steps.trim()},
+            submittedAt: {stringValue: new Date().toISOString()},
+          },
         }),
       });
       setState(res.ok ? 'success' : 'error');
