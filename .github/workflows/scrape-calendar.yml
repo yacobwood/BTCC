@@ -1,21 +1,17 @@
-# Runs calendar + grid scrapers on a schedule. You don't need to know when
-# BTCC announce the calendar — the next run will pick it up when btcc.net updates.
-name: Scrape BTCC Calendar & Grid
+# Runs the calendar scraper on a schedule. Picks up new calendar data
+# automatically when btcc.net publishes it.
+name: Scrape BTCC Calendar
 
 on:
   schedule:
-    # Daily 09:00 UTC. When btcc.net publish the new calendar, it'll be in the repo within a day.
+    # Daily 09:00 UTC.
     - cron: "0 9 * * *"
   workflow_dispatch:
     inputs:
       season:
-        description: "Season year for calendar (e.g. 2026)"
+        description: "Season year (e.g. 2026)"
         type: number
         default: 2026
-      merge_grid:
-        description: "Also scrape drivers and merge into drivers.json"
-        type: boolean
-        default: false
 
 jobs:
   scrape:
@@ -34,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r tools/scraper/requirements.txt
+          pip install playwright
           sudo apt-get install -y libasound2t64
           playwright install chromium --with-deps
 
@@ -44,18 +40,10 @@ jobs:
           [ -z "$SEASON" ] && SEASON=2026
           python tools/scraper/scrape_calendar.py --season "$SEASON"
 
-      - name: Scrape grid (optional)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.merge_grid == 'true'
-        run: python tools/scraper/scrape_grid.py --merge
-
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update calendar from btcc.net [skip ci]"
-          file_pattern: |
-            data/calendar.json
-            data/calendar_schedule.json
-            data/drivers.json
-            data/grid_scraped.json
+          file_pattern: data/calendar.json
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
