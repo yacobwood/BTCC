@@ -78,7 +78,7 @@
       "driver": "Tom INGRAM",
       "team": "Team VERTU",
       "car": "80",
-      "points": 27,
+      "points": 28,
       "wins": 0,
       "seconds": 1,
       "thirds": 0
@@ -222,13 +222,13 @@
     },
     {
       "pos": 2,
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "team": "Team VERTU",
       "points": 69
     },
     {
       "pos": 3,
-      "team": "Team VERTU",
-      "points": 68
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "points": 69
     },
     {
       "pos": 4,

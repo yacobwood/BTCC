@@ -12,6 +12,9 @@ on:
         description: "Season year to scrape (e.g. 2026)"
         type: number
         default: 2026
+      round:
+        description: "Specific round to scrape (leave blank for all)"
+        type: number
 
 concurrency:
   group: scrape-results
@@ -43,28 +46,19 @@ jobs:
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.is_race_weekend == 'true'
-        run: |
-          pip install -r tools/scraper/requirements.txt
-          sudo apt-get install -y libasound2t64
-          playwright install chromium --with-deps
+        run: pip install pdfminer.six
 
-      - name: Scrape results
+      - name: Scrape results and compute standings
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.is_race_weekend == 'true'
         run: |
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
-          python tools/scraper/scrape_results.py "$YEAR"
-
-      - name: Recompute standings from results
-        if: |
-          github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_weekend == 'true'
-        run: |
-          YEAR="${{ github.event.inputs.year }}"
-          [ -z "$YEAR" ] && YEAR=2026
-          python tools/scraper/compute_standings.py "$YEAR" --write
+          ROUND="${{ github.event.inputs.round }}"
+          ARGS="$YEAR"
+          [ -n "$ROUND" ] && ARGS="$ARGS --round $ROUND"
+          python tools/scraper/scrape_tsl.py $ARGS
 
       - name: Commit updated data
         if: |
