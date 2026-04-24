@@ -48,7 +48,8 @@ jobs:
           const imageUrl = process.env.IMAGE_URL || '';
           const body = process.env.BODY || '';
           // data fields drive our Notifee handler on Android; body field signals broadcast style
-          const data = { channel: process.env.CHANNEL, title: process.env.TITLE, body, ...extraData };
+          const data = { channel: process.env.CHANNEL, title: process.env.TITLE, ...extraData };
+          if (body) data.body = body;
           if (imageUrl) data.imageUrl = imageUrl;
 
           // Reach any user subscribed to at least one notification topic

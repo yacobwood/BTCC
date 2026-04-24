@@ -15,9 +15,10 @@ if (Platform.OS === 'android') {
     const imageUrl = data.imageUrl || null;
     // Broadcasts use 'general' channel and have title + body separately;
     // article/podcast messages use data.title as the notification body
-    const isGeneral = channelId === 'general';
-    const notifTitle = isGeneral ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
-    const notifBody = isGeneral ? (data.body || '') : data.title;
+    // If data.body present: custom/broadcast with explicit title+body
+    // Otherwise: scraper-style where data.title is the article title (used as body)
+    const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
+    const notifBody = data.body || data.title;
     await notifee.displayNotification({
       title: notifTitle,
       body: notifBody,

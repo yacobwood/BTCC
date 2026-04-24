@@ -46,9 +46,8 @@ export function onForegroundMessage(callback) {
     if (!data?.title) return;
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
-    const isGeneral = channelId === 'general';
-    const notifTitle = isGeneral ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
-    const notifBody = isGeneral ? (data.body || '') : data.title;
+    const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
+    const notifBody = data.body || data.title;
     await notifee.displayNotification({
       title: notifTitle,
       body: notifBody,
