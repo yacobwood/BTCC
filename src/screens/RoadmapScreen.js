@@ -18,7 +18,6 @@ const ROADMAP_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/
 const PROJECT_ID = 'btcchub-af77a';
 const API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
 const FS_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xqeyanjk';
 
 async function fetchVoteCount(itemId) {
   try {
@@ -77,7 +76,7 @@ export default function RoadmapScreen({navigation}) {
       ]);
       const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
       const STATUS_ORDER = {'in-progress': 0, planned: 1, idea: 2, done: 3, rejected: 4};
-      const planned = (data.planned || [])
+      const planned = (data.items || data.planned || [])
         .filter(item => {
           if (item.status === 'rejected') {
             if (!item.rejectedAt) return false;
@@ -138,13 +137,16 @@ export default function RoadmapScreen({navigation}) {
     if (!ideaText.trim() || ideaState === 'loading') return;
     setIdeaState('loading');
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const id = `sub_${Date.now()}`;
+      const res = await fetch(`${FS_BASE}/roadmap_submissions?key=${API_KEY}`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', Accept: 'application/json'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          category: 'Roadmap Idea',
-          title: ideaText.trim(),
-          platform: 'React Native Android',
+          fields: {
+            id: {stringValue: id},
+            title: {stringValue: ideaText.trim()},
+            submittedAt: {stringValue: new Date().toISOString()},
+          },
         }),
       });
       if (res.ok) {

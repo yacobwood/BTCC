@@ -735,6 +735,10 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
     SCRAPERS
   </button>
+  <button class="tab" onclick="switchTab('roadmap',this)" id="tab-roadmap">
+    <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
+    ROADMAP
+  </button>
 </div>
 
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
@@ -1227,6 +1231,31 @@ select.input { cursor: pointer; }
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
+
+</div>
+
+<!-- ══════════════════════════════ ROADMAP ══════ -->
+<div id="panel-roadmap" class="tab-panel">
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <div class="section-label">PENDING SUBMISSIONS</div>
+      <button class="btn-sm" onclick="loadRoadmap()">↻ REFRESH</button>
+    </div>
+    <div id="roadmap-submissions-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="section-label">ROADMAP ITEMS</div>
+      <button class="btn-sm" onclick="rmAddItem()">+ ADD</button>
+    </div>
+    <div id="roadmap-items-list"><div class="section-note">Loading…</div></div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn-primary" onclick="saveRoadmap()">SAVE TO APP</button>
+      <span id="roadmap-save-status" style="font-size:12px;color:var(--text-sec)"></span>
+    </div>
+  </div>
 
 </div>
 
@@ -2635,6 +2664,194 @@ if (savedTab) {
 
 // Lazy-load hub news + Quill when tab opened
 window._hubnewsLoaded = false;
+
+// ══════════════════════════════ ROADMAP ══════════════════════════════
+
+const ROADMAP_PATH = 'data/roadmap.json';
+const ROADMAP_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/roadmap.json';
+const FS_PROJECT   = 'btcchub-af77a';
+const FS_API_KEY   = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
+const FS_BASE_URL  = `https://firestore.googleapis.com/v1/projects/${FS_PROJECT}/databases/(default)/documents`;
+
+let roadmapItems = [];
+let roadmapFileSha = null;
+let roadmapLoaded = false;
+
+const ROADMAP_STATUS_OPTS = ['idea','planned','in-progress','done','rejected'];
+const ROADMAP_STATUS_COLORS = {
+  'idea':        'var(--text-sec)',
+  'planned':     '#60A5FA',
+  'in-progress': 'var(--yellow)',
+  'done':        'var(--green)',
+  'rejected':    'var(--red)',
+};
+
+async function loadRoadmap() {
+  if (!roadmapLoaded) roadmapLoaded = true;
+
+  // Load items from GitHub
+  document.getElementById('roadmap-items-list').innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(ROADMAP_RAW + '?t=' + Date.now());
+    const d = await r.json();
+    roadmapItems = d.items || d.planned || [];
+  } catch(e) {
+    document.getElementById('roadmap-items-list').innerHTML = `<div class="section-note" style="color:var(--red)">Failed to load: ${e.message}</div>`;
+  }
+  renderRoadmapItems();
+
+  // Load submissions from Firestore
+  document.getElementById('roadmap-submissions-list').innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${FS_BASE_URL}/roadmap_submissions?key=${FS_API_KEY}&pageSize=50`);
+    const d = await r.json();
+    const docs = d.documents || [];
+    if (!docs.length) {
+      document.getElementById('roadmap-submissions-list').innerHTML = '<div class="section-note">No pending submissions.</div>';
+    } else {
+      document.getElementById('roadmap-submissions-list').innerHTML = docs.map(doc => {
+        const f = doc.fields || {};
+        const id = doc.name.split('/').pop();
+        const title = f.title?.stringValue || '(no title)';
+        const submittedAt = f.submittedAt?.stringValue ? new Date(f.submittedAt.stringValue).toLocaleString() : '—';
+        return `<div style="padding:12px 0;border-bottom:1px solid var(--outline-lo);display:flex;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <div style="color:var(--text);font-size:14px;font-weight:600;margin-bottom:2px">${escHtml(title)}</div>
+            <div style="color:var(--text-sec);font-size:11px">${submittedAt}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn-sm" style="background:var(--green-dim);color:var(--green);border-color:var(--green)"
+              onclick="approveSubmission('${escHtml(id)}','${escHtml(title.replace(/'/g,"\\'"))}')">✓ Approve</button>
+            <button class="btn-sm" style="background:var(--red-dim);color:var(--red);border-color:var(--red)"
+              onclick="rejectSubmission('${escHtml(id)}')">✗ Reject</button>
+          </div>
+        </div>`;
+      }).join('') + '<div style="height:4px"></div>';
+    }
+  } catch(e) {
+    document.getElementById('roadmap-submissions-list').innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
+  }
+}
+
+function renderRoadmapItems() {
+  const el = document.getElementById('roadmap-items-list');
+  if (!roadmapItems.length) { el.innerHTML = '<div class="section-note">No items yet.</div>'; return; }
+  el.innerHTML = roadmapItems.map((item, idx) => {
+    const col = ROADMAP_STATUS_COLORS[item.status] || 'var(--text-sec)';
+    const statusOpts = ROADMAP_STATUS_OPTS.map(s =>
+      `<option value="${s}" ${item.status === s ? 'selected' : ''}>${s}</option>`
+    ).join('');
+    return `<div id="rm-item-${idx}" style="padding:12px 0;border-bottom:1px solid var(--outline-lo)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:11px;color:${col};font-weight:700;letter-spacing:0.5px;text-transform:uppercase">${item.status}</span>
+        <span style="color:var(--text);font-size:14px;font-weight:600;flex:1">${escHtml(item.title)}</span>
+        <button class="btn-sm" style="color:var(--red);border-color:rgba(227,0,11,0.3)" onclick="rmRemoveItem(${idx})">Remove</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <div class="field-label">TITLE</div>
+          <input class="input" value="${escHtml(item.title)}" oninput="rmUpdateField(${idx},'title',this.value)">
+        </div>
+        <div>
+          <div class="field-label">STATUS</div>
+          <select class="input" onchange="rmUpdateStatus(${idx},this.value)" style="color:${col}">${statusOpts}</select>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="field-label">DESCRIPTION</div>
+        <input class="input" value="${escHtml(item.description||'')}" oninput="rmUpdateField(${idx},'description',this.value)">
+      </div>
+      ${item.status === 'rejected' ? `<div style="margin-top:8px"><div class="field-label">REJECTION REASON</div>
+        <input class="input" value="${escHtml(item.rejectReason||'')}" placeholder="Why it won't be built…"
+          oninput="rmUpdateField(${idx},'rejectReason',this.value)"></div>` : ''}
+    </div>`;
+  }).join('') + '<div style="height:4px"></div>';
+}
+
+function rmUpdateField(idx, key, val) {
+  roadmapItems[idx][key] = val;
+}
+
+function rmUpdateStatus(idx, val) {
+  roadmapItems[idx].status = val;
+  const today = new Date().toISOString().split('T')[0];
+  if (val === 'done' && !roadmapItems[idx].doneAt) roadmapItems[idx].doneAt = today;
+  if (val === 'rejected' && !roadmapItems[idx].rejectedAt) roadmapItems[idx].rejectedAt = today;
+  renderRoadmapItems();
+}
+
+function rmRemoveItem(idx) {
+  if (!confirm(`Remove "${roadmapItems[idx].title}"?`)) return;
+  roadmapItems.splice(idx, 1);
+  renderRoadmapItems();
+}
+
+function rmAddItem() {
+  const id = String(Date.now());
+  roadmapItems.unshift({id, title: '', description: '', status: 'idea'});
+  renderRoadmapItems();
+  document.getElementById('roadmap-items-list').scrollTop = 0;
+}
+
+async function approveSubmission(docId, title) {
+  const id = String(Date.now());
+  roadmapItems.unshift({id, title, description: '', status: 'idea'});
+  renderRoadmapItems();
+  await deleteSubmission(docId);
+  await saveRoadmap(true);
+}
+
+async function rejectSubmission(docId) {
+  if (!confirm('Reject and delete this submission?')) return;
+  await deleteSubmission(docId);
+  loadRoadmap();
+}
+
+async function deleteSubmission(docId) {
+  try {
+    await fetch(`${FS_BASE_URL}/roadmap_submissions/${docId}?key=${FS_API_KEY}`, {method:'DELETE'});
+    loadRoadmap();
+  } catch {}
+}
+
+async function saveRoadmap(silent) {
+  const tok = getToken();
+  if (!tok) { document.getElementById('roadmap-save-status').innerHTML = '<span class="err">Save GitHub token first.</span>'; return; }
+  document.getElementById('roadmap-save-status').textContent = 'Saving…';
+  const payload = {items: roadmapItems, submissions: []};
+  const content = JSON.stringify(payload, null, 2) + '\n';
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  try {
+    if (!roadmapFileSha) {
+      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${ROADMAP_PATH}`, {headers:{Authorization:'token '+tok}});
+      if (meta.ok) roadmapFileSha = (await meta.json()).sha;
+    }
+    const body = {message:'Update roadmap via admin', content: encoded};
+    if (roadmapFileSha) body.sha = roadmapFileSha;
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${ROADMAP_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (r.ok) {
+      const d = await r.json(); roadmapFileSha = d.content?.sha || null;
+      document.getElementById('roadmap-save-status').innerHTML = '<span class="ok">Saved ✓</span>';
+      if (!silent) setTimeout(() => { document.getElementById('roadmap-save-status').textContent = ''; }, 3000);
+    } else {
+      const e = await r.json();
+      document.getElementById('roadmap-save-status').innerHTML = `<span class="err">Error: ${e.message}</span>`;
+    }
+  } catch(e) {
+    document.getElementById('roadmap-save-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`;
+  }
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Load roadmap when tab is opened
+const _origSwitchTab = window.switchTab;
+window.switchTab = function(name, el) {
+  _origSwitchTab(name, el);
+  if (name === 'roadmap' && !roadmapLoaded) loadRoadmap();
+};
 
 </script>
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js" onload="initQuill()"></script>

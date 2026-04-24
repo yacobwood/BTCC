@@ -1,5 +1,5 @@
 {
-  "planned": [
+  "items": [
     {
       "id": "1",
       "title": "Centralised Merch",
@@ -61,5 +61,6 @@
       "description": "",
       "status": "idea"
     }
-  ]
+  ],
+  "submissions": []
 }
