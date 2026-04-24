@@ -2654,19 +2654,6 @@ loadNotifSchedule();
 window._notifLoaded = true;
 if (getToken()) refreshAllStatus();
 
-const savedTab = sessionStorage.getItem('activeTab');
-if (savedTab) {
-  const btn = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes("'" + savedTab + "'"));
-  if (btn) switchTab(savedTab, btn);
-  if (savedTab === 'roadmap') loadRoadmap();
-  if (savedTab === 'dashboard') refreshDashboard();
-} else {
-  refreshDashboard();
-}
-
-// Lazy-load hub news + Quill when tab opened
-window._hubnewsLoaded = false;
-
 // ══════════════════════════════ ROADMAP ══════════════════════════════
 
 const ROADMAP_PATH = 'data/roadmap.json';
@@ -2687,6 +2674,19 @@ const ROADMAP_STATUS_COLORS = {
   'done':        'var(--green)',
   'rejected':    'var(--red)',
 };
+
+const savedTab = sessionStorage.getItem('activeTab');
+if (savedTab) {
+  const btn = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes("'" + savedTab + "'"));
+  if (btn) switchTab(savedTab, btn);
+  if (savedTab === 'roadmap') loadRoadmap();
+  if (savedTab === 'dashboard') refreshDashboard();
+} else {
+  refreshDashboard();
+}
+
+// Lazy-load hub news + Quill when tab opened
+window._hubnewsLoaded = false;
 
 async function loadRoadmap() {
   if (!roadmapLoaded) roadmapLoaded = true;
