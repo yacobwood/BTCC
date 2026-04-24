@@ -1,12 +1,9 @@
 name: Scrape BTCC Standings
 
 on:
-  schedule:
-    # Baseline: every 6 hours during race season (Apr–Oct).
-    - cron: "0 */6 * * *"
-    # Race weekend boost: every 15 min Sat/Sun 9:00–18:00 UTC.
-    # The is_race_weekend guard step below skips non-race weekends instantly.
-    - cron: "*/15 9-18 * * 6,0"
+  # Disabled — standings are now computed from scraped results by scrape-results.yml
+  # which includes seconds/thirds podium counts. scrape_standings.py is kept for
+  # reference but should not overwrite standings.json.
   workflow_dispatch:
     inputs:
       force:
