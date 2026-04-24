@@ -13,9 +13,11 @@ if (Platform.OS === 'android') {
     if (!data?.title) return;
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
-    // Broadcast messages include data.body; article/podcast messages use data.title as body
-    const notifTitle = data.body != null ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
-    const notifBody = data.body != null ? data.body : data.title;
+    // Broadcasts use 'general' channel and have title + body separately;
+    // article/podcast messages use data.title as the notification body
+    const isGeneral = channelId === 'general';
+    const notifTitle = isGeneral ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
+    const notifBody = isGeneral ? (data.body || '') : data.title;
     await notifee.displayNotification({
       title: notifTitle,
       body: notifBody,
