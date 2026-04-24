@@ -1913,6 +1913,8 @@ async function sendBroadcast() {
   const deeplink = document.getElementById('broadcast-deeplink').value.trim();
   const statusEl = document.getElementById('broadcast-status');
   if (!title) { alert('Title is required'); return; }
+  const preview = body ? `"${title}"\n${body}` : `"${title}"`;
+  if (!confirm(`Send to ALL users?\n\n${preview}`)) return;
   const ghTok = getToken();
   if (!ghTok) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'No GitHub token saved.'; return; }
   const data = {};
@@ -1933,6 +1935,8 @@ async function sendCustomNotif() {
   const channel   = document.getElementById('custom-channel').value;
   const title     = document.getElementById('custom-title').value.trim();
   const body      = document.getElementById('custom-body').value.trim();
+  if (!title) { alert('Title is required'); return; }
+  if (!confirm(`Send to your device only?\n\n${body ? `"${title}"\n${body}` : `"${title}"`}`)) return;
   const imageUrl  = document.getElementById('custom-image').value.trim();
   const deeplink  = document.getElementById('custom-deeplink').value.trim();
   if (!title) { alert('Title is required'); return; }
