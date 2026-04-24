@@ -26,10 +26,13 @@ export default function SettingsScreen({navigation}) {
   const {useKm, toggleUnits} = useUnits();
   const {podcasts_enabled, debug_mode} = useFeatureFlags();
   const [stableDeviceId, setStableDeviceId] = useState('');
+  const [fcmToken, setFcmToken] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copiedFcm, setCopiedFcm] = useState(false);
 
   useEffect(() => {
     getStableDeviceId().then(id => { if (id) setStableDeviceId(id); });
+    getFCMToken().then(tok => { if (tok) setFcmToken(tok); }).catch(() => {});
   }, []);
 
   const copyToken = () => {
@@ -37,6 +40,13 @@ export default function SettingsScreen({navigation}) {
     Clipboard.setString(stableDeviceId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyFcmToken = () => {
+    if (!fcmToken) return;
+    Clipboard.setString(fcmToken);
+    setCopiedFcm(true);
+    setTimeout(() => setCopiedFcm(false), 2000);
   };
 
   useEffect(() => { Analytics.screen('settings'); }, []);
@@ -158,6 +168,11 @@ export default function SettingsScreen({navigation}) {
         {!!stableDeviceId && (
           <TouchableOpacity onPress={copyToken} accessibilityRole="button" accessibilityLabel="Copy device ID">
             <Text style={styles.deviceIdText}>{copied ? '✓ Copied' : `Device ID: ${stableDeviceId}`}</Text>
+          </TouchableOpacity>
+        )}
+        {!!fcmToken && (
+          <TouchableOpacity onPress={copyFcmToken} accessibilityRole="button" accessibilityLabel="Copy FCM token">
+            <Text style={styles.deviceIdText}>{copiedFcm ? '✓ Copied' : `FCM Token: ${fcmToken.slice(0, 20)}…`}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
