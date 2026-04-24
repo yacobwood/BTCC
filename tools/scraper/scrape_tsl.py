@@ -332,12 +332,14 @@ def fastest_lap_driver(results):
 
 def compute_standings(rounds):
     from collections import defaultdict
+    import datetime
     driver_pts    = defaultdict(int)
     driver_wins   = defaultdict(int)
     driver_2nds   = defaultdict(int)
     driver_3rds   = defaultdict(int)
     driver_team   = {}
     driver_car    = {}
+    driver_cl     = {}
     team_pts      = defaultdict(int)
     last_round    = 0
     last_venue    = ""
@@ -364,6 +366,7 @@ def compute_standings(rounds):
                 driver_pts[d]  += pts
                 driver_team[d]  = r.get("team", "")
                 driver_car[d]   = str(r.get("no", ""))
+                driver_cl[d]    = r.get("cl", "")
                 team_pts[r.get("team", "")] += pts
 
                 if not is_qual:
@@ -378,12 +381,14 @@ def compute_standings(rounds):
         "season":    str(YEAR),
         "round":     last_round,
         "venue":     last_venue,
+        "updated":   datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "standings": [
             {
                 "pos":     i,
                 "driver":  name,
                 "team":    driver_team[name],
                 "car":     driver_car[name],
+                "class":   driver_cl.get(name, ""),
                 "points":  pts,
                 "wins":    driver_wins[name],
                 "seconds": driver_2nds[name],
