@@ -4,14 +4,24 @@ import {getSeasonData} from '../assets/seasonData';
  * Navigate to the appropriate screen based on notification data.
  * Polls until navigationRef is ready (handles cold-start timing).
  *
- * @param {object} navigationRef  - React Navigation container ref (must expose navigate + isReady)
- * @param {Record<string,string>|undefined} data - FCM / notifee data payload
+ * Supports two formats:
+ *   type-based:  { type: "roadmap" }
+ *   deeplink:    { deeplink: "btccfanhub://roadmap" }
  */
 export function navigateFromData(navigationRef, data) {
   if (!data) return;
 
   const go = () => {
-    const {type, round, year, race, slug} = data;
+    // Resolve type from explicit `type` field or from `deeplink` URL path
+    let {type, round, year, race, slug, deeplink} = data;
+
+    if (!type && deeplink) {
+      // e.g. "btccfanhub://roadmap" → type = "roadmap"
+      try {
+        const url = deeplink.replace(/^btccfanhub:\/\//, '');
+        type = url.split('?')[0].split('/')[0];
+      } catch {}
+    }
 
     if ((type === 'round' || (!type && round)) && round) {
       navigationRef.navigate('Calendar', {screen: 'TrackDetail', params: {round}});
@@ -31,10 +41,40 @@ export function navigateFromData(navigationRef, data) {
         });
       }
 
-    } else if (type === 'podcast') {
+    } else if (type === 'podcast' || type === 'podcasts') {
       navigationRef.navigate('More', {screen: 'Podcasts'});
 
-    } else if (type === 'hub') {
+    } else if (type === 'roadmap') {
+      navigationRef.navigate('More', {screen: 'Roadmap'});
+
+    } else if (type === 'records') {
+      navigationRef.navigate('More', {screen: 'Records'});
+
+    } else if (type === 'radio') {
+      navigationRef.navigate('More', {screen: 'Radio'});
+
+    } else if (type === 'partners') {
+      navigationRef.navigate('More', {screen: 'Partners'});
+
+    } else if (type === 'settings') {
+      navigationRef.navigate('More', {screen: 'Settings'});
+
+    } else if (type === 'calendar') {
+      navigationRef.navigate('Calendar');
+
+    } else if (type === 'drivers' || type === 'grid') {
+      navigationRef.navigate('Grid');
+
+    } else if (type === 'results' || type === 'history') {
+      navigationRef.navigate('Results');
+
+    } else if (type === 'chat') {
+      navigationRef.navigate('Chat');
+
+    } else if (type === 'more') {
+      navigationRef.navigate('More');
+
+    } else if (type === 'hub' || type === 'news') {
       navigationRef.navigate('News');
     }
   };
