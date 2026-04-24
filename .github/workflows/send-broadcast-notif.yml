@@ -46,7 +46,9 @@ jobs:
           try { extraData = JSON.parse(process.env.EXTRA_DATA || '{}'); } catch(e) {}
 
           const imageUrl = process.env.IMAGE_URL || '';
-          const data = { channel: process.env.CHANNEL, title: process.env.TITLE, ...extraData };
+          const body = process.env.BODY || '';
+          // data fields drive our Notifee handler on Android; body field signals broadcast style
+          const data = { channel: process.env.CHANNEL, title: process.env.TITLE, body, ...extraData };
           if (imageUrl) data.imageUrl = imageUrl;
 
           // Reach any user subscribed to at least one notification topic
@@ -56,11 +58,12 @@ jobs:
             'standings_update', 'podcast_alerts',
           ].map(t => `'${t}' in topics`).join(' || ');
 
+          // No top-level notification block — Android handles via Notifee (full-colour icon)
+          // iOS gets the alert via apns.aps.alert
           admin.messaging().send({
             condition,
-            notification: { title: process.env.TITLE, body: process.env.BODY || '' },
-            android: { priority: 'high', notification: { channelId: process.env.CHANNEL } },
-            apns: { payload: { aps: { sound: 'default' } } },
+            android: { priority: 'high' },
+            apns: { payload: { aps: { alert: { title: process.env.TITLE, body }, sound: 'default' } } },
             data,
           }).then(r => { console.log('Sent:', r); process.exit(0); })
             .catch(e => { console.error('Error:', e.message); process.exit(1); });

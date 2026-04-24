@@ -13,15 +13,20 @@ if (Platform.OS === 'android') {
     if (!data?.title) return;
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
+    // Broadcast messages include data.body; article/podcast messages use data.title as body
+    const notifTitle = data.body != null ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
+    const notifBody = data.body != null ? data.body : data.title;
     await notifee.displayNotification({
-      title: channelId === 'podcasts' ? 'New Podcast' : 'New Article',
-      body: data.title,
+      title: notifTitle,
+      body: notifBody,
       data,
       android: {
         channelId,
-        smallIcon: 'ic_launcher',
+        smallIcon: 'ic_notification',
+        largeIcon: 'ic_launcher',
+        circularLargeIcon: true,
         pressAction: {id: 'default'},
-        ...(imageUrl ? {largeIcon: imageUrl, style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
+        ...(imageUrl ? {style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
       },
     });
   });
