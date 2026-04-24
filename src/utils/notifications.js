@@ -54,7 +54,7 @@ export function onForegroundMessage(callback) {
       data,
       android: {
         channelId,
-        smallIcon: 'ic_launcher',
+        smallIcon: 'ic_notification',
         largeIcon: 'ic_notification_large',
         circularLargeIcon: true,
         pressAction: {id: 'default'},
