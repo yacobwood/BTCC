@@ -1168,17 +1168,6 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
-  <div class="scraper-card" id="sc-merch">
-    <div class="scraper-head">
-      <div class="scraper-title">MERCH</div>
-      <div class="scraper-status-chip" id="ss-merch">—</div>
-    </div>
-    <div class="scraper-desc">Team Shopify listings → <strong>merch.json</strong>. Auto: daily 06:00 UTC.</div>
-    <div class="scraper-footer">
-      <button class="btn-run" onclick="runScraper('scrape-merch.yml','merch')">RUN ▶</button>
-    </div>
-  </div>
-
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
@@ -1559,7 +1548,6 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-results.yml',          key:'results'},
   {file:'scrape-calendar.yml',         key:'calendar'},
   {file:'scrape-schedule.yml',         key:'schedule'},
-  {file:'scrape-merch.yml',            key:'merch'},
 ];
 
 function startLiveTick() {
