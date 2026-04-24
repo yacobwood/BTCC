@@ -4,6 +4,7 @@ import {Platform, PermissionsAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export async function setupNotificationChannels() {
+  await notifee.createChannel({id: 'general', name: 'General', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'news', name: 'News Alerts', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'race', name: 'Race Alerts', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'qualifying', name: 'Qualifying Alerts', importance: AndroidImportance.HIGH});
@@ -53,7 +54,7 @@ export function onForegroundMessage(callback) {
       data,
       android: {
         channelId,
-        smallIcon: 'ic_notification',
+        smallIcon: 'ic_launcher',
         largeIcon: 'ic_launcher',
         circularLargeIcon: true,
         pressAction: {id: 'default'},

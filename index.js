@@ -22,7 +22,7 @@ if (Platform.OS === 'android') {
       data,
       android: {
         channelId,
-        smallIcon: 'ic_notification',
+        smallIcon: 'ic_launcher',
         largeIcon: 'ic_launcher',
         circularLargeIcon: true,
         pressAction: {id: 'default'},
