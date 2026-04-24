@@ -28,7 +28,7 @@
       "driver": "Aiden MOFFAT",
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
       "car": "16",
-      "points": 39,
+      "points": 40,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -38,7 +38,7 @@
       "driver": "Dan CAMMISH",
       "team": "NAPA Racing UK",
       "car": "27",
-      "points": 36,
+      "points": 38,
       "wins": 0,
       "seconds": 1,
       "thirds": 0
@@ -48,28 +48,28 @@
       "driver": "Gordon SHEDDEN",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "52",
-      "points": 30,
+      "points": 32,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
     },
     {
       "pos": 6,
-      "driver": "Mikey DOBLE",
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "car": "88",
-      "points": 29,
-      "wins": 1,
+      "driver": "Dexter PATTERSON",
+      "team": "Steel Seal with Power Maxed Racing",
+      "car": "17",
+      "points": 31,
+      "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 7,
-      "driver": "Dexter PATTERSON",
-      "team": "Steel Seal with Power Maxed Racing",
-      "car": "17",
+      "driver": "Mikey DOBLE",
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "car": "88",
       "points": 29,
-      "wins": 0,
+      "wins": 1,
       "seconds": 0,
       "thirds": 0
     },
@@ -88,7 +88,7 @@
       "driver": "Adam MORGAN",
       "team": "Cataclean Plato Racing",
       "car": "33",
-      "points": 25,
+      "points": 26,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -98,7 +98,7 @@
       "driver": "Ricky COLLARD",
       "team": "Team VERTU",
       "car": "11",
-      "points": 23,
+      "points": 25,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -115,20 +115,20 @@
     },
     {
       "pos": 12,
-      "driver": "Daryl DE LEON",
-      "team": "WSR",
-      "car": "2",
-      "points": 18,
+      "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+      "team": "Laser Tools Racing with MB Motorsport",
+      "car": "50",
+      "points": 20,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 13,
-      "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
-      "team": "Laser Tools Racing with MB Motorsport",
-      "car": "50",
-      "points": 17,
+      "driver": "Daryl DE LEON",
+      "team": "WSR",
+      "car": "2",
+      "points": 18,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -158,7 +158,7 @@
       "driver": "Chris SMILEY",
       "team": "Restart Racing",
       "car": "22",
-      "points": 13,
+      "points": 14,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -178,7 +178,7 @@
       "driver": "James DORLIN",
       "team": "Restart Racing",
       "car": "132",
-      "points": 4,
+      "points": 5,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -195,16 +195,6 @@
     },
     {
       "pos": 20,
-      "driver": "Daryl DELEON",
-      "team": "WSR",
-      "car": "2",
-      "points": 0,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 21,
       "driver": "Nicolas HAMILTON",
       "team": "Team VERTU",
       "car": "28",
@@ -214,7 +204,7 @@
       "thirds": 0
     },
     {
-      "pos": 22,
+      "pos": 21,
       "driver": "Max BUXTON",
       "team": "Speedworks Corolla Racing",
       "car": "19",
@@ -228,17 +218,17 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 106
+      "points": 108
     },
     {
       "pos": 2,
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 68
+      "points": 69
     },
     {
       "pos": 3,
       "team": "Team VERTU",
-      "points": 65
+      "points": 67
     },
     {
       "pos": 4,
@@ -248,22 +238,22 @@
     {
       "pos": 5,
       "team": "Laser Tools Racing with MB Motorsport",
-      "points": 47
+      "points": 52
     },
     {
       "pos": 6,
       "team": "Cataclean Plato Racing",
-      "points": 45
+      "points": 46
     },
     {
       "pos": 7,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 29
+      "points": 31
     },
     {
       "pos": 8,
       "team": "Restart Racing",
-      "points": 17
+      "points": 19
     },
     {
       "pos": 9,

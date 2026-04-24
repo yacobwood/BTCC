@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
-POINTS_QUALIFYING = {1: 10, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 4, 8: 3, 9: 2, 10: 1}
+POINTS_QUALIFYING = {1: 10, 2: 9, 3: 8, 4: 7, 5: 6, 6: 5, 7: 5, 8: 4, 9: 4, 10: 3, 11: 3, 12: 2, 13: 2, 14: 1, 15: 1}
 POINTS_RACE       = {1: 20, 2: 17, 3: 15, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8, 9: 7, 10: 6, 11: 5, 12: 4, 13: 3, 14: 2, 15: 1}
 
 # Repo root (parent of scraper/)
