@@ -54,6 +54,12 @@
       "title": "Live chat",
       "description": "Chat to fellow fans about the race",
       "status": "idea"
+    },
+        {
+      "id": "10",
+      "title": "Standings table for all championship types",
+      "description": "",
+      "status": "idea"
     }
   ]
 }
