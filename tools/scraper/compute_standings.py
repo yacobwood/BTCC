@@ -15,6 +15,21 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = REPO_ROOT / "data"
 
 
+def fastest_lap(results: list):
+    """Return the driver name with the fastest bestLap among classified finishers."""
+    def to_secs(t):
+        try:
+            m, s = t.split(":")
+            return int(m) * 60 + float(s)
+        except Exception:
+            return float("inf")
+
+    finishers = [r for r in results if r.get("pos", 0) > 0 and r.get("bestLap")]
+    if not finishers:
+        return None
+    return min(finishers, key=lambda r: to_secs(r["bestLap"]))["driver"]
+
+
 def compute(year: int, data: dict):
     driver_points = defaultdict(int)
     driver_wins = defaultdict(int)
@@ -33,15 +48,13 @@ def compute(year: int, data: dict):
         for race in rnd["races"]:
             is_qualifying = "qualifying" in race.get("label", "").lower()
             pts_table = POINTS_QUALIFYING if is_qualifying else POINTS_RACE
+            fl_driver = fastest_lap(race["results"]) if not is_qualifying else None
             for r in race["results"]:
                 d = r["driver"]
                 pos = r["pos"]
-                # Prefer the points value stored by the scraper (read from the official
-                # website's Pts column, which includes fastest-lap bonuses etc.).
-                # Fall back to computing from position if not present.
-                pts = r.get("points") if r.get("points") is not None else (
-                    pts_table.get(pos, 0) if pos > 0 else 0
-                )
+                pts = pts_table.get(pos, 0) if pos > 0 else 0
+                if d == fl_driver:
+                    pts += 1  # fastest lap bonus
                 driver_points[d] += pts
                 driver_team[d] = r.get("team", "")
                 driver_car[d] = str(r.get("no", ""))

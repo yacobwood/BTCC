@@ -8,7 +8,7 @@
       "driver": "Ashley SUTTON",
       "team": "NAPA Racing UK",
       "car": "116",
-      "points": 57,
+      "points": 59,
       "wins": 2,
       "seconds": 1,
       "thirds": 0
@@ -48,7 +48,7 @@
       "driver": "Gordon SHEDDEN",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "52",
-      "points": 32,
+      "points": 30,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -78,7 +78,7 @@
       "driver": "Tom INGRAM",
       "team": "Team VERTU",
       "car": "80",
-      "points": 26,
+      "points": 27,
       "wins": 0,
       "seconds": 1,
       "thirds": 0
@@ -118,7 +118,7 @@
       "driver": "Daryl DE LEON",
       "team": "WSR",
       "car": "2",
-      "points": 17,
+      "points": 18,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -128,7 +128,7 @@
       "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "50",
-      "points": 16,
+      "points": 17,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -195,6 +195,16 @@
     },
     {
       "pos": 20,
+      "driver": "Daryl DELEON",
+      "team": "WSR",
+      "car": "2",
+      "points": 0,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "pos": 21,
       "driver": "Nicolas HAMILTON",
       "team": "Team VERTU",
       "car": "28",
@@ -204,7 +214,7 @@
       "thirds": 0
     },
     {
-      "pos": 21,
+      "pos": 22,
       "driver": "Max BUXTON",
       "team": "Speedworks Corolla Racing",
       "car": "19",
@@ -218,7 +228,7 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 104
+      "points": 106
     },
     {
       "pos": 2,
@@ -228,17 +238,17 @@
     {
       "pos": 3,
       "team": "Team VERTU",
-      "points": 64
+      "points": 65
     },
     {
       "pos": 4,
       "team": "WSR",
-      "points": 59
+      "points": 60
     },
     {
       "pos": 5,
       "team": "Laser Tools Racing with MB Motorsport",
-      "points": 48
+      "points": 47
     },
     {
       "pos": 6,

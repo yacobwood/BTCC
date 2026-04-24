@@ -291,7 +291,6 @@ def parse_rows(rows: list[list[str]], race_label: str = "") -> list[dict]:
                 time_raw = cells[5 + offset] if len(cells) > 5 + offset else ""
                 gap_raw  = cells[6 + offset] if len(cells) > 6 + offset else ""
                 best_lap = cells[7 + offset] if len(cells) > 7 + offset else ""
-                pts_col  = cells[8 + offset] if len(cells) > 8 + offset else ""
         except (IndexError, ValueError):
             continue
 
@@ -299,15 +298,8 @@ def parse_rows(rows: list[list[str]], race_label: str = "") -> list[dict]:
             continue
 
         laps = int(re.sub(r"[^\d]", "", laps_raw) or "0")
-        # Use points from the website's Pts column when present (includes FL bonuses etc.),
-        # otherwise fall back to computing from position using the official BTCC scale.
         pts_table = POINTS_QUALIFYING if "qualifying" in race_label.lower() else POINTS_RACE
-        try:
-            points = int(re.sub(r"[^\d]", "", pts_col) or "") if pts_col.strip() else None
-        except (NameError, ValueError):
-            points = None
-        if points is None:
-            points = pts_table.get(pos, 0) if pos > 0 else 0
+        points = pts_table.get(pos, 0) if pos > 0 else 0
 
         results.append({
             "pos":     pos,
