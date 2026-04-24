@@ -1,0 +1,74 @@
+name: Send Broadcast Notification
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Notification channel (used as Android channelId)'
+        required: true
+        default: 'general'
+      title:
+        description: 'Notification title'
+        required: true
+      body:
+        description: 'Notification body'
+        required: false
+        default: ''
+      data:
+        description: |
+          Extra data JSON (optional). Deep-link targets:
+            Standings:  {"type":"standings"}
+            Results:    {"type":"results","round":"1","year":"2026"}
+            News:       {"type":"news","slug":"article-slug"}
+            Roadmap:    {"type":"roadmap"}
+        required: false
+        default: '{}'
+      image_url:
+        description: 'Image URL (optional)'
+        required: false
+        default: ''
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install firebase-admin
+        run: npm install firebase-admin@12
+
+      - name: Send broadcast via topic condition
+        run: |
+          node - <<'EOF'
+          const admin = require('./node_modules/firebase-admin');
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+
+          let extraData = {};
+          try { extraData = JSON.parse(process.env.EXTRA_DATA || '{}'); } catch(e) {}
+
+          const imageUrl = process.env.IMAGE_URL || '';
+          const data = { channel: process.env.CHANNEL, title: process.env.TITLE, ...extraData };
+          if (imageUrl) data.imageUrl = imageUrl;
+
+          // Reach any user subscribed to at least one notification topic
+          const condition = [
+            'race_alerts', 'news_alerts', 'results_alerts',
+            'qualifying_alerts', 'fp_alerts', 'weekend_preview',
+            'standings_update', 'podcast_alerts',
+          ].map(t => `'${t}' in topics`).join(' || ');
+
+          admin.messaging().send({
+            condition,
+            notification: { title: process.env.TITLE, body: process.env.BODY || '' },
+            android: { priority: 'high', notification: { channelId: process.env.CHANNEL } },
+            apns: { payload: { aps: { sound: 'default' } } },
+            data,
+          }).then(r => { console.log('Sent:', r); process.exit(0); })
+            .catch(e => { console.error('Error:', e.message); process.exit(1); });
+          EOF
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          CHANNEL: ${{ inputs.channel }}
+          TITLE: ${{ inputs.title }}
+          BODY: ${{ inputs.body }}
+          EXTRA_DATA: ${{ inputs.data }}
+          IMAGE_URL: ${{ inputs.image_url }}
