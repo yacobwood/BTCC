@@ -56,7 +56,7 @@ export function onForegroundMessage(callback) {
       android: {
         channelId,
         smallIcon: 'ic_launcher',
-        largeIcon: 'ic_launcher',
+        largeIcon: 'ic_notification_large',
         circularLargeIcon: true,
         pressAction: {id: 'default'},
         ...(imageUrl ? {style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
