@@ -1601,7 +1601,13 @@ async function runScraper(workflow, key) {
       method:'POST', headers:{Authorization:'token '+tok,'Content-Type':'application/json'},
       body: JSON.stringify({ref:'main', inputs: scraperInputs(workflow)}),
     });
-    if (r.status === 204) { setScraperStatus(key, 'running', '● Queued…'); }
+    if (r.status === 204) {
+      setScraperStatus(key, 'running', '● Queued…');
+      // Start polling so status auto-updates without needing a manual refresh
+      setTimeout(refreshAllStatus, 5000);
+      clearInterval(pollTimer);
+      pollTimer = setInterval(refreshAllStatus, 10000);
+    }
     else { const e = await r.json(); setScraperStatus(key, 'fail', '✗ ' + (e.message || r.status)); delete dispatchedAt[key]; btn.disabled = false; btn.textContent = 'RUN ▶'; }
   } catch(e) { setScraperStatus(key, 'fail', '✗ ' + e.message); delete dispatchedAt[key]; btn.disabled = false; btn.textContent = 'RUN ▶'; }
 }
