@@ -18,7 +18,7 @@
               "time": "15:07.947",
               "gap": "",
               "bestLap": "1:08.649",
-              "points": 10
+              "points": 6
             },
             {
               "pos": 2,
@@ -29,7 +29,7 @@
               "time": "15:07.971",
               "gap": "0.024",
               "bestLap": "1:08.236",
-              "points": 9
+              "points": 6
             },
             {
               "pos": 3,
@@ -40,7 +40,7 @@
               "time": "15:08.257",
               "gap": "0.310",
               "bestLap": "1:08.713",
-              "points": 8
+              "points": 5
             },
             {
               "pos": 4,
@@ -51,7 +51,7 @@
               "time": "15:09.249",
               "gap": "1.302",
               "bestLap": "1:08.624",
-              "points": 7
+              "points": 9
             },
             {
               "pos": 5,
@@ -62,7 +62,7 @@
               "time": "15:09.952",
               "gap": "2.005",
               "bestLap": "1:08.744",
-              "points": 6
+              "points": 9
             },
             {
               "pos": 6,
@@ -73,7 +73,7 @@
               "time": "15:11.455",
               "gap": "3.508",
               "bestLap": "1:08.818",
-              "points": 5
+              "points": 9
             },
             {
               "pos": 7,
@@ -84,7 +84,7 @@
               "time": "15:12.665",
               "gap": "4.718",
               "bestLap": "1:09.028",
-              "points": 4
+              "points": 11
             },
             {
               "pos": 8,
@@ -95,7 +95,7 @@
               "time": "15:12.955",
               "gap": "5.008",
               "bestLap": "1:08.868",
-              "points": 3
+              "points": 10
             },
             {
               "pos": 9,
@@ -106,7 +106,7 @@
               "time": "15:17.551",
               "gap": "9.604",
               "bestLap": "1:09.104",
-              "points": 2
+              "points": 5
             },
             {
               "pos": 10,
@@ -117,7 +117,7 @@
               "time": "15:18.793",
               "gap": "10.846",
               "bestLap": "1:08.948",
-              "points": 1
+              "points": 5
             },
             {
               "pos": 11,
@@ -128,7 +128,7 @@
               "time": "15:19.116",
               "gap": "11.169",
               "bestLap": "1:09.045",
-              "points": 0
+              "points": 3
             },
             {
               "pos": 12,
@@ -139,7 +139,7 @@
               "time": "15:19.378",
               "gap": "11.431",
               "bestLap": "1:09.022",
-              "points": 0
+              "points": 4
             },
             {
               "pos": 13,
@@ -150,7 +150,7 @@
               "time": "15:19.514",
               "gap": "11.567",
               "bestLap": "1:08.996",
-              "points": 0
+              "points": 3
             },
             {
               "pos": 14,
@@ -161,7 +161,7 @@
               "time": "15:19.741",
               "gap": "11.794",
               "bestLap": "1:08.984",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 15,
@@ -172,7 +172,7 @@
               "time": "15:20.651",
               "gap": "12.704",
               "bestLap": "1:08.968",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 16,
@@ -183,18 +183,18 @@
               "time": "15:22.794",
               "gap": "14.847",
               "bestLap": "1:08.866",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 17,
               "no": 2,
-              "driver": "Daryl DE LEON",
+              "driver": "Daryl DELEON",
               "team": "WSR",
               "laps": 13,
               "time": "15:23.646",
               "gap": "15.699",
               "bestLap": "1:08.969",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 18,
@@ -205,7 +205,7 @@
               "time": "15:28.147",
               "gap": "20.200",
               "bestLap": "1:08.981",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 19,
@@ -216,7 +216,7 @@
               "time": "15:28.442",
               "gap": "20.495",
               "bestLap": "1:09.444",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 20,
@@ -227,7 +227,7 @@
               "time": "15:31.326",
               "gap": "23.379",
               "bestLap": "1:10.071",
-              "points": 0
+              "points": 7
             },
             {
               "pos": 0,
@@ -254,7 +254,7 @@
               "time": "26:01.652",
               "gap": "",
               "bestLap": "1:08.351",
-              "points": 20
+              "points": 3
             },
             {
               "pos": 2,
@@ -265,7 +265,7 @@
               "time": "26:03.401",
               "gap": "1.749",
               "bestLap": "1:07.944",
-              "points": 17
+              "points": 6
             },
             {
               "pos": 3,
@@ -276,7 +276,7 @@
               "time": "26:07.044",
               "gap": "5.392",
               "bestLap": "1:08.246",
-              "points": 15
+              "points": 4
             },
             {
               "pos": 4,
@@ -287,7 +287,7 @@
               "time": "26:07.928",
               "gap": "6.276",
               "bestLap": "1:08.755",
-              "points": 13
+              "points": 3
             },
             {
               "pos": 5,
@@ -298,7 +298,7 @@
               "time": "26:09.053",
               "gap": "7.401",
               "bestLap": "1:08.928",
-              "points": 11
+              "points": 3
             },
             {
               "pos": 6,
@@ -309,7 +309,7 @@
               "time": "26:09.345",
               "gap": "7.693",
               "bestLap": "1:08.654",
-              "points": 10
+              "points": 5
             },
             {
               "pos": 7,
@@ -320,7 +320,7 @@
               "time": "26:09.754",
               "gap": "8.102",
               "bestLap": "1:09.026",
-              "points": 9
+              "points": 15
             },
             {
               "pos": 8,
@@ -331,7 +331,7 @@
               "time": "26:09.832",
               "gap": "8.180",
               "bestLap": "1:09.054",
-              "points": 8
+              "points": 14
             },
             {
               "pos": 9,
@@ -342,7 +342,7 @@
               "time": "26:10.069",
               "gap": "8.417",
               "bestLap": "1:08.748",
-              "points": 7
+              "points": 17
             },
             {
               "pos": 10,
@@ -353,7 +353,7 @@
               "time": "26:10.427",
               "gap": "8.775",
               "bestLap": "1:08.835",
-              "points": 6
+              "points": 2
             },
             {
               "pos": 11,
@@ -364,7 +364,7 @@
               "time": "26:13.319",
               "gap": "11.667",
               "bestLap": "1:08.291",
-              "points": 5
+              "points": 4
             },
             {
               "pos": 12,
@@ -375,7 +375,7 @@
               "time": "26:13.807",
               "gap": "12.155",
               "bestLap": "1:08.966",
-              "points": 4
+              "points": 6
             },
             {
               "pos": 13,
@@ -386,7 +386,7 @@
               "time": "26:15.028",
               "gap": "13.376",
               "bestLap": "1:09.457",
-              "points": 3
+              "points": 17
             },
             {
               "pos": 14,
@@ -397,7 +397,7 @@
               "time": "26:15.268",
               "gap": "13.616",
               "bestLap": "1:09.442",
-              "points": 2
+              "points": 5
             },
             {
               "pos": 15,
@@ -408,7 +408,7 @@
               "time": "26:15.684",
               "gap": "14.032",
               "bestLap": "1:09.249",
-              "points": 1
+              "points": 6
             },
             {
               "pos": 16,
@@ -419,7 +419,7 @@
               "time": "26:15.812",
               "gap": "14.160",
               "bestLap": "1:09.149",
-              "points": 0
+              "points": 7
             },
             {
               "pos": 17,
@@ -430,7 +430,7 @@
               "time": "26:22.783",
               "gap": "21.131",
               "bestLap": "1:09.646",
-              "points": 0
+              "points": 6
             },
             {
               "pos": 18,
@@ -441,7 +441,7 @@
               "time": "26:23.001",
               "gap": "21.349",
               "bestLap": "1:09.693",
-              "points": 0
+              "points": 6
             },
             {
               "pos": 0,
@@ -452,7 +452,7 @@
               "time": "19:45.968",
               "gap": "7 Laps",
               "bestLap": "1:09.167",
-              "points": 0
+              "points": 6
             },
             {
               "pos": 0,
@@ -463,10 +463,9 @@
               "time": "6:58.344",
               "gap": "15 Laps",
               "bestLap": "1:08.347",
-              "points": 0
+              "points": 2
             }
-          ],
-          "fullRaceUrl": "https://youtu.be/7MmOYITiwpg?t=36"
+          ]
         },
         {
           "label": "Race 2",
@@ -480,7 +479,7 @@
               "time": "26:18.898",
               "gap": "",
               "bestLap": "1:08.061",
-              "points": 20
+              "points": 6
             },
             {
               "pos": 2,
@@ -491,7 +490,7 @@
               "time": "26:21.532",
               "gap": "2.634",
               "bestLap": "1:08.206",
-              "points": 17
+              "points": 10
             },
             {
               "pos": 3,
@@ -502,7 +501,7 @@
               "time": "26:21.936",
               "gap": "3.038",
               "bestLap": "1:08.551",
-              "points": 15
+              "points": 8
             },
             {
               "pos": 4,
@@ -513,7 +512,7 @@
               "time": "26:23.403",
               "gap": "4.505",
               "bestLap": "1:08.412",
-              "points": 13
+              "points": 8
             },
             {
               "pos": 5,
@@ -524,7 +523,7 @@
               "time": "26:24.638",
               "gap": "5.740",
               "bestLap": "1:08.293",
-              "points": 11
+              "points": 16
             },
             {
               "pos": 6,
@@ -535,7 +534,7 @@
               "time": "26:25.024",
               "gap": "6.126",
               "bestLap": "1:08.491",
-              "points": 10
+              "points": 11
             },
             {
               "pos": 7,
@@ -546,7 +545,7 @@
               "time": "26:29.869",
               "gap": "10.971",
               "bestLap": "1:08.658",
-              "points": 9
+              "points": 10
             },
             {
               "pos": 8,
@@ -557,7 +556,7 @@
               "time": "26:31.694",
               "gap": "12.796",
               "bestLap": "1:09.015",
-              "points": 8
+              "points": 13
             },
             {
               "pos": 9,
@@ -568,7 +567,7 @@
               "time": "26:33.207",
               "gap": "14.309",
               "bestLap": "1:09.228",
-              "points": 7
+              "points": 10
             },
             {
               "pos": 10,
@@ -579,7 +578,7 @@
               "time": "26:34.099",
               "gap": "15.201",
               "bestLap": "1:08.693",
-              "points": 6
+              "points": 8
             },
             {
               "pos": 11,
@@ -590,7 +589,7 @@
               "time": "26:35.705",
               "gap": "16.807",
               "bestLap": "1:09.103",
-              "points": 5
+              "points": 13
             },
             {
               "pos": 12,
@@ -601,7 +600,7 @@
               "time": "26:36.574",
               "gap": "17.676",
               "bestLap": "1:09.101",
-              "points": 4
+              "points": 7
             },
             {
               "pos": 13,
@@ -612,7 +611,7 @@
               "time": "26:36.982",
               "gap": "18.084",
               "bestLap": "1:08.760",
-              "points": 3
+              "points": 10
             },
             {
               "pos": 14,
@@ -623,7 +622,7 @@
               "time": "26:38.086",
               "gap": "19.188",
               "bestLap": "1:09.570",
-              "points": 2
+              "points": 13
             },
             {
               "pos": 15,
@@ -634,7 +633,7 @@
               "time": "26:40.796",
               "gap": "21.898",
               "bestLap": "1:09.228",
-              "points": 1
+              "points": 9
             },
             {
               "pos": 16,
@@ -645,7 +644,7 @@
               "time": "26:41.233",
               "gap": "22.335",
               "bestLap": "1:09.003",
-              "points": 0
+              "points": 9
             },
             {
               "pos": 17,
@@ -656,7 +655,7 @@
               "time": "26:41.869",
               "gap": "22.971",
               "bestLap": "1:09.440",
-              "points": 0
+              "points": 12
             },
             {
               "pos": 0,
@@ -667,7 +666,7 @@
               "time": "10:36.172",
               "gap": "15 Laps",
               "bestLap": "1:11.883",
-              "points": 0
+              "points": 5
             },
             {
               "pos": 0,
@@ -702,8 +701,7 @@
               "bestLap": "",
               "points": 0
             }
-          ],
-          "fullRaceUrl": "https://youtu.be/7MmOYITiwpg?t=1926"
+          ]
         },
         {
           "label": "Race 3",
@@ -717,7 +715,7 @@
               "time": "20:51.143",
               "gap": "",
               "bestLap": "1:08.624",
-              "points": 20
+              "points": 7
             },
             {
               "pos": 2,
@@ -728,7 +726,7 @@
               "time": "20:53.331",
               "gap": "2.188",
               "bestLap": "1:08.078",
-              "points": 17
+              "points": 10
             },
             {
               "pos": 3,
@@ -739,7 +737,7 @@
               "time": "20:58.361",
               "gap": "7.218",
               "bestLap": "1:08.683",
-              "points": 15
+              "points": 7
             },
             {
               "pos": 4,
@@ -750,7 +748,7 @@
               "time": "21:00.184",
               "gap": "9.041",
               "bestLap": "1:08.823",
-              "points": 13
+              "points": 8
             },
             {
               "pos": 5,
@@ -761,7 +759,7 @@
               "time": "21:01.027",
               "gap": "9.884",
               "bestLap": "1:09.108",
-              "points": 11
+              "points": 18
             },
             {
               "pos": 6,
@@ -772,7 +770,7 @@
               "time": "21:04.161",
               "gap": "13.018",
               "bestLap": "1:08.999",
-              "points": 10
+              "points": 7
             },
             {
               "pos": 7,
@@ -805,7 +803,7 @@
               "time": "21:06.090",
               "gap": "14.947",
               "bestLap": "1:08.680",
-              "points": 7
+              "points": 6
             },
             {
               "pos": 10,
@@ -816,7 +814,7 @@
               "time": "21:08.038",
               "gap": "16.895",
               "bestLap": "1:08.698",
-              "points": 6
+              "points": 8
             },
             {
               "pos": 11,
@@ -827,21 +825,10 @@
               "time": "21:11.153",
               "gap": "20.010",
               "bestLap": "1:08.712",
-              "points": 5
+              "points": 7
             },
             {
               "pos": 12,
-              "no": 52,
-              "driver": "Gordon SHEDDEN",
-              "team": "Laser Tools Racing with MB Motorsport",
-              "laps": 18,
-              "time": "21:11.352",
-              "gap": "20.209",
-              "bestLap": "1:09.331",
-              "points": 4
-            },
-            {
-              "pos": 13,
               "no": 50,
               "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
@@ -849,10 +836,10 @@
               "time": "21:11.402",
               "gap": "20.259",
               "bestLap": "1:09.243",
-              "points": 3
+              "points": 9
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 2,
               "driver": "Daryl DE LEON",
               "team": "WSR",
@@ -860,7 +847,18 @@
               "time": "21:12.421",
               "gap": "21.278",
               "bestLap": "1:09.052",
-              "points": 2
+              "points": 9
+            },
+            {
+              "pos": 14,
+              "no": 52,
+              "driver": "Gordon SHEDDEN",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "laps": 18,
+              "time": "21:12.452",
+              "gap": "21.309",
+              "bestLap": "1:09.331",
+              "points": 5
             },
             {
               "pos": 15,
@@ -871,7 +869,7 @@
               "time": "21:12.618",
               "gap": "21.475",
               "bestLap": "1:08.862",
-              "points": 1
+              "points": 6
             },
             {
               "pos": 16,
@@ -882,7 +880,7 @@
               "time": "21:20.712",
               "gap": "29.569",
               "bestLap": "1:09.408",
-              "points": 0
+              "points": 8
             },
             {
               "pos": 17,
@@ -893,7 +891,7 @@
               "time": "21:40.449",
               "gap": "49.306",
               "bestLap": "1:08.171",
-              "points": 0
+              "points": 6
             },
             {
               "pos": 18,
@@ -904,7 +902,7 @@
               "time": "21:41.697",
               "gap": "50.554",
               "bestLap": "1:09.615",
-              "points": 0
+              "points": 10
             },
             {
               "pos": 19,
@@ -915,7 +913,7 @@
               "time": "21:17.930",
               "gap": "1 Lap",
               "bestLap": "1:08.280",
-              "points": 0
+              "points": 9
             },
             {
               "pos": 0,
@@ -926,7 +924,7 @@
               "time": "18:35.709",
               "gap": "3 Laps",
               "bestLap": "1:08.381",
-              "points": 0
+              "points": 10
             },
             {
               "pos": 0,
@@ -937,10 +935,9 @@
               "time": "9:07.341",
               "gap": "12 Laps",
               "bestLap": "1:09.687",
-              "points": 0
+              "points": 2
             }
-          ],
-          "fullRaceUrl": "https://youtu.be/7MmOYITiwpg?t=3766"
+          ]
         }
       ]
     },
