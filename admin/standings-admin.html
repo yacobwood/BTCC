@@ -749,6 +749,10 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
     RESULTS
   </button>
+  <button class="tab" onclick="switchTab('analytics',this);loadAnalytics()">
+    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+    ANALYTICS
+  </button>
 </div>
 
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
@@ -1307,6 +1311,35 @@ select.input { cursor: pointer; }
       <select class="input" id="results-year-select" onchange="loadResults()" style="max-width:100px;padding:6px 10px;font-size:13px"></select>
     </div>
     <div id="results-list"><div class="section-note">Loading…</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ ANALYTICS ══════ -->
+<div id="panel-analytics" class="tab-panel">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn-sm" onclick="loadAnalytics()">↻ REFRESH</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px" id="analytics-stat-cards">
+    <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">TOTAL VOTES</div><div id="stat-votes" style="font-size:28px;font-weight:900;color:var(--yellow)">—</div></div>
+    <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">BUG REPORTS</div><div id="stat-bugs" style="font-size:28px;font-weight:900;color:var(--red)">—</div></div>
+    <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">PUSHES SENT</div><div id="stat-pushes" style="font-size:28px;font-weight:900;color:#60A5FA">—</div></div>
+    <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">FEATURE IDEAS</div><div id="stat-ideas" style="font-size:28px;font-weight:900;color:var(--green)">—</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">TOP VOTED FEATURES</div></div>
+    <div id="analytics-votes-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">BUG REPORTS BY CATEGORY</div></div>
+    <div id="analytics-bugs-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">RECENT PUSHES</div></div>
+    <div id="analytics-pushes-list"><div class="section-note">Loading…</div></div>
   </div>
 </div>
 
@@ -2734,6 +2767,7 @@ if (savedTab) {
   if (savedTab === 'bugs') loadBugReports();
   if (savedTab === 'pushhistory') loadPushHistory();
   if (savedTab === 'results') loadResults();
+  if (savedTab === 'analytics') loadAnalytics();
   if (savedTab === 'dashboard') refreshDashboard();
 } else {
   refreshDashboard();
@@ -2894,6 +2928,115 @@ async function saveRoadmap(silent) {
   } catch(e) {
     document.getElementById('roadmap-save-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`;
   }
+}
+
+// ══════════════════════════════ ANALYTICS ══════════════════════════════
+
+async function loadAnalytics() {
+  // Reset stats
+  ['stat-votes','stat-bugs','stat-pushes','stat-ideas'].forEach(id => {
+    document.getElementById(id).textContent = '…';
+  });
+  ['analytics-votes-list','analytics-bugs-list','analytics-pushes-list'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="section-note">Loading…</div>';
+  });
+
+  // Fetch all in parallel
+  const [votesRes, bugsRes, pushesRes, ideasRes, roadmapRes] = await Promise.allSettled([
+    fetch(`${FS_BASE_URL}/roadmap_votes?key=${FS_API_KEY}&pageSize=100`).then(r => r.json()),
+    fetch(`${FS_BASE_URL}/bug_reports?key=${FS_API_KEY}&pageSize=100`).then(r => r.json()),
+    fetch(`${FS_BASE_URL}/push_history?key=${FS_API_KEY}&pageSize=50`).then(r => r.json()),
+    fetch(`${FS_BASE_URL}/roadmap_submissions?key=${FS_API_KEY}&pageSize=100`).then(r => r.json()),
+    fetch(ROADMAP_RAW + '?t=' + Date.now()).then(r => r.json()),
+  ]);
+
+  // ── Votes ──
+  const voteDocs = votesRes.status === 'fulfilled' ? (votesRes.value.documents || []) : [];
+  const roadmapItems_ = roadmapRes.status === 'fulfilled' ? (roadmapRes.value.items || []) : [];
+  const voteData = voteDocs.map(doc => ({
+    id: doc.name.split('/').pop(),
+    count: parseInt(doc.fields?.count?.integerValue || 0, 10),
+  })).sort((a, b) => b.count - a.count);
+  const totalVotes = voteData.reduce((s, v) => s + v.count, 0);
+  document.getElementById('stat-votes').textContent = totalVotes;
+
+  if (voteData.length) {
+    const maxVotes = voteData[0].count || 1;
+    document.getElementById('analytics-votes-list').innerHTML = voteData.slice(0, 10).map(v => {
+      const item = roadmapItems_.find(i => i.id === v.id);
+      const label = item ? escHtml(item.title) : `Item ${v.id}`;
+      const pct = Math.round((v.count / maxVotes) * 100);
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:var(--text);font-size:13px">${label}</span>
+          <span style="color:var(--yellow);font-size:13px;font-weight:700">${v.count}</span>
+        </div>
+        <div style="background:var(--outline);border-radius:4px;height:6px">
+          <div style="background:var(--yellow);height:6px;border-radius:4px;width:${pct}%;transition:width .3s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('analytics-votes-list').innerHTML = '<div class="section-note">No votes yet.</div>';
+  }
+
+  // ── Bug reports ──
+  const bugDocs = bugsRes.status === 'fulfilled' ? (bugsRes.value.documents || []) : [];
+  document.getElementById('stat-bugs').textContent = bugDocs.length;
+  const bugCats = {};
+  bugDocs.forEach(doc => {
+    const cat = doc.fields?.category?.stringValue || 'Other';
+    bugCats[cat] = (bugCats[cat] || 0) + 1;
+  });
+  const bugEntries = Object.entries(bugCats).sort((a,b) => b[1]-a[1]);
+  if (bugEntries.length) {
+    const maxBugs = bugEntries[0][1] || 1;
+    document.getElementById('analytics-bugs-list').innerHTML = bugEntries.map(([cat, count]) => {
+      const col = BUG_CAT_COLORS[cat] || 'var(--text-sec)';
+      const pct = Math.round((count / maxBugs) * 100);
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:${col};font-size:13px;font-weight:600">${escHtml(cat)}</span>
+          <span style="color:${col};font-size:13px;font-weight:700">${count}</span>
+        </div>
+        <div style="background:var(--outline);border-radius:4px;height:6px">
+          <div style="background:${col};height:6px;border-radius:4px;width:${pct}%;transition:width .3s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('analytics-bugs-list').innerHTML = '<div class="section-note">No reports yet.</div>';
+  }
+
+  // ── Push history ──
+  const pushDocs = pushesRes.status === 'fulfilled' ? (pushesRes.value.documents || []) : [];
+  document.getElementById('stat-pushes').textContent = pushDocs.length;
+  const recentPushes = pushDocs
+    .map(doc => ({
+      title: doc.fields?.title?.stringValue || '',
+      body: doc.fields?.body?.stringValue || '',
+      type: doc.fields?.type?.stringValue || 'broadcast',
+      sentAt: doc.fields?.sentAt?.stringValue || '',
+    }))
+    .sort((a,b) => b.sentAt.localeCompare(a.sentAt))
+    .slice(0, 5);
+  if (recentPushes.length) {
+    document.getElementById('analytics-pushes-list').innerHTML = recentPushes.map(n => {
+      const date = n.sentAt ? new Date(n.sentAt).toLocaleString() : '—';
+      const col = n.type === 'broadcast' ? 'var(--yellow)' : '#60A5FA';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--outline-lo)">
+        <span style="font-size:10px;font-weight:800;color:${col};letter-spacing:1px;min-width:70px">${n.type.toUpperCase()}</span>
+        <span style="color:var(--text);font-size:13px;flex:1">${escHtml(n.title)}</span>
+        <span style="color:var(--text-sec);font-size:11px;white-space:nowrap">${date}</span>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('analytics-pushes-list').innerHTML = '<div class="section-note">No pushes yet.</div>';
+  }
+
+  // ── Ideas ──
+  const ideaDocs = ideasRes.status === 'fulfilled' ? (ideasRes.value.documents || []) : [];
+  document.getElementById('stat-ideas').textContent = ideaDocs.length;
 }
 
 function escHtml(s) {
