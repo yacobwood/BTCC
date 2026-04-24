@@ -2741,7 +2741,7 @@ function renderRoadmapItems() {
     const statusOpts = ROADMAP_STATUS_OPTS.map(s =>
       `<option value="${s}" ${item.status === s ? 'selected' : ''}>${s}</option>`
     ).join('');
-    return `<div id="rm-item-${idx}" style="padding:12px 0;border-bottom:1px solid var(--outline-lo)">
+    return `<div id="rm-item-${idx}" style="background:var(--surface);border:1px solid var(--outline);border-radius:10px;padding:14px;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <span style="font-size:11px;color:${col};font-weight:700;letter-spacing:0.5px;text-transform:uppercase">${item.status}</span>
         <span style="color:var(--text);font-size:14px;font-weight:600;flex:1">${escHtml(item.title)}</span>
