@@ -1132,24 +1132,13 @@ select.input { cursor: pointer; }
       <div class="scraper-title">RESULTS</div>
       <div class="scraper-status-chip" id="ss-results">—</div>
     </div>
-    <div class="scraper-desc">Race results → <strong>results{year}.json</strong> + <strong>standings.json</strong>. Auto: race Sundays 13–17 UTC.</div>
+    <div class="scraper-desc">Race results → <strong>results{year}.json</strong> + <strong>standings.json</strong>. Auto: Sat 15–18 UTC, Sun 10–18 UTC.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group"><div class="field-label">YEAR</div><input type="number" id="si-year" value="2026" min="2014" max="2030"></div>
         <div class="field-group"><div class="field-label">ROUND</div><input type="number" id="si-round" placeholder="all" min="1" max="30"></div>
       </div>
       <button class="btn-run" onclick="runScraper('scrape-results.yml','results')">RUN ▶</button>
-    </div>
-  </div>
-
-  <div class="scraper-card" id="sc-standings">
-    <div class="scraper-head">
-      <div class="scraper-title">STANDINGS</div>
-      <div class="scraper-status-chip" id="ss-standings">—</div>
-    </div>
-    <div class="scraper-desc">Live standings → <strong>standings.json</strong>. Auto: every 6h, every 15 min race weekends.</div>
-    <div class="scraper-footer">
-      <button class="btn-run" onclick="runScraper('scrape-standings.yml','standings')">RUN ▶</button>
     </div>
   </div>
 
@@ -1175,17 +1164,6 @@ select.input { cursor: pointer; }
     <div class="scraper-desc">Session times (FP, Qual, Race) → <strong>schedule.json</strong>. Auto: nightly 07:00 UTC.</div>
     <div class="scraper-footer">
       <button class="btn-run" onclick="runScraper('scrape-schedule.yml','schedule')">RUN ▶</button>
-    </div>
-  </div>
-
-  <div class="scraper-card" id="sc-grid">
-    <div class="scraper-head">
-      <div class="scraper-title">GRID</div>
-      <div class="scraper-status-chip" id="ss-grid">—</div>
-    </div>
-    <div class="scraper-desc">Driver names, numbers &amp; portraits → <strong>drivers.json</strong>. Manual only.</div>
-    <div class="scraper-footer">
-      <button class="btn-run" onclick="runScraper('scrape-grid.yml','grid')">RUN ▶</button>
     </div>
   </div>
 
@@ -1578,10 +1556,8 @@ const runningTimestamps = {}, dispatchedAt = {};
 
 const SCRAPER_WORKFLOWS = [
   {file:'scrape-results.yml',          key:'results'},
-  {file:'scrape-standings.yml',        key:'standings'},
   {file:'scrape-calendar.yml',         key:'calendar'},
   {file:'scrape-schedule.yml',         key:'schedule'},
-  {file:'scrape-grid.yml',             key:'grid'},
   {file:'scrape-merch.yml',            key:'merch'},
 ];
 
