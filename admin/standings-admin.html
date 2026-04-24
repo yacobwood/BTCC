@@ -2658,6 +2658,8 @@ const savedTab = sessionStorage.getItem('activeTab');
 if (savedTab) {
   const btn = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes("'" + savedTab + "'"));
   if (btn) switchTab(savedTab, btn);
+  if (savedTab === 'roadmap') loadRoadmap();
+  if (savedTab === 'dashboard') refreshDashboard();
 } else {
   refreshDashboard();
 }
