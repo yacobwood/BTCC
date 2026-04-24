@@ -958,12 +958,23 @@ select.input { cursor: pointer; }
       <div class="field-label">DEEPLINK <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional)</span></div>
       <select class="input" id="broadcast-deeplink-preset" onchange="onBroadcastDeeplinkPreset(this.value)" style="margin-bottom:6px">
         <option value="">— Select a screen —</option>
-        <option value="standings">Standings tab</option>
-        <option value="results">Results tab</option>
-        <option value="drivers">Drivers tab</option>
-        <option value="calendar">Calendar tab</option>
-        <option value="roadmap">Roadmap / Vote</option>
-        <option value="more">More tab</option>
+        <optgroup label="Main tabs">
+          <option value="news">News</option>
+          <option value="calendar">Calendar</option>
+          <option value="drivers">Drivers / Grid</option>
+          <option value="chat">Live Chat</option>
+          <option value="results">Results / History</option>
+          <option value="more">More</option>
+        </optgroup>
+        <optgroup label="More menu">
+          <option value="standings">Standings</option>
+          <option value="records">Records</option>
+          <option value="roadmap">Roadmap / Vote</option>
+          <option value="podcasts">Podcasts</option>
+          <option value="radio">Radio</option>
+          <option value="partners">Partners</option>
+          <option value="settings">Settings</option>
+        </optgroup>
         <option value="custom">Custom URL…</option>
       </select>
       <input type="text" id="broadcast-deeplink" placeholder="btccfanhub://…" style="font-family:monospace;font-size:12px">
@@ -1011,13 +1022,23 @@ select.input { cursor: pointer; }
       <div class="field-label">DEEPLINK <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional)</span></div>
       <select class="input" id="custom-deeplink-preset" onchange="onDeeplinkPreset(this.value)" style="margin-bottom:6px">
         <option value="">— Select a screen —</option>
-        <option value="standings">Standings tab</option>
-        <option value="results">Results tab</option>
-        <option value="drivers">Drivers tab</option>
-        <option value="calendar">Calendar tab</option>
-        <option value="roadmap">Roadmap / Vote</option>
-        <option value="more">More tab</option>
-        <option value="chat">Live Chat</option>
+        <optgroup label="Main tabs">
+          <option value="news">News</option>
+          <option value="calendar">Calendar</option>
+          <option value="drivers">Drivers / Grid</option>
+          <option value="chat">Live Chat</option>
+          <option value="results">Results / History</option>
+          <option value="more">More</option>
+        </optgroup>
+        <optgroup label="More menu">
+          <option value="standings">Standings</option>
+          <option value="records">Records</option>
+          <option value="roadmap">Roadmap / Vote</option>
+          <option value="podcasts">Podcasts</option>
+          <option value="radio">Radio</option>
+          <option value="partners">Partners</option>
+          <option value="settings">Settings</option>
+        </optgroup>
         <option value="custom">Custom URL…</option>
       </select>
       <input type="text" id="custom-deeplink" placeholder="btccfanhub://…" style="font-family:monospace;font-size:12px">
@@ -1871,13 +1892,19 @@ function sendResultsTest() {
 function onDeeplinkPreset(val) {
   const input = document.getElementById('custom-deeplink');
   if (!val || val === 'custom') { input.value = ''; input.focus(); return; }
-  const map = {standings:'btccfanhub://standings', results:'btccfanhub://results', drivers:'btccfanhub://drivers', calendar:'btccfanhub://calendar', roadmap:'btccfanhub://roadmap', more:'btccfanhub://more', chat:'btccfanhub://chat'};
-  input.value = map[val] || '';
+  input.value = DEEPLINK_MAP[val] || '';
 }
 
+const DEEPLINK_MAP = {
+  news:'btccfanhub://news', calendar:'btccfanhub://calendar', drivers:'btccfanhub://drivers',
+  chat:'btccfanhub://chat', results:'btccfanhub://results', more:'btccfanhub://more',
+  standings:'btccfanhub://standings', records:'btccfanhub://records', roadmap:'btccfanhub://roadmap',
+  podcasts:'btccfanhub://podcasts', radio:'btccfanhub://radio', partners:'btccfanhub://partners',
+  settings:'btccfanhub://settings',
+};
+
 function onBroadcastDeeplinkPreset(val) {
-  const map = { standings:'btccfanhub://standings', results:'btccfanhub://results', drivers:'btccfanhub://drivers', calendar:'btccfanhub://calendar', roadmap:'btccfanhub://roadmap', more:'btccfanhub://more' };
-  document.getElementById('broadcast-deeplink').value = map[val] || '';
+  document.getElementById('broadcast-deeplink').value = DEEPLINK_MAP[val] || '';
 }
 
 async function sendBroadcast() {
