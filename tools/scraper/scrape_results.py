@@ -8,9 +8,12 @@ Usage:
     python scrape_results.py [year]      # default: 2024
 """
 
+import io
 import json
 import re
 import sys
+import tempfile
+import urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
@@ -161,16 +164,16 @@ ROUNDS = {
         {"round": 10, "venue": "Brands Hatch GP",   "date": "19 Oct 2025", "slug": "2025-brands-hatch-gp"},
     ],
     2026: [
-        {"round":  1, "venue": "Donington Park",    "date": "18 Apr 2026", "slug": "2026-donington-park"},
-        {"round":  2, "venue": "Brands Hatch Indy", "date": "09 May 2026", "slug": "2026-brands-hatch-indy"},
-        {"round":  3, "venue": "Snetterton",        "date": "23 May 2026", "slug": "2026-snetterton"},
-        {"round":  4, "venue": "Oulton Park",       "date": "06 Jun 2026", "slug": "2026-oulton-park"},
-        {"round":  5, "venue": "Thruxton",          "date": "25 Jul 2026", "slug": "2026-thruxton"},
-        {"round":  6, "venue": "Knockhill",         "date": "08 Aug 2026", "slug": "2026-knockhill"},
-        {"round":  7, "venue": "Donington Park GP", "date": "22 Aug 2026", "slug": "2026-donington-park-gp"},
-        {"round":  8, "venue": "Croft",             "date": "05 Sep 2026", "slug": "2026-croft"},
-        {"round":  9, "venue": "Silverstone",       "date": "26 Sep 2026", "slug": "2026-silverstone"},
-        {"round": 10, "venue": "Brands Hatch GP",   "date": "10 Oct 2026", "slug": "2026-brands-hatch-gp"},
+        {"round":  1, "venue": "Donington Park",    "date": "18 Apr 2026", "slug": "2026-donington-park",    "tsl": "261603"},
+        {"round":  2, "venue": "Brands Hatch Indy", "date": "09 May 2026", "slug": "2026-brands-hatch-indy", "tsl": "261903"},
+        {"round":  3, "venue": "Snetterton",        "date": "23 May 2026", "slug": "2026-snetterton",        "tsl": "262103"},
+        {"round":  4, "venue": "Oulton Park",       "date": "06 Jun 2026", "slug": "2026-oulton-park",       "tsl": "262303"},
+        {"round":  5, "venue": "Thruxton",          "date": "25 Jul 2026", "slug": "2026-thruxton",          "tsl": "263003"},
+        {"round":  6, "venue": "Knockhill",         "date": "08 Aug 2026", "slug": "2026-knockhill",         "tsl": "263203"},
+        {"round":  7, "venue": "Donington Park GP", "date": "22 Aug 2026", "slug": "2026-donington-park-gp", "tsl": "263403"},
+        {"round":  8, "venue": "Croft",             "date": "05 Sep 2026", "slug": "2026-croft",             "tsl": "263603"},
+        {"round":  9, "venue": "Silverstone",       "date": "26 Sep 2026", "slug": "2026-silverstone",       "tsl": "263903"},
+        {"round": 10, "venue": "Brands Hatch GP",   "date": "10 Oct 2026", "slug": "2026-brands-hatch-gp",  "tsl": "264103"},
     ],
 }
 
@@ -317,6 +320,65 @@ def parse_rows(rows: list[list[str]], race_label: str = "") -> list[dict]:
     return results
 
 
+TSL_BOOK_URL = "https://www.tsl-timing.com/file/?f=TOCA/{year}/{tsl}trg.pdf"
+# Session order in the book PDF: Qualifying Race, Race 1, Race 2, Race 3
+TSL_RACE_LABELS = ["Qualifying Race", "Race 1", "Race 2", "Race 3"]
+
+
+def scrape_laps_led(tsl_id: str, year: int) -> dict:
+    """
+    Download the TSL results book PDF and extract the 'Session Leader History'
+    sections to find which drivers led at least one lap in each Sunday race.
+    Returns {race_label: set_of_driver_names} for Race 1/2/3 only.
+    """
+    try:
+        from pdfminer.high_level import extract_text as pdf_extract
+    except ImportError:
+        print("  [laps led] pdfminer not installed — skipping laps led bonus")
+        return {}
+
+    url = TSL_BOOK_URL.format(year=year, tsl=tsl_id)
+    print(f"  [laps led] downloading {url}")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            pdf_bytes = resp.read()
+    except Exception as e:
+        print(f"  [laps led] download failed: {e}")
+        return {}
+
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            tmp.write(pdf_bytes)
+            tmp_path = tmp.name
+        text = pdf_extract(tmp_path)
+        Path(tmp_path).unlink(missing_ok=True)
+    except Exception as e:
+        print(f"  [laps led] PDF parse failed: {e}")
+        return {}
+
+    # Find all Session Leader History blocks
+    sections = list(re.finditer(r"Session Leader History", text))
+    result = {}
+    for i, m in enumerate(sections):
+        label = TSL_RACE_LABELS[i] if i < len(TSL_RACE_LABELS) else None
+        if not label or label == "Qualifying Race":
+            continue  # laps led bonus only applies to Sunday races
+        chunk = text[m.start(): m.start() + 1500]
+        # Each row: number  CL  NAME  FROM_LAP  LAPS_LED  distance  vehicle
+        leaders = set(
+            m2.group(1).strip()
+            for m2 in re.finditer(
+                r"\d+\s+(?:M|I|IND)\s+([\w][\w\s]+?)\s{2,}\d+\s+\d+\s+[\d.]+\s+miles",
+                chunk,
+            )
+        )
+        result[label] = leaders
+        print(f"  [laps led] {label}: leaders = {leaders}")
+
+    return result
+
+
 def scrape_round(page, info: dict) -> dict:
     url = f"{BASE_URL}/{info['slug']}"
     print(f"\nRound {info['round']}: {info['venue']}  →  {url}")
@@ -340,6 +402,10 @@ def scrape_round(page, info: dict) -> dict:
         expected.append("Qualifying Race")
     expected += ["Race 1", "Race 2", "Race 3"]
 
+    # Scrape laps led from TSL PDF book (Sunday races only)
+    tsl_id = info.get("tsl")
+    laps_led = scrape_laps_led(tsl_id, YEAR) if tsl_id else {}
+
     races = []
     for label in expected:
         section = label_map.get(label.lower())
@@ -349,6 +415,13 @@ def scrape_round(page, info: dict) -> dict:
         else:
             print(f"  {label}: NOT FOUND")
             results = []
+
+        # Tag each result with whether driver led a lap (Sunday races only)
+        leaders = laps_led.get(label, set())
+        for r in results:
+            if leaders:
+                r["ledLap"] = r["driver"] in leaders
+
         races.append({"label": label, "results": results})
 
     return {

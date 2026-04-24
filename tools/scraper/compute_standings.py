@@ -54,7 +54,9 @@ def compute(year: int, data: dict):
                 pos = r["pos"]
                 pts = pts_table.get(pos, 0) if pos > 0 else 0
                 if d == fl_driver:
-                    pts += 1  # fastest lap bonus
+                    pts += 1  # fastest lap bonus (Sunday races only)
+                if r.get("ledLap"):
+                    pts += 1  # laps led bonus (Sunday races only)
                 driver_points[d] += pts
                 driver_team[d] = r.get("team", "")
                 driver_car[d] = str(r.get("no", ""))

@@ -8,7 +8,7 @@
       "driver": "Ashley SUTTON",
       "team": "NAPA Racing UK",
       "car": "116",
-      "points": 59,
+      "points": 61,
       "wins": 2,
       "seconds": 1,
       "thirds": 0
@@ -18,7 +18,7 @@
       "driver": "Charles RAINFORD",
       "team": "WSR",
       "car": "99",
-      "points": 42,
+      "points": 43,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -98,7 +98,7 @@
       "driver": "Ricky COLLARD",
       "team": "Team VERTU",
       "car": "11",
-      "points": 25,
+      "points": 26,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -218,7 +218,7 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 108
+      "points": 110
     },
     {
       "pos": 2,
@@ -228,12 +228,12 @@
     {
       "pos": 3,
       "team": "Team VERTU",
-      "points": 67
+      "points": 68
     },
     {
       "pos": 4,
       "team": "WSR",
-      "points": 60
+      "points": 61
     },
     {
       "pos": 5,
