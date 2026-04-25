@@ -17,13 +17,28 @@ import {formatDriverName} from '../utils/driverName';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-// Build a map of driver -> grid position for a given race index.
-// Race 1 grid = qualifying race finishing order (index 0).
-// Race 2 grid = Race 1 finishing order (index 1).
+// Abbreviate session labels for tab display.
+function shortLabel(label) {
+  if (label === 'Free Practice') return 'FP';
+  if (label === 'Qualifying') return 'QUAL';
+  if (label === 'Qualifying Race') return 'Q RACE';
+  const m = label.match(/^Race (\d)$/);
+  if (m) return `R${m[1]}`;
+  return label;
+}
+
+// Build a map of driver -> grid position for a given race.
+// Race 1 grid = Qualifying Race finishing order.
+// Race 2 grid = Race 1 finishing order.
 // Race 3 grid = unknown (random reversal draw not stored).
 function buildGridMap(races, raceIndex) {
-  if (raceIndex === 0 || raceIndex > 2) return null;
-  const sourceRace = races[raceIndex - 1];
+  const race = races[raceIndex];
+  if (!race) return null;
+  let sourceLabel;
+  if (race.label === 'Race 1') sourceLabel = 'Qualifying Race';
+  else if (race.label === 'Race 2') sourceLabel = 'Race 1';
+  else return null;
+  const sourceRace = races.find(r => r.label === sourceLabel);
   if (!sourceRace?.results?.length) return null;
   const map = {};
   sourceRace.results.forEach((r, i) => {
@@ -98,9 +113,11 @@ export default function RoundResultsScreen({route, navigation}) {
         </View>
         <View style={styles.rightCol}>
           <Text style={[styles.timeText, item.position === 1 && {color: Colors.yellow}]}>
-            {item.position === 1 ? item.time : (item.gap ? `+${item.gap.replace(/^\+/, '')}` : item.time)}
+            {item.time
+              ? (item.position === 1 ? item.time : (item.gap ? `+${item.gap.replace(/^\+/, '')}` : item.time))
+              : item.bestLap || ''}
           </Text>
-          {item.bestLap ? (
+          {item.time && item.bestLap ? (
             <Text style={styles.detailText}>BL {item.bestLap}</Text>
           ) : null}
           {item.avgLapSpeed ? (
@@ -108,7 +125,7 @@ export default function RoundResultsScreen({route, navigation}) {
               Avg {useKm ? `${parseFloat(item.avgLapSpeed).toFixed(2)} km/h` : `${(parseFloat(item.avgLapSpeed) / 1.60934).toFixed(2)} mph`}
             </Text>
           ) : null}
-          <Text style={styles.pointsText}>+{item.points} pts</Text>
+          {item.points > 0 && <Text style={styles.pointsText}>+{item.points} pts</Text>}
         </View>
       </View>
     );
@@ -136,7 +153,7 @@ export default function RoundResultsScreen({route, navigation}) {
               accessibilityRole="tab"
               accessibilityLabel={r.label}>
               <Text style={[styles.raceTabText, raceIndex === i && styles.raceTabTextActive]}>
-                {r.label}
+                {shortLabel(r.label)}
               </Text>
             </TouchableOpacity>
           ))}

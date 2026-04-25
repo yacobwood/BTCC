@@ -38,13 +38,18 @@ DATA_DIR   = REPO_ROOT / "data"
 
 TSL_BASE = "https://www.tsl-timing.com/file/?f=TOCA/{year}/{tsl}{suffix}.pdf"
 
-# Suffix for each session PDF
+# Suffix for each session PDF (order determines tab order in the app)
 SESSION_SUFFIXES = {
+    "Free Practice":   "fp1",
+    "Qualifying":      "qu1",
     "Qualifying Race": "qra",
     "Race 1":          "rc1",
     "Race 2":          "rc2",
     "Race 3":          "rc3",
 }
+
+# Sessions that award no championship points
+NO_POINTS_SESSIONS = {"Free Practice", "Qualifying"}
 
 POINTS_QUALIFYING = {1:10, 2:9, 3:8, 4:7, 5:6, 6:5, 7:5, 8:4, 9:4, 10:3, 11:3, 12:2, 13:2, 14:1, 15:1}
 POINTS_RACE       = {1:20, 2:17, 3:15, 4:13, 5:11, 6:10, 7:9, 8:8, 9:7, 10:6, 11:5, 12:4, 13:3, 14:2, 15:1}
@@ -137,8 +142,12 @@ def parse_classification(pdf_bytes, label):
     position anchor (x < 30), then collect all elements within ±8 y-units.
     """
     elements = _pdf_elements(pdf_bytes)
-    is_qualifying = "qualifying" in label.lower()
-    pts_table = POINTS_QUALIFYING if is_qualifying else POINTS_RACE
+    if label in NO_POINTS_SESSIONS:
+        pts_table = {}
+    elif label == "Qualifying Race":
+        pts_table = POINTS_QUALIFYING
+    else:
+        pts_table = POINTS_RACE
 
     # Find row anchor elements: positioned at x < 30
     #   "1" .. "20"     → numeric finish position
@@ -196,13 +205,15 @@ def parse_classification(pdf_bytes, label):
                         driver = m.group(1).strip()
                 elif t and not t.startswith("*") and not t.startswith("Car "):
                     if not team:
-                        team = t
+                        # Strip PIC (position-in-class) number prefix e.g. "1 Team VERTU"
+                        team = re.sub(r"^\d+\s+", "", t)
             elif 235 < x < 340:
                 car_name = t
             elif 340 < x < 380:
                 if re.match(r"^\d+$", t):
                     laps = int(t)
-            elif 500 < x < 545:
+            elif 380 < x < 570:
+                # BEST LAP column (x≈503 for races, x≈411 for FP, x≈468 for qualifying)
                 if re.match(r"^\d+:\d{2}\.\d+$", t):
                     best_lap = t
 
@@ -350,9 +361,11 @@ def compute_standings(rounds):
             last_venue = rnd["venue"]
 
         for race in rnd["races"]:
-            is_qual = "qualifying" in race["label"].lower()
-            pts_table = POINTS_QUALIFYING if is_qual else POINTS_RACE
-            fl = fastest_lap_driver(race["results"]) if not is_qual else None
+            if race["label"] in NO_POINTS_SESSIONS:
+                continue
+            is_qual_race = race["label"] == "Qualifying Race"
+            pts_table = POINTS_QUALIFYING if is_qual_race else POINTS_RACE
+            fl = fastest_lap_driver(race["results"]) if not is_qual_race else None
 
             for r in race["results"]:
                 d   = r["driver"]
@@ -369,7 +382,7 @@ def compute_standings(rounds):
                 driver_cl[d]    = r.get("cl", "")
                 team_pts[r.get("team", "")] += pts
 
-                if not is_qual:
+                if not is_qual_race:
                     if pos == 1: driver_wins[d] += 1
                     elif pos == 2: driver_2nds[d] += 1
                     elif pos == 3: driver_3rds[d] += 1
