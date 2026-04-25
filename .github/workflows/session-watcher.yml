@@ -1,0 +1,73 @@
+name: Session Watcher
+
+# Connects to TSL SignalR for a race day, sends pre-session notifications,
+# and on sessioncomplete: scrapes results, commits, and sends results notification.
+#
+# Trigger manually from GitHub Actions → "Run workflow" before each race day,
+# supplying the round number and day (saturday / sunday).
+#
+# Auto-triggers are commented out below — enable once session times are confirmed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      round:
+        description: "Round number (1–10)"
+        required: true
+        type: number
+      day:
+        description: "Race day"
+        required: true
+        type: choice
+        options: [saturday, sunday]
+      year:
+        description: "Season year"
+        required: false
+        default: "2026"
+
+  # Auto-start Saturday watcher at 08:45 UTC on race weekends
+  # (edit dates before enabling — remove the # below)
+  # schedule:
+  #   - cron: "45 8 18 4 6"    # Round 1 Saturday (April 18)
+  #   - cron: "45 8  9 5 6"    # Round 2 Saturday (May 9)
+  #   - cron: "45 8 23 5 6"    # Round 3 Saturday (May 23)
+
+concurrency:
+  group: session-watcher-${{ inputs.round }}-${{ inputs.day }}
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360      # 6-hour cap (enough for either race day)
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pdfminer.six websocket-client google-auth requests
+
+      - name: Configure git identity
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "github-actions[bot]"
+
+      - name: Run session watcher
+        run: |
+          python .github/scripts/session_watcher.py \
+            --round ${{ inputs.round }} \
+            --day   ${{ inputs.day }}   \
+            --year  ${{ inputs.year || '2026' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
