@@ -13,8 +13,8 @@ const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 // user never sees data more than an hour stale.
 const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
-async function fetchJson(url, cacheKey) {
-  if (cacheKey) {
+async function fetchJson(url, cacheKey, forceRefresh = false) {
+  if (cacheKey && !forceRefresh) {
     const cached = await cacheRead(cacheKey, MAX_AGE_MS);
     if (cached) {
       // Refresh cache in background without blocking
@@ -25,7 +25,7 @@ async function fetchJson(url, cacheKey) {
       return cached;
     }
   }
-  // No cache yet — fetch and wait
+  // No cache (or forced refresh) — fetch and wait
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -45,12 +45,12 @@ export async function fetchDrivers() {
   return fetchJson(`${BASE_GITHUB}/drivers.json`, 'drivers');
 }
 
-export async function fetchStandings() {
-  return fetchJson(`${BASE_GITHUB}/standings.json`, 'standings');
+export async function fetchStandings(forceRefresh = false) {
+  return fetchJson(`${BASE_GITHUB}/standings.json`, 'standings', forceRefresh);
 }
 
-export async function fetchResults(year = 2026) {
-  return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`);
+export async function fetchResults(year = 2026, forceRefresh = false) {
+  return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh);
 }
 
 

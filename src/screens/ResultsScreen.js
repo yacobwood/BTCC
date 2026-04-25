@@ -193,7 +193,7 @@ export default function ResultsScreen({navigation, route}) {
     setRefreshing(false);
   }, []);
 
-  const load = useCallback(async (y = year) => {
+  const load = useCallback(async (y = year, forceRefresh = false) => {
     // Bundled years handled by applyBundledYear — called synchronously in button handlers
     if (y >= 2004 && y <= 2025) {
       applyBundledYear(y);
@@ -204,33 +204,38 @@ export default function ResultsScreen({navigation, route}) {
     setBundledStats(null);
       setBundledProgression(null);
 
-      const [cachedResults, cachedStandings] = await Promise.all([
-        cacheRead(`results_${y}`),
-        y === 2026 && seasonStarted ? cacheRead('standings') : Promise.resolve(null),
-      ]);
-      if (cachedResults) {
-        const parsedResults = parseResults(cachedResults);
-        setResults(parsedResults);
-        if (cachedStandings) {
-          const s = parseStandings(cachedStandings);
-          const teamMap = buildTeamMap(parsedResults);
-          s.drivers = s.drivers.map(d => ({...d, team: d.team || teamMap[d.name] || ''}));
-          setStandings(s);
+      if (!forceRefresh) {
+        const [cachedResults, cachedStandings] = await Promise.all([
+          cacheRead(`results_${y}`),
+          y === 2026 && seasonStarted ? cacheRead('standings') : Promise.resolve(null),
+        ]);
+        if (cachedResults) {
+          const parsedResults = parseResults(cachedResults);
+          setResults(parsedResults);
+          if (cachedStandings) {
+            const s = parseStandings(cachedStandings);
+            const teamMap = buildTeamMap(parsedResults);
+            s.drivers = s.drivers.map(d => ({...d, team: d.team || teamMap[d.name] || ''}));
+            setStandings(s);
+          }
+          setLoading(false);
+        } else {
+          setStandings(null);
+          if (y === 2026) setLoading(true);
         }
-        setLoading(false);
       } else {
         setStandings(null);
         if (y === 2026) setLoading(true);
       }
 
       try {
-        const resRaw = await fetchResults(y);
+        const resRaw = await fetchResults(y, forceRefresh);
         const parsedResults = parseResults(resRaw);
         setResults(parsedResults);
         cacheWrite(`results_${y}`, resRaw);
 
         if (y === 2026 && seasonStarted) {
-          const raw = await fetchStandings();
+          const raw = await fetchStandings(forceRefresh);
           const s = parseStandings(raw);
           const teamMap = buildTeamMap(parsedResults);
           s.drivers = s.drivers.map(d => ({...d, team: d.team || teamMap[d.name] || ''}));
@@ -276,7 +281,7 @@ export default function ResultsScreen({navigation, route}) {
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('results');
     setRefreshing(true);
-    load(year);
+    load(year, true);
   }, [load, year]);
 
   const canGoOlder = year > 2004;
