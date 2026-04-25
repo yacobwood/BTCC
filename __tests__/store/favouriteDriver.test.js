@@ -3,125 +3,204 @@ import {act, create} from 'react-test-renderer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {FavouriteDriverProvider, useFavouriteDriver} from '../../src/store/favouriteDriver';
 
-// Helper: renders the provider and captures the latest hook value via a test component
-function renderProvider(asyncStorageValue = null) {
-  AsyncStorage.getItem.mockResolvedValue(asyncStorageValue);
+const KEY = 'favourite_drivers';
+const LEGACY_KEY = 'favourite_driver';
+
+function renderProvider() {
   let hook;
   function Tester() {
     hook = useFavouriteDriver();
     return null;
   }
-  const renderer = create(
+  create(
     <FavouriteDriverProvider>
       <Tester />
     </FavouriteDriverProvider>
   );
-  return {
-    getHook: () => hook,
-    renderer,
-  };
+  return () => hook;
 }
 
 describe('FavouriteDriverProvider', () => {
   describe('initial state', () => {
-    it('starts with null favourite when nothing stored', async () => {
-      let hook;
+    it('starts with empty favourites when nothing stored', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
-      expect(hook().favourite).toBeNull();
+      expect(getHook().favourites).toEqual([]);
     });
 
-    it('loads saved favourite from AsyncStorage on mount', async () => {
-      let hook;
-      await act(async () => {
-        const {getHook} = renderProvider('Tom Ingram');
-        hook = getHook;
+    it('loads saved favourites from AsyncStorage on mount', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === KEY) return Promise.resolve(JSON.stringify(['Tom Ingram', 'Jason Plato']));
+        return Promise.resolve(null);
       });
-      expect(hook().favourite).toBe('Tom Ingram');
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+      expect(getHook().favourites).toEqual(['Tom Ingram', 'Jason Plato']);
+    });
+
+    it('migrates legacy single-favourite key to array', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === LEGACY_KEY) return Promise.resolve('Colin Turkington');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+      expect(getHook().favourites).toEqual(['Colin Turkington']);
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(KEY, JSON.stringify(['Colin Turkington']));
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith(LEGACY_KEY);
     });
   });
 
   describe('toggle', () => {
-    it('sets favourite when toggled for first time', async () => {
-      let hook;
+    it('adds a driver to favourites when not already faved', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
 
       await act(async () => {
-        hook().toggle('Colin Turkington');
+        getHook().toggle('Colin Turkington');
       });
 
-      expect(hook().favourite).toBe('Colin Turkington');
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('favourite_driver', 'Colin Turkington');
+      expect(getHook().favourites).toContain('Colin Turkington');
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(KEY, JSON.stringify(['Colin Turkington']));
     });
 
-    it('clears favourite when same name toggled again', async () => {
-      let hook;
+    it('removes a driver when they are already faved', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
 
-      await act(async () => {
-        hook().toggle('Colin Turkington');
-      });
-      await act(async () => {
-        hook().toggle('Colin Turkington');
-      });
+      await act(async () => { getHook().toggle('Colin Turkington'); });
+      await act(async () => { getHook().toggle('Colin Turkington'); });
 
-      expect(hook().favourite).toBeNull();
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('favourite_driver');
+      expect(getHook().favourites).not.toContain('Colin Turkington');
+      expect(AsyncStorage.setItem).toHaveBeenLastCalledWith(KEY, JSON.stringify([]));
     });
 
-    it('switches favourite to a different driver', async () => {
-      let hook;
+    it('supports multiple favourites simultaneously', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
 
-      await act(async () => { hook().toggle('Tom Ingram'); });
-      await act(async () => { hook().toggle('Jason Plato'); });
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Gordon Shedden'); });
 
-      expect(hook().favourite).toBe('Jason Plato');
-      expect(AsyncStorage.setItem).toHaveBeenLastCalledWith('favourite_driver', 'Jason Plato');
+      expect(getHook().favourites).toContain('Tom Ingram');
+      expect(getHook().favourites).toContain('Gordon Shedden');
+      expect(getHook().favourites).toHaveLength(2);
+    });
+
+    it('adding a second driver does not remove the first', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Daniel Rowbottom'); });
+
+      expect(getHook().favourites).toContain('Tom Ingram');
+      expect(getHook().favourites).toContain('Daniel Rowbottom');
+    });
+
+    it('removes only the toggled driver, leaving others intact', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Gordon Shedden'); });
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+
+      expect(getHook().favourites).not.toContain('Tom Ingram');
+      expect(getHook().favourites).toContain('Gordon Shedden');
+    });
+
+    it('toggle is case-insensitive — treats same driver with different casing as equal', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Tom INGRAM'); });
+
+      expect(getHook().favourites).toHaveLength(0);
     });
   });
 
   describe('isFavourite', () => {
-    it('returns true for the current favourite', async () => {
-      let hook;
+    it('returns true for a faved driver', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
-      await act(async () => { hook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Tom Ingram'); });
 
-      expect(hook().isFavourite('Tom Ingram')).toBe(true);
+      expect(getHook().isFavourite('Tom Ingram')).toBe(true);
     });
 
-    it('returns false for non-favourite drivers', async () => {
-      let hook;
+    it('returns true for any faved driver in a multi-favourite list', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
-      await act(async () => { hook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+      await act(async () => { getHook().toggle('Gordon Shedden'); });
 
-      expect(hook().isFavourite('Jason Plato')).toBe(false);
+      expect(getHook().isFavourite('Tom Ingram')).toBe(true);
+      expect(getHook().isFavourite('Gordon Shedden')).toBe(true);
     });
 
-    it('returns false when no favourite is set', async () => {
-      let hook;
+    it('returns false for a non-faved driver', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
       await act(async () => {
-        const {getHook} = renderProvider(null);
-        hook = getHook;
+        getHook = renderProvider();
       });
-      expect(hook().isFavourite('Anyone')).toBe(false);
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+
+      expect(getHook().isFavourite('Jason Plato')).toBe(false);
+    });
+
+    it('is case-insensitive', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+      await act(async () => { getHook().toggle('Tom Ingram'); });
+
+      expect(getHook().isFavourite('Tom INGRAM')).toBe(true);
+      expect(getHook().isFavourite('tom ingram')).toBe(true);
+    });
+
+    it('returns false when no favourites are set', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+      expect(getHook().isFavourite('Anyone')).toBe(false);
     });
   });
 });

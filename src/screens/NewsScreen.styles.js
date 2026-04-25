@@ -3,6 +3,7 @@ import {Colors} from '../theme/colors';
 
 export default StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
+  favBorder: {borderLeftWidth: 3, borderLeftColor: Colors.yellow},
   center: {flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center'},
 
   // Hero

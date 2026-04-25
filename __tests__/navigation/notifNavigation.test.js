@@ -82,10 +82,10 @@ describe('navigateFromData', () => {
       });
     });
 
-    it('does NOT navigate for type="news" without a slug', () => {
+    it('navigates to News tab for type="news" without a slug', () => {
       const ref = makeRef();
       navigateFromData(ref, {type: 'news'});
-      expect(ref.navigate).not.toHaveBeenCalled();
+      expect(ref.navigate).toHaveBeenCalledWith('News');
     });
   });
 

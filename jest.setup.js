@@ -1,3 +1,6 @@
+// ── React Native Testing Library ──────────────────────────────────────────────
+import '@testing-library/jest-native/extend-expect';
+
 // ── Global fetch mock ──────────────────────────────────────────────────────────
 // Must be assigned before beforeEach so mockResolvedValue etc. are available
 global.fetch = jest.fn(() =>
@@ -112,6 +115,7 @@ jest.mock('@react-navigation/native', () => {
       getState:     jest.fn(() => ({routes: [{name: 'NewsFeed'}], index: 0})),
     })),
     useRoute: jest.fn(() => ({params: {}})),
+    useFocusEffect: jest.fn((cb) => { cb(); }),
     createNavigationContainerRef: jest.fn(() => ({
       navigate: jest.fn(),
       isReady:  jest.fn(() => true),
@@ -155,24 +159,56 @@ jest.mock('react-native-track-player', () => ({
   useProgress:      jest.fn(() => ({position: 0, duration: 0, buffered: 0})),
 }));
 
-// ── React Native Image ────────────────────────────────────────────────────────
-jest.mock('react-native/Libraries/Image/Image', () => ({
-  prefetch: jest.fn(() => Promise.resolve(true)),
-  getSize:  jest.fn(),
-}));
-
 // ── react-native-webview ──────────────────────────────────────────────────────
 jest.mock('react-native-webview', () => ({WebView: 'WebView'}));
 
-// ── react-native Image.prefetch ───────────────────────────────────────────────
-// Patch onto the mocked react-native Image (preset leaves prefetch undefined)
+// ── react-native Image static methods ─────────────────────────────────────────
+// The preset leaves Image.prefetch/getSize undefined — patch them here so
+// code that calls Image.prefetch() doesn't crash. Do NOT mock the whole
+// Image module (that would break ImageBackground which imports Image internally).
 const RNImage = require('react-native').Image;
 if (RNImage && !RNImage.prefetch) {
   RNImage.prefetch = jest.fn(() => Promise.resolve(true));
+}
+if (RNImage && !RNImage.getSize) {
+  RNImage.getSize = jest.fn();
 }
 
 // ── react-native-svg ──────────────────────────────────────────────────────────
 jest.mock('react-native-svg', () => ({
   Svg: 'Svg', Path: 'Path', Circle: 'Circle',
   Line: 'Line', Text: 'SvgText', G: 'G', Polyline: 'Polyline',
+}));
+
+// ── App navigationRef ─────────────────────────────────────────────────────────
+jest.mock('./App', () => ({
+  navigationRef: {navigate: jest.fn(), isReady: jest.fn(() => true), current: null},
+}), {virtual: true});
+
+// ── Lightweight component stubs ───────────────────────────────────────────────
+jest.mock('./src/components/CachedImage', () => {
+  const React = require('react');
+  const {Image} = require('react-native');
+  const CachedImage = ({uri, style}) => React.createElement(Image, {source: {uri}, style, testID: 'cached-image'});
+  return {
+    __esModule: true,
+    default: CachedImage,
+    prefetchImages: jest.fn(),
+  };
+});
+jest.mock('./src/components/AdBanner', () => ({__esModule: true, default: () => null}));
+jest.mock('./src/components/AdSearchBanner', () => ({__esModule: true, default: () => null}));
+jest.mock('./src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
+
+// ── Asset stubs ───────────────────────────────────────────────────────────────
+jest.mock('./src/assets/driverImages', () => ({getDriverImage: () => null}));
+jest.mock('./src/assets/teamImages', () => ({getTeamImage: () => null}));
+jest.mock('./src/assets/seasonData', () => ({getSeasonData: jest.fn(() => null)}));
+jest.mock('./src/utils/notifications', () => ({
+  setupNotificationChannels: jest.fn(() => Promise.resolve()),
+  requestNotificationPermission: jest.fn(() => Promise.resolve(true)),
+  getFCMToken: jest.fn(() => Promise.resolve('test-token')),
+  onForegroundMessage: jest.fn(() => jest.fn()),
+  checkForNewPodcast: jest.fn(() => Promise.resolve()),
+  showLocalNotification: jest.fn(() => Promise.resolve()),
 }));

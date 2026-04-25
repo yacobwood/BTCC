@@ -33,6 +33,24 @@ log = logging.getLogger("watcher")
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+PRE_TOPICS = {
+    "Free Practice":   "pre_fp",
+    "Qualifying":      "pre_qualifying",
+    "Qualifying Race": "pre_qrace",
+    "Race 1":          "pre_race1",
+    "Race 2":          "pre_race2",
+    "Race 3":          "pre_race3",
+}
+
+RESULTS_TOPICS = {
+    "Free Practice":   "results_fp",
+    "Qualifying":      "results_qualifying",
+    "Qualifying Race": "results_qrace",
+    "Race 1":          "results_race1",
+    "Race 2":          "results_race2",
+    "Race 3":          "results_race3",
+}
+
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
 
@@ -177,8 +195,8 @@ def get_top_finisher(year, round_num, label):
 def handle_session_complete(session, year, round_num, venue):
     label     = session["label"]
     suffix    = session.get("suffix")
-    topic     = session.get("topic")
-    channel   = session.get("channel", "general")
+    topic     = RESULTS_TOPICS.get(label)
+    channel   = label.lower().replace(" ", "_")
     is_q1     = session.get("is_q1", False)
     do_notify = session.get("notify_results", True) and not is_q1
 
@@ -245,16 +263,13 @@ def pre_session_notifier(sessions, round_num, venue):
         log.info(f"Pre-session: will notify for {sess['label']} in {wait_secs/60:.0f} min")
         time.sleep(wait_secs)
 
-        label    = sess.get("pre_label", sess["label"])  # Q1 uses "Qualifying" as pre_label
-        topic    = sess.get("topic") or "race_alerts"
-        channel  = sess.get("channel") or "general"
+        label     = sess.get("pre_label", sess["label"])  # Q1 uses "Qualifying" as pre_label
+        topic     = PRE_TOPICS.get(label, "pre_race1")
         start_bst = (start_utc + timedelta(hours=1)).strftime("%H:%M")  # rough BST display
 
         if label == "Free Practice":
             title = f"Free Practice — Round {round_num}"
             body  = f"{venue} · Free Practice starts at {start_bst} BST"
-            topic = "fp_alerts"
-            channel = "free_practice"
         elif "Qualifying Race" in label:
             title = f"Qualifying Race — Round {round_num}"
             body  = f"{venue} · Qualifying Race starts at {start_bst} BST"
@@ -266,7 +281,7 @@ def pre_session_notifier(sessions, round_num, venue):
             title = f"Race {race_num} — Round {round_num}"
             body  = f"{venue} · Race {race_num} starts at {start_bst} BST"
 
-        send_fcm(topic, title, body, channel)
+        send_fcm(topic, title, body, label.lower().replace(" ", "_"))
 
 
 # ── TSL SignalR connection ────────────────────────────────────────────────────

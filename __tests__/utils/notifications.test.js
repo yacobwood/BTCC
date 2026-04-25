@@ -1,3 +1,7 @@
+// This file tests the notifications module itself — unmock it so the real
+// implementation is loaded instead of the global stub in jest.setup.js.
+jest.unmock('../../src/utils/notifications');
+
 import {Platform, PermissionsAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, {AndroidImportance} from '@notifee/react-native';
@@ -18,9 +22,9 @@ import {
 
 // ── setupNotificationChannels ──────────────────────────────────────────────────
 describe('setupNotificationChannels', () => {
-  it('creates all 8 notification channels', async () => {
+  it('creates all 9 notification channels', async () => {
     await setupNotificationChannels();
-    expect(notifee.createChannel).toHaveBeenCalledTimes(8);
+    expect(notifee.createChannel).toHaveBeenCalledTimes(9);
   });
 
   it('creates channel with id "news"', async () => {

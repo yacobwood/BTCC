@@ -34,11 +34,12 @@ function shortLabel(label) {
 function buildGridMap(races, raceIndex) {
   const race = races[raceIndex];
   if (!race) return null;
+
   let sourceLabel;
   if (race.label === 'Qualifying Race') sourceLabel = 'Qualifying';
   else if (race.label === 'Race 1') sourceLabel = 'Qualifying Race';
   else if (race.label === 'Race 2') sourceLabel = 'Race 1';
-  else return null; // R3 grid is a random reversal draw — not computable
+  else return null;
   const sourceRace = races.find(r => r.label === sourceLabel);
   if (!sourceRace?.results?.length) return null;
   const map = {};

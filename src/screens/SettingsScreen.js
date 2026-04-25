@@ -40,6 +40,11 @@ export default function SettingsScreen({navigation}) {
 
   useEffect(() => { Analytics.screen('settings'); }, []);
 
+  const toggle = (key) => (v) => {
+    Analytics.notificationTypeToggled(key, v);
+    setSetting(key, v);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -55,52 +60,145 @@ export default function SettingsScreen({navigation}) {
           label="News alerts"
           description="Get notified when a new BTCC article is published"
           value={settings.newsAlerts}
-          onToggle={(v) => { Analytics.notificationTypeToggled('newsAlerts', v); setSetting('newsAlerts', v); }}
-        />
-        <SettingRow
-          label="Race alerts"
-          description="Get notified when a race session is about to start"
-          value={settings.raceAlerts}
-          onToggle={(v) => { Analytics.notificationTypeToggled('raceAlerts', v); setSetting('raceAlerts', v); }}
-        />
-        <SettingRow
-          label="Qualifying alerts"
-          description="Get notified when qualifying is about to start"
-          value={settings.qualifyingAlerts}
-          onToggle={(v) => { Analytics.notificationTypeToggled('qualifyingAlerts', v); setSetting('qualifyingAlerts', v); }}
-        />
-        <SettingRow
-          label="Free practice alerts"
-          description="Get notified when free practice is about to start"
-          value={settings.fpAlerts}
-          onToggle={(v) => { Analytics.notificationTypeToggled('fpAlerts', v); setSetting('fpAlerts', v); }}
-        />
-        <SettingRow
-          label="Results alerts"
-          description="Get notified when new round results are published"
-          value={settings.resultsAlerts}
-          onToggle={(v) => { Analytics.notificationTypeToggled('resultsAlerts', v); setSetting('resultsAlerts', v); }}
-        />
-        <SettingRow
-          label="Race weekend preview"
-          description="Friday reminder before each race weekend"
-          value={settings.weekendPreview}
-          onToggle={(v) => { Analytics.notificationTypeToggled('weekendPreview', v); setSetting('weekendPreview', v); }}
-        />
-        <SettingRow
-          label="Standings update"
-          description="Tuesday reminder to check standings after each round"
-          value={settings.standingsUpdate}
-          onToggle={(v) => { Analytics.notificationTypeToggled('standingsUpdate', v); setSetting('standingsUpdate', v); }}
+          onToggle={toggle('newsAlerts')}
         />
         {podcasts_enabled && (
           <SettingRow
             label="Podcast alerts"
             description="Get notified when a new BTCC podcast or interview is released"
             value={settings.podcastAlerts}
-            onToggle={(v) => { Analytics.notificationTypeToggled('podcastAlerts', v); setSetting('podcastAlerts', v); }}
+            onToggle={toggle('podcastAlerts')}
           />
         )}
+
+        <SettingRow
+          label="Race weekend preview"
+          description="Friday reminder before each race weekend"
+          value={settings.weekendPreview}
+          onToggle={toggle('weekendPreview')}
+        />
+
+        {/* ── Pre-race ── */}
+        <GroupRow
+          label="Pre-race alerts"
+          description="Notifications before each session starts"
+          value={settings.preRace}
+          onToggle={toggle('preRace')}
+        />
+        <SubRow
+          label="Free Practice"
+          accessibilityLabel="Pre-race Free Practice"
+          value={settings.preRaceFP}
+          onToggle={toggle('preRaceFP')}
+          parentEnabled={settings.preRace}
+        />
+        <SubRow
+          label="Qualifying"
+          accessibilityLabel="Pre-race Qualifying"
+          value={settings.preRaceQualifying}
+          onToggle={toggle('preRaceQualifying')}
+          parentEnabled={settings.preRace}
+        />
+        <SubRow
+          label="Qualifying Race"
+          accessibilityLabel="Pre-race Qualifying Race"
+          value={settings.preRaceQRace}
+          onToggle={toggle('preRaceQRace')}
+          parentEnabled={settings.preRace}
+        />
+        <SubGroupRow
+          label="Race"
+          accessibilityLabel="Pre-race Race"
+          value={settings.preRaceRace}
+          onToggle={toggle('preRaceRace')}
+          parentEnabled={settings.preRace}
+        />
+        <SubSubRow
+          label="Race 1"
+          accessibilityLabel="Pre-race Race 1"
+          value={settings.preRaceRace1}
+          onToggle={toggle('preRaceRace1')}
+          parentEnabled={settings.preRace && settings.preRaceRace}
+        />
+        <SubSubRow
+          label="Race 2"
+          accessibilityLabel="Pre-race Race 2"
+          value={settings.preRaceRace2}
+          onToggle={toggle('preRaceRace2')}
+          parentEnabled={settings.preRace && settings.preRaceRace}
+        />
+        <SubSubRow
+          label="Race 3"
+          accessibilityLabel="Pre-race Race 3"
+          value={settings.preRaceRace3}
+          onToggle={toggle('preRaceRace3')}
+          parentEnabled={settings.preRace && settings.preRaceRace}
+        />
+
+        {/* ── Results ── */}
+        <GroupRow
+          label="Results alerts"
+          description="Notifications when session results are published"
+          value={settings.results}
+          onToggle={toggle('results')}
+        />
+        <SubRow
+          label="Free Practice"
+          accessibilityLabel="Results Free Practice"
+          value={settings.resultsFP}
+          onToggle={toggle('resultsFP')}
+          parentEnabled={settings.results}
+        />
+        <SubRow
+          label="Qualifying"
+          accessibilityLabel="Results Qualifying"
+          value={settings.resultsQualifying}
+          onToggle={toggle('resultsQualifying')}
+          parentEnabled={settings.results}
+        />
+        <SubRow
+          label="Qualifying Race"
+          accessibilityLabel="Results Qualifying Race"
+          value={settings.resultsQRace}
+          onToggle={toggle('resultsQRace')}
+          parentEnabled={settings.results}
+        />
+        <SubGroupRow
+          label="Race"
+          accessibilityLabel="Results Race"
+          value={settings.resultsRace}
+          onToggle={toggle('resultsRace')}
+          parentEnabled={settings.results}
+        />
+        <SubSubRow
+          label="Race 1"
+          accessibilityLabel="Results Race 1"
+          value={settings.resultsRace1}
+          onToggle={toggle('resultsRace1')}
+          parentEnabled={settings.results && settings.resultsRace}
+        />
+        <SubSubRow
+          label="Race 2"
+          accessibilityLabel="Results Race 2"
+          value={settings.resultsRace2}
+          onToggle={toggle('resultsRace2')}
+          parentEnabled={settings.results && settings.resultsRace}
+        />
+        <SubSubRow
+          label="Race 3"
+          accessibilityLabel="Results Race 3"
+          value={settings.resultsRace3}
+          onToggle={toggle('resultsRace3')}
+          parentEnabled={settings.results && settings.resultsRace}
+        />
+
+        <View style={styles.divider} />
+        <SettingRow
+          label="Standings update"
+          description="Tuesday reminder to check standings after each round"
+          value={settings.standingsUpdate}
+          onToggle={toggle('standingsUpdate')}
+        />
 
         <View style={styles.divider} />
         <Text style={styles.sectionTitle}>UNIT DISPLAY</Text>
@@ -164,12 +262,14 @@ export default function SettingsScreen({navigation}) {
   );
 }
 
+// ── Components ────────────────────────────────────────────────────
+
 function SettingRow({label, description, value, onToggle}) {
   return (
     <View style={styles.settingRow}>
       <View style={{flex: 1}}>
         <Text style={styles.settingLabel}>{label}</Text>
-        <Text style={styles.settingDesc}>{description}</Text>
+        {description ? <Text style={styles.settingDesc}>{description}</Text> : null}
       </View>
       <Switch
         value={value}
@@ -177,6 +277,86 @@ function SettingRow({label, description, value, onToggle}) {
         trackColor={{false: Colors.outline, true: Colors.yellow}}
         thumbColor="#fff"
         accessibilityLabel={label}
+        accessibilityRole="switch"
+      />
+    </View>
+  );
+}
+
+// Parent group header with its own toggle
+function GroupRow({label, description, value, onToggle}) {
+  return (
+    <View style={[styles.settingRow, styles.groupRow]}>
+      <View style={{flex: 1}}>
+        <Text style={styles.groupLabel}>{label}</Text>
+        {description ? <Text style={styles.settingDesc}>{description}</Text> : null}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onToggle}
+        trackColor={{false: Colors.outline, true: Colors.yellow}}
+        thumbColor="#fff"
+        accessibilityLabel={label}
+        accessibilityRole="switch"
+      />
+    </View>
+  );
+}
+
+// First-level child (indented once)
+function SubRow({label, accessibilityLabel, value, onToggle, parentEnabled}) {
+  const dimmed = !parentEnabled;
+  return (
+    <View style={[styles.settingRow, styles.subRow]}>
+      <View style={styles.subIndent} />
+      <Text style={[styles.subLabel, dimmed && styles.dimmed]}>{label}</Text>
+      <Switch
+        value={parentEnabled && value}
+        onValueChange={onToggle}
+        disabled={dimmed}
+        trackColor={{false: Colors.outline, true: Colors.yellow}}
+        thumbColor="#fff"
+        accessibilityLabel={accessibilityLabel || label}
+        accessibilityRole="switch"
+      />
+    </View>
+  );
+}
+
+// Second-level parent (e.g. "Race" within Pre-race)
+function SubGroupRow({label, accessibilityLabel, value, onToggle, parentEnabled}) {
+  const dimmed = !parentEnabled;
+  return (
+    <View style={[styles.settingRow, styles.subRow]}>
+      <View style={styles.subIndent} />
+      <Text style={[styles.subGroupLabel, dimmed && styles.dimmed]}>{label}</Text>
+      <Switch
+        value={parentEnabled && value}
+        onValueChange={onToggle}
+        disabled={dimmed}
+        trackColor={{false: Colors.outline, true: Colors.yellow}}
+        thumbColor="#fff"
+        accessibilityLabel={accessibilityLabel || label}
+        accessibilityRole="switch"
+      />
+    </View>
+  );
+}
+
+// Second-level child (indented twice, e.g. Race 1/2/3)
+function SubSubRow({label, accessibilityLabel, value, onToggle, parentEnabled}) {
+  const dimmed = !parentEnabled;
+  return (
+    <View style={[styles.settingRow, styles.subSubRow]}>
+      <View style={styles.subSubIndent} />
+      <Text style={[styles.subLabel, dimmed && styles.dimmed]}>{label}</Text>
+      <Switch
+        value={parentEnabled && value}
+        onValueChange={onToggle}
+        disabled={dimmed}
+        trackColor={{false: Colors.outline, true: Colors.yellow}}
+        thumbColor="#fff"
+        accessibilityLabel={accessibilityLabel || label}
         accessibilityRole="switch"
       />
     </View>
@@ -205,8 +385,22 @@ const styles = StyleSheet.create({
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
+  groupRow: {
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.outline,
+    paddingTop: 14,
+  },
+  groupLabel: {color: '#fff', fontSize: 15, fontWeight: '700'},
+  subRow: {paddingVertical: 7},
+  subSubRow: {paddingVertical: 7},
+  subIndent: {width: 20, height: 1},
+  subSubIndent: {width: 40, height: 1},
+  subLabel: {flex: 1, color: Colors.textSecondary, fontSize: 14, fontWeight: '500'},
+  subGroupLabel: {flex: 1, color: '#fff', fontSize: 14, fontWeight: '600'},
+  dimmed: {opacity: 0.35},
   settingLabel: {color: '#fff', fontSize: 15, fontWeight: '600'},
   settingDesc: {color: Colors.textSecondary, fontSize: 12, marginTop: 2},
   divider: {height: 1, backgroundColor: Colors.outline, marginVertical: 20},

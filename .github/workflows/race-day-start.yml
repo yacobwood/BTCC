@@ -1,0 +1,33 @@
+name: Race Day Start
+
+# Runs every morning to check if today is a BTCC race day.
+# If it is, automatically dispatches the session-watcher workflow.
+
+on:
+  schedule:
+    - cron: "30 8 * * 6,0"   # 08:30 UTC, Saturdays and Sundays only
+  workflow_dispatch:           # allow manual trigger for testing
+
+jobs:
+  check-and-start:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Check schedule and dispatch session watcher
+        run: python .github/scripts/start_race_day.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

@@ -2,6 +2,10 @@
  * @format
  */
 
+// jest.setup.js mocks './App' as a virtual stub (for navigationRef usage).
+// This test imports the real App component, so we must unmock it first.
+jest.unmock('../App');
+
 // Stub out side-effect-heavy utils so this smoke test stays fast
 jest.mock('../src/utils/backgroundPrefetch', () => ({runBackgroundPrefetch: jest.fn()}));
 jest.mock('../src/utils/notifNavigation',    () => ({navigateFromData: jest.fn()}));

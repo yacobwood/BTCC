@@ -23,11 +23,13 @@ import AdBanner from '../components/AdBanner';
 import AdSearchBanner from '../components/AdSearchBanner';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
+import {useFavouriteDriver} from '../store/favouriteDriver';
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
   const {search_ad, hub_news_enabled} = useFeatureFlags();
   const {settings} = useSettings();
+  const {favourites} = useFavouriteDriver();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -154,17 +156,17 @@ export default function NewsScreen({navigation}) {
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
       case 'hero':
-        return <HeroCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'hero', item.article.source); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
+        return <HeroCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'hero', item.article.source); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
       case 'grid':
-        return <GridRow articles={item.articles} onPress={(article) => { Analytics.articleClicked(article.title, 'grid', article.source); openArticle(article); }} />;
+        return <GridRow articles={item.articles} favourite={favourites} onPress={(article) => { Analytics.articleClicked(article.title, 'grid', article.source); openArticle(article); }} />;
       case 'moreHeader':
         return <Text style={styles.moreHeader}>MORE STORIES</Text>;
       case 'compact':
-        return <CompactCard article={item.article} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source); openArticle(item.article); }} />;
+        return <CompactCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source); openArticle(item.article); }} />;
       default:
         return null;
     }
-  }, [openArticle, onRefresh]);
+  }, [openArticle, onRefresh, favourites]);
 
   if (loading) {
     return (
@@ -211,6 +213,7 @@ export default function NewsScreen({navigation}) {
       {(!searchActive || searchQuery.length >= 2) && (
       <FlatList
         ref={flatListRef}
+        testID="news-flatlist"
         data={listData}
         keyExtractor={(item, i) => item.article?.id ? String(item.article.id) : `section-${i}`}
         renderItem={renderItem}
@@ -250,6 +253,13 @@ export default function NewsScreen({navigation}) {
   );
 }
 
+// ── Favourite driver name match ───────────────────────────────────
+function titleMentionsFav(title, favourites) {
+  if (!favourites?.length || !title) return false;
+  const titleLc = title.toLowerCase();
+  return favourites.some(f => titleLc.includes(f.split(' ').pop().toLowerCase()));
+}
+
 // ── Source Badge ─────────────────────────────────────────────────
 function SourceBadge({source}) {
   const isBtccNet = source === 'btcc.net';
@@ -263,9 +273,10 @@ function SourceBadge({source}) {
 }
 
 // ── Hero Card ────────────────────────────────────────────────────
-function HeroCard({article, onPress, onRefresh, onSearchClick}) {
+function HeroCard({article, favourite, onPress, onRefresh, onSearchClick}) {
+  const isFav = titleMentionsFav(article.title, favourite);
   return (
-    <TouchableOpacity style={styles.hero} activeOpacity={0.9} onPress={onPress} accessibilityLabel={`Featured article: ${article.title}`} accessibilityRole="button">
+    <TouchableOpacity style={[styles.hero, isFav && styles.favBorder]} activeOpacity={0.9} onPress={onPress} accessibilityLabel={`Featured article: ${article.title}`} accessibilityRole="button">
       {article.imageUrl && (
         <CachedImage uri={article.imageUrl} style={styles.heroImage} targetWidth={768} />
       )}
@@ -299,13 +310,13 @@ function HeroCard({article, onPress, onRefresh, onSearchClick}) {
 }
 
 // ── Grid Row (2 side-by-side cards) ──────────────────────────────
-function GridRow({articles, onPress}) {
+function GridRow({articles, favourite, onPress}) {
   return (
     <View style={styles.gridRow}>
       {articles.map(article => (
         <TouchableOpacity
           key={article.id}
-          style={styles.gridCard}
+          style={[styles.gridCard, titleMentionsFav(article.title, favourite) && styles.favBorder]}
           activeOpacity={0.85}
           onPress={() => onPress(article)}
           accessibilityLabel={article.title}
@@ -331,9 +342,10 @@ function GridRow({articles, onPress}) {
 }
 
 // ── Compact Card (list item with category badge) ─────────────────
-function CompactCard({article, onPress}) {
+function CompactCard({article, favourite, onPress}) {
+  const isFav = titleMentionsFav(article.title, favourite);
   return (
-    <TouchableOpacity style={styles.compactCard} activeOpacity={0.8} onPress={onPress} accessibilityLabel={article.title} accessibilityRole="button">
+    <TouchableOpacity style={[styles.compactCard, isFav && styles.favBorder]} activeOpacity={0.8} onPress={onPress} accessibilityLabel={article.title} accessibilityRole="button">
       {article.imageUrl && (
         <CachedImage uri={article.imageUrl} style={styles.compactImage} targetWidth={150} />
       )}
