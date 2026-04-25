@@ -202,8 +202,10 @@ export function parseResults(json) {
     polePosition: r.polePosition || null,
     races: (r.races || []).map((race, j) => {
       const label = race.label || `Race ${j + 1}`;
-      const isQR = label.toLowerCase() === 'qualifying race';
-      const isRace1 = label.toLowerCase() === 'race 1';
+      const labelLc = label.toLowerCase();
+      const isQR = labelLc === 'qualifying race';
+      const isRace1 = labelLc === 'race 1';
+      const noPoints = labelLc === 'free practice' || labelLc === 'qualifying';
       return {
         label,
         date: race.date || null,
@@ -215,7 +217,9 @@ export function parseResults(json) {
           const lead = d.leadLap || d.l || false;
           const pole = d.pole || d.p || false;
           let points;
-          if (rawPts > 0) {
+          if (noPoints) {
+            points = 0;
+          } else if (rawPts > 0) {
             points = rawPts;
           } else if (isQR) {
               const qrPts = [10, 9, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1];
