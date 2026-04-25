@@ -27,7 +27,10 @@ export function FavouriteDriverProvider({children}) {
     });
   }, []);
 
-  const isFavourite = useCallback((name) => favourite === name, [favourite]);
+  const isFavourite = useCallback((name) => {
+    if (!favourite || !name) return false;
+    return favourite.toLowerCase() === name.toLowerCase();
+  }, [favourite]);
 
   return (
     <FavouriteDriverContext.Provider value={{favourite, toggle, isFavourite}}>

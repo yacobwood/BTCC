@@ -1,0 +1,244 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "tsl": "261603",
+      "venue": "Donington Park",
+      "saturday_date": "2026-04-18",
+      "sunday_date": "2026-04-19",
+      "sessions": {
+        "saturday": [
+          {
+            "label": "Free Practice",
+            "suffix": "fp1",
+            "topic": "fp_alerts",
+            "channel": "free_practice",
+            "start_utc": "2026-04-18T09:35:00Z",
+            "notify_pre": true,
+            "notify_results": true,
+            "is_q1": false
+          },
+          {
+            "label": "Qualifying",
+            "suffix": null,
+            "topic": null,
+            "channel": null,
+            "start_utc": "2026-04-18T10:40:00Z",
+            "notify_pre": true,
+            "notify_results": false,
+            "is_q1": true,
+            "pre_label": "Qualifying"
+          },
+          {
+            "label": "Qualifying",
+            "suffix": "qu1",
+            "topic": "qualifying_alerts",
+            "channel": "qualifying",
+            "start_utc": "2026-04-18T13:00:00Z",
+            "notify_pre": false,
+            "notify_results": true,
+            "is_q1": false
+          },
+          {
+            "label": "Qualifying Race",
+            "suffix": "qra",
+            "topic": "qualifying_alerts",
+            "channel": "qualifying",
+            "start_utc": "2026-04-18T14:05:00Z",
+            "notify_pre": true,
+            "notify_results": true,
+            "is_q1": false
+          }
+        ],
+        "sunday": [
+          {
+            "label": "Race 1",
+            "suffix": "rc1",
+            "topic": "race_alerts",
+            "channel": "race",
+            "start_utc": "2026-04-19T09:30:00Z",
+            "notify_pre": true,
+            "notify_results": true,
+            "is_q1": false
+          },
+          {
+            "label": "Race 2",
+            "suffix": "rc2",
+            "topic": "race_alerts",
+            "channel": "race",
+            "start_utc": "2026-04-19T12:40:00Z",
+            "notify_pre": true,
+            "notify_results": true,
+            "is_q1": false
+          },
+          {
+            "label": "Race 3",
+            "suffix": "rc3",
+            "topic": "race_alerts",
+            "channel": "race",
+            "start_utc": "2026-04-19T15:30:00Z",
+            "notify_pre": true,
+            "notify_results": true,
+            "is_q1": false
+          }
+        ]
+      }
+    },
+    {
+      "round": 2,
+      "tsl": "261903",
+      "venue": "Brands Hatch Indy",
+      "saturday_date": "2026-05-09",
+      "sunday_date": "2026-05-10",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",   "suffix": "fp1", "topic": "fp_alerts",          "channel": "free_practice", "start_utc": "2026-05-09T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",       "suffix": null,  "topic": null,                  "channel": null,            "start_utc": "2026-05-09T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",       "suffix": "qu1", "topic": "qualifying_alerts",   "channel": "qualifying",    "start_utc": "2026-05-09T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race",  "suffix": "qra", "topic": "qualifying_alerts",   "channel": "qualifying",    "start_utc": "2026-05-09T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-05-10T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-05-10T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-05-10T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 3,  "tsl": "262103", "venue": "Snetterton",
+      "saturday_date": "2026-05-23", "sunday_date": "2026-05-24",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-05-23T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-05-23T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-05-23T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-05-23T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-05-24T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-05-24T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-05-24T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 4,  "tsl": "262303", "venue": "Oulton Park",
+      "saturday_date": "2026-06-06", "sunday_date": "2026-06-07",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-06-06T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-06-06T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-06-06T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-06-06T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-06-07T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-06-07T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-06-07T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 5,  "tsl": "263003", "venue": "Thruxton",
+      "saturday_date": "2026-07-25", "sunday_date": "2026-07-26",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-07-25T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-07-25T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-07-25T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-07-25T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-07-26T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-07-26T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-07-26T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 6,  "tsl": "263203", "venue": "Knockhill",
+      "saturday_date": "2026-08-08", "sunday_date": "2026-08-09",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-08-08T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-08-08T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-08-08T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-08-08T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-08-09T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-08-09T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-08-09T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 7,  "tsl": "263403", "venue": "Donington Park GP",
+      "saturday_date": "2026-08-22", "sunday_date": "2026-08-23",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-08-22T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-08-22T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-08-22T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-08-22T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-08-23T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-08-23T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-08-23T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 8,  "tsl": "263603", "venue": "Croft",
+      "saturday_date": "2026-09-05", "sunday_date": "2026-09-06",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-09-05T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-09-05T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-09-05T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-09-05T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-09-06T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-09-06T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-09-06T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 9,  "tsl": "263903", "venue": "Silverstone",
+      "saturday_date": "2026-09-26", "sunday_date": "2026-09-27",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-09-26T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-09-26T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-09-26T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-09-26T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-09-27T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-09-27T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-09-27T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    },
+    {
+      "round": 10, "tsl": "264103", "venue": "Brands Hatch GP",
+      "saturday_date": "2026-10-10", "sunday_date": "2026-10-11",
+      "sessions": {
+        "saturday": [
+          {"label": "Free Practice",  "suffix": "fp1", "topic": "fp_alerts",        "channel": "free_practice", "start_utc": "2026-10-10T09:35:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying",      "suffix": null,  "topic": null,                "channel": null,            "start_utc": "2026-10-10T10:40:00Z", "notify_pre": true,  "notify_results": false, "is_q1": true, "pre_label": "Qualifying"},
+          {"label": "Qualifying",      "suffix": "qu1", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-10-10T13:00:00Z", "notify_pre": false, "notify_results": true,  "is_q1": false},
+          {"label": "Qualifying Race", "suffix": "qra", "topic": "qualifying_alerts", "channel": "qualifying",    "start_utc": "2026-10-10T14:05:00Z", "notify_pre": true,  "notify_results": true,  "is_q1": false}
+        ],
+        "sunday": [
+          {"label": "Race 1", "suffix": "rc1", "topic": "race_alerts", "channel": "race", "start_utc": "2026-10-11T09:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 2", "suffix": "rc2", "topic": "race_alerts", "channel": "race", "start_utc": "2026-10-11T12:40:00Z", "notify_pre": true, "notify_results": true, "is_q1": false},
+          {"label": "Race 3", "suffix": "rc3", "topic": "race_alerts", "channel": "race", "start_utc": "2026-10-11T15:30:00Z", "notify_pre": true, "notify_results": true, "is_q1": false}
+        ]
+      }
+    }
+  ]
+}
