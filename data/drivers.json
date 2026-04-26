@@ -24,7 +24,8 @@
           "fastestLaps": 0,
           "dnfs": 3
         }
-      ]
+      ],
+      "class": "I"
     },
     {
       "number": 3,
@@ -265,7 +266,8 @@
         }
       ],
       "dateOfBirth": "1985-03-15",
-      "birthplace": "Reigate, Surrey"
+      "birthplace": "Reigate, Surrey",
+      "class": "M"
     },
     {
       "number": 11,
@@ -311,7 +313,8 @@
           "poles": 0,
           "fastestLaps": 0
         }
-      ]
+      ],
+      "class": "M"
     },
     {
       "number": 15,
@@ -323,7 +326,8 @@
       "bio": "Despite ironically standing at more than six foot, Lewis Selby has become synonymous for competing in MINIs, both classic and modern.\n\nWinning races in both the MINI Miglia Championship and MINI Se7en Challenge, Selby originally represented NAPA Racing at the 2022 edition of the Goodwood Festival of Speed before then going on to race a NAPA-branded car in the EnduroKA series.\n\nMaking the high-profile switch to the MINI CHALLENGE in 2023, Selby entered the JCW class with the backing of NAPA Racing UK and punched in a number of standout performances to eventually seal the coveted Directors Cup.\n\nContinuing to improve as each season has passed, the Buckinghamshire racer now takes on a brand-new challenge as he makes the step up to the BTCC.\n\nUndoubtedly set to be one to watch in 2026, Selby will be looking to utilise all of his experience in front-wheel-drive machinery to hit the ground running and challenge for honours in the Jack Sears Trophy, which is for drivers who are yet to score more than one podium in the series.",
       "dateOfBirth": "1980-07-18",
       "birthplace": "Aylesbury, Buckinghamshire",
-      "history": []
+      "history": [],
+      "class": "M"
     },
     {
       "number": 16,
@@ -516,7 +520,8 @@
         }
       ],
       "dateOfBirth": "1996-09-28",
-      "birthplace": "Dalkeith, Scotland"
+      "birthplace": "Dalkeith, Scotland",
+      "class": "I"
     },
     {
       "number": 17,
@@ -565,7 +570,8 @@
         }
       ],
       "dateOfBirth": "2005-03-16",
-      "birthplace": "Irvine, Scotland"
+      "birthplace": "Irvine, Scotland",
+      "class": "I"
     },
     {
       "number": 19,
@@ -590,7 +596,8 @@
         }
       ],
       "dateOfBirth": "2005-08-14",
-      "birthplace": "Lancashire"
+      "birthplace": "Lancashire",
+      "class": "M"
     },
     {
       "number": 22,
@@ -699,7 +706,8 @@
         }
       ],
       "dateOfBirth": "1991-04-18",
-      "birthplace": "Larne, Northern Ireland"
+      "birthplace": "Larne, Northern Ireland",
+      "class": "I"
     },
     {
       "number": 27,
@@ -808,7 +816,8 @@
         }
       ],
       "dateOfBirth": "1989-09-26",
-      "birthplace": "Harrogate, Yorkshire"
+      "birthplace": "Harrogate, Yorkshire",
+      "class": "M"
     },
     {
       "number": 28,
@@ -893,7 +902,8 @@
           "fastestLaps": 0,
           "dnfs": 5
         }
-      ]
+      ],
+      "class": "M"
     },
     {
       "number": 32,
@@ -978,7 +988,8 @@
         }
       ],
       "dateOfBirth": "1989-02-18",
-      "birthplace": "Kidderminster, Worcestershire"
+      "birthplace": "Kidderminster, Worcestershire",
+      "class": "M"
     },
     {
       "number": 33,
@@ -1159,7 +1170,8 @@
         }
       ],
       "dateOfBirth": "1990-07-11",
-      "birthplace": "Lancaster, Lancashire"
+      "birthplace": "Lancaster, Lancashire",
+      "class": "M"
     },
     {
       "number": 50,
@@ -1316,7 +1328,8 @@
         }
       ],
       "dateOfBirth": "1992-06-01",
-      "birthplace": "Ballymena, Northern Ireland"
+      "birthplace": "Ballymena, Northern Ireland",
+      "class": "I"
     },
     {
       "number": 52,
@@ -1541,7 +1554,8 @@
         }
       ],
       "dateOfBirth": "1979-01-23",
-      "birthplace": "Edinburgh, Scotland"
+      "birthplace": "Edinburgh, Scotland",
+      "class": "I"
     },
     {
       "number": 66,
@@ -1710,7 +1724,8 @@
         }
       ],
       "dateOfBirth": "1992-02-22",
-      "birthplace": "Shepton Mallet, Somerset"
+      "birthplace": "Shepton Mallet, Somerset",
+      "class": "M"
     },
     {
       "number": 77,
@@ -1807,7 +1822,8 @@
         }
       ],
       "dateOfBirth": "1993-03-24",
-      "birthplace": "Worksop, Nottinghamshire"
+      "birthplace": "Worksop, Nottinghamshire",
+      "class": "M"
     },
     {
       "number": 80,
@@ -1966,7 +1982,8 @@
         }
       ],
       "dateOfBirth": "1993-08-20",
-      "birthplace": "High Wycombe"
+      "birthplace": "High Wycombe",
+      "class": "M"
     },
     {
       "number": 88,
@@ -2027,7 +2044,8 @@
         }
       ],
       "dateOfBirth": "1998-12-08",
-      "birthplace": "Caterham, Surrey"
+      "birthplace": "Caterham, Surrey",
+      "class": "I"
     },
     {
       "number": 99,
@@ -2052,7 +2070,8 @@
           "fastestLaps": 3,
           "dnfs": 2
         }
-      ]
+      ],
+      "class": "I"
     },
     {
       "number": 116,
@@ -2189,7 +2208,8 @@
         }
       ],
       "dateOfBirth": "1994-07-15",
-      "birthplace": "Bideford, Devon"
+      "birthplace": "Bideford, Devon",
+      "class": "M"
     },
     {
       "number": 132,
@@ -2212,7 +2232,8 @@
           "fastestLaps": 0,
           "dnfs": 4
         }
-      ]
+      ],
+      "class": "I"
     }
   ],
   "teams": [
