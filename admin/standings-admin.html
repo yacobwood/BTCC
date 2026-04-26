@@ -2750,13 +2750,14 @@ let roadmapItems = [];
 let roadmapFileSha = null;
 let roadmapLoaded = false;
 
-const ROADMAP_STATUS_OPTS = ['idea','planned','in-progress','done','rejected'];
+const ROADMAP_STATUS_OPTS = ['idea','planned','in-progress','ready-to-deploy','done','rejected'];
 const ROADMAP_STATUS_COLORS = {
-  'idea':        'var(--text-sec)',
-  'planned':     '#60A5FA',
-  'in-progress': 'var(--yellow)',
-  'done':        'var(--green)',
-  'rejected':    'var(--red)',
+  'idea':             'var(--text-sec)',
+  'planned':          '#60A5FA',
+  'in-progress':      'var(--yellow)',
+  'ready-to-deploy':  '#A78BFA',
+  'done':             'var(--green)',
+  'rejected':         'var(--red)',
 };
 
 const savedTab = sessionStorage.getItem('activeTab');
