@@ -75,7 +75,7 @@ export default function RoadmapScreen({navigation}) {
         AsyncStorage.getItem('roadmap_voted').then(v => (v ? JSON.parse(v) : [])),
       ]);
       const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-      const STATUS_ORDER = {'in-progress': 0, planned: 1, idea: 2, done: 3, rejected: 4};
+      const STATUS_ORDER = {'in-progress': 0, 'ready-to-deploy': 1, planned: 2, idea: 3, done: 4, rejected: 5};
       const planned = (data.items || data.planned || [])
         .filter(item => {
           if (item.status === 'rejected') {
@@ -187,7 +187,7 @@ export default function RoadmapScreen({navigation}) {
             <View key={item.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <StatusBadge status={item.status} />
-                {item.status !== 'rejected' && item.status !== 'done' && (
+                {item.status !== 'rejected' && item.status !== 'done' && item.status !== 'ready-to-deploy' && (
                   <TouchableOpacity
                     style={[
                       styles.voteBtn,
@@ -277,6 +277,7 @@ const STATUS_META = {
   idea: {label: 'Idea', color: Colors.textSecondary, border: Colors.outline},
   planned: {label: 'Planned', color: '#60A5FA', border: '#60A5FA'},
   'in-progress': {label: 'In Progress', color: Colors.yellow, border: Colors.yellow},
+  'ready-to-deploy': {label: 'Ready to Deploy', color: '#A78BFA', border: '#A78BFA'},
   done: {label: 'Done', color: '#22C55E', border: '#22C55E'},
   rejected: {label: 'Not Planned', color: '#EF4444', border: '#EF4444'},
 };

@@ -11,6 +11,8 @@ const defaults = {
   hub_news_enabled: true,
   live_timing_in_app: false,
   live_chat: false,
+  update_available: false,
+  update_min_version: 0,
 };
 
 const FeatureFlagsContext = createContext(defaults);
