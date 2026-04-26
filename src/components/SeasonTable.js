@@ -89,6 +89,38 @@ function Badge({cell}) {
   );
 }
 
+const KEY_ITEMS = [
+  {label: '1', desc: 'Winner', bg: 'rgba(253,224,71,0.15)', border: 'rgba(253,224,71,0.5)', text: '#FDE047'},
+  {label: '2', desc: '2nd', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.4)', text: '#CBD5E1'},
+  {label: '3', desc: '3rd', bg: 'rgba(205,127,50,0.15)', border: 'rgba(205,127,50,0.4)', text: '#D4956A'},
+  {label: '4', desc: 'Points', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', text: '#86EFAC'},
+  {label: 'Ret', desc: 'Retired', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)', text: '#FCA5A5'},
+  {label: 'DNS', desc: 'Did not start', bg: null, border: null, text: 'rgba(255,255,255,0.18)'},
+  {label: 'DSQ', desc: 'Disqualified', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)', text: 'rgba(239,68,68,0.8)'},
+];
+
+function KeyRow() {
+  return (
+    <View style={styles.keyWrap}>
+      <Text style={styles.keyTitle}>KEY</Text>
+      <View style={styles.keyItems}>
+        {KEY_ITEMS.map(item => (
+          <View key={item.label} style={styles.keyItem}>
+            <View style={[
+              styles.badge,
+              item.bg && {backgroundColor: item.bg},
+              item.border && {borderColor: item.border, borderWidth: 1},
+            ]}>
+              <Text style={[styles.badgeText, {color: item.text}]}>{item.label}</Text>
+            </View>
+            <Text style={styles.keyDesc}>{item.desc}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export default function SeasonTable({results}) {
   const {columns, tableData} = useMemo(() => buildTableData(results || []), [results]);
 
@@ -167,6 +199,7 @@ export default function SeasonTable({results}) {
           </View>
         </ScrollView>
       </View>
+      <KeyRow />
     </ScrollView>
   );
 }
@@ -238,4 +271,25 @@ const styles = StyleSheet.create({
 
   empty: {flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60},
   emptyText: {color: Colors.textSecondary, fontSize: 14},
+
+  keyWrap: {
+    marginTop: 24,
+    marginHorizontal: 16,
+    marginBottom: 32,
+    padding: 14,
+    backgroundColor: Colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+  },
+  keyTitle: {
+    color: Colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginBottom: 12,
+  },
+  keyItems: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
+  keyItem: {flexDirection: 'row', alignItems: 'center', gap: 6},
+  keyDesc: {color: Colors.textSecondary, fontSize: 11, fontWeight: '500'},
 });
