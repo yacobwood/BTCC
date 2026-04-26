@@ -11,21 +11,24 @@ const SHORT_LABEL = {
   'Race 3': 'R3',
 };
 
-const CELL_W = 30;
-const CELL_H = 26;
-const NAME_W = 92;
+const CELL_W = 32;
+const CELL_H = 30;
+const NAME_W = 96;
 const PTS_W = 36;
 const LEFT_W = NAME_W + PTS_W;
+const HEADER_H = 40;
+const ROW_DIVIDER = 'rgba(255,255,255,0.06)';
 
+// Low-opacity tints — dark bg bleeds through for a modern look
 function cellBg(pos, laps, time) {
-  if (time === 'DSQ') return '#1a1a1a';
-  if (pos === 0 && laps === 0) return null;     // DNS — no bg
-  if (pos === 0) return '#7F1D1D';              // Ret — dark red
-  if (pos === 1) return '#78350F';              // Gold tint
-  if (pos === 2) return '#374151';              // Silver tint
-  if (pos === 3) return '#431407';              // Bronze tint
-  if (pos <= 15) return '#14532D';              // Green — in points
-  return null;                                  // Outside points
+  if (time === 'DSQ') return 'rgba(239,68,68,0.12)';
+  if (pos === 0 && laps === 0) return null;                 // DNS
+  if (pos === 0) return 'rgba(239,68,68,0.18)';             // Ret
+  if (pos === 1) return 'rgba(253,224,71,0.22)';            // P1 — gold
+  if (pos === 2) return 'rgba(148,163,184,0.2)';            // P2 — silver
+  if (pos === 3) return 'rgba(180,120,60,0.22)';            // P3 — bronze
+  if (pos <= 15) return 'rgba(34,197,94,0.18)';             // Points — green
+  return null;
 }
 
 function cellLabel(pos, laps, time) {
@@ -35,15 +38,19 @@ function cellLabel(pos, laps, time) {
   return String(pos);
 }
 
-function cellTextColor(pos, laps) {
-  if (pos === 0 && laps === 0) return Colors.textSecondary; // DNS — muted
-  return '#fff';
+function cellTextColor(pos, laps, time) {
+  if (time === 'DSQ') return 'rgba(239,68,68,0.7)';
+  if (pos === 0 && laps === 0) return 'rgba(255,255,255,0.2)'; // DNS — very faint
+  if (pos === 0) return 'rgba(252,165,165,0.9)';               // Ret — soft red
+  if (pos === 1) return '#FDE047';                              // P1 — yellow
+  if (pos === 2) return '#CBD5E1';                              // P2 — silver
+  if (pos === 3) return '#D4956A';                              // P3 — bronze
+  if (pos <= 15) return '#86EFAC';                              // Points — soft green
+  return 'rgba(255,255,255,0.45)';                              // Outside points — muted
 }
 
 function buildTableData(results) {
-  // columns: [{round, races: [{label, short}]}]
   const columns = [];
-  // driverMap: name → {points, cells: {key: {pos, laps, time}}}
   const driverMap = {};
 
   for (const round of results) {
@@ -93,19 +100,21 @@ export default function SeasonTable({results}) {
 
   return (
     <ScrollView style={styles.outer} showsVerticalScrollIndicator={false}>
-      <View style={styles.row}>
-        {/* Fixed left panel: driver names + points */}
+      <View style={styles.tableRow}>
+        {/* Fixed left panel */}
         <View style={{width: LEFT_W}}>
-          {/* Header */}
-          <View style={[styles.nameCell, styles.headerCell]}>
-            <Text style={[styles.nameText, styles.headerText, {width: NAME_W}]}>Driver</Text>
-            <Text style={[styles.ptsText, styles.headerText]}>Pts</Text>
+          <View style={styles.leftHeader}>
+            <Text style={[styles.headerLabel, {flex: 1, paddingLeft: 8}]}>Driver</Text>
+            <Text style={[styles.headerLabel, {width: PTS_W, textAlign: 'center'}]}>Pts</Text>
           </View>
           {tableData.map((driver, i) => (
             <View
               key={driver.name}
-              style={[styles.nameCell, i % 2 === 1 && styles.altRow]}>
-              <Text style={[styles.nameText, {width: NAME_W}]} numberOfLines={1}>
+              style={[
+                styles.nameRow,
+                i < tableData.length - 1 && styles.rowDivider,
+              ]}>
+              <Text style={styles.nameText} numberOfLines={1}>
                 {formatDriverName(driver.name)}
               </Text>
               <Text style={styles.ptsText}>{driver.points}</Text>
@@ -114,24 +123,18 @@ export default function SeasonTable({results}) {
         </View>
 
         {/* Horizontally scrollable grid */}
-        <ScrollView
-          horizontal
-          nestedScrollEnabled
-          showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
           <View>
-            {/* Header row */}
-            <View style={[styles.headerCell, {flexDirection: 'row'}]}>
+            {/* Header */}
+            <View style={[styles.gridHeader, {flexDirection: 'row'}]}>
               {columns.map((col, ci) => (
                 <View
                   key={col.round}
                   style={[
-                    styles.roundGroup,
-                    {width: col.races.length * CELL_W},
-                    ci < columns.length - 1 && styles.roundBorder,
+                    {width: col.races.length * CELL_W, alignItems: 'center', justifyContent: 'center'},
+                    ci < columns.length - 1 && styles.colGroupBorder,
                   ]}>
-                  <Text style={styles.roundLabel} numberOfLines={1}>
-                    R{col.round}
-                  </Text>
+                  <Text style={styles.roundLabel}>R{col.round}</Text>
                   <View style={{flexDirection: 'row'}}>
                     {col.races.map(race => (
                       <View key={race.label} style={{width: CELL_W, alignItems: 'center'}}>
@@ -147,25 +150,29 @@ export default function SeasonTable({results}) {
             {tableData.map((driver, i) => (
               <View
                 key={driver.name}
-                style={[{flexDirection: 'row'}, i % 2 === 1 && styles.altRow]}>
+                style={[
+                  {flexDirection: 'row'},
+                  i < tableData.length - 1 && styles.rowDivider,
+                ]}>
                 {columns.map((col, ci) =>
                   col.races.map(race => {
                     const key = `${col.round}_${race.label}`;
                     const cell = driver.cells[key];
                     const bg = cell ? cellBg(cell.pos, cell.laps, cell.time) : null;
-                    const label = cell ? cellLabel(cell.pos, cell.laps, cell.time) : '';
-                    const textColor = cell ? cellTextColor(cell.pos, cell.laps) : Colors.textSecondary;
+                    const label = cell ? cellLabel(cell.pos, cell.laps, cell.time) : '·';
+                    const color = cell
+                      ? cellTextColor(cell.pos, cell.laps, cell.time)
+                      : 'rgba(255,255,255,0.12)';
+                    const isLastInGroup = race.label === col.races[col.races.length - 1].label;
                     return (
                       <View
                         key={key}
                         style={[
                           styles.cell,
-                          bg ? {backgroundColor: bg} : null,
-                          ci < columns.length - 1 &&
-                            race.label === col.races[col.races.length - 1].label &&
-                            styles.roundBorder,
+                          bg && {backgroundColor: bg},
+                          ci < columns.length - 1 && isLastInGroup && styles.colGroupBorder,
                         ]}>
-                        <Text style={[styles.cellText, {color: textColor}]}>{label}</Text>
+                        <Text style={[styles.cellText, {color}]}>{label}</Text>
                       </View>
                     );
                   }),
@@ -181,40 +188,53 @@ export default function SeasonTable({results}) {
 
 const styles = StyleSheet.create({
   outer: {flex: 1, backgroundColor: Colors.background},
-  row: {flexDirection: 'row'},
-  headerCell: {
-    height: 36,
+  tableRow: {flexDirection: 'row'},
+
+  // Left panel
+  leftHeader: {
+    height: HEADER_H,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    paddingBottom: 6,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
   },
-  altRow: {backgroundColor: 'rgba(255,255,255,0.03)'},
-  nameCell: {
+  nameRow: {
     height: CELL_H,
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
-  nameText: {color: '#fff', fontSize: 11, fontWeight: '600'},
+  rowDivider: {borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: ROW_DIVIDER},
+  nameText: {flex: 1, color: '#fff', fontSize: 11, fontWeight: '600'},
   ptsText: {width: PTS_W, color: Colors.yellow, fontSize: 11, fontWeight: '800', textAlign: 'center'},
-  headerText: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},
-  roundGroup: {alignItems: 'center', paddingTop: 2},
-  roundLabel: {color: Colors.textSecondary, fontSize: 9, fontWeight: '800', letterSpacing: 0.5},
+
+  // Grid header
+  gridHeader: {
+    height: HEADER_H,
+    alignItems: 'flex-end',
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
+    paddingBottom: 4,
+  },
+  roundLabel: {color: Colors.yellow, fontSize: 9, fontWeight: '800', letterSpacing: 0.5, marginBottom: 2},
   raceLabel: {color: Colors.textSecondary, fontSize: 9, fontWeight: '600'},
-  roundBorder: {borderRightWidth: 1, borderRightColor: Colors.outline},
+  headerLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 0.5},
+
+  // Group separator between rounds
+  colGroupBorder: {borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.08)'},
+
+  // Cell
   cell: {
     width: CELL_W,
     height: CELL_H,
     justifyContent: 'center',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   cellText: {fontSize: 10, fontWeight: '700'},
+
   empty: {flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60},
   emptyText: {color: Colors.textSecondary, fontSize: 14},
 });
