@@ -88,6 +88,9 @@ function buildTableData(results) {
           pos: entry.position,
           laps: entry.laps,
           time: entry.time || '',
+          fl: entry.fastestLap || false,
+          lead: entry.leadLap || false,
+          pole: entry.pole || false,
         };
         driverMap[entry.driver].points += entry.points || 0;
       }
@@ -102,9 +105,16 @@ function buildTableData(results) {
   };
 }
 
+// Count bonus points earned in a single cell
+function bonusCount(cell) {
+  if (!cell) return 0;
+  return (cell.fl ? 1 : 0) + (cell.lead ? 1 : 0) + (cell.pole ? 1 : 0);
+}
+
 function Badge({cell}) {
   if (!cell) return <View style={{width: CELL_W, height: CELL_H}} />;
   const s = badgeStyle(cell.pos, cell.laps, cell.time);
+  const bonus = bonusCount(cell);
   return (
     <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
       <View style={[
@@ -119,6 +129,13 @@ function Badge({cell}) {
           {color: s.text},
           s.solid && styles.badgeTextSolid,
         ]}>{s.label}</Text>
+        {bonus > 0 && (
+          <View style={styles.bonusDots}>
+            {Array.from({length: bonus}).map((_, i) => (
+              <View key={i} style={styles.bonusDot} />
+            ))}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -133,6 +150,8 @@ const KEY_ITEMS = [
   {label: 'DNS', desc: 'Did not start', style: badgeStyle(0, 0, '')},
   {label: 'DSQ', desc: 'Disqualified', style: badgeStyle(1, 1, 'DSQ')},
 ];
+
+const BONUS_KEY = {dots: 3, desc: 'Dots = bonus points (fastest lap, lead lap, pole)'};
 
 function KeyRow() {
   return (
@@ -157,6 +176,16 @@ function KeyRow() {
             <Text style={styles.keyDesc}>{item.desc}</Text>
           </View>
         ))}
+      </View>
+      {/* Bonus point dots explanation */}
+      <View style={[styles.keyItem, {marginTop: 12}]}>
+        <View style={[styles.badge, {backgroundColor: 'rgba(34,197,94,0.12)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)'}]}>
+          <Text style={[styles.badgeText, {color: '#86EFAC'}]}>4</Text>
+          <View style={styles.bonusDots}>
+            {[0, 1, 2].map(i => <View key={i} style={styles.bonusDot} />)}
+          </View>
+        </View>
+        <Text style={styles.keyDesc}>Dots = bonus pts (FL · lead lap · pole)</Text>
       </View>
     </View>
   );
@@ -329,6 +358,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'visible',
+  },
+  bonusDots: {
+    position: 'absolute',
+    bottom: -3,
+    flexDirection: 'row',
+    gap: 2,
+    alignSelf: 'center',
+  },
+  bonusDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.yellow,
   },
   badgeSolid: {
     shadowColor: '#000',
