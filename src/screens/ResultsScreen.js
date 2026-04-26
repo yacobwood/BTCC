@@ -548,7 +548,7 @@ export default function ResultsScreen({navigation, route}) {
           />
         );
       case 4:
-        return <SeasonTable results={results} />;
+        return <SeasonTable results={results} standings={standings} />;
       case 5:
         if (!hasData) {
           return (

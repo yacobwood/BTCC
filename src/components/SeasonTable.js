@@ -162,8 +162,20 @@ function KeyRow() {
   );
 }
 
-export default function SeasonTable({results}) {
-  const {columns, tableData} = useMemo(() => buildTableData(results || []), [results]);
+export default function SeasonTable({results, standings}) {
+  const {columns, tableData} = useMemo(() => {
+    const base = buildTableData(results || []);
+    // Override points totals with official standings when available
+    if (standings?.drivers?.length) {
+      const officialPts = {};
+      standings.drivers.forEach(d => { officialPts[d.name] = d.points; });
+      base.tableData = base.tableData.map(d => ({
+        ...d,
+        points: officialPts[d.name] ?? d.points,
+      }));
+    }
+    return base;
+  }, [results, standings]);
 
   if (!tableData.length) {
     return (
