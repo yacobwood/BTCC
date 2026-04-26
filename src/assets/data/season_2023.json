@@ -120,6 +120,15 @@
     },
     {
       "position": 14,
+      "name": "Bobby Thompson",
+      "team": "Team Hard",
+      "points": 104,
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 1
+    },
+    {
+      "position": 15,
       "name": "Tom Chilton",
       "team": "Motorbase Performance",
       "points": 97,
@@ -128,7 +137,7 @@
       "thirds": 0
     },
     {
-      "position": 15,
+      "position": 16,
       "name": "Andrew Watson",
       "team": "Ciceley Motorsport",
       "points": 93,
@@ -137,21 +146,12 @@
       "thirds": 1
     },
     {
-      "position": 16,
+      "position": 17,
       "name": "Aiden Moffat",
       "team": "Laser Tools Racing",
       "points": 87,
       "wins": 0,
       "seconds": 0,
-      "thirds": 1
-    },
-    {
-      "position": 17,
-      "name": "Bobby Thompson",
-      "team": "Team Hard",
-      "points": 104,
-      "wins": 0,
-      "seconds": 1,
       "thirds": 1
     },
     {
@@ -174,18 +174,18 @@
     },
     {
       "position": 20,
-      "name": "Mikey Doble",
-      "team": "",
-      "points": 63,
+      "name": "George Gamble",
+      "team": "Team Hard",
+      "points": 65,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "position": 21,
-      "name": "George Gamble",
-      "team": "Team Hard",
-      "points": 65,
+      "name": "Mikey Doble",
+      "team": "",
+      "points": 63,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -219,6 +219,15 @@
     },
     {
       "position": 25,
+      "name": "Nick Halstead",
+      "team": "",
+      "points": 10,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 26,
       "name": "Daryl DeLeon",
       "team": "Team Hard",
       "points": 6,
@@ -227,7 +236,7 @@
       "thirds": 0
     },
     {
-      "position": 26,
+      "position": 27,
       "name": "Robert Huff",
       "team": "",
       "points": 5,
@@ -236,7 +245,7 @@
       "thirds": 0
     },
     {
-      "position": 27,
+      "position": 28,
       "name": "James Gornall",
       "team": "",
       "points": 1,
@@ -245,7 +254,7 @@
       "thirds": 0
     },
     {
-      "position": 28,
+      "position": 29,
       "name": "Jack Butel",
       "team": "",
       "points": 0,
@@ -254,19 +263,10 @@
       "thirds": 0
     },
     {
-      "position": 29,
+      "position": 30,
       "name": "Will Powell",
       "team": "",
       "points": 0,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 30,
-      "name": "Nick Halstead",
-      "team": "",
-      "points": 10,
       "wins": 0,
       "seconds": 0,
       "thirds": 0

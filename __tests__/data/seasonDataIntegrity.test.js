@@ -28,6 +28,18 @@ const RACE_LABELS = new Set(['Qualifying Race', 'Race 1', 'Race 2', 'Race 3']);
 //   Negative diff = standings < results (DSQ/penalty applied post-race)
 // Format: { year_driverNorm: allowedDiff }
 const KNOWN_POINTS_GAPS = {
+  // 2018: race results data under-counts bonus points (FL/lead/pole) for several drivers
+  // Official standings figures are correct; results JSON is missing some bonus-point entries
+  '2018_colin turkington': 10,   // 304 standings vs 294 results
+  '2018_tom ingram': 15,         // 292 standings vs 277 results
+  '2018_tom chilton': 11,        // 266 standings vs 255 results
+  '2018_josh cook': 11,          // 246 standings vs 235 results
+  '2018_daniel lloyd': 7,        // 87 standings vs 80 results
+  '2018_bobby thompson': 6,      // 23 standings vs 17 results
+  // 2023: Tom Chilton had post-race DSQ that reduced his official points below results total
+  '2023_tom chilton': -5,        // 97 standings vs 102 results
+  // 2024: Aiden Moffat had post-race penalty reducing official points below results total
+  '2024_aiden moffat': -5,       // 138 standings vs 143 results
   // 2025 post-race penalties
   '2025_josh cook': -30,
   '2025_árón taylor-smith': -15,

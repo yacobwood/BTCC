@@ -138,6 +138,15 @@
     },
     {
       "position": 16,
+      "name": "Josh Cook",
+      "team": "Power Maxed Racing",
+      "points": 84,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 17,
       "name": "James Cole",
       "team": "",
       "points": 79,
@@ -146,19 +155,10 @@
       "thirds": 0
     },
     {
-      "position": 17,
+      "position": 18,
       "name": "Michael Epps",
       "team": "Team Hard",
       "points": 77,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 18,
-      "name": "Josh Cook",
-      "team": "Power Maxed Racing",
-      "points": 84,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -228,18 +228,18 @@
     },
     {
       "position": 26,
-      "name": "Jeff Smith",
+      "name": "Árón Taylor-Smith",
       "team": "",
-      "points": 24,
+      "points": 25,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "position": 27,
-      "name": "Árón Taylor-Smith",
+      "name": "Jeff Smith",
       "team": "",
-      "points": 25,
+      "points": 24,
       "wins": 0,
       "seconds": 0,
       "thirds": 0

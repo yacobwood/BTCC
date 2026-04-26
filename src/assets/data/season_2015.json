@@ -228,60 +228,6 @@
     },
     {
       "position": 26,
-      "name": "Robb Holland",
-      "team": "",
-      "points": 2,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 27,
-      "name": "Simon Belcher",
-      "team": "",
-      "points": 1,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 28,
-      "name": "Daniel Welch",
-      "team": "",
-      "points": 1,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 29,
-      "name": "Kieran Gallagher",
-      "team": "",
-      "points": 1,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 30,
-      "name": "Tony Gilham",
-      "team": "",
-      "points": 1,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 31,
-      "name": "Alain Menu",
-      "team": "Team BMR",
-      "points": 1,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 32,
       "name": "Alex Martin",
       "team": "",
       "points": 3,
@@ -290,7 +236,70 @@
       "thirds": 0
     },
     {
+      "position": 27,
+      "name": "Robb Holland",
+      "team": "",
+      "points": 2,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 28,
+      "name": "Simon Belcher",
+      "team": "",
+      "points": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 29,
+      "name": "Daniel Welch",
+      "team": "",
+      "points": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 30,
+      "name": "Kieran Gallagher",
+      "team": "",
+      "points": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 31,
+      "name": "Tony Gilham",
+      "team": "",
+      "points": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 32,
+      "name": "Alain Menu",
+      "team": "Team BMR",
+      "points": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
       "position": 33,
+      "name": "Derek Palmer Jr.",
+      "team": "",
+      "points": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "position": 34,
       "name": "Stewart Lines",
       "team": "",
       "points": 0,
@@ -299,7 +308,7 @@
       "thirds": 0
     },
     {
-      "position": 34,
+      "position": 35,
       "name": "Jake Hill",
       "team": "Eurotech Racing",
       "points": 0,
@@ -308,7 +317,7 @@
       "thirds": 0
     },
     {
-      "position": 35,
+      "position": 36,
       "name": "Martin Donnelly",
       "team": "",
       "points": 0,
@@ -317,7 +326,7 @@
       "thirds": 0
     },
     {
-      "position": 36,
+      "position": 37,
       "name": "Andy Wilmot",
       "team": "",
       "points": 0,
@@ -326,7 +335,7 @@
       "thirds": 0
     },
     {
-      "position": 37,
+      "position": 38,
       "name": "Max Coates",
       "team": "",
       "points": 0,
@@ -335,19 +344,10 @@
       "thirds": 0
     },
     {
-      "position": 38,
+      "position": 39,
       "name": "Richard Hawken",
       "team": "",
       "points": 0,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "position": 39,
-      "name": "Derek Palmer Jr.",
-      "team": "",
-      "points": 1,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
