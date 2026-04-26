@@ -126,6 +126,7 @@ export function parseGrid(json) {
       car: d.car || '',
       imageUrl: d.imageUrl || '',
       nationality: d.nationality || 'British',
+      cls: d.class || '',
       bio: d.bio || '',
       dateOfBirth: d.dateOfBirth || '',
       birthplace: d.birthplace || '',

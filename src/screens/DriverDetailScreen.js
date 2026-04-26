@@ -113,8 +113,8 @@ export default function DriverDetailScreen({route, navigation}) {
               <Chip text={driver.nationality} />
               {driver.team ? <Chip text={driver.team} /> : null}
               {driver.car ? <Chip text={driver.car} /> : null}
-              {driver.class === 'I' ? <Chip text="Independents" /> : null}
-              {driver.class === 'M' ? <Chip text="Main Championship" /> : null}
+              {driver.cls === 'I' ? <Chip text="Independents" /> : null}
+              {driver.cls === 'M' ? <Chip text="Main Championship" /> : null}
             </View>
           </View>
           <TouchableOpacity
