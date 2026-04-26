@@ -92,6 +92,7 @@ export default function ResultsScreen({navigation, route}) {
 
   const [year, setYear] = useState(seasonStarted ? 2026 : 2025);
   const [tab, setTab] = useState(0);
+  const [driverFilter, setDriverFilter] = useState('all');
   const {isFavourite} = useFavouriteDriver();
   const [standings, setStandings] = useState(null);
   const [results, setResults] = useState([]);
@@ -287,7 +288,13 @@ export default function ResultsScreen({navigation, route}) {
   const canGoOlder = year > 2004;
   const canGoNewer = year < 2026;
 
-  const driverStandings = standings?.drivers || [];
+  const driverStandings = useMemo(() => {
+    const all = standings?.drivers || [];
+    if (driverFilter === 'all') return all;
+    return all
+      .filter(d => d.cls === driverFilter)
+      .map((d, i) => ({...d, position: i + 1}));
+  }, [standings, driverFilter]);
   const teamStandings = standings?.teams || [];
   const liveRound = standings?.round || 0;
 
@@ -467,18 +474,34 @@ export default function ResultsScreen({navigation, route}) {
     switch (t) {
       case 0:
         return (
-          <FlatList
-            ref={driversListRef}
-            data={driverStandings}
-            keyExtractor={(item) => item.name}
-            renderItem={renderDriverStanding}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
-            onScroll={onListScroll}
-            scrollEventThrottle={100}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
-            ListHeaderComponent={null}
-            ListEmptyComponent={<Text style={styles.emptyText}>No standings available for {year}</Text>}
-          />
+          <>
+            <View style={styles.filterRow}>
+              {[['all', 'All'], ['M', 'Main'], ['I', 'Independents']].map(([val, label]) => (
+                <TouchableOpacity
+                  key={val}
+                  style={[styles.filterPill, driverFilter === val && styles.filterPillActive]}
+                  onPress={() => setDriverFilter(val)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Show ${label} standings`}>
+                  <Text style={[styles.filterPillText, driverFilter === val && styles.filterPillTextActive]}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <FlatList
+              ref={driversListRef}
+              data={driverStandings}
+              keyExtractor={(item) => item.name}
+              renderItem={renderDriverStanding}
+              contentContainerStyle={{padding: 16, paddingBottom: 20}}
+              onScroll={onListScroll}
+              scrollEventThrottle={100}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
+              ListHeaderComponent={null}
+              ListEmptyComponent={<Text style={styles.emptyText}>No standings available for {year}</Text>}
+            />
+          </>
         );
       case 1:
         return (
@@ -563,6 +586,7 @@ export default function ResultsScreen({navigation, route}) {
               setLoading(true);
             }
             setYear(newYear);
+            setDriverFilter('all');
           }}
           accessibilityLabel="Previous season"
           accessibilityRole="button">
@@ -583,6 +607,7 @@ export default function ResultsScreen({navigation, route}) {
               setLoading(true);
             }
             setYear(newYear);
+            setDriverFilter('all');
           }}
           accessibilityLabel="Next season"
           accessibilityRole="button">

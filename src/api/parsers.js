@@ -172,6 +172,7 @@ export function parseStandings(json) {
     name: d.driver || '',
     team: d.team || '',
     car: d.car || '',
+    cls: d.class || '',
     points: d.points || 0,
     wins: d.wins || 0,
     seconds: d.seconds || 0,

@@ -67,4 +67,30 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  filterPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+  },
+  filterPillActive: {
+    backgroundColor: Colors.yellow,
+    borderColor: Colors.yellow,
+  },
+  filterPillText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  filterPillTextActive: {
+    color: Colors.navy,
+  },
 });
