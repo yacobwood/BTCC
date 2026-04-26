@@ -11,42 +11,27 @@ const SHORT_LABEL = {
   'Race 3': 'R3',
 };
 
-const CELL_W = 32;
-const CELL_H = 30;
-const NAME_W = 96;
+const CELL_W = 36;
+const CELL_H = 32;
+const NAME_W = 100;
 const PTS_W = 36;
 const LEFT_W = NAME_W + PTS_W;
-const HEADER_H = 40;
-const ROW_DIVIDER = 'rgba(255,255,255,0.06)';
+const HEADER_H = 42;
+const BADGE_W = 28;
+const BADGE_H = 22;
 
-// Low-opacity tints — dark bg bleeds through for a modern look
-function cellBg(pos, laps, time) {
-  if (time === 'DSQ') return 'rgba(239,68,68,0.12)';
-  if (pos === 0 && laps === 0) return null;                 // DNS
-  if (pos === 0) return 'rgba(239,68,68,0.18)';             // Ret
-  if (pos === 1) return 'rgba(253,224,71,0.22)';            // P1 — gold
-  if (pos === 2) return 'rgba(148,163,184,0.2)';            // P2 — silver
-  if (pos === 3) return 'rgba(180,120,60,0.22)';            // P3 — bronze
-  if (pos <= 15) return 'rgba(34,197,94,0.18)';             // Points — green
-  return null;
-}
-
-function cellLabel(pos, laps, time) {
-  if (time === 'DSQ') return 'DSQ';
-  if (pos === 0 && laps === 0) return 'DNS';
-  if (pos === 0) return 'Ret';
-  return String(pos);
-}
-
-function cellTextColor(pos, laps, time) {
-  if (time === 'DSQ') return 'rgba(239,68,68,0.7)';
-  if (pos === 0 && laps === 0) return 'rgba(255,255,255,0.2)'; // DNS — very faint
-  if (pos === 0) return 'rgba(252,165,165,0.9)';               // Ret — soft red
-  if (pos === 1) return '#FDE047';                              // P1 — yellow
-  if (pos === 2) return '#CBD5E1';                              // P2 — silver
-  if (pos === 3) return '#D4956A';                              // P3 — bronze
-  if (pos <= 15) return '#86EFAC';                              // Points — soft green
-  return 'rgba(255,255,255,0.45)';                              // Outside points — muted
+// Badge style — small rounded rectangle, stronger colours
+function badgeStyle(pos, laps, time) {
+  if (!pos && laps === undefined) return null; // empty cell
+  if (time === 'DSQ') return {bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)', text: 'rgba(239,68,68,0.8)', label: 'DSQ'};
+  if (pos === 0 && laps === 0) return {bg: null, border: null, text: 'rgba(255,255,255,0.18)', label: 'DNS'};
+  if (pos === 0) return {bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)', text: '#FCA5A5', label: 'Ret'};
+  if (pos === 1) return {bg: 'rgba(253,224,71,0.15)', border: 'rgba(253,224,71,0.5)', text: '#FDE047', label: '1'};
+  if (pos === 2) return {bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.4)', text: '#CBD5E1', label: '2'};
+  if (pos === 3) return {bg: 'rgba(205,127,50,0.15)', border: 'rgba(205,127,50,0.4)', text: '#D4956A', label: '3'};
+  if (pos <= 6)  return {bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', text: '#86EFAC', label: String(pos)};
+  if (pos <= 15) return {bg: 'rgba(34,197,94,0.07)', border: 'rgba(34,197,94,0.15)', text: 'rgba(134,239,172,0.65)', label: String(pos)};
+  return {bg: null, border: null, text: 'rgba(255,255,255,0.3)', label: String(pos)};
 }
 
 function buildTableData(results) {
@@ -87,6 +72,23 @@ function buildTableData(results) {
   return {columns, tableData};
 }
 
+function Badge({cell}) {
+  if (!cell) return <View style={{width: CELL_W, height: CELL_H}} />;
+  const s = badgeStyle(cell.pos, cell.laps, cell.time);
+  if (!s) return <View style={{width: CELL_W, height: CELL_H}} />;
+  return (
+    <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={[
+        styles.badge,
+        s.bg && {backgroundColor: s.bg},
+        s.border && {borderColor: s.border, borderWidth: 1},
+      ]}>
+        <Text style={[styles.badgeText, {color: s.text}]}>{s.label}</Text>
+      </View>
+    </View>
+  );
+}
+
 export default function SeasonTable({results}) {
   const {columns, tableData} = useMemo(() => buildTableData(results || []), [results]);
 
@@ -104,16 +106,12 @@ export default function SeasonTable({results}) {
         {/* Fixed left panel */}
         <View style={{width: LEFT_W}}>
           <View style={styles.leftHeader}>
-            <Text style={[styles.headerLabel, {flex: 1, paddingLeft: 8}]}>Driver</Text>
+            <Text style={[styles.headerLabel, {flex: 1, paddingLeft: 10}]}>Driver</Text>
             <Text style={[styles.headerLabel, {width: PTS_W, textAlign: 'center'}]}>Pts</Text>
           </View>
           {tableData.map((driver, i) => (
-            <View
-              key={driver.name}
-              style={[
-                styles.nameRow,
-                i < tableData.length - 1 && styles.rowDivider,
-              ]}>
+            <View key={driver.name} style={styles.nameRow}>
+              <Text style={styles.rankText}>{i + 1}</Text>
               <Text style={styles.nameText} numberOfLines={1}>
                 {formatDriverName(driver.name)}
               </Text>
@@ -122,7 +120,7 @@ export default function SeasonTable({results}) {
           ))}
         </View>
 
-        {/* Horizontally scrollable grid */}
+        {/* Scrollable grid */}
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
           <View>
             {/* Header */}
@@ -132,7 +130,7 @@ export default function SeasonTable({results}) {
                   key={col.round}
                   style={[
                     {width: col.races.length * CELL_W, alignItems: 'center', justifyContent: 'center'},
-                    ci < columns.length - 1 && styles.colGroupBorder,
+                    ci < columns.length - 1 && styles.groupDivider,
                   ]}>
                   <Text style={styles.roundLabel}>R{col.round}</Text>
                   <View style={{flexDirection: 'row'}}>
@@ -148,31 +146,18 @@ export default function SeasonTable({results}) {
 
             {/* Data rows */}
             {tableData.map((driver, i) => (
-              <View
-                key={driver.name}
-                style={[
-                  {flexDirection: 'row'},
-                  i < tableData.length - 1 && styles.rowDivider,
-                ]}>
+              <View key={driver.name} style={{flexDirection: 'row'}}>
                 {columns.map((col, ci) =>
                   col.races.map(race => {
                     const key = `${col.round}_${race.label}`;
-                    const cell = driver.cells[key];
-                    const bg = cell ? cellBg(cell.pos, cell.laps, cell.time) : null;
-                    const label = cell ? cellLabel(cell.pos, cell.laps, cell.time) : '·';
-                    const color = cell
-                      ? cellTextColor(cell.pos, cell.laps, cell.time)
-                      : 'rgba(255,255,255,0.12)';
                     const isLastInGroup = race.label === col.races[col.races.length - 1].label;
                     return (
                       <View
                         key={key}
                         style={[
-                          styles.cell,
-                          bg && {backgroundColor: bg},
-                          ci < columns.length - 1 && isLastInGroup && styles.colGroupBorder,
+                          ci < columns.length - 1 && isLastInGroup && styles.groupDivider,
                         ]}>
-                        <Text style={[styles.cellText, {color}]}>{label}</Text>
+                        <Badge cell={driver.cells[key]} />
                       </View>
                     );
                   }),
@@ -190,12 +175,11 @@ const styles = StyleSheet.create({
   outer: {flex: 1, backgroundColor: Colors.background},
   tableRow: {flexDirection: 'row'},
 
-  // Left panel
   leftHeader: {
     height: HEADER_H,
     flexDirection: 'row',
     alignItems: 'flex-end',
-    paddingBottom: 6,
+    paddingBottom: 8,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
@@ -204,36 +188,53 @@ const styles = StyleSheet.create({
     height: CELL_H,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 8,
+    paddingLeft: 6,
   },
-  rowDivider: {borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: ROW_DIVIDER},
+  rankText: {
+    width: 18,
+    color: Colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginRight: 2,
+  },
   nameText: {flex: 1, color: '#fff', fontSize: 11, fontWeight: '600'},
-  ptsText: {width: PTS_W, color: Colors.yellow, fontSize: 11, fontWeight: '800', textAlign: 'center'},
+  ptsText: {
+    width: PTS_W,
+    color: Colors.yellow,
+    fontSize: 11,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  headerLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},
 
-  // Grid header
   gridHeader: {
     height: HEADER_H,
     alignItems: 'flex-end',
+    paddingBottom: 6,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
-    paddingBottom: 4,
   },
-  roundLabel: {color: Colors.yellow, fontSize: 9, fontWeight: '800', letterSpacing: 0.5, marginBottom: 2},
+  roundLabel: {
+    color: Colors.yellow,
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    marginBottom: 3,
+  },
   raceLabel: {color: Colors.textSecondary, fontSize: 9, fontWeight: '600'},
-  headerLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 0.5},
 
-  // Group separator between rounds
-  colGroupBorder: {borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.08)'},
+  groupDivider: {borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.06)'},
 
-  // Cell
-  cell: {
-    width: CELL_W,
-    height: CELL_H,
+  badge: {
+    width: BADGE_W,
+    height: BADGE_H,
+    borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cellText: {fontSize: 10, fontWeight: '700'},
+  badgeText: {fontSize: 10, fontWeight: '800'},
 
   empty: {flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60},
   emptyText: {color: Colors.textSecondary, fontSize: 14},
