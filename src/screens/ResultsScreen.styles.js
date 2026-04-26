@@ -19,7 +19,7 @@ export default StyleSheet.create({
   tabRow: {flexDirection: 'row', height: 44, backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.outline},
   tab: {flex: 1, justifyContent: 'center', alignItems: 'center'},
   tabActive: {borderBottomWidth: 2, borderBottomColor: Colors.yellow},
-  tabText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 1},
+  tabText: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 0.5},
   tabTextActive: {color: Colors.yellow},
   standingRow: {
     flexDirection: 'row',

@@ -19,6 +19,7 @@ import styles from './ResultsScreen.styles';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getSeasonData} from '../assets/seasonData';
 import ProgressionChart from '../components/ProgressionChart';
+import SeasonTable from '../components/SeasonTable';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite} from '../store/cache';
@@ -116,7 +117,7 @@ export default function ResultsScreen({navigation, route}) {
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
   }, []));
 
-  const TAB_WIDTH = SCREEN_WIDTH / 5;
+  const TAB_WIDTH = SCREEN_WIDTH / 6;
 
   const goToTab = (i) => {
     setTab(i);
@@ -434,12 +435,12 @@ export default function ResultsScreen({navigation, route}) {
     </View>
   );
 
-  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'CHART'];
+  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'TABLE', 'CHART'];
   const hasData = results.some(r => r.races.some(race => race.results.length > 0));
 
   const renderTabContent = (t) => {
     // Show season not started OR no live data for 2026
-    if (year === 2026 && (t === 0 || t === 1 || t === 3 || t === 4)) {
+    if (year === 2026 && (t === 0 || t === 1 || t === 3 || t === 4 || t === 5)) {
       if (!seasonStarted) {
         return (
           <View style={styles.center}>
@@ -547,6 +548,8 @@ export default function ResultsScreen({navigation, route}) {
           />
         );
       case 4:
+        return <SeasonTable results={results} />;
+      case 5:
         if (!hasData) {
           return (
             <View style={styles.center}>
