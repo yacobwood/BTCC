@@ -54,6 +54,14 @@ export default function SettingsScreen({navigation}) {
         <Text style={styles.headerTitle}>SETTINGS</Text>
       </View>
       <ScrollView contentContainerStyle={{padding: 16}}>
+        <Text style={styles.sectionTitle}>SPOILER-FREE MODE</Text>
+        <SettingRow
+          label="No Spoilers"
+          description="Pauses result notifications until you open the app or Monday night"
+          value={settings.spoilerFree}
+          onToggle={toggle('spoilerFree')}
+        />
+        <View style={styles.divider} />
         <Text style={styles.sectionTitle}>NOTIFICATIONS</Text>
 
         <SettingRow

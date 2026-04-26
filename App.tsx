@@ -20,6 +20,7 @@ import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
+import SpoilerClearedDialog from './src/components/SpoilerClearedDialog';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 export const navigationRef = createNavigationContainerRef();
@@ -44,17 +45,31 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
-const VERSION_CODE = 54;
+const VERSION_CODE = 55;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
+  const [showSpoilerCleared, setShowSpoilerCleared] = useState(false);
   const {update_available, update_min_version} = useFeatureFlags();
+  const {setSetting} = useSettings();
 
   useEffect(() => {
     (async () => {
-      const onboardingShown = await AsyncStorage.getItem(ONBOARDING_KEY);
+      const [onboardingShown, spoilerFreeVal, expiryVal] = await Promise.all([
+        AsyncStorage.getItem(ONBOARDING_KEY),
+        AsyncStorage.getItem('setting_spoiler_free'),
+        AsyncStorage.getItem('setting_spoiler_free_expiry'),
+      ]);
       if (!onboardingShown) setShowOnboarding(true);
+
+      // Auto-disable spoiler-free on app open — read directly from storage to avoid context timing
+      if (spoilerFreeVal === 'true') {
+        const expired = !expiryVal || new Date() >= new Date(expiryVal);
+        setSetting('spoilerFree', false);
+        if (!expired) setShowSpoilerCleared(true);
+      }
+
       RNBootSplash.hide({fade: true});
     })();
   }, []);
@@ -79,6 +94,7 @@ function AppDialogs() {
     <>
       <OnboardingDialog visible={showOnboarding} onAllow={handleOnboardingAllow} onSkip={handleOnboardingSkip} />
       <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
+      <SpoilerClearedDialog visible={showSpoilerCleared} onDismiss={() => setShowSpoilerCleared(false)} />
     </>
   );
 }
