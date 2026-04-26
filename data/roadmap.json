@@ -28,7 +28,7 @@
       "id": "5",
       "title": "No Spoilers Option",
       "description": "Allow notification pauses",
-      "status": "idea"
+      "status": "in-progress"
     },
     {
       "id": "6",
@@ -55,7 +55,7 @@
       "description": "Chat to fellow fans about the race",
       "status": "idea"
     },
-        {
+    {
       "id": "10",
       "title": "Standings table for all championship types",
       "description": "",
