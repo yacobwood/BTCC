@@ -11,27 +11,56 @@ const SHORT_LABEL = {
   'Race 3': 'R3',
 };
 
-const CELL_W = 36;
-const CELL_H = 32;
-const NAME_W = 100;
-const PTS_W = 36;
+const CELL_W = 40;
+const CELL_H = 36;
+const BADGE_W = 32;
+const BADGE_H = 26;
+const NAME_W = 104;
+const PTS_W = 38;
 const LEFT_W = NAME_W + PTS_W;
-const HEADER_H = 42;
-const BADGE_W = 28;
-const BADGE_H = 22;
+const HEADER_H = 44;
 
-// Badge style — small rounded rectangle, stronger colours
+// Bold, solid colours for top positions — fade everything else out
 function badgeStyle(pos, laps, time) {
-  if (!pos && laps === undefined) return null; // empty cell
-  if (time === 'DSQ') return {bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)', text: 'rgba(239,68,68,0.8)', label: 'DSQ'};
-  if (pos === 0 && laps === 0) return {bg: null, border: null, text: 'rgba(255,255,255,0.18)', label: 'DNS'};
-  if (pos === 0) return {bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)', text: '#FCA5A5', label: 'Ret'};
-  if (pos === 1) return {bg: 'rgba(253,224,71,0.15)', border: 'rgba(253,224,71,0.5)', text: '#FDE047', label: '1'};
-  if (pos === 2) return {bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.4)', text: '#CBD5E1', label: '2'};
-  if (pos === 3) return {bg: 'rgba(205,127,50,0.15)', border: 'rgba(205,127,50,0.4)', text: '#D4956A', label: '3'};
-  if (pos <= 6)  return {bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', text: '#86EFAC', label: String(pos)};
-  if (pos <= 15) return {bg: 'rgba(34,197,94,0.07)', border: 'rgba(34,197,94,0.15)', text: 'rgba(134,239,172,0.65)', label: String(pos)};
-  return {bg: null, border: null, text: 'rgba(255,255,255,0.3)', label: String(pos)};
+  if (time === 'DSQ') return {
+    bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.4)',
+    text: '#FCA5A5', label: 'DSQ', solid: false,
+  };
+  if (pos === 0 && laps === 0) return {
+    bg: null, border: null,
+    text: 'rgba(255,255,255,0.2)', label: 'DNS', solid: false,
+  };
+  if (pos === 0) return {
+    bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)',
+    text: '#FCA5A5', label: 'Ret', solid: false,
+  };
+  // Solid podium badges — stand out completely
+  if (pos === 1) return {
+    bg: '#FEBD02', border: null,
+    text: Colors.navy, label: '1', solid: true,
+  };
+  if (pos === 2) return {
+    bg: '#94A3B8', border: null,
+    text: '#0F172A', label: '2', solid: true,
+  };
+  if (pos === 3) return {
+    bg: '#C07840', border: null,
+    text: '#1C0F00', label: '3', solid: true,
+  };
+  // Points: vibrant but not solid
+  if (pos <= 6) return {
+    bg: 'rgba(34,197,94,0.22)', border: 'rgba(34,197,94,0.5)',
+    text: '#86EFAC', label: String(pos), solid: false,
+  };
+  if (pos <= 15) return {
+    bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)',
+    text: 'rgba(134,239,172,0.55)', label: String(pos), solid: false,
+  };
+  // Outside points — very muted
+  return {
+    bg: null, border: null,
+    text: 'rgba(255,255,255,0.22)', label: String(pos), solid: false,
+  };
 }
 
 function buildTableData(results) {
@@ -65,38 +94,44 @@ function buildTableData(results) {
     }
   }
 
-  const tableData = Object.entries(driverMap)
-    .map(([name, data]) => ({name, ...data}))
-    .sort((a, b) => b.points - a.points);
-
-  return {columns, tableData};
+  return {
+    columns,
+    tableData: Object.entries(driverMap)
+      .map(([name, data]) => ({name, ...data}))
+      .sort((a, b) => b.points - a.points),
+  };
 }
 
 function Badge({cell}) {
   if (!cell) return <View style={{width: CELL_W, height: CELL_H}} />;
   const s = badgeStyle(cell.pos, cell.laps, cell.time);
-  if (!s) return <View style={{width: CELL_W, height: CELL_H}} />;
   return (
     <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
       <View style={[
         styles.badge,
-        s.bg && {backgroundColor: s.bg},
-        s.border && {borderColor: s.border, borderWidth: 1},
+        s.solid && styles.badgeSolid,
+        !s.solid && s.bg && {backgroundColor: s.bg},
+        !s.solid && s.border && {borderColor: s.border, borderWidth: 1},
+        s.solid && s.bg && {backgroundColor: s.bg},
       ]}>
-        <Text style={[styles.badgeText, {color: s.text}]}>{s.label}</Text>
+        <Text style={[
+          styles.badgeText,
+          {color: s.text},
+          s.solid && styles.badgeTextSolid,
+        ]}>{s.label}</Text>
       </View>
     </View>
   );
 }
 
 const KEY_ITEMS = [
-  {label: '1', desc: 'Winner', bg: 'rgba(253,224,71,0.15)', border: 'rgba(253,224,71,0.5)', text: '#FDE047'},
-  {label: '2', desc: '2nd', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.4)', text: '#CBD5E1'},
-  {label: '3', desc: '3rd', bg: 'rgba(205,127,50,0.15)', border: 'rgba(205,127,50,0.4)', text: '#D4956A'},
-  {label: '4', desc: 'Points', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)', text: '#86EFAC'},
-  {label: 'Ret', desc: 'Retired', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)', text: '#FCA5A5'},
-  {label: 'DNS', desc: 'Did not start', bg: null, border: null, text: 'rgba(255,255,255,0.18)'},
-  {label: 'DSQ', desc: 'Disqualified', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.3)', text: 'rgba(239,68,68,0.8)'},
+  {label: '1', desc: 'Winner', style: badgeStyle(1, 1, '')},
+  {label: '2', desc: '2nd place', style: badgeStyle(2, 1, '')},
+  {label: '3', desc: '3rd place', style: badgeStyle(3, 1, '')},
+  {label: '4', desc: 'Points finish', style: badgeStyle(4, 1, '')},
+  {label: 'Ret', desc: 'Retired', style: badgeStyle(0, 1, '')},
+  {label: 'DNS', desc: 'Did not start', style: badgeStyle(0, 0, '')},
+  {label: 'DSQ', desc: 'Disqualified', style: badgeStyle(1, 1, 'DSQ')},
 ];
 
 function KeyRow() {
@@ -108,10 +143,16 @@ function KeyRow() {
           <View key={item.label} style={styles.keyItem}>
             <View style={[
               styles.badge,
-              item.bg && {backgroundColor: item.bg},
-              item.border && {borderColor: item.border, borderWidth: 1},
+              item.style.solid && styles.badgeSolid,
+              !item.style.solid && item.style.bg && {backgroundColor: item.style.bg},
+              !item.style.solid && item.style.border && {borderColor: item.style.border, borderWidth: 1},
+              item.style.solid && {backgroundColor: item.style.bg},
             ]}>
-              <Text style={[styles.badgeText, {color: item.text}]}>{item.label}</Text>
+              <Text style={[
+                styles.badgeText,
+                {color: item.style.text},
+                item.style.solid && styles.badgeTextSolid,
+              ]}>{item.label}</Text>
             </View>
             <Text style={styles.keyDesc}>{item.desc}</Text>
           </View>
@@ -135,19 +176,23 @@ export default function SeasonTable({results}) {
   return (
     <ScrollView style={styles.outer} showsVerticalScrollIndicator={false}>
       <View style={styles.tableRow}>
+
         {/* Fixed left panel */}
         <View style={{width: LEFT_W}}>
           <View style={styles.leftHeader}>
-            <Text style={[styles.headerLabel, {flex: 1, paddingLeft: 10}]}>Driver</Text>
-            <Text style={[styles.headerLabel, {width: PTS_W, textAlign: 'center'}]}>Pts</Text>
+            <Text style={[styles.colLabel, {flex: 1, paddingLeft: 10}]}>Driver</Text>
+            <Text style={[styles.colLabel, {width: PTS_W, textAlign: 'center'}]}>Pts</Text>
           </View>
           {tableData.map((driver, i) => (
-            <View key={driver.name} style={styles.nameRow}>
-              <Text style={styles.rankText}>{i + 1}</Text>
+            <View key={driver.name} style={[
+              styles.nameRow,
+              i === 0 && styles.leaderRow,
+            ]}>
+              <Text style={[styles.rankText, i === 0 && {color: Colors.yellow}]}>{i + 1}</Text>
               <Text style={styles.nameText} numberOfLines={1}>
                 {formatDriverName(driver.name)}
               </Text>
-              <Text style={styles.ptsText}>{driver.points}</Text>
+              <Text style={[styles.ptsText, i === 0 && {color: Colors.yellow}]}>{driver.points}</Text>
             </View>
           ))}
         </View>
@@ -178,7 +223,10 @@ export default function SeasonTable({results}) {
 
             {/* Data rows */}
             {tableData.map((driver, i) => (
-              <View key={driver.name} style={{flexDirection: 'row'}}>
+              <View key={driver.name} style={[
+                {flexDirection: 'row'},
+                i === 0 && styles.leaderRow,
+              ]}>
                 {columns.map((col, ci) =>
                   col.races.map(race => {
                     const key = `${col.round}_${race.label}`;
@@ -186,9 +234,7 @@ export default function SeasonTable({results}) {
                     return (
                       <View
                         key={key}
-                        style={[
-                          ci < columns.length - 1 && isLastInGroup && styles.groupDivider,
-                        ]}>
+                        style={ci < columns.length - 1 && isLastInGroup ? styles.groupDivider : null}>
                         <Badge cell={driver.cells[key]} />
                       </View>
                     );
@@ -199,6 +245,7 @@ export default function SeasonTable({results}) {
           </View>
         </ScrollView>
       </View>
+
       <KeyRow />
     </ScrollView>
   );
@@ -217,29 +264,34 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
   },
+  leaderRow: {
+    backgroundColor: 'rgba(254,189,2,0.05)',
+  },
   nameRow: {
     height: CELL_H,
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   rankText: {
-    width: 18,
+    width: 20,
     color: Colors.textSecondary,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     textAlign: 'center',
     marginRight: 2,
   },
-  nameText: {flex: 1, color: '#fff', fontSize: 11, fontWeight: '600'},
+  nameText: {flex: 1, color: '#fff', fontSize: 12, fontWeight: '600'},
   ptsText: {
     width: PTS_W,
-    color: Colors.yellow,
-    fontSize: 11,
+    color: Colors.textSecondary,
+    fontSize: 12,
     fontWeight: '800',
     textAlign: 'center',
   },
-  headerLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},
+  colLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 0.5},
 
   gridHeader: {
     height: HEADER_H,
@@ -251,30 +303,35 @@ const styles = StyleSheet.create({
   },
   roundLabel: {
     color: Colors.yellow,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     marginBottom: 3,
   },
   raceLabel: {color: Colors.textSecondary, fontSize: 9, fontWeight: '600'},
-
-  groupDivider: {borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.06)'},
+  groupDivider: {borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.07)'},
 
   badge: {
     width: BADGE_W,
     height: BADGE_H,
-    borderRadius: 5,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  badgeText: {fontSize: 10, fontWeight: '800'},
+  badgeSolid: {
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  badgeText: {fontSize: 11, fontWeight: '800'},
+  badgeTextSolid: {fontSize: 12, fontWeight: '900'},
 
-  empty: {flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60},
-  emptyText: {color: Colors.textSecondary, fontSize: 14},
-
+  // Key
   keyWrap: {
+    margin: 16,
     marginTop: 24,
-    marginHorizontal: 16,
     marginBottom: 32,
     padding: 14,
     backgroundColor: Colors.card,
@@ -289,7 +346,10 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginBottom: 12,
   },
-  keyItems: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
-  keyItem: {flexDirection: 'row', alignItems: 'center', gap: 6},
-  keyDesc: {color: Colors.textSecondary, fontSize: 11, fontWeight: '500'},
+  keyItems: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
+  keyItem: {flexDirection: 'row', alignItems: 'center', gap: 7},
+  keyDesc: {color: Colors.textSecondary, fontSize: 12, fontWeight: '500'},
+
+  empty: {flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60},
+  emptyText: {color: Colors.textSecondary, fontSize: 14},
 });
