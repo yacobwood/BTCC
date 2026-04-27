@@ -10,7 +10,8 @@
       "id": "2",
       "title": "Wiki Style Season Table",
       "description": "A race by race results table",
-      "status": "ready-to-deploy"
+      "status": "done",
+      "doneAt": "2026-04-27"
     },
     {
       "id": "3",
@@ -28,7 +29,8 @@
       "id": "5",
       "title": "No Spoilers Option",
       "description": "Allow notification pauses",
-      "status": "ready-to-deploy"
+      "status": "done",
+      "doneAt": "2026-04-27"
     },
     {
       "id": "6",
@@ -59,7 +61,8 @@
       "id": "10",
       "title": "Standings table for all championship types",
       "description": "",
-      "status": "ready-to-deploy"
+      "status": "done",
+      "doneAt": "2026-04-27"
     }
   ],
   "submissions": []
