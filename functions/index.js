@@ -319,6 +319,173 @@ exports.sendSessionNotifications = onSchedule(
   },
 );
 
+// ── Daily news digest ─────────────────────────────────────────
+// Scrapes Reddit, BTCC.net, Autosport, and Motorsport.com each morning,
+// uses Claude to write a short article, and saves it as a Firestore draft.
+exports.dailyDigest = onSchedule(
+  {
+    schedule: '0 8 * * *',
+    timeZone: 'Europe/London',
+    secrets: ['ANTHROPIC_API_KEY'],
+  },
+  async () => {
+    const db = getFirestore();
+    const messaging = getMessaging();
+    const today = getUKDateString(new Date());
+
+    // Skip if today's digest already exists (e.g. function retried)
+    const digestRef = db.collection('digests').doc(today);
+    if ((await digestRef.get()).exists) return;
+
+    const sources = [];
+
+    // ── Reddit r/BTCC ─────────────────────────────────────────
+    try {
+      const res = await fetch(
+        'https://www.reddit.com/r/BTCC/top.json?t=day&limit=15',
+        {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
+      );
+      const data = await res.json();
+      for (const child of data?.data?.children ?? []) {
+        const p = child.data;
+        if (p.score < 3) continue;
+        sources.push({
+          source: 'Reddit r/BTCC',
+          title: p.title,
+          text: p.selftext?.slice(0, 500) || '',
+          url: `https://reddit.com${p.permalink}`,
+        });
+      }
+    } catch (e) {
+      console.error('Reddit scrape failed:', e);
+    }
+
+    // ── BTCC.net WordPress API ────────────────────────────────
+    try {
+      const posts = await fetch(
+        'https://www.btcc.net/wp-json/wp/v2/posts?per_page=5&_fields=title,excerpt,link&orderby=date',
+      ).then(r => r.json());
+      for (const post of posts) {
+        const excerpt = post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? '';
+        sources.push({
+          source: 'BTCC.net',
+          title: post.title?.rendered ?? '',
+          text: excerpt.slice(0, 400),
+          url: post.link,
+        });
+      }
+    } catch (e) {
+      console.error('BTCC.net scrape failed:', e);
+    }
+
+    // ── RSS helper ────────────────────────────────────────────
+    async function scrapeRss(url, sourceName) {
+      try {
+        const text = await fetch(url).then(r => r.text());
+        const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 5);
+        for (const item of items) {
+          const title =
+            (item[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+              item[1].match(/<title>(.*?)<\/title>/))?.[1] ?? '';
+          const desc =
+            (item[1].match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) ||
+              item[1].match(/<description>(.*?)<\/description>/))?.[1]
+              ?.replace(/<[^>]+>/g, '')
+              .trim() ?? '';
+          const link =
+            (item[1].match(/<link>(.*?)<\/link>/) ||
+              item[1].match(/<link\s[^>]+href="([^"]+)"/))?.[1]?.trim() ?? '';
+          if (title) {
+            sources.push({source: sourceName, title, text: desc.slice(0, 400), url: link});
+          }
+        }
+      } catch (e) {
+        console.error(`${sourceName} RSS failed:`, e);
+      }
+    }
+
+    // ── Autosport & Motorsport.com ────────────────────────────
+    await Promise.all([
+      scrapeRss('https://www.autosport.com/rss/btcc/news/', 'Autosport'),
+      scrapeRss('https://www.motorsport.com/rss/btcc/news/', 'Motorsport.com'),
+    ]);
+
+    if (sources.length === 0) {
+      console.log('dailyDigest: no sources found, skipping');
+      return;
+    }
+
+    // ── Ask Claude to write the article ──────────────────────
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic.default({apiKey: process.env.ANTHROPIC_API_KEY});
+
+    const sourceBlock = sources
+      .map((s, i) => `[${i + 1}] ${s.source}: "${s.title}"\n${s.text || '(no excerpt)'}`)
+      .join('\n\n');
+
+    const message = await client.messages.create({
+      model: 'claude-opus-4-6',
+      max_tokens: 1200,
+      messages: [
+        {
+          role: 'user',
+          content:
+            `You are writing a daily BTCC news digest for the BTCC Hub fan app. ` +
+            `Based on the sources below from the past 24 hours, write a concise, ` +
+            `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
+            `newsworthy items. Write the body in HTML using only <p> tags — no ` +
+            `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
+            `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
+            `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
+            `Sources:\n${sourceBlock}`,
+        },
+      ],
+    });
+
+    let title = `BTCC Daily Digest — ${today}`;
+    let content = '<p>No content generated.</p>';
+    let description = '';
+    try {
+      const parsed = JSON.parse(message.content[0].text);
+      title = parsed.title || title;
+      content = parsed.content || content;
+      description = parsed.description || '';
+    } catch (e) {
+      console.error('dailyDigest: failed to parse Claude response:', e);
+      content = `<p>${message.content[0].text}</p>`;
+    }
+
+    // ── Save draft to Firestore ───────────────────────────────
+    const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/daily-digest-hero.png';
+
+    await digestRef.set({
+      title,
+      content,
+      description,
+      imageUrl: DIGEST_HERO,
+      status: 'draft',
+      pubDate: `${today}T08:00:00`,
+      createdAt: new Date().toISOString(),
+      sources: sources.map(s => ({source: s.source, title: s.title, url: s.url})),
+    });
+
+    // ── Notify admin ──────────────────────────────────────────
+    try {
+      await messaging.send({
+        topic: 'digest_ready',
+        notification: {title: 'Daily Digest Ready', body: title},
+        android: {notification: {channelId: 'news'}},
+        apns: {payload: {aps: {sound: 'default'}}},
+        data: {type: 'digest', date: today},
+      });
+    } catch (e) {
+      console.error('dailyDigest notification failed:', e);
+    }
+
+    console.log(`dailyDigest created for ${today}: ${title}`);
+  },
+);
+
 // Trim live chat to last 200 messages when a new one is written
 exports.trimChat = onValueCreated(
   {ref: '/chat/messages/{msgId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
