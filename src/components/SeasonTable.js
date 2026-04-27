@@ -1,7 +1,6 @@
-import React, {useMemo} from 'react';
-import {View, Text, ScrollView, StyleSheet} from 'react-native';
+import React, {useMemo, useState, useEffect} from 'react';
+import {View, Text, ScrollView, StyleSheet, ActivityIndicator, InteractionManager} from 'react-native';
 import {Colors} from '../theme/colors';
-import {formatDriverName} from '../utils/driverName';
 
 const RACE_LABELS = ['Qualifying Race', 'Race 1', 'Race 2', 'Race 3'];
 const SHORT_LABEL = {
@@ -13,12 +12,29 @@ const SHORT_LABEL = {
 
 const CELL_W = 40;
 const CELL_H = 36;
-const BADGE_W = 32;
-const BADGE_H = 26;
+const BADGE_W = 36;
+const BADGE_H = 30;
 const NAME_W = 104;
 const PTS_W = 38;
 const LEFT_W = NAME_W + PTS_W;
-const HEADER_H = 44;
+const HEADER_H = 56;
+
+const VENUE_ABBR = {
+  'Donington Park':    'DON',
+  'Donington Park GP': 'DPG',
+  'Donington':         'DON',
+  'Brands Hatch':      'BH',
+  'Brands Hatch Indy': 'BHI',
+  'Brands Hatch GP':   'BHGP',
+  'Snetterton':        'SNE',
+  'Thruxton':          'THR',
+  'Oulton Park':       'OUL',
+  'Croft':             'CRO',
+  'Knockhill':         'KNO',
+  'Silverstone':       'SIL',
+  'Rockingham':        'ROC',
+  'Mondello Park':     'MON',
+};
 
 // Bold, solid colours for top positions — fade everything else out
 function badgeStyle(pos, laps, time) {
@@ -27,7 +43,7 @@ function badgeStyle(pos, laps, time) {
     text: '#FCA5A5', label: 'DSQ', solid: false,
   };
   if (pos === 0 && laps === 0) return {
-    bg: null, border: null,
+    bg: null, border: 'rgba(255,255,255,0.07)',
     text: 'rgba(255,255,255,0.2)', label: 'DNS', solid: false,
   };
   if (pos === 0) return {
@@ -56,10 +72,10 @@ function badgeStyle(pos, laps, time) {
     bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)',
     text: 'rgba(134,239,172,0.55)', label: String(pos), solid: false,
   };
-  // Outside points — very muted
+  // Outside points — subtle border, dim text
   return {
-    bg: null, border: null,
-    text: 'rgba(255,255,255,0.22)', label: String(pos), solid: false,
+    bg: null, border: 'rgba(255,255,255,0.1)',
+    text: 'rgba(255,255,255,0.3)', label: String(pos), solid: false,
   };
 }
 
@@ -67,16 +83,17 @@ function buildTableData(results) {
   const columns = [];
   const driverMap = {};
 
-  for (const round of results) {
-    const roundRaces = (round.races || []).filter(r => RACE_LABELS.includes(r.label));
-    if (roundRaces.length === 0) continue;
+  const hasQR = results.some(r => (r.races || []).some(race => race.label === 'Qualifying Race'));
+  const activeLabels = hasQR ? RACE_LABELS : RACE_LABELS.filter(l => l !== 'Qualifying Race');
 
+  for (const round of results) {
     columns.push({
       round: round.round,
       venue: round.venue,
-      races: roundRaces.map(r => ({label: r.label, short: SHORT_LABEL[r.label] || r.label})),
+      races: activeLabels.map(label => ({label, short: SHORT_LABEL[label]})),
     });
 
+    const roundRaces = (round.races || []).filter(r => RACE_LABELS.includes(r.label));
     for (const race of roundRaces) {
       for (const entry of race.results || []) {
         if (!entry.driver) continue;
@@ -85,12 +102,12 @@ function buildTableData(results) {
         }
         const key = `${round.round}_${race.label}`;
         driverMap[entry.driver].cells[key] = {
-          pos: entry.position,
+          pos: entry.position ?? entry.pos,
           laps: entry.laps,
           time: entry.time || '',
-          fl: entry.fastestLap || false,
-          lead: entry.leadLap || false,
-          pole: entry.pole || false,
+          fl: entry.fastestLap || entry.fl || false,
+          lead: entry.leadLap || entry.l || false,
+          pole: entry.pole || entry.p || false,
         };
         driverMap[entry.driver].points += entry.points || 0;
       }
@@ -105,20 +122,36 @@ function buildTableData(results) {
   };
 }
 
-// Count bonus points earned in a single cell
+// Fixed-order bonus labels
+const BONUS_DOTS = [
+  {key: 'pole', label: 'PP'},
+  {key: 'fl',   label: 'FL'},
+  {key: 'lead', label: 'LL'},
+];
+
 function bonusCount(cell) {
   if (!cell) return 0;
   return (cell.fl ? 1 : 0) + (cell.lead ? 1 : 0) + (cell.pole ? 1 : 0);
 }
 
 function Badge({cell}) {
-  if (!cell) return <View style={{width: CELL_W, height: CELL_H}} />;
+  if (!cell) return (
+    <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={[styles.badge, {borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)'}]}>
+        <Text style={styles.dneText}>DNE</Text>
+      </View>
+    </View>
+  );
   const s = badgeStyle(cell.pos, cell.laps, cell.time);
   const bonus = bonusCount(cell);
+  const bonusText = bonus > 0
+    ? BONUS_DOTS.filter(({key}) => cell[key]).map(({label}) => label).join(' ')
+    : null;
   return (
     <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
       <View style={[
         styles.badge,
+        bonusText && styles.badgeWithBonus,
         s.solid && styles.badgeSolid,
         !s.solid && s.bg && {backgroundColor: s.bg},
         !s.solid && s.border && {borderColor: s.border, borderWidth: 1},
@@ -129,13 +162,9 @@ function Badge({cell}) {
           {color: s.text},
           s.solid && styles.badgeTextSolid,
         ]}>{s.label}</Text>
-        {bonus > 0 && (
-          <View style={styles.bonusDots}>
-            {Array.from({length: bonus}).map((_, i) => (
-              <View key={i} style={styles.bonusDot} />
-            ))}
-          </View>
-        )}
+        {bonusText ? (
+          <Text style={[styles.bonusLabel, s.solid && {color: 'rgba(0,0,0,0.55)'}]}>{bonusText}</Text>
+        ) : null}
       </View>
     </View>
   );
@@ -150,8 +179,6 @@ const KEY_ITEMS = [
   {label: 'DNS', desc: 'Did not start', style: badgeStyle(0, 0, '')},
   {label: 'DSQ', desc: 'Disqualified', style: badgeStyle(1, 1, 'DSQ')},
 ];
-
-const BONUS_KEY = {dots: 3, desc: 'Dots = bonus points (fastest lap, lead lap, pole)'};
 
 function KeyRow() {
   return (
@@ -177,21 +204,33 @@ function KeyRow() {
           </View>
         ))}
       </View>
-      {/* Bonus point dots explanation */}
-      <View style={[styles.keyItem, {marginTop: 12}]}>
-        <View style={[styles.badge, {backgroundColor: 'rgba(34,197,94,0.12)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.3)'}]}>
-          <Text style={[styles.badgeText, {color: '#86EFAC'}]}>4</Text>
-          <View style={styles.bonusDots}>
-            {[0, 1, 2].map(i => <View key={i} style={styles.bonusDot} />)}
-          </View>
+      {/* Bonus point label legend */}
+      <View style={styles.bonusKeyWrap}>
+        <Text style={styles.bonusKeyTitle}>BONUS POINTS</Text>
+        <View style={styles.keyItems}>
+          {BONUS_DOTS.map(({key, label}) => (
+            <View key={key} style={styles.keyItem}>
+              <Text style={[styles.bonusLabel, {fontSize: 9}]}>{label}</Text>
+              <Text style={styles.keyDesc}>
+                {key === 'pole' ? 'Pole position' : key === 'fl' ? 'Fastest lap' : 'Lead lap'}
+              </Text>
+            </View>
+          ))}
         </View>
-        <Text style={styles.keyDesc}>Dots = bonus pts (FL · lead lap · pole)</Text>
       </View>
     </View>
   );
 }
 
 export default function SeasonTable({results, standings}) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(false);
+    const task = InteractionManager.runAfterInteractions(() => setReady(true));
+    return () => task.cancel();
+  }, [results]);
+
   const {columns, tableData} = useMemo(() => {
     const base = buildTableData(results || []);
     // Override points totals with official standings when available
@@ -205,6 +244,14 @@ export default function SeasonTable({results, standings}) {
     }
     return base;
   }, [results, standings]);
+
+  if (!ready) {
+    return (
+      <View style={styles.empty}>
+        <ActivityIndicator color={Colors.yellow} />
+      </View>
+    );
+  }
 
   if (!tableData.length) {
     return (
@@ -231,7 +278,7 @@ export default function SeasonTable({results, standings}) {
             ]}>
               <Text style={[styles.rankText, i === 0 && {color: Colors.yellow}]}>{i + 1}</Text>
               <Text style={styles.nameText} numberOfLines={1}>
-                {formatDriverName(driver.name)}
+                {driver.name.trim().split(/\s+/).slice(1).join(' ').toUpperCase()}
               </Text>
               <Text style={[styles.ptsText, i === 0 && {color: Colors.yellow}]}>{driver.points}</Text>
             </View>
@@ -251,6 +298,7 @@ export default function SeasonTable({results, standings}) {
                     ci < columns.length - 1 && styles.groupDivider,
                   ]}>
                   <Text style={styles.roundLabel}>R{col.round}</Text>
+                  <Text style={styles.venueLabel}>{VENUE_ABBR[col.venue] ?? col.venue}</Text>
                   <View style={{flexDirection: 'row'}}>
                     {col.races.map(race => (
                       <View key={race.label} style={{width: CELL_W, alignItems: 'center'}}>
@@ -344,10 +392,16 @@ const styles = StyleSheet.create({
   },
   roundLabel: {
     color: Colors.yellow,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1,
-    marginBottom: 3,
+  },
+  venueLabel: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   raceLabel: {color: Colors.textSecondary, fontSize: 9, fontWeight: '600'},
   groupDivider: {borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.07)'},
@@ -356,22 +410,26 @@ const styles = StyleSheet.create({
     width: BADGE_W,
     height: BADGE_H,
     borderRadius: 6,
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'visible',
+    overflow: 'hidden',
   },
-  bonusDots: {
-    position: 'absolute',
-    bottom: -3,
-    flexDirection: 'row',
-    gap: 2,
-    alignSelf: 'center',
+  badgeWithBonus: {
+    justifyContent: 'space-evenly',
+    paddingVertical: 3,
   },
-  bonusDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.yellow,
+  dneText: {
+    fontSize: 8,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.2)',
+    letterSpacing: 0.3,
+  },
+  bonusLabel: {
+    fontSize: 6,
+    fontWeight: '900',
+    color: Colors.yellow,
+    letterSpacing: 0.2,
   },
   badgeSolid: {
     shadowColor: '#000',
@@ -400,6 +458,19 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 2,
     marginBottom: 12,
+  },
+  bonusKeyWrap: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.outline,
+  },
+  bonusKeyTitle: {
+    color: Colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginBottom: 10,
   },
   keyItems: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
   keyItem: {flexDirection: 'row', alignItems: 'center', gap: 7},

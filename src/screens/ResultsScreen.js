@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useRef, memo} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   RefreshControl,
   Dimensions,
   InteractionManager,
+  Modal,
+  StyleSheet,
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -85,6 +87,53 @@ function buildTeamMap(rounds) {
   return map;
 }
 
+const YEARS = Array.from({length: 2026 - 2004 + 1}, (_, i) => 2026 - i);
+const ITEM_H = 52;
+const VISIBLE = 5; // must be odd
+const PICKER_H = ITEM_H * VISIBLE;
+
+const YearWheelPicker = memo(({year, onChange}) => {
+  const scrollRef = useRef(null);
+  const [centred, setCentred] = useState(year);
+
+  useEffect(() => {
+    const idx = YEARS.indexOf(year);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({y: idx * ITEM_H, animated: false});
+    }, 50);
+  }, []);
+
+  const onScroll = useCallback((e) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.y / ITEM_H);
+    const y = YEARS[Math.max(0, Math.min(idx, YEARS.length - 1))];
+    setCentred(y);
+  }, []);
+
+  return (
+    <View style={styles.wheelBox}>
+      <Text style={styles.yearPickerTitle}>SELECT SEASON</Text>
+      <View pointerEvents="none" style={styles.wheelHighlight} />
+      <ScrollView
+        ref={scrollRef}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={ITEM_H}
+        decelerationRate="fast"
+        scrollEventThrottle={16}
+        onScroll={onScroll}
+        contentContainerStyle={{paddingVertical: ITEM_H * Math.floor(VISIBLE / 2)}}>
+        {YEARS.map(y => (
+          <View key={y} style={{height: ITEM_H, justifyContent: 'center', alignItems: 'center'}}>
+            <Text style={[styles.wheelItemText, y === centred && styles.wheelItemTextActive]}>{y}</Text>
+          </View>
+        ))}
+      </ScrollView>
+      <TouchableOpacity style={styles.wheelOkButton} onPress={() => onChange(centred)}>
+        <Text style={styles.wheelOkText}>OK</Text>
+      </TouchableOpacity>
+    </View>
+  );
+});
+
 export default function ResultsScreen({navigation, route}) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -102,6 +151,7 @@ export default function ResultsScreen({navigation, route}) {
   const [bundledStats, setBundledStats] = useState(null);
   const [bundledProgression, setBundledProgression] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showYearPicker, setShowYearPicker] = useState(false);
 
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
@@ -124,6 +174,18 @@ export default function ResultsScreen({navigation, route}) {
     setShowScrollTop(false);
     Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
   };
+
+  const changeYear = useCallback((newYear) => {
+    Analytics.resultsYearChanged(newYear);
+    if (newYear >= 2004 && newYear <= 2025) {
+      applyBundledYear(newYear);
+    } else {
+      setLoading(true);
+    }
+    setYear(newYear);
+    setDriverFilter('all');
+    setShowYearPicker(false);
+  }, [applyBundledYear]);
 
   const onListScroll = (e) => setShowScrollTop(e.nativeEvent.contentOffset.y > 400);
 
@@ -150,6 +212,7 @@ export default function ResultsScreen({navigation, route}) {
         wins: d.wins || 0,
         seconds: d.seconds || 0,
         thirds: d.thirds || 0,
+        cls: d.cls || '',
       }));
       const teams = (season.teams || []).map((t, i) => ({
         position: t.position || i + 1,
@@ -270,7 +333,6 @@ export default function ResultsScreen({navigation, route}) {
     }
   }, [route?.params?.openRound, route?.params?.openYear, loading, results, year]));
   useEffect(() => {
-    // Bundled years (2004-2025) are synchronous — load immediately to avoid flash
     if (year >= 2004 && year <= 2025) {
       load(year);
       return;
@@ -289,13 +351,15 @@ export default function ResultsScreen({navigation, route}) {
   const canGoOlder = year > 2004;
   const canGoNewer = year < 2026;
 
+  const hasClassification = useMemo(() => (standings?.drivers || []).some(d => d.cls), [standings]);
+
   const driverStandings = useMemo(() => {
     const all = standings?.drivers || [];
-    if (driverFilter === 'all') return all;
+    if (driverFilter === 'all' || !hasClassification) return all;
     return all
       .filter(d => d.cls === driverFilter)
       .map((d, i) => ({...d, position: i + 1}));
-  }, [standings, driverFilter]);
+  }, [standings, driverFilter, hasClassification]);
   const teamStandings = standings?.teams || [];
   const liveRound = standings?.round || 0;
 
@@ -476,20 +540,22 @@ export default function ResultsScreen({navigation, route}) {
       case 0:
         return (
           <>
-            <View style={styles.filterRow}>
-              {[['all', 'All'], ['M', 'Main'], ['I', 'Independents']].map(([val, label]) => (
-                <TouchableOpacity
-                  key={val}
-                  style={[styles.filterPill, driverFilter === val && styles.filterPillActive]}
-                  onPress={() => setDriverFilter(val)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Show ${label} standings`}>
-                  <Text style={[styles.filterPillText, driverFilter === val && styles.filterPillTextActive]}>
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            {hasClassification && (
+              <View style={styles.filterRow}>
+                {[['all', 'All'], ['M', 'Main'], ['I', 'Independents']].map(([val, label]) => (
+                  <TouchableOpacity
+                    key={val}
+                    style={[styles.filterPill, driverFilter === val && styles.filterPillActive]}
+                    onPress={() => setDriverFilter(val)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Show ${label} standings`}>
+                    <Text style={[styles.filterPillText, driverFilter === val && styles.filterPillTextActive]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
             <FlatList
               ref={driversListRef}
               data={driverStandings}
@@ -548,7 +614,7 @@ export default function ResultsScreen({navigation, route}) {
           />
         );
       case 4:
-        return <SeasonTable results={results} standings={standings} />;
+        return <SeasonTable key={year} results={results} standings={standings} />;
       case 5:
         if (!hasData) {
           return (
@@ -580,43 +646,36 @@ export default function ResultsScreen({navigation, route}) {
       <View style={styles.yearRow}>
         <TouchableOpacity
           disabled={!canGoOlder}
-          onPress={() => {
-            const newYear = year - 1;
-            Analytics.resultsYearChanged(newYear);
-            if (newYear >= 2004 && newYear <= 2025) {
-              applyBundledYear(newYear);
-            } else {
-              setLoading(true);
-            }
-            setYear(newYear);
-            setDriverFilter('all');
-          }}
+          onPress={() => changeYear(year - 1)}
           accessibilityLabel="Previous season"
           accessibilityRole="button">
           <Icon name="chevron-left" size={28} color={canGoOlder ? '#fff' : Colors.outline} />
         </TouchableOpacity>
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.yearText}>{year}</Text>
-          <Text style={styles.yearLabel}>SEASON</Text>
-        </View>
+        <TouchableOpacity onPress={() => setShowYearPicker(true)} accessibilityRole="button" accessibilityLabel="Select season">
+          <View style={{alignItems: 'center'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+              <Text style={styles.yearText}>{year}</Text>
+              <Icon name="expand-more" size={18} color={Colors.yellow} />
+            </View>
+            <Text style={styles.yearLabel}>SEASON</Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity
           disabled={!canGoNewer}
-          onPress={() => {
-            const newYear = year + 1;
-            Analytics.resultsYearChanged(newYear);
-            if (newYear >= 2004 && newYear <= 2025) {
-              applyBundledYear(newYear);
-            } else {
-              setLoading(true);
-            }
-            setYear(newYear);
-            setDriverFilter('all');
-          }}
+          onPress={() => changeYear(year + 1)}
           accessibilityLabel="Next season"
           accessibilityRole="button">
           <Icon name="chevron-right" size={28} color={canGoNewer ? '#fff' : Colors.outline} />
         </TouchableOpacity>
       </View>
+
+      {/* Year picker modal */}
+      <Modal visible={showYearPicker} transparent animationType="fade" onRequestClose={() => setShowYearPicker(false)}>
+        <View style={styles.yearPickerOverlay}>
+          <TouchableOpacity style={{...StyleSheet.absoluteFillObject}} activeOpacity={1} onPress={() => setShowYearPicker(false)} />
+          <YearWheelPicker year={year} onChange={changeYear} />
+        </View>
+      </Modal>
 
       <View style={styles.tabRow}>
         {tabs.map((label, i) => (

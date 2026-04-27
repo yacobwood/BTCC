@@ -9,7 +9,8 @@
       "wins": 6,
       "seconds": 6,
       "thirds": 8,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 2,
@@ -19,7 +20,8 @@
       "wins": 6,
       "seconds": 5,
       "thirds": 5,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 3,
@@ -29,7 +31,8 @@
       "wins": 5,
       "seconds": 6,
       "thirds": 5,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 4,
@@ -39,7 +42,8 @@
       "wins": 3,
       "seconds": 3,
       "thirds": 5,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 5,
@@ -49,7 +53,8 @@
       "wins": 4,
       "seconds": 1,
       "thirds": 4,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 6,
@@ -59,7 +64,8 @@
       "wins": 2,
       "seconds": 3,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 7,
@@ -69,7 +75,8 @@
       "wins": 2,
       "seconds": 2,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 8,
@@ -79,7 +86,8 @@
       "wins": 0,
       "seconds": 3,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 9,
@@ -89,7 +97,8 @@
       "wins": 1,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 10,
@@ -99,7 +108,8 @@
       "wins": 0,
       "seconds": 1,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 11,
@@ -109,7 +119,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 12,
@@ -119,7 +130,8 @@
       "wins": 1,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 13,
@@ -129,7 +141,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 14,
@@ -139,7 +152,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 15,
@@ -149,7 +163,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 16,
@@ -159,7 +174,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 17,
@@ -169,7 +185,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 18,
@@ -179,7 +196,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     }
   ],
   "teams": [

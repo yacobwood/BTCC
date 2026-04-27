@@ -9,7 +9,8 @@
       "wins": 8,
       "seconds": 3,
       "thirds": 5,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 2,
@@ -19,7 +20,8 @@
       "wins": 5,
       "seconds": 7,
       "thirds": 3,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 3,
@@ -29,7 +31,8 @@
       "wins": 6,
       "seconds": 3,
       "thirds": 7,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 4,
@@ -39,7 +42,8 @@
       "wins": 1,
       "seconds": 6,
       "thirds": 2,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 5,
@@ -49,7 +53,8 @@
       "wins": 3,
       "seconds": 2,
       "thirds": 2,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 6,
@@ -59,7 +64,8 @@
       "wins": 0,
       "seconds": 4,
       "thirds": 3,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 7,
@@ -69,7 +75,8 @@
       "wins": 3,
       "seconds": 1,
       "thirds": 2,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 8,
@@ -79,7 +86,8 @@
       "wins": 1,
       "seconds": 0,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 9,
@@ -89,7 +97,8 @@
       "wins": 2,
       "seconds": 2,
       "thirds": 2,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 10,
@@ -99,7 +108,8 @@
       "wins": 1,
       "seconds": 1,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 11,
@@ -109,7 +119,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 12,
@@ -119,7 +130,8 @@
       "wins": 0,
       "seconds": 1,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 13,
@@ -129,7 +141,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 14,
@@ -139,7 +152,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 15,
@@ -149,7 +163,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 16,
@@ -159,7 +174,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "M"
     },
     {
       "position": 17,
@@ -169,7 +185,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 18,
@@ -179,7 +196,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 19,
@@ -189,7 +207,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 20,
@@ -199,7 +218,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 21,
@@ -209,7 +229,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 22,
@@ -219,7 +240,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 23,
@@ -229,7 +251,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 24,
@@ -239,7 +262,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 25,
@@ -249,7 +273,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 26,
@@ -259,7 +284,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 27,
@@ -269,7 +295,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     },
     {
       "position": 28,
@@ -279,7 +306,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": ""
+      "car": "",
+      "cls": "I"
     }
   ],
   "teams": [
@@ -628,6 +656,90 @@
               "fl": false,
               "p": true,
               "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "John Thorne",
+              "team": "Thorney Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 11,
+              "driver": "Frank Wrathall",
+              "team": "Dynojet",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 12,
+              "driver": "Daniel Welch",
+              "team": "Welch Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 34,
+              "driver": "Tony Gilham",
+              "team": "Team HARD.",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Adam Morgan",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 50,
+              "driver": "Tony Hughes",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
             }
           ]
         },
@@ -881,6 +993,62 @@
               "time": "",
               "gap": "+49.536",
               "bestLap": "1:48.002",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 17,
+              "no": 0,
+              "driver": "John Thorne",
+              "team": "Thorney Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 11,
+              "driver": "Frank Wrathall",
+              "team": "Dynojet",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Adam Morgan",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 50,
+              "driver": "Tony Hughes",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "fl": false,
               "p": false,
@@ -1180,6 +1348,34 @@
               "time": "",
               "gap": "+21.974",
               "bestLap": "1:46.524",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 16,
+              "no": 0,
+              "driver": "John Thorne",
+              "team": "Thorney Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Adam Morgan",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "fl": false,
               "p": false,
@@ -1504,6 +1700,20 @@
               "fl": false,
               "p": false,
               "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "John Thorne",
+              "team": "Thorney Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
             }
           ]
         },
@@ -1817,6 +2027,20 @@
               "fl": false,
               "p": false,
               "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "John Thorne",
+              "team": "Thorney Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
             }
           ]
         },
@@ -2112,6 +2336,34 @@
               "time": "",
               "gap": "+9 Laps",
               "bestLap": "1:12.500",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "John Thorne",
+              "team": "Thorney Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 13,
+              "driver": "Rob Austin",
+              "team": "Rob Austin Racing",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "fl": false,
               "p": false,
@@ -3044,6 +3296,20 @@
               "time": "",
               "gap": "+1 Lap",
               "bestLap": "1:25.824",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 12,
+              "driver": "Daniel Welch",
+              "team": "Welch Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "fl": false,
               "p": false,
@@ -4314,6 +4580,20 @@
               "fl": false,
               "p": false,
               "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Paul O'Neill",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
             }
           ]
         },
@@ -4623,6 +4903,20 @@
               "time": "",
               "gap": "+8 Laps",
               "bestLap": "1:27.712",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Paul O'Neill",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "fl": false,
               "p": false,
@@ -5256,6 +5550,20 @@
               "time": "",
               "gap": "+4 Laps",
               "bestLap": "2:01.082",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Robb Holland",
+              "team": "Team HARD.",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "fl": false,
               "p": false,
@@ -9609,6 +9917,20 @@
               "laps": 0,
               "time": "",
               "gap": "+15 Laps",
+              "bestLap": "",
+              "points": 0,
+              "fl": false,
+              "p": false,
+              "avgLapSpeed": ""
+            },
+            {
+              "pos": 0,
+              "no": 0,
+              "driver": "Adam Morgan",
+              "team": "Speedworks Motorsport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "",
               "points": 0,
               "fl": false,

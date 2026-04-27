@@ -9,7 +9,8 @@
       "wins": 8,
       "seconds": 5,
       "thirds": 6,
-      "car": "5"
+      "car": "5",
+      "cls": "I"
     },
     {
       "position": 2,
@@ -19,7 +20,8 @@
       "wins": 6,
       "seconds": 4,
       "thirds": 4,
-      "car": "99"
+      "car": "99",
+      "cls": "M"
     },
     {
       "position": 3,
@@ -29,7 +31,8 @@
       "wins": 3,
       "seconds": 4,
       "thirds": 4,
-      "car": "52"
+      "car": "52",
+      "cls": "M"
     },
     {
       "position": 4,
@@ -39,7 +42,8 @@
       "wins": 2,
       "seconds": 2,
       "thirds": 3,
-      "car": "6"
+      "car": "6",
+      "cls": "I"
     },
     {
       "position": 5,
@@ -49,7 +53,8 @@
       "wins": 4,
       "seconds": 1,
       "thirds": 2,
-      "car": "1"
+      "car": "1",
+      "cls": "I"
     },
     {
       "position": 6,
@@ -59,7 +64,8 @@
       "wins": 1,
       "seconds": 2,
       "thirds": 4,
-      "car": "10"
+      "car": "10",
+      "cls": "I"
     },
     {
       "position": 7,
@@ -69,7 +75,8 @@
       "wins": 1,
       "seconds": 4,
       "thirds": 1,
-      "car": "88"
+      "car": "88",
+      "cls": "M"
     },
     {
       "position": 8,
@@ -79,7 +86,8 @@
       "wins": 1,
       "seconds": 2,
       "thirds": 3,
-      "car": "4"
+      "car": "4",
+      "cls": "M"
     },
     {
       "position": 9,
@@ -89,7 +97,8 @@
       "wins": 2,
       "seconds": 1,
       "thirds": 0,
-      "car": "40"
+      "car": "40",
+      "cls": "I"
     },
     {
       "position": 10,
@@ -99,7 +108,8 @@
       "wins": 1,
       "seconds": 0,
       "thirds": 0,
-      "car": "33"
+      "car": "33",
+      "cls": "I"
     },
     {
       "position": 11,
@@ -109,7 +119,8 @@
       "wins": 0,
       "seconds": 1,
       "thirds": 1,
-      "car": "9"
+      "car": "9",
+      "cls": "I"
     },
     {
       "position": 12,
@@ -119,7 +130,8 @@
       "wins": 1,
       "seconds": 2,
       "thirds": 1,
-      "car": "101"
+      "car": "101",
+      "cls": "I"
     },
     {
       "position": 13,
@@ -129,7 +141,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
-      "car": "7"
+      "car": "7",
+      "cls": "I"
     },
     {
       "position": 14,
@@ -139,7 +152,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "80"
+      "car": "80",
+      "cls": "I"
     },
     {
       "position": 15,
@@ -150,7 +164,8 @@
       "seconds": 0,
       "thirds": 0,
       "car": "31",
-      "teamSecondary": "RCIB Insurance Racing"
+      "teamSecondary": "RCIB Insurance Racing",
+      "cls": "I"
     },
     {
       "position": 16,
@@ -160,7 +175,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "18"
+      "car": "18",
+      "cls": "I"
     },
     {
       "position": 17,
@@ -170,7 +186,8 @@
       "wins": 0,
       "seconds": 1,
       "thirds": 0,
-      "car": "17"
+      "car": "17",
+      "cls": "I"
     },
     {
       "position": 18,
@@ -180,7 +197,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "888"
+      "car": "888",
+      "cls": "I"
     },
     {
       "position": 19,
@@ -190,7 +208,8 @@
       "wins": 0,
       "seconds": 1,
       "thirds": 0,
-      "car": "44"
+      "car": "44",
+      "cls": "I"
     },
     {
       "position": 20,
@@ -200,7 +219,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "54"
+      "car": "54",
+      "cls": "I"
     },
     {
       "position": 21,
@@ -210,7 +230,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "39"
+      "car": "39",
+      "cls": "I"
     },
     {
       "position": 22,
@@ -218,7 +239,8 @@
       "team": "United Autosports",
       "points": 15,
       "wins": 0,
-      "car": "21"
+      "car": "21",
+      "cls": "I"
     },
     {
       "position": 23,
@@ -228,7 +250,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "30"
+      "car": "30",
+      "cls": "I"
     },
     {
       "position": 24,
@@ -238,7 +261,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "43"
+      "car": "43",
+      "cls": "I"
     },
     {
       "position": 25,
@@ -246,7 +270,8 @@
       "team": "Laser Tools Racing",
       "points": 6,
       "wins": 0,
-      "car": "16"
+      "car": "16",
+      "cls": "I"
     },
     {
       "position": 26,
@@ -256,7 +281,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "20"
+      "car": "20",
+      "cls": "I"
     },
     {
       "position": 27,
@@ -266,7 +292,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "67"
+      "car": "67",
+      "cls": "I"
     },
     {
       "position": 28,
@@ -276,7 +303,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "48"
+      "car": "48",
+      "cls": "I"
     },
     {
       "position": 29,
@@ -286,7 +314,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "23"
+      "car": "23",
+      "cls": "I"
     },
     {
       "position": 30,
@@ -296,7 +325,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "11"
+      "car": "11",
+      "cls": "I"
     },
     {
       "position": 31,
@@ -306,7 +336,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "28"
+      "car": "28",
+      "cls": "I"
     },
     {
       "position": 32,
@@ -316,7 +347,8 @@
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
-      "car": "12"
+      "car": "12",
+      "cls": "I"
     }
   ],
   "teams": [
@@ -972,36 +1004,6 @@
               "l": false,
               "p": false,
               "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Daniel Welch",
-              "team": "Proton Persona",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
             }
           ]
         },
@@ -1468,39 +1470,9 @@
             },
             {
               "pos": 0,
-              "no": 30,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 31,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Daniel Welch",
-              "team": "Proton Persona",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -1977,39 +1949,9 @@
             },
             {
               "pos": 0,
-              "no": 30,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 31,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Daniel Welch",
-              "team": "Proton Persona",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -2522,21 +2464,6 @@
               "l": false,
               "p": false,
               "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
             }
           ]
         },
@@ -3005,21 +2932,6 @@
               "no": 30,
               "driver": "Ollie Jackson",
               "team": "Proton Persona",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -3535,21 +3447,6 @@
               "l": false,
               "p": false,
               "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
             }
           ]
         }
@@ -3993,36 +3890,6 @@
               "pos": 0,
               "no": 28,
               "driver": "James Cole",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 29,
-              "driver": "Robb Holland",
-              "team": "Audi S3 Saloon",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 30,
-              "driver": "Luke Hines",
               "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
@@ -4528,36 +4395,6 @@
             },
             {
               "pos": 0,
-              "no": 30,
-              "driver": "Robb Holland",
-              "team": "Audi S3 Saloon",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
@@ -5019,39 +4856,9 @@
             },
             {
               "pos": 0,
-              "no": 29,
-              "driver": "Robb Holland",
-              "team": "Audi S3 Saloon",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 30,
               "driver": "Ollie Jackson",
               "team": "Proton Persona",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -5565,21 +5372,6 @@
             },
             {
               "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
@@ -6071,21 +5863,6 @@
             },
             {
               "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
@@ -6564,21 +6341,6 @@
               "no": 30,
               "driver": "Robb Holland",
               "team": "Audi S3 Saloon",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -7093,21 +6855,6 @@
             },
             {
               "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
@@ -7598,21 +7345,6 @@
             },
             {
               "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Chris Stockton",
               "team": "Chevrolet Cruze 5dr",
@@ -8074,21 +7806,6 @@
               "no": 29,
               "driver": "Robb Holland",
               "team": "Audi S3 Saloon",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 30,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -8590,21 +8307,6 @@
               "no": 29,
               "driver": "Nick Foster",
               "team": "BMW 125i M Sport",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 30,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -9125,21 +8827,6 @@
             },
             {
               "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Daniel Welch",
               "team": "Proton Persona",
@@ -9620,21 +9307,6 @@
               "no": 30,
               "driver": "Robb Holland",
               "team": "Audi S3 Saloon",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -10147,21 +9819,6 @@
             },
             {
               "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 32,
               "driver": "Daniel Welch",
               "team": "Proton Persona",
@@ -10628,21 +10285,6 @@
               "no": 29,
               "driver": "Ollie Jackson",
               "team": "Proton Persona",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 30,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -11152,21 +10794,6 @@
               "no": 30,
               "driver": "Ollie Jackson",
               "team": "Proton Persona",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -11693,21 +11320,6 @@
               "l": false,
               "p": false,
               "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
             }
           ]
         },
@@ -12174,21 +11786,6 @@
               "no": 30,
               "driver": "Aiden Moffat",
               "team": "Chevrolet Cruze 4dr",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -12700,21 +12297,6 @@
               "l": false,
               "p": false,
               "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 32,
-              "driver": "Luke Hines",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
             }
           ]
         }
@@ -13161,21 +12743,6 @@
               "no": 28,
               "driver": "Hunter Abbott",
               "team": "Audi A4",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 29,
-              "driver": "Glynn Geddie",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -13683,21 +13250,6 @@
             },
             {
               "pos": 0,
-              "no": 29,
-              "driver": "Glynn Geddie",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 30,
               "driver": "Martin Depper",
               "team": "Honda Civic",
@@ -14149,21 +13701,6 @@
               "no": 26,
               "driver": "Sam Tordoff",
               "team": "MG6 GT",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 27,
-              "driver": "Glynn Geddie",
-              "team": "Toyota Avensis",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -14701,39 +14238,9 @@
             },
             {
               "pos": 0,
-              "no": 29,
-              "driver": "Glynn Geddie",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 30,
               "driver": "James Cole",
               "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 31,
-              "driver": "Robb Holland",
-              "team": "Audi S3 Saloon",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -15191,39 +14698,9 @@
             },
             {
               "pos": 0,
-              "no": 28,
-              "driver": "Glynn Geddie",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 29,
               "driver": "James Cole",
               "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 30,
-              "driver": "Robb Holland",
-              "team": "Audi S3 Saloon",
               "laps": 0,
               "time": "",
               "gap": "",
@@ -15696,39 +15173,9 @@
             },
             {
               "pos": 0,
-              "no": 28,
-              "driver": "Glynn Geddie",
-              "team": "Toyota Avensis",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
               "no": 29,
               "driver": "Martin Depper",
               "team": "Honda Civic",
-              "laps": 0,
-              "time": "",
-              "gap": "",
-              "bestLap": "",
-              "points": 0,
-              "fl": false,
-              "l": false,
-              "p": false,
-              "displayTime": "-"
-            },
-            {
-              "pos": 0,
-              "no": 30,
-              "driver": "Robb Holland",
-              "team": "Audi S3 Saloon",
               "laps": 0,
               "time": "",
               "gap": "",

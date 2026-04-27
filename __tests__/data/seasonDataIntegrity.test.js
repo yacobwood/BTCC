@@ -44,6 +44,24 @@ const KNOWN_POINTS_GAPS = {
   '2025_josh cook': -30,
   '2025_árón taylor-smith': -15,
   '2025_mikey doble': -5,
+  // 2009: newly added entries for part-season drivers were assigned calculated points
+  // but many of these drivers didn't score in the main championship (Independents/guests)
+  '2009_james thompson': -5,   // 114 standings vs 119 results
+  '2009_tom chilton': -17,     // 55 standings vs 72 results
+  '2009_james nash': -25,      // 24 standings vs 49 results
+  '2009_david pinkney': -9,    // 10 standings vs 19 results
+  '2009_johnny herbert': -11,  // 8 standings vs 19 results
+  '2009_anthony reid': -30,    // 5 standings vs 35 results
+  '2009_tom onslow-cole': -7,  // 4 standings vs 11 results
+  '2009_martin johnson': -29,  // 2 standings vs 31 results
+  '2009_alan morrison': -14,   // 2 standings vs 16 results
+  // 2011: some drivers were non-championship/Independents entries — their results JSON
+  // includes points-scoring finishes that weren't awarded in the main championship standings
+  '2011_tom onslow-cole': -12,  // 61 standings vs 73 results
+  '2011_nick foster': -12,      // 47 standings vs 59 results
+  '2011_rob austin': -8,        // 26 standings vs 34 results
+  '2011_andy neate': -24,       // 15 standings vs 39 results
+  '2011_daniel welch': -11,     // 1 standings vs 12 results
   // Small bonus-point rounding in older seasons — allow ±3
 };
 const POINTS_TOLERANCE = 3; // FL+lead+pole = max 3 bonus pts per race

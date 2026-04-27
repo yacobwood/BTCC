@@ -93,4 +93,70 @@ export default StyleSheet.create({
   filterPillTextActive: {
     color: Colors.navy,
   },
+  yearPickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  yearPickerTitle: {
+    color: Colors.textSecondary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2,
+    textAlign: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
+  },
+  wheelBox: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+    width: 200,
+    height: 52 * 5 + 48 + 48, // 5 items + title + ok button
+    overflow: 'hidden',
+  },
+  wheelHighlight: {
+    position: 'absolute',
+    top: 48 + 52 * 2, // title height + 2 items (centres on middle slot)
+    left: 0,
+    right: 0,
+    height: 52,
+    backgroundColor: 'rgba(254,189,2,0.08)',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(254,189,2,0.25)',
+    zIndex: 1,
+  },
+  wheelScrollContent: {
+    paddingTop: 52 * 2,
+    paddingBottom: 52 * 2,
+  },
+  wheelItemText: {
+    color: Colors.textSecondary,
+    fontSize: 20,
+    fontWeight: '600',
+    includeFontPadding: false,
+  },
+  wheelItemTextActive: {
+    color: Colors.yellow,
+    fontSize: 20,
+    fontWeight: '900',
+    includeFontPadding: false,
+  },
+  wheelOkButton: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.outline,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: 'rgba(254,189,2,0.08)',
+  },
+  wheelOkText: {
+    color: Colors.yellow,
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 2,
+  },
 });

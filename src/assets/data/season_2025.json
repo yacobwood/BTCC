@@ -8,7 +8,8 @@
       "points": 462,
       "wins": 7,
       "seconds": 8,
-      "thirds": 3
+      "thirds": 3,
+      "cls": "M"
     },
     {
       "position": 2,
@@ -17,7 +18,8 @@
       "points": 428,
       "wins": 5,
       "seconds": 7,
-      "thirds": 5
+      "thirds": 5,
+      "cls": "M"
     },
     {
       "position": 3,
@@ -26,7 +28,8 @@
       "points": 307,
       "wins": 3,
       "seconds": 4,
-      "thirds": 3
+      "thirds": 3,
+      "cls": "M"
     },
     {
       "position": 4,
@@ -35,7 +38,8 @@
       "points": 295,
       "wins": 3,
       "seconds": 2,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "M"
     },
     {
       "position": 5,
@@ -44,7 +48,8 @@
       "points": 277,
       "wins": 3,
       "seconds": 0,
-      "thirds": 5
+      "thirds": 5,
+      "cls": "M"
     },
     {
       "position": 6,
@@ -53,7 +58,8 @@
       "points": 241,
       "wins": 0,
       "seconds": 4,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "M"
     },
     {
       "position": 7,
@@ -62,7 +68,8 @@
       "points": 230,
       "wins": 2,
       "seconds": 2,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "M"
     },
     {
       "position": 8,
@@ -71,7 +78,8 @@
       "points": 179,
       "wins": 1,
       "seconds": 2,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 9,
@@ -80,7 +88,8 @@
       "points": 177,
       "wins": 1,
       "seconds": 0,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "M"
     },
     {
       "position": 10,
@@ -89,7 +98,8 @@
       "points": 167,
       "wins": 0,
       "seconds": 0,
-      "thirds": 3
+      "thirds": 3,
+      "cls": "M"
     },
     {
       "position": 11,
@@ -98,7 +108,8 @@
       "points": 166,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 12,
@@ -107,7 +118,8 @@
       "points": 160,
       "wins": 1,
       "seconds": 1,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "I"
     },
     {
       "position": 13,
@@ -116,7 +128,8 @@
       "points": 149,
       "wins": 1,
       "seconds": 0,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "M"
     },
     {
       "position": 14,
@@ -125,7 +138,8 @@
       "points": 140,
       "wins": 0,
       "seconds": 0,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "I"
     },
     {
       "position": 15,
@@ -134,7 +148,8 @@
       "points": 128,
       "wins": 1,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 16,
@@ -143,7 +158,8 @@
       "points": 108,
       "wins": 1,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 17,
@@ -152,7 +168,8 @@
       "points": 103,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 18,
@@ -161,7 +178,8 @@
       "points": 100,
       "wins": 1,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 19,
@@ -170,7 +188,8 @@
       "points": 47,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 20,
@@ -179,7 +198,8 @@
       "points": 42,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 21,
@@ -188,7 +208,8 @@
       "points": 29,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 22,
@@ -197,7 +218,8 @@
       "points": 8,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 23,
@@ -206,7 +228,8 @@
       "points": 7,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 24,
@@ -215,7 +238,8 @@
       "points": 7,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 25,
@@ -224,7 +248,8 @@
       "points": 5,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 26,
@@ -233,7 +258,8 @@
       "points": 4,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 27,
@@ -242,7 +268,8 @@
       "points": 4,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 28,
@@ -251,7 +278,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 29,
@@ -260,7 +288,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     }
   ],
   "teams": [

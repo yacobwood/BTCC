@@ -156,7 +156,9 @@ describe('onForegroundMessage', () => {
     expect(result).toBe(unsub);
   });
 
-  it('calls notifee.displayNotification with the FCM data payload', async () => {
+  it('calls notifee.displayNotification on iOS with the FCM data payload', async () => {
+    // onForegroundMessage only calls notifee on iOS — Android defers to the
+    // background handler in index.js to avoid double-display.
     let capturedHandler;
     onMessage.mockImplementationOnce((_, handler) => {
       capturedHandler = handler;
@@ -165,21 +167,23 @@ describe('onForegroundMessage', () => {
 
     onForegroundMessage(jest.fn());
 
-    // Data-only message (no notification key) — notifee handles the display
+    // Data-only message: no `notification` key, has `title` in data
     const remoteMessage = {
       data: {channel: 'race', type: 'round', round: '1', title: 'Race starting!'},
     };
     await capturedHandler(remoteMessage);
 
+    // iOS path uses `ios: {}` — no Android channel concept here
     expect(notifee.displayNotification).toHaveBeenCalledWith(
       expect.objectContaining({
         data: remoteMessage.data,
-        android: expect.objectContaining({channelId: 'race'}),
+        ios: expect.any(Object),
       }),
     );
   });
 
-  it('falls back to "news" channel when no channel in data', async () => {
+  it('skips notifee.displayNotification on Android (background handler takes over)', async () => {
+    Object.defineProperty(Platform, 'OS', {get: () => 'android', configurable: true});
     let capturedHandler;
     onMessage.mockImplementationOnce((_, handler) => {
       capturedHandler = handler;
@@ -187,14 +191,12 @@ describe('onForegroundMessage', () => {
     });
 
     onForegroundMessage(jest.fn());
-    // Data-only message with a title but no channel
     await capturedHandler({data: {title: 'News headline'}});
 
-    expect(notifee.displayNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        android: expect.objectContaining({channelId: 'news'}),
-      }),
-    );
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+
+    // Restore for subsequent tests
+    Object.defineProperty(Platform, 'OS', {get: () => 'ios', configurable: true});
   });
 
   it('invokes the callback with the remote message', async () => {

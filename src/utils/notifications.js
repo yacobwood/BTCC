@@ -40,8 +40,11 @@ export function onForegroundMessage(callback) {
   const messaging = getMessaging();
   return onMessage(messaging, async remoteMessage => {
     callback(remoteMessage);
+    // Android: setBackgroundMessageHandler in index.js handles display for both
+    // foreground and background — don't also display here or it shows twice
+    if (Platform.OS === 'android') return;
     const {data, notification} = remoteMessage;
-    // If a notification payload is present, the system already shows it — skip notifee
+    // iOS: if a notification payload is present, the system already shows it — skip notifee
     if (notification) return;
     if (!data?.title) return;
     const channelId = data.channel || 'news';
@@ -52,13 +55,8 @@ export function onForegroundMessage(callback) {
       title: notifTitle,
       body: notifBody,
       data,
-      android: {
-        channelId,
-        smallIcon: 'ic_notification',
-        largeIcon: 'ic_notification_large',
-        circularLargeIcon: true,
-        pressAction: {id: 'default'},
-        ...(imageUrl ? {style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
+      ios: {
+        ...(imageUrl ? {attachments: [{url: imageUrl}]} : {}),
       },
     });
   });

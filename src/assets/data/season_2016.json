@@ -8,7 +8,8 @@
       "points": 308,
       "wins": 4,
       "seconds": 4,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "M"
     },
     {
       "position": 2,
@@ -17,7 +18,8 @@
       "points": 306,
       "wins": 2,
       "seconds": 6,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "M"
     },
     {
       "position": 3,
@@ -26,7 +28,8 @@
       "points": 292,
       "wins": 5,
       "seconds": 3,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "I"
     },
     {
       "position": 4,
@@ -35,7 +38,8 @@
       "points": 289,
       "wins": 5,
       "seconds": 2,
-      "thirds": 3
+      "thirds": 3,
+      "cls": "M"
     },
     {
       "position": 5,
@@ -44,7 +48,8 @@
       "points": 278,
       "wins": 2,
       "seconds": 2,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "M"
     },
     {
       "position": 6,
@@ -53,7 +58,8 @@
       "points": 274,
       "wins": 3,
       "seconds": 2,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "M"
     },
     {
       "position": 7,
@@ -62,7 +68,8 @@
       "points": 256,
       "wins": 1,
       "seconds": 3,
-      "thirds": 6
+      "thirds": 6,
+      "cls": "M"
     },
     {
       "position": 8,
@@ -71,7 +78,8 @@
       "points": 255,
       "wins": 2,
       "seconds": 2,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "I"
     },
     {
       "position": 9,
@@ -80,7 +88,8 @@
       "points": 241,
       "wins": 2,
       "seconds": 1,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "I"
     },
     {
       "position": 10,
@@ -89,7 +98,8 @@
       "points": 219,
       "wins": 2,
       "seconds": 1,
-      "thirds": 3
+      "thirds": 3,
+      "cls": "I"
     },
     {
       "position": 11,
@@ -98,7 +108,8 @@
       "points": 193,
       "wins": 0,
       "seconds": 1,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "M"
     },
     {
       "position": 12,
@@ -107,7 +118,8 @@
       "points": 175,
       "wins": 0,
       "seconds": 1,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "M"
     },
     {
       "position": 13,
@@ -116,7 +128,8 @@
       "points": 162,
       "wins": 1,
       "seconds": 0,
-      "thirds": 1
+      "thirds": 1,
+      "cls": "M"
     },
     {
       "position": 14,
@@ -125,7 +138,8 @@
       "points": 138,
       "wins": 0,
       "seconds": 1,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 15,
@@ -134,7 +148,8 @@
       "points": 132,
       "wins": 1,
       "seconds": 0,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "I"
     },
     {
       "position": 16,
@@ -143,7 +158,8 @@
       "points": 132,
       "wins": 0,
       "seconds": 1,
-      "thirds": 2
+      "thirds": 2,
+      "cls": "I"
     },
     {
       "position": 17,
@@ -152,7 +168,8 @@
       "points": 83,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 18,
@@ -161,7 +178,8 @@
       "points": 58,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 19,
@@ -170,7 +188,8 @@
       "points": 38,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 20,
@@ -179,7 +198,8 @@
       "points": 36,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 21,
@@ -188,7 +208,8 @@
       "points": 28,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 22,
@@ -197,7 +218,8 @@
       "points": 28,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 23,
@@ -206,7 +228,8 @@
       "points": 23,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 24,
@@ -215,7 +238,8 @@
       "points": 23,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 25,
@@ -224,7 +248,8 @@
       "points": 15,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 26,
@@ -233,7 +258,8 @@
       "points": 14,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 27,
@@ -242,7 +268,8 @@
       "points": 7,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 28,
@@ -251,7 +278,8 @@
       "points": 7,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 29,
@@ -260,7 +288,8 @@
       "points": 3,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 30,
@@ -269,7 +298,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 31,
@@ -278,7 +308,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 32,
@@ -287,7 +318,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 33,
@@ -296,7 +328,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 34,
@@ -305,7 +338,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "M"
     },
     {
       "position": 35,
@@ -314,7 +348,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     },
     {
       "position": 36,
@@ -323,7 +358,8 @@
       "points": 0,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 0,
+      "cls": "I"
     }
   ],
   "teams": [
