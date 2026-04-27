@@ -2670,6 +2670,7 @@ function loadImagesIntoGrid(imageUrl, imagesArr) {
   if (imageUrl) sessionImages.push({ url: imageUrl, isMain: true, inGallery: false, uploading: false });
   (imagesArr || []).forEach(url => { if (url && url !== imageUrl) sessionImages.push({ url, isMain: false, inGallery: true, uploading: false }); });
   renderImgGrid();
+  syncImageFields();
 }
 
 // ── Quill rich-text editor ────────────────────────────────────────────────────
