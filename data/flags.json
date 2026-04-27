@@ -19,6 +19,6 @@
   "hub_news_enabled": true,
   "live_timing_in_app": false,
   "update_available": true,
-  "update_min_version": 55,
+  "update_min_version": 56,
   "live_chat": false
 }
