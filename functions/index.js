@@ -202,6 +202,7 @@ exports.sendSessionNotifications = onSchedule(
         let shouldNotify = false;
         let notifyPayload = null;
         await db.runTransaction(async (tx) => {
+          shouldNotify = false; notifyPayload = null;
           const snap = await tx.get(stateRef);
           const lastId = snap.exists ? snap.data().lastId : null;
           if (latest.id !== lastId) {
@@ -240,6 +241,7 @@ exports.sendSessionNotifications = onSchedule(
         let shouldNotify = false;
         let notifyPayload = null;
         await db.runTransaction(async (tx) => {
+          shouldNotify = false; notifyPayload = null;
           const snap = await tx.get(hubStateRef);
           const lastHubId = snap.exists ? snap.data().lastId : null;
           if (String(latestHub.id) !== String(lastHubId)) {
@@ -286,6 +288,7 @@ exports.sendSessionNotifications = onSchedule(
         let shouldNotify = false;
         let podTitle = null;
         await db.runTransaction(async (tx) => {
+          shouldNotify = false; podTitle = null;
           const snap = await tx.get(podcastStateRef);
           const lastGuid = snap.exists ? snap.data().lastGuid : null;
           if (latestGuid !== lastGuid) {
