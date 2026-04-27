@@ -319,30 +319,47 @@ exports.sendSessionNotifications = onSchedule(
   },
 );
 
-// ── Daily news digest ─────────────────────────────────────────
-// Scrapes Reddit, BTCC.net, Autosport, and Motorsport.com each morning,
-// uses Claude to write a short article, and saves it as a Firestore draft.
-exports.dailyDigest = onSchedule(
+// ── Weekly news digest ────────────────────────────────────────
+// Every Monday at 8am UK time: scrapes Reddit, BTCC.net, Autosport, and
+// Motorsport.com, uses Claude to write a short article, then commits it
+// as a draft post to hub_news.json via the GitHub API.
+exports.weeklyDigest = onSchedule(
   {
-    schedule: '0 8 * * *',
+    schedule: '0 8 * * 1',
     timeZone: 'Europe/London',
-    secrets: ['ANTHROPIC_API_KEY'],
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
   },
   async () => {
-    const db = getFirestore();
     const messaging = getMessaging();
     const today = getUKDateString(new Date());
+    const postId = `digest-${today}`;
 
-    // Skip if today's digest already exists (e.g. function retried)
-    const digestRef = db.collection('digests').doc(today);
-    if ((await digestRef.get()).exists) return;
+    const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/weekly-digest-hero.png';
+    const GITHUB_API = 'https://api.github.com/repos/yacobwood/BTCC/contents/data/hub_news.json';
+    const ghHeaders = {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+
+    // ── Fetch current hub_news.json from GitHub ───────────────
+    const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
+    if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
+    const fileData = await fileRes.json();
+    const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
+
+    // Skip if this week's digest already exists (retry guard)
+    if (hubNews.posts.some(p => p.id === postId)) {
+      console.log(`weeklyDigest: ${postId} already exists, skipping`);
+      return;
+    }
 
     const sources = [];
 
     // ── Reddit r/BTCC ─────────────────────────────────────────
     try {
       const res = await fetch(
-        'https://www.reddit.com/r/BTCC/top.json?t=day&limit=15',
+        'https://www.reddit.com/r/BTCC/top.json?t=week&limit=15',
         {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
       );
       const data = await res.json();
@@ -411,7 +428,7 @@ exports.dailyDigest = onSchedule(
     ]);
 
     if (sources.length === 0) {
-      console.log('dailyDigest: no sources found, skipping');
+      console.log('weeklyDigest: no sources found, skipping');
       return;
     }
 
@@ -430,8 +447,8 @@ exports.dailyDigest = onSchedule(
         {
           role: 'user',
           content:
-            `You are writing a daily BTCC news digest for the BTCC Hub fan app. ` +
-            `Based on the sources below from the past 24 hours, write a concise, ` +
+            `You are writing a weekly BTCC news digest for the BTCC Hub fan app. ` +
+            `Based on the sources below from the past week, write a concise, ` +
             `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
             `newsworthy items. Write the body in HTML using only <p> tags — no ` +
             `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
@@ -442,7 +459,7 @@ exports.dailyDigest = onSchedule(
       ],
     });
 
-    let title = `BTCC Daily Digest — ${today}`;
+    let title = `BTCC Weekly Digest — ${today}`;
     let content = '<p>No content generated.</p>';
     let description = '';
     try {
@@ -451,38 +468,55 @@ exports.dailyDigest = onSchedule(
       content = parsed.content || content;
       description = parsed.description || '';
     } catch (e) {
-      console.error('dailyDigest: failed to parse Claude response:', e);
+      console.error('weeklyDigest: failed to parse Claude response:', e);
       content = `<p>${message.content[0].text}</p>`;
     }
 
-    // ── Save draft to Firestore ───────────────────────────────
-    const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/daily-digest-hero.png';
-
-    await digestRef.set({
+    // ── Prepend draft to hub_news.json and commit ─────────────
+    const newPost = {
+      id: postId,
       title,
-      content,
       description,
+      content,
       imageUrl: DIGEST_HERO,
-      status: 'draft',
       pubDate: `${today}T08:00:00`,
-      createdAt: new Date().toISOString(),
-      sources: sources.map(s => ({source: s.source, title: s.title, url: s.url})),
+      category: 'Weekly Digest',
+      source: 'btcc-hub',
+      status: 'draft',
+    };
+
+    hubNews.posts.unshift(newPost);
+
+    const updatedContent = Buffer.from(JSON.stringify(hubNews, null, 2)).toString('base64');
+    const putRes = await fetch(GITHUB_API, {
+      method: 'PUT',
+      headers: {...ghHeaders, 'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: `Weekly digest draft — ${today}`,
+        content: updatedContent,
+        sha: fileData.sha,
+      }),
     });
+
+    if (!putRes.ok) {
+      const err = await putRes.text();
+      throw new Error(`GitHub PUT failed: ${putRes.status} ${err}`);
+    }
 
     // ── Notify admin ──────────────────────────────────────────
     try {
       await messaging.send({
         topic: 'digest_ready',
-        notification: {title: 'Daily Digest Ready', body: title},
+        notification: {title: 'Weekly Digest Ready', body: title},
         android: {notification: {channelId: 'news'}},
         apns: {payload: {aps: {sound: 'default'}}},
-        data: {type: 'digest', date: today},
+        data: {type: 'hub', id: postId, channel: 'news', title},
       });
     } catch (e) {
-      console.error('dailyDigest notification failed:', e);
+      console.error('weeklyDigest notification failed:', e);
     }
 
-    console.log(`dailyDigest created for ${today}: ${title}`);
+    console.log(`weeklyDigest committed for ${today}: ${title}`);
   },
 );
 
