@@ -234,7 +234,7 @@ exports.sendSessionNotifications = onSchedule(
     // ── Hub news alerts ───────────────────────────────────────────
     try {
       const hubData = await fetch(HUB_NEWS_URL).then(r => r.json());
-      const latestHub = hubData?.posts?.[0];
+      const latestHub = hubData?.posts?.find(p => !p.status || p.status === 'published');
       if (latestHub) {
         const hubStateRef = db.collection('state').doc('hub_news');
         let shouldNotify = false;
