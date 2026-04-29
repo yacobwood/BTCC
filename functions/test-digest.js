@@ -236,7 +236,8 @@ async function main() {
   let content = '<p>No content generated.</p>';
   let description = '';
   try {
-    const parsed = JSON.parse(message.content[0].text);
+    const raw = message.content[0].text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const parsed = JSON.parse(raw);
     title = parsed.title || title;
     content = parsed.content || content;
     description = parsed.description || '';
