@@ -19,6 +19,7 @@ import {getFCMToken} from '../utils/notifications';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getStableDeviceId} from '../utils/deviceId';
 
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
@@ -26,10 +27,20 @@ export default function SettingsScreen({navigation}) {
   const {podcasts_enabled, debug_mode} = useFeatureFlags();
   const [fcmToken, setFcmToken] = useState('');
   const [copiedFcm, setCopiedFcm] = useState(false);
+  const [stableId, setStableId] = useState('');
+  const [copiedStableId, setCopiedStableId] = useState(false);
 
   useEffect(() => {
     getFCMToken().then(tok => { if (tok) setFcmToken(tok); }).catch(() => {});
+    getStableDeviceId().then(id => { if (id) setStableId(id); }).catch(() => {});
   }, []);
+
+  const copyStableId = () => {
+    if (!stableId) return;
+    Clipboard.setString(stableId);
+    setCopiedStableId(true);
+    setTimeout(() => setCopiedStableId(false), 2000);
+  };
 
   const copyFcmToken = () => {
     if (!fcmToken) return;
@@ -260,6 +271,11 @@ export default function SettingsScreen({navigation}) {
 
         <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
+        {!!stableId && (
+          <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy preview device ID">
+            <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `Preview ID: ${stableId.slice(0, 16)}…`}</Text>
+          </TouchableOpacity>
+        )}
         {!!fcmToken && (
           <TouchableOpacity onPress={copyFcmToken} accessibilityRole="button" accessibilityLabel="Copy device token">
             <Text style={styles.deviceIdText}>{copiedFcm ? '✓ Copied' : `Device Token: ${fcmToken.slice(0, 20)}…`}</Text>

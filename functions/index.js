@@ -353,7 +353,7 @@ async function runDigest(label, promptIntro) {
   // ── Reddit r/BTCC ───────────────────────────────────────────
   try {
     const res = await fetch(
-      'https://www.reddit.com/r/BTCC/top.json?t=week&limit=15',
+      'https://www.reddit.com/r/BTCC/top.json?t=week&limit=30',
       {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
     );
     const data = await res.json();
@@ -363,7 +363,7 @@ async function runDigest(label, promptIntro) {
       sources.push({
         source: 'Reddit r/BTCC',
         title: p.title,
-        text: p.selftext?.slice(0, 500) || '',
+        text: p.selftext?.slice(0, 800) || '',
         url: `https://reddit.com${p.permalink}`,
       });
     }
@@ -374,14 +374,14 @@ async function runDigest(label, promptIntro) {
   // ── BTCC.net WordPress API ──────────────────────────────────
   try {
     const posts = await fetch(
-      'https://www.btcc.net/wp-json/wp/v2/posts?per_page=5&_fields=title,excerpt,link&orderby=date',
+      'https://www.btcc.net/wp-json/wp/v2/posts?per_page=15&_fields=title,excerpt,link&orderby=date',
     ).then(r => r.json());
     for (const post of posts) {
       const excerpt = post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? '';
       sources.push({
         source: 'BTCC.net',
         title: post.title?.rendered ?? '',
-        text: excerpt.slice(0, 400),
+        text: excerpt.slice(0, 600),
         url: post.link,
       });
     }
@@ -393,7 +393,7 @@ async function runDigest(label, promptIntro) {
   async function scrapeRss(url, sourceName) {
     try {
       const text = await fetch(url).then(r => r.text());
-      const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 5);
+      const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 12);
       for (const item of items) {
         const title =
           (item[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
@@ -407,7 +407,7 @@ async function runDigest(label, promptIntro) {
           (item[1].match(/<link>(.*?)<\/link>/) ||
             item[1].match(/<link\s[^>]+href="([^"]+)"/))?.[1]?.trim() ?? '';
         if (title) {
-          sources.push({source: sourceName, title, text: desc.slice(0, 400), url: link});
+          sources.push({source: sourceName, title, text: desc.slice(0, 500), url: link});
         }
       }
     } catch (e) {
@@ -418,6 +418,7 @@ async function runDigest(label, promptIntro) {
   await Promise.all([
     scrapeRss('https://www.autosport.com/rss/btcc/news/', 'Autosport'),
     scrapeRss('https://www.motorsport.com/rss/btcc/news/', 'Motorsport.com'),
+    scrapeRss('https://touringcartimes.com/feed/', 'Touring Car Times'),
   ]);
 
   if (sources.length === 0) {
@@ -433,19 +434,38 @@ async function runDigest(label, promptIntro) {
     .map((s, i) => `[${i + 1}] ${s.source}: "${s.title}"\n${s.text || '(no excerpt)'}`)
     .join('\n\n');
 
+  // Build cross-reference context from previous digest articles
+  const prevDigests = hubNews.posts
+    .filter(p => p.category === 'Weekly Digest' && p.id !== postId)
+    .slice(0, 8);
+  const prevDigestBlock = prevDigests.length
+    ? prevDigests.map(p => {
+        const plain = (p.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 600);
+        return `  • "${p.title}"\n    ${plain}`;
+      }).join('\n\n')
+    : '  (none yet — this is the first digest)';
+
   const message = await client.messages.create({
     model: 'claude-opus-4-6',
-    max_tokens: 1200,
+    max_tokens: 2200,
     messages: [
       {
         role: 'user',
         content:
-          promptIntro + +
-          `Style rules you must follow:\n` +
+          promptIntro +
+          `Writing rules — follow all of these without exception:\n` +
+          `- Write in British English (tyre not tire, colour not color, etc.)\n` +
           `- Never use a comma before "and"\n` +
           `- Never use em dashes (— or –)\n` +
+          `- Never start a sentence with "It's worth noting", "Furthermore", "Additionally", "Moreover" or "In conclusion"\n` +
+          `- Never use the words: delve, showcase, navigate, elevate, crucial, pivotal, fascinating, notably, seamlessly, underscores, landscape\n` +
+          `- Avoid passive voice where active is possible\n` +
+          `- Use specific names, lap times, positions and details rather than vague generalities\n` +
+          `- Express opinions and reactions — this is a fan writing for fans, not a wire report\n` +
           `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
           hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
+          `- Do not repeat a topic, story or driver storyline from a previous digest unless genuinely new information has emerged. If revisiting a recurring story, acknowledge only what has changed and move on:\n` +
+          prevDigestBlock + '\n\n' +
           `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
           `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
           `Sources:\n${sourceBlock}`,
@@ -522,10 +542,12 @@ exports.weeklyDigest = onSchedule(
   },
   () => runDigest(
     'weeklyDigest',
-    `You are writing a weekly round-up for the BTCC Hub fan app. ` +
-    `Based on the sources below, write a concise engaging article (3–5 paragraphs) ` +
-    `looking back at everything that happened in BTCC over the past 7 days — ` +
-    `race results, driver news, team updates, fan reaction and anything else noteworthy. ` +
+    `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
+    `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
+    `Use British English throughout. ` +
+    `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
+    `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+    `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
     `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
     `Do not include the title in the body.\n\n`,
   ),
@@ -550,11 +572,13 @@ exports.raceWeekendDigest = onSchedule(
     }
     await runDigest(
       'raceWeekendDigest',
-      `You are writing a race weekend preview for the BTCC Hub fan app. ` +
+      `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
+      `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
+      `Use British English throughout. ` +
       `This weekend the BTCC heads to ${round.venue} (${round.location}). ` +
-      `Based on the sources below, write a concise exciting article (3–5 paragraphs) ` +
-      `building anticipation for the weekend ahead — who to watch, storylines going in, ` +
-      `championship picture, what makes this venue special, and anything fans should know. ` +
+      `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
+      `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+      `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
       `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
       `Do not include the title in the body.\n\n`,
     );

@@ -1101,8 +1101,8 @@ select.input { cursor: pointer; }
       <textarea id="digest-edit-desc" rows="2" placeholder="One sentence summary…"></textarea>
     </div>
     <div class="field-group">
-      <div class="field-label">BODY <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(HTML)</span></div>
-      <textarea id="digest-edit-content" rows="14" style="font-family:monospace;font-size:12px;line-height:1.5" placeholder="<p>…</p>"></textarea>
+      <div class="field-label">BODY</div>
+      <div id="digest-content-editor"></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn-primary" style="flex:1" onclick="saveDigestEdit()">SAVE CHANGES</button>
@@ -2413,9 +2413,10 @@ function openDigestEdit(id) {
   document.getElementById('digest-edit-id').value = p.id;
   document.getElementById('digest-edit-title').value = p.title || '';
   document.getElementById('digest-edit-desc').value = p.description || '';
-  document.getElementById('digest-edit-content').value = p.content || '';
   document.getElementById('digest-edit-status').textContent = '';
   document.getElementById('digest-edit-card').style.display = 'block';
+  initDigestQuill();
+  digestQuill.root.innerHTML = p.content || '';
   document.getElementById('digest-edit-card').scrollIntoView({behavior: 'smooth'});
 }
 
@@ -2427,11 +2428,13 @@ async function saveDigestEdit(andPublish = false) {
   const id = document.getElementById('digest-edit-id').value;
   const idx = hubNewsPosts.findIndex(p => p.id === id);
   if (idx < 0) return;
+  const rawContent = digestQuill ? digestQuill.root.innerHTML : '';
+  const content = rawContent === '<p><br></p>' ? '' : rawContent;
   hubNewsPosts[idx] = {
     ...hubNewsPosts[idx],
     title: document.getElementById('digest-edit-title').value.trim(),
     description: document.getElementById('digest-edit-desc').value.trim(),
-    content: document.getElementById('digest-edit-content').value.trim(),
+    content,
     ...(andPublish ? {status: 'published', pubDate: hubNewsPosts[idx].pubDate || nowIso()} : {}),
   };
   document.getElementById('digest-edit-status').textContent = 'Saving…';
@@ -2795,6 +2798,24 @@ function loadImagesIntoGrid(imageUrl, imagesArr) {
 
 // ── Quill rich-text editor ────────────────────────────────────────────────────
 let quill = null;
+let digestQuill = null;
+
+function initDigestQuill() {
+  if (digestQuill) return;
+  digestQuill = new Quill('#digest-content-editor', {
+    theme: 'snow',
+    placeholder: 'Edit article body…',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{'header': 2}, {'header': 3}],
+        [{'list': 'ordered'}, {'list': 'bullet'}],
+        ['link'],
+        ['clean'],
+      ],
+    },
+  });
+}
 
 function initQuill() {
   if (quill) return;

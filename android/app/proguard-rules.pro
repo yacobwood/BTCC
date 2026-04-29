@@ -12,4 +12,17 @@
 # Keep widget classes
 -keep class com.btccfanhub.widget.** { *; }
 
+# Keep WorkManager workers — WorkManager stores class names as strings in its
+# Room DB and reinstantiates them by name on reboot/update. R8 must not rename.
 -keep class com.btccfanhub.worker.** { *; }
+
+# Keep native service classes — RadioPackage/RadioModule are wired into the
+# React Native host and loaded via the RN module reflection system. RadioService
+# is declared in the manifest. IcyDataSource is used by the ExoPlayer pipeline.
+-keep class com.btccfanhub.service.** { *; }
+
+# WorkManager — ensure the ListenableWorker constructor signature is preserved
+# (work-runtime-ktx ships consumer rules but be explicit for safety)
+-keep public class * extends androidx.work.ListenableWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
