@@ -2578,6 +2578,7 @@ function showHubNewsError(msg) {
 async function dispatchArticleNotif(article) {
   const tok = getToken();
   if (!tok) return;
+  const statusEl = document.getElementById('hubnews-status');
   try {
     const inputs = {
       channel: 'news',
@@ -2586,12 +2587,20 @@ async function dispatchArticleNotif(article) {
       data: JSON.stringify({type: 'hub'}),
       image_url: article.imageUrl || '',
     };
-    await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {
       method: 'POST',
       headers: {Authorization: 'token ' + tok, 'Content-Type': 'application/json'},
       body: JSON.stringify({ref: 'main', inputs}),
     });
-  } catch(e) { /* silent — notification is best-effort */ }
+    if (r.status === 204) {
+      statusEl.innerHTML = '<span class="ok">Saved ✓ · Notification queued</span>';
+    } else {
+      const e = await r.json();
+      statusEl.innerHTML = `<span class="ok">Saved ✓</span> <span class="err">· Notification failed: ${e.message}</span>`;
+    }
+  } catch(e) {
+    statusEl.innerHTML = `<span class="ok">Saved ✓</span> <span class="err">· Notification error: ${e.message}</span>`;
+  }
 }
 
 async function saveHubNews(commitMessage, notifArticle = null) {
