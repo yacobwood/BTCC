@@ -2447,7 +2447,10 @@ async function saveDigestEdit(andPublish = false) {
     ...(andPublish ? {status: 'published', pubDate: hubNewsPosts[idx].pubDate || nowIso()} : {}),
   };
   document.getElementById('digest-edit-status').textContent = 'Saving…';
-  await saveHubNews(andPublish ? 'Publish digest: ' + hubNewsPosts[idx].title : 'Edit digest: ' + hubNewsPosts[idx].title);
+  await saveHubNews(
+    andPublish ? 'Publish digest: ' + hubNewsPosts[idx].title : 'Edit digest: ' + hubNewsPosts[idx].title,
+    andPublish ? hubNewsPosts[idx] : null
+  );
   document.getElementById('digest-edit-card').style.display = 'none';
   renderDigestList();
 }
@@ -2504,7 +2507,7 @@ async function quickPublish(articleId) {
   p.status = 'published';
   p.pubDate = nowIso();
   delete p.scheduledAt; delete p.previewDeviceIds;
-  await saveHubNews('Publish article: ' + p.title);
+  await saveHubNews('Publish article: ' + p.title, p);
 }
 
 async function quickUnpublish(articleId) {
@@ -2561,7 +2564,10 @@ async function publishArticle() {
   } else {
     hubNewsPosts.unshift(article);
   }
-  await saveHubNews(editId ? 'Update hub article' : 'Add hub article: ' + title);
+  await saveHubNews(
+    editId ? 'Update hub article' : 'Add hub article: ' + title,
+    currentArticleStatus === 'published' ? article : null
+  );
 }
 
 function showHubNewsError(msg) {
@@ -2569,7 +2575,26 @@ function showHubNewsError(msg) {
   document.getElementById('digest-edit-status').innerHTML = `<span class="err">${msg}</span>`;
 }
 
-async function saveHubNews(commitMessage) {
+async function dispatchArticleNotif(article) {
+  const tok = getToken();
+  if (!tok) return;
+  try {
+    const inputs = {
+      channel: 'news',
+      title: article.title || 'New BTCC Hub Article',
+      body: article.description || '',
+      data: JSON.stringify({type: 'hub'}),
+      image_url: article.imageUrl || '',
+    };
+    await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {
+      method: 'POST',
+      headers: {Authorization: 'token ' + tok, 'Content-Type': 'application/json'},
+      body: JSON.stringify({ref: 'main', inputs}),
+    });
+  } catch(e) { /* silent — notification is best-effort */ }
+}
+
+async function saveHubNews(commitMessage, notifArticle = null) {
   const tok = getToken();
   if (!tok) { showHubNewsError('Save your GitHub token first (Standings tab).'); return; }
   const btn = document.getElementById('hn-publish-btn');
@@ -2591,6 +2616,7 @@ async function saveHubNews(commitMessage) {
       document.getElementById('hubnews-banner-text').textContent = `Saved · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
       document.getElementById('hubnews-banner').classList.add('visible');
       cancelEdit(); renderHubNewsList(); renderDigestList(); updateDashNews();
+      if (notifArticle) dispatchArticleNotif(notifArticle);
     } else { const e = await r.json(); showHubNewsError(`GitHub error: ${e.message}`); }
   } catch(e) { showHubNewsError(`Network error: ${e.message}`); }
   btn.disabled = false; btn.textContent = document.getElementById('hn-edit-id').value ? 'SAVE CHANGES' : 'PUBLISH ARTICLE';
