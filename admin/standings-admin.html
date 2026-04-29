@@ -1083,7 +1083,33 @@ select.input { cursor: pointer; }
     <span id="digest-banner-text">Editor's Weekly Roundup</span>
   </div>
 
-  <div class="section-note" style="margin-bottom:16px">AI-generated weekly and race weekend digests. Review and publish when ready.</div>
+  <div class="section-note" style="margin-bottom:16px">AI-generated weekly and race weekend digests. Review, edit and publish when ready.</div>
+
+  <!-- Inline edit form -->
+  <div class="card" id="digest-edit-card" style="display:none;margin-bottom:16px">
+    <div class="card-header">
+      <div class="section-label">EDIT DIGEST</div>
+      <button class="btn-sm" onclick="cancelDigestEdit()">Cancel</button>
+    </div>
+    <input type="hidden" id="digest-edit-id">
+    <div class="field-group">
+      <div class="field-label">TITLE</div>
+      <input type="text" id="digest-edit-title" placeholder="Headline">
+    </div>
+    <div class="field-group">
+      <div class="field-label">DESCRIPTION <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(shown in feed)</span></div>
+      <textarea id="digest-edit-desc" rows="2" placeholder="One sentence summary…"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">BODY <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(HTML)</span></div>
+      <textarea id="digest-edit-content" rows="14" style="font-family:monospace;font-size:12px;line-height:1.5" placeholder="<p>…</p>"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn-primary" style="flex:1" onclick="saveDigestEdit()">SAVE CHANGES</button>
+      <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAndPublishDigest()">SAVE &amp; PUBLISH</button>
+    </div>
+    <div id="digest-edit-status" class="status-line"></div>
+  </div>
 
   <div id="digest-list"><div class="section-note">Loading…</div></div>
 
@@ -2368,12 +2394,48 @@ function renderDigestList() {
         <div class="hub-article-actions">
           ${status !== 'published' ? `<button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublish('${htmlEsc(p.id)}');renderDigestList()">Publish Now</button>` : ''}
           ${status === 'published' ? `<button class="btn-sm" onclick="quickUnpublish('${htmlEsc(p.id)}');renderDigestList()">Unpublish</button>` : ''}
+          <button class="btn-sm" onclick="openDigestEdit('${htmlEsc(p.id)}')">Edit</button>
           <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}');renderDigestList()">Delete</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
+
+function openDigestEdit(id) {
+  const p = hubNewsPosts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('digest-edit-id').value = p.id;
+  document.getElementById('digest-edit-title').value = p.title || '';
+  document.getElementById('digest-edit-desc').value = p.description || '';
+  document.getElementById('digest-edit-content').value = p.content || '';
+  document.getElementById('digest-edit-status').textContent = '';
+  document.getElementById('digest-edit-card').style.display = 'block';
+  document.getElementById('digest-edit-card').scrollIntoView({behavior: 'smooth'});
+}
+
+function cancelDigestEdit() {
+  document.getElementById('digest-edit-card').style.display = 'none';
+}
+
+async function saveDigestEdit(andPublish = false) {
+  const id = document.getElementById('digest-edit-id').value;
+  const idx = hubNewsPosts.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  hubNewsPosts[idx] = {
+    ...hubNewsPosts[idx],
+    title: document.getElementById('digest-edit-title').value.trim(),
+    description: document.getElementById('digest-edit-desc').value.trim(),
+    content: document.getElementById('digest-edit-content').value.trim(),
+    ...(andPublish ? {status: 'published', pubDate: hubNewsPosts[idx].pubDate || nowIso()} : {}),
+  };
+  document.getElementById('digest-edit-status').textContent = 'Saving…';
+  await saveHubNews(andPublish ? 'Publish digest: ' + hubNewsPosts[idx].title : 'Edit digest: ' + hubNewsPosts[idx].title);
+  document.getElementById('digest-edit-card').style.display = 'none';
+  renderDigestList();
+}
+
+function saveAndPublishDigest() { saveDigestEdit(true); }
 
 function editArticle(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
