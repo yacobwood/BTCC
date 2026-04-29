@@ -2235,7 +2235,7 @@ async function loadHubNews() {
       if (r.ok) {
         const meta = await r.json();
         hubNewsFileSha = meta.sha;
-        const data = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+        const data = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/\n/g, '')))));
         hubNewsPosts = data.posts || [];
       }
     } else {
