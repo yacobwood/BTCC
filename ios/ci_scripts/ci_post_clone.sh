@@ -11,11 +11,17 @@ fi
 brew install node cocoapods
 
 # Upgrade xcodeproj gem to support Xcode 26 project format (object version 70)
-# Must use the Ruby bundled with CocoaPods, not system Ruby
-COCOAPODS_GEM=$(find /usr/local/Cellar/cocoapods -name "gem" -path "*/bin/gem" | head -1)
-echo "Using gem at: $COCOAPODS_GEM"
-$COCOAPODS_GEM install xcodeproj
-echo "xcodeproj version after install: $($COCOAPODS_GEM list xcodeproj)"
+echo "pod path: $(which pod)"
+echo "ruby path: $(which ruby)"
+POD_PATH=$(which pod)
+COCOAPODS_RUBY=$(ls -la $POD_PATH | awk '{print $NF}' | xargs dirname | xargs dirname)/libexec/bin/ruby
+echo "CocoaPods ruby: $COCOAPODS_RUBY"
+if [ -f "$COCOAPODS_RUBY" ]; then
+  $COCOAPODS_RUBY -S gem install xcodeproj
+else
+  echo "Falling back to brew ruby"
+  $(brew --prefix ruby)/bin/gem install xcodeproj
+fi
 
 # Install JS dependencies (required before pod install for React Native)
 cd "$CI_PRIMARY_REPOSITORY_PATH"
