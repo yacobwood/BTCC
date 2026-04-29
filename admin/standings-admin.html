@@ -2225,13 +2225,26 @@ let hubNewsPosts = [], hubNewsFileSha = null;
 
 async function loadHubNews() {
   try {
-    const r = await fetch(HUB_NEWS_RAW + '?t=' + Date.now());
-    if (r.ok) {
-      const data = await r.json();
-      hubNewsPosts = data.posts || [];
-      document.getElementById('hubnews-banner-text').textContent = `Loaded from GitHub · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
-      document.getElementById('hubnews-banner').classList.add('visible');
+    const tok = getToken();
+    if (tok) {
+      // Contents API is always live — no CDN lag — and returns the SHA we need for saves
+      const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers:{Authorization:'token '+tok}});
+      if (r.ok) {
+        const meta = await r.json();
+        hubNewsFileSha = meta.sha;
+        const data = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+        hubNewsPosts = data.posts || [];
+      }
+    } else {
+      // No token yet — raw URL as fallback (may be CDN-cached)
+      const r = await fetch(HUB_NEWS_RAW + '?t=' + Date.now());
+      if (r.ok) {
+        const data = await r.json();
+        hubNewsPosts = data.posts || [];
+      }
     }
+    document.getElementById('hubnews-banner-text').textContent = `Loaded from GitHub · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
+    document.getElementById('hubnews-banner').classList.add('visible');
   } catch(e) {}
   renderHubNewsList();
   renderDigestList();
