@@ -125,7 +125,7 @@ async function main() {
 
   // ── Fetch current hub_news.json ───────────────────────────
   console.log('── Fetching hub_news.json from GitHub ───────────────\n');
-  const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
+  const fileRes = await fetch(GITHUB_API, {headers: {...ghHeaders, 'Cache-Control': 'no-cache'}});
   if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
   const fileData = await fileRes.json();
   const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
