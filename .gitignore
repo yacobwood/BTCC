@@ -4,7 +4,9 @@
 
 # Local secrets — never commit
 .env
+.env.local
 functions/.env
+functions/.env.local
 
 # Xcode
 #

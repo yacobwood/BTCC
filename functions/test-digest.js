@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Load .env from the same directory as this script
-const envPath = path.join(__dirname, '.env');
+const envPath = path.join(__dirname, '.env.local');
 if (fs.existsSync(envPath)) {
   fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
     const [key, ...rest] = line.split('=');
