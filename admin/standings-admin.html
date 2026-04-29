@@ -2228,27 +2228,22 @@ let hubNewsPosts = [], hubNewsFileSha = null;
 
 async function loadHubNews() {
   try {
+    // Contents API is always live (no CDN lag) and works on public repos without auth.
+    // Add token if available to avoid rate limiting.
     const tok = getToken();
-    if (tok) {
-      // Contents API is always live — no CDN lag — and returns the SHA we need for saves
-      const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers:{Authorization:'token '+tok}});
-      if (r.ok) {
-        const meta = await r.json();
-        hubNewsFileSha = meta.sha;
-        const data = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/\n/g, '')))));
-        hubNewsPosts = data.posts || [];
-      }
-    } else {
-      // No token yet — raw URL as fallback (may be CDN-cached)
-      const r = await fetch(HUB_NEWS_RAW + '?t=' + Date.now());
-      if (r.ok) {
-        const data = await r.json();
-        hubNewsPosts = data.posts || [];
-      }
-    }
+    const headers = tok ? {Authorization:'token '+tok} : {};
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers});
+    if (!r.ok) throw new Error(`GitHub ${r.status}`);
+    const meta = await r.json();
+    hubNewsFileSha = meta.sha;
+    // Robust UTF-8 decode: base64 → bytes → TextDecoder
+    const bytes = Uint8Array.from(atob(meta.content.replace(/\s/g, '')), c => c.charCodeAt(0));
+    const text = new TextDecoder('utf-8').decode(bytes);
+    const data = JSON.parse(text);
+    hubNewsPosts = data.posts || [];
     document.getElementById('hubnews-banner-text').textContent = `Loaded from GitHub · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
     document.getElementById('hubnews-banner').classList.add('visible');
-  } catch(e) {}
+  } catch(e) { console.error('loadHubNews failed:', e); }
   renderHubNewsList();
   renderDigestList();
   renderCategorySelect('');
