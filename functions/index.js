@@ -322,209 +322,229 @@ exports.sendSessionNotifications = onSchedule(
   },
 );
 
-// ── Weekly news digest ────────────────────────────────────────
-// Every Monday at 8am UK time: scrapes Reddit, BTCC.net, Autosport, and
-// Motorsport.com, uses Claude to write a short article, then commits it
-// as a draft post to hub_news.json via the GitHub API.
+// ── Shared digest logic ───────────────────────────────────────
+async function runDigest(label) {
+  const messaging = getMessaging();
+  const today = getUKDateString(new Date());
+  const postId = `digest-${today}`;
+
+  const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/weekly-digest-hero.png';
+  const GITHUB_API = 'https://api.github.com/repos/yacobwood/BTCC/contents/data/hub_news.json';
+  const ghHeaders = {
+    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+
+  // ── Fetch current hub_news.json from GitHub ─────────────────
+  const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
+  if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
+  const fileData = await fileRes.json();
+  const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
+
+  // Skip if today's digest already exists (retry guard)
+  if (hubNews.posts.some(p => p.id === postId)) {
+    console.log(`${label}: ${postId} already exists, skipping`);
+    return;
+  }
+
+  const sources = [];
+
+  // ── Reddit r/BTCC ───────────────────────────────────────────
+  try {
+    const res = await fetch(
+      'https://www.reddit.com/r/BTCC/top.json?t=week&limit=15',
+      {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
+    );
+    const data = await res.json();
+    for (const child of data?.data?.children ?? []) {
+      const p = child.data;
+      if (p.score < 3) continue;
+      sources.push({
+        source: 'Reddit r/BTCC',
+        title: p.title,
+        text: p.selftext?.slice(0, 500) || '',
+        url: `https://reddit.com${p.permalink}`,
+      });
+    }
+  } catch (e) {
+    console.error('Reddit scrape failed:', e);
+  }
+
+  // ── BTCC.net WordPress API ──────────────────────────────────
+  try {
+    const posts = await fetch(
+      'https://www.btcc.net/wp-json/wp/v2/posts?per_page=5&_fields=title,excerpt,link&orderby=date',
+    ).then(r => r.json());
+    for (const post of posts) {
+      const excerpt = post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? '';
+      sources.push({
+        source: 'BTCC.net',
+        title: post.title?.rendered ?? '',
+        text: excerpt.slice(0, 400),
+        url: post.link,
+      });
+    }
+  } catch (e) {
+    console.error('BTCC.net scrape failed:', e);
+  }
+
+  // ── RSS helper ──────────────────────────────────────────────
+  async function scrapeRss(url, sourceName) {
+    try {
+      const text = await fetch(url).then(r => r.text());
+      const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 5);
+      for (const item of items) {
+        const title =
+          (item[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+            item[1].match(/<title>(.*?)<\/title>/))?.[1] ?? '';
+        const desc =
+          (item[1].match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) ||
+            item[1].match(/<description>(.*?)<\/description>/))?.[1]
+            ?.replace(/<[^>]+>/g, '')
+            .trim() ?? '';
+        const link =
+          (item[1].match(/<link>(.*?)<\/link>/) ||
+            item[1].match(/<link\s[^>]+href="([^"]+)"/))?.[1]?.trim() ?? '';
+        if (title) {
+          sources.push({source: sourceName, title, text: desc.slice(0, 400), url: link});
+        }
+      }
+    } catch (e) {
+      console.error(`${sourceName} RSS failed:`, e);
+    }
+  }
+
+  await Promise.all([
+    scrapeRss('https://www.autosport.com/rss/btcc/news/', 'Autosport'),
+    scrapeRss('https://www.motorsport.com/rss/btcc/news/', 'Motorsport.com'),
+  ]);
+
+  if (sources.length === 0) {
+    console.log(`${label}: no sources found, skipping`);
+    return;
+  }
+
+  // ── Ask Claude to write the article ────────────────────────
+  const Anthropic = require('@anthropic-ai/sdk');
+  const client = new Anthropic.default({apiKey: process.env.ANTHROPIC_API_KEY});
+
+  const sourceBlock = sources
+    .map((s, i) => `[${i + 1}] ${s.source}: "${s.title}"\n${s.text || '(no excerpt)'}`)
+    .join('\n\n');
+
+  const message = await client.messages.create({
+    model: 'claude-opus-4-6',
+    max_tokens: 1200,
+    messages: [
+      {
+        role: 'user',
+        content:
+          `You are writing a BTCC news digest for the BTCC Hub fan app. ` +
+          `Based on the sources below from the past week, write a concise, ` +
+          `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
+          `newsworthy items. Write the body in HTML using only <p> tags — no ` +
+          `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
+          `Style rules you must follow:\n` +
+          `- Never use a comma before "and"\n` +
+          `- Never use em dashes (— or –)\n` +
+          `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
+          hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
+          `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
+          `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
+          `Sources:\n${sourceBlock}`,
+      },
+    ],
+  });
+
+  let title = `BTCC Digest — ${today}`;
+  let content = '<p>No content generated.</p>';
+  let description = '';
+  try {
+    const parsed = JSON.parse(message.content[0].text);
+    title = parsed.title || title;
+    content = parsed.content || content;
+    description = parsed.description || '';
+  } catch (e) {
+    console.error(`${label}: failed to parse Claude response:`, e);
+    content = `<p>${message.content[0].text}</p>`;
+  }
+
+  // ── Prepend draft to hub_news.json and commit ───────────────
+  const newPost = {
+    id: postId,
+    title,
+    description,
+    content,
+    imageUrl: DIGEST_HERO,
+    pubDate: `${today}T08:00:00`,
+    category: 'Weekly Digest',
+    source: 'btcc-hub',
+    status: 'draft',
+  };
+
+  hubNews.posts.unshift(newPost);
+
+  const updatedContent = Buffer.from(JSON.stringify(hubNews, null, 2)).toString('base64');
+  const putRes = await fetch(GITHUB_API, {
+    method: 'PUT',
+    headers: {...ghHeaders, 'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      message: `${label} digest draft — ${today}`,
+      content: updatedContent,
+      sha: fileData.sha,
+    }),
+  });
+
+  if (!putRes.ok) {
+    const err = await putRes.text();
+    throw new Error(`GitHub PUT failed: ${putRes.status} ${err}`);
+  }
+
+  // ── Notify admin ────────────────────────────────────────────
+  try {
+    await messaging.send({
+      topic: 'digest_ready',
+      notification: {title: 'Weekly Digest Ready', body: title},
+      android: {notification: {channelId: 'news'}},
+      apns: {payload: {aps: {sound: 'default'}}},
+      data: {type: 'hub', id: postId, channel: 'news', title},
+    });
+  } catch (e) {
+    console.error(`${label}: notification failed:`, e);
+  }
+
+  console.log(`${label}: digest committed for ${today}: ${title}`);
+}
+
+// ── Weekly digest — every Monday at 8am ──────────────────────
 exports.weeklyDigest = onSchedule(
   {
     schedule: '0 8 * * 1',
     timeZone: 'Europe/London',
     secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
   },
+  () => runDigest('weeklyDigest'),
+);
+
+// ── Race weekend preview digest — every Thursday at 8am ──────
+// Only runs if there is a BTCC round starting that Saturday.
+exports.raceWeekendDigest = onSchedule(
+  {
+    schedule: '0 8 * * 4',
+    timeZone: 'Europe/London',
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
+  },
   async () => {
-    const messaging = getMessaging();
-    const today = getUKDateString(new Date());
-    const postId = `digest-${today}`;
-
-    const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/weekly-digest-hero.png';
-    const GITHUB_API = 'https://api.github.com/repos/yacobwood/BTCC/contents/data/hub_news.json';
-    const ghHeaders = {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    };
-
-    // ── Fetch current hub_news.json from GitHub ───────────────
-    const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
-    if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
-    const fileData = await fileRes.json();
-    const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
-
-    // Skip if this week's digest already exists (retry guard)
-    if (hubNews.posts.some(p => p.id === postId)) {
-      console.log(`weeklyDigest: ${postId} already exists, skipping`);
+    const now = new Date();
+    const saturdayStr = getUKDateString(now, 2); // Thursday + 2 = Saturday
+    const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+    const isRaceWeekend = calendar.rounds.some(r => r.startDate === saturdayStr);
+    if (!isRaceWeekend) {
+      console.log(`raceWeekendDigest: no round on ${saturdayStr}, skipping`);
       return;
     }
-
-    const sources = [];
-
-    // ── Reddit r/BTCC ─────────────────────────────────────────
-    try {
-      const res = await fetch(
-        'https://www.reddit.com/r/BTCC/top.json?t=week&limit=15',
-        {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
-      );
-      const data = await res.json();
-      for (const child of data?.data?.children ?? []) {
-        const p = child.data;
-        if (p.score < 3) continue;
-        sources.push({
-          source: 'Reddit r/BTCC',
-          title: p.title,
-          text: p.selftext?.slice(0, 500) || '',
-          url: `https://reddit.com${p.permalink}`,
-        });
-      }
-    } catch (e) {
-      console.error('Reddit scrape failed:', e);
-    }
-
-    // ── BTCC.net WordPress API ────────────────────────────────
-    try {
-      const posts = await fetch(
-        'https://www.btcc.net/wp-json/wp/v2/posts?per_page=5&_fields=title,excerpt,link&orderby=date',
-      ).then(r => r.json());
-      for (const post of posts) {
-        const excerpt = post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? '';
-        sources.push({
-          source: 'BTCC.net',
-          title: post.title?.rendered ?? '',
-          text: excerpt.slice(0, 400),
-          url: post.link,
-        });
-      }
-    } catch (e) {
-      console.error('BTCC.net scrape failed:', e);
-    }
-
-    // ── RSS helper ────────────────────────────────────────────
-    async function scrapeRss(url, sourceName) {
-      try {
-        const text = await fetch(url).then(r => r.text());
-        const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 5);
-        for (const item of items) {
-          const title =
-            (item[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
-              item[1].match(/<title>(.*?)<\/title>/))?.[1] ?? '';
-          const desc =
-            (item[1].match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) ||
-              item[1].match(/<description>(.*?)<\/description>/))?.[1]
-              ?.replace(/<[^>]+>/g, '')
-              .trim() ?? '';
-          const link =
-            (item[1].match(/<link>(.*?)<\/link>/) ||
-              item[1].match(/<link\s[^>]+href="([^"]+)"/))?.[1]?.trim() ?? '';
-          if (title) {
-            sources.push({source: sourceName, title, text: desc.slice(0, 400), url: link});
-          }
-        }
-      } catch (e) {
-        console.error(`${sourceName} RSS failed:`, e);
-      }
-    }
-
-    // ── Autosport & Motorsport.com ────────────────────────────
-    await Promise.all([
-      scrapeRss('https://www.autosport.com/rss/btcc/news/', 'Autosport'),
-      scrapeRss('https://www.motorsport.com/rss/btcc/news/', 'Motorsport.com'),
-    ]);
-
-    if (sources.length === 0) {
-      console.log('weeklyDigest: no sources found, skipping');
-      return;
-    }
-
-    // ── Ask Claude to write the article ──────────────────────
-    const Anthropic = require('@anthropic-ai/sdk');
-    const client = new Anthropic.default({apiKey: process.env.ANTHROPIC_API_KEY});
-
-    const sourceBlock = sources
-      .map((s, i) => `[${i + 1}] ${s.source}: "${s.title}"\n${s.text || '(no excerpt)'}`)
-      .join('\n\n');
-
-    const message = await client.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 1200,
-      messages: [
-        {
-          role: 'user',
-          content:
-            `You are writing a weekly BTCC news digest for the BTCC Hub fan app. ` +
-            `Based on the sources below from the past week, write a concise, ` +
-            `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
-            `newsworthy items. Write the body in HTML using only <p> tags — no ` +
-            `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
-            `Style rules you must follow:\n` +
-            `- Never use a comma before "and"\n` +
-            `- Never use em dashes (— or –)\n` +
-            `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
-            hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
-            `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
-            `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
-            `Sources:\n${sourceBlock}`,
-        },
-      ],
-    });
-
-    let title = `BTCC Weekly Digest — ${today}`;
-    let content = '<p>No content generated.</p>';
-    let description = '';
-    try {
-      const parsed = JSON.parse(message.content[0].text);
-      title = parsed.title || title;
-      content = parsed.content || content;
-      description = parsed.description || '';
-    } catch (e) {
-      console.error('weeklyDigest: failed to parse Claude response:', e);
-      content = `<p>${message.content[0].text}</p>`;
-    }
-
-    // ── Prepend draft to hub_news.json and commit ─────────────
-    const newPost = {
-      id: postId,
-      title,
-      description,
-      content,
-      imageUrl: DIGEST_HERO,
-      pubDate: `${today}T08:00:00`,
-      category: 'Weekly Digest',
-      source: 'btcc-hub',
-      status: 'draft',
-    };
-
-    hubNews.posts.unshift(newPost);
-
-    const updatedContent = Buffer.from(JSON.stringify(hubNews, null, 2)).toString('base64');
-    const putRes = await fetch(GITHUB_API, {
-      method: 'PUT',
-      headers: {...ghHeaders, 'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        message: `Weekly digest draft — ${today}`,
-        content: updatedContent,
-        sha: fileData.sha,
-      }),
-    });
-
-    if (!putRes.ok) {
-      const err = await putRes.text();
-      throw new Error(`GitHub PUT failed: ${putRes.status} ${err}`);
-    }
-
-    // ── Notify admin ──────────────────────────────────────────
-    try {
-      await messaging.send({
-        topic: 'digest_ready',
-        notification: {title: 'Weekly Digest Ready', body: title},
-        android: {notification: {channelId: 'news'}},
-        apns: {payload: {aps: {sound: 'default'}}},
-        data: {type: 'hub', id: postId, channel: 'news', title},
-      });
-    } catch (e) {
-      console.error('weeklyDigest notification failed:', e);
-    }
-
-    console.log(`weeklyDigest committed for ${today}: ${title}`);
+    await runDigest('raceWeekendDigest');
   },
 );
 
