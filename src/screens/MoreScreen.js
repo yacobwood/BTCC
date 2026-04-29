@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Linking,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -94,7 +95,7 @@ export default function MoreScreen({navigation}) {
         {/* Support */}
         <Text style={styles.sectionTitle}>SUPPORT</Text>
         <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
-        <MoreRow label="Buy me a coffee" icon="local-cafe" onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://buymeacoffee.com/btcchub'); }} />
+        {Platform.OS !== 'ios' && <MoreRow label="Buy me a coffee" icon="local-cafe" onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://buymeacoffee.com/btcchub'); }} />}
       </ScrollView>
     </View>
   );
