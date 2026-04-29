@@ -1,18 +1,30 @@
 /**
  * Full end-to-end test — scrapes, asks Claude, commits draft to hub_news.json.
  *
- * Run with:
- *   ANTHROPIC_API_KEY=sk-ant-... GITHUB_TOKEN=ghp_... node test-digest.js
+ * Run with:  node test-digest.js
+ * Keys are loaded from functions/.env automatically.
  */
 
 const Anthropic = require('@anthropic-ai/sdk');
+const fs = require('fs');
+const path = require('path');
+
+// Load .env from the same directory as this script
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const [key, ...rest] = line.split('=');
+    if (key && rest.length) process.env[key.trim()] = rest.join('=').trim();
+  });
+}
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
 const GH_TOKEN = process.env.GITHUB_TOKEN;
 
 if (!API_KEY || !GH_TOKEN) {
-  console.error('Both env vars are required:');
-  console.error('  ANTHROPIC_API_KEY=sk-ant-...  GITHUB_TOKEN=ghp_...  node test-digest.js');
+  console.error('Missing keys. Create functions/.env with:');
+  console.error('  ANTHROPIC_API_KEY=sk-ant-...');
+  console.error('  GITHUB_TOKEN=ghp_...');
   process.exit(1);
 }
 
