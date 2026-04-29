@@ -1,18 +1,28 @@
 /**
- * Run with:  ANTHROPIC_API_KEY=sk-ant-... node test-digest.js
+ * Full end-to-end test — scrapes, asks Claude, commits draft to hub_news.json.
  *
- * Runs the full dailyDigest pipeline (scrape → Claude → output)
- * without touching Firebase at all. Safe to run any time.
+ * Run with:
+ *   ANTHROPIC_API_KEY=sk-ant-... GITHUB_TOKEN=ghp_... node test-digest.js
  */
 
 const Anthropic = require('@anthropic-ai/sdk');
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
-if (!API_KEY) {
-  console.error('Set ANTHROPIC_API_KEY env var first:');
-  console.error('  ANTHROPIC_API_KEY=sk-ant-... node test-digest.js');
+const GH_TOKEN = process.env.GITHUB_TOKEN;
+
+if (!API_KEY || !GH_TOKEN) {
+  console.error('Both env vars are required:');
+  console.error('  ANTHROPIC_API_KEY=sk-ant-...  GITHUB_TOKEN=ghp_...  node test-digest.js');
   process.exit(1);
 }
+
+const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/weekly-digest-hero.png';
+const GITHUB_API = 'https://api.github.com/repos/yacobwood/BTCC/contents/data/hub_news.json';
+const ghHeaders = {
+  Authorization: `Bearer ${GH_TOKEN}`,
+  Accept: 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+};
 
 async function scrapeRss(url, sourceName) {
   const results = [];
@@ -41,14 +51,29 @@ async function scrapeRss(url, sourceName) {
 }
 
 async function main() {
-  console.log('\n── Scraping sources ─────────────────────────────────\n');
+  const today = new Date().toISOString().slice(0, 10);
+  const postId = `digest-${today}`;
 
+  // ── Fetch current hub_news.json ───────────────────────────
+  console.log('\n── Fetching hub_news.json from GitHub ───────────────\n');
+  const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
+  if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
+  const fileData = await fileRes.json();
+  const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
+
+  if (hubNews.posts.some(p => p.id === postId)) {
+    console.log(`Draft ${postId} already exists in hub_news.json — nothing to do.`);
+    return;
+  }
+  console.log(`  ✓ Fetched (${hubNews.posts.length} existing posts, sha: ${fileData.sha.slice(0, 7)})`);
+
+  // ── Scrape sources ────────────────────────────────────────
+  console.log('\n── Scraping sources ─────────────────────────────────\n');
   const sources = [];
 
-  // Reddit r/BTCC
   try {
     const res = await fetch(
-      'https://www.reddit.com/r/BTCC/top.json?t=day&limit=15',
+      'https://www.reddit.com/r/BTCC/top.json?t=week&limit=15',
       {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
     );
     const data = await res.json();
@@ -62,7 +87,6 @@ async function main() {
     console.log(`  ✗ Reddit r/BTCC: ${e.message}`);
   }
 
-  // BTCC.net
   try {
     const posts = await fetch(
       'https://www.btcc.net/wp-json/wp/v2/posts?per_page=5&_fields=title,excerpt,link&orderby=date',
@@ -76,7 +100,6 @@ async function main() {
     console.log(`  ✗ BTCC.net: ${e.message}`);
   }
 
-  // RSS feeds
   const rssResults = await Promise.all([
     scrapeRss('https://www.autosport.com/rss/btcc/news/', 'Autosport'),
     scrapeRss('https://www.motorsport.com/rss/btcc/news/', 'Motorsport.com'),
@@ -90,15 +113,12 @@ async function main() {
     return;
   }
 
-  // Print what we collected
   sources.forEach((s, i) => {
-    console.log(`[${i + 1}] ${s.source}`);
-    console.log(`    ${s.title}`);
-    if (s.text) console.log(`    ${s.text.slice(0, 120)}…`);
-    console.log();
+    console.log(`[${i + 1}] ${s.source}: ${s.title}`);
   });
 
-  console.log('── Asking Claude to write the article ───────────────\n');
+  // ── Ask Claude ────────────────────────────────────────────
+  console.log('\n── Asking Claude to write the article ───────────────\n');
 
   const sourceBlock = sources
     .map((s, i) => `[${i + 1}] ${s.source}: "${s.title}"\n${s.text || '(no excerpt)'}`)
@@ -108,47 +128,77 @@ async function main() {
   const message = await client.messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 1200,
-    messages: [
-      {
-        role: 'user',
-        content:
-          `You are writing a daily BTCC news digest for the BTCC Hub fan app. ` +
-          `Based on the sources below from the past 24 hours, write a concise, ` +
-          `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
-          `newsworthy items. Write the body in HTML using only <p> tags — no ` +
-          `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
-          `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
-          `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
-          `Sources:\n${sourceBlock}`,
-      },
-    ],
+    messages: [{
+      role: 'user',
+      content:
+        `You are writing a weekly BTCC news digest for the BTCC Hub fan app. ` +
+        `Based on the sources below from the past week, write a concise, ` +
+        `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
+        `newsworthy items. Write the body in HTML using only <p> tags — no ` +
+        `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
+        `Style rules you must follow:\n` +
+        `- Never use a comma before "and"\n` +
+        `- Never use em dashes (— or –)\n` +
+        `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
+        hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
+        `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
+        `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
+        `Sources:\n${sourceBlock}`,
+    }],
   });
 
-  console.log('── Result ───────────────────────────────────────────\n');
-
+  let title = `BTCC Weekly Digest — ${today}`;
+  let content = '<p>No content generated.</p>';
+  let description = '';
   try {
     const parsed = JSON.parse(message.content[0].text);
-    console.log('TITLE:');
-    console.log(' ', parsed.title);
-    console.log('\nDESCRIPTION:');
-    console.log(' ', parsed.description);
-    console.log('\nCONTENT (HTML):');
-    console.log(parsed.content);
-    const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/daily-digest-hero.png';
-    console.log('\n── Firestore document preview ───────────────────────\n');
-    console.log(JSON.stringify({
-      title: parsed.title,
-      description: parsed.description,
-      imageUrl: DIGEST_HERO,
-      status: 'draft',
-      pubDate: new Date().toISOString().slice(0, 10) + 'T08:00:00',
-      content: parsed.content,
-      sources: sources.map(s => ({source: s.source, title: s.title, url: s.url})),
-    }, null, 2));
+    title = parsed.title || title;
+    content = parsed.content || content;
+    description = parsed.description || '';
   } catch (e) {
-    console.log('Claude returned (unparsed):');
-    console.log(message.content[0].text);
+    console.error('Failed to parse Claude response:', e);
+    content = `<p>${message.content[0].text}</p>`;
   }
+
+  console.log('TITLE:   ', title);
+  console.log('SUMMARY: ', description);
+  console.log('\nCONTENT:\n', content);
+
+  // ── Commit to hub_news.json ───────────────────────────────
+  console.log('\n── Committing draft to hub_news.json ────────────────\n');
+
+  const newPost = {
+    id: postId,
+    title,
+    description,
+    content,
+    imageUrl: DIGEST_HERO,
+    pubDate: `${today}T08:00:00`,
+    category: 'Weekly Digest',
+    source: 'btcc-hub',
+    status: 'draft',
+  };
+
+  hubNews.posts.unshift(newPost);
+
+  const updatedContent = Buffer.from(JSON.stringify(hubNews, null, 2)).toString('base64');
+  const putRes = await fetch(GITHUB_API, {
+    method: 'PUT',
+    headers: {...ghHeaders, 'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      message: `Weekly digest draft — ${today}`,
+      content: updatedContent,
+      sha: fileData.sha,
+    }),
+  });
+
+  if (!putRes.ok) {
+    const err = await putRes.text();
+    throw new Error(`GitHub PUT failed: ${putRes.status} ${err}`);
+  }
+
+  console.log(`  ✓ Draft committed as "${postId}"`);
+  console.log(`\n  View in admin: https://yacobwood.github.io/BTCC/admin/standings-admin.html`);
 }
 
 main().catch(console.error);

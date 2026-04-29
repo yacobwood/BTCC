@@ -455,6 +455,11 @@ exports.weeklyDigest = onSchedule(
             `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
             `newsworthy items. Write the body in HTML using only <p> tags — no ` +
             `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
+            `Style rules you must follow:\n` +
+            `- Never use a comma before "and"\n` +
+            `- Never use em dashes (— or –)\n` +
+            `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
+            hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
             `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
             `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
             `Sources:\n${sourceBlock}`,
