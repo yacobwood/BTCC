@@ -20,6 +20,7 @@ on:
             Standings:  {"type":"standings"}
             Results:    {"type":"results","round":"1","year":"2026"}
             News:       {"type":"news","slug":"article-slug"}
+            Hub:        {"type":"hub"}
             Roadmap:    {"type":"roadmap"}
         required: false
         default: '{}'
@@ -52,24 +53,25 @@ jobs:
           if (body) data.body = body;
           if (imageUrl) data.imageUrl = imageUrl;
 
-          // Reach any user subscribed to at least one notification topic
-          const condition = [
-            'race_alerts', 'news_alerts', 'results_alerts',
-            'qualifying_alerts', 'fp_alerts', 'weekend_preview',
-            'standings_update', 'podcast_alerts',
-          ].map(t => `'${t}' in topics`).join(' || ');
-
-          const db = admin.firestore();
-
-          // No top-level notification block — Android handles via Notifee (full-colour icon)
-          // iOS gets the alert via apns.aps.alert
-          admin.messaging().send({
-            condition,
+          const msg = {
             android: { priority: 'high' },
             apns: { payload: { aps: { alert: { title: process.env.TITLE, body }, sound: 'default' } } },
             data,
-          }).then(async r => {
-            console.log('Sent:', r);
+          };
+
+          // FCM conditions support max 5 topics — split across two sends to reach all subscribers.
+          // Topics match the LEAF_TOPICS defined in src/store/settings.js.
+          const conditions = [
+            "'news_alerts' in topics || 'weekend_preview' in topics || 'standings_update' in topics || 'podcast_alerts' in topics || 'pre_fp' in topics",
+            "'pre_qualifying' in topics || 'pre_qrace' in topics || 'pre_race1' in topics || 'results_race1' in topics || 'results_qualifying' in topics",
+          ];
+
+          const db = admin.firestore();
+
+          Promise.all(
+            conditions.map(condition => admin.messaging().send({ ...msg, condition }))
+          ).then(async results => {
+            console.log('Sent:', results);
             await db.collection('push_history').add({
               title: process.env.TITLE,
               body,
