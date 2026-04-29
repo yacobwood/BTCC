@@ -463,6 +463,7 @@ async function runDigest(label, promptIntro) {
           `- Use specific names, lap times, positions and details rather than vague generalities\n` +
           `- Do not use full car model names (e.g. "Ford Focus Titanium", "BMW 330i M Sport") — just say "car" or refer to the team/manufacturer only when the make is genuinely relevant\n` +
           `- Express opinions and reactions — this is a fan writing for fans, not a wire report\n` +
+          `- The app is called "BTCC Hub" — never refer to it as "BTCC Fan Hub"\n` +
           `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
           hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
           `- Do not repeat a topic, story or driver storyline from a previous digest unless genuinely new information has emerged. If revisiting a recurring story, acknowledge only what has changed and move on:\n` +
