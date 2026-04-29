@@ -151,7 +151,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{flex: 1, backgroundColor: '#080912'}}>
     <FeatureFlagsProvider>
     <FavouriteDriverProvider>
       <UnitsProvider>

@@ -493,7 +493,7 @@ export default function ArticleScreen({route, navigation}) {
   const insets = useSafeAreaInsets();
   const topPad = insets.top || 44;
 
-  const articleSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null);
+  const articleSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null) || articleParam?.id || null;
 
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState(null);
@@ -502,7 +502,7 @@ export default function ArticleScreen({route, navigation}) {
 
   useEffect(() => {
     const needsFetch = !validParam;
-    const resolvedSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null);
+    const resolvedSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null) || articleParam?.id || null;
     if (needsFetch && resolvedSlug) {
       fetchArticleBySlug(resolvedSlug).then(raw => {
         if (raw) setArticle(parseArticle(raw));
