@@ -2555,19 +2555,24 @@ async function publishArticle() {
   await saveHubNews(editId ? 'Update hub article' : 'Add hub article: ' + title);
 }
 
+function showHubNewsError(msg) {
+  document.getElementById('hubnews-status').innerHTML = `<span class="err">${msg}</span>`;
+  document.getElementById('digest-edit-status').innerHTML = `<span class="err">${msg}</span>`;
+}
+
 async function saveHubNews(commitMessage) {
   const tok = getToken();
-  if (!tok) { document.getElementById('hubnews-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
+  if (!tok) { showHubNewsError('Save your GitHub token first (Standings tab).'); return; }
   const btn = document.getElementById('hn-publish-btn');
   btn.disabled = true; btn.textContent = 'SAVING…';
   document.getElementById('hubnews-status').textContent = '';
   const content = JSON.stringify({posts: hubNewsPosts}, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
-    if (!hubNewsFileSha) {
-      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers:{Authorization:'token '+tok}});
-      if (meta.ok) hubNewsFileSha = (await meta.json()).sha;
-    }
+    // Always fetch the latest SHA to avoid conflicts when Cloud Functions have committed since page load
+    const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers:{Authorization:'token '+tok}});
+    if (meta.ok) hubNewsFileSha = (await meta.json()).sha;
+
     const body = {message: commitMessage, content: encoded};
     if (hubNewsFileSha) body.sha = hubNewsFileSha;
     const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
@@ -2577,8 +2582,8 @@ async function saveHubNews(commitMessage) {
       document.getElementById('hubnews-banner-text').textContent = `Saved · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
       document.getElementById('hubnews-banner').classList.add('visible');
       cancelEdit(); renderHubNewsList(); renderDigestList(); updateDashNews();
-    } else { const e = await r.json(); document.getElementById('hubnews-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
-  } catch(e) { document.getElementById('hubnews-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
+    } else { const e = await r.json(); showHubNewsError(`GitHub error: ${e.message}`); }
+  } catch(e) { showHubNewsError(`Network error: ${e.message}`); }
   btn.disabled = false; btn.textContent = document.getElementById('hn-edit-id').value ? 'SAVE CHANGES' : 'PUBLISH ARTICLE';
 }
 
