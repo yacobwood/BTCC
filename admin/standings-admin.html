@@ -1410,8 +1410,12 @@ function switchTab(name, el) {
   }
   if (name === 'digest' && !window._digestLoaded) {
     window._digestLoaded = true;
-    loadHubNews(); // digest uses same hubNewsPosts data
-    renderDigestList();
+    if (!window._hubnewsLoaded) {
+      window._hubnewsLoaded = true;
+      loadHubNews();
+    } else {
+      renderDigestList();
+    }
   }
   if (name === 'dashboard') refreshDashboard();
 }
@@ -2230,6 +2234,7 @@ async function loadHubNews() {
     }
   } catch(e) {}
   renderHubNewsList();
+  renderDigestList();
   renderCategorySelect('');
   updateDashNews();
   document.getElementById('hn-pubdate').value = nowIso();
