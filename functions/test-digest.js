@@ -1,7 +1,10 @@
 /**
  * Full end-to-end test — scrapes, asks Claude, commits draft to hub_news.json.
  *
- * Run with:  node test-digest.js
+ * Run with:
+ *   node test-digest.js monday     ← weekly round-up
+ *   node test-digest.js thursday   ← race weekend preview
+ *
  * Keys are loaded from functions/.env automatically.
  */
 
@@ -28,8 +31,17 @@ if (!API_KEY || !GH_TOKEN) {
   process.exit(1);
 }
 
+const mode = process.argv[2];
+if (!mode || !['monday', 'thursday'].includes(mode)) {
+  console.error('Usage:');
+  console.error('  node test-digest.js monday     ← weekly round-up');
+  console.error('  node test-digest.js thursday   ← race weekend preview');
+  process.exit(1);
+}
+
 const DIGEST_HERO = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/digest/weekly-digest-hero.png';
 const GITHUB_API = 'https://api.github.com/repos/yacobwood/BTCC/contents/data/hub_news.json';
+const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const ghHeaders = {
   Authorization: `Bearer ${GH_TOKEN}`,
   Accept: 'application/vnd.github+json',
@@ -66,8 +78,47 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10);
   const postId = `digest-${today}`;
 
+  // ── Build prompt intro based on mode ─────────────────────
+  let promptIntro;
+  if (mode === 'monday') {
+    console.log('\n  Mode: Monday round-up\n');
+    promptIntro =
+      `You are writing a weekly round-up for the BTCC Hub fan app. ` +
+      `Based on the sources below, write a concise engaging article (3–5 paragraphs) ` +
+      `looking back at everything that happened in BTCC over the past 7 days — ` +
+      `race results, driver news, team updates, fan reaction and anything else noteworthy. ` +
+      `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+      `Do not include the title in the body.\n\n`;
+  } else {
+    // Thursday — find next race weekend from calendar
+    const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+    // Find the next upcoming round
+    const upcoming = calendar.rounds
+      .filter(r => r.startDate >= today)
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
+    if (upcoming) {
+      console.log(`\n  Mode: Thursday preview — ${upcoming.venue} (${upcoming.startDate})\n`);
+      promptIntro =
+        `You are writing a race weekend preview for the BTCC Hub fan app. ` +
+        `This weekend the BTCC heads to ${upcoming.venue} (${upcoming.location}). ` +
+        `Based on the sources below, write a concise exciting article (3–5 paragraphs) ` +
+        `building anticipation for the weekend ahead — who to watch, storylines going in, ` +
+        `championship picture, what makes this venue special, and anything fans should know. ` +
+        `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+        `Do not include the title in the body.\n\n`;
+    } else {
+      console.log('\n  Mode: Thursday preview — no upcoming round found, using generic prompt\n');
+      promptIntro =
+        `You are writing a race weekend preview for the BTCC Hub fan app. ` +
+        `Based on the sources below, write a concise exciting article (3–5 paragraphs) ` +
+        `building anticipation for the upcoming weekend. ` +
+        `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+        `Do not include the title in the body.\n\n`;
+    }
+  }
+
   // ── Fetch current hub_news.json ───────────────────────────
-  console.log('\n── Fetching hub_news.json from GitHub ───────────────\n');
+  console.log('── Fetching hub_news.json from GitHub ───────────────\n');
   const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
   if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
   const fileData = await fileRes.json();
@@ -143,11 +194,7 @@ async function main() {
     messages: [{
       role: 'user',
       content:
-        `You are writing a weekly BTCC news digest for the BTCC Hub fan app. ` +
-        `Based on the sources below from the past week, write a concise, ` +
-        `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
-        `newsworthy items. Write the body in HTML using only <p> tags — no ` +
-        `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
+        promptIntro +
         `Style rules you must follow:\n` +
         `- Never use a comma before "and"\n` +
         `- Never use em dashes (— or –)\n` +
@@ -159,7 +206,7 @@ async function main() {
     }],
   });
 
-  let title = `BTCC Weekly Digest — ${today}`;
+  let title = `BTCC Digest — ${today}`;
   let content = '<p>No content generated.</p>';
   let description = '';
   try {
@@ -198,7 +245,7 @@ async function main() {
     method: 'PUT',
     headers: {...ghHeaders, 'Content-Type': 'application/json'},
     body: JSON.stringify({
-      message: `Weekly digest draft — ${today}`,
+      message: `${mode} digest draft — ${today}`,
       content: updatedContent,
       sha: fileData.sha,
     }),
