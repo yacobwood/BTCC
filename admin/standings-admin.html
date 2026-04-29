@@ -729,6 +729,10 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h12v2H6zm0 4h8v2H6z"/></svg>
     HUB NEWS
   </button>
+  <button class="tab" onclick="switchTab('digest',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    DIGEST
+  </button>
   <button class="tab" onclick="switchTab('scrapers',this)">
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
     SCRAPERS
@@ -1071,6 +1075,20 @@ select.input { cursor: pointer; }
 
 </div>
 
+<!-- ══════════════════════════════ DIGEST ══════ -->
+<div id="panel-digest" class="tab-panel">
+
+  <div class="banner banner-green" id="digest-banner">
+    <div class="banner-dot"></div>
+    <span id="digest-banner-text">Editor's Weekly Roundup</span>
+  </div>
+
+  <div class="section-note" style="margin-bottom:16px">AI-generated weekly and race weekend digests. Review and publish when ready.</div>
+
+  <div id="digest-list"><div class="section-note">Loading…</div></div>
+
+</div>
+
 <!-- ══════════════════════════════ HUB NEWS ══════ -->
 <div id="panel-hubnews" class="tab-panel">
 
@@ -1363,6 +1381,11 @@ function switchTab(name, el) {
   if (name === 'hubnews' && !window._hubnewsLoaded) {
     window._hubnewsLoaded = true;
     loadHubNews();
+  }
+  if (name === 'digest' && !window._digestLoaded) {
+    window._digestLoaded = true;
+    loadHubNews(); // digest uses same hubNewsPosts data
+    renderDigestList();
   }
   if (name === 'dashboard') refreshDashboard();
 }
@@ -2292,8 +2315,9 @@ function getSelectedCategory() {
 
 function renderHubNewsList() {
   const el = document.getElementById('hubnews-list');
-  if (!hubNewsPosts.length) { el.innerHTML = '<div class="section-note">No articles yet. Create one above.</div>'; return; }
-  el.innerHTML = hubNewsPosts.map(p => {
+  const nonDigestPosts = hubNewsPosts.filter(p => p.category !== 'Weekly Digest');
+  if (!nonDigestPosts.length) { el.innerHTML = '<div class="section-note">No articles yet. Create one above.</div>'; return; }
+  el.innerHTML = nonDigestPosts.map(p => {
     const status = p.status || 'published';
     const badgeClass = status === 'published' ? 'badge-pub' : status === 'scheduled' ? 'badge-sch' : 'badge-dft';
     const badgeLabel = status === 'published' ? '● LIVE' : status === 'scheduled' ? '◷ SCHEDULED' : '◎ DRAFT';
@@ -2316,6 +2340,35 @@ function renderHubNewsList() {
           ${status === 'published' ? `<button class="btn-sm" onclick="quickUnpublish('${htmlEsc(p.id)}')">Unpublish</button>` : ''}
           <button class="btn-sm" onclick="editArticle('${htmlEsc(p.id)}')">Edit</button>
           <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDigestList() {
+  const el = document.getElementById('digest-list');
+  if (!el) return;
+  const digestPosts = hubNewsPosts.filter(p => p.category === 'Weekly Digest');
+  if (!digestPosts.length) { el.innerHTML = '<div class="section-note">No digests yet. They appear here automatically each Monday and before race weekends.</div>'; return; }
+  el.innerHTML = digestPosts.map(p => {
+    const status = p.status || 'published';
+    const badgeClass = status === 'published' ? 'badge-pub' : status === 'scheduled' ? 'badge-sch' : 'badge-dft';
+    const badgeLabel = status === 'published' ? '● LIVE' : status === 'scheduled' ? '◷ SCHEDULED' : '◎ DRAFT';
+    return `
+    <div class="hub-article-card">
+      ${p.imageUrl ? `<img class="hub-article-thumb" src="${htmlEsc(p.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="hub-article-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
+          <span class="status-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <div class="hub-article-meta">${p.pubDate ? new Date(p.pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : ''}</div>
+        <div class="hub-article-meta" style="margin-top:4px">${htmlEsc(p.description || '')}</div>
+        <div class="hub-article-actions">
+          ${status !== 'published' ? `<button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublish('${htmlEsc(p.id)}');renderDigestList()">Publish Now</button>` : ''}
+          ${status === 'published' ? `<button class="btn-sm" onclick="quickUnpublish('${htmlEsc(p.id)}');renderDigestList()">Unpublish</button>` : ''}
+          <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}');renderDigestList()">Delete</button>
         </div>
       </div>
     </div>`;
@@ -2453,7 +2506,7 @@ async function saveHubNews(commitMessage) {
       document.getElementById('hubnews-status').innerHTML = '<span class="ok">Saved ✓</span>';
       document.getElementById('hubnews-banner-text').textContent = `Saved · ${hubNewsPosts.length} article${hubNewsPosts.length !== 1 ? 's' : ''}`;
       document.getElementById('hubnews-banner').classList.add('visible');
-      cancelEdit(); renderHubNewsList(); updateDashNews();
+      cancelEdit(); renderHubNewsList(); renderDigestList(); updateDashNews();
     } else { const e = await r.json(); document.getElementById('hubnews-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
   } catch(e) { document.getElementById('hubnews-status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
   btn.disabled = false; btn.textContent = document.getElementById('hn-edit-id').value ? 'SAVE CHANGES' : 'PUBLISH ARTICLE';
