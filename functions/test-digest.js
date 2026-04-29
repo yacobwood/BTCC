@@ -221,6 +221,7 @@ async function main() {
         `- Never use the words: delve, showcase, navigate, elevate, crucial, pivotal, fascinating, notably, seamlessly, underscores, landscape\n` +
         `- Avoid passive voice where active is possible\n` +
         `- Use specific names, lap times, positions and details rather than vague generalities\n` +
+        `- Do not use full car model names (e.g. "Ford Focus Titanium", "BMW 330i M Sport") — just say "car" or refer to the team/manufacturer only when the make is genuinely relevant\n` +
         `- Express opinions and reactions — this is a fan writing for fans, not a wire report\n` +
         `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
         hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
