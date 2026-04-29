@@ -155,7 +155,8 @@ const linking = {
 };
 
 function AppContent({adBannerRef}) {
-  const {bottom} = useSafeAreaInsets();
+  const {bottom: bottomInset} = useSafeAreaInsets();
+  const [bottom] = React.useState(bottomInset);
   const {banner_ad, live_chat} = useFeatureFlags();
   return (
     <View style={{flex: 1}}>
