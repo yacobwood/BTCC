@@ -89,7 +89,7 @@ async function main() {
       `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
       `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
       `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
-      `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+      `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
       `Do not include the title in the body.\n\n`;
   } else {
     // Thursday — find next race weekend from calendar
@@ -107,7 +107,7 @@ async function main() {
         `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
         `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
-        `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+        `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
         `Do not include the title in the body.\n\n`;
     } else {
       console.log('\n  Mode: Thursday preview — no upcoming round found, using generic prompt\n');
@@ -118,7 +118,7 @@ async function main() {
         `Build genuine anticipation for the upcoming BTCC round: who to watch, storylines going in, the championship picture and anything else fans need to know. ` +
         `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
-        `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+        `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
         `Do not include the title in the body.\n\n`;
     }
   }
