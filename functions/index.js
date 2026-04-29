@@ -323,7 +323,7 @@ exports.sendSessionNotifications = onSchedule(
 );
 
 // ── Shared digest logic ───────────────────────────────────────
-async function runDigest(label) {
+async function runDigest(label, promptIntro) {
   const messaging = getMessaging();
   const today = getUKDateString(new Date());
   const postId = `digest-${today}`;
@@ -440,11 +440,7 @@ async function runDigest(label) {
       {
         role: 'user',
         content:
-          `You are writing a BTCC news digest for the BTCC Hub fan app. ` +
-          `Based on the sources below from the past week, write a concise, ` +
-          `engaging article (3–5 paragraphs) for BTCC fans. Focus on the most ` +
-          `newsworthy items. Write the body in HTML using only <p> tags — no ` +
-          `headers, no bullet points, no images. Do not include the title in the body.\n\n` +
+          promptIntro + +
           `Style rules you must follow:\n` +
           `- Never use a comma before "and"\n` +
           `- Never use em dashes (— or –)\n` +
@@ -524,7 +520,15 @@ exports.weeklyDigest = onSchedule(
     timeZone: 'Europe/London',
     secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
   },
-  () => runDigest('weeklyDigest'),
+  () => runDigest(
+    'weeklyDigest',
+    `You are writing a weekly round-up for the BTCC Hub fan app. ` +
+    `Based on the sources below, write a concise engaging article (3–5 paragraphs) ` +
+    `looking back at everything that happened in BTCC over the past 7 days — ` +
+    `race results, driver news, team updates, fan reaction and anything else noteworthy. ` +
+    `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+    `Do not include the title in the body.\n\n`,
+  ),
 );
 
 // ── Race weekend preview digest — every Thursday at 8am ──────
@@ -539,12 +543,21 @@ exports.raceWeekendDigest = onSchedule(
     const now = new Date();
     const saturdayStr = getUKDateString(now, 2); // Thursday + 2 = Saturday
     const calendar = await fetch(CALENDAR_URL).then(r => r.json());
-    const isRaceWeekend = calendar.rounds.some(r => r.startDate === saturdayStr);
-    if (!isRaceWeekend) {
+    const round = calendar.rounds.find(r => r.startDate === saturdayStr);
+    if (!round) {
       console.log(`raceWeekendDigest: no round on ${saturdayStr}, skipping`);
       return;
     }
-    await runDigest('raceWeekendDigest');
+    await runDigest(
+      'raceWeekendDigest',
+      `You are writing a race weekend preview for the BTCC Hub fan app. ` +
+      `This weekend the BTCC heads to ${round.venue} (${round.location}). ` +
+      `Based on the sources below, write a concise exciting article (3–5 paragraphs) ` +
+      `building anticipation for the weekend ahead — who to watch, storylines going in, ` +
+      `championship picture, what makes this venue special, and anything fans should know. ` +
+      `Write the body in HTML using only <p> tags — no headers, no bullet points, no images. ` +
+      `Do not include the title in the body.\n\n`,
+    );
   },
 );
 
