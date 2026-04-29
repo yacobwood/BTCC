@@ -2228,11 +2228,9 @@ let hubNewsPosts = [], hubNewsFileSha = null;
 
 async function loadHubNews() {
   try {
-    // Contents API is always live (no CDN lag) and works on public repos without auth.
-    // Add token if available to avoid rate limiting.
-    const tok = getToken();
-    const headers = tok ? {Authorization:'token '+tok} : {};
-    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`, {headers});
+    // Repo is public — no auth needed to read. Never send token here as an
+    // expired token causes a 401 even on public endpoints.
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${HUB_NEWS_PATH}`);
     if (!r.ok) throw new Error(`GitHub ${r.status}`);
     const meta = await r.json();
     hubNewsFileSha = meta.sha;
