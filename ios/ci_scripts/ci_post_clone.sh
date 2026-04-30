@@ -10,10 +10,25 @@ fi
 # Install Node and CocoaPods via Homebrew
 brew install node cocoapods
 
-# Upgrade xcodeproj gem inside CocoaPods to support Xcode 26 project format (object version 70)
-# CocoaPods uses its own isolated gem dir at libexec/gems — set GEM_HOME so any `gem` binary installs there
-PODS_VERSION=$(brew list --versions cocoapods | awk '{print $2}')
-GEM_HOME=/usr/local/Cellar/cocoapods/${PODS_VERSION}/libexec gem install xcodeproj --no-document
+# Patch xcodeproj gem to support Xcode 26 project format (object version 70).
+# xcodeproj 1.27.0 (bundled with CocoaPods 1.16.2) has no entry for version 70 in
+# OBJECT_VERSION_FOR_DEV_TOOLS — no fixed release exists yet, so patch the file directly.
+python3 - << 'PYEOF'
+import re, glob
+for path in glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/project.rb'):
+    content = open(path).read()
+    if 'OBJECT_VERSION_FOR_DEV_TOOLS' in content and "'70'" not in content:
+        patched = re.sub(
+            r"(OBJECT_VERSION_FOR_DEV_TOOLS\s*=\s*\{.*?)(\s*\}\.freeze)",
+            lambda m: m.group(1) + "\n        '70' => 'Xcode 26'," + m.group(2),
+            content,
+            flags=re.DOTALL
+        )
+        open(path, 'w').write(patched)
+        print('Patched xcodeproj: ' + path)
+    else:
+        print('No patch needed: ' + path)
+PYEOF
 
 # Install JS dependencies (required before pod install for React Native)
 cd "$CI_PRIMARY_REPOSITORY_PATH"
