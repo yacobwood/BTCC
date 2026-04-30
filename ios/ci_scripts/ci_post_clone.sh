@@ -15,24 +15,28 @@ brew install node cocoapods
 # OBJECT_VERSION_FOR_DEV_TOOLS — no fixed release exists yet, so patch the file directly.
 python3 - << 'PYEOF'
 import re, glob
-# OBJECT_VERSION_FOR_DEV_TOOLS may be in project.rb or constants.rb depending on version
-candidates = (
-    glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/project.rb') +
-    glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb')
-)
-print('Candidate files: ' + str(candidates))
-for path in candidates:
-    content = open(path).read()
-    print(f'  {path}: has OBJECT_VERSION_FOR_DEV_TOOLS={("OBJECT_VERSION_FOR_DEV_TOOLS" in content)}, has 70={("70" in content)}')
-    if 'OBJECT_VERSION_FOR_DEV_TOOLS' in content and "'70'" not in content:
-        patched = re.sub(
-            r"(OBJECT_VERSION_FOR_DEV_TOOLS\s*=\s*\{.*?)(\s*\}\.freeze)",
-            lambda m: m.group(1) + "\n        '70' => 'Xcode 26'," + m.group(2),
-            content,
-            flags=re.DOTALL
-        )
-        open(path, 'w').write(patched)
-        print('Patched: ' + path)
+
+project_files = glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/project.rb')
+print('project.rb files found: ' + str(project_files))
+
+for path in project_files:
+    lines = open(path).readlines()
+    # Print lines 75-95 to see what's around the error at line 85
+    print(f'\n--- {path} lines 75-95 ---')
+    for i, line in enumerate(lines[74:95], start=75):
+        print(f'{i}: {line}', end='')
+
+    # Search all .rb files in xcodeproj gem for the hash that maps version numbers
+    gem_dir = re.match(r'(.*/xcodeproj-[^/]+)/', path).group(1)
+    print(f'\n\nSearching for version hash in: {gem_dir}')
+    for rb in glob.glob(gem_dir + '/lib/**/*.rb', recursive=True):
+        content = open(rb).read()
+        # Look for a hash containing old known Xcode versions like '46', '47', '51'
+        if "'46'" in content or "'51'" in content or 'Xcode' in content:
+            # Find lines containing these patterns
+            for i, line in enumerate(content.splitlines(), 1):
+                if ("'46'" in line or "'51'" in line or ('Xcode' in line and '=>' in line)):
+                    print(f'  {rb}:{i}: {line.strip()}')
 PYEOF
 
 # Install JS dependencies (required before pod install for React Native)
