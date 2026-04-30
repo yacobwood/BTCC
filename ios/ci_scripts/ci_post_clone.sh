@@ -15,8 +15,15 @@ brew install node cocoapods
 # OBJECT_VERSION_FOR_DEV_TOOLS — no fixed release exists yet, so patch the file directly.
 python3 - << 'PYEOF'
 import re, glob
-for path in glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/project.rb'):
+# OBJECT_VERSION_FOR_DEV_TOOLS may be in project.rb or constants.rb depending on version
+candidates = (
+    glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/project.rb') +
+    glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb')
+)
+print('Candidate files: ' + str(candidates))
+for path in candidates:
     content = open(path).read()
+    print(f'  {path}: has OBJECT_VERSION_FOR_DEV_TOOLS={("OBJECT_VERSION_FOR_DEV_TOOLS" in content)}, has 70={("70" in content)}')
     if 'OBJECT_VERSION_FOR_DEV_TOOLS' in content and "'70'" not in content:
         patched = re.sub(
             r"(OBJECT_VERSION_FOR_DEV_TOOLS\s*=\s*\{.*?)(\s*\}\.freeze)",
@@ -25,9 +32,7 @@ for path in glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/li
             flags=re.DOTALL
         )
         open(path, 'w').write(patched)
-        print('Patched xcodeproj: ' + path)
-    else:
-        print('No patch needed: ' + path)
+        print('Patched: ' + path)
 PYEOF
 
 # Install JS dependencies (required before pod install for React Native)
