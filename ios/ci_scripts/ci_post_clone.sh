@@ -16,27 +16,22 @@ brew install node cocoapods
 python3 - << 'PYEOF'
 import re, glob
 
-project_files = glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/project.rb')
-print('project.rb files found: ' + str(project_files))
-
-for path in project_files:
-    lines = open(path).readlines()
-    # Print lines 75-95 to see what's around the error at line 85
-    print(f'\n--- {path} lines 75-95 ---')
-    for i, line in enumerate(lines[74:95], start=75):
-        print(f'{i}: {line}', end='')
-
-    # Search all .rb files in xcodeproj gem for the hash that maps version numbers
-    gem_dir = re.match(r'(.*/xcodeproj-[^/]+)/', path).group(1)
-    print(f'\n\nSearching for version hash in: {gem_dir}')
-    for rb in glob.glob(gem_dir + '/lib/**/*.rb', recursive=True):
-        content = open(rb).read()
-        # Look for a hash containing old known Xcode versions like '46', '47', '51'
-        if "'46'" in content or "'51'" in content or 'Xcode' in content:
-            # Find lines containing these patterns
-            for i, line in enumerate(content.splitlines(), 1):
-                if ("'46'" in line or "'51'" in line or ('Xcode' in line and '=>' in line)):
-                    print(f'  {rb}:{i}: {line.strip()}')
+# Patch COMPATIBILITY_VERSION_BY_OBJECT_VERSION in constants.rb
+# Keys are integers (e.g. 77 => 'Xcode 16.0') — insert 70 => 'Xcode 26'
+for path in glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb'):
+    content = open(path).read()
+    if 'COMPATIBILITY_VERSION_BY_OBJECT_VERSION' in content and '70 =>' not in content:
+        # Insert after the highest existing entry (77 => 'Xcode 16.0')
+        patched = content.replace(
+            "77 => 'Xcode 16.0',",
+            "77 => 'Xcode 16.0',\n        70 => 'Xcode 26',"
+        )
+        open(path, 'w').write(patched)
+        print('Patched: ' + path)
+    elif '70 =>' in content:
+        print('Already patched: ' + path)
+    else:
+        print('ERROR: constant not found in: ' + path)
 PYEOF
 
 # Install JS dependencies (required before pod install for React Native)
