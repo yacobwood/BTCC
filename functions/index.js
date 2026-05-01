@@ -220,9 +220,8 @@ exports.sendSessionNotifications = onSchedule(
           sends.push(
             messaging.send({
               topic: 'news_alerts',
-              notification: {title: 'New Article', body: notifyPayload.title},
               android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
-              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`}, payload: {aps: {sound: 'default'}}},
+              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
               data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
             }),
           );
@@ -260,9 +259,8 @@ exports.sendSessionNotifications = onSchedule(
           sends.push(
             messaging.send({
               topic: 'news_alerts',
-              notification: {title: 'New Post', body: notifyPayload.title},
               android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
-              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default'}}},
+              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
               data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
             }),
           );
@@ -303,9 +301,8 @@ exports.sendSessionNotifications = onSchedule(
           sends.push(
             messaging.send({
               topic: 'podcast_alerts',
-              notification: {title: 'New Podcast', body: podTitle},
               android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000, notification: {channelId: 'podcasts'}},
-              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`}, payload: {aps: {sound: 'default'}}},
+              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`}, payload: {aps: {sound: 'default', alert: {title: 'New Podcast', body: podTitle}}}},
               data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
             }),
           );
