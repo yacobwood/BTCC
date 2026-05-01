@@ -4,6 +4,7 @@ const {getMessaging} = require('firebase-admin/messaging');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getDatabase} = require('firebase-admin/database');
 const {initializeApp} = require('firebase-admin/app');
+const {GoogleAuth} = require('google-auth-library');
 
 initializeApp();
 
@@ -602,5 +603,91 @@ exports.trimChat = onValueCreated(
     } catch (e) {
       console.error('trimChat failed:', e);
     }
+  },
+);
+
+// ── Analytics sync — daily at 8am ─────────────────────────────
+// Fetches key metrics from GA4 and writes to Firestore analytics/summary
+// so they can be queried without needing direct Firebase Console access.
+const GA4_PROPERTY_ID = '528813863';
+
+exports.syncAnalytics = onSchedule(
+  {schedule: '0 8 * * *', timeZone: 'Europe/London'},
+  async () => {
+    const db = getFirestore();
+    const auth = new GoogleAuth({scopes: ['https://www.googleapis.com/auth/analytics.readonly']});
+    const client = await auth.getClient();
+    const {token} = await client.getAccessToken();
+
+    const runReport = async (body) => {
+      const res = await fetch(
+        `https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport`,
+        {method: 'POST', headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}, body: JSON.stringify(body)},
+      );
+      const json = await res.json();
+      if (json.error) throw new Error(`GA4 API error: ${JSON.stringify(json.error)}`);
+      return json;
+    };
+
+    const [overviewReport, sourcesReport, dailyReport] = await Promise.all([
+      // New + active users across three windows
+      runReport({
+        dateRanges: [
+          {startDate: 'today', endDate: 'today', name: '1d'},
+          {startDate: '7daysAgo', endDate: 'today', name: '7d'},
+          {startDate: '29daysAgo', endDate: 'today', name: '30d'},
+        ],
+        metrics: [{name: 'newUsers'}, {name: 'activeUsers'}],
+      }),
+      // Acquisition sources for the last 7 days
+      runReport({
+        dateRanges: [{startDate: '7daysAgo', endDate: 'today'}],
+        dimensions: [{name: 'sessionSource'}, {name: 'sessionMedium'}],
+        metrics: [{name: 'newUsers'}, {name: 'sessions'}],
+        orderBys: [{metric: {metricName: 'newUsers'}, desc: true}],
+        limit: 10,
+      }),
+      // Daily breakdown for the last 30 days
+      runReport({
+        dateRanges: [{startDate: '29daysAgo', endDate: 'today'}],
+        dimensions: [{name: 'date'}],
+        metrics: [{name: 'newUsers'}, {name: 'activeUsers'}],
+        orderBys: [{dimension: {dimensionName: 'date'}}],
+      }),
+    ]);
+
+    // Overview — each row corresponds to a named date range
+    const overview = {};
+    for (const row of overviewReport.rows || []) {
+      const name = row.dimensionValues?.[0]?.value;
+      overview[name] = {
+        newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+        activeUsers: parseInt(row.metricValues?.[1]?.value || '0'),
+      };
+    }
+
+    // Acquisition sources
+    const topSources = (sourcesReport.rows || []).map(row => ({
+      source: row.dimensionValues?.[0]?.value,
+      medium: row.dimensionValues?.[1]?.value,
+      newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+      sessions: parseInt(row.metricValues?.[1]?.value || '0'),
+    }));
+
+    // Daily new users — date is YYYYMMDD from GA4
+    const dailyNewUsers = (dailyReport.rows || []).map(row => ({
+      date: row.dimensionValues?.[0]?.value,
+      newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+      activeUsers: parseInt(row.metricValues?.[1]?.value || '0'),
+    }));
+
+    await db.collection('analytics').doc('summary').set({
+      updatedAt: new Date().toISOString(),
+      overview,
+      topSources,
+      dailyNewUsers,
+    });
+
+    console.log('syncAnalytics: done', JSON.stringify(overview));
   },
 );
