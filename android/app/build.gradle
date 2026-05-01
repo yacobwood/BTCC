@@ -95,6 +95,8 @@ def enableProguardInReleaseBuilds = true
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+def packageJson = new groovy.json.JsonSlurper().parse(file("../../package.json"))
+
 def keystoreProps = new Properties()
 def keystoreFile = rootProject.file("keystore.properties")
 if (keystoreFile.exists()) { keystoreProps.load(new FileInputStream(keystoreFile)) }
@@ -109,8 +111,8 @@ android {
         applicationId "com.btccfanhub"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 58
-        versionName "2.12.1"
+        versionCode packageJson.versionCode
+        versionName packageJson.version
     }
     signingConfigs {
         debug {

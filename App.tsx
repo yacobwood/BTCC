@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
+import {versionCode as VERSION_CODE} from './package.json';
 import {StatusBar, AppState} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
@@ -45,7 +46,6 @@ function PodcastChecker() {
 }
 
 const ONBOARDING_KEY = 'onboarding_shown';
-const VERSION_CODE = 58;
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
