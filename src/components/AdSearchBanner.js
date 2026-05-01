@@ -8,10 +8,9 @@ const AD_UNIT = Platform.OS === 'ios'
   : 'ca-app-pub-2098489502774763/3675006417';
 
 export default function AdSearchBanner({visible = true}) {
+  if (!visible) return null;
   return (
-    <View style={visible
-      ? {flex: 1, justifyContent: 'flex-start', alignItems: 'center', paddingTop: 24}
-      : {position: 'absolute', top: -9999, opacity: 0, pointerEvents: 'none'}}>
+    <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center', paddingTop: 24}}>
       <BannerAd
         unitId={AD_UNIT}
         size={BannerAdSize.MEDIUM_RECTANGLE}
