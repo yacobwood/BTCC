@@ -62,7 +62,10 @@ export default function NewsScreen({navigation}) {
       if (append) {
         setArticles(prev => [...prev, ...parsed]);
       } else {
-        const merged = [...(hubPosts || []), ...parsed].sort((a, b) => {
+        const filteredHub = settings.hideDigests
+          ? (hubPosts || []).filter(p => p.category !== 'Weekly Digest')
+          : (hubPosts || []);
+        const merged = [...filteredHub, ...parsed].sort((a, b) => {
           const da = new Date(a.sortDate || a.pubDate || 0);
           const db = new Date(b.sortDate || b.pubDate || 0);
           return db - da;

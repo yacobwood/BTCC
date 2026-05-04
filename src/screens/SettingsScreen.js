@@ -87,6 +87,15 @@ export default function SettingsScreen({navigation}) {
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
+        {!settings.digestAlerts && (
+          <SubRow
+            label="Hide digests from news feed"
+            accessibilityLabel="Hide digests from news feed"
+            value={settings.hideDigests}
+            onToggle={toggle('hideDigests')}
+            parentEnabled={true}
+          />
+        )}
         {podcasts_enabled && (
           <SettingRow
             label="Podcast alerts"
