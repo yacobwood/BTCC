@@ -223,7 +223,7 @@ exports.sendSessionNotifications = onSchedule(
           sends.push(
             messaging.send({
               topic: 'news_alerts',
-              android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
+              android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000},
               apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
               data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
             }),
@@ -237,7 +237,8 @@ exports.sendSessionNotifications = onSchedule(
     // ── Hub news alerts ───────────────────────────────────────────
     try {
       const hubData = await fetch(HUB_NEWS_URL).then(r => r.json());
-      const latestHub = hubData?.posts?.find(p => !p.status || p.status === 'published');
+      // Exclude Weekly Digest — those have their own notification fired in runDigest
+      const latestHub = hubData?.posts?.find(p => (!p.status || p.status === 'published') && p.category !== 'Weekly Digest');
       if (latestHub) {
         const hubStateRef = db.collection('state').doc('hub_news');
         let shouldNotify = false;
@@ -262,7 +263,7 @@ exports.sendSessionNotifications = onSchedule(
           sends.push(
             messaging.send({
               topic: 'news_alerts',
-              android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000, notification: {channelId: 'news'}},
+              android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000},
               apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
               data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
             }),
@@ -304,7 +305,7 @@ exports.sendSessionNotifications = onSchedule(
           sends.push(
             messaging.send({
               topic: 'podcast_alerts',
-              android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000, notification: {channelId: 'podcasts'}},
+              android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000},
               apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`}, payload: {aps: {sound: 'default', alert: {title: 'New Podcast', body: podTitle}}}},
               data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
             }),
@@ -520,13 +521,12 @@ async function runDigest(label, promptIntro) {
     throw new Error(`GitHub PUT failed: ${putRes.status} ${err}`);
   }
 
-  // ── Notify admin ────────────────────────────────────────────
+  // ── Notify subscribers ───────────────────────────────────────
   try {
     await messaging.send({
-      topic: 'digest_ready',
-      notification: {title: 'Weekly Digest Ready', body: title},
-      android: {notification: {channelId: 'news'}},
-      apns: {payload: {aps: {sound: 'default'}}},
+      topic: 'news_alerts',
+      android: {collapseKey: postId, priority: 'high', ttl: 86400000},
+      apns: {payload: {aps: {sound: 'default', alert: {title: 'BTCC Hub', body: title}}}},
       data: {type: 'hub', id: postId, channel: 'news', title},
     });
   } catch (e) {
