@@ -155,6 +155,34 @@ private func fetchWeather(lat: Double, lng: Double, start: Date, end: Date, comp
 
 // MARK: - Timeline Provider
 
+// MARK: - Calendar cache
+
+private let calendarCacheKey = "btcc_widget_calendar_cache"
+private let layoutImageCacheKey = "btcc_widget_layout_image_cache"
+private let defaults = UserDefaults(suiteName: "group.com.btccfanhub.widget") ?? .standard
+
+private func cachedCalendarData() -> Data? {
+    defaults.data(forKey: calendarCacheKey)
+}
+
+private func cacheCalendarData(_ data: Data) {
+    defaults.set(data, forKey: calendarCacheKey)
+}
+
+private func cachedLayoutImage(for urlStr: String) -> UIImage? {
+    guard let dict = defaults.dictionary(forKey: layoutImageCacheKey),
+          let imgData = dict[urlStr] as? Data else { return nil }
+    return UIImage(data: imgData)
+}
+
+private func cacheLayoutImage(_ image: UIImage, for urlStr: String) {
+    var dict = (defaults.dictionary(forKey: layoutImageCacheKey) as? [String: Data]) ?? [:]
+    dict = [urlStr: image.pngData() ?? Data()] // keep only the latest circuit
+    defaults.set(dict, forKey: layoutImageCacheKey)
+}
+
+// MARK: - Timeline Provider
+
 struct BTCCProvider: TimelineProvider {
     func placeholder(in context: Context) -> BTCCEntry { BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil) }
 
@@ -173,23 +201,38 @@ struct BTCCProvider: TimelineProvider {
         guard let url = URL(string: "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json") else {
             completion(BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil)); return
         }
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            let round = data.flatMap { parseCalendar($0) }
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            // Use fresh data if available, otherwise fall back to cache
+            let calData: Data?
+            if let data = data {
+                cacheCalendarData(data)
+                calData = data
+            } else {
+                calData = cachedCalendarData()
+            }
+            let round = calData.flatMap { parseCalendar($0) }
             guard let r = round else {
-                completion(BTCCEntry(date: Date(), round: round, weather: [], layoutImage: nil)); return
+                completion(BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil)); return
             }
             let days = Calendar.current.dateComponents([.day], from: Date(), to: r.startDate).day ?? 999
             let fetchWeatherAndFinish = { (layoutImage: UIImage?) in
                 guard r.lat != 0, days <= 16 else {
                     completion(BTCCEntry(date: Date(), round: round, weather: [], layoutImage: layoutImage)); return
                 }
+                // Weather is best-effort — no cache, empty is acceptable offline
                 fetchWeather(lat: r.lat, lng: r.lng, start: r.startDate, end: r.endDate) { weather in
                     completion(BTCCEntry(date: Date(), round: round, weather: weather, layoutImage: layoutImage))
                 }
             }
             if let imgUrlStr = r.layoutImageUrl, let imgUrl = URL(string: imgUrlStr) {
                 URLSession.shared.dataTask(with: imgUrl) { imgData, _, _ in
-                    let image = imgData.flatMap { UIImage(data: $0) }
+                    let image: UIImage?
+                    if let imgData = imgData, let fresh = UIImage(data: imgData) {
+                        cacheLayoutImage(fresh, for: imgUrlStr)
+                        image = fresh
+                    } else {
+                        image = cachedLayoutImage(for: imgUrlStr)
+                    }
                     fetchWeatherAndFinish(image)
                 }.resume()
             } else {
