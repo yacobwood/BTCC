@@ -19,6 +19,7 @@ export default function SwipeableTabs({
   onTabChange,
   tabRowStyle,
   lazy = false,
+  scrollEnabled = true,
 }) {
   const pagerRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -80,6 +81,7 @@ export default function SwipeableTabs({
         ref={pagerRef}
         style={{flex: 1}}
         initialPage={initialPage}
+        scrollEnabled={scrollEnabled}
         onPageScroll={onPageScroll}
         onPageSelected={onPageSelected}>
         {pages.map((page, i) => (

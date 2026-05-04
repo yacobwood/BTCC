@@ -139,6 +139,7 @@ export default function ResultsScreen({navigation, route}) {
   const seasonStarted = today >= seasonStart;
 
   const [year, setYear] = useState(seasonStarted ? 2026 : 2025);
+  const [activeTab, setActiveTab] = useState(0);
   const [driverFilter, setDriverFilter] = useState('all');
   const {isFavourite} = useFavouriteDriver();
   const [standings, setStandings] = useState(null);
@@ -669,10 +670,12 @@ export default function ResultsScreen({navigation, route}) {
       <SwipeableTabs
         tabs={tabs}
         onTabChange={(i) => {
+          setActiveTab(i);
           setShowScrollTop(false);
           Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
         }}
         lazy={true}
+        scrollEnabled={activeTab !== 4}
         pages={tabs.map((_, i) => renderTabContent(i))}
       />
       {showScrollTop && (
