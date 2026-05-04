@@ -15,7 +15,7 @@ import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import notifee, {EventType} from '@notifee/react-native';
 import {navigateFromData} from './src/utils/notifNavigation';
-import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage, checkForNewPodcast} from './src/utils/notifications';
+import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import MobileAds from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
@@ -37,13 +37,6 @@ export function navigateToRound(round: string) {
   _navigate({round});
 }
 
-function PodcastChecker() {
-  const {settings} = useSettings();
-  useEffect(() => {
-    checkForNewPodcast(settings.podcastAlerts);
-  }, [settings.podcastAlerts]);
-  return null;
-}
 
 const ONBOARDING_KEY = 'onboarding_shown';
 
@@ -157,7 +150,6 @@ export default function App() {
       <UnitsProvider>
         <SettingsProvider>
           <RadioProvider>
-            <PodcastChecker />
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
             <AppNavigator navigationRef={navigationRef} />
             <AppDialogs />
