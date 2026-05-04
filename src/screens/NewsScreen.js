@@ -49,8 +49,6 @@ export default function NewsScreen({navigation}) {
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
-  const hideDigestsRef = React.useRef(settings.hideDigests);
-  useEffect(() => { hideDigestsRef.current = settings.hideDigests; }, [settings.hideDigests]);
 
   const load = useCallback(async (p = 1, append = false) => {
     try {
@@ -64,10 +62,7 @@ export default function NewsScreen({navigation}) {
       if (append) {
         setArticles(prev => [...prev, ...parsed]);
       } else {
-        const filteredHub = hideDigestsRef.current
-          ? (hubPosts || []).filter(p => p.category !== 'Weekly Digest')
-          : (hubPosts || []);
-        const merged = [...filteredHub, ...parsed].sort((a, b) => {
+        const merged = [...(hubPosts || []), ...parsed].sort((a, b) => {
           const da = new Date(a.sortDate || a.pubDate || 0);
           const db = new Date(b.sortDate || b.pubDate || 0);
           return db - da;
