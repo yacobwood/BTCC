@@ -19,7 +19,7 @@ export default function SwipeableTabs({
   onTabChange,
   tabRowStyle,
   lazy = false,
-  scrollEnabled = true,
+  noSwipePages = [],
 }) {
   const pagerRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -53,9 +53,13 @@ export default function SwipeableTabs({
 
   const onPageSelected = useCallback(({nativeEvent: {position}}) => {
     if (!programmatic.current) {
-      // Swipe-initiated page change — snap indicator to final position in case
+      // Swipe-initiated settle — animate indicator to final position in case
       // onPageScroll stopped firing during PagerView's settle animation.
-      indicatorX.setValue(position * tabW);
+      Animated.timing(indicatorX, {
+        toValue: position * tabW,
+        duration: 80,
+        useNativeDriver: true,
+      }).start();
       setCurrentPage(position);
       onTabChange?.(position);
     }
@@ -83,7 +87,7 @@ export default function SwipeableTabs({
         ref={pagerRef}
         style={{flex: 1}}
         initialPage={initialPage}
-        scrollEnabled={scrollEnabled}
+        scrollEnabled={!noSwipePages.includes(currentPage)}
         onPageScroll={onPageScroll}
         onPageSelected={onPageSelected}>
         {pages.map((page, i) => (
