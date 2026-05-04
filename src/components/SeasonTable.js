@@ -82,6 +82,7 @@ function badgeStyle(pos, laps, time) {
 function buildTableData(results) {
   const columns = [];
   const driverMap = {};
+  const racesWithResults = new Set();
 
   const hasQR = results.some(r => (r.races || []).some(race => race.label === 'Qualifying Race'));
   const activeLabels = hasQR ? RACE_LABELS : RACE_LABELS.filter(l => l !== 'Qualifying Race');
@@ -95,13 +96,14 @@ function buildTableData(results) {
 
     const roundRaces = (round.races || []).filter(r => RACE_LABELS.includes(r.label));
     for (const race of roundRaces) {
+      const key0 = `${round.round}_${race.label}`;
+      if ((race.results || []).length > 0) racesWithResults.add(key0);
       for (const entry of race.results || []) {
         if (!entry.driver) continue;
         if (!driverMap[entry.driver]) {
           driverMap[entry.driver] = {team: entry.team || '', points: 0, cells: {}};
         }
-        const key = `${round.round}_${race.label}`;
-        driverMap[entry.driver].cells[key] = {
+        driverMap[entry.driver].cells[key0] = {
           pos: entry.position ?? entry.pos,
           laps: entry.laps,
           time: entry.time || '',
@@ -116,6 +118,7 @@ function buildTableData(results) {
 
   return {
     columns,
+    racesWithResults,
     tableData: Object.entries(driverMap)
       .map(([name, data]) => ({name, ...data}))
       .sort((a, b) => b.points - a.points),
@@ -134,12 +137,14 @@ function bonusCount(cell) {
   return (cell.fl ? 1 : 0) + (cell.lead ? 1 : 0) + (cell.pole ? 1 : 0);
 }
 
-function Badge({cell}) {
+function Badge({cell, hasData}) {
   if (!cell) return (
     <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
-      <View style={[styles.badge, {borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)'}]}>
-        <Text style={styles.dneText}>DNE</Text>
-      </View>
+      {hasData ? (
+        <View style={[styles.badge, {borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)'}]}>
+          <Text style={styles.dneText}>DNE</Text>
+        </View>
+      ) : null}
     </View>
   );
   const s = badgeStyle(cell.pos, cell.laps, cell.time);
@@ -231,7 +236,7 @@ export default function SeasonTable({results, standings}) {
     return () => task.cancel();
   }, [results]);
 
-  const {columns, tableData} = useMemo(() => {
+  const {columns, tableData, racesWithResults} = useMemo(() => {
     const base = buildTableData(results || []);
     // Override points totals with official standings when available
     if (standings?.drivers?.length) {
@@ -324,7 +329,7 @@ export default function SeasonTable({results, standings}) {
                       <View
                         key={key}
                         style={ci < columns.length - 1 && isLastInGroup ? styles.groupDivider : null}>
-                        <Badge cell={driver.cells[key]} />
+                        <Badge cell={driver.cells[key]} hasData={racesWithResults.has(key)} />
                       </View>
                     );
                   }),
