@@ -35,10 +35,10 @@ export default function SwipeableTabs({
       useNativeDriver: true,
       tension: 200,
       friction: 20,
-    }).start(() => {
-      // Reset only after the spring settles — keeps programmatic=true long enough
-      // to block any trailing onPageScroll events fired by setPageWithoutAnimation.
-      programmatic.current = false;
+    }).start(({finished}) => {
+      // Only reset when this spring ran to completion. If a second tap interrupted
+      // it, finished=false — leave the flag true so the new spring's callback handles it.
+      if (finished) programmatic.current = false;
     });
     setCurrentPage(i);
     onTabChange?.(i);
