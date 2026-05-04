@@ -81,6 +81,12 @@ export default function SettingsScreen({navigation}) {
           value={settings.newsAlerts}
           onToggle={toggle('newsAlerts')}
         />
+        <SettingRow
+          label="Weekly digest"
+          description="Get notified when a new weekly or race weekend digest is published"
+          value={settings.digestAlerts}
+          onToggle={toggle('digestAlerts')}
+        />
         {podcasts_enabled && (
           <SettingRow
             label="Podcast alerts"

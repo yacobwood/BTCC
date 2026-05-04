@@ -524,7 +524,7 @@ async function runDigest(label, promptIntro) {
   // ── Notify subscribers ───────────────────────────────────────
   try {
     await messaging.send({
-      topic: 'news_alerts',
+      topic: 'digest_alerts',
       android: {collapseKey: postId, priority: 'high', ttl: 86400000},
       apns: {payload: {aps: {sound: 'default', alert: {title: 'BTCC Hub', body: title}}}},
       data: {type: 'hub', id: postId, channel: 'news', title},

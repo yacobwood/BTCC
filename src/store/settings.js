@@ -5,6 +5,7 @@ import {getMessaging, subscribeToTopic, unsubscribeFromTopic} from '@react-nativ
 // Leaf settings that map 1:1 to an FCM topic
 const LEAF_TOPICS = {
   newsAlerts:        'news_alerts',
+  digestAlerts:      'digest_alerts',
   weekendPreview:    'weekend_preview',
   standingsUpdate:   'standings_update',
   podcastAlerts:     'podcast_alerts',
@@ -44,6 +45,7 @@ const PARENT_CHAIN = {
 
 const STORAGE_KEYS = {
   newsAlerts:          'setting_news_alerts',
+  digestAlerts:        'setting_digest_alerts',
   weekendPreview:      'setting_weekend_preview',
   standingsUpdate:     'setting_standings_update',
   podcastAlerts:       'setting_podcast_alerts',
@@ -70,6 +72,7 @@ const STORAGE_KEYS = {
 
 const defaults = {
   newsAlerts:          true,
+  digestAlerts:        true,
   weekendPreview:      true,
   standingsUpdate:     true,
   podcastAlerts:       true,
