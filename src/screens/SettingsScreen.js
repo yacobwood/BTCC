@@ -87,15 +87,6 @@ export default function SettingsScreen({navigation}) {
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
-        {!settings.digestAlerts && (
-          <SubRow
-            label="Hide digests from news feed"
-            accessibilityLabel="Hide digests from news feed"
-            value={settings.hideDigests}
-            onToggle={toggle('hideDigests')}
-            parentEnabled={true}
-          />
-        )}
         {podcasts_enabled && (
           <SettingRow
             label="Podcast alerts"
@@ -232,6 +223,15 @@ export default function SettingsScreen({navigation}) {
           description="Tuesday reminder to check standings after each round"
           value={settings.standingsUpdate}
           onToggle={toggle('standingsUpdate')}
+        />
+
+        <View style={styles.divider} />
+        <Text style={styles.sectionTitle}>CUSTOMISATION</Text>
+        <SettingRow
+          label="Hide digests from news feed"
+          description="Remove weekly and race weekend digests from the news feed"
+          value={settings.hideDigests}
+          onToggle={toggle('hideDigests')}
         />
 
         <View style={styles.divider} />
