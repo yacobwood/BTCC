@@ -49,6 +49,8 @@ export default function NewsScreen({navigation}) {
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
+  const hideDigestsRef = React.useRef(settings.hideDigests);
+  useEffect(() => { hideDigestsRef.current = settings.hideDigests; }, [settings.hideDigests]);
 
   const load = useCallback(async (p = 1, append = false) => {
     try {
@@ -62,7 +64,7 @@ export default function NewsScreen({navigation}) {
       if (append) {
         setArticles(prev => [...prev, ...parsed]);
       } else {
-        const filteredHub = settings.hideDigests
+        const filteredHub = hideDigestsRef.current
           ? (hubPosts || []).filter(p => p.category !== 'Weekly Digest')
           : (hubPosts || []);
         const merged = [...filteredHub, ...parsed].sort((a, b) => {
@@ -143,9 +145,12 @@ export default function NewsScreen({navigation}) {
     if (searchActive && searchQuery.length >= 2) {
       return searchResults.map(a => ({type: 'compact', article: a}));
     }
-    const hero = articles.length > 0 ? articles[0] : null;
-    const gridArticles = articles.slice(1, 3);
-    const remaining = articles.slice(3);
+    const visible = settings.hideDigests
+      ? articles.filter(a => a.category !== 'Weekly Digest')
+      : articles;
+    const hero = visible.length > 0 ? visible[0] : null;
+    const gridArticles = visible.slice(1, 3);
+    const remaining = visible.slice(3);
     const data = [];
     if (hero) data.push({type: 'hero', article: hero});
     if (gridArticles.length > 0) data.push({type: 'grid', articles: gridArticles});
@@ -154,7 +159,7 @@ export default function NewsScreen({navigation}) {
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  }, [articles, searchActive, searchQuery, searchResults]);
+  }, [articles, searchActive, searchQuery, searchResults, settings.hideDigests]);
 
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
