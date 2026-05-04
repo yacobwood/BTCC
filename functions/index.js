@@ -1,3 +1,4 @@
+// v2
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onValueCreated} = require('firebase-functions/v2/database');
 const {getMessaging} = require('firebase-admin/messaging');
