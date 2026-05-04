@@ -1087,6 +1087,10 @@ select.input { cursor: pointer; }
     <div class="section-note" style="margin:0">AI-generated weekly and race weekend digests. Review, edit and publish when ready.</div>
     <button class="btn-sm" onclick="window._hubnewsLoaded=false;window._digestLoaded=false;loadHubNews()" style="flex-shrink:0;margin-left:12px">↻ Refresh</button>
   </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="btn-sm" id="gen-weekly-btn" onclick="triggerDigestGenerate('weekly')" style="border-color:var(--yellow);color:var(--yellow)">⚡ Generate Weekly Digest</button>
+    <button class="btn-sm" id="gen-race-btn" onclick="triggerDigestGenerate('race')" style="border-color:var(--yellow);color:var(--yellow)">⚡ Generate Race Preview</button>
+  </div>
 
   <!-- Inline edit form -->
   <div class="card" id="digest-edit-card" style="display:none;margin-bottom:16px">
@@ -2409,6 +2413,7 @@ function renderDigestList() {
           ${status !== 'published' ? `<button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublish('${htmlEsc(p.id)}');renderDigestList()">Publish Now</button>` : ''}
           ${status === 'published' ? `<button class="btn-sm" onclick="quickUnpublish('${htmlEsc(p.id)}');renderDigestList()">Unpublish</button>` : ''}
           <button class="btn-sm" onclick="openDigestEdit('${htmlEsc(p.id)}')">Edit</button>
+          ${status === 'draft' ? `<button class="btn-sm" onclick="regenerateDigest('${htmlEsc(p.id)}')">↻ Regenerate</button>` : ''}
           <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}');renderDigestList()">Delete</button>
         </div>
       </div>
@@ -2456,6 +2461,46 @@ async function saveDigestEdit(andPublish = false) {
 }
 
 function saveAndPublishDigest() { saveDigestEdit(true); }
+
+const TRIGGER_DIGEST_URL = 'https://us-central1-btcchub-af77a.cloudfunctions.net/triggerDigest';
+const TRIGGER_DIGEST_SECRET = 'btcchub-digest-trigger-2026';
+
+async function triggerDigestGenerate(type) {
+  const btnId = type === 'race' ? 'gen-race-btn' : 'gen-weekly-btn';
+  const btn = document.getElementById(btnId);
+  const label = type === 'race' ? 'race preview' : 'weekly digest';
+  if (!confirm(`Generate a new ${label}? This will scrape sources and call Claude — it takes about 30 seconds.`)) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating…';
+  try {
+    const res = await fetch(TRIGGER_DIGEST_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({type}),
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+    btn.textContent = '✓ Done — refreshing…';
+    window._hubnewsLoaded = false;
+    window._digestLoaded = false;
+    await loadHubNews();
+  } catch (e) {
+    alert('Failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = type === 'race' ? '⚡ Generate Race Preview' : '⚡ Generate Weekly Digest';
+  }
+}
+
+async function regenerateDigest(articleId) {
+  const p = hubNewsPosts.find(x => x.id === articleId);
+  if (!p) return;
+  const type = p.title?.toLowerCase().includes('preview') ? 'race' : 'weekly';
+  if (!confirm(`Delete this draft and regenerate a new ${type === 'race' ? 'race preview' : 'weekly digest'}? This cannot be undone.`)) return;
+  // Delete the existing draft first so runDigest's duplicate-ID guard doesn't skip it
+  hubNewsPosts = hubNewsPosts.filter(x => x.id !== articleId);
+  await saveHubNews('Delete digest draft for regeneration: ' + articleId);
+  await triggerDigestGenerate(type);
+}
 
 function editArticle(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);

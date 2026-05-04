@@ -1,5 +1,6 @@
 // v2
 const {onSchedule} = require('firebase-functions/v2/scheduler');
+const {onRequest} = require('firebase-functions/v2/https');
 const {onValueCreated} = require('firebase-functions/v2/database');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getFirestore} = require('firebase-admin/firestore');
@@ -584,6 +585,63 @@ exports.raceWeekendDigest = onSchedule(
       `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
       `Do not include the title in the body.\n\n`,
     );
+  },
+);
+
+// ── Manual digest trigger — called from admin page ────────────
+const ADMIN_SECRET = 'btcchub-digest-trigger-2026';
+
+exports.triggerDigest = onRequest(
+  {
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
+    cors: ['https://yacobwood.github.io'],
+  },
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+
+    const type = req.body?.type || 'weekly';
+    try {
+      if (type === 'race') {
+        const now = new Date();
+        const saturdayStr = getUKDateString(now, 2);
+        const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+        const round = calendar.rounds.find(r => r.startDate === saturdayStr)
+          || calendar.rounds.find(r => {
+            const start = new Date(r.startDate);
+            const end = new Date(r.endDate || r.startDate);
+            return now >= start && now <= end;
+          });
+        await runDigest(
+          'triggerDigest:race',
+          `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
+          `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
+          `Use British English throughout. ` +
+          (round ? `This weekend the BTCC heads to ${round.venue} (${round.location}). ` : '') +
+          `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
+          `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+          `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
+          `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
+          `Do not include the title in the body.\n\n`,
+        );
+      } else {
+        await runDigest(
+          'triggerDigest:weekly',
+          `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
+          `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
+          `Use British English throughout. ` +
+          `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
+          `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+          `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
+          `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
+          `Do not include the title in the body.\n\n`,
+        );
+      }
+      res.status(200).json({ok: true});
+    } catch (e) {
+      console.error('triggerDigest failed:', e);
+      res.status(500).json({ok: false, error: e.message});
+    }
   },
 );
 
