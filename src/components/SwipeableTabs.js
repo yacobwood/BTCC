@@ -53,12 +53,14 @@ export default function SwipeableTabs({
 
   const onPageSelected = useCallback(({nativeEvent: {position}}) => {
     if (!programmatic.current) {
-      // Swipe-initiated page change — update state and fire callback.
+      // Swipe-initiated page change — snap indicator to final position in case
+      // onPageScroll stopped firing during PagerView's settle animation.
+      indicatorX.setValue(position * tabW);
       setCurrentPage(position);
       onTabChange?.(position);
     }
     // programmatic reset is handled by the spring completion callback, not here.
-  }, [onTabChange]);
+  }, [onTabChange, indicatorX, tabW]);
 
   return (
     <View style={{flex: 1}}>
