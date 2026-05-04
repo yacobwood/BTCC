@@ -21,6 +21,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
+import SwipeableTabs from '../components/SwipeableTabs';
 
 function thumbUrl(url, size = '150x150') {
   if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
@@ -45,13 +46,11 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 }
 
 const TABS = ['DRIVERS', 'TEAMS'];
-const TAB_WIDTH = SCREEN_WIDTH / TABS.length;
 
 export default function DriversScreen({navigation}) {
   const [grid, setGrid] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState(0);
-  const {isFavourite, toggle: toggleFav} = useFavouriteDriver();
+  const {isFavourite} = useFavouriteDriver();
 
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
@@ -63,11 +62,6 @@ export default function DriversScreen({navigation}) {
     }, 50);
     return () => clearTimeout(t);
   }, []));
-
-  const goToTab = (i) => {
-    setTab(i);
-    Analytics.gridTabSwitched(TABS[i].toLowerCase());
-  };
 
   const load = useCallback(async () => {
     try {
@@ -153,55 +147,33 @@ export default function DriversScreen({navigation}) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>2026 GRID</Text>
       </View>
-      <View style={styles.tabRow}>
-        {TABS.map((label, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.tab}
-            onPress={() => goToTab(i)}
-            accessibilityRole="tab"
-            accessibilityLabel={`${label} tab`}>
-            <Text style={[styles.tabText, tab === i && styles.tabTextActive]}>
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-        <View style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: TAB_WIDTH,
-          height: 2,
-          backgroundColor: Colors.yellow,
-          transform: [{translateX: TAB_WIDTH * tab}],
-        }} />
-      </View>
-      <View style={{flex: 1}}>
-        <ScrollView
-          ref={driversListRef}
-          style={[StyleSheet.absoluteFill, {zIndex: tab === 0 ? 1 : 0, backgroundColor: Colors.background}]}
-          pointerEvents={tab === 0 ? 'auto' : 'none'}
-          contentContainerStyle={{padding: 16, paddingBottom: 20}}>
-          <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
-          <View style={styles.driversGrid}>
-            {drivers.map(item => (
-              <View key={String(item.number)} style={styles.driverGridItem}>
-                {renderDriver({item})}
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-        <ScrollView
-          ref={teamsListRef}
-          style={[StyleSheet.absoluteFill, {zIndex: tab === 1 ? 1 : 0, backgroundColor: Colors.background}]}
-          pointerEvents={tab === 1 ? 'auto' : 'none'}
-          contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}>
-          <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
-          <View style={styles.teamsGrid}>
-            {teams.map(item => renderTeam({item}))}
-          </View>
-        </ScrollView>
-      </View>
+      <SwipeableTabs
+        tabs={TABS}
+        tabRowStyle={{backgroundColor: Colors.background}}
+        onTabChange={(i) => Analytics.gridTabSwitched(TABS[i].toLowerCase())}
+        pages={[
+          <ScrollView
+            ref={driversListRef}
+            contentContainerStyle={{padding: 16, paddingBottom: 20}}>
+            <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
+            <View style={styles.driversGrid}>
+              {drivers.map(item => (
+                <View key={String(item.number)} style={styles.driverGridItem}>
+                  {renderDriver({item})}
+                </View>
+              ))}
+            </View>
+          </ScrollView>,
+          <ScrollView
+            ref={teamsListRef}
+            contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}>
+            <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
+            <View style={styles.teamsGrid}>
+              {teams.map(item => renderTeam({item}))}
+            </View>
+          </ScrollView>,
+        ]}
+      />
     </View>
   );
 }

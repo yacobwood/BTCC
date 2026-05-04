@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Dimensions,
   InteractionManager,
   Modal,
   StyleSheet,
 } from 'react-native';
+import SwipeableTabs from '../components/SwipeableTabs';
 import {useFocusEffect} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -25,8 +25,6 @@ import SeasonTable from '../components/SeasonTable';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite} from '../store/cache';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 function computeSeasonStats(rounds) {
   const map = {};
@@ -141,7 +139,6 @@ export default function ResultsScreen({navigation, route}) {
   const seasonStarted = today >= seasonStart;
 
   const [year, setYear] = useState(seasonStarted ? 2026 : 2025);
-  const [tab, setTab] = useState(0);
   const [driverFilter, setDriverFilter] = useState('all');
   const {isFavourite} = useFavouriteDriver();
   const [standings, setStandings] = useState(null);
@@ -166,14 +163,6 @@ export default function ResultsScreen({navigation, route}) {
     statsListRef.current?.scrollToOffset({offset: 0, animated: false});
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
   }, []));
-
-  const TAB_WIDTH = SCREEN_WIDTH / 6;
-
-  const goToTab = (i) => {
-    setTab(i);
-    setShowScrollTop(false);
-    Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
-  };
 
   const changeYear = useCallback((newYear) => {
     Analytics.resultsYearChanged(newYear);
@@ -677,29 +666,15 @@ export default function ResultsScreen({navigation, route}) {
         </View>
       </Modal>
 
-      <View style={styles.tabRow}>
-        {tabs.map((label, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.tab}
-            onPress={() => goToTab(i)}
-            accessibilityRole="tab"
-            accessibilityLabel={`${label} tab`}>
-            <Text style={[styles.tabText, tab === i && styles.tabTextActive]}>{label}</Text>
-          </TouchableOpacity>
-        ))}
-        <View style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: TAB_WIDTH,
-          height: 2,
-          backgroundColor: Colors.yellow,
-          transform: [{translateX: TAB_WIDTH * tab}],
-        }} />
-      </View>
-
-      {renderTabContent(tab)}
+      <SwipeableTabs
+        tabs={tabs}
+        onTabChange={(i) => {
+          setShowScrollTop(false);
+          Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
+        }}
+        lazy={true}
+        pages={tabs.map((_, i) => renderTabContent(i))}
+      />
       {showScrollTop && (
         <TouchableOpacity
           style={styles.scrollTopFab}

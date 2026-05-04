@@ -1,21 +1,19 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   Linking,
 } from 'react-native';
+import SwipeableTabs from '../components/SwipeableTabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {useUnits} from '../store/units';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // Abbreviate session labels for tab display.
 function shortLabel(label) {
@@ -52,21 +50,14 @@ function buildGridMap(races, raceIndex) {
 export default function RoundResultsScreen({route, navigation}) {
   const {round, year, initialRace, origin} = route.params;
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
-  const [raceIndex, setRaceIndex] = useState(initialRace ?? 0);
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
   const races = round.races || [];
-
-  const TAB_WIDTH = SCREEN_WIDTH / races.length;
 
   useEffect(() => { Analytics.roundResultsViewed(year, round.round); }, []);
 
   const rStart = (round.round - 1) * 3 + 1;
   const rEnd = rStart + 2;
-
-  const goToRace = (i) => {
-    setRaceIndex(i);
-  };
 
   const makeRenderResult = (gridMap) => ({item}) => {
     const isDNF = item.position === 0 || item.time === 'DNF' || item.time === 'Ret';
@@ -145,66 +136,39 @@ export default function RoundResultsScreen({route, navigation}) {
         </View>
       </View>
 
-      {races.length > 1 && (
-        <View style={styles.raceTabRow}>
-          {races.map((r, i) => (
-            <TouchableOpacity
-              key={i}
-              style={styles.raceTab}
-              onPress={() => goToRace(i)}
-              accessibilityRole="tab"
-              accessibilityLabel={r.label}>
-              <Text style={[styles.raceTabText, raceIndex === i && styles.raceTabTextActive]}>
-                {shortLabel(r.label)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-          <View style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: TAB_WIDTH,
-            height: 2,
-            backgroundColor: Colors.yellow,
-            transform: [{translateX: TAB_WIDTH * raceIndex}],
-          }} />
-        </View>
-      )}
-
-      {(() => {
-        const race = races[raceIndex];
-        const results = race?.results || [];
-        const gridMap = buildGridMap(races, raceIndex);
-        return (
-          <View style={{flex: 1}}>
-            {race?.date && race.date !== round.date && (
-              <Text style={styles.raceDateLabel}>{race.date}</Text>
-            )}
-            <FlatList
-              key={raceIndex}
-              data={results}
-              keyExtractor={(_, idx) => String(idx)}
-              renderItem={makeRenderResult(gridMap)}
-              contentContainerStyle={{padding: 16, paddingBottom: 20}}
-              ListHeaderComponent={race?.fullRaceUrl ? (
-                <TouchableOpacity
-                  style={styles.youtubeBtn}
-                  activeOpacity={0.8}
-                  onPress={() => Linking.openURL(race.fullRaceUrl)}
-                  accessibilityLabel="Watch full race on YouTube"
-                  accessibilityRole="button">
-                  <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
-                  <Text style={styles.youtubeBtnText}>Watch Full Race</Text>
-                  <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
-                </TouchableOpacity>
-              ) : null}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>No results available</Text>
-              }
-            />
-          </View>
-        );
-      })()}
+      <SwipeableTabs
+        tabs={races.map(r => shortLabel(r.label))}
+        initialPage={initialRace ?? 0}
+        pages={races.map((race, i) => {
+          const gridMap = buildGridMap(races, i);
+          return (
+            <View style={{flex: 1}}>
+              {race?.date && race.date !== round.date && (
+                <Text style={styles.raceDateLabel}>{race.date}</Text>
+              )}
+              <FlatList
+                data={race?.results || []}
+                keyExtractor={(_, idx) => String(idx)}
+                renderItem={makeRenderResult(gridMap)}
+                contentContainerStyle={{padding: 16, paddingBottom: 20}}
+                ListHeaderComponent={race?.fullRaceUrl ? (
+                  <TouchableOpacity
+                    style={styles.youtubeBtn}
+                    activeOpacity={0.8}
+                    onPress={() => Linking.openURL(race.fullRaceUrl)}
+                    accessibilityLabel="Watch full race on YouTube"
+                    accessibilityRole="button">
+                    <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
+                    <Text style={styles.youtubeBtnText}>Watch Full Race</Text>
+                    <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                ) : null}
+                ListEmptyComponent={<Text style={styles.emptyText}>No results available</Text>}
+              />
+            </View>
+          );
+        })}
+      />
     </View>
   );
 }
