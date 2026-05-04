@@ -35,7 +35,11 @@ export default function SwipeableTabs({
       useNativeDriver: true,
       tension: 200,
       friction: 20,
-    }).start();
+    }).start(() => {
+      // Reset only after the spring settles — keeps programmatic=true long enough
+      // to block any trailing onPageScroll events fired by setPageWithoutAnimation.
+      programmatic.current = false;
+    });
     setCurrentPage(i);
     onTabChange?.(i);
   }, [indicatorX, tabW, onTabChange]);
@@ -52,7 +56,7 @@ export default function SwipeableTabs({
       setCurrentPage(position);
       onTabChange?.(position);
     }
-    programmatic.current = false;
+    // programmatic reset is handled by the spring completion callback, not here.
   }, [onTabChange]);
 
   return (
