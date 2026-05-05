@@ -3,23 +3,22 @@ import {View, Text, TouchableOpacity, StyleSheet, Modal, Linking, Platform} from
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 
-const STORE_URL = Platform.OS === 'ios'
-  ? 'https://apps.apple.com/gb/app/btcc-hub/id6762619368'
-  : 'https://play.google.com/store/apps/details?id=com.btccfanhub';
-const STORE_NAME = Platform.OS === 'ios' ? 'App Store' : 'Play Store';
-
 export default function UpdateDialog({visible, onDismiss}) {
+  const storeUrl = Platform.OS === 'ios'
+    ? 'https://apps.apple.com/gb/app/btcc-hub/id6762619368'
+    : 'https://play.google.com/store/apps/details?id=com.btccfanhub';
+  const storeName = Platform.OS === 'ios' ? 'App Store' : 'Play Store';
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay}>
         <View style={styles.card}>
           <Icon name="system-update" size={36} color={Colors.yellow} style={{marginBottom: 12}} />
           <Text style={styles.title}>Update Available</Text>
-          <Text style={styles.body}>A new version of BTCC Hub is available on the {STORE_NAME} with improvements and fixes.</Text>
+          <Text style={styles.body}>A new version of BTCC Hub is available on the {storeName} with improvements and fixes.</Text>
           <TouchableOpacity
             style={styles.updateBtn}
-            onPress={() => Linking.openURL(STORE_URL)}
-            accessibilityLabel={`Update on ${STORE_NAME}`}
+            onPress={() => Linking.openURL(storeUrl)}
+            accessibilityLabel={`Update on ${storeName}`}
             accessibilityRole="button">
             <Text style={styles.updateText}>UPDATE NOW</Text>
           </TouchableOpacity>
