@@ -2,7 +2,7 @@ import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NewsScreen from '../../src/screens/NewsScreen';
-import {renderWithProviders, makeNav, MOCK_ARTICLES} from './testUtils';
+import {renderWithProviders, makeNav, MOCK_ARTICLES, MOCK_ARTICLES_WITH_DIGEST} from './testUtils';
 
 jest.mock('../../src/api/client', () => ({
   fetchArticles: jest.fn(),
@@ -15,9 +15,10 @@ jest.mock('../../src/api/parsers', () => ({
 const {fetchArticles, fetchHubPosts} = require('../../src/api/client');
 const nav = makeNav();
 
-function renderNews({articles = MOCK_ARTICLES, favourites = []} = {}) {
+function renderNews({articles = MOCK_ARTICLES, favourites = [], hideDigests = false} = {}) {
   AsyncStorage.getItem.mockImplementation((key) => {
     if (key === 'favourite_drivers') return Promise.resolve(JSON.stringify(favourites));
+    if (key === 'setting_hide_digests') return Promise.resolve(hideDigests ? 'true' : null);
     return Promise.resolve(null);
   });
   fetchArticles.mockResolvedValue(articles);
@@ -114,6 +115,32 @@ describe('NewsScreen', () => {
       await waitFor(() => getByLabelText('Featured article: Ingram wins Race 1 at Donington'));
       expect(getByLabelText('Featured article: Ingram wins Race 1 at Donington'))
         .not.toHaveStyle({borderLeftColor: '#febd02'});
+    });
+  });
+
+  describe('hideDigests setting', () => {
+    it('digest article is visible when hideDigests is false', async () => {
+      const {getByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST, hideDigests: false});
+      await waitFor(() => {
+        expect(getByText('Donington Park Race Weekend Digest')).toBeTruthy();
+      });
+    });
+
+    it('digest article is hidden when hideDigests is true', async () => {
+      const {queryByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST, hideDigests: true});
+      await waitFor(() => {
+        // Wait for load to complete by checking a non-digest article is present
+        expect(queryByText('Ingram wins Race 1 at Donington')).toBeTruthy();
+      });
+      expect(queryByText('Donington Park Race Weekend Digest')).toBeNull();
+    });
+
+    it('non-digest articles are still shown when hideDigests is true', async () => {
+      const {getByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST, hideDigests: true});
+      await waitFor(() => {
+        expect(getByText('Ingram wins Race 1 at Donington')).toBeTruthy();
+        expect(getByText('Shedden claims pole position')).toBeTruthy();
+      });
     });
   });
 

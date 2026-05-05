@@ -118,3 +118,9 @@ export const MOCK_ARTICLES = [
   {id: 3, title: 'Turkington battles through the field',  pubDate: '18 Apr 2026', imageUrl: null, source: 'btcc.net', category: 'LATEST NEWS', sortDate: '2026-04-18'},
   {id: 4, title: 'Round 1 preview',                       pubDate: '17 Apr 2026', imageUrl: null, source: 'btcc.net', category: 'LATEST NEWS', sortDate: '2026-04-17'},
 ];
+
+// Same as MOCK_ARTICLES but with a Weekly Digest article appended
+export const MOCK_ARTICLES_WITH_DIGEST = [
+  ...MOCK_ARTICLES,
+  {id: 5, title: 'Donington Park Race Weekend Digest', pubDate: '20 Apr 2026', imageUrl: null, source: 'btcc.net', category: 'Weekly Digest', sortDate: '2026-04-20'},
+];

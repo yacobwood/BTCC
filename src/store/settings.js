@@ -26,6 +26,7 @@ const LEAF_TOPICS = {
 // For each leaf, which parent keys must also be true for the subscription to be active
 const PARENT_CHAIN = {
   newsAlerts:        [],
+  digestAlerts:      [],
   weekendPreview:    [],
   standingsUpdate:   [],
   podcastAlerts:     [],

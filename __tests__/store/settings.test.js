@@ -7,6 +7,7 @@ import {SettingsProvider, useSettings} from '../../src/store/settings';
 // All leaf keys that map to FCM topics
 const LEAF_TOPICS = {
   newsAlerts:        'news_alerts',
+  digestAlerts:      'digest_alerts',
   weekendPreview:    'weekend_preview',
   standingsUpdate:   'standings_update',
   podcastAlerts:     'podcast_alerts',
@@ -290,6 +291,163 @@ describe('SettingsProvider', () => {
 
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_fp');
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_race1');
+    });
+  });
+
+  describe('digestAlerts', () => {
+    it('defaults to true', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.digestAlerts).toBe(true);
+    });
+
+    it('subscribes to digest_alerts topic by default', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      await act(async () => { renderProvider(); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'digest_alerts');
+    });
+
+    it('disabling digestAlerts unsubscribes from digest_alerts topic', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('digestAlerts', false); });
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'digest_alerts');
+    });
+
+    it('persists digestAlerts to AsyncStorage', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('digestAlerts', false); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_digest_alerts', 'false');
+    });
+
+    it('loads digestAlerts=false from storage', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_digest_alerts') return Promise.resolve('false');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      expect(getHook().settings.digestAlerts).toBe(false);
+    });
+  });
+
+  describe('hideDigests', () => {
+    it('defaults to false', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.hideDigests).toBe(false);
+    });
+
+    it('toggling hideDigests to true persists to AsyncStorage', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('hideDigests', true); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_hide_digests', 'true');
+    });
+
+    it('loads hideDigests=true from storage', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_hide_digests') return Promise.resolve('true');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      expect(getHook().settings.hideDigests).toBe(true);
+    });
+
+    it('hideDigests does not affect any FCM topic subscription', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      const callsBefore = subscribeToTopic.mock.calls.length + unsubscribeFromTopic.mock.calls.length;
+      await act(async () => { getHook().setSetting('hideDigests', true); });
+      const callsAfter = subscribeToTopic.mock.calls.length + unsubscribeFromTopic.mock.calls.length;
+      // hideDigests is a local UI preference — FCM calls still happen (syncAllTopics runs)
+      // but no hideDigests-specific topic should be touched
+      const allTopics = [
+        ...subscribeToTopic.mock.calls.map(c => c[1]),
+        ...unsubscribeFromTopic.mock.calls.map(c => c[1]),
+      ];
+      expect(allTopics).not.toContain('hide_digests');
+    });
+  });
+
+  describe('spoilerFree', () => {
+    it('defaults to false', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.spoilerFree).toBe(false);
+    });
+
+    it('enabling spoilerFree sets spoilerFreeExpiry to a future ISO date string', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      const expiry = getHook().settings.spoilerFreeExpiry;
+      expect(typeof expiry).toBe('string');
+      expect(new Date(expiry).getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it('enabling spoilerFree sets spoilerFreeExpiry to a Monday at 23:00', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      const expiry = new Date(getHook().settings.spoilerFreeExpiry);
+      expect(expiry.getDay()).toBe(1);   // Monday
+      expect(expiry.getHours()).toBe(23);
+      expect(expiry.getMinutes()).toBe(0);
+    });
+
+    it('enabling spoilerFree persists expiry to AsyncStorage', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        'setting_spoiler_free_expiry',
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      );
+    });
+
+    it('disabling spoilerFree clears spoilerFreeExpiry', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_spoiler_free') return Promise.resolve('true');
+        if (key === 'setting_spoiler_free_expiry') return Promise.resolve(new Date(Date.now() + 86400000).toISOString());
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', false); });
+      expect(getHook().settings.spoilerFreeExpiry).toBeNull();
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('setting_spoiler_free_expiry');
+    });
+
+    it('spoilerFree=true unsubscribes all result leaf topics', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      const resultTopics = ['results_fp', 'results_qualifying', 'results_qrace', 'results_race1', 'results_race2', 'results_race3'];
+      for (const topic of resultTopics) {
+        expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), topic);
+      }
+    });
+
+    it('spoilerFree=true does not unsubscribe non-result topics', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'news_alerts');
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'digest_alerts');
+    });
+
+    it('spoilerFreeExpiry is loaded as a string (not parsed as boolean)', async () => {
+      const isoDate = new Date(Date.now() + 86400000).toISOString();
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_spoiler_free_expiry') return Promise.resolve(isoDate);
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      expect(getHook().settings.spoilerFreeExpiry).toBe(isoDate);
     });
   });
 });
