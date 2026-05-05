@@ -38,15 +38,15 @@ describe('RoundResultsScreen', () => {
     });
 
     it('switching tabs renders different results', async () => {
-      const {getByText} = renderRound({initialRace: 0});
-      // FP: Ingram P1
-      expect(getByText('Tom INGRAM')).toBeTruthy();
+      const {getByText, queryByText} = renderRound({initialRace: 0});
+      // FP: no points shown
+      expect(queryByText('+25 pts')).toBeNull();
 
       await act(async () => {
         fireEvent.press(getByText('R1'));
       });
-      // Race 1: Shedden P1
-      expect(getByText('Gordon SHEDDEN')).toBeTruthy();
+      // Race 1: Shedden wins 25 pts — only appears after switching to R1
+      expect(getByText('+25 pts')).toBeTruthy();
     });
   });
 

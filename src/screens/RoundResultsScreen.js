@@ -139,6 +139,7 @@ export default function RoundResultsScreen({route, navigation}) {
       <SwipeableTabs
         tabs={races.map(r => shortLabel(r.label))}
         initialPage={initialRace ?? 0}
+        lazy={true}
         pages={races.map((race, i) => {
           const gridMap = buildGridMap(races, i);
           return (
