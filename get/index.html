@@ -224,12 +224,9 @@
     const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.btccfanhub';
 
     if (isIOS) {
-      document.getElementById('view-ios').style.display = 'block';
-      // Redirect automatically after a brief moment so the page renders first
-      setTimeout(() => { window.location.href = appStoreUrl; }, 800);
+      window.location.replace(appStoreUrl);
     } else if (isAndroid) {
-      document.getElementById('view-android').style.display = 'block';
-      setTimeout(() => { window.location.href = playStoreUrl; }, 800);
+      window.location.replace(playStoreUrl);
     } else {
       // Desktop / unknown — show both store buttons
       document.getElementById('view-ios').style.display = 'block';
