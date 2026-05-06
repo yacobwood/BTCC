@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTCC Hub — Download the App</title>
+  <meta name="description" content="The ultimate companion app for British Touring Car Championship fans. Live standings, results, news and more.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="BTCC Hub">
+  <meta property="og:description" content="Live standings, results, news and more — all in one app.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_images/og-image.png">
+  <meta property="og:url" content="https://yacobwood.github.io/BTCC/get">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #080912;
+      --card:     #10121f;
+      --surface:  #181b2e;
+      --yellow:   #FEBD02;
+      --text:     #f0f2ff;
+      --text-sec: #8087a8;
+      --outline:  #2a2d45;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 52px;
+      box-shadow: 0 8px 32px rgba(254,189,2,0.25);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    h1 span { color: var(--yellow); }
+
+    .tagline {
+      font-size: 15px;
+      color: var(--text-sec);
+      line-height: 1.5;
+      max-width: 280px;
+      margin: 0 auto 36px;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--yellow);
+      color: #000;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 16px 32px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.2px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(254,189,2,0.3);
+    }
+
+    .cta-btn:active { transform: scale(0.97); }
+
+    .cta-btn svg { flex-shrink: 0; }
+
+    .android-card {
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 16px;
+      padding: 20px 24px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .android-card h2 {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .android-card p {
+      font-size: 13px;
+      color: var(--text-sec);
+      line-height: 1.6;
+    }
+
+    .ios-link {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--yellow);
+      text-decoration: none;
+    }
+
+    .redirecting {
+      font-size: 13px;
+      color: var(--text-sec);
+      margin-top: 16px;
+    }
+
+    .dot-anim::after {
+      content: '';
+      animation: dots 1.4s infinite;
+    }
+
+    @keyframes dots {
+      0%   { content: ''; }
+      33%  { content: '.'; }
+      66%  { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    .features {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 32px;
+      max-width: 340px;
+    }
+
+    .feature-chip {
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: var(--text-sec);
+    }
+
+    footer {
+      margin-top: 48px;
+      font-size: 11px;
+      color: var(--text-sec);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- iOS view -->
+  <div id="view-ios" style="display:none">
+    <div class="icon">🏁</div>
+    <h1>BTCC <span>Hub</span></h1>
+    <p class="tagline">Live standings, results, news and more — the ultimate BTCC companion.</p>
+    <a id="appstore-btn" class="cta-btn" href="https://apps.apple.com/gb/app/btcc-hub/id6762619368">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M15.5 11.7c0-2.6 2.1-3.8 2.2-3.9-1.2-1.7-3-2-3.7-2-1.6-.2-3.1 1-3.9 1-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.6-1.8 3.1-.5 7.6 1.2 10.1.8 1.2 1.8 2.5 3.1 2.5 1.2 0 1.7-.8 3.2-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.2-.9-2.2-3.2zM13.1 4c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.1-.6 2.9-1.4z" fill="currentColor"/>
+      </svg>
+      Download on the App Store
+    </a>
+    <p class="redirecting"><span class="dot-anim">Opening App Store</span></p>
+    <div class="features">
+      <span class="feature-chip">🏆 Live Standings</span>
+      <span class="feature-chip">🏎 Race Results</span>
+      <span class="feature-chip">📰 Latest News</span>
+      <span class="feature-chip">📅 Race Calendar</span>
+      <span class="feature-chip">🎙 Podcasts</span>
+      <span class="feature-chip">🔔 Notifications</span>
+    </div>
+  </div>
+
+  <!-- Android view -->
+  <div id="view-android" style="display:none">
+    <div class="icon">🏁</div>
+    <h1>BTCC <span>Hub</span></h1>
+    <p class="tagline">Live standings, results, news and more — the ultimate BTCC companion.</p>
+    <a id="playstore-btn" class="cta-btn" href="https://play.google.com/store/apps/details?id=com.btccfanhub">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M3.2 1.3C2.9 1.6 2.7 2.1 2.7 2.7v16.6c0 .6.2 1.1.5 1.4l.1.1 9.3-9.3v-.2L3.2 1.3z" fill="currentColor" opacity=".8"/>
+        <path d="M15.7 14.6l-3.1-3.1v-.2l3.1-3.1.1.1 3.7 2.1c1.1.6 1.1 1.6 0 2.2l-3.8 2z" fill="currentColor"/>
+        <path d="M15.8 14.5L12.6 11 3.2 20.4c.4.4 1 .4 1.7.1l10.9-6z" fill="currentColor" opacity=".8"/>
+        <path d="M15.8 7.5L4.9 1.5C4.2 1.1 3.6 1.2 3.2 1.6L12.6 11l3.2-3.5z" fill="currentColor" opacity=".6"/>
+      </svg>
+      Get it on Google Play
+    </a>
+    <p class="redirecting"><span class="dot-anim">Opening Google Play</span></p>
+    <div class="features">
+      <span class="feature-chip">🏆 Live Standings</span>
+      <span class="feature-chip">🏎 Race Results</span>
+      <span class="feature-chip">📰 Latest News</span>
+      <span class="feature-chip">📅 Race Calendar</span>
+      <span class="feature-chip">🎙 Podcasts</span>
+      <span class="feature-chip">🔔 Notifications</span>
+    </div>
+  </div>
+
+  <footer>© BTCC Hub</footer>
+
+  <script>
+    // Detect platform and show appropriate view
+    const ua = navigator.userAgent;
+    const isIOS = /iphone|ipad|ipod/i.test(ua);
+    const isAndroid = /android/i.test(ua);
+
+    const appStoreUrl  = 'https://apps.apple.com/gb/app/btcc-hub/id6762619368';
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.btccfanhub';
+
+    if (isIOS) {
+      document.getElementById('view-ios').style.display = 'block';
+      // Redirect automatically after a brief moment so the page renders first
+      setTimeout(() => { window.location.href = appStoreUrl; }, 800);
+    } else if (isAndroid) {
+      document.getElementById('view-android').style.display = 'block';
+      setTimeout(() => { window.location.href = playStoreUrl; }, 800);
+    } else {
+      // Desktop / unknown — show both store buttons
+      document.getElementById('view-ios').style.display = 'block';
+      document.querySelector('.redirecting').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
