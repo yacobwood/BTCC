@@ -13,7 +13,8 @@ const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 // user never sees data more than an hour stale.
 const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
-async function fetchJson(url, cacheKey, forceRefresh = false) {
+// staleFallback: on network error, return any cached value (even expired) rather than throwing
+async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = false) {
   if (cacheKey && !forceRefresh) {
     const cached = await cacheRead(cacheKey, MAX_AGE_MS);
     if (cached) {
@@ -33,6 +34,10 @@ async function fetchJson(url, cacheKey, forceRefresh = false) {
     if (cacheKey) cacheWrite(cacheKey, data);
     return data;
   } catch (e) {
+    if (staleFallback && cacheKey) {
+      const stale = await cacheRead(cacheKey);
+      if (stale) return stale;
+    }
     throw e;
   }
 }
@@ -58,29 +63,7 @@ export async function fetchArticles(page = 1, perPage = 20, search = '') {
   let url = `${BASE_WP}/posts?per_page=${perPage}&page=${page}&_embed=1`;
   if (search) url += `&search=${encodeURIComponent(search)}`;
   const cacheKey = search ? null : `news_p${page}`;
-  if (cacheKey) {
-    const cached = await cacheRead(cacheKey, MAX_AGE_MS);
-    if (cached) {
-      fetch(url)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => { if (data) cacheWrite(cacheKey, data); })
-        .catch(() => {});
-      return cached;
-    }
-  }
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (cacheKey) cacheWrite(cacheKey, data);
-    return data;
-  } catch (e) {
-    if (cacheKey) {
-      const cached = await cacheRead(cacheKey);
-      if (cached) return cached;
-    }
-    throw e;
-  }
+  return fetchJson(url, cacheKey, false, /* staleFallback */ true);
 }
 
 export async function fetchHubPosts() {

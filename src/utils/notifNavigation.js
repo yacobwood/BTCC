@@ -1,3 +1,4 @@
+import {CommonActions} from '@react-navigation/native';
 import {getSeasonData} from '../assets/seasonData';
 
 /**
@@ -7,6 +8,17 @@ import {getSeasonData} from '../assets/seasonData';
  * Supports two formats:
  *   type-based:  { type: "roadmap" }
  *   deeplink:    { deeplink: "btccfanhub://roadmap" }
+ *
+ * Navigator structure (AppNavigator.js):
+ *   Tab: News       → Stack: NewsFeed, Article
+ *   Tab: Calendar   → Stack: CalendarList, TrackDetail, LiveTiming
+ *   Tab: Grid       → Stack: DriversList, DriverDetail, TeamDetail
+ *   Tab: Results    → Stack: ResultsList, RoundResults
+ *   Tab: More       → Stack: MoreMenu, Settings, Radio, Podcasts, Records, Partners, Roadmap
+ *
+ * All nested deep links use CommonActions.reset() so they work on cold start.
+ * navigate('Tab', {screen: 'Nested'}) only works when the nested stack is already
+ * mounted; reset() sets the full state tree directly and works at any lifecycle stage.
  */
 export function navigateFromData(navigationRef, data) {
   if (!data) return;
@@ -23,42 +35,122 @@ export function navigateFromData(navigationRef, data) {
       } catch {}
     }
 
-    if ((type === 'round' || (!type && round)) && round) {
-      navigationRef.navigate('Calendar', {screen: 'TrackDetail', params: {round}});
+    // ── News article ────────────────────────────────────────────────
+    if (type === 'news' && slug) {
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'News',
+            state: {routes: [{name: 'NewsFeed'}, {name: 'Article', params: {slug}}], index: 1},
+          }],
+        }),
+      );
 
-    } else if (type === 'news' && slug) {
-      navigationRef.navigate('News', {screen: 'Article', params: {slug}});
-
+    // ── Results / round ────────────────────────────────────────────
     } else if (type === 'results' && round) {
       const y = parseInt(year, 10) || new Date().getFullYear();
       const season = getSeasonData(y);
       const roundObj = season?.rounds?.find(r => r.round === parseInt(round, 10));
       if (roundObj) {
         const initialRace = race ? parseInt(race, 10) - 1 : 0;
-        navigationRef.navigate('Results', {
-          screen: 'RoundResults',
-          params: {round: roundObj, year: y, initialRace},
-        });
+        navigationRef.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{
+              name: 'Results',
+              state: {
+                routes: [
+                  {name: 'ResultsList'},
+                  {name: 'RoundResults', params: {round: roundObj, year: y, initialRace}},
+                ],
+                index: 1,
+              },
+            }],
+          }),
+        );
       }
 
+    // ── Calendar / round ───────────────────────────────────────────
+    } else if ((type === 'round' || (!type && round)) && round) {
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'Calendar',
+            state: {routes: [{name: 'CalendarList'}, {name: 'TrackDetail', params: {round}}], index: 1},
+          }],
+        }),
+      );
+
+    // ── More → nested screens ──────────────────────────────────────
     } else if (type === 'podcast' || type === 'podcasts') {
-      navigationRef.navigate('More', {screen: 'Podcasts'});
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'More',
+            state: {routes: [{name: 'MoreMenu'}, {name: 'Podcasts'}], index: 1},
+          }],
+        }),
+      );
 
     } else if (type === 'roadmap') {
-      navigationRef.navigate('More', {screen: 'Roadmap'});
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'More',
+            state: {routes: [{name: 'MoreMenu'}, {name: 'Roadmap'}], index: 1},
+          }],
+        }),
+      );
 
     } else if (type === 'records') {
-      navigationRef.navigate('More', {screen: 'Records'});
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'More',
+            state: {routes: [{name: 'MoreMenu'}, {name: 'Records'}], index: 1},
+          }],
+        }),
+      );
 
     } else if (type === 'radio') {
-      navigationRef.navigate('More', {screen: 'Radio'});
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'More',
+            state: {routes: [{name: 'MoreMenu'}, {name: 'Radio'}], index: 1},
+          }],
+        }),
+      );
 
     } else if (type === 'partners') {
-      navigationRef.navigate('More', {screen: 'Partners'});
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'More',
+            state: {routes: [{name: 'MoreMenu'}, {name: 'Partners'}], index: 1},
+          }],
+        }),
+      );
 
     } else if (type === 'settings') {
-      navigationRef.navigate('More', {screen: 'Settings'});
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'More',
+            state: {routes: [{name: 'MoreMenu'}, {name: 'Settings'}], index: 1},
+          }],
+        }),
+      );
 
+    // ── Top-level tabs (no nested screen needed) ───────────────────
     } else if (type === 'calendar') {
       navigationRef.navigate('Calendar');
 

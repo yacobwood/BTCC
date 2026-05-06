@@ -288,6 +288,7 @@ export default function ChatScreen() {
               <TouchableOpacity
                 onPress={handleSend}
                 disabled={!input.trim()}
+                accessibilityLabel="Send message"
                 style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}>
                 <Icon name="send" size={20} color={input.trim() ? Colors.yellow : Colors.textSecondary} />
               </TouchableOpacity>

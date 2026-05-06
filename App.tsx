@@ -69,7 +69,11 @@ function AppDialogs() {
 
   // Flag-based override for testing via admin page device overrides
   useEffect(() => {
-    if (update_available && update_min_version > VERSION_CODE) setShowUpdate(true);
+    if (update_available && update_min_version > VERSION_CODE) {
+      setShowUpdate(true);
+    } else {
+      setShowUpdate(false);
+    }
   }, [update_available, update_min_version]);
 
   const handleOnboardingAllow = async () => {
@@ -103,9 +107,12 @@ export default function App() {
 
     // Handle notifee notification press (background or killed state).
     // notifee.getInitialNotification() stores the press natively — no AsyncStorage race condition.
+    // initialConsumed prevents double-navigation on cold start (mount fires active state immediately after).
+    let initialConsumed = false;
     const consumeNotifeePress = () => {
       notifee.getInitialNotification().then(initial => {
-        if (initial?.notification?.data) {
+        if (initial?.notification?.data && !initialConsumed) {
+          initialConsumed = true;
           console.log('[NOTIF] notifee initial:', JSON.stringify(initial.notification.data));
           _navigate(initial.notification.data as Record<string, string>);
         }

@@ -28,9 +28,10 @@ import {fetchArticleBySlug} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import {getFCMToken} from '../utils/notifications';
 
-const PROJECT_ID = 'btcchub-af77a';
-const API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
-const FS_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+import {FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIRESTORE_BASE} from '../config/firebase';
+const API_KEY = FIREBASE_API_KEY;
+const PROJECT_ID = FIREBASE_PROJECT_ID;
+const FS_BASE = FIRESTORE_BASE;
 const REACTIONS_KEY = 'article_reactions_v1';
 const COMMENTER_NAME_KEY = 'commenter_name';
 
@@ -579,7 +580,7 @@ export default function ArticleScreen({route, navigation}) {
   }, [articleSlug]);
 
   const topPadRef = useRef(topPad);
-  if (!html) topPadRef.current = topPad;
+  if (!article) topPadRef.current = topPad;
 
   const html = useMemo(
     () => article ? buildHtml(article, topPadRef.current) : null,

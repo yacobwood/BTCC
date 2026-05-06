@@ -589,7 +589,7 @@ exports.raceWeekendDigest = onSchedule(
 );
 
 // ── Manual digest trigger — called from admin page ────────────
-const ADMIN_SECRET = 'btcchub-digest-trigger-2026';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'btcchub-digest-trigger-2026';
 
 exports.triggerDigest = onRequest(
   {
