@@ -1868,8 +1868,10 @@ const FLAGS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/f
 const FLAG_DEFS = [
   {key:'radio_tab',               label:'Radio Tab',              desc:'Show the Radio tab in the bottom nav'},
   {key:'banner_ad',               label:'Banner Ad',              desc:'AdMob banner above the bottom nav'},
+  {key:'newsfeed_ad',             label:'Newsfeed Ad',            desc:'AdMob ad injected into the news feed list'},
   {key:'search_ad',               label:'Search Ad',              desc:'AdMob ad shown when news search is open'},
   {key:'podcasts_enabled',        label:'Podcasts',               desc:'Show Podcasts & Interviews in the More tab'},
+  {key:'whats_new',               label:"What's New",             desc:"Show the What's New card on first launch after an update"},
   {key:'live_updates',            label:'Live Updates',           desc:'Live Timing tab is visible'},
   {key:'results_notifications',   label:'Results Notifications',  desc:'Push notifications for race results'},
   {key:'track_weather',           label:'Track Weather',          desc:'Weather card on round detail screens'},
@@ -2096,7 +2098,6 @@ async function sendCustomNotif() {
   if (!confirm(`Send to your device only?\n\n${body ? `"${title}"\n${body}` : `"${title}"`}`)) return;
   const imageUrl  = document.getElementById('custom-image').value.trim();
   const deeplink  = document.getElementById('custom-deeplink').value.trim();
-  if (!title) { alert('Title is required'); return; }
   const data = {};
   if (deeplink) data.deeplink = deeplink;
   await sendTestNotif(channel, title, body, data, imageUrl);
@@ -2613,7 +2614,7 @@ async function dispatchArticleNotif(article) {
       channel: 'news',
       title: article.title || 'New BTCC Hub Article',
       body: article.description || '',
-      data: JSON.stringify({type: 'hub'}),
+      data: JSON.stringify({type: 'hub', id: article.id}),
       image_url: article.imageUrl || '',
     };
     const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {
@@ -2681,10 +2682,15 @@ function updateDashFlags() {
   const el = document.getElementById('dash-flags');
   const on = FLAG_DEFS.filter(f => f.type !== 'number' && flagValues[f.key]);
   const off = FLAG_DEFS.filter(f => f.type !== 'number' && !flagValues[f.key]);
-  el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
-    ${on.map(f => `<span style="background:var(--yellow-dim);border:1px solid rgba(254,189,2,0.3);color:var(--yellow);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700">${f.label}</span>`).join('')}
-    ${off.length > on.length ? `<span style="color:var(--text-sec);font-size:11px;align-self:center">+${off.length} off</span>` : ''}
-  </div>`;
+  el.innerHTML = `
+    <div style="display:flex;gap:16px;margin-bottom:10px">
+      <div style="font-size:22px;font-weight:900;color:var(--green)">${on.length} <span style="font-size:11px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px">on</span></div>
+      <div style="font-size:22px;font-weight:900;color:var(--text-sec)">${off.length} <span style="font-size:11px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:1px">off</span></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px">
+      ${on.map(f => `<span style="background:var(--yellow-dim);border:1px solid rgba(254,189,2,0.25);color:var(--yellow);border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700">${f.label}</span>`).join('')}
+      ${off.map(f => `<span style="background:var(--surface);border:1px solid var(--outline-lo);color:var(--text-sec);border-radius:20px;padding:3px 9px;font-size:11px">${f.label}</span>`).join('')}
+    </div>`;
 }
 
 function updateDashNews() {
@@ -3260,9 +3266,8 @@ async function loadAnalytics() {
   document.getElementById('stat-ideas').textContent = ideaDocs.length;
 }
 
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// escHtml is an alias for htmlEsc (defined above) — kept for call-site compatibility
+const escHtml = htmlEsc;
 
 // ══════════════════════════════ BUG REPORTS ══════════════════════════════
 
