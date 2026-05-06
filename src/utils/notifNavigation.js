@@ -25,7 +25,7 @@ export function navigateFromData(navigationRef, data) {
 
   const go = () => {
     // Resolve type from explicit `type` field or from `deeplink` URL path
-    let {type, round, year, race, slug, deeplink} = data;
+    let {type, round, year, race, slug, deeplink, id, eventId} = data;
 
     if (!type && deeplink) {
       // e.g. "btccfanhub://roadmap" → type = "roadmap"
@@ -82,6 +82,73 @@ export function navigateFromData(navigationRef, data) {
           }],
         }),
       );
+
+    // ── Live timing ────────────────────────────────────────────────
+    } else if (type === 'livetiming' && eventId) {
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{
+            name: 'Calendar',
+            state: {routes: [{name: 'CalendarList'}, {name: 'LiveTiming', params: {eventId}}], index: 1},
+          }],
+        }),
+      );
+
+    // ── Hub article (non-digest) ───────────────────────────────────
+    } else if (type === 'hub' && id) {
+      fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json?t=' + Date.now())
+        .then(r => r.json())
+        .then(data => {
+          const article = data.posts?.find(p => String(p.id) === String(id));
+          if (article) {
+            navigationRef.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{
+                  name: 'News',
+                  state: {routes: [{name: 'NewsFeed'}, {name: 'Article', params: {article}}], index: 1},
+                }],
+              }),
+            );
+          } else {
+            navigationRef.navigate('News');
+          }
+        })
+        .catch(() => navigationRef.navigate('News'));
+
+    // ── Monday Roundup (digest) ────────────────────────────────────
+    } else if (type === 'digest' && id) {
+      fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json?t=' + Date.now())
+        .then(r => r.json())
+        .then(data => {
+          const article = data.posts?.find(p => String(p.id) === String(id));
+          if (article) {
+            navigationRef.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{
+                  name: 'News',
+                  state: {
+                    routes: [{name: 'NewsFeed'}, {name: 'Digests'}, {name: 'Article', params: {article}}],
+                    index: 2,
+                  },
+                }],
+              }),
+            );
+          } else {
+            navigationRef.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{
+                  name: 'News',
+                  state: {routes: [{name: 'NewsFeed'}, {name: 'Digests'}], index: 1},
+                }],
+              }),
+            );
+          }
+        })
+        .catch(() => navigationRef.navigate('News'));
 
     // ── More → nested screens ──────────────────────────────────────
     } else if (type === 'podcast' || type === 'podcasts') {

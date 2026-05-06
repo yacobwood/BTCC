@@ -16,14 +16,14 @@ const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
-// Session name → FCM topic
+// Session name → FCM topic (must match LEAF_TOPICS in src/store/settings.js)
 const SESSION_TOPICS = {
-  'Free Practice': 'fp_alerts',
-  'Qualifying': 'qualifying_alerts',
-  'Qualifying Race': 'race_alerts',
-  'Race 1': 'race_alerts',
-  'Race 2': 'race_alerts',
-  'Race 3': 'race_alerts',
+  'Free Practice':   'pre_fp',
+  'Qualifying':      'pre_qualifying',
+  'Qualifying Race': 'pre_qrace',
+  'Race 1':          'pre_race1',
+  'Race 2':          'pre_race2',
+  'Race 3':          'pre_race3',
 };
 
 // Session name → Android notification channel
@@ -151,6 +151,7 @@ exports.sendSessionNotifications = onSchedule(
               },
               android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
               apns: {payload: {aps: {sound: 'default'}}},
+              ...(round.tslEventId ? {data: {type: 'livetiming', eventId: String(round.tslEventId)}} : {}),
             }),
           );
         }
@@ -190,6 +191,7 @@ exports.sendSessionNotifications = onSchedule(
               },
               android: {notification: {channelId: 'standings'}},
               apns: {payload: {aps: {sound: 'default'}}},
+              data: {type: 'history'},
             }),
           );
         }
@@ -523,11 +525,13 @@ async function runDigest(label, promptIntro) {
 
   // ── Notify subscribers ───────────────────────────────────────
   try {
+    const episodeNumber = hubNews.posts.filter(p => p.category === 'Weekly Digest').length;
+    const notifBody = `Episode ${episodeNumber} — ${title}`;
     await messaging.send({
       topic: 'digest_alerts',
       android: {collapseKey: postId, priority: 'high', ttl: 86400000},
-      apns: {payload: {aps: {sound: 'default', alert: {title: 'BTCC Hub', body: title}}}},
-      data: {type: 'hub', id: postId, channel: 'news', title},
+      apns: {payload: {aps: {sound: 'default', alert: {title: 'BTCC Monday Roundup', body: notifBody}}}},
+      data: {type: 'digest', id: postId, channel: 'news', title},
     });
   } catch (e) {
     console.error(`${label}: notification failed:`, e);

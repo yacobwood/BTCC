@@ -11,7 +11,7 @@ const CHART_COLORS = [
 
 const screenWidth = Dimensions.get('window').width;
 
-function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
+function ProgressionChart({series: rawSeries, pointLabels = [], isFavourite}) {
   // Deduplicate and prepend a R0 origin point (0 pts) so all lines start from the bottom-left
   const series = rawSeries
     .filter((s, i, arr) => arr.findIndex(x => x.name === s.name) === i)
@@ -74,12 +74,20 @@ function ProgressionChart({series: rawSeries, roundLabels, isFavourite}) {
               <SvgText x={padL - 6} y={y(v) + 4} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{v}</SvgText>
             </React.Fragment>
           ))}
-          {/* X-axis labels — skip index 0 (R0 origin point, no label) */}
-          {Array.from({length: maxRounds}, (_, i) => i === 0 ? null : (
-            <SvgText key={i} x={x(i)} y={chartH - 4} fill={Colors.textSecondary} fontSize={8} textAnchor="middle">
-              R{i}
-            </SvgText>
-          ))}
+          {/* X-axis labels — index 0 is the R0 origin, real labels start at 1 */}
+          {Array.from({length: maxRounds}, (_, i) => {
+            if (i === 0) return null;
+            const label = pointLabels[i - 1]; // pointLabels has no origin entry
+            if (!label) return null;
+            const xPos = x(i);
+            // Use "end" anchor at the right edge to prevent clipping
+            const anchor = xPos >= chartW - padR - 4 ? 'end' : 'middle';
+            return (
+              <SvgText key={i} x={xPos} y={chartH - 4} fill={Colors.textSecondary} fontSize={8} textAnchor={anchor}>
+                {label}
+              </SvgText>
+            );
+          })}
           {/* Lines — split into segments at null gaps (late-joining drivers) */}
           {series.map((s, si) => {
             if (visible[s.name] === false) return null;

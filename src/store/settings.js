@@ -47,7 +47,6 @@ const PARENT_CHAIN = {
 const STORAGE_KEYS = {
   newsAlerts:          'setting_news_alerts',
   digestAlerts:        'setting_digest_alerts',
-  hideDigests:         'setting_hide_digests',
   weekendPreview:      'setting_weekend_preview',
   standingsUpdate:     'setting_standings_update',
   podcastAlerts:       'setting_podcast_alerts',
@@ -75,7 +74,6 @@ const STORAGE_KEYS = {
 const defaults = {
   newsAlerts:          true,
   digestAlerts:        true,
-  hideDigests:         false,
   weekendPreview:      true,
   standingsUpdate:     true,
   podcastAlerts:       true,

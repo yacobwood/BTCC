@@ -45,6 +45,7 @@ import BugReportScreen from '../screens/BugReportScreen';
 import RadioScreen from '../screens/RadioScreen';
 import TocaRadioScreen from '../screens/TocaRadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
+import DigestsScreen from '../screens/DigestsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
@@ -68,6 +69,7 @@ function NewsStack() {
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="NewsFeed" component={NewsScreen} />
       <Stack.Screen name="Article" component={ArticleScreen} />
+      <Stack.Screen name="Digests" component={DigestsScreen} />
     </Stack.Navigator>
   );
 }

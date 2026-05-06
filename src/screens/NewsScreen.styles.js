@@ -164,4 +164,32 @@ export default StyleSheet.create({
     alignItems: 'center',
     elevation: 6,
   },
+
+  // Digest banner (between hero and grid)
+  digestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: -10,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  digestBannerUnread: {
+    backgroundColor: Colors.yellow,
+  },
+  digestBannerRead: {
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+  },
+  digestBannerIcon: {marginRight: 12},
+  digestBannerText: {fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: '#fff'},
+  digestBannerTextUnread: {color: '#000'},
+  digestBannerTextRead: {color: Colors.textSecondary},
+  digestBannerSub: {fontSize: 12, marginTop: 2, color: '#fff'},
+  digestBannerSubUnread: {color: '#000', opacity: 0.6},
+  digestBannerSubRead: {color: Colors.textSecondary},
+  digestBannerChevronUnread: {opacity: 0.5},
 });

@@ -48,28 +48,38 @@ function computeSeasonStats(rounds) {
   return Object.values(map).sort((a, b) => b.points - a.points);
 }
 
+const SCORING_RACES = ['Qualifying Race', 'Race 1', 'Race 2', 'Race 3'];
+
 function computeProgression(rounds) {
   const driverPoints = {};
-  const firstRound = {}; // round index when driver first appeared
+  const firstPoint = {}; // point index when driver first appeared
   const series = {};
+  const pointLabels = []; // label for each x-axis point
   const sortedRounds = [...rounds]
     .sort((a, b) => a.round - b.round)
     .filter(r => r.races.some(race => race.results.length > 0));
   sortedRounds.forEach((round, roundIdx) => {
-    for (const race of round.races) {
+    const scoringRaces = round.races.filter(race => SCORING_RACES.includes(race.label) && race.results.length > 0);
+    scoringRaces.forEach((race, raceIdx) => {
       for (const r of race.results) {
         if (!r.driver) continue;
         driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points;
-        if (firstRound[r.driver] === undefined) firstRound[r.driver] = roundIdx;
+        if (firstPoint[r.driver] === undefined) firstPoint[r.driver] = pointLabels.length;
         if (!series[r.driver]) series[r.driver] = {name: r.driver, points: []};
       }
-    }
-    // Snapshot after each round — null for rounds before driver's first appearance
-    for (const name of Object.keys(series)) {
-      series[name].points.push(roundIdx >= firstRound[name] ? (driverPoints[name] || 0) : null);
-    }
+      // Label: show round number on the last race of each round (marks the round boundary)
+      const isLastRace = raceIdx === scoringRaces.length - 1;
+      pointLabels.push(isLastRace ? `R${round.round}` : '');
+      // Snapshot after each scoring race
+      for (const name of Object.keys(series)) {
+        series[name].points.push(pointLabels.length - 1 >= firstPoint[name] ? (driverPoints[name] || 0) : null);
+      }
+    });
   });
-  return Object.values(series).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0));
+  return {
+    series: Object.values(series).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0)),
+    pointLabels,
+  };
 }
 
 // Build a driver-name → team map from race results to fill gaps in standings
@@ -146,10 +156,10 @@ export default function ResultsScreen({navigation, route}) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [bundledStats, setBundledStats] = useState(null);
-  const [bundledProgression, setBundledProgression] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showYearPicker, setShowYearPicker] = useState(false);
 
+  const progressionCache = useRef({});
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
   const resultsListRef = useRef(null);
@@ -210,7 +220,6 @@ export default function ResultsScreen({navigation, route}) {
       }));
       setStandings({season: String(y), round: 0, venue: '', drivers, teams});
       setBundledStats(season.driverStats || null);
-      setBundledProgression(season.progression || null);
       setResults(season.rounds ? season.rounds.map((r, i) => ({
         round: r.round || i + 1,
         venue: r.venue || '',
@@ -240,7 +249,6 @@ export default function ResultsScreen({navigation, route}) {
     } else {
       setStandings(null);
       setBundledStats(null);
-      setBundledProgression(null);
       setResults([]);
     }
     setLoading(false);
@@ -256,7 +264,6 @@ export default function ResultsScreen({navigation, route}) {
 
     // 2026: stale-while-revalidate from cache, then fetch
     setBundledStats(null);
-      setBundledProgression(null);
 
       if (!forceRefresh) {
         const [cachedResults, cachedStandings] = await Promise.all([
@@ -368,15 +375,14 @@ export default function ResultsScreen({navigation, route}) {
     return computeSeasonStats(results);
   }, [results, bundledStats]);
 
-  const progression = useMemo(() => {
-    if (bundledProgression) {
-      return bundledProgression.map(p => ({
-        name: p.driver || '',
-        points: p.cumulativePointsByRound || [],
-      })).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0));
-    }
-    return computeProgression(results);
-  }, [results, bundledProgression]);
+  const {progression, pointLabels} = useMemo(() => {
+    // Cache by year — historical years never change so no need to recompute
+    if (progressionCache.current[year]) return progressionCache.current[year];
+    const {series, pointLabels: labels} = computeProgression(results);
+    const computed = {progression: series, pointLabels: labels};
+    if (year !== 2026) progressionCache.current[year] = computed; // don't cache live year
+    return computed;
+  }, [year, results]);
 
   const renderDriverStanding = useCallback(({item}) => {
     const fav = isFavourite(item.name);
@@ -616,7 +622,7 @@ export default function ResultsScreen({navigation, route}) {
           <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20}} onScroll={onListScroll} scrollEventThrottle={100}>
             <ProgressionChart
               series={progression}
-              roundLabels={results.filter(r => r.races.some(race => race.results.length > 0)).sort((a, b) => a.round - b.round).map(r => r.venue)}
+              pointLabels={pointLabels}
               isFavourite={isFavourite}
             />
           </ScrollView>

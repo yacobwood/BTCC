@@ -21,14 +21,14 @@ import CachedImage, {prefetchImages} from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import AdBanner from '../components/AdBanner';
 import AdSearchBanner from '../components/AdSearchBanner';
+import {useFocusEffect} from '@react-navigation/native';
 import {useFeatureFlags} from '../store/featureFlags';
-import {useSettings} from '../store/settings';
 import {useFavouriteDriver} from '../store/favouriteDriver';
+import {getReadIds} from '../utils/digestRead';
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
   const {search_ad, hub_news_enabled} = useFeatureFlags();
-  const {settings} = useSettings();
   const {favourites} = useFavouriteDriver();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +46,7 @@ export default function NewsScreen({navigation}) {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [searchKeyboardShown, setSearchKeyboardShown] = useState(false);
   const [error, setError] = useState(null);
+  const [digestReadIds, setDigestReadIds] = useState(new Set());
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
@@ -84,6 +85,7 @@ export default function NewsScreen({navigation}) {
 
 
   useEffect(() => { Analytics.screen('news'); }, []);
+  useFocusEffect(useCallback(() => { getReadIds().then(setDigestReadIds); }, []));
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
@@ -140,21 +142,24 @@ export default function NewsScreen({navigation}) {
     if (searchActive && searchQuery.length >= 2) {
       return searchResults.map(a => ({type: 'compact', article: a}));
     }
-    const visible = settings.hideDigests
-      ? articles.filter(a => a.category !== 'Weekly Digest')
-      : articles;
-    const hero = visible.length > 0 ? visible[0] : null;
-    const gridArticles = visible.slice(1, 3);
-    const remaining = visible.slice(3);
+    const digests = articles.filter(a => a.category === 'Weekly Digest');
+    const nonDigests = articles.filter(a => a.category !== 'Weekly Digest');
+    const hero = nonDigests[0] ?? null;
+    const gridArticles = nonDigests.slice(1, 3);
+    const remaining = nonDigests.slice(3);
     const data = [];
     if (hero) data.push({type: 'hero', article: hero});
     if (gridArticles.length > 0) data.push({type: 'grid', articles: gridArticles});
+    if (digests.length > 0) {
+      const unread = digests.filter(a => !digestReadIds.has(String(a.id))).length;
+      data.push({type: 'digestBanner', count: digests.length, unread});
+    }
     if (remaining.length > 0) {
       data.push({type: 'moreHeader'});
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  }, [articles, searchActive, searchQuery, searchResults, settings.hideDigests]);
+  }, [articles, searchActive, searchQuery, searchResults, digestReadIds]);
 
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
@@ -166,6 +171,17 @@ export default function NewsScreen({navigation}) {
         return <Text style={styles.moreHeader}>MORE STORIES</Text>;
       case 'compact':
         return <CompactCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source); openArticle(item.article); }} />;
+      case 'digestBanner':
+        return (
+          <DigestBanner
+            count={item.count}
+            unread={item.unread}
+            onPress={() => {
+              Analytics.navItemClicked('digest_banner');
+              navigation.navigate('Digests');
+            }}
+          />
+        );
       default:
         return null;
     }
@@ -341,6 +357,43 @@ function GridRow({articles, favourite, onPress}) {
         </TouchableOpacity>
       ))}
     </View>
+  );
+}
+
+// ── Digest Banner ─────────────────────────────────────────────────
+function DigestBanner({count, unread, onPress}) {
+  const hasUnread = unread > 0;
+  const subtitle = hasUnread
+    ? `${unread} unread edition${unread !== 1 ? 's' : ''}`
+    : 'All caught up';
+  return (
+    <TouchableOpacity
+      style={[styles.digestBanner, hasUnread ? styles.digestBannerUnread : styles.digestBannerRead]}
+      activeOpacity={0.8}
+      onPress={onPress}
+      accessibilityLabel="View BTCC Monday Roundup"
+      accessibilityRole="button">
+      <Icon
+        name="library-books"
+        size={22}
+        color={hasUnread ? '#000' : Colors.textSecondary}
+        style={styles.digestBannerIcon}
+      />
+      <View style={{flex: 1}}>
+        <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: hasUnread ? '#000' : Colors.textSecondary}}>
+          BTCC MONDAY ROUNDUP
+        </Text>
+        <Text style={{fontSize: 12, marginTop: 2, color: hasUnread ? 'rgba(0,0,0,0.6)' : Colors.textSecondary}}>
+          {subtitle}
+        </Text>
+      </View>
+      <Icon
+        name="chevron-right"
+        size={22}
+        color={hasUnread ? '#000' : Colors.textSecondary}
+        style={hasUnread && styles.digestBannerChevronUnread}
+      />
+    </TouchableOpacity>
   );
 }
 

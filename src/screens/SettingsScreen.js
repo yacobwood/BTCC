@@ -82,8 +82,8 @@ export default function SettingsScreen({navigation}) {
           onToggle={toggle('newsAlerts')}
         />
         <SettingRow
-          label="Weekly digest"
-          description="Get notified when a new weekly or race weekend digest is published"
+          label="Monday Roundup"
+          description="Get notified when a new BTCC Monday Roundup drops"
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
@@ -223,15 +223,6 @@ export default function SettingsScreen({navigation}) {
           description="Tuesday reminder to check standings after each round"
           value={settings.standingsUpdate}
           onToggle={toggle('standingsUpdate')}
-        />
-
-        <View style={styles.divider} />
-        <Text style={styles.sectionTitle}>CUSTOMISATION</Text>
-        <SettingRow
-          label="Hide digests from news feed"
-          description="Remove weekly and race weekend digests from the news feed"
-          value={settings.hideDigests}
-          onToggle={toggle('hideDigests')}
         />
 
         <View style={styles.divider} />
