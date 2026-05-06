@@ -44,16 +44,6 @@ describe('SettingsScreen', () => {
       expect(getByText('NOTIFICATIONS')).toBeTruthy();
     });
 
-    it('renders the CUSTOMISATION section heading', async () => {
-      const {getByText} = await renderSettings();
-      expect(getByText('CUSTOMISATION')).toBeTruthy();
-    });
-
-    it('renders the Hide digests toggle', async () => {
-      const {getByLabelText} = await renderSettings();
-      expect(getByLabelText('Hide digests from news feed')).toBeTruthy();
-    });
-
     it('renders the UNIT DISPLAY section', async () => {
       const {getByText} = await renderSettings();
       expect(getByText('UNIT DISPLAY')).toBeTruthy();
@@ -66,9 +56,9 @@ describe('SettingsScreen', () => {
       expect(getByText('Standings update')).toBeTruthy();
     });
 
-    it('renders the Weekly digest toggle', async () => {
+    it('renders the Monday Roundup toggle', async () => {
       const {getByLabelText} = await renderSettings();
-      expect(getByLabelText('Weekly digest')).toBeTruthy();
+      expect(getByLabelText('Monday Roundup')).toBeTruthy();
     });
 
     it('renders Pre-race alerts group', async () => {
@@ -166,16 +156,10 @@ describe('SettingsScreen', () => {
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_news_alerts', 'false');
     });
 
-    it('toggling Weekly digest off persists to AsyncStorage', async () => {
+    it('toggling Monday Roundup off persists to AsyncStorage', async () => {
       const {UNSAFE_getAllByType} = await renderSettings();
-      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Weekly digest', false); });
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Monday Roundup', false); });
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_digest_alerts', 'false');
-    });
-
-    it('toggling Hide digests from news feed persists to AsyncStorage', async () => {
-      const {UNSAFE_getAllByType} = await renderSettings();
-      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Hide digests from news feed', true); });
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_hide_digests', 'true');
     });
 
     it('toggling No Spoilers on persists to AsyncStorage', async () => {

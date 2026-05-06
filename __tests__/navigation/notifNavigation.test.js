@@ -177,9 +177,9 @@ describe('navigateFromData', () => {
   });
 
   describe('hub news deeplinks', () => {
-    it('navigates to News tab for type="hub"', () => {
+    it('navigates to News tab for type="hub" with no id (legacy fallback)', () => {
       const ref = makeRef();
-      navigateFromData(ref, {type: 'hub', id: '42', channel: 'news', title: 'Test post'});
+      navigateFromData(ref, {type: 'hub', channel: 'news', title: 'Test post'});
 
       expect(ref.navigate).toHaveBeenCalledWith('News');
     });
@@ -189,6 +189,16 @@ describe('navigateFromData', () => {
       navigateFromData(ref, {type: 'hub'});
 
       expect(ref.navigate).toHaveBeenCalledWith('News');
+    });
+
+    it('type="hub" with id triggers async fetch (navigate not called synchronously)', () => {
+      // When id is present, notifNavigation fetches hub_news.json before navigating.
+      // Navigation is async so this test just confirms no synchronous navigate call.
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'hub', id: '42', channel: 'news', title: 'Test post'});
+
+      expect(ref.navigate).not.toHaveBeenCalled();
+      expect(ref.dispatch).not.toHaveBeenCalled();
     });
   });
 
@@ -352,9 +362,9 @@ describe('notification tap integration scenarios', () => {
     );
   });
 
-  it('hub news notification → opens news tab', () => {
+  it('hub news notification without id → opens news tab', () => {
     const ref = makeRef();
-    navigateFromData(ref, {channel: 'news', type: 'hub', id: '123', title: 'New post'});
+    navigateFromData(ref, {channel: 'news', type: 'hub', title: 'New post'});
 
     expect(ref.navigate).toHaveBeenCalledWith('News');
   });

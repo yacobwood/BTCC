@@ -332,46 +332,6 @@ describe('SettingsProvider', () => {
     });
   });
 
-  describe('hideDigests', () => {
-    it('defaults to false', () => {
-      let getHook;
-      act(() => { getHook = renderProvider(); });
-      expect(getHook().settings.hideDigests).toBe(false);
-    });
-
-    it('toggling hideDigests to true persists to AsyncStorage', async () => {
-      let getHook;
-      await act(async () => { getHook = renderProvider(); });
-      await act(async () => { getHook().setSetting('hideDigests', true); });
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_hide_digests', 'true');
-    });
-
-    it('loads hideDigests=true from storage', async () => {
-      AsyncStorage.getItem.mockImplementation((key) => {
-        if (key === 'setting_hide_digests') return Promise.resolve('true');
-        return Promise.resolve(null);
-      });
-      let getHook;
-      await act(async () => { getHook = renderProvider(); });
-      expect(getHook().settings.hideDigests).toBe(true);
-    });
-
-    it('hideDigests does not affect any FCM topic subscription', async () => {
-      let getHook;
-      await act(async () => { getHook = renderProvider(); });
-      const callsBefore = subscribeToTopic.mock.calls.length + unsubscribeFromTopic.mock.calls.length;
-      await act(async () => { getHook().setSetting('hideDigests', true); });
-      const callsAfter = subscribeToTopic.mock.calls.length + unsubscribeFromTopic.mock.calls.length;
-      // hideDigests is a local UI preference — FCM calls still happen (syncAllTopics runs)
-      // but no hideDigests-specific topic should be touched
-      const allTopics = [
-        ...subscribeToTopic.mock.calls.map(c => c[1]),
-        ...unsubscribeFromTopic.mock.calls.map(c => c[1]),
-      ];
-      expect(allTopics).not.toContain('hide_digests');
-    });
-  });
-
   describe('spoilerFree', () => {
     it('defaults to false', () => {
       let getHook;

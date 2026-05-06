@@ -4,6 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import NewsScreen from '../../src/screens/NewsScreen';
 import {renderWithProviders, makeNav, MOCK_ARTICLES, MOCK_ARTICLES_WITH_DIGEST} from './testUtils';
 
+// useFocusEffect needs a NavigationContainer — mock it as a no-op in unit tests
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: jest.fn(),
+}));
+
 jest.mock('../../src/api/client', () => ({
   fetchArticles: jest.fn(),
   fetchHubPosts: jest.fn(),
@@ -11,14 +16,23 @@ jest.mock('../../src/api/client', () => ({
 jest.mock('../../src/api/parsers', () => ({
   parseArticle: jest.fn(a => a),
 }));
+jest.mock('../../src/utils/digestRead', () => ({
+  getReadIds: jest.fn().mockResolvedValue(new Set()),
+}));
 
 const {fetchArticles, fetchHubPosts} = require('../../src/api/client');
 const nav = makeNav();
 
-function renderNews({articles = MOCK_ARTICLES, favourites = [], hideDigests = false} = {}) {
+beforeEach(() => {
+  // Clear call history between tests so navigate assertions don't bleed across
+  jest.clearAllMocks();
+  fetchArticles.mockResolvedValue(MOCK_ARTICLES);
+  fetchHubPosts.mockResolvedValue([]);
+});
+
+function renderNews({articles = MOCK_ARTICLES, favourites = []} = {}) {
   AsyncStorage.getItem.mockImplementation((key) => {
     if (key === 'favourite_drivers') return Promise.resolve(JSON.stringify(favourites));
-    if (key === 'setting_hide_digests') return Promise.resolve(hideDigests ? 'true' : null);
     return Promise.resolve(null);
   });
   fetchArticles.mockResolvedValue(articles);
@@ -98,7 +112,6 @@ describe('NewsScreen', () => {
     });
 
     it('hero article not mentioning favourite has no yellow border', async () => {
-      // Use articles where hero doesn't mention the favourite
       const noFavArticles = [
         {id: 1, title: 'Turkington battles through the field', pubDate: '19 Apr 2026', imageUrl: null, source: 'btcc.net', category: 'LATEST NEWS', sortDate: '2026-04-19'},
         {id: 2, title: 'Other story',  pubDate: '18 Apr 2026', imageUrl: null, source: 'btcc.net', category: 'LATEST NEWS', sortDate: '2026-04-18'},
@@ -118,29 +131,32 @@ describe('NewsScreen', () => {
     });
   });
 
-  describe('hideDigests setting', () => {
-    it('digest article is visible when hideDigests is false', async () => {
-      const {getByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST, hideDigests: false});
-      await waitFor(() => {
-        expect(getByText('Donington Park Race Weekend Digest')).toBeTruthy();
-      });
-    });
-
-    it('digest article is hidden when hideDigests is true', async () => {
-      const {queryByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST, hideDigests: true});
-      await waitFor(() => {
-        // Wait for load to complete by checking a non-digest article is present
-        expect(queryByText('Ingram wins Race 1 at Donington')).toBeTruthy();
-      });
+  describe('digest banner', () => {
+    it('digest articles do not appear in the main feed', async () => {
+      const {getByText, queryByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST});
+      await waitFor(() => getByText('Ingram wins Race 1 at Donington'));
       expect(queryByText('Donington Park Race Weekend Digest')).toBeNull();
     });
 
-    it('non-digest articles are still shown when hideDigests is true', async () => {
-      const {getByText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST, hideDigests: true});
-      await waitFor(() => {
-        expect(getByText('Ingram wins Race 1 at Donington')).toBeTruthy();
-        expect(getByText('Shedden claims pole position')).toBeTruthy();
+    it('shows digest banner when digests are present', async () => {
+      const {getByLabelText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST});
+      await waitFor(() => getByLabelText('View BTCC Monday Roundup'));
+      expect(getByLabelText('View BTCC Monday Roundup')).toBeTruthy();
+    });
+
+    it('no digest banner when no digests in feed', async () => {
+      const {getByText, queryByLabelText} = renderNews({articles: MOCK_ARTICLES});
+      await waitFor(() => getByText('Ingram wins Race 1 at Donington'));
+      expect(queryByLabelText('View BTCC Monday Roundup')).toBeNull();
+    });
+
+    it('tapping digest banner navigates to Digests', async () => {
+      const {getByLabelText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST});
+      await waitFor(() => getByLabelText('View BTCC Monday Roundup'));
+      await act(async () => {
+        fireEvent.press(getByLabelText('View BTCC Monday Roundup'));
       });
+      expect(nav.navigate).toHaveBeenCalledWith('Digests');
     });
   });
 
