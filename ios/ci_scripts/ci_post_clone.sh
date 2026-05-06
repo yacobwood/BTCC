@@ -12,26 +12,35 @@ brew install node cocoapods
 
 # Patch xcodeproj gem to support Xcode 26 project format (object version 70).
 # xcodeproj 1.27.0 (bundled with CocoaPods 1.16.2) has no entry for version 70 in
-# OBJECT_VERSION_FOR_DEV_TOOLS — no fixed release exists yet, so patch the file directly.
+# COMPATIBILITY_VERSION_BY_OBJECT_VERSION — no fixed release exists yet, so patch directly.
+# Search both Intel (/usr/local) and Apple Silicon (/opt/homebrew) Homebrew prefixes.
 python3 - << 'PYEOF'
-import re, glob
+import glob
 
-# Patch COMPATIBILITY_VERSION_BY_OBJECT_VERSION in constants.rb
-# Keys are integers (e.g. 77 => 'Xcode 16.0') — insert 70 => 'Xcode 26'
-for path in glob.glob('/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb'):
-    content = open(path).read()
-    if 'COMPATIBILITY_VERSION_BY_OBJECT_VERSION' in content and '70 =>' not in content:
-        # Insert after the highest existing entry (77 => 'Xcode 16.0')
-        patched = content.replace(
-            "77 => 'Xcode 16.0',",
-            "77 => 'Xcode 16.0',\n        70 => 'Xcode 26',"
-        )
-        open(path, 'w').write(patched)
-        print('Patched: ' + path)
-    elif '70 =>' in content:
-        print('Already patched: ' + path)
-    else:
-        print('ERROR: constant not found in: ' + path)
+patterns = [
+    '/usr/local/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb',
+    '/opt/homebrew/Cellar/cocoapods/*/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb',
+    '/opt/homebrew/opt/cocoapods/libexec/gems/xcodeproj-*/lib/xcodeproj/constants.rb',
+]
+
+paths = [p for pattern in patterns for p in glob.glob(pattern)]
+if not paths:
+    print('WARNING: no xcodeproj constants.rb found — skipping patch')
+else:
+    for path in paths:
+        content = open(path).read()
+        if '70 =>' in content:
+            print('Already patched: ' + path)
+        elif "77 => 'Xcode 16.0'," in content:
+            patched = content.replace(
+                "77 => 'Xcode 16.0',",
+                "77 => 'Xcode 16.0',\n        70 => 'Xcode 26',"
+            )
+            open(path, 'w').write(patched)
+            print('Patched: ' + path)
+        else:
+            print('ERROR: expected constant not found in: ' + path)
+            print('First 200 chars:', content[:200])
 PYEOF
 
 # Install JS dependencies (required before pod install for React Native)
