@@ -2534,10 +2534,12 @@ function cancelEdit() {
 async function quickPublish(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
   if (!p) return;
+  const wasPublished = p.status === 'published';
   p.status = 'published';
-  p.pubDate = nowIso();
+  p.pubDate = p.pubDate || nowIso();
   delete p.scheduledAt; delete p.previewDeviceIds;
-  await saveHubNews('Publish article: ' + p.title, p);
+  // Only fire notification when transitioning from draft/scheduled → published
+  await saveHubNews('Publish article: ' + p.title, wasPublished ? null : p);
 }
 
 async function quickUnpublish(articleId) {
@@ -2609,12 +2611,15 @@ async function dispatchArticleNotif(article) {
   const tok = getToken();
   if (!tok) return;
   const statusEl = document.getElementById('hubnews-status');
+  const isDigest = article.category === 'Weekly Digest';
   try {
     const inputs = {
-      channel: 'news',
-      title: article.title || 'New BTCC Hub Article',
+      channel: isDigest ? 'digest' : 'news',
+      title: article.title || (isDigest ? 'BTCC Monday Roundup' : 'New BTCC Hub Article'),
       body: article.description || '',
-      data: JSON.stringify({type: 'hub', id: article.id}),
+      data: JSON.stringify(isDigest
+        ? {type: 'hub', id: article.id, channel: 'news'}
+        : {type: 'hub', id: article.id}),
       image_url: article.imageUrl || '',
     };
     const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {

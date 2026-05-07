@@ -523,21 +523,10 @@ async function runDigest(label, promptIntro) {
     throw new Error(`GitHub PUT failed: ${putRes.status} ${err}`);
   }
 
-  // ── Notify subscribers ───────────────────────────────────────
-  try {
-    const episodeNumber = hubNews.posts.filter(p => p.category === 'Weekly Digest').length;
-    const notifBody = `Episode ${episodeNumber} — ${title}`;
-    await messaging.send({
-      topic: 'digest_alerts',
-      android: {collapseKey: postId, priority: 'high', ttl: 86400000},
-      apns: {payload: {aps: {sound: 'default', alert: {title: 'BTCC Monday Roundup', body: notifBody}}}},
-      data: {type: 'digest', id: postId, channel: 'news', title},
-    });
-  } catch (e) {
-    console.error(`${label}: notification failed:`, e);
-  }
-
-  console.log(`${label}: digest committed for ${today}: ${title}`);
+  // Notification is intentionally NOT sent here — the article is saved as a
+  // draft for admin review first. The admin publishes it manually via the
+  // admin panel, which triggers the digest_alerts notification at that point.
+  console.log(`${label}: digest draft committed for ${today}: ${title}`);
 }
 
 // ── Weekly digest — every Monday at 8am ──────────────────────
