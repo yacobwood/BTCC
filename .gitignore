@@ -103,3 +103,10 @@ tools/scraper/.venv/
 !.yarn/sdks
 !.yarn/versions
 payload.json
+
+# Firebase debug logs
+firebase-debug.log
+firestore-debug.log
+
+# Bundled iOS driver images (generated assets, not source)
+ios/assets/
