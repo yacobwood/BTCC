@@ -132,7 +132,7 @@ function ProgressionChart({series: rawSeries, pointLabels = [], isFavourite}) {
           const on = visible[s.name] !== false;
           const fav = isFavourite?.(s.name);
           const finalPts = s.points[s.points.length - 1] || 0;
-          const surname = s.name.split(' ').pop();
+          const surname = s.name.split(' ').pop().toUpperCase();
           return (
             <TouchableOpacity
               key={s.name}

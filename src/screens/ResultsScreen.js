@@ -24,7 +24,7 @@ import ProgressionChart from '../components/ProgressionChart';
 import SeasonTable from '../components/SeasonTable';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
-import {cacheRead, cacheWrite} from '../store/cache';
+import {cacheRead, cacheWrite, cacheReadTimestamp} from '../store/cache';
 
 function computeSeasonStats(rounds) {
   const map = {};
@@ -95,6 +95,13 @@ function buildTeamMap(rounds) {
   return map;
 }
 
+function formatAge(ms) {
+  const mins = Math.floor((Date.now() - ms) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  return `${Math.floor(mins / 60)}h ago`;
+}
+
 const YEARS = Array.from({length: 2026 - 2004 + 1}, (_, i) => 2026 - i);
 const ITEM_H = 52;
 const VISIBLE = 5; // must be odd
@@ -158,6 +165,7 @@ export default function ResultsScreen({navigation, route}) {
   const [bundledStats, setBundledStats] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showYearPicker, setShowYearPicker] = useState(false);
+  const [dataFreshnessMs, setDataFreshnessMs] = useState(null);
 
   const progressionCache = useRef({});
   const driversListRef = useRef(null);
@@ -264,6 +272,7 @@ export default function ResultsScreen({navigation, route}) {
 
     // 2026: stale-while-revalidate from cache, then fetch
     setBundledStats(null);
+    setDataFreshnessMs(null);
 
       if (!forceRefresh) {
         const [cachedResults, cachedStandings] = await Promise.all([
@@ -280,6 +289,8 @@ export default function ResultsScreen({navigation, route}) {
             setStandings(s);
           }
           setLoading(false);
+          const ts = await cacheReadTimestamp(`results_${y}`);
+          if (ts) setDataFreshnessMs(ts);
         } else {
           setStandings(null);
           if (y === 2026) setLoading(true);
@@ -303,6 +314,7 @@ export default function ResultsScreen({navigation, route}) {
           setStandings(s);
           cacheWrite('standings', raw);
         }
+        setDataFreshnessMs(Date.now());
       } catch {}
     setLoading(false);
     setRefreshing(false);
@@ -634,8 +646,16 @@ export default function ResultsScreen({navigation, route}) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>HISTORY</Text>
+      <View style={[styles.header, {flexDirection: 'row', alignItems: 'center'}]}>
+        <Text style={[styles.headerTitle, {flex: 1}]}>HISTORY</Text>
+        {year === 2026 && dataFreshnessMs !== null && (
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}>
+            <Icon name="access-time" size={11} color={Colors.textSecondary} />
+            <Text style={{color: Colors.textSecondary, fontSize: 11, fontWeight: '600'}}>
+              {formatAge(dataFreshnessMs)}
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.yearRow}>

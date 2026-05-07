@@ -34,6 +34,7 @@ const PROJECT_ID = FIREBASE_PROJECT_ID;
 const FS_BASE = FIRESTORE_BASE;
 const REACTIONS_KEY = 'article_reactions_v1';
 const COMMENTER_NAME_KEY = 'commenter_name';
+const COMMENT_REACTIONS_KEY = 'comment_reactions_v1';
 
 const BLACKLIST = require('../../data/blacklist.json');
 
@@ -80,11 +81,15 @@ async function fetchComments(slug) {
         structuredQuery: {
           from: [{collectionId: 'article_comments'}],
           where: {fieldFilter: {field: {fieldPath: 'slug'}, op: 'EQUAL', value: {stringValue: slug}}},
-          orderBy: [{field: {fieldPath: 'timestamp'}, direction: 'ASCENDING'}],
           limit: 200,
         },
       }),
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.warn('[fetchComments] Firestore error', res.status, err?.error?.message);
+      return [];
+    }
     const rows = await res.json();
     return rows
       .filter(r => r.document)
@@ -96,12 +101,14 @@ async function fetchComments(slug) {
           authorId: f.authorId?.stringValue || '',
           authorName: f.authorName?.stringValue || 'Fan',
           timestamp: f.timestamp?.stringValue || '',
-          flags: parseInt(f.flags?.integerValue || 0, 10),
+          likes: parseInt(f.likes?.integerValue || 0, 10),
+          dislikes: parseInt(f.dislikes?.integerValue || 0, 10),
           hidden: f.hidden?.booleanValue || false,
           parentId: f.parentId?.stringValue || null,
         };
       })
-      .filter(c => !c.hidden);
+      .filter(c => !c.hidden)
+      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   } catch {
     return [];
   }
@@ -114,7 +121,8 @@ async function postComment(slug, text, authorId, authorName, parentId) {
     authorId:   {stringValue: authorId},
     authorName: {stringValue: authorName},
     timestamp:  {stringValue: new Date().toISOString()},
-    flags:      {integerValue: '0'},
+    likes:      {integerValue: '0'},
+    dislikes:   {integerValue: '0'},
     hidden:     {booleanValue: false},
     parentId:   parentId ? {stringValue: parentId} : {nullValue: null},
   };
@@ -123,12 +131,15 @@ async function postComment(slug, text, authorId, authorName, parentId) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({fields}),
   });
-  if (!res.ok) throw new Error('post failed');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || 'post failed');
+  }
   const doc = await res.json();
   return doc.name.split('/').pop(); // return new doc ID
 }
 
-async function flagComment(docId) {
+async function reactToComment(docId, type, delta) {
   await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -136,7 +147,7 @@ async function flagComment(docId) {
       writes: [{
         transform: {
           document: `projects/${PROJECT_ID}/databases/(default)/documents/article_comments/${docId}`,
-          fieldTransforms: [{fieldPath: 'flags', increment: {integerValue: '1'}}],
+          fieldTransforms: [{fieldPath: type, increment: {integerValue: String(delta)}}],
         },
       }],
     }),
@@ -175,7 +186,16 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   const [inputError, setInputError] = useState('');
   const [nameEditing, setNameEditing] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [commentReactions, setCommentReactions] = useState({});
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (visible) {
+      AsyncStorage.getItem(COMMENT_REACTIONS_KEY).then(raw => {
+        setCommentReactions(raw ? JSON.parse(raw) : {});
+      }).catch(() => {});
+    }
+  }, [visible]);
 
   const translateY = useRef(new Animated.Value(0)).current;
 
@@ -246,7 +266,8 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
       authorId: myAuthorId,
       authorName,
       timestamp: new Date().toISOString(),
-      flags: 0,
+      likes: 0,
+      dislikes: 0,
       hidden: false,
       parentId: parentId || null,
     };
@@ -256,7 +277,9 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
       const realId = await postComment(articleSlug, text, myAuthorId, authorName, parentId);
       setComments(prev => prev.map(c => c.id === tempId ? {...c, id: realId} : c));
     } catch {
-      // Keep optimistic entry — low-stakes, will disappear on reload
+      setComments(prev => (prev || []).filter(c => c.id !== tempId));
+      setInputError('Failed to post comment. Please try again.');
+      setInput(text);
     }
   };
 
@@ -278,13 +301,38 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
     }
   };
 
-  const handleFlag = async (commentId) => {
-    setComments(prev => prev.map(c => {
+  const handleCommentReact = async (commentId, type) => {
+    const myPrev = commentReactions[commentId] || null;
+    const toggling = myPrev === type;
+    const newType = toggling ? null : type;
+
+    setComments(cs => cs.map(c => {
       if (c.id !== commentId) return c;
-      const newFlags = c.flags + 1;
-      return {...c, flags: newFlags, hidden: newFlags >= 3};
-    }).filter(c => !c.hidden));
-    try { await flagComment(commentId); } catch {}
+      let likes = c.likes || 0;
+      let dislikes = c.dislikes || 0;
+      if (myPrev === 'likes') likes = Math.max(0, likes - 1);
+      if (myPrev === 'dislikes') dislikes = Math.max(0, dislikes - 1);
+      if (newType === 'likes') likes++;
+      if (newType === 'dislikes') dislikes++;
+      return {...c, likes, dislikes};
+    }));
+
+    setCommentReactions(r => {
+      const updated = {...r};
+      if (newType) updated[commentId] = newType;
+      else delete updated[commentId];
+      return updated;
+    });
+
+    try {
+      const raw = await AsyncStorage.getItem(COMMENT_REACTIONS_KEY).catch(() => null);
+      const stored = raw ? JSON.parse(raw) : {};
+      if (newType) stored[commentId] = newType;
+      else delete stored[commentId];
+      await AsyncStorage.setItem(COMMENT_REACTIONS_KEY, JSON.stringify(stored));
+      if (myPrev) await reactToComment(commentId, myPrev, -1);
+      if (newType) await reactToComment(commentId, type, 1);
+    } catch {}
   };
 
   const handleDelete = (commentId) => {
@@ -299,12 +347,16 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
 
   const renderComment = ({item}) => {
     const isOwn = item.authorId === myAuthorId;
+    const myReaction = commentReactions[item.id] || null;
+    const idSuffix = item.authorId ? ` #${item.authorId.slice(-4)}` : '';
     return (
       <View style={[styles.commentRow, item.isReply && styles.commentReply]}>
         {item.isReply && <View style={styles.replyLine} />}
         <View style={styles.commentBody}>
           <View style={styles.commentMeta}>
-            <Text style={[styles.commentAuthor, isOwn && styles.commentAuthorOwn]}>{item.authorName}</Text>
+            <Text style={[styles.commentAuthor, isOwn && styles.commentAuthorOwn]}>
+              {item.authorName}<Text style={styles.commentAuthorId}>{idSuffix}</Text>
+            </Text>
             <Text style={styles.commentTime}>{timeAgo(item.timestamp)}</Text>
           </View>
           <Text style={styles.commentText}>{item.text}</Text>
@@ -314,11 +366,14 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
                 <Text style={styles.commentActionText}>Reply</Text>
               </TouchableOpacity>
             )}
-            {!isOwn && (
-              <TouchableOpacity onPress={() => handleFlag(item.id)} style={styles.commentActionBtn} accessibilityLabel="Flag comment" accessibilityRole="button">
-                <Icon name="flag" size={13} color={Colors.textSecondary} />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity onPress={() => handleCommentReact(item.id, 'likes')} style={styles.commentReactBtn} accessibilityLabel="Like comment" accessibilityRole="button">
+              <Icon name="thumb-up" size={13} color={myReaction === 'likes' ? Colors.yellow : Colors.textSecondary} />
+              {(item.likes || 0) > 0 && <Text style={[styles.commentReactCount, myReaction === 'likes' && {color: Colors.yellow}]}>{item.likes}</Text>}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleCommentReact(item.id, 'dislikes')} style={styles.commentReactBtn} accessibilityLabel="Dislike comment" accessibilityRole="button">
+              <Icon name="thumb-down" size={13} color={myReaction === 'dislikes' ? '#ff6b6b' : Colors.textSecondary} />
+              {(item.dislikes || 0) > 0 && <Text style={[styles.commentReactCount, myReaction === 'dislikes' && {color: '#ff6b6b'}]}>{item.dislikes}</Text>}
+            </TouchableOpacity>
             {isOwn && (
               <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.commentActionBtn} accessibilityLabel="Delete comment" accessibilityRole="button">
                 <Icon name="delete-outline" size={13} color={Colors.textSecondary} />
@@ -884,6 +939,9 @@ const styles = StyleSheet.create({
   commentActions: {flexDirection: 'row', gap: 14, marginTop: 6},
   commentActionBtn: {paddingVertical: 2},
   commentActionText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '600'},
+  commentAuthorId: {color: Colors.textSecondary, fontWeight: '400', fontSize: 12},
+  commentReactBtn: {flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 2},
+  commentReactCount: {color: Colors.textSecondary, fontSize: 12},
 
   // Replying bar
   replyingBar: {

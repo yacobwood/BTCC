@@ -10,6 +10,46 @@ const {GoogleAuth} = require('google-auth-library');
 
 initializeApp();
 
+// ── Error observability ───────────────────────────────────────
+// opts.key   — upsert at errors/{key} instead of appending (use for repetitive per-minute errors)
+// opts.alert — also send an email to btcchub@gmail.com
+async function logError(fn, message, err, opts = {}) {
+  try {
+    const db = getFirestore();
+    const entry = {
+      fn,
+      message: String(message).slice(0, 500),
+      stack: (err?.stack || '').slice(0, 2000),
+      timestamp: new Date().toISOString(),
+      resolved: false,
+    };
+    if (opts.key) {
+      await db.collection('errors').doc(opts.key).set(entry);
+    } else {
+      await db.collection('errors').add(entry);
+    }
+    if (opts.alert && process.env.GMAIL_APP_PASSWORD) {
+      await sendErrorEmail(fn, message, err);
+    }
+  } catch (e) {
+    console.error('logError itself failed:', e);
+  }
+}
+
+async function sendErrorEmail(fn, message, err) {
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {user: 'btcchub@gmail.com', pass: process.env.GMAIL_APP_PASSWORD},
+  });
+  await transporter.sendMail({
+    from: '"BTCC Hub" <btcchub@gmail.com>',
+    to: 'btcchub@gmail.com',
+    subject: `[BTCC Hub Error] ${fn}`,
+    text: `Function: ${fn}\nMessage: ${message}\n\nStack:\n${err?.stack || 'n/a'}\n\nTime: ${new Date().toISOString()}`,
+  });
+}
+
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
 const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug,featured_media,_links&_embed=wp:featuredmedia';
@@ -234,6 +274,7 @@ exports.sendSessionNotifications = onSchedule(
       }
     } catch (e) {
       console.error('News check failed:', e);
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-news'});
     }
 
     // ── Hub news alerts ───────────────────────────────────────────
@@ -274,6 +315,7 @@ exports.sendSessionNotifications = onSchedule(
       }
     } catch (e) {
       console.error('Hub news check failed:', e);
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-hub'});
     }
 
     // ── Podcast alerts ────────────────────────────────────────────
@@ -316,11 +358,15 @@ exports.sendSessionNotifications = onSchedule(
       }
     } catch (e) {
       console.error('Podcast check failed:', e);
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-podcast'});
     }
 
     const results = await Promise.allSettled(sends);
     results.forEach((r, i) => {
-      if (r.status === 'rejected') console.error(`Send ${i} failed:`, r.reason);
+      if (r.status === 'rejected') {
+        console.error(`Send ${i} failed:`, r.reason);
+        logError('sendSessionNotifications:fcm', r.reason?.message || String(r.reason), r.reason);
+      }
     });
   },
 );
@@ -534,19 +580,26 @@ exports.weeklyDigest = onSchedule(
   {
     schedule: '0 8 * * 1',
     timeZone: 'Europe/London',
-    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN', 'GMAIL_APP_PASSWORD'],
   },
-  () => runDigest(
-    'weeklyDigest',
-    `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
-    `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
-    `Use British English throughout. ` +
-    `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
-    `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-    `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
-    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-    `Do not include the title in the body.\n\n`,
-  ),
+  async () => {
+    try {
+      await runDigest(
+        'weeklyDigest',
+        `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
+        `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
+        `Use British English throughout. ` +
+        `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
+        `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+        `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
+        `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
+        `Do not include the title in the body.\n\n`,
+      );
+    } catch (e) {
+      console.error('weeklyDigest failed:', e);
+      await logError('weeklyDigest', e.message, e, {alert: true});
+    }
+  },
 );
 
 // ── Race weekend preview digest — every Thursday at 8am ──────
@@ -555,29 +608,34 @@ exports.raceWeekendDigest = onSchedule(
   {
     schedule: '0 8 * * 4',
     timeZone: 'Europe/London',
-    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN', 'GMAIL_APP_PASSWORD'],
   },
   async () => {
-    const now = new Date();
-    const saturdayStr = getUKDateString(now, 2); // Thursday + 2 = Saturday
-    const calendar = await fetch(CALENDAR_URL).then(r => r.json());
-    const round = calendar.rounds.find(r => r.startDate === saturdayStr);
-    if (!round) {
-      console.log(`raceWeekendDigest: no round on ${saturdayStr}, skipping`);
-      return;
+    try {
+      const now = new Date();
+      const saturdayStr = getUKDateString(now, 2); // Thursday + 2 = Saturday
+      const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+      const round = calendar.rounds.find(r => r.startDate === saturdayStr);
+      if (!round) {
+        console.log(`raceWeekendDigest: no round on ${saturdayStr}, skipping`);
+        return;
+      }
+      await runDigest(
+        'raceWeekendDigest',
+        `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
+        `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
+        `Use British English throughout. ` +
+        `This weekend the BTCC heads to ${round.venue} (${round.location}). ` +
+        `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
+        `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+        `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
+        `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
+        `Do not include the title in the body.\n\n`,
+      );
+    } catch (e) {
+      console.error('raceWeekendDigest failed:', e);
+      await logError('raceWeekendDigest', e.message, e, {alert: true});
     }
-    await runDigest(
-      'raceWeekendDigest',
-      `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
-      `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
-      `Use British English throughout. ` +
-      `This weekend the BTCC heads to ${round.venue} (${round.location}). ` +
-      `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
-      `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-      `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
-      `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-      `Do not include the title in the body.\n\n`,
-    );
   },
 );
 
@@ -586,7 +644,7 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET || 'btcchub-digest-trigger-2026';
 
 exports.triggerDigest = onRequest(
   {
-    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN'],
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN', 'GMAIL_APP_PASSWORD'],
     cors: ['https://yacobwood.github.io'],
   },
   async (req, res) => {
@@ -633,6 +691,7 @@ exports.triggerDigest = onRequest(
       res.status(200).json({ok: true});
     } catch (e) {
       console.error('triggerDigest failed:', e);
+      await logError('triggerDigest', e.message, e, {alert: true});
       res.status(500).json({ok: false, error: e.message});
     }
   },
@@ -665,7 +724,7 @@ const GA4_PROPERTY_ID = '528813863';
 
 exports.syncAnalytics = onSchedule(
   {schedule: '0 8 * * *', timeZone: 'Europe/London'},
-  async () => {
+  async () => { try {
     const db = getFirestore();
     const auth = new GoogleAuth({scopes: ['https://www.googleapis.com/auth/analytics.readonly']});
     const client = await auth.getClient();
@@ -741,5 +800,8 @@ exports.syncAnalytics = onSchedule(
     });
 
     console.log('syncAnalytics: done', JSON.stringify(overview));
-  },
+  } catch (e) {
+    console.error('syncAnalytics failed:', e);
+    await logError('syncAnalytics', e.message, e);
+  }},
 );

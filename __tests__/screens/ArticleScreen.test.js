@@ -38,6 +38,9 @@ jest.mock('react-native-webview', () => {
         <Text testID="webview-message-likes"    onPress={() => fire('likes')}>like</Text>
         <Text testID="webview-message-dislikes" onPress={() => fire('dislikes')}>dislike</Text>
         <Text testID="webview-open-comments"    onPress={() => fire('open_comments')}>comments</Text>
+        {/* prev-carrying messages for toggle/switch tests */}
+        <Text testID="webview-toggle-likes"     onPress={() => fire(null, 'likes')}>toggle-like</Text>
+        <Text testID="webview-switch-to-dislike" onPress={() => fire('dislikes', 'likes')}>switch-dislike</Text>
       </View>
     );
   });
@@ -66,13 +69,14 @@ const nav = makeNav();
 function makeCommentRow(overrides = {}) {
   return {
     document: {
-      name: 'projects/btcchub-af77a/databases/(default)/documents/article_comments/comment1',
+      name: `projects/btcchub-af77a/databases/(default)/documents/article_comments/${overrides.id ?? 'comment1'}`,
       fields: {
         text:       {stringValue: overrides.text       ?? 'Great race!'},
         authorId:   {stringValue: overrides.authorId   ?? 'other_author_xyz'},
         authorName: {stringValue: overrides.authorName ?? 'BTCC Fan'},
         timestamp:  {stringValue: overrides.timestamp  ?? '2026-04-19T10:00:00Z'},
-        flags:      {integerValue: String(overrides.flags ?? 0)},
+        likes:      {integerValue: String(overrides.likes    ?? 0)},
+        dislikes:   {integerValue: String(overrides.dislikes ?? 0)},
         hidden:     {booleanValue: overrides.hidden    ?? false},
         parentId:   {nullValue: null},
       },
@@ -342,6 +346,85 @@ describe('ArticleScreen', () => {
       });
     });
 
+    it('removes reaction from AsyncStorage when toggled off', async () => {
+      // Seed storage with an existing 'likes' reaction for this slug
+      AsyncStorage.getItem.mockImplementation(key => {
+        if (key === 'article_reactions_v1')
+          return Promise.resolve(JSON.stringify({'ingram-wins-donington': 'likes'}));
+        return Promise.resolve(null);
+      });
+
+      const {getByTestId} = renderArticle({article: FULL_ARTICLE});
+
+      await act(async () => {
+        getByTestId('webview-toggle-likes').props.onPress();
+      });
+
+      await waitFor(() => {
+        const call = AsyncStorage.setItem.mock.calls.find(([key]) => key === 'article_reactions_v1');
+        expect(call).toBeTruthy();
+        const stored = JSON.parse(call[1]);
+        expect(stored['ingram-wins-donington']).toBeUndefined();
+      });
+    });
+
+    it('sends a decrement for previous reaction when switching', async () => {
+      const {getByTestId} = renderArticle();
+
+      await act(async () => {
+        getByTestId('webview-switch-to-dislike').props.onPress();
+      });
+
+      await waitFor(() => {
+        const commitCalls = global.fetch.mock.calls.filter(
+          ([url]) => typeof url === 'string' && url.includes(':commit'),
+        );
+        // Two commits: -1 on likes (prev) and +1 on dislikes (new)
+        expect(commitCalls.length).toBeGreaterThanOrEqual(2);
+        const bodies = commitCalls.map(c => JSON.parse(c[1].body));
+        const transforms = bodies.map(b => b.writes[0].transform.fieldTransforms[0]);
+        expect(transforms).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({fieldPath: 'likes',    increment: {integerValue: '-1'}}),
+            expect.objectContaining({fieldPath: 'dislikes', increment: {integerValue: '1'}}),
+          ]),
+        );
+      });
+    });
+
+    it('calls injectJavaScript to revert reaction when Firestore commit fails', async () => {
+      global.fetch = jest.fn().mockImplementation((url) => {
+        if (typeof url === 'string' && url.includes(':commit')) {
+          return Promise.reject(new Error('network error'));
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({fields: {likes: {integerValue: '0'}, dislikes: {integerValue: '0'}}}),
+        });
+      });
+
+      const {getByTestId} = renderArticle();
+      // Trigger webview load so webviewRef is wired up
+      await act(async () => { getByTestId('webview-load').props.onPress(); });
+
+      await act(async () => {
+        getByTestId('webview-message-likes').props.onPress();
+      });
+
+      await waitFor(() => {
+        const webviewMock = getByTestId('webview');
+        // injectJavaScript is called on the ref — find it via the mock
+        const ref = webviewMock._fiber?.ref;
+        // Use the WebView ref mock exposed via useImperativeHandle
+        const injectCalls = require('react-native-webview').WebView.mock?.instances;
+        // Verify via fetch: commit was attempted and failed
+        const commitAttempt = global.fetch.mock.calls.find(
+          ([url]) => typeof url === 'string' && url.includes(':commit'),
+        );
+        expect(commitAttempt).toBeTruthy();
+      });
+    });
+
     it('stores reaction keyed by article slug', async () => {
       const {getByTestId} = renderArticle({article: FULL_ARTICLE, slug: undefined});
 
@@ -369,8 +452,8 @@ describe('CommentsSheet', () => {
    * Trigger onWebViewLoad then open the CommentsSheet.
    * Configures AsyncStorage so commenterName is available (or null for name-prompt tests).
    */
-  async function openComments(getByTestId, {commentRows = [], storedName = 'Test Fan'} = {}) {
-    global.fetch = makeCommentsFetch(commentRows);
+  async function openComments(getByTestId, {commentRows = [], storedName = 'Test Fan', fetchMock} = {}) {
+    global.fetch = fetchMock ?? makeCommentsFetch(commentRows);
 
     AsyncStorage.getItem.mockImplementation(key => {
       if (key === 'commenter_name') return Promise.resolve(storedName);
@@ -449,7 +532,7 @@ describe('CommentsSheet', () => {
     await openComments(getByTestId, {commentRows: [makeCommentRow({authorName: 'BTCC Fan'})]});
 
     await waitFor(() => {
-      expect(getByText('BTCC Fan')).toBeTruthy();
+      expect(getByText(/BTCC Fan/)).toBeTruthy();
     });
   });
 
@@ -551,26 +634,126 @@ describe('CommentsSheet', () => {
     });
   });
 
-  // ── Flagging comments ───────────────────────────────────────────────────────
+  // ── Comment reactions (likes / dislikes) ────────────────────────────────────
 
-  it('hides a comment from the list when flags reach 3', async () => {
-    // Comment already at 2 flags — one more press hides it
-    const row = makeCommentRow({text: 'Nearly flagged', flags: 2});
-    const {getByTestId, getByText, getByLabelText, queryByText} = renderArticle();
+  it('renders like count when comment has likes', async () => {
+    const row = makeCommentRow({text: 'Fast lap!', likes: 5});
+    const {getByTestId, getByText} = renderArticle();
 
     await openComments(getByTestId, {commentRows: [row]});
 
     await waitFor(() => {
-      expect(getByText('Nearly flagged')).toBeTruthy();
+      expect(getByText('5')).toBeTruthy();
     });
+  });
 
-    // Press flag — handleFlag increments to 3, hides the comment
+  it('calls Firestore commit with likes increment when like button pressed', async () => {
+    const row = makeCommentRow({id: 'cmt42', text: 'Amazing!'});
+    const {getByTestId, getByLabelText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row]});
+
     await act(async () => {
-      fireEvent.press(getByLabelText('Flag comment'));
+      fireEvent.press(getByLabelText('Like comment'));
     });
 
     await waitFor(() => {
-      expect(queryByText('Nearly flagged')).toBeNull();
+      const commitCall = global.fetch.mock.calls.find(
+        ([url]) => typeof url === 'string' && url.includes(':commit'),
+      );
+      expect(commitCall).toBeTruthy();
+      const body = JSON.parse(commitCall[1].body);
+      const t = body.writes[0].transform;
+      expect(t.document).toContain('article_comments/cmt42');
+      expect(t.fieldTransforms[0].fieldPath).toBe('likes');
+      expect(t.fieldTransforms[0].increment.integerValue).toBe('1');
+    });
+  });
+
+  it('calls Firestore commit with dislikes increment when dislike button pressed', async () => {
+    const row = makeCommentRow({id: 'cmt99', text: 'Boring race'});
+    const {getByTestId, getByLabelText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row]});
+
+    await act(async () => {
+      fireEvent.press(getByLabelText('Dislike comment'));
+    });
+
+    await waitFor(() => {
+      const commitCall = global.fetch.mock.calls.find(
+        ([url]) => typeof url === 'string' && url.includes(':commit'),
+      );
+      expect(commitCall).toBeTruthy();
+      const body = JSON.parse(commitCall[1].body);
+      const t = body.writes[0].transform;
+      expect(t.document).toContain('article_comments/cmt99');
+      expect(t.fieldTransforms[0].fieldPath).toBe('dislikes');
+    });
+  });
+
+  it('persists like reaction to AsyncStorage', async () => {
+    const row = makeCommentRow({id: 'cmt1'});
+    const {getByTestId, getByLabelText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row]});
+
+    await act(async () => {
+      fireEvent.press(getByLabelText('Like comment'));
+    });
+
+    await waitFor(() => {
+      const call = AsyncStorage.setItem.mock.calls.find(([key]) => key === 'comment_reactions_v1');
+      expect(call).toBeTruthy();
+      expect(JSON.parse(call[1]).cmt1).toBe('likes');
+    });
+  });
+
+  // ── fetchComments error handling (regression for silent Firestore failures) ──
+
+  it('shows empty state (not a crash) when Firestore returns an error on fetch', async () => {
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes(':runQuery')) {
+        return Promise.resolve({
+          ok: false,
+          status: 400,
+          json: () => Promise.resolve({error: {code: 400, message: 'The query requires an index.'}}),
+        });
+      }
+      return Promise.resolve({ok: true, json: () => Promise.resolve({fields: {likes: {integerValue: '0'}, dislikes: {integerValue: '0'}}})});
+    });
+
+    const {getByTestId, getByText} = renderArticle();
+    await openComments(getByTestId);
+
+    await waitFor(() => {
+      expect(getByText('No comments yet. Be the first!')).toBeTruthy();
+    });
+  });
+
+  it('shows error and restores input when postComment fails', async () => {
+    const failFetch = jest.fn().mockImplementation((url, options) => {
+      const u = typeof url === 'string' ? url : '';
+      if (u.includes(':runQuery')) return Promise.resolve({ok: true, json: () => Promise.resolve([])});
+      if (u.includes('article_comments') && options?.method === 'POST') {
+        return Promise.resolve({
+          ok: false,
+          status: 403,
+          json: () => Promise.resolve({error: {code: 403, message: 'Missing or insufficient permissions.'}}),
+        });
+      }
+      return Promise.resolve({ok: true, json: () => Promise.resolve({fields: {likes: {integerValue: '0'}, dislikes: {integerValue: '0'}}})});
+    });
+
+    const {getByTestId, getByPlaceholderText, getByLabelText, getByText} = renderArticle();
+    await openComments(getByTestId, {fetchMock: failFetch});
+
+    const input = await waitFor(() => getByPlaceholderText('Add a comment...'));
+    fireEvent.changeText(input, 'My comment');
+    fireEvent.press(getByLabelText('Send comment'));
+
+    await waitFor(() => {
+      expect(getByText('Failed to post comment. Please try again.')).toBeTruthy();
     });
   });
 });

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {cacheWrite, cacheRead} from '../../src/store/cache';
+import {cacheWrite, cacheRead, cacheReadTimestamp} from '../../src/store/cache';
 
 describe('cacheWrite', () => {
   it('stores JSON wrapped with data and cachedAt', async () => {
@@ -63,5 +63,35 @@ describe('cacheRead', () => {
   it('returns null when AsyncStorage throws', async () => {
     AsyncStorage.getItem.mockRejectedValueOnce(new Error('storage error'));
     expect(await cacheRead('any')).toBeNull();
+  });
+});
+
+describe('cacheReadTimestamp', () => {
+  it('returns cachedAt ms from a wrapped entry', async () => {
+    const ts = Date.now() - 5_000;
+    AsyncStorage.getItem.mockResolvedValueOnce(
+      JSON.stringify({data: {x: 1}, cachedAt: ts}),
+    );
+    expect(await cacheReadTimestamp('key')).toBe(ts);
+  });
+
+  it('returns null for legacy plain entries without cachedAt', async () => {
+    AsyncStorage.getItem.mockResolvedValueOnce('{"x":1}');
+    expect(await cacheReadTimestamp('key')).toBeNull();
+  });
+
+  it('returns null for missing key', async () => {
+    AsyncStorage.getItem.mockResolvedValueOnce(null);
+    expect(await cacheReadTimestamp('missing')).toBeNull();
+  });
+
+  it('returns null on invalid JSON', async () => {
+    AsyncStorage.getItem.mockResolvedValueOnce('not-json{{');
+    expect(await cacheReadTimestamp('bad')).toBeNull();
+  });
+
+  it('returns null when AsyncStorage throws', async () => {
+    AsyncStorage.getItem.mockRejectedValueOnce(new Error('storage error'));
+    expect(await cacheReadTimestamp('any')).toBeNull();
   });
 });

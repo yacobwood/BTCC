@@ -8,11 +8,18 @@ export async function cacheWrite(key, data) {
   } catch {}
 }
 
-/**
- * Read cached data. Returns null if missing, unreadable, or older than maxAgeMs.
- * @param {string} key
- * @param {number} [maxAgeMs] - if provided, entries older than this are treated as cache misses
- */
+export async function cacheReadTimestamp(key) {
+  try {
+    const raw = await AsyncStorage.getItem(PREFIX + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || !('cachedAt' in parsed)) return null;
+    return parsed.cachedAt;
+  } catch {
+    return null;
+  }
+}
+
 export async function cacheRead(key, maxAgeMs) {
   try {
     const raw = await AsyncStorage.getItem(PREFIX + key);

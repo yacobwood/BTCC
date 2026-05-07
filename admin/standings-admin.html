@@ -757,6 +757,10 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
     ANALYTICS
   </button>
+  <button class="tab" id="tab-errors" onclick="switchTab('errors',this);loadErrors()">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    ERRORS<span id="errors-badge" style="display:none;background:#E3000B;color:#fff;font-size:9px;font-weight:900;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle"></span>
+  </button>
 </div>
 
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
@@ -1382,6 +1386,18 @@ select.input { cursor: pointer; }
     <div class="card-header"><div class="section-label">RECENT PUSHES</div></div>
     <div id="analytics-pushes-list"><div class="section-note">Loading…</div></div>
   </div>
+</div>
+
+<!-- ══════════════════════════════ ERRORS ══════════════════ -->
+<div id="panel-errors" class="tab-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-label">CLOUD FUNCTION ERRORS</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-sm" onclick="loadErrors()">↻ REFRESH</button>
+      <button class="btn-sm" onclick="dismissAllErrors()" style="color:#E3000B">DISMISS ALL</button>
+    </div>
+  </div>
+  <div id="errors-list"><div class="section-note">Loading…</div></div>
 </div>
 
 <script>
@@ -2968,6 +2984,7 @@ loadFlags();
 loadNotifSchedule();
 window._notifLoaded = true;
 if (getToken()) refreshAllStatus();
+refreshErrorBadge();
 
 // ══════════════════════════════ ROADMAP ══════════════════════════════
 
@@ -3449,6 +3466,90 @@ function toggleRound(id, header) {
   body.style.display = open ? 'block' : 'none';
   chevron.textContent = open ? '˅' : '›';
   header.style.borderRadius = open ? '10px 10px 0 0' : '10px';
+}
+
+// ── Error log ────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadErrors() {
+  const el = document.getElementById('errors-list');
+  el.innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${FS_BASE_URL}/errors?key=${FS_API_KEY}&pageSize=100`);
+    const data = await r.json();
+    const docs = (data.documents || [])
+      .map(d => ({
+        id: d.name.split('/').pop(),
+        fn: d.fields?.fn?.stringValue || '',
+        message: d.fields?.message?.stringValue || '',
+        stack: d.fields?.stack?.stringValue || '',
+        timestamp: d.fields?.timestamp?.stringValue || '',
+        resolved: d.fields?.resolved?.booleanValue || false,
+      }))
+      .filter(d => !d.resolved)
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+    const badge = document.getElementById('errors-badge');
+    if (docs.length > 0) { badge.textContent = docs.length; badge.style.display = 'inline'; }
+    else { badge.style.display = 'none'; }
+
+    if (docs.length === 0) {
+      el.innerHTML = '<div class="section-note" style="text-align:center;padding:24px 0;color:var(--green)">✓ No errors</div>';
+      return;
+    }
+    el.innerHTML = docs.map(d => `
+      <div class="card" style="margin-bottom:8px;border-left:3px solid #E3000B" id="err-${d.id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div>
+            <span style="background:rgba(227,0,11,0.12);color:#f87171;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:6px">${escHtml(d.fn)}</span>
+            <span style="color:var(--text-sec);font-size:11px">${d.timestamp ? new Date(d.timestamp).toLocaleString('en-GB') : '—'}</span>
+          </div>
+          <button class="btn-sm" onclick="dismissError('${d.id}')" style="color:var(--text-sec)">Dismiss</button>
+        </div>
+        <div style="color:var(--text);font-size:13px;font-weight:600;margin-bottom:4px">${escHtml(d.message)}</div>
+        ${d.stack ? `<details><summary style="font-size:11px;color:var(--text-sec);cursor:pointer;margin-top:4px">Stack trace</summary><pre style="font-size:10px;color:var(--text-sec);overflow-x:auto;margin-top:6px;white-space:pre-wrap;word-break:break-all">${escHtml(d.stack.slice(0,1200))}</pre></details>` : ''}
+      </div>`).join('');
+  } catch (e) {
+    el.innerHTML = `<div class="section-note" style="color:#E3000B">Failed to load: ${escHtml(e.message)}</div>`;
+  }
+}
+
+async function dismissError(id) {
+  document.getElementById(`err-${id}`)?.remove();
+  const remaining = document.querySelectorAll('[id^="err-"]').length;
+  const badge = document.getElementById('errors-badge');
+  if (remaining === 0) { badge.style.display = 'none'; document.getElementById('errors-list').innerHTML = '<div class="section-note" style="text-align:center;padding:24px 0;color:var(--green)">✓ No errors</div>'; }
+  else { badge.textContent = remaining; }
+  try {
+    await fetch(`${FS_BASE_URL}/errors/${id}?key=${FS_API_KEY}&updateMask.fieldPaths=resolved`, {
+      method: 'PATCH', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({fields: {resolved: {booleanValue: true}}}),
+    });
+  } catch (e) { console.error('dismiss failed:', e); }
+}
+
+async function dismissAllErrors() {
+  const ids = Array.from(document.querySelectorAll('[id^="err-"]')).map(el => el.id.replace('err-', ''));
+  if (!ids.length) return;
+  document.getElementById('errors-list').innerHTML = '<div class="section-note" style="text-align:center;padding:24px 0;color:var(--green)">✓ No errors</div>';
+  document.getElementById('errors-badge').style.display = 'none';
+  await Promise.all(ids.map(id => fetch(`${FS_BASE_URL}/errors/${id}?key=${FS_API_KEY}&updateMask.fieldPaths=resolved`, {
+    method: 'PATCH', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({fields: {resolved: {booleanValue: true}}}),
+  }).catch(e => console.error('dismiss failed:', id, e))));
+}
+
+async function refreshErrorBadge() {
+  try {
+    const r = await fetch(`${FS_BASE_URL}/errors?key=${FS_API_KEY}&pageSize=100`);
+    const data = await r.json();
+    const count = (data.documents || []).filter(d => !d.fields?.resolved?.booleanValue).length;
+    const badge = document.getElementById('errors-badge');
+    if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+    else { badge.style.display = 'none'; }
+  } catch {}
 }
 
 
