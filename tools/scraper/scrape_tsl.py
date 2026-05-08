@@ -137,50 +137,41 @@ def parse_grid(pdf_bytes):
     """
     Parse a TSL starting grid PDF into a list of grid position dicts.
 
-    Grid PDFs share the same column layout as classification PDFs but omit
-    time/lap columns.  We anchor on the grid position number (x < 30) and
-    collect car number, driver name and team from the surrounding row.
+    Grid PDFs use a two-column side-by-side layout (odd positions on the
+    left, even on the right) rather than the single-column classification
+    layout.  Column x-boundaries determined from live PDFs:
+
+      Left column:   position x≈73–82  car-number x≈86–97  driver x≈105–250
+      Right column:  position x≈313–322  car-number x≈325–340  driver x≈340–430
     """
     elements = _pdf_elements(pdf_bytes)
-    anchors = []
-    for y, x, t in elements:
-        if x >= 30:
-            continue
-        if re.match(r"^\d{1,2}$", t):
-            anchors.append((y, int(t)))
 
-    anchors.sort(key=lambda a: -a[0])  # top-to-bottom
+    def collect(pos_x_lo, pos_x_hi, no_x_lo, no_x_hi, drv_x_lo, drv_x_hi):
+        entries = []
+        seen = set()
+        for y, x, t in elements:
+            if not (pos_x_lo < x < pos_x_hi and re.match(r"^\d{1,2}$", t)):
+                continue
+            pos = int(t)
+            if pos in seen:
+                continue
+            seen.add(pos)
+            no, driver = 0, ""
+            for y2, x2, t2 in elements:
+                if abs(y2 - y) > 10:
+                    continue
+                if no_x_lo < x2 < no_x_hi and re.match(r"^\d+$", t2):
+                    no = int(t2)
+                elif drv_x_lo < x2 < drv_x_hi and " " in t2 and t2[0].isupper():
+                    driver = t2
+            if driver:
+                driver = DRIVER_NAME_MAP.get(driver, driver)
+                entries.append({"pos": pos, "no": no, "cl": "", "driver": driver, "team": ""})
+        return entries
 
-    grid = []
-    seen_pos = set()
-    for anchor_y, pos in anchors:
-        if pos in seen_pos:
-            continue
-        seen_pos.add(pos)
-        y_min, y_max = anchor_y - 8, anchor_y + 8
-        row = [(y, x, t) for y, x, t in elements if y_min <= y <= y_max]
-
-        driver, team, no, cl = "", "", 0, ""
-        for _, x, t in row:
-            if 30 < x < 75:
-                m = re.match(r"^(\d+)\s+([MI])", t)
-                if m:
-                    no = int(m.group(1))
-                    cl = m.group(2)
-            elif 85 < x < 235:
-                if re.search(r"\(\w{3}\)", t):
-                    m = re.match(r"^(.*?)\s*\(\w{3}\)", t)
-                    if m:
-                        driver = m.group(1).strip()
-                elif t and not t.startswith("*") and not t.startswith("Car "):
-                    if not team:
-                        team = re.sub(r"^\d+\s+", "", t)
-
-        driver = DRIVER_NAME_MAP.get(driver, driver)
-        if driver:
-            grid.append({"pos": pos, "no": no, "cl": cl, "driver": driver, "team": team})
-
-    return grid
+    left  = collect(73, 82, 86, 97, 105, 250)
+    right = collect(313, 322, 325, 340, 340, 430)
+    return sorted(left + right, key=lambda e: e["pos"])
 
 
 # ── Classification parser ─────────────────────────────────────────────────────
