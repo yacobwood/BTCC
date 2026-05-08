@@ -1896,7 +1896,9 @@ const FLAG_DEFS = [
   {key:'live_chat',               label:'Live Chat',              desc:'Show the Live Chat tab in the bottom nav'},
   {key:'debug_mode',              label:'Debug Mode',             desc:'Show the Debug section in Settings'},
   {key:'update_available',        label:'Update Available',       desc:'Force update modal'},
-  {key:'update_min_version',      label:'Update Min Version',     desc:'Min versionCode to require update', type:'number'},
+  {key:'update_min_version',      label:'Update Min Version',     desc:'Min versionCode to require update (legacy fallback)', type:'number'},
+  {key:'update_min_version_ios',  label:'Update Min Version — iOS',     desc:'iOS only: min versionCode to require update (0 = never)', type:'number'},
+  {key:'update_min_version_android', label:'Update Min Version — Android', desc:'Android only: min versionCode to require update (0 = never)', type:'number'},
 ];
 
 let flagValues = {}, flagFileSha = null;
