@@ -3,6 +3,7 @@ import {
   View,
   Text,
   FlatList,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   Linking,
@@ -169,8 +170,8 @@ export default function RoundResultsScreen({route, navigation}) {
           const hasResults = race?.results?.length > 0;
 
           if (!hasResults) {
-            if (race?.grid?.length) {
-              return <StartingGridTab key={i} race={race} isFavourite={isFavourite} />;
+            if (race.grid?.length) {
+              return <StartingGridTab key={i} race={race} races={races} isFavourite={isFavourite} />;
             }
             if (isR3) {
               return <ReverseGridTab key={i} races={races} isFavourite={isFavourite} />;
@@ -212,38 +213,74 @@ export default function RoundResultsScreen({route, navigation}) {
 const REVERSAL_MIN = 6;
 const REVERSAL_MAX = 12;
 
-function StartingGridTab({race, isFavourite}) {
+const GRID_CARD_HEIGHT = 52;
+const GRID_GAP = 6;
+
+function detectReversalCount(races, gridDrivers) {
+  const r2 = races?.find(r => r.label === 'Race 2');
+  if (!r2?.results?.length) return null;
+  const r2Order = [...r2.results].filter(d => d.position > 0).sort((a, b) => a.position - b.position).map(d => d.driver);
+  for (let n = 12; n >= 6; n--) {
+    const reversed = r2Order.slice(0, n).reverse();
+    if (reversed.length === n && reversed.every((driver, i) => gridDrivers[i] === driver)) return n;
+  }
+  return null;
+}
+
+function StartingGridTab({race, races, isFavourite}) {
+  const sorted = [...race.grid].sort((a, b) => a.pos - b.pos);
+  const isR3 = race.label === 'Race 3';
+  const reversalCount = isR3 ? detectReversalCount(races, sorted.map(g => g.driver)) : null;
+  const teamMap = {};
+  races.forEach(r => (r.results || []).forEach(d => { if (d.driver && d.team) teamMap[d.driver] = d.team; }));
+  const leftItems = sorted.filter(g => g.pos % 2 === 1);
+  const rightItems = sorted.filter(g => g.pos % 2 === 0);
+  const rightOffset = (GRID_CARD_HEIGHT + GRID_GAP) / 2;
   return (
     <View style={{flex: 1}}>
       <View style={styles.reverseHeader}>
         <Text style={styles.reverseTitle}>Official Starting Grid</Text>
-        <Text style={styles.reverseSubtitle}>
-          Published by TSL Timing · results will appear here once the race is complete
-        </Text>
       </View>
-      <FlatList
-        data={race.grid}
-        keyExtractor={(_, i) => String(i)}
-        renderItem={({item}) => {
-          const fav = isFavourite(item.driver);
-          return (
-            <View style={[styles.resultRow, fav && styles.resultRowFav]}>
-              <Text style={[styles.pos, {color: '#fff'}]}>{item.pos}</Text>
-              <View style={{flex: 1}}>
-                <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-                  {fav && <Icon name="star" size={11} color={Colors.yellow} />}
-                  <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>
-                    {formatDriverName(item.driver)}
-                  </Text>
-                  <Badge text={`#${item.no}`} color={Colors.textSecondary} />
-                </View>
-                <Text style={styles.teamName}>{item.team}</Text>
-              </View>
-            </View>
-          );
-        }}
-        contentContainerStyle={{padding: 16, paddingBottom: 20}}
-      />
+      <ScrollView contentContainerStyle={{paddingTop: 12, paddingHorizontal: 16, paddingBottom: 20}}>
+        <View style={{flexDirection: 'row', gap: GRID_GAP}}>
+          <View style={{flex: 1, gap: GRID_GAP}}>
+            {leftItems.map(item => (
+              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} />
+            ))}
+          </View>
+          <View style={{flex: 1, gap: GRID_GAP, marginTop: rightOffset}}>
+            {rightItems.map(item => (
+              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} />
+            ))}
+          </View>
+        </View>
+        {reversalCount && (
+          <View style={[styles.reversalBadge, {alignSelf: 'center', marginTop: 20}]}>
+            <Icon name="shuffle" size={11} color={Colors.yellow} />
+            <Text style={styles.reversalBadgeText}>Top {reversalCount} reversed (draw: {reversalCount})</Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+function GridSlot({item, isFavourite, reversed, team}) {
+  if (!item) return null;
+  const fav = isFavourite(item.driver);
+  return (
+    <View style={[styles.gridSlot, fav && styles.resultRowFav]}>
+      <Text style={styles.gridPos}>{item.pos}</Text>
+      <View style={{flex: 1, minWidth: 0}}>
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}>
+          {fav && <Icon name="star" size={10} color={Colors.yellow} />}
+          <Text style={[styles.gridDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
+            {formatDriverName(item.driver)}
+          </Text>
+        </View>
+        {team ? <Text style={styles.gridCar} numberOfLines={1}>{team}</Text> : null}
+      </View>
+      {reversed && <Icon name="shuffle" size={10} color={Colors.textSecondary} />}
     </View>
   );
 }
@@ -375,7 +412,7 @@ const styles = StyleSheet.create({
   badgeText: {fontSize: 10, fontWeight: '800'},
   pointsText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600', marginTop: 2},
   emptyText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 40},
-  reverseHeader: {padding: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.outline},
+  reverseHeader: {padding: 16, paddingBottom: 12},
   reverseTitle: {color: '#fff', fontSize: 15, fontWeight: '800'},
   reverseSubtitle: {color: Colors.textSecondary, fontSize: 11, marginTop: 2, marginBottom: 10},
   reversalToggle: {flexDirection: 'row', alignItems: 'center', gap: 8},
@@ -390,6 +427,20 @@ const styles = StyleSheet.create({
   reverseRow: {borderLeftWidth: 3, borderLeftColor: `${Colors.yellow}60`},
   reverseRowFav: {borderLeftWidth: 3, borderLeftColor: Colors.yellow},
   r2PosText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
+  gridSlot: {
+    height: GRID_CARD_HEIGHT, flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: Colors.card, borderRadius: 8, paddingHorizontal: 10,
+  },
+  gridSlotReversed: {borderWidth: 1, borderColor: `${Colors.yellow}50`},
+  reversalBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6,
+    alignSelf: 'flex-start', backgroundColor: `${Colors.yellow}18`,
+    borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
+  },
+  reversalBadgeText: {color: Colors.yellow, fontSize: 11, fontWeight: '600'},
+  gridPos: {color: '#fff', fontSize: 16, fontWeight: '900', width: 24, textAlign: 'center'},
+  gridDriver: {color: '#fff', fontSize: 12, fontWeight: '700'},
+  gridCar: {color: Colors.textSecondary, fontSize: 11},
   youtubeBtn: {
     flexDirection: 'row',
     alignItems: 'center',

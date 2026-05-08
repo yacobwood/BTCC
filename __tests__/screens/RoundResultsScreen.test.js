@@ -280,4 +280,152 @@ describe('RoundResultsScreen', () => {
       expect(getByText('Race 2 results needed to predict grid')).toBeTruthy();
     });
   });
+
+  // ── Starting grid tab (race has grid PDF data, no results yet) ────────────────
+
+  // Six R2 finishers whose top 6 reversed exactly match the R3 grid (draw = 6).
+  const GRID_ROUND = {
+    round: 2,
+    venue: 'Brands Hatch Indy',
+    date: '10–11 May 2026',
+    races: [
+      {label: 'Free Practice',   results: [], grid: []},
+      {label: 'Qualifying',      results: [], grid: []},
+      {label: 'Qualifying Race', results: [], grid: []},
+      {label: 'Race 1',          results: [], grid: []},
+      {
+        label: 'Race 2',
+        grid: [],
+        results: [
+          {driver: 'Alpha Driver',   position: 1, team: 'Team Alpha', points: 25, time: '30:00', gap: null, laps: 20, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Beta Driver',    position: 2, team: 'Team Beta',  points: 18, time: '30:01', gap: '1.0', laps: 20, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Gamma Driver',   position: 3, team: 'Team Gamma', points: 15, time: '30:02', gap: '2.0', laps: 20, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Delta Driver',   position: 4, team: 'Team Delta', points: 13, time: '30:03', gap: '3.0', laps: 20, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Echo Driver',    position: 5, team: 'Team Echo',  points: 11, time: '30:04', gap: '4.0', laps: 20, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Foxtrot Driver', position: 6, team: 'Team Fox',   points: 10, time: '30:05', gap: '5.0', laps: 20, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+        ],
+      },
+      {
+        label: 'Race 3',
+        results: [],
+        // R2 top-6 reversed (draw = 6): F→1, E→2, D→3, C→4, B→5, A→6
+        grid: [
+          {pos: 1, no: 6,  cl: 'M', driver: 'Foxtrot Driver', team: ''},
+          {pos: 2, no: 5,  cl: 'M', driver: 'Echo Driver',    team: ''},
+          {pos: 3, no: 4,  cl: 'M', driver: 'Delta Driver',   team: ''},
+          {pos: 4, no: 3,  cl: 'M', driver: 'Gamma Driver',   team: ''},
+          {pos: 5, no: 2,  cl: 'M', driver: 'Beta Driver',    team: ''},
+          {pos: 6, no: 1,  cl: 'M', driver: 'Alpha Driver',   team: ''},
+        ],
+      },
+    ],
+  };
+
+  describe('starting grid tab', () => {
+    it('shows Official Starting Grid heading', () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5});
+      expect(getByText('Official Starting Grid')).toBeTruthy();
+    });
+
+    it('renders all drivers from grid data', () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5});
+      expect(getByText('Foxtrot DRIVER')).toBeTruthy();
+      expect(getByText('Alpha DRIVER')).toBeTruthy();
+    });
+
+    it('cross-references team names from race results', () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5});
+      expect(getByText('Team Fox')).toBeTruthy();
+      expect(getByText('Team Alpha')).toBeTruthy();
+    });
+
+    it('shows reversal badge with detected draw number at the bottom', () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5});
+      expect(getByText('Top 6 reversed (draw: 6)')).toBeTruthy();
+    });
+
+    it('does not show reversal badge when R3 grid does not match a clean reversal', () => {
+      const scrambledRound = {
+        ...GRID_ROUND,
+        races: GRID_ROUND.races.map(r =>
+          r.label === 'Race 3'
+            ? {...r, grid: [{pos: 1, no: 1, cl: 'M', driver: 'Alpha Driver', team: ''}, {pos: 2, no: 2, cl: 'M', driver: 'Beta Driver', team: ''}]}
+            : r,
+        ),
+      };
+      const {queryByText} = renderRound({round: scrambledRound, initialRace: 5});
+      expect(queryByText(/reversed/)).toBeNull();
+    });
+
+    it('does not show reversal badge for non-R3 races', () => {
+      const r1GridRound = {
+        ...GRID_ROUND,
+        races: GRID_ROUND.races.map(r =>
+          r.label === 'Race 1'
+            ? {...r, grid: [{pos: 1, no: 1, cl: 'M', driver: 'Alpha Driver', team: ''}]}
+            : r,
+        ),
+      };
+      const {queryByText} = renderRound({round: r1GridRound, initialRace: 2});
+      expect(queryByText(/reversed/)).toBeNull();
+    });
+
+    it('highlights favourite driver in the grid', async () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5, favourites: ['Foxtrot Driver']});
+      await waitFor(() => getByText('Foxtrot DRIVER'));
+      expect(getByText('Foxtrot DRIVER')).toHaveStyle({color: '#FEBD02'});
+    });
+
+    it('non-favourite driver is not highlighted', async () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5, favourites: ['Foxtrot Driver']});
+      await waitFor(() => getByText('Alpha DRIVER'));
+      expect(getByText('Alpha DRIVER')).not.toHaveStyle({color: '#FEBD02'});
+    });
+  });
+
+  // ── R3 delta arrows when actual grid is available ─────────────────────────────
+
+  const R3_WITH_GRID_ROUND = {
+    ...MOCK_ROUND,
+    races: MOCK_ROUND.races.map(r =>
+      r.label === 'Race 3'
+        ? {
+            ...r,
+            // Colin was P1 on grid, finished P1 (delta 0)
+            // Tom was P2 on grid, finished P2 (delta 0)
+            // Swap them to create visible deltas: Tom P1 grid → finishes P2 (↓1), Colin P2 grid → finishes P1 (↑1)
+            grid: [
+              {pos: 1, no: 80, cl: 'M', driver: 'Tom Ingram',       team: ''},
+              {pos: 2, no: 4,  cl: 'M', driver: 'Colin Turkington', team: ''},
+            ],
+          }
+        : r,
+    ),
+  };
+
+  describe('grid position deltas — Race 3 with actual TSL grid', () => {
+    it('shows delta arrows when R3 has both grid and results', async () => {
+      const {UNSAFE_queryAllByType} = renderRound({round: R3_WITH_GRID_ROUND, initialRace: 5});
+      const {Text} = require('react-native');
+      const deltaColours = new Set(['#4ADE80', '#F87171']);
+      await waitFor(() => {
+        const hasDelta = UNSAFE_queryAllByType(Text).some(el =>
+          [].concat(el.props.style || []).some(s => deltaColours.has(s?.color)),
+        );
+        expect(hasDelta).toBe(true);
+      });
+    });
+
+    it('uses grid position not previous-race derivation for R3 delta', async () => {
+      // Tom started P1 on grid, finished P2 → delta should be -1 (red / downward)
+      const {UNSAFE_queryAllByType} = renderRound({round: R3_WITH_GRID_ROUND, initialRace: 5});
+      const {Text} = require('react-native');
+      await waitFor(() => {
+        const redDeltas = UNSAFE_queryAllByType(Text).filter(el =>
+          [].concat(el.props.style || []).some(s => s?.color === '#F87171'),
+        );
+        expect(redDeltas.length).toBeGreaterThan(0);
+      });
+    });
+  });
 });
