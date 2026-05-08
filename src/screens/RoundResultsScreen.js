@@ -42,13 +42,20 @@ function buildReverseGrid(races, reversalCount) {
 }
 
 // Build a map of driver -> grid position for a given race.
-// Race 1 grid = Qualifying Race finishing order.
-// Race 2 grid = Race 1 finishing order.
-// Race 3 grid = unknown (random reversal draw not stored).
+// Prefers the actual TSL grid PDF data when available (covers all races incl. R3).
+// Falls back to derivation from the previous session's finishing order.
 function buildGridMap(races, raceIndex) {
   const race = races[raceIndex];
   if (!race) return null;
 
+  // Prefer actual TSL grid (populated by scraper from gqr/grd/gr2/gr3 PDFs)
+  if (race.grid?.length) {
+    const map = {};
+    race.grid.forEach(g => { if (g.driver) map[g.driver] = g.pos; });
+    return Object.keys(map).length ? map : null;
+  }
+
+  // Derive from previous session finishing order when TSL grid not yet available
   let sourceLabel;
   if (race.label === 'Qualifying Race') sourceLabel = 'Qualifying';
   else if (race.label === 'Race 1') sourceLabel = 'Qualifying Race';
@@ -161,8 +168,13 @@ export default function RoundResultsScreen({route, navigation}) {
           const isR3 = race?.label === 'Race 3';
           const hasResults = race?.results?.length > 0;
 
-          if (isR3 && !hasResults) {
-            return <ReverseGridTab key={i} races={races} isFavourite={isFavourite} />;
+          if (!hasResults) {
+            if (race?.grid?.length) {
+              return <StartingGridTab key={i} race={race} isFavourite={isFavourite} />;
+            }
+            if (isR3) {
+              return <ReverseGridTab key={i} races={races} isFavourite={isFavourite} />;
+            }
           }
 
           return (
@@ -199,6 +211,42 @@ export default function RoundResultsScreen({route, navigation}) {
 
 const REVERSAL_MIN = 6;
 const REVERSAL_MAX = 12;
+
+function StartingGridTab({race, isFavourite}) {
+  return (
+    <View style={{flex: 1}}>
+      <View style={styles.reverseHeader}>
+        <Text style={styles.reverseTitle}>Official Starting Grid</Text>
+        <Text style={styles.reverseSubtitle}>
+          Published by TSL Timing · results will appear here once the race is complete
+        </Text>
+      </View>
+      <FlatList
+        data={race.grid}
+        keyExtractor={(_, i) => String(i)}
+        renderItem={({item}) => {
+          const fav = isFavourite(item.driver);
+          return (
+            <View style={[styles.resultRow, fav && styles.resultRowFav]}>
+              <Text style={[styles.pos, {color: '#fff'}]}>{item.pos}</Text>
+              <View style={{flex: 1}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+                  {fav && <Icon name="star" size={11} color={Colors.yellow} />}
+                  <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>
+                    {formatDriverName(item.driver)}
+                  </Text>
+                  <Badge text={`#${item.no}`} color={Colors.textSecondary} />
+                </View>
+                <Text style={styles.teamName}>{item.team}</Text>
+              </View>
+            </View>
+          );
+        }}
+        contentContainerStyle={{padding: 16, paddingBottom: 20}}
+      />
+    </View>
+  );
+}
 
 function ReverseGridTab({races, isFavourite}) {
   const [reversalCount, setReversalCount] = useState(8);

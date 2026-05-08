@@ -48,6 +48,14 @@ SESSION_SUFFIXES = {
     "Race 3":          "rc3",
 }
 
+# Grid PDF suffix for each race session (published before the race starts)
+GRID_SUFFIXES = {
+    "Qualifying Race": "gqr",
+    "Race 1":          "grd",
+    "Race 2":          "gr2",
+    "Race 3":          "gr3",
+}
+
 # Sessions that award no championship points
 NO_POINTS_SESSIONS = {"Free Practice", "Qualifying"}
 
@@ -121,6 +129,58 @@ def _pdf_text(pdf_bytes):
         return ""
     finally:
         Path(path).unlink(missing_ok=True)
+
+
+# ── Grid parser ──────────────────────────────────────────────────────────────
+
+def parse_grid(pdf_bytes):
+    """
+    Parse a TSL starting grid PDF into a list of grid position dicts.
+
+    Grid PDFs share the same column layout as classification PDFs but omit
+    time/lap columns.  We anchor on the grid position number (x < 30) and
+    collect car number, driver name and team from the surrounding row.
+    """
+    elements = _pdf_elements(pdf_bytes)
+    anchors = []
+    for y, x, t in elements:
+        if x >= 30:
+            continue
+        if re.match(r"^\d{1,2}$", t):
+            anchors.append((y, int(t)))
+
+    anchors.sort(key=lambda a: -a[0])  # top-to-bottom
+
+    grid = []
+    seen_pos = set()
+    for anchor_y, pos in anchors:
+        if pos in seen_pos:
+            continue
+        seen_pos.add(pos)
+        y_min, y_max = anchor_y - 8, anchor_y + 8
+        row = [(y, x, t) for y, x, t in elements if y_min <= y <= y_max]
+
+        driver, team, no, cl = "", "", 0, ""
+        for _, x, t in row:
+            if 30 < x < 75:
+                m = re.match(r"^(\d+)\s+([MI])", t)
+                if m:
+                    no = int(m.group(1))
+                    cl = m.group(2)
+            elif 85 < x < 235:
+                if re.search(r"\(\w{3}\)", t):
+                    m = re.match(r"^(.*?)\s*\(\w{3}\)", t)
+                    if m:
+                        driver = m.group(1).strip()
+                elif t and not t.startswith("*") and not t.startswith("Car "):
+                    if not team:
+                        team = re.sub(r"^\d+\s+", "", t)
+
+        driver = DRIVER_NAME_MAP.get(driver, driver)
+        if driver:
+            grid.append({"pos": pos, "no": no, "cl": cl, "driver": driver, "team": team})
+
+    return grid
 
 
 # ── Classification parser ─────────────────────────────────────────────────────
@@ -282,22 +342,35 @@ def scrape_round(info):
     tsl = info["tsl"]
     print(f"\nRound {info['round']}: {info['venue']}  (TSL {tsl})")
 
-    # Download and parse each session PDF
+    # Download and parse each session PDF (+ grid PDF where available)
     races = []
     any_results = False
     for label, suffix in SESSION_SUFFIXES.items():
         url = TSL_BASE.format(year=YEAR, tsl=tsl, suffix=f"{suffix}trg")
         print(f"  {label} → {url}")
         data = fetch_pdf(url)
+        results = []
         if not data:
             print(f"    not available yet")
-            races.append({"label": label, "results": []})
-            continue
-        results = parse_classification(data, label)
-        print(f"    parsed {len(results)} entries")
-        races.append({"label": label, "results": results})
-        if results:
-            any_results = True
+        else:
+            results = parse_classification(data, label)
+            print(f"    parsed {len(results)} entries")
+            if results:
+                any_results = True
+
+        grid = []
+        grid_suffix = GRID_SUFFIXES.get(label)
+        if grid_suffix:
+            grid_url = TSL_BASE.format(year=YEAR, tsl=tsl, suffix=f"{grid_suffix}trg")
+            print(f"  {label} grid → {grid_url}")
+            grid_data = fetch_pdf(grid_url)
+            if grid_data:
+                grid = parse_grid(grid_data)
+                print(f"    grid: {len(grid)} entries")
+            else:
+                print(f"    grid not available yet")
+
+        races.append({"label": label, "results": results, "grid": grid})
 
     if not any_results:
         print(f"  No results available yet — skipping")
@@ -444,6 +517,13 @@ def main():
 
         scraped = scrape_round(info)
         if scraped:
+            # Carry forward any grids stored in previous runs (safety net for transient fetch failures)
+            if info["round"] in existing_rounds:
+                existing_map = {r["label"]: r for r in existing_rounds[info["round"]].get("races", [])}
+                for race in scraped["races"]:
+                    ex = existing_map.get(race["label"])
+                    if ex and ex.get("grid") and not race.get("grid"):
+                        race["grid"] = ex["grid"]
             output_rounds.append(scraped)
         elif info["round"] in existing_rounds:
             output_rounds.append(existing_rounds[info["round"]])

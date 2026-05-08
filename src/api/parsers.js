@@ -212,6 +212,13 @@ export function parseResults(json) {
         label,
         date: race.date || null,
         fullRaceUrl: race.fullRaceUrl || null,
+        grid: (race.grid || []).map(g => ({
+          pos: g.pos,
+          no: g.no,
+          cl: g.cl || '',
+          driver: g.driver || '',
+          team: g.team || '',
+        })),
         results: (race.results || []).map(d => {
           const pos = d.pos || 0;
           const rawPts = d.points || 0;
