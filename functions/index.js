@@ -56,6 +56,12 @@ const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
+// Wrap fetch with a hard timeout so a hanging external service never causes a 504.
+// Cloud Run kills the function at 60s; with 10s per request we stay well inside that.
+function fetchWithTimeout(url, ms = 10000, options = {}) {
+  return fetch(url, {...options, signal: AbortSignal.timeout(ms)});
+}
+
 // Session name → FCM topic (must match LEAF_TOPICS in src/store/settings.js)
 const SESSION_TOPICS = {
   'Free Practice':   'pre_fp',
@@ -146,7 +152,7 @@ exports.sendSessionNotifications = onSchedule(
     // ── Calendar-gated alerts (session, preview, standings) ───────
     // Only fetch calendar + schedule on relevant days to avoid unnecessary
     // network calls every minute when there's no race activity.
-    const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+    const calendar = await fetchWithTimeout(CALENDAR_URL).then(r => r.json());
 
     const isRaceDay = calendar.rounds.some(
       r => r.startDate === todayStr || r.endDate === todayStr,
@@ -157,7 +163,7 @@ exports.sendSessionNotifications = onSchedule(
       calendar.rounds.some(r => r.endDate === sundayStr);
 
     if (isRaceDay || isFridayBefore || isTuesdayAfter) {
-      const schedule = await fetch(SCHEDULE_URL).then(r => r.json());
+      const schedule = await fetchWithTimeout(SCHEDULE_URL).then(r => r.json());
 
       const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
       const windowMs = 30 * 1000; // ±30 sec window
@@ -240,7 +246,7 @@ exports.sendSessionNotifications = onSchedule(
 
     // ── News alerts ───────────────────────────────────────────────
     try {
-      const articles = await fetch(NEWS_URL).then(r => r.json());
+      const articles = await fetchWithTimeout(NEWS_URL).then(r => r.json());
       const latest = articles?.[0];
       if (latest) {
         const stateRef = db.collection('state').doc('news');
@@ -251,7 +257,7 @@ exports.sendSessionNotifications = onSchedule(
           const snap = await tx.get(stateRef);
           const lastId = snap.exists ? snap.data().lastId : null;
           if (latest.id !== lastId) {
-            tx.set(stateRef, {lastId: latest.id});
+            tx.set(stateRef, {lastId: latest.id, detectedAt: new Date().toISOString()});
             if (lastId !== null) {
               shouldNotify = true;
               const title = latest.title?.rendered?.replace(/&#\d+;/g, c =>
@@ -262,6 +268,7 @@ exports.sendSessionNotifications = onSchedule(
           }
         });
         if (shouldNotify && notifyPayload) {
+          console.log(`News notification queued: "${notifyPayload.title}" (${notifyPayload.slug})`);
           sends.push(
             messaging.send({
               topic: 'news_alerts',
@@ -279,7 +286,7 @@ exports.sendSessionNotifications = onSchedule(
 
     // ── Hub news alerts ───────────────────────────────────────────
     try {
-      const hubData = await fetch(HUB_NEWS_URL).then(r => r.json());
+      const hubData = await fetchWithTimeout(HUB_NEWS_URL).then(r => r.json());
       // Exclude Weekly Digest — those have their own notification fired in runDigest
       const latestHub = hubData?.posts?.find(p => (!p.status || p.status === 'published') && p.category !== 'Weekly Digest');
       if (latestHub) {
@@ -320,7 +327,7 @@ exports.sendSessionNotifications = onSchedule(
 
     // ── Podcast alerts ────────────────────────────────────────────
     try {
-      const rssText = await fetch(PODCAST_RSS_URL).then(r => r.text());
+      const rssText = await fetchWithTimeout(PODCAST_RSS_URL).then(r => r.text());
       const guidMatch = rssText.match(/<guid[^>]*>(.*?)<\/guid>/);
       const titleMatch = rssText.match(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
                          rssText.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
@@ -386,7 +393,7 @@ async function runDigest(label, promptIntro) {
   };
 
   // ── Fetch current hub_news.json from GitHub ─────────────────
-  const fileRes = await fetch(GITHUB_API, {headers: ghHeaders});
+  const fileRes = await fetchWithTimeout(GITHUB_API, 10000, {headers: ghHeaders});
   if (!fileRes.ok) throw new Error(`GitHub GET failed: ${fileRes.status}`);
   const fileData = await fileRes.json();
   const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
@@ -401,8 +408,9 @@ async function runDigest(label, promptIntro) {
 
   // ── Reddit r/BTCC ───────────────────────────────────────────
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       'https://www.reddit.com/r/BTCC/top.json?t=week&limit=30',
+      10000,
       {headers: {'User-Agent': 'BTCCHubBot/1.0 by BTCC_Hub'}},
     );
     const data = await res.json();
@@ -422,7 +430,7 @@ async function runDigest(label, promptIntro) {
 
   // ── BTCC.net WordPress API ──────────────────────────────────
   try {
-    const posts = await fetch(
+    const posts = await fetchWithTimeout(
       'https://www.btcc.net/wp-json/wp/v2/posts?per_page=15&_fields=title,excerpt,link&orderby=date',
     ).then(r => r.json());
     for (const post of posts) {
@@ -441,7 +449,7 @@ async function runDigest(label, promptIntro) {
   // ── RSS helper ──────────────────────────────────────────────
   async function scrapeRss(url, sourceName) {
     try {
-      const text = await fetch(url).then(r => r.text());
+      const text = await fetchWithTimeout(url).then(r => r.text());
       const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 12);
       for (const item of items) {
         const title =
@@ -554,7 +562,7 @@ async function runDigest(label, promptIntro) {
   hubNews.posts.unshift(newPost);
 
   const updatedContent = Buffer.from(JSON.stringify(hubNews, null, 2)).toString('base64');
-  const putRes = await fetch(GITHUB_API, {
+  const putRes = await fetchWithTimeout(GITHUB_API, 10000, {
     method: 'PUT',
     headers: {...ghHeaders, 'Content-Type': 'application/json'},
     body: JSON.stringify({
@@ -614,7 +622,7 @@ exports.raceWeekendDigest = onSchedule(
     try {
       const now = new Date();
       const saturdayStr = getUKDateString(now, 2); // Thursday + 2 = Saturday
-      const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+      const calendar = await fetchWithTimeout(CALENDAR_URL).then(r => r.json());
       const round = calendar.rounds.find(r => r.startDate === saturdayStr);
       if (!round) {
         console.log(`raceWeekendDigest: no round on ${saturdayStr}, skipping`);
@@ -656,7 +664,7 @@ exports.triggerDigest = onRequest(
       if (type === 'race') {
         const now = new Date();
         const saturdayStr = getUKDateString(now, 2);
-        const calendar = await fetch(CALENDAR_URL).then(r => r.json());
+        const calendar = await fetchWithTimeout(CALENDAR_URL).then(r => r.json());
         const round = calendar.rounds.find(r => r.startDate === saturdayStr)
           || calendar.rounds.find(r => {
             const start = new Date(r.startDate);
@@ -731,7 +739,7 @@ exports.syncAnalytics = onSchedule(
     const {token} = await client.getAccessToken();
 
     const runReport = async (body) => {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport`,
         {method: 'POST', headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}, body: JSON.stringify(body)},
       );

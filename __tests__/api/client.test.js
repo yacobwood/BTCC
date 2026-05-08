@@ -23,6 +23,7 @@ import {
   fetchArticles,
   fetchArticleBySlug,
   fetchHubPosts,
+  peekArticlesCache,
 } from '../../src/api/client';
 
 describe('fetchCalendar', () => {
@@ -62,15 +63,19 @@ describe('fetchDrivers', () => {
 
     const result = await fetchDrivers();
 
-    expect(cacheRead).toHaveBeenCalledWith('drivers', expect.any(Number));
+    // staleFirst=true: no maxAge argument — any cached data regardless of age
+    expect(cacheRead).toHaveBeenCalledWith('drivers', undefined);
     expect(result).toEqual({drivers: [{name: 'Cached Driver'}]});
   });
 
-  it('throws when fetch fails and no cache exists', async () => {
+  it('falls back to bundled data when fetch fails and no cache exists', async () => {
     global.fetch.mockResolvedValueOnce({ok: false});
     cacheRead.mockResolvedValueOnce(null);
 
-    await expect(fetchDrivers()).rejects.toThrow();
+    // Should resolve with bundled snapshot rather than throwing
+    const result = await fetchDrivers();
+    expect(result).toBeDefined();
+    expect(result.drivers).toBeDefined();
   });
 
   it('falls back to cache when network throws', async () => {
@@ -162,11 +167,54 @@ describe('fetchArticles', () => {
 
   it('falls back to cached page on network error', async () => {
     const cached = [{id: 99}];
+    // First cacheRead: cache miss (no fresh data). Then fetch fails. Then staleFallback cacheRead: returns stale.
+    cacheRead.mockResolvedValueOnce(null).mockResolvedValueOnce(cached);
     global.fetch.mockResolvedValueOnce({ok: false});
-    cacheRead.mockResolvedValueOnce(cached);
 
     const result = await fetchArticles(1);
     expect(result).toEqual(cached);
+  });
+
+  it('forceRefresh bypasses cache and always hits the network', async () => {
+    const fresh = [{id: 42}];
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(fresh)});
+
+    const result = await fetchArticles(1, 20, '', /* forceRefresh */ true);
+
+    expect(result).toEqual(fresh);
+    // cacheRead must not have been called — forceRefresh skips the cache check entirely
+    expect(cacheRead).not.toHaveBeenCalled();
+  });
+});
+
+describe('peekArticlesCache', () => {
+  it('reads cache without any max-age restriction', async () => {
+    const stale = [{id: 7, title: 'Old article'}];
+    cacheRead.mockResolvedValueOnce(stale);
+
+    const result = await peekArticlesCache(1);
+
+    expect(result).toEqual(stale);
+    // Must be called without a maxAgeMs argument so even expired entries are returned
+    expect(cacheRead).toHaveBeenCalledWith('news_p1');
+  });
+
+  it('returns null when nothing is cached', async () => {
+    cacheRead.mockResolvedValueOnce(null);
+    const result = await peekArticlesCache(1);
+    expect(result).toBeNull();
+  });
+
+  it('uses the correct cache key for the given page', async () => {
+    cacheRead.mockResolvedValueOnce(null);
+    await peekArticlesCache(3);
+    expect(cacheRead).toHaveBeenCalledWith('news_p3');
+  });
+
+  it('makes no network request', async () => {
+    cacheRead.mockResolvedValueOnce([]);
+    await peekArticlesCache(1);
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });
 

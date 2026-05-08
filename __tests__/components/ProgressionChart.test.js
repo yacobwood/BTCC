@@ -30,9 +30,9 @@ describe('ProgressionChart', () => {
       <ProgressionChart series={SERIES} roundLabels={ROUND_LABELS} />,
     );
     await waitFor(() => {
-      expect(getByText('Ingram')).toBeTruthy();
-      expect(getByText('Shedden')).toBeTruthy();
-      expect(getByText('Turkington')).toBeTruthy();
+      expect(getByText('INGRAM')).toBeTruthy();
+      expect(getByText('SHEDDEN')).toBeTruthy();
+      expect(getByText('TURKINGTON')).toBeTruthy();
     });
   });
 
@@ -56,7 +56,7 @@ describe('ProgressionChart', () => {
       <ProgressionChart series={dupesSeries} roundLabels={['R1']} />,
     );
     // Only one "Ingram" entry should appear in the legend
-    await waitFor(() => expect(getAllByText('Ingram').length).toBe(1));
+    await waitFor(() => expect(getAllByText('INGRAM').length).toBe(1));
   });
 
   // ── Show all / Hide all ───────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ describe('ProgressionChart', () => {
     fireEvent.press(getByLabelText('Hide all drivers'));
     fireEvent.press(getByLabelText('Show all drivers'));
     // All surnames should still be visible in legend
-    await waitFor(() => expect(getAllByText('Ingram').length).toBe(1));
+    await waitFor(() => expect(getAllByText('INGRAM').length).toBe(1));
   });
 
   it('pressing a driver legend item does not crash', async () => {
@@ -130,7 +130,7 @@ describe('ProgressionChart', () => {
     const {getByText} = renderWithProviders(
       <ProgressionChart series={nullSeries} roundLabels={['R1','R2','R3','R4']} />,
     );
-    await waitFor(() => expect(getByText('Joiner')).toBeTruthy());
+    await waitFor(() => expect(getByText('JOINER')).toBeTruthy());
   });
 
   // ── Empty / edge cases ────────────────────────────────────────────────────────

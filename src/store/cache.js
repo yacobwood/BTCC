@@ -20,6 +20,28 @@ export async function cacheReadTimestamp(key) {
   }
 }
 
+// Remove all cache entries older than maxAgeMs (default 7 days). Call on app launch.
+export async function cacheEvictStale(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
+  try {
+    const allKeys = await AsyncStorage.getAllKeys();
+    const cacheKeys = allKeys.filter(k => k.startsWith(PREFIX));
+    if (!cacheKeys.length) return;
+    const entries = await AsyncStorage.multiGet(cacheKeys);
+    const toRemove = [];
+    const now = Date.now();
+    for (const [key, value] of entries) {
+      if (!value) { toRemove.push(key); continue; }
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed && typeof parsed === 'object' && 'cachedAt' in parsed) {
+          if (now - parsed.cachedAt > maxAgeMs) toRemove.push(key);
+        }
+      } catch { toRemove.push(key); }
+    }
+    if (toRemove.length) await AsyncStorage.multiRemove(toRemove);
+  } catch {}
+}
+
 export async function cacheRead(key, maxAgeMs) {
   try {
     const raw = await AsyncStorage.getItem(PREFIX + key);

@@ -14,13 +14,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchArticles, fetchHubPosts} from '../api/client';
+import {fetchArticles, fetchHubPosts, peekArticlesCache} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import styles from './NewsScreen.styles';
 import CachedImage, {prefetchImages} from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import AdBanner from '../components/AdBanner';
-import AdSearchBanner from '../components/AdSearchBanner';
 import {useFocusEffect} from '@react-navigation/native';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useFavouriteDriver} from '../store/favouriteDriver';
@@ -28,7 +27,7 @@ import {getReadIds} from '../utils/digestRead';
 const logoImg = require('../assets/logo_long.png');
 
 export default function NewsScreen({navigation}) {
-  const {search_ad, hub_news_enabled} = useFeatureFlags();
+  const {hub_news_enabled} = useFeatureFlags();
   const {favourites} = useFavouriteDriver();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,12 +50,31 @@ export default function NewsScreen({navigation}) {
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
 
-  const load = useCallback(async (p = 1, append = false) => {
+  const load = useCallback(async (p = 1, append = false, force = false) => {
+    setError(null);
+
+    // Phase 1 — show any cached articles immediately so the user never stares at a spinner
+    // for content they've already seen. Skipped when force=true (pull-to-refresh) because
+    // the user explicitly asked for fresh data, or when paginating.
+    let shownStale = false;
+    if (p === 1 && !append && !force) {
+      const staleRaw = await peekArticlesCache(1);
+      if (staleRaw?.length) {
+        setArticles(staleRaw.map(parseArticle));
+        setLoading(false);
+        shownStale = true;
+      } else {
+        setLoading(true);
+      }
+    } else if (p === 1 && !append) {
+      setLoading(true);
+    }
+
+    // Phase 2 — fetch fresh data from the network and update the list.
+    // forceRefresh=true bypasses the fetchJson cache so this always hits the network.
     try {
-      if (p === 1 && !append) setLoading(true);
-      setError(null);
       const [raw, hubPosts] = await Promise.all([
-        fetchArticles(p),
+        fetchArticles(p, 20, '', /* forceRefresh */ true),
         p === 1 && !append && hubNewsEnabledRef.current ? fetchHubPosts() : Promise.resolve(null),
       ]);
       const parsed = raw.map(parseArticle);
@@ -74,7 +92,9 @@ export default function NewsScreen({navigation}) {
       setHasMore(parsed.length >= 20);
       setPage(p);
     } catch (e) {
-      if (!append) setError(e.message);
+      // If Phase 1 already showed stale articles, silently absorb the network error —
+      // the user has something to read. Only surface the error on a true cold start.
+      if (!append && !shownStale) setError(e.message);
       if (append) setHasMore(false);
     } finally {
       setLoading(false);
@@ -107,7 +127,7 @@ export default function NewsScreen({navigation}) {
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('news');
     setRefreshing(true);
-    load(1);
+    load(1, false, true);
   }, [load]);
 
   const onEndReached = useCallback(() => {
@@ -226,8 +246,6 @@ export default function NewsScreen({navigation}) {
           </TouchableOpacity>
         </View>
       )}
-
-      <AdSearchBanner visible={search_ad && searchActive && searchKeyboardShown && searchQuery.length < 2} />
 
       {(!searchActive || searchQuery.length >= 2) && (
       <FlatList

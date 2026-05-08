@@ -105,5 +105,46 @@ describe('DriversScreen', () => {
       });
       expect(getByText('Team Ingram')).toBeTruthy();
     });
+
+    it('driver names remain in the tree after switching to teams tab and back', async () => {
+      const {getByText, getByLabelText} = await renderDrivers();
+      await act(async () => { fireEvent.press(getByLabelText('TEAMS tab')); });
+      await act(async () => { fireEvent.press(getByLabelText('DRIVERS tab')); });
+      // Drivers must still be present — offscreenPageLimit keeps the page mounted
+      expect(getByText('Tom INGRAM')).toBeTruthy();
+    });
+  });
+
+  describe('image caching', () => {
+    it('driver photo uses CachedImage when imageUrl is set and no bundled image exists', async () => {
+      // getDriverImage is mocked to return null (jest.setup.js), so imageUrl triggers CachedImage
+      const gridWithImage = {
+        ...MOCK_GRID,
+        drivers: [{...MOCK_GRID.drivers[0], imageUrl: 'https://www.btcc.net/wp-content/uploads/driver.jpg'}],
+      };
+      parseGrid.mockReturnValue(gridWithImage);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      // The CachedImage mock renders with testID="cached-image"
+      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('team card background and car image both use CachedImage when URLs are set', async () => {
+      const gridWithImages = {
+        drivers: [],
+        teams: [{
+          name: 'Team Ingram',
+          cardBgUrl: 'https://www.btcc.net/wp-content/uploads/bg.jpg',
+          cardBgThumbUrl: null,
+          carImageUrl: 'https://www.btcc.net/wp-content/uploads/car.jpg',
+          carThumbUrl: null,
+        }],
+      };
+      parseGrid.mockReturnValue(gridWithImages);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('0 CONFIRMED');
+      // cardBgUrl and carImageUrl each render a CachedImage
+      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

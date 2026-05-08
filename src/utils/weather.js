@@ -36,7 +36,10 @@ export function weatherIconColor(code) {
   return '#5BA3FF'; // rain/drizzle/showers — blue
 }
 
+import {cacheRead, cacheWrite} from '../store/cache';
+
 const MAX_FORECAST_DAYS = 16;
+const WEATHER_CACHE_MAX_AGE = 3 * 60 * 60 * 1000; // 3 hours
 
 export async function fetchWeather(lat, lng, startDate, endDate) {
   const today = new Date();
@@ -44,14 +47,21 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
   const diffDays = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
   if (diffDays > MAX_FORECAST_DAYS) return null;
 
+  const cacheKey = `weather_${lat}_${lng}_${startDate}`;
+
+  try {
+    const cached = await cacheRead(cacheKey, WEATHER_CACHE_MAX_AGE);
+    if (cached) return cached;
+  } catch {}
+
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe/London&start_date=${startDate}&end_date=${endDate}`;
-    const res = await fetch(url);
+    const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
     if (!res.ok) return null;
     const json = await res.json();
     const d = json.daily;
     if (!d?.time) return null;
-    return d.time.map((date, i) => ({
+    const result = d.time.map((date, i) => ({
       date,
       weatherCode: d.weather_code[i],
       tempMax: Math.round(d.temperature_2m_max[i]),
@@ -59,5 +69,7 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
       precipProb: d.precipitation_probability_max[i],
       windMax: Math.round(d.wind_speed_10m_max[i]),
     }));
+    cacheWrite(cacheKey, result).catch(() => {});
+    return result;
   } catch { return null; }
 }

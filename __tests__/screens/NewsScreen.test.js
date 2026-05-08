@@ -12,6 +12,7 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('../../src/api/client', () => ({
   fetchArticles: jest.fn(),
   fetchHubPosts: jest.fn(),
+  peekArticlesCache: jest.fn(),
 }));
 jest.mock('../../src/api/parsers', () => ({
   parseArticle: jest.fn(a => a),
@@ -20,7 +21,7 @@ jest.mock('../../src/utils/digestRead', () => ({
   getReadIds: jest.fn().mockResolvedValue(new Set()),
 }));
 
-const {fetchArticles, fetchHubPosts} = require('../../src/api/client');
+const {fetchArticles, fetchHubPosts, peekArticlesCache} = require('../../src/api/client');
 const nav = makeNav();
 
 beforeEach(() => {
@@ -28,6 +29,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   fetchArticles.mockResolvedValue(MOCK_ARTICLES);
   fetchHubPosts.mockResolvedValue([]);
+  peekArticlesCache.mockResolvedValue(null); // cold start by default
 });
 
 function renderNews({articles = MOCK_ARTICLES, favourites = []} = {}) {
@@ -42,12 +44,75 @@ function renderNews({articles = MOCK_ARTICLES, favourites = []} = {}) {
 
 describe('NewsScreen', () => {
   describe('loading', () => {
-    it('shows a loading indicator before articles arrive', () => {
+    it('shows a loading indicator on cold start (no cache) before articles arrive', () => {
+      peekArticlesCache.mockResolvedValue(null); // no stale cache
       fetchArticles.mockImplementation(() => new Promise(() => {}));
       fetchHubPosts.mockResolvedValue([]);
       const {UNSAFE_queryByType} = renderWithProviders(<NewsScreen navigation={nav} />);
       const {ActivityIndicator} = require('react-native');
       expect(UNSAFE_queryByType(ActivityIndicator)).toBeTruthy();
+    });
+
+    it('shows stale articles immediately without a spinner when cache exists', async () => {
+      const staleArticles = [MOCK_ARTICLES[0]];
+      peekArticlesCache.mockResolvedValue(staleArticles);
+      // Phase 2 network fetch is slow — hangs indefinitely
+      fetchArticles.mockImplementation(() => new Promise(() => {}));
+      fetchHubPosts.mockResolvedValue([]);
+
+      const {getByText, UNSAFE_queryByType} = renderWithProviders(<NewsScreen navigation={nav} />);
+
+      // Stale article title appears without waiting for network
+      await waitFor(() => expect(getByText(staleArticles[0].title)).toBeTruthy());
+      // Spinner should be gone since stale data is showing
+      const {ActivityIndicator} = require('react-native');
+      expect(UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+    });
+
+    it('replaces stale articles with fresh ones when network responds', async () => {
+      const staleArticles = [{...MOCK_ARTICLES[0], title: 'Old headline'}];
+      const freshArticles = [{...MOCK_ARTICLES[0], title: 'Fresh headline'}];
+      peekArticlesCache.mockResolvedValue(staleArticles);
+      fetchArticles.mockResolvedValue(freshArticles);
+      fetchHubPosts.mockResolvedValue([]);
+
+      const {findByText, queryByText} = renderWithProviders(<NewsScreen navigation={nav} />);
+
+      // Stale appears first, then fresh replaces it
+      await findByText('Fresh headline');
+      expect(queryByText('Old headline')).toBeNull();
+    });
+
+    it('keeps stale articles visible when the network request fails', async () => {
+      const staleArticles = [MOCK_ARTICLES[0]];
+      peekArticlesCache.mockResolvedValue(staleArticles);
+      fetchArticles.mockRejectedValue(new Error('Network error'));
+      fetchHubPosts.mockResolvedValue([]);
+
+      const {getByText, queryByText} = renderWithProviders(<NewsScreen navigation={nav} />);
+
+      await waitFor(() => expect(getByText(staleArticles[0].title)).toBeTruthy());
+      // Error screen must not replace stale content
+      expect(queryByText('Retry')).toBeNull();
+    });
+
+    it('pull-to-refresh skips stale cache and shows the refresh indicator', async () => {
+      const staleArticles = [MOCK_ARTICLES[0]];
+      peekArticlesCache.mockResolvedValue(staleArticles);
+      fetchArticles.mockResolvedValue(MOCK_ARTICLES);
+      fetchHubPosts.mockResolvedValue([]);
+
+      const {getByLabelText, getByText} = renderWithProviders(<NewsScreen navigation={nav} />);
+
+      // Wait for stale phase to complete
+      await waitFor(() => expect(getByText(staleArticles[0].title)).toBeTruthy());
+
+      await act(async () => {
+        fireEvent.press(getByLabelText('Refresh news'));
+      });
+
+      // peekArticlesCache should only have been called once (initial load), not during refresh
+      expect(peekArticlesCache).toHaveBeenCalledTimes(1);
     });
   });
 

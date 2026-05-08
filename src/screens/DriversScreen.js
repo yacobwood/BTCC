@@ -22,6 +22,7 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import SwipeableTabs from '../components/SwipeableTabs';
+import CachedImage from '../components/CachedImage';
 
 function thumbUrl(url, size = '150x150') {
   if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
@@ -96,14 +97,14 @@ export default function DriversScreen({navigation}) {
         accessibilityLabel={`${item.name}, ${item.team}, number ${item.number}`}
         accessibilityRole="button">
         <ImageBackground
-          source={item.cardBgUrl ? {uri: item.cardBgUrl} : undefined}
+          source={item.cardBgUrl ? {uri: item.cardBgUrl, cache: 'force-cache'} : undefined}
           style={styles.driverImageArea}
           resizeMode="stretch">
           <Text style={[styles.driverNumberBg, [2,16,17,88,99].includes(item.number) && {color: '#000'}]}>{item.number}</Text>
           {bundled ? (
             <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
           ) : item.imageUrl ? (
-            <Image source={{uri: thumbUrl(item.imageUrl, '300x300')}} style={styles.driverPhoto} resizeMode="contain" />
+            <CachedImage uri={item.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
           ) : null}
           {fav && (
             <View style={styles.favBadge}>
@@ -128,12 +129,12 @@ export default function DriversScreen({navigation}) {
       accessibilityRole="button">
       <View style={styles.teamImageArea}>
         {item.cardBgUrl ? (
-          <Image source={{uri: item.cardBgThumbUrl || item.cardBgUrl}} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <CachedImage uri={item.cardBgThumbUrl || item.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
         {item.carImageUrl ? (
-          <Image source={{uri: item.carThumbUrl || item.carImageUrl}} style={styles.teamCarImage} resizeMode="contain" />
+          <CachedImage uri={item.carThumbUrl || item.carImageUrl} style={styles.teamCarImage} resizeMode="contain" />
         ) : null}
       </View>
       <View style={styles.teamFooter}>

@@ -3,17 +3,22 @@ import {fireEvent, render} from '@testing-library/react-native';
 import {Text} from 'react-native';
 import SwipeableTabs from '../../src/components/SwipeableTabs';
 
+// Captures the most recent props received by PagerView so tests can assert on
+// native-only props (like offscreenPageLimit) that aren't visible in the tree.
+let lastPagerViewProps = {};
+
 // PagerView is a native module — mock it as a simple View
 jest.mock('react-native-pager-view', () => {
   const React = require('react');
   const {View} = require('react-native');
   const PagerView = React.forwardRef(
-    ({children, onPageSelected, initialPage = 0}, ref) => {
+    (props, ref) => {
+      lastPagerViewProps = props;
       React.useImperativeHandle(ref, () => ({
         setPage: jest.fn(),
         setPageWithoutAnimation: jest.fn(),
       }));
-      return <View testID="pager-view">{children}</View>;
+      return <View testID="pager-view">{props.children}</View>;
     },
   );
   PagerView.displayName = 'PagerView';
@@ -70,6 +75,11 @@ describe('SwipeableTabs', () => {
     TABS.forEach(t => {
       expect(getAllByText(`Page ${t}`)).toHaveLength(1);
     });
+  });
+
+  it('passes offscreenPageLimit equal to pages.length - 1 so all pages stay mounted on Android', () => {
+    renderTabs();
+    expect(lastPagerViewProps.offscreenPageLimit).toBe(PAGES.length - 1);
   });
 
   it('lazy mode: only renders content for the initial active page', () => {

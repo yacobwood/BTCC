@@ -7,6 +7,7 @@ const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
 
 const BUNDLED_CALENDAR = require('../data/calendar.json');
 const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
+const BUNDLED_DRIVERS = require('../../data/drivers.json');
 
 // Stale-while-revalidate: serve from cache immediately, refresh in background.
 // If the cached entry is older than MAX_AGE_MS, treat as a cache miss so the
@@ -14,9 +15,13 @@ const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
 // staleFallback: on network error, return any cached value (even expired) rather than throwing
-async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = false) {
+// staleFirst:   serve ANY cached value immediately (no age limit) and always refresh in background;
+//               only blocks on network when there is truly nothing cached (cold install).
+//               Use for content where showing slightly old data beats a long spinner (e.g. news).
+async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = false, staleFirst = false) {
   if (cacheKey && !forceRefresh) {
-    const cached = await cacheRead(cacheKey, MAX_AGE_MS);
+    const ageLimit = staleFirst ? undefined : MAX_AGE_MS;
+    const cached = await cacheRead(cacheKey, ageLimit);
     if (cached) {
       // Refresh cache in background without blocking
       fetch(url)
@@ -47,7 +52,12 @@ export function fetchCalendar() {
 }
 
 export async function fetchDrivers() {
-  return fetchJson(`${BASE_GITHUB}/drivers.json`, 'drivers');
+  try {
+    return await fetchJson(`${BASE_GITHUB}/drivers.json`, 'drivers', false, false, /* staleFirst */ true);
+  } catch {
+    // Cold install + no network: fall back to the bundled snapshot
+    return BUNDLED_DRIVERS;
+  }
 }
 
 export async function fetchStandings(forceRefresh = false) {
@@ -59,46 +69,73 @@ export async function fetchResults(year = 2026, forceRefresh = false) {
 }
 
 
-export async function fetchArticles(page = 1, perPage = 20, search = '') {
+export async function fetchArticles(page = 1, perPage = 20, search = '', forceRefresh = false) {
   let url = `${BASE_WP}/posts?per_page=${perPage}&page=${page}&_embed=1`;
   if (search) url += `&search=${encodeURIComponent(search)}`;
   const cacheKey = search ? null : `news_p${page}`;
-  return fetchJson(url, cacheKey, false, /* staleFallback */ true);
+  return fetchJson(url, cacheKey, forceRefresh, /* staleFallback */ true);
+}
+
+// Returns any cached articles for a page without triggering a network request.
+// Used by NewsScreen to show stale data instantly before fetching fresh data.
+export async function peekArticlesCache(page = 1) {
+  return cacheRead(`news_p${page}`); // no maxAge — any cached data regardless of age
+}
+
+const HUB_CACHE_KEY = 'hub_posts';
+const HUB_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+
+function mapHubPosts(data, deviceId) {
+  const now = Date.now();
+  return (data.posts || [])
+    .filter(p => {
+      const status = p.status || 'published';
+      if (status === 'published') return true;
+      if (status === 'scheduled') return p.scheduledAt && new Date(p.scheduledAt).getTime() <= now;
+      if (status === 'draft') return deviceId && Array.isArray(p.previewDeviceIds) && p.previewDeviceIds.includes(deviceId);
+      return false;
+    })
+    .map(p => ({
+      id: p.id,
+      title: p.title || '',
+      link: p.link || null,
+      description: p.description || '',
+      sortDate: p.pubDate || new Date().toISOString(),
+      pubDate: formatDate(p.pubDate || ''),
+      imageUrl: p.imageUrl || null,
+      category: p.category || '',
+      content: [
+        p.content || '',
+        ...(Array.isArray(p.images) ? p.images.map(u => `<img src="${u}" />`) : []),
+      ].filter(Boolean).join('\n'),
+      source: p.source || 'btcc hub',
+      sourceUrl: p.sourceUrl || null,
+    }));
 }
 
 export async function fetchHubPosts() {
+  const deviceId = await getStableDeviceId().catch(() => null);
   try {
-    const deviceId = await getStableDeviceId();
-    // No cache — hub news is author-managed and must reflect deletes/publishes immediately
-    const res = await fetch(`${BASE_GITHUB}/hub_news.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const now = Date.now();
-    return (data.posts || [])
-      .filter(p => {
-        const status = p.status || 'published';
-        if (status === 'published') return true;
-        if (status === 'scheduled') return p.scheduledAt && new Date(p.scheduledAt).getTime() <= now;
-        if (status === 'draft') return deviceId && Array.isArray(p.previewDeviceIds) && p.previewDeviceIds.includes(deviceId);
-        return false;
-      })
-      .map(p => ({
-        id: p.id,
-        title: p.title || '',
-        link: p.link || null,
-        description: p.description || '',
-        sortDate: p.pubDate || new Date().toISOString(),
-        pubDate: formatDate(p.pubDate || ''),
-        imageUrl: p.imageUrl || null,
-        category: p.category || '',
-        content: [
-          p.content || '',
-          ...(Array.isArray(p.images) ? p.images.map(u => `<img src="${u}" />`) : []),
-        ].filter(Boolean).join('\n'),
-        source: p.source || 'btcc hub',
-        sourceUrl: p.sourceUrl || null,
-      }));
+    const cached = await cacheRead(HUB_CACHE_KEY, HUB_CACHE_MAX_AGE);
+    let data;
+    if (cached) {
+      // Serve cached immediately, refresh in background
+      fetch(`${BASE_GITHUB}/hub_news.json?t=${Date.now()}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) cacheWrite(HUB_CACHE_KEY, d); })
+        .catch(() => {});
+      data = cached;
+    } else {
+      const res = await fetch(`${BASE_GITHUB}/hub_news.json?t=${Date.now()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      cacheWrite(HUB_CACHE_KEY, data).catch(() => {});
+    }
+    return mapHubPosts(data, deviceId);
   } catch {
+    // Stale fallback on network error (any age)
+    const stale = await cacheRead(HUB_CACHE_KEY);
+    if (stale) return mapHubPosts(stale, deviceId);
     return [];
   }
 }

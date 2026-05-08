@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
+import {cacheRead, cacheWrite} from '../store/cache';
 
 export default function RadioScreen({navigation}) {
   const [stations, setStations] = useState([]);
@@ -13,12 +14,24 @@ export default function RadioScreen({navigation}) {
   useEffect(() => {
     Analytics.screen('radio');
     (async () => {
+      // Phase 1: show cached stations instantly (no spinner for returning users)
       try {
-        const res = await fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/radio.json');
+        const cached = await cacheRead('radio');
+        if (cached?.stations?.length) {
+          setStations(cached.stations);
+          setLoading(false);
+        }
+      } catch {}
+
+      // Phase 2: fetch fresh data with timeout
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/radio.json', {signal: AbortSignal.timeout(8000)});
         const data = await res.json();
-        setStations((data.stations || []).map(s => ({
+        const mapped = (data.stations || []).map(s => ({
           name: s.name || '', tagline: s.tagline || '', streamUrl: s.streamUrl || '', coverage: s.coverage || '',
-        })));
+        }));
+        setStations(mapped);
+        cacheWrite('radio', {stations: mapped}).catch(() => {});
       } catch {}
       setLoading(false);
     })();

@@ -226,12 +226,10 @@ export default function CalendarScreen({navigation}) {
             <View style={styles.nextCountdown}>
               {days === 0 ? (
                 <Text style={styles.countdownToday}>TODAY</Text>
-              ) : days === 1 ? (
-                <Text style={styles.countdownToday}>TMW</Text>
               ) : (
                 <>
                   <Text style={styles.countdownNum}>{days}</Text>
-                  <Text style={styles.countdownUnit}>DAYS</Text>
+                  <Text style={styles.countdownUnit}>{days === 1 ? 'DAY' : 'DAYS'}</Text>
                 </>
               )}
             </View>

@@ -11,11 +11,18 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
+import {useUnits} from '../store/units';
 
 const pagesData = require('../assets/pages.json');
 
+function convertSpeeds(text, useKm) {
+  if (useKm) return text;
+  return text.replace(/(\d+)\s*kph/g, (_, n) => `${Math.round(parseInt(n, 10) / 1.60934)} mph`);
+}
+
 export default function InfoPageScreen({route, navigation}) {
   const {page} = route.params;
+  const {useKm} = useUnits();
 
   useEffect(() => { Analytics.infoPageViewed(page.id); }, []);
 
@@ -47,11 +54,12 @@ export default function InfoPageScreen({route, navigation}) {
       <View style={styles.yellowDivider} />
       <ScrollView contentContainerStyle={{padding: 16, paddingBottom: 30}}>
         {(page.sections || []).map((section, i) => {
+          const body = convertSpeeds(section.body || '', useKm);
           switch (section.type) {
             case 'text':
-              return <Text key={i} style={styles.text}>{section.body}</Text>;
+              return <Text key={i} style={styles.text}>{body}</Text>;
             case 'heading':
-              return <Text key={i} style={styles.heading}>{section.body}</Text>;
+              return <Text key={i} style={styles.heading}>{body}</Text>;
             case 'image':
               return section.url ? (
                 <Image key={i} source={{uri: section.url}} style={styles.image} resizeMode="cover" />
@@ -60,7 +68,7 @@ export default function InfoPageScreen({route, navigation}) {
               return (
                 <View key={i} style={styles.callout}>
                   <Text style={styles.calloutLabel}>TALKING POINT</Text>
-                  <Text style={styles.calloutText}>{section.body}</Text>
+                  <Text style={styles.calloutText}>{body}</Text>
                 </View>
               );
             case 'link':
@@ -79,7 +87,7 @@ export default function InfoPageScreen({route, navigation}) {
                 </TouchableOpacity>
               );
             default:
-              return section.body ? <Text key={i} style={styles.text}>{section.body}</Text> : null;
+              return body ? <Text key={i} style={styles.text}>{body}</Text> : null;
           }
         })}
       </ScrollView>

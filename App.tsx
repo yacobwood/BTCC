@@ -13,6 +13,7 @@ import {RadioProvider} from './src/store/radio';
 import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
+import {cacheEvictStale} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
 import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
@@ -104,6 +105,7 @@ export default function App() {
     setupNotificationChannels();
     maybeRequestReview();
     runBackgroundPrefetch();
+    cacheEvictStale();
 
     // Handle notifee notification press (background or killed state).
     // notifee.getInitialNotification() stores the press natively — no AsyncStorage race condition.

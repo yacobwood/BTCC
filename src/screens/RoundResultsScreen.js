@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,22 @@ function shortLabel(label) {
   const m = label.match(/^Race (\d)$/);
   if (m) return `R${m[1]}`;
   return label;
+}
+
+// Compute the predicted R3 grid per reg 3.4.1.b:
+// - Top `reversalCount` classified R2 finishers are reversed (draw picks 6–12 inclusive)
+// - Remaining classified finishers follow in R2 order
+// - Non-classified (DNFs) start after the last classified, ordered by laps covered (desc)
+function buildReverseGrid(races, reversalCount) {
+  const r2 = races.find(r => r.label === 'Race 2');
+  if (!r2?.results?.length) return null;
+  const classified = r2.results.filter(r => r.position > 0);
+  const dnfs = r2.results
+    .filter(r => r.position === 0)
+    .sort((a, b) => (b.laps || 0) - (a.laps || 0));
+  const reversed = classified.slice(0, reversalCount).reverse();
+  const rest = classified.slice(reversalCount);
+  return [...reversed, ...rest, ...dnfs].map((r, i) => ({...r, gridPos: i + 1, r2Pos: r.position}));
 }
 
 // Build a map of driver -> grid position for a given race.
@@ -142,6 +158,13 @@ export default function RoundResultsScreen({route, navigation}) {
         lazy={true}
         pages={races.map((race, i) => {
           const gridMap = buildGridMap(races, i);
+          const isR3 = race?.label === 'Race 3';
+          const hasResults = race?.results?.length > 0;
+
+          if (isR3 && !hasResults) {
+            return <ReverseGridTab key={i} races={races} isFavourite={isFavourite} />;
+          }
+
           return (
             <View style={{flex: 1}}>
               {race?.date && race.date !== round.date && (
@@ -169,6 +192,74 @@ export default function RoundResultsScreen({route, navigation}) {
             </View>
           );
         })}
+      />
+    </View>
+  );
+}
+
+const REVERSAL_MIN = 6;
+const REVERSAL_MAX = 12;
+
+function ReverseGridTab({races, isFavourite}) {
+  const [reversalCount, setReversalCount] = useState(8);
+  const grid = buildReverseGrid(races, reversalCount);
+
+  if (!grid) {
+    return <Text style={styles.emptyText}>Race 2 results needed to predict grid</Text>;
+  }
+
+  return (
+    <View style={{flex: 1}}>
+      <View style={styles.reverseHeader}>
+        <Text style={styles.reverseTitle}>Predicted R3 Grid</Text>
+        <Text style={styles.reverseSubtitle}>Draw picks 6–12 at random after R2 — explore each scenario</Text>
+        <View style={styles.reversalToggle}>
+          <Text style={styles.reversalLabel}>Reverse top</Text>
+          <TouchableOpacity
+            style={[styles.stepperBtn, reversalCount <= REVERSAL_MIN && styles.stepperBtnDisabled]}
+            onPress={() => setReversalCount(c => Math.max(REVERSAL_MIN, c - 1))}
+            disabled={reversalCount <= REVERSAL_MIN}
+            accessibilityRole="button"
+            accessibilityLabel="Decrease reversal count">
+            <Icon name="remove" size={16} color={reversalCount <= REVERSAL_MIN ? Colors.textSecondary : '#fff'} />
+          </TouchableOpacity>
+          <Text style={styles.stepperValue}>{reversalCount}</Text>
+          <TouchableOpacity
+            style={[styles.stepperBtn, reversalCount >= REVERSAL_MAX && styles.stepperBtnDisabled]}
+            onPress={() => setReversalCount(c => Math.min(REVERSAL_MAX, c + 1))}
+            disabled={reversalCount >= REVERSAL_MAX}
+            accessibilityRole="button"
+            accessibilityLabel="Increase reversal count">
+            <Icon name="add" size={16} color={reversalCount >= REVERSAL_MAX ? Colors.textSecondary : '#fff'} />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <FlatList
+        data={grid}
+        keyExtractor={(_, i) => String(i)}
+        renderItem={({item, index}) => {
+          const fav = isFavourite(item.driver);
+          const isReversed = index < reversalCount && item.r2Pos > 0;
+          return (
+            <View style={[styles.resultRow, fav && styles.resultRowFav, isReversed && styles.reverseRow, fav && isReversed && styles.reverseRowFav]}>
+              <Text style={[styles.pos, {color: '#fff'}]}>{item.gridPos}</Text>
+              <View style={{flex: 1}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+                  {fav && <Icon name="star" size={11} color={Colors.yellow} />}
+                  <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>
+                    {formatDriverName(item.driver)}
+                  </Text>
+                  {isReversed && <Badge text="REV" color={Colors.yellow} />}
+                </View>
+                <Text style={styles.teamName}>{item.team}</Text>
+              </View>
+              {item.r2Pos > 0 && (
+                <Text style={styles.r2PosText}>P{item.r2Pos} in R2</Text>
+              )}
+            </View>
+          );
+        }}
+        contentContainerStyle={{padding: 16, paddingBottom: 20}}
       />
     </View>
   );
@@ -236,6 +327,21 @@ const styles = StyleSheet.create({
   badgeText: {fontSize: 10, fontWeight: '800'},
   pointsText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600', marginTop: 2},
   emptyText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 40},
+  reverseHeader: {padding: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.outline},
+  reverseTitle: {color: '#fff', fontSize: 15, fontWeight: '800'},
+  reverseSubtitle: {color: Colors.textSecondary, fontSize: 11, marginTop: 2, marginBottom: 10},
+  reversalToggle: {flexDirection: 'row', alignItems: 'center', gap: 8},
+  reversalLabel: {color: Colors.textSecondary, fontSize: 12, fontWeight: '600'},
+  stepperBtn: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.outline,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  stepperBtnDisabled: {opacity: 0.4},
+  stepperValue: {color: '#fff', fontSize: 16, fontWeight: '800', minWidth: 24, textAlign: 'center'},
+  reverseRow: {borderLeftWidth: 3, borderLeftColor: `${Colors.yellow}60`},
+  reverseRowFav: {borderLeftWidth: 3, borderLeftColor: Colors.yellow},
+  r2PosText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
   youtubeBtn: {
     flexDirection: 'row',
     alignItems: 'center',

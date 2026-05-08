@@ -468,35 +468,35 @@
         },
         {
           "type": "text",
-          "body": "1st: 140 kph, 2 secs/lap, 3 laps (A), 1 lap (B)"
+          "body": "1st: 140 kph, 1 sec/lap, 1 lap (A), 4 laps (B)"
         },
         {
           "type": "text",
-          "body": "2nd: 135 kph, 3 secs/lap, 4 laps (A), 2 laps (B)"
+          "body": "2nd: 135 kph, 3 secs/lap, 2 laps (A), 5 laps (B)"
         },
         {
           "type": "text",
-          "body": "3rd: 130 kph, 5 secs/lap, 5 laps (A), 3 laps (B)"
+          "body": "3rd: 130 kph, 5 secs/lap, 3 laps (A), 6 laps (B)"
         },
         {
           "type": "text",
-          "body": "4th: 125 kph, 7 secs/lap, 6 laps (A), 4 laps (B)"
+          "body": "4th: 125 kph, 7 secs/lap, 4 laps (A), 7 laps (B)"
         },
         {
           "type": "text",
-          "body": "5th: 120 kph, 9 secs/lap, 7 laps (A), 5 laps (B)"
+          "body": "5th: 120 kph, 9 secs/lap, 5 laps (A), 8 laps (B)"
         },
         {
           "type": "text",
-          "body": "6th: 115 kph, 11 secs/lap, 8 laps (A), 6 laps (B)"
+          "body": "6th: 115 kph, 11 secs/lap, 6 laps (A), 10 laps (B)"
         },
         {
           "type": "text",
-          "body": "7th: 110 kph, 15 secs/lap, 10 laps (A), 8 laps (B)"
+          "body": "7th: 110 kph, 15 secs/lap, 8 laps (A), 12 laps (B)"
         },
         {
           "type": "text",
-          "body": "8th and below: 105 kph, 20 secs/lap, 12 laps (A), 10 laps (B)"
+          "body": "8th and below: 105 kph, 20 secs/lap, 10 laps (A), 14 laps (B)"
         },
         {
           "type": "heading",

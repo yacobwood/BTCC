@@ -166,4 +166,118 @@ describe('RoundResultsScreen', () => {
       expect(nav.goBack).toHaveBeenCalled();
     });
   });
+
+  // ── Reverse grid tab (Race 3 with no results) ─────────────────────────────────
+
+  const REVERSE_GRID_ROUND = {
+    round: 2,
+    venue: 'Brands Hatch Indy',
+    date: '10–11 May 2026',
+    races: [
+      {label: 'Free Practice',   results: []},
+      {label: 'Qualifying',      results: []},
+      {label: 'Qualifying Race', results: []},
+      {label: 'Race 1',          results: []},
+      {
+        label: 'Race 2',
+        results: [
+          {driver: 'Tom Ingram',       position: 1, laps: 20, team: 'Team Ingram',  points: 25, time: '30:00.0', gap: null,  bestLap: '1:23.9', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Gordon Shedden',   position: 2, laps: 20, team: 'Laser Tools',  points: 18, time: '30:01.0', gap: '1.0', bestLap: '1:24.0', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Ashley Sutton',    position: 0, laps: 12, team: 'NAPA Racing',  points: 0,  time: 'DNF',     gap: null,  bestLap: null,      fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Colin Turkington', position: 0, laps: 8,  team: 'West Surrey',  points: 0,  time: 'DNF',     gap: null,  bestLap: null,      fastestLap: false, leadLap: false, pole: false},
+        ],
+      },
+      {label: 'Race 3', results: []},
+    ],
+  };
+
+  describe('reverse grid tab', () => {
+    it('shows predicted grid heading when Race 3 has no results', () => {
+      const {getByText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      expect(getByText('Predicted R3 Grid')).toBeTruthy();
+    });
+
+    it('shows all Race 2 finishers in the predicted grid', () => {
+      const {getByText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      expect(getByText('Tom INGRAM')).toBeTruthy();
+      expect(getByText('Gordon SHEDDEN')).toBeTruthy();
+      expect(getByText('Ashley SUTTON')).toBeTruthy();
+      expect(getByText('Colin TURKINGTON')).toBeTruthy();
+    });
+
+    it('reverses the top N classified drivers (default reversal=8 reverses both classified)', () => {
+      const {getByText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      // R2 P2 Shedden goes to grid 1, P1 Ingram goes to grid 2
+      const sheddenRow = getByText('Gordon SHEDDEN').parent?.parent;
+      const ingramRow  = getByText('Tom INGRAM').parent?.parent;
+      expect(getByText('P2 in R2')).toBeTruthy();
+      expect(getByText('P1 in R2')).toBeTruthy();
+    });
+
+    it('places DNF drivers after classified, ordered by laps covered descending', () => {
+      const {UNSAFE_queryAllByType} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      const {Text} = require('react-native');
+      const names = UNSAFE_queryAllByType(Text)
+        .map(el => el.props.children)
+        .filter(c => typeof c === 'string' && (c.includes('SUTTON') || c.includes('TURKINGTON')));
+      const suttonIdx   = names.findIndex(n => n.includes('SUTTON'));
+      const turkingtonIdx = names.findIndex(n => n.includes('TURKINGTON'));
+      // Sutton (12 laps) must appear before Turkington (8 laps)
+      expect(suttonIdx).toBeGreaterThan(-1);
+      expect(turkingtonIdx).toBeGreaterThan(suttonIdx);
+    });
+
+    it('shows REV badge on reversed drivers', () => {
+      const {getAllByText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      // Both classified are within reversal=8, so both get REV
+      expect(getAllByText('REV').length).toBe(2);
+    });
+
+    it('stepper starts at 8', () => {
+      const {getByText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      expect(getByText('8')).toBeTruthy();
+    });
+
+    it('stepper decrements by 1 on press', async () => {
+      const {getByText, getByLabelText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      await act(async () => { fireEvent.press(getByLabelText('Decrease reversal count')); });
+      expect(getByText('7')).toBeTruthy();
+    });
+
+    it('stepper increments by 1 on press', async () => {
+      const {getByText, getByLabelText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      await act(async () => { fireEvent.press(getByLabelText('Increase reversal count')); });
+      expect(getByText('9')).toBeTruthy();
+    });
+
+    it('stepper cannot go below 6', async () => {
+      const {getByText, getByLabelText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      const dec = getByLabelText('Decrease reversal count');
+      // 8 → 7 → 6 → (blocked)
+      await act(async () => { fireEvent.press(dec); fireEvent.press(dec); fireEvent.press(dec); });
+      expect(getByText('6')).toBeTruthy();
+    });
+
+    it('stepper cannot go above 12', async () => {
+      const {getByText, getByLabelText} = renderRound({round: REVERSE_GRID_ROUND, initialRace: 5});
+      const inc = getByLabelText('Increase reversal count');
+      // 8 → 9 → 10 → 11 → 12 → (blocked)
+      await act(async () => {
+        fireEvent.press(inc); fireEvent.press(inc); fireEvent.press(inc);
+        fireEvent.press(inc); fireEvent.press(inc);
+      });
+      expect(getByText('12')).toBeTruthy();
+    });
+
+    it('shows fallback message when Race 2 also has no results', () => {
+      const noR2Round = {
+        ...REVERSE_GRID_ROUND,
+        races: REVERSE_GRID_ROUND.races.map(r =>
+          r.label === 'Race 2' ? {...r, results: []} : r,
+        ),
+      };
+      const {getByText} = renderRound({round: noR2Round, initialRace: 5});
+      expect(getByText('Race 2 results needed to predict grid')).toBeTruthy();
+    });
+  });
 });

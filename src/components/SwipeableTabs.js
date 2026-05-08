@@ -88,6 +88,7 @@ export default function SwipeableTabs({
         style={{flex: 1}}
         initialPage={initialPage}
         scrollEnabled={!noSwipePages.includes(currentPage)}
+        offscreenPageLimit={pages.length - 1}
         onPageScroll={onPageScroll}
         onPageSelected={onPageSelected}>
         {pages.map((page, i) => (

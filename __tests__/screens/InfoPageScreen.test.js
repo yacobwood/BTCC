@@ -1,4 +1,5 @@
 import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {fireEvent, waitFor} from '@testing-library/react-native';
 import InfoPageScreen from '../../src/screens/InfoPageScreen';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
@@ -71,5 +72,82 @@ describe('InfoPageScreen', () => {
       <InfoPageScreen route={makeRoute({page: emptyPage})} navigation={nav} />,
     );
     await waitFor(() => expect(toJSON()).toBeTruthy());
+  });
+
+  // ── Speed unit conversion (kph ↔ mph) ─────────────────────────────────────────
+
+  const speedPage = (sections) => ({id: 'btcc-ttb', title: 'TTB', sections});
+
+  it('converts kph to mph in text sections when units are set to mph', async () => {
+    // Default AsyncStorage returns null → useKm=false (mph)
+    AsyncStorage.getItem.mockResolvedValue(null);
+    const {getByText} = renderWithProviders(
+      <InfoPageScreen
+        route={makeRoute({page: speedPage([{type: 'text', body: '1st: 140 kph, 1 sec/lap'}])})}
+        navigation={nav}
+      />,
+    );
+    // 140 / 1.60934 = 87.017… → Math.round → 87
+    await waitFor(() => expect(getByText('1st: 87 mph, 1 sec/lap')).toBeTruthy());
+  });
+
+  it('leaves kph unchanged in text sections when units are set to km', async () => {
+    AsyncStorage.getItem.mockImplementation((key) =>
+      key === 'use_km' ? Promise.resolve('true') : Promise.resolve(null),
+    );
+    const {getByText} = renderWithProviders(
+      <InfoPageScreen
+        route={makeRoute({page: speedPage([{type: 'text', body: '1st: 140 kph, 1 sec/lap'}])})}
+        navigation={nav}
+      />,
+    );
+    await waitFor(() => expect(getByText('1st: 140 kph, 1 sec/lap')).toBeTruthy());
+  });
+
+  it('converts multiple kph values within the same text body', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    const {getByText} = renderWithProviders(
+      <InfoPageScreen
+        route={makeRoute({page: speedPage([{type: 'text', body: 'Min 140 kph, max 200 kph'}])})}
+        navigation={nav}
+      />,
+    );
+    // 140→87, 200→124
+    await waitFor(() => expect(getByText('Min 87 mph, max 124 mph')).toBeTruthy());
+  });
+
+  it('converts kph in heading sections', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    const {getByText} = renderWithProviders(
+      <InfoPageScreen
+        route={makeRoute({page: speedPage([{type: 'heading', body: 'Deploy above 140 kph'}])})}
+        navigation={nav}
+      />,
+    );
+    await waitFor(() => expect(getByText('Deploy above 87 mph')).toBeTruthy());
+  });
+
+  it('converts kph in callout sections', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    const {getByText} = renderWithProviders(
+      <InfoPageScreen
+        route={makeRoute({page: speedPage([{type: 'callout', body: 'Must exceed 105 kph to deploy'}])})}
+        navigation={nav}
+      />,
+    );
+    // 105 / 1.60934 = 65.24… → 65
+    await waitFor(() => expect(getByText('Must exceed 65 mph to deploy')).toBeTruthy());
+  });
+
+  it('leaves text without kph values unchanged', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    const body = 'No speed values here.';
+    const {getByText} = renderWithProviders(
+      <InfoPageScreen
+        route={makeRoute({page: speedPage([{type: 'text', body}])})}
+        navigation={nav}
+      />,
+    );
+    await waitFor(() => expect(getByText(body)).toBeTruthy());
   });
 });
