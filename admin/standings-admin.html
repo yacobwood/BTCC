@@ -3469,10 +3469,6 @@ function toggleRound(id, header) {
 }
 
 // ── Error log ────────────────────────────────────────────────
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 async function loadErrors() {
   const el = document.getElementById('errors-list');
   el.innerHTML = '<div class="section-note">Loading…</div>';
