@@ -86,8 +86,13 @@ jest.mock('react-native-google-mobile-ads', () => ({
   __esModule: true,
   default: jest.fn(() => ({initialize: jest.fn(() => Promise.resolve())})),
   BannerAd: 'BannerAd',
-  BannerAdSize: {BANNER: 'BANNER', MEDIUM_RECTANGLE: 'MEDIUM_RECTANGLE'},
+  BannerAdSize: {BANNER: 'BANNER', MEDIUM_RECTANGLE: 'MEDIUM_RECTANGLE', ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER'},
   TestIds: {BANNER: 'ca-app-pub-test/banner'},
+  AdsConsent: {
+    requestInfoUpdate: jest.fn(() => Promise.resolve({isConsentFormAvailable: false, status: 'NOT_REQUIRED'})),
+    showForm: jest.fn(() => Promise.resolve()),
+  },
+  AdsConsentStatus: {UNKNOWN: 'UNKNOWN', REQUIRED: 'REQUIRED', NOT_REQUIRED: 'NOT_REQUIRED', OBTAINED: 'OBTAINED'},
 }));
 
 // ── react-native-vector-icons ─────────────────────────────────────────────────

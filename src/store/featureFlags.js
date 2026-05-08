@@ -15,6 +15,8 @@ const defaults = {
   live_chat: false,
   update_available: false,
   update_min_version: 0,
+  update_min_version_ios: 0,
+  update_min_version_android: 0,
 };
 
 const FeatureFlagsContext = createContext(defaults);

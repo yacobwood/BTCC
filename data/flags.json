@@ -15,5 +15,7 @@
   "live_timing_in_app": false,
   "update_available": true,
   "update_min_version": 62,
+  "update_min_version_ios": 0,
+  "update_min_version_android": 62,
   "live_chat": false
 }

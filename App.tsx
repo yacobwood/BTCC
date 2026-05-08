@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {versionCode as VERSION_CODE} from './package.json';
-import {StatusBar, AppState} from 'react-native';
+import {StatusBar, AppState, Platform} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import RNBootSplash from 'react-native-bootsplash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,7 +18,7 @@ import notifee, {EventType} from '@notifee/react-native';
 import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
-import MobileAds from 'react-native-google-mobile-ads';
+import MobileAds, {AdsConsent, AdsConsentStatus} from 'react-native-google-mobile-ads';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
@@ -45,7 +45,7 @@ function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
   const [showSpoilerCleared, setShowSpoilerCleared] = useState(false);
-  const {update_available, update_min_version} = useFeatureFlags();
+  const {update_available, update_min_version, update_min_version_ios, update_min_version_android} = useFeatureFlags();
   const {setSetting} = useSettings();
 
   useEffect(() => {
@@ -70,7 +70,10 @@ function AppDialogs() {
 
   // Flag-based override for testing via admin page device overrides
   useEffect(() => {
-    if (update_available && update_min_version > VERSION_CODE) {
+    const platformMinVersion = Platform.OS === 'ios'
+      ? (update_min_version_ios || update_min_version)
+      : (update_min_version_android || update_min_version);
+    if (update_available && platformMinVersion > VERSION_CODE) {
       setShowUpdate(true);
     } else {
       setShowUpdate(false);
@@ -99,7 +102,17 @@ function AppDialogs() {
 
 export default function App() {
   useEffect(() => {
-    MobileAds().initialize();
+    // Request ATT/UMP consent before initialising AdMob — required on iOS 14+
+    // and for GDPR regions (UK included). Without this the SDK serves no ads silently.
+    AdsConsent.requestInfoUpdate().then(async (info) => {
+      if (info.isConsentFormAvailable &&
+          (info.status === AdsConsentStatus.UNKNOWN || info.status === AdsConsentStatus.REQUIRED)) {
+        await AdsConsent.showForm();
+      }
+      MobileAds().initialize();
+    }).catch(() => {
+      MobileAds().initialize();
+    });
     const crashlytics = getCrashlytics();
     setCrashlyticsCollectionEnabled(crashlytics, true);
     setupNotificationChannels();
