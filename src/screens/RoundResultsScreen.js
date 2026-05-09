@@ -167,9 +167,9 @@ export default function RoundResultsScreen({route, navigation}) {
         pages={races.map((race, i) => {
           const gridMap = buildGridMap(races, i);
           const isR3 = race?.label === 'Race 3';
-          const hasResults = race?.results?.length > 0;
-
           const isQual = race.label === 'Qualifying';
+          // TEMP: force qual groups preview in dev
+          const hasResults = race?.results?.length > 0 && !(__DEV__ && isQual);
           if (!hasResults) {
             if (race.grid?.length) {
               return <StartingGridTab key={i} race={race} races={races} isFavourite={isFavourite} />;
