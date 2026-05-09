@@ -21,7 +21,7 @@ import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
-import {fetchStandings, fetchResults} from '../api/client';
+import {fetchResults} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
@@ -105,15 +105,15 @@ export default function TrackDetailScreen({route, navigation}) {
     }
   }, [track.lat, track.lng, track.startDate, track.endDate, track_weather]);
 
-  // Check whether standings have been updated (i.e. at least one race has finished this weekend)
+  // Show Results button and load round data once this specific round has results.
+  // For past weekends the date alone is sufficient; for live weekends we check the
+  // results file directly so previous-round standings don't trigger the button early.
   useEffect(() => {
     if (!isRaceWeekend && !isPastRaceWeekend) return;
-    const hasPoints = raw => (raw?.standings || []).some(d => d.points > 0);
 
     const applyRoundData = (found) => {
       if (!found) return;
       setCurrentRoundData(found);
-      // Check if any race best lap beats the stored race record
       const storedSecs = lapTimeSecs(track.raceRecord?.time);
       let best = null;
       found.races.forEach(race => {
@@ -131,26 +131,18 @@ export default function TrackDetailScreen({route, navigation}) {
       if (best) setLiveRaceRecord({...best, driver: formatDriverName(best.driver)});
     };
 
-    const applyFinished = () => {
-      setRacesFinished(true);
-      // Fetch results so we can navigate directly to RoundResults without flash
-      cacheRead('results_2026').then(cached => {
-        const parsed = parseResults(cached);
-        applyRoundData(parsed.find(r => r.round === track.round));
-      });
-      fetchResults(2026).then(raw => {
-        const parsed = parseResults(raw);
-        applyRoundData(parsed.find(r => r.round === track.round));
-      }).catch(() => {});
+    const checkAndApply = (raw) => {
+      const parsed = parseResults(raw);
+      const found = parsed.find(r => r.round === track.round);
+      // Past weekends always show Results; live weekends only once this round has data
+      if (isPastRaceWeekend || found?.races?.some(r => r.results.length > 0)) {
+        setRacesFinished(true);
+      }
+      applyRoundData(found);
     };
 
-    // Check cache instantly, then confirm with network
-    cacheRead('standings').then(cached => {
-      if (hasPoints(cached)) applyFinished();
-    });
-    fetchStandings().then(raw => {
-      if (hasPoints(raw)) applyFinished();
-    }).catch(() => {});
+    cacheRead('results_2026').then(cached => { if (cached) checkAndApply(cached); });
+    fetchResults(2026).then(raw => checkAndApply(raw)).catch(() => {});
   }, [isRaceWeekend, isPastRaceWeekend, track.round]);
 
   // Build flat list sections: hero, sticky title, then all content blocks
@@ -170,7 +162,12 @@ export default function TrackDetailScreen({route, navigation}) {
     items.push({type: 'stats'});
 
     // Live Timing / Results button
-    if ((isRaceWeekend && live_updates) || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
+    // Section is shown for any race weekend or past round; the live_updates flag only
+    // gates the Live Timing sub-button inside — Results have their own guard.
+    if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
+
+    // YouTube links — always shown when URLs exist (hot lap is available pre-weekend too)
+    if ((track.youtubeUrls || []).some(Boolean)) items.push({type: 'youtube'});
 
     // About
     if (track.about) items.push({type: 'about'});
@@ -291,26 +288,28 @@ export default function TrackDetailScreen({route, navigation}) {
                 <Icon name="chevron-right" size={18} color={Colors.yellow} />
               </TouchableOpacity>
             )}
-            {(racesFinished || isPastRaceWeekend) && ['Race 1', 'Race 2', 'Race 3'].some((_, i) => track.youtubeUrls?.[i]) && (
-              <View style={styles.youtubeBtnRow}>
-                {['Race 1', 'Race 2', 'Race 3'].map((label, i) => {
-                  const url = track.youtubeUrls?.[i];
-                  if (!url) return null;
-                  return (
-                    <TouchableOpacity
-                      key={label}
-                      style={styles.youtubeBtn}
-                      activeOpacity={0.8}
-                      onPress={() => Linking.openURL(url)}
-                      accessibilityLabel={`Watch ${label} on YouTube`}
-                      accessibilityRole="button">
-                      <Icon name="play-circle-filled" size={14} color="#FF0000" />
-                      <Text style={styles.youtubeBtnText}>{label}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            )}
+          </View>
+        );
+
+      case 'youtube':
+        return (
+          <View style={styles.youtubeBtnRow}>
+            {['Hot Lap', 'Race 1', 'Race 2', 'Race 3'].map((label, i) => {
+              const url = (track.youtubeUrls || [])[i];
+              if (!url) return null;
+              return (
+                <TouchableOpacity
+                  key={label}
+                  style={styles.youtubeBtn}
+                  activeOpacity={0.8}
+                  onPress={() => Linking.openURL(url)}
+                  accessibilityLabel={`Watch ${label} on YouTube`}
+                  accessibilityRole="button">
+                  <Icon name="play-circle-filled" size={14} color="#FF0000" />
+                  <Text style={styles.youtubeBtnText}>{label}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         );
 

@@ -13,10 +13,10 @@ const defaults = {
   hub_news_enabled: true,
   live_timing_in_app: false,
   live_chat: false,
-  update_available: false,
-  update_min_version: 0,
+  update_available: true,
+  update_min_version: 62,
   update_min_version_ios: 0,
-  update_min_version_android: 0,
+  update_min_version_android: 63,
 };
 
 const FeatureFlagsContext = createContext(defaults);

@@ -449,7 +449,7 @@ export default function ResultsScreen({navigation, route}) {
   ), []);
 
   const renderRound = useCallback(({item}) => {
-    const hasResults = item.races.some(r => r.results.length > 0);
+    const hasResults = item.races.some(r => r.results.length > 0 || r.grid?.length > 0);
     const rStart = (item.round - 1) * 3 + 1;
     const rEnd = rStart + 2;
     return (

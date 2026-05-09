@@ -75,6 +75,19 @@ jest.mock('react-native-in-app-review', () => ({
   },
 }));
 
+// ── react-native-device-info ──────────────────────────────────────────────────
+jest.mock('react-native-device-info', () => ({
+  __esModule: true,
+  default: {
+    getBuildNumber:  jest.fn(() => '999'),
+    getVersion:      jest.fn(() => '1.0.0'),
+    getSystemVersion: jest.fn(() => '18.0'),
+    isEmulator:      jest.fn(() => Promise.resolve(false)),
+    getUniqueId:     jest.fn(() => Promise.resolve('test-device-id')),
+    getUniqueIdSync: jest.fn(() => 'test-device-id'),
+  },
+}));
+
 // ── react-native-bootsplash ────────────────────────────────────────────────────
 jest.mock('react-native-bootsplash', () => ({
   __esModule: true,

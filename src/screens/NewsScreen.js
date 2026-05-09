@@ -87,7 +87,12 @@ export default function NewsScreen({navigation}) {
           return db - da;
         });
         setArticles(merged);
-        prefetchImages(merged.map(a => a.imageUrl).filter(Boolean));
+        // Prefetch at the thumbnail sizes CachedImage will actually request so
+        // Android's OkHttp disk cache is warm for the exact URLs rendered.
+        const allImageUrls = merged.map(a => a.imageUrl);
+        prefetchImages(allImageUrls.slice(0, 1).filter(Boolean), 768);   // hero
+        prefetchImages(allImageUrls.slice(1, 3).filter(Boolean), 300);   // grid
+        prefetchImages(allImageUrls.slice(3).filter(Boolean), 150);      // compact list
       }
       setHasMore(parsed.length >= 20);
       setPage(p);

@@ -109,4 +109,11 @@ describe('prefetchImages', () => {
     expect(Image.prefetch).toHaveBeenCalledTimes(1);
     expect(Image.prefetch).toHaveBeenCalledWith('https://a.com/valid.jpg');
   });
+
+  it('does not throw when Image.prefetch rejects (404 silenced)', async () => {
+    Image.prefetch = jest.fn().mockRejectedValue(new Error('404 Not Found'));
+    await expect(
+      Promise.resolve().then(() => prefetchImages(['https://a.com/missing.jpg'])),
+    ).resolves.not.toThrow();
+  });
 });

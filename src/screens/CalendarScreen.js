@@ -42,6 +42,7 @@ function firstRaceNumber(round) {
 }
 
 export default function CalendarScreen({navigation}) {
+  const [selectedYear, setSelectedYear] = useState(2026);
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,12 +54,12 @@ export default function CalendarScreen({navigation}) {
 
   const load = useCallback(async () => {
     try {
-      const raw = fetchCalendar();
+      const raw = fetchCalendar(selectedYear);
       setCalendar(parseCalendar(raw));
     } catch {}
     setLoading(false);
     setRefreshing(false);
-  }, []);
+  }, [selectedYear]);
 
   useEffect(() => {
     Analytics.screen('calendar');
@@ -289,14 +290,23 @@ export default function CalendarScreen({navigation}) {
     );
   };
 
-  const year = rounds[0]?.startDate?.substring(0, 4) || '2026';
-
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>{year} SEASON</Text>
+        <View style={styles.yearSelector}>
+          {[2026, 2027].map(yr => (
+            <TouchableOpacity
+              key={yr}
+              style={[styles.yearPill, selectedYear === yr && styles.yearPillActive]}
+              onPress={() => { setSelectedYear(yr); setLoading(true); }}
+              accessibilityLabel={`${yr} season`}
+              accessibilityRole="button">
+              <Text style={[styles.yearPillText, selectedYear === yr && styles.yearPillTextActive]}>
+                {yr}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
         <View style={styles.headerPill}>
           <Text style={styles.headerPillText}>
@@ -353,12 +363,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '900',
-    letterSpacing: 0.5,
+  yearSelector: {flexDirection: 'row', gap: 6},
+  yearPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.outline,
   },
+  yearPillActive: {
+    backgroundColor: Colors.yellow,
+    borderColor: Colors.yellow,
+  },
+  yearPillText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  yearPillTextActive: {color: Colors.navy},
   headerSub: {color: Colors.textSecondary, fontSize: 12, marginTop: 2},
   headerPill: {
     backgroundColor: Colors.card,

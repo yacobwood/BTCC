@@ -41,9 +41,11 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
   );
 }
 
-// Prefetch a batch of image URLs
-export function prefetchImages(urls) {
+// Prefetch a batch of image URLs, optionally at a specific WP thumbnail size.
+// targetWidth should match the CachedImage targetWidth prop so the prefetched URL
+// is identical to the URL the Image component will request.
+export function prefetchImages(urls, targetWidth) {
   urls.forEach(url => {
-    if (url) Image.prefetch(url);
+    if (url) Image.prefetch(targetWidth ? wpThumb(url, targetWidth) : url).catch(() => {});
   });
 }

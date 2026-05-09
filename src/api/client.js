@@ -6,6 +6,7 @@ const BASE_GITHUB = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data'
 const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
 
 const BUNDLED_CALENDAR = require('../data/calendar.json');
+const BUNDLED_CALENDAR_2027 = require('../../data/calendar2027.json');
 const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
 
@@ -47,7 +48,8 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
   }
 }
 
-export function fetchCalendar() {
+export function fetchCalendar(year = 2026) {
+  if (year === 2027) return BUNDLED_CALENDAR_2027;
   return BUNDLED_CALENDAR;
 }
 

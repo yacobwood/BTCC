@@ -78,7 +78,7 @@ function AppDialogs() {
     } else {
       setShowUpdate(false);
     }
-  }, [update_available, update_min_version]);
+  }, [update_available, update_min_version, update_min_version_ios, update_min_version_android]);
 
   const handleOnboardingAllow = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');

@@ -1,5 +1,5 @@
 import React from 'react';
-import {waitFor} from '@testing-library/react-native';
+import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import CalendarScreen from '../../src/screens/CalendarScreen';
 import {renderWithProviders, makeNav} from './testUtils';
 
@@ -61,10 +61,10 @@ describe('CalendarScreen', () => {
     });
   });
 
-  it('calls fetchCalendar on mount', async () => {
+  it('calls fetchCalendar with 2026 on mount', async () => {
     renderWithProviders(<CalendarScreen navigation={nav} />);
     await waitFor(() => {
-      expect(fetchCalendar).toHaveBeenCalled();
+      expect(fetchCalendar).toHaveBeenCalledWith(2026);
     });
   });
 
@@ -74,6 +74,93 @@ describe('CalendarScreen', () => {
     renderWithProviders(<CalendarScreen navigation={nav} />);
     await waitFor(() => {
       expect(parseCalendar).toHaveBeenCalledWith(rawData);
+    });
+  });
+
+  // ── Year selector ─────────────────────────────────────────────────────────────
+
+  describe('year selector', () => {
+    const MOCK_ROUNDS_2027 = [
+      {round: 1, venue: 'Donington Park', startDate: '2027-04-10', endDate: '2027-04-11', sessions: []},
+      {round: 2, venue: 'Brands Hatch Indy', startDate: '2027-05-08', endDate: '2027-05-09', sessions: []},
+    ];
+
+    it('renders both year pills', async () => {
+      const {getByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => {
+        expect(getByText('2026')).toBeTruthy();
+        expect(getByText('2027')).toBeTruthy();
+      });
+    });
+
+    it('tapping 2027 calls fetchCalendar with 2027', async () => {
+      fetchCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      parseCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      const {getByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByText('2027'));
+
+      await act(async () => {
+        fireEvent.press(getByText('2027'));
+      });
+
+      await waitFor(() => {
+        expect(fetchCalendar).toHaveBeenCalledWith(2027);
+      });
+    });
+
+    it('switching to 2027 renders 2027 venue names', async () => {
+      const {getByText, queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByText('Donington Park'));
+
+      fetchCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      parseCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+
+      await act(async () => {
+        fireEvent.press(getByText('2027'));
+      });
+
+      await waitFor(() => {
+        expect(getByText('Brands Hatch Indy')).toBeTruthy();
+      });
+    });
+
+    it('switching back to 2026 re-loads 2026 data', async () => {
+      fetchCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      parseCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      const {getByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByText('2027'));
+
+      await act(async () => {
+        fireEvent.press(getByText('2027'));
+      });
+
+      fetchCalendar.mockReturnValue({rounds: MOCK_ROUNDS});
+      parseCalendar.mockReturnValue({rounds: MOCK_ROUNDS});
+
+      await act(async () => {
+        fireEvent.press(getByText('2026'));
+      });
+
+      await waitFor(() => {
+        expect(fetchCalendar).toHaveBeenCalledWith(2026);
+        expect(getByText('Thruxton')).toBeTruthy();
+      });
+    });
+
+    it('2027 rounds with empty sessions do not show session times', async () => {
+      fetchCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      parseCalendar.mockReturnValue({rounds: MOCK_ROUNDS_2027});
+      const {getByText, queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByText('2027'));
+
+      await act(async () => {
+        fireEvent.press(getByText('2027'));
+      });
+
+      await waitFor(() => {
+        expect(queryByText('10:35')).toBeNull();
+        expect(queryByText('11:30')).toBeNull();
+      });
     });
   });
 

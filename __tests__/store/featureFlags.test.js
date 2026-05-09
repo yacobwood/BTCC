@@ -20,6 +20,10 @@ describe('FeatureFlagsProvider', () => {
   const defaults = {
     podcasts_enabled: false,
     podcast_last_episode_url: '',
+    update_available: true,
+    update_min_version: 62,
+    update_min_version_ios: 0,
+    update_min_version_android: 63,
   };
 
   it('provides default flags immediately (before fetch resolves)', () => {
