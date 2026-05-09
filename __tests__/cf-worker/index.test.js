@@ -162,6 +162,25 @@ describe('CF Worker scheduled handler', () => {
     expect(ytCall[0]).toContain('eventType=live');
   });
 
+  it('treats a live stream without "BTCC" in the title as inactive', async () => {
+    global.fetch
+      .mockResolvedValueOnce(dispatchOk())
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytLive('xyz789', 'ITV Sport Special Coverage'))})
+      .mockResolvedValueOnce(ghNotFound())
+      .mockResolvedValueOnce(ghPutOk());
+
+    await handler.scheduled({}, ENV, CTX);
+
+    const putCall = global.fetch.mock.calls.find(([url, opts]) =>
+      url.includes('live_status.json') && opts?.method === 'PUT'
+    );
+    expect(putCall).toBeDefined();
+    const body = JSON.parse(putCall[1].body);
+    const committed = JSON.parse(atob(body.content));
+    expect(committed.active).toBe(false);
+    expect(committed.liveUrl).toBeNull();
+  });
+
   it('still commits offline status even when YouTube API call fails', async () => {
     global.fetch
       .mockResolvedValueOnce(dispatchOk())

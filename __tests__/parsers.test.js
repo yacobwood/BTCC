@@ -187,4 +187,81 @@ describe('parseResults', () => {
     // QR P1 = 10 points
     expect(rounds[0].races[0].results[0].points).toBe(10);
   });
+
+  test('QR results have fastestLap, leadLap and pole stripped (reg 1.6.2.a)', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Qualifying Race',
+          results: [{
+            pos: 1, no: 1, driver: 'A', team: 'T', laps: 10, time: '20:00',
+            fastestLap: true, leadLap: true, pole: true,
+          }],
+        }],
+      }],
+    };
+    const result = parseResults(json)[0].races[0].results[0];
+    expect(result.fastestLap).toBe(false);
+    expect(result.leadLap).toBe(false);
+    expect(result.pole).toBe(false);
+  });
+
+  test('regular race results preserve fastestLap, leadLap and pole flags', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Race 1',
+          results: [{
+            pos: 1, no: 1, driver: 'A', team: 'T', laps: 10, time: '20:00',
+            fastestLap: true, leadLap: true, pole: true,
+          }],
+        }],
+      }],
+    };
+    const result = parseResults(json)[0].races[0].results[0];
+    expect(result.fastestLap).toBe(true);
+    expect(result.leadLap).toBe(true);
+    expect(result.pole).toBe(true);
+  });
+});
+
+describe('parseStandings', () => {
+  test('returns jst and independentsTeams arrays', () => {
+    const json = {
+      season: '2026',
+      round: 3,
+      standings: [],
+      teams: [],
+      jst: [{pos: 1, driver: 'Dexter PATTERSON', team: 'Steel Seal', points: 60, wins: 0, seconds: 1, thirds: 0}],
+      independentsTeams: [{pos: 1, team: 'LKQ Euro Car Parts', points: 57}],
+    };
+    const s = parseStandings(json);
+    expect(s.jst).toHaveLength(1);
+    expect(s.jst[0].name).toBe('Dexter PATTERSON');
+    expect(s.jst[0].points).toBe(60);
+    expect(s.independentsTeams).toHaveLength(1);
+    expect(s.independentsTeams[0].name).toBe('LKQ Euro Car Parts');
+  });
+
+  test('driver entries include nat field', () => {
+    const json = {
+      season: '2026',
+      round: 1,
+      standings: [{pos: 1, driver: 'Ashley SUTTON', team: 'NAPA Racing UK', points: 71, nat: 'GBR'}],
+      teams: [],
+    };
+    const s = parseStandings(json);
+    expect(s.drivers[0].nat).toBe('GBR');
+  });
+
+  test('returns empty jst and independentsTeams when absent', () => {
+    const json = {season: '2026', round: 0, standings: [], teams: []};
+    const s = parseStandings(json);
+    expect(s.jst).toEqual([]);
+    expect(s.independentsTeams).toEqual([]);
+  });
 });

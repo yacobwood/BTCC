@@ -106,6 +106,42 @@ describe('DriverDetailScreen', () => {
     );
     await waitFor(() => expect(getByText(/Tom Ingram/)).toBeTruthy());
   });
+
+  it('does not count a QR win as an official win in 2026 live stats', async () => {
+    fetchResults.mockResolvedValue({
+      rounds: [{
+        races: [
+          // QR P1 — should NOT count as a win
+          {label: 'Qualifying Race', results: [{pos: 1, driver: 'Tom Ingram', team: 'Team Ingram', points: 10, bestLap: ''}]},
+          // Race 1 P3 — not a win, but is a podium
+          {label: 'Race 1', results: [{pos: 3, driver: 'Tom Ingram', team: 'Team Ingram', points: 15, bestLap: ''}]},
+        ],
+      }],
+    });
+    const route = makeRoute({driver: DRIVER});
+    const {queryByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    // wins = 0 (QR excluded) → "1 W" badge must not appear
+    await waitFor(() => expect(queryByText('1 W')).toBeNull());
+  });
+
+  it('does not count a QR podium in 2026 live stats', async () => {
+    fetchResults.mockResolvedValue({
+      rounds: [{
+        races: [
+          // QR P2 — should NOT count as a podium
+          {label: 'Qualifying Race', results: [{pos: 2, driver: 'Tom Ingram', team: 'Team Ingram', points: 9, bestLap: ''}]},
+        ],
+      }],
+    });
+    const route = makeRoute({driver: DRIVER});
+    const {queryByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    // podiums = 0 → "1 P" badge must not appear
+    await waitFor(() => expect(queryByText('1 P')).toBeNull());
+  });
 });
 
 // ─── TeamDetailScreen ─────────────────────────────────────────────────────────
