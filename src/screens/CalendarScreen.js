@@ -201,7 +201,7 @@ export default function CalendarScreen({navigation}) {
               <Icon name="chevron-right" size={16} color="#fff" />
             </View>
           </View>
-          {round.liveUrl ? (
+          {round.liveUrl && (!round.liveEnd || Date.now() < new Date(round.liveEnd).getTime()) ? (
             <TouchableOpacity
               style={styles.liveWatchBtn}
               activeOpacity={0.8}
