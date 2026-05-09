@@ -180,7 +180,8 @@ export default function ResultsScreen({navigation, route}) {
     resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
     statsListRef.current?.scrollToOffset({offset: 0, animated: false});
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
-  }, []));
+    if (year === 2026) load(2026, true);
+  }, [year]));
 
   const changeYear = useCallback((newYear) => {
     Analytics.resultsYearChanged(newYear);

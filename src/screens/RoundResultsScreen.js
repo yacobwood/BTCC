@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Linking,
+  AppState,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -15,6 +16,8 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {useUnits} from '../store/units';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
+import {fetchResults} from '../api/client';
+import {parseResults} from '../api/parsers';
 
 // Abbreviate session labels for tab display.
 function shortLabel(label) {
@@ -71,14 +74,37 @@ function buildGridMap(races, raceIndex) {
   return Object.keys(map).length ? map : null;
 }
 
+const POLL_INTERVAL_MS = 60 * 1000;
+
 export default function RoundResultsScreen({route, navigation}) {
-  const {round, year, initialRace, origin} = route.params;
+  const {round: initialRound, year, initialRace, origin} = route.params;
+  const [round, setRound] = useState(initialRound);
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
   const races = round.races || [];
 
   useEffect(() => { Analytics.roundResultsViewed(year, round.round); }, []);
+
+  const refresh = useCallback(async () => {
+    if (year < 2026) return;
+    try {
+      const raw = await fetchResults(year, true);
+      const parsed = parseResults(raw);
+      const fresh = parsed.find(r => r.round === round.round);
+      if (fresh) setRound(fresh);
+    } catch (_) {}
+  }, [year, round.round]);
+
+  useEffect(() => {
+    if (year < 2026) return;
+    refresh();
+    const interval = setInterval(refresh, POLL_INTERVAL_MS);
+    const appSub = AppState.addEventListener('change', state => {
+      if (state === 'active') refresh();
+    });
+    return () => { clearInterval(interval); appSub.remove(); };
+  }, [refresh, year]);
 
   const rStart = (round.round - 1) * 3 + 1;
   const rEnd = rStart + 2;
