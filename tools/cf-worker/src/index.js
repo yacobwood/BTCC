@@ -2,6 +2,26 @@ const BTCC_CHANNEL_ID = 'UCm1pFKRmvlf7vd7-Yni5MWA';
 const GITHUB_REPO    = 'yacobwood/BTCC';
 const LIVE_FILE_PATH = 'data/live_status.json';
 
+// BTCC race weekends — [Saturday ISO date, Sunday ISO date]
+// Update each season alongside scrape_tsl.py ROUNDS.
+const RACE_WEEKENDS_2026 = [
+  ['2026-04-18', '2026-04-19'], // Donington Park
+  ['2026-05-09', '2026-05-10'], // Brands Hatch Indy
+  ['2026-05-23', '2026-05-24'], // Snetterton
+  ['2026-06-06', '2026-06-07'], // Oulton Park
+  ['2026-07-25', '2026-07-26'], // Thruxton
+  ['2026-08-08', '2026-08-09'], // Knockhill
+  ['2026-08-22', '2026-08-23'], // Donington Park GP
+  ['2026-09-05', '2026-09-06'], // Croft
+  ['2026-09-26', '2026-09-27'], // Silverstone
+  ['2026-10-10', '2026-10-11'], // Brands Hatch GP
+];
+
+function isRaceWeekend() {
+  const today = new Date().toISOString().slice(0, 10);
+  return RACE_WEEKENDS_2026.some(([sat, sun]) => today === sat || today === sun);
+}
+
 async function checkLive(youtubeApiKey) {
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${BTCC_CHANNEL_ID}&eventType=live&type=video&key=${youtubeApiKey}`;
   const res = await fetch(url);
@@ -61,7 +81,12 @@ async function dispatchScrape(githubToken) {
 
 export default {
   async scheduled(event, env, ctx) {
-    // Always dispatch results scrape
+    if (!isRaceWeekend()) {
+      console.log('Not a race weekend — skipping');
+      return;
+    }
+
+    // Dispatch results scrape
     await dispatchScrape(env.GITHUB_TOKEN);
 
     // Check YouTube for a live BTCC broadcast

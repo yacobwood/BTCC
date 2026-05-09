@@ -31,7 +31,20 @@ const ghPutOk = () => ({status: 200, ok: true, json: () => Promise.resolve({})})
 const dispatchOk = () => ({status: 204, ok: true});
 
 describe('CF Worker scheduled handler', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Pin clock to a known BTCC race weekend (Brands Hatch Indy Saturday)
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-05-09T12:00:00Z'));
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it('does nothing on a non-race weekend', async () => {
+    jest.setSystemTime(new Date('2026-05-02T12:00:00Z')); // random Saturday, no race
+    await handler.scheduled({}, ENV, CTX);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
 
   it('always dispatches the scrape workflow', async () => {
     global.fetch
