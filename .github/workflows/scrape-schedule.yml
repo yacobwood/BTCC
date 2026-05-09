@@ -30,10 +30,13 @@ jobs:
       - name: Scrape session schedule
         run: python tools/scraper/scrape_schedule.py
 
+      - name: Merge sessions into app calendar
+        run: python tools/scraper/merge_schedule.py
+
       - name: Commit updated schedule
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update session schedule from btcc.net [skip ci]"
-          file_pattern: data/schedule.json
+          file_pattern: data/schedule.json src/data/calendar.json
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
