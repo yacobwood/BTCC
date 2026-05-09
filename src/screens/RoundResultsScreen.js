@@ -209,16 +209,20 @@ export default function RoundResultsScreen({route, navigation}) {
             }
           }
 
+          if (!race?.results?.length) {
+            return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight — results will appear automatically" />;
+          }
+
           return (
             <View style={{flex: 1}}>
               {race?.date && race.date !== round.date && (
                 <Text style={styles.raceDateLabel}>{race.date}</Text>
               )}
               <FlatList
-                data={race?.results || []}
+                data={race.results}
                 keyExtractor={(_, idx) => String(idx)}
                 renderItem={makeRenderResult(gridMap)}
-                contentContainerStyle={{paddingHorizontal: 16, paddingTop: race?.results?.length ? 16 : 0, paddingBottom: 20, flexGrow: 1}}
+                contentContainerStyle={{padding: 16, paddingBottom: 20}}
                 ListHeaderComponent={race?.fullRaceUrl ? (
                   <TouchableOpacity
                     style={styles.youtubeBtn}
@@ -231,7 +235,6 @@ export default function RoundResultsScreen({route, navigation}) {
                     <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
                   </TouchableOpacity>
                 ) : null}
-                ListEmptyComponent={<EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight — results will appear automatically" />}
               />
             </View>
           );
