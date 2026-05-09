@@ -125,7 +125,6 @@ export default function RoundResultsScreen({route, navigation}) {
                 </Text>
               </View>
             )}
-            {delta === 0 && <Text style={styles.deltaFlat}>±0</Text>}
           </View>
         </View>
         <View style={styles.rightCol}>
