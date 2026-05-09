@@ -108,6 +108,12 @@ jest.mock('react-native-google-mobile-ads', () => ({
   AdsConsentStatus: {UNKNOWN: 'UNKNOWN', REQUIRED: 'REQUIRED', NOT_REQUIRED: 'NOT_REQUIRED', OBTAINED: 'OBTAINED'},
 }));
 
+// ── react-native-tracking-transparency ───────────────────────────────────────
+jest.mock('react-native-tracking-transparency', () => ({
+  requestTrackingPermission: jest.fn(() => Promise.resolve('authorized')),
+  getTrackingStatus:         jest.fn(() => Promise.resolve('authorized')),
+}));
+
 // ── react-native-vector-icons ─────────────────────────────────────────────────
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
 
