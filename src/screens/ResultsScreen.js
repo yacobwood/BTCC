@@ -37,7 +37,7 @@ function computeSeasonStats(rounds) {
         }
         const s = map[r.driver];
         s.points += r.points;
-        if (r.position === 1) s.wins++;
+        if (r.position === 1 && race.label !== 'Qualifying Race') s.wins++;
         if (r.position >= 1 && r.position <= 3) s.podiums++;
         if (r.pole) s.poles++;
         if (r.fastestLap) s.fastestLaps++;
