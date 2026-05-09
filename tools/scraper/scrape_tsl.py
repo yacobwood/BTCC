@@ -242,7 +242,7 @@ def parse_classification(pdf_bytes, label):
         race_time = ""
         gap = ""
         best_lap = ""
-        is_race = label not in NO_POINTS_SESSIONS and label != "Qualifying Race"
+        is_race = label not in NO_POINTS_SESSIONS
 
         for _, x, t in row:
             if 30 < x < 75 and not no:
