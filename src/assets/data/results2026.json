@@ -31,7 +31,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.206",
               "bestLap": "1:08.048",
               "points": 0
             },
@@ -44,7 +44,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.234",
               "bestLap": "1:08.076",
               "points": 0
             },
@@ -57,7 +57,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.312",
               "bestLap": "1:08.154",
               "points": 0
             },
@@ -70,7 +70,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.399",
               "bestLap": "1:08.241",
               "points": 0
             },
@@ -83,7 +83,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.446",
               "bestLap": "1:08.288",
               "points": 0
             },
@@ -96,7 +96,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.477",
               "bestLap": "1:08.319",
               "points": 0
             },
@@ -109,7 +109,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.571",
               "bestLap": "1:08.413",
               "points": 0
             },
@@ -122,7 +122,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.585",
               "bestLap": "1:08.427",
               "points": 0
             },
@@ -135,7 +135,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.609",
               "bestLap": "1:08.451",
               "points": 0
             },
@@ -148,7 +148,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.756",
               "bestLap": "1:08.598",
               "points": 0
             },
@@ -161,7 +161,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.815",
               "bestLap": "1:08.657",
               "points": 0
             },
@@ -174,7 +174,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.857",
               "bestLap": "1:08.699",
               "points": 0
             },
@@ -187,7 +187,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.870",
               "bestLap": "1:08.712",
               "points": 0
             },
@@ -200,7 +200,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.881",
               "bestLap": "1:08.723",
               "points": 0
             },
@@ -213,7 +213,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.892",
               "bestLap": "1:08.734",
               "points": 0
             },
@@ -226,7 +226,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.979",
               "bestLap": "1:08.821",
               "points": 0
             },
@@ -239,7 +239,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.010",
               "bestLap": "1:08.852",
               "points": 0
             },
@@ -252,7 +252,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.345",
               "bestLap": "1:09.187",
               "points": 0
             },
@@ -265,7 +265,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.362",
               "bestLap": "1:09.204",
               "points": 0
             },
@@ -278,7 +278,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "2.630",
               "bestLap": "1:10.472",
               "points": 0
             }
@@ -299,7 +299,8 @@
               "time": "",
               "gap": "",
               "bestLap": "1:07.647",
-              "points": 0
+              "points": 0,
+              "pole": true
             },
             {
               "pos": 2,
@@ -310,7 +311,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.008",
               "bestLap": "1:07.655",
               "points": 0
             },
@@ -323,7 +324,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.297",
               "bestLap": "1:07.944",
               "points": 0
             },
@@ -336,7 +337,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.209",
               "bestLap": "1:07.856",
               "points": 0
             },
@@ -349,7 +350,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.358",
               "bestLap": "1:08.005",
               "points": 0
             },
@@ -362,7 +363,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.270",
               "bestLap": "1:07.917",
               "points": 0
             },
@@ -375,7 +376,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.429",
               "bestLap": "1:08.076",
               "points": 0
             },
@@ -388,7 +389,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.312",
               "bestLap": "1:07.959",
               "points": 0
             },
@@ -401,7 +402,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.648",
               "bestLap": "1:08.295",
               "points": 0
             },
@@ -414,7 +415,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.592",
               "bestLap": "1:08.239",
               "points": 0
             },
@@ -427,7 +428,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.820",
               "bestLap": "1:08.467",
               "points": 0
             },
@@ -440,7 +441,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.722",
               "bestLap": "1:08.369",
               "points": 0
             },
@@ -453,7 +454,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.857",
               "bestLap": "1:08.504",
               "points": 0
             },
@@ -466,7 +467,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.837",
               "bestLap": "1:08.484",
               "points": 0
             },
@@ -479,7 +480,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.899",
               "bestLap": "1:08.546",
               "points": 0
             },
@@ -492,7 +493,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.949",
               "bestLap": "1:08.596",
               "points": 0
             },
@@ -505,7 +506,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.079",
               "bestLap": "1:08.726",
               "points": 0
             },
@@ -518,7 +519,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.190",
               "bestLap": "1:08.837",
               "points": 0
             },
@@ -531,7 +532,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.179",
               "bestLap": "1:08.826",
               "points": 0
             },
@@ -544,7 +545,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.744",
               "bestLap": "1:09.391",
               "points": 0
             },
@@ -557,7 +558,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.568",
               "bestLap": "1:09.215",
               "points": 0
             }
@@ -591,7 +592,8 @@
               "time": "15:07.971",
               "gap": "0.024",
               "bestLap": "1:08.236",
-              "points": 9
+              "points": 9,
+              "fastestLap": true
             },
             {
               "pos": 3,
@@ -1006,7 +1008,7 @@
               "gap": "",
               "bestLap": "1:08.351",
               "points": 20,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 2,
@@ -1020,7 +1022,8 @@
               "gap": "1.749",
               "bestLap": "1:07.944",
               "points": 17,
-              "ledLap": false
+              "fastestLap": true,
+              "leadLap": false
             },
             {
               "pos": 3,
@@ -1034,7 +1037,7 @@
               "gap": "5.392",
               "bestLap": "1:08.246",
               "points": 15,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 4,
@@ -1048,7 +1051,7 @@
               "gap": "6.276",
               "bestLap": "1:08.755",
               "points": 13,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 5,
@@ -1062,7 +1065,7 @@
               "gap": "7.401",
               "bestLap": "1:08.928",
               "points": 11,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 6,
@@ -1076,7 +1079,7 @@
               "gap": "7.693",
               "bestLap": "1:08.654",
               "points": 10,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 7,
@@ -1090,7 +1093,7 @@
               "gap": "8.102",
               "bestLap": "1:09.026",
               "points": 9,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 8,
@@ -1104,7 +1107,7 @@
               "gap": "8.180",
               "bestLap": "1:09.054",
               "points": 8,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 9,
@@ -1118,7 +1121,7 @@
               "gap": "8.417",
               "bestLap": "1:08.748",
               "points": 7,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 10,
@@ -1132,7 +1135,7 @@
               "gap": "8.775",
               "bestLap": "1:08.835",
               "points": 6,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 11,
@@ -1146,7 +1149,7 @@
               "gap": "11.667",
               "bestLap": "1:08.291",
               "points": 5,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 12,
@@ -1160,7 +1163,7 @@
               "gap": "12.155",
               "bestLap": "1:08.966",
               "points": 4,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 13,
@@ -1174,7 +1177,7 @@
               "gap": "13.376",
               "bestLap": "1:09.457",
               "points": 3,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 14,
@@ -1188,7 +1191,7 @@
               "gap": "13.616",
               "bestLap": "1:09.442",
               "points": 2,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 15,
@@ -1202,7 +1205,7 @@
               "gap": "14.032",
               "bestLap": "1:09.249",
               "points": 1,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 16,
@@ -1216,7 +1219,7 @@
               "gap": "14.160",
               "bestLap": "1:09.149",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 17,
@@ -1230,7 +1233,7 @@
               "gap": "21.131",
               "bestLap": "1:09.646",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 18,
@@ -1244,7 +1247,7 @@
               "gap": "21.349",
               "bestLap": "1:09.693",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1258,7 +1261,7 @@
               "gap": "",
               "bestLap": "1:09.167",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1272,7 +1275,7 @@
               "gap": "",
               "bestLap": "1:08.347",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1286,7 +1289,7 @@
               "gap": "",
               "bestLap": "",
               "points": 0,
-              "ledLap": true
+              "leadLap": true
             }
           ],
           "grid": [
@@ -1454,7 +1457,8 @@
               "gap": "",
               "bestLap": "1:08.061",
               "points": 20,
-              "ledLap": true
+              "fastestLap": true,
+              "leadLap": true
             },
             {
               "pos": 2,
@@ -1468,7 +1472,7 @@
               "gap": "2.634",
               "bestLap": "1:08.206",
               "points": 17,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 3,
@@ -1482,7 +1486,7 @@
               "gap": "3.038",
               "bestLap": "1:08.551",
               "points": 15,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 4,
@@ -1496,7 +1500,7 @@
               "gap": "4.505",
               "bestLap": "1:08.412",
               "points": 13,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 5,
@@ -1510,7 +1514,7 @@
               "gap": "5.740",
               "bestLap": "1:08.293",
               "points": 11,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 6,
@@ -1524,7 +1528,7 @@
               "gap": "6.126",
               "bestLap": "1:08.491",
               "points": 10,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 7,
@@ -1538,7 +1542,7 @@
               "gap": "10.971",
               "bestLap": "1:08.658",
               "points": 9,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 8,
@@ -1552,7 +1556,7 @@
               "gap": "12.796",
               "bestLap": "1:09.015",
               "points": 8,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 9,
@@ -1566,7 +1570,7 @@
               "gap": "14.309",
               "bestLap": "1:09.228",
               "points": 7,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 10,
@@ -1580,7 +1584,7 @@
               "gap": "15.201",
               "bestLap": "1:08.693",
               "points": 6,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 11,
@@ -1594,7 +1598,7 @@
               "gap": "16.807",
               "bestLap": "1:09.103",
               "points": 5,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 12,
@@ -1608,7 +1612,7 @@
               "gap": "17.676",
               "bestLap": "1:09.101",
               "points": 4,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 13,
@@ -1622,7 +1626,7 @@
               "gap": "18.084",
               "bestLap": "1:08.760",
               "points": 3,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 14,
@@ -1636,7 +1640,7 @@
               "gap": "19.188",
               "bestLap": "1:09.570",
               "points": 2,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 15,
@@ -1650,7 +1654,7 @@
               "gap": "21.898",
               "bestLap": "1:09.228",
               "points": 1,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 16,
@@ -1664,7 +1668,7 @@
               "gap": "22.335",
               "bestLap": "1:09.003",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 17,
@@ -1678,7 +1682,7 @@
               "gap": "22.971",
               "bestLap": "1:09.440",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1692,7 +1696,7 @@
               "gap": "",
               "bestLap": "1:11.883",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1706,7 +1710,7 @@
               "gap": "",
               "bestLap": "67.21",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1720,7 +1724,7 @@
               "gap": "",
               "bestLap": "",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -1734,7 +1738,7 @@
               "gap": "",
               "bestLap": "",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             }
           ],
           "grid": [
@@ -1902,7 +1906,7 @@
               "gap": "",
               "bestLap": "1:08.624",
               "points": 20,
-              "ledLap": true
+              "leadLap": true
             },
             {
               "pos": 2,
@@ -1916,7 +1920,8 @@
               "gap": "2.188",
               "bestLap": "1:08.078",
               "points": 17,
-              "ledLap": false
+              "fastestLap": true,
+              "leadLap": false
             },
             {
               "pos": 3,
@@ -1930,7 +1935,7 @@
               "gap": "7.218",
               "bestLap": "1:08.683",
               "points": 15,
-              "ledLap": true
+              "leadLap": true
             },
             {
               "pos": 4,
@@ -1944,7 +1949,7 @@
               "gap": "9.041",
               "bestLap": "1:08.823",
               "points": 13,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 5,
@@ -1958,7 +1963,7 @@
               "gap": "9.884",
               "bestLap": "1:09.108",
               "points": 11,
-              "ledLap": true
+              "leadLap": true
             },
             {
               "pos": 6,
@@ -1972,7 +1977,7 @@
               "gap": "13.018",
               "bestLap": "1:08.999",
               "points": 10,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 7,
@@ -1986,7 +1991,7 @@
               "gap": "14.176",
               "bestLap": "1:08.608",
               "points": 9,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 8,
@@ -2000,7 +2005,7 @@
               "gap": "14.777",
               "bestLap": "1:09.086",
               "points": 8,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 9,
@@ -2014,7 +2019,7 @@
               "gap": "14.947",
               "bestLap": "1:08.680",
               "points": 7,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 10,
@@ -2028,7 +2033,7 @@
               "gap": "16.895",
               "bestLap": "1:08.698",
               "points": 6,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 11,
@@ -2042,7 +2047,7 @@
               "gap": "20.010",
               "bestLap": "1:08.712",
               "points": 5,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 12,
@@ -2056,7 +2061,7 @@
               "gap": "20.259",
               "bestLap": "1:09.243",
               "points": 4,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 13,
@@ -2070,7 +2075,7 @@
               "gap": "21.278",
               "bestLap": "1:09.052",
               "points": 3,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 14,
@@ -2084,7 +2089,7 @@
               "gap": "21.309",
               "bestLap": "1:09.331",
               "points": 2,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 15,
@@ -2098,7 +2103,7 @@
               "gap": "21.475",
               "bestLap": "1:08.862",
               "points": 1,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 16,
@@ -2112,7 +2117,7 @@
               "gap": "29.569",
               "bestLap": "1:09.408",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 17,
@@ -2126,7 +2131,7 @@
               "gap": "49.306",
               "bestLap": "1:08.171",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 18,
@@ -2140,7 +2145,7 @@
               "gap": "50.554",
               "bestLap": "1:09.615",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 19,
@@ -2154,7 +2159,7 @@
               "gap": "",
               "bestLap": "1:08.280",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -2168,7 +2173,7 @@
               "gap": "",
               "bestLap": "1:08.381",
               "points": 0,
-              "ledLap": false
+              "leadLap": false
             }
           ],
           "grid": [
@@ -2621,7 +2626,8 @@
               "time": "",
               "gap": "",
               "bestLap": "47.310",
-              "points": 0
+              "points": 0,
+              "pole": true
             },
             {
               "pos": 2,
@@ -2939,7 +2945,8 @@
               "time": "14:35.822",
               "gap": "2.431",
               "bestLap": "47.634",
-              "points": 7
+              "points": 7,
+              "fastestLap": true
             },
             {
               "pos": 5,

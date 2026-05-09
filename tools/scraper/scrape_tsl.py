@@ -401,12 +401,29 @@ def scrape_round(info):
     book_data = fetch_pdf(book_url)
     laps_led = parse_laps_led(_pdf_text(book_data)) if book_data else {}
 
-    # Tag ledLap on results
+    # Tag pole (P1 in Qualifying only)
+    qual = next((r for r in races if r["label"] == "Qualifying"), None)
+    if qual and qual["results"]:
+        p1 = next((r for r in qual["results"] if r["pos"] == 1), None)
+        if p1:
+            p1["pole"] = True
+
+    # Tag fastestLap on the driver with the quickest lap in each points race
+    for race in races:
+        if race["label"] in NO_POINTS_SESSIONS:
+            continue
+        fl_driver = fastest_lap_driver(race["results"])
+        if fl_driver:
+            for r in race["results"]:
+                if r["driver"] == fl_driver:
+                    r["fastestLap"] = True
+
+    # Tag leadLap on results
     for race in races:
         leaders = laps_led.get(race["label"], set())
         if leaders:
             for r in race["results"]:
-                r["ledLap"] = r["driver"] in leaders
+                r["leadLap"] = r["driver"] in leaders
 
     return {
         "round": info["round"],

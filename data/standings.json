@@ -2,7 +2,7 @@
   "season": "2026",
   "round": 2,
   "venue": "Brands Hatch Indy",
-  "updated": "2026-05-09T16:50:09Z",
+  "updated": "2026-05-09T18:17:37Z",
   "standings": [
     {
       "pos": 1,
@@ -10,7 +10,7 @@
       "team": "NAPA Racing UK",
       "car": "116",
       "class": "M",
-      "points": 71,
+      "points": 69,
       "wins": 2,
       "seconds": 1,
       "thirds": 0
@@ -32,7 +32,7 @@
       "team": "WSR",
       "car": "99",
       "class": "I",
-      "points": 44,
+      "points": 43,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -72,17 +72,6 @@
     },
     {
       "pos": 7,
-      "driver": "Tom INGRAM",
-      "team": "Team VERTU",
-      "car": "80",
-      "class": "M",
-      "points": 34,
-      "wins": 0,
-      "seconds": 1,
-      "thirds": 0
-    },
-    {
-      "pos": 8,
       "driver": "Mikey DOBLE",
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
       "car": "88",
@@ -93,12 +82,23 @@
       "thirds": 0
     },
     {
+      "pos": 8,
+      "driver": "Tom INGRAM",
+      "team": "Team VERTU",
+      "car": "80",
+      "class": "M",
+      "points": 33,
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
+    },
+    {
       "pos": 9,
       "driver": "Ricky COLLARD",
       "team": "Team VERTU",
       "car": "11",
       "class": "M",
-      "points": 33,
+      "points": 32,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -240,12 +240,12 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 133
+      "points": 131
     },
     {
       "pos": 2,
       "team": "Team VERTU",
-      "points": 83
+      "points": 81
     },
     {
       "pos": 3,
@@ -255,7 +255,7 @@
     {
       "pos": 4,
       "team": "WSR",
-      "points": 71
+      "points": 70
     },
     {
       "pos": 5,
