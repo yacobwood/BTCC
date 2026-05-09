@@ -157,12 +157,12 @@ export default function RoundResultsScreen({route, navigation}) {
           <Text style={[styles.timeText, item.position === 1 && {color: Colors.yellow}]}>
             {item.time
               ? (item.position === 1 ? item.time : (item.gap ? `+${item.gap.replace(/^\+/, '')}` : item.time))
-              : (item.position > 1 && item.gap ? `+${item.gap}` : item.bestLap || '')}
+              : item.bestLap || ''}
           </Text>
           {item.time && item.bestLap ? (
             <Text style={styles.detailText}>BL {item.bestLap}</Text>
-          ) : (!item.time && item.gap && item.position > 1 && item.bestLap) ? (
-            <Text style={styles.detailText}>{item.bestLap}</Text>
+          ) : (!item.time && item.gap && item.position > 1) ? (
+            <Text style={styles.detailText}>+{item.gap}</Text>
           ) : null}
           {item.avgLapSpeed ? (
             <Text style={styles.detailText}>
