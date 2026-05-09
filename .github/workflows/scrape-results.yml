@@ -2,10 +2,10 @@ name: Scrape BTCC Results
 
 on:
   schedule:
-    # Saturday: every 15 min 08:00–18:00 UTC to catch FP (~08:30 BST), Qualifying (~11:00 BST), Qualifying Race (~15:05 BST).
-    - cron: "*/15 8-18 * * 6"
-    # Sunday: every 15 min 09:00–18:00 UTC to catch Race 1 (~10:30 BST), Race 2 (~13:40 BST), Race 3 (~16:30 BST).
-    - cron: "*/15 9-18 * * 0"
+    # Every 5 min Sat/Sun 08:00–19:00 UTC — is_race_weekend.py gates execution
+    # to the actual session window (first session BST−5min → last session BST+90min).
+    - cron: "*/5 8-19 * * 6"
+    - cron: "*/5 8-19 * * 0"
   workflow_dispatch:
     inputs:
       year:
@@ -37,7 +37,7 @@ jobs:
       - name: Set up Python
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_weekend == 'true'
+          steps.raceday.outputs.in_session_window == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -45,13 +45,13 @@ jobs:
       - name: Install dependencies
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_weekend == 'true'
+          steps.raceday.outputs.in_session_window == 'true'
         run: pip install pdfminer.six
 
       - name: Scrape results and compute standings
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_weekend == 'true'
+          steps.raceday.outputs.in_session_window == 'true'
         run: |
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
@@ -63,7 +63,7 @@ jobs:
       - name: Commit updated data
         if: |
           github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.is_race_weekend == 'true'
+          steps.raceday.outputs.in_session_window == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"
