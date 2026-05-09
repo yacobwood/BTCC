@@ -20,9 +20,9 @@ const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 // staleFirst:   serve ANY cached value immediately (no age limit) and always refresh in background;
 //               only blocks on network when there is truly nothing cached (cold install).
 //               Use for content where showing slightly old data beats a long spinner (e.g. news).
-async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = false, staleFirst = false) {
+async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = false, staleFirst = false, maxAgeMs = MAX_AGE_MS) {
   if (cacheKey && !forceRefresh) {
-    const ageLimit = staleFirst ? undefined : MAX_AGE_MS;
+    const ageLimit = staleFirst ? undefined : maxAgeMs;
     const cached = await cacheRead(cacheKey, ageLimit);
     if (cached) {
       // Refresh cache in background without blocking
@@ -86,7 +86,7 @@ export async function fetchStandings(forceRefresh = false) {
 }
 
 export async function fetchResults(year = 2026, forceRefresh = false) {
-  return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh);
+  return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, false, false, 5 * 60 * 1000);
 }
 
 
