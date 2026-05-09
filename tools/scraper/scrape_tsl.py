@@ -13,6 +13,7 @@ Usage:
     python scrape_tsl.py [year] --round N   # scrape specific round only
 """
 
+import datetime
 import json
 import re
 import sys
@@ -55,6 +56,9 @@ GRID_SUFFIXES = {
     "Race 2":          "gr2",
     "Race 3":          "gr3",
 }
+
+# Championship standings PDF suffix
+CHAMPIONSHIP_SUFFIX = "ptstrg"
 
 # Sessions that award no championship points
 NO_POINTS_SESSIONS = {"Free Practice", "Qualifying"}
@@ -453,9 +457,196 @@ def fastest_lap_driver(results):
     return min(finishers, key=lambda r: lap_to_secs(r["bestLap"]))["driver"]
 
 
-def compute_standings(rounds):
+# ── Championship PDF parser ───────────────────────────────────────────────────
+
+# Section header substrings → output key.
+# "BTCC Independents Teams" must precede "BTCC Teams" to avoid substring collision.
+_CHAMP_SECTIONS = [
+    ("BTCC Drivers Championship",                "standings"),
+    ("BTCC Manufacturers/Constructors",           "manufacturers"),
+    ("BTCC Independents Teams Championship",      "independentsTeams"),
+    ("BTCC Teams Championship",                   "teams"),
+    ("Independents Trophy",                       "independents"),
+    ("Jack Sears Trophy",                         "jst"),
+]
+_DRIVER_SECTIONS = {"standings", "independents", "jst"}
+
+
+def _group_by_y(elems, tolerance=4):
+    """Group (y, x, text) tuples into row buckets by y proximity."""
+    groups = {}
+    for y, x, t in elems:
+        matched = None
+        for gy in groups:
+            if abs(gy - y) <= tolerance:
+                matched = gy
+                break
+        if matched is None:
+            matched = y
+            groups[matched] = []
+        groups[matched].append((y, x, t))
+    return groups
+
+
+def _find_text(row_elems, x_min, x_max, pattern=None):
+    """First text in x range matching pattern (any text if pattern is None)."""
+    for _, x, t in sorted(row_elems, key=lambda e: e[1]):
+        if x_min <= x <= x_max:
+            if pattern is None or re.match(pattern, t):
+                return t
+    return None
+
+
+def _to_int(s):
+    try:
+        return int(str(s).strip())
+    except (TypeError, ValueError):
+        return 0
+
+
+def _parse_driver_rows(elems):
+    """Parse a driver-type championship section into a list of entry dicts."""
+    entries = []
+    for _y, row_elems in sorted(_group_by_y(elems).items(), reverse=True):
+        pos_text = _find_text(row_elems, 40, 60, r"^\d+$")
+        if not pos_text:
+            continue
+        pos = int(pos_text)
+
+        # Car number at x≈79; P1 3-digit cars get merged with driver name at x≈76
+        car, driver = "", ""
+        car_raw = _find_text(row_elems, 70, 115)
+        if car_raw:
+            m = re.match(r"^(\d+)\s+(.+)$", car_raw)
+            if m:
+                car, driver = m.group(1), m.group(2).strip()
+            else:
+                car = car_raw.strip()
+        if not driver:
+            driver = _find_text(row_elems, 100, 215, r"[A-Za-z]") or ""
+
+        driver = DRIVER_NAME_MAP.get(driver, driver)
+        nat   = _find_text(row_elems, 260, 295, r"^[A-Z]{3}$") or ""
+        cls   = _find_text(row_elems, 315, 340, r"^[MI]$") or ""
+        total = _to_int(_find_text(row_elems, 355, 400, r"^\d+$"))
+        wins  = _to_int(_find_text(row_elems, 510, 555, r"^\d+$"))
+        snds  = _to_int(_find_text(row_elems, 555, 600, r"^\d+$"))
+        thrds = _to_int(_find_text(row_elems, 600, 641, r"^\d+$"))
+
+        if driver:
+            entries.append({
+                "pos": pos, "car": car, "driver": driver,
+                "nat": nat, "class": cls, "points": total,
+                "wins": wins, "seconds": snds, "thirds": thrds,
+                "team": "",  # backfilled from race results
+            })
+    return entries
+
+
+def _parse_team_rows(elems):
+    """Parse a team/manufacturer championship section into a list of entry dicts."""
+    entries = []
+    pos = 1
+    for _y, row_elems in sorted(_group_by_y(elems).items(), reverse=True):
+        pts_text = _find_text(row_elems, 460, 510, r"^\d+$")
+        if not pts_text:
+            continue
+        name = _find_text(row_elems, 95, 450, r"[A-Za-z]")
+        if not name:
+            continue
+        entries.append({"pos": pos, "team": name, "points": _to_int(pts_text)})
+        pos += 1
+    return entries
+
+
+def _backfill_teams(driver_list, output_rounds):
+    """Fill 'team' field from race results for championship PDF entries."""
+    team_map = {}
+    for rnd in output_rounds:
+        for race in rnd.get("races", []):
+            for r in race.get("results", []):
+                if r.get("team") and r.get("driver"):
+                    team_map[r["driver"]] = r["team"]
+    for entry in driver_list:
+        if not entry.get("team"):
+            entry["team"] = team_map.get(entry["driver"], "")
+
+
+def parse_championship_pdf(pdf_bytes):
+    """
+    Parse a TSL championship standings PDF (ptstrg suffix).
+    Returns a dict with standings, teams, manufacturers, independentsTeams, jst
+    (each a list of dicts), or None if the PDF cannot be parsed.
+
+    Column x-bounds derived from 261903ptstrg.pdf (Brands Hatch Indy 2026).
+    Processes each page separately and sorts by y to avoid content-stream ordering
+    issues (pdfminer may not emit text boxes in top-to-bottom order).
+    """
+    if not pdf_bytes:
+        return None
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
+        f.write(pdf_bytes)
+        path = f.name
+    try:
+        all_pages = []
+        for page_layout in extract_pages(path):
+            page_elems = []
+            for element in page_layout:
+                if isinstance(element, LTTextBox):
+                    for line in element:
+                        if isinstance(line, LTTextLine):
+                            txt = line.get_text().strip()
+                            if txt:
+                                page_elems.append((round(line.y0, 1), round(line.x0, 1), txt))
+            all_pages.append(page_elems)
+    except Exception:
+        return None
+    finally:
+        Path(path).unlink(missing_ok=True)
+
+    section_elems = {key: [] for _, key in _CHAMP_SECTIONS}
+
+    for page_elems in all_pages:
+        # Sort top-to-bottom so y-ranges are meaningful
+        sorted_elems = sorted(page_elems, key=lambda e: -e[0])
+
+        # Find section headers present on this page with their y positions
+        headers_on_page = []
+        seen_keys = set()
+        for y, x, t in sorted_elems:
+            for header, key in _CHAMP_SECTIONS:
+                if key not in seen_keys and header.lower() in t.lower():
+                    headers_on_page.append((y, key))
+                    seen_keys.add(key)
+                    break
+
+        if not headers_on_page:
+            continue
+
+        # Assign elements between consecutive header y-values to each section
+        for i, (header_y, key) in enumerate(headers_on_page):
+            floor_y = headers_on_page[i + 1][0] if i + 1 < len(headers_on_page) else 0
+            for y, x, t in sorted_elems:
+                if x < 641 and floor_y < y < header_y:
+                    section_elems[key].append((y, x, t))
+
+    result = {
+        "standings":         _parse_driver_rows(section_elems["standings"]),
+        "teams":             _parse_team_rows(section_elems["teams"]),
+        "manufacturers":     _parse_team_rows(section_elems["manufacturers"]),
+        "independentsTeams": _parse_team_rows(section_elems["independentsTeams"]),
+        "jst":               _parse_driver_rows(section_elems["jst"]),
+    }
+    for m in result["manufacturers"]:
+        m["manufacturer"] = m.pop("team")
+
+    return result if result["standings"] else None
+
+
+def compute_standings_fallback(rounds):
+    """Compute standings from race results. Used when the championship PDF is unavailable."""
     from collections import defaultdict
-    import datetime
     driver_pts    = defaultdict(int)
     driver_wins   = defaultdict(int)
     driver_2nds   = defaultdict(int)
@@ -572,13 +763,51 @@ def main():
     results_path.write_text(json.dumps(results_out, indent=2))
     print(f"\nWrote {results_path}")
 
-    standings = compute_standings(output_rounds)
+    # Find the latest round that has any results
+    completed = [r for r in output_rounds
+                 if any(race.get("results") for race in r.get("races", []))]
+    latest = max(completed, key=lambda r: r["round"]) if completed else None
+
+    # Try to use the official championship PDF; fall back to computed standings
+    standings = None
+    if latest:
+        tsl_map = {info["round"]: info["tsl"] for info in ROUNDS[YEAR]}
+        tsl = tsl_map.get(latest["round"])
+        if tsl:
+            champ_url = TSL_BASE.format(year=YEAR, tsl=tsl, suffix=CHAMPIONSHIP_SUFFIX)
+            print(f"\n[championship] → {champ_url}")
+            champ_data = fetch_pdf(champ_url)
+            if champ_data:
+                standings = parse_championship_pdf(champ_data)
+                if standings:
+                    print(f"  parsed ({len(standings['standings'])} drivers, "
+                          f"{len(standings.get('jst', []))} JST)")
+                    _backfill_teams(standings["standings"], output_rounds)
+                    _backfill_teams(standings["jst"],       output_rounds)
+                else:
+                    print("  parse failed — falling back to computed standings")
+            else:
+                print("  not available yet — falling back to computed standings")
+
+    if not standings:
+        standings = compute_standings_fallback(output_rounds)
+
+    standings["season"]  = str(YEAR)
+    standings["round"]   = latest["round"] if latest else 0
+    standings["venue"]   = latest["venue"] if latest else ""
+    standings["updated"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
     standings_path.write_text(json.dumps(standings, indent=2))
     print(f"Wrote {standings_path}")
 
     print(f"\nDriver standings (top 10):")
     for s in standings["standings"][:10]:
         print(f"  {s['pos']:>2}. {s['driver']:<30} {s['points']} pts  W{s['wins']} 2nd{s['seconds']} 3rd{s['thirds']}")
+
+    if standings.get("jst"):
+        print(f"\nJack Sears Trophy:")
+        for s in standings["jst"]:
+            print(f"  {s['pos']:>2}. {s['driver']:<30} {s['points']} pts")
 
 
 if __name__ == "__main__":

@@ -61,9 +61,11 @@ function computeProgression(rounds) {
   sortedRounds.forEach((round, roundIdx) => {
     const scoringRaces = round.races.filter(race => SCORING_RACES.includes(race.label) && race.results.length > 0);
     scoringRaces.forEach((race, raceIdx) => {
+      const isQR = race.label === 'Qualifying Race';
       for (const r of race.results) {
         if (!r.driver) continue;
-        driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points;
+        const bonus = (r.leadLap ? 1 : 0) + (!isQR && r.fastestLap ? 1 : 0);
+        driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points + bonus;
         if (firstPoint[r.driver] === undefined) firstPoint[r.driver] = pointLabels.length;
         if (!series[r.driver]) series[r.driver] = {name: r.driver, points: []};
       }
@@ -363,6 +365,7 @@ export default function ResultsScreen({navigation, route}) {
   const hasClassification = useMemo(() => (standings?.drivers || []).some(d => d.cls), [standings]);
 
   const driverStandings = useMemo(() => {
+    if (driverFilter === 'JST') return standings?.jst || [];
     const all = standings?.drivers || [];
     if (driverFilter === 'all' || !hasClassification) return all;
     return all
@@ -550,7 +553,10 @@ export default function ResultsScreen({navigation, route}) {
           <>
             {hasClassification && (
               <View style={styles.filterRow}>
-                {[['all', 'All'], ['M', 'Main'], ['I', 'Independents']].map(([val, label]) => (
+                {[
+                  ['all', 'All'], ['M', 'Main'], ['I', 'Independents'],
+                  ...(standings?.jst?.length ? [['JST', 'Jack Sears']] : []),
+                ].map(([val, label]) => (
                   <TouchableOpacity
                     key={val}
                     style={[styles.filterPill, driverFilter === val && styles.filterPillActive]}

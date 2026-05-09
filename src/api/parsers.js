@@ -169,18 +169,26 @@ export function parseGrid(json) {
 
 // Parse standings JSON
 export function parseStandings(json) {
-  const drivers = (json.standings || []).map((d, i) => ({
+  const mapDriver = (d, i) => ({
     position: d.pos || i + 1,
     name: d.driver || '',
     team: d.team || '',
     car: d.car || '',
     cls: d.class || '',
+    nat: d.nat || '',
     points: d.points || 0,
     wins: d.wins || 0,
     seconds: d.seconds || 0,
     thirds: d.thirds || 0,
-  }));
+  });
+  const drivers = (json.standings || []).map(mapDriver);
+  const jst     = (json.jst      || []).map(mapDriver);
   const teams = (json.teams || []).map((t, i) => ({
+    position: t.pos || i + 1,
+    name: t.team || '',
+    points: t.points || 0,
+  }));
+  const independentsTeams = (json.independentsTeams || []).map((t, i) => ({
     position: t.pos || i + 1,
     name: t.team || '',
     points: t.points || 0,
@@ -191,6 +199,8 @@ export function parseStandings(json) {
     venue: json.venue || '',
     drivers,
     teams,
+    jst,
+    independentsTeams,
   };
 }
 
