@@ -90,6 +90,7 @@ export function parseCalendar(json) {
     layoutImageUrl: r.layoutImageUrl || '',
     raceImages: r.raceImages || [],
     youtubeUrls: r.youtubeUrls || [],
+    liveUrl: r.liveUrl || null,
     firstBtccYear: r.firstBtccYear || null,
     qualifyingRecord: r.qualifyingRecord || null,
     raceRecord: r.raceRecord || null,

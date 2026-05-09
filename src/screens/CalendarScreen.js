@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -200,6 +201,18 @@ export default function CalendarScreen({navigation}) {
               <Icon name="chevron-right" size={16} color="#fff" />
             </View>
           </View>
+          {round.liveUrl ? (
+            <TouchableOpacity
+              style={styles.liveWatchBtn}
+              activeOpacity={0.8}
+              onPress={e => { e.stopPropagation?.(); Linking.openURL(round.liveUrl); }}
+              accessibilityLabel="Watch live stream"
+              accessibilityRole="button">
+              <View style={styles.livePulseDot} />
+              <Text style={styles.liveWatchBtnText}>WATCH LIVE</Text>
+              <Icon name="open-in-new" size={14} color="#fff" />
+            </TouchableOpacity>
+          ) : null}
         </TouchableOpacity>
       );
     }
@@ -481,6 +494,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(254,189,2,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  liveWatchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    marginTop: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: RED,
+  },
+  livePulseDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+  },
+  liveWatchBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
 
   // Next race card
