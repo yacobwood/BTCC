@@ -218,7 +218,7 @@ export default function RoundResultsScreen({route, navigation}) {
                 data={race?.results || []}
                 keyExtractor={(_, idx) => String(idx)}
                 renderItem={makeRenderResult(gridMap)}
-                contentContainerStyle={{padding: 16, paddingBottom: 20, flexGrow: 1}}
+                contentContainerStyle={{paddingHorizontal: 16, paddingTop: race?.results?.length ? 16 : 0, paddingBottom: 20, flexGrow: 1}}
                 ListHeaderComponent={race?.fullRaceUrl ? (
                   <TouchableOpacity
                     style={styles.youtubeBtn}
