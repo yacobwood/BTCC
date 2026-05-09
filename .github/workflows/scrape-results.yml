@@ -2,10 +2,11 @@ name: Scrape BTCC Results
 
 on:
   schedule:
-    # Every 5 min Sat/Sun 08:00–19:00 UTC — is_race_weekend.py gates execution
+    # Every 5 min Sat/Sun 09:00–18:00 UTC — is_race_weekend.py gates execution
     # to the actual session window (first session BST−5min → last session BST+90min).
-    - cron: "*/5 8-19 * * 6"
-    - cron: "*/5 8-19 * * 0"
+    # Earliest window open: 09:05 UTC (BH GP FP 10:10 BST). Latest close: 18:00 UTC (R3 17:30 BST+90min).
+    - cron: "*/5 9-18 * * 6"
+    - cron: "*/5 9-18 * * 0"
   workflow_dispatch:
     inputs:
       year:
