@@ -166,4 +166,24 @@ describe('SeasonTable badge display', () => {
     const {getAllByText} = renderWithProviders(<SeasonTable results={ppResults} />);
     await waitFor(() => expect(getAllByText('PP').length).toBeGreaterThan(0));
   });
+
+  it('shows no FL/LL/PP bonus badges on QR cells (reg 1.6.2.a — flags stripped by parsers)', async () => {
+    // parsers.js strips fastestLap/leadLap/pole to false for QR results;
+    // this test confirms SeasonTable renders no bonus badges when those flags are false.
+    // FL/PP/LL each appear exactly once — in the KEY legend, not in any result cell.
+    const qrResults = [{
+      round: 1, venue: 'Brands Hatch',
+      races: [{
+        label: 'Qualifying Race',
+        results: [{driver: 'Test Driver', position: 1, laps: 10, time: '20:00', points: 10,
+          fastestLap: false, leadLap: false, pole: false, team: 'Test'}],
+      }],
+    }];
+    const {getAllByText} = renderWithProviders(<SeasonTable results={qrResults} />);
+    await waitFor(() => {
+      expect(getAllByText('FL')).toHaveLength(1); // KEY only
+      expect(getAllByText('PP')).toHaveLength(1); // KEY only
+      expect(getAllByText('LL')).toHaveLength(1); // KEY only
+    });
+  });
 });
