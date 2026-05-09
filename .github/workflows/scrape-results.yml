@@ -61,6 +61,12 @@ jobs:
           [ -n "$ROUND" ] && ARGS="$ARGS --round $ROUND"
           python tools/scraper/scrape_tsl.py $ARGS
 
+      - name: Pull latest before commit
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.in_session_window == 'true'
+        run: git pull --rebase origin main
+
       - name: Commit updated data
         if: |
           github.event_name == 'workflow_dispatch' ||
@@ -73,3 +79,4 @@ jobs:
             data/standings.json
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: "--force-with-lease"
