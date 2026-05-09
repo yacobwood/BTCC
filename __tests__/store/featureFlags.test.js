@@ -18,6 +18,9 @@ function renderProvider() {
 
 describe('FeatureFlagsProvider', () => {
   const defaults = {
+    banner_ad: true,
+    newsfeed_ad: false,
+    search_ad: false,
     podcasts_enabled: false,
     podcast_last_episode_url: '',
     update_available: true,
