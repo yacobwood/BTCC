@@ -9,6 +9,7 @@ const BUNDLED_CALENDAR = require('../data/calendar.json');
 const BUNDLED_CALENDAR_2027 = require('../../data/calendar2027.json');
 const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
+const BUNDLED_BLACKLIST = require('../../data/blacklist.json');
 
 // Stale-while-revalidate: serve from cache immediately, refresh in background.
 // If the cached entry is older than MAX_AGE_MS, treat as a cache miss so the
@@ -60,6 +61,14 @@ export async function fetchCalendar(year = 2026) {
     );
   } catch {
     return BUNDLED_CALENDAR;
+  }
+}
+
+export async function fetchBlacklist() {
+  try {
+    return await fetchJson(`${BASE_GITHUB}/blacklist.json`, 'blacklist', false, false, /* staleFirst */ true);
+  } catch {
+    return BUNDLED_BLACKLIST;
   }
 }
 

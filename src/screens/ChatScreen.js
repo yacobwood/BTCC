@@ -20,8 +20,8 @@ const DB = database();
 import {Colors} from '../theme/colors';
 import {getFCMToken} from '../utils/notifications';
 import {Analytics} from '../utils/analytics';
+import {fetchBlacklist} from '../api/client';
 
-const BLACKLIST = require('../../data/blacklist.json');
 const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
 
@@ -34,9 +34,9 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function containsProfanity(text) {
+function containsProfanity(text, blacklist) {
   const lower = text.toLowerCase();
-  return BLACKLIST.some(w => lower.includes(w));
+  return blacklist.some(w => lower.includes(w));
 }
 
 export default function ChatScreen() {
@@ -48,10 +48,12 @@ export default function ChatScreen() {
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [nameEditing, setNameEditing] = useState(false);
+  const [blacklist, setBlacklist] = useState([]);
   const myAuthorIdRef = useRef('anonymous');
   const listRef = useRef(null);
 
   useEffect(() => {
+    fetchBlacklist().then(setBlacklist).catch(() => {});
     Analytics.screen('chat');
 
     // Load identity
@@ -88,7 +90,7 @@ export default function ChatScreen() {
     const text = input.trim();
     if (!text) return;
     if (text.length > 300) { setInputError('Message too long (max 300 characters)'); return; }
-    if (containsProfanity(text)) { setInputError('Message contains disallowed content'); return; }
+    if (containsProfanity(text, blacklist)) { setInputError('Message contains disallowed content'); return; }
     setInputError('');
 
     let authorName = commenterName;

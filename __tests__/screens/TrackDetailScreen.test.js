@@ -18,6 +18,7 @@ jest.mock('../../src/utils/weather', () => ({
 jest.mock('../../src/api/client', () => ({
   fetchStandings: jest.fn().mockResolvedValue({standings: []}),
   fetchResults:   jest.fn().mockResolvedValue({rounds: []}),
+  fetchCalendar:  jest.fn().mockResolvedValue({rounds: []}),
 }));
 
 jest.mock('../../src/api/parsers', () => ({

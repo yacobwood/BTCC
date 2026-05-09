@@ -21,12 +21,12 @@ import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
-import {fetchResults} from '../api/client';
+import {fetchResults, fetchCalendar} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
 
-const calendarData = require('../data/calendar.json');
+const BUNDLED_CALENDAR = require('../data/calendar.json');
 
 // Parse "M:SS.mmm" lap time to seconds, returns null on failure
 function lapTimeSecs(str) {
@@ -60,8 +60,22 @@ function roundLength(str) {
 
 export default function TrackDetailScreen({route, navigation}) {
   // Can receive full track object (normal nav) or just round number (deep link)
-  const track = route.params?.track ||
-    calendarData.rounds.find(r => r.round === parseInt(route.params?.round, 10));
+  const trackParam = route.params?.track ?? null;
+  const roundParam = route.params?.round ? parseInt(route.params.round, 10) : null;
+  const [track, setTrack] = useState(
+    trackParam || BUNDLED_CALENDAR.rounds.find(r => r.round === roundParam) || null,
+  );
+
+  useEffect(() => {
+    // Deep-link entry: upgrade bundled track data with remotely fetched calendar
+    if (!trackParam && roundParam) {
+      fetchCalendar().then(cal => {
+        const found = (cal.rounds || []).find(r => r.round === roundParam);
+        if (found) setTrack(found);
+      }).catch(() => {});
+    }
+  }, []);
+
   if (!track) return null;
   const {useKm} = useUnits();
   const {track_weather, live_updates} = useFeatureFlags();

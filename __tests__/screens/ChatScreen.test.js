@@ -8,6 +8,10 @@ jest.mock('../../src/utils/analytics', () => ({
   Analytics: {screen: jest.fn()},
 }));
 
+jest.mock('../../src/api/client', () => ({
+  fetchBlacklist: jest.fn().mockResolvedValue(['fuck', 'shit', 'damn']),
+}));
+
 jest.mock('../../src/utils/notifications', () => ({
   getFCMToken: jest.fn().mockResolvedValue('test-fcm-token-abc12345'),
 }));

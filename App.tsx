@@ -27,8 +27,6 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 
 export const navigationRef = createNavigationContainerRef();
 
-const calendar = require('./src/data/calendar.json');
-
 function _navigate(data: Record<string, string> | undefined) {
   navigateFromData(navigationRef as any, data);
 }

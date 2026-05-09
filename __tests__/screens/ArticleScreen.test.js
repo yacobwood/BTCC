@@ -8,6 +8,7 @@ import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 
 jest.mock('../../src/api/client', () => ({
   fetchArticleBySlug: jest.fn(),
+  fetchBlacklist:     jest.fn().mockResolvedValue(['fuck', 'shit', 'damn']),
 }));
 
 jest.mock('../../src/api/parsers', () => ({

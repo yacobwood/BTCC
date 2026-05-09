@@ -24,7 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
-import {fetchArticleBySlug} from '../api/client';
+import {fetchArticleBySlug, fetchBlacklist} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import {getFCMToken} from '../utils/notifications';
 
@@ -35,8 +35,6 @@ const FS_BASE = FIRESTORE_BASE;
 const REACTIONS_KEY = 'article_reactions_v1';
 const COMMENTER_NAME_KEY = 'commenter_name';
 const COMMENT_REACTIONS_KEY = 'comment_reactions_v1';
-
-const BLACKLIST = require('../../data/blacklist.json');
 
 // ─── Reactions helpers ───────────────────────────────────────────────────────
 
@@ -169,9 +167,9 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function containsProfanity(text) {
+function containsProfanity(text, blacklist) {
   const lower = text.toLowerCase();
-  return BLACKLIST.some(w => lower.includes(w));
+  return blacklist.some(w => lower.includes(w));
 }
 
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
@@ -187,7 +185,12 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   const [nameEditing, setNameEditing] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
+  const [blacklist, setBlacklist] = useState([]);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    fetchBlacklist().then(setBlacklist).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -240,7 +243,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
     const text = input.trim();
     if (!text) return;
     if (text.length > 500) { setInputError('Comment too long (max 500 characters)'); return; }
-    if (containsProfanity(text)) { setInputError('Comment contains disallowed content'); return; }
+    if (containsProfanity(text, blacklist)) { setInputError('Comment contains disallowed content'); return; }
     setInputError('');
 
     let authorName = commenterName;
