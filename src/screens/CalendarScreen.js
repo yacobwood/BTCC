@@ -237,7 +237,7 @@ export default function CalendarScreen({navigation}) {
             <TouchableOpacity
               style={styles.liveWatchBtn}
               activeOpacity={0.8}
-              onPress={e => { e.stopPropagation?.(); Linking.openURL(resolvedLiveUrl); }}
+              onPress={e => { e?.stopPropagation?.(); Linking.openURL(resolvedLiveUrl); }}
               accessibilityLabel="Watch live stream"
               accessibilityRole="button">
               <View style={styles.livePulseDot} />

@@ -7,15 +7,15 @@ jest.mock('../../src/utils/analytics', () => ({
   Analytics: {screen: jest.fn(), pullToRefresh: jest.fn()},
 }));
 
-// fetchCalendar returns the bundled calendar JSON synchronously
 jest.mock('../../src/api/client', () => ({
   fetchCalendar: jest.fn(),
+  fetchLiveStatus: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock('../../src/api/parsers', () => ({
   parseCalendar: jest.fn(),
 }));
 
-const {fetchCalendar} = require('../../src/api/client');
+const {fetchCalendar, fetchLiveStatus} = require('../../src/api/client');
 const {parseCalendar} = require('../../src/api/parsers');
 
 const MOCK_ROUNDS = [
@@ -161,6 +161,86 @@ describe('CalendarScreen', () => {
         expect(queryByText('10:35')).toBeNull();
         expect(queryByText('11:30')).toBeNull();
       });
+    });
+  });
+
+  // ── Watch Live button ─────────────────────────────────────────────────────────
+  // Pin clock to 2026-05-09T12:00:00Z (Saturday, 13:00 BST).
+  // Active round spans 2026-05-09 → 2026-05-10.
+  // Last SAT session: Q Race at 15:05 BST → cutoff = 16:05 BST = 15:05 UTC.
+  // So 12:00 UTC is BEFORE the cutoff → button should show from the fallback.
+  // 16:00 UTC is AFTER the cutoff → button should hide.
+
+  describe('Watch Live button', () => {
+    const ACTIVE_ROUND = {
+      round: 2,
+      venue: 'Brands Hatch Indy',
+      startDate: '2026-05-09',
+      endDate: '2026-05-10',
+      liveUrl: 'https://www.youtube.com/watch?v=fallback',
+      sessions: [
+        {name: 'Qualifying Race', day: 'SAT', time: '15:05'},
+        {name: 'Race 3',          day: 'SUN', time: '17:30'},
+      ],
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-05-09T12:00:00Z'));
+      fetchLiveStatus.mockResolvedValue(null);
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    it('shows WATCH LIVE when liveStatus is active', async () => {
+      fetchLiveStatus.mockResolvedValue({active: true, liveUrl: 'https://www.youtube.com/watch?v=live123'});
+      setupCalendar([ACTIVE_ROUND]);
+      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      expect(await findByText('WATCH LIVE')).toBeTruthy();
+    });
+
+    it('opens the liveStatus URL, not the fallback, when auto-detected', async () => {
+      fetchLiveStatus.mockResolvedValue({active: true, liveUrl: 'https://www.youtube.com/watch?v=live123'});
+      setupCalendar([ACTIVE_ROUND]);
+      const {Linking} = require('react-native');
+      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      const btn = await findByText('WATCH LIVE');
+      fireEvent.press(btn);
+      expect(openURL).toHaveBeenCalledWith('https://www.youtube.com/watch?v=live123');
+      openURL.mockRestore();
+    });
+
+    it('hides WATCH LIVE when liveStatus.active is false (stream confirmed ended)', async () => {
+      fetchLiveStatus.mockResolvedValue({active: false, liveUrl: null});
+      setupCalendar([ACTIVE_ROUND]);
+      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
+    it('shows WATCH LIVE from fallback round.liveUrl when liveStatus is null and within time window', async () => {
+      // 12:00 UTC = 13:00 BST, before the 16:05 BST cutoff
+      fetchLiveStatus.mockResolvedValue(null);
+      setupCalendar([ACTIVE_ROUND]);
+      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      expect(await findByText('WATCH LIVE')).toBeTruthy();
+    });
+
+    it('hides fallback WATCH LIVE button after 1h past last session of today', async () => {
+      // 16:00 UTC = 17:00 BST, after the 16:05 BST cutoff (15:05 BST + 1h)
+      jest.setSystemTime(new Date('2026-05-09T16:00:00Z'));
+      fetchLiveStatus.mockResolvedValue(null);
+      setupCalendar([ACTIVE_ROUND]);
+      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
+    it('does not show WATCH LIVE on a non-active weekend', async () => {
+      fetchLiveStatus.mockResolvedValue({active: true, liveUrl: 'https://www.youtube.com/watch?v=live'});
+      // This round is in the past relative to pinned clock
+      setupCalendar([{...ACTIVE_ROUND, startDate: '2026-04-05', endDate: '2026-04-06'}]);
+      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
     });
   });
 

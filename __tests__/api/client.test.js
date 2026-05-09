@@ -24,6 +24,7 @@ import {
   fetchArticleBySlug,
   fetchHubPosts,
   peekArticlesCache,
+  fetchLiveStatus,
 } from '../../src/api/client';
 
 describe('fetchCalendar', () => {
@@ -338,6 +339,54 @@ describe('fetchArticleBySlug', () => {
     global.fetch.mockResolvedValueOnce({ok: false});
 
     const result = await fetchArticleBySlug('any-slug');
+    expect(result).toBeNull();
+  });
+});
+
+describe('fetchLiveStatus', () => {
+  it('fetches from live_status.json URL', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({active: false})});
+    await fetchLiveStatus();
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('live_status.json'));
+  });
+
+  it('returns live status with active=true when stream is live', async () => {
+    const status = {active: true, liveUrl: 'https://www.youtube.com/watch?v=abc123', title: 'BTCC Live'};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(status)});
+    const result = await fetchLiveStatus();
+    expect(result.active).toBe(true);
+    expect(result.liveUrl).toBe('https://www.youtube.com/watch?v=abc123');
+  });
+
+  it('returns live status with active=false when stream is not live', async () => {
+    const status = {active: false, liveUrl: null};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(status)});
+    const result = await fetchLiveStatus();
+    expect(result.active).toBe(false);
+  });
+
+  it('caches the fetched result under live_status key', async () => {
+    const status = {active: true, liveUrl: 'https://www.youtube.com/watch?v=xyz'};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(status)});
+    await fetchLiveStatus();
+    expect(cacheWrite).toHaveBeenCalledWith('live_status', status);
+  });
+
+  it('uses stale-first cache — serves cached value with no age limit', async () => {
+    const cached = {active: false, liveUrl: null};
+    cacheRead.mockResolvedValueOnce(cached);
+    // Background revalidation fetch
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(cached)});
+    const result = await fetchLiveStatus();
+    // staleFirst passes undefined as maxAge so any cached value is returned regardless of age
+    expect(cacheRead).toHaveBeenCalledWith('live_status', undefined);
+    expect(result).toEqual(cached);
+  });
+
+  it('returns null when fetch fails and no cache exists', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    cacheRead.mockResolvedValueOnce(null);
+    const result = await fetchLiveStatus();
     expect(result).toBeNull();
   });
 });
