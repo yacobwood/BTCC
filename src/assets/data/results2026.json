@@ -17,6 +17,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.842",
               "points": 0
             },
@@ -28,6 +30,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.048",
               "points": 0
             },
@@ -39,6 +43,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.076",
               "points": 0
             },
@@ -50,6 +56,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.154",
               "points": 0
             },
@@ -61,6 +69,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.241",
               "points": 0
             },
@@ -72,6 +82,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.288",
               "points": 0
             },
@@ -83,6 +95,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.319",
               "points": 0
             },
@@ -94,6 +108,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.413",
               "points": 0
             },
@@ -105,6 +121,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.427",
               "points": 0
             },
@@ -116,6 +134,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.451",
               "points": 0
             },
@@ -127,6 +147,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.598",
               "points": 0
             },
@@ -138,6 +160,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.657",
               "points": 0
             },
@@ -149,6 +173,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.699",
               "points": 0
             },
@@ -160,6 +186,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.712",
               "points": 0
             },
@@ -171,6 +199,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.723",
               "points": 0
             },
@@ -178,10 +208,12 @@
               "pos": 16,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.734",
               "points": 0
             },
@@ -193,6 +225,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.821",
               "points": 0
             },
@@ -204,6 +238,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.852",
               "points": 0
             },
@@ -215,6 +251,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.187",
               "points": 0
             },
@@ -226,6 +264,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.204",
               "points": 0
             },
@@ -237,6 +277,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:10.472",
               "points": 0
             }
@@ -254,6 +296,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.647",
               "points": 0
             },
@@ -265,6 +309,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.655",
               "points": 0
             },
@@ -276,6 +322,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.944",
               "points": 0
             },
@@ -287,6 +335,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.856",
               "points": 0
             },
@@ -298,6 +348,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.005",
               "points": 0
             },
@@ -309,6 +361,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.917",
               "points": 0
             },
@@ -320,6 +374,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.076",
               "points": 0
             },
@@ -331,6 +387,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:07.959",
               "points": 0
             },
@@ -342,6 +400,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.295",
               "points": 0
             },
@@ -353,6 +413,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.239",
               "points": 0
             },
@@ -364,6 +426,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.467",
               "points": 0
             },
@@ -375,6 +439,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.369",
               "points": 0
             },
@@ -386,6 +452,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.504",
               "points": 0
             },
@@ -393,10 +461,12 @@
               "pos": 14,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.484",
               "points": 0
             },
@@ -408,6 +478,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.546",
               "points": 0
             },
@@ -419,6 +491,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.596",
               "points": 0
             },
@@ -430,6 +504,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.726",
               "points": 0
             },
@@ -441,6 +517,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.837",
               "points": 0
             },
@@ -452,6 +530,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.826",
               "points": 0
             },
@@ -463,6 +543,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.391",
               "points": 0
             },
@@ -474,6 +556,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.215",
               "points": 0
             }
@@ -491,6 +575,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.649",
               "points": 10
             },
@@ -502,6 +588,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.236",
               "points": 9
             },
@@ -513,6 +601,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.713",
               "points": 8
             },
@@ -524,6 +614,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.624",
               "points": 7
             },
@@ -535,6 +627,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.744",
               "points": 6
             },
@@ -546,6 +640,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.818",
               "points": 5
             },
@@ -557,6 +653,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.028",
               "points": 5
             },
@@ -568,6 +666,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.868",
               "points": 4
             },
@@ -579,6 +679,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.104",
               "points": 4
             },
@@ -590,6 +692,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.948",
               "points": 3
             },
@@ -597,10 +701,12 @@
               "pos": 11,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.045",
               "points": 3
             },
@@ -612,6 +718,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.022",
               "points": 2
             },
@@ -623,6 +731,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.996",
               "points": 2
             },
@@ -634,6 +744,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.984",
               "points": 1
             },
@@ -645,6 +757,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.968",
               "points": 1
             },
@@ -656,6 +770,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.866",
               "points": 0
             },
@@ -667,6 +783,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.969",
               "points": 0
             },
@@ -678,6 +796,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:08.981",
               "points": 0
             },
@@ -689,6 +809,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:09.444",
               "points": 0
             },
@@ -700,6 +822,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 13,
+              "time": "",
+              "gap": "",
               "bestLap": "1:10.071",
               "points": 0
             },
@@ -711,7 +835,9 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 1,
-              "bestLap": "",
+              "time": "",
+              "gap": "",
+              "bestLap": "91.46",
               "points": 0
             }
           ],
@@ -811,7 +937,7 @@
               "pos": 14,
               "no": 50,
               "cl": "",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -876,6 +1002,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 21,
+              "time": "26:01.652",
+              "gap": "",
               "bestLap": "1:08.351",
               "points": 20,
               "ledLap": false
@@ -888,6 +1016,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:03.401",
+              "gap": "1.749",
               "bestLap": "1:07.944",
               "points": 17,
               "ledLap": false
@@ -900,6 +1030,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 21,
+              "time": "26:07.044",
+              "gap": "5.392",
               "bestLap": "1:08.246",
               "points": 15,
               "ledLap": false
@@ -912,6 +1044,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:07.928",
+              "gap": "6.276",
               "bestLap": "1:08.755",
               "points": 13,
               "ledLap": false
@@ -924,6 +1058,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
+              "time": "26:09.053",
+              "gap": "7.401",
               "bestLap": "1:08.928",
               "points": 11,
               "ledLap": false
@@ -936,6 +1072,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 21,
+              "time": "26:09.345",
+              "gap": "7.693",
               "bestLap": "1:08.654",
               "points": 10,
               "ledLap": false
@@ -948,6 +1086,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 21,
+              "time": "26:09.754",
+              "gap": "8.102",
               "bestLap": "1:09.026",
               "points": 9,
               "ledLap": false
@@ -956,10 +1096,12 @@
               "pos": 8,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
+              "time": "26:09.832",
+              "gap": "8.180",
               "bestLap": "1:09.054",
               "points": 8,
               "ledLap": false
@@ -972,6 +1114,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:10.069",
+              "gap": "8.417",
               "bestLap": "1:08.748",
               "points": 7,
               "ledLap": false
@@ -984,6 +1128,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 21,
+              "time": "26:10.427",
+              "gap": "8.775",
               "bestLap": "1:08.835",
               "points": 6,
               "ledLap": false
@@ -996,6 +1142,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 21,
+              "time": "26:13.319",
+              "gap": "11.667",
               "bestLap": "1:08.291",
               "points": 5,
               "ledLap": false
@@ -1008,6 +1156,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 21,
+              "time": "26:13.807",
+              "gap": "12.155",
               "bestLap": "1:08.966",
               "points": 4,
               "ledLap": false
@@ -1020,6 +1170,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:15.028",
+              "gap": "13.376",
               "bestLap": "1:09.457",
               "points": 3,
               "ledLap": false
@@ -1032,6 +1184,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:15.268",
+              "gap": "13.616",
               "bestLap": "1:09.442",
               "points": 2,
               "ledLap": false
@@ -1044,6 +1198,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:15.684",
+              "gap": "14.032",
               "bestLap": "1:09.249",
               "points": 1,
               "ledLap": false
@@ -1056,6 +1212,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:15.812",
+              "gap": "14.160",
               "bestLap": "1:09.149",
               "points": 0,
               "ledLap": false
@@ -1068,6 +1226,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:22.783",
+              "gap": "21.131",
               "bestLap": "1:09.646",
               "points": 0,
               "ledLap": false
@@ -1080,6 +1240,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
+              "time": "26:23.001",
+              "gap": "21.349",
               "bestLap": "1:09.693",
               "points": 0,
               "ledLap": false
@@ -1092,6 +1254,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 14,
+              "time": "19:45.968",
+              "gap": "",
               "bestLap": "1:09.167",
               "points": 0,
               "ledLap": false
@@ -1104,6 +1268,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 6,
+              "time": "6:58.344",
+              "gap": "",
               "bestLap": "1:08.347",
               "points": 0,
               "ledLap": false
@@ -1116,6 +1282,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "",
               "points": 0,
               "ledLap": true
@@ -1196,7 +1364,7 @@
               "pos": 11,
               "no": 50,
               "cl": "",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -1282,6 +1450,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:18.898",
+              "gap": "",
               "bestLap": "1:08.061",
               "points": 20,
               "ledLap": true
@@ -1294,6 +1464,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:21.532",
+              "gap": "2.634",
               "bestLap": "1:08.206",
               "points": 17,
               "ledLap": false
@@ -1306,6 +1478,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
+              "time": "26:21.936",
+              "gap": "3.038",
               "bestLap": "1:08.551",
               "points": 15,
               "ledLap": false
@@ -1318,6 +1492,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 21,
+              "time": "26:23.403",
+              "gap": "4.505",
               "bestLap": "1:08.412",
               "points": 13,
               "ledLap": false
@@ -1330,6 +1506,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 21,
+              "time": "26:24.638",
+              "gap": "5.740",
               "bestLap": "1:08.293",
               "points": 11,
               "ledLap": false
@@ -1342,6 +1520,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 21,
+              "time": "26:25.024",
+              "gap": "6.126",
               "bestLap": "1:08.491",
               "points": 10,
               "ledLap": false
@@ -1354,6 +1534,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 21,
+              "time": "26:29.869",
+              "gap": "10.971",
               "bestLap": "1:08.658",
               "points": 9,
               "ledLap": false
@@ -1366,6 +1548,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:31.694",
+              "gap": "12.796",
               "bestLap": "1:09.015",
               "points": 8,
               "ledLap": false
@@ -1378,6 +1562,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 21,
+              "time": "26:33.207",
+              "gap": "14.309",
               "bestLap": "1:09.228",
               "points": 7,
               "ledLap": false
@@ -1390,6 +1576,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
+              "time": "26:34.099",
+              "gap": "15.201",
               "bestLap": "1:08.693",
               "points": 6,
               "ledLap": false
@@ -1398,10 +1586,12 @@
               "pos": 11,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
+              "time": "26:35.705",
+              "gap": "16.807",
               "bestLap": "1:09.103",
               "points": 5,
               "ledLap": false
@@ -1414,6 +1604,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:36.574",
+              "gap": "17.676",
               "bestLap": "1:09.101",
               "points": 4,
               "ledLap": false
@@ -1426,6 +1618,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:36.982",
+              "gap": "18.084",
               "bestLap": "1:08.760",
               "points": 3,
               "ledLap": false
@@ -1438,6 +1632,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 21,
+              "time": "26:38.086",
+              "gap": "19.188",
               "bestLap": "1:09.570",
               "points": 2,
               "ledLap": false
@@ -1450,6 +1646,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:40.796",
+              "gap": "21.898",
               "bestLap": "1:09.228",
               "points": 1,
               "ledLap": false
@@ -1462,6 +1660,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 21,
+              "time": "26:41.233",
+              "gap": "22.335",
               "bestLap": "1:09.003",
               "points": 0,
               "ledLap": false
@@ -1474,6 +1674,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 21,
+              "time": "26:41.869",
+              "gap": "22.971",
               "bestLap": "1:09.440",
               "points": 0,
               "ledLap": false
@@ -1486,6 +1688,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 6,
+              "time": "10:36.172",
+              "gap": "",
               "bestLap": "1:11.883",
               "points": 0,
               "ledLap": false
@@ -1498,7 +1702,9 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 2,
-              "bestLap": "",
+              "time": "3:29.976",
+              "gap": "",
+              "bestLap": "67.21",
               "points": 0,
               "ledLap": false
             },
@@ -1510,6 +1716,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "",
               "points": 0,
               "ledLap": false
@@ -1522,6 +1730,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "",
               "points": 0,
               "ledLap": false
@@ -1581,7 +1791,7 @@
               "pos": 8,
               "no": 50,
               "cl": "",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -1688,6 +1898,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 18,
+              "time": "20:51.143",
+              "gap": "",
               "bestLap": "1:08.624",
               "points": 20,
               "ledLap": true
@@ -1700,6 +1912,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 18,
+              "time": "20:53.331",
+              "gap": "2.188",
               "bestLap": "1:08.078",
               "points": 17,
               "ledLap": false
@@ -1712,6 +1926,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 18,
+              "time": "20:58.361",
+              "gap": "7.218",
               "bestLap": "1:08.683",
               "points": 15,
               "ledLap": true
@@ -1724,6 +1940,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 18,
+              "time": "21:00.184",
+              "gap": "9.041",
               "bestLap": "1:08.823",
               "points": 13,
               "ledLap": false
@@ -1736,6 +1954,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 18,
+              "time": "21:01.027",
+              "gap": "9.884",
               "bestLap": "1:09.108",
               "points": 11,
               "ledLap": true
@@ -1748,6 +1968,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 18,
+              "time": "21:04.161",
+              "gap": "13.018",
               "bestLap": "1:08.999",
               "points": 10,
               "ledLap": false
@@ -1760,6 +1982,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 18,
+              "time": "21:05.319",
+              "gap": "14.176",
               "bestLap": "1:08.608",
               "points": 9,
               "ledLap": false
@@ -1772,6 +1996,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 18,
+              "time": "21:05.920",
+              "gap": "14.777",
               "bestLap": "1:09.086",
               "points": 8,
               "ledLap": false
@@ -1784,6 +2010,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 18,
+              "time": "21:06.090",
+              "gap": "14.947",
               "bestLap": "1:08.680",
               "points": 7,
               "ledLap": false
@@ -1796,6 +2024,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 18,
+              "time": "21:08.038",
+              "gap": "16.895",
               "bestLap": "1:08.698",
               "points": 6,
               "ledLap": false
@@ -1808,6 +2038,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 18,
+              "time": "21:11.153",
+              "gap": "20.010",
               "bestLap": "1:08.712",
               "points": 5,
               "ledLap": false
@@ -1816,10 +2048,12 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
+              "time": "21:11.402",
+              "gap": "20.259",
               "bestLap": "1:09.243",
               "points": 4,
               "ledLap": false
@@ -1832,6 +2066,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 18,
+              "time": "21:12.421",
+              "gap": "21.278",
               "bestLap": "1:09.052",
               "points": 3,
               "ledLap": false
@@ -1844,6 +2080,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
+              "time": "21:12.452",
+              "gap": "21.309",
               "bestLap": "1:09.331",
               "points": 2,
               "ledLap": false
@@ -1856,6 +2094,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 18,
+              "time": "21:12.618",
+              "gap": "21.475",
               "bestLap": "1:08.862",
               "points": 1,
               "ledLap": false
@@ -1868,6 +2108,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
+              "time": "21:20.712",
+              "gap": "29.569",
               "bestLap": "1:09.408",
               "points": 0,
               "ledLap": false
@@ -1880,6 +2122,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 18,
+              "time": "21:40.449",
+              "gap": "49.306",
               "bestLap": "1:08.171",
               "points": 0,
               "ledLap": false
@@ -1892,6 +2136,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 18,
+              "time": "21:41.697",
+              "gap": "50.554",
               "bestLap": "1:09.615",
               "points": 0,
               "ledLap": false
@@ -1904,6 +2150,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 17,
+              "time": "21:17.930",
+              "gap": "",
               "bestLap": "1:08.280",
               "points": 0,
               "ledLap": false
@@ -1916,6 +2164,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 15,
+              "time": "18:35.709",
+              "gap": "",
               "bestLap": "1:08.381",
               "points": 0,
               "ledLap": false
@@ -1996,7 +2246,7 @@
               "pos": 11,
               "no": 50,
               "cl": "",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -2089,6 +2339,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.360",
               "points": 0
             },
@@ -2100,6 +2352,8 @@
               "team": "Steel Seal with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.402",
               "points": 0
             },
@@ -2111,6 +2365,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.437",
               "points": 0
             },
@@ -2122,6 +2378,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.494",
               "points": 0
             },
@@ -2133,6 +2391,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.508",
               "points": 0
             },
@@ -2144,6 +2404,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.518",
               "points": 0
             },
@@ -2155,6 +2417,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.583",
               "points": 0
             },
@@ -2166,6 +2430,8 @@
               "team": "WSR",
               "car": "BMW 330i M Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.657",
               "points": 0
             },
@@ -2177,6 +2443,8 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.701",
               "points": 0
             },
@@ -2188,6 +2456,8 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.717",
               "points": 0
             },
@@ -2199,6 +2469,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.758",
               "points": 0
             },
@@ -2206,10 +2478,12 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "47.842",
               "points": 0
             },
@@ -2221,6 +2495,8 @@
               "team": "LKQ Euro Car Parts with Power Maxed Racing",
               "car": "Audi A3 Saloon",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.021",
               "points": 0
             },
@@ -2232,6 +2508,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.058",
               "points": 0
             },
@@ -2243,6 +2521,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.093",
               "points": 0
             },
@@ -2254,6 +2534,8 @@
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.101",
               "points": 0
             },
@@ -2265,6 +2547,8 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.110",
               "points": 0
             },
@@ -2276,6 +2560,8 @@
               "team": "Team VERTU",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.471",
               "points": 0
             },
@@ -2287,6 +2573,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.622",
               "points": 0
             },
@@ -2298,6 +2586,8 @@
               "team": "Speedworks Corolla Racing",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "48.814",
               "points": 0
             },
@@ -2309,42 +2599,882 @@
               "team": "Restart Racing",
               "car": "Hyundai i30N",
               "laps": 0,
+              "time": "",
+              "gap": "",
               "bestLap": "",
               "points": 0
             }
           ],
-          "grid": [],
-          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
+          "grid": []
         },
         {
           "label": "Qualifying",
-          "results": [],
-          "grid": [],
-          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
+          "results": [
+            {
+              "pos": 1,
+              "no": 80,
+              "cl": "M",
+              "driver": "Tom INGRAM",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.310",
+              "points": 0
+            },
+            {
+              "pos": 2,
+              "no": 27,
+              "cl": "M",
+              "driver": "Dan CAMMISH",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.410",
+              "points": 0
+            },
+            {
+              "pos": 3,
+              "no": 2,
+              "cl": "I",
+              "driver": "Daryl DE LEON",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.415",
+              "points": 0
+            },
+            {
+              "pos": 4,
+              "no": 11,
+              "cl": "M",
+              "driver": "Ricky COLLARD",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.458",
+              "points": 0
+            },
+            {
+              "pos": 5,
+              "no": 116,
+              "cl": "M",
+              "driver": "Ashley SUTTON",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.478",
+              "points": 0
+            },
+            {
+              "pos": 6,
+              "no": 33,
+              "cl": "M",
+              "driver": "Adam MORGAN",
+              "team": "Cataclean Plato Racing",
+              "car": "Mercedes A35 Saloon",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.474",
+              "points": 0
+            },
+            {
+              "pos": 7,
+              "no": 88,
+              "cl": "I",
+              "driver": "Mikey DOBLE",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.491",
+              "points": 0
+            },
+            {
+              "pos": 8,
+              "no": 17,
+              "cl": "I",
+              "driver": "Dexter PATTERSON",
+              "team": "Steel Seal with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.496",
+              "points": 0
+            },
+            {
+              "pos": 9,
+              "no": 3,
+              "cl": "M",
+              "driver": "Tom CHILTON",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.523",
+              "points": 0
+            },
+            {
+              "pos": 10,
+              "no": 99,
+              "cl": "I",
+              "driver": "Charles RAINFORD",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.584",
+              "points": 0
+            },
+            {
+              "pos": 11,
+              "no": 66,
+              "cl": "M",
+              "driver": "Josh COOK",
+              "team": "Speedworks Corolla Racing",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.541",
+              "points": 0
+            },
+            {
+              "pos": 12,
+              "no": 50,
+              "cl": "I",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.629",
+              "points": 0
+            },
+            {
+              "pos": 13,
+              "no": 77,
+              "cl": "M",
+              "driver": "Sam OSBORNE",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.586",
+              "points": 0
+            },
+            {
+              "pos": 14,
+              "no": 52,
+              "cl": "I",
+              "driver": "Gordon SHEDDEN",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.792",
+              "points": 0
+            },
+            {
+              "pos": 15,
+              "no": 15,
+              "cl": "M",
+              "driver": "Lewis SELBY",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.697",
+              "points": 0
+            },
+            {
+              "pos": 16,
+              "no": 19,
+              "cl": "M",
+              "driver": "Max BUXTON",
+              "team": "Speedworks Corolla Racing",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.817",
+              "points": 0
+            },
+            {
+              "pos": 17,
+              "no": 22,
+              "cl": "I",
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.737",
+              "points": 0
+            },
+            {
+              "pos": 18,
+              "no": 32,
+              "cl": "M",
+              "driver": "Daniel ROWBOTTOM",
+              "team": "Cataclean Plato Racing",
+              "car": "Mercedes A35 Saloon",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.835",
+              "points": 0
+            },
+            {
+              "pos": 19,
+              "no": 16,
+              "cl": "I",
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.748",
+              "points": 0
+            },
+            {
+              "pos": 20,
+              "no": 28,
+              "cl": "M",
+              "driver": "Nicolas HAMILTON",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.127",
+              "points": 0
+            },
+            {
+              "pos": 21,
+              "no": 132,
+              "cl": "I",
+              "driver": "James DORLIN",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.941",
+              "points": 0
+            }
+          ],
+          "grid": []
         },
         {
           "label": "Qualifying Race",
-          "results": [],
-          "grid": [],
-          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
+          "results": [
+            {
+              "pos": 1,
+              "no": 116,
+              "cl": "M",
+              "driver": "Ashley SUTTON",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.750",
+              "points": 10
+            },
+            {
+              "pos": 2,
+              "no": 2,
+              "cl": "I",
+              "driver": "Daryl DE LEON",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.759",
+              "points": 9
+            },
+            {
+              "pos": 3,
+              "no": 27,
+              "cl": "M",
+              "driver": "Dan CAMMISH",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.712",
+              "points": 8
+            },
+            {
+              "pos": 4,
+              "no": 11,
+              "cl": "M",
+              "driver": "Ricky COLLARD",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.634",
+              "points": 7
+            },
+            {
+              "pos": 5,
+              "no": 80,
+              "cl": "M",
+              "driver": "Tom INGRAM",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.741",
+              "points": 6
+            },
+            {
+              "pos": 6,
+              "no": 33,
+              "cl": "M",
+              "driver": "Adam MORGAN",
+              "team": "Cataclean Plato Racing",
+              "car": "Mercedes A35 Saloon",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.876",
+              "points": 5
+            },
+            {
+              "pos": 7,
+              "no": 88,
+              "cl": "I",
+              "driver": "Mikey DOBLE",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.895",
+              "points": 5
+            },
+            {
+              "pos": 8,
+              "no": 17,
+              "cl": "I",
+              "driver": "Dexter PATTERSON",
+              "team": "Steel Seal with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.007",
+              "points": 4
+            },
+            {
+              "pos": 9,
+              "no": 50,
+              "cl": "I",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.208",
+              "points": 4
+            },
+            {
+              "pos": 10,
+              "no": 52,
+              "cl": "I",
+              "driver": "Gordon SHEDDEN",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.115",
+              "points": 3
+            },
+            {
+              "pos": 11,
+              "no": 77,
+              "cl": "M",
+              "driver": "Sam OSBORNE",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.218",
+              "points": 3
+            },
+            {
+              "pos": 12,
+              "no": 15,
+              "cl": "M",
+              "driver": "Lewis SELBY",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.254",
+              "points": 2
+            },
+            {
+              "pos": 13,
+              "no": 22,
+              "cl": "I",
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.135",
+              "points": 2
+            },
+            {
+              "pos": 14,
+              "no": 3,
+              "cl": "M",
+              "driver": "Tom CHILTON",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.093",
+              "points": 1
+            },
+            {
+              "pos": 15,
+              "no": 99,
+              "cl": "I",
+              "driver": "Charles RAINFORD",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.153",
+              "points": 1
+            },
+            {
+              "pos": 16,
+              "no": 16,
+              "cl": "I",
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.349",
+              "points": 0
+            },
+            {
+              "pos": 17,
+              "no": 32,
+              "cl": "M",
+              "driver": "Daniel ROWBOTTOM",
+              "team": "Cataclean Plato Racing",
+              "car": "Mercedes A35 Saloon",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.076",
+              "points": 0
+            },
+            {
+              "pos": 18,
+              "no": 132,
+              "cl": "I",
+              "driver": "James DORLIN",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "47.962",
+              "points": 0
+            },
+            {
+              "pos": 19,
+              "no": 19,
+              "cl": "M",
+              "driver": "Max BUXTON",
+              "team": "Speedworks Corolla Racing",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 18,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.452",
+              "points": 0
+            },
+            {
+              "pos": 20,
+              "no": 28,
+              "cl": "M",
+              "driver": "Nicolas HAMILTON",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 16,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.414",
+              "points": 0
+            },
+            {
+              "pos": 0,
+              "no": 66,
+              "cl": "M",
+              "driver": "Josh COOK",
+              "team": "Speedworks Corolla Racing",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 16,
+              "time": "",
+              "gap": "",
+              "bestLap": "48.013",
+              "points": 0
+            }
+          ],
+          "grid": [
+            {
+              "pos": 1,
+              "no": 80,
+              "cl": "",
+              "driver": "Tom INGRAM",
+              "team": ""
+            },
+            {
+              "pos": 2,
+              "no": 27,
+              "cl": "",
+              "driver": "Dan CAMMISH",
+              "team": ""
+            },
+            {
+              "pos": 3,
+              "no": 2,
+              "cl": "",
+              "driver": "Daryl DE LEON",
+              "team": ""
+            },
+            {
+              "pos": 4,
+              "no": 11,
+              "cl": "",
+              "driver": "Ricky COLLARD",
+              "team": ""
+            },
+            {
+              "pos": 5,
+              "no": 116,
+              "cl": "",
+              "driver": "Ashley SUTTON",
+              "team": ""
+            },
+            {
+              "pos": 6,
+              "no": 33,
+              "cl": "",
+              "driver": "Adam MORGAN",
+              "team": ""
+            },
+            {
+              "pos": 7,
+              "no": 88,
+              "cl": "",
+              "driver": "Mikey DOBLE",
+              "team": ""
+            },
+            {
+              "pos": 8,
+              "no": 17,
+              "cl": "",
+              "driver": "Dexter PATTERSON",
+              "team": ""
+            },
+            {
+              "pos": 9,
+              "no": 3,
+              "cl": "",
+              "driver": "Tom CHILTON",
+              "team": ""
+            },
+            {
+              "pos": 10,
+              "no": 99,
+              "cl": "",
+              "driver": "Charles RAINFORD",
+              "team": ""
+            },
+            {
+              "pos": 11,
+              "no": 66,
+              "cl": "",
+              "driver": "Josh COOK",
+              "team": ""
+            },
+            {
+              "pos": 12,
+              "no": 50,
+              "cl": "",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": ""
+            },
+            {
+              "pos": 13,
+              "no": 77,
+              "cl": "",
+              "driver": "Sam OSBORNE",
+              "team": ""
+            },
+            {
+              "pos": 14,
+              "no": 52,
+              "cl": "",
+              "driver": "Gordon SHEDDEN",
+              "team": ""
+            },
+            {
+              "pos": 15,
+              "no": 15,
+              "cl": "",
+              "driver": "Lewis SELBY",
+              "team": ""
+            },
+            {
+              "pos": 16,
+              "no": 19,
+              "cl": "",
+              "driver": "Max BUXTON",
+              "team": ""
+            },
+            {
+              "pos": 17,
+              "no": 22,
+              "cl": "",
+              "driver": "Chris SMILEY",
+              "team": ""
+            },
+            {
+              "pos": 18,
+              "no": 32,
+              "cl": "",
+              "driver": "Daniel ROWBOTTOM",
+              "team": ""
+            },
+            {
+              "pos": 19,
+              "no": 16,
+              "cl": "",
+              "driver": "Aiden MOFFAT",
+              "team": ""
+            },
+            {
+              "pos": 20,
+              "no": 28,
+              "cl": "",
+              "driver": "Nicolas HAMILTON",
+              "team": ""
+            },
+            {
+              "pos": 21,
+              "no": 132,
+              "cl": "",
+              "driver": "James DORLIN",
+              "team": ""
+            }
+          ]
         },
         {
           "label": "Race 1",
           "results": [],
-          "grid": [],
-          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
+          "grid": [
+            {
+              "pos": 1,
+              "no": 116,
+              "cl": "",
+              "driver": "Ashley SUTTON",
+              "team": ""
+            },
+            {
+              "pos": 2,
+              "no": 2,
+              "cl": "",
+              "driver": "Daryl DE LEON",
+              "team": ""
+            },
+            {
+              "pos": 3,
+              "no": 27,
+              "cl": "",
+              "driver": "Dan CAMMISH",
+              "team": ""
+            },
+            {
+              "pos": 4,
+              "no": 11,
+              "cl": "",
+              "driver": "Ricky COLLARD",
+              "team": ""
+            },
+            {
+              "pos": 5,
+              "no": 80,
+              "cl": "",
+              "driver": "Tom INGRAM",
+              "team": ""
+            },
+            {
+              "pos": 6,
+              "no": 33,
+              "cl": "",
+              "driver": "Adam MORGAN",
+              "team": ""
+            },
+            {
+              "pos": 7,
+              "no": 88,
+              "cl": "",
+              "driver": "Mikey DOBLE",
+              "team": ""
+            },
+            {
+              "pos": 8,
+              "no": 17,
+              "cl": "",
+              "driver": "Dexter PATTERSON",
+              "team": ""
+            },
+            {
+              "pos": 9,
+              "no": 50,
+              "cl": "",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": ""
+            },
+            {
+              "pos": 10,
+              "no": 52,
+              "cl": "",
+              "driver": "Gordon SHEDDEN",
+              "team": ""
+            },
+            {
+              "pos": 11,
+              "no": 77,
+              "cl": "",
+              "driver": "Sam OSBORNE",
+              "team": ""
+            },
+            {
+              "pos": 12,
+              "no": 15,
+              "cl": "",
+              "driver": "Lewis SELBY",
+              "team": ""
+            },
+            {
+              "pos": 13,
+              "no": 22,
+              "cl": "",
+              "driver": "Chris SMILEY",
+              "team": ""
+            },
+            {
+              "pos": 14,
+              "no": 3,
+              "cl": "",
+              "driver": "Tom CHILTON",
+              "team": ""
+            },
+            {
+              "pos": 15,
+              "no": 99,
+              "cl": "",
+              "driver": "Charles RAINFORD",
+              "team": ""
+            },
+            {
+              "pos": 16,
+              "no": 16,
+              "cl": "",
+              "driver": "Aiden MOFFAT",
+              "team": ""
+            },
+            {
+              "pos": 17,
+              "no": 32,
+              "cl": "",
+              "driver": "Daniel ROWBOTTOM",
+              "team": ""
+            },
+            {
+              "pos": 18,
+              "no": 132,
+              "cl": "",
+              "driver": "James DORLIN",
+              "team": ""
+            },
+            {
+              "pos": 19,
+              "no": 19,
+              "cl": "",
+              "driver": "Max BUXTON",
+              "team": ""
+            },
+            {
+              "pos": 20,
+              "no": 28,
+              "cl": "",
+              "driver": "Nicolas HAMILTON",
+              "team": ""
+            },
+            {
+              "pos": 21,
+              "no": 66,
+              "cl": "",
+              "driver": "Josh COOK",
+              "team": ""
+            }
+          ]
         },
         {
           "label": "Race 2",
           "results": [],
-          "grid": [],
-          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
+          "grid": []
         },
         {
           "label": "Race 3",
           "results": [],
-          "grid": [],
-          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
+          "grid": []
         }
       ]
     },

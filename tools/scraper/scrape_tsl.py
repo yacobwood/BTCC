@@ -239,7 +239,10 @@ def parse_classification(pdf_bytes, label):
         no = anchor_no or 0
         cl = anchor_cl or ""
         laps = 0
+        race_time = ""
+        gap = ""
         best_lap = ""
+        is_race = label not in NO_POINTS_SESSIONS and label != "Qualifying Race"
 
         for _, x, t in row:
             if 30 < x < 75 and not no:
@@ -260,13 +263,24 @@ def parse_classification(pdf_bytes, label):
                         team = re.sub(r"^\d+\s+", "", t)
             elif 235 < x < 340:
                 car_name = t
-            elif 340 < x < 380:
+            elif 340 < x < 360:
                 if re.match(r"^\d+$", t):
                     laps = int(t)
-            elif 380 < x < 545:
-                # BEST LAP column (x≈503 for races, x≈411 for FP, x≈468 for qualifying)
-                # Upper bound stops before MPH column at x≈559.
-                # Sub-minute tracks (Brands Hatch Indy, Knockhill) emit "SS.mmm"; others "M:SS.mmm"
+            elif is_race and 360 < x < 400:
+                # Race total time column (x≈374): e.g. "26:01.652"
+                if re.match(r"^\d+:\d{2}\.\d+$", t):
+                    race_time = t
+            elif is_race and 400 < x < 440:
+                # Gap to leader column (x≈418): e.g. "1.749", "12.034"
+                if re.match(r"^\d+\.\d+$", t):
+                    gap = t
+            elif 470 < x < 545:
+                # BEST LAP column (x≈503 for races, x≈468 for qualifying)
+                if re.match(r"^(?:\d+:)?\d{2}\.\d+$", t):
+                    best_lap = t
+            elif not is_race and 380 < x < 470:
+                # FP/Qualifying best lap column (x≈411 for FP, x≈468 for qualifying)
+                # Sub-minute tracks emit "SS.mmm"; others "M:SS.mmm"
                 if re.match(r"^(?:\d+:)?\d{2}\.\d+$", t):
                     best_lap = t
 
@@ -282,6 +296,8 @@ def parse_classification(pdf_bytes, label):
             "team":    team,
             "car":     car_name,
             "laps":    laps,
+            "time":    race_time,
+            "gap":     gap,
             "bestLap": best_lap,
             "points":  pts,
         })

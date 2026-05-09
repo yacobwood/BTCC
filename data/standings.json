@@ -2,7 +2,7 @@
   "season": "2026",
   "round": 2,
   "venue": "Brands Hatch Indy",
-  "updated": "2026-05-09T11:23:28Z",
+  "updated": "2026-05-09T16:41:18Z",
   "standings": [
     {
       "pos": 1,
@@ -10,24 +10,35 @@
       "team": "NAPA Racing UK",
       "car": "116",
       "class": "M",
-      "points": 61,
+      "points": 71,
       "wins": 2,
       "seconds": 1,
       "thirds": 0
     },
     {
       "pos": 2,
+      "driver": "Dan CAMMISH",
+      "team": "NAPA Racing UK",
+      "car": "27",
+      "class": "M",
+      "points": 46,
+      "wins": 0,
+      "seconds": 1,
+      "thirds": 0
+    },
+    {
+      "pos": 3,
       "driver": "Charles RAINFORD",
       "team": "WSR",
       "car": "99",
       "class": "I",
-      "points": 43,
+      "points": 44,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
     },
     {
-      "pos": 3,
+      "pos": 4,
       "driver": "Aiden MOFFAT",
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
       "car": "16",
@@ -38,23 +49,12 @@
       "thirds": 0
     },
     {
-      "pos": 4,
-      "driver": "Dan CAMMISH",
-      "team": "NAPA Racing UK",
-      "car": "27",
-      "class": "M",
-      "points": 38,
-      "wins": 0,
-      "seconds": 1,
-      "thirds": 0
-    },
-    {
       "pos": 5,
       "driver": "Gordon SHEDDEN",
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "52",
       "class": "I",
-      "points": 32,
+      "points": 35,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -65,62 +65,62 @@
       "team": "Steel Seal with Power Maxed Racing",
       "car": "17",
       "class": "I",
-      "points": 31,
+      "points": 35,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 7,
-      "driver": "Mikey DOBLE",
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "car": "88",
-      "class": "I",
-      "points": 29,
-      "wins": 1,
-      "seconds": 0,
-      "thirds": 0
-    },
-    {
-      "pos": 8,
       "driver": "Tom INGRAM",
       "team": "Team VERTU",
       "car": "80",
       "class": "M",
-      "points": 28,
+      "points": 34,
       "wins": 0,
       "seconds": 1,
       "thirds": 0
     },
     {
-      "pos": 9,
-      "driver": "Adam MORGAN",
-      "team": "Cataclean Plato Racing",
-      "car": "33",
-      "class": "M",
-      "points": 26,
-      "wins": 0,
+      "pos": 8,
+      "driver": "Mikey DOBLE",
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "car": "88",
+      "class": "I",
+      "points": 34,
+      "wins": 1,
       "seconds": 0,
       "thirds": 0
     },
     {
-      "pos": 10,
+      "pos": 9,
       "driver": "Ricky COLLARD",
       "team": "Team VERTU",
       "car": "11",
       "class": "M",
-      "points": 26,
+      "points": 33,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
     },
     {
-      "pos": 11,
-      "driver": "Daniel ROWBOTTOM",
+      "pos": 10,
+      "driver": "Adam MORGAN",
       "team": "Cataclean Plato Racing",
-      "car": "32",
+      "car": "33",
       "class": "M",
-      "points": 20,
+      "points": 31,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0
+    },
+    {
+      "pos": 11,
+      "driver": "Daryl DE LEON",
+      "team": "WSR",
+      "car": "2",
+      "class": "I",
+      "points": 27,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -131,18 +131,18 @@
       "team": "Laser Tools Racing with MB Motorsport",
       "car": "50",
       "class": "I",
-      "points": 20,
+      "points": 24,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 13,
-      "driver": "Daryl DE LEON",
-      "team": "WSR",
-      "car": "2",
-      "class": "I",
-      "points": 18,
+      "driver": "Daniel ROWBOTTOM",
+      "team": "Cataclean Plato Racing",
+      "car": "32",
+      "class": "M",
+      "points": 20,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -153,28 +153,28 @@
       "team": "Team VERTU",
       "car": "3",
       "class": "M",
-      "points": 15,
+      "points": 16,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 15,
-      "driver": "Josh COOK",
-      "team": "Speedworks Corolla Racing",
-      "car": "66",
-      "class": "M",
-      "points": 14,
+      "driver": "Chris SMILEY",
+      "team": "Restart Racing",
+      "car": "22",
+      "class": "I",
+      "points": 16,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
     },
     {
       "pos": 16,
-      "driver": "Chris SMILEY",
-      "team": "Restart Racing",
-      "car": "22",
-      "class": "I",
+      "driver": "Josh COOK",
+      "team": "Speedworks Corolla Racing",
+      "car": "66",
+      "class": "M",
       "points": 14,
       "wins": 0,
       "seconds": 0,
@@ -186,7 +186,7 @@
       "team": "NAPA Racing UK",
       "car": "77",
       "class": "M",
-      "points": 9,
+      "points": 12,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -208,7 +208,7 @@
       "team": "NAPA Racing UK",
       "car": "15",
       "class": "M",
-      "points": 2,
+      "points": 4,
       "wins": 0,
       "seconds": 0,
       "thirds": 0
@@ -240,42 +240,42 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 110
+      "points": 133
     },
     {
       "pos": 2,
       "team": "Team VERTU",
-      "points": 69
+      "points": 83
     },
     {
       "pos": 3,
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 69
+      "points": 74
     },
     {
       "pos": 4,
       "team": "WSR",
-      "points": 61
+      "points": 71
     },
     {
       "pos": 5,
       "team": "Laser Tools Racing with MB Motorsport",
-      "points": 52
+      "points": 59
     },
     {
       "pos": 6,
       "team": "Cataclean Plato Racing",
-      "points": 46
+      "points": 51
     },
     {
       "pos": 7,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 31
+      "points": 35
     },
     {
       "pos": 8,
       "team": "Restart Racing",
-      "points": 19
+      "points": 21
     },
     {
       "pos": 9,
