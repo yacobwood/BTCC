@@ -2,7 +2,7 @@
   "season": "2026",
   "round": 2,
   "venue": "Brands Hatch Indy",
-  "updated": "2026-05-09T18:17:37Z",
+  "updated": "2026-05-09T18:28:20Z",
   "standings": [
     {
       "pos": 1,
@@ -10,8 +10,8 @@
       "team": "NAPA Racing UK",
       "car": "116",
       "class": "M",
-      "points": 69,
-      "wins": 2,
+      "points": 71,
+      "wins": 3,
       "seconds": 1,
       "thirds": 0
     },
@@ -24,7 +24,7 @@
       "points": 46,
       "wins": 0,
       "seconds": 1,
-      "thirds": 0
+      "thirds": 1
     },
     {
       "pos": 3,
@@ -32,7 +32,7 @@
       "team": "WSR",
       "car": "99",
       "class": "I",
-      "points": 43,
+      "points": 44,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -72,6 +72,17 @@
     },
     {
       "pos": 7,
+      "driver": "Tom INGRAM",
+      "team": "Team VERTU",
+      "car": "80",
+      "class": "M",
+      "points": 34,
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 0
+    },
+    {
+      "pos": 8,
       "driver": "Mikey DOBLE",
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
       "car": "88",
@@ -82,23 +93,12 @@
       "thirds": 0
     },
     {
-      "pos": 8,
-      "driver": "Tom INGRAM",
-      "team": "Team VERTU",
-      "car": "80",
-      "class": "M",
-      "points": 33,
-      "wins": 0,
-      "seconds": 1,
-      "thirds": 0
-    },
-    {
       "pos": 9,
       "driver": "Ricky COLLARD",
       "team": "Team VERTU",
       "car": "11",
       "class": "M",
-      "points": 32,
+      "points": 33,
       "wins": 0,
       "seconds": 0,
       "thirds": 1
@@ -122,7 +122,7 @@
       "class": "I",
       "points": 27,
       "wins": 0,
-      "seconds": 0,
+      "seconds": 1,
       "thirds": 0
     },
     {
@@ -143,7 +143,7 @@
       "car": "32",
       "class": "M",
       "points": 20,
-      "wins": 0,
+      "wins": 1,
       "seconds": 0,
       "thirds": 0
     },
@@ -178,7 +178,7 @@
       "points": 14,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0
+      "thirds": 1
     },
     {
       "pos": 17,
@@ -240,12 +240,12 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 131
+      "points": 133
     },
     {
       "pos": 2,
       "team": "Team VERTU",
-      "points": 81
+      "points": 83
     },
     {
       "pos": 3,
@@ -255,7 +255,7 @@
     {
       "pos": 4,
       "team": "WSR",
-      "points": 70
+      "points": 71
     },
     {
       "pos": 5,

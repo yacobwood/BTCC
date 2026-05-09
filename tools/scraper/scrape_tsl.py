@@ -485,7 +485,7 @@ def compute_standings(rounds):
                 pts = pts_table.get(pos, 0) if pos > 0 else 0
                 if d == fl:
                     pts += 1          # fastest lap bonus
-                if r.get("ledLap"):
+                if r.get("leadLap"):
                     pts += 1          # laps led bonus
 
                 driver_pts[d]  += pts
@@ -494,10 +494,9 @@ def compute_standings(rounds):
                 driver_cl[d]    = r.get("cl", "")
                 team_pts[r.get("team", "")] += pts
 
-                if not is_qual_race:
-                    if pos == 1: driver_wins[d] += 1
-                    elif pos == 2: driver_2nds[d] += 1
-                    elif pos == 3: driver_3rds[d] += 1
+                if pos == 1: driver_wins[d] += 1
+                elif pos == 2: driver_2nds[d] += 1
+                elif pos == 3: driver_3rds[d] += 1
 
     drivers = sorted(driver_pts.items(), key=lambda x: -x[1])
     teams   = sorted(team_pts.items(),   key=lambda x: -x[1])
