@@ -1,19 +1,83 @@
+const BTCC_CHANNEL_ID = 'UCm1pFKRmvlf7vd7-Yni5MWA';
+const GITHUB_REPO    = 'yacobwood/BTCC';
+const LIVE_FILE_PATH = 'data/live_status.json';
+
+async function checkLive(youtubeApiKey) {
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${BTCC_CHANNEL_ID}&eventType=live&type=video&key=${youtubeApiKey}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.log(`YouTube API error: ${res.status}`);
+    return null;
+  }
+  const data = await res.json();
+  const item = data.items?.[0];
+  if (!item) return null;
+  return {
+    videoId: item.id.videoId,
+    title: item.snippet.title,
+  };
+}
+
+async function getCurrentFile(githubToken) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/contents/${LIVE_FILE_PATH}`,
+    { headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json', 'User-Agent': 'btcc-cf-worker' } }
+  );
+  if (res.status === 404) return { sha: null, content: null };
+  if (!res.ok) return { sha: null, content: null };
+  const data = await res.json();
+  return { sha: data.sha, content: JSON.parse(atob(data.content.replace(/\n/g, ''))) };
+}
+
+async function commitFile(githubToken, content, sha) {
+  const body = {
+    message: 'chore: update live status [skip ci]',
+    content: btoa(JSON.stringify(content, null, 2)),
+    committer: { name: 'github-actions[bot]', email: 'github-actions[bot]@users.noreply.github.com' },
+  };
+  if (sha) body.sha = sha;
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/contents/${LIVE_FILE_PATH}`,
+    {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'btcc-cf-worker', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }
+  );
+  console.log(`Committed live_status.json: ${res.status}`);
+}
+
+async function dispatchScrape(githubToken) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/scrape-results.yml/dispatches`,
+    {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'btcc-cf-worker', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main' }),
+    }
+  );
+  console.log(`Dispatched scrape: ${res.status}`);
+}
+
 export default {
   async scheduled(event, env, ctx) {
-    const res = await fetch(
-      'https://api.github.com/repos/yacobwood/BTCC/actions/workflows/scrape-results.yml/dispatches',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-          'User-Agent': 'btcc-cf-worker',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ref: 'main' }),
-      }
-    );
-    console.log(`Dispatched: ${res.status}`);
+    // Always dispatch results scrape
+    await dispatchScrape(env.GITHUB_TOKEN);
+
+    // Check YouTube for a live BTCC broadcast
+    const live = await checkLive(env.YOUTUBE_API_KEY);
+    const { sha, content: current } = await getCurrentFile(env.GITHUB_TOKEN);
+
+    const next = live
+      ? { active: true, liveUrl: `https://www.youtube.com/watch?v=${live.videoId}`, title: live.title }
+      : { active: false, liveUrl: null, title: null };
+
+    // Only commit if state changed
+    const changed = !current || current.active !== next.active || current.liveUrl !== next.liveUrl;
+    if (changed) {
+      await commitFile(env.GITHUB_TOKEN, next, sha);
+    }
+
+    console.log(`Live: ${next.active}, url: ${next.liveUrl}`);
   },
 };

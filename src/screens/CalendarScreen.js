@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchCalendar} from '../api/client';
+import {fetchCalendar, fetchLiveStatus} from '../api/client';
 import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
@@ -47,6 +47,7 @@ export default function CalendarScreen({navigation}) {
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [liveStatus, setLiveStatus] = useState(null);
   const flatListRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
@@ -68,6 +69,9 @@ export default function CalendarScreen({navigation}) {
   useEffect(() => {
     load();
   }, [load]);
+  useEffect(() => {
+    fetchLiveStatus().then(s => { if (s) setLiveStatus(s); });
+  }, []);
 
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('calendar');
@@ -178,9 +182,16 @@ export default function CalendarScreen({navigation}) {
     const isActive = round.startDate <= today && today <= round.endDate;
     const isNext = !activeRound && round === nextRound;
 
-    // Compute cutoff: 1 hour after the last session of today
-    const liveEndMs = (() => {
-      if (!round.liveUrl || !round.sessions?.length) return null;
+    // Resolve live URL: YouTube auto-detection takes priority, round.liveUrl is fallback
+    // liveStatus.active=false means stream confirmed ended; suppress fallback too
+    const resolvedLiveUrl = liveStatus?.active
+      ? liveStatus.liveUrl
+      : (!liveStatus && round.liveUrl) ? round.liveUrl
+      : null;
+
+    // Fallback cutoff: 1 hour after the last session of today (used when liveStatus unavailable)
+    const fallbackLiveEndMs = (() => {
+      if (!round.liveUrl || liveStatus || !round.sessions?.length) return null;
       const DAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
       const dateMap = {};
       let d = new Date(round.startDate + 'T12:00:00Z');
@@ -189,16 +200,15 @@ export default function CalendarScreen({navigation}) {
         dateMap[DAY_LABELS[d.getUTCDay()]] = d.toISOString().slice(0, 10);
         d = new Date(d.getTime() + 86400000);
       }
-      // Find the day label matching today
       const todayLabel = Object.keys(dateMap).find(k => dateMap[k] === today);
       if (!todayLabel) return null;
-      // Find last session of today
       const todaySessions = round.sessions.filter(s => s.day === todayLabel);
       if (!todaySessions.length) return null;
       const last = todaySessions.reduce((a, b) => b.time > a.time ? b : a);
-      // Times are UK local — all BTCC events run Apr–Oct (BST = UTC+1)
       return new Date(`${today}T${last.time}:00+01:00`).getTime() + 60 * 60 * 1000;
     })();
+
+    const showLiveBtn = resolvedLiveUrl && (!fallbackLiveEndMs || Date.now() < fallbackLiveEndMs);
 
     // Race weekend in progress
     if (isActive) {
@@ -223,11 +233,11 @@ export default function CalendarScreen({navigation}) {
               <Icon name="chevron-right" size={16} color="#fff" />
             </View>
           </View>
-          {round.liveUrl && (!liveEndMs || Date.now() < liveEndMs) ? (
+          {showLiveBtn ? (
             <TouchableOpacity
               style={styles.liveWatchBtn}
               activeOpacity={0.8}
-              onPress={e => { e.stopPropagation?.(); Linking.openURL(round.liveUrl); }}
+              onPress={e => { e.stopPropagation?.(); Linking.openURL(resolvedLiveUrl); }}
               accessibilityLabel="Watch live stream"
               accessibilityRole="button">
               <View style={styles.livePulseDot} />

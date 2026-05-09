@@ -85,6 +85,14 @@ export async function fetchStandings(forceRefresh = false) {
   return fetchJson(`${BASE_GITHUB}/standings.json`, 'standings', forceRefresh);
 }
 
+export async function fetchLiveStatus() {
+  try {
+    return await fetchJson(`${BASE_GITHUB}/live_status.json`, 'live_status', false, false, /* staleFirst */ true, 2 * 60 * 1000);
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchResults(year = 2026, forceRefresh = false) {
   return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, false, false, 5 * 60 * 1000);
 }
