@@ -370,7 +370,7 @@ function ReverseGridTab({races, isFavourite}) {
   const grid = buildReverseGrid(races, reversalCount);
 
   if (!grid) {
-    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight, results will appear when they're ready" />;
+    return <EmptyState icon="schedule" title="Race 2 results needed to predict grid" subtitle="Check back once Race 2 is complete" />;
   }
 
   return (

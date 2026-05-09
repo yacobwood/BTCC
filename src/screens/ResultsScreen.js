@@ -176,39 +176,6 @@ export default function ResultsScreen({navigation, route}) {
   const statsListRef = useRef(null);
   const chartScrollRef = useRef(null);
 
-  useFocusEffect(useCallback(() => {
-    driversListRef.current?.scrollToOffset({offset: 0, animated: false});
-    teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
-    resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
-    statsListRef.current?.scrollToOffset({offset: 0, animated: false});
-    chartScrollRef.current?.scrollTo({y: 0, animated: false});
-    if (year === 2026) load(2026, true);
-  }, [year]));
-
-  const changeYear = useCallback((newYear) => {
-    Analytics.resultsYearChanged(newYear);
-    if (newYear >= 2004 && newYear <= 2025) {
-      applyBundledYear(newYear);
-    } else {
-      setLoading(true);
-    }
-    setYear(newYear);
-    setDriverFilter('all');
-    setShowYearPicker(false);
-  }, [applyBundledYear]);
-
-  const onListScroll = (e) => setShowScrollTop(e.nativeEvent.contentOffset.y > 400);
-
-  const scrollToTop = () => {
-    Analytics.scrollToTop('results');
-    driversListRef.current?.scrollToOffset({offset: 0, animated: true});
-    teamsListRef.current?.scrollToOffset({offset: 0, animated: true});
-    resultsListRef.current?.scrollToOffset({offset: 0, animated: true});
-    statsListRef.current?.scrollToOffset({offset: 0, animated: true});
-    chartScrollRef.current?.scrollTo({y: 0, animated: true});
-    setShowScrollTop(false);
-  };
-
   // Synchronously apply all state for a bundled year in one batch — no flash
   const applyBundledYear = useCallback((y) => {
     const season = getSeasonData(y);
@@ -322,6 +289,39 @@ export default function ResultsScreen({navigation, route}) {
     setLoading(false);
     setRefreshing(false);
   }, [year, seasonStarted]);
+
+  useFocusEffect(useCallback(() => {
+    driversListRef.current?.scrollToOffset({offset: 0, animated: false});
+    teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
+    resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
+    statsListRef.current?.scrollToOffset({offset: 0, animated: false});
+    chartScrollRef.current?.scrollTo({y: 0, animated: false});
+    if (year === 2026) load(2026, true);
+  }, [year]));
+
+  const changeYear = useCallback((newYear) => {
+    Analytics.resultsYearChanged(newYear);
+    if (newYear >= 2004 && newYear <= 2025) {
+      applyBundledYear(newYear);
+    } else {
+      setLoading(true);
+    }
+    setYear(newYear);
+    setDriverFilter('all');
+    setShowYearPicker(false);
+  }, [applyBundledYear]);
+
+  const onListScroll = (e) => setShowScrollTop(e.nativeEvent.contentOffset.y > 400);
+
+  const scrollToTop = () => {
+    Analytics.scrollToTop('results');
+    driversListRef.current?.scrollToOffset({offset: 0, animated: true});
+    teamsListRef.current?.scrollToOffset({offset: 0, animated: true});
+    resultsListRef.current?.scrollToOffset({offset: 0, animated: true});
+    statsListRef.current?.scrollToOffset({offset: 0, animated: true});
+    chartScrollRef.current?.scrollTo({y: 0, animated: true});
+    setShowScrollTop(false);
+  };
 
   useEffect(() => { Analytics.screen('results'); }, []);
 

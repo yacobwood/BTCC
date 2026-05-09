@@ -139,7 +139,7 @@ jest.mock('@react-navigation/native', () => {
       getState:     jest.fn(() => ({routes: [{name: 'NewsFeed'}], index: 0})),
     })),
     useRoute: jest.fn(() => ({params: {}})),
-    useFocusEffect: jest.fn((cb) => { cb(); }),
+    useFocusEffect: jest.fn(),
     createNavigationContainerRef: jest.fn(() => ({
       navigate: jest.fn(),
       isReady:  jest.fn(() => true),
