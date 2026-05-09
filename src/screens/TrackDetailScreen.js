@@ -308,7 +308,7 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'youtube':
         return (
           <View style={styles.youtubeBtnRow}>
-            {['Hot Lap', 'Race 1', 'Race 2', 'Race 3'].map((label, i) => {
+            {['Lap Preview', 'Race 1', 'Race 2', 'Race 3'].map((label, i) => {
               const url = (track.youtubeUrls || [])[i];
               if (!url) return null;
               return (
