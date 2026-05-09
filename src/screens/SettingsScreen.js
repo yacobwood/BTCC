@@ -18,6 +18,8 @@ import {version} from '../../package.json';
 import {getFCMToken} from '../utils/notifications';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
+import {fetchResults} from '../api/client';
+import {parseResults} from '../api/parsers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getStableDeviceId} from '../utils/deviceId';
 
@@ -251,7 +253,7 @@ export default function SettingsScreen({navigation}) {
           </View>
         </View>
 
-        {debug_mode && (
+        {(debug_mode || __DEV__) && (
           <>
             <View style={styles.divider} />
             <Text style={styles.sectionTitle}>DEBUG</Text>
@@ -272,6 +274,24 @@ export default function SettingsScreen({navigation}) {
                 <Text style={styles.debugBtnText}>{label}</Text>
               </TouchableOpacity>
             ))}
+            <Text style={[styles.settingDesc, {marginTop: 12, marginBottom: 8}]}>Component tests</Text>
+            <TouchableOpacity
+              style={styles.debugBtn}
+              onPress={async () => {
+                const raw = await fetchResults(2026);
+                const rounds = parseResults(raw);
+                const r1 = rounds.find(r => r.round === 1);
+                if (!r1) return;
+                const testRound = {
+                  ...r1,
+                  races: r1.races.map(s =>
+                    s.label === 'Qualifying' ? {...s, results: []} : s,
+                  ),
+                };
+                navigation.navigate('Results', {screen: 'RoundResults', params: {round: testRound, year: 2026, initialRace: 1, origin: 'calendar'}});
+              }}>
+              <Text style={styles.debugBtnText}>Qual Groups (R1 FP → no QUAL results)</Text>
+            </TouchableOpacity>
           </>
         )}
 
