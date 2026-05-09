@@ -711,7 +711,7 @@
               "team": "NAPA Racing UK",
               "car": "Ford Focus Titanium",
               "laps": 1,
-              "bestLap": "91.46",
+              "bestLap": "",
               "points": 0
             }
           ],
@@ -1498,7 +1498,7 @@
               "team": "Cataclean Plato Racing",
               "car": "Mercedes A35 Saloon",
               "laps": 2,
-              "bestLap": "67.21",
+              "bestLap": "",
               "points": 0,
               "ledLap": false
             },
