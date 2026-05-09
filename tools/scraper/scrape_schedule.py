@@ -30,8 +30,8 @@ DAY_MAP = {"saturday": "SAT", "sunday": "SUN", "friday": "FRI"}
 VENUE_SLUG_MAP = {
     "donington park":    "donington-park",
     "donington park gp": "donington-park",
-    "brands hatch indy": "brands-hatch",
-    "brands hatch gp":   "brands-hatch",
+    "brands hatch indy": "brands-hatch-indy",
+    "brands hatch gp":   "brands-hatch-gp",
     "snetterton":        "snetterton",
     "oulton park":       "oulton-park",
     "thruxton":          "thruxton",
