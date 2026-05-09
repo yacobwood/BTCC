@@ -19,6 +19,7 @@ import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import MobileAds, {AdsConsent, AdsConsentStatus} from 'react-native-google-mobile-ads';
+import {requestTrackingPermission} from 'react-native-tracking-transparency';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
@@ -100,17 +101,19 @@ function AppDialogs() {
 
 export default function App() {
   useEffect(() => {
-    // Request ATT/UMP consent before initialising AdMob — required on iOS 14+
-    // and for GDPR regions (UK included). Without this the SDK serves no ads silently.
-    AdsConsent.requestInfoUpdate().then(async (info) => {
-      if (info.isConsentFormAvailable &&
-          (info.status === AdsConsentStatus.UNKNOWN || info.status === AdsConsentStatus.REQUIRED)) {
-        await AdsConsent.showForm();
-      }
+    // iOS ATT prompt must appear before any data collection (App Store guideline 2.1).
+    // Then run the UMP/GDPR consent flow, then initialise AdMob.
+    (async () => {
+      await requestTrackingPermission();
+      try {
+        const info = await AdsConsent.requestInfoUpdate();
+        if (info.isConsentFormAvailable &&
+            (info.status === AdsConsentStatus.UNKNOWN || info.status === AdsConsentStatus.REQUIRED)) {
+          await AdsConsent.showForm();
+        }
+      } catch (_) {}
       MobileAds().initialize();
-    }).catch(() => {
-      MobileAds().initialize();
-    });
+    })();
     const crashlytics = getCrashlytics();
     setCrashlyticsCollectionEnabled(crashlytics, true);
     setupNotificationChannels();

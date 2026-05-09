@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier is used to deliver personalised ads and measure ad performance.</string>
+	<string>Your device's advertising identifier is used to measure ad performance and limit how often you see the same ad.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
