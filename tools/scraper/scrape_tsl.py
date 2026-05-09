@@ -302,6 +302,16 @@ def parse_classification(pdf_bytes, label):
             "points":  pts,
         })
 
+    # Compute gap to P1 for FP/Qualifying (PDF has no gap column for QUAL; derive from bestLap)
+    if label in NO_POINTS_SESSIONS and results:
+        p1 = next((r for r in results if r['pos'] == 1 and r.get('bestLap')), None)
+        p1_secs = lap_to_secs(p1['bestLap']) if p1 else None
+        if p1_secs and p1_secs < float('inf'):
+            for r in results:
+                if r['pos'] != 1 and r.get('bestLap'):
+                    diff = lap_to_secs(r['bestLap']) - p1_secs
+                    r['gap'] = f'{diff:.3f}' if diff >= 0 else ''
+
     return results
 
 

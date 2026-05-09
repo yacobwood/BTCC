@@ -2353,7 +2353,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.042",
               "bestLap": "47.402",
               "points": 0
             },
@@ -2366,7 +2366,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.077",
               "bestLap": "47.437",
               "points": 0
             },
@@ -2379,7 +2379,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.134",
               "bestLap": "47.494",
               "points": 0
             },
@@ -2392,7 +2392,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.148",
               "bestLap": "47.508",
               "points": 0
             },
@@ -2405,7 +2405,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.158",
               "bestLap": "47.518",
               "points": 0
             },
@@ -2418,7 +2418,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.223",
               "bestLap": "47.583",
               "points": 0
             },
@@ -2431,7 +2431,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.297",
               "bestLap": "47.657",
               "points": 0
             },
@@ -2444,7 +2444,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.341",
               "bestLap": "47.701",
               "points": 0
             },
@@ -2457,7 +2457,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.357",
               "bestLap": "47.717",
               "points": 0
             },
@@ -2470,7 +2470,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.398",
               "bestLap": "47.758",
               "points": 0
             },
@@ -2483,7 +2483,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.482",
               "bestLap": "47.842",
               "points": 0
             },
@@ -2496,7 +2496,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.661",
               "bestLap": "48.021",
               "points": 0
             },
@@ -2509,7 +2509,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.698",
               "bestLap": "48.058",
               "points": 0
             },
@@ -2522,7 +2522,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.733",
               "bestLap": "48.093",
               "points": 0
             },
@@ -2535,7 +2535,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.741",
               "bestLap": "48.101",
               "points": 0
             },
@@ -2548,7 +2548,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.750",
               "bestLap": "48.110",
               "points": 0
             },
@@ -2561,7 +2561,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.111",
               "bestLap": "48.471",
               "points": 0
             },
@@ -2574,7 +2574,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.262",
               "bestLap": "48.622",
               "points": 0
             },
@@ -2587,7 +2587,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "1.454",
               "bestLap": "48.814",
               "points": 0
             },
@@ -2632,7 +2632,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.100",
               "bestLap": "47.410",
               "points": 0
             },
@@ -2645,7 +2645,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.105",
               "bestLap": "47.415",
               "points": 0
             },
@@ -2658,7 +2658,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.148",
               "bestLap": "47.458",
               "points": 0
             },
@@ -2671,7 +2671,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.168",
               "bestLap": "47.478",
               "points": 0
             },
@@ -2684,7 +2684,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.164",
               "bestLap": "47.474",
               "points": 0
             },
@@ -2697,7 +2697,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.181",
               "bestLap": "47.491",
               "points": 0
             },
@@ -2710,7 +2710,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.186",
               "bestLap": "47.496",
               "points": 0
             },
@@ -2723,7 +2723,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.213",
               "bestLap": "47.523",
               "points": 0
             },
@@ -2736,7 +2736,7 @@
               "car": "BMW 330i M Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.274",
               "bestLap": "47.584",
               "points": 0
             },
@@ -2749,7 +2749,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.231",
               "bestLap": "47.541",
               "points": 0
             },
@@ -2762,7 +2762,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.319",
               "bestLap": "47.629",
               "points": 0
             },
@@ -2775,7 +2775,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.276",
               "bestLap": "47.586",
               "points": 0
             },
@@ -2788,7 +2788,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.482",
               "bestLap": "47.792",
               "points": 0
             },
@@ -2801,7 +2801,7 @@
               "car": "Ford Focus Titanium",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.387",
               "bestLap": "47.697",
               "points": 0
             },
@@ -2814,7 +2814,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.507",
               "bestLap": "47.817",
               "points": 0
             },
@@ -2827,7 +2827,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.427",
               "bestLap": "47.737",
               "points": 0
             },
@@ -2840,7 +2840,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.525",
               "bestLap": "47.835",
               "points": 0
             },
@@ -2853,7 +2853,7 @@
               "car": "Audi A3 Saloon",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.438",
               "bestLap": "47.748",
               "points": 0
             },
@@ -2866,7 +2866,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.817",
               "bestLap": "48.127",
               "points": 0
             },
@@ -2879,7 +2879,7 @@
               "car": "Hyundai i30N",
               "laps": 0,
               "time": "",
-              "gap": "",
+              "gap": "0.631",
               "bestLap": "47.941",
               "points": 0
             }
