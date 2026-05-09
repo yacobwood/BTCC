@@ -32,9 +32,11 @@ async function checkLive(youtubeApiKey) {
   const data = await res.json();
   const item = data.items?.[0];
   if (!item) return null;
+  const title = item.snippet.title;
+  if (!title.includes('BTCC')) return null;
   return {
     videoId: item.id.videoId,
-    title: item.snippet.title,
+    title,
   };
 }
 
