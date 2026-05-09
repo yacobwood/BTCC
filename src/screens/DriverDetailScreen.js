@@ -56,8 +56,9 @@ export default function DriverDetailScreen({route, navigation}) {
           const results = race.results || [];
           const entry = results.find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
           if (!entry) continue;
-          if (entry.pos === 1) wins++;
-          if (entry.pos >= 1 && entry.pos <= 3) podiums++;
+          const isQR = race.label === 'Qualifying Race';
+          if (entry.pos === 1 && !isQR) wins++;
+          if (entry.pos >= 1 && entry.pos <= 3 && !isQR) podiums++;
           if (entry.pos === 0) dnfs++;
           points += entry.points || 0;
           if (entry.pole) poles++;
