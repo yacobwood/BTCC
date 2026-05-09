@@ -33,7 +33,7 @@ function shortLabel(label) {
 // - Top `reversalCount` classified R2 finishers are reversed (draw picks 6–12 inclusive)
 // - Remaining classified finishers follow in R2 order
 // - Non-classified (DNFs) start after the last classified, ordered by laps covered (desc)
-function buildReverseGrid(races, reversalCount) {
+export function buildReverseGrid(races, reversalCount) {
   const r2 = races.find(r => r.label === 'Race 2');
   if (!r2?.results?.length) return null;
   const classified = r2.results.filter(r => r.position > 0);
@@ -48,7 +48,7 @@ function buildReverseGrid(races, reversalCount) {
 // Build a map of driver -> grid position for a given race.
 // Prefers the actual TSL grid PDF data when available (covers all races incl. R3).
 // Falls back to derivation from the previous session's finishing order.
-function buildGridMap(races, raceIndex) {
+export function buildGridMap(races, raceIndex) {
   const race = races[raceIndex];
   if (!race) return null;
 
@@ -250,7 +250,7 @@ const REVERSAL_MAX = 12;
 const GRID_CARD_HEIGHT = 52;
 const GRID_GAP = 6;
 
-function detectReversalCount(races, gridDrivers) {
+export function detectReversalCount(races, gridDrivers) {
   const r2 = races?.find(r => r.label === 'Race 2');
   if (!r2?.results?.length) return null;
   const r2Order = [...r2.results].filter(d => d.position > 0).sort((a, b) => a.position - b.position).map(d => d.driver);

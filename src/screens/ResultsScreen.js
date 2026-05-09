@@ -64,7 +64,7 @@ export function computeProgression(rounds) {
       const isQR = race.label === 'Qualifying Race';
       for (const r of race.results) {
         if (!r.driver) continue;
-        const bonus = (r.leadLap ? 1 : 0) + (!isQR && r.fastestLap ? 1 : 0);
+        const bonus = isQR ? 0 : (r.leadLap ? 1 : 0) + (r.fastestLap ? 1 : 0);
         driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points + bonus;
         if (firstPoint[r.driver] === undefined) firstPoint[r.driver] = pointLabels.length;
         if (!series[r.driver]) series[r.driver] = {name: r.driver, points: []};

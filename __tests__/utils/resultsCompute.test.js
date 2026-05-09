@@ -117,6 +117,17 @@ describe('computeProgression', () => {
     expect(alice.points[alice.points.length - 1]).toBe(18);
   });
 
+  it('does NOT add LL bonus for QR (reg 1.6.2.a — guard in computeProgression)', () => {
+    // parsers.js strips leadLap to false for QR; computeProgression also guards with isQR
+    // to catch any hypothetical scenario where the flag was not stripped upstream
+    const rounds = [makeRound(1, [
+      makeRace('Qualifying Race', [makeResult('Alice', 1, {points: 10, leadLap: true})]),
+    ])];
+    const {series} = computeProgression(rounds);
+    const alice = series.find(s => s.name === 'Alice');
+    expect(alice.points[alice.points.length - 1]).toBe(10);
+  });
+
   it('does NOT add FL bonus for QR (flags stripped by parsers — fastestLap is false)', () => {
     // parsers.js strips fastestLap to false for QR; this confirms computeProgression
     // correctly accumulates 0 bonus when the flag is false
