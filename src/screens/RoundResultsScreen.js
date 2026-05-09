@@ -210,7 +210,7 @@ export default function RoundResultsScreen({route, navigation}) {
           }
 
           if (!race?.results?.length) {
-            return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Results will appear when they're ready" />;
+            return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight - Results will appear when they're ready" />;
           }
 
           return (
@@ -312,7 +312,7 @@ function EmptyState({icon, title, subtitle}) {
 function QualGroupsTab({races, isFavourite}) {
   const fp = races.find(r => r.label === 'Free Practice');
   if (!fp?.results?.length) {
-    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Results will appear when they're ready" />;
+    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight - Results will appear when they're ready" />;
   }
   const classified = [...fp.results]
     .filter(r => r.position > 0)
@@ -370,7 +370,7 @@ function ReverseGridTab({races, isFavourite}) {
   const grid = buildReverseGrid(races, reversalCount);
 
   if (!grid) {
-    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Results will appear when they're ready" />;
+    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight - Results will appear when they're ready" />;
   }
 
   return (
