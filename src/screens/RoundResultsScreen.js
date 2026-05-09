@@ -231,7 +231,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
                   </TouchableOpacity>
                 ) : null}
-                ListEmptyComponent={<Text style={styles.emptyText}>No results available</Text>}
+                ListEmptyComponent={<EmptyState icon="schedule" title="Results Coming Soon" subtitle="Results will appear here as soon as the session classification is published" />}
               />
             </View>
           );
@@ -296,10 +296,20 @@ function StartingGridTab({race, races, isFavourite}) {
   );
 }
 
+function EmptyState({icon, title, subtitle}) {
+  return (
+    <View style={styles.emptyState}>
+      <Icon name={icon} size={48} color="#fff" style={styles.emptyStateIcon} />
+      <Text style={styles.emptyStateTitle}>{title}</Text>
+      <Text style={styles.emptyStateSubtitle}>{subtitle}</Text>
+    </View>
+  );
+}
+
 function QualGroupsTab({races, isFavourite}) {
   const fp = races.find(r => r.label === 'Free Practice');
   if (!fp?.results?.length) {
-    return <Text style={styles.emptyText}>Free Practice results needed to determine qualifying groups</Text>;
+    return <EmptyState icon="groups" title="Awaiting Free Practice" subtitle="Qualifying groups are determined by FP finishing order — check back once the session is complete" />;
   }
   const classified = [...fp.results]
     .filter(r => r.position > 0)
@@ -357,7 +367,7 @@ function ReverseGridTab({races, isFavourite}) {
   const grid = buildReverseGrid(races, reversalCount);
 
   if (!grid) {
-    return <Text style={styles.emptyText}>Race 2 results needed to predict grid</Text>;
+    return <EmptyState icon="shuffle" title="Awaiting Race 2" subtitle="The R3 reverse grid draw is based on Race 2 results — predictions will appear once R2 is classified" />;
   }
 
   return (
@@ -479,6 +489,10 @@ const styles = StyleSheet.create({
   badgeText: {fontSize: 10, fontWeight: '800'},
   pointsText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600', marginTop: 2},
   emptyText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 40},
+  emptyState: {flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, gap: 10},
+  emptyStateIcon: {opacity: 0.25, marginBottom: 4},
+  emptyStateTitle: {color: '#fff', fontSize: 16, fontWeight: '800', textAlign: 'center'},
+  emptyStateSubtitle: {color: Colors.textSecondary, fontSize: 13, textAlign: 'center', lineHeight: 18},
   reverseHeader: {padding: 16, paddingBottom: 12},
   reverseTitle: {color: '#fff', fontSize: 15, fontWeight: '800'},
   reverseSubtitle: {color: Colors.textSecondary, fontSize: 11, marginTop: 2, marginBottom: 10},
