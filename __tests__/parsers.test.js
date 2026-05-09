@@ -208,6 +208,18 @@ describe('parseResults', () => {
     expect(result.pole).toBe(false);
   });
 
+  test('pole bonus (+1) is only added in Race 1, not Race 2 or Race 3', () => {
+    const mkRace = (label) => ({
+      label,
+      results: [{pos: 1, no: 1, driver: 'A', team: 'T', laps: 10, time: '20:00', pole: true}],
+    });
+    const json = {rounds: [{round: 1, venue: 'Test', races: [mkRace('Race 1'), mkRace('Race 2'), mkRace('Race 3')]}]};
+    const [round] = parseResults(json);
+    expect(round.races[0].results[0].points).toBe(21); // 20 base + 1 PP
+    expect(round.races[1].results[0].points).toBe(20); // no PP bonus
+    expect(round.races[2].results[0].points).toBe(20); // no PP bonus
+  });
+
   test('regular race results preserve fastestLap, leadLap and pole flags', () => {
     const json = {
       rounds: [{

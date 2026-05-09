@@ -26,7 +26,7 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite, cacheReadTimestamp} from '../store/cache';
 
-function computeSeasonStats(rounds) {
+export function computeSeasonStats(rounds) {
   const map = {};
   for (const round of rounds) {
     for (const race of round.races) {
@@ -50,7 +50,7 @@ function computeSeasonStats(rounds) {
 
 const SCORING_RACES = ['Qualifying Race', 'Race 1', 'Race 2', 'Race 3'];
 
-function computeProgression(rounds) {
+export function computeProgression(rounds) {
   const driverPoints = {};
   const firstPoint = {}; // point index when driver first appeared
   const series = {};
