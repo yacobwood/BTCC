@@ -676,7 +676,7 @@ def compute_standings_fallback(rounds):
                 pts = pts_table.get(pos, 0) if pos > 0 else 0
                 if d == fl:
                     pts += 1          # fastest lap bonus
-                if r.get("leadLap"):
+                if r.get("leadLap") and not is_qual_race:
                     pts += 1          # laps led bonus
 
                 driver_pts[d]  += pts

@@ -118,10 +118,11 @@ class TestComputeStandingsFallback(unittest.TestCase):
         standings = self._standings([make_round(1, [make_race('Qualifying Race', [r])])])
         self.assertEqual(standings['Alice']['points'], 10)
 
-    def test_qualifying_race_lead_lap_adds_1(self):
+    def test_qualifying_race_lead_lap_no_bonus(self):
+        """Reg 1.6.2.a: PP, FL and laps-led bonus points are not awarded in the QR."""
         r = make_result('Alice', pos=1, points=10, leadLap=True)
         standings = self._standings([make_round(1, [make_race('Qualifying Race', [r])])])
-        self.assertEqual(standings['Alice']['points'], 11)
+        self.assertEqual(standings['Alice']['points'], 10)
 
     # Wins counting — QR wins now count
 

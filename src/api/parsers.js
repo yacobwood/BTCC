@@ -260,9 +260,9 @@ export function parseResults(json) {
             gap: d.gap || null,
             bestLap: d.bestLap || '',
             points,
-            fastestLap: fl,
-            leadLap: lead,
-            pole,
+            fastestLap: isQR ? false : fl,
+            leadLap: isQR ? false : lead,
+            pole: isQR ? false : pole,
             avgLapSpeed: d.avgLapSpeed || null,
           };
         }),
