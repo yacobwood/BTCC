@@ -161,6 +161,18 @@
         {
           "type": "callout",
           "body": "The 20-metre window between the Go boards is one of the most overlooked details of a BTCC restart. A lead driver who hesitates, or whose rivals anticipate the acceleration perfectly, can lose ground in the blink of an eye - even before the first corner after the Safety Car comes in."
+        },
+        {
+          "type": "heading",
+          "body": "Regulations Awareness Test"
+        },
+        {
+          "type": "text",
+          "body": "When required to do so by the Administrator, all drivers and team managers must participate in and pass a Regulations Awareness Test. A driver who has not passed is not permitted to race. A team manager who has not passed is not permitted to take any further part in the championship."
+        },
+        {
+          "type": "callout",
+          "body": "The consequences are hard stops: a driver cannot get in the car, and a team manager cannot participate further in the championship at all — until the test is passed."
         }
       ]
     },
