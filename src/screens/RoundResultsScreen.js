@@ -161,6 +161,8 @@ export default function RoundResultsScreen({route, navigation}) {
           </Text>
           {item.time && item.bestLap ? (
             <Text style={styles.detailText}>BL {item.bestLap}</Text>
+          ) : (!item.time && item.gap && item.position > 1 && item.bestLap) ? (
+            <Text style={styles.detailText}>{item.bestLap}</Text>
           ) : null}
           {item.avgLapSpeed ? (
             <Text style={styles.detailText}>
