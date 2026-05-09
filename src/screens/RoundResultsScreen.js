@@ -231,7 +231,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
                   </TouchableOpacity>
                 ) : null}
-                ListEmptyComponent={<EmptyState icon="schedule" title="Results Coming Soon" subtitle="Results will appear here as soon as the session classification is published" />}
+                ListEmptyComponent={<EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight — results will appear automatically" />}
               />
             </View>
           );
@@ -309,7 +309,7 @@ function EmptyState({icon, title, subtitle}) {
 function QualGroupsTab({races, isFavourite}) {
   const fp = races.find(r => r.label === 'Free Practice');
   if (!fp?.results?.length) {
-    return <EmptyState icon="groups" title="Awaiting Free Practice" subtitle="Qualifying groups are determined by FP finishing order — check back once the session is complete" />;
+    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight — results will appear automatically" />;
   }
   const classified = [...fp.results]
     .filter(r => r.position > 0)
@@ -367,7 +367,7 @@ function ReverseGridTab({races, isFavourite}) {
   const grid = buildReverseGrid(races, reversalCount);
 
   if (!grid) {
-    return <EmptyState icon="shuffle" title="Awaiting Race 2" subtitle="The R3 reverse grid draw is based on Race 2 results — predictions will appear once R2 is classified" />;
+    return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight — results will appear automatically" />;
   }
 
   return (
