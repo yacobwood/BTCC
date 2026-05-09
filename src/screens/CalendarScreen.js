@@ -178,6 +178,28 @@ export default function CalendarScreen({navigation}) {
     const isActive = round.startDate <= today && today <= round.endDate;
     const isNext = !activeRound && round === nextRound;
 
+    // Compute cutoff: 1 hour after the last session of the last day
+    const liveEndMs = (() => {
+      if (!round.liveUrl || !round.sessions?.length) return null;
+      const DAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      const dateMap = {};
+      let d = new Date(round.startDate + 'T12:00:00Z');
+      const endD = new Date(round.endDate + 'T12:00:00Z');
+      while (d <= endD) {
+        dateMap[DAY_LABELS[d.getUTCDay()]] = d.toISOString().slice(0, 10);
+        d = new Date(d.getTime() + 86400000);
+      }
+      const last = round.sessions.reduce((a, b) => {
+        const at = (dateMap[a.day] || '') + 'T' + a.time;
+        const bt = (dateMap[b.day] || '') + 'T' + b.time;
+        return bt > at ? b : a;
+      });
+      const date = dateMap[last.day];
+      if (!date || !last.time) return null;
+      // Times are UK local — all BTCC events run Apr–Oct (BST = UTC+1)
+      return new Date(`${date}T${last.time}:00+01:00`).getTime() + 60 * 60 * 1000;
+    })();
+
     // Race weekend in progress
     if (isActive) {
       return (
@@ -201,7 +223,7 @@ export default function CalendarScreen({navigation}) {
               <Icon name="chevron-right" size={16} color="#fff" />
             </View>
           </View>
-          {round.liveUrl && (!round.liveEnd || Date.now() < new Date(round.liveEnd).getTime()) ? (
+          {round.liveUrl && (!liveEndMs || Date.now() < liveEndMs) ? (
             <TouchableOpacity
               style={styles.liveWatchBtn}
               activeOpacity={0.8}

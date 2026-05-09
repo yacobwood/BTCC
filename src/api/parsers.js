@@ -91,7 +91,6 @@ export function parseCalendar(json) {
     raceImages: r.raceImages || [],
     youtubeUrls: r.youtubeUrls || [],
     liveUrl: r.liveUrl || null,
-    liveEnd: r.liveEnd || null,
     firstBtccYear: r.firstBtccYear || null,
     qualifyingRecord: r.qualifyingRecord || null,
     raceRecord: r.raceRecord || null,
