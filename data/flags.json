@@ -14,5 +14,8 @@
   "update_min_version": 62,
   "update_min_version_ios": 0,
   "update_min_version_android": 63,
-  "live_chat": false
+  "live_chat": true,
+  "banner_ad": false,
+  "newsfeed_ad": false,
+  "search_ad": false
 }
