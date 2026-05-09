@@ -54,7 +54,7 @@ export default function CalendarScreen({navigation}) {
 
   const load = useCallback(async () => {
     try {
-      const raw = fetchCalendar(selectedYear);
+      const raw = await fetchCalendar(selectedYear);
       setCalendar(parseCalendar(raw));
     } catch {}
     setLoading(false);

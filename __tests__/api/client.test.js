@@ -27,8 +27,17 @@ import {
 } from '../../src/api/client';
 
 describe('fetchCalendar', () => {
-  it('returns bundled calendar data synchronously', () => {
-    const data = fetchCalendar();
+  it('returns remote calendar data when fetch succeeds', async () => {
+    const remote = {rounds: [{round: 1}]};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(remote)});
+    const data = await fetchCalendar();
+    expect(data.rounds).toBeDefined();
+    expect(Array.isArray(data.rounds)).toBe(true);
+  });
+
+  it('falls back to bundled calendar when fetch fails', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    const data = await fetchCalendar();
     expect(data.rounds).toBeDefined();
     expect(Array.isArray(data.rounds)).toBe(true);
   });
