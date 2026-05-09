@@ -159,7 +159,7 @@ const linking = {
 function AppContent({adBannerRef}) {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
-  const {banner_ad, live_chat} = useFeatureFlags();
+  const {live_chat} = useFeatureFlags();
   return (
     <View style={{flex: 1}}>
       <Tab.Navigator
@@ -174,8 +174,8 @@ function AppContent({adBannerRef}) {
               backgroundColor: Colors.surface,
               borderTopColor: Colors.outline,
               borderTopWidth: 1,
-              paddingBottom: banner_ad ? 0 : bottom,
-              height: 56 + (banner_ad ? 0 : bottom),
+              paddingBottom: 0,
+              height: 56,
             },
             tabBarLabelStyle: {
               fontSize: 11,
@@ -190,11 +190,9 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'History'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
-        {banner_ad && (
-          <View style={{paddingBottom: bottom}}>
-            <AdBanner ref={adBannerRef} />
-          </View>
-        )}
+        <View style={{paddingBottom: bottom}}>
+          <AdBanner ref={adBannerRef} />
+        </View>
       </View>
   );
 }

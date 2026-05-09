@@ -215,7 +215,6 @@ jest.mock('./src/components/CachedImage', () => {
   };
 });
 jest.mock('./src/components/AdBanner', () => ({__esModule: true, default: () => null}));
-jest.mock('./src/components/AdSearchBanner', () => ({__esModule: true, default: () => null}));
 jest.mock('./src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
 
 // ── Asset stubs ───────────────────────────────────────────────────────────────

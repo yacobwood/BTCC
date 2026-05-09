@@ -7,9 +7,6 @@ const FLAGS_CACHE_KEY = 'feature_flags_cache';
 
 const defaults = {
   radio_tab: false,
-  banner_ad: true,
-  newsfeed_ad: false,
-  search_ad: false,
   podcasts_enabled: false,
   podcast_last_episode_url: '',
   debug_mode: false,

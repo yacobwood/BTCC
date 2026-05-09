@@ -19,7 +19,6 @@ import {parseArticle} from '../api/parsers';
 import styles from './NewsScreen.styles';
 import CachedImage, {prefetchImages} from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
-import AdBanner from '../components/AdBanner';
 import {useFocusEffect} from '@react-navigation/native';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useFavouriteDriver} from '../store/favouriteDriver';
