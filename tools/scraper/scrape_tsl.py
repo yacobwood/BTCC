@@ -263,9 +263,11 @@ def parse_classification(pdf_bytes, label):
             elif 340 < x < 380:
                 if re.match(r"^\d+$", t):
                     laps = int(t)
-            elif 380 < x < 570:
+            elif 380 < x < 545:
                 # BEST LAP column (x≈503 for races, x≈411 for FP, x≈468 for qualifying)
-                if re.match(r"^\d+:\d{2}\.\d+$", t):
+                # Upper bound stops before MPH column at x≈559.
+                # Sub-minute tracks (Brands Hatch Indy, Knockhill) emit "SS.mmm"; others "M:SS.mmm"
+                if re.match(r"^(?:\d+:)?\d{2}\.\d+$", t):
                     best_lap = t
 
         # Normalise driver name
@@ -392,8 +394,11 @@ def scrape_round(info):
 
 def lap_to_secs(t):
     try:
-        m, s = t.strip().split(":")
-        return int(m) * 60 + float(s)
+        t = t.strip()
+        if ":" in t:
+            m, s = t.split(":")
+            return int(m) * 60 + float(s)
+        return float(t)
     except Exception:
         return float("inf")
 
