@@ -277,7 +277,7 @@ describe('RoundResultsScreen', () => {
         ),
       };
       const {getByText} = renderRound({round: noR2Round, initialRace: 5});
-      expect(getByText('Race 2 results needed to predict grid')).toBeTruthy();
+      expect(getByText('Nothing to see here. Literally.')).toBeTruthy();
     });
   });
 
