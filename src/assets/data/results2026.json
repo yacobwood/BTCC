@@ -178,7 +178,7 @@
               "pos": 16,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -393,7 +393,7 @@
               "pos": 14,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -597,7 +597,7 @@
               "pos": 11,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 13,
@@ -811,7 +811,7 @@
               "pos": 14,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -956,7 +956,7 @@
               "pos": 8,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
@@ -1196,7 +1196,7 @@
               "pos": 11,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -1398,7 +1398,7 @@
               "pos": 11,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
@@ -1581,7 +1581,7 @@
               "pos": 8,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -1816,7 +1816,7 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
@@ -1996,7 +1996,7 @@
               "pos": 11,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -2206,7 +2206,7 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -2313,32 +2313,38 @@
               "points": 0
             }
           ],
-          "grid": []
+          "grid": [],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
         },
         {
           "label": "Qualifying",
           "results": [],
-          "grid": []
+          "grid": [],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
         },
         {
           "label": "Qualifying Race",
           "results": [],
-          "grid": []
+          "grid": [],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
         },
         {
           "label": "Race 1",
           "results": [],
-          "grid": []
+          "grid": [],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
         },
         {
           "label": "Race 2",
           "results": [],
-          "grid": []
+          "grid": [],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
         },
         {
           "label": "Race 3",
           "results": [],
-          "grid": []
+          "grid": [],
+          "fullRaceUrl": "https://www.youtube.com/watch?v=8Rjuzi4EV3c"
         }
       ]
     },
