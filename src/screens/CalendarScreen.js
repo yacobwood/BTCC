@@ -178,7 +178,7 @@ export default function CalendarScreen({navigation}) {
     const isActive = round.startDate <= today && today <= round.endDate;
     const isNext = !activeRound && round === nextRound;
 
-    // Compute cutoff: 1 hour after the last session of the last day
+    // Compute cutoff: 1 hour after the last session of today
     const liveEndMs = (() => {
       if (!round.liveUrl || !round.sessions?.length) return null;
       const DAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -189,15 +189,15 @@ export default function CalendarScreen({navigation}) {
         dateMap[DAY_LABELS[d.getUTCDay()]] = d.toISOString().slice(0, 10);
         d = new Date(d.getTime() + 86400000);
       }
-      const last = round.sessions.reduce((a, b) => {
-        const at = (dateMap[a.day] || '') + 'T' + a.time;
-        const bt = (dateMap[b.day] || '') + 'T' + b.time;
-        return bt > at ? b : a;
-      });
-      const date = dateMap[last.day];
-      if (!date || !last.time) return null;
+      // Find the day label matching today
+      const todayLabel = Object.keys(dateMap).find(k => dateMap[k] === today);
+      if (!todayLabel) return null;
+      // Find last session of today
+      const todaySessions = round.sessions.filter(s => s.day === todayLabel);
+      if (!todaySessions.length) return null;
+      const last = todaySessions.reduce((a, b) => b.time > a.time ? b : a);
       // Times are UK local — all BTCC events run Apr–Oct (BST = UTC+1)
-      return new Date(`${date}T${last.time}:00+01:00`).getTime() + 60 * 60 * 1000;
+      return new Date(`${today}T${last.time}:00+01:00`).getTime() + 60 * 60 * 1000;
     })();
 
     // Race weekend in progress
