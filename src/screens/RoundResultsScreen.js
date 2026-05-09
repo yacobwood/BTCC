@@ -169,12 +169,19 @@ export default function RoundResultsScreen({route, navigation}) {
           const isR3 = race?.label === 'Race 3';
           const hasResults = race?.results?.length > 0;
 
+          const isQual = race.label === 'Qualifying';
           if (!hasResults) {
             if (race.grid?.length) {
               return <StartingGridTab key={i} race={race} races={races} isFavourite={isFavourite} />;
             }
             if (isR3) {
               return <ReverseGridTab key={i} races={races} isFavourite={isFavourite} />;
+            }
+            if (isQual) {
+              const fp = races.find(r => r.label === 'Free Practice');
+              if (fp?.results?.length) {
+                return <QualGroupsTab key={i} races={races} isFavourite={isFavourite} />;
+              }
             }
           }
 
@@ -260,6 +267,42 @@ function StartingGridTab({race, races, isFavourite}) {
             <Text style={styles.reversalBadgeText}>Top {reversalCount} reversed (draw: {reversalCount})</Text>
           </View>
         )}
+      </ScrollView>
+    </View>
+  );
+}
+
+function QualGroupsTab({races, isFavourite}) {
+  const fp = races.find(r => r.label === 'Free Practice');
+  if (!fp?.results?.length) {
+    return <Text style={styles.emptyText}>Free Practice results needed to determine qualifying groups</Text>;
+  }
+  const classified = [...fp.results]
+    .filter(r => r.position > 0)
+    .sort((a, b) => a.position - b.position);
+  const q1 = classified.filter(r => r.position % 2 === 1);
+  const q2 = classified.filter(r => r.position % 2 === 0);
+  return (
+    <View style={{flex: 1}}>
+      <View style={styles.reverseHeader}>
+        <Text style={styles.reverseTitle}>Qualifying Groups</Text>
+        <Text style={styles.reverseSubtitle}>Odd FP finishers → Q1 · Even FP finishers → Q2</Text>
+      </View>
+      <ScrollView contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 20}}>
+        <View style={{flexDirection: 'row', gap: GRID_GAP}}>
+          <View style={{flex: 1, gap: GRID_GAP}}>
+            <Text style={styles.qualGroupLabel}>Q1</Text>
+            {q1.map(item => (
+              <GridSlot key={item.position} item={{pos: item.position, driver: item.driver}} isFavourite={isFavourite} reversed={false} team={item.team || ''} />
+            ))}
+          </View>
+          <View style={{flex: 1, gap: GRID_GAP}}>
+            <Text style={styles.qualGroupLabel}>Q2</Text>
+            {q2.map(item => (
+              <GridSlot key={item.position} item={{pos: item.position, driver: item.driver}} isFavourite={isFavourite} reversed={false} team={item.team || ''} />
+            ))}
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -438,6 +481,7 @@ const styles = StyleSheet.create({
     borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
   },
   reversalBadgeText: {color: Colors.yellow, fontSize: 11, fontWeight: '600'},
+  qualGroupLabel: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1.5, textAlign: 'center', marginBottom: 2},
   gridPos: {color: '#fff', fontSize: 16, fontWeight: '900', width: 24, textAlign: 'center'},
   gridDriver: {color: '#fff', fontSize: 12, fontWeight: '700'},
   gridCar: {color: Colors.textSecondary, fontSize: 11},
