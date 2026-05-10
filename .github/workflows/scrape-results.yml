@@ -74,9 +74,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"
-          file_pattern: |
-            data/results*.json
-            data/standings.json
+          file_pattern: "data/results*.json data/standings.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
