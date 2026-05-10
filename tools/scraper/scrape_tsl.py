@@ -768,14 +768,23 @@ def main():
                  if any(race.get("results") for race in r.get("races", []))]
     latest = max(completed, key=lambda r: r["round"]) if completed else None
 
-    # Try to use the official championship PDF; fall back to computed standings
+    # Try championship PDFs from most-recent completed round backwards.
+    # TSL only publishes ptstrg after Race 3, so mid-round we fall back to the
+    # previous round's official PDF rather than the computed standings.
     standings = None
     if latest:
         tsl_map = {info["round"]: info["tsl"] for info in ROUNDS[YEAR]}
-        tsl = tsl_map.get(latest["round"])
-        if tsl:
+        completed_rounds = sorted(
+            [r for r in output_rounds if any(race.get("results") for race in r.get("races", []))],
+            key=lambda r: r["round"],
+            reverse=True,
+        )
+        for rnd in completed_rounds:
+            tsl = tsl_map.get(rnd["round"])
+            if not tsl:
+                continue
             champ_url = TSL_BASE.format(year=YEAR, tsl=tsl, suffix=CHAMPIONSHIP_SUFFIX)
-            print(f"\n[championship] → {champ_url}")
+            print(f"\n[championship] round {rnd['round']} → {champ_url}")
             champ_data = fetch_pdf(champ_url)
             if champ_data:
                 standings = parse_championship_pdf(champ_data)
@@ -784,10 +793,13 @@ def main():
                           f"{len(standings.get('jst', []))} JST)")
                     _backfill_teams(standings["standings"], output_rounds)
                     _backfill_teams(standings["jst"],       output_rounds)
+                    break
                 else:
-                    print("  parse failed — falling back to computed standings")
+                    print("  parse failed — trying previous round")
             else:
-                print("  not available yet — falling back to computed standings")
+                print(f"  not available yet — trying previous round")
+        if not standings:
+            print("  no championship PDF found — falling back to computed standings")
 
     if not standings:
         standings = compute_standings_fallback(output_rounds)
