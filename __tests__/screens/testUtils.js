@@ -91,7 +91,7 @@ export const MOCK_ROUND = {
     {
       label: 'Race 1',
       results: [
-        {driver: 'Gordon Shedden',   position: 1, time: '30:01.0', team: 'Laser Tools',  points: 25, bestLap: '1:24.1', gap: null, laps: 20, fastestLap: true, leadLap: false, pole: false},
+        {driver: 'Gordon Shedden',   position: 1, time: '30:01.0', team: 'Laser Tools',  points: 20, bestLap: '1:24.1', gap: null, laps: 20, fastestLap: true, leadLap: false, pole: false},
         {driver: 'Tom Ingram',       position: 2, time: '30:02.0', team: 'Team Ingram',  points: 18, bestLap: '1:24.2', gap: '1.0', laps: 20, fastestLap: false, leadLap: false, pole: false},
       ],
     },

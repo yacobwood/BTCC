@@ -167,7 +167,15 @@ export default function RoundResultsScreen({route, navigation}) {
               Avg {useKm ? `${parseFloat(item.avgLapSpeed).toFixed(2)} km/h` : `${(parseFloat(item.avgLapSpeed) / 1.60934).toFixed(2)} mph`}
             </Text>
           ) : null}
-          {item.points > 0 && <Text style={styles.pointsText}>+{item.points} pts</Text>}
+          {(() => {
+            const totalPoints = (item.points || 0)
+              + (item.fastestLap ? 1 : 0)
+              + (item.leadLap ? 1 : 0)
+              + (item.pole ? 1 : 0);
+            return totalPoints > 0
+              ? <Text style={styles.pointsText}>+{totalPoints} pts</Text>
+              : null;
+          })()}
         </View>
       </View>
     );

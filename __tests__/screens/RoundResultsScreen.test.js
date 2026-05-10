@@ -40,13 +40,13 @@ describe('RoundResultsScreen', () => {
     it('switching tabs renders different results', async () => {
       const {getByText, queryByText} = renderRound({initialRace: 0});
       // FP: no points shown
-      expect(queryByText('+25 pts')).toBeNull();
+      expect(queryByText('+21 pts')).toBeNull();
 
       await act(async () => {
         fireEvent.press(getByText('R1'));
       });
-      // Race 1: Shedden wins 25 pts — only appears after switching to R1
-      expect(getByText('+25 pts')).toBeTruthy();
+      // Race 1: Shedden wins (20 pts) + FL bonus (1 pt) = 21 pts
+      expect(getByText('+21 pts')).toBeTruthy();
     });
   });
 
@@ -76,14 +76,14 @@ describe('RoundResultsScreen', () => {
     it('shows points for a race session', async () => {
       const {getByText} = renderRound({initialRace: 3}); // Race 1
       await waitFor(() => {
-        expect(getByText('+25 pts')).toBeTruthy();
+        expect(getByText('+21 pts')).toBeTruthy();
       });
     });
 
     it('does not show points for Free Practice', () => {
       const {queryByText} = renderRound({initialRace: 0});
       expect(queryByText('+0 pts')).toBeNull();
-      expect(queryByText('+25 pts')).toBeNull();
+      expect(queryByText('+21 pts')).toBeNull();
     });
   });
 
