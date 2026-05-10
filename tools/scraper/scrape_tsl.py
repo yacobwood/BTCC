@@ -342,18 +342,35 @@ def parse_laps_led(text):
         end = sections[i + 1].start() if i + 1 < len(sections) else m.start() + 3000
         chunk = text[m.start():end]
 
-        # Names sit between the NAME column header and the FROM LAP column header
+        # The Session Leader History table has columns: NAME, FROM LAP, LAPS LED,
+        # DISTANCE, VEHICLE. pdfminer may emit them in two different orderings
+        # depending on the page layout:
+        #   Mode A (row-interleaved): NAME\n\n<names>\n\nFROM LAP\n\n...
+        #   Mode B (column-grouped):  NAME\n\nFROM LAP\n\n...\n\nVEHICLE\n\n<names>\n\n<numbers>
+        # Try Mode A first; if the capture is empty, fall back to Mode B.
+        names_block = ""
         name_m = re.search(r"NAME\n\n(.*?)FROM LAP", chunk, re.DOTALL)
+        if name_m and name_m.group(1).strip():
+            names_block = name_m.group(1)
+        else:
+            # Mode B: names appear right after VEHICLE header, before the first number block
+            veh_m = re.search(r"VEHICLE\n\n(.*?)\n\n\d", chunk, re.DOTALL)
+            if veh_m:
+                names_block = veh_m.group(1)
+
         leaders = set()
-        if name_m:
-            for line in name_m.group(1).split("\n"):
-                name = line.strip()
-                # Must start with a capital letter and contain a space (driver names)
-                # Driver names always have an ALL-CAPS surname (e.g. "Tom INGRAM")
-                if name and re.match(r"^[A-Z][a-z]", name) and " " in name \
-                        and any(w.isupper() and len(w) > 1 for w in name.split()):
-                    name = DRIVER_NAME_MAP.get(name, name)
-                    leaders.add(name)
+        for line in names_block.split("\n"):
+            name = line.strip()
+            if not name or " " not in name:
+                continue
+            parts = name.split()
+            if (len(parts) >= 2
+                    and len(parts[0]) >= 2
+                    and parts[0][0].isupper()
+                    and parts[0][1].islower()
+                    and any(p.isupper() and len(p) > 1 for p in parts)):
+                name = DRIVER_NAME_MAP.get(name, name)
+                leaders.add(name)
         result[label] = leaders
         print(f"    [laps led] {label}: {leaders}")
     return result
@@ -411,6 +428,16 @@ def scrape_round(info):
         p1 = next((r for r in qual["results"] if r["pos"] == 1), None)
         if p1:
             p1["pole"] = True
+
+    # Carry pole flag to the same driver's Race 1 result (they started from pole)
+    r1 = next((r for r in races if r["label"] == "Race 1"), None)
+    if qual and qual["results"] and r1 and r1["results"]:
+        pole_driver = next((r["driver"] for r in qual["results"] if r.get("pole")), None)
+        if pole_driver:
+            for r in r1["results"]:
+                if r["driver"] == pole_driver:
+                    r["pole"] = True
+                    break
 
     # Tag fastestLap on the driver with the quickest lap in each points race
     for race in races:
