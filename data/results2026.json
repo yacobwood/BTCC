@@ -1289,6 +1289,7 @@
               "gap": "",
               "bestLap": "",
               "points": 0,
+              "pole": true,
               "leadLap": true
             }
           ],
