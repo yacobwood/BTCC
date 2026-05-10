@@ -78,7 +78,7 @@ export default function DriverDetailScreen({route, navigation}) {
   const has2026InHistory = history.some(h => h.year === 2026);
   const live = (!has2026InHistory && season2026) ? season2026 : null;
 
-  // Career stats — merge live 2026 on top of historical data
+  // Career stats  -  merge live 2026 on top of historical data
   const totalSeasons = history.length + (live ? 1 : 0);
   const totalWins = history.reduce((s, h) => s + h.wins, 0) + (live?.wins || 0);
   const totalPodiums = history.reduce((s, h) => s + h.podiums, 0) + (live?.podiums || 0);
@@ -309,7 +309,7 @@ function CareerTimeline({history}) {
 
   return (
     <View style={{backgroundColor: Colors.card, borderRadius: 10, paddingHorizontal: 8, paddingTop: 10, paddingBottom: 6, marginBottom: 12, overflow: 'hidden', flexDirection: 'row', alignItems: 'flex-start'}}>
-      {/* Y-axis labels as native Text — outside SVG to avoid SVG clipping */}
+      {/* Y-axis labels as native Text  -  outside SVG to avoid SVG clipping */}
       <View style={{width: LABEL_W, height: H}}>
         {ticks.map(v => (
           <Text key={v} style={{position: 'absolute', top: yOf(v) - 6, right: 4, color: Colors.textSecondary, fontSize: 8, fontWeight: '600'}}>P{v}</Text>

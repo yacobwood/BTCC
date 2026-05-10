@@ -176,7 +176,7 @@ export default function ResultsScreen({navigation, route}) {
   const statsListRef = useRef(null);
   const chartScrollRef = useRef(null);
 
-  // Synchronously apply all state for a bundled year in one batch — no flash
+  // Synchronously apply all state for a bundled year in one batch  -  no flash
   const applyBundledYear = useCallback((y) => {
     const season = getSeasonData(y);
     if (season) {
@@ -234,7 +234,7 @@ export default function ResultsScreen({navigation, route}) {
   }, []);
 
   const load = useCallback(async (y = year, forceRefresh = false) => {
-    // Bundled years handled by applyBundledYear — called synchronously in button handlers
+    // Bundled years handled by applyBundledYear  -  called synchronously in button handlers
     if (y >= 2004 && y <= 2025) {
       applyBundledYear(y);
       return;
@@ -330,7 +330,7 @@ export default function ResultsScreen({navigation, route}) {
     const openRound = route?.params?.openRound;
     const openYear = route?.params?.openYear;
     if (!openRound) return;
-    // If the year doesn't match, switch it — the load useEffect will reload results
+    // If the year doesn't match, switch it  -  the load useEffect will reload results
     if (openYear && openYear !== year) {
       navigation.setParams({openRound: undefined, openYear: undefined});
       setYear(openYear);
@@ -392,7 +392,7 @@ export default function ResultsScreen({navigation, route}) {
   }, [results, bundledStats]);
 
   const {progression, pointLabels} = useMemo(() => {
-    // Cache by year — historical years never change so no need to recompute
+    // Cache by year  -  historical years never change so no need to recompute
     if (progressionCache.current[year]) return progressionCache.current[year];
     const {series, pointLabels: labels} = computeProgression(results);
     const computed = {progression: series, pointLabels: labels};

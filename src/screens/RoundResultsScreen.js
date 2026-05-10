@@ -377,7 +377,7 @@ function ReverseGridTab({races, isFavourite}) {
     <View style={{flex: 1}}>
       <View style={styles.reverseHeader}>
         <Text style={styles.reverseTitle}>Predicted R3 Grid</Text>
-        <Text style={styles.reverseSubtitle}>Draw picks 6–12 at random after R2 — explore each scenario</Text>
+        <Text style={styles.reverseSubtitle}>Draw picks 6–12 at random after R2  -  explore each scenario</Text>
         <View style={styles.reversalToggle}>
           <Text style={styles.reversalLabel}>Reverse top</Text>
           <TouchableOpacity

@@ -69,7 +69,7 @@ const UK_PATH = [
   'Z',
 ].join(' ');
 
-// Tight viewBox — trimmed to actual UK outline extents
+// Tight viewBox  -  trimmed to actual UK outline extents
 const VB_X = 30;
 const VB_Y = 75;
 const VB_TW = 170;

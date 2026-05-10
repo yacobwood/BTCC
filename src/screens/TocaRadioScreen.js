@@ -14,10 +14,10 @@ const TOCA_FALLBACK_URL = 'https://btcc.net/live/live-audio/';
 const STATION_NAME = 'TOCA Live Radio';
 const TIMEOUT_MS = 15000;
 
-// Comprehensive stream URL interceptor — covers all known ways a player can set audio src:
+// Comprehensive stream URL interceptor  -  covers all known ways a player can set audio src:
 //   1. audio.src = url               (src setter)
 //   2. audio.setAttribute('src',url) (setAttribute)
-//   3. new Audio(url)                (constructor — bypasses src setter!)
+//   3. new Audio(url)                (constructor  -  bypasses src setter!)
 //   4. static <audio src="url">      (HTML attribute, polled via currentSrc)
 //   5. XHR / fetch to a stream URL
 const INJECT_JS = `(function() {
@@ -50,7 +50,7 @@ const INJECT_JS = `(function() {
     };
   } catch(e){}
 
-  // 3. Audio constructor — new Audio(url) bypasses the src setter entirely
+  // 3. Audio constructor  -  new Audio(url) bypasses the src setter entirely
   try {
     var OrigAudio = window.Audio;
     if(OrigAudio) {
@@ -64,7 +64,7 @@ const INJECT_JS = `(function() {
   } catch(e){}
 
   // 4. Poll audio/video elements for currentSrc (catches static HTML src attributes
-  //    set during HTML parsing — those never fire JS property setters)
+  //    set during HTML parsing  -  those never fire JS property setters)
   var polls = 0;
   var poll = setInterval(function(){
     if(sent||++polls>60){clearInterval(poll);return;}
@@ -77,7 +77,7 @@ const INJECT_JS = `(function() {
     }catch(e){}
   },500);
 
-  // 5. XHR — for players that fetch audio data directly
+  // 5. XHR  -  for players that fetch audio data directly
   var xhrOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(m,u){
     try{
@@ -87,7 +87,7 @@ const INJECT_JS = `(function() {
     return xhrOpen.apply(this,arguments);
   };
 
-  // 6. fetch — same as above
+  // 6. fetch  -  same as above
   var origFetch = window.fetch;
   window.fetch = function(i,o){
     try{
@@ -165,7 +165,7 @@ export default function TocaRadioScreen({navigation}) {
         )}
       </View>
 
-      {/* Connecting phase — hidden WebView sniffs stream URL */}
+      {/* Connecting phase  -  hidden WebView sniffs stream URL */}
       {phase === 'connecting' && (
         <>
           <View style={styles.center}>
@@ -204,7 +204,7 @@ export default function TocaRadioScreen({navigation}) {
         </View>
       )}
 
-      {/* Fallback — show the web player if URL couldn't be captured */}
+      {/* Fallback  -  show the web player if URL couldn't be captured */}
       {phase === 'fallback' && (
         <WebView
           ref={webviewRef}
@@ -218,7 +218,7 @@ export default function TocaRadioScreen({navigation}) {
         />
       )}
 
-      {/* Error — shouldn't normally reach here but just in case */}
+      {/* Error  -  shouldn't normally reach here but just in case */}
       {phase === 'error' && (
         <View style={styles.center}>
           <Icon name="signal-wifi-off" size={48} color={Colors.textSecondary} />

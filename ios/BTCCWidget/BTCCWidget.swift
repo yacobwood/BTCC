@@ -219,7 +219,7 @@ struct BTCCProvider: TimelineProvider {
                 guard r.lat != 0, days <= 16 else {
                     completion(BTCCEntry(date: Date(), round: round, weather: [], layoutImage: layoutImage)); return
                 }
-                // Weather is best-effort — no cache, empty is acceptable offline
+                // Weather is best-effort  -  no cache, empty is acceptable offline
                 fetchWeather(lat: r.lat, lng: r.lng, start: r.startDate, end: r.endDate) { weather in
                     completion(BTCCEntry(date: Date(), round: round, weather: weather, layoutImage: layoutImage))
                 }

@@ -41,10 +41,10 @@ export function onForegroundMessage(callback) {
   return onMessage(messaging, async remoteMessage => {
     callback(remoteMessage);
     // Android: setBackgroundMessageHandler in index.js handles display for both
-    // foreground and background — don't also display here or it shows twice
+    // foreground and background  -  don't also display here or it shows twice
     if (Platform.OS === 'android') return;
     const {data, notification} = remoteMessage;
-    // iOS: if a notification payload is present, the system already shows it — skip notifee
+    // iOS: if a notification payload is present, the system already shows it  -  skip notifee
     if (notification) return;
     if (!data?.title) return;
     const channelId = data.channel || 'news';

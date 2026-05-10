@@ -54,9 +54,9 @@ async function prefetchNews() {
 }
 
 export function runBackgroundPrefetch() {
-  // Calendar images are bundled — start immediately
+  // Calendar images are bundled  -  start immediately
   prefetchCalendar();
-  // Network-dependent — run after a short delay so startup isn't impacted
+  // Network-dependent  -  run after a short delay so startup isn't impacted
   setTimeout(() => {
     prefetchDrivers();
     prefetchNews();

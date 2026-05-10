@@ -74,7 +74,7 @@ function ProgressionChart({series: rawSeries, pointLabels = [], isFavourite}) {
               <SvgText x={padL - 6} y={y(v) + 4} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{v}</SvgText>
             </React.Fragment>
           ))}
-          {/* X-axis labels — index 0 is the R0 origin, real labels start at 1 */}
+          {/* X-axis labels  -  index 0 is the R0 origin, real labels start at 1 */}
           {Array.from({length: maxRounds}, (_, i) => {
             if (i === 0) return null;
             const label = pointLabels[i - 1]; // pointLabels has no origin entry
@@ -88,7 +88,7 @@ function ProgressionChart({series: rawSeries, pointLabels = [], isFavourite}) {
               </SvgText>
             );
           })}
-          {/* Lines — split into segments at null gaps (late-joining drivers) */}
+          {/* Lines  -  split into segments at null gaps (late-joining drivers) */}
           {series.map((s, si) => {
             if (visible[s.name] === false) return null;
             const color = CHART_COLORS[si % CHART_COLORS.length];

@@ -33,7 +33,7 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
       return cached;
     }
   }
-  // No cache (or forced refresh) — fetch and wait
+  // No cache (or forced refresh)  -  fetch and wait
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -108,7 +108,7 @@ export async function fetchArticles(page = 1, perPage = 20, search = '', forceRe
 // Returns any cached articles for a page without triggering a network request.
 // Used by NewsScreen to show stale data instantly before fetching fresh data.
 export async function peekArticlesCache(page = 1) {
-  return cacheRead(`news_p${page}`); // no maxAge — any cached data regardless of age
+  return cacheRead(`news_p${page}`); // no maxAge  -  any cached data regardless of age
 }
 
 const HUB_CACHE_KEY = 'hub_posts';

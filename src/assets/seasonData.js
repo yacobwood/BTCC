@@ -1,6 +1,6 @@
 // Bundled season data with official standings (2004-2025).
 // Each entry is a loader function so Metro defers module evaluation until
-// the season is actually requested — avoids parsing 7MB of JSON at startup.
+// the season is actually requested  -  avoids parsing 7MB of JSON at startup.
 const seasons = {
   2004: () => require('./data/season_2004.json'),
   2005: () => require('./data/season_2005.json'),
@@ -36,14 +36,14 @@ export function getSeasonData(year) {
   return cache[year];
 }
 
-// Computed once at module load — all data is bundled so this is synchronous.
+// Computed once at module load  -  all data is bundled so this is synchronous.
 const MIN_STARTS = 30;
 
-// Official all-time records — auto-scraped from motorsportstats.com
+// Official all-time records  -  auto-scraped from motorsportstats.com
 // To refresh: run tools/scraper/scrape_records.py then copy data/records/records.json here
 const MSS = require('./data/records.json');
 
-// Lazy-computed driver records — iterates all season JSON files on first call.
+// Lazy-computed driver records  -  iterates all season JSON files on first call.
 // Kept lazy so importing this module at startup doesn't trigger parsing 7MB of JSON.
 let _driverRecords = null;
 export function getDriverRecords() {
@@ -91,7 +91,7 @@ export function getDriverRecords() {
   return _driverRecords;
 }
 
-// All-time records — sourced from MSS (records.json), all drivers, no minimum starts
+// All-time records  -  sourced from MSS (records.json), all drivers, no minimum starts
 export const ALL_TIME_RECORDS = (() => {
   const tables = [
     MSS.wins, MSS.podiums, MSS.poles, MSS.fastestLaps,

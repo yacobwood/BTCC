@@ -217,7 +217,7 @@ export default function CalendarScreen({navigation}) {
           style={styles.liveCard}
           activeOpacity={0.8}
           onPress={() => navigate(round)}
-          accessibilityLabel={`${round.venue} — Race Weekend`}
+          accessibilityLabel={`${round.venue}  -  Race Weekend`}
           accessibilityRole="button">
           <View style={styles.liveBadgeRow}>
             <View style={styles.liveDot} />
@@ -291,7 +291,7 @@ export default function CalendarScreen({navigation}) {
           style={styles.pastRow}
           activeOpacity={0.6}
           onPress={() => navigate(round)}
-          accessibilityLabel={`${round.venue} — completed`}
+          accessibilityLabel={`${round.venue}  -  completed`}
           accessibilityRole="button">
           <Icon
             name="check-circle"

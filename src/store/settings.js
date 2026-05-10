@@ -110,7 +110,7 @@ const RESULT_LEAF_KEYS = new Set([
 
 function syncAllTopics(settings) {
   const messaging = getMessaging();
-  // All installs subscribe to 'broadcast' unconditionally — used for hub news and announcements.
+  // All installs subscribe to 'broadcast' unconditionally  -  used for hub news and announcements.
   subscribeToTopic(messaging, 'broadcast').catch(() => {});
   for (const [key, topic] of Object.entries(LEAF_TOPICS)) {
     const spoilerBlocked = settings.spoilerFree && RESULT_LEAF_KEYS.has(key);

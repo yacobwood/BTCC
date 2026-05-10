@@ -36,7 +36,7 @@ const VENUE_ABBR = {
   'Mondello Park':     'MON',
 };
 
-// Bold, solid colours for top positions — fade everything else out
+// Bold, solid colours for top positions  -  fade everything else out
 function badgeStyle(pos, laps, time) {
   if (time === 'DSQ') return {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.4)',
@@ -50,7 +50,7 @@ function badgeStyle(pos, laps, time) {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)',
     text: '#FCA5A5', label: 'Ret', solid: false,
   };
-  // Solid podium badges — stand out completely
+  // Solid podium badges  -  stand out completely
   if (pos === 1) return {
     bg: '#FEBD02', border: null,
     text: Colors.navy, label: '1', solid: true,
@@ -72,7 +72,7 @@ function badgeStyle(pos, laps, time) {
     bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)',
     text: 'rgba(134,239,172,0.55)', label: String(pos), solid: false,
   };
-  // Outside points — subtle border, dim text
+  // Outside points  -  subtle border, dim text
   return {
     bg: null, border: 'rgba(255,255,255,0.1)',
     text: 'rgba(255,255,255,0.3)', label: String(pos), solid: false,

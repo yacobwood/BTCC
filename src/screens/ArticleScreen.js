@@ -248,7 +248,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
 
     let authorName = commenterName;
     if (!authorName) {
-      // First comment — show name prompt; remember the text + replyingTo context
+      // First comment  -  show name prompt; remember the text + replyingTo context
       setPendingSubmit(true);
       setShowNamePrompt(true);
       return;
@@ -396,7 +396,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
         style={styles.sheetOuter}
         keyboardVerticalOffset={0}>
         <Animated.View style={[styles.sheet, {paddingBottom: insets.bottom || 16, transform: [{translateY}]}]}>
-          {/* Handle — drag target */}
+          {/* Handle  -  drag target */}
           <View style={styles.handleWrap} {...panResponder.panHandlers}>
             <View style={styles.handle} />
           </View>
@@ -595,7 +595,7 @@ export default function ArticleScreen({route, navigation}) {
     if (savedName) {
       setCommenterName(savedName);
     }
-    // Don't set commenterName yet if null — name prompt will handle it on first comment
+    // Don't set commenterName yet if null  -  name prompt will handle it on first comment
 
     // Reactions
     const stored = rawReactions ? JSON.parse(rawReactions) : {};

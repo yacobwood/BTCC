@@ -177,10 +177,10 @@ export default function TrackDetailScreen({route, navigation}) {
 
     // Live Timing / Results button
     // Section is shown for any race weekend or past round; the live_updates flag only
-    // gates the Live Timing sub-button inside — Results have their own guard.
+    // gates the Live Timing sub-button inside  -  Results have their own guard.
     if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
 
-    // YouTube links — always shown when URLs exist (hot lap is available pre-weekend too)
+    // YouTube links  -  always shown when URLs exist (hot lap is available pre-weekend too)
     if ((track.youtubeUrls || []).some(Boolean)) items.push({type: 'youtube'});
 
     // About

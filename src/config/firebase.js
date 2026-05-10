@@ -1,4 +1,4 @@
-// Firebase project constants — same values as google-services.json / GoogleService-Info.plist.
+// Firebase project constants  -  same values as google-services.json / GoogleService-Info.plist.
 // The Web API key is a restricted public key (Firebase Console → API restrictions).
 export const FIREBASE_PROJECT_ID = 'btcchub-af77a';
 export const FIREBASE_API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';

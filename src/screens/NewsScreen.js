@@ -52,7 +52,7 @@ export default function NewsScreen({navigation}) {
   const load = useCallback(async (p = 1, append = false, force = false) => {
     setError(null);
 
-    // Phase 1 — show any cached articles immediately so the user never stares at a spinner
+    // Phase 1  -  show any cached articles immediately so the user never stares at a spinner
     // for content they've already seen. Skipped when force=true (pull-to-refresh) because
     // the user explicitly asked for fresh data, or when paginating.
     let shownStale = false;
@@ -69,7 +69,7 @@ export default function NewsScreen({navigation}) {
       setLoading(true);
     }
 
-    // Phase 2 — fetch fresh data from the network and update the list.
+    // Phase 2  -  fetch fresh data from the network and update the list.
     // forceRefresh=true bypasses the fetchJson cache so this always hits the network.
     try {
       const [raw, hubPosts] = await Promise.all([
@@ -96,7 +96,7 @@ export default function NewsScreen({navigation}) {
       setHasMore(parsed.length >= 20);
       setPage(p);
     } catch (e) {
-      // If Phase 1 already showed stale articles, silently absorb the network error —
+      // If Phase 1 already showed stale articles, silently absorb the network error  - 
       // the user has something to read. Only surface the error on a true cold start.
       if (!append && !shownStale) setError(e.message);
       if (append) setHasMore(false);

@@ -49,7 +49,7 @@ export default function DigestsScreen({navigation}) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Group by month — assign episode numbers oldest-first
+  // Group by month  -  assign episode numbers oldest-first
   const listData = useMemo(() => {
     const sorted = [...digests].sort((a, b) => new Date(a.sortDate) - new Date(b.sortDate));
     const episodeMap = {};

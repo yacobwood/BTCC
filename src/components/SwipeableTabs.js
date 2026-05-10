@@ -38,7 +38,7 @@ export default function SwipeableTabs({
       friction: 20,
     }).start(({finished}) => {
       // Only reset when this spring ran to completion. If a second tap interrupted
-      // it, finished=false — leave the flag true so the new spring's callback handles it.
+      // it, finished=false  -  leave the flag true so the new spring's callback handles it.
       if (finished) programmatic.current = false;
     });
     setCurrentPage(i);
@@ -53,7 +53,7 @@ export default function SwipeableTabs({
 
   const onPageSelected = useCallback(({nativeEvent: {position}}) => {
     if (!programmatic.current) {
-      // Swipe-initiated settle — animate indicator to final position in case
+      // Swipe-initiated settle  -  animate indicator to final position in case
       // onPageScroll stopped firing during PagerView's settle animation.
       Animated.timing(indicatorX, {
         toValue: position * tabW,
