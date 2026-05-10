@@ -68,6 +68,7 @@ jobs:
           python tools/scraper/scrape_tsl.py $ARGS
 
       - name: Commit updated data
+        id: commit
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.in_session_window == 'true'
@@ -78,3 +79,15 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
+
+      - name: Notify app clients to refresh results cache
+        if: steps.commit.outputs.changes_detected == 'true'
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+          YEAR: ${{ github.event.inputs.year || '2026' }}
+        run: |
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"year\":\"${YEAR}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/notifyResultsUpdate" || echo "Notify failed (non-fatal)"

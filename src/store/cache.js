@@ -42,6 +42,12 @@ export async function cacheEvictStale(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
   } catch {}
 }
 
+export async function cacheDelete(key) {
+  try {
+    await AsyncStorage.removeItem(PREFIX + key);
+  } catch {}
+}
+
 export async function cacheRead(key, maxAgeMs) {
   try {
     const raw = await AsyncStorage.getItem(PREFIX + key);

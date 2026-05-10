@@ -813,3 +813,35 @@ exports.syncAnalytics = onSchedule(
     await logError('syncAnalytics', e.message, e);
   }},
 );
+
+// ── Results cache invalidation — called by GitHub Actions scraper ─────────────
+// Sends a silent FCM data message to the 'results_live' topic so all app
+// clients immediately discard their cached results and fetch fresh data.
+// No visible notification is shown to users.
+const SCRAPER_SECRET = process.env.SCRAPER_SECRET;
+
+exports.notifyResultsUpdate = onRequest(
+  {secrets: ['SCRAPER_SECRET']},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+    if (!SCRAPER_SECRET || req.headers['x-scraper-secret'] !== SCRAPER_SECRET) {
+      res.status(401).send('Unauthorized'); return;
+    }
+    const year = String(req.body?.year || '2026');
+    try {
+      await getMessaging().send({
+        topic: 'results_live',
+        data: {type: 'results_refresh', year},
+        // content_available wakes iOS apps that are backgrounded
+        apns: {payload: {aps: {'content-available': 1}}},
+        android: {priority: 'high'},
+      });
+      console.log(`notifyResultsUpdate: sent results_refresh for year=${year}`);
+      res.status(200).json({ok: true});
+    } catch (e) {
+      console.error('notifyResultsUpdate failed:', e);
+      await logError('notifyResultsUpdate', e.message, e);
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
+);

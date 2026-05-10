@@ -13,7 +13,7 @@ import {RadioProvider} from './src/store/radio';
 import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
 import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
-import {cacheEvictStale} from './src/store/cache';
+import {cacheEvictStale, cacheDelete} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
 import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
@@ -139,7 +139,12 @@ export default function App() {
       if (state === 'active') consumeNotifeePress();
     });
 
-    const unsubscribeFg = onForegroundMessage(() => {});
+    const unsubscribeFg = onForegroundMessage(msg => {
+      if (msg?.data?.type === 'results_refresh') {
+        const year = msg.data.year || '2026';
+        cacheDelete(`results_${year}`).catch(() => {});
+      }
+    });
 
     // Notifee local notification tapped while app is in foreground
     const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {

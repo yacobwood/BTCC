@@ -1,6 +1,7 @@
 import {AppRegistry, Platform} from 'react-native';
 import {getMessaging, setBackgroundMessageHandler} from '@react-native-firebase/messaging';
 import notifee, {AndroidStyle} from '@notifee/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import App from './App';
 import {name as appName} from './app.json';
 
@@ -10,6 +11,12 @@ if (Platform.OS === 'android') {
   const messaging = getMessaging();
   setBackgroundMessageHandler(messaging, async remoteMessage => {
     const {data} = remoteMessage;
+    // Silent cache-invalidation from scraper — no notification, just bust the cache.
+    if (data?.type === 'results_refresh') {
+      const year = data.year || '2026';
+      await AsyncStorage.removeItem(`cache_results_${year}`).catch(() => {});
+      return;
+    }
     if (!data?.title) return;
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
