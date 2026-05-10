@@ -121,6 +121,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const broadcaster = useMemo(() => detectBroadcaster(), []);
   const [currentRoundData, setCurrentRoundData] = useState(null);
   const [liveRaceRecord, setLiveRaceRecord] = useState(null);
+  const [liveQualRecord, setLiveQualRecord] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const HERO_H = track.imageUrl ? 220 : 0;
   const titlePaddingTop = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [12, statusBarHeight + 12], extrapolate: 'clamp'});
@@ -147,21 +148,41 @@ export default function TrackDetailScreen({route, navigation}) {
     const applyRoundData = (found) => {
       if (!found) return;
       setCurrentRoundData(found);
-      const storedSecs = lapTimeSecs(track.raceRecord?.time);
-      let best = null;
+      // Race lap record — fastest bestLap across all race sessions vs stored record
+      const storedRaceSecs = lapTimeSecs(track.raceRecord?.time);
+      let bestRace = null;
       found.races.forEach(race => {
+        if (!['Race 1', 'Race 2', 'Race 3'].includes(race.label)) return;
         race.results.forEach(r => {
           if (!r.bestLap) return;
           const secs = lapTimeSecs(r.bestLap);
           if (secs === null) return;
-          if (storedSecs === null || secs < storedSecs) {
-            if (!best || secs < lapTimeSecs(best.time)) {
-              best = {driver: r.driver, time: r.bestLap, year: 2026};
+          if (storedRaceSecs === null || secs < storedRaceSecs) {
+            if (!bestRace || secs < lapTimeSecs(bestRace.time)) {
+              bestRace = {driver: r.driver, time: r.bestLap, year: 2026};
             }
           }
         });
       });
-      if (best) setLiveRaceRecord({...best, driver: formatDriverName(best.driver)});
+      if (bestRace) setLiveRaceRecord({...bestRace, driver: formatDriverName(bestRace.driver)});
+
+      // Qualifying lap record — P1 bestLap from Qualifying session vs stored record
+      const storedQualSecs = lapTimeSecs(track.qualifyingRecord?.time);
+      let bestQual = null;
+      found.races.forEach(race => {
+        if (race.label !== 'Qualifying') return;
+        race.results.forEach(r => {
+          if (!r.bestLap) return;
+          const secs = lapTimeSecs(r.bestLap);
+          if (secs === null) return;
+          if (storedQualSecs === null || secs < storedQualSecs) {
+            if (!bestQual || secs < lapTimeSecs(bestQual.time)) {
+              bestQual = {driver: r.driver, time: r.bestLap, year: 2026};
+            }
+          }
+        });
+      });
+      if (bestQual) setLiveQualRecord({...bestQual, driver: formatDriverName(bestQual.driver)});
     };
 
     const checkAndApply = (raw) => {
@@ -387,8 +408,8 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'records':
         return (
           <View style={styles.recordsRow}>
-            {track.qualifyingRecord && (
-              <RecordCard label="Qualifying" record={track.qualifyingRecord} useKm={useKm} trackLengthMiles={track.lengthMiles} />
+            {(liveQualRecord || track.qualifyingRecord) && (
+              <RecordCard label="Qualifying" record={liveQualRecord || track.qualifyingRecord} useKm={useKm} trackLengthMiles={track.lengthMiles} />
             )}
             {(liveRaceRecord || track.raceRecord) && (
               <RecordCard label="Race" record={liveRaceRecord || track.raceRecord} useKm={useKm} trackLengthMiles={track.lengthMiles} />

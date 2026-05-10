@@ -56,17 +56,13 @@ export default function DriverDetailScreen({route, navigation}) {
           const results = race.results || [];
           const entry = results.find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
           if (!entry) continue;
-          const isQR = race.label === 'Qualifying Race';
-          if (entry.pos === 1 && !isQR) wins++;
-          if (entry.pos >= 1 && entry.pos <= 3 && !isQR) podiums++;
+          const isRace = race.label === 'Race 1' || race.label === 'Race 2' || race.label === 'Race 3';
+          if (entry.pos === 1 && isRace) wins++;
+          if (entry.pos >= 1 && entry.pos <= 3 && isRace) podiums++;
           if (entry.pos === 0) dnfs++;
           points += entry.points || 0;
           if (entry.pole) poles++;
-          const times = results.map(r => r.bestLap).filter(Boolean);
-          if (times.length > 0) {
-            const fastest = times.slice().sort()[0];
-            if (entry.bestLap === fastest) fastestLaps++;
-          }
+          if (entry.fastestLap && isRace) fastestLaps++;
         }
       }
       setSeason2026({wins, podiums, points, fastestLaps, poles, dnfs});

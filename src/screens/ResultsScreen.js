@@ -36,12 +36,14 @@ export function computeSeasonStats(rounds) {
           map[r.driver] = {name: r.driver, team: r.team, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, dnfs: 0, points: 0};
         }
         const s = map[r.driver];
+        const isRace = race.label === 'Race 1' || race.label === 'Race 2' || race.label === 'Race 3';
+        const isScoringSession = isRace || race.label === 'Qualifying Race';
         s.points += r.points;
-        if (r.position === 1 && race.label !== 'Qualifying Race') s.wins++;
-        if (r.position >= 1 && r.position <= 3) s.podiums++;
+        if (r.position === 1 && isRace) s.wins++;
+        if (r.position >= 1 && r.position <= 3 && isRace) s.podiums++;
         if (r.pole) s.poles++;
         if (r.fastestLap) s.fastestLaps++;
-        if (r.position === 0) s.dnfs++;
+        if (r.position === 0 && isScoringSession) s.dnfs++;
       }
     }
   }
