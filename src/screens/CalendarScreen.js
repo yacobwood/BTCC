@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchCalendar, fetchLiveStatus} from '../api/client';
+import {fetchCalendar} from '../api/client';
 import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
@@ -47,7 +47,6 @@ export default function CalendarScreen({navigation}) {
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [liveStatus, setLiveStatus] = useState(null);
   const flatListRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
@@ -69,9 +68,6 @@ export default function CalendarScreen({navigation}) {
   useEffect(() => {
     load();
   }, [load]);
-  useEffect(() => {
-    fetchLiveStatus().then(s => { if (s) setLiveStatus(s); });
-  }, []);
 
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('calendar');
@@ -182,34 +178,6 @@ export default function CalendarScreen({navigation}) {
     const isActive = round.startDate <= today && today <= round.endDate;
     const isNext = !activeRound && round === nextRound;
 
-    // Resolve live URL: YouTube auto-detection takes priority, round.liveUrl is fallback
-    // liveStatus.active=false means stream confirmed ended; suppress fallback too
-    const resolvedLiveUrl = liveStatus?.active
-      ? liveStatus.liveUrl
-      : (!liveStatus && round.liveUrl) ? round.liveUrl
-      : null;
-
-    // Fallback cutoff: 1 hour after the last session of today (used when liveStatus unavailable)
-    const fallbackLiveEndMs = (() => {
-      if (!round.liveUrl || liveStatus || !round.sessions?.length) return null;
-      const DAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-      const dateMap = {};
-      let d = new Date(round.startDate + 'T12:00:00Z');
-      const endD = new Date(round.endDate + 'T12:00:00Z');
-      while (d <= endD) {
-        dateMap[DAY_LABELS[d.getUTCDay()]] = d.toISOString().slice(0, 10);
-        d = new Date(d.getTime() + 86400000);
-      }
-      const todayLabel = Object.keys(dateMap).find(k => dateMap[k] === today);
-      if (!todayLabel) return null;
-      const todaySessions = round.sessions.filter(s => s.day === todayLabel);
-      if (!todaySessions.length) return null;
-      const last = todaySessions.reduce((a, b) => b.time > a.time ? b : a);
-      return new Date(`${today}T${last.time}:00+01:00`).getTime() + 60 * 60 * 1000;
-    })();
-
-    const showLiveBtn = resolvedLiveUrl && (!fallbackLiveEndMs || Date.now() < fallbackLiveEndMs);
-
     // Race weekend in progress
     if (isActive) {
       return (
@@ -233,18 +201,6 @@ export default function CalendarScreen({navigation}) {
               <Icon name="chevron-right" size={16} color="#fff" />
             </View>
           </View>
-          {showLiveBtn ? (
-            <TouchableOpacity
-              style={styles.liveWatchBtn}
-              activeOpacity={0.8}
-              onPress={e => { e?.stopPropagation?.(); Linking.openURL(resolvedLiveUrl); }}
-              accessibilityLabel="Watch live stream"
-              accessibilityRole="button">
-              <View style={styles.livePulseDot} />
-              <Text style={styles.liveWatchBtnText}>WATCH LIVE</Text>
-              <Icon name="open-in-new" size={14} color="#fff" />
-            </TouchableOpacity>
-          ) : null}
         </TouchableOpacity>
       );
     }
@@ -526,28 +482,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(254,189,2,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  liveWatchBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    marginTop: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: RED,
-  },
-  livePulseDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: '#fff',
-  },
-  liveWatchBtnText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1,
   },
 
   // Next race card

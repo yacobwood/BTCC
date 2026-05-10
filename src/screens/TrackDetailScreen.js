@@ -28,6 +28,23 @@ import {formatDriverName} from '../utils/driverName';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 
+const BROADCASTERS = {
+  uk:            {label: 'ITV4 / ITVX',    sub: 'Free · UK',            icon: '📺', url: 'https://www.itv.com/hub/itv4'},
+  us:            {label: 'Racer Network',   sub: 'Live · United States', icon: '🏁', url: 'https://www.racernetwork.com/live'},
+  international: {label: 'YouTube Live',   sub: 'Free · International', icon: '▶',  url: 'https://www.youtube.com/@OfficialBTCC/streams'},
+};
+
+function detectBroadcaster() {
+  try {
+    const {timeZone = '', locale = ''} = Intl.DateTimeFormat().resolvedOptions();
+    if (timeZone === 'Europe/London' || locale.includes('-GB')) return 'uk';
+    if (locale.includes('-US')) return 'us';
+    return 'international';
+  } catch {
+    return 'international';
+  }
+}
+
 // Parse "M:SS.mmm" lap time to seconds, returns null on failure
 function lapTimeSecs(str) {
   if (!str) return null;
@@ -101,6 +118,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const sessions = track.sessions || [];
   const [weather, setWeather] = useState(null);
   const [racesFinished, setRacesFinished] = useState(false);
+  const broadcaster = useMemo(() => detectBroadcaster(), []);
   const [currentRoundData, setCurrentRoundData] = useState(null);
   const [liveRaceRecord, setLiveRaceRecord] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
@@ -109,6 +127,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const titlePaddingLeft = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [0, 46], extrapolate: 'clamp'});
 
   useEffect(() => { Analytics.trackDetailViewed(track.round, track.venue); }, []);
+
 
   useEffect(() => {
     if (!track_weather || isPastRaceWeekend) return;
@@ -174,6 +193,9 @@ export default function TrackDetailScreen({route, navigation}) {
 
     // Stats
     items.push({type: 'stats'});
+
+    // Watch Live — Sundays during race weekends only, broadcaster resolved by IP geolocation
+    if (isRaceWeekend && new Date().getDay() === 0) items.push({type: 'watchLive'});
 
     // Live Timing / Results button
     // Section is shown for any race weekend or past round; the live_updates flag only
@@ -268,6 +290,23 @@ export default function TrackDetailScreen({route, navigation}) {
             ) : null}
           </View>
         );
+
+      case 'watchLive': {
+        const bc = broadcaster ? BROADCASTERS[broadcaster] : null;
+        if (!bc) return null;
+        return (
+          <TouchableOpacity
+            style={styles.watchLiveBtn}
+            activeOpacity={0.8}
+            onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(bc.url); }}
+            accessibilityLabel={`Watch on ${bc.label}`}
+            accessibilityRole="button">
+            <Icon name="live-tv" size={16} color="#22C55E" />
+            <Text style={styles.watchLiveBtnTitle}>{bc.label.toUpperCase()}</Text>
+            <Icon name="open-in-new" size={18} color="#22C55E" />
+          </TouchableOpacity>
+        );
+      }
 
       case 'liveTiming':
         return (
@@ -725,6 +764,21 @@ const styles = StyleSheet.create({
   dotsRow: {flexDirection: 'row', justifyContent: 'center', marginTop: 10, gap: 6},
   dot: {width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.outline},
   dotActive: {backgroundColor: Colors.yellow, width: 18},
+
+  // Watch Live
+  watchLiveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(34,197,94,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.35)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginTop: 8,
+    gap: 8,
+  },
+  watchLiveBtnTitle: {flex: 1, color: '#22C55E', fontSize: 13, fontWeight: '800', letterSpacing: 1},
 
   // Live Timing button
   liveTimingBtn: {
