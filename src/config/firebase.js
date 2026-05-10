@@ -3,3 +3,4 @@
 export const FIREBASE_PROJECT_ID = 'btcchub-af77a';
 export const FIREBASE_API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
 export const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+export const COMMENT_REACT_URL = `https://us-central1-${FIREBASE_PROJECT_ID}.cloudfunctions.net/commentReact`;

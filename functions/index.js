@@ -3,7 +3,7 @@ const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onRequest} = require('firebase-functions/v2/https');
 const {onValueCreated} = require('firebase-functions/v2/database');
 const {getMessaging} = require('firebase-admin/messaging');
-const {getFirestore} = require('firebase-admin/firestore');
+const {getFirestore, FieldValue} = require('firebase-admin/firestore');
 const {getDatabase} = require('firebase-admin/database');
 const {initializeApp} = require('firebase-admin/app');
 const {GoogleAuth} = require('google-auth-library');
@@ -845,3 +845,27 @@ exports.notifyResultsUpdate = onRequest(
     }
   },
 );
+
+exports.commentReact = onRequest(async (req, res) => {
+  if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+
+  const {commentId, prev, next} = req.body || {};
+  const valid = [null, 'likes', 'dislikes'];
+  if (!commentId || !valid.includes(prev) || !valid.includes(next) || prev === next) {
+    res.status(400).json({ok: false, error: 'Invalid request'}); return;
+  }
+
+  const updates = {};
+  if (prev === 'likes')    updates.likes    = FieldValue.increment(-1);
+  if (prev === 'dislikes') updates.dislikes = FieldValue.increment(-1);
+  if (next === 'likes')    updates.likes    = FieldValue.increment(1);
+  if (next === 'dislikes') updates.dislikes = FieldValue.increment(1);
+
+  try {
+    await getFirestore().collection('article_comments').doc(commentId).update(updates);
+    res.status(200).json({ok: true});
+  } catch (e) {
+    console.error('commentReact error:', e);
+    res.status(500).json({ok: false, error: e.message});
+  }
+});

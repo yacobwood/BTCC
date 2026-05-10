@@ -28,7 +28,7 @@ import {fetchArticleBySlug, fetchBlacklist} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import {getFCMToken} from '../utils/notifications';
 
-import {FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIRESTORE_BASE} from '../config/firebase';
+import {FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIRESTORE_BASE, COMMENT_REACT_URL} from '../config/firebase';
 const API_KEY = FIREBASE_API_KEY;
 const PROJECT_ID = FIREBASE_PROJECT_ID;
 const FS_BASE = FIRESTORE_BASE;
@@ -137,19 +137,13 @@ async function postComment(slug, text, authorId, authorName, parentId) {
   return doc.name.split('/').pop(); // return new doc ID
 }
 
-async function reactToComment(docId, type, delta) {
-  await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
+async function reactToComment(commentId, prev, next) {
+  const res = await fetch(COMMENT_REACT_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      writes: [{
-        transform: {
-          document: `projects/${PROJECT_ID}/databases/(default)/documents/article_comments/${docId}`,
-          fieldTransforms: [{fieldPath: type, increment: {integerValue: String(delta)}}],
-        },
-      }],
-    }),
+    body: JSON.stringify({commentId, prev, next}),
   });
+  if (!res.ok) throw new Error('reaction failed');
 }
 
 async function deleteComment(docId) {
@@ -333,9 +327,32 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
       if (newType) stored[commentId] = newType;
       else delete stored[commentId];
       await AsyncStorage.setItem(COMMENT_REACTIONS_KEY, JSON.stringify(stored));
-      if (myPrev) await reactToComment(commentId, myPrev, -1);
-      if (newType) await reactToComment(commentId, type, 1);
-    } catch {}
+      await reactToComment(commentId, myPrev, newType);
+    } catch {
+      // Revert optimistic updates on failure
+      setComments(cs => cs.map(c => {
+        if (c.id !== commentId) return c;
+        let likes = c.likes || 0;
+        let dislikes = c.dislikes || 0;
+        if (newType === 'likes') likes = Math.max(0, likes - 1);
+        if (newType === 'dislikes') dislikes = Math.max(0, dislikes - 1);
+        if (myPrev === 'likes') likes++;
+        if (myPrev === 'dislikes') dislikes++;
+        return {...c, likes, dislikes};
+      }));
+      setCommentReactions(r => {
+        const updated = {...r};
+        if (myPrev) updated[commentId] = myPrev;
+        else delete updated[commentId];
+        return updated;
+      });
+      AsyncStorage.getItem(COMMENT_REACTIONS_KEY).then(raw => {
+        const stored = raw ? JSON.parse(raw) : {};
+        if (myPrev) stored[commentId] = myPrev;
+        else delete stored[commentId];
+        return AsyncStorage.setItem(COMMENT_REACTIONS_KEY, JSON.stringify(stored));
+      }).catch(() => {});
+    }
   };
 
   const handleDelete = (commentId) => {

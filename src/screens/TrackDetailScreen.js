@@ -818,11 +818,13 @@ const styles = StyleSheet.create({
   liveTimingText: {flex: 1, color: '#E3000B', fontSize: 13, fontWeight: '800', letterSpacing: 1},
   youtubeBtnRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 8,
   },
   youtubeBtn: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '45%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

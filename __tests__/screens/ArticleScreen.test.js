@@ -87,11 +87,12 @@ function makeCommentRow(overrides = {}) {
 
 /**
  * Build a fetch mock that routes:
- *  - :runQuery   → commentRows (fetchComments)
- *  - /article_comments POST → postComment response
- *  - everything else → reactions GET response
+ *  - :runQuery        → commentRows (fetchComments)
+ *  - article_comments POST → postComment response
+ *  - commentReact     → Cloud Function comment reaction (ok: true, or error if cfFails)
+ *  - everything else  → reactions GET response
  */
-function makeCommentsFetch(commentRows = []) {
+function makeCommentsFetch(commentRows = [], {cfFails = false} = {}) {
   return jest.fn().mockImplementation((url, options) => {
     const u = typeof url === 'string' ? url : '';
     if (u.includes(':runQuery')) {
@@ -104,6 +105,10 @@ function makeCommentsFetch(commentRows = []) {
           name: 'projects/btcchub-af77a/databases/(default)/documents/article_comments/newDocId',
         }),
       });
+    }
+    if (u.includes('commentReact')) {
+      if (cfFails) return Promise.resolve({ok: false, status: 500, json: () => Promise.resolve({ok: false})});
+      return Promise.resolve({ok: true, json: () => Promise.resolve({ok: true})});
     }
     // Default: reactions GET
     return Promise.resolve({
@@ -453,11 +458,14 @@ describe('CommentsSheet', () => {
    * Trigger onWebViewLoad then open the CommentsSheet.
    * Configures AsyncStorage so commenterName is available (or null for name-prompt tests).
    */
-  async function openComments(getByTestId, {commentRows = [], storedName = 'Test Fan', fetchMock} = {}) {
+  async function openComments(getByTestId, {commentRows = [], storedName = 'Test Fan', fetchMock, commentReactions = {}} = {}) {
     global.fetch = fetchMock ?? makeCommentsFetch(commentRows);
 
     AsyncStorage.getItem.mockImplementation(key => {
       if (key === 'commenter_name') return Promise.resolve(storedName);
+      if (key === 'comment_reactions_v1') {
+        return Promise.resolve(Object.keys(commentReactions).length ? JSON.stringify(commentReactions) : null);
+      }
       return Promise.resolve(null);
     });
 
@@ -648,7 +656,7 @@ describe('CommentsSheet', () => {
     });
   });
 
-  it('calls Firestore commit with likes increment when like button pressed', async () => {
+  it('calls commentReact CF with { commentId, prev: null, next: "likes" } on like', async () => {
     const row = makeCommentRow({id: 'cmt42', text: 'Amazing!'});
     const {getByTestId, getByLabelText} = renderArticle();
 
@@ -659,19 +667,16 @@ describe('CommentsSheet', () => {
     });
 
     await waitFor(() => {
-      const commitCall = global.fetch.mock.calls.find(
-        ([url]) => typeof url === 'string' && url.includes(':commit'),
+      const cfCall = global.fetch.mock.calls.find(
+        ([url]) => typeof url === 'string' && url.includes('commentReact'),
       );
-      expect(commitCall).toBeTruthy();
-      const body = JSON.parse(commitCall[1].body);
-      const t = body.writes[0].transform;
-      expect(t.document).toContain('article_comments/cmt42');
-      expect(t.fieldTransforms[0].fieldPath).toBe('likes');
-      expect(t.fieldTransforms[0].increment.integerValue).toBe('1');
+      expect(cfCall).toBeTruthy();
+      expect(cfCall[1].method).toBe('POST');
+      expect(JSON.parse(cfCall[1].body)).toEqual({commentId: 'cmt42', prev: null, next: 'likes'});
     });
   });
 
-  it('calls Firestore commit with dislikes increment when dislike button pressed', async () => {
+  it('calls commentReact CF with { commentId, prev: null, next: "dislikes" } on dislike', async () => {
     const row = makeCommentRow({id: 'cmt99', text: 'Boring race'});
     const {getByTestId, getByLabelText} = renderArticle();
 
@@ -682,14 +687,104 @@ describe('CommentsSheet', () => {
     });
 
     await waitFor(() => {
-      const commitCall = global.fetch.mock.calls.find(
-        ([url]) => typeof url === 'string' && url.includes(':commit'),
+      const cfCall = global.fetch.mock.calls.find(
+        ([url]) => typeof url === 'string' && url.includes('commentReact'),
       );
-      expect(commitCall).toBeTruthy();
-      const body = JSON.parse(commitCall[1].body);
-      const t = body.writes[0].transform;
-      expect(t.document).toContain('article_comments/cmt99');
-      expect(t.fieldTransforms[0].fieldPath).toBe('dislikes');
+      expect(cfCall).toBeTruthy();
+      expect(JSON.parse(cfCall[1].body)).toEqual({commentId: 'cmt99', prev: null, next: 'dislikes'});
+    });
+  });
+
+  it('shows optimistic like count immediately before CF responds', async () => {
+    let resolveCf;
+    const fetchMock = jest.fn().mockImplementation((url, options) => {
+      const u = typeof url === 'string' ? url : '';
+      if (u.includes(':runQuery')) return Promise.resolve({ok: true, json: () => Promise.resolve([makeCommentRow({id: 'cmt1', likes: 0})])});
+      if (u.includes('commentReact')) return new Promise(resolve => { resolveCf = resolve; });
+      return Promise.resolve({ok: true, json: () => Promise.resolve({fields: {likes: {integerValue: '0'}, dislikes: {integerValue: '0'}}})});
+    });
+
+    const {getByTestId, getByLabelText, queryByText} = renderArticle();
+    await openComments(getByTestId, {fetchMock});
+
+    fireEvent.press(getByLabelText('Like comment'));
+
+    await waitFor(() => {
+      expect(queryByText('1')).toBeTruthy();
+    });
+  });
+
+  it('calls commentReact CF with prev="likes" next=null when toggling off a like', async () => {
+    const row = makeCommentRow({id: 'cmt1', likes: 1});
+    const {getByTestId, getByLabelText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row], commentReactions: {cmt1: 'likes'}});
+
+    await act(async () => {
+      fireEvent.press(getByLabelText('Like comment'));
+    });
+
+    await waitFor(() => {
+      const cfCall = global.fetch.mock.calls.find(
+        ([url]) => typeof url === 'string' && url.includes('commentReact'),
+      );
+      expect(cfCall).toBeTruthy();
+      expect(JSON.parse(cfCall[1].body)).toEqual({commentId: 'cmt1', prev: 'likes', next: null});
+    });
+  });
+
+  it('sends a single CF call with prev="likes" next="dislikes" when switching reaction', async () => {
+    const row = makeCommentRow({id: 'cmt1', likes: 1});
+    const {getByTestId, getByLabelText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row], commentReactions: {cmt1: 'likes'}});
+
+    await act(async () => {
+      fireEvent.press(getByLabelText('Dislike comment'));
+    });
+
+    await waitFor(() => {
+      const cfCalls = global.fetch.mock.calls.filter(
+        ([url]) => typeof url === 'string' && url.includes('commentReact'),
+      );
+      expect(cfCalls).toHaveLength(1);
+      expect(JSON.parse(cfCalls[0][1].body)).toEqual({commentId: 'cmt1', prev: 'likes', next: 'dislikes'});
+    });
+  });
+
+  it('reverts optimistic like count when CF call fails', async () => {
+    const row = makeCommentRow({id: 'cmt1', likes: 0});
+    const fetchMock = makeCommentsFetch([row], {cfFails: true});
+    const {getByTestId, getByLabelText, queryByText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row], fetchMock});
+
+    await act(async () => {
+      fireEvent.press(getByLabelText('Like comment'));
+    });
+
+    await waitFor(() => {
+      // count only renders when > 0 — null means the revert succeeded
+      expect(queryByText('1')).toBeNull();
+    });
+  });
+
+  it('reverts AsyncStorage reaction when CF call fails', async () => {
+    const row = makeCommentRow({id: 'cmt1'});
+    const fetchMock = makeCommentsFetch([row], {cfFails: true});
+    const {getByTestId, getByLabelText} = renderArticle();
+
+    await openComments(getByTestId, {commentRows: [row], fetchMock});
+
+    await act(async () => {
+      fireEvent.press(getByLabelText('Like comment'));
+    });
+
+    await waitFor(() => {
+      const calls = AsyncStorage.setItem.mock.calls.filter(([key]) => key === 'comment_reactions_v1');
+      expect(calls.length).toBeGreaterThanOrEqual(2);
+      const stored = JSON.parse(calls[calls.length - 1][1]);
+      expect(stored.cmt1).toBeUndefined();
     });
   });
 

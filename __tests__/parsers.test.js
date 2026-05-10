@@ -80,6 +80,33 @@ describe('parseCalendar', () => {
     expect(cal.rounds[0].venue).toBe('Donington Park');
     expect(cal.rounds[0].corners).toBe(10);
   });
+
+  test('wraps singular youtubeUrl string into youtubeUrls array', () => {
+    const json = {
+      rounds: [{round: 1, venue: 'Donington Park', youtubeUrl: 'https://youtu.be/abc123'}],
+    };
+    const cal = parseCalendar(json);
+    expect(cal.rounds[0].youtubeUrls).toEqual(['https://youtu.be/abc123']);
+  });
+
+  test('prefers youtubeUrls array over singular youtubeUrl when both present', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Donington Park',
+        youtubeUrl: 'https://youtu.be/singular',
+        youtubeUrls: ['https://youtu.be/r1', 'https://youtu.be/r2'],
+      }],
+    };
+    const cal = parseCalendar(json);
+    expect(cal.rounds[0].youtubeUrls).toEqual(['https://youtu.be/r1', 'https://youtu.be/r2']);
+  });
+
+  test('returns empty youtubeUrls when neither field is present', () => {
+    const json = {rounds: [{round: 1, venue: 'Donington Park'}]};
+    const cal = parseCalendar(json);
+    expect(cal.rounds[0].youtubeUrls).toEqual([]);
+  });
 });
 
 describe('parseGrid', () => {
