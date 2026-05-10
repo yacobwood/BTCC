@@ -90,7 +90,7 @@
       "driver": "Gordon SHEDDEN",
       "nat": "GBR",
       "class": "I",
-      "points": 38,
+      "points": 39,
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
@@ -114,7 +114,7 @@
       "driver": "Daryl DE LEON",
       "nat": "PHL",
       "class": "I",
-      "points": 33,
+      "points": 32,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -174,7 +174,7 @@
       "driver": "Daniel ROWBOTTOM",
       "nat": "GBR",
       "class": "M",
-      "points": 20,
+      "points": 21,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -186,7 +186,7 @@
       "driver": "Josh COOK",
       "nat": "GBR",
       "class": "M",
-      "points": 19,
+      "points": 20,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -194,27 +194,27 @@
     },
     {
       "pos": 18,
-      "car": "15",
-      "driver": "Lewis SELBY",
-      "nat": "GBR",
-      "class": "M",
-      "points": 8,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 0,
-      "team": "NAPA Racing UK"
-    },
-    {
-      "pos": 19,
       "car": "132",
       "driver": "James DORLIN",
       "nat": "GBR",
       "class": "I",
-      "points": 6,
+      "points": 7,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
       "team": "Restart Racing"
+    },
+    {
+      "pos": 19,
+      "car": "15",
+      "driver": "Lewis SELBY",
+      "nat": "GBR",
+      "class": "M",
+      "points": 4,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "team": "NAPA Racing UK"
     },
     {
       "pos": 20,
@@ -255,7 +255,7 @@
     {
       "pos": 3,
       "team": "WSR",
-      "points": 75
+      "points": 74
     },
     {
       "pos": 4,
@@ -285,7 +285,7 @@
     {
       "pos": 9,
       "team": "Speedworks Corolla Racing",
-      "points": 18
+      "points": 19
     }
   ],
   "manufacturers": [
@@ -352,6 +352,18 @@
     },
     {
       "pos": 2,
+      "car": "132",
+      "driver": "James DORLIN",
+      "nat": "GBR",
+      "class": "I",
+      "points": 62,
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 1,
+      "team": "Restart Racing"
+    },
+    {
+      "pos": 3,
       "car": "17",
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
@@ -363,27 +375,15 @@
       "team": "Steel Seal with Power Maxed Racing"
     },
     {
-      "pos": 3,
-      "car": "132",
-      "driver": "James DORLIN",
-      "nat": "GBR",
-      "class": "I",
-      "points": 60,
-      "wins": 0,
-      "seconds": 1,
-      "thirds": 2,
-      "team": "Restart Racing"
-    },
-    {
       "pos": 4,
       "car": "15",
       "driver": "Lewis SELBY",
       "nat": "GBR",
       "class": "M",
-      "points": 58,
+      "points": 56,
       "wins": 0,
-      "seconds": 2,
-      "thirds": 0,
+      "seconds": 1,
+      "thirds": 1,
       "team": "NAPA Racing UK"
     },
     {
@@ -414,5 +414,5 @@
   "season": "2026",
   "round": 2,
   "venue": "Brands Hatch Indy",
-  "updated": "2026-05-10T12:59:27Z"
+  "updated": "2026-05-10T13:02:01Z"
 }
