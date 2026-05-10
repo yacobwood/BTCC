@@ -2,7 +2,7 @@ import {Image} from 'react-native';
 import {fetchDrivers, fetchArticles} from '../api/client';
 import {parseGrid, parseArticle} from '../api/parsers';
 
-const BUNDLED_CALENDAR = require('../data/calendar.json');
+const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const PREFETCH_CONCURRENCY = 5;
 
 function thumb(url, size = '150x150') {

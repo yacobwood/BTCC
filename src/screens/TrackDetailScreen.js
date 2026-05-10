@@ -26,7 +26,7 @@ import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
 
-const BUNDLED_CALENDAR = require('../data/calendar.json');
+const BUNDLED_CALENDAR = require('../../data/calendar.json');
 
 // Parse "M:SS.mmm" lap time to seconds, returns null on failure
 function lapTimeSecs(str) {

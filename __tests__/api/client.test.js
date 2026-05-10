@@ -8,7 +8,7 @@ jest.mock('../../src/utils/deviceId', () => ({
 }));
 
 // calendar.json must be importable in test env
-jest.mock('../../src/data/calendar.json', () => ({
+jest.mock('../../data/calendar.json', () => ({
   rounds: [{round: 1, venue: 'Donington Park'}],
   seasonStartDate: '2026-04-18',
 }));
