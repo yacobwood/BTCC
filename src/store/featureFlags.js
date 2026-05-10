@@ -33,8 +33,15 @@ export function FeatureFlagsProvider({children}) {
       } catch {}
 
       // Phase 2: fetch fresh flags with a hard timeout
+      // AbortSignal.timeout() is not supported on all Hermes/Android versions —
+      // use a manual AbortController instead.
       try {
-        const data = await fetch(FLAGS_URL, {signal: AbortSignal.timeout(8000)}).then(r => r.json());
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        // unref so the timer doesn't keep the process alive in test environments
+        if (timeoutId?.unref) timeoutId.unref();
+        const data = await fetch(FLAGS_URL, {signal: controller.signal})
+          .then(r => { clearTimeout(timeoutId); return r.json(); });
         const {overrides = {}, ...globalFlags} = data;
 
         // Apply per-device overrides if this device has any
