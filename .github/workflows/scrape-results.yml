@@ -35,6 +35,12 @@ jobs:
         id: raceday
         run: python .github/scripts/is_race_weekend.py
 
+      - name: Pull latest before scraping
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.in_session_window == 'true'
+        run: git pull --rebase origin main
+
       - name: Set up Python
         if: |
           github.event_name == 'workflow_dispatch' ||
@@ -60,12 +66,6 @@ jobs:
           ARGS="$YEAR"
           [ -n "$ROUND" ] && ARGS="$ARGS --round $ROUND"
           python tools/scraper/scrape_tsl.py $ARGS
-
-      - name: Pull latest before commit
-        if: |
-          github.event_name == 'workflow_dispatch' ||
-          steps.raceday.outputs.in_session_window == 'true'
-        run: git pull --rebase --autostash origin main
 
       - name: Commit updated data
         if: |

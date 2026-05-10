@@ -82,7 +82,7 @@ export async function fetchDrivers() {
 }
 
 export async function fetchStandings(forceRefresh = false) {
-  return fetchJson(`${BASE_GITHUB}/standings.json`, 'standings', forceRefresh);
+  return fetchJson(`${BASE_GITHUB}/standings.json`, 'standings', forceRefresh, /* staleFallback */ true, false, 5 * 60 * 1000);
 }
 
 export async function fetchLiveStatus() {
