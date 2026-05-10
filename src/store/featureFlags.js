@@ -44,14 +44,19 @@ export function FeatureFlagsProvider({children}) {
           .then(r => { clearTimeout(timeoutId); return r.json(); });
         const {overrides = {}, ...globalFlags} = data;
 
-        // Apply per-device overrides if this device has any
-        let deviceOverrides = {};
-        try {
-          const token = await getToken(getMessaging());
-          if (token && overrides[token]) deviceOverrides = overrides[token];
-        } catch {}
+        // Apply global flags immediately — don't block on token lookup
+        setFlags(prev => ({...prev, ...globalFlags}));
 
-        setFlags(prev => ({...prev, ...globalFlags, ...deviceOverrides}));
+        // Apply per-device overrides if this device has any (best-effort, 3s timeout)
+        try {
+          const token = await Promise.race([
+            getToken(getMessaging()),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000)),
+          ]);
+          if (token && overrides[token]) {
+            setFlags(prev => ({...prev, ...overrides[token]}));
+          }
+        } catch {}
         // Cache global flags only (device overrides are ephemeral)
         AsyncStorage.setItem(FLAGS_CACHE_KEY, JSON.stringify(globalFlags)).catch(() => {});
       } catch {}
