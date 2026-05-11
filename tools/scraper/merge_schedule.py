@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT         = Path(__file__).resolve().parent.parent.parent
 SCHEDULE_JSON  = ROOT / "data" / "schedule.json"
-CALENDAR_JSON  = ROOT / "src" / "data" / "calendar.json"
+CALENDAR_JSON  = ROOT / "data" / "calendar.json"
 
 
 def main():
