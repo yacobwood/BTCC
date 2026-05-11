@@ -600,7 +600,7 @@ exports.weeklyDigest = onSchedule(
         `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
         `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
         `Use British English throughout. ` +
-        `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
+        `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
         `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
         `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
@@ -692,7 +692,7 @@ exports.triggerDigest = onRequest(
           `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
           `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
           `Use British English throughout. ` +
-          `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. ` +
+          `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
           `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
           `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
           `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
