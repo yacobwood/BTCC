@@ -763,6 +763,8 @@ function buildHtml(article, topPad) {
       .hero-gradient { position:absolute; top:0;left:0;right:0;bottom:0; background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,transparent 30%,transparent 50%,rgba(11,12,15,0.95) 100%); }
       .hero-text { position:relative; z-index:1; padding:0 16px 20px; }
       h1 { font-size:22px; font-weight:700; margin-bottom:6px; line-height:1.3; }
+      h2 { font-size:18px; font-weight:700; margin-top:14px; margin-bottom:0; }
+      h3 { font-size:16px; font-weight:700; margin-top:14px; margin-bottom:0; }
       .date { font-size:13px; color:#8B949E; }
       .divider { height:2px; background:#FEBD02; margin:0 16px 20px; border-radius:2px; }
       .content { padding:0 16px 0; }

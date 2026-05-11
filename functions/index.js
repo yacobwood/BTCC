@@ -539,7 +539,10 @@ async function runDigest(label, promptIntro) {
     const raw = message.content[0].text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const parsed = JSON.parse(raw);
     title = parsed.title || title;
-    content = parsed.content || content;
+    content = (parsed.content || content)
+      .replace(/<p>\s*<\/p>/g, '')
+      .replace(/<h([23])>\s*/g, '<h$1>')
+      .replace(/\s*<\/h([23])>/g, '</h$1>');
     description = parsed.description || '';
   } catch (e) {
     console.error(`${label}: failed to parse Claude response:`, e);
@@ -601,7 +604,7 @@ exports.weeklyDigest = onSchedule(
         `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
         `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-        `Do not include the title in the body.\n\n`,
+        `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`,
       );
     } catch (e) {
       console.error('weeklyDigest failed:', e);
@@ -638,7 +641,7 @@ exports.raceWeekendDigest = onSchedule(
         `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
         `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-        `Do not include the title in the body.\n\n`,
+        `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`,
       );
     } catch (e) {
       console.error('raceWeekendDigest failed:', e);

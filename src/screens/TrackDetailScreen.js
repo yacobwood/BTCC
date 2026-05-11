@@ -84,13 +84,14 @@ export default function TrackDetailScreen({route, navigation}) {
   );
 
   useEffect(() => {
-    // Deep-link entry: upgrade bundled track data with remotely fetched calendar
-    if (!trackParam && roundParam) {
-      fetchCalendar().then(cal => {
-        const found = (cal.rounds || []).find(r => r.round === roundParam);
-        if (found) setTrack(found);
-      }).catch(() => {});
-    }
+    // Always upgrade track data from the remote calendar so live edits
+    // (e.g. new youtubeUrls) appear without clearing the app cache
+    const targetRound = trackParam?.round ?? roundParam;
+    if (!targetRound) return;
+    fetchCalendar().then(cal => {
+      const found = (cal.rounds || []).find(r => r.round === targetRound);
+      if (found) setTrack(found);
+    }).catch(() => {});
   }, []);
 
   if (!track) return null;
@@ -215,16 +216,11 @@ export default function TrackDetailScreen({route, navigation}) {
     // Stats
     items.push({type: 'stats'});
 
-    // Watch Live — Sundays during race weekends only, broadcaster resolved by IP geolocation
-    if (isRaceWeekend && new Date().getDay() === 0) items.push({type: 'watchLive'});
-
-    // Live Timing / Results button
-    // Section is shown for any race weekend or past round; the live_updates flag only
-    // gates the Live Timing sub-button inside  -  Results have their own guard.
-    if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
-
     // YouTube links  -  always shown when URLs exist (hot lap is available pre-weekend too)
     if ((track.youtubeUrls || []).some(Boolean)) items.push({type: 'youtube'});
+
+    // Watch Live + Live Timing rendered side-by-side in one item
+    if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
 
     // About
     if (track.about) items.push({type: 'about'});
@@ -312,39 +308,41 @@ export default function TrackDetailScreen({route, navigation}) {
           </View>
         );
 
-      case 'watchLive': {
-        const bc = broadcaster ? BROADCASTERS[broadcaster] : null;
-        if (!bc) return null;
+      case 'liveTiming': {
+        const bc = (isRaceWeekend && new Date().getDay() === 0 && broadcaster) ? BROADCASTERS[broadcaster] : null;
+        const showLive = isRaceWeekend && live_updates;
+        const showResults = racesFinished || isPastRaceWeekend;
         return (
-          <TouchableOpacity
-            style={styles.watchLiveBtn}
-            activeOpacity={0.8}
-            onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(bc.url); }}
-            accessibilityLabel={`Watch on ${bc.label}`}
-            accessibilityRole="button">
-            <Icon name="live-tv" size={16} color="#22C55E" />
-            <Text style={styles.watchLiveBtnTitle}>{bc.label.toUpperCase()}</Text>
-            <Icon name="open-in-new" size={18} color="#22C55E" />
-          </TouchableOpacity>
-        );
-      }
-
-      case 'liveTiming':
-        return (
-          <View style={{gap: 8}}>
-            {isRaceWeekend && live_updates && (
-              <TouchableOpacity
-                style={styles.liveTimingBtn}
-                activeOpacity={0.8}
-                onPress={() => { Analytics.liveTimingOpened(track.venue); navigation.navigate('LiveTiming', {eventId: track.tslEventId}); }}
-                accessibilityLabel="Open live timing"
-                accessibilityRole="button">
-                <View style={styles.liveDot} />
-                <Text style={styles.liveTimingText}>LIVE TIMING</Text>
-                <Icon name="chevron-right" size={18} color="#E3000B" />
-              </TouchableOpacity>
+          <View style={{gap: 10}}>
+            {(bc || showLive) && (
+              <View style={{flexDirection: 'row', gap: 10}}>
+                {bc && (
+                  <TouchableOpacity
+                    style={[styles.watchLiveBtn, {flex: 1}]}
+                    activeOpacity={0.8}
+                    onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(bc.url); }}
+                    accessibilityLabel={`Watch on ${bc.label}`}
+                    accessibilityRole="button">
+                    <Icon name="live-tv" size={16} color="#22C55E" />
+                    <Text style={styles.watchLiveBtnTitle}>{bc.label.toUpperCase()}</Text>
+                    <Icon name="open-in-new" size={18} color="#22C55E" />
+                  </TouchableOpacity>
+                )}
+                {showLive && (
+                  <TouchableOpacity
+                    style={[styles.liveTimingBtn, {flex: 1}]}
+                    activeOpacity={0.8}
+                    onPress={() => { Analytics.liveTimingOpened(track.venue); navigation.navigate('LiveTiming', {eventId: track.tslEventId}); }}
+                    accessibilityLabel="Open live timing"
+                    accessibilityRole="button">
+                    <View style={styles.liveDot} />
+                    <Text style={styles.liveTimingText}>LIVE TIMING</Text>
+                    <Icon name="chevron-right" size={18} color="#E3000B" />
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
-            {(racesFinished || isPastRaceWeekend) && (
+            {showResults && (
               <TouchableOpacity
                 style={[styles.liveTimingBtn, {borderColor: Colors.yellow, backgroundColor: 'transparent'}]}
                 activeOpacity={0.8}
@@ -364,28 +362,47 @@ export default function TrackDetailScreen({route, navigation}) {
             )}
           </View>
         );
+      }
 
-      case 'youtube':
+      case 'youtube': {
+        const urls = track.youtubeUrls || [];
+        const lapUrl = urls[0];
+        const raceEntries = [['Race 1', urls[1]], ['Race 2', urls[2]], ['Race 3', urls[3]]].filter(([, u]) => u);
         return (
-          <View style={styles.youtubeBtnRow}>
-            {['Lap Preview', 'Race 1', 'Race 2', 'Race 3'].map((label, i) => {
-              const url = (track.youtubeUrls || [])[i];
-              if (!url) return null;
-              return (
-                <TouchableOpacity
-                  key={label}
-                  style={styles.youtubeBtn}
-                  activeOpacity={0.8}
-                  onPress={() => Linking.openURL(url)}
-                  accessibilityLabel={`Watch ${label} on YouTube`}
-                  accessibilityRole="button">
-                  <Icon name="play-circle-filled" size={14} color="#FF0000" />
-                  <Text style={styles.youtubeBtnText}>{label}</Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View style={{gap: 8}}>
+            {lapUrl && (
+              <TouchableOpacity
+                style={styles.youtubeBtn}
+                activeOpacity={0.8}
+                onPress={() => Linking.openURL(lapUrl)}
+                accessibilityLabel="Watch Lap Preview on YouTube"
+                accessibilityRole="button">
+                <Icon name="play-circle-filled" size={14} color="#FF0000" />
+                <Text style={styles.youtubeBtnText}>Lap Preview</Text>
+              </TouchableOpacity>
+            )}
+            {raceEntries.length > 0 && (
+              <View style={{flexDirection: 'row', gap: 8}}>
+                {raceEntries.map(([label, url]) => {
+                  const btnW = (SCREEN_WIDTH - 32 - (raceEntries.length - 1) * 8) / raceEntries.length;
+                  return (
+                    <TouchableOpacity
+                      key={label}
+                      style={[styles.youtubeBtn, {width: btnW}]}
+                      activeOpacity={0.8}
+                      onPress={() => Linking.openURL(url)}
+                      accessibilityLabel={`Watch ${label} on YouTube`}
+                      accessibilityRole="button">
+                      <Icon name="play-circle-filled" size={14} color="#FF0000" />
+                      <Text style={styles.youtubeBtnText}>{label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
           </View>
         );
+      }
 
       case 'about':
         return (
@@ -553,6 +570,7 @@ export default function TrackDetailScreen({route, navigation}) {
         renderItem={renderItem}
         stickyHeaderIndices={[stickyIndex]}
         contentContainerStyle={{paddingBottom: 30, paddingHorizontal: 16}}
+        ItemSeparatorComponent={() => <View style={{height: 10}} />}
         onScroll={Animated.event([{nativeEvent: {contentOffset: {y: scrollAnim}}}], {useNativeDriver: false})}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -690,7 +708,7 @@ const styles = StyleSheet.create({
   location: {color: Colors.textSecondary, fontSize: 13, marginTop: 2},
 
   // Stats
-  statsRow: {flexDirection: 'row', marginTop: 16, gap: 8},
+  statsRow: {flexDirection: 'row', gap: 8},
   statBox: {
     flex: 1,
     backgroundColor: Colors.card,
@@ -796,7 +814,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    marginTop: 8,
     gap: 8,
   },
   watchLiveBtnTitle: {flex: 1, color: '#22C55E', fontSize: 13, fontWeight: '800', letterSpacing: 1},
@@ -811,20 +828,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    marginTop: 12,
     gap: 8,
   },
   liveDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: '#E3000B'},
   liveTimingText: {flex: 1, color: '#E3000B', fontSize: 13, fontWeight: '800', letterSpacing: 1},
-  youtubeBtnRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 8,
-  },
   youtubeBtn: {
-    flexGrow: 1,
-    flexBasis: '45%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
