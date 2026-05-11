@@ -56,8 +56,9 @@ export async function fetchCalendar(year = 2026) {
       'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json',
       'calendar_2026',
       false,
-      /* staleFallback */ false,
-      /* staleFirst */ true,
+      /* staleFallback */ true,
+      /* staleFirst */ false,
+      10 * 60 * 1000,
     );
   } catch {
     return BUNDLED_CALENDAR;
