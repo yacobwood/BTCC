@@ -1,0 +1,41 @@
+name: Scrape ITV YouTube Race Links
+
+on:
+  schedule:
+    - cron: "0 10 * * 1"   # Monday 10:00 UTC
+    - cron: "0 10 * * 2"   # Tuesday 10:00 UTC (catches late uploads)
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install yt-dlp Pillow numpy
+
+      - name: Write YouTube cookies
+        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > /tmp/yt_cookies.txt
+
+      - name: Scrape YouTube race links
+        env:
+          YT_COOKIES_FILE: /tmp/yt_cookies.txt
+        run: python tools/scraper/scrape_youtube.py
+
+      - name: Commit updated calendar
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update race YouTube links [skip ci]"
+          file_pattern: data/calendar.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
