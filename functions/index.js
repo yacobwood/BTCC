@@ -287,8 +287,15 @@ exports.sendSessionNotifications = onSchedule(
     // ── Hub news alerts ───────────────────────────────────────────
     try {
       const hubData = await fetchWithTimeout(HUB_NEWS_URL).then(r => r.json());
-      // Exclude Weekly Digest — those have their own notification fired in runDigest
-      const latestHub = hubData?.posts?.find(p => (!p.status || p.status === 'published') && p.category !== 'Weekly Digest');
+      // Exclude Weekly Digest — those have their own notification fired via the admin page.
+      // Also exclude articles older than 48 hours so a stale Firestore lastId can never
+      // cause an old article to appear "new" when hub_news.json changes for any reason.
+      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000);
+      const latestHub = hubData?.posts?.find(p =>
+        (!p.status || p.status === 'published') &&
+        p.category !== 'Weekly Digest' &&
+        new Date(p.pubDate) > cutoff
+      );
       if (latestHub) {
         const hubStateRef = db.collection('state').doc('hub_news');
         let shouldNotify = false;
