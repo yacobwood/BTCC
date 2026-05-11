@@ -1370,27 +1370,27 @@
         {
           "name": "Qualifying",
           "day": "SAT",
-          "time": "14:00"
+          "time": "13:45"
         },
         {
           "name": "Qualifying Race",
           "day": "SAT",
-          "time": "15:05"
+          "time": "14:50"
         },
         {
           "name": "Race 1",
           "day": "SUN",
-          "time": "11:30"
+          "time": "11:25"
         },
         {
           "name": "Race 2",
           "day": "SUN",
-          "time": "14:45"
+          "time": "14:35"
         },
         {
           "name": "Race 3",
           "day": "SUN",
-          "time": "17:30"
+          "time": "17:15"
         }
       ],
       "cornersLeft": 4,
