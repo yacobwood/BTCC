@@ -309,7 +309,10 @@ export default function TrackDetailScreen({route, navigation}) {
                     accessibilityLabel={`Watch on ${bc.label}`}
                     accessibilityRole="button">
                     <Icon name="live-tv" size={16} color="#22C55E" />
-                    <Text style={styles.watchLiveBtnTitle}>{bc.label.toUpperCase()}</Text>
+                    <View style={{flex: 1}}>
+                      <Text style={styles.watchLiveBtnTitle}>WATCH LIVE</Text>
+                      <Text style={styles.watchLiveBtnSub}>{bc.label}</Text>
+                    </View>
                     <Icon name="open-in-new" size={18} color="#22C55E" />
                   </TouchableOpacity>
                 )}
@@ -823,7 +826,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 8,
   },
-  watchLiveBtnTitle: {flex: 1, color: '#22C55E', fontSize: 13, fontWeight: '800', letterSpacing: 1},
+  watchLiveBtnTitle: {color: '#22C55E', fontSize: 13, fontWeight: '800', letterSpacing: 1},
+  watchLiveBtnSub: {color: '#22C55E', fontSize: 11, opacity: 0.7},
 
   // Live Timing button
   liveTimingBtn: {
