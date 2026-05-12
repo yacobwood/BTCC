@@ -73,7 +73,7 @@
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
-      "pos": 8,
+      "pos": 7,
       "car": "99",
       "driver": "Charles RAINFORD",
       "nat": "GBR",
@@ -85,7 +85,7 @@
       "team": "WSR"
     },
     {
-      "pos": 9,
+      "pos": 8,
       "car": "2",
       "driver": "Daryl DE LEON",
       "nat": "PHL",
@@ -97,7 +97,7 @@
       "team": "WSR"
     },
     {
-      "pos": 10,
+      "pos": 9,
       "car": "52",
       "driver": "Gordon SHEDDEN",
       "nat": "GBR",
@@ -109,7 +109,7 @@
       "team": "Laser Tools Racing with MB Motorsport"
     },
     {
-      "pos": 11,
+      "pos": 10,
       "car": "17",
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
@@ -121,7 +121,7 @@
       "team": "Steel Seal with Power Maxed Racing"
     },
     {
-      "pos": 12,
+      "pos": 11,
       "car": "33",
       "driver": "Adam MORGAN",
       "nat": "GBR",
@@ -133,7 +133,7 @@
       "team": "Cataclean Plato Racing"
     },
     {
-      "pos": 13,
+      "pos": 12,
       "car": "66",
       "driver": "Josh COOK",
       "nat": "GBR",
@@ -145,7 +145,7 @@
       "team": "Speedworks Corolla Racing"
     },
     {
-      "pos": 14,
+      "pos": 13,
       "car": "3",
       "driver": "Tom CHILTON",
       "nat": "GBR",
@@ -157,7 +157,7 @@
       "team": "Team VERTU"
     },
     {
-      "pos": 15,
+      "pos": 14,
       "car": "22",
       "driver": "Chris SMILEY",
       "nat": "GBR",
@@ -169,7 +169,7 @@
       "team": "Restart Racing"
     },
     {
-      "pos": 16,
+      "pos": 15,
       "car": "32",
       "driver": "Daniel ROWBOTTOM",
       "nat": "GBR",
@@ -181,7 +181,7 @@
       "team": "Cataclean Plato Racing"
     },
     {
-      "pos": 17,
+      "pos": 16,
       "car": "77",
       "driver": "Sam OSBORNE",
       "nat": "GBR",
@@ -193,7 +193,7 @@
       "team": "NAPA Racing UK"
     },
     {
-      "pos": 18,
+      "pos": 17,
       "car": "132",
       "driver": "James DORLIN",
       "nat": "GBR",
@@ -205,7 +205,7 @@
       "team": "Restart Racing"
     },
     {
-      "pos": 19,
+      "pos": 18,
       "car": "28",
       "driver": "Nicolas HAMILTON",
       "nat": "GBR",
@@ -217,7 +217,7 @@
       "team": "Team VERTU"
     },
     {
-      "pos": 20,
+      "pos": 19,
       "car": "15",
       "driver": "Lewis SELBY",
       "nat": "GBR",
@@ -229,7 +229,7 @@
       "team": "NAPA Racing UK"
     },
     {
-      "pos": 21,
+      "pos": 20,
       "car": "19",
       "driver": "Max BUXTON",
       "nat": "GBR",
@@ -411,7 +411,7 @@
       "team": "Speedworks Corolla Racing"
     }
   ],
-  "season": "2026",
+  "season": 2026,
   "round": 2,
   "venue": "Brands Hatch Indy",
   "updated": "2026-05-10T18:55:53Z"
