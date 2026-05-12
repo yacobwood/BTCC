@@ -74,6 +74,18 @@
     },
     {
       "pos": 7,
+      "car": "50",
+      "driver": "Árón TAYLOR-SMITH",
+      "nat": "GBR",
+      "class": "I",
+      "points": 54,
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 0,
+      "team": "Laser Tools Racing with MB Motorsport"
+    },
+    {
+      "pos": 8,
       "car": "99",
       "driver": "Charles RAINFORD",
       "nat": "GBR",
@@ -85,7 +97,7 @@
       "team": "WSR"
     },
     {
-      "pos": 8,
+      "pos": 9,
       "car": "2",
       "driver": "Daryl DE LEON",
       "nat": "PHL",
@@ -97,7 +109,7 @@
       "team": "WSR"
     },
     {
-      "pos": 9,
+      "pos": 10,
       "car": "52",
       "driver": "Gordon SHEDDEN",
       "nat": "GBR",
@@ -109,7 +121,7 @@
       "team": "Laser Tools Racing with MB Motorsport"
     },
     {
-      "pos": 10,
+      "pos": 11,
       "car": "17",
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
@@ -121,7 +133,7 @@
       "team": "Steel Seal with Power Maxed Racing"
     },
     {
-      "pos": 11,
+      "pos": 12,
       "car": "33",
       "driver": "Adam MORGAN",
       "nat": "GBR",
@@ -133,7 +145,7 @@
       "team": "Cataclean Plato Racing"
     },
     {
-      "pos": 12,
+      "pos": 13,
       "car": "66",
       "driver": "Josh COOK",
       "nat": "GBR",
@@ -145,7 +157,7 @@
       "team": "Speedworks Corolla Racing"
     },
     {
-      "pos": 13,
+      "pos": 14,
       "car": "3",
       "driver": "Tom CHILTON",
       "nat": "GBR",
@@ -157,7 +169,7 @@
       "team": "Team VERTU"
     },
     {
-      "pos": 14,
+      "pos": 15,
       "car": "22",
       "driver": "Chris SMILEY",
       "nat": "GBR",
@@ -169,7 +181,7 @@
       "team": "Restart Racing"
     },
     {
-      "pos": 15,
+      "pos": 16,
       "car": "32",
       "driver": "Daniel ROWBOTTOM",
       "nat": "GBR",
@@ -181,7 +193,7 @@
       "team": "Cataclean Plato Racing"
     },
     {
-      "pos": 16,
+      "pos": 17,
       "car": "77",
       "driver": "Sam OSBORNE",
       "nat": "GBR",
@@ -193,7 +205,7 @@
       "team": "NAPA Racing UK"
     },
     {
-      "pos": 17,
+      "pos": 18,
       "car": "132",
       "driver": "James DORLIN",
       "nat": "GBR",
@@ -205,7 +217,7 @@
       "team": "Restart Racing"
     },
     {
-      "pos": 18,
+      "pos": 19,
       "car": "28",
       "driver": "Nicolas HAMILTON",
       "nat": "GBR",
@@ -217,7 +229,7 @@
       "team": "Team VERTU"
     },
     {
-      "pos": 19,
+      "pos": 20,
       "car": "15",
       "driver": "Lewis SELBY",
       "nat": "GBR",
@@ -229,7 +241,7 @@
       "team": "NAPA Racing UK"
     },
     {
-      "pos": 20,
+      "pos": 21,
       "car": "19",
       "driver": "Max BUXTON",
       "nat": "GBR",
