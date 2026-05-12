@@ -15,6 +15,7 @@ import {fetchCalendar} from '../api/client';
 import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
+import {BROADCASTERS, detectBroadcaster} from '../utils/broadcaster';
 
 const RED = '#E3000B';
 
@@ -129,6 +130,9 @@ export default function CalendarScreen({navigation}) {
     return items;
   }, [rounds, today, pastCount]);
 
+  const broadcaster = useMemo(() => detectBroadcaster(), []);
+  const bc = activeRound ? BROADCASTERS[broadcaster] : null;
+
   const focusRound = activeRound || nextRound;
   const focusRoundIndex = focusRound ? rounds.indexOf(focusRound) : -1;
 
@@ -181,27 +185,40 @@ export default function CalendarScreen({navigation}) {
     // Race weekend in progress
     if (isActive) {
       return (
-        <TouchableOpacity
-          style={styles.liveCard}
-          activeOpacity={0.8}
-          onPress={() => navigate(round)}
-          accessibilityLabel={`${round.venue}  -  Race Weekend`}
-          accessibilityRole="button">
-          <View style={styles.liveBadgeRow}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveBadgeText}>RACE WEEKEND</Text>
-            <Text style={styles.liveRoundsLabel}>Rds {rStart}–{rEnd}</Text>
-          </View>
-          <Text style={styles.liveVenue}>{round.venue}</Text>
-          <View style={styles.liveFooter}>
-            <Text style={styles.liveDate}>
-              {formatDateRange(round.startDate, round.endDate)}
-            </Text>
-            <View style={styles.liveChevron}>
-              <Icon name="chevron-right" size={16} color="#fff" />
+        <View style={styles.liveCard}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigate(round)}
+            accessibilityLabel={`${round.venue}  -  Race Weekend`}
+            accessibilityRole="button">
+            <View style={styles.liveBadgeRow}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveBadgeText}>RACE WEEKEND</Text>
+              <Text style={styles.liveRoundsLabel}>Rds {rStart}–{rEnd}</Text>
             </View>
-          </View>
-        </TouchableOpacity>
+            <Text style={styles.liveVenue}>{round.venue}</Text>
+            <View style={styles.liveFooter}>
+              <Text style={styles.liveDate}>
+                {formatDateRange(round.startDate, round.endDate)}
+              </Text>
+              <View style={styles.liveChevron}>
+                <Icon name="chevron-right" size={16} color="#fff" />
+              </View>
+            </View>
+          </TouchableOpacity>
+          {bc && (
+            <TouchableOpacity
+              style={styles.watchLiveBtn}
+              activeOpacity={0.8}
+              onPress={() => { Analytics.trackDetailViewed(round.round, `watch_${broadcaster}`); Linking.openURL(bc.url); }}
+              accessibilityLabel={`Watch live on ${bc.label}`}
+              accessibilityRole="button">
+              <View style={styles.liveDot} />
+              <Text style={styles.watchLiveText}>WATCH LIVE</Text>
+              <Text style={styles.watchLiveSub}>{bc.label} · {bc.sub}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       );
     }
 
@@ -482,6 +499,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(254,189,2,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  watchLiveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  watchLiveText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 13,
+    letterSpacing: 0.5,
+    flex: 1,
+  },
+  watchLiveSub: {
+    color: Colors.textSecondary,
+    fontSize: 12,
   },
 
   // Next race card

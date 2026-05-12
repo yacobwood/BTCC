@@ -11,12 +11,21 @@ jest.mock('../../src/api/client', () => ({
   fetchCalendar: jest.fn(),
   fetchLiveStatus: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock('../../src/utils/broadcaster', () => ({
+  BROADCASTERS: {
+    uk:            {label: 'ITV4 / ITVX',   sub: 'Free · UK',            url: 'https://www.itv.com/hub/itv4'},
+    us:            {label: 'Racer Network',  sub: 'Live · United States', url: 'https://www.youtube.com/@RACER_Network/streams'},
+    international: {label: 'Official BTCC', sub: 'Free · Worldwide',     url: 'https://www.youtube.com/@OfficialBTCC/streams'},
+  },
+  detectBroadcaster: jest.fn(() => 'uk'),
+}));
 jest.mock('../../src/api/parsers', () => ({
   parseCalendar: jest.fn(),
 }));
 
 const {fetchCalendar, fetchLiveStatus} = require('../../src/api/client');
 const {parseCalendar} = require('../../src/api/parsers');
+const {detectBroadcaster} = require('../../src/utils/broadcaster');
 
 const MOCK_ROUNDS = [
   {round: 1, venue: 'Donington Park', startDate: '2025-04-19', endDate: '2025-04-20', date: '19–20 Apr 2025', sessions: []},
@@ -164,12 +173,9 @@ describe('CalendarScreen', () => {
     });
   });
 
-  // ── Watch Live button ─────────────────────────────────────────────────────────
-  // Pin clock to 2026-05-09T12:00:00Z (Saturday, 13:00 BST).
-  // Active round spans 2026-05-09 → 2026-05-10.
-  // Last SAT session: Q Race at 15:05 BST → cutoff = 16:05 BST = 15:05 UTC.
-  // So 12:00 UTC is BEFORE the cutoff → button should show from the fallback.
-  // 16:00 UTC is AFTER the cutoff → button should hide.
+  // ── Watch Live button (geo-based broadcaster) ─────────────────────────────────
+  // Pin clock inside an active race weekend. detectBroadcaster is mocked so we
+  // can control which broadcaster is returned without relying on device locale.
 
   describe('Watch Live button', () => {
     const ACTIVE_ROUND = {
@@ -177,67 +183,45 @@ describe('CalendarScreen', () => {
       venue: 'Brands Hatch Indy',
       startDate: '2026-05-09',
       endDate: '2026-05-10',
-      liveUrl: 'https://www.youtube.com/watch?v=fallback',
-      sessions: [
-        {name: 'Qualifying Race', day: 'SAT', time: '15:05'},
-        {name: 'Race 3',          day: 'SUN', time: '17:30'},
-      ],
+      sessions: [],
     };
 
     beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-05-09T12:00:00Z'));
-      fetchLiveStatus.mockResolvedValue(null);
+      detectBroadcaster.mockReturnValue('uk');
     });
 
     afterEach(() => jest.useRealTimers());
 
-    it('shows WATCH LIVE when liveStatus is active', async () => {
-      fetchLiveStatus.mockResolvedValue({active: true, liveUrl: 'https://www.youtube.com/watch?v=live123'});
+    it('shows WATCH LIVE during an active race weekend', async () => {
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       expect(await findByText('WATCH LIVE')).toBeTruthy();
     });
 
-    it('opens the liveStatus URL, not the fallback, when auto-detected', async () => {
-      fetchLiveStatus.mockResolvedValue({active: true, liveUrl: 'https://www.youtube.com/watch?v=live123'});
-      setupCalendar([ACTIVE_ROUND]);
-      const {Linking} = require('react-native');
-      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
-      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
-      const btn = await findByText('WATCH LIVE');
-      fireEvent.press(btn);
-      expect(openURL).toHaveBeenCalledWith('https://www.youtube.com/watch?v=live123');
-      openURL.mockRestore();
-    });
-
-    it('hides WATCH LIVE when liveStatus.active is false (stream confirmed ended)', async () => {
-      fetchLiveStatus.mockResolvedValue({active: false, liveUrl: null});
-      setupCalendar([ACTIVE_ROUND]);
-      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
-      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
-    });
-
-    it('shows WATCH LIVE from fallback round.liveUrl when liveStatus is null and within time window', async () => {
-      // 12:00 UTC = 13:00 BST, before the 16:05 BST cutoff
-      fetchLiveStatus.mockResolvedValue(null);
+    it('shows ITV4 / ITVX label for UK users', async () => {
+      detectBroadcaster.mockReturnValue('uk');
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
-      expect(await findByText('WATCH LIVE')).toBeTruthy();
+      expect(await findByText(/ITV4/)).toBeTruthy();
     });
 
-    it('hides fallback WATCH LIVE button after 1h past last session of today', async () => {
-      // 16:00 UTC = 17:00 BST, after the 16:05 BST cutoff (15:05 BST + 1h)
-      jest.setSystemTime(new Date('2026-05-09T16:00:00Z'));
-      fetchLiveStatus.mockResolvedValue(null);
+    it('shows Racer Network label for US users', async () => {
+      detectBroadcaster.mockReturnValue('us');
       setupCalendar([ACTIVE_ROUND]);
-      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
-      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      expect(await findByText(/Racer Network/)).toBeTruthy();
     });
 
-    it('does not show WATCH LIVE on a non-active weekend', async () => {
-      fetchLiveStatus.mockResolvedValue({active: true, liveUrl: 'https://www.youtube.com/watch?v=live'});
-      // This round is in the past relative to pinned clock
+    it('shows Official BTCC label for international users', async () => {
+      detectBroadcaster.mockReturnValue('international');
+      setupCalendar([ACTIVE_ROUND]);
+      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      expect(await findByText(/Official BTCC/)).toBeTruthy();
+    });
+
+    it('does not show WATCH LIVE when no round is active', async () => {
       setupCalendar([{...ACTIVE_ROUND, startDate: '2026-04-05', endDate: '2026-04-06'}]);
       const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());

@@ -26,25 +26,9 @@ import {fetchResults, fetchCalendar} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
+import {BROADCASTERS, detectBroadcaster} from '../utils/broadcaster';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
-
-const BROADCASTERS = {
-  uk:            {label: 'ITV4 / ITVX',    sub: 'Free · UK',            icon: '📺', url: 'https://www.itv.com/hub/itv4'},
-  us:            {label: 'Racer Network',   sub: 'Live · United States', icon: '🏁', url: 'https://www.racernetwork.com/live'},
-  international: {label: 'YouTube Live',   sub: 'Free · International', icon: '▶',  url: 'https://www.youtube.com/@OfficialBTCC/streams'},
-};
-
-function detectBroadcaster() {
-  try {
-    const {timeZone = '', locale = ''} = Intl.DateTimeFormat().resolvedOptions();
-    if (timeZone === 'Europe/London' || locale.includes('-GB')) return 'uk';
-    if (locale.includes('-US')) return 'us';
-    return 'international';
-  } catch {
-    return 'international';
-  }
-}
 
 // Parse "M:SS.mmm" lap time to seconds, returns null on failure
 function lapTimeSecs(str) {
