@@ -33,6 +33,14 @@ jest.mock('../../src/store/cache', () => ({
 // UKMapPin uses SVG which is problematic in tests — stub it
 jest.mock('../../src/components/UKMapPin', () => ({__esModule: true, default: () => null}));
 
+jest.mock('../../src/utils/broadcaster', () => ({
+  BROADCASTERS: {
+    uk:            {label: 'ITV4 / ITVX',   sub: 'Free · UK',        url: 'https://www.itv.com/hub/itv4'},
+    international: {label: 'Official BTCC', sub: 'Free · Worldwide', url: 'https://www.youtube.com/@OfficialBTCC/streams'},
+  },
+  detectBroadcaster: jest.fn(() => 'uk'),
+}));
+
 const nav = makeNav();
 
 // A complete track fixture matching the shape in calendar.json
@@ -135,6 +143,75 @@ describe('TrackDetailScreen', () => {
     const {queryByLabelText} = render(PAST_TRACK);
     // isPastRaceWeekend is true but live_updates flag is off by default
     await waitFor(() => expect(queryByLabelText('Open live timing')).toBeNull());
+  });
+
+  // ── Watch Live button (broadcaster, Sunday only) ──────────────────────────────
+  // 2026-04-26 is a Sunday. LIVE_TRACK spans 2026-04-25 → 2026-04-26 and has a
+  // tslEventId so isRaceWeekend is true.
+
+  describe('Watch Live button', () => {
+    const {detectBroadcaster} = require('../../src/utils/broadcaster');
+
+    const LIVE_TRACK = {
+      ...TRACK,
+      tslEventId: 99,
+      startDate: '2026-04-25',
+      endDate:   '2026-04-26',
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-04-26T10:00:00Z')); // Sunday
+      detectBroadcaster.mockReturnValue('uk');
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    it('shows WATCH LIVE on a Sunday during a race weekend', async () => {
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('WATCH LIVE')).toBeTruthy();
+    });
+
+    it('shows broadcaster sub-label for UK users', async () => {
+      detectBroadcaster.mockReturnValue('uk');
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('ITV4 / ITVX')).toBeTruthy();
+    });
+
+    it('shows broadcaster sub-label for international users', async () => {
+      detectBroadcaster.mockReturnValue('international');
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('Official BTCC')).toBeTruthy();
+    });
+
+    it('does not show WATCH LIVE for US users (no broadcaster entry)', async () => {
+      detectBroadcaster.mockReturnValue('us');
+      const {queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
+    it('does not show WATCH LIVE on a Saturday (Sunday-only)', async () => {
+      jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
+      const {queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
+    it('does not show WATCH LIVE outside a race weekend', async () => {
+      const {queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: TRACK})} navigation={nav} />, // TRACK has no tslEventId
+      );
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
   });
 
   // ── Session times ─────────────────────────────────────────────────────────────
