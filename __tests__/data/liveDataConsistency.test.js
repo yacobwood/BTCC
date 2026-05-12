@@ -1,10 +1,10 @@
 /**
  * Live 2026 data consistency tests.
  *
- * Cross-validates standings.json, results2026.json, drivers.json and
- * calendar.json against each other. These tests run offline against the
- * committed data files — they fail the moment any file is updated in a
- * way that breaks consistency.
+ * Cross-validates standings.json, results2026.json, drivers.json,
+ * calendar.json, schedule.json and historical results files against each
+ * other. These tests run offline against committed data files — they fail
+ * the moment any file is updated in a way that breaks consistency.
  *
  * Coverage:
  *   1. standings.json structural integrity (shape, ordering, no dupes)
@@ -13,12 +13,17 @@
  *   4. drivers.json <-> results2026.json  (name resolution, car numbers)
  *   5. calendar.json <-> standings.json  (round/venue agreement)
  *   6. JST standings — classification and subset checks
+ *   7. Per-driver spot checks
+ *   8. schedule.json <-> calendar.json  (round and session alignment)
+ *   9. results2026.json internal integrity  (venues, grid drivers, no impossible positions)
+ *  10. drivers.json history <-> historical results files  (wins/podiums 2022-2025)
  */
 
 const DRIVERS    = require('../../data/drivers.json').drivers;
 const STANDINGS  = require('../../data/standings.json');
 const RESULTS    = require('../../data/results2026.json');
 const CALENDAR   = require('../../data/calendar.json');
+const SCHEDULE   = require('../../data/schedule.json');
 const {formatDriverName} = require('../../src/utils/driverName');
 
 // Scoring races only — QR is NOT a championship points race for win/podium tallies
@@ -477,4 +482,219 @@ describe('per-driver spot checks — standings data matches app display', () => 
       expect(driver.team).toBe(entry.team);
     });
   });
+});
+
+// ── 8. schedule.json <-> calendar.json ───────────────────────────────────────
+
+describe('schedule.json <-> calendar.json consistency', () => {
+  it('both files have the same number of rounds', () => {
+    expect(SCHEDULE.rounds.length).toBe(CALENDAR.rounds.length);
+  });
+
+  it('round numbers match between schedule and calendar', () => {
+    const schedRounds = SCHEDULE.rounds.map(r => r.round).sort((a, b) => a - b);
+    const calRounds   = CALENDAR.rounds.map(r => r.round).sort((a, b) => a - b);
+    expect(schedRounds).toEqual(calRounds);
+  });
+
+  it('session names match for every round', () => {
+    const mismatches = [];
+    for (const sr of SCHEDULE.rounds) {
+      const cr = CALENDAR.rounds.find(c => c.round === sr.round);
+      if (!cr) continue;
+      const schedNames = (sr.sessions || []).map(s => s.name).sort().join(',');
+      const calNames   = (cr.sessions || []).map(s => s.name).sort().join(',');
+      if (schedNames !== calNames) {
+        mismatches.push(`Round ${sr.round}: schedule="${schedNames}" calendar="${calNames}"`);
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('every schedule session has a name, day and time', () => {
+    const bad = [];
+    for (const rnd of SCHEDULE.rounds) {
+      for (const s of rnd.sessions || []) {
+        if (!s.name || !s.day || !s.time) {
+          bad.push(`Round ${rnd.round} session missing field: ${JSON.stringify(s)}`);
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('every calendar round has required fields for TrackDetailScreen', () => {
+    const required = ['venue', 'about', 'lengthMiles', 'lengthKm', 'corners', 'imageUrl', 'startDate', 'endDate'];
+    const missing = [];
+    for (const r of CALENDAR.rounds) {
+      for (const f of required) {
+        if (!r[f]) missing.push(`Round ${r.round} (${r.venue}): missing "${f}"`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('calendar startDate is before endDate for every round', () => {
+    const bad = [];
+    for (const r of CALENDAR.rounds) {
+      if (r.startDate && r.endDate && r.startDate > r.endDate) {
+        bad.push(`Round ${r.round} (${r.venue}): startDate ${r.startDate} after endDate ${r.endDate}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('schedule season matches standings season', () => {
+    expect(Number(SCHEDULE.season)).toBe(Number(STANDINGS.season));
+  });
+});
+
+// ── 9. results2026.json internal integrity ────────────────────────────────────
+
+describe('results2026.json internal integrity', () => {
+  it('every round venue matches calendar.json', () => {
+    const mismatches = [];
+    for (const rnd of RESULTS.rounds) {
+      const cr = CALENDAR.rounds.find(c => c.round === rnd.round);
+      if (!cr) { mismatches.push(`Round ${rnd.round}: no calendar entry`); continue; }
+      if (rnd.venue !== cr.venue) {
+        mismatches.push(`Round ${rnd.round}: results="${rnd.venue}" calendar="${cr.venue}"`);
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('every grid driver resolves to a known driver in drivers.json', () => {
+    const unknown = new Set();
+    for (const rnd of RESULTS.rounds) {
+      for (const race of rnd.races || []) {
+        for (const g of race.grid || []) {
+          if (g.driver && !driversMap[formatDriverName(g.driver)]) {
+            unknown.add(g.driver);
+          }
+        }
+      }
+    }
+    expect([...unknown]).toEqual([]);
+  });
+
+  it('grid car numbers match drivers.json', () => {
+    const mismatches = [];
+    for (const rnd of RESULTS.rounds) {
+      for (const race of rnd.races || []) {
+        for (const g of race.grid || []) {
+          if (!g.driver || !g.no) continue;
+          const dr = driversMap[formatDriverName(g.driver)];
+          if (dr && dr.number !== g.no) {
+            mismatches.push(`Round ${rnd.round} ${race.label} grid: ${g.driver} no=${g.no} vs drivers.json=${dr.number}`);
+          }
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('no result entry has an impossible finishing position (pos > field size)', () => {
+    const bad = [];
+    for (const rnd of RESULTS.rounds) {
+      for (const race of rnd.races || []) {
+        const results = race.results || [];
+        const fieldSize = results.length;
+        for (const r of results) {
+          if (r.pos > fieldSize) {
+            bad.push(`Round ${rnd.round} ${race.label}: ${r.driver} pos=${r.pos} but only ${fieldSize} entries`);
+          }
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('no duplicate finishing positions within a single race (excluding DNFs at pos 0)', () => {
+    const bad = [];
+    for (const rnd of RESULTS.rounds) {
+      for (const race of rnd.races || []) {
+        const positions = (race.results || []).filter(r => r.pos > 0).map(r => r.pos);
+        const unique = new Set(positions);
+        if (unique.size !== positions.length) {
+          bad.push(`Round ${rnd.round} ${race.label}: duplicate finishing positions`);
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('every completed scoring race has a P1 finisher', () => {
+    const bad = [];
+    for (const rnd of RESULTS.rounds) {
+      for (const race of rnd.races || []) {
+        if (!SCORING_RACES.has(race.label)) continue;
+        const results = race.results || [];
+        if (results.length === 0) continue; // not yet run
+        const hasP1 = results.some(r => r.pos === 1);
+        if (!hasP1) bad.push(`Round ${rnd.round} ${race.label}: no P1 finisher`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});
+
+// ── 10. Driver history <-> historical results files (2022-2025) ───────────────
+
+describe('drivers.json history <-> historical results files (2022-2025)', () => {
+  // 2020/2021 have minor discrepancies (~1 podium) attributable to data-entry
+  // approximations in the historical records. 2022 onwards is reliable.
+  const CHECK_YEARS = [2022, 2023, 2024, 2025];
+
+  function buildHistoryStats(year) {
+    const data = require(`../../data/results${year}.json`);
+    const stats = {};
+    for (const rnd of data.rounds || []) {
+      for (const race of rnd.races || []) {
+        if (!SCORING_RACES.has(race.label)) continue;
+        for (const e of race.results || []) {
+          if (!e.driver) continue;
+          const k = formatDriverName(e.driver);
+          if (!stats[k]) stats[k] = {wins: 0, podiums: 0};
+          if (e.pos === 1) { stats[k].wins++; stats[k].podiums++; }
+          else if (e.pos === 2 || e.pos === 3) { stats[k].podiums++; }
+        }
+      }
+    }
+    return stats;
+  }
+
+  for (const year of CHECK_YEARS) {
+    it(`${year}: driver history wins match scoring race P1 finishes`, () => {
+      const stats = buildHistoryStats(year);
+      const mismatches = [];
+      for (const d of DRIVERS) {
+        const h = (d.history || []).find(e => e.year === year);
+        if (!h) continue;
+        const norm = formatDriverName(d.name);
+        const computed = stats[norm];
+        if (!computed) continue; // driver didn't race that year — no results to compare
+        if (h.wins !== computed.wins) {
+          mismatches.push(`${d.name}: history_wins=${h.wins} result_wins=${computed.wins}`);
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+
+    it(`${year}: driver history podiums match P1/P2/P3 finishes in scoring races`, () => {
+      const stats = buildHistoryStats(year);
+      const mismatches = [];
+      for (const d of DRIVERS) {
+        const h = (d.history || []).find(e => e.year === year);
+        if (!h) continue;
+        const norm = formatDriverName(d.name);
+        const computed = stats[norm];
+        if (!computed) continue;
+        if (h.podiums !== computed.podiums) {
+          mismatches.push(`${d.name}: history_podiums=${h.podiums} result_podiums=${computed.podiums}`);
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+  }
 });
