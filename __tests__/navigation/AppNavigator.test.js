@@ -150,9 +150,9 @@ describe('AppNavigator', () => {
     await waitFor(() => expect(getByText('Grid')).toBeTruthy());
   });
 
-  it('shows the History (Results) tab label', async () => {
+  it('shows the Season (Results) tab label', async () => {
     const {getByText} = renderNav();
-    await waitFor(() => expect(getByText('History')).toBeTruthy());
+    await waitFor(() => expect(getByText('Season')).toBeTruthy());
   });
 
   it('shows the More tab label', async () => {

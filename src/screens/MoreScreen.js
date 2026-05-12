@@ -12,8 +12,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
-import {useFeatureFlags} from '../store/featureFlags';
-
 const pagesData = require('../assets/pages.json');
 
 const iconMap = {
@@ -26,7 +24,6 @@ const iconMap = {
 };
 
 export default function MoreScreen({navigation}) {
-  const {podcasts_enabled, radio_tab} = useFeatureFlags();
   const [pages, setPages] = useState([]);
   const scrollRef = useRef(null);
 
@@ -70,9 +67,7 @@ export default function MoreScreen({navigation}) {
 
         {/* App section */}
         <Text style={styles.sectionTitle}>APP</Text>
-        {radio_tab && <MoreRow label="Radio" icon="radio" onPress={() => { Analytics.moreItemClicked('radio'); navigation.navigate('Radio'); }} />}
-        {podcasts_enabled && <MoreRow label="Podcasts & Interviews" icon="mic" onPress={() => { Analytics.moreItemClicked('podcasts'); navigation.navigate('Podcasts'); }} />}
-        <MoreRow label="All-Time Records" icon="emoji-events" onPress={() => { Analytics.moreItemClicked('records'); navigation.navigate('Records'); }} />
+        <MoreRow label="Listen" icon="headphones" onPress={() => { Analytics.moreItemClicked('listen'); navigation.navigate('Listen'); }} />
         <MoreRow label="Settings" icon="settings" onPress={() => { Analytics.moreItemClicked('settings'); navigation.navigate('Settings'); }} />
 
         <View style={styles.divider} />

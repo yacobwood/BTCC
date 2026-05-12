@@ -45,6 +45,7 @@ import BugReportScreen from '../screens/BugReportScreen';
 import RadioScreen from '../screens/RadioScreen';
 import TocaRadioScreen from '../screens/TocaRadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
+import ListenScreen from '../screens/ListenScreen';
 import DigestsScreen from '../screens/DigestsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
@@ -105,6 +106,7 @@ function ResultsStack() {
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="ResultsList" component={ResultsScreen} />
       <Stack.Screen name="RoundResults" component={RoundResultsScreen} />
+      <Stack.Screen name="Records" component={RecordsScreen} />
     </Stack.Navigator>
   );
 }
@@ -118,6 +120,7 @@ function MoreStack() {
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="InfoPage" component={InfoPageScreen} />
       <Stack.Screen name="BugReport" component={BugReportScreen} />
+      <Stack.Screen name="Listen" component={ListenScreen} />
       <Stack.Screen name="Radio" component={RadioScreen} />
       <Stack.Screen name="Podcasts" component={PodcastsScreen} />
       <Stack.Screen name="Records" component={RecordsScreen} />
@@ -150,6 +153,16 @@ const linking = {
         screens: {
           TrackDetail: 'round/:round',
           LiveTiming: 'live-timing/:eventId',
+        },
+      },
+      Grid: {
+        screens: {
+          DriverDetail: 'drivers/:slug',
+        },
+      },
+      Results: {
+        screens: {
+          RoundResults: 'results/:round',
         },
       },
     },
@@ -187,7 +200,7 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="Calendar" component={CalendarStack} />
           <Tab.Screen name="Grid" component={DriversStack} />
           {live_chat && <Tab.Screen name="Chat" component={ChatScreen} />}
-          <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'History'}} />
+          <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'Season'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
         <View style={{paddingBottom: bottom}}>

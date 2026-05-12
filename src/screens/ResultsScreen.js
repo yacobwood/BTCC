@@ -418,6 +418,9 @@ export default function ResultsScreen({navigation, route}) {
           <Text style={{color: '#fff', fontSize: 15, fontWeight: '900'}}>{item.points} pts</Text>
           {(item.wins > 0 || item.seconds > 0 || item.thirds > 0) && (
             <View style={{flexDirection: 'row', gap: 6, marginTop: 3, alignItems: 'center'}}>
+              {driverFilter === 'JST' && (
+                <Text style={{color: Colors.textSecondary, fontSize: 9, fontWeight: '800', letterSpacing: 0.5}}>JST</Text>
+              )}
               {item.wins > 0 && (
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 2}}>
                   <Icon name="emoji-events" size={11} color="#FFD700" />
@@ -441,7 +444,7 @@ export default function ResultsScreen({navigation, route}) {
         </View>
       </View>
     );
-  }, [isFavourite]);
+  }, [isFavourite, driverFilter]);
 
   const renderTeamStanding = useCallback(({item}) => (
     <View style={styles.standingRow}>
@@ -656,15 +659,24 @@ export default function ResultsScreen({navigation, route}) {
   return (
     <View style={styles.container}>
       <View style={[styles.header, {flexDirection: 'row', alignItems: 'center'}]}>
-        <Text style={[styles.headerTitle, {flex: 1}]}>HISTORY</Text>
-        {year === 2026 && dataFreshnessMs !== null && (
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}>
-            <Icon name="access-time" size={11} color={Colors.textSecondary} />
-            <Text style={{color: Colors.textSecondary, fontSize: 11, fontWeight: '600'}}>
-              {formatAge(dataFreshnessMs)}
-            </Text>
-          </View>
-        )}
+        <Text style={[styles.headerTitle, {flex: 1}]}>SEASON</Text>
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
+          {year === 2026 && dataFreshnessMs !== null && (
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}>
+              <Icon name="access-time" size={11} color={Colors.textSecondary} />
+              <Text style={{color: Colors.textSecondary, fontSize: 11, fontWeight: '600'}}>
+                {formatAge(dataFreshnessMs)}
+              </Text>
+            </View>
+          )}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Records')}
+            accessibilityLabel="All-time records"
+            accessibilityRole="button"
+            style={{width: 34, height: 34, borderRadius: 17, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.outline, justifyContent: 'center', alignItems: 'center'}}>
+            <Icon name="emoji-events" size={18} color={Colors.yellow} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.yearRow}>

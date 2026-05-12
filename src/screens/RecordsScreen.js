@@ -99,7 +99,11 @@ export default function RecordsScreen({navigation}) {
     return (
       <View style={[styles.row, fav && styles.rowFav]}>
         <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 8}}>
-          <Text style={[styles.pos, {fontSize: medal ? 18 : 15}]}>{medal || rank}</Text>
+          <Text
+            style={[styles.pos, {fontSize: medal ? 18 : 15}]}
+            accessibilityLabel={rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : String(rank)}>
+            {medal || rank}
+          </Text>
           <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4}}>
             {fav && <Icon name="star" size={13} color={Colors.yellow} />}
             <Text style={[styles.driver, fav && {color: Colors.yellow}]}>{item.driver}</Text>

@@ -11,7 +11,6 @@ import {UnitsProvider} from './src/store/units';
 import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
 import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
-import {maybeRequestReview} from './src/utils/reviewPrompt';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import {cacheEvictStale, cacheDelete} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
@@ -117,7 +116,6 @@ export default function App() {
     const crashlytics = getCrashlytics();
     setCrashlyticsCollectionEnabled(crashlytics, true);
     setupNotificationChannels();
-    maybeRequestReview();
     runBackgroundPrefetch();
     cacheEvictStale();
 
@@ -129,7 +127,6 @@ export default function App() {
       notifee.getInitialNotification().then(initial => {
         if (initial?.notification?.data && !initialConsumed) {
           initialConsumed = true;
-          console.log('[NOTIF] notifee initial:', JSON.stringify(initial.notification.data));
           _navigate(initial.notification.data as Record<string, string>);
         }
       }).catch(() => {});
@@ -149,7 +146,6 @@ export default function App() {
     // Notifee local notification tapped while app is in foreground
     const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS) {
-        console.log('[NOTIF] notifee press:', JSON.stringify(detail.notification?.data));
         _navigate(detail.notification?.data as Record<string, string>);
       }
     });
@@ -157,13 +153,11 @@ export default function App() {
     // App opened from background by tapping an FCM notification
     const messaging = getMessaging();
     const unsubscribeBg = onNotificationOpenedApp(messaging, message => {
-      console.log('[NOTIF] onNotificationOpenedApp:', JSON.stringify(message?.data));
       _navigate(message?.data as Record<string, string>);
     });
 
     // App launched cold by tapping an FCM notification
     getInitialNotification(messaging).then(message => {
-      console.log('[NOTIF] getInitialNotification:', JSON.stringify(message?.data));
       _navigate(message?.data as Record<string, string>);
     });
 

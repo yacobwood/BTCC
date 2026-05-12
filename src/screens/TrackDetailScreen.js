@@ -11,6 +11,7 @@ import {
   Dimensions,
   Animated,
   Linking,
+  Share,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -555,6 +556,10 @@ export default function TrackDetailScreen({route, navigation}) {
     }
   };
 
+  const onShare = async () => {
+    await Share.share({message: `Round ${track.round} - ${track.venue}\n\nbtccfanhub://round/${track.round}`});
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -563,6 +568,13 @@ export default function TrackDetailScreen({route, navigation}) {
         accessibilityLabel="Go back"
         accessibilityRole="button">
         <Icon name="arrow-back" size={22} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.floatingShareBtn, {top: statusBarHeight + 12}]}
+        onPress={onShare}
+        accessibilityLabel="Share round"
+        accessibilityRole="button">
+        <Icon name="share" size={20} color="#fff" />
       </TouchableOpacity>
       <FlatList
         data={data}
@@ -687,6 +699,17 @@ const styles = StyleSheet.create({
   floatingBackBtn: {
     position: 'absolute',
     left: 16,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  floatingShareBtn: {
+    position: 'absolute',
+    right: 16,
     zIndex: 10,
     width: 36,
     height: 36,

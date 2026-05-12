@@ -27,6 +27,8 @@ import {Analytics} from '../utils/analytics';
 import {fetchArticleBySlug, fetchBlacklist} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import {getFCMToken} from '../utils/notifications';
+import {timeAgo} from '../utils/timeAgo';
+import {containsProfanity} from '../utils/profanityFilter';
 
 import {FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIRESTORE_BASE, COMMENT_REACT_URL} from '../config/firebase';
 const API_KEY = FIREBASE_API_KEY;
@@ -151,20 +153,6 @@ async function deleteComment(docId) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function timeAgo(iso) {
-  if (!iso) return '';
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
-function containsProfanity(text, blacklist) {
-  const lower = text.toLowerCase();
-  return blacklist.some(w => lower.includes(w));
-}
 
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 

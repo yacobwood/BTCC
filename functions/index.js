@@ -751,6 +751,7 @@ exports.syncAnalytics = onSchedule(
     const runReport = async (body) => {
       const res = await fetchWithTimeout(
         `https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport`,
+        15000,
         {method: 'POST', headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}, body: JSON.stringify(body)},
       );
       const json = await res.json();

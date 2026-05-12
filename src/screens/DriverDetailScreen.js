@@ -8,7 +8,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Share,
 } from 'react-native';
+
+const BUNDLED_DRIVERS = require('../../data/drivers.json');
 import Svg, {Polyline, Line, Circle, Text as SvgText} from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -16,7 +19,7 @@ import {getDriverImage} from '../assets/driverImages';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
-import {fetchResults} from '../api/client';
+import {fetchStandings} from '../api/client';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 function formatDob(dateStr) {
@@ -38,7 +41,13 @@ function calcAge(dateStr) {
 }
 
 export default function DriverDetailScreen({route, navigation}) {
-  const {driver} = route.params;
+  const driverParam = route.params?.driver ?? null;
+  const slugParam = route.params?.slug ?? null;
+  const driver = driverParam ?? (slugParam
+    ? BUNDLED_DRIVERS.drivers.find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam)
+    : null);
+
+  if (!driver) return null;
   const {isFavourite, toggle: toggleFav} = useFavouriteDriver();
   const fav = isFavourite(driver.name);
   const insets = useSafeAreaInsets();
@@ -49,23 +58,15 @@ export default function DriverDetailScreen({route, navigation}) {
 
   useEffect(() => {
     if (!driver.team || (driver.history || []).some(h => h.year === 2026)) return;
-    fetchResults(2026).then(data => {
-      let wins = 0, podiums = 0, points = 0, fastestLaps = 0, poles = 0, dnfs = 0;
-      for (const round of (data.rounds || [])) {
-        for (const race of (round.races || [])) {
-          const results = race.results || [];
-          const entry = results.find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
-          if (!entry) continue;
-          const isRace = race.label === 'Race 1' || race.label === 'Race 2' || race.label === 'Race 3';
-          if (entry.pos === 1 && isRace) wins++;
-          if (entry.pos >= 1 && entry.pos <= 3 && isRace) podiums++;
-          if (entry.pos === 0) dnfs++;
-          points += entry.points || 0;
-          if (entry.pole) poles++;
-          if (entry.fastestLap && isRace) fastestLaps++;
-        }
-      }
-      setSeason2026({wins, podiums, points, fastestLaps, poles, dnfs});
+    fetchStandings().then(data => {
+      const entry = (data.standings || []).find(
+        s => formatDriverName(s.driver) === formatDriverName(driver.name),
+      );
+      // Driver may have 0 points and not appear in standings yet - still show 0 pts badge
+      const points = entry ? (entry.points || 0) : 0;
+      const wins = entry ? (entry.wins || 0) : 0;
+      const podiums = entry ? (entry.wins || 0) + (entry.seconds || 0) + (entry.thirds || 0) : 0;
+      setSeason2026({points, wins, podiums, fastestLaps: 0, poles: 0, dnfs: 0});
     }).catch(() => {});
   }, [driver.name, driver.team]);
 
@@ -89,6 +90,12 @@ export default function DriverDetailScreen({route, navigation}) {
   const dobFormatted = formatDob(driver.dateOfBirth);
 
   const bundledImg = getDriverImage(driver.number);
+
+  const onShare = async () => {
+    const slug = driver.name.toLowerCase().replace(/\s+/g, '-');
+    Analytics.screen('driver_detail_share:' + driver.name);
+    await Share.share({message: `${driver.name} - 2026 BTCC\n\nbtccfanhub://drivers/${slug}`});
+  };
 
   return (
     <View style={styles.container}>
@@ -151,7 +158,7 @@ export default function DriverDetailScreen({route, navigation}) {
             </View>
           ) : null}
 
-          {/* Career stats */}
+          {/* Career stats - only shown for drivers with prior seasons */}
           {history.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>BTCC CAREER</Text>
@@ -190,78 +197,82 @@ export default function DriverDetailScreen({route, navigation}) {
               </View>
 
               <CareerTimeline history={history} />
+            </>
+          )}
 
-              {/* Season history */}
-              <Text style={styles.sectionTitle}>SEASON HISTORY</Text>
-              {driver.team && !history.some(h => h.year === 2026) && (
-                <View style={[styles.historyRow, {borderLeftWidth: 3, borderLeftColor: Colors.textSecondary}]}>
-                  <View style={styles.historyTopLine}>
-                    <View style={styles.historyYearCol}>
-                      <Text style={styles.historyYear}>2026</Text>
-                    </View>
-                    <View style={styles.inProgressBadge}>
-                      <Text style={styles.inProgressText}>IN PROGRESS</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.historyTeam}>{driver.team}</Text>
-                  {driver.car ? <Text style={styles.historyCar}>{driver.car}</Text> : null}
-                  {season2026 && season2026.points > 0 && (
-                    <View style={styles.historyBadges}>
-                      <View style={styles.badgePts}><Text style={styles.badgePtsText}>{season2026.points} pts</Text></View>
-                      {season2026.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{season2026.wins} W</Text></View>}
-                      {season2026.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{season2026.podiums} P</Text></View>}
-                      {season2026.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{season2026.fastestLaps} FL</Text></View>}
-                      {season2026.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{season2026.dnfs} DNF</Text></View>}
-                    </View>
-                  )}
+          {/* Season history - shown for any active driver or driver with prior history */}
+          {(driver.team || history.length > 0) && (
+            <Text style={styles.sectionTitle}>SEASON HISTORY</Text>
+          )}
+          {driver.team && !history.some(h => h.year === 2026) && (
+            <View style={[styles.historyRow, {borderLeftWidth: 3, borderLeftColor: Colors.textSecondary}]}>
+              <View style={styles.historyTopLine}>
+                <View style={styles.historyYearCol}>
+                  <Text style={styles.historyYear}>2026</Text>
+                </View>
+                <View style={styles.inProgressBadge}>
+                  <Text style={styles.inProgressText}>IN PROGRESS</Text>
+                </View>
+              </View>
+              <Text style={styles.historyTeam}>{driver.team}</Text>
+              {driver.car ? <Text style={styles.historyCar}>{driver.car}</Text> : null}
+              {season2026 && (
+                <View style={styles.historyBadges}>
+                  <View style={styles.badgePts}><Text style={styles.badgePtsText}>{season2026.points} pts</Text></View>
+                  {season2026.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{season2026.wins} W</Text></View>}
+                  {season2026.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{season2026.podiums} P</Text></View>}
+                  {season2026.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{season2026.fastestLaps} FL</Text></View>}
+                  {season2026.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{season2026.dnfs} DNF</Text></View>}
                 </View>
               )}
-              {[...history].sort((a, b) => b.year - a.year).map(h => {
-                const posColor = h.isChampion || h.pos === 1 ? Colors.yellow
-                  : h.pos === 2 ? '#C0C0C0'
-                  : h.pos === 3 ? '#CD7F32'
-                  : h.pos <= 10 ? '#fff'
-                  : Colors.textSecondary;
-                return (
-                  <View key={h.year} style={[
-                    styles.historyRow,
-                    h.isChampion && {borderLeftWidth: 3, borderLeftColor: Colors.yellow},
-                  ]}>
-                    <View style={styles.historyTopLine}>
-                      <View style={styles.historyYearCol}>
-                        <Text style={[styles.historyYear, h.isChampion && {color: Colors.yellow}]}>{h.year}</Text>
-                        {h.isChampion && <Icon name="emoji-events" size={14} color={Colors.yellow} />}
-                      </View>
-                      <Text style={[styles.historyPos, {color: posColor}]}>P{h.pos}</Text>
-                    </View>
-                    <Text style={styles.historyTeam}>{h.team}</Text>
-                    {h.car ? <Text style={styles.historyCar}>{h.car}</Text> : null}
-                    <View style={styles.historyBadges}>
-                      <View style={styles.badgePts}><Text style={styles.badgePtsText}>{h.points} pts</Text></View>
-                      {h.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{h.wins} W</Text></View>}
-                      {h.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{h.podiums} P</Text></View>}
-                      {h.poles > 0 && <View style={styles.badgePole}><Text style={styles.badgePoleText}>{h.poles} PL</Text></View>}
-                      {h.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{h.fastestLaps} FL</Text></View>}
-                      {h.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{h.dnfs} DNF</Text></View>}
-                    </View>
+            </View>
+          )}
+          {[...history].sort((a, b) => b.year - a.year).map(h => {
+            const posColor = h.isChampion || h.pos === 1 ? Colors.yellow
+              : h.pos === 2 ? '#C0C0C0'
+              : h.pos === 3 ? '#CD7F32'
+              : h.pos <= 10 ? '#fff'
+              : Colors.textSecondary;
+            return (
+              <View key={h.year} style={[
+                styles.historyRow,
+                h.isChampion && {borderLeftWidth: 3, borderLeftColor: Colors.yellow},
+              ]}>
+                <View style={styles.historyTopLine}>
+                  <View style={styles.historyYearCol}>
+                    <Text style={[styles.historyYear, h.isChampion && {color: Colors.yellow}]}>{h.year}</Text>
+                    {h.isChampion && <Icon name="emoji-events" size={14} color={Colors.yellow} />}
                   </View>
-                );
-              })}
-              <View style={styles.legend}>
-                <Text style={styles.legendItem}>
-                  <Text style={{color: Colors.yellow}}>W</Text>
-                  <Text style={styles.legendLabel}> Wins  </Text>
-                  <Text style={{color: '#C0C0C0'}}>P</Text>
-                  <Text style={styles.legendLabel}> Podiums  </Text>
-                  <Text style={{color: '#5BA3FF'}}>PL</Text>
-                  <Text style={styles.legendLabel}> Poles  </Text>
-                  <Text style={{color: '#A855F7'}}>FL</Text>
-                  <Text style={styles.legendLabel}> Fastest Laps  </Text>
-                  <Text style={{color: '#ff4444'}}>DNF</Text>
-                  <Text style={styles.legendLabel}> Did Not Finish</Text>
-                </Text>
+                  <Text style={[styles.historyPos, {color: posColor}]}>P{h.pos}</Text>
+                </View>
+                <Text style={styles.historyTeam}>{h.team}</Text>
+                {h.car ? <Text style={styles.historyCar}>{h.car}</Text> : null}
+                <View style={styles.historyBadges}>
+                  <View style={styles.badgePts}><Text style={styles.badgePtsText}>{h.points} pts</Text></View>
+                  {h.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{h.wins} W</Text></View>}
+                  {h.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{h.podiums} P</Text></View>}
+                  {h.poles > 0 && <View style={styles.badgePole}><Text style={styles.badgePoleText}>{h.poles} PL</Text></View>}
+                  {h.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{h.fastestLaps} FL</Text></View>}
+                  {h.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{h.dnfs} DNF</Text></View>}
+                </View>
               </View>
-            </>
+            );
+          })}
+          {history.length > 0 && (
+            <View style={styles.legend}>
+              <Text style={styles.legendItem}>
+                <Text style={{color: Colors.yellow}}>W</Text>
+                <Text style={styles.legendLabel}> Wins  </Text>
+                <Text style={{color: '#C0C0C0'}}>P</Text>
+                <Text style={styles.legendLabel}> Podiums  </Text>
+                <Text style={{color: '#5BA3FF'}}>PL</Text>
+                <Text style={styles.legendLabel}> Poles  </Text>
+                <Text style={{color: '#A855F7'}}>FL</Text>
+                <Text style={styles.legendLabel}> Fastest Laps  </Text>
+                <Text style={{color: '#ff4444'}}>DNF</Text>
+                <Text style={styles.legendLabel}> Did Not Finish</Text>
+              </Text>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -272,6 +283,13 @@ export default function DriverDetailScreen({route, navigation}) {
         accessibilityLabel="Go back"
         accessibilityRole="button">
         <Icon name="arrow-back" size={24} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.shareBtn, {top: insets.top + 8}]}
+        onPress={onShare}
+        accessibilityLabel="Share driver"
+        accessibilityRole="button">
+        <Icon name="share" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -446,6 +464,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     left: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareBtn: {
+    position: 'absolute',
+    top: 50,
+    right: 12,
     width: 40,
     height: 40,
     borderRadius: 20,

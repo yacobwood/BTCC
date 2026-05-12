@@ -13,6 +13,7 @@ jest.mock('../../src/api/client', () => ({
 jest.mock('../../src/api/parsers', () => ({
   parseGrid:    jest.fn(),
   parseArticle: jest.fn(),
+  thumbUrl:     jest.fn(url => url),
 }));
 
 import {Image} from 'react-native';

@@ -7,7 +7,6 @@ const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const BUNDLED_CALENDAR_2027 = require('../../data/calendar2027.json');
-const BUNDLED_HUB_DRAFT = require('../../data/hub_news_draft.json');
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
 const BUNDLED_BLACKLIST = require('../../data/blacklist.json');
 
@@ -26,7 +25,7 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
     const cached = await cacheRead(cacheKey, ageLimit);
     if (cached) {
       // Refresh cache in background without blocking
-      fetch(url)
+      fetch(url, {signal: AbortSignal.timeout(10000)})
         .then(r => r.ok ? r.json() : null)
         .then(data => { if (data) cacheWrite(cacheKey, data); })
         .catch(() => {});
@@ -54,7 +53,7 @@ export async function fetchCalendar(year = 2026) {
   try {
     return await fetchJson(
       'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json',
-      'calendar_2026',
+      `calendar_${year}`,
       false,
       /* staleFallback */ true,
       /* staleFirst */ false,
@@ -171,8 +170,8 @@ export async function fetchHubPosts() {
 }
 
 export async function fetchArticleBySlug(slug) {
-  const res = await fetch(`${BASE_WP}/posts?slug=${slug}&_embed=1`);
-  if (!res.ok) return null;
-  const arr = await res.json();
-  return arr.length > 0 ? arr[0] : null;
+  const cacheKey = `article_${slug}`;
+  return fetchJson(`${BASE_WP}/posts?slug=${slug}&_embed=1`, cacheKey, false, /* staleFallback */ true, /* staleFirst */ true)
+    .then(arr => (Array.isArray(arr) ? arr[0] ?? null : arr))
+    .catch(() => null);
 }

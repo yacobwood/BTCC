@@ -21,23 +21,11 @@ import {Colors} from '../theme/colors';
 import {getFCMToken} from '../utils/notifications';
 import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
+import {timeAgo} from '../utils/timeAgo';
+import {containsProfanity} from '../utils/profanityFilter';
 
 const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
-
-function timeAgo(ts) {
-  if (!ts) return '';
-  const diff = (Date.now() - ts) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
-function containsProfanity(text, blacklist) {
-  const lower = text.toLowerCase();
-  return blacklist.some(w => lower.includes(w));
-}
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();

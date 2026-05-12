@@ -1,22 +1,32 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import InAppReview from 'react-native-in-app-review';
 
-const KEY_LAUNCH_COUNT = 'review_launch_count';
 const KEY_REVIEW_SHOWN = 'review_shown';
-const LAUNCHES_BEFORE_PROMPT = 5;
+const KEY_REVIEWED = 'has_reviewed'; // shared guard with store/reviewPrompt.js
+const KEY_FIRST_LAUNCH = 'review_first_launch_ts';
+const DAYS_BEFORE_PROMPT = 7;
 
-export async function maybeRequestReview() {
+export async function maybeRequestReviewAfterResults() {
   try {
-    const shown = await AsyncStorage.getItem(KEY_REVIEW_SHOWN);
-    if (shown === 'true') return;
+    const [shown, reviewed] = await Promise.all([
+      AsyncStorage.getItem(KEY_REVIEW_SHOWN),
+      AsyncStorage.getItem(KEY_REVIEWED),
+    ]);
+    if (shown === 'true' || reviewed === 'true') return;
 
-    const countStr = await AsyncStorage.getItem(KEY_LAUNCH_COUNT);
-    const count = (parseInt(countStr, 10) || 0) + 1;
-    await AsyncStorage.setItem(KEY_LAUNCH_COUNT, String(count));
+    const now = Date.now();
+    const firstLaunchStr = await AsyncStorage.getItem(KEY_FIRST_LAUNCH);
+    if (!firstLaunchStr) {
+      await AsyncStorage.setItem(KEY_FIRST_LAUNCH, String(now));
+      return;
+    }
 
-    if (count >= LAUNCHES_BEFORE_PROMPT && InAppReview.isAvailable()) {
+    const daysSinceInstall = (now - parseInt(firstLaunchStr, 10)) / (1000 * 60 * 60 * 24);
+    if (daysSinceInstall < DAYS_BEFORE_PROMPT) return;
+
+    if (InAppReview.isAvailable()) {
       await InAppReview.RequestInAppReview();
-      await AsyncStorage.setItem(KEY_REVIEW_SHOWN, 'true');
+      await AsyncStorage.multiSet([[KEY_REVIEW_SHOWN, 'true'], [KEY_REVIEWED, 'true']]);
     }
   } catch {}
 }

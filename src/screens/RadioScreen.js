@@ -6,6 +6,15 @@ import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
 import {cacheRead, cacheWrite} from '../store/cache';
 
+const BUNDLED_RADIO = require('../../data/radio.json');
+const RADIO_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/radio.json';
+
+function mapStations(data) {
+  return (data.stations || []).map(s => ({
+    name: s.name || '', tagline: s.tagline || '', streamUrl: s.streamUrl || '', coverage: s.coverage || '',
+  }));
+}
+
 export default function RadioScreen({navigation}) {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,14 +34,17 @@ export default function RadioScreen({navigation}) {
 
       // Phase 2: fetch fresh data with timeout
       try {
-        const res = await fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/radio.json', {signal: AbortSignal.timeout(8000)});
+        const res = await fetch(RADIO_URL, {signal: AbortSignal.timeout(8000)});
         const data = await res.json();
-        const mapped = (data.stations || []).map(s => ({
-          name: s.name || '', tagline: s.tagline || '', streamUrl: s.streamUrl || '', coverage: s.coverage || '',
-        }));
-        setStations(mapped);
-        cacheWrite('radio', {stations: mapped}).catch(() => {});
+        const mapped = mapStations(data);
+        if (mapped.length) {
+          setStations(mapped);
+          cacheWrite('radio', {stations: mapped}).catch(() => {});
+        }
       } catch {}
+
+      // Phase 3: fall back to bundled data if still empty
+      setStations(prev => prev.length ? prev : mapStations(BUNDLED_RADIO));
       setLoading(false);
     })();
   }, []);

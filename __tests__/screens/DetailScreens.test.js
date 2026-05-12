@@ -10,10 +10,11 @@ jest.mock('../../src/utils/analytics', () => ({
 }));
 
 jest.mock('../../src/api/client', () => ({
-  fetchResults: jest.fn(),
+  fetchStandings: jest.fn(),
 }));
 
-const {fetchResults} = require('../../src/api/client');
+const {fetchStandings} = require('../../src/api/client');
+const REAL_DRIVERS = require('../../data/drivers.json').drivers;
 
 const nav = makeNav();
 
@@ -40,11 +41,13 @@ const DRIVER_NO_TEAM = {
   history: [],
 };
 
+const EMPTY_STANDINGS = {standings: []};
+
 describe('DriverDetailScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     AsyncStorage.getItem.mockResolvedValue(null);
-    fetchResults.mockResolvedValue({rounds: []});
+    fetchStandings.mockResolvedValue(EMPTY_STANDINGS);
   });
 
   it('displays the driver name', async () => {
@@ -93,7 +96,6 @@ describe('DriverDetailScreen', () => {
     );
     await waitFor(() => getByLabelText(/favourite/i));
     fireEvent.press(getByLabelText(/favourite/i));
-    // After pressing, AsyncStorage should be updated
     await waitFor(() => {
       expect(AsyncStorage.setItem).toHaveBeenCalled();
     });
@@ -107,40 +109,130 @@ describe('DriverDetailScreen', () => {
     await waitFor(() => expect(getByText(/Tom Ingram/)).toBeTruthy());
   });
 
-  it('does not count a QR win as an official win in 2026 live stats', async () => {
-    fetchResults.mockResolvedValue({
-      rounds: [{
-        races: [
-          // QR P1 — should NOT count as a win
-          {label: 'Qualifying Race', results: [{pos: 1, driver: 'Tom Ingram', team: 'Team Ingram', points: 10, bestLap: ''}]},
-          // Race 1 P3 — not a win, but is a podium
-          {label: 'Race 1', results: [{pos: 3, driver: 'Tom Ingram', team: 'Team Ingram', points: 15, bestLap: ''}]},
-        ],
-      }],
-    });
-    const route = makeRoute({driver: DRIVER});
-    const {queryByText} = renderWithProviders(
+  // Rookie driver - the bug: history.length === 0 used to hide the entire SEASON HISTORY section
+  const ROOKIE = {
+    name: 'Lewis Selby',
+    number: 11,
+    team: 'NAPA Racing UK',
+    nationality: 'British',
+    history: [],
+    imageUrl: null,
+    cardBgUrl: null,
+  };
+
+  it('shows SEASON HISTORY heading for a rookie driver (no prior history)', async () => {
+    const route = makeRoute({driver: ROOKIE});
+    const {getByText} = renderWithProviders(
       <DriverDetailScreen route={route} navigation={nav} />,
     );
-    // wins = 0 (QR excluded) → "1 W" badge must not appear
-    await waitFor(() => expect(queryByText('1 W')).toBeNull());
+    await waitFor(() => expect(getByText('SEASON HISTORY')).toBeTruthy());
   });
 
-  it('does not count a QR podium in 2026 live stats', async () => {
-    fetchResults.mockResolvedValue({
-      rounds: [{
-        races: [
-          // QR P2 — should NOT count as a podium
-          {label: 'Qualifying Race', results: [{pos: 2, driver: 'Tom Ingram', team: 'Team Ingram', points: 9, bestLap: ''}]},
-        ],
-      }],
+  it('shows 2026 IN PROGRESS card for a rookie driver', async () => {
+    const route = makeRoute({driver: ROOKIE});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('2026')).toBeTruthy();
+      expect(getByText('IN PROGRESS')).toBeTruthy();
     });
-    const route = makeRoute({driver: DRIVER});
+  });
+
+  it('shows stats badges for a rookie driver from standings data', async () => {
+    fetchStandings.mockResolvedValue({
+      standings: [{driver: 'Lewis SELBY', points: 43, wins: 1, seconds: 1, thirds: 0, team: 'NAPA Racing UK'}],
+    });
+    const route = makeRoute({driver: ROOKIE});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('43 pts')).toBeTruthy();
+      expect(getByText('1 W')).toBeTruthy();
+      expect(getByText('2 P')).toBeTruthy(); // wins + seconds + thirds = 1+1+0
+    });
+  });
+
+  it('does NOT show BTCC CAREER section for a rookie driver (no history)', async () => {
+    const route = makeRoute({driver: ROOKIE});
     const {queryByText} = renderWithProviders(
       <DriverDetailScreen route={route} navigation={nav} />,
     );
-    // podiums = 0 → "1 P" badge must not appear
-    await waitFor(() => expect(queryByText('1 P')).toBeNull());
+    await waitFor(() => expect(queryByText('BTCC CAREER')).toBeNull());
+  });
+
+  it('shows both BTCC CAREER and SEASON HISTORY for a veteran driver', async () => {
+    const route = makeRoute({driver: DRIVER});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('BTCC CAREER')).toBeTruthy();
+      expect(getByText('SEASON HISTORY')).toBeTruthy();
+    });
+  });
+
+  it('shows stats badges for a veteran driver using standings', async () => {
+    fetchStandings.mockResolvedValue({
+      standings: [{driver: 'Tom INGRAM', points: 87, wins: 4, seconds: 1, thirds: 2, team: 'Team Ingram'}],
+    });
+    const route = makeRoute({driver: DRIVER});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('87 pts')).toBeTruthy(); // unique: historical rows show 250/200 pts
+      expect(getByText('4 W')).toBeTruthy();    // unique: historical rows show 3W and 2W
+      expect(getByText('7 P')).toBeTruthy();    // wins(4) + seconds(1) + thirds(2)
+    });
+  });
+
+  it('shows 0 pts badge when driver is in standings with no points yet', async () => {
+    fetchStandings.mockResolvedValue({
+      standings: [{driver: 'Lewis SELBY', points: 0, wins: 0, seconds: 0, thirds: 0, team: 'NAPA Racing UK'}],
+    });
+    const route = makeRoute({driver: ROOKIE});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('0 pts')).toBeTruthy());
+  });
+
+  it('shows 0 pts badge when driver is active but not yet in standings feed', async () => {
+    // e.g. Árón Taylor-Smith has a team but 0 pts and isn't listed in standings.json yet
+    fetchStandings.mockResolvedValue({standings: []});
+    const route = makeRoute({driver: ROOKIE});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('0 pts')).toBeTruthy());
+  });
+});
+
+// ─── All real drivers smoke test ──────────────────────────────────────────────
+
+describe('DriverDetailScreen - all real drivers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    AsyncStorage.getItem.mockResolvedValue(null);
+    fetchStandings.mockResolvedValue(EMPTY_STANDINGS);
+  });
+
+  const navSmoke = makeNav();
+
+  REAL_DRIVERS.forEach(driver => {
+    it(`renders without crashing: ${driver.name} (history years: ${(driver.history || []).map(h => h.year).join(', ') || 'none'})`, async () => {
+      const route = makeRoute({driver});
+      const {getByText, getAllByText} = renderWithProviders(
+        <DriverDetailScreen route={route} navigation={navSmoke} />,
+      );
+      await waitFor(() => expect(getAllByText(new RegExp(driver.name.split(' ')[0])).length).toBeGreaterThan(0));
+      // Active drivers must show SEASON HISTORY
+      if (driver.team) {
+        await waitFor(() => expect(getByText('SEASON HISTORY')).toBeTruthy());
+      }
+    });
   });
 });
 

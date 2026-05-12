@@ -23,9 +23,9 @@ describe('MoreScreen', () => {
 
   // ── Static rows always present ───────────────────────────────────────────────
 
-  it('shows the ALL-TIME RECORDS row', async () => {
+  it('shows the LISTEN row', async () => {
     const {getByLabelText} = renderMore();
-    await waitFor(() => expect(getByLabelText('All-Time Records')).toBeTruthy());
+    await waitFor(() => expect(getByLabelText('Listen')).toBeTruthy());
   });
 
   it('shows the SETTINGS row', async () => {
@@ -48,26 +48,13 @@ describe('MoreScreen', () => {
     await waitFor(() => expect(getByLabelText('Feedback & Bugs')).toBeTruthy());
   });
 
-  // ── Feature-flag-controlled rows ─────────────────────────────────────────────
-
-  it('does NOT show Radio row when radio_tab flag is off (default)', async () => {
-    const {queryByLabelText} = renderMore();
-    // Give flags time to load (they won't — fetch fails, so flags stay default false)
-    await waitFor(() => expect(queryByLabelText('Radio')).toBeNull());
-  });
-
-  it('does NOT show Podcasts row when podcasts_enabled flag is off (default)', async () => {
-    const {queryByLabelText} = renderMore();
-    await waitFor(() => expect(queryByLabelText('Podcasts & Interviews')).toBeNull());
-  });
-
   // ── Navigation ────────────────────────────────────────────────────────────────
 
-  it('navigates to Records screen when All-Time Records is pressed', async () => {
+  it('navigates to Listen screen when Listen is pressed', async () => {
     const {getByLabelText} = renderMore();
-    await waitFor(() => getByLabelText('All-Time Records'));
-    fireEvent.press(getByLabelText('All-Time Records'));
-    expect(nav.navigate).toHaveBeenCalledWith('Records');
+    await waitFor(() => getByLabelText('Listen'));
+    fireEvent.press(getByLabelText('Listen'));
+    expect(nav.navigate).toHaveBeenCalledWith('Listen');
   });
 
   it('navigates to Settings screen when Settings is pressed', async () => {

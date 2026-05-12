@@ -75,7 +75,7 @@ export function connectSignalR(eventId, onSession, onEntry) {
         }
       };
 
-      ws.onerror = () => {};
+      ws.onerror = (e) => { console.warn('[SignalR] WebSocket error:', e?.message); };
       ws.onclose = () => {
         clearHeartbeat();
         if (!closed) setTimeout(() => connectSignalR(eventId, onSession, onEntry), 3000);

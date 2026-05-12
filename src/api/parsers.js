@@ -1,5 +1,5 @@
 // Rewrite a btcc.net image URL to a smaller WordPress-generated thumbnail
-function thumbUrl(url, size = '150x150') {
+export function thumbUrl(url, size = '150x150') {
   if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
   return url.replace(/(\.[a-z]+)$/i, `-${size}$1`);
 }
@@ -20,20 +20,14 @@ export function parseArticle(post) {
 }
 
 function extractFeaturedImage(embedded, content = '') {
-  try {
-    const media = embedded?.['wp:featuredmedia']?.[0]?.source_url;
-    if (media) return media;
-  } catch {}
+  const media = embedded?.['wp:featuredmedia']?.[0]?.source_url;
+  if (media) return media;
   const match = content.match(/<img[^>]+src=["']([^"']+)["']/i);
   return match ? match[1] : null;
 }
 
 function extractCategory(embedded) {
-  try {
-    return embedded?.['wp:term']?.[0]?.[0]?.name || '';
-  } catch {
-    return '';
-  }
+  return embedded?.['wp:term']?.[0]?.[0]?.name || '';
 }
 
 export function formatDate(date) {

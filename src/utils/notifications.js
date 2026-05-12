@@ -31,9 +31,8 @@ export async function getFCMToken() {
   try {
     const messaging = getMessaging();
     const token = await getToken(messaging);
-    console.log('[FCM] Device token:', token);
     return token;
-  } catch (e) { console.log('[FCM] Token error:', e); return null; }
+  } catch (e) { return null; }
 }
 
 export function onForegroundMessage(callback) {

@@ -199,10 +199,23 @@ if (RNImage && !RNImage.getSize) {
 }
 
 // ── react-native-svg ──────────────────────────────────────────────────────────
-jest.mock('react-native-svg', () => ({
-  Svg: 'Svg', Path: 'Path', Circle: 'Circle',
-  Line: 'Line', Text: 'SvgText', G: 'G', Polyline: 'Polyline',
-}));
+// Use component stubs (not strings) so SVG containers that wrap children render cleanly.
+jest.mock('react-native-svg', () => {
+  const React = require('react');
+  const {View, Text} = require('react-native');
+  const Stub = ({children}) => React.createElement(View, null, children);
+  const TextStub = ({children}) => React.createElement(Text, null, children);
+  return {
+    __esModule: true,
+    default: Stub,
+    Svg: Stub, Circle: Stub, Ellipse: Stub, G: Stub,
+    Line: Stub, Path: Stub, Polygon: Stub, Polyline: Stub,
+    Rect: Stub, Use: Stub, Image: Stub, Symbol: Stub,
+    Defs: Stub, LinearGradient: Stub, RadialGradient: Stub,
+    Stop: Stub, ClipPath: Stub, Pattern: Stub, Mask: Stub,
+    Text: TextStub, TSpan: TextStub, TextPath: Stub,
+  };
+});
 
 // ── App navigationRef ─────────────────────────────────────────────────────────
 jest.mock('./App', () => ({

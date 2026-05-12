@@ -1,6 +1,14 @@
 import {CommonActions} from '@react-navigation/native';
 import {getSeasonData} from '../assets/seasonData';
 
+const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
+
+function fetchHubPost(id) {
+  return fetch(HUB_NEWS_URL + '?t=' + Date.now())
+    .then(r => r.json())
+    .then(data => data.posts?.find(p => String(p.id) === String(id)) || null);
+}
+
 /**
  * Navigate to the appropriate screen based on notification data.
  * Polls until navigationRef is ready (handles cold-start timing).
@@ -97,10 +105,8 @@ export function navigateFromData(navigationRef, data) {
 
     // ── Hub article (non-digest) ───────────────────────────────────
     } else if (type === 'hub' && id) {
-      fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json?t=' + Date.now())
-        .then(r => r.json())
-        .then(data => {
-          const article = data.posts?.find(p => String(p.id) === String(id));
+      fetchHubPost(id)
+        .then(article => {
           if (article) {
             navigationRef.dispatch(
               CommonActions.reset({
@@ -119,10 +125,8 @@ export function navigateFromData(navigationRef, data) {
 
     // ── Monday Roundup (digest) ────────────────────────────────────
     } else if (type === 'digest' && id) {
-      fetch('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json?t=' + Date.now())
-        .then(r => r.json())
-        .then(data => {
-          const article = data.posts?.find(p => String(p.id) === String(id));
+      fetchHubPost(id)
+        .then(article => {
           if (article) {
             navigationRef.dispatch(
               CommonActions.reset({

@@ -75,7 +75,8 @@ export default function SwipeableTabs({
             style={styles.tab}
             onPress={() => goToTab(i)}
             accessibilityRole="tab"
-            accessibilityLabel={`${label} tab`}>
+            accessibilityLabel={`${label} tab`}
+            accessibilityState={{selected: currentPage === i}}>
             <Text style={[styles.tabText, currentPage === i && styles.tabTextActive]}>
               {label}
             </Text>

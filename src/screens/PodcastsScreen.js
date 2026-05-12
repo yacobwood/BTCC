@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useMemo} from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager, RefreshControl} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Colors} from '../theme/colors';
@@ -59,26 +59,29 @@ const PAGE_SIZE = 20;
 export default function PodcastsScreen({navigation}) {
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState('All');
   const [page, setPage] = useState(1);
   const {currentStation, isPlaying, play, stop} = useRadio();
 
   useEffect(() => {
-    if (!loading) return;
-    Analytics.screen('podcasts');
+    if (!loading && !refreshing) return;
+    if (loading) Analytics.screen('podcasts');
     let cancelled = false;
     let task;
 
     const run = async () => {
-      // 1. Show cached episodes immediately  -  no spinner if we have data
-      try {
-        const raw = await AsyncStorage.getItem(CACHE_KEY);
-        if (raw && !cancelled) {
-          setEpisodes(JSON.parse(raw));
-          setLoading(false);
-        }
-      } catch {}
+      // 1. Show cached episodes immediately on first load (skip on pull-to-refresh)
+      if (loading) {
+        try {
+          const raw = await AsyncStorage.getItem(CACHE_KEY);
+          if (raw && !cancelled) {
+            setEpisodes(JSON.parse(raw));
+            setLoading(false);
+          }
+        } catch {}
+      }
 
       // 2. Wait for screen transition to finish before network + parse
       await new Promise(resolve => {
@@ -108,8 +111,8 @@ export default function PodcastsScreen({navigation}) {
           AsyncStorage.setItem(CACHE_KEY, JSON.stringify(fresh)).catch(() => {});
         } catch {}
       }
-      if (!fetched && !cancelled) setError(true);
-      if (!cancelled) setLoading(false);
+      if (!fetched && !cancelled) setError(episodes.length === 0);
+      if (!cancelled) { setLoading(false); setRefreshing(false); }
     };
 
     run();
@@ -118,7 +121,7 @@ export default function PodcastsScreen({navigation}) {
       cancelled = true;
       task?.cancel();
     };
-  }, [loading]);
+  }, [loading, refreshing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = useMemo(() =>
     episodes.filter(e => matchesSession(e.title, filter)),
@@ -233,6 +236,14 @@ export default function PodcastsScreen({navigation}) {
           ListEmptyComponent={<Text style={styles.emptyText}>No episodes found</Text>}
           onEndReached={onLoadMore}
           onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => setRefreshing(true)}
+              tintColor={Colors.yellow}
+              colors={[Colors.yellow]}
+            />
+          }
         />
       )}
     </View>

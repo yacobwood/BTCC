@@ -18,6 +18,7 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {fetchResults} from '../api/client';
 import {parseResults} from '../api/parsers';
+import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 
 // Abbreviate session labels for tab display.
 function shortLabel(label) {
@@ -84,7 +85,10 @@ export default function RoundResultsScreen({route, navigation}) {
   const {useKm} = useUnits();
   const races = round.races || [];
 
-  useEffect(() => { Analytics.roundResultsViewed(year, round.round); }, []);
+  useEffect(() => {
+    Analytics.roundResultsViewed(year, round.round);
+    maybeRequestReviewAfterResults();
+  }, []);
 
   const refresh = useCallback(async () => {
     if (year < 2026) return;

@@ -70,12 +70,11 @@ describe('RadioScreen', () => {
     });
   });
 
-  it('shows empty state when no stations returned', async () => {
+  it('falls back to bundled stations when fetch returns no stations', async () => {
     setupFetch([]);
-    const {getByText} = renderWithProviders(<RadioScreen navigation={nav} />);
-    await waitFor(() => {
-      expect(getByText('No stations available')).toBeTruthy();
-    });
+    const {getAllByText} = renderWithProviders(<RadioScreen navigation={nav} />);
+    // Bundled radio.json always has at least one station so empty state never shows
+    await waitFor(() => expect(getAllByText(/talkSPORT/i).length).toBeGreaterThan(0));
   });
 
   // ── Playback ─────────────────────────────────────────────────────────────────

@@ -102,8 +102,8 @@ describe('ResultsScreen', () => {
   });
 
   it('renders SEASON label', async () => {
-    const {getByText} = renderResults();
-    await waitFor(() => expect(getByText('SEASON')).toBeTruthy());
+    const {getAllByText} = renderResults();
+    await waitFor(() => expect(getAllByText('SEASON').length).toBeGreaterThan(0));
   });
 
   // ── Tab bar ──────────────────────────────────────────────────────────────────
