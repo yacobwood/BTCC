@@ -202,7 +202,7 @@ export default function TrackDetailScreen({route, navigation}) {
     items.push({type: 'stats'});
 
     // YouTube links  -  always shown when URLs exist (hot lap is available pre-weekend too)
-    if ((track.youtubeUrls || []).some(Boolean)) items.push({type: 'youtube'});
+    if (broadcaster === 'uk' && (track.youtubeUrls || []).some(Boolean)) items.push({type: 'youtube'});
 
     // Watch Live + Live Timing rendered side-by-side in one item
     if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
