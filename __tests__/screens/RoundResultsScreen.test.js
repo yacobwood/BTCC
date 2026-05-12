@@ -403,6 +403,114 @@ describe('RoundResultsScreen', () => {
     ),
   };
 
+  // ── Round switch when screen is reused (navigation stale-state regression) ───
+  //
+  // React Navigation does NOT remount a screen when navigate() is called for a
+  // screen already in the stack - it updates route.params in place. Before the
+  // fix, useState(initialRound) only ran once on mount, so navigating from e.g.
+  // Donington → Brands Hatch would leave stale Donington data on screen.
+
+  const BRANDS_HATCH = {
+    round: 2,
+    venue: 'Brands Hatch Indy',
+    races: [
+      {
+        label: 'Free Practice',
+        results: [
+          {driver: 'Ashley Sutton', position: 1, time: '1:22.000', team: 'NAPA Racing', points: 0, bestLap: '1:22.000', gap: null, laps: 10, fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Charles Rainford', position: 2, time: '1:22.500', team: 'WSR', points: 0, bestLap: '1:22.500', gap: '0.5', laps: 10, fastestLap: false, leadLap: false, pole: false},
+        ],
+      },
+      {label: 'Qualifying',      results: []},
+      {label: 'Qualifying Race', results: []},
+      {label: 'Race 1',          results: []},
+      {label: 'Race 2',          results: []},
+      {label: 'Race 3',          results: []},
+    ],
+  };
+
+  describe('round switch when screen is reused', () => {
+    it('updates the venue header when navigated to a different round', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      const route1 = makeRoute({round: MOCK_ROUND, year: 2026, initialRace: 0, origin: 'calendar'});
+      const {getByText, rerender} = renderWithProviders(
+        <RoundResultsScreen navigation={nav} route={route1} />,
+      );
+
+      expect(getByText('Donington Park')).toBeTruthy();
+
+      const route2 = makeRoute({round: BRANDS_HATCH, year: 2026, initialRace: 0, origin: 'calendar'});
+      await act(async () => {
+        rerender(<RoundResultsScreen navigation={nav} route={route2} />);
+      });
+
+      expect(getByText('Brands Hatch Indy')).toBeTruthy();
+    });
+
+    it('shows results from the new round after navigation', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      const route1 = makeRoute({round: MOCK_ROUND, year: 2026, initialRace: 0, origin: 'calendar'});
+      const {getByText, queryByText, rerender} = renderWithProviders(
+        <RoundResultsScreen navigation={nav} route={route1} />,
+      );
+
+      // Donington FP: Tom Ingram P1, no Ashley Sutton
+      expect(getByText('Tom INGRAM')).toBeTruthy();
+      expect(queryByText('Ashley SUTTON')).toBeNull();
+
+      const route2 = makeRoute({round: BRANDS_HATCH, year: 2026, initialRace: 0, origin: 'calendar'});
+      await act(async () => {
+        rerender(<RoundResultsScreen navigation={nav} route={route2} />);
+      });
+
+      // Brands Hatch FP: Ashley Sutton P1, no Tom Ingram
+      expect(getByText('Ashley SUTTON')).toBeTruthy();
+      expect(queryByText('Tom INGRAM')).toBeNull();
+    });
+
+    it('does not reset state when params update with the same round number', async () => {
+      // The useEffect is keyed on initialRound.round (integer). Passing a new
+      // object reference for the same round (as the refresh path does) must not
+      // cause a visible state reset.
+      AsyncStorage.getItem.mockResolvedValue(null);
+      const route1 = makeRoute({round: MOCK_ROUND, year: 2026, initialRace: 0, origin: 'results'});
+      const {getByText, rerender} = renderWithProviders(
+        <RoundResultsScreen navigation={nav} route={route1} />,
+      );
+
+      expect(getByText('Donington Park')).toBeTruthy();
+
+      // Same round number, different object reference - should not flicker/reset
+      const route2 = makeRoute({round: {...MOCK_ROUND}, year: 2026, initialRace: 0, origin: 'results'});
+      await act(async () => {
+        rerender(<RoundResultsScreen navigation={nav} route={route2} />);
+      });
+
+      expect(getByText('Donington Park')).toBeTruthy();
+    });
+
+    it('updates the race tabs when navigating to a round with different session data', async () => {
+      // Brands Hatch only has FP with results - switching to it and pressing Race 1
+      // should show an empty state, not Donington Race 1 results.
+      AsyncStorage.getItem.mockResolvedValue(null);
+      const route1 = makeRoute({round: MOCK_ROUND, year: 2026, initialRace: 3, origin: 'calendar'});
+      const {queryByText, rerender} = renderWithProviders(
+        <RoundResultsScreen navigation={nav} route={route1} />,
+      );
+
+      // Donington Race 1: Shedden P1 scores 21 pts
+      expect(queryByText('+21 pts')).toBeTruthy();
+
+      const route2 = makeRoute({round: BRANDS_HATCH, year: 2026, initialRace: 3, origin: 'calendar'});
+      await act(async () => {
+        rerender(<RoundResultsScreen navigation={nav} route={route2} />);
+      });
+
+      // Brands Hatch Race 1 has no results - points badge should be gone
+      expect(queryByText('+21 pts')).toBeNull();
+    });
+  });
+
   describe('grid position deltas — Race 3 with actual TSL grid', () => {
     it('shows delta arrows when R3 has both grid and results', async () => {
       const {UNSAFE_queryAllByType} = renderRound({round: R3_WITH_GRID_ROUND, initialRace: 5});
