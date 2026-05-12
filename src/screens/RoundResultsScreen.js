@@ -20,6 +20,11 @@ import {fetchResults} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 
+const BUNDLED_RESULTS = require('../../data/results2026.json');
+const BUNDLED_YOUTUBE_URLS = Object.fromEntries(
+  (BUNDLED_RESULTS.rounds || []).map(r => [r.round, r.youtubeUrls || []])
+);
+
 // Abbreviate session labels for tab display.
 function shortLabel(label) {
   if (label === 'Free Practice') return 'FP';
@@ -240,18 +245,24 @@ export default function RoundResultsScreen({route, navigation}) {
                 keyExtractor={(_, idx) => String(idx)}
                 renderItem={makeRenderResult(gridMap)}
                 contentContainerStyle={{padding: 16, paddingBottom: 20}}
-                ListHeaderComponent={race?.fullRaceUrl ? (
-                  <TouchableOpacity
-                    style={styles.youtubeBtn}
-                    activeOpacity={0.8}
-                    onPress={() => Linking.openURL(race.fullRaceUrl)}
-                    accessibilityLabel="Watch full race on YouTube"
-                    accessibilityRole="button">
-                    <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
-                    <Text style={styles.youtubeBtnText}>Watch Full Race</Text>
-                    <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
-                  </TouchableOpacity>
-                ) : null}
+                ListHeaderComponent={(() => {
+                  const urls = round.youtubeUrls?.length ? round.youtubeUrls : (BUNDLED_YOUTUBE_URLS[round.round] || []);
+                  const raceUrlMap = {'Race 1': urls[1], 'Race 2': urls[2], 'Race 3': urls[3]};
+                  const url = race?.fullRaceUrl || raceUrlMap[race?.label];
+                  if (!url) return null;
+                  return (
+                    <TouchableOpacity
+                      style={styles.youtubeBtn}
+                      activeOpacity={0.8}
+                      onPress={() => Linking.openURL(url)}
+                      accessibilityLabel="Watch full race on YouTube"
+                      accessibilityRole="button">
+                      <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />
+                      <Text style={styles.youtubeBtnText}>Watch Full Race</Text>
+                      <Icon name="open-in-new" size={14} color={Colors.textSecondary} />
+                    </TouchableOpacity>
+                  );
+                })()}
               />
             </View>
           );

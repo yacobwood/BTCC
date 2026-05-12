@@ -206,6 +206,7 @@ export function parseResults(json) {
     round: r.round || i + 1,
     venue: r.venue || '',
     date: r.date || '',
+    youtubeUrls: r.youtubeUrls || [],
     polePosition: r.polePosition || null,
     races: (r.races || []).map((race, j) => {
       const label = race.label || `Race ${j + 1}`;

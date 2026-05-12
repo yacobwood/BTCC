@@ -2,10 +2,12 @@
 """
 Find the ITV Sport Extra full-races compilation for the most recently completed
 BTCC race weekend and detect Race 2 / Race 3 start timestamps via green-screen
-detection. Writes youtubeUrls[1/2/3] into data/calendar.json.
+detection. Writes youtubeUrls[1/2/3] into data/results2026.json (authoritative
+long-term record) and also updates data/calendar.json (used by the track card
+race buttons until the calendar rolls over to a new season).
 
 Usage:
-    python scrape_youtube.py                         # writes to calendar.json
+    python scrape_youtube.py                         # writes to results2026.json + calendar.json
     python scrape_youtube.py --dry-run               # prints detected URLs, no file changes
     python scrape_youtube.py --round 2 --dry-run     # target a specific round
     python scrape_youtube.py --cookies /path/cookies.txt  # use explicit cookies file
@@ -28,6 +30,7 @@ from pathlib import Path
 
 ROOT          = Path(__file__).resolve().parent.parent.parent
 CALENDAR_JSON = ROOT / "data" / "calendar.json"
+RESULTS_JSON  = ROOT / "data" / "results2026.json"
 
 ITV_CHANNEL   = "https://www.youtube.com/@ITVSportExtra/videos"
 TITLE_PATTERN = re.compile(r"full races.*btcc 2026", re.IGNORECASE)
@@ -51,6 +54,17 @@ def load_calendar():
 def save_calendar(calendar):
     with open(CALENDAR_JSON, "w") as f:
         json.dump(calendar, f, indent=2)
+        f.write("\n")
+
+
+def load_results():
+    with open(RESULTS_JSON) as f:
+        return json.load(f)
+
+
+def save_results(results):
+    with open(RESULTS_JSON, "w") as f:
+        json.dump(results, f, indent=2)
         f.write("\n")
 
 
@@ -318,7 +332,7 @@ def main():
     print(f"  [3] Race 3      : {new_urls[3]}")
 
     if args.dry_run:
-        print("\n--dry-run: calendar.json was NOT modified.")
+        print("\n--dry-run: no files were modified.")
         return
 
     for r in calendar["rounds"]:
@@ -326,8 +340,15 @@ def main():
             r["youtubeUrls"] = new_urls
             break
 
+    results = load_results()
+    for r in results["rounds"]:
+        if r["round"] == round_num:
+            r["youtubeUrls"] = new_urls
+            break
+
     save_calendar(calendar)
-    print(f"\nWritten to calendar.json for Round {round_num} ({venue}).")
+    save_results(results)
+    print(f"\nWritten to calendar.json and results2026.json for Round {round_num} ({venue}).")
 
 
 if __name__ == "__main__":
