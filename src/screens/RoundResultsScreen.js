@@ -85,6 +85,11 @@ export default function RoundResultsScreen({route, navigation}) {
   const {useKm} = useUnits();
   const races = round.races || [];
 
+  // Sync state when navigated to a different round (screen is reused in the stack)
+  useEffect(() => {
+    setRound(initialRound);
+  }, [initialRound.round]);
+
   useEffect(() => {
     Analytics.roundResultsViewed(year, round.round);
     maybeRequestReviewAfterResults();
