@@ -13,9 +13,8 @@ jest.mock('../../src/api/client', () => ({
 }));
 jest.mock('../../src/utils/broadcaster', () => ({
   BROADCASTERS: {
-    uk:            {label: 'ITV4 / ITVX',   sub: 'Free · UK',            url: 'https://www.itv.com/hub/itv4'},
-    us:            {label: 'Racer Network',  sub: 'Live · United States', url: 'https://www.youtube.com/@RACER_Network/streams'},
-    international: {label: 'Official BTCC', sub: 'Free · Worldwide',     url: 'https://www.youtube.com/@OfficialBTCC/streams'},
+    uk:            {label: 'ITV4 / ITVX',   sub: 'Free · UK',        url: 'https://www.itv.com/hub/itv4'},
+    international: {label: 'Official BTCC', sub: 'Free · Worldwide', url: 'https://www.youtube.com/@OfficialBTCC/streams'},
   },
   detectBroadcaster: jest.fn(() => 'uk'),
 }));
@@ -207,11 +206,11 @@ describe('CalendarScreen', () => {
       expect(await findByText(/ITV4/)).toBeTruthy();
     });
 
-    it('shows Racer Network label for US users', async () => {
+    it('does not show WATCH LIVE for US users (no broadcaster configured)', async () => {
       detectBroadcaster.mockReturnValue('us');
       setupCalendar([ACTIVE_ROUND]);
-      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
-      expect(await findByText(/Racer Network/)).toBeTruthy();
+      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
     });
 
     it('shows Official BTCC label for international users', async () => {
