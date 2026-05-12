@@ -19,11 +19,13 @@ import {formatDriverName} from '../utils/driverName';
 import {fetchResults} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
+import {detectBroadcaster} from '../utils/broadcaster';
 
 const BUNDLED_RESULTS = require('../../data/results2026.json');
 const BUNDLED_YOUTUBE_URLS = Object.fromEntries(
   (BUNDLED_RESULTS.rounds || []).map(r => [r.round, r.youtubeUrls || []])
 );
+const IS_UK = detectBroadcaster() === 'uk';
 
 // Abbreviate session labels for tab display.
 function shortLabel(label) {
@@ -248,7 +250,7 @@ export default function RoundResultsScreen({route, navigation}) {
                 ListHeaderComponent={(() => {
                   const urls = round.youtubeUrls?.length ? round.youtubeUrls : (BUNDLED_YOUTUBE_URLS[round.round] || []);
                   const raceUrlMap = {'Race 1': urls[1], 'Race 2': urls[2], 'Race 3': urls[3]};
-                  const url = race?.fullRaceUrl || raceUrlMap[race?.label];
+                  const url = race?.fullRaceUrl || (IS_UK ? raceUrlMap[race?.label] : null);
                   if (!url) return null;
                   return (
                     <TouchableOpacity
