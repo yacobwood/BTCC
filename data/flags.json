@@ -1,16 +1,13 @@
 {
   "radio_tab": true,
   "live_updates": true,
-  "results_notifications": true,
   "track_weather": true,
   "overrides": {},
   "podcasts_enabled": true,
-  "podcast_last_episode_url": "",
   "debug_mode": false,
   "hub_news_enabled": true,
   "live_timing_in_app": false,
   "update_available": true,
-  "update_min_version": 62,
   "update_min_version_ios": 0,
   "update_min_version_android": 66,
   "live_chat": false

@@ -8,13 +8,11 @@ const FLAGS_CACHE_KEY = 'feature_flags_cache';
 const defaults = {
   radio_tab: false,
   podcasts_enabled: false,
-  podcast_last_episode_url: '',
   debug_mode: false,
   hub_news_enabled: true,
   live_timing_in_app: false,
   live_chat: false,
   update_available: true,
-  update_min_version: 62,
   update_min_version_ios: 0,
   update_min_version_android: 63,
 };

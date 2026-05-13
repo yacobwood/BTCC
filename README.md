@@ -366,12 +366,10 @@ Per-device overrides are keyed by FCM token inside the `overrides` object in `fl
 | `live_timing_in_app` | false | Enable LiveTimingScreen |
 | `live_chat` | false | Show Chat tab |
 | `update_available` | true | Enable update prompt |
-| `update_min_version` | 62 | Legacy fallback min build |
 | `update_min_version_ios` | 0 | iOS minimum build number |
 | `update_min_version_android` | 66 | Android minimum build number |
 | `track_weather` | - | Enable WeatherAPI widget |
 | `live_updates` | - | Enable live scoring updates |
-| `results_notifications` | - | Enable results push notifications |
 
 ### SettingsContext ([src/store/settings.js](src/store/settings.js))
 
