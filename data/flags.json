@@ -10,5 +10,5 @@
   "update_available": true,
   "update_min_version_ios": 0,
   "update_min_version_android": 66,
-  "live_chat": false
+  "live_chat": true
 }
