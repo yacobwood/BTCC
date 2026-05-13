@@ -31,7 +31,8 @@ class LargeWidget : AppWidgetProvider() {
         CoroutineScope(Dispatchers.IO).launch {
             try { withTimeout(25_000L) {
                 val cal = fetchCalendar(context)
-                val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
+                val daysUntil = if (cal != null) ChronoUnit.DAYS.between(LocalDate.now(), cal.startDate) else Long.MAX_VALUE
+                val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0 && daysUntil <= 7) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
                 val sessions = cal?.sessions
                 for (id in appWidgetIds) {
                     val opts = appWidgetManager.getAppWidgetOptions(id)
@@ -66,7 +67,8 @@ class LargeWidget : AppWidgetProvider() {
         CoroutineScope(Dispatchers.IO).launch {
             try { withTimeout(25_000L) {
                 val cal = fetchCalendar(context)
-                val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
+                val daysUntil = if (cal != null) ChronoUnit.DAYS.between(LocalDate.now(), cal.startDate) else Long.MAX_VALUE
+                val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0 && daysUntil <= 7) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
                 val sessions = cal?.sessions
                 try {
                     appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, cal, sessions, weather, minW, minH, theme))

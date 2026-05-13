@@ -1,5 +1,6 @@
 import React, {useEffect, useRef} from 'react';
-import {View} from 'react-native';
+import {View, Platform} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -52,6 +53,7 @@ import PartnersScreen from '../screens/PartnersScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
 import ChatScreen from '../screens/ChatScreen';
 import AdBanner from '../components/AdBanner';
+import UpdateDialog from '../components/UpdateDialog';
 import {useFeatureFlags} from '../store/featureFlags';
 
 const Tab = createBottomTabNavigator();
@@ -172,7 +174,16 @@ const linking = {
 function AppContent({adBannerRef}) {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
-  const {live_chat} = useFeatureFlags();
+  const {live_chat, update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
+  const [showUpdate, setShowUpdate] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!update_available) return;
+    const minBuild = Platform.OS === 'android' ? update_min_version_android : update_min_version_ios;
+    const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
+    if (currentBuild < minBuild) setShowUpdate(true);
+  }, [update_available, update_min_version_android, update_min_version_ios]);
+
   return (
     <View style={{flex: 1}}>
       <Tab.Navigator
@@ -206,6 +217,7 @@ function AppContent({adBannerRef}) {
         <View style={{paddingBottom: bottom}}>
           <AdBanner ref={adBannerRef} />
         </View>
+        <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       </View>
   );
 }

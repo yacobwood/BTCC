@@ -38,7 +38,7 @@ export function weatherIconColor(code) {
 
 import {cacheRead, cacheWrite} from '../store/cache';
 
-const MAX_FORECAST_DAYS = 16;
+const MAX_FORECAST_DAYS = 7;
 const WEATHER_CACHE_MAX_AGE = 3 * 60 * 60 * 1000; // 3 hours
 
 export async function fetchWeather(lat, lng, startDate, endDate) {
@@ -56,7 +56,11 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe/London&start_date=${startDate}&end_date=${endDate}`;
-    const res = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    if (timeoutId?.unref) timeoutId.unref();
+    const res = await fetch(url, {signal: controller.signal});
+    clearTimeout(timeoutId);
     if (!res.ok) return null;
     const json = await res.json();
     const d = json.daily;

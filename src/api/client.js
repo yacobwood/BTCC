@@ -97,6 +97,10 @@ export async function fetchResults(year = 2026, forceRefresh = false) {
   return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, false, false, 5 * 60 * 1000);
 }
 
+export async function fetchRecords() {
+  return fetchJson(`${BASE_GITHUB}/records.json`, 'records', false, /* staleFallback */ true, /* staleFirst */ true);
+}
+
 
 export async function fetchArticles(page = 1, perPage = 20, search = '', forceRefresh = false) {
   let url = `${BASE_WP}/posts?per_page=${perPage}&page=${page}&_embed=1`;

@@ -745,6 +745,93 @@ def compute_standings_fallback(rounds):
     }
 
 
+# ── Calendar track record updater ────────────────────────────────────────────
+
+def update_calendar_records(output_rounds, year):
+    """
+    Compare the best lap times from this scrape against the stored qualifying
+    and race records in calendar.json, updating entries where a new record was set.
+    """
+    calendar_path = DATA_DIR / "calendar.json"
+    if not calendar_path.exists():
+        return
+
+    calendar = json.loads(calendar_path.read_text())
+    round_map = {r["round"]: r for r in calendar.get("rounds", [])}
+    changed = False
+
+    for rnd in output_rounds:
+        cal = round_map.get(rnd["round"])
+        if not cal:
+            continue
+
+        length_str = cal.get("lengthMiles", "")
+        length_match = re.match(r"^([\d.]+)", length_str)
+        length_miles = float(length_match.group(1)) if length_match else None
+
+        def speed_str(secs):
+            if not length_miles or secs <= 0:
+                return None
+            mph = length_miles / (secs / 3600)
+            return f"{mph:.2f} mph"
+
+        # Qualifying record  -  fastest bestLap across all Qualifying results
+        best_qual_secs = None
+        best_qual_entry = None
+        for race in rnd.get("races", []):
+            if race["label"] != "Qualifying":
+                continue
+            for r in race["results"]:
+                secs = lap_to_secs(r.get("bestLap", ""))
+                if secs < float("inf") and (best_qual_secs is None or secs < best_qual_secs):
+                    best_qual_secs = secs
+                    best_qual_entry = r
+
+        if best_qual_entry:
+            stored_secs = lap_to_secs(cal.get("qualifyingRecord", {}).get("time", ""))
+            if stored_secs == float("inf") or best_qual_secs < stored_secs:
+                sp = speed_str(best_qual_secs)
+                rec = {"driver": best_qual_entry["driver"], "time": best_qual_entry["bestLap"], "year": year}
+                if sp:
+                    rec["speed"] = sp
+                cal["qualifyingRecord"] = rec
+                changed = True
+                print(f"  [record] Round {rnd['round']} qualifying: "
+                      f"{rec['driver']} {rec['time']}"
+                      + (f" ({sp})" if sp else "") + "  NEW RECORD")
+
+        # Race record  -  fastest bestLap across Race 1, Race 2, Race 3
+        best_race_secs = None
+        best_race_entry = None
+        for race in rnd.get("races", []):
+            if race["label"] not in ("Race 1", "Race 2", "Race 3"):
+                continue
+            for r in race["results"]:
+                secs = lap_to_secs(r.get("bestLap", ""))
+                if secs < float("inf") and (best_race_secs is None or secs < best_race_secs):
+                    best_race_secs = secs
+                    best_race_entry = r
+
+        if best_race_entry:
+            stored_secs = lap_to_secs(cal.get("raceRecord", {}).get("time", ""))
+            if stored_secs == float("inf") or best_race_secs < stored_secs:
+                sp = speed_str(best_race_secs)
+                rec = {"driver": best_race_entry["driver"], "time": best_race_entry["bestLap"], "year": year}
+                if sp:
+                    rec["speed"] = sp
+                cal["raceRecord"] = rec
+                changed = True
+                print(f"  [record] Round {rnd['round']} race: "
+                      f"{rec['driver']} {rec['time']}"
+                      + (f" ({sp})" if sp else "") + "  NEW RECORD")
+
+    if changed:
+        calendar_path.write_text(json.dumps(calendar, indent=2))
+        print("  [records] calendar.json updated")
+    else:
+        print("  [records] no new track records this scrape")
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -847,6 +934,21 @@ def main():
         print(f"\nJack Sears Trophy:")
         for s in standings["jst"]:
             print(f"  {s['pos']:>2}. {s['driver']:<30} {s['points']} pts")
+
+    print("\n[track records]")
+    update_calendar_records(output_rounds, YEAR)
+
+    print("\n[all-time records]")
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "compute_records", Path(__file__).parent / "compute_records.py"
+        )
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.main()
+    except Exception as e:
+        print(f"  WARNING: compute_records failed: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

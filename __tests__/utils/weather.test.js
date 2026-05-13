@@ -128,10 +128,29 @@ describe('fetchWeather', () => {
     jest.useRealTimers();
   });
 
-  it('returns null when the event is more than 16 days away', async () => {
+  it('returns null when the event is more than 7 days away', async () => {
+    // system time: 2025-04-27; May 15 is 18 days away
     const result = await fetchWeather(52.07, -1.02, '2025-05-15', '2025-05-17');
     expect(result).toBeNull();
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('returns null at the boundary of exactly 8 days away', async () => {
+    // system time: 2025-04-27; May 5 is exactly 8 days away
+    const result = await fetchWeather(52.07, -1.02, '2025-05-05', '2025-05-06');
+    expect(result).toBeNull();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('fetches at the boundary of exactly 7 days away', async () => {
+    // system time: 2025-04-27; May 4 is exactly 7 days away — should fetch
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(MOCK_RESPONSE),
+    });
+    const result = await fetchWeather(52.07, -1.02, '2025-05-04', '2025-05-05');
+    expect(result).not.toBeNull();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('returns mapped forecast data for a date within range', async () => {

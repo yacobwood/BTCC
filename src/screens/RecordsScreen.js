@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useRef} from 'react';
+import React, {useState, useMemo, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,18 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {getDriverRecords, ALL_TIME_RECORDS} from '../assets/seasonData';
+import {fetchRecords} from '../api/client';
+import {cacheRead} from '../store/cache';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const MIN_STARTS = 30;
 
 const RATE_SORTS = [
   {key: 'winPct',         label: 'Win %',     format: v => (v * 100).toFixed(1) + '%', sub: item => `${item.wins}W from ${item.starts} starts · ${item.seasons} season${item.seasons !== 1 ? 's' : ''}`},
@@ -30,8 +33,7 @@ const COUNT_SORTS = [
   {key: 'podiums',          label: 'Podiums',                 format: v => v.toString(), sub: item => `${item.wins} wins · ${item.poles} poles`},
   {key: 'poles',            label: 'Pole Positions',          format: v => v.toString(), sub: item => `${item.wins} wins · ${item.fastestLaps} fastest laps`},
   {key: 'fastestLaps',      label: 'Fastest Laps',            format: v => v.toString(), sub: item => `${item.wins} wins · ${item.podiums} podiums`},
-  {key: 'lapsLed',          label: 'Laps Led',                format: v => v.toString(), sub: item => `${item.wins} wins · ${item.racesLed} races led`, hideZero: true},
-  {key: 'racesLed',         label: 'Races Led',               format: v => v.toString(), sub: item => `${item.wins} wins · ${item.lapsLed} laps led`, hideZero: true},
+  {key: 'racesLed',         label: 'Races Led',               format: v => v.toString(), sub: item => `${item.wins} wins · ${item.podiums} podiums`, hideZero: true},
   {key: 'hatTricks',        label: 'Hat Tricks',              format: v => v.toString(), sub: item => `${item.wins} wins · ${item.starts} starts`, hideZero: true},
   {key: 'winStreak',        label: 'Win Streak',              format: v => v.toString(), sub: item => `${item.wins} career wins · ${item.podiums} podiums`, hideZero: true},
   {key: 'bestSeasonWins',   label: 'Wins in a Season',        format: v => v.toString(), sub: item => `${item.wins} career wins · ${item.championships} title${item.championships !== 1 ? 's' : ''}`, hideZero: true},
@@ -44,21 +46,34 @@ const COUNT_SORTS = [
   {key: 'dnfs',             label: 'DNFs',                    format: v => v.toString(), sub: item => `${item.starts} starts · ${item.wins} wins`, hideZero: true},
 ];
 
-const SECTIONS = [
-  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004–2025', get data() { return getDriverRecords(); }},
-  {label: 'Totals', sorts: COUNT_SORTS, data: ALL_TIME_RECORDS},
+const SECTION_DEFS = [
+  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts'},
+  {label: 'Totals', sorts: COUNT_SORTS, subtitle: null},
 ];
 
 export default function RecordsScreen({navigation}) {
   const [section, setSection] = useState(0);
   const [tab, setTab] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [allDrivers, setAllDrivers] = useState([]);
   const {isFavourite} = useFavouriteDriver();
 
   const listRef = useRef(null);
   const tabRowRef = useRef(null);
 
-  const numTabs = SECTIONS[section].sorts.length;
+  useEffect(() => {
+    cacheRead('records').then(cached => {
+      if (cached?.drivers?.length) setAllDrivers(cached.drivers);
+    });
+    fetchRecords()
+      .then(data => { if (data?.drivers?.length) setAllDrivers(data.drivers); })
+      .catch(() => {});
+  }, []);
+
+  const ratesData = useMemo(() => allDrivers.filter(d => d.starts >= MIN_STARTS), [allDrivers]);
+  const totalsData = allDrivers;
+
+  const numTabs = SECTION_DEFS[section].sorts.length;
   const [showMoreTabs, setShowMoreTabs] = useState(numTabs > 4);
   const tabWidth = SCREEN_WIDTH / Math.min(numTabs, 4);
 
@@ -67,8 +82,8 @@ export default function RecordsScreen({navigation}) {
     setTab(0);
     tabRowRef.current?.scrollTo({x: 0, animated: false});
     setShowScrollTop(false);
-    setShowMoreTabs(SECTIONS[s].sorts.length > 4);
-    Analytics.navItemClicked('records_section:' + SECTIONS[s].label.toLowerCase());
+    setShowMoreTabs(SECTION_DEFS[s].sorts.length > 4);
+    Analytics.navItemClicked('records_section:' + SECTION_DEFS[s].label.toLowerCase());
   };
 
   const goToTab = (i) => {
@@ -76,23 +91,24 @@ export default function RecordsScreen({navigation}) {
     setShowScrollTop(false);
     listRef.current?.scrollToOffset({offset: 0, animated: false});
     tabRowRef.current?.scrollTo({x: Math.max(0, (i - 1) * tabWidth), animated: true});
-    Analytics.navItemClicked('records_sort:' + SECTIONS[section].sorts[i].key);
+    Analytics.navItemClicked('records_sort:' + SECTION_DEFS[section].sorts[i].key);
   };
 
   const sortedData = useMemo(
-    () => SECTIONS.map(sec => sec.sorts.map(s => {
-      const filtered = s.hideZero ? sec.data.filter(d => d[s.key] > 0) : sec.data;
-      return [...filtered].sort((a, b) => b[s.key] - a[s.key]);
-    })),
-    [],
+    () => [ratesData, totalsData].map((sectionData, secIdx) =>
+      SECTION_DEFS[secIdx].sorts.map(s => {
+        const filtered = s.hideZero ? sectionData.filter(d => d[s.key] > 0) : sectionData;
+        return [...filtered].sort((a, b) => b[s.key] - a[s.key]);
+      })
+    ),
+    [ratesData, totalsData],
   );
 
-  const activeSorts = SECTIONS[section].sorts;
+  const activeSorts = SECTION_DEFS[section].sorts;
   const activeSortedData = sortedData[section];
 
   const renderRow = (sortDef, maxVal, data) => ({item}) => {
     const fav = isFavourite(item.driver);
-    // Standard competition ranking: rank = number of entries with a strictly higher value + 1
     const rank = data.filter(d => d[sortDef.key] > item[sortDef.key]).length + 1;
     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
     const barWidth = item[sortDef.key] / maxVal;
@@ -129,7 +145,7 @@ export default function RecordsScreen({navigation}) {
       </View>
 
       <View style={styles.sectionRow}>
-        {SECTIONS.map((sec, i) => (
+        {SECTION_DEFS.map((sec, i) => (
           <TouchableOpacity
             key={sec.label}
             style={[styles.sectionChip, section === i && styles.sectionChipActive]}
@@ -172,7 +188,11 @@ export default function RecordsScreen({navigation}) {
         )}
       </View>
 
-      {(() => {
+      {allDrivers.length === 0 ? (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color={Colors.yellow} />
+        </View>
+      ) : (() => {
         const s = activeSorts[tab];
         const data = activeSortedData[tab];
         const maxVal = data[0]?.[s.key] || 1;
@@ -187,8 +207,8 @@ export default function RecordsScreen({navigation}) {
             scrollEventThrottle={100}
             contentContainerStyle={{padding: 16, paddingBottom: 20}}
             ListHeaderComponent={
-              SECTIONS[section].subtitle
-                ? <Text style={styles.subtitle}>{SECTIONS[section].subtitle}</Text>
+              SECTION_DEFS[section].subtitle
+                ? <Text style={styles.subtitle}>{SECTION_DEFS[section].subtitle}</Text>
                 : null
             }
           />
@@ -228,6 +248,7 @@ const styles = StyleSheet.create({
   tabIndicator: {position: 'absolute', bottom: 0, left: 0, height: 2, backgroundColor: Colors.yellow},
   tabFade: {position: 'absolute', right: 0, top: 0, bottom: 0, width: 36, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 1, borderLeftColor: Colors.outline},
   subtitle: {color: Colors.textSecondary, fontSize: 11, marginBottom: 12},
+  loading: {flex: 1, justifyContent: 'center', alignItems: 'center'},
   row: {
     backgroundColor: Colors.card,
     borderRadius: 12,

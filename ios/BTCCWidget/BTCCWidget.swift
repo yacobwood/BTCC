@@ -216,7 +216,7 @@ struct BTCCProvider: TimelineProvider {
             }
             let days = Calendar.current.dateComponents([.day], from: Date(), to: r.startDate).day ?? 999
             let fetchWeatherAndFinish = { (layoutImage: UIImage?) in
-                guard r.lat != 0, days <= 16 else {
+                guard r.lat != 0, days <= 7 else {
                     completion(BTCCEntry(date: Date(), round: round, weather: [], layoutImage: layoutImage)); return
                 }
                 // Weather is best-effort  -  no cache, empty is acceptable offline
