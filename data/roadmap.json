@@ -7,12 +7,6 @@
       "status": "idea"
     },
     {
-      "id": "1778699339245",
-      "title": "Historic race videos",
-      "description": "",
-      "status": "idea"
-    },
-    {
       "id": "1778699309817",
       "title": "Where to watch",
       "description": "",
@@ -35,7 +29,8 @@
       "id": "3",
       "title": "Live Video Footage Youtube Links",
       "description": "Enable quick navigation to live race footage",
-      "status": "idea"
+      "status": "done",
+      "doneAt": "2026-05-13"
     },
     {
       "id": "4",
@@ -74,7 +69,7 @@
       "id": "9",
       "title": "Live chat",
       "description": "Chat to fellow fans about the race",
-      "status": "idea"
+      "status": "in-progress"
     },
     {
       "id": "10",
