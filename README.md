@@ -372,7 +372,6 @@ Per-device overrides are keyed by FCM token inside the `overrides` object in `fl
 | `track_weather` | - | Enable WeatherAPI widget |
 | `live_updates` | - | Enable live scoring updates |
 | `results_notifications` | - | Enable results push notifications |
-| `whats_new` | - | Show "What's New" dialog |
 
 ### SettingsContext ([src/store/settings.js](src/store/settings.js))
 

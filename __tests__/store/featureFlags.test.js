@@ -37,7 +37,7 @@ describe('FeatureFlagsProvider', () => {
   it('merges fetched flags with defaults', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({podcasts_enabled: true, whats_new: true}),
+      json: () => Promise.resolve({podcasts_enabled: true}),
     });
 
     let getHook;
@@ -46,7 +46,6 @@ describe('FeatureFlagsProvider', () => {
     });
 
     expect(getHook().podcasts_enabled).toBe(true);
-    expect(getHook().whats_new).toBe(true);
     // Default fields still present
     expect(getHook().podcast_last_episode_url).toBe('');
   });
