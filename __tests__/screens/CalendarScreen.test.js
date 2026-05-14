@@ -233,6 +233,18 @@ describe('CalendarScreen', () => {
       await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
     });
 
+    it('does not show WATCH LIVE on Saturday for international users (UK-only stream)', async () => {
+      jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
+      detectBroadcaster.mockReturnValue('international');
+      flagsSpy.mockReturnValue({
+        saturday_live_url: 'https://www.youtube.com/@ITVSport/streams',
+        saturday_live_url_us: null,
+      });
+      setupCalendar([ACTIVE_ROUND]);
+      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
     it('shows WATCH LIVE on Saturday when saturday_live_url is set', async () => {
       jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
       flagsSpy.mockReturnValue({

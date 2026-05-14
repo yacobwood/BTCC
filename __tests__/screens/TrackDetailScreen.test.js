@@ -226,6 +226,20 @@ describe('TrackDetailScreen', () => {
       expect(await findByText('YouTube')).toBeTruthy();
     });
 
+    it('does not show WATCH LIVE on a Saturday for international users (UK-only stream)', async () => {
+      jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
+      detectBroadcaster.mockReturnValue('international');
+      flagsSpy.mockReturnValue({
+        track_weather: false, live_updates: false, live_chat: false,
+        saturday_live_url: 'https://www.youtube.com/@ITVSport/streams',
+        saturday_live_url_us: null,
+      });
+      const {queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
     it('does not show WATCH LIVE on a Saturday for US when saturday_live_url_us is null', async () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
       detectBroadcaster.mockReturnValue('us');

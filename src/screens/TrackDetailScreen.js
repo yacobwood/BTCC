@@ -297,7 +297,7 @@ export default function TrackDetailScreen({route, navigation}) {
         const today = new Date().getDay();
         const bc = (isRaceWeekend && today === 0 && broadcaster) ? BROADCASTERS[broadcaster] : null;
         const satUrl = isRaceWeekend && today === 6
-          ? (broadcaster === 'us' ? saturday_live_url_us : saturday_live_url)
+          ? (broadcaster === 'uk' ? saturday_live_url : broadcaster === 'us' ? saturday_live_url_us : null)
           : null;
         const satBc = satUrl ? {url: satUrl, label: 'YouTube'} : null;
         const activeBc = bc || satBc;

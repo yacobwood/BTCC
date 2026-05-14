@@ -137,8 +137,8 @@ export default function CalendarScreen({navigation}) {
     if (!activeRound) return null;
     const day = new Date().getDay();
     if (day === 6) {
-      const satUrl = broadcaster === 'us' ? saturday_live_url_us : saturday_live_url;
-      return satUrl ? {url: satUrl, label: 'YouTube', sub: 'Free · Worldwide'} : null;
+      const satUrl = broadcaster === 'uk' ? saturday_live_url : broadcaster === 'us' ? saturday_live_url_us : null;
+      return satUrl ? {url: satUrl, label: 'YouTube', sub: 'Free · UK'} : null;
     }
     if (day === 0) return BROADCASTERS[broadcaster] || null;
     return null;
