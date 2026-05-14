@@ -938,11 +938,11 @@ select.input { cursor: pointer; }
         <div class="flag-name">UK + Ireland</div>
         <div class="flag-desc">Shows WATCH LIVE for UK users on Saturdays</div>
       </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_saturday_uk"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="liveUrlValues.saturday.uk = this.value.trim() || null">
+      <div style="flex:1;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+        <input type="url" id="live_saturday_uk_url" placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
+        <input type="text" id="live_saturday_uk_label" placeholder="Button label (e.g. ITV Sport)"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -951,11 +951,11 @@ select.input { cursor: pointer; }
         <div class="flag-name">International</div>
         <div class="flag-desc">Shows WATCH LIVE for international users on Saturdays</div>
       </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_saturday_international"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="liveUrlValues.saturday.international = this.value.trim() || null">
+      <div style="flex:1;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+        <input type="url" id="live_saturday_international_url" placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
+        <input type="text" id="live_saturday_international_label" placeholder="Button label"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -964,11 +964,11 @@ select.input { cursor: pointer; }
         <div class="flag-name">US</div>
         <div class="flag-desc">Shows WATCH LIVE for US users on Saturdays</div>
       </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_saturday_us"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="liveUrlValues.saturday.us = this.value.trim() || null">
+      <div style="flex:1;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+        <input type="url" id="live_saturday_us_url" placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
+        <input type="text" id="live_saturday_us_label" placeholder="Button label"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -983,11 +983,11 @@ select.input { cursor: pointer; }
         <div class="flag-name">UK + Ireland</div>
         <div class="flag-desc">ITV4 / ITVX when set</div>
       </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_sunday_uk"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="liveUrlValues.sunday.uk = this.value.trim() || null">
+      <div style="flex:1;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+        <input type="url" id="live_sunday_uk_url" placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
+        <input type="text" id="live_sunday_uk_label" placeholder="Button label (e.g. ITV4 / ITVX)"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -996,11 +996,11 @@ select.input { cursor: pointer; }
         <div class="flag-name">International</div>
         <div class="flag-desc">Official BTCC YouTube when set</div>
       </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_sunday_international"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="liveUrlValues.sunday.international = this.value.trim() || null">
+      <div style="flex:1;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+        <input type="url" id="live_sunday_international_url" placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
+        <input type="text" id="live_sunday_international_label" placeholder="Button label (e.g. Official BTCC)"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -1009,11 +1009,11 @@ select.input { cursor: pointer; }
         <div class="flag-name">US</div>
         <div class="flag-desc">Shows WATCH LIVE for US users on Sundays</div>
       </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_sunday_us"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="liveUrlValues.sunday.us = this.value.trim() || null">
+      <div style="flex:1;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+        <input type="url" id="live_sunday_us_url" placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
+        <input type="text" id="live_sunday_us_label" placeholder="Button label"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;box-sizing:border-box">
       </div>
     </div>
 
@@ -1996,6 +1996,7 @@ const FLAGS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/f
 const LIVE_URLS_PATH = 'data/live_urls.json';
 const LIVE_URLS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/live_urls.json';
 let liveUrlValues = {saturday: {uk: null, international: null, us: null}, sunday: {uk: null, international: null, us: null}};
+// Each entry is {url, label} or null
 let liveUrlsFileSha = null;
 
 const FLAG_DEFS = [
@@ -2062,8 +2063,11 @@ async function loadLiveUrls() {
 function renderLiveUrls() {
   ['saturday', 'sunday'].forEach(day => {
     ['uk', 'international', 'us'].forEach(region => {
-      const el = document.getElementById(`live_${day}_${region}`);
-      if (el) el.value = liveUrlValues?.[day]?.[region] || '';
+      const entry = liveUrlValues?.[day]?.[region];
+      const urlEl   = document.getElementById(`live_${day}_${region}_url`);
+      const labelEl = document.getElementById(`live_${day}_${region}_label`);
+      if (urlEl)   urlEl.value   = entry?.url   || '';
+      if (labelEl) labelEl.value = entry?.label || '';
     });
   });
 }
@@ -2071,11 +2075,13 @@ function renderLiveUrls() {
 async function doSaveLiveUrls() {
   ['saturday', 'sunday'].forEach(day => {
     ['uk', 'international', 'us'].forEach(region => {
-      const el = document.getElementById(`live_${day}_${region}`);
-      if (el) {
-        if (!liveUrlValues[day]) liveUrlValues[day] = {};
-        liveUrlValues[day][region] = el.value.trim() || null;
-      }
+      const urlEl   = document.getElementById(`live_${day}_${region}_url`);
+      const labelEl = document.getElementById(`live_${day}_${region}_label`);
+      if (!urlEl) return;
+      if (!liveUrlValues[day]) liveUrlValues[day] = {};
+      const url   = urlEl.value.trim() || null;
+      const label = labelEl ? labelEl.value.trim() : '';
+      liveUrlValues[day][region] = (url && label) ? {url, label} : null;
     });
   });
   const tok = getToken();

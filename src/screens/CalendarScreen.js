@@ -16,7 +16,7 @@ import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
 import {useBroadcaster} from '../utils/broadcaster';
-import {useLiveUrls, getLiveInfo} from '../store/liveUrls';
+import {useLiveUrls} from '../store/liveUrls';
 import {useFeatureFlags} from '../store/featureFlags';
 
 const RED = '#E3000B';
@@ -141,9 +141,9 @@ export default function CalendarScreen({navigation}) {
     const day = new Date().getDay();
     const dayKey = day === 0 ? 'sunday' : day === 6 ? 'saturday' : null;
     if (!dayKey || !broadcaster) return null;
-    const url = liveUrls[dayKey]?.[broadcaster] || null;
-    if (!url) return null;
-    return {url, ...getLiveInfo(dayKey, broadcaster)};
+    const entry = liveUrls[dayKey]?.[broadcaster] || null;
+    if (!entry?.url || !entry?.label) return null;
+    return {url: entry.url, label: entry.label};
   }, [activeRound, broadcaster, liveUrls]);
 
   const focusRound = activeRound || nextRound;
@@ -228,7 +228,7 @@ export default function CalendarScreen({navigation}) {
               accessibilityRole="button">
               <View style={styles.liveDot} />
               <Text style={styles.watchLiveText}>WATCH LIVE</Text>
-              <Text style={styles.watchLiveSub}>{bc.label} · {bc.sub}</Text>
+              <Text style={styles.watchLiveSub}>{bc.label}</Text>
             </TouchableOpacity>
           )}
         </View>

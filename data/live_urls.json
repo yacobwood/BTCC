@@ -1,12 +1,12 @@
 {
   "saturday": {
-    "uk": "https://www.youtube.com/@ITVSport/streams",
+    "uk": {"url": "https://www.youtube.com/@ITVSport/streams", "label": "ITV Sport"},
     "international": null,
-    "us": "www.google.com"
+    "us": null
   },
   "sunday": {
-    "uk": "https://www.itv.com/hub/itv4",
-    "international": "https://www.youtube.com/@OfficialBTCC/streams",
-    "us": "www.google.com"
+    "uk": {"url": "https://www.itv.com/hub/itv4", "label": "ITV4 / ITVX"},
+    "international": {"url": "https://www.youtube.com/@OfficialBTCC/streams", "label": "Official BTCC"},
+    "us": null
   }
 }

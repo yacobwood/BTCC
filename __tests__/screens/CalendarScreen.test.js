@@ -195,7 +195,7 @@ describe('CalendarScreen', () => {
       useBroadcaster.mockReturnValue('uk');
       liveUrlsSpy = jest.spyOn(liveUrlsStore, 'useLiveUrls').mockReturnValue({
         saturday: {uk: null, international: null, us: null},
-        sunday: {uk: 'https://www.itv.com/hub/itv4', international: 'https://www.youtube.com/@OfficialBTCC/streams', us: null},
+        sunday: {uk: {url: 'https://www.itv.com/hub/itv4', label: 'ITV4 / ITVX'}, international: {url: 'https://www.youtube.com/@OfficialBTCC/streams', label: 'Official BTCC'}, us: null},
       });
     });
 
@@ -239,7 +239,7 @@ describe('CalendarScreen', () => {
       jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
       useBroadcaster.mockReturnValue('international');
       liveUrlsSpy.mockReturnValue({
-        saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
+        saturday: {uk: {url: 'https://www.youtube.com/@ITVSport/streams', label: 'YouTube'}, international: null, us: null},
         sunday: {uk: null, international: null, us: null},
       });
       setupCalendar([ACTIVE_ROUND]);
@@ -250,7 +250,7 @@ describe('CalendarScreen', () => {
     it('shows WATCH LIVE on Saturday when saturday uk url is set', async () => {
       jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
       liveUrlsSpy.mockReturnValue({
-        saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
+        saturday: {uk: {url: 'https://www.youtube.com/@ITVSport/streams', label: 'YouTube'}, international: null, us: null},
         sunday: {uk: null, international: null, us: null},
       });
       setupCalendar([ACTIVE_ROUND]);

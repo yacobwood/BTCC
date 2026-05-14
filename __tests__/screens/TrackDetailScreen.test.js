@@ -173,7 +173,7 @@ describe('TrackDetailScreen', () => {
       });
       liveUrlsSpy = jest.spyOn(liveUrlsStore, 'useLiveUrls').mockReturnValue({
         saturday: {uk: null, international: null, us: null},
-        sunday: {uk: 'https://www.itv.com/hub/itv4', international: 'https://www.youtube.com/@OfficialBTCC/streams', us: null},
+        sunday: {uk: {url: 'https://www.itv.com/hub/itv4', label: 'ITV4 / ITVX'}, international: {url: 'https://www.youtube.com/@OfficialBTCC/streams', label: 'Official BTCC'}, us: null},
       });
     });
 
@@ -221,7 +221,7 @@ describe('TrackDetailScreen', () => {
     it('shows WATCH LIVE on a Saturday when saturday uk url is set (UK)', async () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
       liveUrlsSpy.mockReturnValue({
-        saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
+        saturday: {uk: {url: 'https://www.youtube.com/@ITVSport/streams', label: 'YouTube'}, international: null, us: null},
         sunday: {uk: null, international: null, us: null},
       });
       const {findByText} = renderWithProviders(
@@ -235,7 +235,7 @@ describe('TrackDetailScreen', () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
       useBroadcaster.mockReturnValue('international');
       liveUrlsSpy.mockReturnValue({
-        saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
+        saturday: {uk: {url: 'https://www.youtube.com/@ITVSport/streams', label: 'YouTube'}, international: null, us: null},
         sunday: {uk: null, international: null, us: null},
       });
       const {queryByText} = renderWithProviders(
@@ -248,7 +248,7 @@ describe('TrackDetailScreen', () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
       useBroadcaster.mockReturnValue('us');
       liveUrlsSpy.mockReturnValue({
-        saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
+        saturday: {uk: {url: 'https://www.youtube.com/@ITVSport/streams', label: 'YouTube'}, international: null, us: null},
         sunday: {uk: null, international: null, us: null},
       });
       const {queryByText} = renderWithProviders(

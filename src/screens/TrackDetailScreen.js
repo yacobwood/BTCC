@@ -22,7 +22,7 @@ import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
-import {useLiveUrls, getLiveInfo} from '../store/liveUrls';
+import {useLiveUrls} from '../store/liveUrls';
 import {fetchResults, fetchCalendar} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
@@ -299,9 +299,8 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'liveTiming': {
         const today = new Date().getDay();
         const dayKey = today === 0 ? 'sunday' : today === 6 ? 'saturday' : null;
-        const url = (isRaceWeekend && dayKey && broadcaster) ? (liveUrls[dayKey]?.[broadcaster] || null) : null;
-        const liveInfo = url ? getLiveInfo(dayKey, broadcaster) : null;
-        const activeBc = url && liveInfo ? {url, ...liveInfo} : null;
+        const entry = (isRaceWeekend && dayKey && broadcaster) ? (liveUrls[dayKey]?.[broadcaster] || null) : null;
+        const activeBc = (entry?.url && entry?.label) ? {url: entry.url, label: entry.label} : null;
         const showLive = isRaceWeekend && live_updates;
         const showResults = racesFinished || isPastRaceWeekend;
         return (

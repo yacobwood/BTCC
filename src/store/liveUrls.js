@@ -4,25 +4,12 @@ const LIVE_URLS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/dat
 
 const defaults = {
   saturday: {uk: null, international: null, us: null},
-  sunday: {uk: 'https://www.itv.com/hub/itv4', international: 'https://www.youtube.com/@OfficialBTCC/streams', us: null},
-};
-
-const LIVE_INFO = {
-  saturday: {
-    uk:            {label: 'YouTube',       sub: 'Free · UK'},
-    international: {label: 'YouTube',       sub: 'Free · Worldwide'},
-    us:            {label: 'YouTube',       sub: 'Free · US'},
-  },
   sunday: {
-    uk:            {label: 'ITV4 / ITVX',   sub: 'Free · UK'},
-    international: {label: 'Official BTCC', sub: 'Free · Worldwide'},
-    us:            {label: 'Watch Live',    sub: 'Free · US'},
+    uk:            {url: 'https://www.itv.com/hub/itv4',                      label: 'ITV4 / ITVX'},
+    international: {url: 'https://www.youtube.com/@OfficialBTCC/streams',     label: 'Official BTCC'},
+    us:            null,
   },
 };
-
-export function getLiveInfo(dayKey, broadcaster) {
-  return LIVE_INFO[dayKey]?.[broadcaster] || null;
-}
 
 const LiveUrlsContext = createContext(defaults);
 
