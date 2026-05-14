@@ -8,11 +8,15 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.app.Activity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.btccfanhub.R
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +27,7 @@ class WidgetConfigureActivity : Activity() {
 
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private var selectedTheme = WidgetTheme.NAVY
-    private val swatchViews = mutableMapOf<WidgetTheme, ImageView>()
+    private val swatchViews = mutableMapOf<WidgetTheme, FrameLayout>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,10 +42,20 @@ class WidgetConfigureActivity : Activity() {
             return
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_widget_configure)
 
-        val grid = findViewById<LinearLayout>(R.id.theme_grid)
+        val rootLayout = findViewById<LinearLayout>(R.id.configure_root)
         val density = resources.displayMetrics.density
+        val dp20 = (20 * density).toInt()
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(dp20, bars.top + dp20, dp20, bars.bottom + dp20)
+            insets
+        }
+
+        val grid = findViewById<LinearLayout>(R.id.theme_grid)
 
         addSectionLabel(grid, "CLASSIC")
         addThemeRows(grid, WidgetTheme.classics, density)
@@ -108,15 +122,10 @@ class WidgetConfigureActivity : Activity() {
             gravity = Gravity.CENTER_HORIZONTAL
         }
 
-        val swatchH = (56 * density).toInt()
-        val swatch = ImageView(this).apply {
-            val bmp = LiveryRenderer.buildLiveryBitmap(this@WidgetConfigureActivity, 120, 56, theme)
-            setImageBitmap(bmp)
-            scaleType = ImageView.ScaleType.FIT_XY
-            val bg = GradientDrawable().apply {
-                cornerRadius = 8 * density
-            }
-            background = bg
+        val swatchH = (90 * density).toInt()
+
+        // Container hosts livery + overlay text and carries the selection border
+        val container = FrameLayout(this).apply {
             clipToOutline = true
             outlineProvider = object : android.view.ViewOutlineProvider() {
                 override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
@@ -124,12 +133,62 @@ class WidgetConfigureActivity : Activity() {
                 }
             }
         }
-        swatchViews[theme] = swatch
-        swatch.setOnClickListener {
+
+        // Livery background
+        val livery = ImageView(this).apply {
+            val bmp = LiveryRenderer.buildLiveryBitmap(this@WidgetConfigureActivity, 160, 90, theme)
+            setImageBitmap(bmp)
+            scaleType = ImageView.ScaleType.FIT_XY
+        }
+        container.addView(livery, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT,
+        ))
+
+        // Example widget content overlay (mirrors widget_small.xml layout)
+        val overlay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+        }
+        val daysNum = TextView(this).apply {
+            text = "12"
+            setTextColor(Color.parseColor("#FEBD02"))
+            textSize = 22f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            includeFontPadding = false
+            gravity = Gravity.CENTER
+        }
+        overlay.addView(daysNum)
+        val daysLabel = TextView(this).apply {
+            text = "DAYS"
+            setTextColor(Color.parseColor("#CCFFFFFF"))
+            textSize = 7f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+        }
+        overlay.addView(daysLabel)
+        val venue = TextView(this).apply {
+            text = "Brands Hatch"
+            setTextColor(Color.WHITE)
+            textSize = 7f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+            maxLines = 1
+        }
+        overlay.addView(venue, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply { topMargin = (2 * density).toInt() })
+
+        container.addView(overlay, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT,
+        ))
+
+        swatchViews[theme] = container
+        container.setOnClickListener {
             selectedTheme = theme
             updateSelection()
         }
-        cell.addView(swatch, LinearLayout.LayoutParams(
+        cell.addView(container, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, swatchH,
         ))
 
@@ -144,7 +203,7 @@ class WidgetConfigureActivity : Activity() {
             LinearLayout.LayoutParams.WRAP_CONTENT,
         ).apply { topMargin = (4 * density).toInt() })
 
-        cell.tag = label // store label ref for selection update
+        cell.tag = label
         return cell
     }
 
@@ -153,7 +212,7 @@ class WidgetConfigureActivity : Activity() {
         val border = Color.parseColor("#2A2D35")
         val density = resources.displayMetrics.density
 
-        swatchViews.forEach { (theme, iv) ->
+        swatchViews.forEach { (theme, container) ->
             val isSelected = theme == selectedTheme
             val bg = GradientDrawable().apply {
                 cornerRadius = 8 * density
@@ -162,9 +221,10 @@ class WidgetConfigureActivity : Activity() {
                     if (isSelected) yellow else border,
                 )
             }
-            iv.foreground = bg
+            container.foreground = bg
 
-            val label = (iv.parent as? LinearLayout)?.tag as? TextView
+            val cell = container.parent as? LinearLayout
+            val label = cell?.tag as? TextView
             label?.setTextColor(if (isSelected) yellow else Color.parseColor("#8A8D94"))
             label?.setTypeface(label.typeface, if (isSelected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         }
