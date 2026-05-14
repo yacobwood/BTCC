@@ -22,5 +22,7 @@
   "update_min_version_ios": 0,
   "update_min_version_android": 66,
   "live_chat": false,
+  "live_chat_min_build_android": 68,
+  "live_chat_min_build_ios": 68,
   "broadcaster_override": false
 }

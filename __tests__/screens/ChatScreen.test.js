@@ -67,7 +67,9 @@ function renderChat() {
 describe('ChatScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    AsyncStorage.getItem.mockResolvedValue(null);
+    AsyncStorage.getItem.mockImplementation(() => Promise.resolve(null));
+    const {getFCMToken} = require('../../src/utils/notifications');
+    getFCMToken.mockResolvedValue('test-fcm-token-abc12345');
     mockDbOn.mockImplementation(() => {});
     mockDbPush.mockResolvedValue({});
     mockDbRemove.mockResolvedValue({});
@@ -171,7 +173,7 @@ describe('ChatScreen', () => {
         {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
-    await waitFor(() => expect(getByText('Gordon')).toBeTruthy());
+    await waitFor(() => expect(getByText(/Gordon/)).toBeTruthy());
   });
 
   it('renders the author ID suffix as last 4 chars', async () => {
@@ -226,7 +228,8 @@ describe('ChatScreen', () => {
 
   it('shows delete button (not flag) for own messages', async () => {
     // FCM token gives authorId 'test-fcm'
-    const {queryByLabelText} = renderChat();
+    const {queryByLabelText, getByLabelText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
     await act(async () => {
       triggerMessages([
         {id: '1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
@@ -234,9 +237,8 @@ describe('ChatScreen', () => {
     });
     await waitFor(() => {
       expect(queryByLabelText('Flag message')).toBeNull();
+      expect(getByLabelText('Delete message')).toBeTruthy();
     });
-    // Delete button is rendered via an Icon - check it is in the tree via accessible role presence
-    // We look for the fact that flag is absent, confirming it's own message path
   });
 
   it('shows flag button (not delete) for other messages', async () => {
@@ -435,10 +437,9 @@ describe('ChatScreen', () => {
     fireEvent.changeText(getByPlaceholderText(/say something/i), 'Hello!');
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() => getByText(/Choose a display name/i));
-    // Find the name input in the prompt (placeholder is "Fan #...")
     const nameInput = getByPlaceholderText(/Fan #/i);
     fireEvent.changeText(nameInput, 'Speedster');
-    fireEvent.press(getByText('Set name'));
+    fireEvent.press(getByLabelText('Set name'));
     await waitFor(() =>
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('commenter_name', 'Speedster'),
     );
@@ -453,7 +454,7 @@ describe('ChatScreen', () => {
     await waitFor(() => getByText(/Choose a display name/i));
     const nameInput = getByPlaceholderText(/Fan #/i);
     fireEvent.changeText(nameInput, 'Speedster');
-    fireEvent.press(getByText('Set name'));
+    fireEvent.press(getByLabelText('Set name'));
     await waitFor(() => expect(queryByText(/Choose a display name/i)).toBeNull());
   });
 
@@ -465,7 +466,7 @@ describe('ChatScreen', () => {
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() => getByText(/Choose a display name/i));
     fireEvent.changeText(getByPlaceholderText(/Fan #/i), 'Speedster');
-    fireEvent.press(getByText('Set name'));
+    fireEvent.press(getByLabelText('Set name'));
     await waitFor(() =>
       expect(mockDbPush).toHaveBeenCalledWith(
         expect.objectContaining({text: 'Pending message!', authorName: 'Speedster'}),
@@ -683,26 +684,26 @@ describe('ChatScreen', () => {
 
   // ── Deleting ──────────────────────────────────────────────────────────────────
 
-  // Helper: render with an own message already shown and return the delete touchable
+  // Helper: render with an own message already shown
   async function renderWithOwnMessage() {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const {UNSAFE_getAllByType, ...rest} = renderWithProviders(<ChatScreen />);
+    const result = renderWithProviders(<ChatScreen />);
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
     await act(async () => {
       triggerMessages([
         {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
-    await waitFor(() => rest.getByText('My message'));
-    // Find the delete TouchableOpacity - it has no accessibilityLabel (flag button does)
-    const {TouchableOpacity} = require('react-native');
-    const touchables = UNSAFE_getAllByType(TouchableOpacity);
-    const deleteBtn = touchables.find(t => !t.props.accessibilityLabel && t.props.onPress);
-    return {alertSpy, deleteBtn, UNSAFE_getAllByType, ...rest};
+    await waitFor(() => {
+      result.getByText('My message');
+      result.getByLabelText('Delete message');
+    });
+    return {alertSpy, ...result};
   }
 
   it('pressing delete on own message shows Alert', async () => {
-    const {alertSpy, deleteBtn} = await renderWithOwnMessage();
-    if (deleteBtn) fireEvent.press(deleteBtn);
+    const {alertSpy, getByLabelText} = await renderWithOwnMessage();
+    fireEvent.press(getByLabelText('Delete message'));
     expect(alertSpy).toHaveBeenCalledWith(
       'Delete message',
       expect.any(String),
@@ -717,18 +718,17 @@ describe('ChatScreen', () => {
       const btn = buttons.find(b => b.style === 'destructive');
       deleteOnPress = btn?.onPress;
     });
-    const {UNSAFE_getAllByType, getByText} = renderWithProviders(<ChatScreen />);
+    const result = renderWithProviders(<ChatScreen />);
     await act(async () => {
       triggerMessages([
         {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
-    await waitFor(() => getByText('My message'));
-    const {TouchableOpacity} = require('react-native');
-    const touchables = UNSAFE_getAllByType(TouchableOpacity);
-    const deleteBtn = touchables.find(t => !t.props.accessibilityLabel && t.props.onPress);
-    if (deleteBtn) fireEvent.press(deleteBtn);
-    // Confirm the delete
+    await waitFor(() => {
+      result.getByText('My message');
+      result.getByLabelText('Delete message');
+    });
+    fireEvent.press(result.getByLabelText('Delete message'));
     if (deleteOnPress) {
       await act(async () => { await deleteOnPress(); });
     }
@@ -742,18 +742,17 @@ describe('ChatScreen', () => {
       const btn = buttons.find(b => b.style === 'cancel');
       cancelOnPress = btn?.onPress;
     });
-    const {UNSAFE_getAllByType, getByText} = renderWithProviders(<ChatScreen />);
+    const result = renderWithProviders(<ChatScreen />);
     await act(async () => {
       triggerMessages([
         {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
-    await waitFor(() => getByText('My message'));
-    const {TouchableOpacity} = require('react-native');
-    const touchables = UNSAFE_getAllByType(TouchableOpacity);
-    const deleteBtn = touchables.find(t => !t.props.accessibilityLabel && t.props.onPress);
-    if (deleteBtn) fireEvent.press(deleteBtn);
-    // Invoke cancel (no-op)
+    await waitFor(() => {
+      result.getByText('My message');
+      result.getByLabelText('Delete message');
+    });
+    fireEvent.press(result.getByLabelText('Delete message'));
     if (cancelOnPress) cancelOnPress();
     expect(mockDbRemove).not.toHaveBeenCalled();
     Alert.alert.mockRestore();

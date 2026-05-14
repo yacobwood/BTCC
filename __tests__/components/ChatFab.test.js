@@ -2,6 +2,7 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react-native';
 import {AllProviders} from '../screens/testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ChatFab from '../../src/components/ChatFab';
 
 jest.mock('../../src/screens/ChatScreen', () => ({
   __esModule: true,
@@ -45,7 +46,6 @@ function triggerSnapshot(timestamp) {
 }
 
 function renderFab(props = {}) {
-  const ChatFab = require('../../src/components/ChatFab').default;
   return render(
     <AllProviders>
       <ChatFab {...props} />
@@ -56,7 +56,6 @@ function renderFab(props = {}) {
 describe('ChatFab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
     mockLiveChat = false;
     AsyncStorage.getItem.mockResolvedValue(null);
     mockDbOn.mockImplementation(() => {});
@@ -89,7 +88,9 @@ describe('ChatFab', () => {
 
   it('shows no unread badge when message timestamp is older than lastRead', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockResolvedValue(String(Date.now() + 5000)); // last read in the future
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'chat_last_read' ? Promise.resolve(String(Date.now() + 5000)) : Promise.resolve(null),
+    );
     const {getByLabelText} = renderFab();
     await act(async () => {
       triggerSnapshot(Date.now() - 1000); // message older than last read
@@ -99,10 +100,12 @@ describe('ChatFab', () => {
 
   it('shows unread badge when message timestamp is newer than lastRead', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockResolvedValue(String(Date.now() - 1000)); // last read 1s ago
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'chat_last_read' ? Promise.resolve(String(Date.now() - 1000)) : Promise.resolve(null),
+    );
     const {getByLabelText} = renderFab();
     await act(async () => {
-      triggerSnapshot(Date.now()); // message is newer than last read
+      triggerSnapshot(Date.now() + 1000); // guarantee newer than lastReadRef.current regardless of async init timing
     });
     await waitFor(() => expect(getByLabelText('Open live chat, new messages')).toBeTruthy());
   });
@@ -110,7 +113,9 @@ describe('ChatFab', () => {
   it('loads lastRead timestamp from AsyncStorage on mount and uses it for comparison', async () => {
     mockLiveChat = true;
     const storedTs = Date.now() - 500;
-    AsyncStorage.getItem.mockResolvedValue(String(storedTs));
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'chat_last_read' ? Promise.resolve(String(storedTs)) : Promise.resolve(null),
+    );
     const {getByLabelText} = renderFab();
     // Trigger a message that is older than storedTs - should NOT be unread
     await act(async () => {
@@ -121,10 +126,12 @@ describe('ChatFab', () => {
 
   it('unread clears when FAB is pressed (opened)', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockResolvedValue(String(Date.now() - 1000));
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'chat_last_read' ? Promise.resolve(String(Date.now() - 1000)) : Promise.resolve(null),
+    );
     const {getByLabelText} = renderFab();
     await act(async () => {
-      triggerSnapshot(Date.now());
+      triggerSnapshot(Date.now() + 1000); // guarantee newer than lastReadRef.current regardless of async init timing
     });
     await waitFor(() => getByLabelText('Open live chat, new messages'));
     fireEvent.press(getByLabelText('Open live chat, new messages'));
@@ -189,9 +196,11 @@ describe('ChatFab', () => {
 
   it('closing via chat-close button clears unread state', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockResolvedValue(String(Date.now() - 1000));
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'chat_last_read' ? Promise.resolve(String(Date.now() - 1000)) : Promise.resolve(null),
+    );
     const {getByLabelText, getByTestId, queryByTestId} = renderFab();
-    await act(async () => { triggerSnapshot(Date.now()); });
+    await act(async () => { triggerSnapshot(Date.now() + 1000); }); // guarantee newer than lastReadRef.current
     await waitFor(() => getByLabelText('Open live chat, new messages'));
     // Open
     fireEvent.press(getByLabelText('Open live chat, new messages'));
@@ -206,9 +215,11 @@ describe('ChatFab', () => {
 
   it('closes chat and clears unread when close FAB is pressed', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockResolvedValue(String(Date.now() - 1000));
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'chat_last_read' ? Promise.resolve(String(Date.now() - 1000)) : Promise.resolve(null),
+    );
     const {getByLabelText, getByTestId, queryByTestId} = renderFab();
-    await act(async () => { triggerSnapshot(Date.now()); });
+    await act(async () => { triggerSnapshot(Date.now() + 1000); }); // guarantee newer than lastReadRef.current
     await waitFor(() => getByLabelText('Open live chat, new messages'));
     fireEvent.press(getByLabelText('Open live chat, new messages'));
     await waitFor(() => getByTestId('chat-screen'));

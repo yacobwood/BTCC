@@ -128,11 +128,24 @@ export default function ChatScreen({onClose} = {}) {
   };
 
   const handleNameSkip = async () => {
-    await saveName('');
+    const name = await saveName('');
     setShowNamePrompt(false);
     setNameEditing(false);
     setNameInput('');
-    handleSend();
+    if (input.trim()) {
+      const text = input.trim();
+      setInput('');
+      try {
+        await DB.ref('/chat/messages').push({
+          text,
+          authorId: myAuthorIdRef.current,
+          authorName: name,
+          timestamp: database.ServerValue.TIMESTAMP,
+          flagCount: 0,
+          hidden: false,
+        });
+      } catch {}
+    }
   };
 
   const handleFlag = async (msgId) => {
@@ -172,10 +185,8 @@ export default function ChatScreen({onClose} = {}) {
     return (
       <View style={styles.msgRow}>
         <View style={styles.msgMeta}>
-          <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>
-            {item.authorName}
-            {item.authorId ? <Text style={styles.msgAuthorId}>{` #${item.authorId.slice(-4)}`}</Text> : null}
-          </Text>
+          <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{item.authorName}</Text>
+          {item.authorId ? <Text style={styles.msgAuthorId}>{` #${item.authorId.slice(-4)}`}</Text> : null}
           <Text style={styles.msgTime}>{timeAgo(item.timestamp)}</Text>
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
@@ -186,7 +197,7 @@ export default function ChatScreen({onClose} = {}) {
             </TouchableOpacity>
           )}
           {isOwn && (
-            <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.msgActionBtn}>
+            <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.msgActionBtn} accessibilityLabel="Delete message">
               <Icon name="delete-outline" size={13} color="#ff4444" />
             </TouchableOpacity>
           )}
@@ -276,7 +287,7 @@ export default function ChatScreen({onClose} = {}) {
             <TouchableOpacity onPress={handleNameSkip} style={styles.nameSkipBtn}>
               <Text style={styles.nameSkipText}>Skip</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleNameSet} style={styles.nameSetBtn}>
+            <TouchableOpacity onPress={handleNameSet} style={styles.nameSetBtn} accessibilityLabel="Set name">
               <Text style={styles.nameSetText}>Set name</Text>
             </TouchableOpacity>
           </View>

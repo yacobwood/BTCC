@@ -115,13 +115,16 @@ jest.mock('../../src/components/ChatFab', () => ({
   default: () => null,
 }));
 
-jest.mock('../../src/components/AdBanner', () => ({
-  __esModule: true,
-  default: React.forwardRef((_props, _ref) => {
-    const {View} = require('react-native');
-    return <View testID="ad-banner" />;
-  }),
-}));
+jest.mock('../../src/components/AdBanner', () => {
+  const {forwardRef} = require('react');
+  return {
+    __esModule: true,
+    default: forwardRef((_props, _ref) => {
+      const {View} = require('react-native');
+      return <View testID="ad-banner" />;
+    }),
+  };
+});
 
 jest.mock('../../src/components/UpdateDialog', () => ({
   __esModule: true,
