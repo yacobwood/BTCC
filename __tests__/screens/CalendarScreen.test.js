@@ -18,6 +18,7 @@ jest.mock('../../src/utils/broadcaster', () => ({
     international: {label: 'Official BTCC', sub: 'Free · Worldwide', url: 'https://www.youtube.com/@OfficialBTCC/streams'},
   },
   detectBroadcaster: jest.fn(() => 'uk'),
+  useBroadcaster: jest.fn(() => 'uk'),
 }));
 jest.mock('../../src/api/parsers', () => ({
   parseCalendar: jest.fn(),
@@ -25,7 +26,7 @@ jest.mock('../../src/api/parsers', () => ({
 
 const {fetchCalendar, fetchLiveStatus} = require('../../src/api/client');
 const {parseCalendar} = require('../../src/api/parsers');
-const {detectBroadcaster} = require('../../src/utils/broadcaster');
+const {useBroadcaster} = require('../../src/utils/broadcaster');
 
 const MOCK_ROUNDS = [
   {round: 1, venue: 'Donington Park', startDate: '2025-04-19', endDate: '2025-04-20', date: '19–20 Apr 2025', sessions: []},
@@ -191,7 +192,7 @@ describe('CalendarScreen', () => {
     beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-05-10T12:00:00Z')); // Sunday by default
-      detectBroadcaster.mockReturnValue('uk');
+      useBroadcaster.mockReturnValue('uk');
       liveUrlsSpy = jest.spyOn(liveUrlsStore, 'useLiveUrls').mockReturnValue({
         saturday: {uk: null, international: null, us: null},
         sunday: {uk: 'https://www.itv.com/hub/itv4', international: 'https://www.youtube.com/@OfficialBTCC/streams', us: null},
@@ -207,21 +208,21 @@ describe('CalendarScreen', () => {
     });
 
     it('shows ITV4 / ITVX label for UK users on Sunday', async () => {
-      detectBroadcaster.mockReturnValue('uk');
+      useBroadcaster.mockReturnValue('uk');
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       expect(await findByText(/ITV4/)).toBeTruthy();
     });
 
     it('does not show WATCH LIVE for US users on Sunday (no broadcaster configured)', async () => {
-      detectBroadcaster.mockReturnValue('us');
+      useBroadcaster.mockReturnValue('us');
       setupCalendar([ACTIVE_ROUND]);
       const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
     });
 
     it('shows Official BTCC label for international users on Sunday', async () => {
-      detectBroadcaster.mockReturnValue('international');
+      useBroadcaster.mockReturnValue('international');
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       expect(await findByText(/Official BTCC/)).toBeTruthy();
@@ -236,7 +237,7 @@ describe('CalendarScreen', () => {
 
     it('does not show WATCH LIVE on Saturday for international users (UK-only stream)', async () => {
       jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
-      detectBroadcaster.mockReturnValue('international');
+      useBroadcaster.mockReturnValue('international');
       liveUrlsSpy.mockReturnValue({
         saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
         sunday: {uk: null, international: null, us: null},

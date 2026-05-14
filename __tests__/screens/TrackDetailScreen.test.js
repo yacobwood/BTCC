@@ -41,6 +41,7 @@ jest.mock('../../src/utils/broadcaster', () => ({
     international: {label: 'Official BTCC', sub: 'Free · Worldwide', url: 'https://www.youtube.com/@OfficialBTCC/streams'},
   },
   detectBroadcaster: jest.fn(() => 'uk'),
+  useBroadcaster: jest.fn(() => 'uk'),
 }));
 
 const nav = makeNav();
@@ -152,7 +153,7 @@ describe('TrackDetailScreen', () => {
   // LIVE_TRACK spans 2026-04-25 → 2026-04-26 and has a tslEventId so isRaceWeekend is true.
 
   describe('Watch Live button', () => {
-    const {detectBroadcaster} = require('../../src/utils/broadcaster');
+    const {useBroadcaster} = require('../../src/utils/broadcaster');
     let flagsSpy;
     let liveUrlsSpy;
 
@@ -166,7 +167,7 @@ describe('TrackDetailScreen', () => {
     beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-04-26T10:00:00Z')); // Sunday
-      detectBroadcaster.mockReturnValue('uk');
+      useBroadcaster.mockReturnValue('uk');
       flagsSpy = jest.spyOn(featureFlags, 'useFeatureFlags').mockReturnValue({
         track_weather: false, live_updates: false, live_chat: false,
       });
@@ -186,7 +187,7 @@ describe('TrackDetailScreen', () => {
     });
 
     it('shows broadcaster sub-label for UK users', async () => {
-      detectBroadcaster.mockReturnValue('uk');
+      useBroadcaster.mockReturnValue('uk');
       const {findByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
       );
@@ -194,7 +195,7 @@ describe('TrackDetailScreen', () => {
     });
 
     it('shows broadcaster sub-label for international users', async () => {
-      detectBroadcaster.mockReturnValue('international');
+      useBroadcaster.mockReturnValue('international');
       const {findByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
       );
@@ -202,7 +203,7 @@ describe('TrackDetailScreen', () => {
     });
 
     it('does not show WATCH LIVE for US users (no broadcaster entry)', async () => {
-      detectBroadcaster.mockReturnValue('us');
+      useBroadcaster.mockReturnValue('us');
       const {queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
       );
@@ -232,7 +233,7 @@ describe('TrackDetailScreen', () => {
 
     it('does not show WATCH LIVE on a Saturday for international users (UK-only stream)', async () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
-      detectBroadcaster.mockReturnValue('international');
+      useBroadcaster.mockReturnValue('international');
       liveUrlsSpy.mockReturnValue({
         saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
         sunday: {uk: null, international: null, us: null},
@@ -245,7 +246,7 @@ describe('TrackDetailScreen', () => {
 
     it('does not show WATCH LIVE on a Saturday for US when saturday us url is null', async () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
-      detectBroadcaster.mockReturnValue('us');
+      useBroadcaster.mockReturnValue('us');
       liveUrlsSpy.mockReturnValue({
         saturday: {uk: 'https://www.youtube.com/@ITVSport/streams', international: null, us: null},
         sunday: {uk: null, international: null, us: null},

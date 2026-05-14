@@ -15,7 +15,7 @@ import {fetchCalendar} from '../api/client';
 import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
-import {detectBroadcaster} from '../utils/broadcaster';
+import {useBroadcaster} from '../utils/broadcaster';
 import {useLiveUrls, getLiveInfo} from '../store/liveUrls';
 
 const RED = '#E3000B';
@@ -132,7 +132,7 @@ export default function CalendarScreen({navigation}) {
     return items;
   }, [rounds, today, pastCount]);
 
-  const broadcaster = useMemo(() => detectBroadcaster(), []);
+  const broadcaster = useBroadcaster();
   const bc = useMemo(() => {
     if (!activeRound) return null;
     const day = new Date().getDay();

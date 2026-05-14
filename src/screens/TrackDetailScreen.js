@@ -27,7 +27,7 @@ import {fetchResults, fetchCalendar} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
-import {detectBroadcaster} from '../utils/broadcaster';
+import {useBroadcaster} from '../utils/broadcaster';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 
@@ -106,7 +106,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const sessions = track.sessions || [];
   const [weather, setWeather] = useState(null);
   const [racesFinished, setRacesFinished] = useState(false);
-  const broadcaster = useMemo(() => detectBroadcaster(), []);
+  const broadcaster = useBroadcaster();
   const [currentRoundData, setCurrentRoundData] = useState(null);
   const [liveRaceRecord, setLiveRaceRecord] = useState(null);
   const [liveQualRecord, setLiveQualRecord] = useState(null);
