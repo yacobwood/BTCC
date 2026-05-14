@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import database from '@react-native-firebase/database';
 
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
@@ -21,6 +22,7 @@ const FAB_BOTTOM_OFFSET = 12;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default function ChatFab({bottomOffset = 0}) {
+  const {bottom: navBarInset} = useSafeAreaInsets();
   const {live_chat} = useFeatureFlags();
   const {settings} = useSettings();
 
@@ -118,7 +120,7 @@ export default function ChatFab({bottomOffset = 0}) {
         onRequestClose={closeChat}
         statusBarTranslucent>
         <Pressable style={styles.backdrop} onPress={closeChat} />
-        <Animated.View style={[styles.sheetOuter, {bottom: sheetLift}]}>
+        <Animated.View style={[styles.sheetOuter, {bottom: Animated.add(sheetLift, navBarInset)}]}>
           {/* FAB above the sheet */}
           <TouchableOpacity
             onPress={closeChat}

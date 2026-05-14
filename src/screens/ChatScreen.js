@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import database from '@react-native-firebase/database';
@@ -27,7 +26,6 @@ const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
 
 export default function ChatScreen({onClose} = {}) {
-  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState(null); // null = loading
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
@@ -270,7 +268,7 @@ export default function ChatScreen({onClose} = {}) {
 
       {/* Name prompt */}
       {showNamePrompt ? (
-        <View style={[styles.namePrompt, {paddingBottom: (insets.bottom || 0) + 12}]}>
+        <View style={[styles.namePrompt, {paddingBottom: 12}]}>
           <Text style={styles.namePromptTitle}>Choose a display name</Text>
           <TextInput
             style={styles.nameInput}
@@ -293,7 +291,7 @@ export default function ChatScreen({onClose} = {}) {
           </View>
         </View>
       ) : (
-          <View style={[styles.inputRow, {paddingBottom: (insets.bottom || 0) + 12}]}>
+          <View style={[styles.inputRow, {paddingBottom: 12}]}>
             {inputError ? <Text style={styles.inputError}>{inputError}</Text> : null}
             <View style={styles.inputInner}>
               <TextInput
