@@ -20,9 +20,10 @@ const defaults = {
   update_min_version_ios: 0,
   update_min_version_android: 63,
   broadcaster_override: null,
+  banner_ad: false,
 };
 
-const FeatureFlagsContext = createContext(defaults);
+export const FeatureFlagsContext = createContext(defaults);
 
 export function FeatureFlagsProvider({children}) {
   const [flags, setFlags] = useState(defaults);

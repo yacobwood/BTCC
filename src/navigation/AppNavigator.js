@@ -175,7 +175,7 @@ const linking = {
 function AppContent() {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
-  const {update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
+  const {update_available, update_min_version_android, update_min_version_ios, banner_ad} = useFeatureFlags();
   const [showUpdate, setShowUpdate] = React.useState(false);
   const [adBannerHeight, setAdBannerHeight] = React.useState(0);
 
@@ -215,9 +215,11 @@ function AppContent() {
           <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'Season'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
-        <View style={{paddingBottom: bottom}} onLayout={e => setAdBannerHeight(e.nativeEvent.layout.height)}>
-          <AdBanner />
-        </View>
+        {banner_ad && (
+          <View style={{paddingBottom: bottom}} onLayout={e => setAdBannerHeight(e.nativeEvent.layout.height)}>
+            <AdBanner />
+          </View>
+        )}
         <ChatFab bottomOffset={adBannerHeight + TAB_BAR_HEIGHT} />
         <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       </View>

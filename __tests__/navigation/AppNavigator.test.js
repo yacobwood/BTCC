@@ -220,6 +220,41 @@ describe('AppNavigator', () => {
   });
 });
 
+describe('AppNavigator — banner ad flag', () => {
+  // Inject context values directly to avoid flushing the async fetch chain in tests.
+  function renderNavWithFlags(flagOverrides = {}) {
+    const AppNavigator = require('../../src/navigation/AppNavigator').default;
+    const {FeatureFlagsContext} = require('../../src/store/featureFlags');
+    const value = {
+      update_available: false,
+      update_min_version_android: 63,
+      update_min_version_ios: 0,
+      live_chat: false,
+      live_chat_min_build_android: 68,
+      live_chat_min_build_ios: 68,
+      banner_ad: false,
+      ...flagOverrides,
+    };
+    return render(
+      <FeatureFlagsContext.Provider value={value}>
+        <AppNavigator navigationRef={React.createRef()} />
+      </FeatureFlagsContext.Provider>,
+    );
+  }
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('does not render the ad banner when banner_ad flag is false', async () => {
+    const {queryByTestId} = renderNavWithFlags({banner_ad: false});
+    await waitFor(() => expect(queryByTestId('ad-banner')).toBeNull());
+  });
+
+  it('renders the ad banner when banner_ad flag is true', async () => {
+    const {getByTestId} = renderNavWithFlags({banner_ad: true});
+    await waitFor(() => expect(getByTestId('ad-banner')).toBeTruthy());
+  });
+});
+
 describe('AppNavigator — update dialog', () => {
   const originalOS = Platform.OS;
 
