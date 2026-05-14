@@ -52,16 +52,16 @@ describe('RecordsScreen', () => {
     });
   });
 
-  it('defaults to Rates section showing Win % tab', async () => {
+  it('defaults to Totals section showing Titles tab', async () => {
     const {getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
-    await waitFor(() => expect(getByText('Win %')).toBeTruthy());
+    await waitFor(() => expect(getByText('Titles')).toBeTruthy());
   });
 
-  it('switches to Totals section when pressed', async () => {
+  it('switches to Rates section when pressed', async () => {
     const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
-    await waitFor(() => getByLabelText('Totals'));
-    fireEvent.press(getByLabelText('Totals'));
-    await waitFor(() => expect(getByText('Titles')).toBeTruthy());
+    await waitFor(() => getByLabelText('Rates'));
+    fireEvent.press(getByLabelText('Rates'));
+    await waitFor(() => expect(getByText('Win %')).toBeTruthy());
   });
 
   // ── Tab switching ─────────────────────────────────────────────────────────────

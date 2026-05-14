@@ -32,8 +32,8 @@ const COUNT_SORTS = [
 ];
 
 const SECTION_DEFS = [
-  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004 onwards'},
   {label: 'Totals', sorts: COUNT_SORTS, subtitle: 'Source: btcc.net'},
+  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004 onwards'},
 ];
 
 export default function RecordsScreen({navigation}) {
