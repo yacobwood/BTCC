@@ -633,6 +633,7 @@ No bonus points in QR.
 - **QR / Race 3:** Reverse of top N from previous session (N determined by draw 6 to 12)
 
 R3 reverse grid detection (`detectReversalCount` in RoundResultsScreen) compares the actual TSL grid against reversed R2 top-N for N in range 12 down to 6.
+i cant see it
 
 ---
 
@@ -798,7 +799,8 @@ A single-page web admin UI with tabs for:
 
 - **Standings** - Update driver and team championship standings in `standings.json`
 - **Notifications** - Send broadcast notifications, test notifications to a single device, compose news article deep-link notifications
-- **Flags** - Edit all feature flags and per-device overrides in `flags.json`
+- **Flags** - Edit all feature flags and per-device overrides in `flags.json`. Includes `broadcaster_override` (uk/international/us) which bypasses IP geolocation on a specific device.
+- **Live** - Edit Saturday and Sunday live stream URLs per region (UK, International, US) in `live_urls.json`. Watch Live button only shows when a URL is set for the user's region and day.
 - **Hub News** - Compose and publish hub news posts to `hub_news.json`
 - **Digests** - Manually trigger the AI digest generation via `triggerDigest` Cloud Function
 
