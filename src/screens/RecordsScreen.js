@@ -27,28 +27,13 @@ const RATE_SORTS = [
 ];
 
 const COUNT_SORTS = [
-  {key: 'championships',    label: 'Titles',                  format: v => v.toString(), sub: item => `${item.wins} win${item.wins !== 1 ? 's' : ''} · ${item.podiums} podiums`, hideZero: true},
-  {key: 'starts',           label: 'Starts',                  format: v => v.toString(), sub: item => `${item.wins} wins · ${item.podiums} podiums`},
-  {key: 'wins',             label: 'Wins',                    format: v => v.toString(), sub: item => `${item.podiums} podiums · ${item.poles} poles`},
-  {key: 'podiums',          label: 'Podiums',                 format: v => v.toString(), sub: item => `${item.wins} wins · ${item.poles} poles`},
-  {key: 'poles',            label: 'Pole Positions',          format: v => v.toString(), sub: item => `${item.wins} wins · ${item.fastestLaps} fastest laps`},
-  {key: 'fastestLaps',      label: 'Fastest Laps',            format: v => v.toString(), sub: item => `${item.wins} wins · ${item.podiums} podiums`},
-  {key: 'racesLed',         label: 'Races Led',               format: v => v.toString(), sub: item => `${item.wins} wins · ${item.podiums} podiums`, hideZero: true},
-  {key: 'hatTricks',        label: 'Hat Tricks',              format: v => v.toString(), sub: item => `${item.wins} wins · ${item.starts} starts`, hideZero: true},
-  {key: 'winStreak',        label: 'Win Streak',              format: v => v.toString(), sub: item => `${item.wins} career wins · ${item.podiums} podiums`, hideZero: true},
-  {key: 'bestSeasonWins',   label: 'Wins in a Season',        format: v => v.toString(), sub: item => `${item.wins} career wins · ${item.championships} title${item.championships !== 1 ? 's' : ''}`, hideZero: true},
-  {key: 'podiumStreak',     label: 'Podium Streak',           format: v => v.toString(), sub: item => `${item.podiums} career podiums · ${item.wins} wins`, hideZero: true},
-  {key: 'bestSeasonPodiums',label: 'Podiums in a Season',     format: v => v.toString(), sub: item => `${item.podiums} career podiums · ${item.wins} wins`, hideZero: true},
-  {key: 'poleStreak',       label: 'Pole Streak',             format: v => v.toString(), sub: item => `${item.poles} career poles · ${item.wins} wins`, hideZero: true},
-  {key: 'bestSeasonPoles',  label: 'Poles in a Season',       format: v => v.toString(), sub: item => `${item.poles} career poles · ${item.wins} wins`, hideZero: true},
-  {key: 'consecutive',      label: 'Consecutive Finishes',    format: v => v.toString(), sub: item => `${item.wins} wins · ${item.podiums} podiums`, hideZero: true},
-  {key: 'consecutivePoints',label: 'Consecutive Points',      format: v => v.toString(), sub: item => `${item.starts} starts · ${item.podiums} podiums`, hideZero: true},
-  {key: 'dnfs',             label: 'DNFs',                    format: v => v.toString(), sub: item => `${item.starts} starts · ${item.wins} wins`, hideZero: true},
+  {key: 'championships', label: 'Titles', format: v => v.toString(), sub: item => `${item.wins} win${item.wins !== 1 ? 's' : ''}`, hideZero: true},
+  {key: 'wins',          label: 'Wins',   format: v => v.toString(), sub: item => `${item.championships} title${item.championships !== 1 ? 's' : ''}`},
 ];
 
 const SECTION_DEFS = [
-  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts'},
-  {label: 'Totals', sorts: COUNT_SORTS, subtitle: null},
+  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004 onwards'},
+  {label: 'Totals', sorts: COUNT_SORTS, subtitle: 'Source: btcc.net'},
 ];
 
 export default function RecordsScreen({navigation}) {

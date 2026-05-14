@@ -61,7 +61,7 @@ describe('RecordsScreen', () => {
     const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
     await waitFor(() => getByLabelText('Totals'));
     fireEvent.press(getByLabelText('Totals'));
-    await waitFor(() => expect(getByText('Starts')).toBeTruthy());
+    await waitFor(() => expect(getByText('Titles')).toBeTruthy());
   });
 
   // ── Tab switching ─────────────────────────────────────────────────────────────
@@ -95,20 +95,27 @@ describe('RecordsScreen', () => {
     await waitFor(() => expect(getByText('20.0%')).toBeTruthy());
   });
 
-  it('renders driver names in Totals Starts list', async () => {
+  it('renders driver names in Totals Wins list', async () => {
     const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
     await waitFor(() => getByLabelText('Totals'));
     fireEvent.press(getByLabelText('Totals'));
-    fireEvent.press(getByLabelText('Starts tab'));
+    fireEvent.press(getByLabelText('Wins tab'));
     await waitFor(() => {
       expect(getByText('Tom Ingram')).toBeTruthy();
       expect(getByText('Gordon Shedden')).toBeTruthy();
     });
   });
 
-  it('shows the Rates section subtitle about minimum starts', async () => {
+  it('shows the Rates section subtitle about minimum starts and 2004 onwards', async () => {
     const {getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
     await waitFor(() => expect(getByText(/Min\. 30 starts/)).toBeTruthy());
+  });
+
+  it('shows the Totals section subtitle crediting btcc.net', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => getByLabelText('Totals'));
+    fireEvent.press(getByLabelText('Totals'));
+    await waitFor(() => expect(getByText('Source: btcc.net')).toBeTruthy());
   });
 
   // ── hideZero filtering ────────────────────────────────────────────────────────
@@ -146,12 +153,15 @@ describe('RecordsScreen', () => {
     await waitFor(() => expect(getByText('Andy Rouse')).toBeTruthy());
   });
 
-  it('hides historical drivers from the Starts tab', async () => {
-    const {getByLabelText, queryByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+  it('shows historical drivers in the Wins tab alongside modern drivers', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
     await waitFor(() => getByLabelText('Totals'));
     fireEvent.press(getByLabelText('Totals'));
-    fireEvent.press(getByLabelText('Starts tab'));
-    await waitFor(() => expect(queryByText('Andy Rouse')).toBeNull());
+    fireEvent.press(getByLabelText('Wins tab'));
+    await waitFor(() => {
+      expect(getByText('Andy Rouse')).toBeTruthy();
+      expect(getByText('Tom Ingram')).toBeTruthy();
+    });
   });
 
   it('shows historical drivers in the Titles tab', async () => {
@@ -162,12 +172,19 @@ describe('RecordsScreen', () => {
     await waitFor(() => expect(getByText('Andy Rouse')).toBeTruthy());
   });
 
-  // ── Laps Led tab removed ──────────────────────────────────────────────────────
+  // ── Totals only has Titles and Wins ──────────────────────────────────────────
 
-  it('does not show a Laps Led tab', async () => {
+  it('does not show a Starts tab in Totals', async () => {
     const {getByLabelText, queryByLabelText} = renderWithProviders(<RecordsScreen navigation={nav} />);
     await waitFor(() => getByLabelText('Totals'));
     fireEvent.press(getByLabelText('Totals'));
-    await waitFor(() => expect(queryByLabelText('Laps Led tab')).toBeNull());
+    await waitFor(() => expect(queryByLabelText('Starts tab')).toBeNull());
+  });
+
+  it('does not show a Podiums tab in Totals', async () => {
+    const {getByLabelText, queryByLabelText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => getByLabelText('Totals'));
+    fireEvent.press(getByLabelText('Totals'));
+    await waitFor(() => expect(queryByLabelText('Podiums tab')).toBeNull());
   });
 });

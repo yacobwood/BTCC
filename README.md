@@ -323,10 +323,10 @@ Buzzsprout RSS feed with filter chips (All/Race/Qualifying/Podcast). Pagination.
 
 **RecordsScreen** ([src/screens/RecordsScreen.js](src/screens/RecordsScreen.js))
 All-time driver statistics. Two tab groups:
-- Rates: Win%, Podium%, Pole%, Fastest Lap% (minimum 30 starts filter)
-- Totals: Championships, Wins, Podiums, Poles, Fastest Laps, Laps Led, Hat Tricks
+- Rates: Win%, Podium%, Pts/Start, DNF% (min. 30 starts · 2004 onwards)
+- Totals: Championships, Wins (source: btcc.net - 228 drivers including 51 historical pre-2004 era drivers)
 
-Sortable columns. Medal emojis for top 3. Wins and Championships data sourced from btcc.net official statistics (228 drivers including 51 historical pre-2004 era drivers). Historical drivers appear only in the Wins and Titles tabs; all other tabs show modern-era drivers only where computed race-by-race stats are available.
+Sortable columns. Medal emojis for top 3. Historical (pre-2004) drivers appear in both Totals tabs; they are excluded from Rates because those only use 2004+ computed data.
 
 **RoadmapScreen** ([src/screens/RoadmapScreen.js](src/screens/RoadmapScreen.js))
 Feature roadmap from `roadmap.json`. Firestore voting per device (one vote per item). Status filter (Planned/In Progress/Done). Idea submission form.
