@@ -2,29 +2,29 @@
   "saturday": {
     "uk": {
       "url": "www.google.com",
-      "label": "ITV4 / ITVX"
+      "label": "ITV4 / ITVX SATURDAY"
     },
     "international": {
       "url": "www.youtube.com",
-      "label": "International"
+      "label": "International SATURDAY"
     },
     "us": {
       "url": "www.facebook.com",
-      "label": "US"
+      "label": "US SATURDAY"
     }
   },
   "sunday": {
     "uk": {
       "url": "www.google.com",
-      "label": "ITV4 / ITVX"
+      "label": "ITV4 / ITVX SUNDAY"
     },
     "international": {
       "url": "www.youtube.com",
-      "label": "International"
+      "label": "International SUNDAY"
     },
     "us": {
       "url": "www.facebook.com",
-      "label": "US"
+      "label": "US SUNDAY"
     }
   }
 }
