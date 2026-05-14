@@ -81,7 +81,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
   if (!track) return null;
   const {useKm} = useUnits();
-  const {track_weather, live_updates} = useFeatureFlags();
+  const {track_weather, live_updates, saturday_live_url, saturday_live_url_us} = useFeatureFlags();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || StatusBar.currentHeight || 0;
   const rStart = firstRaceNumber(track.round);
@@ -294,24 +294,30 @@ export default function TrackDetailScreen({route, navigation}) {
         );
 
       case 'liveTiming': {
-        const bc = (isRaceWeekend && new Date().getDay() === 0 && broadcaster) ? BROADCASTERS[broadcaster] : null;
+        const today = new Date().getDay();
+        const bc = (isRaceWeekend && today === 0 && broadcaster) ? BROADCASTERS[broadcaster] : null;
+        const satUrl = isRaceWeekend && today === 6
+          ? (broadcaster === 'us' ? saturday_live_url_us : saturday_live_url)
+          : null;
+        const satBc = satUrl ? {url: satUrl, label: 'ITV Sport'} : null;
+        const activeBc = bc || satBc;
         const showLive = isRaceWeekend && live_updates;
         const showResults = racesFinished || isPastRaceWeekend;
         return (
           <View style={{gap: 10}}>
-            {(bc || showLive) && (
+            {(activeBc || showLive) && (
               <View style={{flexDirection: 'row', gap: 10}}>
-                {bc && (
+                {activeBc && (
                   <TouchableOpacity
                     style={[styles.watchLiveBtn, {flex: 1}]}
                     activeOpacity={0.8}
-                    onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(bc.url); }}
-                    accessibilityLabel={`Watch on ${bc.label}`}
+                    onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(activeBc.url); }}
+                    accessibilityLabel={`Watch on ${activeBc.label}`}
                     accessibilityRole="button">
                     <Icon name="live-tv" size={16} color="#22C55E" />
                     <View style={{flex: 1}}>
                       <Text style={styles.watchLiveBtnTitle}>WATCH LIVE</Text>
-                      <Text style={styles.watchLiveBtnSub}>{bc.label}</Text>
+                      <Text style={styles.watchLiveBtnSub}>{activeBc.label}</Text>
                     </View>
                     <Icon name="open-in-new" size={18} color="#22C55E" />
                   </TouchableOpacity>

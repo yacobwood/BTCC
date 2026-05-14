@@ -3,6 +3,7 @@ import {waitFor, fireEvent} from '@testing-library/react-native';
 import TrackDetailScreen from '../../src/screens/TrackDetailScreen';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as featureFlags from '../../src/store/featureFlags';
 
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn()},
@@ -145,12 +146,13 @@ describe('TrackDetailScreen', () => {
     await waitFor(() => expect(queryByLabelText('Open live timing')).toBeNull());
   });
 
-  // ── Watch Live button (broadcaster, Sunday only) ──────────────────────────────
-  // 2026-04-26 is a Sunday. LIVE_TRACK spans 2026-04-25 → 2026-04-26 and has a
-  // tslEventId so isRaceWeekend is true.
+  // ── Watch Live button ─────────────────────────────────────────────────────────
+  // 2026-04-26 is a Sunday, 2026-04-25 is a Saturday.
+  // LIVE_TRACK spans 2026-04-25 → 2026-04-26 and has a tslEventId so isRaceWeekend is true.
 
   describe('Watch Live button', () => {
     const {detectBroadcaster} = require('../../src/utils/broadcaster');
+    let flagsSpy;
 
     const LIVE_TRACK = {
       ...TRACK,
@@ -163,9 +165,13 @@ describe('TrackDetailScreen', () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-04-26T10:00:00Z')); // Sunday
       detectBroadcaster.mockReturnValue('uk');
+      flagsSpy = jest.spyOn(featureFlags, 'useFeatureFlags').mockReturnValue({
+        track_weather: false, live_updates: false, live_chat: false,
+        saturday_live_url: null, saturday_live_url_us: null,
+      });
     });
 
-    afterEach(() => jest.useRealTimers());
+    afterEach(() => { jest.useRealTimers(); flagsSpy.mockRestore(); });
 
     it('shows WATCH LIVE on a Sunday during a race weekend', async () => {
       const {findByText} = renderWithProviders(
@@ -198,8 +204,36 @@ describe('TrackDetailScreen', () => {
       await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
     });
 
-    it('does not show WATCH LIVE on a Saturday (Sunday-only)', async () => {
+    it('does not show WATCH LIVE on a Saturday when saturday_live_url is null', async () => {
       jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
+      const {queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
+    it('shows WATCH LIVE on a Saturday when saturday_live_url is set (UK)', async () => {
+      jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
+      flagsSpy.mockReturnValue({
+        track_weather: false, live_updates: false, live_chat: false,
+        saturday_live_url: 'https://www.youtube.com/@ITVSport/streams',
+        saturday_live_url_us: null,
+      });
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('WATCH LIVE')).toBeTruthy();
+      expect(await findByText('ITV Sport')).toBeTruthy();
+    });
+
+    it('does not show WATCH LIVE on a Saturday for US when saturday_live_url_us is null', async () => {
+      jest.setSystemTime(new Date('2026-04-25T10:00:00Z')); // Saturday
+      detectBroadcaster.mockReturnValue('us');
+      flagsSpy.mockReturnValue({
+        track_weather: false, live_updates: false, live_chat: false,
+        saturday_live_url: 'https://www.youtube.com/@ITVSport/streams',
+        saturday_live_url_us: null,
+      });
       const {queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
       );

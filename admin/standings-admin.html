@@ -1893,6 +1893,8 @@ const FLAG_DEFS = [
   {key:'update_available',        label:'Update Available',       desc:'Force update modal'},
   {key:'update_min_version_ios',  label:'Update Min Version — iOS',     desc:'iOS only: min versionCode to require update (0 = never)', type:'number'},
   {key:'update_min_version_android', label:'Update Min Version — Android', desc:'Android only: min versionCode to require update (0 = never)', type:'number'},
+  {key:'saturday_live_url',    label:'Saturday Live URL (UK + World)', desc:'Watch Live button URL on Saturdays for UK and international users. Clear to hide the button.', type:'url'},
+  {key:'saturday_live_url_us', label:'Saturday Live URL (US)',         desc:'Watch Live button URL on Saturdays for US users. Clear to hide the button.', type:'url'},
 ];
 
 let flagValues = {}, flagFileSha = null;
@@ -1908,6 +1910,8 @@ function renderFlags() {
       <div class="toggle-wrap">
         ${f.type === 'number'
           ? `<input type="number" id="flag_${f.key}" value="${flagValues[f.key] ?? ''}" style="width:80px;padding:5px 8px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:13px;text-align:right" onchange="flagValues['${f.key}'] = Number(this.value)">`
+          : f.type === 'url'
+          ? `<input type="url" id="flag_${f.key}" value="${flagValues[f.key] || ''}" placeholder="https://…" style="width:220px;padding:5px 8px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace" onchange="flagValues['${f.key}'] = this.value.trim() || null">`
           : `<input type="checkbox" id="flag_${f.key}" ${flagValues[f.key] ? 'checked' : ''} onchange="flagValues['${f.key}'] = this.checked">`
         }
       </div>
@@ -1933,7 +1937,13 @@ async function doSaveFlags() {
   const btn = document.getElementById('flags-savebtn');
   btn.disabled = true; btn.textContent = 'SAVING…';
   document.getElementById('flags-status').textContent = '';
-  FLAG_DEFS.forEach(f => { if (f.type !== 'number') flagValues[f.key] = document.getElementById('flag_' + f.key)?.checked ?? flagValues[f.key]; });
+  FLAG_DEFS.forEach(f => {
+    const el = document.getElementById('flag_' + f.key);
+    if (!el) return;
+    if (f.type === 'number') { /* already handled via onchange */ }
+    else if (f.type === 'url') { flagValues[f.key] = el.value.trim() || null; }
+    else { flagValues[f.key] = el.checked; }
+  });
   const content = JSON.stringify(flagValues, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
@@ -1968,7 +1978,7 @@ function renderOverridesList() {
 }
 
 function renderAddOverrideToggles() {
-  document.getElementById('new-override-toggles').innerHTML = FLAG_DEFS.map(f => `
+  document.getElementById('new-override-toggles').innerHTML = FLAG_DEFS.filter(f => f.type !== 'url').map(f => `
     <div class="new-override-row">
       <span class="new-override-label">${f.label}</span>
       <div class="new-override-controls">
