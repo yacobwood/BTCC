@@ -454,8 +454,8 @@ describe('ChatScreen', () => {
     await waitFor(() => getByText(/Choose a display name/i));
     const nameInput = getByPlaceholderText(/Fan #/i);
     fireEvent.changeText(nameInput, 'Speedster');
-    fireEvent.press(getByLabelText('Set name'));
-    await waitFor(() => expect(queryByText(/Choose a display name/i)).toBeNull());
+    await act(async () => { fireEvent.press(getByLabelText('Set name')); });
+    expect(queryByText(/Choose a display name/i)).toBeNull();
   });
 
   it('setting name then sends the pending message via push', async () => {
@@ -556,8 +556,8 @@ describe('ChatScreen', () => {
     fireEvent.press(getByText('Old Name'));
     await waitFor(() => getByPlaceholderText('Your display name'));
     fireEvent.changeText(getByPlaceholderText('Your display name'), 'New Name');
-    fireEvent.press(getByText('Save'));
-    await waitFor(() => expect(queryByPlaceholderText('Your display name')).toBeNull());
+    await act(async () => { fireEvent.press(getByText('Save')); });
+    expect(queryByPlaceholderText('Your display name')).toBeNull();
   });
 
   it('empty name on Save defaults to Fan #xxxx', async () => {
