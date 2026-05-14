@@ -155,7 +155,7 @@ export default StyleSheet.create({
   scrollTopFab: {
     position: 'absolute',
     bottom: 20,
-    right: 16,
+    left: 16,
     width: 44,
     height: 44,
     borderRadius: 22,
