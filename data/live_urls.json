@@ -8,10 +8,7 @@
       "url": "www.youtube.com",
       "label": "International SATURDAY"
     },
-    "us": {
-      "url": "www.facebook.com",
-      "label": "US SATURDAY"
-    }
+    "us": null
   },
   "sunday": {
     "uk": {
@@ -22,9 +19,6 @@
       "url": "www.youtube.com",
       "label": "International SUNDAY"
     },
-    "us": {
-      "url": "www.facebook.com",
-      "label": "US SUNDAY"
-    }
+    "us": null
   }
 }
