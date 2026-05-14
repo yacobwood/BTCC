@@ -82,7 +82,7 @@ export default function RecordsScreen({navigation}) {
   const HISTORICAL_TABS = new Set(['wins', 'championships']);
 
   const sortedData = useMemo(
-    () => [ratesData, totalsData].map((sectionData, secIdx) =>
+    () => [totalsData, ratesData].map((sectionData, secIdx) =>
       SECTION_DEFS[secIdx].sorts.map(s => {
         let base = HISTORICAL_TABS.has(s.key) ? sectionData : sectionData.filter(d => !d.historical);
         const filtered = s.hideZero ? base.filter(d => d[s.key] > 0) : base;
