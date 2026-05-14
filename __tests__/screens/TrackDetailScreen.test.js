@@ -223,7 +223,7 @@ describe('TrackDetailScreen', () => {
         <TrackDetailScreen route={makeRoute({track: LIVE_TRACK})} navigation={nav} />,
       );
       expect(await findByText('WATCH LIVE')).toBeTruthy();
-      expect(await findByText('ITV Sport')).toBeTruthy();
+      expect(await findByText('YouTube')).toBeTruthy();
     });
 
     it('does not show WATCH LIVE on a Saturday for US when saturday_live_url_us is null', async () => {

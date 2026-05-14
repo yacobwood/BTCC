@@ -299,7 +299,7 @@ export default function TrackDetailScreen({route, navigation}) {
         const satUrl = isRaceWeekend && today === 6
           ? (broadcaster === 'us' ? saturday_live_url_us : saturday_live_url)
           : null;
-        const satBc = satUrl ? {url: satUrl, label: 'ITV Sport'} : null;
+        const satBc = satUrl ? {url: satUrl, label: 'YouTube'} : null;
         const activeBc = bc || satBc;
         const showLive = isRaceWeekend && live_updates;
         const showResults = racesFinished || isPastRaceWeekend;
