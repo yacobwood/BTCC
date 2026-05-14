@@ -6,6 +6,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import database from '@react-native-firebase/database';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
@@ -116,6 +117,7 @@ export default function ChatFab({bottomOffset = 0}) {
         transparent
         onRequestClose={closeChat}
         statusBarTranslucent>
+        <SafeAreaProvider>
         <Pressable style={styles.backdrop} onPress={closeChat} />
         <Animated.View style={[styles.sheetOuter, {bottom: sheetLift}]}>
           {/* FAB above the sheet */}
@@ -135,6 +137,7 @@ export default function ChatFab({bottomOffset = 0}) {
             <ChatScreen onClose={closeChat} />
           </Animated.View>
         </Animated.View>
+        </SafeAreaProvider>
       </Modal>
     </>
   );
