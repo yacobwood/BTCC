@@ -94,25 +94,6 @@ jest.mock('react-native-bootsplash', () => ({
   default: {hide: jest.fn(() => Promise.resolve())},
 }));
 
-// ── react-native-google-mobile-ads ────────────────────────────────────────────
-jest.mock('react-native-google-mobile-ads', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({initialize: jest.fn(() => Promise.resolve())})),
-  BannerAd: 'BannerAd',
-  BannerAdSize: {BANNER: 'BANNER', MEDIUM_RECTANGLE: 'MEDIUM_RECTANGLE', ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER'},
-  TestIds: {BANNER: 'ca-app-pub-test/banner'},
-  AdsConsent: {
-    requestInfoUpdate: jest.fn(() => Promise.resolve({isConsentFormAvailable: false, status: 'NOT_REQUIRED'})),
-    showForm: jest.fn(() => Promise.resolve()),
-  },
-  AdsConsentStatus: {UNKNOWN: 'UNKNOWN', REQUIRED: 'REQUIRED', NOT_REQUIRED: 'NOT_REQUIRED', OBTAINED: 'OBTAINED'},
-}));
-
-// ── react-native-tracking-transparency ───────────────────────────────────────
-jest.mock('react-native-tracking-transparency', () => ({
-  requestTrackingPermission: jest.fn(() => Promise.resolve('authorized')),
-  getTrackingStatus:         jest.fn(() => Promise.resolve('authorized')),
-}));
 
 // ── react-native-vector-icons ─────────────────────────────────────────────────
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
@@ -233,7 +214,6 @@ jest.mock('./src/components/CachedImage', () => {
     prefetchImages: jest.fn(),
   };
 });
-jest.mock('./src/components/AdBanner', () => ({__esModule: true, default: () => null}));
 jest.mock('./src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
 
 // ── Asset stubs ───────────────────────────────────────────────────────────────

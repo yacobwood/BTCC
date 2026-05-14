@@ -51,7 +51,6 @@ import DigestsScreen from '../screens/DigestsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
-import AdBanner from '../components/AdBanner';
 import UpdateDialog from '../components/UpdateDialog';
 import ChatFab from '../components/ChatFab';
 import {useFeatureFlags} from '../store/featureFlags';
@@ -175,9 +174,8 @@ const linking = {
 function AppContent() {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
-  const {update_available, update_min_version_android, update_min_version_ios, banner_ad} = useFeatureFlags();
+  const {update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
   const [showUpdate, setShowUpdate] = React.useState(false);
-  const [adBannerHeight, setAdBannerHeight] = React.useState(0);
 
   React.useEffect(() => {
     if (!update_available) return;
@@ -215,12 +213,7 @@ function AppContent() {
           <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'Season'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
-        {banner_ad && (
-          <View style={{paddingBottom: bottom}} onLayout={e => setAdBannerHeight(e.nativeEvent.layout.height)}>
-            <AdBanner />
-          </View>
-        )}
-        <ChatFab bottomOffset={adBannerHeight + TAB_BAR_HEIGHT + bottom} />
+        <ChatFab bottomOffset={TAB_BAR_HEIGHT + bottom} />
         <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       </View>
   );
