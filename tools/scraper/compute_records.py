@@ -25,6 +25,23 @@ OUT_PATH   = DATA_DIR / "records.json"
 
 POINTS_SESSIONS = {"Race 1", "Race 2", "Race 3", "Qualifying Race"}
 
+# Official all-time wins from btcc.net/history/statistics/drivers/
+# Used to override computed wins for drivers whose careers span pre-2004 seasons
+OFFICIAL_WINS = {
+    'Jason Plato': 97, 'Colin Turkington': 72, 'Matt Neal': 63, 'Gordon Shedden': 53,
+    'Ashley Sutton': 50, 'Tom Ingram': 41, 'Mat Jackson': 31, 'Andrew Jordan': 26,
+    'Fabrizio Giovanardi': 24, 'Jake Hill': 23, 'Josh Cook': 21, 'Tom Chilton': 18,
+    'Dan Cammish': 16, 'Rob Collard': 15, 'Adam Morgan': 11, 'Rory Butcher': 11,
+    'Sam Tordoff': 8, 'Tom Onslow-Cole': 7, 'Dan Eaves': 6, 'Darren Turner': 5,
+    'Jack Goff': 5, 'Aiden Moffat': 5, 'Daniel Rowbottom': 5, 'Daniel Lloyd': 5,
+    'Stephen Jelley': 4, 'Rob Huff': 4,
+}
+
+# Official championship counts from btcc.net/history/champions/btcc-titles/
+OFFICIAL_CHAMPS_OVERRIDE = {
+    'Jason Plato': 2, 'Tom Ingram': 2,
+}
+
 # BTCC Drivers' Champions — verified against season points totals
 CHAMPIONS = {
     2004: "James Thompson",
@@ -300,15 +317,35 @@ def main():
     drivers = compute_records(timeline)
     print(f"  {len(drivers)} drivers")
 
+    # Apply official wins/championships overrides for modern drivers
     by_name = {d["driver"]: d for d in drivers}
+    for driver, official_w in OFFICIAL_WINS.items():
+        if driver in by_name:
+            by_name[driver]["wins"] = official_w
+            s = by_name[driver]["starts"]
+            by_name[driver]["winPct"] = official_w / s if s > 0 else 0
+    for driver, official_c in OFFICIAL_CHAMPS_OVERRIDE.items():
+        if driver in by_name:
+            by_name[driver]["championships"] = official_c
+
     for name in ["Jason Plato", "Colin Turkington", "Tom Ingram"]:
         if name in by_name:
             d = by_name[name]
             print(f"  {name}: {d['wins']}W {d['championships']}T "
                   f"streak={d['winStreak']} consecutive={d['consecutive']} starts={d['starts']}")
 
-    OUT_PATH.write_text(json.dumps({"drivers": drivers}, indent=2))
-    print(f"\nWrote {OUT_PATH}  ({len(drivers)} drivers)")
+    # Preserve historical=True entries from previous records.json (pre-2004 era drivers)
+    historical_entries = []
+    if OUT_PATH.exists():
+        try:
+            prev = json.loads(OUT_PATH.read_text())
+            historical_entries = [d for d in prev.get("drivers", []) if d.get("historical")]
+        except Exception:
+            pass
+
+    all_drivers = list(by_name.values()) + historical_entries
+    OUT_PATH.write_text(json.dumps({"drivers": all_drivers}, indent=2))
+    print(f"\nWrote {OUT_PATH}  ({len(by_name)} modern + {len(historical_entries)} historical = {len(all_drivers)} total drivers)")
 
 
 if __name__ == "__main__":

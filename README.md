@@ -326,7 +326,7 @@ All-time driver statistics. Two tab groups:
 - Rates: Win%, Podium%, Pole%, Fastest Lap% (minimum 30 starts filter)
 - Totals: Championships, Wins, Podiums, Poles, Fastest Laps, Laps Led, Hat Tricks
 
-Sortable columns. Medal emojis for top 3.
+Sortable columns. Medal emojis for top 3. Wins and Championships data sourced from btcc.net official statistics (228 drivers including 51 historical pre-2004 era drivers). Historical drivers appear only in the Wins and Titles tabs; all other tabs show modern-era drivers only where computed race-by-race stats are available.
 
 **RoadmapScreen** ([src/screens/RoadmapScreen.js](src/screens/RoadmapScreen.js))
 Feature roadmap from `roadmap.json`. Firestore voting per device (one vote per item). Status filter (Planned/In Progress/Done). Idea submission form.
@@ -777,7 +777,7 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 
 **scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session. Parses race results and starting grids. Writes to `results{year}.json`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py`.
 
-**compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape.
+**compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Applies official wins/championships overrides from btcc.net for modern drivers. Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape.
 
 **scrape_calendar.py** - Parses the BTCC calendar to update `calendar.json` with round dates, venues and session times.
 

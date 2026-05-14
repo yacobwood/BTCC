@@ -94,10 +94,13 @@ export default function RecordsScreen({navigation}) {
     Analytics.navItemClicked('records_sort:' + SECTION_DEFS[section].sorts[i].key);
   };
 
+  const HISTORICAL_TABS = new Set(['wins', 'championships']);
+
   const sortedData = useMemo(
     () => [ratesData, totalsData].map((sectionData, secIdx) =>
       SECTION_DEFS[secIdx].sorts.map(s => {
-        const filtered = s.hideZero ? sectionData.filter(d => d[s.key] > 0) : sectionData;
+        let base = HISTORICAL_TABS.has(s.key) ? sectionData : sectionData.filter(d => !d.historical);
+        const filtered = s.hideZero ? base.filter(d => d[s.key] > 0) : base;
         return [...filtered].sort((a, b) => b[s.key] - a[s.key]);
       })
     ),
