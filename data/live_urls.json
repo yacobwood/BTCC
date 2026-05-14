@@ -1,24 +1,18 @@
 {
   "saturday": {
     "uk": {
-      "url": "www.google.com",
-      "label": "ITV4 / ITVX SATURDAY"
+      "url": "https://www.youtube.com/@ITVSportExtra/streams",
+      "label": "Youtube BTCC"
     },
-    "international": {
-      "url": "www.youtube.com",
-      "label": "International SATURDAY"
-    },
+    "international": null,
     "us": null
   },
   "sunday": {
     "uk": {
-      "url": "www.google.com",
-      "label": "ITV4 / ITVX SUNDAY"
+      "url": "https://www.itv.com/btcc",
+      "label": "ITV4 / ITVX"
     },
-    "international": {
-      "url": "www.youtube.com",
-      "label": "International SUNDAY"
-    },
+    "international": null,
     "us": null
   }
 }
