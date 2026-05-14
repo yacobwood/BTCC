@@ -1,12 +1,30 @@
 {
   "saturday": {
-    "uk": {"url": "https://www.youtube.com/@ITVSport/streams", "label": "ITV Sport"},
-    "international": null,
-    "us": null
+    "uk": {
+      "url": "www.google.com",
+      "label": "ITV4 / ITVX"
+    },
+    "international": {
+      "url": "www.youtube.com",
+      "label": "International"
+    },
+    "us": {
+      "url": "www.facebook.com",
+      "label": "US"
+    }
   },
   "sunday": {
-    "uk": {"url": "https://www.itv.com/hub/itv4", "label": "ITV4 / ITVX"},
-    "international": {"url": "https://www.youtube.com/@OfficialBTCC/streams", "label": "Official BTCC"},
-    "us": null
+    "uk": {
+      "url": "www.google.com",
+      "label": "ITV4 / ITVX"
+    },
+    "international": {
+      "url": "www.youtube.com",
+      "label": "International"
+    },
+    "us": {
+      "url": "www.facebook.com",
+      "label": "US"
+    }
   }
 }
