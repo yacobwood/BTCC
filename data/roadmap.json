@@ -13,25 +13,11 @@
       "status": "planned"
     },
     {
-      "id": "2",
-      "title": "Wiki Style Season Table",
-      "description": "A race by race results table",
-      "status": "done",
-      "doneAt": "2026-04-27"
-    },
-    {
       "id": "3",
       "title": "Live Video Footage Youtube Links",
       "description": "Enable quick navigation to live race footage",
       "status": "done",
       "doneAt": "2026-05-13"
-    },
-    {
-      "id": "5",
-      "title": "No Spoilers Option",
-      "description": "Allow notification pauses",
-      "status": "done",
-      "doneAt": "2026-04-27"
     },
     {
       "id": "6",
@@ -40,32 +26,11 @@
       "status": "idea"
     },
     {
-      "id": "7",
-      "title": "Multi Country",
-      "description": "Enable the app in alot more countries",
-      "status": "done",
-      "doneAt": "2026-04-14"
-    },
-    {
-      "id": "8",
-      "title": "iOS App",
-      "description": "Add app to Apple store",
-      "status": "done",
-      "doneAt": "2026-04-29"
-    },
-    {
       "id": "9",
       "title": "Live chat",
       "description": "Chat to fellow fans about the race",
       "status": "done",
       "doneAt": "2026-05-14"
-    },
-    {
-      "id": "10",
-      "title": "Standings table for all championship types",
-      "description": "",
-      "status": "done",
-      "doneAt": "2026-04-27"
     }
   ],
   "submissions": []
