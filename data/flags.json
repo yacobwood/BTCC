@@ -20,9 +20,14 @@
   "live_timing_in_app": false,
   "update_available": true,
   "update_min_version_ios": 0,
-  "update_min_version_android": 66,
+  "update_min_version_android": 68,
   "live_chat": false,
   "live_chat_min_build_android": 68,
   "live_chat_min_build_ios": 68,
-  "broadcaster_override": false
+  "broadcaster_override": false,
+  "banner_ad": false,
+  "newsfeed_ad": false,
+  "search_ad": false,
+  "whats_new": false,
+  "results_notifications": false
 }
