@@ -25,7 +25,7 @@ import {containsProfanity} from '../utils/profanityFilter';
 const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
 
-export default function ChatScreen({onClose} = {}) {
+export default function ChatScreen({onClose, bottomInset = 0} = {}) {
   const [messages, setMessages] = useState(null); // null = loading
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
@@ -268,7 +268,7 @@ export default function ChatScreen({onClose} = {}) {
 
       {/* Name prompt */}
       {showNamePrompt ? (
-        <View style={[styles.namePrompt, {paddingBottom: 12}]}>
+        <View style={[styles.namePrompt, {paddingBottom: bottomInset + 12}]}>
           <Text style={styles.namePromptTitle}>Choose a display name</Text>
           <TextInput
             style={styles.nameInput}
@@ -291,7 +291,7 @@ export default function ChatScreen({onClose} = {}) {
           </View>
         </View>
       ) : (
-          <View style={[styles.inputRow, {paddingBottom: 12}]}>
+          <View style={[styles.inputRow, {paddingBottom: bottomInset + 12}]}>
             {inputError ? <Text style={styles.inputError}>{inputError}</Text> : null}
             <View style={styles.inputInner}>
               <TextInput

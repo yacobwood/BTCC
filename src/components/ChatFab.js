@@ -120,7 +120,7 @@ export default function ChatFab({bottomOffset = 0}) {
         onRequestClose={closeChat}
         statusBarTranslucent>
         <Pressable style={styles.backdrop} onPress={closeChat} />
-        <Animated.View style={[styles.sheetOuter, {bottom: Animated.add(sheetLift, navBarInset)}]}>
+        <Animated.View style={[styles.sheetOuter, {bottom: sheetLift}]}>
           {/* FAB above the sheet */}
           <TouchableOpacity
             onPress={closeChat}
@@ -135,7 +135,7 @@ export default function ChatFab({bottomOffset = 0}) {
             <View style={styles.handleWrap} {...panResponder.panHandlers}>
               <View style={styles.handle} />
             </View>
-            <ChatScreen onClose={closeChat} />
+            <ChatScreen onClose={closeChat} bottomInset={navBarInset} />
           </Animated.View>
         </Animated.View>
       </Modal>
