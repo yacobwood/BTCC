@@ -7,7 +7,8 @@
       "live_chat": true
     },
     "ezyElDipQ4efv5FPGUhMUr:APA91bGQW6kgiEuDMRvAFcGkmo27W3Zo0K1Y9uOOSfCQ6vRgToqWtja8mcNlB-5hbBGqrvITLP7yDRGOU2ZoEcepaBMOezMBa1z0ddd86otBDuVffZRUb0o": {
-      "live_chat": true
+      "live_chat": true,
+      "debug_mode": true
     },
     "f-dvBN5zQXyYlHjeif_5WC:APA91bFZkJXTcDYg3X95PhqxyGkTJhVbhCZExOWhiiiQTuCZyrpHD_TNY-zkRaxOWxoGCQZVgt-hAzxMzYYLZKiltWlkLEmciG7CEwZEBb_Qr1ww3MyIu4s": {
       "live_chat": true
@@ -20,5 +21,6 @@
   "update_available": true,
   "update_min_version_ios": 0,
   "update_min_version_android": 66,
-  "live_chat": false
+  "live_chat": false,
+  "broadcaster_override": false
 }
