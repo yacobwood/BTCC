@@ -69,7 +69,8 @@
       "id": "9",
       "title": "Live chat",
       "description": "Chat to fellow fans about the race",
-      "status": "in-progress"
+      "status": "done",
+      "doneAt": "2026-05-14"
     },
     {
       "id": "10",
