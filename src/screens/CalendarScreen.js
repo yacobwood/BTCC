@@ -16,6 +16,7 @@ import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
 import {BROADCASTERS, detectBroadcaster} from '../utils/broadcaster';
+import {useFeatureFlags} from '../store/featureFlags';
 
 const RED = '#E3000B';
 
@@ -44,6 +45,7 @@ function firstRaceNumber(round) {
 }
 
 export default function CalendarScreen({navigation}) {
+  const {saturday_live_url, saturday_live_url_us} = useFeatureFlags();
   const [selectedYear, setSelectedYear] = useState(2026);
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -131,7 +133,16 @@ export default function CalendarScreen({navigation}) {
   }, [rounds, today, pastCount]);
 
   const broadcaster = useMemo(() => detectBroadcaster(), []);
-  const bc = activeRound ? BROADCASTERS[broadcaster] : null;
+  const bc = useMemo(() => {
+    if (!activeRound) return null;
+    const day = new Date().getDay();
+    if (day === 6) {
+      const satUrl = broadcaster === 'us' ? saturday_live_url_us : saturday_live_url;
+      return satUrl ? {url: satUrl, label: 'YouTube', sub: 'Free · Worldwide'} : null;
+    }
+    if (day === 0) return BROADCASTERS[broadcaster] || null;
+    return null;
+  }, [activeRound, broadcaster, saturday_live_url, saturday_live_url_us]);
 
   const focusRound = activeRound || nextRound;
   const focusRoundIndex = focusRound ? rounds.indexOf(focusRound) : -1;

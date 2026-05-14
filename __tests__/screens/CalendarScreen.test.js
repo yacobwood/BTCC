@@ -2,6 +2,7 @@ import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import CalendarScreen from '../../src/screens/CalendarScreen';
 import {renderWithProviders, makeNav} from './testUtils';
+import * as featureFlags from '../../src/store/featureFlags';
 
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {screen: jest.fn(), pullToRefresh: jest.fn()},
@@ -172,9 +173,9 @@ describe('CalendarScreen', () => {
     });
   });
 
-  // ── Watch Live button (geo-based broadcaster) ─────────────────────────────────
-  // Pin clock inside an active race weekend. detectBroadcaster is mocked so we
-  // can control which broadcaster is returned without relying on device locale.
+  // ── Watch Live button ─────────────────────────────────────────────────────────
+  // ACTIVE_ROUND spans 2026-05-09 (Sat) to 2026-05-10 (Sun).
+  // Sunday tests use hardcoded BROADCASTERS; Saturday tests require saturday_live_url flag.
 
   describe('Watch Live button', () => {
     const ACTIVE_ROUND = {
@@ -185,39 +186,63 @@ describe('CalendarScreen', () => {
       sessions: [],
     };
 
+    let flagsSpy;
+
     beforeEach(() => {
       jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-05-09T12:00:00Z'));
+      jest.setSystemTime(new Date('2026-05-10T12:00:00Z')); // Sunday by default
       detectBroadcaster.mockReturnValue('uk');
+      flagsSpy = jest.spyOn(featureFlags, 'useFeatureFlags').mockReturnValue({
+        saturday_live_url: null, saturday_live_url_us: null,
+      });
     });
 
-    afterEach(() => jest.useRealTimers());
+    afterEach(() => { jest.useRealTimers(); flagsSpy.mockRestore(); });
 
-    it('shows WATCH LIVE during an active race weekend', async () => {
+    it('shows WATCH LIVE on Sunday during an active race weekend', async () => {
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       expect(await findByText('WATCH LIVE')).toBeTruthy();
     });
 
-    it('shows ITV4 / ITVX label for UK users', async () => {
+    it('shows ITV4 / ITVX label for UK users on Sunday', async () => {
       detectBroadcaster.mockReturnValue('uk');
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       expect(await findByText(/ITV4/)).toBeTruthy();
     });
 
-    it('does not show WATCH LIVE for US users (no broadcaster configured)', async () => {
+    it('does not show WATCH LIVE for US users on Sunday (no broadcaster configured)', async () => {
       detectBroadcaster.mockReturnValue('us');
       setupCalendar([ACTIVE_ROUND]);
       const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
     });
 
-    it('shows Official BTCC label for international users', async () => {
+    it('shows Official BTCC label for international users on Sunday', async () => {
       detectBroadcaster.mockReturnValue('international');
       setupCalendar([ACTIVE_ROUND]);
       const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
       expect(await findByText(/Official BTCC/)).toBeTruthy();
+    });
+
+    it('does not show WATCH LIVE on Saturday when saturday_live_url is null', async () => {
+      jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
+      setupCalendar([ACTIVE_ROUND]);
+      const {queryByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => expect(queryByText('WATCH LIVE')).toBeNull());
+    });
+
+    it('shows WATCH LIVE on Saturday when saturday_live_url is set', async () => {
+      jest.setSystemTime(new Date('2026-05-09T12:00:00Z')); // Saturday
+      flagsSpy.mockReturnValue({
+        saturday_live_url: 'https://www.youtube.com/@ITVSport/streams',
+        saturday_live_url_us: null,
+      });
+      setupCalendar([ACTIVE_ROUND]);
+      const {findByText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      expect(await findByText('WATCH LIVE')).toBeTruthy();
+      expect(await findByText(/YouTube/)).toBeTruthy();
     });
 
     it('does not show WATCH LIVE when no round is active', async () => {
