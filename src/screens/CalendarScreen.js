@@ -16,7 +16,7 @@ import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
 import {useBroadcaster} from '../utils/broadcaster';
-import {useLiveUrls} from '../store/liveUrls';
+import {useLiveUrls, ensureHttps} from '../store/liveUrls';
 import {useFeatureFlags} from '../store/featureFlags';
 
 const RED = '#E3000B';
@@ -223,7 +223,7 @@ export default function CalendarScreen({navigation}) {
             <TouchableOpacity
               style={styles.watchLiveBtn}
               activeOpacity={0.8}
-              onPress={() => { Analytics.trackDetailViewed(round.round, `watch_${broadcaster}`); Linking.openURL(bc.url); }}
+              onPress={() => { Analytics.trackDetailViewed(round.round, `watch_${broadcaster}`); Linking.openURL(ensureHttps(bc.url)); }}
               accessibilityLabel={`Watch live on ${bc.label}`}
               accessibilityRole="button">
               <View style={styles.liveDot} />

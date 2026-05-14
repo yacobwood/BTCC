@@ -22,7 +22,7 @@ import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
-import {useLiveUrls} from '../store/liveUrls';
+import {useLiveUrls, ensureHttps} from '../store/liveUrls';
 import {fetchResults, fetchCalendar} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
@@ -311,7 +311,7 @@ export default function TrackDetailScreen({route, navigation}) {
                   <TouchableOpacity
                     style={[styles.watchLiveBtn, {flex: 1}]}
                     activeOpacity={0.8}
-                    onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(activeBc.url); }}
+                    onPress={() => { Analytics.trackDetailViewed(track.round, `watch_${broadcaster}`); Linking.openURL(ensureHttps(activeBc.url)); }}
                     accessibilityLabel={`Watch on ${activeBc.label}`}
                     accessibilityRole="button">
                     <Icon name="live-tv" size={16} color="#22C55E" />

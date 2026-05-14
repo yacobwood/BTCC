@@ -2079,7 +2079,8 @@ async function doSaveLiveUrls() {
       const labelEl = document.getElementById(`live_${day}_${region}_label`);
       if (!urlEl) return;
       if (!liveUrlValues[day]) liveUrlValues[day] = {};
-      const url   = urlEl.value.trim() || null;
+      let url = urlEl.value.trim() || null;
+      if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
       const label = labelEl ? labelEl.value.trim() : '';
       liveUrlValues[day][region] = (url && label) ? {url, label} : null;
     });
