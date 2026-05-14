@@ -98,7 +98,7 @@ export async function fetchResults(year = 2026, forceRefresh = false) {
 }
 
 export async function fetchRecords() {
-  return fetchJson(`${BASE_GITHUB}/records.json`, 'records', false, /* staleFallback */ true, /* staleFirst */ false);
+  return fetchJson(`${BASE_GITHUB}/records.json`, 'records', /* forceRefresh */ true, /* staleFallback */ true);
 }
 
 
