@@ -29,9 +29,12 @@ export function useBroadcaster() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     if (timeoutId?.unref) timeoutId.unref();
-    fetch('https://api.country.is', {signal: controller.signal})
-      .then(r => { clearTimeout(timeoutId); return r.json(); })
-      .then(({country}) => { if (country) setBroadcaster(countryToBroadcaster(country)); })
+    fetch('https://cloudflare.com/cdn-cgi/trace', {signal: controller.signal})
+      .then(r => { clearTimeout(timeoutId); return r.text(); })
+      .then(text => {
+        const match = text.match(/loc=([A-Z]{2})/);
+        if (match) setBroadcaster(countryToBroadcaster(match[1]));
+      })
       .catch(() => {});
     return () => { clearTimeout(timeoutId); controller.abort(); };
   }, []);
