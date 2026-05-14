@@ -15,8 +15,8 @@ import {fetchCalendar} from '../api/client';
 import {parseCalendar} from '../api/parsers';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
-import {BROADCASTERS, detectBroadcaster} from '../utils/broadcaster';
-import {useFeatureFlags} from '../store/featureFlags';
+import {detectBroadcaster} from '../utils/broadcaster';
+import {useLiveUrls, getLiveInfo} from '../store/liveUrls';
 
 const RED = '#E3000B';
 
@@ -45,7 +45,7 @@ function firstRaceNumber(round) {
 }
 
 export default function CalendarScreen({navigation}) {
-  const {saturday_live_url, saturday_live_url_us} = useFeatureFlags();
+  const liveUrls = useLiveUrls();
   const [selectedYear, setSelectedYear] = useState(2026);
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -136,13 +136,12 @@ export default function CalendarScreen({navigation}) {
   const bc = useMemo(() => {
     if (!activeRound) return null;
     const day = new Date().getDay();
-    if (day === 6) {
-      const satUrl = broadcaster === 'uk' ? saturday_live_url : broadcaster === 'us' ? saturday_live_url_us : null;
-      return satUrl ? {url: satUrl, label: 'YouTube', sub: 'Free · UK'} : null;
-    }
-    if (day === 0) return BROADCASTERS[broadcaster] || null;
-    return null;
-  }, [activeRound, broadcaster, saturday_live_url, saturday_live_url_us]);
+    const dayKey = day === 0 ? 'sunday' : day === 6 ? 'saturday' : null;
+    if (!dayKey || !broadcaster) return null;
+    const url = liveUrls[dayKey]?.[broadcaster] || null;
+    if (!url) return null;
+    return {url, ...getLiveInfo(dayKey, broadcaster)};
+  }, [activeRound, broadcaster, liveUrls]);
 
   const focusRound = activeRound || nextRound;
   const focusRoundIndex = focusRound ? rounds.indexOf(focusRound) : -1;

@@ -922,7 +922,7 @@ select.input { cursor: pointer; }
 <!-- ══════════════════════════════ LIVE URLS ══════ -->
 <div id="panel-live" class="tab-panel">
 
-  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/flags.json</strong>. The app fetches on launch and every 60s. Clear a field to hide the button.</div>
+  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/live_urls.json</strong>. The app fetches on launch. Clear a field to hide the button for that region.</div>
 
   <div class="banner banner-green" id="live-banner">
     <div class="banner-dot"></div>
@@ -931,70 +931,89 @@ select.input { cursor: pointer; }
 
   <!-- Saturday -->
   <div class="section-label" style="margin-bottom:10px">SATURDAY</div>
-  <div class="flags-card" style="margin-bottom:18px">
+  <div class="card" style="margin-bottom:18px">
 
     <div class="flag-row">
       <div class="flag-info">
         <div class="flag-name">UK + Ireland</div>
-        <div class="flag-key">saturday_live_url</div>
         <div class="flag-desc">Shows WATCH LIVE for UK users on Saturdays</div>
       </div>
       <div style="flex:1;margin-left:16px">
         <input type="url" id="live_saturday_uk"
           placeholder="https://…"
           style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="flagValues['saturday_live_url'] = this.value.trim() || null">
-      </div>
-    </div>
-
-    <div class="flag-row">
-      <div class="flag-info">
-        <div class="flag-name">US</div>
-        <div class="flag-key">saturday_live_url_us</div>
-        <div class="flag-desc">Shows WATCH LIVE for US users on Saturdays</div>
-      </div>
-      <div style="flex:1;margin-left:16px">
-        <input type="url" id="live_saturday_us"
-          placeholder="https://…"
-          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
-          oninput="flagValues['saturday_live_url_us'] = this.value.trim() || null">
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Sunday (read-only, managed in code) -->
-  <div class="section-label" style="margin-bottom:6px">SUNDAY</div>
-  <div class="section-note" style="margin-bottom:10px">Hardcoded in app - not configurable here.</div>
-  <div class="flags-card" style="margin-bottom:18px">
-
-    <div class="flag-row">
-      <div class="flag-info">
-        <div class="flag-name">UK + Ireland</div>
-        <div class="flag-desc">ITV4 / ITVX</div>
-      </div>
-      <div style="flex:1;margin-left:16px">
-        <a href="https://www.itv.com/hub/itv4" target="_blank" style="color:var(--text-sec);font-size:11px;font-family:monospace;word-break:break-all">https://www.itv.com/hub/itv4</a>
+          oninput="liveUrlValues.saturday.uk = this.value.trim() || null">
       </div>
     </div>
 
     <div class="flag-row">
       <div class="flag-info">
         <div class="flag-name">International</div>
-        <div class="flag-desc">Official BTCC YouTube</div>
+        <div class="flag-desc">Shows WATCH LIVE for international users on Saturdays</div>
       </div>
       <div style="flex:1;margin-left:16px">
-        <a href="https://www.youtube.com/@OfficialBTCC/streams" target="_blank" style="color:var(--text-sec);font-size:11px;font-family:monospace;word-break:break-all">https://www.youtube.com/@OfficialBTCC/streams</a>
+        <input type="url" id="live_saturday_international"
+          placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
+          oninput="liveUrlValues.saturday.international = this.value.trim() || null">
       </div>
     </div>
 
     <div class="flag-row">
       <div class="flag-info">
         <div class="flag-name">US</div>
-        <div class="flag-desc">Not available</div>
+        <div class="flag-desc">Shows WATCH LIVE for US users on Saturdays</div>
       </div>
       <div style="flex:1;margin-left:16px">
-        <span style="color:var(--text-sec);font-size:12px">—</span>
+        <input type="url" id="live_saturday_us"
+          placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
+          oninput="liveUrlValues.saturday.us = this.value.trim() || null">
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sunday -->
+  <div class="section-label" style="margin-bottom:10px">SUNDAY</div>
+  <div class="card" style="margin-bottom:18px">
+
+    <div class="flag-row">
+      <div class="flag-info">
+        <div class="flag-name">UK + Ireland</div>
+        <div class="flag-desc">ITV4 / ITVX when set</div>
+      </div>
+      <div style="flex:1;margin-left:16px">
+        <input type="url" id="live_sunday_uk"
+          placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
+          oninput="liveUrlValues.sunday.uk = this.value.trim() || null">
+      </div>
+    </div>
+
+    <div class="flag-row">
+      <div class="flag-info">
+        <div class="flag-name">International</div>
+        <div class="flag-desc">Official BTCC YouTube when set</div>
+      </div>
+      <div style="flex:1;margin-left:16px">
+        <input type="url" id="live_sunday_international"
+          placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
+          oninput="liveUrlValues.sunday.international = this.value.trim() || null">
+      </div>
+    </div>
+
+    <div class="flag-row">
+      <div class="flag-info">
+        <div class="flag-name">US</div>
+        <div class="flag-desc">Shows WATCH LIVE for US users on Sundays</div>
+      </div>
+      <div style="flex:1;margin-left:16px">
+        <input type="url" id="live_sunday_us"
+          placeholder="https://…"
+          style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box"
+          oninput="liveUrlValues.sunday.us = this.value.trim() || null">
       </div>
     </div>
 
@@ -1521,6 +1540,10 @@ function switchTab(name, el) {
     }
   }
   if (name === 'dashboard') refreshDashboard();
+  if (name === 'live' && !window._liveLoaded) {
+    window._liveLoaded = true;
+    loadLiveUrls();
+  }
 }
 
 function switchTabByName(name) {
@@ -1970,6 +1993,10 @@ async function refreshAllStatus() {
 // ── Feature Flags ─────────────────────────────────────────────────────────────
 const FLAGS_PATH = 'data/flags.json';
 const FLAGS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
+const LIVE_URLS_PATH = 'data/live_urls.json';
+const LIVE_URLS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/live_urls.json';
+let liveUrlValues = {saturday: {uk: null, international: null, us: null}, sunday: {uk: null, international: null, us: null}};
+let liveUrlsFileSha = null;
 
 const FLAG_DEFS = [
   {key:'radio_tab',               label:'Radio Tab',              desc:'Show the Radio tab in the bottom nav'},
@@ -2014,42 +2041,59 @@ async function loadFlags() {
       flagValues = await r.json();
       document.getElementById('flags-banner-text').textContent = 'Loaded from GitHub';
       document.getElementById('flags-banner').classList.add('visible');
+    }
+  } catch(e) {}
+  renderFlags(); renderOverridesList(); renderAddOverrideToggles();
+}
+
+async function loadLiveUrls() {
+  try {
+    const r = await fetch(LIVE_URLS_RAW + '?t=' + Date.now());
+    if (r.ok) {
+      liveUrlValues = await r.json();
       document.getElementById('live-banner-text').textContent = 'Loaded from GitHub';
       document.getElementById('live-banner').classList.add('visible');
     }
   } catch(e) {}
-  renderFlags(); renderOverridesList(); renderAddOverrideToggles(); renderLiveUrls();
+  renderLiveUrls();
 }
 
 function renderLiveUrls() {
-  const ukEl = document.getElementById('live_saturday_uk');
-  const usEl = document.getElementById('live_saturday_us');
-  if (ukEl) ukEl.value = flagValues['saturday_live_url'] || '';
-  if (usEl) usEl.value = flagValues['saturday_live_url_us'] || '';
+  ['saturday', 'sunday'].forEach(day => {
+    ['uk', 'international', 'us'].forEach(region => {
+      const el = document.getElementById(`live_${day}_${region}`);
+      if (el) el.value = liveUrlValues?.[day]?.[region] || '';
+    });
+  });
 }
 
 async function doSaveLiveUrls() {
-  const ukEl = document.getElementById('live_saturday_uk');
-  const usEl = document.getElementById('live_saturday_us');
-  if (ukEl) flagValues['saturday_live_url']    = ukEl.value.trim() || null;
-  if (usEl) flagValues['saturday_live_url_us'] = usEl.value.trim() || null;
+  ['saturday', 'sunday'].forEach(day => {
+    ['uk', 'international', 'us'].forEach(region => {
+      const el = document.getElementById(`live_${day}_${region}`);
+      if (el) {
+        if (!liveUrlValues[day]) liveUrlValues[day] = {};
+        liveUrlValues[day][region] = el.value.trim() || null;
+      }
+    });
+  });
   const tok = getToken();
   if (!tok) { document.getElementById('live-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
   const btn = document.getElementById('live-savebtn');
   const statusEl = document.getElementById('live-status');
   btn.disabled = true; btn.textContent = 'SAVING…'; statusEl.textContent = '';
-  const content = JSON.stringify(flagValues, null, 2) + '\n';
+  const content = JSON.stringify(liveUrlValues, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
-    if (!flagFileSha) {
-      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {headers:{Authorization:'token '+tok}});
-      if (meta.ok) flagFileSha = (await meta.json()).sha;
+    if (!liveUrlsFileSha) {
+      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${LIVE_URLS_PATH}`, {headers:{Authorization:'token '+tok}});
+      if (meta.ok) liveUrlsFileSha = (await meta.json()).sha;
     }
     const body = {message:'Update live stream URLs via admin', content: encoded};
-    if (flagFileSha) body.sha = flagFileSha;
-    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (liveUrlsFileSha) body.sha = liveUrlsFileSha;
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${LIVE_URLS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
     if (r.ok) {
-      const d = await r.json(); flagFileSha = d.content?.sha || null;
+      const d = await r.json(); liveUrlsFileSha = d.content?.sha || null;
       statusEl.innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>';
       document.getElementById('live-banner-text').textContent = 'Saved to GitHub · just now';
     } else { const e = await r.json(); statusEl.innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }

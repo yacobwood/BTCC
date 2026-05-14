@@ -15,8 +15,6 @@ const defaults = {
   update_available: true,
   update_min_version_ios: 0,
   update_min_version_android: 63,
-  saturday_live_url: null,
-  saturday_live_url_us: null,
 };
 
 const FeatureFlagsContext = createContext(defaults);

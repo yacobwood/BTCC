@@ -11,6 +11,7 @@ import {UnitsProvider} from './src/store/units';
 import {SettingsProvider, useSettings} from './src/store/settings';
 import {RadioProvider} from './src/store/radio';
 import {FeatureFlagsProvider, useFeatureFlags} from './src/store/featureFlags';
+import {LiveUrlsProvider} from './src/store/liveUrls';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import {cacheEvictStale, cacheDelete} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
@@ -168,6 +169,7 @@ export default function App() {
     <ErrorBoundary>
     <SafeAreaProvider style={{flex: 1, backgroundColor: '#080912'}}>
     <FeatureFlagsProvider>
+    <LiveUrlsProvider>
     <FavouriteDriverProvider>
       <UnitsProvider>
         <SettingsProvider>
@@ -179,6 +181,7 @@ export default function App() {
         </SettingsProvider>
       </UnitsProvider>
     </FavouriteDriverProvider>
+    </LiveUrlsProvider>
     </FeatureFlagsProvider>
     </SafeAreaProvider>
     </ErrorBoundary>

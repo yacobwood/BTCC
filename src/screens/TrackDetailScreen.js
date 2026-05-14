@@ -22,11 +22,12 @@ import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
+import {useLiveUrls, getLiveInfo} from '../store/liveUrls';
 import {fetchResults, fetchCalendar} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
-import {BROADCASTERS, detectBroadcaster} from '../utils/broadcaster';
+import {detectBroadcaster} from '../utils/broadcaster';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 
@@ -81,7 +82,8 @@ export default function TrackDetailScreen({route, navigation}) {
 
   if (!track) return null;
   const {useKm} = useUnits();
-  const {track_weather, live_updates, saturday_live_url, saturday_live_url_us} = useFeatureFlags();
+  const {track_weather, live_updates} = useFeatureFlags();
+  const liveUrls = useLiveUrls();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || StatusBar.currentHeight || 0;
   const rStart = firstRaceNumber(track.round);
@@ -295,12 +297,10 @@ export default function TrackDetailScreen({route, navigation}) {
 
       case 'liveTiming': {
         const today = new Date().getDay();
-        const bc = (isRaceWeekend && today === 0 && broadcaster) ? BROADCASTERS[broadcaster] : null;
-        const satUrl = isRaceWeekend && today === 6
-          ? (broadcaster === 'uk' ? saturday_live_url : broadcaster === 'us' ? saturday_live_url_us : null)
-          : null;
-        const satBc = satUrl ? {url: satUrl, label: 'YouTube'} : null;
-        const activeBc = bc || satBc;
+        const dayKey = today === 0 ? 'sunday' : today === 6 ? 'saturday' : null;
+        const url = (isRaceWeekend && dayKey && broadcaster) ? (liveUrls[dayKey]?.[broadcaster] || null) : null;
+        const liveInfo = url ? getLiveInfo(dayKey, broadcaster) : null;
+        const activeBc = url && liveInfo ? {url, ...liveInfo} : null;
         const showLive = isRaceWeekend && live_updates;
         const showResults = racesFinished || isPastRaceWeekend;
         return (

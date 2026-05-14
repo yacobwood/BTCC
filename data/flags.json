@@ -20,7 +20,5 @@
   "update_available": true,
   "update_min_version_ios": 0,
   "update_min_version_android": 66,
-  "live_chat": false,
-  "saturday_live_url": "https://www.youtube.com/@ITVSport/streams",
-  "saturday_live_url_us": null
+  "live_chat": false
 }

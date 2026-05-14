@@ -10,10 +10,12 @@ import {FavouriteDriverProvider} from '../../src/store/favouriteDriver';
 import {SettingsProvider} from '../../src/store/settings';
 import {UnitsProvider} from '../../src/store/units';
 import {FeatureFlagsProvider} from '../../src/store/featureFlags';
+import {LiveUrlsProvider} from '../../src/store/liveUrls';
 
 export function AllProviders({children}) {
   return (
     <FeatureFlagsProvider>
+      <LiveUrlsProvider>
       <SettingsProvider>
         <UnitsProvider>
           <FavouriteDriverProvider>
@@ -21,6 +23,7 @@ export function AllProviders({children}) {
           </FavouriteDriverProvider>
         </UnitsProvider>
       </SettingsProvider>
+      </LiveUrlsProvider>
     </FeatureFlagsProvider>
   );
 }
