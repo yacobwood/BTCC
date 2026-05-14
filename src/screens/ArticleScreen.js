@@ -764,8 +764,9 @@ function buildHtml(article, topPad) {
       li { margin-bottom:8px; color:#ccc; }
       iframe { width:100%!important; max-width:100%!important; border:none; }
       video { width:100%!important; height:auto!important; border-radius:8px; margin:12px 0; }
-      table { width:100%!important; border-collapse:collapse; margin:16px 0; font-size:14px; }
-      th, td { border:1px solid #333; padding:8px 10px; text-align:left; }
+      .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:16px 0; }
+      table { width:auto!important; min-width:100%; border-collapse:collapse; font-size:14px; }
+      th, td { border:1px solid #333; padding:8px 10px; text-align:left; white-space:nowrap; }
       th { background:rgba(255,255,255,0.08); font-weight:700; color:#fff; }
       tr:nth-child(even) { background:rgba(255,255,255,0.03); }
       td { color:#ccc; }
@@ -855,6 +856,14 @@ function buildHtml(article, topPad) {
         _interacted = true;
         window.ReactNativeWebView.postMessage(JSON.stringify({type: toggling ? null : type, prev: prev}));
       }
+
+      document.querySelectorAll('table').forEach(function(t) {
+        if (t.parentElement.classList.contains('table-wrap')) return;
+        var w = document.createElement('div');
+        w.className = 'table-wrap';
+        t.parentNode.insertBefore(w, t);
+        w.appendChild(t);
+      });
     </script>
   </body></html>`;
 }
