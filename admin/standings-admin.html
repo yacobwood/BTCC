@@ -2010,6 +2010,7 @@ const FLAG_DEFS = [
   {key:'update_available',        label:'Update Available',       desc:'Force update modal'},
   {key:'update_min_version_ios',  label:'Update Min Version — iOS',     desc:'iOS only: min versionCode to require update (0 = never)', type:'number'},
   {key:'update_min_version_android', label:'Update Min Version — Android', desc:'Android only: min versionCode to require update (0 = never)', type:'number'},
+  {key:'broadcaster_override', label:'Broadcaster Override', desc:'Force a region for testing — device overrides only. Bypasses IP detection.', type:'broadcaster'},
 ];
 
 let flagValues = {}, flagFileSha = null;
@@ -2142,7 +2143,11 @@ function renderOverridesList() {
   const el = document.getElementById('overrides-list');
   if (!entries.length) { el.innerHTML = '<div class="section-note" style="margin-bottom:8px">No device overrides yet.</div>'; return; }
   el.innerHTML = entries.map(([devId, flags]) => {
-    const chips = Object.entries(flags).map(([k,v]) => `<span class="override-chip ${v ? 'on' : 'off'}">${k}</span>`).join('');
+    const chips = Object.entries(flags).map(([k,v]) => {
+      const cls = typeof v === 'string' ? 'on' : (v ? 'on' : 'off');
+      const label = typeof v === 'string' ? `${k}: ${v}` : k;
+      return `<span class="override-chip ${cls}">${label}</span>`;
+    }).join('');
     return `<div class="override-card"><div class="override-head"><div class="override-id" title="${devId}">${devId}</div><button class="btn-sm" onclick="removeOverride('${devId}')">Remove</button></div><div class="override-flags">${chips || '<span class="section-note">No flags</span>'}</div></div>`;
   }).join('');
 }
@@ -2154,7 +2159,9 @@ function renderAddOverrideToggles() {
       <div class="new-override-controls">
         ${f.type === 'number'
           ? `<input type="number" id="nof_${f.key}" placeholder="inherit" style="width:100px;padding:4px 8px;border-radius:6px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px">`
-          : `<select id="nof_${f.key}"><option value="skip" selected>— inherit</option><option value="true">ON</option><option value="false">OFF</option></select>`
+          : f.type === 'broadcaster'
+            ? `<select id="nof_${f.key}"><option value="skip" selected>— inherit (auto-detect)</option><option value="uk">UK</option><option value="international">International</option><option value="us">US</option></select>`
+            : `<select id="nof_${f.key}"><option value="skip" selected>— inherit</option><option value="true">ON</option><option value="false">OFF</option></select>`
         }
       </div>
     </div>`).join('');
@@ -2167,6 +2174,7 @@ function addOverride() {
   FLAG_DEFS.forEach(f => {
     const el = document.getElementById('nof_' + f.key); if (!el) return;
     if (f.type === 'number') { if (el.value !== '') flags[f.key] = Number(el.value); }
+    else if (f.type === 'broadcaster') { if (el.value !== 'skip') flags[f.key] = el.value; }
     else { if (el.value === 'true') flags[f.key] = true; if (el.value === 'false') flags[f.key] = false; }
   });
   if (!flagValues.overrides) flagValues.overrides = {};

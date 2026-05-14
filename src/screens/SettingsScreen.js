@@ -13,6 +13,7 @@ import {Colors} from '../theme/colors';
 import {useUnits} from '../store/units';
 import {useSettings} from '../store/settings';
 import {useFeatureFlags} from '../store/featureFlags';
+import {useBroadcaster} from '../utils/broadcaster';
 import {Analytics} from '../utils/analytics';
 import {version} from '../../package.json';
 import {getFCMToken} from '../utils/notifications';
@@ -24,7 +25,8 @@ import {getStableDeviceId} from '../utils/deviceId';
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
   const {useKm, toggleUnits} = useUnits();
-  const {podcasts_enabled, debug_mode, live_chat} = useFeatureFlags();
+  const {podcasts_enabled, debug_mode, live_chat, broadcaster_override} = useFeatureFlags();
+  const detectedBroadcaster = useBroadcaster();
   const [fcmToken, setFcmToken] = useState('');
   const [copiedFcm, setCopiedFcm] = useState(false);
   const [stableId, setStableId] = useState('');
@@ -285,6 +287,13 @@ export default function SettingsScreen({navigation}) {
                 <Text style={styles.debugBtnText}>{label}</Text>
               </TouchableOpacity>
             ))}
+            <Text style={[styles.settingDesc, {marginTop: 12, marginBottom: 4}]}>Broadcaster detection</Text>
+            <Text style={styles.deviceIdText}>
+              Detected: {detectedBroadcaster || 'unknown'}
+            </Text>
+            <Text style={styles.deviceIdText}>
+              Active: {broadcaster_override ? `${broadcaster_override} (override)` : `${detectedBroadcaster} (auto)`}
+            </Text>
           </>
         )}
 

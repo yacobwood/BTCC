@@ -82,7 +82,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
   if (!track) return null;
   const {useKm} = useUnits();
-  const {track_weather, live_updates} = useFeatureFlags();
+  const {track_weather, live_updates, broadcaster_override} = useFeatureFlags();
   const liveUrls = useLiveUrls();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || StatusBar.currentHeight || 0;
@@ -106,7 +106,8 @@ export default function TrackDetailScreen({route, navigation}) {
   const sessions = track.sessions || [];
   const [weather, setWeather] = useState(null);
   const [racesFinished, setRacesFinished] = useState(false);
-  const broadcaster = useBroadcaster();
+  const detectedBroadcaster = useBroadcaster();
+  const broadcaster = broadcaster_override || detectedBroadcaster;
   const [currentRoundData, setCurrentRoundData] = useState(null);
   const [liveRaceRecord, setLiveRaceRecord] = useState(null);
   const [liveQualRecord, setLiveQualRecord] = useState(null);

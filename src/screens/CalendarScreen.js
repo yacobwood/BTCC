@@ -17,6 +17,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
 import {useBroadcaster} from '../utils/broadcaster';
 import {useLiveUrls, getLiveInfo} from '../store/liveUrls';
+import {useFeatureFlags} from '../store/featureFlags';
 
 const RED = '#E3000B';
 
@@ -46,6 +47,7 @@ function firstRaceNumber(round) {
 
 export default function CalendarScreen({navigation}) {
   const liveUrls = useLiveUrls();
+  const {broadcaster_override} = useFeatureFlags();
   const [selectedYear, setSelectedYear] = useState(2026);
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -132,7 +134,8 @@ export default function CalendarScreen({navigation}) {
     return items;
   }, [rounds, today, pastCount]);
 
-  const broadcaster = useBroadcaster();
+  const detectedBroadcaster = useBroadcaster();
+  const broadcaster = broadcaster_override || detectedBroadcaster;
   const bc = useMemo(() => {
     if (!activeRound) return null;
     const day = new Date().getDay();

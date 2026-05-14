@@ -15,6 +15,7 @@ const defaults = {
   update_available: true,
   update_min_version_ios: 0,
   update_min_version_android: 63,
+  broadcaster_override: null,
 };
 
 const FeatureFlagsContext = createContext(defaults);

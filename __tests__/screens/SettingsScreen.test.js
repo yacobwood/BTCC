@@ -5,6 +5,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SettingsScreen from '../../src/screens/SettingsScreen';
 import {renderWithProviders, makeNav} from './testUtils';
 
+jest.mock('../../src/utils/broadcaster', () => ({
+  useBroadcaster: jest.fn(() => 'uk'),
+}));
+
 const nav = makeNav();
 
 async function renderSettings(storageOverrides = {}) {
