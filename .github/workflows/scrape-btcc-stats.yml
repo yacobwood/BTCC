@@ -1,0 +1,52 @@
+name: Scrape BTCC Official Stats
+
+on:
+  schedule:
+    # Daily at 06:00 UTC — well outside race windows to avoid commit conflicts
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (print changes without writing)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: scrape-btcc-stats
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Pull latest
+        run: git pull --rebase origin main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run scraper
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python tools/scraper/scrape_btcc_stats.py $ARGS
+
+      - name: Commit updated records
+        if: github.event.inputs.dry_run != 'true'
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update all-time records from btcc.net [skip ci]"
+          file_pattern: "data/records.json"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: "--force-with-lease"
