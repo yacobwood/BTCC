@@ -28,6 +28,11 @@ const MAX_MESSAGES = 200;
 
 export default function ChatScreen({onClose} = {}) {
   const insets = useSafeAreaInsets();
+  // Latch the first non-zero bottom inset so keyboard open/close doesn't cause a layout jump.
+  const [stableBottom, setStableBottom] = useState(insets.bottom);
+  useEffect(() => {
+    if (insets.bottom > 0) setStableBottom(insets.bottom);
+  }, [insets.bottom]);
   const [messages, setMessages] = useState(null); // null = loading
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
@@ -270,7 +275,7 @@ export default function ChatScreen({onClose} = {}) {
 
       {/* Name prompt */}
       {showNamePrompt ? (
-        <View style={[styles.namePrompt, {paddingBottom: (insets.bottom || 0) + 12}]}>
+        <View style={[styles.namePrompt, {paddingBottom: stableBottom + 12}]}>
           <Text style={styles.namePromptTitle}>Choose a display name</Text>
           <TextInput
             style={styles.nameInput}
@@ -293,7 +298,7 @@ export default function ChatScreen({onClose} = {}) {
           </View>
         </View>
       ) : (
-          <View style={[styles.inputRow, {paddingBottom: (insets.bottom || 0) + 12}]}>
+          <View style={[styles.inputRow, {paddingBottom: stableBottom + 12}]}>
             {inputError ? <Text style={styles.inputError}>{inputError}</Text> : null}
             <View style={styles.inputInner}>
               <TextInput
