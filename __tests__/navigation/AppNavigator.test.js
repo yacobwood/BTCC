@@ -110,6 +110,11 @@ jest.mock('../../src/screens/PartnersScreen',     () => ({__esModule: true, defa
 jest.mock('../../src/screens/RoadmapScreen',      () => ({__esModule: true, default: makeScreen('Roadmap')}));
 jest.mock('../../src/screens/ChatScreen',         () => ({__esModule: true, default: makeScreen('Chat')}));
 
+jest.mock('../../src/components/ChatFab', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 jest.mock('../../src/components/AdBanner', () => ({
   __esModule: true,
   default: React.forwardRef((_props, _ref) => {
@@ -180,7 +185,7 @@ describe('AppNavigator', () => {
     await waitFor(() => expect(getByText('More')).toBeTruthy());
   });
 
-  it('does not show Chat tab when live_chat flag is off', async () => {
+  it('does not show a Chat tab (chat is now a floating button)', async () => {
     const {queryByText} = renderNav();
     await waitFor(() => expect(queryByText('Chat')).toBeNull());
   });

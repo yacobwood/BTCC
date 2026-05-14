@@ -6,8 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+
   ActivityIndicator,
   Alert,
 } from 'react-native';
@@ -27,7 +26,7 @@ import {containsProfanity} from '../utils/profanityFilter';
 const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
 
-export default function ChatScreen() {
+export default function ChatScreen({onClose} = {}) {
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState(null); // null = loading
   const [input, setInput] = useState('');
@@ -37,7 +36,9 @@ export default function ChatScreen() {
   const [nameInput, setNameInput] = useState('');
   const [nameEditing, setNameEditing] = useState(false);
   const [blacklist, setBlacklist] = useState([]);
+  const [flaggedIds, setFlaggedIds] = useState(new Set());
   const myAuthorIdRef = useRef('anonymous');
+  const [myAuthorId, setMyAuthorId] = useState('anonymous');
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function ChatScreen() {
       ]);
       const myId = token ? token.slice(0, 8) : `anon_${Math.random().toString(36).slice(2, 6)}`;
       myAuthorIdRef.current = myId;
+      setMyAuthorId(myId);
       if (savedName) setCommenterName(savedName);
     };
     init();
@@ -133,13 +135,26 @@ export default function ChatScreen() {
     handleSend();
   };
 
-  const handleFlag = async (msgId, current) => {
-    const newCount = (current.flagCount || 0) + 1;
+  const handleFlag = async (msgId) => {
+    if (flaggedIds.has(msgId)) return;
+    setFlaggedIds(prev => new Set(prev).add(msgId));
     try {
-      await DB.ref(`/chat/messages/${msgId}`).update({
-        flagCount: newCount,
-        hidden: newCount >= 3,
-      });
+      const idx = messages.findIndex(m => m.id === msgId);
+      const flaggedMsg = messages[idx];
+      // messages is newest-first; higher indices are older
+      const context = messages.slice(idx + 1, idx + 21).reverse();
+
+      await Promise.all([
+        DB.ref('/chat/reports').push({
+          flaggedMessage: flaggedMsg,
+          context,
+          reportedAt: database.ServerValue.TIMESTAMP,
+        }),
+        DB.ref(`/chat/messages/${msgId}`).transaction(msg => {
+          if (msg === null) return msg;
+          return {...msg, flagCount: (msg.flagCount || 0) + 1};
+        }),
+      ]);
     } catch {}
   };
 
@@ -153,18 +168,21 @@ export default function ChatScreen() {
   };
 
   const renderMessage = ({item}) => {
-    const isOwn = item.authorId === myAuthorIdRef.current;
+    const isOwn = item.authorId === myAuthorId;
     return (
       <View style={styles.msgRow}>
         <View style={styles.msgMeta}>
-          <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{item.authorName}</Text>
+          <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>
+            {item.authorName}
+            {item.authorId ? <Text style={styles.msgAuthorId}>{` #${item.authorId.slice(-4)}`}</Text> : null}
+          </Text>
           <Text style={styles.msgTime}>{timeAgo(item.timestamp)}</Text>
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
         <View style={styles.msgActions}>
           {!isOwn && (
-            <TouchableOpacity onPress={() => handleFlag(item.id, item)} style={styles.msgActionBtn}>
-              <Icon name="flag" size={13} color={Colors.textSecondary} />
+            <TouchableOpacity onPress={() => handleFlag(item.id)} accessibilityLabel="Flag message" style={styles.msgActionBtn}>
+              <Icon name="flag" size={13} color={flaggedIds.has(item.id) ? '#E53935' : Colors.textSecondary} />
             </TouchableOpacity>
           )}
           {isOwn && (
@@ -178,9 +196,14 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={[styles.container, {paddingTop: insets.top}]}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        {onClose && (
+          <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityLabel="Close chat" accessibilityRole="button">
+            <Icon name="keyboard-arrow-down" size={28} color="#fff" />
+          </TouchableOpacity>
+        )}
         <Text style={styles.headerTitle}>LIVE CHAT</Text>
         <TouchableOpacity
           onPress={() => { setNameInput(commenterName || ''); setNameEditing(true); }}
@@ -236,7 +259,7 @@ export default function ChatScreen() {
 
       {/* Name prompt */}
       {showNamePrompt ? (
-        <View style={styles.namePrompt}>
+        <View style={[styles.namePrompt, {paddingBottom: (insets.bottom || 0) + 12}]}>
           <Text style={styles.namePromptTitle}>Choose a display name</Text>
           <TextInput
             style={styles.nameInput}
@@ -259,10 +282,7 @@ export default function ChatScreen() {
           </View>
         </View>
       ) : (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={insets.bottom}>
-          <View style={[styles.inputRow, {paddingBottom: Platform.OS === 'ios' ? (insets.bottom || 12) : 12}]}>
+          <View style={[styles.inputRow, {paddingBottom: (insets.bottom || 0) + 12}]}>
             {inputError ? <Text style={styles.inputError}>{inputError}</Text> : null}
             <View style={styles.inputInner}>
               <TextInput
@@ -284,20 +304,21 @@ export default function ChatScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAvoidingView>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: Colors.background},
+  container: {flex: 1, backgroundColor: Colors.surface},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    gap: 8,
   },
+  closeBtn: {padding: 4},
   headerTitle: {color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 1, flex: 1},
   nameBtn: {flexDirection: 'row', alignItems: 'center', gap: 5, maxWidth: 140},
   nameBtnText: {color: Colors.textSecondary, fontSize: 12, flexShrink: 1},
@@ -316,6 +337,7 @@ const styles = StyleSheet.create({
   msgMeta: {flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4},
   msgAuthor: {color: Colors.textSecondary, fontSize: 13, fontWeight: '700'},
   msgAuthorOwn: {color: Colors.yellow},
+  msgAuthorId: {color: Colors.textSecondary, fontSize: 11, fontWeight: '400', opacity: 0.6},
   msgTime: {color: Colors.textSecondary, fontSize: 11},
   msgText: {color: '#fff', fontSize: 15, lineHeight: 22},
   msgActions: {flexDirection: 'row', gap: 14, marginTop: 6},

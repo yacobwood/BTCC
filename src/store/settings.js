@@ -69,6 +69,7 @@ const STORAGE_KEYS = {
   hubPreview:          'setting_hub_preview',
   spoilerFree:         'setting_spoiler_free',
   spoilerFreeExpiry:   'setting_spoiler_free_expiry',
+  chatFab:             'setting_chat_fab',
 };
 
 const defaults = {
@@ -96,6 +97,7 @@ const defaults = {
   hubPreview:          false,
   spoilerFree:         false,
   spoilerFreeExpiry:   null,
+  chatFab:             true,
 };
 
 function isEffective(settings, key) {

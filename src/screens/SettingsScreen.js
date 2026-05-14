@@ -24,7 +24,7 @@ import {getStableDeviceId} from '../utils/deviceId';
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
   const {useKm, toggleUnits} = useUnits();
-  const {podcasts_enabled, debug_mode} = useFeatureFlags();
+  const {podcasts_enabled, debug_mode, live_chat} = useFeatureFlags();
   const [fcmToken, setFcmToken] = useState('');
   const [copiedFcm, setCopiedFcm] = useState(false);
   const [stableId, setStableId] = useState('');
@@ -224,6 +224,19 @@ export default function SettingsScreen({navigation}) {
           value={settings.standingsUpdate}
           onToggle={toggle('standingsUpdate')}
         />
+
+        {live_chat && (
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>LIVE CHAT</Text>
+            <SettingRow
+              label="Chat button"
+              description="Show the floating chat button on all screens"
+              value={settings.chatFab}
+              onToggle={(v) => setSetting('chatFab', v)}
+            />
+          </>
+        )}
 
         <View style={styles.divider} />
         <Text style={styles.sectionTitle}>UNIT DISPLAY</Text>

@@ -14,6 +14,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.app.Activity
 import com.btccfanhub.R
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -188,6 +189,11 @@ class WidgetConfigureActivity : Activity() {
             component = info?.provider
         }
         sendBroadcast(updateIntent)
+
+        FirebaseAnalytics.getInstance(this).logEvent("widget_configured", Bundle().apply {
+            putString("size", widgetSize.name.lowercase())
+            putString("theme", selectedTheme.name.lowercase())
+        })
 
         val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         setResult(RESULT_OK, result)

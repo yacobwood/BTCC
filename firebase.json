@@ -1,5 +1,9 @@
 {
   "functions": {
     "source": "functions"
+  },
+  "database": {
+    "rules": "database.rules.json",
+    "target": "btcchub-af77a-default-rtdb"
   }
 }

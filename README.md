@@ -223,7 +223,7 @@ React Navigation 7 with a bottom tab navigator containing 5 permanent tabs and 1
 | News | News | article | NewsFeed | true |
 | Calendar | Calendar | date-range | CalendarList | true |
 | Grid | Grid | groups | DriversList | true |
-| Chat | Chat | chat-bubble | ChatScreen | true (gated on `live_chat` flag) |
+| Chat | - | - | ChatFab + ChatScreen modal | Floating button, gated on `live_chat` flag |
 | Results | Season | emoji-events | ResultsList | **false** (preserves year state) |
 | More | More | more-horiz | MoreMenu | true |
 
@@ -338,7 +338,7 @@ Feedback form. Category chips: Bug, Crash, UI Issue, Feature Request. Title, des
 Generic page renderer for `pages.json` content. Sections support `text` (body) and `heading` types. Used for About BTCC, History, Rules and Academy pages.
 
 **ChatScreen** ([src/screens/ChatScreen.js](src/screens/ChatScreen.js))
-Firebase Realtime Database community chat. 200 message limit. Profanity filter via `blacklist.json`. Hidden message support (admin can flag messages). Name prompt on first post (stored as `commenter_name` in AsyncStorage). 300 character limit.
+Firebase Realtime Database community chat. 200 message limit (enforced by `trimChat` Cloud Function). Profanity filter via `blacklist.json`. 3-flag auto-hide via atomic RTDB transaction (prevents race conditions from concurrent flags). Name prompt on first post (stored as `commenter_name` in AsyncStorage). 300 character limit. Security rules in `database.rules.json` enforce field types, length limits, immutability of text/author/timestamp after creation, and that flagCount can only increase and hidden can only go true - never back to false. Opened via `ChatFab` floating button (not a tab). Accepts an `onClose` prop that shows a back arrow in the header when provided.
 
 **ListenScreen** ([src/screens/ListenScreen.js](src/screens/ListenScreen.js))
 Entry point routing to Radio and Podcasts sections.
@@ -742,7 +742,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 ## 18. Utility Modules
 
-**analytics.js** - Firebase Analytics event helpers wrapping `logEvent()` calls.
+**analytics.js** - Firebase Analytics event helpers wrapping `logEvent()` calls. Note: the `widget_configured` event (Android, params: `size` and `theme`) and `widget_size_used` event (iOS, param: `size`) are fired natively - not via this module. Android fires from `WidgetConfigureActivity.kt` at configure time. iOS queues the family in the shared App Group UserDefaults during `getTimeline` and the main app flushes to Firebase in `AppDelegate.didFinishLaunchingWithOptions`.
 
 **backgroundPrefetch.js** - Prefetches driver and article images into the React Native image cache on app start.
 

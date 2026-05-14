@@ -191,6 +191,21 @@ struct BTCCProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<BTCCEntry>) -> Void) {
+        // Record the widget family so the main app can flush to Firebase Analytics on next launch.
+        // Uses the shared App Group UserDefaults — widget extensions cannot call Firebase directly.
+        let familyName: String
+        switch context.family {
+        case .systemSmall:  familyName = "small"
+        case .systemMedium: familyName = "medium"
+        case .systemLarge:  familyName = "large"
+        default:            familyName = "medium"
+        }
+        var pending = defaults.stringArray(forKey: "btcc_widget_pending_sizes") ?? []
+        if !pending.contains(familyName) {
+            pending.append(familyName)
+            defaults.set(pending, forKey: "btcc_widget_pending_sizes")
+        }
+
         loadEntry { entry in
             let refresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
             completion(Timeline(entries: [entry], policy: .after(refresh)))

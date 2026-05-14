@@ -49,7 +49,7 @@ export function FeatureFlagsProvider({children}) {
         try {
           const token = await Promise.race([
             getToken(getMessaging()),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000)),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000)),
           ]);
           if (token && overrides[token]) {
             setFlags(prev => ({...prev, ...overrides[token]}));

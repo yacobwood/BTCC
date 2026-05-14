@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "btcchub-af77a"
-  }
+  },
+  "targets": {
+    "btcchub-af77a": {
+      "database": {
+        "btcchub-af77a-default-rtdb": [
+          "btcchub-af77a-default-rtdb"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

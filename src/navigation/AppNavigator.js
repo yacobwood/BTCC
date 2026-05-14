@@ -51,9 +51,9 @@ import DigestsScreen from '../screens/DigestsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
-import ChatScreen from '../screens/ChatScreen';
 import AdBanner from '../components/AdBanner';
 import UpdateDialog from '../components/UpdateDialog';
+import ChatFab from '../components/ChatFab';
 import {useFeatureFlags} from '../store/featureFlags';
 
 const Tab = createBottomTabNavigator();
@@ -137,10 +137,11 @@ const tabIcons = {
   News: 'article',
   Calendar: 'date-range',
   Grid: 'groups',
-  Chat: 'chat-bubble',
   Results: 'emoji-events',
   More: 'more-horiz',
 };
+
+const TAB_BAR_HEIGHT = 56;
 
 const linking = {
   prefixes: ['btccfanhub://', 'https://btcchub.vercel.app'],
@@ -174,8 +175,9 @@ const linking = {
 function AppContent({adBannerRef}) {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
-  const {live_chat, update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
+  const {update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
   const [showUpdate, setShowUpdate] = React.useState(false);
+  const [adBannerHeight, setAdBannerHeight] = React.useState(0);
 
   React.useEffect(() => {
     if (!update_available) return;
@@ -210,13 +212,13 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="News" component={NewsStack} />
           <Tab.Screen name="Calendar" component={CalendarStack} />
           <Tab.Screen name="Grid" component={DriversStack} />
-          {live_chat && <Tab.Screen name="Chat" component={ChatScreen} />}
           <Tab.Screen name="Results" component={ResultsStack} options={{unmountOnBlur: false, tabBarLabel: 'Season'}} />
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
-        <View style={{paddingBottom: bottom}}>
+        <View style={{paddingBottom: bottom}} onLayout={e => setAdBannerHeight(e.nativeEvent.layout.height)}>
           <AdBanner ref={adBannerRef} />
         </View>
+        <ChatFab bottomOffset={adBannerHeight + TAB_BAR_HEIGHT} />
         <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       </View>
   );

@@ -17,6 +17,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   ) -> Bool {
     FirebaseApp.configure()
 
+    // Flush widget size events queued by the widget extension (which cannot call Firebase directly).
+    if let widgetDefaults = UserDefaults(suiteName: "group.com.btccfanhub.widget"),
+       let pending = widgetDefaults.stringArray(forKey: "btcc_widget_pending_sizes"), !pending.isEmpty {
+      for size in pending {
+        Analytics.logEvent("widget_size_used", parameters: ["size": size])
+      }
+      widgetDefaults.removeObject(forKey: "btcc_widget_pending_sizes")
+    }
+
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()

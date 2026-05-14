@@ -1,0 +1,42 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "chat": {
+      "reports": {
+        "$reportId": {
+          ".write": "!data.exists()",
+          ".validate": "newData.hasChildren(['flaggedMessage', 'reportedAt'])"
+        }
+      },
+      "messages": {
+        ".read": true,
+        "$msgId": {
+          ".write": true,
+          ".validate": "!newData.exists() || newData.hasChildren(['text', 'authorId', 'authorName', 'timestamp', 'flagCount', 'hidden'])",
+          "text": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 300 && (!data.exists() || newData.val() === data.val())"
+          },
+          "authorId": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 50 && (!data.exists() || newData.val() === data.val())"
+          },
+          "authorName": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && (!data.exists() || newData.val() === data.val())"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())"
+          },
+          "flagCount": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() ? newData.val() === 0 : newData.val() >= data.val())"
+          },
+          "hidden": {
+            ".validate": "newData.isBoolean() && (!data.exists() ? newData.val() === false : (data.val() === false || newData.val() === true))"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}
