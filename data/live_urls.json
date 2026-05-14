@@ -12,7 +12,10 @@
       "url": "https://www.itv.com/btcc",
       "label": "ITV4 / ITVX"
     },
-    "international": null,
+    "international": {
+      "url": "https://www.youtube.com/@OfficialBTCC/streams",
+      "label": "Youtube BTCC"
+    },
     "us": null
   }
 }
