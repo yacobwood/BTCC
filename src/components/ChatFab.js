@@ -32,13 +32,12 @@ export default function ChatFab({bottomOffset = 0}) {
   const sheetLift = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-    const show = Keyboard.addListener(showEvent, e => {
-      Animated.timing(sheetLift, {toValue: e.endCoordinates.height, duration: Platform.OS === 'ios' ? 250 : 0, useNativeDriver: false}).start();
+    if (Platform.OS !== 'ios') return;
+    const show = Keyboard.addListener('keyboardWillShow', e => {
+      Animated.timing(sheetLift, {toValue: e.endCoordinates.height, duration: 250, useNativeDriver: false}).start();
     });
-    const hide = Keyboard.addListener(hideEvent, () => {
-      Animated.timing(sheetLift, {toValue: 0, duration: Platform.OS === 'ios' ? 250 : 0, useNativeDriver: false}).start();
+    const hide = Keyboard.addListener('keyboardWillHide', () => {
+      Animated.timing(sheetLift, {toValue: 0, duration: 250, useNativeDriver: false}).start();
     });
     return () => { show.remove(); hide.remove(); };
   }, [sheetLift]);

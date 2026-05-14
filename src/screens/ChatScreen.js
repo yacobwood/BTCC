@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -212,6 +213,10 @@ export default function ChatScreen({onClose} = {}) {
   };
 
   return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'android' ? 'height' : undefined}
+      keyboardVerticalOffset={0}>
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -322,6 +327,7 @@ export default function ChatScreen({onClose} = {}) {
           </View>
       )}
     </View>
+    </KeyboardAvoidingView>
   );
 }
 
