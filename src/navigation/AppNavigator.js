@@ -200,8 +200,8 @@ function AppContent() {
               backgroundColor: Colors.surface,
               borderTopColor: Colors.outline,
               borderTopWidth: 1,
-              paddingBottom: 0,
-              height: 56,
+              paddingBottom: bottom,
+              height: TAB_BAR_HEIGHT + bottom,
             },
             tabBarLabelStyle: {
               fontSize: 11,
@@ -220,7 +220,7 @@ function AppContent() {
             <AdBanner />
           </View>
         )}
-        <ChatFab bottomOffset={adBannerHeight + TAB_BAR_HEIGHT} />
+        <ChatFab bottomOffset={adBannerHeight + TAB_BAR_HEIGHT + bottom} />
         <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       </View>
   );
