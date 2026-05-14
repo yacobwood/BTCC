@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect} from 'react';
 import {View, Platform} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -172,7 +172,7 @@ const linking = {
   },
 };
 
-function AppContent({adBannerRef}) {
+function AppContent() {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
   const {update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
@@ -216,7 +216,7 @@ function AppContent({adBannerRef}) {
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
         <View style={{paddingBottom: bottom}} onLayout={e => setAdBannerHeight(e.nativeEvent.layout.height)}>
-          <AdBanner ref={adBannerRef} />
+          <AdBanner />
         </View>
         <ChatFab bottomOffset={adBannerHeight + TAB_BAR_HEIGHT} />
         <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
@@ -225,19 +225,9 @@ function AppContent({adBannerRef}) {
 }
 
 export default function AppNavigator({navigationRef}) {
-  const adBannerRef = useRef(null);
-  const prevTabRef = useRef(0);
-
-  const handleStateChange = (state) => {
-    if (state?.index !== undefined && state.index !== prevTabRef.current) {
-      prevTabRef.current = state.index;
-      adBannerRef.current?.load();
-    }
-  };
-
   return (
-    <NavigationContainer ref={navigationRef} linking={linking} onStateChange={handleStateChange}>
-      <AppContent adBannerRef={adBannerRef} />
+    <NavigationContainer ref={navigationRef} linking={linking}>
+      <AppContent />
     </NavigationContainer>
   );
 }

@@ -8,16 +8,16 @@ const BANNER_AD_UNIT = Platform.OS === 'ios'
   : 'ca-app-pub-2098489502774763/8563706368';
 
 const AdBanner = forwardRef((props, ref) => {
-  const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   return (
-    <View style={failed ? styles.hidden : styles.container}>
+    <View style={loaded ? styles.container : styles.hidden}>
       <BannerAd
         ref={ref}
         unitId={BANNER_AD_UNIT}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{requestNonPersonalizedAdsOnly: true}}
-        onAdLoaded={() => setFailed(false)}
-        onAdFailedToLoad={() => setFailed(true)}
+        onAdLoaded={() => setLoaded(true)}
+        onAdFailedToLoad={() => setLoaded(false)}
         onAdImpression={() => Analytics.adImpression('banner')}
         onAdOpened={() => Analytics.adClicked('banner')}
       />

@@ -253,7 +253,7 @@ All screens use `animation: 'none'` - no page transition animations. This is del
 
 ### 5.5 Ad Banner
 
-`AppNavigator` owns an `AdBanner` ref positioned below the tab bar. A new ad is loaded on every tab switch (`onStateChange`). The banner collapses to zero height on load failure so no black gap appears.
+`AdBanner` is positioned below the tab bar. The banner stays hidden until the first ad loads (`loaded` state starts `false`) to prevent the empty container from flashing before the ad arrives. `BannerAd` manages its own refresh timer internally - no manual `.load()` calls are needed.
 
 ---
 
@@ -719,7 +719,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 ## 17. Shared Components
 
-**AdBanner** ([src/components/AdBanner.js](src/components/AdBanner.js)) - Google AdMob banner, loaded on tab switch. Collapses to zero height on load failure so no black gap appears.
+**AdBanner** ([src/components/AdBanner.js](src/components/AdBanner.js)) - Google AdMob banner. Hidden until first ad loads (`loaded` state). `BannerAd` handles refresh internally; manually calling `.load()` on tab switch interrupted the cycle and caused visible flashing.
 
 **CachedImage** ([src/components/CachedImage.js](src/components/CachedImage.js)) - Image component that rewrites btcc.net WordPress URLs to thumbnails (`-150x150` or `-768x768` suffix depending on display size). Provides a fallback placeholder on load error or null URI.
 
