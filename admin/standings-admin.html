@@ -1545,9 +1545,10 @@ select.input { cursor: pointer; }
 
 <script>
 const REPO   = 'yacobwood/BTCC';
-const GH_API = 'https://api.github.com';
-const GIST_ID = '7a2af0a9690d24cab8eb608dd4c5ba42';
-const FILE    = 'btcc-standings.json';
+const GH_API    = 'https://api.github.com';
+const GIST_ID   = '7a2af0a9690d24cab8eb608dd4c5ba42';
+const FILE      = 'btcc-standings.json';
+const RTDB_URL  = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
 
 // ── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(name, el) {
@@ -3768,8 +3769,6 @@ async function dismissAllErrors() {
 }
 
 // ── Chat moderation ──────────────────────────────────────────────────────────
-const RTDB_URL = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
-
 async function loadChat() {
   await Promise.all([loadChatReports(), loadChatBans()]);
 }
