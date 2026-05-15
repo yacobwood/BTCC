@@ -300,7 +300,7 @@ export default function ChatScreen({onClose} = {}) {
           <Text style={styles.bannedText}>
             {banInfo?.duration === 'permanent'
               ? 'You are permanently banned from this chat.'
-              : 'You are banned from this chat.'}
+              : `You are banned from this chat until ${new Date(banInfo?.expiresAt).toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}.`}
           </Text>
         </View>
       ) : showNamePrompt ? (

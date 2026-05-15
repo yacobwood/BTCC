@@ -808,14 +808,14 @@ describe('ChatScreen', () => {
     expect(queryByLabelText('Delete message')).toBeNull();
   });
 
-  it('shows banned input row when an active ban exists', async () => {
+  it('shows banned input row with expiry date when an active ban exists', async () => {
     const {getByText, queryByPlaceholderText} = renderChat();
     await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
     await act(async () => { triggerMessages([]); });
     await act(async () => {
       triggerBan({bannedAt: Date.now(), expiresAt: Date.now() + 3600000, duration: '1h', authorName: 'Test Fan'});
     });
-    await waitFor(() => expect(getByText(/banned from this chat/i)).toBeTruthy());
+    await waitFor(() => expect(getByText(/banned from this chat until/i)).toBeTruthy());
     expect(queryByPlaceholderText(/say something/i)).toBeNull();
   });
 
