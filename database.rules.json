@@ -45,7 +45,7 @@
         ".read": true,
         "$authorId": {
           ".write": true,
-          ".validate": "!newData.exists() || newData.hasChildren(['bannedAt', 'expiresAt', 'duration', 'authorName'])"
+          ".validate": "!newData.exists() || newData.hasChildren(['bannedAt', 'duration', 'authorName'])"
         }
       }
     }
