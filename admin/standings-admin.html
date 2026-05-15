@@ -3769,6 +3769,8 @@ async function dismissAllErrors() {
 }
 
 // ── Chat moderation ──────────────────────────────────────────────────────────
+let chatReportsRaw = {}; // reportId -> raw RTDB data (used to store in ban for unban restore)
+
 async function loadChat() {
   await Promise.all([loadChatReports(), loadChatBans()]);
 }
@@ -3780,7 +3782,8 @@ async function loadChatReports() {
     const r = await fetch(`${RTDB_URL}/chat/reports.json`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    if (!data || typeof data !== 'object' || Array.isArray(data)) { el.innerHTML = '<div class="section-note">No reports yet.</div>'; return; }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) { chatReportsRaw = {}; el.innerHTML = '<div class="section-note">No reports yet.</div>'; return; }
+    chatReportsRaw = data;
     const reports = Object.entries(data)
       .map(([k, v]) => ({id: k, ...v}))
       .sort((a, b) => (b.reportedAt || 0) - (a.reportedAt || 0))
@@ -3854,12 +3857,7 @@ async function banUser(authorId, authorName, reportId) {
   if (!confirm(`Ban ${authorName || authorId} for ${duration}?`)) return;
 
   const now = Date.now();
-  const durationMs = {
-    '1h': 3600000,
-    '24h': 86400000,
-    '7d': 604800000,
-    'permanent': null,
-  };
+  const durationMs = {'1h': 3600000, '24h': 86400000, '7d': 604800000, 'permanent': null};
   const ms = durationMs[duration];
   const ban = {
     bannedAt: now,
@@ -3867,6 +3865,7 @@ async function banUser(authorId, authorName, reportId) {
     duration,
     authorName: authorName || authorId,
   };
+  if (reportId && chatReportsRaw[reportId]) ban.reportData = chatReportsRaw[reportId];
 
   try {
     const r = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`, {
@@ -3875,6 +3874,7 @@ async function banUser(authorId, authorName, reportId) {
       body: JSON.stringify(ban),
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    if (reportId) await fetch(`${RTDB_URL}/chat/reports/${encodeURIComponent(reportId)}.json`, {method: 'DELETE'});
     await loadChat();
   } catch (e) {
     alert(`Failed to ban: ${e.message}`);
@@ -3894,9 +3894,18 @@ async function dismissReport(reportId) {
 async function unbanUser(authorId) {
   if (!confirm(`Unban ${authorId}?`)) return;
   try {
+    const banR = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`);
+    const ban = banR.ok ? await banR.json() : null;
+    if (ban?.reportData) {
+      await fetch(`${RTDB_URL}/chat/reports.json`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(ban.reportData),
+      });
+    }
     const r = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`, {method: 'DELETE'});
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    await loadChatBans();
+    await loadChat();
   } catch (e) {
     alert(`Failed to unban: ${e.message}`);
   }
