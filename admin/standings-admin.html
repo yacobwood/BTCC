@@ -761,7 +761,7 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
     ANALYTICS
   </button>
-  <button class="tab" id="tab-errors" onclick="switchTab('errors',this);loadErrors()">
+  <button class="tab" id="tab-errors" onclick="switchTab('errors',this);loadFirestore()">
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
     FIRESTORE<span id="errors-badge" style="display:none;background:#E3000B;color:#fff;font-size:9px;font-weight:900;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle"></span>
   </button>
@@ -1519,14 +1519,22 @@ select.input { cursor: pointer; }
 
 <!-- ══════════════════════════════ ERRORS ══════════════════ -->
 <div id="panel-errors" class="tab-panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div class="section-label">FIRESTORE ERRORS</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-sm" onclick="loadErrors()">↻ REFRESH</button>
-      <button class="btn-sm" onclick="dismissAllErrors()" style="color:#E3000B">DISMISS ALL</button>
-    </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div class="section-label">FIRESTORE</div>
+    <button class="btn-sm" onclick="loadFirestore()">↻ REFRESH ALL</button>
   </div>
-  <div id="errors-list"><div class="section-note">Loading…</div></div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text-sec)">CLOUD FUNCTION ERRORS</div>
+    <button class="btn-sm" onclick="dismissAllErrors()" style="color:#E3000B">DISMISS ALL</button>
+  </div>
+  <div id="errors-list" style="margin-bottom:24px"><div class="section-note">Loading…</div></div>
+
+  <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text-sec);margin-bottom:8px">BUG REPORTS</div>
+  <div id="fs-bug-reports-list" style="margin-bottom:24px"><div class="section-note">Loading…</div></div>
+
+  <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text-sec);margin-bottom:8px">PUSH HISTORY</div>
+  <div id="fs-push-history-list"><div class="section-note">Loading…</div></div>
 </div>
 
 <!-- ══════════════════════════════ CHAT ══════ -->
@@ -3248,7 +3256,7 @@ if (savedTab) {
   if (savedTab === 'results') loadResults();
   if (savedTab === 'analytics') loadAnalytics();
   if (savedTab === 'chat') loadChat();
-  if (savedTab === 'errors') loadErrors();
+  if (savedTab === 'errors') loadFirestore();
   if (savedTab === 'dashboard') refreshDashboard();
 } else {
   refreshDashboard();
@@ -3701,6 +3709,80 @@ function toggleRound(id, header) {
 }
 
 // ── Error log ────────────────────────────────────────────────
+async function loadFirestore() {
+  await Promise.all([loadErrors(), loadFsBugReports(), loadFsPushHistory()]);
+}
+
+async function loadFsBugReports() {
+  const el = document.getElementById('fs-bug-reports-list');
+  el.innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${FS_BASE_URL}/bug_reports?key=${FS_API_KEY}&pageSize=100`);
+    const d = await r.json();
+    const docs = (d.documents || []).map(doc => {
+      const f = doc.fields || {};
+      return {
+        id: doc.name.split('/').pop(),
+        category: f.category?.stringValue || 'Other',
+        title: f.title?.stringValue || '',
+        description: f.description?.stringValue || '',
+        submittedAt: f.submittedAt?.stringValue || '',
+      };
+    }).sort((a,b) => b.submittedAt.localeCompare(a.submittedAt));
+    if (!docs.length) { el.innerHTML = '<div class="section-note" style="text-align:center;padding:16px 0;color:var(--green)">✓ No reports</div>'; return; }
+    const col = {Bug:'var(--red)',Crash:'var(--red)','UI Issue':'#60A5FA','Feature Request':'var(--yellow)',Other:'var(--text-sec)'};
+    el.innerHTML = docs.map(r => `
+      <div class="card" style="margin-bottom:8px" id="fsbug-${r.id}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:${col[r.category]||'var(--text-sec)'};text-transform:uppercase">${escHtml(r.category)}</span>
+          <span style="color:var(--text-sec);font-size:11px;margin-left:auto">${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-GB') : '—'}</span>
+          <button class="btn-sm" style="color:var(--red)" onclick="deleteFsBug('${r.id}')">✗</button>
+        </div>
+        ${r.title ? `<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">${escHtml(r.title)}</div>` : ''}
+        ${r.description ? `<div style="font-size:12px;color:var(--text-sec)">${escHtml(r.description)}</div>` : ''}
+      </div>`).join('');
+  } catch(e) { el.innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${escHtml(e.message)}</div>`; }
+}
+
+async function deleteFsBug(id) {
+  document.getElementById(`fsbug-${id}`)?.remove();
+  await fetch(`${FS_BASE_URL}/bug_reports/${id}?key=${FS_API_KEY}`, {method:'DELETE'}).catch(e => console.error('delete bug failed:', e));
+}
+
+async function loadFsPushHistory() {
+  const el = document.getElementById('fs-push-history-list');
+  el.innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${FS_BASE_URL}/push_history?key=${FS_API_KEY}&pageSize=50`);
+    const d = await r.json();
+    const docs = (d.documents || []).map(doc => {
+      const f = doc.fields || {};
+      return {
+        title: f.title?.stringValue || '',
+        body: f.body?.stringValue || '',
+        channel: f.channel?.stringValue || '',
+        type: f.type?.stringValue || 'broadcast',
+        sentAt: f.sentAt?.stringValue || '',
+      };
+    }).sort((a,b) => b.sentAt.localeCompare(a.sentAt));
+    if (!docs.length) { el.innerHTML = '<div class="section-note">No notifications sent yet.</div>'; return; }
+    el.innerHTML = docs.map(n => {
+      const typeBadge = n.type === 'broadcast'
+        ? `<span style="font-size:10px;font-weight:800;color:var(--yellow);letter-spacing:1px">BROADCAST</span>`
+        : `<span style="font-size:10px;font-weight:800;color:#60A5FA;letter-spacing:1px">TEST</span>`;
+      return `<div class="card" style="margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          ${typeBadge}
+          <span style="color:var(--text-sec);font-size:11px;margin-left:auto">${n.sentAt ? new Date(n.sentAt).toLocaleString('en-GB') : '—'}</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">${escHtml(n.title)}</div>
+        ${n.body ? `<div style="font-size:12px;color:var(--text-sec)">${escHtml(n.body)}</div>` : ''}
+        ${n.channel ? `<div style="font-size:11px;color:var(--text-sec);margin-top:3px">channel: ${escHtml(n.channel)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${escHtml(e.message)}</div>`; }
+}
+
 async function loadErrors() {
   const el = document.getElementById('errors-list');
   el.innerHTML = '<div class="section-note">Loading…</div>';
