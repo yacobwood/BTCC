@@ -3825,7 +3825,7 @@ async function loadChatBans() {
     const now = Date.now();
     const bans = Object.entries(data)
       .map(([k, v]) => ({authorId: k, ...v}))
-      .filter(b => b.expiresAt === null || b.expiresAt > now)
+      .filter(b => !b.expiresAt || b.expiresAt > now)
       .sort((a, b) => (b.bannedAt || 0) - (a.bannedAt || 0));
     if (!bans.length) { el.innerHTML = '<div class="section-note">No active bans.</div>'; return; }
     el.innerHTML = bans.map(ban => {
