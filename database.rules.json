@@ -6,7 +6,7 @@
       "reports": {
         ".read": true,
         "$reportId": {
-          ".write": "!data.exists()",
+          ".write": "!data.exists() || !newData.exists()",
           ".validate": "newData.hasChildren(['flaggedMessage', 'reportedAt'])"
         }
       },
