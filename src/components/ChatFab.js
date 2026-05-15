@@ -32,14 +32,26 @@ export default function ChatFab({bottomOffset = 0}) {
   const sheetLift = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    const show = Keyboard.addListener('keyboardWillShow', e => {
-      Animated.timing(sheetLift, {toValue: e.endCoordinates.height, duration: 250, useNativeDriver: false}).start();
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const duration = Platform.OS === 'ios' ? 250 : 0;
+    let liftTimer = null;
+
+    const show = Keyboard.addListener(showEvent, e => {
+      clearTimeout(liftTimer);
+      // Debounce: floating keyboards fire show then hide in quick succession.
+      // Wait 80ms before committing the lift so transient events cancel each other.
+      liftTimer = setTimeout(() => {
+        Animated.timing(sheetLift, {toValue: e.endCoordinates.height, duration, useNativeDriver: false}).start();
+      }, Platform.OS === 'ios' ? 0 : 80);
     });
-    const hide = Keyboard.addListener('keyboardWillHide', () => {
-      Animated.timing(sheetLift, {toValue: 0, duration: 250, useNativeDriver: false}).start();
+    const hide = Keyboard.addListener(hideEvent, () => {
+      clearTimeout(liftTimer);
+      liftTimer = setTimeout(() => {
+        Animated.timing(sheetLift, {toValue: 0, duration, useNativeDriver: false}).start();
+      }, Platform.OS === 'ios' ? 0 : 80);
     });
-    return () => { show.remove(); hide.remove(); };
+    return () => { show.remove(); hide.remove(); clearTimeout(liftTimer); };
   }, [sheetLift]);
 
   const panResponder = useRef(PanResponder.create({
