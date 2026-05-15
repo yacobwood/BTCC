@@ -1400,6 +1400,22 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
+  <div class="scraper-card" id="sc-btcc-stats">
+    <div class="scraper-head">
+      <div class="scraper-title">ALL-TIME STATS</div>
+      <div class="scraper-status-chip" id="ss-btcc-stats">—</div>
+    </div>
+    <div class="scraper-desc">All-time records from btcc.net → <strong>records.json</strong>. Auto: daily 06:00 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);cursor:pointer">
+          <input type="checkbox" id="si-stats-dry-run"> DRY RUN
+        </label>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-btcc-stats.yml','btcc-stats')">RUN ▶</button>
+    </div>
+  </div>
+
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
@@ -1914,6 +1930,7 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-results.yml',          key:'results'},
   {file:'scrape-calendar.yml',         key:'calendar'},
   {file:'scrape-schedule.yml',         key:'schedule'},
+  {file:'scrape-btcc-stats.yml',       key:'btcc-stats'},
 ];
 
 function startLiveTick() {
@@ -1940,6 +1957,7 @@ function scraperInputs(workflow) {
     return inputs;
   }
   if (workflow === 'scrape-calendar.yml') return {season: String(document.getElementById('si-season').value || 2026)};
+  if (workflow === 'scrape-btcc-stats.yml') return {dry_run: String(!!document.getElementById('si-stats-dry-run')?.checked)};
   return {};
 }
 
@@ -3787,6 +3805,7 @@ async function loadChatReports() {
             <option value="permanent">Permanent</option>
           </select>
           <button class="btn-sm" onclick="banUser('${htmlEsc(msg.authorId||'')}','${htmlEsc(msg.authorName||'')}','${htmlEsc(rep.id)}')">BAN USER</button>
+          <button class="btn-sm" style="color:var(--text-sec)" onclick="dismissReport('${htmlEsc(rep.id)}')">DISMISS</button>
         </div>
       </div>`;
     }).join('');
@@ -3858,6 +3877,16 @@ async function banUser(authorId, authorName, reportId) {
     await loadChat();
   } catch (e) {
     alert(`Failed to ban: ${e.message}`);
+  }
+}
+
+async function dismissReport(reportId) {
+  try {
+    const r = await fetch(`${RTDB_URL}/chat/reports/${encodeURIComponent(reportId)}.json`, {method: 'DELETE'});
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    await loadChatReports();
+  } catch (e) {
+    alert(`Failed to dismiss: ${e.message}`);
   }
 }
 
