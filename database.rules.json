@@ -4,6 +4,7 @@
     ".write": false,
     "chat": {
       "reports": {
+        ".read": true,
         "$reportId": {
           ".write": "!data.exists()",
           ".validate": "newData.hasChildren(['flaggedMessage', 'reportedAt'])"
@@ -32,9 +33,19 @@
           "hidden": {
             ".validate": "newData.isBoolean() && (!data.exists() ? newData.val() === false : (data.val() === false || newData.val() === true))"
           },
+          "type": {
+            ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())"
+          },
           "$other": {
             ".validate": false
           }
+        }
+      },
+      "bans": {
+        ".read": true,
+        "$authorId": {
+          ".write": true,
+          ".validate": "!newData.exists() || newData.hasChildren(['bannedAt', 'expiresAt', 'duration', 'authorName'])"
         }
       }
     }

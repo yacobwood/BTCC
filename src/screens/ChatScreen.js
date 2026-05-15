@@ -43,6 +43,8 @@ export default function ChatScreen({onClose} = {}) {
   const [flaggedIds, setFlaggedIds] = useState(new Set());
   const myAuthorIdRef = useRef('anonymous');
   const [myAuthorId, setMyAuthorId] = useState('anonymous');
+  const [isBanned, setIsBanned] = useState(false);
+  const [banInfo, setBanInfo] = useState(null);
   const listRef = useRef(null);
 
   useEffect(() => {
@@ -72,6 +74,19 @@ export default function ChatScreen({onClose} = {}) {
 
     return () => ref.off('value');
   }, []);
+
+  useEffect(() => {
+    if (myAuthorId === 'anonymous') return;
+    const banRef = DB.ref(`/chat/bans/${myAuthorId}`);
+    banRef.on('value', snap => {
+      const ban = snap.val();
+      if (!ban) { setIsBanned(false); setBanInfo(null); return; }
+      const expired = ban.expiresAt !== null && ban.expiresAt < Date.now();
+      setIsBanned(!expired);
+      setBanInfo(expired ? null : ban);
+    });
+    return () => banRef.off('value');
+  }, [myAuthorId]);
 
   const saveName = async (name) => {
     const trimmed = name.trim() || `Fan #${myAuthorIdRef.current.slice(-4)}`;
@@ -185,6 +200,13 @@ export default function ChatScreen({onClose} = {}) {
   };
 
   const renderMessage = ({item}) => {
+    if (item.type === 'ban_notice') {
+      return (
+        <View style={styles.systemMsg}>
+          <Text style={styles.systemMsgText}>{item.text}</Text>
+        </View>
+      );
+    }
     const isOwn = item.authorId === myAuthorId;
     return (
       <View style={styles.msgRow}>
@@ -272,8 +294,16 @@ export default function ChatScreen({onClose} = {}) {
         />
       )}
 
-      {/* Name prompt */}
-      {showNamePrompt ? (
+      {/* Banned state */}
+      {isBanned ? (
+        <View style={[styles.inputRow, {paddingBottom: stableBottom + 12, justifyContent: 'center', alignItems: 'center'}]}>
+          <Text style={styles.bannedText}>
+            {banInfo?.duration === 'permanent'
+              ? 'You are permanently banned from this chat.'
+              : 'You are banned from this chat.'}
+          </Text>
+        </View>
+      ) : showNamePrompt ? (
         <View style={[styles.namePrompt, {paddingBottom: stableBottom + 12}]}>
           <Text style={styles.namePromptTitle}>Choose a display name</Text>
           <TextInput
@@ -434,4 +464,21 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.outline,
   },
   sendBtnDisabled: {opacity: 0.4},
+
+  systemMsg: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  systemMsgText: {
+    color: '#E53935',
+    fontSize: 13,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  bannedText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+  },
 });

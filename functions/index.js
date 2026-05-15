@@ -715,6 +715,37 @@ exports.triggerDigest = onRequest(
   },
 );
 
+// Apply ban: hide all existing messages from the banned author and write a system notice
+exports.onChatBan = onValueCreated(
+  {ref: '/chat/bans/{authorId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
+  async (event) => {
+    try {
+      const authorId = event.params.authorId;
+      const ban = event.data.val();
+      const db = getDatabase('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
+      const messagesRef = db.ref('/chat/messages');
+
+      const snap = await messagesRef.orderByChild('authorId').equalTo(authorId).once('value');
+      const updates = {};
+      snap.forEach(c => { updates[`${c.key}/hidden`] = true; });
+      if (Object.keys(updates).length > 0) await messagesRef.update(updates);
+
+      const durationText = ban.duration === 'permanent' ? 'permanently' : `for ${ban.duration}`;
+      await messagesRef.push({
+        text: `${ban.authorName} has been banned ${durationText}.`,
+        authorId: 'system',
+        authorName: 'BTCC Hub Admin',
+        timestamp: Date.now(),
+        flagCount: 0,
+        hidden: false,
+        type: 'ban_notice',
+      });
+    } catch (e) {
+      console.error('onChatBan failed:', e);
+    }
+  },
+);
+
 // Trim live chat to last 200 messages when a new one is written
 exports.trimChat = onValueCreated(
   {ref: '/chat/messages/{msgId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},

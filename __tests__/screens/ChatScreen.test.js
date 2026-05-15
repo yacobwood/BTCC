@@ -23,6 +23,7 @@ jest.mock('../../src/utils/timeAgo', () => ({
 
 // Variable names must be prefixed with "mock" to be accessible from a hoisted jest.mock factory
 var mockDbOn, mockDbOff, mockDbPush, mockDbUpdate, mockDbRemove, mockDbTransaction, mockDbRef;
+var mockBanOn, mockBanOff, mockBanRef;
 
 jest.mock('@react-native-firebase/database', () => {
   mockDbOn          = jest.fn();
@@ -45,7 +46,15 @@ jest.mock('@react-native-firebase/database', () => {
     remove:        mockDbRemove,
     transaction:   mockDbTransaction,
   };
-  const db = jest.fn(() => ({ref: jest.fn(() => mockDbRef)}));
+  mockBanOn  = jest.fn();
+  mockBanOff = jest.fn();
+  mockBanRef = {on: mockBanOn, off: mockBanOff};
+  const db = jest.fn(() => ({
+    ref: jest.fn(path => {
+      if (path && path.startsWith('/chat/bans/')) return mockBanRef;
+      return mockDbRef;
+    }),
+  }));
   db.ServerValue = {TIMESTAMP: 'TIMESTAMP'};
   return db;
 });
@@ -56,6 +65,12 @@ function triggerMessages(msgs) {
     forEach: cb => msgs.forEach(m => cb({key: m.id, val: () => m})),
   };
   const onCall = mockDbOn.mock.calls[0];
+  if (onCall) onCall[1](snap);
+}
+
+function triggerBan(banData) {
+  const snap = {val: () => banData};
+  const onCall = mockBanOn.mock.calls[0];
   if (onCall) onCall[1](snap);
 }
 
@@ -71,6 +86,8 @@ describe('ChatScreen', () => {
     const {getFCMToken} = require('../../src/utils/notifications');
     getFCMToken.mockResolvedValue('test-fcm-token-abc12345');
     mockDbOn.mockImplementation(() => {});
+    mockBanOn.mockImplementation(() => {});
+    mockBanOff.mockImplementation(() => {});
     mockDbPush.mockResolvedValue({});
     mockDbRemove.mockResolvedValue({});
     mockDbTransaction.mockImplementation(cb => {
@@ -774,5 +791,76 @@ describe('ChatScreen', () => {
     await act(async () => { triggerMessages([]); });
     await waitFor(() => {});
     expect(queryByLabelText('Close chat')).toBeNull();
+  });
+
+  // ── Ban system ────────────────────────────────────────────────────────────────
+
+  it('renders ban notice system message with red italic style (not a regular row)', async () => {
+    const {getByText, queryByLabelText} = renderChat();
+    await act(async () => {
+      triggerMessages([
+        {id: 'sys1', text: 'Test Fan has been banned for 24h.', authorId: 'system', authorName: 'BTCC Hub Admin', timestamp: 1000, flagCount: 0, hidden: false, type: 'ban_notice'},
+      ]);
+    });
+    await waitFor(() => expect(getByText('Test Fan has been banned for 24h.')).toBeTruthy());
+    // System message should not have flag or delete buttons
+    expect(queryByLabelText('Flag message')).toBeNull();
+    expect(queryByLabelText('Delete message')).toBeNull();
+  });
+
+  it('shows banned input row when an active ban exists', async () => {
+    const {getByText, queryByPlaceholderText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
+    await act(async () => { triggerMessages([]); });
+    await act(async () => {
+      triggerBan({bannedAt: Date.now(), expiresAt: Date.now() + 3600000, duration: '1h', authorName: 'Test Fan'});
+    });
+    await waitFor(() => expect(getByText(/banned from this chat/i)).toBeTruthy());
+    expect(queryByPlaceholderText(/say something/i)).toBeNull();
+  });
+
+  it('shows permanently banned message when duration is permanent', async () => {
+    const {getByText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    await act(async () => { triggerMessages([]); });
+    await act(async () => {
+      triggerBan({bannedAt: Date.now(), expiresAt: null, duration: 'permanent', authorName: 'Test Fan'});
+    });
+    await waitFor(() => expect(getByText(/permanently banned/i)).toBeTruthy());
+  });
+
+  it('shows normal input when ban is expired', async () => {
+    const {getByPlaceholderText, queryByText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    await act(async () => { triggerMessages([]); });
+    await act(async () => {
+      triggerBan({bannedAt: Date.now() - 7200000, expiresAt: Date.now() - 3600000, duration: '1h', authorName: 'Test Fan'});
+    });
+    await waitFor(() => expect(getByPlaceholderText(/say something/i)).toBeTruthy());
+    expect(queryByText(/banned from this chat/i)).toBeNull();
+  });
+
+  it('shows normal input when no ban exists', async () => {
+    const {getByPlaceholderText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    await act(async () => { triggerMessages([]); });
+    await act(async () => {
+      triggerBan(null);
+    });
+    await waitFor(() => expect(getByPlaceholderText(/say something/i)).toBeTruthy());
+  });
+
+  it('attaches ban listener when myAuthorId resolves from anonymous', async () => {
+    renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    await waitFor(() => expect(mockBanOn).toHaveBeenCalled());
+  });
+
+  it('cleans up ban listener on unmount', async () => {
+    const {unmount} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    await act(async () => { triggerMessages([]); });
+    unmount();
+    expect(mockBanOff).toHaveBeenCalled();
   });
 });

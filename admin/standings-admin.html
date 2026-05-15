@@ -765,6 +765,10 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
     ERRORS<span id="errors-badge" style="display:none;background:#E3000B;color:#fff;font-size:9px;font-weight:900;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle"></span>
   </button>
+  <button class="tab" onclick="switchTab('chat',this);loadChat()">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    CHAT
+  </button>
 </div>
 
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
@@ -1507,6 +1511,20 @@ select.input { cursor: pointer; }
     </div>
   </div>
   <div id="errors-list"><div class="section-note">Loading…</div></div>
+</div>
+
+<!-- ══════════════════════════════ CHAT ══════ -->
+<div id="panel-chat" class="tab-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-label">FLAGGED REPORTS</div>
+    <button class="btn-sm" onclick="loadChat()">↻ REFRESH</button>
+  </div>
+  <div id="chat-reports-list"><div class="section-note">Loading…</div></div>
+
+  <div style="margin-top:28px;margin-bottom:12px">
+    <div class="section-label">ACTIVE BANS</div>
+  </div>
+  <div id="chat-bans-list"><div class="section-note">Loading…</div></div>
 </div>
 
 <script>
@@ -3210,6 +3228,7 @@ if (savedTab) {
   if (savedTab === 'pushhistory') loadPushHistory();
   if (savedTab === 'results') loadResults();
   if (savedTab === 'analytics') loadAnalytics();
+  if (savedTab === 'chat') loadChat();
   if (savedTab === 'dashboard') refreshDashboard();
 } else {
   refreshDashboard();
@@ -3728,6 +3747,129 @@ async function dismissAllErrors() {
     method: 'PATCH', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({fields: {resolved: {booleanValue: true}}}),
   }).catch(e => console.error('dismiss failed:', id, e))));
+}
+
+// ── Chat moderation ──────────────────────────────────────────────────────────
+const RTDB_URL = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
+
+async function loadChat() {
+  await Promise.all([loadChatReports(), loadChatBans()]);
+}
+
+async function loadChatReports() {
+  const el = document.getElementById('chat-reports-list');
+  el.innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${RTDB_URL}/chat/reports.json?orderBy="reportedAt"&limitToLast=50`);
+    const data = await r.json();
+    if (!data) { el.innerHTML = '<div class="section-note">No reports yet.</div>'; return; }
+    const reports = Object.entries(data)
+      .map(([k, v]) => ({id: k, ...v}))
+      .sort((a, b) => (b.reportedAt || 0) - (a.reportedAt || 0));
+    if (!reports.length) { el.innerHTML = '<div class="section-note">No reports yet.</div>'; return; }
+    el.innerHTML = reports.map(rep => {
+      const msg = rep.flaggedMessage || {};
+      const ts = rep.reportedAt ? new Date(rep.reportedAt).toLocaleString() : '—';
+      return `<div class="card" style="margin-bottom:10px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+          <div>
+            <span style="color:var(--yellow);font-weight:700;font-size:13px">${htmlEsc(msg.authorName || '—')}</span>
+            <span style="color:var(--text-sec);font-size:11px"> #${htmlEsc((msg.authorId||'').slice(-4))}</span>
+            <span style="color:var(--text-sec);font-size:11px;margin-left:8px">${htmlEsc(ts)}</span>
+          </div>
+        </div>
+        <div style="color:var(--text);font-size:14px;margin-bottom:10px">${htmlEsc(msg.text || '—')}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select id="ban-dur-${htmlEsc(rep.id)}" style="background:var(--surface);color:var(--text);border:1px solid var(--outline);border-radius:6px;padding:5px 8px;font-size:12px">
+            <option value="1h">1 hour</option>
+            <option value="24h">24 hours</option>
+            <option value="7d">7 days</option>
+            <option value="permanent">Permanent</option>
+          </select>
+          <button class="btn-sm" onclick="banUser('${htmlEsc(msg.authorId||'')}','${htmlEsc(msg.authorName||'')}','${htmlEsc(rep.id)}')">BAN USER</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${htmlEsc(e.message)}</div>`;
+  }
+}
+
+async function loadChatBans() {
+  const el = document.getElementById('chat-bans-list');
+  el.innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const r = await fetch(`${RTDB_URL}/chat/bans.json`);
+    const data = await r.json();
+    if (!data) { el.innerHTML = '<div class="section-note">No active bans.</div>'; return; }
+    const now = Date.now();
+    const bans = Object.entries(data)
+      .map(([k, v]) => ({authorId: k, ...v}))
+      .filter(b => b.expiresAt === null || b.expiresAt > now)
+      .sort((a, b) => (b.bannedAt || 0) - (a.bannedAt || 0));
+    if (!bans.length) { el.innerHTML = '<div class="section-note">No active bans.</div>'; return; }
+    el.innerHTML = bans.map(ban => {
+      const bannedAt = ban.bannedAt ? new Date(ban.bannedAt).toLocaleString() : '—';
+      const expiresAt = ban.expiresAt ? new Date(ban.expiresAt).toLocaleString() : 'Permanent';
+      return `<div class="card" style="margin-bottom:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div>
+          <span style="color:var(--yellow);font-weight:700;font-size:13px">${htmlEsc(ban.authorName || '—')}</span>
+          <span style="color:var(--text-sec);font-size:11px"> #${htmlEsc((ban.authorId||'').slice(-4))}</span>
+          <div style="color:var(--text-sec);font-size:12px;margin-top:4px">
+            Banned: ${htmlEsc(bannedAt)} &middot; Expires: ${htmlEsc(expiresAt)} &middot; Duration: ${htmlEsc(ban.duration||'—')}
+          </div>
+        </div>
+        <button class="btn-sm" style="color:var(--red)" onclick="unbanUser('${htmlEsc(ban.authorId)}')">UNBAN</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${htmlEsc(e.message)}</div>`;
+  }
+}
+
+async function banUser(authorId, authorName, reportId) {
+  if (!authorId) { alert('No authorId on this report.'); return; }
+  const durSel = document.getElementById(`ban-dur-${reportId}`);
+  const duration = durSel ? durSel.value : '24h';
+  if (!confirm(`Ban ${authorName || authorId} for ${duration}?`)) return;
+
+  const now = Date.now();
+  const durationMs = {
+    '1h': 3600000,
+    '24h': 86400000,
+    '7d': 604800000,
+    'permanent': null,
+  };
+  const ms = durationMs[duration];
+  const ban = {
+    bannedAt: now,
+    expiresAt: ms !== null ? now + ms : null,
+    duration,
+    authorName: authorName || authorId,
+  };
+
+  try {
+    const r = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(ban),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    await loadChat();
+  } catch (e) {
+    alert(`Failed to ban: ${e.message}`);
+  }
+}
+
+async function unbanUser(authorId) {
+  if (!confirm(`Unban ${authorId}?`)) return;
+  try {
+    const r = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`, {method: 'DELETE'});
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    await loadChatBans();
+  } catch (e) {
+    alert(`Failed to unban: ${e.message}`);
+  }
 }
 
 async function refreshErrorBadge() {
