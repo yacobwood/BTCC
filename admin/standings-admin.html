@@ -3836,7 +3836,7 @@ async function loadChatBans() {
           <span style="color:var(--yellow);font-weight:700;font-size:13px">${htmlEsc(ban.authorName || '—')}</span>
           <span style="color:var(--text-sec);font-size:11px"> #${htmlEsc((ban.authorId||'').slice(-4))}</span>
           <div style="color:var(--text-sec);font-size:12px;margin-top:4px">
-            Banned: ${htmlEsc(bannedAt)} &middot; Expires: ${htmlEsc(expiresAt)} &middot; Duration: ${htmlEsc(ban.duration||'—')}
+            Banned: ${htmlEsc(bannedAt)} &middot; Expires: ${htmlEsc(expiresAt)} &middot; Duration: ${htmlEsc({'1h':'1 hour','24h':'24 hours','7d':'7 days','permanent':'Permanent'}[ban.duration] || ban.duration || '—')}
           </div>
         </div>
         <button class="btn-sm" style="color:var(--red)" onclick="unbanUser('${htmlEsc(ban.authorId)}')">UNBAN</button>
