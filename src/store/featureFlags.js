@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useState, useEffect, useMemo} from 'react';
-import {Platform} from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getMessaging, getToken} from '@react-native-firebase/messaging';
 import DeviceInfo from 'react-native-device-info';
@@ -14,8 +14,6 @@ const defaults = {
   hub_news_enabled: true,
   live_timing_in_app: false,
   live_chat: false,
-  live_chat_min_build_android: 68,
-  live_chat_min_build_ios: 68,
   update_available: true,
   update_min_version_ios: 0,
   update_min_version_android: 63,
@@ -68,12 +66,9 @@ export function FeatureFlagsProvider({children}) {
 
   const effectiveFlags = useMemo(() => {
     const build = parseInt(DeviceInfo.getBuildNumber(), 10);
-    const minBuild = Platform.OS === 'android'
-      ? (flags.live_chat_min_build_android ?? 0)
-      : (flags.live_chat_min_build_ios ?? 0);
     return {
       ...flags,
-      live_chat: flags.live_chat && (minBuild === 0 || build >= minBuild),
+      live_chat: flags.live_chat && build >= 68,
     };
   }, [flags]);
 
