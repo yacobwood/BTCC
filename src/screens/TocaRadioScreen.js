@@ -186,18 +186,20 @@ export default function TocaRadioScreen({navigation}) {
         </View>
       )}
 
-      {/* Hidden WebView  -  stays mounted briefly after capture for clean renderer exit */}
+      {/* Hidden WebView  -  zero-size absolute wrapper keeps it out of the flex layout tree */}
       {webViewMounted && (
-        <WebView
-          ref={webviewRef}
-          source={{uri: TOCA_URL}}
-          injectedJavaScriptBeforeContentLoaded={INJECT_JS}
-          injectedJavaScriptForMainFrameOnly={false}
-          onMessage={onMessage}
-          mediaPlaybackRequiresUserAction={false}
-          allowsInlineMediaPlayback
-          style={styles.hiddenWebView}
-        />
+        <View style={styles.hiddenWebViewWrap}>
+          <WebView
+            ref={webviewRef}
+            source={{uri: TOCA_URL}}
+            injectedJavaScriptBeforeContentLoaded={INJECT_JS}
+            injectedJavaScriptForMainFrameOnly={false}
+            onMessage={onMessage}
+            mediaPlaybackRequiresUserAction={false}
+            allowsInlineMediaPlayback
+            style={styles.hiddenWebView}
+          />
+        </View>
       )}
 
       {/* Native now-playing UI */}
@@ -254,8 +256,9 @@ const styles = StyleSheet.create({
 
   center: {flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16, paddingHorizontal: 32},
   connectingText: {color: Colors.textSecondary, fontSize: 15, marginTop: 4},
-  // Rendered off-screen so it loads fully but the user never sees it
-  hiddenWebView: {position: 'absolute', width: SW, height: SH, top: -SH * 2, left: 0},
+  // Zero-size absolute container keeps the WebView fully outside the flex layout tree
+  hiddenWebViewWrap: {position: 'absolute', width: 0, height: 0, overflow: 'hidden'},
+  hiddenWebView: {width: SW, height: SH},
   radioIconWrap: {width: 100, height: 100, borderRadius: 50, backgroundColor: Colors.card, justifyContent: 'center', alignItems: 'center'},
   liveBadge: {flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(220,0,0,0.15)', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 5},
   liveDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: '#e00000'},
