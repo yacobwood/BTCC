@@ -124,8 +124,12 @@ export default function TocaRadioScreen({navigation}) {
 
   // If already playing from a previous visit, go straight to playing phase
   const [phase, setPhase] = useState(isTocaPlaying ? 'playing' : 'connecting');
+  // Keep the hidden WebView mounted briefly after stream capture so the renderer
+  // can wind down gracefully rather than being killed mid-load (avoids logcat crash)
+  const [webViewMounted, setWebViewMounted] = useState(!isTocaPlaying);
   const webviewRef = useRef(null);
   const timeoutRef = useRef(null);
+  const webViewDismissRef = useRef(null);
 
   useEffect(() => {
     Analytics.screen('toca_live_radio');
@@ -138,6 +142,8 @@ export default function TocaRadioScreen({navigation}) {
     return () => clearTimeout(timeoutRef.current);
   }, [phase]);
 
+  useEffect(() => () => clearTimeout(webViewDismissRef.current), []);
+
   const onMessage = useCallback((e) => {
     try {
       const msg = JSON.parse(e.nativeEvent.data);
@@ -147,6 +153,8 @@ export default function TocaRadioScreen({navigation}) {
         webviewRef.current?.injectJavaScript(PAUSE_JS);
         play({name: STATION_NAME, streamUrl: msg.url});
         setPhase('playing');
+        // Delay WebView unmount so the renderer can exit cleanly (avoids crash log)
+        webViewDismissRef.current = setTimeout(() => setWebViewMounted(false), 4000);
       }
     } catch {}
   }, [play]);
@@ -175,24 +183,26 @@ export default function TocaRadioScreen({navigation}) {
         )}
       </View>
 
-      {/* Connecting phase  -  hidden WebView sniffs stream URL */}
+      {/* Connecting phase spinner */}
       {phase === 'connecting' && (
-        <>
-          <View style={styles.center}>
-            <ActivityIndicator color={Colors.yellow} size="large" />
-            <Text style={styles.connectingText}>Connecting to TOCA Radio...</Text>
-          </View>
-          <WebView
-            ref={webviewRef}
-            source={{uri: TOCA_URL}}
-            injectedJavaScriptBeforeContentLoaded={INJECT_JS}
-            injectedJavaScriptForMainFrameOnly={false}
-            onMessage={onMessage}
-            mediaPlaybackRequiresUserAction={false}
-            allowsInlineMediaPlayback
-            style={styles.hiddenWebView}
-          />
-        </>
+        <View style={styles.center}>
+          <ActivityIndicator color={Colors.yellow} size="large" />
+          <Text style={styles.connectingText}>Connecting to TOCA Radio...</Text>
+        </View>
+      )}
+
+      {/* Hidden WebView  -  stays mounted briefly after capture for clean renderer exit */}
+      {webViewMounted && (
+        <WebView
+          ref={webviewRef}
+          source={{uri: TOCA_URL}}
+          injectedJavaScriptBeforeContentLoaded={INJECT_JS}
+          injectedJavaScriptForMainFrameOnly={false}
+          onMessage={onMessage}
+          mediaPlaybackRequiresUserAction={false}
+          allowsInlineMediaPlayback
+          style={styles.hiddenWebView}
+        />
       )}
 
       {/* Native now-playing UI */}
