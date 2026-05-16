@@ -24,7 +24,7 @@ import {useUnits} from '../store/units';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useLiveUrls, ensureHttps} from '../store/liveUrls';
 import {fetchResults, fetchCalendar} from '../api/client';
-import {parseResults} from '../api/parsers';
+import {parseResults, parseCalendar} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
 import {useBroadcaster} from '../utils/broadcaster';
@@ -75,7 +75,8 @@ export default function TrackDetailScreen({route, navigation}) {
     const targetRound = trackParam?.round ?? roundParam;
     if (!targetRound) return;
     fetchCalendar().then(cal => {
-      const found = (cal.rounds || []).find(r => r.round === targetRound);
+      const parsed = parseCalendar(cal);
+      const found = (parsed.rounds || []).find(r => r.round === targetRound);
       if (found) setTrack(found);
     }).catch(() => {});
   }, []);
@@ -745,7 +746,7 @@ const styles = StyleSheet.create({
   cornerSplitRight: {color: '#4ADE80', fontSize: 12, fontWeight: '800'},
 
   // Cards
-  card: {backgroundColor: Colors.card, borderRadius: 10, padding: 14, marginTop: 12},
+  card: {backgroundColor: Colors.card, borderRadius: 10, padding: 14},
   cardText: {color: Colors.textSecondary, fontSize: 14, lineHeight: 22},
   factLabel: {color: Colors.yellow, fontSize: 11, fontWeight: '800', letterSpacing: 1, marginBottom: 6},
 
