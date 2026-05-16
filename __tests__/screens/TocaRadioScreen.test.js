@@ -79,16 +79,15 @@ describe('TocaRadioScreen', () => {
 
   it('shows stop button when TOCA is playing', () => {
     mockRadio({currentStation: 'TOCA Live Radio', isPlaying: true});
-    const {getAllByLabelText} = renderWithProviders(<TocaRadioScreen navigation={nav} />);
-    // Stop radio appears in both the header and the playing-phase body
-    expect(getAllByLabelText('Stop radio').length).toBeGreaterThan(0);
+    const {getByLabelText} = renderWithProviders(<TocaRadioScreen navigation={nav} />);
+    expect(getByLabelText('Stop radio')).toBeTruthy();
   });
 
   it('calls stop and navigates back when Stop is pressed while playing', () => {
     const stop = jest.fn();
     mockRadio({currentStation: 'TOCA Live Radio', isPlaying: true, stop});
-    const {getAllByLabelText} = renderWithProviders(<TocaRadioScreen navigation={nav} />);
-    fireEvent.press(getAllByLabelText('Stop radio')[0]);
+    const {getByLabelText} = renderWithProviders(<TocaRadioScreen navigation={nav} />);
+    fireEvent.press(getByLabelText('Stop radio'));
     expect(stop).toHaveBeenCalled();
     expect(nav.goBack).toHaveBeenCalled();
   });
