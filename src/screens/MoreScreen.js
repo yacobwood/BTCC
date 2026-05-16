@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Image,
   StyleSheet,
   Linking,
   Platform,
@@ -90,7 +91,22 @@ export default function MoreScreen({navigation}) {
         {/* Support */}
         <Text style={styles.sectionTitle}>SUPPORT</Text>
         <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
-        {Platform.OS !== 'ios' && <MoreRow label="Buy me a coffee" icon="local-cafe" onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://buymeacoffee.com/btcchub'); }} />}
+        {Platform.OS !== 'ios' && (
+          <>
+            <TouchableOpacity
+              style={styles.coffeeBtn}
+              activeOpacity={0.8}
+              onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://www.buymeacoffee.com/btcchub'); }}
+              accessibilityLabel="Buy me a coffee"
+              accessibilityRole="button">
+              <Image
+                source={require('../assets/bmc-button.png')}
+                style={styles.coffeeBtnImg}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -118,4 +134,6 @@ const styles = StyleSheet.create({
   },
   rowLabel: {flex: 1, color: '#fff', fontSize: 15, fontWeight: '600', marginLeft: 16},
   divider: {height: 1, backgroundColor: Colors.outline, marginVertical: 16},
+  coffeeBtn: {marginTop: 4},
+  coffeeBtnImg: {width: 245, height: 69},
 });

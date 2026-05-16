@@ -1,5 +1,6 @@
 import React from 'react';
 import {fireEvent, waitFor} from '@testing-library/react-native';
+import {Platform, Linking} from 'react-native';
 import MoreScreen from '../../src/screens/MoreScreen';
 import {renderWithProviders, makeNav} from './testUtils';
 
@@ -83,5 +84,32 @@ describe('MoreScreen', () => {
     await waitFor(() => getByLabelText('Partners & Sponsors'));
     fireEvent.press(getByLabelText('Partners & Sponsors'));
     expect(nav.navigate).toHaveBeenCalledWith('Partners');
+  });
+
+  // ── Support buttons (Android only) ────────────────────────────────────────────
+
+  it('shows Buy Me a Coffee button on Android', async () => {
+    Platform.OS = 'android';
+    const {getByLabelText} = renderMore();
+    await waitFor(() => {
+      expect(getByLabelText('Buy me a coffee')).toBeTruthy();
+    });
+    Platform.OS = 'ios';
+  });
+
+  it('opens buymeacoffee URL when Buy Me a Coffee is pressed', async () => {
+    Platform.OS = 'android';
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+    const {getByLabelText} = renderMore();
+    await waitFor(() => getByLabelText('Buy me a coffee'));
+    fireEvent.press(getByLabelText('Buy me a coffee'));
+    expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub');
+    Platform.OS = 'ios';
+  });
+
+  it('hides support buttons on iOS', async () => {
+    Platform.OS = 'ios';
+    const {queryByLabelText} = renderMore();
+    await waitFor(() => expect(queryByLabelText('Buy me a coffee')).toBeNull());
   });
 });
