@@ -20,6 +20,8 @@ const TIMEOUT_MS = 15000;
 //   3. new Audio(url)                (constructor  -  bypasses src setter!)
 //   4. static <audio src="url">      (HTML attribute, polled via currentSrc)
 //   5. XHR / fetch to a stream URL
+//   6. data-audiopath attribute      (Sonaar Music / Voscast player pattern)
+const STREAM_HOST_RE = /voscast|radiojar|streamguys|tritondigital|shoutcast|icecast/;
 const INJECT_JS = `(function() {
   var sent = false;
   function send(url) {
@@ -31,6 +33,11 @@ const INJECT_JS = `(function() {
     sent = true;
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'stream',url:url}));
   }
+  function isStreamUrl(u) {
+    if (!u) return false;
+    var l = u.toLowerCase();
+    return /\\.m3u8|\\.(mp3|aac|ogg)(\\?|$)|voscast|radiojar|streamguys|tritondigital|shoutcast|icecast|\\/(?:stream|listen|live\\.)(\\?|$)/.test(l);
+  }
 
   // 1. HTMLMediaElement.src setter (audio.src = url)
   try {
@@ -41,11 +48,11 @@ const INJECT_JS = `(function() {
     });
   } catch(e){}
 
-  // 2. Element.setAttribute (audio.setAttribute('src',url) and <source src="">)
+  // 2. Element.setAttribute  -  catches src, data-src, and data-audiopath (Sonaar/Voscast)
   try {
     var origSetAttr = Element.prototype.setAttribute;
     Element.prototype.setAttribute = function(name,value){
-      try{ if(name==='src'||name==='data-src') send(value); }catch(e){}
+      try{ if(name==='src'||name==='data-src'||name==='data-audiopath') send(value); }catch(e){}
       return origSetAttr.apply(this,arguments);
     };
   } catch(e){}
@@ -63,8 +70,8 @@ const INJECT_JS = `(function() {
     }
   } catch(e){}
 
-  // 4. Poll audio/video elements for currentSrc (catches static HTML src attributes
-  //    set during HTML parsing  -  those never fire JS property setters)
+  // 4. Poll audio/video currentSrc AND data-audiopath attributes (Sonaar stores stream
+  //    URL in data-audiopath on track <li> elements before copying it to audio.src)
   var polls = 0;
   var poll = setInterval(function(){
     if(sent||++polls>60){clearInterval(poll);return;}
@@ -74,16 +81,17 @@ const INJECT_JS = `(function() {
         if(u&&u.indexOf('http')===0) send(u);
         el.querySelectorAll('source').forEach(function(s){if(s.src&&s.src.indexOf('http')===0)send(s.src);});
       });
+      document.querySelectorAll('[data-audiopath]').forEach(function(el){
+        var u=el.getAttribute('data-audiopath');
+        if(u&&u.indexOf('http')===0) send(u);
+      });
     }catch(e){}
   },500);
 
   // 5. XHR  -  for players that fetch audio data directly
   var xhrOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(m,u){
-    try{
-      var l=String(u).toLowerCase();
-      if(/\\.m3u8|\\.(mp3|aac|ogg)(\\?|$)|radiojar|streamguys|tritondigital|shoutcast|icecast|\\/(?:stream|listen|live\\.)(\\?|$)/.test(l)) send(String(u));
-    }catch(e){}
+    try{ if(isStreamUrl(String(u))) send(String(u)); }catch(e){}
     return xhrOpen.apply(this,arguments);
   };
 
@@ -92,8 +100,7 @@ const INJECT_JS = `(function() {
   window.fetch = function(i,o){
     try{
       var u=typeof i==='string'?i:(i&&i.url?i.url:'');
-      var l=u.toLowerCase();
-      if(/\\.m3u8|\\.(mp3|aac|ogg)(\\?|$)|radiojar|streamguys|tritondigital|shoutcast|icecast|\\/(?:stream|listen|live\\.)(\\?|$)/.test(l)) send(u);
+      if(isStreamUrl(u)) send(u);
     }catch(e){}
     return origFetch.apply(this,arguments);
   };
