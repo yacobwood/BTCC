@@ -1,4 +1,5 @@
 // v2
+const {checkBtccNews} = require('./newsCheck');
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onRequest} = require('firebase-functions/v2/https');
 const {onValueCreated} = require('firebase-functions/v2/database');
@@ -23,16 +24,33 @@ async function logError(fn, message, err, opts = {}) {
       timestamp: new Date().toISOString(),
       resolved: false,
     };
+    let shouldAlert = !!opts.alert;
     if (opts.key) {
-      await db.collection('errors').doc(opts.key).set(entry);
+      const ref = db.collection('errors').doc(opts.key);
+      if (opts.alert) {
+        // Only alert on first occurrence or when error recurs after being resolved
+        const existing = await ref.get();
+        shouldAlert = !existing.exists || existing.data().resolved === true;
+      }
+      await ref.set(entry);
     } else {
       await db.collection('errors').add(entry);
     }
-    if (opts.alert && process.env.GMAIL_APP_PASSWORD) {
+    if (shouldAlert && process.env.GMAIL_APP_PASSWORD) {
       await sendErrorEmail(fn, message, err);
     }
   } catch (e) {
     console.error('logError itself failed:', e);
+  }
+}
+
+async function logPushHistory(title, body, channel) {
+  try {
+    await db.collection('push_history').add({
+      title, body, channel, type: 'auto', sentAt: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('logPushHistory failed:', e);
   }
 }
 
@@ -52,7 +70,6 @@ async function sendErrorEmail(fn, message, err) {
 
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
-const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug,featured_media,_links&_embed=wp:featuredmedia';
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
@@ -200,6 +217,7 @@ exports.sendSessionNotifications = onSchedule(
               ...(round.tslEventId ? {data: {type: 'livetiming', eventId: String(round.tslEventId)}} : {}),
             }),
           );
+          logPushHistory(`${session.name} — Starting in 15 mins`, `${session.name} at ${round.venue} is about to get underway`, topic);
         }
       }
 
@@ -220,6 +238,7 @@ exports.sendSessionNotifications = onSchedule(
               data: {type: 'round', round: String(round.round)},
             }),
           );
+          logPushHistory('Race Weekend Tomorrow', `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`, 'weekend_preview');
         }
       }
 
@@ -240,48 +259,17 @@ exports.sendSessionNotifications = onSchedule(
               data: {type: 'history'},
             }),
           );
+          logPushHistory('Standings Updated', `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`, 'standings_update');
         }
       }
     }
 
     // ── News alerts ───────────────────────────────────────────────
     try {
-      const articles = await fetchWithTimeout(NEWS_URL).then(r => r.json());
-      const latest = articles?.[0];
-      if (latest) {
-        const stateRef = db.collection('state').doc('news');
-        let shouldNotify = false;
-        let notifyPayload = null;
-        await db.runTransaction(async (tx) => {
-          shouldNotify = false; notifyPayload = null;
-          const snap = await tx.get(stateRef);
-          const lastId = snap.exists ? snap.data().lastId : null;
-          if (latest.id !== lastId) {
-            tx.set(stateRef, {lastId: latest.id, detectedAt: new Date().toISOString()});
-            if (lastId !== null) {
-              shouldNotify = true;
-              const title = latest.title?.rendered?.replace(/&#\d+;/g, c =>
-                String.fromCharCode(parseInt(c.match(/\d+/)[0]))) || 'New BTCC Article';
-              const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
-              notifyPayload = {title, imageUrl, slug: latest.slug || ''};
-            }
-          }
-        });
-        if (shouldNotify && notifyPayload) {
-          console.log(`News notification queued: "${notifyPayload.title}" (${notifyPayload.slug})`);
-          sends.push(
-            messaging.send({
-              topic: 'news_alerts',
-              android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000},
-              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
-              data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
-            }),
-          );
-        }
-      }
+      await checkBtccNews({fetchFn: fetchWithTimeout, db, messaging, logHistory: logPushHistory, sends});
     } catch (e) {
       console.error('News check failed:', e);
-      await logError('sendSessionNotifications', e.message, e, {key: 'check-news'});
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-news', alert: true});
     }
 
     // ── Hub news alerts ───────────────────────────────────────────
@@ -325,11 +313,12 @@ exports.sendSessionNotifications = onSchedule(
               data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
             }),
           );
+          logPushHistory('New Post', notifyPayload.title, 'news_alerts');
         }
       }
     } catch (e) {
       console.error('Hub news check failed:', e);
-      await logError('sendSessionNotifications', e.message, e, {key: 'check-hub'});
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-hub', alert: true});
     }
 
     // ── Podcast alerts ────────────────────────────────────────────
@@ -368,18 +357,19 @@ exports.sendSessionNotifications = onSchedule(
               data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
             }),
           );
+          logPushHistory('New Podcast', podTitle, 'podcast_alerts');
         }
       }
     } catch (e) {
       console.error('Podcast check failed:', e);
-      await logError('sendSessionNotifications', e.message, e, {key: 'check-podcast'});
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-podcast', alert: true});
     }
 
     const results = await Promise.allSettled(sends);
     results.forEach((r, i) => {
       if (r.status === 'rejected') {
         console.error(`Send ${i} failed:`, r.reason);
-        logError('sendSessionNotifications:fcm', r.reason?.message || String(r.reason), r.reason);
+        logError('sendSessionNotifications:fcm', r.reason?.message || String(r.reason), r.reason, {key: 'fcm-send-failure', alert: true});
       }
     });
   },
@@ -852,7 +842,7 @@ exports.syncAnalytics = onSchedule(
     console.log('syncAnalytics: done', JSON.stringify(overview));
   } catch (e) {
     console.error('syncAnalytics failed:', e);
-    await logError('syncAnalytics', e.message, e);
+    await logError('syncAnalytics', e.message, e, {alert: true});
   }},
 );
 
@@ -882,7 +872,7 @@ exports.notifyResultsUpdate = onRequest(
       res.status(200).json({ok: true});
     } catch (e) {
       console.error('notifyResultsUpdate failed:', e);
-      await logError('notifyResultsUpdate', e.message, e);
+      await logError('notifyResultsUpdate', e.message, e, {alert: true});
       res.status(500).json({ok: false, error: e.message});
     }
   },
