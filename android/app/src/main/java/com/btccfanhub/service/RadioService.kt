@@ -6,14 +6,18 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.MediaPlayer
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.ExoPlayer
 import com.btccfanhub.MainActivity
 
+@UnstableApi
 class RadioService : Service() {
     companion object {
         const val ACTION_PLAY = "com.btccfanhub.RADIO_PLAY"
@@ -26,7 +30,7 @@ class RadioService : Service() {
         var stationName = ""; private set
     }
 
-    private var player: MediaPlayer? = null
+    private var player: ExoPlayer? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -52,25 +56,34 @@ class RadioService : Service() {
         Log.d("RadioService", "startPlaying: url=$url name=$name")
         player?.release()
 
-        player = MediaPlayer().apply {
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                1000,   // minBufferMs  - keep at least 1s buffered while playing
+                3000,   // maxBufferMs  - never build more than 3s of delay behind live
+                500,    // bufferForPlaybackMs  - start after 500ms to minimise lag
+                1000,   // bufferForPlaybackAfterRebufferMs
             )
-            setOnPreparedListener { mp ->
-                Log.d("RadioService", "onPrepared, starting playback")
-                mp.start()
+            .build()
+
+        player = ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
+            .build()
+            .also { exo ->
+                exo.addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_READY) {
+                            Log.d("RadioService", "onPrepared, starting playback")
+                        }
+                    }
+                    override fun onPlayerError(error: PlaybackException) {
+                        Log.e("RadioService", "onError: ${error.message}")
+                        stopPlaying()
+                    }
+                })
+                exo.setMediaItem(MediaItem.fromUri(url))
+                exo.playWhenReady = true
+                exo.prepare()
             }
-            setOnErrorListener { _, what, extra ->
-                Log.e("RadioService", "onError: what=$what extra=$extra")
-                stopPlaying()
-                true
-            }
-            setDataSource(url)
-            prepareAsync()
-        }
 
         isPlaying = true
         stationName = name
