@@ -65,12 +65,12 @@ def parse_args():
 # ── Schedule loading ──────────────────────────────────────────────────────────
 
 def load_sessions(year, round_num, day):
-    schedule_path = os.path.join(REPO_ROOT, "data", f"schedule{year}.json")
+    schedule_path = os.path.join(REPO_ROOT, "data", "schedule.json")
     with open(schedule_path) as f:
         sched = json.load(f)
     rnd = next((r for r in sched["rounds"] if r["round"] == round_num), None)
     if not rnd:
-        log.error(f"Round {round_num} not found in schedule{year}.json")
+        log.error(f"Round {round_num} not found in schedule.json")
         sys.exit(1)
     return rnd["tsl"], rnd["venue"], rnd["sessions"][day]
 

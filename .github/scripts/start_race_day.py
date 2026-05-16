@@ -4,7 +4,7 @@ Checks whether today is a BTCC race day and, if so, dispatches
 the session-watcher workflow with the correct round + day inputs.
 
 Run daily via cron (e.g. 08:30 UTC). If today matches a Saturday or
-Sunday in schedule2026.json, it triggers session-watcher.yml via the
+Sunday in schedule.json, it triggers session-watcher.yml via the
 GitHub Actions API.
 """
 import json, os, sys, urllib.request
@@ -17,7 +17,7 @@ GH_REPO   = os.environ.get("GITHUB_REPOSITORY", "yacobwood/BTCC")
 
 today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-with open(os.path.join(REPO_ROOT, "data", f"schedule{YEAR}.json")) as f:
+with open(os.path.join(REPO_ROOT, "data", "schedule.json")) as f:
     schedule = json.load(f)
 
 match_round = None

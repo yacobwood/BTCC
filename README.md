@@ -586,11 +586,13 @@ The main workhorse function. Runs every minute and handles two categories of wor
 - Post-session results: triggered when session results land in `results{year}.json`
 
 **Always runs (every minute, regardless of race day):**
-- News alerts: polls `btcc.net/wp-json/wp/v2/posts?per_page=1`, compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload.
+- News alerts: polls `btcc.net/wp-json/wp/v2/posts?per_page=1`, compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability).
 - Hub news alerts: polls `hub_news.json`, compares latest `id` to Firestore `state/hub_news.lastId`. Sends to `news_alerts`. Excludes "Weekly Digest" category articles.
 - Podcast alerts: polls Buzzsprout RSS, compares `guid` to Firestore state. Sends to `podcast_alerts`.
 
 Firestore transactions prevent duplicate sends. First-time detection (when `lastId` is null) stores the ID but does NOT send a notification.
+
+**Error alerting:** every `logError` call uses `alert: true`. For per-minute checks (news/hub/podcast/FCM) the error is upserted at a fixed key and the email is only sent on first occurrence or when the error recurs after being marked resolved in the admin FIRESTORE tab. One-off failures (syncAnalytics, notifyResultsUpdate, digest generation) always email. All alerts go to `btcchub@gmail.com` via `GMAIL_APP_PASSWORD` secret.
 
 ### weeklyDigest (Monday 8am)
 
@@ -928,10 +930,12 @@ Notification deep links use the `data` payload fields (`type`, `slug`, `round`) 
 
 **Firestore for user-generated content** - Chat, comments, reactions, bug reports and roadmap votes are stored in Firestore rather than GitHub, as they require write access from untrusted clients with per-document security rules.
 
+**`android:extractNativeLibs="true"`** - AGP 8.x injects `extractNativeLibs="false"` by default, which loads `.so` files directly from the APK zip. This caused a recurring Crashlytics crash (`couldn't find DSO to load: libreactnative.so`) on a subset of Android devices (Samsung/OEM and sideloaded APKs). The app manifest explicitly overrides this to `true` so native libs are extracted to disk on install, making them reliably available to SoLoader on all devices.
+
 **FCM topics not tokens** - All notification subscriptions use named topics managed client-side in `SettingsProvider`. This avoids maintaining a server-side device registry and allows instant opt-in/out without a backend call.
 
 **Spoiler-free expiry on app open** - The mode auto-disables on the next app open after expiry rather than at the exact expiry time. This is simpler and avoids background timer management.
 
 ---
 
-*This document is kept up to date with every code change. Last updated: 2026-05-12*
+*This document is kept up to date with every code change. Last updated: 2026-05-16*
