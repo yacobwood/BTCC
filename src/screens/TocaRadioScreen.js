@@ -176,11 +176,6 @@ export default function TocaRadioScreen({navigation}) {
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>TOCA LIVE RADIO</Text>
-        {isTocaPlaying && (
-          <TouchableOpacity onPress={handleStop} style={styles.stopHeaderBtn} accessibilityRole="button" accessibilityLabel="Stop radio">
-            <Icon name="stop" size={18} color={Colors.navy} />
-          </TouchableOpacity>
-        )}
       </View>
 
       {/* Connecting phase spinner */}
@@ -256,7 +251,7 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
   header: {flexDirection: 'row', alignItems: 'center', paddingTop: 54, paddingHorizontal: 16, paddingBottom: 12, gap: 8},
   headerTitle: {color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 1, flex: 1},
-  stopHeaderBtn: {width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.yellow, justifyContent: 'center', alignItems: 'center'},
+
   center: {flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16, paddingHorizontal: 32},
   connectingText: {color: Colors.textSecondary, fontSize: 15, marginTop: 4},
   // Rendered off-screen so it loads fully but the user never sees it
