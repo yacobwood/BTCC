@@ -30,6 +30,9 @@ const INJECT_JS = `(function() {
     var l = url.toLowerCase();
     if (/\\.(js|css|png|jpg|gif|svg|woff2?|ico|xml|html)(\\?|$)/.test(l)) return;
     if (/google|facebook|gtm|doubleclick|exactmetrics|gravatar|wp-json|admin-ajax|wp-content\\/(?:plugins|themes)/.test(l)) return;
+    // Stream URLs are always cross-origin - reject same-origin URLs that aren't streams
+    // (prevents the page URL itself from being captured as the stream)
+    try { if (url.indexOf(window.location.origin) === 0 && !isStreamUrl(url)) return; } catch(e) {}
     sent = true;
     window.ReactNativeWebView.postMessage(JSON.stringify({type:'stream',url:url}));
   }
