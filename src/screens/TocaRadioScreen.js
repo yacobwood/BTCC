@@ -124,12 +124,12 @@ export default function TocaRadioScreen({navigation}) {
 
   // If already playing from a previous visit, go straight to playing phase
   const [phase, setPhase] = useState(isTocaPlaying ? 'playing' : 'connecting');
-  // Keep the hidden WebView mounted briefly after stream capture so the renderer
-  // can wind down gracefully rather than being killed mid-load (avoids logcat crash)
-  const [webViewMounted, setWebViewMounted] = useState(!isTocaPlaying);
+  // WebView stays mounted for the entire screen lifetime - the zero-size container
+  // keeps it invisible, and letting React Navigation unmount the screen naturally
+  // avoids the aw_browser_terminator crash caused by forced mid-load unmount
+  const [webViewMounted] = useState(!isTocaPlaying);
   const webviewRef = useRef(null);
   const timeoutRef = useRef(null);
-  const webViewDismissRef = useRef(null);
 
   useEffect(() => {
     Analytics.screen('toca_live_radio');
@@ -142,8 +142,6 @@ export default function TocaRadioScreen({navigation}) {
     return () => clearTimeout(timeoutRef.current);
   }, [phase]);
 
-  useEffect(() => () => clearTimeout(webViewDismissRef.current), []);
-
   const onMessage = useCallback((e) => {
     try {
       const msg = JSON.parse(e.nativeEvent.data);
@@ -153,8 +151,6 @@ export default function TocaRadioScreen({navigation}) {
         webviewRef.current?.injectJavaScript(PAUSE_JS);
         play({name: STATION_NAME, streamUrl: msg.url});
         setPhase('playing');
-        // Delay WebView unmount so the renderer can exit cleanly (avoids crash log)
-        webViewDismissRef.current = setTimeout(() => setWebViewMounted(false), 4000);
       }
     } catch {}
   }, [play]);
