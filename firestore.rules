@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin reads only — writes are exclusively via Cloud Functions (Admin SDK, bypasses rules)
+    match /errors/{doc}              { allow read: if true; allow write: if false; }
+    match /bug_reports/{doc}         { allow read: if true; allow write: if false; }
+    match /push_history/{doc}        { allow read: if true; allow write: if false; }
+    match /roadmap_submissions/{doc} { allow read: if true; allow write: if false; }
+    match /roadmap_votes/{doc}       { allow read: if true; allow write: if false; }
+
+    // App writes — state tracking for notification deduplication
+    match /state/{doc}   { allow read: if true; allow write: if false; }
+
+    // Chat — app reads and writes, rules enforced per-field
+    match /chat/bans/{doc}    { allow read: if true; allow write: if true; }
+    match /chat/reports/{doc} { allow read: if true; allow write: if !resource.data.keys().hasAny(['flaggedMessage']); }
+    match /chat/messages/{doc} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Deny everything else
+    match /{document=**} { allow read, write: if false; }
+  }
+}
