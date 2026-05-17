@@ -148,27 +148,26 @@ export default function ChatFab({bottomOffset = 0}) {
             <View style={styles.handleWrap} {...panResponder.panHandlers}>
               <View style={styles.handle} />
             </View>
-            {/* Stable wrapper keeps Animated.View children count constant while
-                ai_ask flag loads asynchronously — prevents ReadOnlyText reconciler error */}
+            {/* Tab bar is always mounted (display:none when flag is off) so Text nodes
+                are never created mid-update inside Animated.View — avoids the Android
+                ReadOnlyText "cannot call a class as a function" error */}
             <View style={styles.sheetContent}>
-              {ai_ask && (
-                <View style={styles.tabBar}>
-                  <TouchableOpacity
-                    style={[styles.tabBtn, activeTab === 'chat' && styles.tabBtnActive]}
-                    onPress={() => setActiveTab('chat')}
-                    accessibilityRole="tab"
-                    accessibilityState={{selected: activeTab === 'chat'}}>
-                    <Text style={[styles.tabBtnText, activeTab === 'chat' && styles.tabBtnTextActive]}>Live Chat</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.tabBtn, activeTab === 'ai' && styles.tabBtnActive]}
-                    onPress={() => setActiveTab('ai')}
-                    accessibilityRole="tab"
-                    accessibilityState={{selected: activeTab === 'ai'}}>
-                    <Text style={[styles.tabBtnText, activeTab === 'ai' && styles.tabBtnTextActive]}>Ask Colin</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              <View style={[styles.tabBar, !ai_ask && styles.tabBarHidden]}>
+                <TouchableOpacity
+                  style={[styles.tabBtn, activeTab === 'chat' && styles.tabBtnActive]}
+                  onPress={() => setActiveTab('chat')}
+                  accessibilityRole="tab"
+                  accessibilityState={{selected: activeTab === 'chat'}}>
+                  <Text style={[styles.tabBtnText, activeTab === 'chat' && styles.tabBtnTextActive]}>Live Chat</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tabBtn, activeTab === 'ai' && styles.tabBtnActive]}
+                  onPress={() => setActiveTab('ai')}
+                  accessibilityRole="tab"
+                  accessibilityState={{selected: activeTab === 'ai'}}>
+                  <Text style={[styles.tabBtnText, activeTab === 'ai' && styles.tabBtnTextActive]}>Ask Colin</Text>
+                </TouchableOpacity>
+              </View>
               {activeTab === 'ai' ? <AskAIScreen /> : <ChatScreen onClose={closeChat} />}
             </View>
           </Animated.View>
@@ -265,6 +264,9 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.outline,
     paddingHorizontal: 16,
     gap: 4,
+  },
+  tabBarHidden: {
+    display: 'none',
   },
   tabBtn: {
     paddingVertical: 10,
