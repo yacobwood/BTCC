@@ -30,5 +30,5 @@
   "search_ad": false,
   "whats_new": false,
   "results_notifications": false,
-  "ai_ask": false
+  "ai_ask": true
 }
