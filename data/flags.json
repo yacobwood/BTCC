@@ -29,5 +29,6 @@
   "newsfeed_ad": false,
   "search_ad": false,
   "whats_new": false,
-  "results_notifications": false
+  "results_notifications": false,
+  "ai_ask": false
 }
