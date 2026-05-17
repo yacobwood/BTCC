@@ -11,6 +11,7 @@ import {Colors} from '../theme/colors';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
 import ChatScreen from '../screens/ChatScreen';
+import AskAIScreen from '../screens/AskAIScreen';
 
 const LAST_READ_KEY = 'chat_last_read';
 const DB = database();
@@ -21,10 +22,11 @@ const FAB_BOTTOM_OFFSET = 12;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default function ChatFab({bottomOffset = 0}) {
-  const {live_chat} = useFeatureFlags();
+  const {live_chat, ai_ask} = useFeatureFlags();
   const {settings} = useSettings();
 
   const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const [hasUnread, setHasUnread] = useState(false);
   const lastReadRef = useRef(Date.now());
 
@@ -103,6 +105,7 @@ export default function ChatFab({bottomOffset = 0}) {
     lastReadRef.current = now;
     AsyncStorage.setItem(LAST_READ_KEY, String(now)).catch(() => {});
     setHasUnread(false);
+    setActiveTab('chat');
     setOpen(false);
   };
 
@@ -145,7 +148,25 @@ export default function ChatFab({bottomOffset = 0}) {
             <View style={styles.handleWrap} {...panResponder.panHandlers}>
               <View style={styles.handle} />
             </View>
-            <ChatScreen onClose={closeChat} />
+            {ai_ask && (
+              <View style={styles.tabBar}>
+                <TouchableOpacity
+                  style={[styles.tabBtn, activeTab === 'chat' && styles.tabBtnActive]}
+                  onPress={() => setActiveTab('chat')}
+                  accessibilityRole="tab"
+                  accessibilityState={{selected: activeTab === 'chat'}}>
+                  <Text style={[styles.tabBtnText, activeTab === 'chat' && styles.tabBtnTextActive]}>Live Chat</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tabBtn, activeTab === 'ai' && styles.tabBtnActive]}
+                  onPress={() => setActiveTab('ai')}
+                  accessibilityRole="tab"
+                  accessibilityState={{selected: activeTab === 'ai'}}>
+                  <Text style={[styles.tabBtnText, activeTab === 'ai' && styles.tabBtnTextActive]}>Ask Colin</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {activeTab === 'ai' ? <AskAIScreen /> : <ChatScreen onClose={closeChat} />}
           </Animated.View>
         </Animated.View>
         </SafeAreaProvider>
@@ -230,5 +251,30 @@ const styles = StyleSheet.create({
   handle: {
     width: 36, height: 4, borderRadius: 2,
     backgroundColor: Colors.outline,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
+    paddingHorizontal: 16,
+    gap: 4,
+  },
+  tabBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+    marginBottom: -1,
+  },
+  tabBtnActive: {
+    borderBottomColor: Colors.yellow,
+  },
+  tabBtnText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  tabBtnTextActive: {
+    color: Colors.yellow,
   },
 });

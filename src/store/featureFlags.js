@@ -14,6 +14,7 @@ const defaults = {
   hub_news_enabled: true,
   live_timing_in_app: false,
   live_chat: false,
+  ai_ask: false,
   update_available: true,
   update_min_version_ios: 0,
   update_min_version_android: 63,

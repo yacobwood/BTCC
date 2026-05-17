@@ -342,6 +342,9 @@ Firebase Realtime Database community chat. 200 message limit (enforced by `trimC
 
 **Ban system:** Admins can ban users via the Chat tab in the admin panel. Bans are stored at `/chat/bans/{authorId}` (authorId = first 8 chars of FCM token). The `onChatBan` Cloud Function triggers on creation, hides all existing messages from the banned user, and writes a `ban_notice` system message. The banned user sees a locked input row instead of the text field. Temporary bans (1h / 24h / 7d) expire automatically via `expiresAt` timestamp checked client-side; permanent bans have `expiresAt: null`. Unbanning deletes the `/chat/bans/{authorId}` node.
 
+**Ask Colin (AskAIScreen)** ([src/screens/AskAIScreen.js](src/screens/AskAIScreen.js))
+AI Q&A bot named after Colin Turkington. Appears as a second tab ("Ask Colin") in the ChatFab modal when the `ai_ask` feature flag is true. One-shot Q&A: each question is independent. Calls the `askBtccAi` Cloud Function (europe-west1, claude-haiku-4-5-20251001) via POST. System prompt restricts answers to BTCC topics only. User bubbles are right-aligned (navy/yellow border); Colin response bubbles are left-aligned with a "C" avatar. Tab bar is hidden entirely when `ai_ask` is false - no change visible to existing users.
+
 **ListenScreen** ([src/screens/ListenScreen.js](src/screens/ListenScreen.js))
 Entry point routing to Radio and Podcasts sections.
 
@@ -367,6 +370,7 @@ Per-device overrides are keyed by FCM token inside the `overrides` object in `fl
 | `hub_news_enabled` | true | Show hub posts in News feed |
 | `live_timing_in_app` | false | Enable LiveTimingScreen |
 | `live_chat` | false | Show Chat tab |
+| `ai_ask` | false | Show "Ask Colin" AI tab in chat bubble |
 | `update_available` | true | Enable update prompt |
 | `update_min_version_ios` | 0 | iOS minimum build number |
 | `update_min_version_android` | 66 | Android minimum build number |

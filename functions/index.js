@@ -901,3 +901,32 @@ exports.commentReact = onRequest(async (req, res) => {
     res.status(500).json({ok: false, error: e.message});
   }
 });
+
+// ── Ask Colin (AI Q&A) ────────────────────────────────────────
+exports.askBtccAi = onRequest(
+  {region: 'europe-west1', secrets: ['ANTHROPIC_API_KEY'], cors: false},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).json({error: 'Method Not Allowed'}); return; }
+
+    const question = (req.body?.question ?? '').trim();
+    if (!question || question.length > 500) {
+      res.status(400).json({error: 'Question must be between 1 and 500 characters'}); return;
+    }
+
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic.default({apiKey: process.env.ANTHROPIC_API_KEY});
+
+    try {
+      const response = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 512,
+        system: `You are Colin, a BTCC (British Touring Car Championship) expert assistant inside the official BTCC Hub app. You are named after Colin Turkington, the 4x BTCC champion. Answer questions about BTCC only - drivers, teams, tracks, results, history, regulations and race format. Be concise and factual. Use British English. Never use em dashes. Never use a comma before "and". If the question is not related to BTCC, respond with exactly: "I can only answer questions about the BTCC."`,
+        messages: [{role: 'user', content: question}],
+      });
+      res.status(200).json({answer: response.content[0].text});
+    } catch (e) {
+      console.error('askBtccAi error:', e);
+      res.status(500).json({error: 'Failed to get a response. Please try again.'});
+    }
+  },
+);
