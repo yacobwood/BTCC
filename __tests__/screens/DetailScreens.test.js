@@ -5,15 +5,20 @@ import TeamDetailScreen from '../../src/screens/TeamDetailScreen';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: cb => { require('react').useEffect(cb, []); },
+}));
+
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {screen: jest.fn(), favouriteToggled: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({
+  fetchResults: jest.fn(),
   fetchStandings: jest.fn(),
 }));
 
-const {fetchStandings} = require('../../src/api/client');
+const {fetchResults, fetchStandings} = require('../../src/api/client');
 const REAL_DRIVERS = require('../../data/drivers.json').drivers;
 
 const nav = makeNav();
@@ -41,13 +46,14 @@ const DRIVER_NO_TEAM = {
   history: [],
 };
 
-const EMPTY_STANDINGS = {standings: []};
+const EMPTY_RESULTS = {rounds: []};
 
 describe('DriverDetailScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     AsyncStorage.getItem.mockResolvedValue(null);
-    fetchStandings.mockResolvedValue(EMPTY_STANDINGS);
+    fetchResults.mockResolvedValue(EMPTY_RESULTS);
+    fetchStandings.mockResolvedValue({standings: []});
   });
 
   it('displays the driver name', async () => {
@@ -139,18 +145,27 @@ describe('DriverDetailScreen', () => {
     });
   });
 
-  it('shows stats badges for a rookie driver from standings data', async () => {
+  it('shows stats badges using standings for pts/wins/podiums and results for FL', async () => {
     fetchStandings.mockResolvedValue({
       standings: [{driver: 'Lewis SELBY', points: 43, wins: 1, seconds: 1, thirds: 0, team: 'NAPA Racing UK'}],
     });
+    fetchResults.mockResolvedValue({rounds: [{races: [
+      {label: 'Race 1', results: [
+        {driver: 'Lewis SELBY', pos: 1, points: 25, pole: true, fastestLap: true},
+      ]},
+      {label: 'Race 2', results: [
+        {driver: 'Lewis SELBY', pos: 2, points: 18, pole: false, fastestLap: false},
+      ]},
+    ]}]});
     const route = makeRoute({driver: ROOKIE});
     const {getByText} = renderWithProviders(
       <DriverDetailScreen route={route} navigation={nav} />,
     );
     await waitFor(() => {
-      expect(getByText('43 pts')).toBeTruthy();
-      expect(getByText('1 W')).toBeTruthy();
-      expect(getByText('2 P')).toBeTruthy(); // wins + seconds + thirds = 1+1+0
+      expect(getByText('43 pts')).toBeTruthy();  // from standings
+      expect(getByText('1 W')).toBeTruthy();     // from standings
+      expect(getByText('2 P')).toBeTruthy();     // from standings (wins + seconds)
+      expect(getByText('1 FL')).toBeTruthy();    // from results
     });
   });
 
@@ -173,7 +188,7 @@ describe('DriverDetailScreen', () => {
     });
   });
 
-  it('shows stats badges for a veteran driver using standings', async () => {
+  it('shows standings pts/wins/podiums for a veteran driver', async () => {
     fetchStandings.mockResolvedValue({
       standings: [{driver: 'Tom INGRAM', points: 87, wins: 4, seconds: 1, thirds: 2, team: 'Team Ingram'}],
     });
@@ -188,10 +203,8 @@ describe('DriverDetailScreen', () => {
     });
   });
 
-  it('shows 0 pts badge when driver is in standings with no points yet', async () => {
-    fetchStandings.mockResolvedValue({
-      standings: [{driver: 'Lewis SELBY', points: 0, wins: 0, seconds: 0, thirds: 0, team: 'NAPA Racing UK'}],
-    });
+  it('shows 0 pts badge when driver has a team but is not in standings', async () => {
+    fetchStandings.mockResolvedValue({standings: []});
     const route = makeRoute({driver: ROOKIE});
     const {getByText} = renderWithProviders(
       <DriverDetailScreen route={route} navigation={nav} />,
@@ -199,9 +212,24 @@ describe('DriverDetailScreen', () => {
     await waitFor(() => expect(getByText('0 pts')).toBeTruthy());
   });
 
-  it('shows 0 pts badge when driver is active but not yet in standings feed', async () => {
-    // e.g. Árón Taylor-Smith has a team but 0 pts and isn't listed in standings.json yet
-    fetchStandings.mockResolvedValue({standings: []});
+  it('shows standings pts even when fetchResults fails', async () => {
+    fetchStandings.mockResolvedValue({
+      standings: [{driver: 'Lewis SELBY', points: 30, wins: 1, seconds: 0, thirds: 1, team: 'NAPA Racing UK'}],
+    });
+    fetchResults.mockRejectedValue(new Error('network error'));
+    const route = makeRoute({driver: ROOKIE});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('30 pts')).toBeTruthy();
+      expect(getByText('1 W')).toBeTruthy();
+    });
+  });
+
+  it('shows 0 pts when both fetches fail', async () => {
+    fetchStandings.mockRejectedValue(new Error('network error'));
+    fetchResults.mockRejectedValue(new Error('network error'));
     const route = makeRoute({driver: ROOKIE});
     const {getByText} = renderWithProviders(
       <DriverDetailScreen route={route} navigation={nav} />,
@@ -216,7 +244,8 @@ describe('DriverDetailScreen - all real drivers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     AsyncStorage.getItem.mockResolvedValue(null);
-    fetchStandings.mockResolvedValue(EMPTY_STANDINGS);
+    fetchResults.mockResolvedValue(EMPTY_RESULTS);
+    fetchStandings.mockResolvedValue({standings: []});
   });
 
   const navSmoke = makeNav();

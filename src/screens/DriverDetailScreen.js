@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -19,8 +19,9 @@ import {getDriverImage} from '../assets/driverImages';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
-import {fetchStandings} from '../api/client';
+import {fetchResults, fetchStandings} from '../api/client';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useFocusEffect} from '@react-navigation/native';
 
 function formatDob(dateStr) {
   if (!dateStr) return null;
@@ -56,19 +57,31 @@ export default function DriverDetailScreen({route, navigation}) {
 
   useEffect(() => { Analytics.screen('driver_detail:' + driver.name); }, []);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     if (!driver.team || (driver.history || []).some(h => h.year === 2026)) return;
-    fetchStandings().then(data => {
-      const entry = (data.standings || []).find(
+    fetchStandings(true).then(sData => {
+      const entry = (sData.standings || []).find(
         s => formatDriverName(s.driver) === formatDriverName(driver.name),
       );
-      // Driver may have 0 points and not appear in standings yet - still show 0 pts badge
-      const points = entry ? (entry.points || 0) : 0;
-      const wins = entry ? (entry.wins || 0) : 0;
-      const podiums = entry ? (entry.wins || 0) + (entry.seconds || 0) + (entry.thirds || 0) : 0;
-      setSeason2026({points, wins, podiums, fastestLaps: 0, poles: 0, dnfs: 0});
-    }).catch(() => {});
-  }, [driver.name, driver.team]);
+      const pts = entry ? (entry.points || 0) : 0;
+      const w   = entry ? (entry.wins || 0) : 0;
+      const p   = entry ? w + (entry.seconds || 0) + (entry.thirds || 0) : 0;
+      fetchResults(2026).then(rData => {
+        let fastestLaps = 0, poles = 0, dnfs = 0;
+        for (const round of (rData.rounds || [])) {
+          for (const race of (round.races || [])) {
+            const e = (race.results || []).find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
+            if (!e) continue;
+            const isRace = race.label === 'Race 1' || race.label === 'Race 2' || race.label === 'Race 3';
+            if (e.pos === 0) dnfs++;
+            if (e.pole) poles++;
+            if (e.fastestLap && isRace) fastestLaps++;
+          }
+        }
+        setSeason2026({wins: w, podiums: p, points: pts, fastestLaps, poles, dnfs});
+      }).catch(() => setSeason2026({wins: w, podiums: p, points: pts, fastestLaps: 0, poles: 0, dnfs: 0}));
+    }).catch(() => setSeason2026({wins: 0, podiums: 0, points: 0, fastestLaps: 0, poles: 0, dnfs: 0}));
+  }, [driver.name, driver.team]));
 
   const history = driver.history || [];
   // Whether 2026 is a live season (not yet in history JSON)
