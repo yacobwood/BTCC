@@ -250,7 +250,7 @@ export default function RoundResultsScreen({route, navigation}) {
                 ListHeaderComponent={(() => {
                   const urls = round.youtubeUrls?.length ? round.youtubeUrls : (year === 2026 ? (BUNDLED_YOUTUBE_URLS[round.round] || []) : []);
                   const raceUrlMap = {'Free Practice': urls[0], 'Qualifying': urls[1], 'Qualifying Race': urls[2], 'Race 1': urls[3], 'Race 2': urls[4], 'Race 3': urls[5]};
-                  const url = race?.fullRaceUrl || (IS_UK ? raceUrlMap[race?.label] : null);
+                  const url = IS_UK ? raceUrlMap[race?.label] : null;
                   if (!url) return null;
                   return (
                     <TouchableOpacity
