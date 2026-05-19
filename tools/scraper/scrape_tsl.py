@@ -849,29 +849,41 @@ def main():
     else:
         existing_rounds = {}
 
+    all_session_labels = list(SESSION_SUFFIXES.keys())
+
+    def make_stub(info, existing=None):
+        youtube_urls = (existing or {}).get("youtubeUrls", [None] * 6)
+        existing_race_map = {r["label"]: r for r in (existing or {}).get("races", [])}
+        races = [existing_race_map.get(s, {"label": s, "results": [], "grid": []}) for s in all_session_labels]
+        return {"round": info["round"], "venue": info["venue"], "date": info["date"], "youtubeUrls": youtube_urls, "races": races}
+
     output_rounds = []
     for info in ROUNDS[YEAR]:
         if ROUND_FILTER and info["round"] != ROUND_FILTER:
             if info["round"] in existing_rounds:
                 output_rounds.append(existing_rounds[info["round"]])
             else:
-                output_rounds.append({"round": info["round"], "venue": info["venue"], "date": info["date"], "races": []})
+                output_rounds.append(make_stub(info))
             continue
 
         scraped = scrape_round(info)
         if scraped:
-            # Carry forward any grids stored in previous runs (safety net for transient fetch failures)
+            # Carry forward grids and youtubeUrls from previous runs
             if info["round"] in existing_rounds:
-                existing_map = {r["label"]: r for r in existing_rounds[info["round"]].get("races", [])}
+                ex_round = existing_rounds[info["round"]]
+                scraped["youtubeUrls"] = ex_round.get("youtubeUrls", [None] * 6)
+                existing_map = {r["label"]: r for r in ex_round.get("races", [])}
                 for race in scraped["races"]:
                     ex = existing_map.get(race["label"])
                     if ex and ex.get("grid") and not race.get("grid"):
                         race["grid"] = ex["grid"]
+            else:
+                scraped["youtubeUrls"] = [None] * 6
             output_rounds.append(scraped)
         elif info["round"] in existing_rounds:
             output_rounds.append(existing_rounds[info["round"]])
         else:
-            output_rounds.append({"round": info["round"], "venue": info["venue"], "date": info["date"], "races": []})
+            output_rounds.append(make_stub(info))
 
     results_out = {"season": str(YEAR), "rounds": output_rounds}
     results_path.write_text(json.dumps(results_out, indent=2))
