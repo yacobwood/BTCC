@@ -20,6 +20,12 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // Article reactions — direct Firestore increment writes from the app
+    match /article_reactions/{doc} { allow read: if true; allow write: if true; }
+
+    // Article comments — app reads/writes; deletes are direct
+    match /article_comments/{doc} { allow read: if true; allow write: if true; }
+
     // Deny everything else
     match /{document=**} { allow read, write: if false; }
   }
