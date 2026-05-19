@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Donington Park",
       "date": "Apr 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -891,6 +899,14 @@
       "round": 2,
       "venue": "Brands Hatch Indy",
       "date": "May 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1849,6 +1865,14 @@
       "round": 3,
       "venue": "Thruxton",
       "date": "May 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2771,6 +2795,14 @@
       "round": 4,
       "venue": "Oulton Park",
       "date": "Jun 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3681,6 +3713,14 @@
       "round": 5,
       "venue": "Croft",
       "date": "Jun 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4555,6 +4595,14 @@
       "round": 6,
       "venue": "Knockhill",
       "date": "Aug 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5537,6 +5585,14 @@
       "round": 7,
       "venue": "Snetterton",
       "date": "Aug 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6423,6 +6479,14 @@
       "round": 8,
       "venue": "Thruxton 2",
       "date": "Sep 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -7380,6 +7444,14 @@
       "round": 9,
       "venue": "Silverstone",
       "date": "Sep 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -8278,6 +8350,14 @@
       "round": 10,
       "venue": "Brands Hatch GP",
       "date": "Oct 2022",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

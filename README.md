@@ -302,7 +302,7 @@ Year selector (2004 - 2026) via `YearWheelPicker` modal. Four tabs:
 - Progression Chart (`ProgressionChart` component) - SVG line chart of points accumulation per round
 
 **RoundResultsScreen** ([src/screens/RoundResultsScreen.js](src/screens/RoundResultsScreen.js))
-Per-round detail. `SwipeableTabs` with lazy loading across all sessions: Free Practice, Qualifying, Qualifying Race, Race 1, Race 2, Race 3. Each tab shows: position badges (P1=gold, P2=silver, P3=bronze), grid position delta arrows (↑/↓), points awarded, fastest lap / lead lap / pole bonuses. Before results land, if a TSL grid PDF has been scraped, shows a `StartingGridTab` with a two-column staggered layout mirroring the physical grid. R3 shows a `ReverseGridTab` prediction stepper as fallback when no actual grid data exists yet.
+Per-round detail. `SwipeableTabs` with lazy loading across all sessions: Free Practice, Qualifying, Qualifying Race, Race 1, Race 2, Race 3. Each tab shows: position badges (P1=gold, P2=silver, P3=bronze), grid position delta arrows (↑/↓), points awarded, fastest lap / lead lap / pole bonuses. Before results land, if a TSL grid PDF has been scraped, shows a `StartingGridTab` with a two-column staggered layout mirroring the physical grid. R3 shows a `ReverseGridTab` prediction stepper as fallback when no actual grid data exists yet. For UK users, race tabs show a "Watch Full Race" YouTube button when a URL is available - for 2026 this falls back to bundled URLs from `results2026.json`; for past years the button only appears if the round's own `youtubeUrls` field is populated.
 
 ### More Stack
 

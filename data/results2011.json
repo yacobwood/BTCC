@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Brands Hatch",
       "date": "Apr 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -559,6 +567,14 @@
       "round": 2,
       "venue": "Donington",
       "date": "May 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1225,6 +1241,14 @@
       "round": 3,
       "venue": "Thruxton",
       "date": "May 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1919,6 +1943,14 @@
       "round": 4,
       "venue": "Oulton Park",
       "date": "Jun 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2725,6 +2757,14 @@
       "round": 5,
       "venue": "Croft",
       "date": "Jul 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3545,6 +3585,14 @@
       "round": 6,
       "venue": "Snetterton",
       "date": "Jul 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4393,6 +4441,14 @@
       "round": 7,
       "venue": "Knockhill",
       "date": "Aug 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4526,7 +4582,7 @@
             {
               "pos": 10,
               "no": 88,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "888 Racing with Collins Contractors",
               "laps": 27,
               "time": "",
@@ -4853,7 +4909,7 @@
             {
               "pos": 13,
               "no": 88,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "888 Racing with Collins Contractors",
               "laps": 27,
               "time": "",
@@ -5236,7 +5292,7 @@
             {
               "pos": 0,
               "no": 88,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "888 Racing with Collins Contractors",
               "laps": 5,
               "time": "",
@@ -5255,6 +5311,14 @@
       "round": 8,
       "venue": "Rockingham",
       "date": "Sep 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6159,6 +6223,14 @@
       "round": 9,
       "venue": "Brands Hatch",
       "date": "Sep 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -7105,6 +7177,14 @@
       "round": 10,
       "venue": "Silverstone",
       "date": "Oct 2011",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

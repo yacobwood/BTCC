@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Thruxton",
       "date": "Apr 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -559,6 +567,14 @@
       "round": 2,
       "venue": "Brands Hatch",
       "date": "May 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1225,6 +1241,14 @@
       "round": 3,
       "venue": "Silverstone",
       "date": "May 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1961,6 +1985,14 @@
       "round": 4,
       "venue": "Oulton Park",
       "date": "Jun 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2725,6 +2757,14 @@
       "round": 5,
       "venue": "Mondello Park",
       "date": "Jul 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3419,6 +3459,14 @@
       "round": 6,
       "venue": "Croft",
       "date": "Jul 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4197,6 +4245,14 @@
       "round": 7,
       "venue": "Knockhill",
       "date": "Aug 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4849,6 +4905,14 @@
       "round": 8,
       "venue": "Brands Hatch",
       "date": "Sep 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5585,6 +5649,14 @@
       "round": 9,
       "venue": "Snetterton",
       "date": "Sep 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6321,6 +6393,14 @@
       "round": 10,
       "venue": "Donington",
       "date": "Oct 2004",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Brands Hatch",
       "date": "Apr 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -559,6 +567,14 @@
       "round": 2,
       "venue": "Mondello Park",
       "date": "May 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1225,6 +1241,14 @@
       "round": 3,
       "venue": "Oulton Park",
       "date": "May 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1919,6 +1943,14 @@
       "round": 4,
       "venue": "Thruxton",
       "date": "Jun 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2585,6 +2617,14 @@
       "round": 5,
       "venue": "Croft",
       "date": "Jul 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3321,6 +3361,14 @@
       "round": 6,
       "venue": "Donington",
       "date": "Jul 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4001,6 +4049,14 @@
       "round": 7,
       "venue": "Snetterton",
       "date": "Aug 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4779,6 +4835,14 @@
       "round": 8,
       "venue": "Knockhill",
       "date": "Sep 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5515,6 +5579,14 @@
       "round": 9,
       "venue": "Brands Hatch",
       "date": "Sep 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6279,6 +6351,14 @@
       "round": 10,
       "venue": "Silverstone",
       "date": "Oct 2006",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

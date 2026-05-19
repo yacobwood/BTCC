@@ -4,6 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RoundResultsScreen from '../../src/screens/RoundResultsScreen';
 import {renderWithProviders, makeNav, makeRoute, MOCK_ROUND} from './testUtils';
 
+jest.mock('../../src/utils/broadcaster', () => ({
+  detectBroadcaster: jest.fn(() => 'uk'),
+}));
+
 const nav = makeNav();
 
 function renderRound({round = MOCK_ROUND, initialRace = 0, favourites = [], year = 2026} = {}) {
@@ -534,6 +538,29 @@ describe('RoundResultsScreen', () => {
         );
         expect(redDeltas.length).toBeGreaterThan(0);
       });
+    });
+  });
+
+  describe('Watch Full Race button', () => {
+    const RACE_1_TAB = 3;
+
+    it('shows for 2026 when bundled youtubeUrls are available', () => {
+      const {queryByText} = renderRound({year: 2026, initialRace: RACE_1_TAB});
+      expect(queryByText('Watch Full Race')).toBeTruthy();
+    });
+
+    it('does not show for a past year when round has no youtubeUrls', () => {
+      const {queryByText} = renderRound({year: 2024, initialRace: RACE_1_TAB});
+      expect(queryByText('Watch Full Race')).toBeNull();
+    });
+
+    it('shows for a past year when the round explicitly has youtubeUrls', () => {
+      const roundWithUrls = {
+        ...MOCK_ROUND,
+        youtubeUrls: [null, null, null, 'https://www.youtube.com/watch?v=old_r1', null, null],
+      };
+      const {queryByText} = renderRound({round: roundWithUrls, year: 2024, initialRace: RACE_1_TAB});
+      expect(queryByText('Watch Full Race')).toBeTruthy();
     });
   });
 });

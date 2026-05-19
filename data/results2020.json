@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Donington Park",
       "date": "Aug 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -795,6 +803,14 @@
       "round": 2,
       "venue": "Brands Hatch GP",
       "date": "Aug 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1561,6 +1577,14 @@
       "round": 3,
       "venue": "Oulton Park",
       "date": "Sep 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2411,6 +2435,14 @@
       "round": 4,
       "venue": "Knockhill",
       "date": "Sep 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3201,6 +3233,14 @@
       "round": 5,
       "venue": "Thruxton",
       "date": "Sep 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4003,6 +4043,14 @@
       "round": 6,
       "venue": "Silverstone",
       "date": "Oct 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4022,6 +4070,14 @@
       "round": 7,
       "venue": "Croft",
       "date": "Oct 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4812,6 +4868,14 @@
       "round": 8,
       "venue": "Snetterton",
       "date": "Oct 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5734,6 +5798,14 @@
       "round": 9,
       "venue": "Brands Hatch Indy",
       "date": "Nov 2020",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Brands Hatch",
       "date": "Apr 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -559,6 +567,14 @@
       "round": 2,
       "venue": "Rockingham",
       "date": "May 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1309,6 +1325,14 @@
       "round": 3,
       "venue": "Thruxton",
       "date": "May 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2087,6 +2111,14 @@
       "round": 4,
       "venue": "Croft",
       "date": "Jun 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2865,6 +2897,14 @@
       "round": 5,
       "venue": "Oulton Park",
       "date": "Jul 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3615,6 +3655,14 @@
       "round": 6,
       "venue": "Donington",
       "date": "Jul 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4435,6 +4483,14 @@
       "round": 7,
       "venue": "Snetterton",
       "date": "Aug 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5255,6 +5311,14 @@
       "round": 8,
       "venue": "Brands Hatch",
       "date": "Sep 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6103,6 +6167,14 @@
       "round": 9,
       "venue": "Knockhill",
       "date": "Sep 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6811,6 +6883,14 @@
       "round": 10,
       "venue": "Thruxton",
       "date": "Oct 2007",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

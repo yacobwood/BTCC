@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Brands Hatch",
       "date": "Apr 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -596,7 +604,7 @@
             {
               "pos": 8,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 20,
               "time": "",
@@ -797,6 +805,14 @@
       "round": 2,
       "venue": "Donington",
       "date": "May 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -902,7 +918,7 @@
             {
               "pos": 8,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 16,
               "time": "",
@@ -1229,7 +1245,7 @@
             {
               "pos": 9,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 17,
               "time": "",
@@ -1570,7 +1586,7 @@
             {
               "pos": 11,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 19,
               "time": "",
@@ -1729,6 +1745,14 @@
       "round": 3,
       "venue": "Thruxton",
       "date": "May 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1820,7 +1844,7 @@
             {
               "pos": 7,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 14,
               "time": "",
@@ -2147,7 +2171,7 @@
             {
               "pos": 8,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 16,
               "time": "",
@@ -2544,7 +2568,7 @@
             {
               "pos": 14,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 15,
               "time": "",
@@ -2661,6 +2685,14 @@
       "round": 4,
       "venue": "Oulton Park",
       "date": "Jun 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2878,7 +2910,7 @@
             {
               "pos": 0,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 14,
               "time": "",
@@ -3191,7 +3223,7 @@
             {
               "pos": 16,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 14,
               "time": "",
@@ -3518,7 +3550,7 @@
             {
               "pos": 0,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 9,
               "time": "",
@@ -3607,6 +3639,14 @@
       "round": 5,
       "venue": "Croft",
       "date": "Jul 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3740,7 +3780,7 @@
             {
               "pos": 10,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 18,
               "time": "",
@@ -4221,7 +4261,7 @@
             {
               "pos": 0,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 7,
               "time": "",
@@ -4478,7 +4518,7 @@
             {
               "pos": 0,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 11,
               "time": "",
@@ -4567,6 +4607,14 @@
       "round": 6,
       "venue": "Snetterton",
       "date": "Jul 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4756,7 +4804,7 @@
             {
               "pos": 14,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 15,
               "time": "",
@@ -4999,7 +5047,7 @@
             {
               "pos": 10,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 12,
               "time": "",
@@ -5256,7 +5304,7 @@
             {
               "pos": 6,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 12,
               "time": "",
@@ -5499,6 +5547,14 @@
       "round": 7,
       "venue": "Knockhill",
       "date": "Aug 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5548,7 +5604,7 @@
             {
               "pos": 4,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 27,
               "time": "",
@@ -5847,7 +5903,7 @@
             {
               "pos": 6,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 27,
               "time": "",
@@ -6146,7 +6202,7 @@
             {
               "pos": 8,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 24,
               "time": "",
@@ -6319,6 +6375,14 @@
       "round": 8,
       "venue": "Rockingham",
       "date": "Sep 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6536,7 +6600,7 @@
             {
               "pos": 0,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 6,
               "time": "",
@@ -6681,7 +6745,7 @@
             {
               "pos": 6,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 18,
               "time": "",
@@ -6952,7 +7016,7 @@
             {
               "pos": 5,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 19,
               "time": "",
@@ -7181,6 +7245,14 @@
       "round": 9,
       "venue": "Silverstone",
       "date": "Sep 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -7216,7 +7288,7 @@
             {
               "pos": 3,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 25,
               "time": "",
@@ -7571,7 +7643,7 @@
             {
               "pos": 4,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 25,
               "time": "",
@@ -7982,7 +8054,7 @@
             {
               "pos": 9,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 22,
               "time": "",
@@ -8211,6 +8283,14 @@
       "round": 10,
       "venue": "Brands Hatch",
       "date": "Oct 2012",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -8260,7 +8340,7 @@
             {
               "pos": 4,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 17,
               "time": "",
@@ -8559,7 +8639,7 @@
             {
               "pos": 1,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 18,
               "time": "35:56.647",
@@ -8956,7 +9036,7 @@
             {
               "pos": 5,
               "no": 5,
-              "driver": "Árón Taylor-Smith",
+              "driver": "\u00c1r\u00f3n Taylor-Smith",
               "team": "Redstone Racing",
               "laps": 15,
               "time": "",

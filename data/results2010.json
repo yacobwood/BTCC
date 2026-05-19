@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Thruxton",
       "date": "Apr 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -601,6 +609,14 @@
       "round": 2,
       "venue": "Rockingham",
       "date": "May 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1323,6 +1339,14 @@
       "round": 3,
       "venue": "Brands Hatch",
       "date": "May 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2073,6 +2097,14 @@
       "round": 4,
       "venue": "Oulton Park",
       "date": "Jun 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2851,6 +2883,14 @@
       "round": 5,
       "venue": "Croft",
       "date": "Jul 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3629,6 +3669,14 @@
       "round": 6,
       "venue": "Snetterton",
       "date": "Jul 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4365,6 +4413,14 @@
       "round": 7,
       "venue": "Silverstone",
       "date": "Aug 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5143,6 +5199,14 @@
       "round": 8,
       "venue": "Knockhill",
       "date": "Sep 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5837,6 +5901,14 @@
       "round": 9,
       "venue": "Donington",
       "date": "Sep 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6615,6 +6687,14 @@
       "round": 10,
       "venue": "Brands Hatch",
       "date": "Oct 2010",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

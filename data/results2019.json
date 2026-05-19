@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Brands Hatch Indy",
       "date": "Apr 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -963,6 +971,14 @@
       "round": 2,
       "venue": "Donington Park",
       "date": "May 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1801,6 +1817,14 @@
       "round": 3,
       "venue": "Thruxton",
       "date": "May 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2795,6 +2819,14 @@
       "round": 4,
       "venue": "Croft",
       "date": "Jun 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3777,6 +3809,14 @@
       "round": 5,
       "venue": "Oulton Park",
       "date": "Jun 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4698,6 +4738,14 @@
       "round": 6,
       "venue": "Snetterton",
       "date": "Aug 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5584,6 +5632,14 @@
       "round": 7,
       "venue": "Thruxton 2",
       "date": "Aug 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6638,6 +6694,14 @@
       "round": 8,
       "venue": "Knockhill",
       "date": "Sep 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -7560,6 +7624,14 @@
       "round": 9,
       "venue": "Silverstone",
       "date": "Sep 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -8434,6 +8506,14 @@
       "round": 10,
       "venue": "Brands Hatch GP",
       "date": "Oct 2019",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",

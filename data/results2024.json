@@ -5,6 +5,14 @@
       "round": 1,
       "venue": "Donington Park",
       "date": "28 Apr 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -84,7 +92,7 @@
             {
               "pos": 7,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 21,
               "time": "32:36.320",
@@ -375,7 +383,7 @@
             {
               "pos": 11,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 18,
               "time": "21:20.271",
@@ -642,7 +650,7 @@
             {
               "pos": 14,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 20,
               "time": "25:09.649",
@@ -728,6 +736,14 @@
       "round": 2,
       "venue": "Brands Hatch Indy",
       "date": "19 May 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -843,7 +859,7 @@
             {
               "pos": 10,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 24,
               "time": "20:10.483",
@@ -1087,7 +1103,7 @@
             {
               "pos": 10,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 27,
               "time": "23:50.261",
@@ -1257,7 +1273,7 @@
             {
               "pos": 4,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 24,
               "time": "19:51.282",
@@ -1465,6 +1481,14 @@
       "round": 3,
       "venue": "Oulton Park",
       "date": "02 Jun 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -1544,7 +1568,7 @@
             {
               "pos": 7,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "22:05.221",
@@ -1765,7 +1789,7 @@
             {
               "pos": 5,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "22:03.450",
@@ -1986,7 +2010,7 @@
             {
               "pos": 3,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "21:44.599",
@@ -2207,6 +2231,14 @@
       "round": 4,
       "venue": "Croft",
       "date": "23 Jun 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2262,7 +2294,7 @@
             {
               "pos": 5,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "21:00.383",
@@ -2531,7 +2563,7 @@
             {
               "pos": 7,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "21:19.920",
@@ -2848,7 +2880,7 @@
             {
               "pos": 13,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "21:25.166",
@@ -2949,6 +2981,14 @@
       "round": 5,
       "venue": "Knockhill",
       "date": "14 Jul 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -2992,7 +3032,7 @@
             {
               "pos": 4,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 24,
               "time": "21:03.155",
@@ -3321,7 +3361,7 @@
             {
               "pos": 11,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 24,
               "time": "21:24.549",
@@ -3578,7 +3618,7 @@
             {
               "pos": 12,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 27,
               "time": "26:17.520",
@@ -3667,6 +3707,14 @@
       "round": 6,
       "venue": "Snetterton",
       "date": "04 Aug 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -3806,7 +3854,7 @@
             {
               "pos": 12,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 12,
               "time": "24:04.692",
@@ -4063,7 +4111,7 @@
             {
               "pos": 12,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 12,
               "time": "27:52.198",
@@ -4344,7 +4392,7 @@
             {
               "pos": 15,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 12,
               "time": "26:12.100",
@@ -4421,6 +4469,14 @@
       "round": 7,
       "venue": "Thruxton",
       "date": "25 Aug 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -4536,7 +4592,7 @@
             {
               "pos": 10,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 18,
               "time": "25:44.893",
@@ -4769,7 +4825,7 @@
             {
               "pos": 9,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 16,
               "time": "20:59.802",
@@ -5002,7 +5058,7 @@
             {
               "pos": 8,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 19,
               "time": "27:30.099",
@@ -5162,6 +5218,14 @@
       "round": 8,
       "venue": "Silverstone",
       "date": "15 Sep 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -5301,7 +5365,7 @@
             {
               "pos": 12,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 22,
               "time": "24:06.241",
@@ -5510,7 +5574,7 @@
             {
               "pos": 9,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 22,
               "time": "24:17.838",
@@ -5755,7 +5819,7 @@
             {
               "pos": 9,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 25,
               "time": "59:10.396",
@@ -5903,6 +5967,14 @@
       "round": 9,
       "venue": "Donington Park GP",
       "date": "22 Sep 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6006,7 +6078,7 @@
             {
               "pos": 9,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 17,
               "time": "29:58.922",
@@ -6239,7 +6311,7 @@
             {
               "pos": 8,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 14,
               "time": "22:27.324",
@@ -6424,7 +6496,7 @@
             {
               "pos": 3,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 17,
               "time": "29:32.196",
@@ -6644,6 +6716,14 @@
       "round": 10,
       "venue": "Brands Hatch GP",
       "date": "06 Oct 2024",
+      "youtubeUrls": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
       "races": [
         {
           "label": "Race 1",
@@ -6711,7 +6791,7 @@
             {
               "pos": 6,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 18,
               "time": "31:10.811",
@@ -6951,7 +7031,7 @@
             {
               "pos": 6,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "23:15.403",
@@ -7254,7 +7334,7 @@
             {
               "pos": 12,
               "no": 40,
-              "driver": "Árón TAYLOR-SMITH",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": "Evans Halshaw Power Maxed Racing",
               "laps": 15,
               "time": "26:04.753",
