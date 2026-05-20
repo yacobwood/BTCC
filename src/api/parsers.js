@@ -245,8 +245,8 @@ export function parseResults(json) {
               points = pos >= 1 && pos <= 15 ? qrPts[pos - 1] : 0;
           } else {
               points = pos >= 1 && pos <= 15 ? POINTS_BY_POS[pos - 1] : 0;
-              if (fl) points += 1;
-              if (lead) points += 1;
+              if (pos >= 1 && fl) points += 1;
+              if (pos >= 1 && lead) points += 1;
           }
           return {
             position: pos,

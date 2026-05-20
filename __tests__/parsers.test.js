@@ -157,7 +157,7 @@ describe('parseStandings', () => {
 });
 
 describe('parseResults', () => {
-  test('parses results with explicit points', () => {
+  test('parses results with explicit points, adding FL and leadLap bonuses', () => {
     const json = {
       rounds: [{
         round: 1,
@@ -166,7 +166,8 @@ describe('parseResults', () => {
         races: [{
           label: 'Race 1',
           results: [
-            {pos: 1, no: 80, driver: 'Ingram', team: 'Vertu', laps: 20, time: '30:00', points: 22, fastestLap: true, leadLap: true},
+            // Scraper provides position-only points; bonuses are separate flags
+            {pos: 1, no: 80, driver: 'Ingram', team: 'Vertu', laps: 20, time: '30:00', points: 20, fastestLap: true, leadLap: true},
             {pos: 2, no: 3, driver: 'Chilton', team: 'Vertu', laps: 20, time: '', gap: '+1.5', points: 17},
           ],
         }],
@@ -174,9 +175,9 @@ describe('parseResults', () => {
     };
     const rounds = parseResults(json);
     expect(rounds).toHaveLength(1);
-    expect(rounds[0].races[0].results[0].points).toBe(22);
+    expect(rounds[0].races[0].results[0].points).toBe(22); // 20 + FL(1) + leadLap(1)
     expect(rounds[0].races[0].results[0].fastestLap).toBe(true);
-    expect(rounds[0].races[0].results[1].points).toBe(17);
+    expect(rounds[0].races[0].results[1].points).toBe(17); // no bonus flags
   });
 
   test('computes points when not provided', () => {
@@ -235,16 +236,37 @@ describe('parseResults', () => {
     expect(result.pole).toBe(false);
   });
 
-  test('pole bonus (+1) is only added in Race 1, not Race 2 or Race 3', () => {
+  test('pole flag is informational only and does not add championship points', () => {
+    // Verified against official TSL standings: pole bonus is not a separate
+    // points addition in the results data - standings match without it.
     const mkRace = (label) => ({
       label,
       results: [{pos: 1, no: 1, driver: 'A', team: 'T', laps: 10, time: '20:00', pole: true}],
     });
     const json = {rounds: [{round: 1, venue: 'Test', races: [mkRace('Race 1'), mkRace('Race 2'), mkRace('Race 3')]}]};
     const [round] = parseResults(json);
-    expect(round.races[0].results[0].points).toBe(21); // 20 base + 1 PP
-    expect(round.races[1].results[0].points).toBe(20); // no PP bonus
-    expect(round.races[2].results[0].points).toBe(20); // no PP bonus
+    expect(round.races[0].results[0].points).toBe(20); // P1 base only, no pole bonus
+    expect(round.races[1].results[0].points).toBe(20);
+    expect(round.races[2].results[0].points).toBe(20);
+    expect(round.races[0].results[0].pole).toBe(true); // flag preserved for display
+  });
+
+  test('DNF driver with pole and leadLap flags scores 0 points', () => {
+    // Regression: Tom Ingram R1 Race 1 DNF had leadLap:true causing a phantom +1
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Race 1',
+          results: [{pos: 0, no: 80, driver: 'Ingram', team: 'Vertu', laps: 0, time: '', points: 0, pole: true, leadLap: true}],
+        }],
+      }],
+    };
+    const result = parseResults(json)[0].races[0].results[0];
+    expect(result.points).toBe(0);
+    expect(result.pole).toBe(true);   // flag preserved for display
+    expect(result.leadLap).toBe(true);
   });
 
   test('regular race results preserve fastestLap, leadLap and pole flags', () => {
