@@ -157,7 +157,9 @@ describe('parseStandings', () => {
 });
 
 describe('parseResults', () => {
-  test('parses results with explicit points, adding FL and leadLap bonuses', () => {
+  test('passes scraper-provided points through unchanged', () => {
+    // The scraper bakes FL/leadLap bonuses into points before writing the JSON.
+    // parsers.js must not add them again — just pass rawPts through.
     const json = {
       rounds: [{
         round: 1,
@@ -166,8 +168,8 @@ describe('parseResults', () => {
         races: [{
           label: 'Race 1',
           results: [
-            // Scraper provides position-only points; bonuses are separate flags
-            {pos: 1, no: 80, driver: 'Ingram', team: 'Vertu', laps: 20, time: '30:00', points: 20, fastestLap: true, leadLap: true},
+            // 22 = scraper-provided total (20 base + FL + leadLap already included)
+            {pos: 1, no: 80, driver: 'Ingram', team: 'Vertu', laps: 20, time: '30:00', points: 22, fastestLap: true, leadLap: true},
             {pos: 2, no: 3, driver: 'Chilton', team: 'Vertu', laps: 20, time: '', gap: '+1.5', points: 17},
           ],
         }],
@@ -175,9 +177,9 @@ describe('parseResults', () => {
     };
     const rounds = parseResults(json);
     expect(rounds).toHaveLength(1);
-    expect(rounds[0].races[0].results[0].points).toBe(22); // 20 + FL(1) + leadLap(1)
+    expect(rounds[0].races[0].results[0].points).toBe(22); // passed through as-is
     expect(rounds[0].races[0].results[0].fastestLap).toBe(true);
-    expect(rounds[0].races[0].results[1].points).toBe(17); // no bonus flags
+    expect(rounds[0].races[0].results[1].points).toBe(17);
   });
 
   test('computes points when not provided', () => {

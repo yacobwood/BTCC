@@ -456,6 +456,19 @@ def scrape_round(info):
             for r in race["results"]:
                 r["leadLap"] = r["driver"] in leaders
 
+    # Bake FL and leadLap bonuses into points so the JSON reflects the
+    # championship PDF totals directly. QR has no bonus flags (stripped above).
+    for race in races:
+        if race["label"] in NO_POINTS_SESSIONS:
+            continue
+        is_qr = race["label"] == "Qualifying Race"
+        for r in race["results"]:
+            if not is_qr:
+                if r.get("fastestLap"):
+                    r["points"] += 1
+                if r.get("leadLap"):
+                    r["points"] += 1
+
     return {
         "round": info["round"],
         "venue": info["venue"],
