@@ -92,8 +92,8 @@ describe('SeasonTable', () => {
     const {getAllByText} = renderWithProviders(<SeasonTable results={RESULTS} />);
     await waitFor(() => {
       // Tom: 25+18=43 pts, Gordon: 18+25=43 pts, Colin: 0 — tied first, Colin last
-      // Rank labels 1 and 2 and 3 should all be present
-      const ranks = getAllByText(/^[123]$/).map(el => el.props.children);
+      // Rank labels 1 and 2 and 3 should all be present (coerce to string - RN renders numbers)
+      const ranks = getAllByText(/^[123]$/).map(el => String(el.props.children));
       expect(ranks).toContain('1');
       expect(ranks).toContain('3'); // Colin is last
     });
