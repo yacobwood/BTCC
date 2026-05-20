@@ -46,6 +46,7 @@ async function logError(fn, message, err, opts = {}) {
 
 async function logPushHistory(title, body, channel) {
   try {
+    const db = getFirestore();
     await db.collection('push_history').add({
       title, body, channel, type: 'auto', sentAt: new Date().toISOString(),
     });
