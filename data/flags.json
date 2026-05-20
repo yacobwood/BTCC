@@ -2,7 +2,18 @@
   "radio_tab": true,
   "live_updates": true,
   "track_weather": true,
-  "overrides": {},
+  "overrides": {
+    "feNNfzeMR5aC4Nv1udh-Ew:APA91bFi4u5XcrOQPnqN2Tbr7cO4Gxjy1F6Se-nuJlLgBLJvcQgWYC_v2e33qCE3d6tE_3mDBpfiMyc9kPlHAxAWUKNEgH3VZzEqENr0H62d6SZd5_89lGE": {
+      "live_chat": true
+    },
+    "ezyElDipQ4efv5FPGUhMUr:APA91bGQW6kgiEuDMRvAFcGkmo27W3Zo0K1Y9uOOSfCQ6vRgToqWtja8mcNlB-5hbBGqrvITLP7yDRGOU2ZoEcepaBMOezMBa1z0ddd86otBDuVffZRUb0o": {
+      "live_chat": true,
+      "debug_mode": true
+    },
+    "f-dvBN5zQXyYlHjeif_5WC:APA91bFZkJXTcDYg3X95PhqxyGkTJhVbhCZExOWhiiiQTuCZyrpHD_TNY-zkRaxOWxoGCQZVgt-hAzxMzYYLZKiltWlkLEmciG7CEwZEBb_Qr1ww3MyIu4s": {
+      "live_chat": true
+    }
+  },
   "podcasts_enabled": true,
   "debug_mode": false,
   "hub_news_enabled": true,
