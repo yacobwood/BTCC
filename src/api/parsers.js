@@ -236,6 +236,10 @@ export function parseResults(json) {
             points = 0;
           } else if (rawPts > 0) {
             points = rawPts;
+            if (!isQR) {
+              if (fl) points += 1;
+              if (lead) points += 1;
+            }
           } else if (isQR) {
               const qrPts = [10, 9, 8, 7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1];
               points = pos >= 1 && pos <= 15 ? qrPts[pos - 1] : 0;
@@ -243,7 +247,6 @@ export function parseResults(json) {
               points = pos >= 1 && pos <= 15 ? POINTS_BY_POS[pos - 1] : 0;
               if (fl) points += 1;
               if (lead) points += 1;
-              if (pole && isRace1) points += 1;
           }
           return {
             position: pos,
