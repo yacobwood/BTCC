@@ -105,13 +105,15 @@ describe('SeasonTable', () => {
     await waitFor(() => expect(getByText('999')).toBeTruthy());
   });
 
-  it('renders KEY section', async () => {
+  it('renders KEY toggle button', async () => {
     const {getByText} = renderWithProviders(<SeasonTable results={RESULTS} />);
     await waitFor(() => expect(getByText('KEY')).toBeTruthy());
   });
 
-  it('renders BONUS POINTS section in key', async () => {
+  it('renders BONUS POINTS section after expanding the key', async () => {
     const {getByText} = renderWithProviders(<SeasonTable results={RESULTS} />);
+    await waitFor(() => getByText('KEY'));
+    fireEvent.press(getByText('KEY'));
     await waitFor(() => expect(getByText('BONUS POINTS')).toBeTruthy());
   });
 });
@@ -170,7 +172,6 @@ describe('SeasonTable badge display', () => {
   it('shows no FL/LL/PP bonus badges on QR cells (reg 1.6.2.a — flags stripped by parsers)', async () => {
     // parsers.js strips fastestLap/leadLap/pole to false for QR results;
     // this test confirms SeasonTable renders no bonus badges when those flags are false.
-    // FL/PP/LL each appear exactly once — in the KEY legend, not in any result cell.
     const qrResults = [{
       round: 1, venue: 'Brands Hatch',
       races: [{
@@ -179,11 +180,12 @@ describe('SeasonTable badge display', () => {
           fastestLap: false, leadLap: false, pole: false, team: 'Test'}],
       }],
     }];
-    const {getAllByText} = renderWithProviders(<SeasonTable results={qrResults} />);
+    const {queryAllByText} = renderWithProviders(<SeasonTable results={qrResults} />);
     await waitFor(() => {
-      expect(getAllByText('FL')).toHaveLength(1); // KEY only
-      expect(getAllByText('PP')).toHaveLength(1); // KEY only
-      expect(getAllByText('LL')).toHaveLength(1); // KEY only
+      // KEY is collapsed by default, so FL/PP/LL appear 0 times — none in QR result cells
+      expect(queryAllByText('FL')).toHaveLength(0);
+      expect(queryAllByText('PP')).toHaveLength(0);
+      expect(queryAllByText('LL')).toHaveLength(0);
     });
   });
 });

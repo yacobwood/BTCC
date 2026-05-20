@@ -63,11 +63,9 @@ export function computeProgression(rounds) {
   sortedRounds.forEach((round, roundIdx) => {
     const scoringRaces = round.races.filter(race => SCORING_RACES.includes(race.label) && race.results.length > 0);
     scoringRaces.forEach((race, raceIdx) => {
-      const isQR = race.label === 'Qualifying Race';
       for (const r of race.results) {
         if (!r.driver) continue;
-        const bonus = isQR ? 0 : (r.leadLap ? 1 : 0) + (r.fastestLap ? 1 : 0);
-        driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points + bonus;
+        driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points;
         if (firstPoint[r.driver] === undefined) firstPoint[r.driver] = pointLabels.length;
         if (!series[r.driver]) series[r.driver] = {name: r.driver, points: []};
       }

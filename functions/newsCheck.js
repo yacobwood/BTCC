@@ -5,7 +5,7 @@ function decodeHtmlEntities(str) {
   return str.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)));
 }
 
-async function checkBtccNews({fetchFn, db, messaging, logHistory, sends}) {
+async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
   const newsRes = await fetchFn(NEWS_URL, 10000, {headers: {'User-Agent': NEWS_USER_AGENT}});
   const articles = await newsRes.json();
   const latest = articles?.[0];
@@ -16,34 +16,37 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory, sends}) {
   }
 
   const stateRef = db.collection('state').doc('news');
-  let shouldNotify = false;
   let notifyPayload = null;
 
   await db.runTransaction(async (tx) => {
-    shouldNotify = false; notifyPayload = null;
+    notifyPayload = null;
     const snap = await tx.get(stateRef);
-    const lastId = snap.exists ? snap.data().lastId : null;
+    const data = snap.exists ? snap.data() : {};
+    const lastId = data.lastId ?? null;
+    const pendingSend = data.pendingSend ?? null;
+
     if (latest.id !== lastId) {
-      tx.set(stateRef, {lastId: latest.id, detectedAt: new Date().toISOString()});
-      if (lastId !== null) {
-        shouldNotify = true;
-        const title = decodeHtmlEntities(latest.title?.rendered || '') || 'New BTCC Article';
-        const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
-        notifyPayload = {title, imageUrl, slug: latest.slug || ''};
-      }
+      const title = decodeHtmlEntities(latest.title?.rendered || '') || 'New BTCC Article';
+      const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
+      // Only notify if this isn't the very first article we've ever seen
+      const payload = lastId !== null ? {title, imageUrl, slug: latest.slug || ''} : null;
+      tx.set(stateRef, {lastId: latest.id, detectedAt: new Date().toISOString(), pendingSend: payload});
+      notifyPayload = payload;
+    } else if (pendingSend) {
+      // Previous run wrote state but crashed before sending — retry
+      notifyPayload = pendingSend;
     }
   });
 
-  if (shouldNotify && notifyPayload) {
-    console.log(`News notification queued: "${notifyPayload.title}" (${notifyPayload.slug})`);
-    sends.push(
-      messaging.send({
-        topic: 'news_alerts',
-        android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000},
-        apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
-        data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
-      }),
-    );
+  if (notifyPayload) {
+    console.log(`News notification sending: "${notifyPayload.title}" (${notifyPayload.slug})`);
+    await messaging.send({
+      topic: 'news_alerts',
+      android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000},
+      apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
+      data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
+    });
+    await stateRef.update({pendingSend: null});
     logHistory('New Article', notifyPayload.title, 'news_alerts');
   }
 }

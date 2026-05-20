@@ -168,106 +168,109 @@ exports.sendSessionNotifications = onSchedule(
     const sends = [];
 
     // ── Calendar-gated alerts (session, preview, standings) ───────
-    // Only fetch calendar + schedule on relevant days to avoid unnecessary
-    // network calls every minute when there's no race activity.
-    const calendar = await fetchWithTimeout(CALENDAR_URL).then(r => r.json());
+    try {
+      const calendar = await fetchWithTimeout(CALENDAR_URL).then(r => r.json());
 
-    const isRaceDay = calendar.rounds.some(
-      r => r.startDate === todayStr || r.endDate === todayStr,
-    );
-    const isFridayBefore = uk.weekday === 'Friday' &&
-      calendar.rounds.some(r => r.startDate === tomorrowStr);
-    const isTuesdayAfter = uk.weekday === 'Tuesday' &&
-      calendar.rounds.some(r => r.endDate === sundayStr);
+      const isRaceDay = calendar.rounds.some(
+        r => r.startDate === todayStr || r.endDate === todayStr,
+      );
+      const isFridayBefore = uk.weekday === 'Friday' &&
+        calendar.rounds.some(r => r.startDate === tomorrowStr);
+      const isTuesdayAfter = uk.weekday === 'Tuesday' &&
+        calendar.rounds.some(r => r.endDate === sundayStr);
 
-    if (isRaceDay || isFridayBefore || isTuesdayAfter) {
-      const schedule = await fetchWithTimeout(SCHEDULE_URL).then(r => r.json());
+      if (isRaceDay || isFridayBefore || isTuesdayAfter) {
+        const schedule = await fetchWithTimeout(SCHEDULE_URL).then(r => r.json());
 
-      const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
-      const windowMs = 30 * 1000; // ±30 sec window
+        const target = new Date(now.getTime() + 15 * 60 * 1000); // 15 mins from now
+        const windowMs = 30 * 1000; // ±30 sec window
 
-      const scheduleByRound = {};
-      for (const r of schedule.rounds) {
-        scheduleByRound[r.round] = r.sessions;
-      }
+        const scheduleByRound = {};
+        for (const r of schedule.rounds) {
+          scheduleByRound[r.round] = r.sessions;
+        }
 
-      // ── Session alerts ──────────────────────────────────────────
-      for (const round of calendar.rounds) {
-        const sessions = scheduleByRound[round.round];
-        if (!sessions) continue;
+        // ── Session alerts ──────────────────────────────────────────
+        for (const round of calendar.rounds) {
+          const sessions = scheduleByRound[round.round];
+          if (!sessions) continue;
 
-        for (const session of sessions) {
-          const dateStr = session.day === 'SAT' ? round.startDate : round.endDate;
-          const sessionUTC = sessionToUTC(dateStr, session.time);
-          const diff = Math.abs(sessionUTC.getTime() - target.getTime());
+          for (const session of sessions) {
+            const dateStr = session.day === 'SAT' ? round.startDate : round.endDate;
+            const sessionUTC = sessionToUTC(dateStr, session.time);
+            const diff = Math.abs(sessionUTC.getTime() - target.getTime());
 
-          if (diff > windowMs) continue;
+            if (diff > windowMs) continue;
 
-          const topic = SESSION_TOPICS[session.name];
-          if (!topic) continue;
+            const topic = SESSION_TOPICS[session.name];
+            if (!topic) continue;
 
-          sends.push(
-            messaging.send({
-              topic,
-              notification: {
-                title: `${session.name} — Starting in 15 mins`,
-                body: `${session.name} at ${round.venue} is about to get underway`,
-              },
-              android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
-              apns: {payload: {aps: {sound: 'default'}}},
-              ...(round.tslEventId ? {data: {type: 'livetiming', eventId: String(round.tslEventId)}} : {}),
-            }),
-          );
-          logPushHistory(`${session.name} — Starting in 15 mins`, `${session.name} at ${round.venue} is about to get underway`, topic);
+            sends.push(
+              messaging.send({
+                topic,
+                notification: {
+                  title: `${session.name} — Starting in 15 mins`,
+                  body: `${session.name} at ${round.venue} is about to get underway`,
+                },
+                android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
+                apns: {payload: {aps: {sound: 'default'}}},
+                ...(round.tslEventId ? {data: {type: 'livetiming', eventId: String(round.tslEventId)}} : {}),
+              }),
+            );
+            logPushHistory(`${session.name} — Starting in 15 mins`, `${session.name} at ${round.venue} is about to get underway`, topic);
+          }
+        }
+
+        // ── Friday 9am — race weekend preview ──────────────────────
+        if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute === 0) {
+          const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
+          if (round) {
+            const rStart = (round.round - 1) * 3 + 1;
+            sends.push(
+              messaging.send({
+                topic: 'weekend_preview',
+                notification: {
+                  title: 'Race Weekend Tomorrow',
+                  body: `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`,
+                },
+                android: {notification: {channelId: 'weekend_preview'}},
+                apns: {payload: {aps: {sound: 'default'}}},
+                data: {type: 'round', round: String(round.round)},
+              }),
+            );
+            logPushHistory('Race Weekend Tomorrow', `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`, 'weekend_preview');
+          }
+        }
+
+        // ── Tuesday 9am — standings update ─────────────────────────
+        if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute === 0) {
+          const round = calendar.rounds.find(r => r.endDate === sundayStr);
+          if (round) {
+            const rStart = (round.round - 1) * 3 + 1;
+            sends.push(
+              messaging.send({
+                topic: 'standings_update',
+                notification: {
+                  title: 'Standings Updated',
+                  body: `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`,
+                },
+                android: {notification: {channelId: 'standings'}},
+                apns: {payload: {aps: {sound: 'default'}}},
+                data: {type: 'history'},
+              }),
+            );
+            logPushHistory('Standings Updated', `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`, 'standings_update');
+          }
         }
       }
-
-      // ── Friday 9am — race weekend preview ──────────────────────
-      if (uk.weekday === 'Friday' && uk.hour === 9 && uk.minute === 0) {
-        const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
-        if (round) {
-          const rStart = (round.round - 1) * 3 + 1;
-          sends.push(
-            messaging.send({
-              topic: 'weekend_preview',
-              notification: {
-                title: 'Race Weekend Tomorrow',
-                body: `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`,
-              },
-              android: {notification: {channelId: 'weekend_preview'}},
-              apns: {payload: {aps: {sound: 'default'}}},
-              data: {type: 'round', round: String(round.round)},
-            }),
-          );
-          logPushHistory('Race Weekend Tomorrow', `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`, 'weekend_preview');
-        }
-      }
-
-      // ── Tuesday 9am — standings update ─────────────────────────
-      if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute === 0) {
-        const round = calendar.rounds.find(r => r.endDate === sundayStr);
-        if (round) {
-          const rStart = (round.round - 1) * 3 + 1;
-          sends.push(
-            messaging.send({
-              topic: 'standings_update',
-              notification: {
-                title: 'Standings Updated',
-                body: `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`,
-              },
-              android: {notification: {channelId: 'standings'}},
-              apns: {payload: {aps: {sound: 'default'}}},
-              data: {type: 'history'},
-            }),
-          );
-          logPushHistory('Standings Updated', `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`, 'standings_update');
-        }
-      }
+    } catch (e) {
+      console.error('Calendar check failed:', e);
+      await logError('sendSessionNotifications', e.message, e, {key: 'check-calendar', alert: true});
     }
 
     // ── News alerts ───────────────────────────────────────────────
     try {
-      await checkBtccNews({fetchFn: fetchWithTimeout, db, messaging, logHistory: logPushHistory, sends});
+      await checkBtccNews({fetchFn: fetchWithTimeout, db, messaging, logHistory: logPushHistory});
     } catch (e) {
       console.error('News check failed:', e);
       await logError('sendSessionNotifications', e.message, e, {key: 'check-news', alert: true});
@@ -287,33 +290,33 @@ exports.sendSessionNotifications = onSchedule(
       );
       if (latestHub) {
         const hubStateRef = db.collection('state').doc('hub_news');
-        let shouldNotify = false;
         let notifyPayload = null;
         await db.runTransaction(async (tx) => {
-          shouldNotify = false; notifyPayload = null;
+          notifyPayload = null;
           const snap = await tx.get(hubStateRef);
-          const lastHubId = snap.exists ? snap.data().lastId : null;
+          const data = snap.exists ? snap.data() : {};
+          const lastHubId = data.lastId ?? null;
+          const pendingSend = data.pendingSend ?? null;
           if (String(latestHub.id) !== String(lastHubId)) {
-            tx.set(hubStateRef, {lastId: String(latestHub.id)});
-            if (lastHubId !== null) {
-              shouldNotify = true;
-              notifyPayload = {
-                title: latestHub.title || 'New Post',
-                imageUrl: latestHub.heroImage || latestHub.images?.[0] || null,
-                id: String(latestHub.id),
-              };
-            }
+            const newPayload = lastHubId !== null ? {
+              title: latestHub.title || 'New Post',
+              imageUrl: latestHub.heroImage || latestHub.images?.[0] || null,
+              id: String(latestHub.id),
+            } : null;
+            tx.set(hubStateRef, {lastId: String(latestHub.id), pendingSend: newPayload});
+            notifyPayload = newPayload;
+          } else if (pendingSend) {
+            notifyPayload = pendingSend;
           }
         });
-        if (shouldNotify && notifyPayload) {
-          sends.push(
-            messaging.send({
-              topic: 'news_alerts',
-              android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000},
-              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
-              data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
-            }),
-          );
+        if (notifyPayload) {
+          await messaging.send({
+            topic: 'news_alerts',
+            android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000},
+            apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
+            data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
+          });
+          await hubStateRef.update({pendingSend: null});
           logPushHistory('New Post', notifyPayload.title, 'news_alerts');
         }
       }
@@ -335,30 +338,32 @@ exports.sendSessionNotifications = onSchedule(
 
       if (latestGuid) {
         const podcastStateRef = db.collection('state').doc('podcast');
-        let shouldNotify = false;
-        let podTitle = null;
+        let notifyPayload = null;
         await db.runTransaction(async (tx) => {
-          shouldNotify = false; podTitle = null;
+          notifyPayload = null;
           const snap = await tx.get(podcastStateRef);
-          const lastGuid = snap.exists ? snap.data().lastGuid : null;
+          const data = snap.exists ? snap.data() : {};
+          const lastGuid = data.lastGuid ?? null;
+          const pendingSend = data.pendingSend ?? null;
           if (latestGuid !== lastGuid) {
-            tx.set(podcastStateRef, {lastGuid: latestGuid});
-            if (lastGuid !== null) {
-              shouldNotify = true;
-              podTitle = latestTitle || 'New BTCC Podcast';
-            }
+            const newPayload = lastGuid !== null
+              ? {title: latestTitle || 'New BTCC Podcast', artworkUrl: artworkUrl || null}
+              : null;
+            tx.set(podcastStateRef, {lastGuid: latestGuid, pendingSend: newPayload});
+            notifyPayload = newPayload;
+          } else if (pendingSend) {
+            notifyPayload = pendingSend;
           }
         });
-        if (shouldNotify && podTitle) {
-          sends.push(
-            messaging.send({
-              topic: 'podcast_alerts',
-              android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000},
-              apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`}, payload: {aps: {sound: 'default', alert: {title: 'New Podcast', body: podTitle}}}},
-              data: {type: 'podcast', channel: 'podcasts', title: podTitle, ...(artworkUrl ? {imageUrl: artworkUrl} : {})},
-            }),
-          );
-          logPushHistory('New Podcast', podTitle, 'podcast_alerts');
+        if (notifyPayload) {
+          await messaging.send({
+            topic: 'podcast_alerts',
+            android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000},
+            apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Podcast', body: notifyPayload.title}}}},
+            data: {type: 'podcast', channel: 'podcasts', title: notifyPayload.title, ...(notifyPayload.artworkUrl ? {imageUrl: notifyPayload.artworkUrl} : {})},
+          });
+          await podcastStateRef.update({pendingSend: null});
+          logPushHistory('New Podcast', notifyPayload.title, 'podcast_alerts');
         }
       }
     } catch (e) {
@@ -366,19 +371,20 @@ exports.sendSessionNotifications = onSchedule(
       await logError('sendSessionNotifications', e.message, e, {key: 'check-podcast', alert: true});
     }
 
-    const results = await Promise.allSettled(sends);
-    results.forEach((r, i) => {
-      if (r.status === 'rejected') {
-        console.error(`Send ${i} failed:`, r.reason);
-        logError('sendSessionNotifications:fcm', r.reason?.message || String(r.reason), r.reason, {key: 'fcm-send-failure', alert: true});
-      }
-    });
+    if (sends.length > 0) {
+      const results = await Promise.allSettled(sends);
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          console.error(`Send ${i} failed:`, r.reason);
+          logError('sendSessionNotifications:fcm', r.reason?.message || String(r.reason), r.reason, {key: 'fcm-send-failure', alert: true});
+        }
+      });
+    }
   },
 );
 
 // ── Shared digest logic ───────────────────────────────────────
 async function runDigest(label, promptIntro) {
-  const messaging = getMessaging();
   const today = getUKDateString(new Date());
   const postId = `digest-${today}`;
 

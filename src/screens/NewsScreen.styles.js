@@ -108,7 +108,7 @@ export default StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
   },
-  compactImage: {width: 100, height: 90},
+  compactImage: {width: 100, alignSelf: 'stretch'},
   compactContent: {flex: 1, padding: 10, justifyContent: 'center'},
   compactCategory: {
     color: Colors.yellow,

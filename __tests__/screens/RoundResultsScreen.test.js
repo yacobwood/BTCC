@@ -44,13 +44,13 @@ describe('RoundResultsScreen', () => {
     it('switching tabs renders different results', async () => {
       const {getByText, queryByText} = renderRound({initialRace: 0});
       // FP: no points shown
-      expect(queryByText('+21 pts')).toBeNull();
+      expect(queryByText('+20 pts')).toBeNull();
 
       await act(async () => {
         fireEvent.press(getByText('R1'));
       });
-      // Race 1: Shedden wins (20 pts) + FL bonus (1 pt) = 21 pts
-      expect(getByText('+21 pts')).toBeTruthy();
+      // Race 1: Shedden wins (20 pts — bonus already in points from scraper)
+      expect(getByText('+20 pts')).toBeTruthy();
     });
   });
 
@@ -80,14 +80,14 @@ describe('RoundResultsScreen', () => {
     it('shows points for a race session', async () => {
       const {getByText} = renderRound({initialRace: 3}); // Race 1
       await waitFor(() => {
-        expect(getByText('+21 pts')).toBeTruthy();
+        expect(getByText('+20 pts')).toBeTruthy();
       });
     });
 
     it('does not show points for Free Practice', () => {
       const {queryByText} = renderRound({initialRace: 0});
       expect(queryByText('+0 pts')).toBeNull();
-      expect(queryByText('+21 pts')).toBeNull();
+      expect(queryByText('+20 pts')).toBeNull();
     });
   });
 
@@ -503,7 +503,7 @@ describe('RoundResultsScreen', () => {
       );
 
       // Donington Race 1: Shedden P1 scores 21 pts
-      expect(queryByText('+21 pts')).toBeTruthy();
+      expect(queryByText('+20 pts')).toBeTruthy();
 
       const route2 = makeRoute({round: BRANDS_HATCH, year: 2026, initialRace: 3, origin: 'calendar'});
       await act(async () => {
@@ -511,7 +511,7 @@ describe('RoundResultsScreen', () => {
       });
 
       // Brands Hatch Race 1 has no results - points badge should be gone
-      expect(queryByText('+21 pts')).toBeNull();
+      expect(queryByText('+20 pts')).toBeNull();
     });
   });
 

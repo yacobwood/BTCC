@@ -99,27 +99,27 @@ describe('computeProgression', () => {
     expect(alice.points[alice.points.length - 1]).toBe(37);
   });
 
-  it('adds LL bonus (+1) for regular race', () => {
+  it('reads points directly from result without adding bonus flags', () => {
+    // Bonus is now baked into r.points by the scraper; computeProgression is a pure pass-through
     const rounds = [makeRound(1, [
       makeRace('Race 1', [makeResult('Alice', 1, {points: 20, leadLap: true})]),
     ])];
     const {series} = computeProgression(rounds);
     const alice = series.find(s => s.name === 'Alice');
-    expect(alice.points[alice.points.length - 1]).toBe(21);
+    expect(alice.points[alice.points.length - 1]).toBe(20);
   });
 
-  it('adds FL bonus (+1) for regular race', () => {
+  it('does not inflate points when fastestLap flag is set (bonus already in r.points)', () => {
     const rounds = [makeRound(1, [
       makeRace('Race 1', [makeResult('Alice', 2, {points: 17, fastestLap: true})]),
     ])];
     const {series} = computeProgression(rounds);
     const alice = series.find(s => s.name === 'Alice');
-    expect(alice.points[alice.points.length - 1]).toBe(18);
+    expect(alice.points[alice.points.length - 1]).toBe(17);
   });
 
-  it('does NOT add LL bonus for QR (reg 1.6.2.a — guard in computeProgression)', () => {
-    // parsers.js strips leadLap to false for QR; computeProgression also guards with isQR
-    // to catch any hypothetical scenario where the flag was not stripped upstream
+  it('does NOT add LL bonus for QR (reg 1.6.2.a — flags stripped by parsers)', () => {
+    // parsers.js strips leadLap to false for QR before data reaches computeProgression
     const rounds = [makeRound(1, [
       makeRace('Qualifying Race', [makeResult('Alice', 1, {points: 10, leadLap: true})]),
     ])];
@@ -129,8 +129,7 @@ describe('computeProgression', () => {
   });
 
   it('does NOT add FL bonus for QR (flags stripped by parsers — fastestLap is false)', () => {
-    // parsers.js strips fastestLap to false for QR; this confirms computeProgression
-    // correctly accumulates 0 bonus when the flag is false
+    // parsers.js strips fastestLap to false for QR results
     const rounds = [makeRound(1, [
       makeRace('Qualifying Race', [makeResult('Alice', 1, {points: 10, fastestLap: false})]),
     ])];
