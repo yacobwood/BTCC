@@ -902,3 +902,55 @@ exports.commentReact = onRequest(async (req, res) => {
     res.status(500).json({ok: false, error: e.message});
   }
 });
+
+// ── Ask Colin (AI Q&A) ────────────────────────────────────────
+const ASK_RATE_LIMIT = 5;   // max requests
+const ASK_RATE_WINDOW = 10 * 60 * 1000; // per 10 minutes
+
+exports.askBtccAi = onRequest(
+  {region: 'europe-west1', secrets: ['ANTHROPIC_API_KEY'], cors: false},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).json({error: 'Method Not Allowed'}); return; }
+
+    const question = (req.body?.question ?? '').trim();
+    if (!question || question.length > 500) {
+      res.status(400).json({error: 'Question must be between 1 and 500 characters'}); return;
+    }
+
+    // Rate limit by IP: ASK_RATE_LIMIT requests per ASK_RATE_WINDOW
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || 'unknown';
+    const db = getFirestore();
+    const rateLimitRef = db.collection('rate_limits').doc(`ask_${ip.replace(/[^a-z0-9]/gi, '_')}`);
+    try {
+      const now = Date.now();
+      const limited = await db.runTransaction(async tx => {
+        const doc = await tx.get(rateLimitRef);
+        const data = doc.exists ? doc.data() : {count: 0, windowStart: now};
+        const windowExpired = now - data.windowStart > ASK_RATE_WINDOW;
+        const count = windowExpired ? 1 : data.count + 1;
+        const windowStart = windowExpired ? now : data.windowStart;
+        tx.set(rateLimitRef, {count, windowStart});
+        return count > ASK_RATE_LIMIT;
+      });
+      if (limited) { res.status(429).json({error: 'Too many requests. Please wait a few minutes.'}); return; }
+    } catch (e) {
+      console.error('askBtccAi rate limit error:', e);
+    }
+
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic.default({apiKey: process.env.ANTHROPIC_API_KEY});
+
+    try {
+      const response = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 512,
+        system: `You are Colin, a BTCC (British Touring Car Championship) expert assistant inside the official BTCC Hub app. You are named after Colin Turkington, the 4x BTCC champion. Answer questions about BTCC only - drivers, teams, tracks, results, history, regulations and race format. Be concise and factual. Use British English. Never use em dashes. Never use a comma before "and". If the question is not related to BTCC, respond with exactly: "I can only answer questions about the BTCC."`,
+        messages: [{role: 'user', content: question}],
+      });
+      res.status(200).json({answer: response.content[0].text});
+    } catch (e) {
+      console.error('askBtccAi error:', e);
+      res.status(500).json({error: 'Failed to get a response. Please try again.'});
+    }
+  },
+);
