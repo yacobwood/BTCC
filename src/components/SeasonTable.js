@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect} from 'react';
+import React, {useMemo, useState, useEffect, useRef, useCallback} from 'react';
 import {View, Text, ScrollView, StyleSheet, ActivityIndicator, InteractionManager} from 'react-native';
 import {Colors} from '../theme/colors';
 
@@ -230,6 +230,7 @@ function KeyRow() {
 
 export default function SeasonTable({results, standings}) {
   const [ready, setReady] = useState(false);
+  const headerScrollRef = useRef(null);
 
   useEffect(() => {
     setReady(false);
@@ -251,6 +252,13 @@ export default function SeasonTable({results, standings}) {
     return base;
   }, [results, standings]);
 
+  const onGridScroll = useCallback(e => {
+    headerScrollRef.current?.scrollTo({
+      x: e.nativeEvent.contentOffset.x,
+      animated: false,
+    });
+  }, []);
+
   if (!ready) {
     return (
       <View style={styles.empty}>
@@ -268,86 +276,102 @@ export default function SeasonTable({results, standings}) {
   }
 
   return (
-    <ScrollView style={styles.outer} showsVerticalScrollIndicator={false}>
+    <View style={styles.outer}>
+      {/* Sticky header - outside the vertical scroll so it never moves up */}
       <View style={styles.tableRow}>
-
-        {/* Fixed left panel */}
         <View style={{width: LEFT_W}}>
           <View style={styles.leftHeader}>
             <Text style={[styles.colLabel, {flex: 1, paddingLeft: 10}]}>Driver</Text>
             <Text style={[styles.colLabel, {width: PTS_W, textAlign: 'center'}]}>Pts</Text>
           </View>
-          {tableData.map((driver, i) => (
-            <View key={driver.name} style={[
-              styles.nameRow,
-              i === 0 && styles.leaderRow,
-            ]}>
-              <Text style={[styles.rankText, i === 0 && {color: Colors.yellow}]}>{i + 1}</Text>
-              <Text style={styles.nameText} numberOfLines={1}>
-                {driver.name.trim().split(/\s+/).slice(1).join(' ').toUpperCase()}
-              </Text>
-              <Text style={[styles.ptsText, i === 0 && {color: Colors.yellow}]}>{driver.points}</Text>
-            </View>
-          ))}
         </View>
-
-        {/* Scrollable grid */}
-        <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View>
-            {/* Header */}
-            <View style={[styles.gridHeader, {flexDirection: 'row'}]}>
-              {columns.map((col, ci) => (
-                <View
-                  key={col.round}
-                  style={[
-                    {width: col.races.length * CELL_W, alignItems: 'center', justifyContent: 'center'},
-                    ci < columns.length - 1 && styles.groupDivider,
-                  ]}>
-                  <Text style={styles.roundLabel}>R{col.round}</Text>
-                  <Text style={styles.venueLabel}>{VENUE_ABBR[col.venue] ?? col.venue}</Text>
-                  <View style={{flexDirection: 'row'}}>
-                    {col.races.map(race => (
-                      <View key={race.label} style={{width: CELL_W, alignItems: 'center'}}>
-                        <Text style={styles.raceLabel}>{race.short}</Text>
-                      </View>
-                    ))}
-                  </View>
+        <ScrollView
+          horizontal
+          scrollEnabled={false}
+          ref={headerScrollRef}
+          showsHorizontalScrollIndicator={false}>
+          <View style={[styles.gridHeader, {flexDirection: 'row'}]}>
+            {columns.map((col, ci) => (
+              <View
+                key={col.round}
+                style={[
+                  {width: col.races.length * CELL_W, alignItems: 'center', justifyContent: 'center'},
+                  ci < columns.length - 1 && styles.groupDivider,
+                ]}>
+                <Text style={styles.roundLabel}>R{col.round}</Text>
+                <Text style={styles.venueLabel}>{VENUE_ABBR[col.venue] ?? col.venue}</Text>
+                <View style={{flexDirection: 'row'}}>
+                  {col.races.map(race => (
+                    <View key={race.label} style={{width: CELL_W, alignItems: 'center'}}>
+                      <Text style={styles.raceLabel}>{race.short}</Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-
-            {/* Data rows */}
-            {tableData.map((driver, i) => (
-              <View key={driver.name} style={[
-                {flexDirection: 'row'},
-                i === 0 && styles.leaderRow,
-              ]}>
-                {columns.map((col, ci) =>
-                  col.races.map(race => {
-                    const key = `${col.round}_${race.label}`;
-                    const isLastInGroup = race.label === col.races[col.races.length - 1].label;
-                    return (
-                      <View
-                        key={key}
-                        style={ci < columns.length - 1 && isLastInGroup ? styles.groupDivider : null}>
-                        <Badge cell={driver.cells[key]} hasData={racesWithResults.has(key)} />
-                      </View>
-                    );
-                  }),
-                )}
               </View>
             ))}
           </View>
         </ScrollView>
       </View>
 
-      <KeyRow />
-    </ScrollView>
+      {/* Body - vertical scroll owns the rows, horizontal scroll owns the grid */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.tableRow}>
+          {/* Fixed left column */}
+          <View style={{width: LEFT_W}}>
+            {tableData.map((driver, i) => (
+              <View key={driver.name} style={[
+                styles.nameRow,
+                i === 0 && styles.leaderRow,
+              ]}>
+                <Text style={[styles.rankText, i === 0 && {color: Colors.yellow}]}>{i + 1}</Text>
+                <Text style={styles.nameText} numberOfLines={1}>
+                  {driver.name.trim().split(/\s+/).slice(1).join(' ').toUpperCase()}
+                </Text>
+                <Text style={[styles.ptsText, i === 0 && {color: Colors.yellow}]}>{driver.points}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Horizontally scrollable grid - syncs header on scroll */}
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={onGridScroll}
+            scrollEventThrottle={16}>
+            <View>
+              {tableData.map((driver, i) => (
+                <View key={driver.name} style={[
+                  {flexDirection: 'row'},
+                  i === 0 && styles.leaderRow,
+                ]}>
+                  {columns.map((col, ci) =>
+                    col.races.map(race => {
+                      const key = `${col.round}_${race.label}`;
+                      const isLastInGroup = race.label === col.races[col.races.length - 1].label;
+                      return (
+                        <View
+                          key={key}
+                          style={ci < columns.length - 1 && isLastInGroup ? styles.groupDivider : null}>
+                          <Badge cell={driver.cells[key]} hasData={racesWithResults.has(key)} />
+                        </View>
+                      );
+                    }),
+                  )}
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+
+        <KeyRow />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  outer: {flex: 1, backgroundColor: Colors.background},
+  outer: {flex: 1, backgroundColor: Colors.background, overflow: 'hidden'},
   tableRow: {flexDirection: 'row'},
 
   leftHeader: {
