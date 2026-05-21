@@ -975,6 +975,24 @@ def main():
     except Exception as e:
         print(f"  WARNING: compute_records failed: {e}", file=sys.stderr)
 
+    print("\n[team stats]")
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "scrape_team_stats", Path(__file__).parent / "scrape_team_stats.py"
+        )
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.main()
+    except Exception as e:
+        print(f"  WARNING: team stats scrape failed: {e}", file=sys.stderr)
+
+    print("\n[team totals]")
+    try:
+        _compute_team_totals(DATA_DIR)
+    except Exception as e:
+        print(f"  WARNING: team totals failed: {e}", file=sys.stderr)
+
 
 if __name__ == "__main__":
     main()
