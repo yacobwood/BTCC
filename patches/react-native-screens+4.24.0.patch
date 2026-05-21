@@ -1,15 +1,15 @@
-diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
 index 22a5710..6a22e70 100644
---- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
-+++ b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
 @@ -224,9 +224,8 @@ class ScreenStackHeaderConfigViewManager :
          const val REACT_CLASS = "RNSScreenStackHeaderConfig"
      }
-
+ 
 -    // TODO: Find better way to handle platform specific props
 +    // iOS-only props have no-op setters on Android - logging suppressed via patch
      private fun logNotAvailable(propName: String) {
 -        Log.w("[RNScreens]", "$propName prop is not available on Android")
      }
-
+ 
      override fun setBackTitle(
