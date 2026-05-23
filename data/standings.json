@@ -73,18 +73,6 @@
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
-      "pos": 7,
-      "car": "50",
-      "driver": "Árón TAYLOR-SMITH",
-      "nat": "GBR",
-      "class": "I",
-      "points": 55,
-      "wins": 1,
-      "seconds": 0,
-      "thirds": 0,
-      "team": "Laser Tools Racing with MB Motorsport"
-    },
-    {
       "pos": 8,
       "car": "99",
       "driver": "Charles RAINFORD",
@@ -423,8 +411,8 @@
       "team": "Speedworks Corolla Racing"
     }
   ],
-  "season": 2026,
+  "season": "2026",
   "round": 2,
   "venue": "Brands Hatch Indy",
-  "updated": "2026-05-10T18:55:53Z"
+  "updated": "2026-05-23T09:01:56Z"
 }
