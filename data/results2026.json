@@ -5412,19 +5412,6 @@
             },
             {
               "pos": 14,
-              "no": 22,
-              "cl": "I",
-              "driver": "Chris SMILEY",
-              "team": "Restart Racing",
-              "car": "Hyundai i30N",
-              "laps": 8,
-              "time": "15:57.719",
-              "gap": "14.905",
-              "bestLap": "1:57.469",
-              "points": 1
-            },
-            {
-              "pos": 15,
               "no": 88,
               "cl": "I",
               "driver": "Mikey DOBLE",
@@ -5437,7 +5424,7 @@
               "points": 1
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 28,
               "cl": "M",
               "driver": "Nicolas HAMILTON",
@@ -5447,10 +5434,10 @@
               "time": "16:00.588",
               "gap": "17.774",
               "bestLap": "1:57.610",
-              "points": 0
+              "points": 1
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 15,
               "cl": "M",
               "driver": "Lewis SELBY",
@@ -5460,6 +5447,19 @@
               "time": "16:02.383",
               "gap": "19.569",
               "bestLap": "1:57.601",
+              "points": 0
+            },
+            {
+              "pos": 17,
+              "no": 22,
+              "cl": "I",
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 8,
+              "time": "16:02.719",
+              "gap": "19.905",
+              "bestLap": "1:57.469",
               "points": 0
             },
             {
@@ -5762,30 +5762,30 @@
             },
             {
               "pos": 14,
-              "no": 22,
-              "cl": "",
-              "driver": "Chris SMILEY",
-              "team": ""
-            },
-            {
-              "pos": 15,
               "no": 88,
               "cl": "",
               "driver": "Mikey DOBLE",
               "team": ""
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 28,
               "cl": "",
               "driver": "Nicolas HAMILTON",
               "team": ""
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 15,
               "cl": "",
               "driver": "Lewis SELBY",
+              "team": ""
+            },
+            {
+              "pos": 17,
+              "no": 22,
+              "cl": "",
+              "driver": "Chris SMILEY",
               "team": ""
             },
             {

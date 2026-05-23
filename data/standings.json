@@ -174,7 +174,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 29,
+      "points": 28,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -210,7 +210,7 @@
       "driver": "Nicolas HAMILTON",
       "nat": "GBR",
       "class": "M",
-      "points": 5,
+      "points": 6,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -414,5 +414,5 @@
   "season": "2026",
   "round": 3,
   "venue": "Snetterton",
-  "updated": "2026-05-23T17:08:38Z"
+  "updated": "2026-05-23T17:15:37Z"
 }
