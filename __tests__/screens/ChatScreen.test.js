@@ -6,7 +6,7 @@ import {renderWithProviders} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn()},
+  Analytics: {screen: jest.fn(), chatMessageSent: jest.fn(), chatMessageFlagged: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({
@@ -118,6 +118,19 @@ describe('ChatScreen', () => {
     const {Analytics} = require('../../src/utils/analytics');
     renderChat();
     await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('chat'));
+  });
+
+  it('calls Analytics.chatMessageSent after successful send', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'commenter_name' ? Promise.resolve('Tom') : Promise.resolve(null),
+    );
+    const {getByPlaceholderText, getByLabelText} = renderWithProviders(<ChatScreen />);
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => getByPlaceholderText(/say something/i));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'Hello!');
+    await act(async () => { fireEvent.press(getByLabelText('Send message')); });
+    await waitFor(() => expect(Analytics.chatMessageSent).toHaveBeenCalled());
   });
 
   it('calls fetchBlacklist on mount', async () => {
@@ -267,6 +280,19 @@ describe('ChatScreen', () => {
     });
     await waitFor(() => expect(getAllByLabelText('Flag message').length).toBeGreaterThan(0));
     expect(queryByLabelText('Delete message')).toBeNull();
+  });
+
+  it('calls Analytics.chatMessageFlagged when flag button pressed', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    const {getAllByLabelText} = renderChat();
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Bad message', authorName: 'Spammer', authorId: 'other123', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
+    });
+    await waitFor(() => getAllByLabelText('Flag message'));
+    await act(async () => { fireEvent.press(getAllByLabelText('Flag message')[0]); });
+    await waitFor(() => expect(Analytics.chatMessageFlagged).toHaveBeenCalled());
   });
 
   // ── Firebase lifecycle ────────────────────────────────────────────────────────

@@ -316,6 +316,7 @@ exports.sendSessionNotifications = onSchedule(
             apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
             data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
           });
+          console.log(`Hub notification sent OK: "${notifyPayload.title}"`);
           await hubStateRef.update({pendingSend: null});
           logPushHistory('New Post', notifyPayload.title, 'news_alerts');
         }
@@ -362,6 +363,7 @@ exports.sendSessionNotifications = onSchedule(
             apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Podcast', body: notifyPayload.title}}}},
             data: {type: 'podcast', channel: 'podcasts', title: notifyPayload.title, ...(notifyPayload.artworkUrl ? {imageUrl: notifyPayload.artworkUrl} : {})},
           });
+          console.log(`Podcast notification sent OK: "${notifyPayload.title}"`);
           await podcastStateRef.update({pendingSend: null});
           logPushHistory('New Podcast', notifyPayload.title, 'podcast_alerts');
         }

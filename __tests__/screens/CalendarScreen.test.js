@@ -266,6 +266,64 @@ describe('CalendarScreen', () => {
     });
   });
 
+  // ── Navigation year param ─────────────────────────────────────────────────────
+  // Verifies that the year currently selected in the UI is forwarded to
+  // TrackDetail so the detail screen fetches the correct season's data.
+
+  describe('navigation year param', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      // Pin to a date before all MOCK_ROUNDS so every round is treated as upcoming
+      jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    it('passes year: 2026 when 2026 is selected and a round is tapped', async () => {
+      setupCalendar(MOCK_ROUNDS);
+      const {getByLabelText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByLabelText(/Next race: Donington Park/));
+      fireEvent.press(getByLabelText(/Next race: Donington Park/));
+      expect(nav.navigate).toHaveBeenCalledWith(
+        'TrackDetail',
+        expect.objectContaining({year: 2026}),
+      );
+    });
+
+    it('passes year: 2027 after switching to the 2027 tab', async () => {
+      const ROUNDS_2027 = [
+        {round: 1, venue: 'Donington Park', startDate: '2027-04-10', endDate: '2027-04-11', sessions: []},
+      ];
+      // Initial 2026 load
+      setupCalendar(MOCK_ROUNDS);
+      const {getByText, getByLabelText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByText('2027'));
+
+      // Switch to 2027
+      fetchCalendar.mockReturnValue({rounds: ROUNDS_2027});
+      parseCalendar.mockReturnValue({rounds: ROUNDS_2027});
+      await act(async () => { fireEvent.press(getByText('2027')); });
+      await waitFor(() => getByLabelText(/Next race: Donington Park/));
+
+      fireEvent.press(getByLabelText(/Next race: Donington Park/));
+      expect(nav.navigate).toHaveBeenCalledWith(
+        'TrackDetail',
+        expect.objectContaining({year: 2027}),
+      );
+    });
+
+    it('passes the track object alongside the year', async () => {
+      setupCalendar(MOCK_ROUNDS);
+      const {getByLabelText} = renderWithProviders(<CalendarScreen navigation={nav} />);
+      await waitFor(() => getByLabelText(/Next race: Donington Park/));
+      fireEvent.press(getByLabelText(/Next race: Donington Park/));
+      expect(nav.navigate).toHaveBeenCalledWith(
+        'TrackDetail',
+        expect.objectContaining({track: MOCK_ROUNDS[0], year: 2026}),
+      );
+    });
+  });
+
   // ── Countdown label (next upcoming round) ─────────────────────────────────────
   // daysUntil() uses new Date() internally, so we pin the clock to make these
   // deterministic regardless of when the test suite runs.

@@ -174,7 +174,7 @@ export default function CalendarScreen({navigation}) {
 
   const navigate = item => {
     Analytics.raceClicked(item.round, item.venue);
-    navigation.navigate('TrackDetail', {track: item});
+    navigation.navigate('TrackDetail', {track: item, year: selectedYear});
   };
 
   const renderItem = ({item}) => {

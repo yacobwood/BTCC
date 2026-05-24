@@ -23,6 +23,12 @@ const PAGE = {
 describe('InfoPageScreen', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it('calls Analytics.screen("info_page") on mount', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    renderWithProviders(<InfoPageScreen route={makeRoute({page: PAGE})} navigation={nav} />);
+    await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('info_page'));
+  });
+
   // ── Header ────────────────────────────────────────────────────────────────────
 
   it('renders page title uppercased in header', async () => {

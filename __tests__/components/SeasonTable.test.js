@@ -123,22 +123,22 @@ describe('SeasonTable', () => {
 describe('SeasonTable badge display', () => {
   // Note: badge labels also appear in the KEY legend, so use getAllByText
 
-  it('shows DSQ label for disqualified entry', async () => {
-    const dsqResults = [{
+  it('shows DQ label for disqualified entry', async () => {
+    const dqResults = [{
       round: 1, venue: 'Thruxton',
-      races: [{label: 'Race 1', results: [{driver: 'Test Driver', position: 1, laps: 20, time: 'DSQ', points: 0, fastestLap: false, leadLap: false, pole: false, team: 'Test'}]}],
+      races: [{label: 'Race 1', results: [{driver: 'Test Driver', position: 0, laps: 0, time: '', status: 'DQ', points: 0, fastestLap: false, leadLap: false, pole: false, team: 'Test'}]}],
     }];
-    const {getAllByText} = renderWithProviders(<SeasonTable results={dsqResults} />);
-    await waitFor(() => expect(getAllByText('DSQ').length).toBeGreaterThan(0));
+    const {getAllByText} = renderWithProviders(<SeasonTable results={dqResults} />);
+    await waitFor(() => expect(getAllByText('DQ').length).toBeGreaterThan(0));
   });
 
-  it('shows Ret label for retired entry (pos=0, laps>0)', async () => {
+  it('shows DNF label for retired entry (pos=0, laps>0)', async () => {
     const retResults = [{
       round: 1, venue: 'Thruxton',
       races: [{label: 'Race 1', results: [{driver: 'Test Driver', position: 0, laps: 5, time: 'DNF', points: 0, fastestLap: false, leadLap: false, pole: false, team: 'Test'}]}],
     }];
     const {getAllByText} = renderWithProviders(<SeasonTable results={retResults} />);
-    await waitFor(() => expect(getAllByText('Ret').length).toBeGreaterThan(0));
+    await waitFor(() => expect(getAllByText('DNF').length).toBeGreaterThan(0));
   });
 
   it('shows DNS label for did-not-start entry (pos=0, laps=0)', async () => {

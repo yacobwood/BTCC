@@ -8,6 +8,10 @@ jest.mock('../../src/utils/broadcaster', () => ({
   detectBroadcaster: jest.fn(() => 'uk'),
 }));
 
+jest.mock('../../src/utils/analytics', () => ({
+  Analytics: {screen: jest.fn(), roundResultsViewed: jest.fn()},
+}));
+
 const nav = makeNav();
 
 function renderRound({round = MOCK_ROUND, initialRace = 0, favourites = [], year = 2026} = {}) {
@@ -20,6 +24,14 @@ function renderRound({round = MOCK_ROUND, initialRace = 0, favourites = [], year
 }
 
 describe('RoundResultsScreen', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('calls Analytics.screen("round_results") on mount', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    renderRound();
+    await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('round_results'));
+  });
+
   describe('tab bar', () => {
     it('renders abbreviated tab labels for all sessions', () => {
       const {getByText} = renderRound();
@@ -75,6 +87,11 @@ describe('RoundResultsScreen', () => {
     it('shows DNF for a driver who did not finish', () => {
       const {getAllByText} = renderRound({initialRace: 2}); // Q Race
       expect(getAllByText('DNF').length).toBeGreaterThan(0);
+    });
+
+    it('shows DQ for a disqualified driver rather than DNS', () => {
+      const {getByText} = renderRound({initialRace: 4}); // Race 2
+      expect(getByText('DQ')).toBeTruthy();
     });
 
     it('shows points for a race session', async () => {

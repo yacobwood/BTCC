@@ -118,6 +118,7 @@ export default function ChatScreen({onClose} = {}) {
         flagCount: 0,
         hidden: false,
       });
+      Analytics.chatMessageSent();
     } catch (e) {
       setInputError('Failed to send. Please try again.');
       setInput(text);
@@ -170,6 +171,7 @@ export default function ChatScreen({onClose} = {}) {
   const handleFlag = async (msgId) => {
     if (flaggedIds.has(msgId)) return;
     setFlaggedIds(prev => new Set(prev).add(msgId));
+    Analytics.chatMessageFlagged();
     try {
       const idx = messages.findIndex(m => m.id === msgId);
       const flaggedMsg = messages[idx];

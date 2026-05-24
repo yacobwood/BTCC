@@ -47,6 +47,7 @@ export default function RecordsScreen({navigation}) {
   const tabRowRef = useRef(null);
 
   useEffect(() => {
+    Analytics.screen('records');
     cacheRead('records').then(cached => {
       if (cached?.drivers?.length) setAllDrivers(cached.drivers);
     });

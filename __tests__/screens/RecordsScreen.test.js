@@ -35,6 +35,14 @@ async function goToSection(getByLabelText, label) {
 describe('RecordsScreen', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  // ── Analytics ────────────────────────────────────────────────────────────────
+
+  it('calls Analytics.screen("records") on mount', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('records'));
+  });
+
   // ── Header ────────────────────────────────────────────────────────────────────
 
   it('renders ALL-TIME RECORDS title', async () => {

@@ -37,10 +37,10 @@ const VENUE_ABBR = {
 };
 
 // Bold, solid colours for top positions  -  fade everything else out
-function badgeStyle(pos, laps, time) {
-  if (time === 'DSQ') return {
+function badgeStyle(pos, laps, time, status) {
+  if (status === 'DQ' || time === 'DSQ') return {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.4)',
-    text: '#FCA5A5', label: 'DSQ', solid: false,
+    text: '#FCA5A5', label: 'DQ', solid: false,
   };
   if (pos === 0 && laps === 0) return {
     bg: null, border: 'rgba(255,255,255,0.07)',
@@ -48,7 +48,7 @@ function badgeStyle(pos, laps, time) {
   };
   if (pos === 0) return {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)',
-    text: '#FCA5A5', label: 'Ret', solid: false,
+    text: '#FCA5A5', label: 'DNF', solid: false,
   };
   // Solid podium badges  -  stand out completely
   if (pos === 1) return {
@@ -107,6 +107,7 @@ function buildTableData(results) {
           pos: entry.position ?? entry.pos,
           laps: entry.laps,
           time: entry.time || '',
+          status: entry.status || null,
           fl: entry.fastestLap || entry.fl || false,
           lead: entry.leadLap || entry.l || false,
           pole: entry.pole || entry.p || false,
@@ -147,8 +148,8 @@ function Badge({cell, hasData}) {
       ) : null}
     </View>
   );
-  const s = badgeStyle(cell.pos, cell.laps, cell.time);
-  const isDNS = cell.pos === 0 && cell.laps === 0;
+  const s = badgeStyle(cell.pos, cell.laps, cell.time, cell.status);
+  const isDNS = cell.pos === 0 && cell.laps === 0 && cell.status !== 'DQ';
   const bonus = isDNS ? 0 : bonusCount(cell);
   const bonusText = bonus > 0
     ? BONUS_DOTS.filter(({key}) => cell[key]).map(({label}) => label).join(' ')
@@ -181,9 +182,9 @@ const KEY_ITEMS = [
   {label: '2', desc: '2nd place', style: badgeStyle(2, 1, '')},
   {label: '3', desc: '3rd place', style: badgeStyle(3, 1, '')},
   {label: '4', desc: 'Points finish', style: badgeStyle(4, 1, '')},
-  {label: 'Ret', desc: 'Retired', style: badgeStyle(0, 1, '')},
+  {label: 'DNF', desc: 'Did not finish', style: badgeStyle(0, 1, '', null)},
   {label: 'DNS', desc: 'Did not start', style: badgeStyle(0, 0, '')},
-  {label: 'DSQ', desc: 'Disqualified', style: badgeStyle(1, 1, 'DSQ')},
+  {label: 'DQ', desc: 'Disqualified', style: badgeStyle(0, 1, '', 'DQ')},
 ];
 
 function KeyRow() {

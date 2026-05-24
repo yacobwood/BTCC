@@ -302,7 +302,7 @@ Year selector (2004 - 2026) via `YearWheelPicker` modal. Four tabs:
 - Progression Chart (`ProgressionChart` component) - SVG line chart of points accumulation per round
 
 **RoundResultsScreen** ([src/screens/RoundResultsScreen.js](src/screens/RoundResultsScreen.js))
-Per-round detail. `SwipeableTabs` with lazy loading across all sessions: Free Practice, Qualifying, Qualifying Race, Race 1, Race 2, Race 3. Each tab shows: position badges (P1=gold, P2=silver, P3=bronze), grid position delta arrows (↑/↓), points awarded, fastest lap / lead lap / pole bonuses. Before results land, if a TSL grid PDF has been scraped, shows a `StartingGridTab` with a two-column staggered layout mirroring the physical grid. R3 shows a `ReverseGridTab` prediction stepper as fallback when no actual grid data exists yet. For UK users, race tabs show a "Watch Full Race" YouTube button when a URL is available - for 2026 this falls back to bundled URLs from `results2026.json`; for past years the button only appears if the round's own `youtubeUrls` field is populated.
+Per-round detail. `SwipeableTabs` with lazy loading across all sessions: Free Practice, Qualifying, Qualifying Race, Race 1, Race 2, Race 3. Each tab shows: position badges (P1=gold, P2=silver, P3=bronze), grid position delta arrows (↑/↓), points awarded, fastest lap / lead lap / pole bonuses. Non-finisher labels: `DQ` (disqualified, driven by a `status: "DQ"` field in the result), `DNS` (did not start - pos 0, laps 0, no DQ status) or `DNF` (did not finish - pos 0, laps > 0). Before results land, if a TSL grid PDF has been scraped, shows a `StartingGridTab` with a two-column staggered layout mirroring the physical grid. R3 shows a `ReverseGridTab` prediction stepper as fallback when no actual grid data exists yet. For UK users, race tabs show a "Watch Full Race" YouTube button when a URL is available - for 2026 this falls back to bundled URLs from `results2026.json`; for past years the button only appears if the round's own `youtubeUrls` field is populated.
 
 ### More Stack
 
@@ -779,7 +779,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update data files on GitHub.
 
-**scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session. Parses race results and starting grids. Writes to `results{year}.json`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py`.
+**scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session. Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py`.
 
 **compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Applies official wins/championships overrides from btcc.net for modern drivers. Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape.
 

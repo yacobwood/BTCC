@@ -47,12 +47,34 @@ export default function TeamDetailScreen({route, navigation}) {
             {team.base ? <StatBox label="Base" value={team.base} /> : null}
             <StatBox label="Cars" value={String(team.entries)} />
           </View>
+          {(team.totalRaces > 0 || team.totalWins > 0) && (
+            <View style={styles.statsRow}>
+              <StatBox label="Races" value={String(team.totalRaces)} />
+              <StatBox label="Wins" value={String(team.totalWins)} />
+            </View>
+          )}
 
           {team.bio ? (
             <View style={styles.card}>
               <Text style={styles.bioText}>{team.bio}</Text>
             </View>
           ) : null}
+
+          {team.carSpecs && (
+            <>
+              <Text style={styles.sectionTitle}>CAR SPECS</Text>
+              <View style={styles.card}>
+                {Object.entries(team.carSpecs).map(([label, value], i, arr) => (
+                  <View
+                    key={label}
+                    style={[styles.specRow, i < arr.length - 1 && styles.specRowBorder]}>
+                    <Text style={styles.specLabel}>{label}</Text>
+                    <Text style={styles.specValue}>{value}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
 
           <Text style={styles.sectionTitle}>DRIVERS</Text>
           <View style={styles.driversGrid}>
@@ -149,6 +171,10 @@ const styles = StyleSheet.create({
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
+  specRow: {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, alignItems: 'flex-start'},
+  specRowBorder: {borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.outline},
+  specLabel: {color: Colors.textSecondary, fontSize: 12, flex: 1},
+  specValue: {color: '#fff', fontSize: 12, fontWeight: '700', flex: 1.4, textAlign: 'right'},
   champRow: {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4},
   champLabel: {color: Colors.textSecondary, fontSize: 13},
   champValue: {color: Colors.yellow, fontSize: 14, fontWeight: '800'},

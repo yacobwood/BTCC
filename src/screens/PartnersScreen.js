@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -80,6 +80,8 @@ const PARTNERS = [
 ];
 
 export default function PartnersScreen({navigation}) {
+  useEffect(() => { Analytics.screen('partners'); }, []);
+
   const renderPartner = ({item}) => (
     <View style={styles.card}>
       <View style={styles.logoWrap}>

@@ -12,6 +12,12 @@ const nav = makeNav();
 describe('PartnersScreen', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it('calls Analytics.screen("partners") on mount', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    renderWithProviders(<PartnersScreen navigation={nav} />);
+    await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('partners'));
+  });
+
   // ── Header ────────────────────────────────────────────────────────────────────
 
   it('renders PARTNERS & SPONSORS header', () => {

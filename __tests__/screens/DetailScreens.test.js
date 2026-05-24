@@ -351,4 +351,33 @@ describe('TeamDetailScreen', () => {
     );
     await waitFor(() => expect(getByText('Northampton')).toBeTruthy());
   });
+
+  it('renders CAR SPECS section when carSpecs are present', async () => {
+    const teamWithSpecs = {
+      ...TEAM,
+      carSpecs: {
+        Engine: '350+bhp 2-litre turbo direct-injection',
+        Gearbox: 'Xtrac 6-speed sequential',
+        Drive: 'Front-wheel drive',
+      },
+    };
+    const route = makeRoute({team: teamWithSpecs});
+    const {getByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('CAR SPECS')).toBeTruthy();
+      expect(getByText('Engine')).toBeTruthy();
+      expect(getByText('350+bhp 2-litre turbo direct-injection')).toBeTruthy();
+      expect(getByText('Front-wheel drive')).toBeTruthy();
+    });
+  });
+
+  it('does not render CAR SPECS section when carSpecs is absent', async () => {
+    const route = makeRoute({team: TEAM});
+    const {queryByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(queryByText('CAR SPECS')).toBeNull());
+  });
 });

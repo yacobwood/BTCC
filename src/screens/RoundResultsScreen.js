@@ -98,6 +98,7 @@ export default function RoundResultsScreen({route, navigation}) {
   }, [initialRound.round]);
 
   useEffect(() => {
+    Analytics.screen('round_results');
     Analytics.roundResultsViewed(year, round.round);
     maybeRequestReviewAfterResults();
   }, []);
@@ -126,9 +127,9 @@ export default function RoundResultsScreen({route, navigation}) {
   const rEnd = rStart + 2;
 
   const makeRenderResult = (gridMap) => ({item}) => {
-    const isDNF = item.position === 0 || item.time === 'DNF' || item.time === 'Ret';
-    const isDNS = isDNF && item.laps === 0;
-    const posLabel = isDNS ? 'DNS' : isDNF ? 'DNF' : item.position;
+    const isDNF = item.position === 0 || item.time === 'DNF';
+    const isDNS = isDNF && item.laps === 0 && item.status !== 'DQ';
+    const posLabel = item.status === 'DQ' ? 'DQ' : isDNS ? 'DNS' : isDNF ? 'DNF' : item.position;
     const fav = isFavourite(item.driver);
     const posColor = item.position === 1 ? '#FFD700'
       : item.position === 2 ? '#C0C0C0'

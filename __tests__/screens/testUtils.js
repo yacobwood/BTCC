@@ -103,6 +103,7 @@ export const MOCK_ROUND = {
       results: [
         {driver: 'Tom Ingram',       position: 1, time: '30:00.0', team: 'Team Ingram',  points: 25, bestLap: '1:23.9', gap: null, laps: 20, fastestLap: false, leadLap: false, pole: false},
         {driver: 'Gordon Shedden',   position: 2, time: '30:01.5', team: 'Laser Tools',  points: 18, bestLap: '1:24.0', gap: '1.5', laps: 20, fastestLap: false, leadLap: false, pole: false},
+        {driver: 'Dan Cammish',      position: 0, time: '',        team: 'NAPA Racing',  points: 0,  bestLap: null,     gap: null,  laps: 0,  fastestLap: false, leadLap: false, pole: false, status: 'DQ'},
       ],
     },
     {

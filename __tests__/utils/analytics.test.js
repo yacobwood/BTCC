@@ -3,12 +3,21 @@ import {Analytics} from '../../src/utils/analytics';
 
 describe('Analytics', () => {
   describe('screen', () => {
-    it('logs screen_view with screen_name', () => {
-      Analytics.screen('Home');
+    it('logs screen_view with screen_name and firebase_screen_class', () => {
+      Analytics.screen('news');
       expect(logEvent).toHaveBeenCalledWith(
         expect.anything(),
         'screen_view',
-        {screen_name: 'Home'},
+        {screen_name: 'news', firebase_screen_class: 'news'},
+      );
+    });
+
+    it('strips colon suffix for firebase_screen_class on parametrised screens', () => {
+      Analytics.screen('driver_detail:Tom Ingram');
+      expect(logEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        'screen_view',
+        {screen_name: 'driver_detail:Tom Ingram', firebase_screen_class: 'driver_detail'},
       );
     });
   });
@@ -156,6 +165,23 @@ describe('Analytics', () => {
     it('notificationOpened logs type', () => {
       Analytics.notificationOpened('results');
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'notification_opened', {type: 'results'});
+    });
+
+    it('notificationOpened falls back to "unknown" when type is undefined', () => {
+      Analytics.notificationOpened(undefined);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'notification_opened', {type: 'unknown'});
+    });
+  });
+
+  describe('chat events', () => {
+    it('chatMessageSent logs chat_message_sent', () => {
+      Analytics.chatMessageSent();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'chat_message_sent');
+    });
+
+    it('chatMessageFlagged logs chat_message_flagged', () => {
+      Analytics.chatMessageFlagged();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'chat_message_flagged');
     });
   });
 

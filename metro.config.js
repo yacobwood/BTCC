@@ -1,11 +1,18 @@
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 const path = require('path');
 
+const defaultConfig = getDefaultConfig(__dirname);
+const {assetExts, sourceExts} = defaultConfig.resolver;
+
 const config = {
   watchFolders: [__dirname],
+  transformer: {
+    babelTransformerPath: require.resolve('react-native-svg-transformer/react-native'),
+  },
   resolver: {
+    assetExts: assetExts.filter(ext => ext !== 'svg'),
+    sourceExts: [...sourceExts, 'svg'],
     blockList: [
-      // Don't crawl the parent native Android project
       new RegExp(path.resolve(__dirname, '..', 'app') + '/.*'),
       new RegExp(path.resolve(__dirname, '..', '.gradle') + '/.*'),
       new RegExp(path.resolve(__dirname, '..', '.kotlin') + '/.*'),
@@ -15,4 +22,4 @@ const config = {
   },
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = mergeConfig(defaultConfig, config);

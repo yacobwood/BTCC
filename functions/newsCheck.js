@@ -46,6 +46,7 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
       apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
       data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
     });
+    console.log(`News notification sent OK: "${notifyPayload.title}"`);
     await stateRef.update({pendingSend: null});
     logHistory('New Article', notifyPayload.title, 'news_alerts');
   }

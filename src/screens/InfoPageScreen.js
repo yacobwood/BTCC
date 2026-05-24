@@ -24,7 +24,7 @@ export default function InfoPageScreen({route, navigation}) {
   const {page} = route.params;
   const {useKm} = useUnits();
 
-  useEffect(() => { Analytics.infoPageViewed(page.id); }, []);
+  useEffect(() => { Analytics.screen('info_page'); Analytics.infoPageViewed(page.id); }, []);
 
   const openSubPage = (pageId) => {
     const allPages = (pagesData.pages || []).map(p => ({

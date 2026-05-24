@@ -46,24 +46,28 @@ jest.mock('../../src/utils/broadcaster', () => ({
 
 const nav = makeNav();
 
-// A complete track fixture matching the shape in calendar.json
+// A complete track fixture matching the shape produced by parseCalendar after
+// the tracks.json merge. lapPreviewUrl and youtubeUrls are explicit here
+// because they are now separate concerns.
 const TRACK = {
-  round:       1,
-  venue:       'Donington Park',
-  date:        '19–20 Apr 2026',
-  startDate:   '2026-04-19',
-  endDate:     '2026-04-20',
-  lat:         52.83,
-  lng:         -1.37,
-  about:       'One of the most iconic circuits in the UK.',
-  btccFact:    'First BTCC race held here in 1977.',
-  imageUrl:    null,
-  cardBgUrl:   null,
-  tslEventId:  null,   // null → not a live-timing round
-  raceRecord:  {driver: 'Tom Ingram', time: '1:23.456', year: 2024},
+  round:            1,
+  venue:            'Donington Park',
+  date:             '19–20 Apr 2026',
+  startDate:        '2026-04-19',
+  endDate:          '2026-04-20',
+  lat:              52.83,
+  lng:              -1.37,
+  about:            'One of the most iconic circuits in the UK.',
+  btccFact:         'First BTCC race held here in 1977.',
+  imageUrl:         null,
+  cardBgUrl:        null,
+  tslEventId:       null,   // null → not a live-timing round
+  lapPreviewUrl:    null,   // explicitly null unless overridden in a test
+  youtubeUrls:      [],     // race highlights only (indices 0,1,2 = Race 1,2,3)
+  raceRecord:       {driver: 'Tom Ingram', time: '1:23.456', year: 2024},
   qualifyingRecord: {driver: 'Gordon Shedden', time: '1:22.000', year: 2023},
-  sessions:    [{name: 'Free Practice', time: '09:00', day: 'SAT'}],
-  photos:      [],
+  sessions:         [{name: 'Free Practice', time: '09:00', day: 'SAT'}],
+  photos:           [],
 };
 
 // Past race weekend — races fully finished
@@ -83,6 +87,12 @@ function render(track = TRACK) {
 
 describe('TrackDetailScreen', () => {
   beforeEach(() => jest.clearAllMocks());
+
+  it('calls Analytics.screen("track_detail") on mount', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    render();
+    await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('track_detail'));
+  });
 
   // ── Core rendering ────────────────────────────────────────────────────────────
 
@@ -265,11 +275,140 @@ describe('TrackDetailScreen', () => {
     });
   });
 
+  // ── Year param ────────────────────────────────────────────────────────────────
+
+  it('passes year=2027 to fetchCalendar when year param is 2027', async () => {
+    const {fetchCalendar} = require('../../src/api/client');
+    renderWithProviders(
+      <TrackDetailScreen route={makeRoute({track: TRACK, year: 2027})} navigation={nav} />,
+    );
+    await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2027));
+  });
+
+  it('defaults to year=2026 when no year param is provided', async () => {
+    const {fetchCalendar} = require('../../src/api/client');
+    renderWithProviders(
+      <TrackDetailScreen route={makeRoute({track: TRACK})} navigation={nav} />,
+    );
+    await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2026));
+  });
+
   // ── Session times ─────────────────────────────────────────────────────────────
 
   it('renders session time from track data', async () => {
     const {getByText} = render();
     await waitFor(() => expect(getByText('Free Practice')).toBeTruthy());
+  });
+
+  // ── Lap Preview button ────────────────────────────────────────────────────────
+  // lapPreviewUrl comes from tracks.json (year-agnostic); it is distinct from
+  // youtubeUrls which holds race-highlight URLs for the specific season.
+
+  describe('Lap Preview button', () => {
+    const {useBroadcaster} = require('../../src/utils/broadcaster');
+
+    const TRACK_WITH_PREVIEW = {
+      ...TRACK,
+      lapPreviewUrl: 'https://www.youtube.com/watch?v=hotlap123',
+    };
+
+    it('shows Lap Preview button for UK broadcaster when lapPreviewUrl is set', async () => {
+      useBroadcaster.mockReturnValue('uk');
+      const {findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: TRACK_WITH_PREVIEW})} navigation={nav} />,
+      );
+      expect(await findByLabelText('Watch Lap Preview on YouTube')).toBeTruthy();
+    });
+
+    it('does not show Lap Preview button when lapPreviewUrl is null', async () => {
+      useBroadcaster.mockReturnValue('uk');
+      // TRACK has lapPreviewUrl: null and youtubeUrls: [] so the youtube section should not render
+      const {queryByLabelText} = render(TRACK);
+      await waitFor(() => expect(queryByLabelText('Watch Lap Preview on YouTube')).toBeNull());
+    });
+
+    it('does not show Lap Preview button for international broadcaster even with a URL', async () => {
+      useBroadcaster.mockReturnValue('international');
+      const {queryByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: TRACK_WITH_PREVIEW})} navigation={nav} />,
+      );
+      await waitFor(() => expect(queryByLabelText('Watch Lap Preview on YouTube')).toBeNull());
+    });
+
+    it('shows Lap Preview button on a 2027 track that has lapPreviewUrl set', async () => {
+      useBroadcaster.mockReturnValue('uk');
+      const track2027 = {
+        ...TRACK,
+        startDate:     '2027-04-10',
+        endDate:       '2027-04-11',
+        lapPreviewUrl: 'https://www.youtube.com/watch?v=hotlap123',
+        youtubeUrls:   [], // no race highlights yet for 2027
+      };
+      const {findByLabelText, queryByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: track2027, year: 2027})} navigation={nav} />,
+      );
+      expect(await findByLabelText('Watch Lap Preview on YouTube')).toBeTruthy();
+      // Race highlight buttons should not appear when youtubeUrls is empty
+      expect(queryByLabelText('Watch Race 1 on YouTube')).toBeNull();
+    });
+  });
+
+  // ── Race highlight YouTube buttons ────────────────────────────────────────────
+  // youtubeUrls[0,1,2] = Race 1, Race 2, Race 3 highlights (lap preview is separate)
+
+  describe('Race YouTube buttons', () => {
+    const {useBroadcaster} = require('../../src/utils/broadcaster');
+
+    beforeEach(() => useBroadcaster.mockReturnValue('uk'));
+
+    it('shows Race 1 and Race 2 buttons when youtubeUrls has two entries', async () => {
+      const track = {
+        ...TRACK,
+        youtubeUrls: ['https://youtu.be/r1', 'https://youtu.be/r2'],
+      };
+      const {findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track})} navigation={nav} />,
+      );
+      expect(await findByLabelText('Watch Race 1 on YouTube')).toBeTruthy();
+      expect(await findByLabelText('Watch Race 2 on YouTube')).toBeTruthy();
+    });
+
+    it('shows all three race buttons when youtubeUrls has three entries', async () => {
+      const track = {
+        ...TRACK,
+        youtubeUrls: ['https://youtu.be/r1', 'https://youtu.be/r2', 'https://youtu.be/r3'],
+      };
+      const {findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track})} navigation={nav} />,
+      );
+      expect(await findByLabelText('Watch Race 1 on YouTube')).toBeTruthy();
+      expect(await findByLabelText('Watch Race 2 on YouTube')).toBeTruthy();
+      expect(await findByLabelText('Watch Race 3 on YouTube')).toBeTruthy();
+    });
+
+    it('does not show race buttons when youtubeUrls is empty', async () => {
+      // TRACK has youtubeUrls: [] and lapPreviewUrl: null
+      const {queryByLabelText} = render(TRACK);
+      await waitFor(() => {
+        expect(queryByLabelText('Watch Race 1 on YouTube')).toBeNull();
+        expect(queryByLabelText('Watch Race 2 on YouTube')).toBeNull();
+        expect(queryByLabelText('Watch Race 3 on YouTube')).toBeNull();
+      });
+    });
+
+    it('lap preview and race buttons can coexist on the same track', async () => {
+      const track = {
+        ...TRACK,
+        lapPreviewUrl: 'https://youtu.be/lap',
+        youtubeUrls:   ['https://youtu.be/r1', 'https://youtu.be/r2', 'https://youtu.be/r3'],
+      };
+      const {findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track})} navigation={nav} />,
+      );
+      expect(await findByLabelText('Watch Lap Preview on YouTube')).toBeTruthy();
+      expect(await findByLabelText('Watch Race 1 on YouTube')).toBeTruthy();
+      expect(await findByLabelText('Watch Race 3 on YouTube')).toBeTruthy();
+    });
   });
 
   // ── Weather ───────────────────────────────────────────────────────────────────

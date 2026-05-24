@@ -18,6 +18,7 @@ import notifee, {EventType} from '@notifee/react-native';
 import {navigateFromData} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
+import {Analytics} from './src/utils/analytics';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
@@ -27,6 +28,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 export const navigationRef = createNavigationContainerRef();
 
 function _navigate(data: Record<string, string> | undefined) {
+  if (data) Analytics.notificationOpened(data.type);
   navigateFromData(navigationRef as any, data);
 }
 

@@ -4,7 +4,7 @@ let _fa = null;
 const fa = () => { if (!_fa) _fa = getAnalytics(); return _fa; };
 
 export const Analytics = {
-  screen: (name) => logEvent(fa(), 'screen_view', {screen_name: name}),
+  screen: (name) => logEvent(fa(), 'screen_view', {screen_name: name, firebase_screen_class: name.split(':')[0]}),
 
   articleClicked: (title, position, source) => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position, ...(source ? {source} : {})}),
   articleShared: (title) => logEvent(fa(),'share', {content_type: 'article', item_id: title?.substring(0, 100) || ''}),
@@ -46,7 +46,10 @@ export const Analytics = {
   navItemClicked: (label) => logEvent(fa(),'nav_item_clicked', {label}),
 
   notificationDelivered: (type, venue) => logEvent(fa(),'notification_delivered', {type, ...(venue ? {venue} : {})}),
-  notificationOpened: (type) => logEvent(fa(),'notification_opened', {type}),
+  notificationOpened: (type) => logEvent(fa(),'notification_opened', {type: type || 'unknown'}),
+
+  chatMessageSent: () => logEvent(fa(),'chat_message_sent'),
+  chatMessageFlagged: () => logEvent(fa(),'chat_message_flagged'),
 
   adImpression: (placement) => logEvent(fa(),'ad_impression', {placement}),
   adClicked: (placement) => logEvent(fa(),'ad_clicked', {placement}),

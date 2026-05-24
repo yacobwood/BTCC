@@ -208,7 +208,7 @@ def parse_classification(pdf_bytes, label):
     #   "1" .. "20"     → numeric finish position
     #   "15 132 I"      → pos + 3-digit car number + class (combined when no space)
     #   "DNF 116 M"     → non-finish with car number and class
-    anchors = []  # (y, pos_int, no_int_or_None, cl_or_None)
+    anchors = []  # (y, pos_int, no_int_or_None, cl_or_None, status_or_None)
     for y, x, t in elements:
         if x >= 30:
             continue
@@ -217,21 +217,21 @@ def parse_classification(pdf_bytes, label):
         # "DNF/DQ/NC/RET NNN C" — non-finish with car+class embedded
         m = re.match(r"^(DNF|DQ|NC|RET)\s+(\d+)\s+([MI])", t)
         if m:
-            anchors.append((y, 0, int(m.group(2)), m.group(3)))
+            anchors.append((y, 0, int(m.group(2)), m.group(3), m.group(1)))
             continue
         # "PP NNN C" — pos + 3-digit car + class (car number too wide for separate column)
         m = re.match(r"^(\d{1,2})\s+(\d+)\s+([MI])$", t)
         if m:
-            anchors.append((y, int(m.group(1)), int(m.group(2)), m.group(3)))
+            anchors.append((y, int(m.group(1)), int(m.group(2)), m.group(3), None))
             continue
         # Just a position number
         if re.match(r"^\d{1,2}$", t):
-            anchors.append((y, int(t), None, None))
+            anchors.append((y, int(t), None, None, None))
 
     anchors.sort(key=lambda a: -a[0])  # top-to-bottom (highest y first)
 
     results = []
-    for anchor_y, pos, anchor_no, anchor_cl in anchors:
+    for anchor_y, pos, anchor_no, anchor_cl, anchor_status in anchors:
         y_min = anchor_y - 8
         y_max = anchor_y + 8
 
@@ -292,7 +292,7 @@ def parse_classification(pdf_bytes, label):
         driver = DRIVER_NAME_MAP.get(driver, driver)
 
         pts = pts_table.get(pos, 0) if pos > 0 else 0
-        results.append({
+        entry = {
             "pos":     pos,
             "no":      no,
             "cl":      cl,
@@ -304,7 +304,10 @@ def parse_classification(pdf_bytes, label):
             "gap":     gap,
             "bestLap": best_lap,
             "points":  pts,
-        })
+        }
+        if anchor_status:
+            entry["status"] = anchor_status
+        results.append(entry)
 
     # Compute gap to P1 for FP/Qualifying (PDF has no gap column for QUAL; derive from bestLap)
     if label in NO_POINTS_SESSIONS and results:
@@ -563,7 +566,7 @@ def _parse_driver_rows(elems):
             else:
                 car = car_raw.strip()
         if not driver:
-            driver = _find_text(row_elems, 100, 215, r"[A-Za-z]") or ""
+            driver = _find_text(row_elems, 100, 215) or ""
 
         driver = DRIVER_NAME_MAP.get(driver, driver)
         nat   = _find_text(row_elems, 260, 295, r"^[A-Z]{3}$") or ""

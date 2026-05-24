@@ -28,8 +28,13 @@ import {parseResults, parseCalendar} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
 import {useBroadcaster} from '../utils/broadcaster';
+import SnettertonLayout from '../assets/tracks/Snetterton Track.svg';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
+
+const BUNDLED_TRACK_LAYOUTS = {
+  Snetterton: SnettertonLayout,
+};
 
 // Parse "M:SS.mmm" lap time to seconds, returns null on failure
 function lapTimeSecs(str) {
@@ -65,6 +70,7 @@ export default function TrackDetailScreen({route, navigation}) {
   // Can receive full track object (normal nav) or just round number (deep link)
   const trackParam = route.params?.track ?? null;
   const roundParam = route.params?.round ? parseInt(route.params.round, 10) : null;
+  const year = route.params?.year ?? 2026;
   const [track, setTrack] = useState(
     trackParam || BUNDLED_CALENDAR.rounds.find(r => r.round === roundParam) || null,
   );
@@ -74,7 +80,7 @@ export default function TrackDetailScreen({route, navigation}) {
     // (e.g. new youtubeUrls) appear without clearing the app cache
     const targetRound = trackParam?.round ?? roundParam;
     if (!targetRound) return;
-    fetchCalendar().then(cal => {
+    fetchCalendar(year).then(cal => {
       const parsed = parseCalendar(cal);
       const found = (parsed.rounds || []).find(r => r.round === targetRound);
       if (found) setTrack(found);
@@ -117,7 +123,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const titlePaddingTop = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [12, statusBarHeight + 12], extrapolate: 'clamp'});
   const titlePaddingLeft = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [0, 46], extrapolate: 'clamp'});
 
-  useEffect(() => { Analytics.trackDetailViewed(track.round, track.venue); }, []);
+  useEffect(() => { Analytics.screen('track_detail'); Analytics.trackDetailViewed(track.round, track.venue); }, []);
 
 
   useEffect(() => {
@@ -149,7 +155,7 @@ export default function TrackDetailScreen({route, navigation}) {
           if (secs === null) return;
           if (storedRaceSecs === null || secs < storedRaceSecs) {
             if (!bestRace || secs < lapTimeSecs(bestRace.time)) {
-              bestRace = {driver: r.driver, time: r.bestLap, year: 2026};
+              bestRace = {driver: r.driver, time: r.bestLap, year};
             }
           }
         });
@@ -167,7 +173,7 @@ export default function TrackDetailScreen({route, navigation}) {
           if (secs === null) return;
           if (storedQualSecs === null || secs < storedQualSecs) {
             if (!bestQual || secs < lapTimeSecs(bestQual.time)) {
-              bestQual = {driver: r.driver, time: r.bestLap, year: 2026};
+              bestQual = {driver: r.driver, time: r.bestLap, year};
             }
           }
         });
@@ -185,8 +191,8 @@ export default function TrackDetailScreen({route, navigation}) {
       applyRoundData(found);
     };
 
-    cacheRead('results_2026').then(cached => { if (cached) checkAndApply(cached); });
-    fetchResults(2026).then(raw => checkAndApply(raw)).catch(() => {});
+    cacheRead(`results_${year}`).then(cached => { if (cached) checkAndApply(cached); });
+    fetchResults(year).then(raw => checkAndApply(raw)).catch(() => {});
   }, [isRaceWeekend, isPastRaceWeekend, track.round]);
 
   // Build flat list sections: hero, sticky title, then all content blocks
@@ -205,8 +211,8 @@ export default function TrackDetailScreen({route, navigation}) {
     // Stats
     items.push({type: 'stats'});
 
-    // YouTube links  -  always shown when URLs exist (hot lap is available pre-weekend too)
-    if (broadcaster === 'uk' && (track.youtubeUrls || []).some(Boolean)) items.push({type: 'youtube'});
+    // YouTube links  -  lap preview is on track object (merged from tracks.json at parse time)
+    if (broadcaster === 'uk' && (track.lapPreviewUrl || (track.youtubeUrls || []).some(Boolean))) items.push({type: 'youtube'});
 
     // Watch Live + Live Timing rendered side-by-side in one item
     if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
@@ -343,9 +349,9 @@ export default function TrackDetailScreen({route, navigation}) {
                 activeOpacity={0.8}
                 onPress={() => {
                   if (currentRoundData) {
-                    navigation.navigate('Results', {screen: 'RoundResults', params: {round: currentRoundData, year: 2026, initialRace: 0, origin: 'calendar'}});
+                    navigation.navigate('Results', {screen: 'RoundResults', params: {round: currentRoundData, year, initialRace: 0, origin: 'calendar'}});
                   } else {
-                    navigation.navigate('Results', {screen: 'ResultsList', params: {openRound: track.round, openYear: 2026}});
+                    navigation.navigate('Results', {screen: 'ResultsList', params: {openRound: track.round, openYear: year}});
                   }
                 }}
                 accessibilityLabel="View race results"
@@ -361,8 +367,8 @@ export default function TrackDetailScreen({route, navigation}) {
 
       case 'youtube': {
         const urls = track.youtubeUrls || [];
-        const lapUrl = urls[0];
-        const raceEntries = [['Race 1', urls[1]], ['Race 2', urls[2]], ['Race 3', urls[3]]].filter(([, u]) => u);
+        const lapUrl = track.lapPreviewUrl;
+        const raceEntries = [['Race 1', urls[0]], ['Race 2', urls[1]], ['Race 3', urls[2]]].filter(([, u]) => u);
         return (
           <View style={{gap: 8}}>
             {lapUrl && (
@@ -528,7 +534,15 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'layoutHeader':
         return <Text style={styles.sectionTitle}>CIRCUIT LAYOUT</Text>;
 
-      case 'layout':
+      case 'layout': {
+        const BundledLayout = BUNDLED_TRACK_LAYOUTS[track.venue];
+        if (BundledLayout) {
+          return (
+            <View style={styles.layoutSvgWrap}>
+              <BundledLayout width="100%" height="100%" />
+            </View>
+          );
+        }
         return (
           <CachedImage
             uri={track.layoutImageUrl}
@@ -538,6 +552,7 @@ export default function TrackDetailScreen({route, navigation}) {
             accessibilityLabel="Circuit layout map"
           />
         );
+      }
 
       case 'photosHeader':
         return <Text style={styles.sectionTitle}>RACE PHOTOS</Text>;
@@ -801,6 +816,7 @@ const styles = StyleSheet.create({
 
   // Layout & photos
   layoutImg: {width: '100%', height: 200, borderRadius: 10},
+  layoutSvgWrap: {width: '100%', height: 200, borderRadius: 10, overflow: 'hidden'},
 
   // Weather
   weatherRow: {flexDirection: 'row', gap: 8},

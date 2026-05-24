@@ -1,3 +1,5 @@
+const BUNDLED_TRACKS = require('../../data/tracks.json');
+
 // Rewrite a btcc.net image URL to a smaller WordPress-generated thumbnail
 export function thumbUrl(url, size = '150x150') {
   if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
@@ -63,46 +65,53 @@ export function stripHtml(html) {
 
 // Parse calendar JSON
 export function parseCalendar(json) {
-  const rounds = (json.rounds || []).map((r, i) => ({
-    round: r.round || i + 1,
-    venue: r.venue || '',
-    startDate: r.startDate || '',
-    endDate: r.endDate || '',
-    tslEventId: r.tslEventId || 0,
-    location: r.location || '',
-    country: r.country || '',
-    lat: r.lat || 0,
-    lng: r.lng || 0,
-    lengthMiles: r.lengthMiles || '',
-    lengthKm: r.lengthKm || '',
-    corners: r.corners || 0,
-    cornersLeft: r.cornersLeft ?? null,
-    cornersRight: r.cornersRight ?? null,
-    about: r.about || '',
-    btccFact: r.btccFact || '',
-    imageUrl: r.imageUrl || '',
-    layoutImageUrl: r.layoutImageUrl || '',
-    raceImages: r.raceImages || [],
-    youtubeUrls: r.youtubeUrls || (r.youtubeUrl ? [r.youtubeUrl] : []),
-    liveUrl: r.liveUrl || null,
-    firstBtccYear: r.firstBtccYear || null,
-    qualifyingRecord: r.qualifyingRecord || null,
-    raceRecord: r.raceRecord || null,
-    sessions: (r.sessions || []).map(s => ({
-      name: s.name || '',
-      day: s.day || '',
-      time: s.time || '',
-    })),
-    trackGuide: (r.trackGuide || []).map(s => ({
-      name: s.sector || '',
-      corners: (s.corners || []).map(c => ({
-        number: c.number || '',
-        name: c.name || '',
-        description: c.description || '',
-        overtaking: c.overtaking || false,
+  const rounds = (json.rounds || []).map((r, i) => {
+    const venue = r.venue || '';
+    const t = BUNDLED_TRACKS[venue] || {};
+    return {
+      round: r.round || i + 1,
+      venue,
+      startDate: r.startDate || '',
+      endDate: r.endDate || '',
+      tslEventId: r.tslEventId || 0,
+      // Static venue data merged from tracks.json
+      location: t.location || '',
+      country: t.country || '',
+      lat: t.lat || 0,
+      lng: t.lng || 0,
+      lengthMiles: t.lengthMiles || '',
+      lengthKm: t.lengthKm || '',
+      corners: t.corners || 0,
+      cornersLeft: t.cornersLeft ?? null,
+      cornersRight: t.cornersRight ?? null,
+      about: t.about || '',
+      btccFact: t.btccFact || '',
+      imageUrl: t.imageUrl || '',
+      layoutImageUrl: t.layoutImageUrl || '',
+      raceImages: t.raceImages || [],
+      lapPreviewUrl: t.lapPreviewUrl || null,
+      firstBtccYear: t.firstBtccYear || null,
+      trackGuide: (t.trackGuide || []).map(s => ({
+        name: s.sector || '',
+        corners: (s.corners || []).map(c => ({
+          number: c.number || '',
+          name: c.name || '',
+          description: c.description || '',
+          overtaking: c.overtaking || false,
+        })),
       })),
-    })),
-  }));
+      // Year-specific data from the calendar file
+      youtubeUrls: r.youtubeUrls || [],
+      liveUrl: r.liveUrl || null,
+      qualifyingRecord: r.qualifyingRecord || null,
+      raceRecord: r.raceRecord || null,
+      sessions: (r.sessions || []).map(s => ({
+        name: s.name || '',
+        day: s.day || '',
+        time: s.time || '',
+      })),
+    };
+  });
   return {
     seasonStartDate: json.seasonStartDate || '2026-04-18',
     liveTimingEnabled: json.liveTimingEnabled !== false,
@@ -152,6 +161,10 @@ export function parseGrid(json) {
     base: t.base || '',
     driversChampionships: t.driversChampionships || 0,
     teamsChampionships: t.teamsChampionships || 0,
+    totalRaces: t.totalRaces || 0,
+    totalWins: t.totalWins || 0,
+    history: t.history || [],
+    carSpecs: t.carSpecs || null,
     drivers: drivers.filter(d => d.team === t.name),
   }));
   // Attach each team's cardBgUrl to its drivers
@@ -258,6 +271,7 @@ export function parseResults(json) {
             leadLap: isQR ? false : lead,
             pole: isQR ? false : pole,
             avgLapSpeed: d.avgLapSpeed || null,
+            status: d.status || null,
           };
         }),
       };
