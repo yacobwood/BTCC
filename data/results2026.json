@@ -5798,20 +5798,6 @@
             },
             {
               "pos": 10,
-              "no": 77,
-              "cl": "M",
-              "driver": "Sam OSBORNE",
-              "team": "NAPA Racing UK",
-              "car": "Ford Focus Titanium",
-              "laps": 12,
-              "time": "23:48.154",
-              "gap": "19.497",
-              "bestLap": "1:57.315",
-              "points": 6,
-              "leadLap": false
-            },
-            {
-              "pos": 11,
               "no": 116,
               "cl": "M",
               "driver": "Ashley SUTTON",
@@ -5821,11 +5807,11 @@
               "time": "23:49.451",
               "gap": "20.794",
               "bestLap": "1:57.519",
-              "points": 5,
+              "points": 6,
               "leadLap": false
             },
             {
-              "pos": 12,
+              "pos": 11,
               "no": 33,
               "cl": "M",
               "driver": "Adam MORGAN",
@@ -5835,11 +5821,11 @@
               "time": "23:56.188",
               "gap": "27.531",
               "bestLap": "1:58.170",
-              "points": 4,
+              "points": 5,
               "leadLap": false
             },
             {
-              "pos": 13,
+              "pos": 12,
               "no": 15,
               "cl": "M",
               "driver": "Lewis SELBY",
@@ -5849,11 +5835,11 @@
               "time": "23:57.413",
               "gap": "28.756",
               "bestLap": "1:58.033",
-              "points": 3,
+              "points": 4,
               "leadLap": false
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 52,
               "cl": "I",
               "driver": "Gordon SHEDDEN",
@@ -5863,11 +5849,11 @@
               "time": "24:04.907",
               "gap": "36.250",
               "bestLap": "1:58.683",
-              "points": 2,
+              "points": 3,
               "leadLap": false
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 88,
               "cl": "I",
               "driver": "Mikey DOBLE",
@@ -5877,11 +5863,11 @@
               "time": "24:05.421",
               "gap": "36.764",
               "bestLap": "1:58.560",
-              "points": 1,
+              "points": 2,
               "leadLap": false
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 22,
               "cl": "I",
               "driver": "Chris SMILEY",
@@ -5891,11 +5877,11 @@
               "time": "24:05.620",
               "gap": "36.963",
               "bestLap": "1:58.579",
-              "points": 0,
+              "points": 1,
               "leadLap": false
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 17,
               "cl": "I",
               "driver": "Dexter PATTERSON",
@@ -5909,7 +5895,7 @@
               "leadLap": false
             },
             {
-              "pos": 18,
+              "pos": 17,
               "no": 28,
               "cl": "M",
               "driver": "Nicolas HAMILTON",
@@ -5923,7 +5909,7 @@
               "leadLap": false
             },
             {
-              "pos": 19,
+              "pos": 18,
               "no": 16,
               "cl": "I",
               "driver": "Aiden MOFFAT",
@@ -5937,7 +5923,7 @@
               "leadLap": false
             },
             {
-              "pos": 20,
+              "pos": 19,
               "no": 50,
               "cl": "I",
               "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
@@ -5951,7 +5937,7 @@
               "leadLap": false
             },
             {
-              "pos": 21,
+              "pos": 20,
               "no": 19,
               "cl": "M",
               "driver": "Max BUXTON",
@@ -5961,6 +5947,20 @@
               "time": "24:12.297",
               "gap": "43.640",
               "bestLap": "1:59.008",
+              "points": 0,
+              "leadLap": false
+            },
+            {
+              "pos": 0,
+              "no": 77,
+              "cl": "M",
+              "driver": "Sam OSBORNE",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 0,
+              "time": "",
+              "gap": "",
+              "bestLap": "",
               "points": 0,
               "leadLap": false
             }
@@ -6184,86 +6184,86 @@
             },
             {
               "pos": 10,
-              "no": 77,
-              "cl": "",
-              "driver": "Sam OSBORNE",
-              "team": ""
-            },
-            {
-              "pos": 11,
               "no": 116,
               "cl": "",
               "driver": "Ashley SUTTON",
               "team": ""
             },
             {
-              "pos": 12,
+              "pos": 11,
               "no": 33,
               "cl": "",
               "driver": "Adam MORGAN",
               "team": ""
             },
             {
-              "pos": 13,
+              "pos": 12,
               "no": 15,
               "cl": "",
               "driver": "Lewis SELBY",
               "team": ""
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 52,
               "cl": "",
               "driver": "Gordon SHEDDEN",
               "team": ""
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 88,
               "cl": "",
               "driver": "Mikey DOBLE",
               "team": ""
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 22,
               "cl": "",
               "driver": "Chris SMILEY",
               "team": ""
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 17,
               "cl": "",
               "driver": "Dexter PATTERSON",
               "team": ""
             },
             {
-              "pos": 18,
+              "pos": 17,
               "no": 28,
               "cl": "",
               "driver": "Nicolas HAMILTON",
               "team": ""
             },
             {
-              "pos": 19,
+              "pos": 18,
               "no": 16,
               "cl": "",
               "driver": "Aiden MOFFAT",
               "team": ""
             },
             {
-              "pos": 20,
+              "pos": 19,
               "no": 50,
               "cl": "",
               "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
               "team": ""
             },
             {
-              "pos": 21,
+              "pos": 20,
               "no": 19,
               "cl": "",
               "driver": "Max BUXTON",
+              "team": ""
+            },
+            {
+              "pos": 21,
+              "no": 77,
+              "cl": "",
+              "driver": "Sam OSBORNE",
               "team": ""
             }
           ]
