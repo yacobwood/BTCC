@@ -6597,20 +6597,6 @@
             },
             {
               "pos": 3,
-              "no": 80,
-              "cl": "M",
-              "driver": "Tom INGRAM",
-              "team": "Team VERTU",
-              "car": "Hyundai i30N",
-              "laps": 12,
-              "time": "23:46.184",
-              "gap": "0.923",
-              "bestLap": "1:56.781",
-              "points": 15,
-              "leadLap": false
-            },
-            {
-              "pos": 4,
               "no": 2,
               "cl": "I",
               "driver": "Daryl DE LEON",
@@ -6620,11 +6606,11 @@
               "time": "23:48.487",
               "gap": "3.226",
               "bestLap": "1:57.103",
-              "points": 13,
+              "points": 15,
               "leadLap": false
             },
             {
-              "pos": 5,
+              "pos": 4,
               "no": 22,
               "cl": "I",
               "driver": "Chris SMILEY",
@@ -6634,11 +6620,11 @@
               "time": "23:50.236",
               "gap": "4.975",
               "bestLap": "1:57.013",
-              "points": 11,
+              "points": 13,
               "leadLap": false
             },
             {
-              "pos": 6,
+              "pos": 5,
               "no": 99,
               "cl": "I",
               "driver": "Charles RAINFORD",
@@ -6648,12 +6634,12 @@
               "time": "23:50.959",
               "gap": "5.698",
               "bestLap": "1:56.621",
-              "points": 11,
+              "points": 12,
               "fastestLap": true,
               "leadLap": false
             },
             {
-              "pos": 7,
+              "pos": 6,
               "no": 33,
               "cl": "M",
               "driver": "Adam MORGAN",
@@ -6663,11 +6649,11 @@
               "time": "23:52.206",
               "gap": "6.945",
               "bestLap": "1:57.632",
-              "points": 9,
+              "points": 10,
               "leadLap": false
             },
             {
-              "pos": 8,
+              "pos": 7,
               "no": 3,
               "cl": "M",
               "driver": "Tom CHILTON",
@@ -6677,6 +6663,20 @@
               "time": "23:52.354",
               "gap": "7.093",
               "bestLap": "1:57.561",
+              "points": 9,
+              "leadLap": false
+            },
+            {
+              "pos": 8,
+              "no": 80,
+              "cl": "M",
+              "driver": "Tom INGRAM",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 12,
+              "time": "23:56.184",
+              "gap": "10.923",
+              "bestLap": "1:56.781",
               "points": 8,
               "leadLap": false
             },

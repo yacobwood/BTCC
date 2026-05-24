@@ -18,10 +18,10 @@
       "driver": "Tom INGRAM",
       "nat": "GBR",
       "class": "M",
-      "points": 124,
+      "points": 117,
       "wins": 1,
       "seconds": 2,
-      "thirds": 2,
+      "thirds": 1,
       "team": "Team VERTU"
     },
     {
@@ -30,7 +30,7 @@
       "driver": "Charles RAINFORD",
       "nat": "GBR",
       "class": "I",
-      "points": 105,
+      "points": 106,
       "wins": 1,
       "seconds": 0,
       "thirds": 1,
@@ -66,10 +66,10 @@
       "driver": "Daryl DE LEON",
       "nat": "PHL",
       "class": "I",
-      "points": 90,
+      "points": 92,
       "wins": 0,
       "seconds": 0,
-      "thirds": 1,
+      "thirds": 2,
       "team": "WSR"
     },
     {
@@ -102,7 +102,7 @@
       "driver": "Adam MORGAN",
       "nat": "GBR",
       "class": "M",
-      "points": 72,
+      "points": 73,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -114,7 +114,7 @@
       "driver": "Tom CHILTON",
       "nat": "GBR",
       "class": "M",
-      "points": 67,
+      "points": 68,
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
@@ -174,7 +174,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 47,
+      "points": 49,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -250,12 +250,12 @@
     {
       "pos": 2,
       "team": "WSR",
-      "points": 171
+      "points": 174
     },
     {
       "pos": 3,
       "team": "Team VERTU",
-      "points": 163
+      "points": 157
     },
     {
       "pos": 4,
@@ -270,12 +270,12 @@
     {
       "pos": 6,
       "team": "Cataclean Plato Racing",
-      "points": 112
+      "points": 113
     },
     {
       "pos": 7,
       "team": "Restart Racing",
-      "points": 92
+      "points": 94
     },
     {
       "pos": 8,
@@ -296,12 +296,12 @@
     },
     {
       "pos": 2,
-      "points": 199,
+      "points": 197,
       "manufacturer": "EXCELR8 Motorsport / Hyundai"
     },
     {
       "pos": 3,
-      "points": 191,
+      "points": 193,
       "manufacturer": "Mercedes"
     },
     {
@@ -414,5 +414,5 @@
   "season": "2026",
   "round": 3,
   "venue": "Snetterton",
-  "updated": "2026-05-24T18:08:51Z"
+  "updated": "2026-05-24T18:15:32Z"
 }
