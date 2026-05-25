@@ -74,16 +74,21 @@ export default function TrackDetailScreen({route, navigation}) {
   const [track, setTrack] = useState(
     trackParam || BUNDLED_CALENDAR.rounds.find(r => r.round === roundParam) || null,
   );
+  const [raceUrls, setRaceUrls] = useState([]);
 
   useEffect(() => {
-    // Always upgrade track data from the remote calendar so live edits
-    // (e.g. new youtubeUrls) appear without clearing the app cache
     const targetRound = trackParam?.round ?? roundParam;
     if (!targetRound) return;
     fetchCalendar(year, true).then(cal => {
       const parsed = parseCalendar(cal);
       const found = (parsed.rounds || []).find(r => r.round === targetRound);
       if (found) setTrack(found);
+    }).catch(() => {});
+    fetchResults(year, true).then(res => {
+      const found = (res.rounds || []).find(r => r.round === targetRound);
+      const urls = found?.youtubeUrls || [];
+      // results2026.json format: ["", "", "", r1, r2, r3]
+      setRaceUrls([urls[3] || '', urls[4] || '', urls[5] || '']);
     }).catch(() => {});
   }, []);
 
@@ -212,7 +217,7 @@ export default function TrackDetailScreen({route, navigation}) {
     items.push({type: 'stats'});
 
     // YouTube links  -  lap preview is on track object (merged from tracks.json at parse time)
-    if (broadcaster === 'uk' && (track.lapPreviewUrl || (track.youtubeUrls || []).some(Boolean))) items.push({type: 'youtube'});
+    if (broadcaster === 'uk' && (track.lapPreviewUrl || raceUrls.some(Boolean))) items.push({type: 'youtube'});
 
     // Watch Live + Live Timing rendered side-by-side in one item
     if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
@@ -256,7 +261,7 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     return {data: items, stickyIndex: titleIdx};
-  }, [track, sessions, weather, isRaceWeekend, isPastRaceWeekend, track_weather, live_updates, racesFinished]);
+  }, [track, raceUrls, sessions, weather, isRaceWeekend, isPastRaceWeekend, track_weather, live_updates, racesFinished]);
 
   const renderItem = ({item}) => {
     switch (item.type) {
@@ -366,9 +371,8 @@ export default function TrackDetailScreen({route, navigation}) {
       }
 
       case 'youtube': {
-        const urls = track.youtubeUrls || [];
         const lapUrl = track.lapPreviewUrl;
-        const raceEntries = [['Race 1', urls[1]], ['Race 2', urls[2]], ['Race 3', urls[3]]].filter(([, u]) => u);
+        const raceEntries = [['Race 1', raceUrls[0]], ['Race 2', raceUrls[1]], ['Race 3', raceUrls[2]]].filter(([, u]) => u);
         return (
           <View style={{gap: 8}}>
             {lapUrl && (

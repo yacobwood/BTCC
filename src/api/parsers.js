@@ -101,7 +101,6 @@ export function parseCalendar(json) {
         })),
       })),
       // Year-specific data from the calendar file
-      youtubeUrls: r.youtubeUrls || [],
       liveUrl: r.liveUrl || null,
       qualifyingRecord: r.qualifyingRecord || null,
       raceRecord: r.raceRecord || null,

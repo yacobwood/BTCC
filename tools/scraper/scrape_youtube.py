@@ -68,8 +68,8 @@ def save_results(results):
         f.write("\n")
 
 
-def find_target_round(calendar):
-    """Return the most recently completed round that lacks full youtubeUrls."""
+def find_target_round(calendar, results):
+    """Return the most recently completed round that lacks full race URLs in results2026.json."""
     today = date.today()
     completed = [
         r for r in calendar.get("rounds", [])
@@ -78,9 +78,11 @@ def find_target_round(calendar):
     if not completed:
         return None
     completed.sort(key=lambda r: r["endDate"], reverse=True)
+    results_by_round = {r["round"]: r for r in results.get("rounds", [])}
     for r in completed:
-        urls = r.get("youtubeUrls", [])
-        if len(urls) >= 4 and all(urls[1:4]):
+        result = results_by_round.get(r["round"], {})
+        urls = result.get("youtubeUrls", [])
+        if len(urls) >= 6 and all(urls[3:6]):
             print(f"Round {r['round']} ({r['venue']}) already has all race URLs, skipping.")
             continue
         return r
@@ -275,7 +277,7 @@ def build_urls(video_id, t1, t2, t3):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true", help="Print results without writing calendar.json")
+    parser.add_argument("--dry-run", action="store_true", help="Print results without writing results2026.json")
     parser.add_argument("--round", type=int, help="Target a specific round number (bypasses auto-detection)")
     parser.add_argument("--video-id", help="YouTube video ID to use directly (bypasses channel search)")
     parser.add_argument("--cookies", help="Path to a Netscape cookies.txt file for YouTube auth")
@@ -289,6 +291,7 @@ def main():
     _COOKIES_ARGS = resolve_cookies(args.cookies)
 
     calendar = load_calendar()
+    results = load_results()
 
     if args.round is not None:
         rounds = calendar.get("rounds", [])
@@ -298,7 +301,7 @@ def main():
             sys.exit(1)
         print(f"Forcing round {args.round} ({target['venue']}) via --round flag")
     else:
-        target = find_target_round(calendar)
+        target = find_target_round(calendar, results)
 
     if target is None:
         print("No round needs YouTube URLs.")
@@ -336,12 +339,7 @@ def main():
 
     r1_url, r2_url, r3_url = build_urls(video_id, t1, t2, t3)
 
-    existing_urls = target.get("youtubeUrls", [])
-    lap_preview = existing_urls[0] if existing_urls else target.get("youtubeUrl", "")
-
-    # calendar.json format: [lapPreview, r1, r2, r3]  (TrackDetailScreen)
-    calendar_urls = [lap_preview, r1_url, r2_url, r3_url]
-    # results2026.json format: [fp, qual, qualRace, r1, r2, r3]  (RoundResultsScreen)
+    # results2026.json format: [fp, qual, qualRace, r1, r2, r3]  (RoundResultsScreen + TrackDetailScreen)
     # Scraper only captures full-race URLs; preserve existing fp/qual/qualRace slots.
     results = load_results()
     existing_result = next((r for r in results["rounds"] if r["round"] == round_num), {})
@@ -354,10 +352,6 @@ def main():
     ]
 
     print("\nDetected YouTube URLs:")
-    print(f"  calendar [0] Lap preview : {calendar_urls[0]}")
-    print(f"  calendar [1] Race 1      : {calendar_urls[1]}")
-    print(f"  calendar [2] Race 2      : {calendar_urls[2]}")
-    print(f"  calendar [3] Race 3      : {calendar_urls[3]}")
     print(f"  results  [3] Race 1      : {results_urls[3]}")
     print(f"  results  [4] Race 2      : {results_urls[4]}")
     print(f"  results  [5] Race 3      : {results_urls[5]}")
@@ -366,19 +360,13 @@ def main():
         print("\n--dry-run: no files were modified.")
         return
 
-    for r in calendar["rounds"]:
-        if r["round"] == round_num:
-            r["youtubeUrls"] = calendar_urls
-            break
-
     for r in results["rounds"]:
         if r["round"] == round_num:
             r["youtubeUrls"] = results_urls
             break
 
-    save_calendar(calendar)
     save_results(results)
-    print(f"\nWritten to calendar.json and results2026.json for Round {round_num} ({venue}).")
+    print(f"\nWritten to results2026.json for Round {round_num} ({venue}).")
 
 
 if __name__ == "__main__":
