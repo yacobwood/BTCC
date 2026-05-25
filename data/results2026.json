@@ -4665,12 +4665,10 @@
         }
       ],
       "youtubeUrls": [
-        null,
-        "https://youtu.be/8Rjuzi4EV3c?t=300",
-        "https://youtu.be/8Rjuzi4EV3c?t=4454",
-        "https://youtu.be/bLid_TC95gs?t=0",
-        "https://youtu.be/bLid_TC95gs?t=1805",
-        "https://youtu.be/bLid_TC95gs?t=3639"
+        "https://www.youtube.com/watch?v=bLid_TC95gs",
+        "https://www.youtube.com/watch?v=bLid_TC95gs&t=0",
+        "https://www.youtube.com/watch?v=bLid_TC95gs&t=1805",
+        "https://www.youtube.com/watch?v=bLid_TC95gs&t=3639"
       ]
     },
     {
@@ -7015,12 +7013,10 @@
         }
       ],
       "youtubeUrls": [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
+        "",
+        "https://www.youtube.com/watch?v=yTUgi6lVJAY&t=0",
+        "https://www.youtube.com/watch?v=yTUgi6lVJAY&t=1933",
+        "https://www.youtube.com/watch?v=yTUgi6lVJAY&t=4003"
       ]
     },
     {

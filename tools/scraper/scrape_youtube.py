@@ -124,23 +124,29 @@ def search_itv_channel(venue):
     result = yt_dlp(
         "--flat-playlist",
         "--dump-json",
-        "--playlist-end", "20",
+        "--playlist-end", "40",
         ITV_CHANNEL,
     )
     venue_words = [w.lower() for w in venue.split() if len(w) > 3]
-    for line in result.stdout.strip().splitlines():
+    lines = result.stdout.strip().splitlines()
+    print(f"yt-dlp returned {len(lines)} lines of output")
+    for line in lines:
         try:
             entry = json.loads(line)
         except json.JSONDecodeError:
+            print(f"  [skip] non-JSON line: {line[:80]}")
             continue
         title = entry.get("title", "")
+        print(f"  [check] '{title}'")
         if not TITLE_PATTERN.search(title):
+            print(f"          ^ no TITLE_PATTERN match")
             continue
         title_lower = title.lower()
         if any(w in title_lower for w in venue_words):
             video_id = entry.get("id") or entry.get("url", "").split("v=")[-1]
             print(f"Found: '{title}' (id={video_id})")
             return video_id, title
+        print(f"          ^ title matched but venue words {venue_words} not found")
     return None, None
 
 
@@ -261,7 +267,7 @@ def detect_race_timestamps(video_id):
 
 def build_urls(video_id, t1, t2, t3):
     base = f"https://www.youtube.com/watch?v={video_id}"
-    r1 = base if t1 == 0 else f"{base}&t={t1}"
+    r1 = f"{base}&t={t1}"
     r2 = f"{base}&t={t2}"
     r3 = f"{base}&t={t3}"
     return r1, r2, r3
@@ -271,10 +277,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Print results without writing calendar.json")
     parser.add_argument("--round", type=int, help="Target a specific round number (bypasses auto-detection)")
+    parser.add_argument("--video-id", help="YouTube video ID to use directly (bypasses channel search)")
     parser.add_argument("--cookies", help="Path to a Netscape cookies.txt file for YouTube auth")
     args = parser.parse_args()
 
     global _COOKIES_ARGS
+    if args.video_id and args.round is None:
+        print("ERROR: --video-id requires --round to avoid targeting the wrong round.")
+        sys.exit(1)
+
     _COOKIES_ARGS = resolve_cookies(args.cookies)
 
     calendar = load_calendar()
@@ -297,10 +308,15 @@ def main():
     round_num = target["round"]
     print(f"Target: Round {round_num} - {venue}")
 
-    video_id, title = search_itv_channel(venue)
-    if not video_id:
-        print(f"ERROR: No ITV Sport Extra video found for venue '{venue}'")
-        sys.exit(1)
+    if args.video_id:
+        video_id = args.video_id
+        print(f"Using supplied video ID: {video_id}")
+    else:
+        video_id, title = search_itv_channel(venue)
+        if not video_id:
+            print(f"No ITV Sport Extra video found yet for venue '{venue}' - will retry on next run.")
+            print(f"Tip: find the video manually and re-run with --video-id <id>")
+            sys.exit(0)
 
     print("Checking for YouTube chapters...")
     chapters = get_chapters(video_id)
