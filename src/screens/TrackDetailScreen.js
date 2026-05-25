@@ -317,7 +317,19 @@ export default function TrackDetailScreen({route, navigation}) {
         const today = new Date().getDay();
         const dayKey = today === 0 ? 'sunday' : today === 6 ? 'saturday' : null;
         const entry = (isRaceWeekend && dayKey && broadcaster) ? (liveUrls[dayKey]?.[broadcaster] || null) : null;
-        const activeBc = (entry?.url && entry?.label) ? {url: entry.url, label: entry.label} : null;
+        // Watch Live only shows from 30 mins before the first televised session (Qualifying onwards).
+        // Free Practice is not broadcast so never show it for practice-only periods.
+        const daySessionKey = dayKey === 'saturday' ? 'SAT' : dayKey === 'sunday' ? 'SUN' : null;
+        const todaySessions = daySessionKey ? sessions.filter(s => s.day === daySessionKey) : [];
+        const firstTvSession = todaySessions.find(s => !s.name.toLowerCase().includes('practice'));
+        const watchLiveAllowed = (() => {
+          if (!firstTvSession) return false;
+          const [hh, mm] = firstTvSession.time.split(':').map(Number);
+          const threshold = new Date();
+          threshold.setHours(hh, mm - 30, 0, 0);
+          return new Date() >= threshold;
+        })();
+        const activeBc = (entry?.url && entry?.label && watchLiveAllowed) ? {url: entry.url, label: entry.label} : null;
         const showLive = isRaceWeekend && live_updates;
         const showResults = racesFinished || isPastRaceWeekend;
         return (
