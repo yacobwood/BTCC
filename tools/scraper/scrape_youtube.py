@@ -339,13 +339,28 @@ def main():
     existing_urls = target.get("youtubeUrls", [])
     lap_preview = existing_urls[0] if existing_urls else target.get("youtubeUrl", "")
 
-    new_urls = [lap_preview, r1_url, r2_url, r3_url]
+    # calendar.json format: [lapPreview, r1, r2, r3]  (TrackDetailScreen)
+    calendar_urls = [lap_preview, r1_url, r2_url, r3_url]
+    # results2026.json format: [fp, qual, qualRace, r1, r2, r3]  (RoundResultsScreen)
+    # Scraper only captures full-race URLs; preserve existing fp/qual/qualRace slots.
+    results = load_results()
+    existing_result = next((r for r in results["rounds"] if r["round"] == round_num), {})
+    existing_result_urls = existing_result.get("youtubeUrls", ["", "", "", "", "", ""])
+    results_urls = [
+        existing_result_urls[0] if len(existing_result_urls) > 0 else "",
+        existing_result_urls[1] if len(existing_result_urls) > 1 else "",
+        existing_result_urls[2] if len(existing_result_urls) > 2 else "",
+        r1_url, r2_url, r3_url,
+    ]
 
     print("\nDetected YouTube URLs:")
-    print(f"  [0] Lap preview : {new_urls[0]}")
-    print(f"  [1] Race 1      : {new_urls[1]}")
-    print(f"  [2] Race 2      : {new_urls[2]}")
-    print(f"  [3] Race 3      : {new_urls[3]}")
+    print(f"  calendar [0] Lap preview : {calendar_urls[0]}")
+    print(f"  calendar [1] Race 1      : {calendar_urls[1]}")
+    print(f"  calendar [2] Race 2      : {calendar_urls[2]}")
+    print(f"  calendar [3] Race 3      : {calendar_urls[3]}")
+    print(f"  results  [3] Race 1      : {results_urls[3]}")
+    print(f"  results  [4] Race 2      : {results_urls[4]}")
+    print(f"  results  [5] Race 3      : {results_urls[5]}")
 
     if args.dry_run:
         print("\n--dry-run: no files were modified.")
@@ -353,13 +368,12 @@ def main():
 
     for r in calendar["rounds"]:
         if r["round"] == round_num:
-            r["youtubeUrls"] = new_urls
+            r["youtubeUrls"] = calendar_urls
             break
 
-    results = load_results()
     for r in results["rounds"]:
         if r["round"] == round_num:
-            r["youtubeUrls"] = new_urls
+            r["youtubeUrls"] = results_urls
             break
 
     save_calendar(calendar)
