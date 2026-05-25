@@ -133,7 +133,7 @@
     {
       "driver": "Gordon Shedden",
       "starts": 441,
-      "wins": 53,
+      "wins": 54,
       "podiums": 143,
       "poles": 12,
       "fastestLaps": 56,
@@ -151,7 +151,7 @@
       "consecutivePoints": 32,
       "racesLed": 25,
       "hatTricks": 3,
-      "winPct": 0.12018140589569161,
+      "winPct": 0.12244897959183673,
       "podiumPct": 0.3242630385487528,
       "pointsPerStart": 8.80952380952381,
       "dnfPct": 0.12698412698412698
@@ -341,7 +341,7 @@
     {
       "driver": "Ashley Sutton",
       "starts": 305,
-      "wins": 50,
+      "wins": 51,
       "podiums": 120,
       "poles": 13,
       "fastestLaps": 57,
@@ -359,7 +359,7 @@
       "consecutivePoints": 29,
       "racesLed": 61,
       "hatTricks": 4,
-      "winPct": 0.16393442622950818,
+      "winPct": 0.16721311475409836,
       "podiumPct": 0.39344262295081966,
       "pointsPerStart": 11.38360655737705,
       "dnfPct": 0.06229508196721312
@@ -2710,7 +2710,7 @@
     {
       "driver": "Charles Rainford",
       "starts": 38,
-      "wins": 1,
+      "wins": 2,
       "podiums": 4,
       "poles": 1,
       "fastestLaps": 3,
@@ -2728,7 +2728,7 @@
       "consecutivePoints": 7,
       "racesLed": 3,
       "hatTricks": 0,
-      "winPct": 0.02631578947368421,
+      "winPct": 0.05263157894736842,
       "podiumPct": 0.10526315789473684,
       "pointsPerStart": 6.105263157894737,
       "dnfPct": 0.10526315789473684
