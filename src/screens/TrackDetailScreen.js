@@ -71,9 +71,14 @@ export default function TrackDetailScreen({route, navigation}) {
   const trackParam = route.params?.track ?? null;
   const roundParam = route.params?.round ? parseInt(route.params.round, 10) : null;
   const year = route.params?.year ?? 2026;
-  const [track, setTrack] = useState(
-    trackParam || BUNDLED_CALENDAR.rounds.find(r => r.round === roundParam) || null,
-  );
+  const [track, setTrack] = useState(() => {
+    // trackParam from CalendarScreen may be a raw calendar round (no corners/length).
+    // Always resolve initial state through parseCalendar so tracks.json data is merged in.
+    const targetRound = trackParam?.round ?? roundParam;
+    if (!targetRound) return trackParam || null;
+    const parsed = parseCalendar(BUNDLED_CALENDAR);
+    return parsed.rounds.find(r => r.round === targetRound) || trackParam || null;
+  });
   const [raceUrls, setRaceUrls] = useState([]);
 
   useEffect(() => {
