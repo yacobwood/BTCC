@@ -466,7 +466,7 @@ def scrape_round(info):
             continue
         is_qr = race["label"] == "Qualifying Race"
         for r in race["results"]:
-            if not is_qr:
+            if not is_qr and r.get("status") != "DQ":
                 if r.get("fastestLap"):
                     r["points"] += 1
                 if r.get("leadLap"):
@@ -550,11 +550,18 @@ def _to_int(s):
 def _parse_driver_rows(elems):
     """Parse a driver-type championship section into a list of entry dicts."""
     entries = []
+    _debug_cols_printed = False
     for _y, row_elems in sorted(_group_by_y(elems).items(), reverse=True):
         pos_text = _find_text(row_elems, 40, 60, r"^\d+$")
         if not pos_text:
             continue
         pos = int(pos_text)
+        if not _debug_cols_printed:
+            # Print all x positions and values for the first driver row so we can
+            # calibrate the per-race point column positions.
+            print(f"  [ptstrg col debug] first driver row x-values: "
+                  + ", ".join(f"x={x:.0f}:{t!r}" for _y2, x, t in sorted(row_elems, key=lambda e: e[1])))
+            _debug_cols_printed = True
 
         # Car number at x≈79; P1 3-digit cars get merged with driver name at x≈76
         car, driver = "", ""
