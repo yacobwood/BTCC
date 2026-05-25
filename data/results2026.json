@@ -6411,7 +6411,8 @@
               "gap": "",
               "bestLap": "1:57.626",
               "points": 1,
-              "leadLap": true
+              "leadLap": true,
+              "status": "DQ"
             }
           ],
           "grid": [
