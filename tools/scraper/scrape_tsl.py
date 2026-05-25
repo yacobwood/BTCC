@@ -547,21 +547,72 @@ def _to_int(s):
         return 0
 
 
+# Per-race column layout in ptstrg PDFs (calibrated from 262103ptstrg.pdf)
+# x = _PTSTRG_BASE_X + (round - 1) * _PTSTRG_RND_W + session_offset
+_PTSTRG_BASE_X  = 641.0   # x-centre of round-1 QR column header
+_PTSTRG_RND_W   = 138.6   # x-distance between successive round QR columns
+_PTSTRG_OFFSETS = {       # x-offset from QR within each round
+    "Qualifying Race": 0.0,
+    "Race 1":          31.2,
+    "Race 2":          67.2,
+    "Race 3":         103.2,
+}
+
+def _ptstrg_col_x(rnd, label):
+    return _PTSTRG_BASE_X + (rnd - 1) * _PTSTRG_RND_W + _PTSTRG_OFFSETS.get(label, 0.0)
+
+
+def _parse_ptstrg_per_race(section_elems, num_rounds):
+    """
+    Extract per-race points from the drivers championship section.
+    Returns (per_race, scored_sessions) where:
+      per_race        = {driver: {(round, label): points}}
+      scored_sessions = set of (round, label) pairs where at least one driver scored
+    Only sessions with at least one non-zero value are in scored_sessions, so
+    future-round columns (all zeros) are never mistaken for real data.
+    """
+    per_race = {}
+    scored_sessions = set()
+    labels = list(_PTSTRG_OFFSETS.keys())
+
+    for _y, row_elems in sorted(_group_by_y(section_elems).items(), reverse=True):
+        if not _find_text(row_elems, 40, 60, r"^\d+$"):
+            continue  # not a driver row
+
+        car_raw = _find_text(row_elems, 70, 115)
+        driver = ""
+        if car_raw:
+            m = re.match(r"^(\d+)\s+(.+)$", car_raw)
+            if m:
+                driver = m.group(2).strip()
+        if not driver:
+            driver = _find_text(row_elems, 100, 215) or ""
+        if not driver:
+            continue
+        driver = DRIVER_NAME_MAP.get(driver, driver)
+
+        driver_pts = {}
+        for rnd in range(1, num_rounds + 1):
+            for label in labels:
+                cx = _ptstrg_col_x(rnd, label)
+                val = _find_text(row_elems, cx - 10, cx + 25, r"^\d+$")
+                pts = int(val) if val else 0
+                driver_pts[(rnd, label)] = pts
+                if pts > 0:
+                    scored_sessions.add((rnd, label))
+        per_race[driver] = driver_pts
+
+    return per_race, scored_sessions
+
+
 def _parse_driver_rows(elems):
     """Parse a driver-type championship section into a list of entry dicts."""
     entries = []
-    _debug_cols_printed = False
     for _y, row_elems in sorted(_group_by_y(elems).items(), reverse=True):
         pos_text = _find_text(row_elems, 40, 60, r"^\d+$")
         if not pos_text:
             continue
         pos = int(pos_text)
-        if not _debug_cols_printed:
-            # Print all x positions and values for the first driver row so we can
-            # calibrate the per-race point column positions.
-            print(f"  [ptstrg col debug] first driver row x-values: "
-                  + ", ".join(f"x={x:.0f}:{t!r}" for _y2, x, t in sorted(row_elems, key=lambda e: e[1])))
-            _debug_cols_printed = True
 
         # Car number at x≈79; P1 3-digit cars get merged with driver name at x≈76
         car, driver = "", ""
@@ -655,7 +706,8 @@ def parse_championship_pdf(pdf_bytes):
     finally:
         Path(path).unlink(missing_ok=True)
 
-    section_elems = {key: [] for _, key in _CHAMP_SECTIONS}
+    section_elems      = {key: [] for _, key in _CHAMP_SECTIONS}
+    section_elems_full = {key: [] for _, key in _CHAMP_SECTIONS}  # includes race columns (x >= 641)
 
     for page_elems in all_pages:
         # Sort top-to-bottom so y-ranges are meaningful
@@ -678,8 +730,14 @@ def parse_championship_pdf(pdf_bytes):
         for i, (header_y, key) in enumerate(headers_on_page):
             floor_y = headers_on_page[i + 1][0] if i + 1 < len(headers_on_page) else 0
             for y, x, t in sorted_elems:
-                if x < 641 and floor_y < y < header_y:
-                    section_elems[key].append((y, x, t))
+                if floor_y < y < header_y:
+                    section_elems_full[key].append((y, x, t))
+                    if x < 641:
+                        section_elems[key].append((y, x, t))
+
+    per_race, scored_sessions = _parse_ptstrg_per_race(
+        section_elems_full["standings"], num_rounds=len(ROUNDS[YEAR])
+    )
 
     result = {
         "standings":         _parse_driver_rows(section_elems["standings"]),
@@ -687,11 +745,35 @@ def parse_championship_pdf(pdf_bytes):
         "manufacturers":     _parse_team_rows(section_elems["manufacturers"]),
         "independentsTeams": _parse_team_rows(section_elems["independentsTeams"]),
         "jst":               _parse_driver_rows(section_elems["jst"]),
+        "per_race_points":   per_race,
+        "scored_sessions":   scored_sessions,
     }
     for m in result["manufacturers"]:
         m["manufacturer"] = m.pop("team")
 
     return result if result["standings"] else None
+
+
+def _apply_per_race_points(rounds, per_race, scored_sessions):
+    """
+    Override computed per-race points in results with values from the championship PDF.
+    Only touches (round, session) pairs that appear in scored_sessions (i.e. at least
+    one driver had a non-zero value in the PDF for that session). Future rounds whose
+    columns are all-zero are left untouched so in-progress data is preserved.
+    """
+    for rnd in rounds:
+        rnd_num = rnd["round"]
+        for race in rnd.get("races", []):
+            label = race["label"]
+            if (rnd_num, label) not in scored_sessions:
+                continue
+            for r in race.get("results", []):
+                driver = r.get("driver", "")
+                if not driver:
+                    continue
+                if driver in per_race:
+                    r["points"] = per_race[driver].get((rnd_num, label), 0)
+                # Drivers not in per_race (wildcards not in championship) are unchanged
 
 
 def compute_standings_fallback(rounds):
@@ -939,9 +1021,15 @@ def main():
                 standings = parse_championship_pdf(champ_data)
                 if standings:
                     print(f"  parsed ({len(standings['standings'])} drivers, "
-                          f"{len(standings.get('jst', []))} JST)")
+                          f"{len(standings.get('jst', []))} JST, "
+                          f"{len(standings.get('scored_sessions', []))} scored sessions)")
                     _backfill_teams(standings["standings"], output_rounds)
                     _backfill_teams(standings["jst"],       output_rounds)
+                    # Override computed per-race points with championship PDF values
+                    per_race       = standings.get("per_race_points", {})
+                    scored_sessions = standings.get("scored_sessions", set())
+                    if per_race and scored_sessions:
+                        _apply_per_race_points(output_rounds, per_race, scored_sessions)
                     break
                 else:
                     print("  parse failed — trying previous round")
