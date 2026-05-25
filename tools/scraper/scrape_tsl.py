@@ -466,10 +466,10 @@ def scrape_round(info):
             continue
         is_qr = race["label"] == "Qualifying Race"
         for r in race["results"]:
-            if not is_qr and r.get("status") != "DQ":
-                if r.get("fastestLap"):
+            if not is_qr:
+                if r.get("fastestLap") and r.get("laps", 0) > 0:
                     r["points"] += 1
-                if r.get("leadLap"):
+                if r.get("leadLap") and r.get("laps", 0) > 0:
                     r["points"] += 1
 
     return {

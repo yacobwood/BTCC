@@ -1288,7 +1288,7 @@
               "time": "",
               "gap": "",
               "bestLap": "",
-              "points": 1,
+              "points": 0,
               "pole": true,
               "leadLap": true
             }
@@ -6410,7 +6410,7 @@
               "time": "17:58.263",
               "gap": "",
               "bestLap": "1:57.626",
-              "points": 0,
+              "points": 1,
               "leadLap": true,
               "status": "DQ"
             }
