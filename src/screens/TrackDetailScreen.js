@@ -368,7 +368,7 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'youtube': {
         const urls = track.youtubeUrls || [];
         const lapUrl = track.lapPreviewUrl;
-        const raceEntries = [['Race 1', urls[0]], ['Race 2', urls[1]], ['Race 3', urls[2]]].filter(([, u]) => u);
+        const raceEntries = [['Race 1', urls[1]], ['Race 2', urls[2]], ['Race 3', urls[3]]].filter(([, u]) => u);
         return (
           <View style={{gap: 8}}>
             {lapUrl && (
