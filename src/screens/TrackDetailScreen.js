@@ -80,7 +80,7 @@ export default function TrackDetailScreen({route, navigation}) {
     // (e.g. new youtubeUrls) appear without clearing the app cache
     const targetRound = trackParam?.round ?? roundParam;
     if (!targetRound) return;
-    fetchCalendar(year).then(cal => {
+    fetchCalendar(year, true).then(cal => {
       const parsed = parseCalendar(cal);
       const found = (parsed.rounds || []).find(r => r.round === targetRound);
       if (found) setTrack(found);
