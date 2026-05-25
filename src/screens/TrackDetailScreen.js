@@ -509,7 +509,7 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'weather':
         return (
           <View style={styles.weatherRow}>
-            {(weather || []).map((day, i) => {
+            {(weather || []).filter(day => new Date(day.date) >= today).map((day, i) => {
               const d = new Date(day.date);
               const dayName = d.toLocaleDateString('en-GB', {weekday: 'short'});
               return (
