@@ -363,7 +363,7 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=DW9kp8YwJOE"
   },
   "Thruxton": {
     "location": "Andover, Hampshire",
@@ -375,7 +375,7 @@
     "corners": 9,
     "cornersLeft": 3,
     "cornersRight": 6,
-    "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb–Noble–Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
+    "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Cobb\u2013Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Coppice is among the most demanding high-speed sequences in domestic racing.",
     "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
     "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
@@ -445,7 +445,7 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=aI5u5fsVKWI"
   },
   "Knockhill": {
     "location": "Dunfermline, Fife",
@@ -523,7 +523,7 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=a5DtpM9NQ_k"
   },
   "Donington Park GP": {
     "location": "Castle Donington, Leicestershire",
@@ -619,7 +619,7 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=_jA_1NJFLig"
   },
   "Croft": {
     "location": "Dalton-on-Tees, North Yorkshire",
@@ -712,7 +712,7 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=M3lv_S1eqCw"
   },
   "Silverstone": {
     "location": "Towcester, Northamptonshire",
@@ -724,7 +724,7 @@
     "corners": 8,
     "cornersLeft": 3,
     "cornersRight": 5,
-    "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts–Becketts–Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
+    "about": "The home of British motorsport. Silverstone's Grand Prix circuit is the longest and fastest on the BTCC calendar, demanding aerodynamic efficiency and high-speed confidence throughout its many quick corners. Maggotts\u2013Becketts\u2013Chapel is one of the great sequences in world motorsport, taken flat in qualifying trim. Abbey, The Loop, and Village provide overtaking opportunities.",
     "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead - or deficit - can completely shape the outcome.",
     "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
@@ -796,7 +796,7 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=KHVKEJbBowA"
   },
   "Brands Hatch GP": {
     "location": "Fawkham, Kent",
@@ -894,6 +894,6 @@
         ]
       }
     ],
-    "lapPreviewUrl": null
+    "lapPreviewUrl": "https://www.youtube.com/watch?v=7yNiW_O1ySg"
   }
 }
