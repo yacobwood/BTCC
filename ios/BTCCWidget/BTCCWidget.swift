@@ -412,7 +412,10 @@ struct LargeView: View {
             if let r = entry.round {
                 let sat = r.sessions.filter { $0.day == "SAT" }
                 let sun = r.sessions.filter { $0.day == "SUN" }
-                let satW = entry.weather.first { Calendar.current.isDate($0.date, inSameDayAs: r.startDate) }
+                let today = Calendar.current.startOfDay(for: Date())
+                let satW = today <= Calendar.current.startOfDay(for: r.startDate)
+                    ? entry.weather.first { Calendar.current.isDate($0.date, inSameDayAs: r.startDate) }
+                    : nil
                 let sunW = entry.weather.first { Calendar.current.isDate($0.date, inSameDayAs: r.endDate) }
 
                 HStack(alignment: .top, spacing: 0) {

@@ -167,8 +167,9 @@ class LargeWidget : AppWidgetProvider() {
         if (sessions != null && sessions.isNotEmpty()) {
             val sat = sessions.filter { it.day == "SAT" }
             val sun = sessions.filter { it.day == "SUN" }
+            val showSatWeather = sat.isNotEmpty() && LocalDate.now() <= cal.startDate
             views.setTextViewText(R.id.widget_sat_header, if (sat.isNotEmpty()) "SATURDAY" else "")
-            views.setTextViewText(R.id.widget_sat_weather, if (sat.isNotEmpty()) weatherText(cal.startDate) else "")
+            views.setTextViewText(R.id.widget_sat_weather, if (showSatWeather) weatherText(cal.startDate) else "")
             views.setTextViewText(R.id.widget_sun_header, if (sun.isNotEmpty()) "SUNDAY" else "")
             views.setTextViewText(R.id.widget_sun_weather, if (sun.isNotEmpty()) weatherText(cal.endDate) else "")
             bindRow(views, sat, 0, R.id.widget_sat_name1, R.id.widget_sat_time1)
