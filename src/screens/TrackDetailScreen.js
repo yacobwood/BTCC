@@ -322,12 +322,15 @@ export default function TrackDetailScreen({route, navigation}) {
         const daySessionKey = dayKey === 'saturday' ? 'SAT' : dayKey === 'sunday' ? 'SUN' : null;
         const todaySessions = daySessionKey ? sessions.filter(s => s.day === daySessionKey) : [];
         const firstTvSession = todaySessions.find(s => !s.name.toLowerCase().includes('practice'));
+        const lastSession = todaySessions.length ? todaySessions[todaySessions.length - 1] : null;
         const watchLiveAllowed = (() => {
-          if (!firstTvSession) return false;
-          const [hh, mm] = firstTvSession.time.split(':').map(Number);
-          const threshold = new Date();
-          threshold.setHours(hh, mm - 30, 0, 0);
-          return new Date() >= threshold;
+          if (!firstTvSession || !lastSession) return false;
+          const now = new Date();
+          const [startHh, startMm] = firstTvSession.time.split(':').map(Number);
+          const start = new Date(); start.setHours(startHh, startMm - 30, 0, 0);
+          const [endHh, endMm] = lastSession.time.split(':').map(Number);
+          const end = new Date(); end.setHours(endHh, endMm + 60, 0, 0);
+          return now >= start && now <= end;
         })();
         const activeBc = (entry?.url && entry?.label && watchLiveAllowed) ? {url: entry.url, label: entry.label} : null;
         const showLive = isRaceWeekend && live_updates;
