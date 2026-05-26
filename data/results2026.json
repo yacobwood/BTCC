@@ -4038,6 +4038,21 @@
             },
             {
               "pos": 0,
+              "no": 3,
+              "cl": "M",
+              "driver": "Tom CHILTON",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "18:19.442",
+              "gap": "",
+              "bestLap": "55.767",
+              "points": 0,
+              "leadLap": false,
+              "fastestLap": false
+            },
+            {
+              "pos": 0,
               "no": 52,
               "cl": "I",
               "driver": "Gordon SHEDDEN",
