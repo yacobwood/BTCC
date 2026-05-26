@@ -68,8 +68,7 @@ function badgeStyle(pos, laps, time, status) {
     const t      = (pos - 4) / 11;
     const bg     = `rgba(34,197,94,${(0.22 - t * 0.16).toFixed(3)})`;
     const border = `rgba(34,197,94,${(0.50 - t * 0.38).toFixed(3)})`;
-    const text   = `rgba(134,239,172,${(1.00 - t * 0.65).toFixed(3)})`;
-    return {bg, border, text, label: String(pos), solid: false};
+    return {bg, border, text: '#86EFAC', label: String(pos), solid: false};
   }
   // Outside points  -  subtle border, dim text
   return {
