@@ -1,17 +1,27 @@
-import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Modal, Linking, Platform} from 'react-native';
+import React, {useRef, useEffect} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet, Modal, Linking, Platform, Animated} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 
 export default function UpdateDialog({visible, onDismiss}) {
+  const cardY = useRef(new Animated.Value(400)).current;
+
+  useEffect(() => {
+    if (visible) {
+      cardY.setValue(400);
+      Animated.spring(cardY, {toValue: 0, useNativeDriver: true, bounciness: 0, speed: 20}).start();
+    }
+  }, [visible, cardY]);
+
   const storeUrl = Platform.OS === 'ios'
     ? 'https://apps.apple.com/gb/app/btcc-hub/id6762619368'
     : 'https://play.google.com/store/apps/details?id=com.btccfanhub';
   const storeName = Platform.OS === 'ios' ? 'App Store' : 'Play Store';
+
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="none">
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <Animated.View style={[styles.card, {transform: [{translateY: cardY}]}]}>
           <Icon name="system-update" size={36} color={Colors.yellow} style={{marginBottom: 12}} />
           <Text style={styles.title}>Update Available</Text>
           <Text style={styles.body}>A new version of BTCC Hub is available on the {storeName} with improvements and fixes.</Text>
@@ -29,7 +39,7 @@ export default function UpdateDialog({visible, onDismiss}) {
             accessibilityRole="button">
             <Text style={styles.dismissText}>NOT NOW</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
