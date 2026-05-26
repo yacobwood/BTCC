@@ -73,7 +73,7 @@ function badgeStyle(pos, laps, time, status) {
   // Outside points  -  subtle border, dim text
   return {
     bg: null, border: 'rgba(255,255,255,0.1)',
-    text: 'rgba(255,255,255,0.3)', label: String(pos), solid: false,
+    text: '#4B5563', label: String(pos), solid: false,
   };
 }
 
