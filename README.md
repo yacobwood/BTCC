@@ -733,7 +733,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 **ProgressionChart** ([src/components/ProgressionChart.js](src/components/ProgressionChart.js)) - SVG line chart (react-native-svg) plotting points-per-round for each driver. Supports "Show all / Hide all" toggle and individual driver series toggling. Handles null gaps in data.
 
-**SeasonTable** ([src/components/SeasonTable.js](src/components/SeasonTable.js)) - Scrollable grid of all rounds and results. Shows DSQ/Ret/DNS/FL/PP badges. Sorted by championship points. Supports standings override for historical seasons.
+**SeasonTable** ([src/components/SeasonTable.js](src/components/SeasonTable.js)) - Scrollable grid of all rounds and results. Shows DSQ/Ret/DNS/FL/PP badges. P4-P15 rendered with a smooth green gradient (brightest at P4). Sorted by championship points. Supports standings override for historical seasons. Round/venue header background lives on the static clip container (not the translated Animated.View) to prevent React Native GPU layer clipping from cutting the colour band short on Android.
 
 **SpoilerClearedDialog** ([src/components/SpoilerClearedDialog.js](src/components/SpoilerClearedDialog.js)) - Modal shown when spoiler-free mode was active and auto-expired.
 

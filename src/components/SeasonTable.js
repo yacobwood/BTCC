@@ -463,15 +463,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
   },
-  headerClip: {flex: 1, height: HEADER_H, overflow: 'hidden'},
+  headerClip: {
+    flex: 1,
+    height: HEADER_H,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
+  },
   gridHeader: {
     height: HEADER_H,
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingBottom: 6,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.outline,
   },
 
   // Body
