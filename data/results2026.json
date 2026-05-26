@@ -1294,7 +1294,8 @@
               "points": 0,
               "status": "DQ",
               "pole": true,
-              "leadLap": true
+              "leadLap": false,
+              "fastestLap": false
             }
           ],
           "grid": [

@@ -463,6 +463,14 @@ def scrape_round(info):
             for r in race["results"]:
                 r["leadLap"] = r["driver"] in leaders
 
+    # Reg 1.6.2.a: LL bonus goes to drivers "classified as the Race leader".
+    # A DQ'd driver is not classified, so strip both bonus flags from DQ entries.
+    for race in races:
+        for r in race["results"]:
+            if r.get("status") == "DQ":
+                r["leadLap"] = False
+                r["fastestLap"] = False
+
     # Bake FL and leadLap bonuses into points so the JSON reflects the
     # championship PDF totals directly. QR has no bonus flags (stripped above).
     for race in races:
