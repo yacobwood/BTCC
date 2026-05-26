@@ -69,6 +69,7 @@ export default function MoreScreen({navigation}) {
         {/* App section */}
         <Text style={styles.sectionTitle}>APP</Text>
         <MoreRow label="Listen" icon="headphones" onPress={() => { Analytics.moreItemClicked('listen'); navigation.navigate('Listen'); }} />
+        <MoreRow label="Team Merch" icon="shopping-bag" onPress={() => { Analytics.moreItemClicked('merch'); navigation.navigate('Merch'); }} />
         <MoreRow label="Settings" icon="settings" onPress={() => { Analytics.moreItemClicked('settings'); navigation.navigate('Settings'); }} />
 
         <View style={styles.divider} />

@@ -9,6 +9,7 @@ const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const BUNDLED_CALENDAR_2027 = require('../../data/calendar2027.json');
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
 const BUNDLED_BLACKLIST = require('../../data/blacklist.json');
+const BUNDLED_MERCH = require('../../data/merch.json');
 
 // Stale-while-revalidate: serve from cache immediately, refresh in background.
 // If the cached entry is older than MAX_AGE_MS, treat as a cache miss so the
@@ -95,6 +96,15 @@ export async function fetchLiveStatus() {
 
 export async function fetchResults(year = 2026, forceRefresh = false) {
   return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, false, false, 5 * 60 * 1000);
+}
+
+export async function fetchMerchStores() {
+  try {
+    const data = await fetchJson(`${BASE_GITHUB}/merch.json`, 'merch_stores', false, false, /* staleFirst */ true);
+    return data.stores || {};
+  } catch {
+    return BUNDLED_MERCH.stores || {};
+  }
 }
 
 export async function fetchRecords() {

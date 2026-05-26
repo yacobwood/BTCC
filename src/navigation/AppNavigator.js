@@ -50,6 +50,7 @@ import ListenScreen from '../screens/ListenScreen';
 import DigestsScreen from '../screens/DigestsScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
+import MerchScreen from '../screens/MerchScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
 import UpdateDialog from '../components/UpdateDialog';
 import ChatFab from '../components/ChatFab';
@@ -126,6 +127,7 @@ function MoreStack() {
       <Stack.Screen name="Podcasts" component={PodcastsScreen} />
       <Stack.Screen name="Records" component={RecordsScreen} />
       <Stack.Screen name="Partners" component={PartnersScreen} />
+      <Stack.Screen name="Merch" component={MerchScreen} />
       <Stack.Screen name="Roadmap" component={RoadmapScreen} />
       <Stack.Screen name="TocaRadio" component={TocaRadioScreen} />
     </Stack.Navigator>

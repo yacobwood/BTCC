@@ -31,6 +31,7 @@ export const Analytics = {
 
   infoPageViewed: (pageId) => logEvent(fa(),'info_page_viewed', {page_id: pageId}),
   moreItemClicked: (item) => logEvent(fa(),'more_item_clicked', {item}),
+  merchStoreClicked: (teamName, storeName) => logEvent(fa(),'merch_store_clicked', {team_name: teamName, ...(storeName ? {store_name: storeName} : {})}),
 
   notificationTypeToggled: (type, enabled) => logEvent(fa(),'notification_type_toggled', {type, enabled: enabled ? 'true' : 'false'}),
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
