@@ -190,7 +190,7 @@ export default function RecordsScreen({navigation}) {
             ref={listRef}
             key={`${section}-${s.key}`}
             data={data}
-            keyExtractor={item => item.driver}
+            keyExtractor={item => item.driver + (item.historical ? '_h' : '')}
             renderItem={renderRow(s, maxVal, data)}
             onScroll={e => setShowScrollTop(e.nativeEvent.contentOffset.y > 400)}
             scrollEventThrottle={100}
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     bottom: 20,
-    right: 16,
+    left: 16,
     width: 44,
     height: 44,
     borderRadius: 22,

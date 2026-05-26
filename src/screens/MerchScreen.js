@@ -18,17 +18,19 @@ import {fetchDrivers, fetchMerchStores} from '../api/client';
 import {parseGrid} from '../api/parsers';
 import {Analytics} from '../utils/analytics';
 import {useFocusEffect} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CachedImage from '../components/CachedImage';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_WIDTH = (SCREEN_WIDTH - 32 - 10) / 2;
 
 function withTracking(url) {
+  if (!url) return url;
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}utm_source=btcchub&utm_medium=app&utm_campaign=merch`;
 }
 
-function StorePickerModal({team, onClose}) {
+function StorePickerModal({team, onClose, bottomInset}) {
   const sheetY = useRef(new Animated.Value(400)).current;
 
   useEffect(() => {
@@ -36,7 +38,7 @@ function StorePickerModal({team, onClose}) {
       sheetY.setValue(400);
       Animated.spring(sheetY, {toValue: 0, useNativeDriver: true, bounciness: 0, speed: 20}).start();
     }
-  }, [team]);
+  }, [team, sheetY]);
 
   const open = (store) => {
     Analytics.merchStoreClicked(team.name, store.name);
@@ -51,14 +53,14 @@ function StorePickerModal({team, onClose}) {
       animationType="none"
       onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Animated.View style={[styles.sheet, {transform: [{translateY: sheetY}]}]}>
+        <Animated.View style={[styles.sheet, {transform: [{translateY: sheetY}], paddingBottom: Math.max(36, bottomInset + 16)}]}>
           <Pressable onPress={() => {}}>
             <View style={styles.sheetHandle} />
             <Text style={styles.sheetTitle} numberOfLines={2}>{team?.name}</Text>
             <Text style={styles.sheetSubtitle}>CHOOSE A STORE</Text>
-            {(team?.stores || []).map((store, i) => (
+            {(team?.stores || []).map((store) => (
               <TouchableOpacity
-                key={i}
+                key={store.url}
                 style={styles.storeRow}
                 activeOpacity={0.7}
                 onPress={() => open(store)}
@@ -82,6 +84,7 @@ export default function MerchScreen({navigation}) {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pickerTeam, setPickerTeam] = useState(null);
+  const {bottom: bottomInset} = useSafeAreaInsets();
   const scrollRef = useRef(null);
 
   useFocusEffect(useCallback(() => {
@@ -190,7 +193,7 @@ export default function MerchScreen({navigation}) {
         )}
       </ScrollView>
 
-      <StorePickerModal team={pickerTeam} onClose={() => setPickerTeam(null)} />
+      <StorePickerModal team={pickerTeam} onClose={() => setPickerTeam(null)} bottomInset={bottomInset} />
     </View>
   );
 }
