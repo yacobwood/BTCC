@@ -2,7 +2,11 @@
   "radio_tab": true,
   "live_updates": true,
   "track_weather": true,
-  "overrides": {},
+  "overrides": {
+    "36612f84-fd2e-4927-9042-305fca2c42a8": {
+      "update_min_version_android": 73
+    }
+  },
   "podcasts_enabled": true,
   "debug_mode": false,
   "hub_news_enabled": true,
