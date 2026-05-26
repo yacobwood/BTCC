@@ -43,8 +43,8 @@ function badgeStyle(pos, laps, time, status) {
     text: '#FCA5A5', label: 'DQ', solid: false,
   };
   if (pos === 0 && laps === 0) return {
-    bg: null, border: 'rgba(255,255,255,0.07)',
-    text: 'rgba(255,255,255,0.2)', label: 'DNS', solid: false,
+    bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)',
+    text: '#FCA5A5', label: 'DNS', solid: false,
   };
   if (pos === 0) return {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)',
