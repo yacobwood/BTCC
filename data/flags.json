@@ -4,7 +4,7 @@
   "track_weather": true,
   "overrides": {
     "36612f84-fd2e-4927-9042-305fca2c42a8": {
-      "update_min_version_android": 73
+      "update_min_version_android": 74
     }
   },
   "podcasts_enabled": true,
