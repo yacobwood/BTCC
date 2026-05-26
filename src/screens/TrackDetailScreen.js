@@ -28,12 +28,30 @@ import {parseResults, parseCalendar} from '../api/parsers';
 import {cacheRead} from '../store/cache';
 import {formatDriverName} from '../utils/driverName';
 import {useBroadcaster} from '../utils/broadcaster';
-import SnettertonLayout from '../assets/tracks/Snetterton Track.svg';
+import BrandsHatchGPLayout    from '../assets/tracks/Brands Hatch GP.svg';
+import BrandsHatchIndyLayout  from '../assets/tracks/Brands Hatch Indy.svg';
+import CroftLayout            from '../assets/tracks/Croft.svg';
+import DoningtonGPLayout      from '../assets/tracks/Donington Park GP.svg';
+import DoningtonLayout        from '../assets/tracks/Donington Park National.svg';
+import KnockhillLayout        from '../assets/tracks/Knockhill.svg';
+import OultonParkLayout       from '../assets/tracks/Oulton Park.svg';
+import SilvestoneLayout       from '../assets/tracks/Silverstone.svg';
+import SnettertonLayout       from '../assets/tracks/Snetterton.svg';
+import ThrutonLayout          from '../assets/tracks/Thruxton.svg';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 
 const BUNDLED_TRACK_LAYOUTS = {
-  Snetterton: SnettertonLayout,
+  'Brands Hatch GP':   BrandsHatchGPLayout,
+  'Brands Hatch Indy': BrandsHatchIndyLayout,
+  'Croft':             CroftLayout,
+  'Donington Park GP': DoningtonGPLayout,
+  'Donington Park':    DoningtonLayout,
+  'Knockhill':         KnockhillLayout,
+  'Oulton Park':       OultonParkLayout,
+  'Silverstone':       SilvestoneLayout,
+  'Snetterton':        SnettertonLayout,
+  'Thruxton':          ThrutonLayout,
 };
 
 // Parse "M:SS.mmm" lap time to seconds, returns null on failure
@@ -252,7 +270,7 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     // Circuit layout (before guide)
-    if (track.layoutImageUrl) {
+    if (track.layoutImageUrl || BUNDLED_TRACK_LAYOUTS[track.venue]) {
       items.push({type: 'layoutHeader'});
       items.push({type: 'layout'});
     }
