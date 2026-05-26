@@ -2,6 +2,7 @@ import React, {createContext, useContext, useState, useEffect, useMemo} from 're
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
+import {getStableDeviceId} from '../utils/deviceId';
 
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
 const FLAGS_CACHE_KEY = 'feature_flags_cache';
