@@ -836,10 +836,9 @@ const styles = StyleSheet.create({
   sectorName: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 10},
   cornerRow: {flexDirection: 'row', marginBottom: 12},
   cornerNum: {
-    minWidth: 36,
+    width: 46,
     height: 36,
     borderRadius: 18,
-    paddingHorizontal: 6,
     backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',

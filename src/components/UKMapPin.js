@@ -88,9 +88,9 @@ export default function UKMapPin({lat, lng, height = 100}) {
       <Svg width={innerW} height={innerH} viewBox={`${VB_X} ${VB_Y} ${VB_TW} ${VB_TH}`}>
         <Path
           d={UK_PATH}
-          fill={Colors.surface}
-          stroke={Colors.outline}
-          strokeWidth={2}
+          fill={Colors.outline}
+          stroke={Colors.textSecondary}
+          strokeWidth={1.5}
           strokeLinejoin="round"
         />
         <Circle cx={pinX} cy={pinY} r={10} fill={Colors.yellow} opacity={0.25} />
