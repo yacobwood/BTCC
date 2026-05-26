@@ -178,12 +178,16 @@ function AppContent() {
   const [bottom] = React.useState(bottomInset);
   const {update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
   const [showUpdate, setShowUpdate] = React.useState(false);
+  const updateShown = React.useRef(false);
 
   React.useEffect(() => {
-    if (!update_available) return;
+    if (!update_available || updateShown.current) return;
     const minBuild = Platform.OS === 'android' ? update_min_version_android : update_min_version_ios;
     const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
-    if (currentBuild < minBuild) setShowUpdate(true);
+    if (currentBuild < minBuild) {
+      updateShown.current = true;
+      setShowUpdate(true);
+    }
   }, [update_available, update_min_version_android, update_min_version_ios]);
 
   return (
