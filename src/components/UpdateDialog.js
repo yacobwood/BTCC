@@ -1,9 +1,11 @@
 import React, {useRef, useEffect} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Linking, Platform, Animated} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 
 export default function UpdateDialog({visible, onDismiss}) {
+  const {bottom: bottomInset} = useSafeAreaInsets();
   const cardY = useRef(new Animated.Value(400)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
 
@@ -26,7 +28,7 @@ export default function UpdateDialog({visible, onDismiss}) {
   const storeName = Platform.OS === 'ios' ? 'App Store' : 'Play Store';
 
   return (
-    <Animated.View style={[styles.overlay, {opacity: overlayOpacity}]}>
+    <Animated.View style={[styles.overlay, {opacity: overlayOpacity, paddingBottom: Math.max(16, bottomInset + 16)}]}>
       <Animated.View style={[styles.card, {transform: [{translateY: cardY}]}]}>
         <Icon name="system-update" size={36} color={Colors.yellow} style={{marginBottom: 12}} />
         <Text style={styles.title}>Update Available</Text>
@@ -51,7 +53,7 @@ export default function UpdateDialog({visible, onDismiss}) {
 }
 
 const styles = StyleSheet.create({
-  overlay: {position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end', padding: 16},
+  overlay: {position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end', padding: 16, paddingBottom: 16},
   card: {backgroundColor: Colors.card, borderRadius: 20, padding: 24, alignItems: 'center'},
   title: {color: '#fff', fontSize: 22, fontWeight: '900', marginBottom: 8},
   body: {color: Colors.textSecondary, fontSize: 14, lineHeight: 20, textAlign: 'center', marginBottom: 24},
