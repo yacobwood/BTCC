@@ -17,6 +17,9 @@
  *   8. schedule.json <-> calendar.json  (round and session alignment)
  *   9. results2026.json internal integrity  (venues, grid drivers, no impossible positions)
  *  10. drivers.json history <-> historical results files  (wins/podiums 2022-2025)
+ *  11. results2026.json <-> standings.json - points totals per driver
+ *  12. results2026.json entry integrity - DQ/DNS bonus-point rules
+ *  13. calendar.json - no legacy youtubeUrls keys in rounds
  */
 
 const DRIVERS    = require('../../data/drivers.json').drivers;
@@ -697,4 +700,88 @@ describe('drivers.json history <-> historical results files (2022-2025)', () => 
       expect(mismatches).toEqual([]);
     });
   }
+});
+
+// ── 11. results2026.json <-> standings.json — points totals ───────────────────
+
+describe('11. results2026.json <-> standings.json — points totals', () => {
+  it('sum of r.points in results2026 matches standings.json total for every driver', () => {
+    // Points come directly from the TSL championship PDF (baked by scraper).
+    // A mismatch means the two files disagree — likely a hand-edit or scraper bug.
+    const pointsFromResults = {};
+    for (const rnd of RESULTS.rounds || []) {
+      for (const race of rnd.races || []) {
+        for (const e of race.results || []) {
+          if (!e.driver) continue;
+          const key = formatDriverName(e.driver);
+          pointsFromResults[key] = (pointsFromResults[key] || 0) + (e.points || 0);
+        }
+      }
+    }
+
+    const mismatches = [];
+    for (const entry of STANDINGS.drivers || []) {
+      if (!entry.name) continue;
+      const key = formatDriverName(entry.name);
+      const fromResults = pointsFromResults[key] || 0;
+      if (fromResults !== entry.points) {
+        mismatches.push(
+          `${entry.name}: standings=${entry.points} sum_of_results=${fromResults} (diff=${fromResults - entry.points})`
+        );
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+});
+
+// ── 12. results2026.json entry integrity — DQ/DNS bonus-point rules ───────────
+
+describe('12. results2026.json entry integrity — DQ/DNS bonus-point rules', () => {
+  it('DQ entries (status=DQ, pos=0) with 0 laps have 0 points', () => {
+    // A driver who was disqualified before completing any laps (DNS-style DQ)
+    // must have 0 points — no bonus is earned with 0 laps.
+    const violations = [];
+    for (const rnd of RESULTS.rounds || []) {
+      for (const race of rnd.races || []) {
+        for (const e of race.results || []) {
+          if (e.status === 'DQ' && (e.laps || 0) === 0 && (e.points || 0) !== 0) {
+            violations.push(`Rd${rnd.round} ${race.label} ${e.driver}: DQ/0-laps but points=${e.points}`);
+          }
+        }
+      }
+    }
+    expect(violations).toEqual([]);
+  });
+
+  it('DNS entries (pos=0, laps=0, no DQ status) have 0 points', () => {
+    // A DNS entry cannot have earned any points.
+    const violations = [];
+    for (const rnd of RESULTS.rounds || []) {
+      for (const race of rnd.races || []) {
+        for (const e of race.results || []) {
+          const isDns = (e.pos || 0) === 0 && (e.laps || 0) === 0 && e.status !== 'DQ';
+          if (isDns && (e.points || 0) !== 0) {
+            violations.push(`Rd${rnd.round} ${race.label} ${e.driver}: DNS but points=${e.points}`);
+          }
+        }
+      }
+    }
+    expect(violations).toEqual([]);
+  });
+});
+
+// ── 13. calendar.json — no legacy youtubeUrls keys ────────────────────────────
+
+describe('13. calendar.json — no legacy youtubeUrls keys in rounds', () => {
+  it('no round contains a youtubeUrls key (URLs live in results2026.json)', () => {
+    // After the single-source-of-truth refactor, race URLs moved to results2026.json.
+    // calendar.json rounds must not have the old youtubeUrls array.
+    const violations = [];
+    for (const rnd of CALENDAR.rounds || []) {
+      if ('youtubeUrls' in rnd) {
+        violations.push(`Round ${rnd.round} (${rnd.venue}) still has youtubeUrls`);
+      }
+    }
+    expect(violations).toEqual([]);
+  });
 });

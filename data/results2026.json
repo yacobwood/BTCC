@@ -208,7 +208,7 @@
               "pos": 16,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -462,7 +462,7 @@
               "pos": 14,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -703,7 +703,7 @@
               "pos": 11,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 13,
@@ -939,7 +939,7 @@
               "pos": 14,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -1099,7 +1099,7 @@
               "pos": 8,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
@@ -1290,7 +1290,8 @@
               "bestLap": "",
               "points": 0,
               "pole": true,
-              "leadLap": true
+              "leadLap": false,
+              "status": "DQ"
             }
           ],
           "grid": [
@@ -1368,7 +1369,7 @@
               "pos": 11,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -1591,7 +1592,7 @@
               "pos": 11,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 21,
@@ -1796,7 +1797,7 @@
               "pos": 8,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -2054,7 +2055,7 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
@@ -2252,7 +2253,7 @@
               "pos": 11,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -2492,7 +2493,7 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -2772,7 +2773,7 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -3013,7 +3014,7 @@
               "pos": 9,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
@@ -3261,7 +3262,7 @@
               "pos": 12,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -3506,7 +3507,7 @@
               "pos": 13,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 27,
@@ -3690,7 +3691,7 @@
               "pos": 9,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -3786,7 +3787,7 @@
               "pos": 1,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 20,
@@ -4153,7 +4154,7 @@
               "pos": 13,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -4334,7 +4335,7 @@
               "pos": 9,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 24,
@@ -4567,7 +4568,7 @@
               "pos": 8,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -4932,7 +4933,7 @@
               "pos": 20,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -5186,7 +5187,7 @@
               "pos": 18,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 0,
@@ -5479,7 +5480,7 @@
               "pos": 19,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 7,
@@ -5639,7 +5640,7 @@
               "pos": 18,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -5926,7 +5927,7 @@
               "pos": 19,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 12,
@@ -6096,7 +6097,7 @@
               "pos": 19,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -6305,7 +6306,7 @@
               "pos": 14,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 12,
@@ -6411,8 +6412,7 @@
               "gap": "",
               "bestLap": "1:57.626",
               "points": 1,
-              "leadLap": true,
-              "status": "DQ"
+              "leadLap": true
             }
           ],
           "grid": [
@@ -6546,7 +6546,7 @@
               "pos": 19,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {
@@ -6727,7 +6727,7 @@
               "pos": 12,
               "no": 50,
               "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": "Laser Tools Racing with MB Motorsport",
               "car": "Toyota Corolla GR Sport",
               "laps": 12,
@@ -6960,7 +6960,7 @@
               "pos": 14,
               "no": 50,
               "cl": "",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "driver": "Árón TAYLOR-SMITH",
               "team": ""
             },
             {

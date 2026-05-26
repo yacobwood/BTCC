@@ -33,11 +33,10 @@ describe('computeSeasonStats', () => {
     expect(alice.wins).toBe(0);
   });
 
-  it('counts QR podium positions (2nd and 3rd) as podiums', () => {
-    // Only "wins" are excluded from QR — podium counting is separate
+  it('does not count QR podium positions on the stats tab', () => {
     const rounds = [makeRound(1, [makeRace('Qualifying Race', [makeResult('Alice', 2, {points: 9})])])];
     const [alice] = computeSeasonStats(rounds);
-    expect(alice.podiums).toBe(1);
+    expect(alice.podiums).toBe(0);
     expect(alice.wins).toBe(0);
   });
 
@@ -72,7 +71,7 @@ describe('computeSeasonStats', () => {
     ];
     const [alice] = computeSeasonStats(rounds);
     expect(alice.wins).toBe(2);    // QR excluded
-    expect(alice.podiums).toBe(4); // all pos 1-3 including QR
+    expect(alice.podiums).toBe(3); // QR excluded from podiums too
   });
 
   it('sorts drivers by total points descending', () => {
