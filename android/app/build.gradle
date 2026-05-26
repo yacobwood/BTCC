@@ -138,6 +138,15 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    packaging {
+        jniLibs {
+            // Force .so extraction to the filesystem at install time so SoLoader can
+            // find libreactnative.so via the directory source, not just inside base.apk.
+            // Without this, AGP's default useLegacyPackaging=false conflicts with
+            // android:extractNativeLibs="true" in the manifest when delivered via AAB splits.
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {

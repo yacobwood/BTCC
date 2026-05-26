@@ -135,8 +135,8 @@
     {
       "pos": 12,
       "car": "50",
-      "driver": "Árón TAYLOR-SMITH",
-      "nat": "GBR",
+      "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+      "nat": "IRL",
       "class": "I",
       "points": 61,
       "wins": 1,
@@ -426,5 +426,5 @@
   "season": "2026",
   "round": 3,
   "venue": "Snetterton",
-  "updated": "2026-05-24T18:56:47Z"
+  "updated": "2026-05-26T08:27:21Z"
 }

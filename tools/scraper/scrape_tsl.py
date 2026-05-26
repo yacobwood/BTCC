@@ -1050,6 +1050,10 @@ def main():
     standings["venue"]   = latest["venue"] if latest else ""
     standings["updated"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
+    # Strip internal working fields that aren't JSON-serializable (tuple keys/sets)
+    standings.pop("per_race_points", None)
+    standings.pop("scored_sessions", None)
+
     standings_path.write_text(json.dumps(standings, indent=2))
     print(f"Wrote {standings_path}")
 

@@ -189,7 +189,12 @@ object LiveryRenderer {
             }
         }
 
-        return bmp
+        // Return an immutable copy so the pixel ref is owned solely by the returned object.
+        // Passing a mutable bitmap into RemoteViews can let HWUI's render thread access freed
+        // pixel data on Samsung Android 15 before the Binder parcel is fully consumed.
+        val immutable = bmp.copy(Bitmap.Config.ARGB_8888, false)
+        bmp.recycle()
+        return immutable
     }
 
     private fun withAlpha(color: Long, alpha: Float): Int {
