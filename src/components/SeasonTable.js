@@ -63,15 +63,14 @@ function badgeStyle(pos, laps, time, status) {
     bg: '#C07840', border: null,
     text: '#1C0F00', label: '3', solid: true,
   };
-  // Points: vibrant but not solid
-  if (pos <= 6) return {
-    bg: 'rgba(34,197,94,0.22)', border: 'rgba(34,197,94,0.5)',
-    text: '#86EFAC', label: String(pos), solid: false,
-  };
-  if (pos <= 15) return {
-    bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)',
-    text: 'rgba(134,239,172,0.55)', label: String(pos), solid: false,
-  };
+  // Points P4-P15: smooth green gradient, brightest at P4 fading to P15
+  if (pos <= 15) {
+    const t      = (pos - 4) / 11;
+    const bg     = `rgba(34,197,94,${(0.22 - t * 0.16).toFixed(3)})`;
+    const border = `rgba(34,197,94,${(0.50 - t * 0.38).toFixed(3)})`;
+    const text   = `rgba(134,239,172,${(1.00 - t * 0.65).toFixed(3)})`;
+    return {bg, border, text, label: String(pos), solid: false};
+  }
   // Outside points  -  subtle border, dim text
   return {
     bg: null, border: 'rgba(255,255,255,0.1)',
