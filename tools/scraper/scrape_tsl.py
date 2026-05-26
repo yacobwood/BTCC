@@ -212,12 +212,16 @@ def parse_classification(pdf_bytes, label):
     for y, x, t in elements:
         if x >= 30:
             continue
-        if t.startswith("*") or not t[0].isdigit() and t[:3] not in ("DNF", "DQ ", "NC ", "RET"):
+        if t.startswith("*") or not t[0].isdigit() and not t.startswith(("DNF", "DQ", "NC", "RET")):
             continue
-        # "DNF/DQ/NC/RET NNN C" — non-finish with car+class embedded
+        # "DNF/DQ/NC/RET NNN C" — non-finish with car+class embedded in one token
         m = re.match(r"^(DNF|DQ|NC|RET)\s+(\d+)\s+([MI])", t)
         if m:
             anchors.append((y, 0, int(m.group(2)), m.group(3), m.group(1)))
+            continue
+        # Standalone "DNF/DQ/NC/RET" — car+class appear in separate elements on the same row
+        if re.match(r"^(DNF|DQ|NC|RET)$", t):
+            anchors.append((y, 0, None, None, t))
             continue
         # "PP NNN C" — pos + 3-digit car + class (car number too wide for separate column)
         m = re.match(r"^(\d{1,2})\s+(\d+)\s+([MI])$", t)
