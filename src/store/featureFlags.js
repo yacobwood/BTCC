@@ -1,7 +1,6 @@
 import React, {createContext, useContext, useState, useEffect, useMemo} from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getMessaging, getToken} from '@react-native-firebase/messaging';
 import DeviceInfo from 'react-native-device-info';
 
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
@@ -48,14 +47,11 @@ export function FeatureFlagsProvider({children}) {
         // Apply global flags immediately  -  don't block on token lookup
         setFlags(prev => ({...prev, ...globalFlags}));
 
-        // Apply per-device overrides if this device has any (best-effort, 3s timeout)
+        // Apply per-device overrides if this device has any (best-effort)
         try {
-          const token = await Promise.race([
-            getToken(getMessaging()),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000)),
-          ]);
-          if (token && overrides[token]) {
-            setFlags(prev => ({...prev, ...overrides[token]}));
+          const deviceId = await getStableDeviceId();
+          if (deviceId && overrides[deviceId]) {
+            setFlags(prev => ({...prev, ...overrides[deviceId]}));
           }
         } catch {}
         // Cache global flags only (device overrides are ephemeral)
