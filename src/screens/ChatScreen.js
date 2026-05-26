@@ -46,6 +46,7 @@ export default function ChatScreen({onClose} = {}) {
   const [isBanned, setIsBanned] = useState(false);
   const [banInfo, setBanInfo] = useState(null);
   const listRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     fetchBlacklist().then(setBlacklist).catch(() => {});
@@ -168,6 +169,11 @@ export default function ChatScreen({onClose} = {}) {
     }
   };
 
+  const handleReply = useCallback((authorName) => {
+    setInput(`@${authorName} `);
+    inputRef.current?.focus();
+  }, []);
+
   const handleFlag = async (msgId) => {
     if (flaggedIds.has(msgId)) return;
     setFlaggedIds(prev => new Set(prev).add(msgId));
@@ -219,6 +225,11 @@ export default function ChatScreen({onClose} = {}) {
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
         <View style={styles.msgActions}>
+          {!isOwn && (
+            <TouchableOpacity onPress={() => handleReply(item.authorName)} accessibilityLabel="Reply" style={styles.msgActionBtn}>
+              <Icon name="reply" size={13} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          )}
           {!isOwn && (
             <TouchableOpacity onPress={() => handleFlag(item.id)} accessibilityLabel="Flag message" style={styles.msgActionBtn}>
               <Icon name="flag" size={13} color={flaggedIds.has(item.id) ? '#E53935' : Colors.textSecondary} />
@@ -333,6 +344,7 @@ export default function ChatScreen({onClose} = {}) {
             {inputError ? <Text style={styles.inputError}>{inputError}</Text> : null}
             <View style={styles.inputInner}>
               <TextInput
+                ref={inputRef}
                 style={styles.textInput}
                 value={input}
                 onChangeText={t => { setInput(t); if (inputError) setInputError(''); }}
