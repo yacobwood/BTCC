@@ -104,6 +104,7 @@ export function parseCalendar(json) {
       liveUrl: r.liveUrl || null,
       qualifyingRecord: r.qualifyingRecord || null,
       raceRecord: r.raceRecord || null,
+      youtubeUrls: r.youtubeUrls || [],
       sessions: (r.sessions || []).map(s => ({
         name: s.name || '',
         day: s.day || '',

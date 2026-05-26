@@ -19,9 +19,9 @@ function renderProvider() {
 describe('FeatureFlagsProvider', () => {
   const defaults = {
     podcasts_enabled: false,
-    update_available: true,
+    update_available: false,
     update_min_version_ios: 0,
-    update_min_version_android: 63,
+    update_min_version_android: 0,
   };
 
   it('provides default flags immediately (before fetch resolves)', () => {

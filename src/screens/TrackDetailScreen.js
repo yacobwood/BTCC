@@ -97,7 +97,7 @@ export default function TrackDetailScreen({route, navigation}) {
     const parsed = parseCalendar(BUNDLED_CALENDAR);
     return parsed.rounds.find(r => r.round === targetRound) || trackParam || null;
   });
-  const [raceUrls, setRaceUrls] = useState([]);
+  const [raceUrls, setRaceUrls] = useState(() => track?.youtubeUrls || []);
 
   useEffect(() => {
     const targetRound = trackParam?.round ?? roundParam;
@@ -111,7 +111,10 @@ export default function TrackDetailScreen({route, navigation}) {
       const found = (res.rounds || []).find(r => r.round === targetRound);
       const urls = found?.youtubeUrls || [];
       // results2026.json format: ["", "", "", r1, r2, r3]
-      setRaceUrls([urls[3] || '', urls[4] || '', urls[5] || '']);
+      const r1 = urls[3] || '';
+      const r2 = urls[4] || '';
+      const r3 = urls[5] || '';
+      if (r1 || r2 || r3) setRaceUrls([r1, r2, r3]);
     }).catch(() => {});
   }, []);
 

@@ -5,7 +5,7 @@ import {renderWithProviders, makeNav} from './testUtils';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), pullToRefresh: jest.fn()},
+  Analytics: {screen: jest.fn(), pullToRefresh: jest.fn(), raceClicked: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({

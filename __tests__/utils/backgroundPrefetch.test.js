@@ -33,15 +33,11 @@ describe('runBackgroundPrefetch', () => {
     jest.useRealTimers();
   });
 
-  it('immediately prefetches calendar images', () => {
-    runBackgroundPrefetch();
-    expect(prefetch).toHaveBeenCalled();
-  });
-
-  it('does NOT immediately fetch drivers or articles', () => {
+  it('does NOT immediately fetch or prefetch anything', () => {
     runBackgroundPrefetch();
     expect(fetchDrivers).not.toHaveBeenCalled();
     expect(fetchArticles).not.toHaveBeenCalled();
+    expect(prefetch).not.toHaveBeenCalled();
   });
 
   it('fetches drivers and articles after 3 second delay', async () => {

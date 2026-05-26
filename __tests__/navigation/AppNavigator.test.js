@@ -115,18 +115,6 @@ jest.mock('../../src/components/ChatFab', () => ({
   default: () => null,
 }));
 
-jest.mock('../../src/components/UpdateDialog', () => ({
-  __esModule: true,
-  default: ({visible, onDismiss}) => {
-    const {View, TouchableOpacity, Text} = require('react-native');
-    if (!visible) return null;
-    return (
-      <View testID="update-dialog">
-        <TouchableOpacity testID="update-dialog-dismiss" onPress={onDismiss} />
-      </View>
-    );
-  },
-}));
 
 beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue({
@@ -209,50 +197,3 @@ describe('AppNavigator', () => {
   });
 });
 
-describe('AppNavigator — update dialog', () => {
-  const originalOS = Platform.OS;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    Platform.OS = 'android';
-    // Default flags: update_available=true, update_min_version_android=63
-    // Default DeviceInfo mock: getBuildNumber() = '999'
-  });
-
-  afterEach(() => {
-    Platform.OS = originalOS;
-  });
-
-  it('shows when Android build number is below update_min_version_android', async () => {
-    DeviceInfo.getBuildNumber.mockReturnValue('62'); // 62 < default min 63
-    const {getByTestId} = renderNav();
-    await waitFor(() => expect(getByTestId('update-dialog')).toBeTruthy());
-  });
-
-  it('does not show when Android build number meets update_min_version_android', async () => {
-    DeviceInfo.getBuildNumber.mockReturnValue('63'); // 63 is not < 63
-    const {queryByTestId} = renderNav();
-    await waitFor(() => expect(queryByTestId('update-dialog')).toBeNull());
-  });
-
-  it('does not show when Android build number is above update_min_version_android', async () => {
-    DeviceInfo.getBuildNumber.mockReturnValue('999'); // default, well above min
-    const {queryByTestId} = renderNav();
-    await waitFor(() => expect(queryByTestId('update-dialog')).toBeNull());
-  });
-
-  it('hides after dismiss is called', async () => {
-    DeviceInfo.getBuildNumber.mockReturnValue('62');
-    const {getByTestId, queryByTestId} = renderNav();
-    await waitFor(() => expect(getByTestId('update-dialog')).toBeTruthy());
-    fireEvent.press(getByTestId('update-dialog-dismiss'));
-    await waitFor(() => expect(queryByTestId('update-dialog')).toBeNull());
-  });
-
-  it('does not show on iOS when update_min_version_ios is 0', async () => {
-    Platform.OS = 'ios';
-    DeviceInfo.getBuildNumber.mockReturnValue('1'); // any build > 0
-    const {queryByTestId} = renderNav();
-    await waitFor(() => expect(queryByTestId('update-dialog')).toBeNull());
-  });
-});

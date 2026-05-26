@@ -2,7 +2,6 @@ import {Image} from 'react-native';
 import {fetchDrivers, fetchArticles} from '../api/client';
 import {parseGrid, parseArticle, thumbUrl} from '../api/parsers';
 
-const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const PREFETCH_CONCURRENCY = 5;
 
 // Prefetch up to `concurrency` images at a time to avoid flooding slow connections
@@ -15,16 +14,6 @@ async function batchPrefetch(urls, concurrency = PREFETCH_CONCURRENCY) {
     }
   });
   await Promise.all(workers);
-}
-
-function prefetchCalendar() {
-  const urls = [];
-  for (const round of BUNDLED_CALENDAR.rounds || []) {
-    if (round.imageUrl) urls.push(thumbUrl(round.imageUrl, '768x768'));
-    if (round.layoutImageUrl) urls.push(thumbUrl(round.layoutImageUrl, '300x300'));
-    if (round.raceImages) urls.push(...round.raceImages.map(u => thumbUrl(u, '300x300')));
-  }
-  batchPrefetch(urls);
 }
 
 async function prefetchDrivers() {
@@ -49,9 +38,6 @@ async function prefetchNews() {
 }
 
 export function runBackgroundPrefetch() {
-  // Calendar images are bundled  -  start immediately
-  prefetchCalendar();
-  // Network-dependent  -  run after a short delay so startup isn't impacted
   setTimeout(() => {
     prefetchDrivers();
     prefetchNews();

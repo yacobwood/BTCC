@@ -24,6 +24,7 @@ jest.mock('../../src/api/client', () => ({
 }));
 
 jest.mock('../../src/api/parsers', () => ({
+  ...jest.requireActual('../../src/api/parsers'),
   parseResults: jest.fn().mockReturnValue([]),
 }));
 
@@ -50,7 +51,7 @@ const nav = makeNav();
 // the tracks.json merge. lapPreviewUrl and youtubeUrls are explicit here
 // because they are now separate concerns.
 const TRACK = {
-  round:            1,
+  round:            99,
   venue:            'Donington Park',
   date:             '19–20 Apr 2026',
   startDate:        '2026-04-19',
@@ -172,6 +173,13 @@ describe('TrackDetailScreen', () => {
       tslEventId: 99,
       startDate: '2026-04-25',
       endDate:   '2026-04-26',
+      sessions: [
+        {name: 'Free Practice', time: '08:30', day: 'SAT'},
+        {name: 'Qualifying',    time: '10:00', day: 'SAT'},
+        {name: 'Race 1',        time: '14:00', day: 'SAT'},
+        {name: 'Race 2',        time: '09:30', day: 'SUN'},
+        {name: 'Race 3',        time: '13:00', day: 'SUN'},
+      ],
     };
 
     beforeEach(() => {
@@ -282,7 +290,7 @@ describe('TrackDetailScreen', () => {
     renderWithProviders(
       <TrackDetailScreen route={makeRoute({track: TRACK, year: 2027})} navigation={nav} />,
     );
-    await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2027));
+    await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2027, true));
   });
 
   it('defaults to year=2026 when no year param is provided', async () => {
@@ -290,7 +298,7 @@ describe('TrackDetailScreen', () => {
     renderWithProviders(
       <TrackDetailScreen route={makeRoute({track: TRACK})} navigation={nav} />,
     );
-    await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2026));
+    await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2026, true));
   });
 
   // ── Session times ─────────────────────────────────────────────────────────────

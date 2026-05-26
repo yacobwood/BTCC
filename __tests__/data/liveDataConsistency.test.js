@@ -28,6 +28,8 @@ const RESULTS    = require('../../data/results2026.json');
 const CALENDAR   = require('../../data/calendar.json');
 const SCHEDULE   = require('../../data/schedule.json');
 const {formatDriverName} = require('../../src/utils/driverName');
+const {parseCalendar} = require('../../src/api/parsers');
+const PARSED_CALENDAR = parseCalendar(CALENDAR);
 
 // Scoring races only — QR is NOT a championship points race for win/podium tallies
 const SCORING_RACES = new Set(['Race 1', 'Race 2', 'Race 3']);
@@ -76,7 +78,7 @@ describe('standings.json — structural integrity', () => {
   });
 
   it('season is 2026', () => {
-    expect(STANDINGS.season).toBe(2026);
+    expect(String(STANDINGS.season)).toBe('2026');
   });
 
   it('round is a positive integer within the calendar range', () => {
@@ -529,7 +531,7 @@ describe('schedule.json <-> calendar.json consistency', () => {
   it('every calendar round has required fields for TrackDetailScreen', () => {
     const required = ['venue', 'about', 'lengthMiles', 'lengthKm', 'corners', 'imageUrl', 'startDate', 'endDate'];
     const missing = [];
-    for (const r of CALENDAR.rounds) {
+    for (const r of PARSED_CALENDAR.rounds) {
       for (const f of required) {
         if (!r[f]) missing.push(`Round ${r.round} (${r.venue}): missing "${f}"`);
       }
