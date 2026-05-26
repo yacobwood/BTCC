@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
-import {View, Platform} from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import {View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -52,9 +51,7 @@ import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
 import MerchScreen from '../screens/MerchScreen';
 import RoadmapScreen from '../screens/RoadmapScreen';
-import UpdateDialog from '../components/UpdateDialog';
 import ChatFab from '../components/ChatFab';
-import {useFeatureFlags} from '../store/featureFlags';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -176,19 +173,6 @@ const linking = {
 function AppContent() {
   const {bottom: bottomInset} = useSafeAreaInsets();
   const [bottom] = React.useState(bottomInset);
-  const {update_available, update_min_version_android, update_min_version_ios} = useFeatureFlags();
-  const [showUpdate, setShowUpdate] = React.useState(false);
-  const updateShown = React.useRef(false);
-
-  React.useEffect(() => {
-    if (!update_available || updateShown.current) return;
-    const minBuild = Platform.OS === 'android' ? update_min_version_android : update_min_version_ios;
-    const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
-    if (currentBuild < minBuild) {
-      updateShown.current = true;
-      setShowUpdate(true);
-    }
-  }, [update_available, update_min_version_android, update_min_version_ios]);
 
   return (
     <View style={{flex: 1}}>
@@ -220,7 +204,6 @@ function AppContent() {
           <Tab.Screen name="More" component={MoreStack} />
         </Tab.Navigator>
         <ChatFab bottomOffset={TAB_BAR_HEIGHT + bottom} />
-        <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       </View>
   );
 }
