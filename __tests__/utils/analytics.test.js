@@ -23,12 +23,23 @@ describe('Analytics', () => {
   });
 
   describe('article events', () => {
-    it('articleClicked logs select_content with title and position', () => {
+    it('articleClicked logs select_content with title, position and organic traffic_source by default', () => {
       Analytics.articleClicked('BTCC opener', 2);
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'select_content', {
         content_type: 'article',
         item_id: 'BTCC opener',
         position: 2,
+        traffic_source: 'organic',
+      });
+    });
+
+    it('articleClicked logs traffic_source: notification when specified', () => {
+      Analytics.articleClicked('ingram-wins-race-3', 'notification', undefined, 'notification');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'select_content', {
+        content_type: 'article',
+        item_id: 'ingram-wins-race-3',
+        position: 'notification',
+        traffic_source: 'notification',
       });
     });
 
@@ -66,6 +77,7 @@ describe('Analytics', () => {
       expect(() => Analytics.articleClicked(null, 0)).not.toThrow();
       const call = logEvent.mock.calls[0][2];
       expect(call.item_id).toBe('');
+      expect(call.traffic_source).toBe('organic');
     });
   });
 

@@ -1,7 +1,6 @@
-import React, {createContext, useContext, useState, useEffect, useMemo} from 'react';
+import React, {createContext, useContext, useState, useEffect} from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DeviceInfo from 'react-native-device-info';
 import {getStableDeviceId} from '../utils/deviceId';
 
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
@@ -61,16 +60,8 @@ export function FeatureFlagsProvider({children}) {
     })();
   }, []);
 
-  const effectiveFlags = useMemo(() => {
-    const build = parseInt(DeviceInfo.getBuildNumber(), 10);
-    return {
-      ...flags,
-      live_chat: flags.live_chat && build >= 68,
-    };
-  }, [flags]);
-
   return (
-    <FeatureFlagsContext.Provider value={effectiveFlags}>
+    <FeatureFlagsContext.Provider value={flags}>
       {children}
     </FeatureFlagsContext.Provider>
   );

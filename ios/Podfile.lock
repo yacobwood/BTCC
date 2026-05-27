@@ -78,8 +78,6 @@ PODS:
     - nanopb (~> 3.30910.0)
     - PromisesSwift (~> 2.1)
   - FirebaseSharedSwift (12.10.0)
-  - Google-Mobile-Ads-SDK (13.1.0):
-    - GoogleUserMessagingPlatform (>= 1.1)
   - GoogleAppMeasurement/Core (12.10.0):
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/MethodSwizzler (~> 8.1)
@@ -96,7 +94,6 @@ PODS:
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
-  - GoogleUserMessagingPlatform (3.1.0)
   - GoogleUtilities (8.1.0):
     - GoogleUtilities/AppDelegateSwizzler (= 8.1.0)
     - GoogleUtilities/Environment (= 8.1.0)
@@ -1643,8 +1640,6 @@ PODS:
   - react-native-track-player (4.1.2):
     - React-Core
     - SwiftAudioEx (= 1.1.0)
-  - react-native-tracking-transparency (0.1.2):
-    - React
   - react-native-webview (13.16.1):
     - hermes-engine
     - RCTRequired
@@ -2220,30 +2215,6 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNGoogleMobileAds (16.3.1):
-    - Google-Mobile-Ads-SDK (= 13.1.0)
-    - GoogleUserMessagingPlatform (= 3.1.0)
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - Yoga
   - RNNotifee (9.1.8):
     - React-Core
     - RNNotifee/NotifeeCore (= 9.1.8)
@@ -2416,7 +2387,6 @@ DEPENDENCIES:
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-track-player (from `../node_modules/react-native-track-player`)
-  - react-native-tracking-transparency (from `../node_modules/react-native-tracking-transparency`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../node_modules/react-native/ReactCommon/react/networking`)
@@ -2460,7 +2430,6 @@ DEPENDENCIES:
   - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
   - "RNFBDatabase (from `../node_modules/@react-native-firebase/database`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
-  - RNGoogleMobileAds (from `../node_modules/react-native-google-mobile-ads`)
   - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -2482,10 +2451,8 @@ SPEC REPOS:
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - FirebaseSharedSwift
-    - Google-Mobile-Ads-SDK
     - GoogleAppMeasurement
     - GoogleDataTransport
-    - GoogleUserMessagingPlatform
     - GoogleUtilities
     - leveldb-library
     - nanopb
@@ -2580,8 +2547,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-track-player:
     :path: "../node_modules/react-native-track-player"
-  react-native-tracking-transparency:
-    :path: "../node_modules/react-native-tracking-transparency"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -2668,8 +2633,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/database"
   RNFBMessaging:
     :path: "../node_modules/@react-native-firebase/messaging"
-  RNGoogleMobileAds:
-    :path: "../node_modules/react-native-google-mobile-ads"
   RNNotifee:
     :path: "../node_modules/@notifee/react-native"
   RNScreens:
@@ -2696,10 +2659,8 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfigInterop: a169873f4093b241eb5e27a4fbad91af36d64b8d
   FirebaseSessions: dba7635960740ad77cc2f3387d90ff22a7942f82
   FirebaseSharedSwift: 3d1e448b7202e36821a492941c84592d1308ea14
-  Google-Mobile-Ads-SDK: 8429bef6ee1a4e322b0a5571b64217ed8317a3d5
   GoogleAppMeasurement: 57270ccc2b77472d7e85c4cbe45972564eff78bb
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
-  GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   hermes-engine: 9ab9450616b0409cdcab0c828cff95fface705aa
   leveldb-library: cc8b8f8e013647a295ad3f8cd2ddf49a6f19be19
@@ -2746,7 +2707,6 @@ SPEC CHECKSUMS:
   react-native-pager-view: adc7d78123fb395e03a70d19e8d75805b49838b5
   react-native-safe-area-context: ae7587b95fb580d1800c5b0b2a7bd48c2868e67a
   react-native-track-player: dd56f9948e03756a217c75e0a61aa04aab65b5a1
-  react-native-tracking-transparency: 15eb319f2b982070eb9831582af27d87badfa624
   react-native-webview: 0ed52ddb2eafc64a502871218440b8b4d37961c3
   React-NativeModulesApple: 5ba0903927f6b8d335a091700e9fda143980f819
   React-networking: 3a4b7f9ed2b2d1c0441beacb79674323a24bcca6
@@ -2790,7 +2750,6 @@ SPEC CHECKSUMS:
   RNFBCrashlytics: 080348feb2f6221efa8d1598dafdc9deeb759eca
   RNFBDatabase: 5c01f3f6b892581d90f79d89b123e3802d541034
   RNFBMessaging: 1b0ed6e3963b9b32b340286130542097e01f5a33
-  RNGoogleMobileAds: d266aeeed25da0b8edea9ce2cb5d60de449b47f0
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
   RNScreens: 6cb648bdad8fe9bee9259fe144df95b6d1d5b707
   RNSVG: c69f7709226108f5eb89b5aa8833c17a36345468

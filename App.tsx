@@ -27,8 +27,16 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 
 export const navigationRef = createNavigationContainerRef();
 
+const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest']);
+
 function _navigate(data: Record<string, string> | undefined) {
-  if (data) Analytics.notificationOpened(data.type);
+  if (data) {
+    Analytics.notificationOpened(data.type);
+    if (ARTICLE_NOTIF_TYPES.has(data.type)) {
+      const articleId = data.slug || data.id || data.type;
+      Analytics.articleClicked(articleId, 'notification', undefined, 'notification');
+    }
+  }
   navigateFromData(navigationRef as any, data);
 }
 
