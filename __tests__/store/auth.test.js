@@ -4,6 +4,12 @@ import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {AuthProvider, useAuth} from '../../src/store/auth';
 
+jest.mock('../../src/utils/userProfile', () => ({
+  loadProfile:           jest.fn(() => Promise.resolve(null)),
+  uploadLocalProfile:    jest.fn(() => Promise.resolve()),
+  applyProfileToStorage: jest.fn(() => Promise.resolve()),
+}));
+
 function renderProvider() {
   let hook;
   function Tester() {
@@ -58,6 +64,23 @@ describe('AuthProvider', () => {
         getHook = renderProvider();
       });
       expect(getHook().isAnonymous).toBe(true);
+    });
+  });
+
+  describe('profile sync', () => {
+    it('uploads local profile when no Firestore doc exists (first sign-in)', async () => {
+      const {loadProfile, uploadLocalProfile} = require('../../src/utils/userProfile');
+      loadProfile.mockResolvedValueOnce(null);
+      await act(async () => { renderProvider(); });
+      expect(uploadLocalProfile).toHaveBeenCalledWith('test-uid-123');
+    });
+
+    it('applies Firestore profile to storage when doc exists (returning user)', async () => {
+      const {loadProfile, applyProfileToStorage} = require('../../src/utils/userProfile');
+      const saved = {unitKm: true, commenterName: 'Jake'};
+      loadProfile.mockResolvedValueOnce(saved);
+      await act(async () => { renderProvider(); });
+      expect(applyProfileToStorage).toHaveBeenCalledWith(saved);
     });
   });
 

@@ -26,6 +26,9 @@ service cloud.firestore {
     // Article comments — app reads/writes; deletes are direct
     match /article_comments/{doc} { allow read: if true; allow write: if true; }
 
+    // User profiles — only the owning UID can read or write their own doc
+    match /users/{userId} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+
     // Deny everything else
     match /{document=**} { allow read, write: if false; }
   }

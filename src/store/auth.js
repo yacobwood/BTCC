@@ -4,10 +4,11 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import appleAuth from '@invertase/react-native-apple-authentication';
 import {Platform} from 'react-native';
 import {Analytics} from '../utils/analytics';
+import {loadProfile, uploadLocalProfile, applyProfileToStorage} from '../utils/userProfile';
 
 // Set this to the Web OAuth 2.0 Client ID from Firebase Console → Authentication → Google → Web SDK config.
 // Google Sign-In must be enabled in the Firebase Console before this will work.
-const GOOGLE_WEB_CLIENT_ID = 'TODO_REPLACE_WITH_WEB_CLIENT_ID';
+const GOOGLE_WEB_CLIENT_ID = '399066588683-1d1bpqv7616h2f68lg78s4jufl7g528j.apps.googleusercontent.com';
 
 GoogleSignin.configure({webClientId: GOOGLE_WEB_CLIENT_ID});
 
@@ -28,6 +29,12 @@ export function AuthProvider({children}) {
         setUser(u);
         const provider = u.isAnonymous ? 'anonymous' : (u.providerData[0]?.providerId || 'unknown');
         Analytics.setAuthUser(u.uid, provider);
+        const existing = await loadProfile(u.uid);
+        if (!existing) {
+          await uploadLocalProfile(u.uid);
+        } else {
+          await applyProfileToStorage(existing);
+        }
       } else {
         try {
           const cred = await auth().signInAnonymously();
