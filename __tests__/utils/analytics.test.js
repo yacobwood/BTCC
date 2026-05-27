@@ -1,4 +1,4 @@
-import {logEvent, setUserProperty} from '@react-native-firebase/analytics';
+import {logEvent, setUserProperty, setUserId} from '@react-native-firebase/analytics';
 import {Analytics} from '../../src/utils/analytics';
 
 describe('Analytics', () => {
@@ -232,6 +232,19 @@ describe('Analytics', () => {
     it('unitSystemChanged logs unit', () => {
       Analytics.unitSystemChanged('km');
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'unit_system_changed', {unit: 'km'});
+    });
+  });
+
+  describe('setAuthUser', () => {
+    it('sets user ID and auth_provider property', () => {
+      Analytics.setAuthUser('uid-abc', 'google.com');
+      expect(setUserId).toHaveBeenCalledWith(expect.anything(), 'uid-abc');
+      expect(setUserProperty).toHaveBeenCalledWith(expect.anything(), 'auth_provider', 'google.com');
+    });
+
+    it('sets auth_provider to anonymous for anonymous users', () => {
+      Analytics.setAuthUser('uid-anon', 'anonymous');
+      expect(setUserProperty).toHaveBeenCalledWith(expect.anything(), 'auth_provider', 'anonymous');
     });
   });
 });

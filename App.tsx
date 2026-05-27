@@ -24,6 +24,7 @@ import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
 import SpoilerClearedDialog from './src/components/SpoilerClearedDialog';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import {AuthProvider} from './src/store/auth';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -162,6 +163,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+    <AuthProvider>
     <SafeAreaProvider style={{flex: 1, backgroundColor: '#080912'}}>
     <FeatureFlagsProvider>
     <LiveUrlsProvider>
@@ -179,6 +181,7 @@ export default function App() {
     </LiveUrlsProvider>
     </FeatureFlagsProvider>
     </SafeAreaProvider>
+    </AuthProvider>
     </ErrorBoundary>
   );
 }

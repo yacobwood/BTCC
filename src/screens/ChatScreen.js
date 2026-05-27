@@ -16,7 +16,7 @@ import database from '@react-native-firebase/database';
 
 const DB = database();
 import {Colors} from '../theme/colors';
-import {getFCMToken} from '../utils/notifications';
+import auth from '@react-native-firebase/auth';
 import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
 import {timeAgo} from '../utils/timeAgo';
@@ -54,11 +54,10 @@ export default function ChatScreen({onClose} = {}) {
 
     // Load identity
     const init = async () => {
-      const [savedName, token] = await Promise.all([
+      const [savedName] = await Promise.all([
         AsyncStorage.getItem(COMMENTER_NAME_KEY).catch(() => null),
-        getFCMToken().catch(() => null),
       ]);
-      const myId = token ? token.slice(0, 8) : `anon_${Math.random().toString(36).slice(2, 6)}`;
+      const myId = auth().currentUser?.uid || 'anonymous';
       myAuthorIdRef.current = myId;
       setMyAuthorId(myId);
       if (savedName) setCommenterName(savedName);

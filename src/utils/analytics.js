@@ -1,4 +1,4 @@
-import {getAnalytics, logEvent, setUserProperty} from '@react-native-firebase/analytics';
+import {getAnalytics, logEvent, setUserId, setUserProperty} from '@react-native-firebase/analytics';
 
 let _fa = null;
 const fa = () => { if (!_fa) _fa = getAnalytics(); return _fa; };
@@ -23,6 +23,10 @@ export const Analytics = {
   teamClicked: (name) => logEvent(fa(),'team_clicked', {team_name: name}),
   favouriteToggled: (name, added) => logEvent(fa(),'favourite_toggled', {driver_name: name, action: added ? 'added' : 'removed'}),
   setFavouriteDriverProperty: (name) => setUserProperty(fa(),'favourite_driver', name?.substring(0, 36)),
+  setAuthUser: (uid, provider) => {
+    setUserId(fa(), uid).catch(() => {});
+    setUserProperty(fa(), 'auth_provider', provider).catch(() => {});
+  },
 
   gridTabSwitched: (tab) => logEvent(fa(),'grid_tab_switched', {tab}),
   newsSearched: (query) => logEvent(fa(),'search', {search_term: query?.substring(0, 100)}),

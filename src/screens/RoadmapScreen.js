@@ -12,7 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
-import {getFCMToken} from '../utils/notifications';
+import auth from '@react-native-firebase/auth';
 
 const ROADMAP_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/roadmap.json';
 const PROJECT_ID = 'btcchub-af77a';
@@ -111,7 +111,8 @@ export default function RoadmapScreen({navigation}) {
     if (!hasVoted) Analytics.roadmapVoted(item.id);
 
     try {
-      const deviceId = await getFCMToken();
+      const deviceId = auth().currentUser?.uid;
+      if (!deviceId) return;
       if (hasVoted) {
         await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
           method: 'POST',

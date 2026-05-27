@@ -73,23 +73,9 @@ describe('FeatureFlagsProvider', () => {
     expect(getHook()).toMatchObject(defaults);
   });
 
-  // ── live_chat version gate (hardcoded: build >= 68, applies on all platforms) ──
+  // ── live_chat passes through the remote flag value directly (no build gate) ──
 
-  it('live_chat is false when raw flag is true but build is below 68', async () => {
-    const DeviceInfo = require('react-native-device-info').default;
-    DeviceInfo.getBuildNumber.mockReturnValue('67');
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({live_chat: true}),
-    });
-    let getHook;
-    await act(async () => { getHook = renderProvider(); });
-    expect(getHook().live_chat).toBe(false);
-  });
-
-  it('live_chat is true when raw flag is true and build is exactly 68', async () => {
-    const DeviceInfo = require('react-native-device-info').default;
-    DeviceInfo.getBuildNumber.mockReturnValue('68');
+  it('live_chat is true when remote flag is true', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({live_chat: true}),
@@ -99,21 +85,7 @@ describe('FeatureFlagsProvider', () => {
     expect(getHook().live_chat).toBe(true);
   });
 
-  it('live_chat is true when raw flag is true and build exceeds 68', async () => {
-    const DeviceInfo = require('react-native-device-info').default;
-    DeviceInfo.getBuildNumber.mockReturnValue('99');
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({live_chat: true}),
-    });
-    let getHook;
-    await act(async () => { getHook = renderProvider(); });
-    expect(getHook().live_chat).toBe(true);
-  });
-
-  it('live_chat is false when raw flag is false regardless of build', async () => {
-    const DeviceInfo = require('react-native-device-info').default;
-    DeviceInfo.getBuildNumber.mockReturnValue('999');
+  it('live_chat is false when remote flag is false', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({live_chat: false}),

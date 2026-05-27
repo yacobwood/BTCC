@@ -7,6 +7,9 @@ import {
   StyleSheet,
   Switch,
   Clipboard,
+  Alert,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -21,16 +24,19 @@ import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getStableDeviceId} from '../utils/deviceId';
+import {useAuth} from '../store/auth';
 
 export default function SettingsScreen({navigation}) {
   const {settings, setSetting} = useSettings();
   const {useKm, toggleUnits} = useUnits();
   const {podcasts_enabled, debug_mode, live_chat, broadcaster_override} = useFeatureFlags();
   const detectedBroadcaster = useBroadcaster();
+  const {user, isAnonymous, providerIds, signInWithGoogle, signInWithApple, signOut} = useAuth();
   const [fcmToken, setFcmToken] = useState('');
   const [copiedFcm, setCopiedFcm] = useState(false);
   const [stableId, setStableId] = useState('');
   const [copiedStableId, setCopiedStableId] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     getFCMToken().then(tok => { if (tok) setFcmToken(tok); }).catch(() => {});
@@ -42,6 +48,29 @@ export default function SettingsScreen({navigation}) {
     Clipboard.setString(stableId);
     setCopiedStableId(true);
     setTimeout(() => setCopiedStableId(false), 2000);
+  };
+
+  const handleSignIn = async (provider) => {
+    setAuthLoading(true);
+    try {
+      if (provider === 'google') await signInWithGoogle();
+      else if (provider === 'apple') await signInWithApple();
+    } catch (e) {
+      Alert.alert('Sign in failed', e?.message || 'Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign out',
+      'Your preferences are saved. You will be signed in anonymously until you link an account again.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Sign out', style: 'destructive', onPress: () => signOut().catch(() => {})},
+      ],
+    );
   };
 
   const copyFcmToken = () => {
@@ -298,6 +327,42 @@ export default function SettingsScreen({navigation}) {
         )}
 
         <View style={styles.divider} />
+        <Text style={styles.sectionTitle}>ACCOUNT</Text>
+        {isAnonymous ? (
+          <>
+            <Text style={styles.settingDesc}>Sign in to sync your preferences and chat identity across devices.</Text>
+            <View style={{marginTop: 12, gap: 8}}>
+              {authLoading ? (
+                <ActivityIndicator color={Colors.yellow} />
+              ) : (
+                <>
+                  <TouchableOpacity style={styles.authBtn} onPress={() => handleSignIn('google')} accessibilityRole="button">
+                    <Icon name="login" size={16} color={Colors.yellow} />
+                    <Text style={styles.authBtnText}>Sign in with Google</Text>
+                  </TouchableOpacity>
+                  {Platform.OS === 'ios' && (
+                    <TouchableOpacity style={styles.authBtn} onPress={() => handleSignIn('apple')} accessibilityRole="button">
+                      <Icon name="apple" size={16} color={Colors.yellow} />
+                      <Text style={styles.authBtnText}>Sign in with Apple</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </View>
+          </>
+        ) : (
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+            <View>
+              <Text style={styles.settingLabel}>{user?.email || user?.displayName || 'Linked account'}</Text>
+              <Text style={styles.settingDesc}>{providerIds.filter(p => p !== 'firebase').join(', ')}</Text>
+            </View>
+            <TouchableOpacity onPress={handleSignOut} accessibilityRole="button">
+              <Text style={[styles.settingDesc, {color: Colors.yellow}]}>Sign out</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
         {!!stableId && (
           <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy preview device ID">
@@ -472,4 +537,6 @@ const styles = StyleSheet.create({
   debugBtnText: {color: Colors.yellow, fontSize: 13, fontWeight: '600'},
   tokenRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12},
   tokenText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 2},
+  authBtn: {flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: Colors.surface, borderRadius: 8, alignSelf: 'flex-start'},
+  authBtnText: {color: Colors.yellow, fontSize: 14, fontWeight: '600'},
 });

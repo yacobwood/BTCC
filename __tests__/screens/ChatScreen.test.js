@@ -15,6 +15,7 @@ jest.mock('../../src/api/client', () => ({
 
 jest.mock('../../src/utils/notifications', () => ({
   getFCMToken: jest.fn().mockResolvedValue('test-fcm-token-abc12345'),
+  onForegroundMessage: jest.fn(() => jest.fn()),
 }));
 
 jest.mock('../../src/utils/timeAgo', () => ({
@@ -148,9 +149,7 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(getByText('Saved User')).toBeTruthy());
   });
 
-  it('derives authorId from first 8 chars of FCM token', async () => {
-    const {getFCMToken} = require('../../src/utils/notifications');
-    getFCMToken.mockResolvedValue('test-fcm-token-abc12345');
+  it('derives authorId from Firebase Auth UID', async () => {
     AsyncStorage.getItem.mockImplementation(key =>
       key === 'commenter_name' ? Promise.resolve('Tom') : Promise.resolve(null),
     );
@@ -161,14 +160,14 @@ describe('ChatScreen', () => {
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() =>
       expect(mockDbPush).toHaveBeenCalledWith(
-        expect.objectContaining({authorId: 'test-fcm'}),
+        expect.objectContaining({authorId: 'test-uid-123'}),
       ),
     );
   });
 
-  it('falls back to anon_xxxx authorId when getFCMToken throws', async () => {
-    const {getFCMToken} = require('../../src/utils/notifications');
-    getFCMToken.mockRejectedValue(new Error('no token'));
+  it('falls back to "anonymous" authorId when auth has no current user', async () => {
+    const auth = require('@react-native-firebase/auth').default;
+    auth.mockReturnValueOnce({...auth(), currentUser: null});
     AsyncStorage.getItem.mockImplementation(key =>
       key === 'commenter_name' ? Promise.resolve('Tom') : Promise.resolve(null),
     );
@@ -179,7 +178,7 @@ describe('ChatScreen', () => {
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() =>
       expect(mockDbPush).toHaveBeenCalledWith(
-        expect.objectContaining({authorId: expect.stringMatching(/^anon_/)}),
+        expect.objectContaining({authorId: 'anonymous'}),
       ),
     );
   });
@@ -257,12 +256,12 @@ describe('ChatScreen', () => {
   });
 
   it('shows delete button (not flag) for own messages', async () => {
-    // FCM token gives authorId 'test-fcm'
+    // Auth UID is 'test-uid-123' from the jest mock
     const {queryByLabelText, getByLabelText} = renderChat();
     await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
     await act(async () => {
       triggerMessages([
-        {id: '1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
+        {id: '1', text: 'My message', authorName: 'Me', authorId: 'test-uid-123', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
     await waitFor(() => {
@@ -734,7 +733,7 @@ describe('ChatScreen', () => {
     await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
     await act(async () => {
       triggerMessages([
-        {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
+        {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-uid-123', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
     await waitFor(() => {
@@ -764,7 +763,7 @@ describe('ChatScreen', () => {
     const result = renderWithProviders(<ChatScreen />);
     await act(async () => {
       triggerMessages([
-        {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
+        {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-uid-123', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
     await waitFor(() => {
@@ -788,7 +787,7 @@ describe('ChatScreen', () => {
     const result = renderWithProviders(<ChatScreen />);
     await act(async () => {
       triggerMessages([
-        {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-fcm', timestamp: 1000, flagCount: 0, hidden: false},
+        {id: 'own1', text: 'My message', authorName: 'Me', authorId: 'test-uid-123', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
     await waitFor(() => {

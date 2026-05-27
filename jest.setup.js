@@ -42,6 +42,44 @@ jest.mock('@react-native-firebase/analytics', () => ({
   getAnalytics:    jest.fn(() => ({})),
   logEvent:        jest.fn(() => Promise.resolve()),
   setUserProperty: jest.fn(() => Promise.resolve()),
+  setUserId:       jest.fn(() => Promise.resolve()),
+}));
+
+// ── Firebase Auth ──────────────────────────────────────────────────────────────
+const mockAuthUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], email: null, displayName: null};
+const mockAuth = {
+  currentUser: mockAuthUser,
+  onAuthStateChanged: jest.fn(cb => { cb(mockAuthUser); return jest.fn(); }),
+  signInAnonymously: jest.fn(() => Promise.resolve({user: mockAuthUser})),
+  signInWithCredential: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
+  signOut: jest.fn(() => Promise.resolve()),
+  GoogleAuthProvider: {credential: jest.fn(() => ({providerId: 'google.com'}))},
+  AppleAuthProvider: {credential: jest.fn(() => ({providerId: 'apple.com'}))},
+};
+jest.mock('@react-native-firebase/auth', () => {
+  const fn = jest.fn(() => mockAuth);
+  fn.GoogleAuthProvider = mockAuth.GoogleAuthProvider;
+  fn.AppleAuthProvider = mockAuth.AppleAuthProvider;
+  return {__esModule: true, default: fn};
+});
+
+// ── Google Sign-In ─────────────────────────────────────────────────────────────
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure:       jest.fn(),
+    hasPlayServices: jest.fn(() => Promise.resolve(true)),
+    signIn:          jest.fn(() => Promise.resolve({data: {idToken: 'test-id-token'}})),
+  },
+}));
+
+// ── Apple Auth ─────────────────────────────────────────────────────────────────
+jest.mock('@invertase/react-native-apple-authentication', () => ({
+  __esModule: true,
+  default: {
+    performRequest: jest.fn(() => Promise.resolve({identityToken: 'test-apple-token', nonce: 'nonce'})),
+    Operation: {LOGIN: 'LOGIN'},
+    Scope: {EMAIL: 'EMAIL', FULL_NAME: 'FULL_NAME'},
+  },
 }));
 
 // ── Firebase Crashlytics ───────────────────────────────────────────────────────

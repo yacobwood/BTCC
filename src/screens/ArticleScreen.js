@@ -26,7 +26,7 @@ import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {fetchArticleBySlug, fetchBlacklist} from '../api/client';
 import {parseArticle} from '../api/parsers';
-import {getFCMToken} from '../utils/notifications';
+import auth from '@react-native-firebase/auth';
 import {timeAgo} from '../utils/timeAgo';
 import {containsProfanity} from '../utils/profanityFilter';
 
@@ -586,16 +586,15 @@ export default function ArticleScreen({route, navigation}) {
 
   const onWebViewLoad = async () => {
     if (!articleSlug || !webviewRef.current) return;
-    const [reactionsData, rawReactions, savedName, token, commentsData] = await Promise.all([
+    const [reactionsData, rawReactions, savedName, commentsData] = await Promise.all([
       fetchReactions(articleSlug),
       AsyncStorage.getItem(REACTIONS_KEY).catch(() => null),
       AsyncStorage.getItem(COMMENTER_NAME_KEY).catch(() => null),
-      getFCMToken().catch(() => null),
       fetchComments(articleSlug),
     ]);
 
     // Author identity
-    const myAuthorId = token ? token.slice(0, 8) : `anon_${Math.random().toString(36).slice(2, 6)}`;
+    const myAuthorId = auth().currentUser?.uid || 'anonymous';
     myAuthorIdRef.current = myAuthorId;
     if (savedName) {
       setCommenterName(savedName);
