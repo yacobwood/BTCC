@@ -1,9 +1,9 @@
 {
   "project_info": {
     "project_number": "399066588683",
+    "firebase_url": "https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "btcchub-af77a",
-    "storage_bucket": "btcchub-af77a.firebasestorage.app",
-    "firebase_url": "https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app"
+    "storage_bucket": "btcchub-af77a.firebasestorage.app"
   },
   "client": [
     {
@@ -13,7 +13,20 @@
           "package_name": "com.btccfanhub"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "399066588683-q1mnumsp2sn192a5ss0quo6pvj4ft7fo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.btccfanhub",
+            "certificate_hash": "d2e21f5b067f0a88e6b1e561a747b1e8a41c0272"
+          }
+        },
+        {
+          "client_id": "399066588683-1d1bpqv7616h2f68lg78s4jufl7g528j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE"
@@ -21,7 +34,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399066588683-1d1bpqv7616h2f68lg78s4jufl7g528j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "399066588683-m3mmubcelqqfk8e4e9d2j3tsehe2miph.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.btcchub.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399066588683:android:fb7812c56b8a5c4ca8c90e",
+        "android_client_info": {
+          "package_name": "com.btccfanhub.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "399066588683-1d1bpqv7616h2f68lg78s4jufl7g528j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399066588683-1d1bpqv7616h2f68lg78s4jufl7g528j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "399066588683-m3mmubcelqqfk8e4e9d2j3tsehe2miph.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.btcchub.app"
+              }
+            }
+          ]
         }
       }
     }
