@@ -107,6 +107,7 @@ async function fetchComments(slug) {
           dislikes: parseInt(f.dislikes?.integerValue || 0, 10),
           hidden: f.hidden?.booleanValue || false,
           parentId: f.parentId?.stringValue || null,
+          editedAt: f.editedAt?.stringValue || null,
         };
       })
       .filter(c => !c.hidden)
@@ -154,6 +155,22 @@ async function deleteComment(docId) {
   await fetch(`${FS_BASE}/article_comments/${docId}?key=${API_KEY}`, {method: 'DELETE'});
 }
 
+async function editComment(docId, newText) {
+  await fetch(
+    `${FS_BASE}/article_comments/${docId}?key=${API_KEY}&updateMask.fieldPaths=text&updateMask.fieldPaths=editedAt`,
+    {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        fields: {
+          text:     {stringValue: newText},
+          editedAt: {stringValue: new Date().toISOString()},
+        },
+      }),
+    },
+  );
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
@@ -170,6 +187,8 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   const [nameEditing, setNameEditing] = useState(false);
   const [nameError, setNameError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editingText, setEditingText] = useState('');
   const [commentReactions, setCommentReactions] = useState({});
   const [blacklist, setBlacklist] = useState([]);
   const inputRef = useRef(null);
@@ -383,9 +402,27 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
     setConfirmDeleteId(null);
   };
 
+  const handleEdit = (item) => {
+    setEditingId(item.id);
+    setEditingText(item.text);
+  };
+
+  const handleSaveEdit = () => {
+    const trimmed = editingText.trim();
+    const original = comments.find(c => c.id === editingId)?.text;
+    if (!trimmed || trimmed === original) { setEditingId(null); return; }
+    const id = editingId;
+    setEditingId(null);
+    setComments(prev => prev.map(c =>
+      c.id === id ? {...c, text: trimmed, editedAt: new Date().toISOString()} : c,
+    ));
+    editComment(id, trimmed).catch(() => {});
+  };
+
   const renderComment = ({item}) => {
     const isOwn = item.authorId === myAuthorId;
     const myReaction = commentReactions[item.id] || null;
+    const isEditing = editingId === item.id;
     return (
       <View style={[styles.commentRow, item.isReply && styles.commentReply]}>
         {item.isReply && <View style={styles.replyLine} />}
@@ -395,28 +432,58 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
               {item.authorName}
             </Text>
             <Text style={styles.commentTime}>{timeAgo(item.timestamp)}</Text>
+            {!!item.editedAt && <Text style={styles.commentEdited}>edited</Text>}
           </View>
-          <Text style={styles.commentText}>{item.text}</Text>
-          <View style={styles.commentActions}>
-            {!item.isReply && (
-              <TouchableOpacity onPress={() => { setReplyingTo({id: item.id, authorName: item.authorName}); inputRef.current?.focus(); }} style={styles.commentActionBtn} accessibilityLabel={`Reply to ${item.authorName}`} accessibilityRole="button">
-                <Text style={styles.commentActionText}>Reply</Text>
+          {isEditing ? (
+            <View>
+              <TextInput
+                style={styles.editInput}
+                value={editingText}
+                onChangeText={setEditingText}
+                autoFocus
+                multiline
+                maxLength={500}
+                accessibilityLabel="Edit comment"
+              />
+              <View style={styles.editActions}>
+                <TouchableOpacity onPress={handleSaveEdit} accessibilityLabel="Save edit" accessibilityRole="button">
+                  <Text style={styles.editSave}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setEditingId(null)} accessibilityLabel="Cancel edit" accessibilityRole="button">
+                  <Text style={styles.editCancel}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.commentText}>{item.text}</Text>
+          )}
+          {!isEditing && (
+            <View style={styles.commentActions}>
+              {!item.isReply && (
+                <TouchableOpacity onPress={() => { setReplyingTo({id: item.id, authorName: item.authorName}); inputRef.current?.focus(); }} style={styles.commentActionBtn} accessibilityLabel={`Reply to ${item.authorName}`} accessibilityRole="button">
+                  <Text style={styles.commentActionText}>Reply</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={() => handleCommentReact(item.id, 'likes')} style={styles.commentReactBtn} accessibilityLabel="Like comment" accessibilityRole="button">
+                <Icon name="thumb-up" size={13} color={myReaction === 'likes' ? Colors.yellow : Colors.textSecondary} />
+                {(item.likes || 0) > 0 && <Text style={[styles.commentReactCount, myReaction === 'likes' && {color: Colors.yellow}]}>{item.likes}</Text>}
               </TouchableOpacity>
-            )}
-            <TouchableOpacity onPress={() => handleCommentReact(item.id, 'likes')} style={styles.commentReactBtn} accessibilityLabel="Like comment" accessibilityRole="button">
-              <Icon name="thumb-up" size={13} color={myReaction === 'likes' ? Colors.yellow : Colors.textSecondary} />
-              {(item.likes || 0) > 0 && <Text style={[styles.commentReactCount, myReaction === 'likes' && {color: Colors.yellow}]}>{item.likes}</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleCommentReact(item.id, 'dislikes')} style={styles.commentReactBtn} accessibilityLabel="Dislike comment" accessibilityRole="button">
-              <Icon name="thumb-down" size={13} color={myReaction === 'dislikes' ? '#ff6b6b' : Colors.textSecondary} />
-              {(item.dislikes || 0) > 0 && <Text style={[styles.commentReactCount, myReaction === 'dislikes' && {color: '#ff6b6b'}]}>{item.dislikes}</Text>}
-            </TouchableOpacity>
-            {isOwn && (
-              <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.commentActionBtn} accessibilityLabel="Delete comment" accessibilityRole="button">
-                <Icon name="delete-outline" size={13} color={Colors.textSecondary} />
+              <TouchableOpacity onPress={() => handleCommentReact(item.id, 'dislikes')} style={styles.commentReactBtn} accessibilityLabel="Dislike comment" accessibilityRole="button">
+                <Icon name="thumb-down" size={13} color={myReaction === 'dislikes' ? '#ff6b6b' : Colors.textSecondary} />
+                {(item.dislikes || 0) > 0 && <Text style={[styles.commentReactCount, myReaction === 'dislikes' && {color: '#ff6b6b'}]}>{item.dislikes}</Text>}
               </TouchableOpacity>
-            )}
-          </View>
+              {isOwn && (
+                <>
+                  <TouchableOpacity onPress={() => handleEdit(item)} style={styles.commentActionBtn} accessibilityLabel="Edit comment" accessibilityRole="button">
+                    <Icon name="edit" size={13} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.commentActionBtn} accessibilityLabel="Delete comment" accessibilityRole="button">
+                    <Icon name="delete-outline" size={13} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          )}
         </View>
       </View>
     );
@@ -1010,6 +1077,21 @@ const styles = StyleSheet.create({
   nameErrorText: {color: '#ff6b6b', fontSize: 12, paddingHorizontal: 4, paddingBottom: 4},
   commentReactBtn: {flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 2},
   commentReactCount: {color: Colors.textSecondary, fontSize: 12},
+  commentEdited: {color: Colors.textSecondary, fontSize: 11, fontStyle: 'italic'},
+  editInput: {
+    backgroundColor: Colors.surface,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    color: '#fff',
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+    marginTop: 2,
+  },
+  editActions: {flexDirection: 'row', gap: 16, marginTop: 8},
+  editSave: {color: Colors.yellow, fontSize: 13, fontWeight: '700'},
+  editCancel: {color: Colors.textSecondary, fontSize: 13},
 
   // Replying bar
   replyingBar: {

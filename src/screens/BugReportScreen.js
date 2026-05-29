@@ -11,6 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
+import auth from '@react-native-firebase/auth';
 
 const FS_BASE = 'https://firestore.googleapis.com/v1/projects/btcchub-af77a/databases/(default)/documents';
 const FS_API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
@@ -34,11 +35,12 @@ export default function BugReportScreen({navigation}) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           fields: {
-            category: {stringValue: category},
-            title: {stringValue: title.trim()},
+            category:    {stringValue: category},
+            title:       {stringValue: title.trim()},
             description: {stringValue: description.trim()},
-            steps: {stringValue: steps.trim()},
+            steps:       {stringValue: steps.trim()},
             submittedAt: {stringValue: new Date().toISOString()},
+            uid:         {stringValue: auth().currentUser?.uid || 'anonymous'},
           },
         }),
       });

@@ -265,7 +265,7 @@ All screens use `animation: 'none'` - no page transition animations. This is del
 Combines two feeds: official btcc.net WordPress articles (via REST API) and curated hub posts (from `hub_news.json` on GitHub). Features: search with debounce, pagination, hideDigests filter toggle, real-time Firestore reactions (emoji voting). Hub news requires `hub_news_enabled` feature flag. Article cards show category, date and featured image. Favourite driver highlighting applied when a driver's name appears in article title.
 
 **ArticleScreen** ([src/screens/ArticleScreen.js](src/screens/ArticleScreen.js))
-WebView article reader for btcc.net articles. Adds Firestore comments (with commenter name input and optimistic posting), like/dislike reactions, share button and external link option. Tracks scroll depth for Firebase Analytics. Accepts either a full article object or just a `slug` parameter (fetches by slug if needed).
+WebView article reader for btcc.net articles. Adds Firestore comments (with commenter name input and optimistic posting), like/dislike reactions, share button and external link option. Tracks scroll depth for Firebase Analytics. Accepts either a full article object or just a `slug` parameter (fetches by slug if needed). Signed-in users can edit and delete their own comments - edit uses Firestore REST PATCH with `updateMask.fieldPaths` to update only `text` and `editedAt` without touching reactions. Edited comments show an "edited" label. Delete uses Firestore REST DELETE and removes the item from local state optimistically.
 
 **DigestsScreen** ([src/screens/DigestsScreen.js](src/screens/DigestsScreen.js))
 Lists AI-generated weekly digest articles from hub_news.json filtered to the Weekly Digest category.
@@ -332,7 +332,7 @@ Sortable columns. Medal emojis for top 3. Historical (pre-2004) drivers appear i
 Feature roadmap from `roadmap.json`. Firestore voting per device (one vote per item). Status filter (Planned/In Progress/Done). Idea submission form.
 
 **BugReportScreen** ([src/screens/BugReportScreen.js](src/screens/BugReportScreen.js))
-Feedback form. Category chips: Bug, Crash, UI Issue, Feature Request. Title, description and steps fields. Firestore submission.
+Feedback form. Category chips: Bug, Crash, UI Issue, Feature Request. Title, description and steps fields. Firestore submission. Submissions include the signed-in user's UID (or `'anonymous'` for unauthenticated users) for triage traceability.
 
 **InfoPageScreen** ([src/screens/InfoPageScreen.js](src/screens/InfoPageScreen.js))
 Generic page renderer for `pages.json` content. Sections support `text` (body) and `heading` types. Used for About BTCC, History, Rules and Academy pages.

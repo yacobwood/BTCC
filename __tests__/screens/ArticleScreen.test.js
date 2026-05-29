@@ -852,4 +852,84 @@ describe('CommentsSheet', () => {
       expect(getByText('Failed to post comment. Please try again.')).toBeTruthy();
     });
   });
+
+  // ── Edit and delete own comments ────────────────────────────────────────────
+
+  it('shows edit and delete buttons only on own comments', async () => {
+    const ownRow   = makeCommentRow({id: 'own1',   authorId: 'test-uid-123', text: 'My comment'});
+    const otherRow = makeCommentRow({id: 'other1', authorId: 'someone-else',  text: 'Their comment'});
+    const {getByTestId, getByLabelText, queryByLabelText} = renderArticle();
+    await openComments(getByTestId, {commentRows: [ownRow, otherRow]});
+    await waitFor(() => {
+      expect(getByLabelText('Edit comment')).toBeTruthy();
+      expect(getByLabelText('Delete comment')).toBeTruthy();
+    });
+    // Other author's comment should have neither button
+    expect(queryByLabelText('Edit comment, Their comment')).toBeNull();
+  });
+
+  it('shows inline TextInput and Save/Cancel when edit button is pressed', async () => {
+    const ownRow = makeCommentRow({id: 'own1', authorId: 'test-uid-123', text: 'Original text'});
+    const {getByTestId, getByLabelText, queryByText} = renderArticle();
+    await openComments(getByTestId, {commentRows: [ownRow]});
+    await waitFor(() => getByLabelText('Edit comment'));
+    fireEvent.press(getByLabelText('Edit comment'));
+    await waitFor(() => {
+      expect(getByLabelText('Edit comment')).toBeTruthy(); // TextInput label
+      expect(queryByText('Save')).toBeTruthy();
+      expect(queryByText('Cancel')).toBeTruthy();
+    });
+  });
+
+  it('calls Firestore PATCH with new text when edit is saved', async () => {
+    const ownRow = makeCommentRow({id: 'editme', authorId: 'test-uid-123', text: 'Old text'});
+    const fetchMock = jest.fn().mockImplementation((url, opts) => {
+      if (url.includes(':runQuery'))
+        return Promise.resolve({ok: true, json: () => Promise.resolve([ownRow])});
+      if (url.includes('article_comments') && opts?.method === 'PATCH')
+        return Promise.resolve({ok: true, json: () => Promise.resolve({})});
+      return Promise.resolve({ok: true, json: () => Promise.resolve({fields: {likes: {integerValue: '0'}, dislikes: {integerValue: '0'}}})});
+    });
+    global.fetch = fetchMock;
+    const {getByTestId, getByLabelText} = renderArticle();
+    await openComments(getByTestId, {commentRows: [ownRow], fetchMock});
+    await waitFor(() => getByLabelText('Edit comment'));
+    fireEvent.press(getByLabelText('Edit comment'));
+    await waitFor(() => getByLabelText('Edit comment')); // TextInput
+    fireEvent.changeText(getByLabelText('Edit comment'), 'Updated text');
+    fireEvent.press(getByLabelText('Save edit'));
+    await waitFor(() => {
+      const patchCall = fetchMock.mock.calls.find(
+        ([url, opts]) => typeof url === 'string' && url.includes('article_comments/editme') && opts?.method === 'PATCH',
+      );
+      expect(patchCall).toBeTruthy();
+      const body = JSON.parse(patchCall[1].body);
+      expect(body.fields.text.stringValue).toBe('Updated text');
+      expect(body.fields.editedAt.stringValue).toBeTruthy();
+    });
+  });
+
+  it('shows edited tag on comments that have an editedAt field', async () => {
+    const editedRow = {
+      document: {
+        name: 'projects/btcchub-af77a/databases/(default)/documents/article_comments/edited1',
+        fields: {
+          text:       {stringValue: 'Edited comment text'},
+          authorId:   {stringValue: 'someone'},
+          authorName: {stringValue: 'A Fan'},
+          timestamp:  {stringValue: '2026-04-19T10:00:00Z'},
+          likes:      {integerValue: '0'},
+          dislikes:   {integerValue: '0'},
+          hidden:     {booleanValue: false},
+          parentId:   {nullValue: null},
+          editedAt:   {stringValue: '2026-04-19T11:00:00Z'},
+        },
+      },
+    };
+    const {getByTestId, getByText} = renderArticle();
+    await openComments(getByTestId, {commentRows: [editedRow]});
+    await waitFor(() => {
+      expect(getByText('edited')).toBeTruthy();
+    });
+  });
 });
