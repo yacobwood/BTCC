@@ -158,7 +158,7 @@ export default function NewsScreen({navigation}) {
   }, [searchQuery]);
 
   const openArticle = article => {
-    navigation.navigate('Article', {article});
+    navigation.navigate('Article', {article, trafficSource: 'organic'});
   };
 
   // Hooks must be declared before any early returns (Rules of Hooks).

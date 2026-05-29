@@ -4,7 +4,7 @@ let _fa = null;
 const fa = () => { if (!_fa) _fa = getAnalytics(); return _fa; };
 
 export const Analytics = {
-  screen: (name) => logEvent(fa(), 'screen_view', {screen_name: name, firebase_screen_class: name.split(':')[0]}),
+  screen: (name, extra) => logEvent(fa(), 'screen_view', {screen_name: name, firebase_screen_class: name.split(':')[0], ...extra}),
 
   articleClicked: (title, position, source, trafficSource = 'organic') => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position, ...(source ? {source} : {}), traffic_source: trafficSource}),
   articleShared: (title) => logEvent(fa(),'share', {content_type: 'article', item_id: title?.substring(0, 100) || ''}),

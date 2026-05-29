@@ -50,7 +50,7 @@ export function navigateFromData(navigationRef, data) {
           index: 0,
           routes: [{
             name: 'News',
-            state: {routes: [{name: 'NewsFeed'}, {name: 'Article', params: {slug}}], index: 1},
+            state: {routes: [{name: 'NewsFeed'}, {name: 'Article', params: {slug, trafficSource: 'notification'}}], index: 1},
           }],
         }),
       );
@@ -113,7 +113,7 @@ export function navigateFromData(navigationRef, data) {
                 index: 0,
                 routes: [{
                   name: 'News',
-                  state: {routes: [{name: 'NewsFeed'}, {name: 'Article', params: {article}}], index: 1},
+                  state: {routes: [{name: 'NewsFeed'}, {name: 'Article', params: {article, trafficSource: 'notification'}}], index: 1},
                 }],
               }),
             );
@@ -134,7 +134,7 @@ export function navigateFromData(navigationRef, data) {
                 routes: [{
                   name: 'News',
                   state: {
-                    routes: [{name: 'NewsFeed'}, {name: 'Digests'}, {name: 'Article', params: {article}}],
+                    routes: [{name: 'NewsFeed'}, {name: 'Digests'}, {name: 'Article', params: {article, trafficSource: 'notification'}}],
                     index: 2,
                   },
                 }],

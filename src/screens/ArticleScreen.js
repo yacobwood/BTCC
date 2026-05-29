@@ -650,7 +650,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 export default function ArticleScreen({route, navigation}) {
-  const {article: articleParam, slug} = route.params;
+  const {article: articleParam, slug, trafficSource} = route.params;
   const validParam = articleParam && articleParam.content !== undefined ? articleParam : null;
   const [article, setArticle] = useState(validParam || null);
   const webviewRef = useRef(null);
@@ -675,7 +675,7 @@ export default function ArticleScreen({route, navigation}) {
   }, []);
 
   useEffect(() => {
-    if (article) Analytics.screen('article:' + article.title?.substring(0, 50));
+    if (article) Analytics.screen('article:' + article.title?.substring(0, 50), trafficSource ? {traffic_source: trafficSource} : undefined);
   }, [article]);
 
   useEffect(() => {

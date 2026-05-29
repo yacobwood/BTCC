@@ -77,7 +77,7 @@ export default function DigestsScreen({navigation}) {
     markRead(article.id).then(() =>
       setReadIds(prev => new Set([...prev, String(article.id)])),
     );
-    navigation.navigate('Article', {article});
+    navigation.navigate('Article', {article, trafficSource: 'organic'});
   };
 
   const handleMarkAllRead = () => {
