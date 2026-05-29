@@ -12,6 +12,7 @@
       },
       "messages": {
         ".read": true,
+        ".indexOn": ["timestamp"],
         "$msgId": {
           ".write": "auth != null",
           ".validate": "!newData.exists() || newData.hasChildren(['text', 'authorId', 'authorName', 'timestamp', 'flagCount', 'hidden'])",
