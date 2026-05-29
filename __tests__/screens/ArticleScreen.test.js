@@ -668,7 +668,7 @@ describe('CommentsSheet', () => {
 
     await waitFor(() => {
       const cfCall = global.fetch.mock.calls.find(
-        ([url]) => typeof url === 'string' && url.includes('commentReact'),
+        ([url]) => typeof url === 'string' && url.includes('/commentReact'),
       );
       expect(cfCall).toBeTruthy();
       expect(cfCall[1].method).toBe('POST');
@@ -688,7 +688,7 @@ describe('CommentsSheet', () => {
 
     await waitFor(() => {
       const cfCall = global.fetch.mock.calls.find(
-        ([url]) => typeof url === 'string' && url.includes('commentReact'),
+        ([url]) => typeof url === 'string' && url.includes('/commentReact'),
       );
       expect(cfCall).toBeTruthy();
       expect(JSON.parse(cfCall[1].body)).toEqual({commentId: 'cmt99', prev: null, next: 'dislikes'});
@@ -726,7 +726,7 @@ describe('CommentsSheet', () => {
 
     await waitFor(() => {
       const cfCall = global.fetch.mock.calls.find(
-        ([url]) => typeof url === 'string' && url.includes('commentReact'),
+        ([url]) => typeof url === 'string' && url.includes('/commentReact'),
       );
       expect(cfCall).toBeTruthy();
       expect(JSON.parse(cfCall[1].body)).toEqual({commentId: 'cmt1', prev: 'likes', next: null});
@@ -745,7 +745,7 @@ describe('CommentsSheet', () => {
 
     await waitFor(() => {
       const cfCalls = global.fetch.mock.calls.filter(
-        ([url]) => typeof url === 'string' && url.includes('commentReact'),
+        ([url]) => typeof url === 'string' && url.includes('/commentReact'),
       );
       expect(cfCalls).toHaveLength(1);
       expect(JSON.parse(cfCalls[0][1].body)).toEqual({commentId: 'cmt1', prev: 'likes', next: 'dislikes'});

@@ -11,11 +11,11 @@ import CachedImage, {prefetchImages} from '../../src/components/CachedImage';
 const WP_URI  = 'https://www.btcc.net/wp-content/uploads/2026/photo.jpg';
 const EXT_URI = 'https://example.com/image.jpg';
 
-// CachedImage renders <Image source={{uri, cache:'force-cache'}} onError={...}>
-// We identify it by the unique cache:'force-cache' prop in the JSON tree.
+// CachedImage renders <Image source={{uri}} onError={...}>
+// We identify it by type and the presence of a uri source prop.
 function findCachedImgNode(json) {
   if (!json) return null;
-  if (json.type === 'Image' && json.props?.source?.cache === 'force-cache') return json;
+  if (json.type === 'Image' && json.props?.source?.uri) return json;
   for (const child of json.children || []) {
     const found = findCachedImgNode(child);
     if (found) return found;
@@ -28,12 +28,34 @@ function getCachedImg({toJSON}) {
 }
 
 describe('CachedImage', () => {
-  it('renders an Image with force-cache and the given uri', () => {
+  it('renders an Image with the given uri', () => {
     const tree = render(<CachedImage uri={WP_URI} style={{width: 100, height: 100}} />);
     const node = getCachedImg(tree);
     expect(node).toBeTruthy();
     expect(node.props.source.uri).toBe(WP_URI);
-    expect(node.props.source.cache).toBe('force-cache');
+    expect(node.props.source.cache).toBeUndefined();
+  });
+
+  it('does not include cache property on source (removed to prevent Android image reload)', () => {
+    const tree = render(<CachedImage uri={WP_URI} style={{width: 100, height: 100}} />);
+    const node = getCachedImg(tree);
+    expect(node.props.source).not.toHaveProperty('cache');
+  });
+
+  it('source object reference is stable across re-renders when uri unchanged', () => {
+    // A parent with changing state forces CachedImage to re-render without any of its
+    // own props changing. On Android, a new source object reference triggers a full
+    // image reload cycle even when the URI is identical — this test catches that regression.
+    function Wrapper({count}) {
+      return <CachedImage uri={WP_URI} style={{width: 100}} />;
+    }
+    const {rerender, UNSAFE_getAllByType} = render(<Wrapper count={0} />);
+    const source1 = UNSAFE_getAllByType(Image)[0].props.source;
+
+    rerender(<Wrapper count={1} />);
+    const source2 = UNSAFE_getAllByType(Image)[0].props.source;
+
+    expect(source1).toBe(source2);
   });
 
   it('shows the fallback (no image element) when uri is null', () => {

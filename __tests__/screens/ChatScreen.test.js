@@ -205,14 +205,14 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(getByText(/Gordon/)).toBeTruthy());
   });
 
-  it('renders the author ID suffix as last 4 chars', async () => {
-    const {getByText} = renderChat();
+  it('does not render an author ID suffix — names are unique so no disambiguation needed', async () => {
+    const {queryByText} = renderChat();
     await act(async () => {
       triggerMessages([
         {id: '1', text: 'Hi!', authorName: 'Alice', authorId: 'abcd1234', timestamp: 1000, flagCount: 0, hidden: false},
       ]);
     });
-    await waitFor(() => expect(getByText(' #1234')).toBeTruthy());
+    await waitFor(() => expect(queryByText(/ #[a-zA-Z0-9]{4}/)).toBeNull());
   });
 
   it('renders a relative timestamp for each message', async () => {

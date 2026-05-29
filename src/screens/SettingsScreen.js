@@ -10,6 +10,10 @@ import {
   Alert,
   Platform,
   ActivityIndicator,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Pressable,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -23,7 +27,6 @@ import {getFCMToken} from '../utils/notifications';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getStableDeviceId} from '../utils/deviceId';
 import {useAuth} from '../store/auth';
 
 export default function SettingsScreen({navigation}) {
@@ -31,32 +34,72 @@ export default function SettingsScreen({navigation}) {
   const {useKm, toggleUnits} = useUnits();
   const {podcasts_enabled, debug_mode, live_chat, broadcaster_override} = useFeatureFlags();
   const detectedBroadcaster = useBroadcaster();
-  const {user, isAnonymous, providerIds, signInWithGoogle, signInWithApple, signOut} = useAuth();
+  const {user, isAnonymous, providerIds, registerWithEmail, signInWithEmail, signOut} = useAuth();
   const [fcmToken, setFcmToken] = useState('');
   const [copiedFcm, setCopiedFcm] = useState(false);
-  const [stableId, setStableId] = useState('');
   const [copiedStableId, setCopiedStableId] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const [authModalVisible, setAuthModalVisible] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authConfirm, setAuthConfirm] = useState('');
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     getFCMToken().then(tok => { if (tok) setFcmToken(tok); }).catch(() => {});
-    getStableDeviceId().then(id => { if (id) setStableId(id); }).catch(() => {});
   }, []);
 
   const copyStableId = () => {
-    if (!stableId) return;
-    Clipboard.setString(stableId);
+    if (!user?.uid) return;
+    Clipboard.setString(user.uid);
     setCopiedStableId(true);
     setTimeout(() => setCopiedStableId(false), 2000);
   };
 
-  const handleSignIn = async (provider) => {
+  const openAuthModal = () => {
+    setAuthEmail('');
+    setAuthPassword('');
+    setAuthConfirm('');
+    setAuthError('');
+    setAuthMode('login');
+    setAuthModalVisible(true);
+  };
+
+  const friendlyAuthError = (code) => {
+    switch (code) {
+      case 'auth/email-already-in-use':    return 'An account with that email already exists. Try logging in instead.';
+      case 'auth/invalid-email':           return 'That doesn\'t look like a valid email address.';
+      case 'auth/weak-password':           return 'Password must be at least 6 characters.';
+      case 'auth/wrong-password':
+      case 'auth/user-not-found':
+      case 'auth/invalid-credential':      return 'Incorrect email or password.';
+      case 'auth/too-many-requests':       return 'Too many attempts. Please wait a moment and try again.';
+      case 'auth/network-request-failed':  return 'Check your internet connection and try again.';
+      default:                             return 'Something went wrong. Please try again.';
+    }
+  };
+
+  const handleAuthSubmit = async () => {
+    if (!authEmail.trim() || !authPassword) {
+      setAuthError('Please enter your email and password.');
+      return;
+    }
+    if (authMode === 'register' && authPassword !== authConfirm) {
+      setAuthError('Passwords don\'t match.');
+      return;
+    }
     setAuthLoading(true);
+    setAuthError('');
     try {
-      if (provider === 'google') await signInWithGoogle();
-      else if (provider === 'apple') await signInWithApple();
+      if (authMode === 'register') {
+        await registerWithEmail(authEmail.trim(), authPassword);
+      } else {
+        await signInWithEmail(authEmail.trim(), authPassword);
+      }
+      setAuthModalVisible(false);
     } catch (e) {
-      Alert.alert('Sign in failed', e?.message || 'Please try again.');
+      setAuthError(friendlyAuthError(e?.code));
     } finally {
       setAuthLoading(false);
     }
@@ -331,24 +374,10 @@ export default function SettingsScreen({navigation}) {
         {isAnonymous ? (
           <>
             <Text style={styles.settingDesc}>Sign in to sync your preferences and chat identity across devices.</Text>
-            <View style={{marginTop: 12, gap: 8}}>
-              {authLoading ? (
-                <ActivityIndicator color={Colors.yellow} />
-              ) : (
-                <>
-                  <TouchableOpacity style={styles.authBtn} onPress={() => handleSignIn('google')} accessibilityRole="button">
-                    <Icon name="login" size={16} color={Colors.yellow} />
-                    <Text style={styles.authBtnText}>Sign in with Google</Text>
-                  </TouchableOpacity>
-                  {Platform.OS === 'ios' && (
-                    <TouchableOpacity style={styles.authBtn} onPress={() => handleSignIn('apple')} accessibilityRole="button">
-                      <Icon name="apple" size={16} color={Colors.yellow} />
-                      <Text style={styles.authBtnText}>Sign in with Apple</Text>
-                    </TouchableOpacity>
-                  )}
-                </>
-              )}
-            </View>
+            <TouchableOpacity style={[styles.authBtn, {marginTop: 12}]} onPress={openAuthModal} accessibilityRole="button">
+              <Icon name="login" size={16} color={Colors.yellow} />
+              <Text style={styles.authBtnText}>Register or Log in</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -362,11 +391,88 @@ export default function SettingsScreen({navigation}) {
           </View>
         )}
 
+        <Modal
+          visible={authModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setAuthModalVisible(false)}>
+          <KeyboardAvoidingView
+            style={styles.modalOverlay}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => setAuthModalVisible(false)} />
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {authMode === 'register' ? 'Create account' : 'Log in'}
+                </Text>
+                <Pressable onPress={() => setAuthModalVisible(false)} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
+                  <Icon name="close" size={22} color={Colors.textSecondary} />
+                </Pressable>
+              </View>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Email"
+                placeholderTextColor={Colors.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={authEmail}
+                onChangeText={v => { setAuthEmail(v); setAuthError(''); }}
+              />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Password"
+                placeholderTextColor={Colors.textSecondary}
+                secureTextEntry
+                value={authPassword}
+                onChangeText={v => { setAuthPassword(v); setAuthError(''); }}
+                onSubmitEditing={authMode === 'login' ? handleAuthSubmit : undefined}
+                returnKeyType={authMode === 'login' ? 'done' : 'next'}
+              />
+              {authMode === 'register' && (
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Confirm password"
+                  placeholderTextColor={Colors.textSecondary}
+                  secureTextEntry
+                  value={authConfirm}
+                  onChangeText={v => { setAuthConfirm(v); setAuthError(''); }}
+                  onSubmitEditing={handleAuthSubmit}
+                  returnKeyType="done"
+                />
+              )}
+              {!!authError && <Text style={styles.modalError}>{authError}</Text>}
+              {authLoading ? (
+                <ActivityIndicator color={Colors.yellow} style={{marginTop: 16}} />
+              ) : (
+                <TouchableOpacity style={styles.modalSubmitBtn} onPress={handleAuthSubmit} accessibilityRole="button">
+                  <Text style={styles.modalSubmitText}>
+                    {authMode === 'register' ? 'Create account' : 'Log in'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <View style={styles.modalDivider}>
+                <View style={styles.modalDividerLine} />
+                <Text style={styles.modalDividerText}>or</Text>
+                <View style={styles.modalDividerLine} />
+              </View>
+              <TouchableOpacity
+                onPress={() => { setAuthMode(m => m === 'login' ? 'register' : 'login'); setAuthError(''); }}
+                accessibilityRole="button"
+                style={styles.modalSecondaryBtn}>
+                <Text style={styles.modalSecondaryText}>
+                  {authMode === 'login' ? 'Register' : 'Log in'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+
         <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
-        {!!stableId && (
-          <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy preview device ID">
-            <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `Preview ID: ${stableId.slice(0, 16)}…`}</Text>
+        {!!user?.uid && (
+          <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy user ID">
+            <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `User ID: ${user.uid.slice(0, 16)}…`}</Text>
           </TouchableOpacity>
         )}
         {!!fcmToken && (
@@ -539,4 +645,18 @@ const styles = StyleSheet.create({
   tokenText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 2},
   authBtn: {flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: Colors.surface, borderRadius: 8, alignSelf: 'flex-start'},
   authBtnText: {color: Colors.yellow, fontSize: 14, fontWeight: '600'},
+  modalOverlay: {flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)'},
+  modalCard: {width: '85%', backgroundColor: Colors.surface, borderRadius: 12, padding: 24},
+  modalHeader: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20},
+  modalTitle: {color: Colors.textPrimary, fontSize: 18, fontWeight: '700'},
+  modalInput: {backgroundColor: Colors.background, color: Colors.textPrimary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, marginBottom: 12, borderWidth: 1, borderColor: Colors.outline},
+  modalError: {color: '#ff6b6b', fontSize: 13, marginBottom: 4},
+  modalSubmitBtn: {marginTop: 8, backgroundColor: Colors.yellow, borderRadius: 8, paddingVertical: 12, alignItems: 'center'},
+  modalSubmitText: {color: Colors.background, fontWeight: '700', fontSize: 15},
+  modalToggleText: {color: Colors.textSecondary, fontSize: 13},
+  modalDivider: {flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 4},
+  modalDividerLine: {flex: 1, height: 1, backgroundColor: Colors.outline},
+  modalDividerText: {color: Colors.textSecondary, fontSize: 13, marginHorizontal: 10},
+  modalSecondaryBtn: {marginTop: 8, borderWidth: 1, borderColor: Colors.outline, borderRadius: 10, paddingVertical: 13, alignItems: 'center'},
+  modalSecondaryText: {color: Colors.textPrimary, fontSize: 15, fontWeight: '600'},
 });

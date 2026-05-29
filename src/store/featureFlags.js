@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useState, useEffect} from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getStableDeviceId} from '../utils/deviceId';
+import auth from '@react-native-firebase/auth';
 
 const FLAGS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/flags.json';
 const FLAGS_CACHE_KEY = 'feature_flags_cache';
@@ -47,12 +47,10 @@ export function FeatureFlagsProvider({children}) {
         // Apply global flags immediately  -  don't block on token lookup
         setFlags(prev => ({...prev, ...globalFlags}));
 
-        // Apply per-device overrides if this device has any (best-effort)
+        // Apply per-user overrides keyed by Firebase Auth UID
         try {
-          const deviceId = await getStableDeviceId();
-          if (deviceId && overrides[deviceId]) {
-            setFlags(prev => ({...prev, ...overrides[deviceId]}));
-          }
+          const uid = auth().currentUser?.uid;
+          if (uid && overrides[uid]) setFlags(prev => ({...prev, ...overrides[uid]}));
         } catch {}
         // Cache global flags only (device overrides are ephemeral)
         AsyncStorage.setItem(FLAGS_CACHE_KEY, JSON.stringify(globalFlags)).catch(() => {});

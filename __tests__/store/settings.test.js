@@ -4,6 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
 import {SettingsProvider, useSettings} from '../../src/store/settings';
 
+jest.mock('../../src/store/auth', () => ({
+  useAuth: jest.fn(() => ({user: null, isAnonymous: true})),
+}));
+jest.mock('../../src/utils/userProfile', () => ({
+  saveProfile: jest.fn(() => Promise.resolve()),
+}));
+
 // All leaf keys that map to FCM topics
 const LEAF_TOPICS = {
   newsAlerts:        'news_alerts',
@@ -408,6 +415,98 @@ describe('SettingsProvider', () => {
       let getHook;
       await act(async () => { getHook = renderProvider(); });
       expect(getHook().settings.spoilerFreeExpiry).toBe(isoDate);
+    });
+  });
+
+  describe('Firestore live sync', () => {
+    beforeEach(() => {
+      const {saveProfile} = require('../../src/utils/userProfile');
+      saveProfile.mockClear();
+    });
+
+    it('calls saveProfile with new value when logged-in user changes a synced setting', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('newsAlerts', false);
+      });
+
+      expect(saveProfile).toHaveBeenCalledWith('test-uid', {newsAlerts: false});
+    });
+
+    it('calls saveProfile for preRace parent key (it is synced)', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('preRace', false);
+      });
+
+      expect(saveProfile).toHaveBeenCalledWith('test-uid', {preRace: false});
+    });
+
+    it('does not call saveProfile for hubPreview (not synced)', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('hubPreview', true);
+      });
+
+      expect(saveProfile).not.toHaveBeenCalled();
+    });
+
+    it('does not call saveProfile for chatFab (not synced)', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('chatFab', false);
+      });
+
+      expect(saveProfile).not.toHaveBeenCalled();
+    });
+
+    it('does not call saveProfile when user is anonymous', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: null, isAnonymous: true});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('newsAlerts', false);
+      });
+
+      expect(saveProfile).not.toHaveBeenCalled();
     });
   });
 });

@@ -27,6 +27,8 @@ import {Analytics} from '../utils/analytics';
 import {fetchArticleBySlug, fetchBlacklist} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import auth from '@react-native-firebase/auth';
+import {useAuth} from '../store/auth';
+import {claimUsername, validateUsername, loadProfile, saveProfile} from '../utils/userProfile';
 import {timeAgo} from '../utils/timeAgo';
 import {containsProfanity} from '../utils/profanityFilter';
 
@@ -157,6 +159,7 @@ async function deleteComment(docId) {
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 
 function CommentsSheet({visible, onClose, comments, setComments, articleSlug, myAuthorId, commenterName, setCommenterName}) {
+  const {user} = useAuth();
   const insets = useSafeAreaInsets();
   const [input, setInput] = useState('');
   const [replyingTo, setReplyingTo] = useState(null); // {id, authorName}
@@ -165,6 +168,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   const [pendingSubmit, setPendingSubmit] = useState(false);
   const [inputError, setInputError] = useState('');
   const [nameEditing, setNameEditing] = useState(false);
+  const [nameError, setNameError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
   const [blacklist, setBlacklist] = useState([]);
@@ -175,11 +179,20 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   }, []);
 
   useEffect(() => {
-    if (visible) {
-      AsyncStorage.getItem(COMMENT_REACTIONS_KEY).then(raw => {
-        setCommentReactions(raw ? JSON.parse(raw) : {});
-      }).catch(() => {});
-    }
+    if (!visible) return;
+    (async () => {
+      const raw = await AsyncStorage.getItem(COMMENT_REACTIONS_KEY).catch(() => null);
+      let reactions = raw ? JSON.parse(raw) : {};
+      const currentUser = auth().currentUser;
+      if (currentUser && !currentUser.isAnonymous) {
+        const profile = await loadProfile(currentUser.uid).catch(() => null);
+        if (profile?.commentReactions) {
+          reactions = {...reactions, ...profile.commentReactions};
+          AsyncStorage.setItem(COMMENT_REACTIONS_KEY, JSON.stringify(reactions)).catch(() => {});
+        }
+      }
+      setCommentReactions(reactions);
+    })();
   }, [visible]);
 
   const translateY = useRef(new Animated.Value(0)).current;
@@ -216,8 +229,22 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
 
   const saveName = async (name) => {
     const trimmed = name.trim() || `Fan #${(myAuthorId || 'xxxx').slice(-4)}`;
+
+    if (name.trim() && user && !user.isAnonymous) {
+      const validationError = validateUsername(trimmed);
+      if (validationError) {
+        setNameError(validationError);
+        return null;
+      }
+      const result = await claimUsername(user.uid, trimmed, commenterName || null);
+      if (result === 'taken') { setNameError('That name is already taken'); return null; }
+      if (result === 'error') { setNameError('Could not save name. Please try again.'); return null; }
+    } else {
+      await AsyncStorage.setItem(COMMENTER_NAME_KEY, trimmed);
+    }
+
+    setNameError('');
     setCommenterName(trimmed);
-    await AsyncStorage.setItem(COMMENTER_NAME_KEY, trimmed);
     return trimmed;
   };
 
@@ -270,6 +297,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
 
   const handleNameSet = async () => {
     const name = await saveName(nameInput);
+    if (name === null) return;
     setShowNamePrompt(false);
     setNameEditing(false);
     if (pendingSubmit && input.trim()) {
@@ -315,6 +343,8 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
       if (newType) stored[commentId] = newType;
       else delete stored[commentId];
       await AsyncStorage.setItem(COMMENT_REACTIONS_KEY, JSON.stringify(stored));
+      const uid = auth().currentUser?.uid;
+      if (uid) saveProfile(uid, {commentReactions: stored}).catch(() => {});
       await reactToComment(commentId, myPrev, newType);
     } catch {
       // Revert optimistic updates on failure
@@ -356,14 +386,13 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   const renderComment = ({item}) => {
     const isOwn = item.authorId === myAuthorId;
     const myReaction = commentReactions[item.id] || null;
-    const idSuffix = item.authorId ? ` #${item.authorId.slice(-4)}` : '';
     return (
       <View style={[styles.commentRow, item.isReply && styles.commentReply]}>
         {item.isReply && <View style={styles.replyLine} />}
         <View style={styles.commentBody}>
           <View style={styles.commentMeta}>
             <Text style={[styles.commentAuthor, isOwn && styles.commentAuthorOwn]}>
-              {item.authorName}<Text style={styles.commentAuthorId}>{idSuffix}</Text>
+              {item.authorName}
             </Text>
             <Text style={styles.commentTime}>{timeAgo(item.timestamp)}</Text>
           </View>
@@ -409,26 +438,29 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
           {/* Header */}
           <View style={styles.sheetHeader}>
             {nameEditing ? (
-              <View style={styles.nameEditRow}>
-                <TextInput
-                  style={styles.nameEditInput}
-                  value={nameInput}
-                  onChangeText={setNameInput}
-                  placeholder="Your display name"
-                  placeholderTextColor={Colors.textSecondary}
-                  autoFocus
-                  maxLength={30}
-                  returnKeyType="done"
-                  onSubmitEditing={handleNameSet}
-                  accessibilityLabel="Display name"
-                />
-                <TouchableOpacity onPress={handleNameSet} style={styles.nameEditSave} accessibilityLabel="Save name" accessibilityRole="button">
-                  <Text style={styles.nameEditSaveText}>Save</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setNameEditing(false); setNameInput(''); }} accessibilityLabel="Cancel name edit" accessibilityRole="button">
-                  <Icon name="close" size={18} color={Colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
+              <>
+                <View style={styles.nameEditRow}>
+                  <TextInput
+                    style={[styles.nameEditInput, nameError ? {borderColor: '#ff6b6b'} : null]}
+                    value={nameInput}
+                    onChangeText={v => { setNameInput(v); if (nameError) setNameError(''); }}
+                    placeholder="Your display name"
+                    placeholderTextColor={Colors.textSecondary}
+                    autoFocus
+                    maxLength={20}
+                    returnKeyType="done"
+                    onSubmitEditing={handleNameSet}
+                    accessibilityLabel="Display name"
+                  />
+                  <TouchableOpacity onPress={handleNameSet} style={styles.nameEditSave} accessibilityLabel="Save name" accessibilityRole="button">
+                    <Text style={styles.nameEditSaveText}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { setNameEditing(false); setNameInput(''); setNameError(''); }} accessibilityLabel="Cancel name edit" accessibilityRole="button">
+                    <Icon name="close" size={18} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+                {nameError ? <Text style={styles.nameErrorText}>{nameError}</Text> : null}
+              </>
             ) : (
               <>
                 <Text style={styles.sheetTitle}>Comments ({(comments || []).length})</Text>
@@ -474,17 +506,18 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
             <View style={styles.namePrompt}>
               <Text style={styles.namePromptTitle}>Choose a display name</Text>
               <TextInput
-                style={styles.nameInput}
+                style={[styles.nameInput, nameError ? {borderColor: '#ff6b6b'} : null]}
                 value={nameInput}
-                onChangeText={setNameInput}
+                onChangeText={v => { setNameInput(v); if (nameError) setNameError(''); }}
                 placeholder={`Fan #${(myAuthorId || 'xxxx').slice(-4)}`}
                 placeholderTextColor={Colors.textSecondary}
                 autoFocus
-                maxLength={30}
+                maxLength={20}
                 returnKeyType="done"
                 onSubmitEditing={handleNameSet}
                 accessibilityLabel="Choose a display name"
               />
+              {nameError ? <Text style={styles.nameErrorText}>{nameError}</Text> : null}
               <View style={styles.namePromptBtns}>
                 <TouchableOpacity onPress={handleNameSkip} style={styles.nameSkipBtn} accessibilityLabel="Skip name prompt" accessibilityRole="button">
                   <Text style={styles.nameSkipText}>Skip</Text>
@@ -594,15 +627,30 @@ export default function ArticleScreen({route, navigation}) {
     ]);
 
     // Author identity
-    const myAuthorId = auth().currentUser?.uid || 'anonymous';
+    const currentUser = auth().currentUser;
+    const myAuthorId = currentUser?.uid || 'anonymous';
     myAuthorIdRef.current = myAuthorId;
-    if (savedName) {
-      setCommenterName(savedName);
-    }
-    // Don't set commenterName yet if null  -  name prompt will handle it on first comment
 
-    // Reactions
-    const stored = rawReactions ? JSON.parse(rawReactions) : {};
+    // Migrate pre-uniqueness names: claim in Firestore; clear if already taken by someone else
+    let resolvedName = savedName;
+    if (savedName && currentUser && !currentUser.isAnonymous && !savedName.startsWith('Fan #')) {
+      const result = await claimUsername(currentUser.uid, savedName, null);
+      if (result === 'taken') {
+        await AsyncStorage.removeItem(COMMENTER_NAME_KEY).catch(() => {});
+        resolvedName = null;
+      }
+    }
+    if (resolvedName) setCommenterName(resolvedName);
+
+    // Reactions — merge local AsyncStorage with Firestore profile (Firestore wins)
+    let stored = rawReactions ? JSON.parse(rawReactions) : {};
+    if (currentUser && !currentUser.isAnonymous) {
+      const profile = await loadProfile(currentUser.uid).catch(() => null);
+      if (profile?.articleReactions) {
+        stored = {...stored, ...profile.articleReactions};
+        AsyncStorage.setItem(REACTIONS_KEY, JSON.stringify(stored)).catch(() => {});
+      }
+    }
     const mine = stored[articleSlug] || null;
     webviewRef.current.injectJavaScript(`
       updateReactions(${reactionsData.likes}, ${reactionsData.dislikes}, ${JSON.stringify(mine)});
@@ -633,6 +681,8 @@ export default function ArticleScreen({route, navigation}) {
         if (type) await submitReaction(articleSlug, type, 1);
         if (type) { stored[articleSlug] = type; } else { delete stored[articleSlug]; }
         await AsyncStorage.setItem(REACTIONS_KEY, JSON.stringify(stored));
+        const uid = auth().currentUser?.uid;
+        if (uid) saveProfile(uid, {articleReactions: stored}).catch(() => {});
       } catch {
         if (webviewRef.current) {
           webviewRef.current.injectJavaScript(`revertReaction(${JSON.stringify(type)}, ${JSON.stringify(prev)}); true;`);
@@ -957,7 +1007,7 @@ const styles = StyleSheet.create({
   commentActions: {flexDirection: 'row', gap: 14, marginTop: 6},
   commentActionBtn: {paddingVertical: 2},
   commentActionText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '600'},
-  commentAuthorId: {color: Colors.textSecondary, fontWeight: '400', fontSize: 12},
+  nameErrorText: {color: '#ff6b6b', fontSize: 12, paddingHorizontal: 4, paddingBottom: 4},
   commentReactBtn: {flexDirection: 'row', alignItems: 'center', gap: 3, paddingVertical: 2},
   commentReactCount: {color: Colors.textSecondary, fontSize: 12},
 

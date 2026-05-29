@@ -19,18 +19,20 @@ const PROJECT_ID = 'btcchub-af77a';
 const API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
 const FS_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-async function fetchVoteCount(itemId) {
+async function fetchVoteData(itemId, uid) {
   try {
     const r = await fetch(`${FS_BASE}/roadmap_votes/${itemId}?key=${API_KEY}`);
-    if (!r.ok) return 0;
+    if (!r.ok) return {count: 0, hasVoted: false};
     const doc = await r.json();
-    return parseInt(doc?.fields?.count?.integerValue || 0, 10);
+    const count = parseInt(doc?.fields?.count?.integerValue || 0, 10);
+    const voters = (doc?.fields?.voters?.arrayValue?.values || []).map(v => v.stringValue);
+    return {count, hasVoted: !!uid && voters.includes(uid)};
   } catch {
-    return 0;
+    return {count: 0, hasVoted: false};
   }
 }
 
-async function submitVote(itemId, deviceId) {
+async function submitVote(itemId, uid) {
   const res = await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -43,7 +45,7 @@ async function submitVote(itemId, deviceId) {
               {fieldPath: 'count', increment: {integerValue: '1'}},
               {
                 fieldPath: 'voters',
-                appendMissingElements: {values: [{stringValue: deviceId}]},
+                appendMissingElements: {values: [{stringValue: uid}]},
               },
             ],
           },
@@ -70,10 +72,7 @@ export default function RoadmapScreen({navigation}) {
   const load = async () => {
     setLoading(true);
     try {
-      const [data, storedVoted] = await Promise.all([
-        fetch(ROADMAP_URL).then(r => r.json()),
-        AsyncStorage.getItem('roadmap_voted').then(v => (v ? JSON.parse(v) : [])),
-      ]);
+      const data = await fetch(ROADMAP_URL).then(r => r.json());
       const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
       const STATUS_ORDER = {'in-progress': 0, 'ready-to-deploy': 1, planned: 2, idea: 3, done: 4, rejected: 5};
       const planned = (data.items || data.planned || [])
@@ -90,14 +89,18 @@ export default function RoadmapScreen({navigation}) {
         })
         .sort((a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99));
       setItems(planned);
-      setVoted(storedVoted);
 
-      const counts = await Promise.all(planned.map(item => fetchVoteCount(item.id)));
+      const uid = auth().currentUser?.uid || null;
+      const voteData = await Promise.all(planned.map(item => fetchVoteData(item.id, uid)));
       const voteMap = {};
+      const votedIds = [];
       planned.forEach((item, i) => {
-        voteMap[item.id] = counts[i];
+        voteMap[item.id] = voteData[i].count;
+        if (voteData[i].hasVoted) votedIds.push(item.id);
       });
       setVotes(voteMap);
+      setVoted(votedIds);
+      AsyncStorage.setItem('roadmap_voted', JSON.stringify(votedIds)).catch(() => {});
     } catch {}
     setLoading(false);
   };
@@ -111,8 +114,8 @@ export default function RoadmapScreen({navigation}) {
     if (!hasVoted) Analytics.roadmapVoted(item.id);
 
     try {
-      const deviceId = auth().currentUser?.uid;
-      if (!deviceId) return;
+      const uid = auth().currentUser?.uid;
+      if (!uid) return;
       if (hasVoted) {
         await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
           method: 'POST',
@@ -123,13 +126,14 @@ export default function RoadmapScreen({navigation}) {
                 document: `projects/${PROJECT_ID}/databases/(default)/documents/roadmap_votes/${item.id}`,
                 fieldTransforms: [
                   {fieldPath: 'count', increment: {integerValue: '-1'}},
+                  {fieldPath: 'voters', removeAllFromArray: {values: [{stringValue: uid}]}},
                 ],
               },
             }],
           }),
         });
       } else {
-        await submitVote(item.id, deviceId);
+        await submitVote(item.id, uid);
       }
     } catch {}
   };

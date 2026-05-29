@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C80B921A6F3F58F76C31292 /* libPods-BTCCFanHub.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-BTCCFanHub.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		53F51B589C2E41118B295644 /* Cookie-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC9BCAE9C25C49E3BADCE051 /* Cookie-Regular.ttf */; };
 		6027BE5A5D0F055A42353152 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
@@ -18,6 +17,7 @@
 		C52CE8182F96B86A00319CF2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C52CE8172F96B86A00319CF2 /* WidgetKit.framework */; };
 		C52CE81A2F96B86A00319CF2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C52CE8192F96B86A00319CF2 /* SwiftUI.framework */; };
 		C52CE8272F96B86C00319CF2 /* BTCCWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C52CE8162F96B86A00319CF2 /* BTCCWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CC00F6DFBB12EF4B72B8E2CA /* libPods-BTCCFanHub.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8513C4C806FFF3C3E2DA9798 /* libPods-BTCCFanHub.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,9 +52,9 @@
 		3B4392A12AC88292D35C810B /* Pods-BTCCFanHub.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BTCCFanHub.debug.xcconfig"; path = "Target Support Files/Pods-BTCCFanHub/Pods-BTCCFanHub.debug.xcconfig"; sourceTree = "<group>"; };
 		4B34AD4900DA114A0DB0511F /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "BTCCFanHub/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-BTCCFanHub.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BTCCFanHub.release.xcconfig"; path = "Target Support Files/Pods-BTCCFanHub/Pods-BTCCFanHub.release.xcconfig"; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-BTCCFanHub.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BTCCFanHub.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = BTCCFanHub/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = BTCCFanHub/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8513C4C806FFF3C3E2DA9798 /* libPods-BTCCFanHub.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BTCCFanHub.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C51CDC712FA8F986006CDFDE /* BTCCWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BTCCWidgetExtension.entitlements; sourceTree = "<group>"; };
 		C52CE8112F964D1E00319CF2 /* BTCCFanHub.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = BTCCFanHub.entitlements; path = BTCCFanHub/BTCCFanHub.entitlements; sourceTree = "<group>"; };
 		C52CE8162F96B86A00319CF2 /* BTCCWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BTCCWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,7 +94,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-BTCCFanHub.a in Frameworks */,
+				CC00F6DFBB12EF4B72B8E2CA /* libPods-BTCCFanHub.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,9 +128,9 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				5DCACB8F33CDC322A6C60F78 /* libPods-BTCCFanHub.a */,
 				C52CE8172F96B86A00319CF2 /* WidgetKit.framework */,
 				C52CE8192F96B86A00319CF2 /* SwiftUI.framework */,
+				8513C4C806FFF3C3E2DA9798 /* libPods-BTCCFanHub.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -543,6 +543,19 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_ROOT}/ReactCommon",
+					"${PODS_ROOT}/ReactCommon/react/nativemodule/core",
+					"${PODS_ROOT}/React-runtimeexecutor",
+					"${PODS_ROOT}/React-runtimeexecutor/platform/ios",
+					"${PODS_ROOT}/ReactCommon-Samples",
+					"${PODS_ROOT}/ReactCommon-Samples/platform/ios",
+					"${PODS_ROOT}/React-Fabric/react/renderer/components/view/platform/cxx",
+					"${PODS_ROOT}/React-NativeModulesApple",
+					"${PODS_ROOT}/React-graphics",
+					"${PODS_ROOT}/React-graphics/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
@@ -618,6 +631,19 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_ROOT}/ReactCommon",
+					"${PODS_ROOT}/ReactCommon/react/nativemodule/core",
+					"${PODS_ROOT}/React-runtimeexecutor",
+					"${PODS_ROOT}/React-runtimeexecutor/platform/ios",
+					"${PODS_ROOT}/ReactCommon-Samples",
+					"${PODS_ROOT}/ReactCommon-Samples/platform/ios",
+					"${PODS_ROOT}/React-Fabric/react/renderer/components/view/platform/cxx",
+					"${PODS_ROOT}/React-NativeModulesApple",
+					"${PODS_ROOT}/React-graphics",
+					"${PODS_ROOT}/React-graphics/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,

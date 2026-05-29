@@ -15,6 +15,8 @@ GoogleSignin.configure({webClientId: GOOGLE_WEB_CLIENT_ID});
 const AuthContext = createContext({
   user: null,
   isAnonymous: true,
+  registerWithEmail: async () => {},
+  signInWithEmail: async () => {},
   signInWithGoogle: async () => {},
   signInWithApple: async () => {},
   signOut: async () => {},
@@ -26,7 +28,6 @@ export function AuthProvider({children}) {
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async u => {
       if (u) {
-        setUser(u);
         const provider = u.isAnonymous ? 'anonymous' : (u.providerData[0]?.providerId || 'unknown');
         Analytics.setAuthUser(u.uid, provider);
         const existing = await loadProfile(u.uid);
@@ -35,6 +36,7 @@ export function AuthProvider({children}) {
         } else {
           await applyProfileToStorage(existing);
         }
+        setUser(u);
       } else {
         try {
           const cred = await auth().signInAnonymously();
@@ -74,7 +76,26 @@ export function AuthProvider({children}) {
     }
   }
 
+  async function registerWithEmail(email, password) {
+    const credential = auth.EmailAuthProvider.credential(email, password);
+    if (user?.isAnonymous) {
+      // linkWithCredential mutates the existing user in place and may not
+      // trigger onAuthStateChanged, so update state directly from the result.
+      const result = await user.linkWithCredential(credential);
+      setUser(result.user);
+    } else {
+      await auth().createUserWithEmailAndPassword(email, password);
+    }
+  }
+
+  async function signInWithEmail(email, password) {
+    await auth().signInWithEmailAndPassword(email, password);
+  }
+
   async function signOut() {
+    if (user && !user.isAnonymous) {
+      await uploadLocalProfile(user.uid);
+    }
     await auth().signOut();
   }
 
@@ -86,6 +107,8 @@ export function AuthProvider({children}) {
       user,
       isAnonymous,
       providerIds,
+      registerWithEmail,
+      signInWithEmail,
       signInWithGoogle,
       signInWithApple: Platform.OS === 'ios' ? signInWithApple : null,
       signOut,

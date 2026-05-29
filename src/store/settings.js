@@ -1,6 +1,8 @@
 import React, {createContext, useContext, useState, useCallback, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getMessaging, subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
+import {useAuth} from './auth';
+import {saveProfile} from '../utils/userProfile';
 
 // Leaf settings that map 1:1 to an FCM topic
 const LEAF_TOPICS = {
@@ -135,9 +137,19 @@ function nextMondayNight() {
   return monday.toISOString();
 }
 
+const SYNCED_KEYS = new Set([
+  'newsAlerts', 'digestAlerts', 'weekendPreview', 'standingsUpdate', 'podcastAlerts',
+  'preRace', 'preRaceFP', 'preRaceQualifying', 'preRaceQRace', 'preRaceRace',
+  'preRaceRace1', 'preRaceRace2', 'preRaceRace3',
+  'results', 'resultsFP', 'resultsQualifying', 'resultsQRace', 'resultsRace',
+  'resultsRace1', 'resultsRace2', 'resultsRace3',
+  'spoilerFree',
+]);
+
 const SettingsContext = createContext({settings: defaults, setSetting: (_key, _value) => {}});
 
 export function SettingsProvider({children}) {
+  const {user} = useAuth();
   const [settings, setSettings] = useState(defaults);
 
   useEffect(() => {
@@ -168,12 +180,15 @@ export function SettingsProvider({children}) {
       setSettings(loaded);
       syncAllTopics(loaded);
     })();
-  }, []);
+  }, [user]);
 
   const setSetting = useCallback((key, value) => {
     setSettings(prev => {
       const next = {...prev, [key]: value};
       AsyncStorage.setItem(STORAGE_KEYS[key], String(value)).catch(() => {});
+      if (user && !user.isAnonymous && SYNCED_KEYS.has(key)) {
+        saveProfile(user.uid, {[key]: value}).catch(() => {});
+      }
       // Manage spoiler-free expiry alongside the toggle
       if (key === 'spoilerFree') {
         const expiry = value ? nextMondayNight() : null;
@@ -188,7 +203,7 @@ export function SettingsProvider({children}) {
       syncAllTopics(next);
       return next;
     });
-  }, []);
+  }, [user]);
 
   return (
     <SettingsContext.Provider value={{settings, setSetting}}>

@@ -10,12 +10,11 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
-
+# FirebaseAuth contains Swift source files. In static library mode the
+# Swift compatibility header (FirebaseAuth-Swift.h) lands in a non-standard
+# location that Firebase.h hardcodes as a framework-style path. Forcing just
+# FirebaseAuth to build as a static framework gives it a proper Headers/
+# directory, while all React Native pods stay as static libraries.
 pod 'GoogleUtilities', :modular_headers => true
 pod 'GoogleDataTransport', :modular_headers => true
 pod 'nanopb', :modular_headers => true
@@ -23,6 +22,16 @@ pod 'leveldb-library', :modular_headers => true
 pod 'FirebaseAppCheckInterop', :modular_headers => true
 pod 'FirebaseAuthInterop', :modular_headers => true
 pod 'RecaptchaInterop', :modular_headers => true
+
+pre_install do |installer|
+  installer.pod_targets.each do |pod|
+    if pod.name == 'FirebaseAuth'
+      def pod.build_type
+        Pod::BuildType.static_framework
+      end
+    end
+  end
+end
 
 target 'BTCCFanHub' do
   config = use_native_modules!
@@ -40,5 +49,19 @@ target 'BTCCFanHub' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        # React.xcframework (React-Core-prebuilt) is pre-built with production
+        # settings, so Sealable and other debug-only C++ types are inline/no-op
+        # there. Without REACT_NATIVE_PRODUCTION, pods that use Fabric headers
+        # auto-define REACT_NATIVE_DEBUG (via flags.h) and call the non-inline
+        # Sealable constructor that never gets exported by the framework.
+        existing = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || '$(inherited)'
+        unless existing.include?('REACT_NATIVE_PRODUCTION')
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = "#{existing} REACT_NATIVE_PRODUCTION=1"
+        end
+      end
+    end
   end
 end

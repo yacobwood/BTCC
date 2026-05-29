@@ -1,6 +1,6 @@
 import {cacheWrite, cacheRead} from '../store/cache';
 import {formatDate} from './parsers';
-import {getStableDeviceId} from '../utils/deviceId';
+import auth from '@react-native-firebase/auth';
 
 const BASE_GITHUB = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data';
 const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
@@ -95,7 +95,7 @@ export async function fetchLiveStatus() {
 }
 
 export async function fetchResults(year = 2026, forceRefresh = false) {
-  return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, false, false, 5 * 60 * 1000);
+  return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, /* staleFallback */ true, false, 5 * 60 * 1000);
 }
 
 export async function fetchMerchStores() {
@@ -128,14 +128,17 @@ export async function peekArticlesCache(page = 1) {
 const HUB_CACHE_KEY = 'hub_posts';
 const HUB_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
 
-function mapHubPosts(data, deviceId) {
+function mapHubPosts(data, uid) {
   const now = Date.now();
   return (data.posts || [])
     .filter(p => {
       const status = p.status || 'published';
       if (status === 'published') return true;
       if (status === 'scheduled') return p.scheduledAt && new Date(p.scheduledAt).getTime() <= now;
-      if (status === 'draft') return deviceId && Array.isArray(p.previewDeviceIds) && p.previewDeviceIds.includes(deviceId);
+      if (status === 'draft') {
+        const ids = Array.isArray(p.previewDeviceIds) ? p.previewDeviceIds : [];
+        return uid && ids.includes(uid);
+      }
       return false;
     })
     .map(p => ({
@@ -157,7 +160,7 @@ function mapHubPosts(data, deviceId) {
 }
 
 export async function fetchHubPosts() {
-  const deviceId = await getStableDeviceId().catch(() => null);
+  const uid = auth().currentUser?.uid ?? null;
   try {
     const cached = await cacheRead(HUB_CACHE_KEY, HUB_CACHE_MAX_AGE);
     let data;
@@ -174,11 +177,11 @@ export async function fetchHubPosts() {
       data = await res.json();
       cacheWrite(HUB_CACHE_KEY, data).catch(() => {});
     }
-    return mapHubPosts(data, deviceId);
+    return mapHubPosts(data, uid);
   } catch {
     // Stale fallback on network error (any age)
     const stale = await cacheRead(HUB_CACHE_KEY);
-    if (stale) return mapHubPosts(stale, deviceId);
+    if (stale) return mapHubPosts(stale, uid);
     return [];
   }
 }

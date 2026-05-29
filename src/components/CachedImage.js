@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {Image, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -18,6 +18,10 @@ function wpThumb(uri, targetPx) {
 export default function CachedImage({uri, style, resizeMode = 'cover', targetWidth, ...props}) {
   const [src, setSrc] = useState(() => targetWidth ? wpThumb(uri, targetWidth) : uri);
   const [errored, setErrored] = useState(false);
+  const source = useMemo(() => ({uri: src}), [src]);
+  const handleError = useCallback(() => {
+    if (src !== uri) { setSrc(uri); } else { setErrored(true); }
+  }, [src, uri]);
 
   if (!uri || errored) {
     return (
@@ -29,13 +33,10 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
 
   return (
     <Image
-      source={{uri: src, cache: 'force-cache'}}
+      source={source}
       style={style}
       resizeMode={resizeMode}
-      onError={() => {
-        // If thumbnail 404s, fall back to the original URL
-        if (src !== uri) { setSrc(uri); } else { setErrored(true); }
-      }}
+      onError={handleError}
       {...props}
     />
   );

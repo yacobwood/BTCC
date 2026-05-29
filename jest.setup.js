@@ -46,12 +46,14 @@ jest.mock('@react-native-firebase/analytics', () => ({
 }));
 
 // ── Firebase Auth ──────────────────────────────────────────────────────────────
-const mockAuthUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], email: null, displayName: null};
+const mockAuthUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], email: null, displayName: null, getIdToken: jest.fn(() => Promise.resolve('test-id-token'))};
 const mockAuth = {
   currentUser: mockAuthUser,
   onAuthStateChanged: jest.fn(cb => { cb(mockAuthUser); return jest.fn(); }),
   signInAnonymously: jest.fn(() => Promise.resolve({user: mockAuthUser})),
   signInWithCredential: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
+  signInWithEmailAndPassword: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
+  createUserWithEmailAndPassword: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
   signOut: jest.fn(() => Promise.resolve()),
   GoogleAuthProvider: {credential: jest.fn(() => ({providerId: 'google.com'}))},
   AppleAuthProvider: {credential: jest.fn(() => ({providerId: 'apple.com'}))},
@@ -60,6 +62,7 @@ jest.mock('@react-native-firebase/auth', () => {
   const fn = jest.fn(() => mockAuth);
   fn.GoogleAuthProvider = mockAuth.GoogleAuthProvider;
   fn.AppleAuthProvider = mockAuth.AppleAuthProvider;
+  fn.EmailAuthProvider = {credential: jest.fn(() => ({providerId: 'password'}))};
   return {__esModule: true, default: fn};
 });
 

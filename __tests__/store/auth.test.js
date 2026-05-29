@@ -82,6 +82,45 @@ describe('AuthProvider', () => {
       await act(async () => { renderProvider(); });
       expect(applyProfileToStorage).toHaveBeenCalledWith(saved);
     });
+
+    it('sets user only after applyProfileToStorage completes', async () => {
+      const {loadProfile, applyProfileToStorage} = require('../../src/utils/userProfile');
+      const saved = {unitKm: true};
+      loadProfile.mockResolvedValueOnce(saved);
+
+      // Use a deferred promise so we can control when applyProfileToStorage resolves
+      let resolveApply;
+      const applyPromise = new Promise(resolve => { resolveApply = resolve; });
+      applyProfileToStorage.mockImplementationOnce(() => applyPromise);
+
+      let getHook;
+      // Mount the provider - applyProfileToStorage will be called but not yet resolved
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      expect(applyProfileToStorage).toHaveBeenCalledWith(saved);
+
+      // Now resolve and allow the user to be set
+      await act(async () => {
+        resolveApply();
+      });
+
+      expect(getHook().user).not.toBeNull();
+    });
+
+    it('sets user only after uploadLocalProfile completes for new user', async () => {
+      const {loadProfile, uploadLocalProfile} = require('../../src/utils/userProfile');
+      loadProfile.mockResolvedValueOnce(null);
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      expect(uploadLocalProfile).toHaveBeenCalledWith('test-uid-123');
+      expect(getHook().user).not.toBeNull();
+    });
   });
 
   describe('signInWithGoogle', () => {
@@ -121,6 +160,109 @@ describe('AuthProvider', () => {
       });
 
       expect(mockAuthInstance.signOut).toHaveBeenCalled();
+    });
+
+    it('uploads local profile before signing out when user is not anonymous', async () => {
+      const {uploadLocalProfile} = require('../../src/utils/userProfile');
+      const mockAuthInstance = auth();
+      const nonAnonUser = {uid: 'real-uid-456', isAnonymous: false, providerData: [{providerId: 'google.com'}]};
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
+        cb(nonAnonUser);
+        return jest.fn();
+      });
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      uploadLocalProfile.mockClear();
+
+      await act(async () => {
+        await getHook().signOut();
+      });
+
+      expect(uploadLocalProfile).toHaveBeenCalledWith('real-uid-456');
+      expect(mockAuthInstance.signOut).toHaveBeenCalled();
+    });
+
+    it('does not upload profile when signing out as anonymous user', async () => {
+      const {uploadLocalProfile} = require('../../src/utils/userProfile');
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      uploadLocalProfile.mockClear();
+
+      await act(async () => {
+        await getHook().signOut();
+      });
+
+      expect(uploadLocalProfile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('registerWithEmail', () => {
+    it('links email credential to anonymous user and updates user state', async () => {
+      const mockAuthInstance = auth();
+      const linkedUser = {uid: 'test-uid-123', isAnonymous: false, providerData: [{providerId: 'password'}]};
+      const linkFn = jest.fn(() => Promise.resolve({user: linkedUser}));
+      const anonUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], linkWithCredential: linkFn};
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
+        cb(anonUser);
+        return jest.fn();
+      });
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        await getHook().registerWithEmail('test@example.com', 'password123');
+      });
+
+      expect(linkFn).toHaveBeenCalled();
+      expect(getHook().user.isAnonymous).toBe(false);
+    });
+
+    it('creates new account when user is already authenticated', async () => {
+      const mockAuthInstance = auth();
+      const nonAnonUser = {uid: 'real-uid-456', isAnonymous: false, providerData: [{providerId: 'google.com'}]};
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
+        cb(nonAnonUser);
+        return jest.fn();
+      });
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        await getHook().registerWithEmail('new@example.com', 'securepass');
+      });
+
+      expect(mockAuthInstance.createUserWithEmailAndPassword).toHaveBeenCalledWith('new@example.com', 'securepass');
+    });
+  });
+
+  describe('signInWithEmail', () => {
+    it('calls signInWithEmailAndPassword with email and password', async () => {
+      const mockAuthInstance = auth();
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        await getHook().signInWithEmail('test@test.com', 'pass');
+      });
+
+      expect(mockAuthInstance.signInWithEmailAndPassword).toHaveBeenCalledWith('test@test.com', 'pass');
     });
   });
 });

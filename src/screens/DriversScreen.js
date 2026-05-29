@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Image,
-  ImageBackground,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -48,11 +47,78 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 
 const TABS = ['DRIVERS', 'TEAMS'];
 
+function DriverCardInner({item, onPress, fav}) {
+  const [bgError, setBgError] = useState(false);
+  const bundled = getDriverImage(item.number);
+  const bgSource = React.useMemo(() => item.cardBgUrl ? {uri: item.cardBgUrl} : null, [item.cardBgUrl]);
+  const handleBgError = React.useCallback(() => setBgError(true), []);
+  return (
+    <TouchableOpacity
+      style={[styles.driverCard, fav && styles.driverCardFav]}
+      activeOpacity={0.8}
+      onPress={onPress}
+      accessibilityLabel={`${item.name}, ${item.team}, number ${item.number}`}
+      accessibilityRole="button">
+      <View style={styles.driverImageArea}>
+        {bgSource && !bgError ? (
+          <Image
+            source={bgSource}
+            style={StyleSheet.absoluteFill}
+            resizeMode="stretch"
+            onError={handleBgError}
+          />
+        ) : (
+          <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
+        )}
+        <Text style={[styles.driverNumberBg, [2,16,17,88,99].includes(item.number) && {color: '#000'}]}>{item.number}</Text>
+        {bundled ? (
+          <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
+        ) : item.imageUrl ? (
+          <CachedImage uri={item.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
+        ) : null}
+        {fav && (
+          <View style={styles.favBadge}>
+            <Icon name="star" size={12} color={Colors.yellow} />
+          </View>
+        )}
+      </View>
+      <View style={styles.driverFooter}>
+        <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// Only re-render when item data or fav status changes - onPress is intentionally excluded
+// from the comparison because it's recreated on every parent render.
+const DriverCard = React.memo(DriverCardInner, (prev, next) => prev.item === next.item && prev.fav === next.fav);
+
+// Isolated so DriversScreen doesn't subscribe to favouriteDriver context.
+// When a fav toggles, only this component re-renders — PagerView receives no
+// new children and no native view recreations happen on Android.
+const DriversGrid = React.memo(function DriversGrid({drivers, listRef, navigation}) {
+  const {isFavourite} = useFavouriteDriver();
+  return (
+    <ScrollView ref={listRef} contentContainerStyle={{padding: 16, paddingBottom: 20}}>
+      <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
+      <View style={styles.driversGrid}>
+        {drivers.map(item => (
+          <View key={String(item.number)} style={styles.driverGridItem}>
+            <DriverCard
+              item={item}
+              fav={isFavourite(item.name)}
+              onPress={() => { Analytics.driverClicked(item.name); navigation.navigate('DriverDetail', {driver: item}); }}
+            />
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+});
+
 export default function DriversScreen({navigation}) {
   const [grid, setGrid] = useState(null);
   const [loading, setLoading] = useState(true);
-  const {isFavourite} = useFavouriteDriver();
-
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
 
@@ -85,39 +151,6 @@ export default function DriversScreen({navigation}) {
 
   const drivers = grid?.drivers || [];
   const teams = grid?.teams || [];
-
-  const renderDriver = ({item}) => {
-    const fav = isFavourite(item.name);
-    const bundled = getDriverImage(item.number);
-    return (
-      <TouchableOpacity
-        style={[styles.driverCard, fav && styles.driverCardFav]}
-        activeOpacity={0.8}
-        onPress={() => { Analytics.driverClicked(item.name); navigation.navigate('DriverDetail', {driver: item}); }}
-        accessibilityLabel={`${item.name}, ${item.team}, number ${item.number}`}
-        accessibilityRole="button">
-        <ImageBackground
-          source={item.cardBgUrl ? {uri: item.cardBgUrl, cache: 'force-cache'} : undefined}
-          style={styles.driverImageArea}
-          resizeMode="stretch">
-          <Text style={[styles.driverNumberBg, [2,16,17,88,99].includes(item.number) && {color: '#000'}]}>{item.number}</Text>
-          {bundled ? (
-            <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
-          ) : item.imageUrl ? (
-            <CachedImage uri={item.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
-          ) : null}
-          {fav && (
-            <View style={styles.favBadge}>
-              <Icon name="star" size={12} color={Colors.yellow} />
-            </View>
-          )}
-        </ImageBackground>
-        <View style={styles.driverFooter}>
-          <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
 
   const renderTeam = ({item}) => (
     <TouchableOpacity
@@ -153,18 +186,7 @@ export default function DriversScreen({navigation}) {
         tabRowStyle={{backgroundColor: Colors.background}}
         onTabChange={(i) => Analytics.gridTabSwitched(TABS[i].toLowerCase())}
         pages={[
-          <ScrollView
-            ref={driversListRef}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}>
-            <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
-            <View style={styles.driversGrid}>
-              {drivers.map(item => (
-                <View key={String(item.number)} style={styles.driverGridItem}>
-                  {renderDriver({item})}
-                </View>
-              ))}
-            </View>
-          </ScrollView>,
+          <DriversGrid drivers={drivers} listRef={driversListRef} navigation={navigation} />,
           <ScrollView
             ref={teamsListRef}
             contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}>
@@ -191,8 +213,8 @@ const styles = StyleSheet.create({
   countLabel: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginBottom: 8},
   driversGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
   driverGridItem: {width: (SCREEN_WIDTH - 32 - 10) / 2},
-  driverCard: {borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
-  driverCardFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'},
+  driverCard: {borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card, borderWidth: 1, borderColor: 'transparent'},
+  driverCardFav: {borderColor: 'rgba(254,189,2,0.5)'},
   driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
   driverPhoto: {width: '100%', height: '85%'},
   driverNumberBg: {

@@ -17,6 +17,8 @@ import database from '@react-native-firebase/database';
 const DB = database();
 import {Colors} from '../theme/colors';
 import auth from '@react-native-firebase/auth';
+import {useAuth} from '../store/auth';
+import {saveProfile, claimUsername, validateUsername} from '../utils/userProfile';
 import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
 import {timeAgo} from '../utils/timeAgo';
@@ -26,6 +28,7 @@ const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
 
 export default function ChatScreen({onClose} = {}) {
+  const {user} = useAuth();
   const insets = useSafeAreaInsets();
   // Latch the first non-zero bottom inset so keyboard open/close doesn't cause a layout jump.
   const [stableBottom, setStableBottom] = useState(insets.bottom);
@@ -39,6 +42,7 @@ export default function ChatScreen({onClose} = {}) {
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [nameEditing, setNameEditing] = useState(false);
+  const [nameError, setNameError] = useState('');
   const [blacklist, setBlacklist] = useState([]);
   const [flaggedIds, setFlaggedIds] = useState(new Set());
   const myAuthorIdRef = useRef('anonymous');
@@ -54,12 +58,22 @@ export default function ChatScreen({onClose} = {}) {
 
     // Load identity
     const init = async () => {
-      const [savedName] = await Promise.all([
-        AsyncStorage.getItem(COMMENTER_NAME_KEY).catch(() => null),
-      ]);
-      const myId = auth().currentUser?.uid || 'anonymous';
+      let savedName = await AsyncStorage.getItem(COMMENTER_NAME_KEY).catch(() => null);
+      const currentUser = auth().currentUser;
+      const myId = currentUser?.uid || 'anonymous';
       myAuthorIdRef.current = myId;
       setMyAuthorId(myId);
+
+      // Migrate pre-uniqueness names: claim the name in Firestore if not yet claimed.
+      // If someone else grabbed it first, clear it so the user is prompted to choose a new one.
+      if (savedName && currentUser && !currentUser.isAnonymous && !savedName.startsWith('Fan #')) {
+        const result = await claimUsername(currentUser.uid, savedName, null);
+        if (result === 'taken') {
+          await AsyncStorage.removeItem(COMMENTER_NAME_KEY).catch(() => {});
+          savedName = null;
+        }
+      }
+
       if (savedName) setCommenterName(savedName);
     };
     init();
@@ -90,8 +104,29 @@ export default function ChatScreen({onClose} = {}) {
 
   const saveName = async (name) => {
     const trimmed = name.trim() || `Fan #${myAuthorIdRef.current.slice(-4)}`;
+
+    // Validate and enforce uniqueness for non-empty names on non-anonymous accounts
+    if (name.trim() && user && !user.isAnonymous) {
+      const validationError = validateUsername(trimmed);
+      if (validationError) {
+        setNameError(validationError);
+        return null;
+      }
+      const result = await claimUsername(user.uid, trimmed, commenterName || null);
+      if (result === 'taken') {
+        setNameError('That name is already taken');
+        return null;
+      }
+      if (result === 'error') {
+        setNameError('Could not save name. Please try again.');
+        return null;
+      }
+    } else {
+      await AsyncStorage.setItem(COMMENTER_NAME_KEY, trimmed);
+    }
+
+    setNameError('');
     setCommenterName(trimmed);
-    await AsyncStorage.setItem(COMMENTER_NAME_KEY, trimmed);
     return trimmed;
   };
 
@@ -127,6 +162,7 @@ export default function ChatScreen({onClose} = {}) {
 
   const handleNameSet = async () => {
     const name = await saveName(nameInput);
+    if (name === null) return; // validation or uniqueness error - nameError is set
     setShowNamePrompt(false);
     setNameEditing(false);
     setNameInput('');
@@ -219,7 +255,6 @@ export default function ChatScreen({onClose} = {}) {
       <View style={styles.msgRow}>
         <View style={styles.msgMeta}>
           <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{item.authorName}</Text>
-          {item.authorId ? <Text style={styles.msgAuthorId}>{` #${item.authorId.slice(-4)}`}</Text> : null}
           <Text style={styles.msgTime}>{timeAgo(item.timestamp)}</Text>
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
@@ -267,24 +302,27 @@ export default function ChatScreen({onClose} = {}) {
       {nameEditing && (
         <View style={styles.nameEditRow}>
           <TextInput
-            style={styles.nameEditInput}
+            style={[styles.nameEditInput, nameError ? styles.nameEditInputError : null]}
             value={nameInput}
-            onChangeText={setNameInput}
+            onChangeText={v => { setNameInput(v); if (nameError) setNameError(''); }}
             placeholder="Your display name"
             placeholderTextColor={Colors.textSecondary}
             autoFocus
-            maxLength={30}
+            maxLength={20}
             returnKeyType="done"
             onSubmitEditing={handleNameSet}
           />
           <TouchableOpacity onPress={handleNameSet} style={styles.nameEditSave}>
             <Text style={styles.nameEditSaveText}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setNameEditing(false); setNameInput(''); }} hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+          <TouchableOpacity onPress={() => { setNameEditing(false); setNameInput(''); setNameError(''); }} hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
             <Icon name="close" size={18} color={Colors.textSecondary} />
           </TouchableOpacity>
         </View>
       )}
+      {nameEditing && nameError ? (
+        <Text style={styles.nameErrorText}>{nameError}</Text>
+      ) : null}
 
       <View style={styles.divider} />
 
@@ -319,16 +357,17 @@ export default function ChatScreen({onClose} = {}) {
         <View style={[styles.namePrompt, {paddingBottom: stableBottom + 12}]}>
           <Text style={styles.namePromptTitle}>Choose a display name</Text>
           <TextInput
-            style={styles.nameInput}
+            style={[styles.nameInput, nameError ? {borderColor: '#ff6b6b'} : null]}
             value={nameInput}
-            onChangeText={setNameInput}
+            onChangeText={v => { setNameInput(v); if (nameError) setNameError(''); }}
             placeholder={`Fan #${myAuthorIdRef.current.slice(-4)}`}
             placeholderTextColor={Colors.textSecondary}
             autoFocus
-            maxLength={30}
+            maxLength={20}
             returnKeyType="done"
             onSubmitEditing={handleNameSet}
           />
+          {nameError ? <Text style={styles.nameErrorText}>{nameError}</Text> : null}
           <View style={styles.namePromptBtns}>
             <TouchableOpacity onPress={handleNameSkip} style={styles.nameSkipBtn}>
               <Text style={styles.nameSkipText}>Skip</Text>
@@ -395,7 +434,6 @@ const styles = StyleSheet.create({
   msgMeta: {flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4},
   msgAuthor: {color: Colors.textSecondary, fontSize: 13, fontWeight: '700'},
   msgAuthorOwn: {color: Colors.yellow},
-  msgAuthorId: {color: Colors.textSecondary, fontSize: 11, fontWeight: '400', opacity: 0.6},
   msgTime: {color: Colors.textSecondary, fontSize: 11},
   msgText: {color: '#fff', fontSize: 15, lineHeight: 22},
   msgActions: {flexDirection: 'row', gap: 14, marginTop: 6},
@@ -422,6 +460,8 @@ const styles = StyleSheet.create({
   },
   nameEditSave: {backgroundColor: Colors.yellow, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6},
   nameEditSaveText: {color: '#020255', fontSize: 13, fontWeight: '700'},
+  nameEditInputError: {borderColor: '#ff6b6b'},
+  nameErrorText: {color: '#ff6b6b', fontSize: 12, paddingHorizontal: 16, paddingBottom: 6},
 
   // Name prompt
   namePrompt: {
