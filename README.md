@@ -522,6 +522,7 @@ Stored in [data/](data/) directory. Served via GitHub raw CDN. Some are also bun
 | `schedule.json` | Session start times used by Cloud Functions for pre-session notifications |
 | `team_map.json` | Driver-to-team mapping used by scrapers |
 | `records.json` | All-time driver records (computed by `compute_records.py` on every scrape) |
+| `tracks.json` | Static circuit guide data - corner sequences, L/R counts, sector breakdowns and corner descriptions for all 10 BTCC venues. Corner names and lap order are authoritative from `src/assets/tracks/*.svg` SVG renders. |
 
 ---
 
@@ -828,6 +829,7 @@ The test suite covers all major stores, utilities, components and screens. Key f
 |---|---|
 | API parsers | `__tests__/parsers.test.js` |
 | API client | `__tests__/api/client.test.js` |
+| Auth store | `__tests__/store/auth.test.js` |
 | FeatureFlags store | `__tests__/store/featureFlags.test.js` |
 | Settings store | `__tests__/store/settings.test.js` |
 | FavouriteDriver store | `__tests__/store/favouriteDriver.test.js` |
@@ -840,6 +842,7 @@ The test suite covers all major stores, utilities, components and screens. Key f
 | All components | `__tests__/components/*.test.js` |
 | All utils | `__tests__/utils/*.test.js` |
 | Data integrity | `__tests__/data/seasonDataIntegrity.test.js` |
+| Firestore rules | `__tests__/firestore.rules.test.js` |
 
 ### Key Testing Notes
 
@@ -848,6 +851,8 @@ The test suite covers all major stores, utilities, components and screens. Key f
 - `CommonActions.reset()` is used in notifNavigation - not `navigate()` for nested screens
 - `jest.mock` factory variables must be prefixed with `mock` (e.g. `mockDbOn`) to avoid babel-jest hoisting TDZ errors
 - When mocking a module that exports both a provider and a hook, always spread `jest.requireActual()` so `AllProviders` still has the real provider
+- `useAuth` is not in `AllProviders` - mock it directly in screen tests with `jest.mock('../../src/store/auth', ...)`
+- Auth modal submit button has `accessibilityLabel="Log in to account"` (login) or `"Create account"` (register) to distinguish it from the modal title
 
 ### Untested Areas
 

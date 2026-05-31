@@ -26,6 +26,12 @@ const APP_WRITE_COLLECTIONS = [
   'chat/messages',
 ];
 
+// User accounts collections — auth-guarded, not blanket writes.
+const USER_ACCOUNT_COLLECTIONS = [
+  'users',
+  'usernames',
+];
+
 // Collections that must stay write-locked (Cloud Functions / Admin SDK only).
 const LOCKED_WRITE_COLLECTIONS = [
   'errors',
@@ -56,6 +62,28 @@ describe('firestore.rules', () => {
         expect(block).toMatch(/allow write/);
         expect(block).not.toMatch(/allow write:\s*if false/);
       });
+    });
+  });
+
+  describe('user account collections have auth-guarded rules', () => {
+    it('users/{userId} allows read/write when request.auth.uid == userId', () => {
+      expect(rules).toMatch(/match\s+\/users\/\{userId\}[^{]*\{[^}]*allow read, write: if request\.auth != null && request\.auth\.uid == userId/s);
+    });
+
+    it('usernames/{username} allows public read', () => {
+      expect(rules).toMatch(/match\s+\/usernames\/\{username\}[^{]*\{[^}]*allow read: if true/s);
+    });
+
+    it('usernames/{username} restricts create to the owning uid', () => {
+      expect(rules).toMatch(/allow create: if request\.auth != null && request\.resource\.data\.uid == request\.auth\.uid/);
+    });
+
+    it('usernames/{username} restricts delete to the owning uid', () => {
+      expect(rules).toMatch(/allow delete: if request\.auth != null && resource\.data\.uid == request\.auth\.uid/);
+    });
+
+    it('usernames/{username} blocks updates entirely', () => {
+      expect(rules).toMatch(/allow update: if false/);
     });
   });
 

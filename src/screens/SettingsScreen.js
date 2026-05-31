@@ -373,7 +373,7 @@ export default function SettingsScreen({navigation}) {
         <Text style={styles.sectionTitle}>ACCOUNT</Text>
         {isAnonymous ? (
           <>
-            <Text style={styles.settingDesc}>Sign in to sync your preferences and chat identity across devices.</Text>
+            <Text style={styles.settingDesc}>Keeps your favourite driver(s), notification settings and chat username in sync across every device you use.</Text>
             <TouchableOpacity style={[styles.authBtn, {marginTop: 12}]} onPress={openAuthModal} accessibilityRole="button">
               <Icon name="login" size={16} color={Colors.yellow} />
               <Text style={styles.authBtnText}>Register or Log in</Text>
@@ -445,7 +445,7 @@ export default function SettingsScreen({navigation}) {
               {authLoading ? (
                 <ActivityIndicator color={Colors.yellow} style={{marginTop: 16}} />
               ) : (
-                <TouchableOpacity style={styles.modalSubmitBtn} onPress={handleAuthSubmit} accessibilityRole="button">
+                <TouchableOpacity style={styles.modalSubmitBtn} onPress={handleAuthSubmit} accessibilityRole="button" accessibilityLabel={authMode === 'register' ? 'Create account' : 'Log in to account'}>
                   <Text style={styles.modalSubmitText}>
                     {authMode === 'register' ? 'Create account' : 'Log in'}
                   </Text>

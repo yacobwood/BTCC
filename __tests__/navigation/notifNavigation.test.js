@@ -89,7 +89,7 @@ describe('navigateFromData', () => {
       navigateFromData(ref, {type: 'news', slug: 'ingram-wins-race-3'});
 
       expect(ref.dispatch).toHaveBeenCalledWith(
-        resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'Article', params: {slug: 'ingram-wins-race-3'}}])),
+        resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'Article', params: {slug: 'ingram-wins-race-3', trafficSource: 'notification'}}])),
       );
     });
 
@@ -349,7 +349,7 @@ describe('notification tap integration scenarios', () => {
     navigateFromData(ref, {channel: 'news', type: 'news', slug: 'btcc-2026-season-preview'});
 
     expect(ref.dispatch).toHaveBeenCalledWith(
-      resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'Article', params: {slug: 'btcc-2026-season-preview'}}])),
+      resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'Article', params: {slug: 'btcc-2026-season-preview', trafficSource: 'notification'}}])),
     );
   });
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import {act} from '@testing-library/react-native';
-import {Switch} from 'react-native';
+import {act, fireEvent, waitFor} from '@testing-library/react-native';
+import {Switch, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SettingsScreen from '../../src/screens/SettingsScreen';
 import {renderWithProviders, makeNav} from './testUtils';
@@ -8,6 +8,30 @@ import {renderWithProviders, makeNav} from './testUtils';
 jest.mock('../../src/utils/broadcaster', () => ({
   useBroadcaster: jest.fn(() => 'uk'),
 }));
+
+jest.mock('../../src/store/auth', () => ({
+  useAuth: jest.fn(),
+}));
+
+const mockUseAuth = require('../../src/store/auth').useAuth;
+
+const mockRegisterWithEmail = jest.fn(() => Promise.resolve());
+const mockSignInWithEmail = jest.fn(() => Promise.resolve());
+const mockSignOut = jest.fn(() => Promise.resolve());
+
+beforeEach(() => {
+  mockRegisterWithEmail.mockResolvedValue(undefined);
+  mockSignInWithEmail.mockResolvedValue(undefined);
+  mockSignOut.mockResolvedValue(undefined);
+  mockUseAuth.mockReturnValue({
+    user: null,
+    isAnonymous: true,
+    providerIds: [],
+    registerWithEmail: mockRegisterWithEmail,
+    signInWithEmail: mockSignInWithEmail,
+    signOut: mockSignOut,
+  });
+});
 
 const nav = makeNav();
 
@@ -191,6 +215,192 @@ describe('SettingsScreen', () => {
     it('Race 2 starts off when stored as false', async () => {
       const {getByLabelText} = await renderSettings({'setting_pre_race_race2': 'false'});
       expect(getByLabelText('Pre-race Race 2')).toHaveProp('value', false);
+    });
+  });
+
+  describe('ACCOUNT section - anonymous user', () => {
+    it('renders the ACCOUNT section heading', async () => {
+      const {getByText} = await renderSettings();
+      expect(getByText('ACCOUNT')).toBeTruthy();
+    });
+
+    it('shows "Register or Log in" button when anonymous', async () => {
+      const {getByText} = await renderSettings();
+      expect(getByText('Register or Log in')).toBeTruthy();
+    });
+
+    it('does not show User ID when user is null', async () => {
+      const {queryByLabelText} = await renderSettings();
+      expect(queryByLabelText('Copy user ID')).toBeNull();
+    });
+
+    describe('auth modal', () => {
+      async function openModal() {
+        const utils = await renderSettings();
+        await act(async () => {
+          fireEvent.press(utils.getByText('Register or Log in'));
+        });
+        return utils;
+      }
+
+      it('opens auth modal when "Register or Log in" is pressed', async () => {
+        const {getByPlaceholderText} = await openModal();
+        expect(getByPlaceholderText('Email')).toBeTruthy();
+      });
+
+      it('shows email and password inputs', async () => {
+        const {getByPlaceholderText} = await openModal();
+        expect(getByPlaceholderText('Email')).toBeTruthy();
+        expect(getByPlaceholderText('Password')).toBeTruthy();
+      });
+
+      it('does not show confirm password field in login mode by default', async () => {
+        const {queryByPlaceholderText} = await openModal();
+        expect(queryByPlaceholderText('Confirm password')).toBeNull();
+      });
+
+      it('switches to register mode when Register toggle is pressed', async () => {
+        const {getByText, getByLabelText, getByPlaceholderText} = await openModal();
+        await act(async () => {
+          fireEvent.press(getByText('Register'));
+        });
+        expect(getByLabelText('Create account')).toBeTruthy();
+        expect(getByPlaceholderText('Confirm password')).toBeTruthy();
+      });
+
+      it('shows error when email is empty on submit', async () => {
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Log in to account')); });
+        expect(utils.getByText('Please enter your email and password.')).toBeTruthy();
+      });
+
+      it('shows password mismatch error in register mode', async () => {
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => { fireEvent.press(utils.getByText('Register')); });
+        await act(async () => {
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'test@test.com');
+          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
+          fireEvent.changeText(utils.getByPlaceholderText('Confirm password'), 'different');
+        });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Create account')); });
+        expect(utils.getByText("Passwords don't match.")).toBeTruthy();
+      });
+
+      it('calls signInWithEmail on login submit', async () => {
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => {
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'user@test.com');
+          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
+        });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Log in to account')); });
+        expect(mockSignInWithEmail).toHaveBeenCalledWith('user@test.com', 'pass1234');
+      });
+
+      it('calls registerWithEmail on register submit', async () => {
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => { fireEvent.press(utils.getByText('Register')); });
+        await act(async () => {
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'new@test.com');
+          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
+          fireEvent.changeText(utils.getByPlaceholderText('Confirm password'), 'pass1234');
+        });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Create account')); });
+        expect(mockRegisterWithEmail).toHaveBeenCalledWith('new@test.com', 'pass1234');
+      });
+
+      it('shows friendly error on auth/wrong-password', async () => {
+        mockSignInWithEmail.mockRejectedValueOnce({code: 'auth/wrong-password'});
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => {
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'user@test.com');
+          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'wrong');
+        });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Log in to account')); });
+        expect(utils.getByText('Incorrect email or password.')).toBeTruthy();
+      });
+
+      it('shows friendly error on auth/email-already-in-use', async () => {
+        mockRegisterWithEmail.mockRejectedValueOnce({code: 'auth/email-already-in-use'});
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => { fireEvent.press(utils.getByText('Register')); });
+        await act(async () => {
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'taken@test.com');
+          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
+          fireEvent.changeText(utils.getByPlaceholderText('Confirm password'), 'pass1234');
+        });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Create account')); });
+        expect(utils.getByText('An account with that email already exists. Try logging in instead.')).toBeTruthy();
+      });
+
+      it('closes modal when close button is pressed', async () => {
+        const {getByLabelText, queryByPlaceholderText} = await openModal();
+        await act(async () => {
+          fireEvent.press(getByLabelText('Close'));
+        });
+        expect(queryByPlaceholderText('Email')).toBeNull();
+      });
+    });
+  });
+
+  describe('ACCOUNT section - signed-in user', () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        user: {uid: 'real-uid-abcdefghijklmnopqrstuvwx', isAnonymous: false, email: 'jake@test.com', providerData: [{providerId: 'password'}]},
+        isAnonymous: false,
+        providerIds: ['password'],
+        registerWithEmail: mockRegisterWithEmail,
+        signInWithEmail: mockSignInWithEmail,
+        signOut: mockSignOut,
+      });
+    });
+
+    it('shows email instead of "Register or Log in" when signed in', async () => {
+      const {getByText, queryByText} = await renderSettings();
+      expect(getByText('jake@test.com')).toBeTruthy();
+      expect(queryByText('Register or Log in')).toBeNull();
+    });
+
+    it('shows "Sign out" button when signed in', async () => {
+      const {getByText} = await renderSettings();
+      expect(getByText('Sign out')).toBeTruthy();
+    });
+
+    it('shows truncated User ID', async () => {
+      const {getByText} = await renderSettings();
+      expect(getByText('User ID: real-uid-abcdefg…')).toBeTruthy();
+    });
+
+    it('pressing Sign out shows an Alert confirmation', async () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      const {getByText} = await renderSettings();
+      await act(async () => {
+        fireEvent.press(getByText('Sign out'));
+      });
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Sign out',
+        expect.any(String),
+        expect.any(Array),
+      );
+      alertSpy.mockRestore();
+    });
+
+    it('confirms sign out when destructive button pressed in Alert', async () => {
+      jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons) => {
+        const destructive = buttons.find(b => b.style === 'destructive');
+        destructive?.onPress();
+      });
+      const {getByText} = await renderSettings();
+      await act(async () => {
+        fireEvent.press(getByText('Sign out'));
+      });
+      expect(mockSignOut).toHaveBeenCalled();
+      Alert.alert.mockRestore();
     });
   });
 });
