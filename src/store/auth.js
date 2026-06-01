@@ -2,21 +2,22 @@ import React, {createContext, useContext, useState, useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import appleAuth from '@invertase/react-native-apple-authentication';
-import {Platform} from 'react-native';
+import {Platform, Linking} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Analytics} from '../utils/analytics';
 import {loadProfile, uploadLocalProfile, applyProfileToStorage} from '../utils/userProfile';
+import {MAGIC_LINK_URL} from '../config/firebase';
 
-// Set this to the Web OAuth 2.0 Client ID from Firebase Console → Authentication → Google → Web SDK config.
-// Google Sign-In must be enabled in the Firebase Console before this will work.
 const GOOGLE_WEB_CLIENT_ID = '399066588683-1d1bpqv7616h2f68lg78s4jufl7g528j.apps.googleusercontent.com';
+const MAGIC_LINK_EMAIL_KEY = 'magic_link_pending_email';
+
 
 GoogleSignin.configure({webClientId: GOOGLE_WEB_CLIENT_ID});
 
 const AuthContext = createContext({
   user: null,
   isAnonymous: true,
-  registerWithEmail: async () => {},
-  signInWithEmail: async () => {},
+  sendMagicLink: async () => {},
   signInWithGoogle: async () => {},
   signInWithApple: async () => {},
   signOut: async () => {},
@@ -49,6 +50,58 @@ export function AuthProvider({children}) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    function unwrapAuthUrl(url) {
+      // Firebase wraps the action URL: /__/auth/links?link=/__/auth/action?mode=signIn&oobCode=...
+      // Extract the inner URL so the SDK receives the actual sign-in parameters.
+      try {
+        const parsed = new URL(url);
+        const inner = parsed.searchParams.get('link');
+        if (inner) {return decodeURIComponent(inner);}
+      } catch {}
+      return url;
+    }
+
+    async function handleUrl(raw) {
+      if (!raw) {return;}
+      const url = unwrapAuthUrl(raw);
+      if (!auth().isSignInWithEmailLink(url)) {return;}
+      const email = await AsyncStorage.getItem(MAGIC_LINK_EMAIL_KEY);
+      if (!email) {return;}
+      try {
+        const currentUser = auth().currentUser;
+        if (currentUser?.isAnonymous) {
+          const credential = auth.EmailAuthProvider.credentialWithLink(email, url);
+          const result = await currentUser.linkWithCredential(credential);
+          setUser(result.user);
+        } else {
+          await auth().signInWithEmailLink(email, url);
+        }
+        await AsyncStorage.removeItem(MAGIC_LINK_EMAIL_KEY);
+      } catch (e) {
+        console.error('Magic link completion error:', e);
+      }
+    }
+    Linking.getInitialURL().then(handleUrl);
+    const sub = Linking.addEventListener('url', ({url}) => handleUrl(url));
+    return () => sub.remove();
+  }, []);
+
+  async function sendMagicLink(email) {
+    await AsyncStorage.setItem(MAGIC_LINK_EMAIL_KEY, email);
+    const res = await fetch(MAGIC_LINK_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email}),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const err = new Error(body.error || 'Failed to send magic link');
+      err.code = body.error?.startsWith('auth/') ? body.error : 'auth/network-request-failed';
+      throw err;
+    }
+  }
+
   async function signInWithGoogle() {
     await GoogleSignin.hasPlayServices();
     const {data} = await GoogleSignin.signIn();
@@ -76,22 +129,6 @@ export function AuthProvider({children}) {
     }
   }
 
-  async function registerWithEmail(email, password) {
-    const credential = auth.EmailAuthProvider.credential(email, password);
-    if (user?.isAnonymous) {
-      // linkWithCredential mutates the existing user in place and may not
-      // trigger onAuthStateChanged, so update state directly from the result.
-      const result = await user.linkWithCredential(credential);
-      setUser(result.user);
-    } else {
-      await auth().createUserWithEmailAndPassword(email, password);
-    }
-  }
-
-  async function signInWithEmail(email, password) {
-    await auth().signInWithEmailAndPassword(email, password);
-  }
-
   async function signOut() {
     if (user && !user.isAnonymous) {
       await uploadLocalProfile(user.uid);
@@ -107,8 +144,7 @@ export function AuthProvider({children}) {
       user,
       isAnonymous,
       providerIds,
-      registerWithEmail,
-      signInWithEmail,
+      sendMagicLink,
       signInWithGoogle,
       signInWithApple: Platform.OS === 'ios' ? signInWithApple : null,
       signOut,

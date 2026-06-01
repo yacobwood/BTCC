@@ -15,20 +15,17 @@ jest.mock('../../src/store/auth', () => ({
 
 const mockUseAuth = require('../../src/store/auth').useAuth;
 
-const mockRegisterWithEmail = jest.fn(() => Promise.resolve());
-const mockSignInWithEmail = jest.fn(() => Promise.resolve());
+const mockSendMagicLink = jest.fn(() => Promise.resolve());
 const mockSignOut = jest.fn(() => Promise.resolve());
 
 beforeEach(() => {
-  mockRegisterWithEmail.mockResolvedValue(undefined);
-  mockSignInWithEmail.mockResolvedValue(undefined);
+  mockSendMagicLink.mockResolvedValue(undefined);
   mockSignOut.mockResolvedValue(undefined);
   mockUseAuth.mockReturnValue({
     user: null,
     isAnonymous: true,
     providerIds: [],
-    registerWithEmail: mockRegisterWithEmail,
-    signInWithEmail: mockSignInWithEmail,
+    sendMagicLink: mockSendMagicLink,
     signOut: mockSignOut,
   });
 });
@@ -248,94 +245,74 @@ describe('SettingsScreen', () => {
         expect(getByPlaceholderText('Email')).toBeTruthy();
       });
 
-      it('shows email and password inputs', async () => {
-        const {getByPlaceholderText} = await openModal();
+      it('shows only email input - no password field', async () => {
+        const {getByPlaceholderText, queryByPlaceholderText} = await openModal();
         expect(getByPlaceholderText('Email')).toBeTruthy();
-        expect(getByPlaceholderText('Password')).toBeTruthy();
+        expect(queryByPlaceholderText('Password')).toBeNull();
       });
 
-      it('does not show confirm password field in login mode by default', async () => {
-        const {queryByPlaceholderText} = await openModal();
-        expect(queryByPlaceholderText('Confirm password')).toBeNull();
+      it('shows "Send magic link" button', async () => {
+        const {getByLabelText} = await openModal();
+        expect(getByLabelText('Send magic link')).toBeTruthy();
       });
 
-      it('switches to register mode when Register toggle is pressed', async () => {
-        const {getByText, getByLabelText, getByPlaceholderText} = await openModal();
-        await act(async () => {
-          fireEvent.press(getByText('Register'));
-        });
-        expect(getByLabelText('Create account')).toBeTruthy();
-        expect(getByPlaceholderText('Confirm password')).toBeTruthy();
-      });
-
-      it('shows error when email is empty on submit', async () => {
+      it('shows error when email is blank on submit', async () => {
         const utils = await renderSettings();
         await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
-        await act(async () => { fireEvent.press(utils.getByLabelText('Log in to account')); });
-        expect(utils.getByText('Please enter your email and password.')).toBeTruthy();
+        await act(async () => { fireEvent.press(utils.getByLabelText('Send magic link')); });
+        expect(utils.getByText('Please enter your email address.')).toBeTruthy();
       });
 
-      it('shows password mismatch error in register mode', async () => {
+      it('calls sendMagicLink with trimmed email', async () => {
         const utils = await renderSettings();
         await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
-        await act(async () => { fireEvent.press(utils.getByText('Register')); });
         await act(async () => {
-          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'test@test.com');
-          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
-          fireEvent.changeText(utils.getByPlaceholderText('Confirm password'), 'different');
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), '  user@test.com  ');
         });
-        await act(async () => { fireEvent.press(utils.getByLabelText('Create account')); });
-        expect(utils.getByText("Passwords don't match.")).toBeTruthy();
+        await act(async () => { fireEvent.press(utils.getByLabelText('Send magic link')); });
+        expect(mockSendMagicLink).toHaveBeenCalledWith('user@test.com');
       });
 
-      it('calls signInWithEmail on login submit', async () => {
+      it('shows "Check your inbox" confirmation after link is sent', async () => {
         const utils = await renderSettings();
         await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
         await act(async () => {
           fireEvent.changeText(utils.getByPlaceholderText('Email'), 'user@test.com');
-          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
         });
-        await act(async () => { fireEvent.press(utils.getByLabelText('Log in to account')); });
-        expect(mockSignInWithEmail).toHaveBeenCalledWith('user@test.com', 'pass1234');
+        await act(async () => { fireEvent.press(utils.getByLabelText('Send magic link')); });
+        expect(utils.getByText('Check your inbox')).toBeTruthy();
       });
 
-      it('calls registerWithEmail on register submit', async () => {
-        const utils = await renderSettings();
-        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
-        await act(async () => { fireEvent.press(utils.getByText('Register')); });
-        await act(async () => {
-          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'new@test.com');
-          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
-          fireEvent.changeText(utils.getByPlaceholderText('Confirm password'), 'pass1234');
-        });
-        await act(async () => { fireEvent.press(utils.getByLabelText('Create account')); });
-        expect(mockRegisterWithEmail).toHaveBeenCalledWith('new@test.com', 'pass1234');
-      });
-
-      it('shows friendly error on auth/wrong-password', async () => {
-        mockSignInWithEmail.mockRejectedValueOnce({code: 'auth/wrong-password'});
+      it('shows the email address in the sent confirmation', async () => {
         const utils = await renderSettings();
         await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
         await act(async () => {
           fireEvent.changeText(utils.getByPlaceholderText('Email'), 'user@test.com');
-          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'wrong');
         });
-        await act(async () => { fireEvent.press(utils.getByLabelText('Log in to account')); });
-        expect(utils.getByText('Incorrect email or password.')).toBeTruthy();
+        await act(async () => { fireEvent.press(utils.getByLabelText('Send magic link')); });
+        expect(utils.getByText(/user@test\.com/)).toBeTruthy();
       });
 
-      it('shows friendly error on auth/email-already-in-use', async () => {
-        mockRegisterWithEmail.mockRejectedValueOnce({code: 'auth/email-already-in-use'});
+      it('shows friendly error on auth/invalid-email', async () => {
+        mockSendMagicLink.mockRejectedValueOnce({code: 'auth/invalid-email'});
         const utils = await renderSettings();
         await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
-        await act(async () => { fireEvent.press(utils.getByText('Register')); });
         await act(async () => {
-          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'taken@test.com');
-          fireEvent.changeText(utils.getByPlaceholderText('Password'), 'pass1234');
-          fireEvent.changeText(utils.getByPlaceholderText('Confirm password'), 'pass1234');
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'notanemail');
         });
-        await act(async () => { fireEvent.press(utils.getByLabelText('Create account')); });
-        expect(utils.getByText('An account with that email already exists. Try logging in instead.')).toBeTruthy();
+        await act(async () => { fireEvent.press(utils.getByLabelText('Send magic link')); });
+        expect(utils.getByText("That doesn't look like a valid email address.")).toBeTruthy();
+      });
+
+      it('shows generic error on unknown failure', async () => {
+        mockSendMagicLink.mockRejectedValueOnce({code: 'auth/internal-error'});
+        const utils = await renderSettings();
+        await act(async () => { fireEvent.press(utils.getByText('Register or Log in')); });
+        await act(async () => {
+          fireEvent.changeText(utils.getByPlaceholderText('Email'), 'user@test.com');
+        });
+        await act(async () => { fireEvent.press(utils.getByLabelText('Send magic link')); });
+        expect(utils.getByText('Something went wrong. Please try again.')).toBeTruthy();
       });
 
       it('closes modal when close button is pressed', async () => {
@@ -345,17 +322,37 @@ describe('SettingsScreen', () => {
         });
         expect(queryByPlaceholderText('Email')).toBeNull();
       });
+
+      it('auto-closes modal when sign-in completes and isAnonymous becomes false', async () => {
+        const utils = await renderSettings();
+        await act(async () => {
+          fireEvent.press(utils.getByText('Register or Log in'));
+        });
+        expect(utils.getByPlaceholderText('Email')).toBeTruthy();
+
+        mockUseAuth.mockReturnValue({
+          user: {uid: 'linked-uid', isAnonymous: false, providerData: [{providerId: 'emailLink'}]},
+          isAnonymous: false,
+          providerIds: ['emailLink'],
+          sendMagicLink: mockSendMagicLink,
+          signOut: mockSignOut,
+        });
+        await act(async () => {
+          utils.rerender(<SettingsScreen navigation={nav} />);
+        });
+
+        expect(utils.queryByPlaceholderText('Email')).toBeNull();
+      });
     });
   });
 
   describe('ACCOUNT section - signed-in user', () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({
-        user: {uid: 'real-uid-abcdefghijklmnopqrstuvwx', isAnonymous: false, email: 'jake@test.com', providerData: [{providerId: 'password'}]},
+        user: {uid: 'real-uid-abcdefghijklmnopqrstuvwx', isAnonymous: false, email: 'jake@test.com', providerData: [{providerId: 'emailLink'}]},
         isAnonymous: false,
-        providerIds: ['password'],
-        registerWithEmail: mockRegisterWithEmail,
-        signInWithEmail: mockSignInWithEmail,
+        providerIds: ['emailLink'],
+        sendMagicLink: mockSendMagicLink,
         signOut: mockSignOut,
       });
     });

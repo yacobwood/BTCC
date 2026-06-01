@@ -1,6 +1,8 @@
 import React from 'react';
 import {act, create} from 'react-test-renderer';
+import {Linking} from 'react-native';
 import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {AuthProvider, useAuth} from '../../src/store/auth';
 
@@ -204,36 +206,46 @@ describe('AuthProvider', () => {
     });
   });
 
-  describe('registerWithEmail', () => {
-    it('links email credential to anonymous user and updates user state', async () => {
-      const mockAuthInstance = auth();
-      const linkedUser = {uid: 'test-uid-123', isAnonymous: false, providerData: [{providerId: 'password'}]};
-      const linkFn = jest.fn(() => Promise.resolve({user: linkedUser}));
-      const anonUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], linkWithCredential: linkFn};
-      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
-        cb(anonUser);
-        return jest.fn();
-      });
-
+  describe('sendMagicLink', () => {
+    it('stores email in AsyncStorage before calling the Cloud Function', async () => {
       let getHook;
       await act(async () => {
         getHook = renderProvider();
       });
 
       await act(async () => {
-        await getHook().registerWithEmail('test@example.com', 'password123');
+        await getHook().sendMagicLink('user@example.com');
       });
 
-      expect(linkFn).toHaveBeenCalled();
-      expect(getHook().user.isAnonymous).toBe(false);
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        'magic_link_pending_email',
+        'user@example.com',
+      );
     });
 
-    it('creates new account when user is already authenticated', async () => {
-      const mockAuthInstance = auth();
-      const nonAnonUser = {uid: 'real-uid-456', isAnonymous: false, providerData: [{providerId: 'google.com'}]};
-      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
-        cb(nonAnonUser);
-        return jest.fn();
+    it('POSTs the email to the sendMagicLinkEmail Cloud Function', async () => {
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        await getHook().sendMagicLink('user@example.com');
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('sendMagicLinkEmail'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({email: 'user@example.com'}),
+        }),
+      );
+    });
+
+    it('throws with auth/network-request-failed when the Cloud Function returns an error', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        json: jest.fn(() => Promise.resolve({error: 'Failed to send email'})),
       });
 
       let getHook;
@@ -241,28 +253,100 @@ describe('AuthProvider', () => {
         getHook = renderProvider();
       });
 
-      await act(async () => {
-        await getHook().registerWithEmail('new@example.com', 'securepass');
-      });
-
-      expect(mockAuthInstance.createUserWithEmailAndPassword).toHaveBeenCalledWith('new@example.com', 'securepass');
+      await expect(
+        act(async () => { await getHook().sendMagicLink('user@example.com'); }),
+      ).rejects.toThrow();
     });
   });
 
-  describe('signInWithEmail', () => {
-    it('calls signInWithEmailAndPassword with email and password', async () => {
+  describe('magic link completion (Linking handler)', () => {
+    const MAGIC_URL = 'https://btcchub-af77a.firebaseapp.com/__/auth/action?mode=signIn&oobCode=abc123';
+
+    it('upgrades anonymous user via linkWithCredential when cold-start URL is a magic link', async () => {
       const mockAuthInstance = auth();
+      const linkedUser = {uid: 'test-uid-123', isAnonymous: false, providerData: [{providerId: 'emailLink'}]};
+      const linkFn = jest.fn(() => Promise.resolve({user: linkedUser}));
+      const anonUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], linkWithCredential: linkFn};
 
-      let getHook;
-      await act(async () => {
-        getHook = renderProvider();
-      });
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => { cb(anonUser); return jest.fn(); });
+      mockAuthInstance.currentUser = anonUser;
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(true);
+      AsyncStorage.getItem.mockResolvedValueOnce('user@example.com');
+      Linking.getInitialURL.mockResolvedValueOnce(MAGIC_URL);
 
-      await act(async () => {
-        await getHook().signInWithEmail('test@test.com', 'pass');
-      });
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
 
-      expect(mockAuthInstance.signInWithEmailAndPassword).toHaveBeenCalledWith('test@test.com', 'pass');
+      expect(auth.EmailAuthProvider.credentialWithLink).toHaveBeenCalledWith('user@example.com', MAGIC_URL);
+      expect(linkFn).toHaveBeenCalled();
+    });
+
+    it('clears the pending email from AsyncStorage after completing sign-in', async () => {
+      const mockAuthInstance = auth();
+      const linkFn = jest.fn(() => Promise.resolve({user: {uid: 'test-uid-123', isAnonymous: false, providerData: []}}));
+      const anonUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], linkWithCredential: linkFn};
+
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => { cb(anonUser); return jest.fn(); });
+      mockAuthInstance.currentUser = anonUser;
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(true);
+      AsyncStorage.getItem.mockResolvedValueOnce('user@example.com');
+      Linking.getInitialURL.mockResolvedValueOnce(MAGIC_URL);
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('magic_link_pending_email');
+    });
+
+    it('calls signInWithEmailLink for a non-anonymous current user', async () => {
+      const mockAuthInstance = auth();
+      const nonAnonUser = {uid: 'real-uid', isAnonymous: false, providerData: [{providerId: 'google.com'}]};
+
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => { cb(nonAnonUser); return jest.fn(); });
+      mockAuthInstance.currentUser = nonAnonUser;
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(true);
+      AsyncStorage.getItem.mockResolvedValueOnce('user@example.com');
+      Linking.getInitialURL.mockResolvedValueOnce(MAGIC_URL);
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(mockAuthInstance.signInWithEmailLink).toHaveBeenCalledWith('user@example.com', MAGIC_URL);
+    });
+
+    it('is a no-op when the URL is not a magic link', async () => {
+      const mockAuthInstance = auth();
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(false);
+      Linking.getInitialURL.mockResolvedValueOnce('https://example.com/not-a-link');
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(mockAuthInstance.signInWithEmailLink).not.toHaveBeenCalled();
+      expect(auth.EmailAuthProvider.credentialWithLink).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when getInitialURL resolves to null', async () => {
+      const mockAuthInstance = auth();
+      Linking.getInitialURL.mockResolvedValueOnce(null);
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(mockAuthInstance.isSignInWithEmailLink).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when no pending email is stored', async () => {
+      const mockAuthInstance = auth();
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(true);
+      AsyncStorage.getItem.mockResolvedValueOnce(null);
+      Linking.getInitialURL.mockResolvedValueOnce(MAGIC_URL);
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(mockAuthInstance.signInWithEmailLink).not.toHaveBeenCalled();
+      expect(auth.EmailAuthProvider.credentialWithLink).not.toHaveBeenCalled();
     });
   });
 });

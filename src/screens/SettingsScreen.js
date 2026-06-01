@@ -34,21 +34,26 @@ export default function SettingsScreen({navigation}) {
   const {useKm, toggleUnits} = useUnits();
   const {podcasts_enabled, debug_mode, live_chat, broadcaster_override} = useFeatureFlags();
   const detectedBroadcaster = useBroadcaster();
-  const {user, isAnonymous, providerIds, registerWithEmail, signInWithEmail, signOut} = useAuth();
+  const {user, isAnonymous, providerIds, sendMagicLink, signOut} = useAuth();
   const [fcmToken, setFcmToken] = useState('');
   const [copiedFcm, setCopiedFcm] = useState(false);
   const [copiedStableId, setCopiedStableId] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authModalVisible, setAuthModalVisible] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
   const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authConfirm, setAuthConfirm] = useState('');
   const [authError, setAuthError] = useState('');
+  const [authSent, setAuthSent] = useState(false);
 
   useEffect(() => {
     getFCMToken().then(tok => { if (tok) setFcmToken(tok); }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!isAnonymous && authModalVisible) {
+      setAuthModalVisible(false);
+      setAuthSent(false);
+    }
+  }, [isAnonymous]);
 
   const copyStableId = () => {
     if (!user?.uid) return;
@@ -59,47 +64,30 @@ export default function SettingsScreen({navigation}) {
 
   const openAuthModal = () => {
     setAuthEmail('');
-    setAuthPassword('');
-    setAuthConfirm('');
     setAuthError('');
-    setAuthMode('login');
+    setAuthSent(false);
     setAuthModalVisible(true);
   };
 
-  const friendlyAuthError = (code) => {
-    switch (code) {
-      case 'auth/email-already-in-use':    return 'An account with that email already exists. Try logging in instead.';
-      case 'auth/invalid-email':           return 'That doesn\'t look like a valid email address.';
-      case 'auth/weak-password':           return 'Password must be at least 6 characters.';
-      case 'auth/wrong-password':
-      case 'auth/user-not-found':
-      case 'auth/invalid-credential':      return 'Incorrect email or password.';
-      case 'auth/too-many-requests':       return 'Too many attempts. Please wait a moment and try again.';
-      case 'auth/network-request-failed':  return 'Check your internet connection and try again.';
-      default:                             return 'Something went wrong. Please try again.';
-    }
-  };
-
-  const handleAuthSubmit = async () => {
-    if (!authEmail.trim() || !authPassword) {
-      setAuthError('Please enter your email and password.');
-      return;
-    }
-    if (authMode === 'register' && authPassword !== authConfirm) {
-      setAuthError('Passwords don\'t match.');
+  const handleSendMagicLink = async () => {
+    if (!authEmail.trim()) {
+      setAuthError('Please enter your email address.');
       return;
     }
     setAuthLoading(true);
     setAuthError('');
     try {
-      if (authMode === 'register') {
-        await registerWithEmail(authEmail.trim(), authPassword);
-      } else {
-        await signInWithEmail(authEmail.trim(), authPassword);
-      }
-      setAuthModalVisible(false);
+      await sendMagicLink(authEmail.trim());
+      setAuthSent(true);
     } catch (e) {
-      setAuthError(friendlyAuthError(e?.code));
+      const code = e?.code;
+      if (code === 'auth/invalid-email') {
+        setAuthError("That doesn't look like a valid email address.");
+      } else if (code === 'auth/network-request-failed') {
+        setAuthError('Check your internet connection and try again.');
+      } else {
+        setAuthError('Something went wrong. Please try again.');
+      }
     } finally {
       setAuthLoading(false);
     }
@@ -403,67 +391,45 @@ export default function SettingsScreen({navigation}) {
             <View style={styles.modalCard}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
-                  {authMode === 'register' ? 'Create account' : 'Log in'}
+                  {authSent ? 'Check your inbox' : 'Sign in'}
                 </Text>
                 <Pressable onPress={() => setAuthModalVisible(false)} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
                   <Icon name="close" size={22} color={Colors.textSecondary} />
                 </Pressable>
               </View>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="Email"
-                placeholderTextColor={Colors.textSecondary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                value={authEmail}
-                onChangeText={v => { setAuthEmail(v); setAuthError(''); }}
-              />
-              <TextInput
-                style={styles.modalInput}
-                placeholder="Password"
-                placeholderTextColor={Colors.textSecondary}
-                secureTextEntry
-                value={authPassword}
-                onChangeText={v => { setAuthPassword(v); setAuthError(''); }}
-                onSubmitEditing={authMode === 'login' ? handleAuthSubmit : undefined}
-                returnKeyType={authMode === 'login' ? 'done' : 'next'}
-              />
-              {authMode === 'register' && (
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Confirm password"
-                  placeholderTextColor={Colors.textSecondary}
-                  secureTextEntry
-                  value={authConfirm}
-                  onChangeText={v => { setAuthConfirm(v); setAuthError(''); }}
-                  onSubmitEditing={handleAuthSubmit}
-                  returnKeyType="done"
-                />
-              )}
-              {!!authError && <Text style={styles.modalError}>{authError}</Text>}
-              {authLoading ? (
-                <ActivityIndicator color={Colors.yellow} style={{marginTop: 16}} />
-              ) : (
-                <TouchableOpacity style={styles.modalSubmitBtn} onPress={handleAuthSubmit} accessibilityRole="button" accessibilityLabel={authMode === 'register' ? 'Create account' : 'Log in to account'}>
-                  <Text style={styles.modalSubmitText}>
-                    {authMode === 'register' ? 'Create account' : 'Log in'}
+              {authSent ? (
+                <>
+                  <Text style={styles.settingDesc}>
+                    We sent a magic link to {authEmail}. Open it on this device to sign in - no password needed.
                   </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity style={[styles.modalSubmitBtn, {marginTop: 20}]} onPress={() => setAuthModalVisible(false)} accessibilityRole="button">
+                    <Text style={styles.modalSubmitText}>Done</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Email"
+                    placeholderTextColor={Colors.textSecondary}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    value={authEmail}
+                    onChangeText={v => { setAuthEmail(v); setAuthError(''); }}
+                    onSubmitEditing={handleSendMagicLink}
+                    returnKeyType="done"
+                  />
+                  {!!authError && <Text style={styles.modalError}>{authError}</Text>}
+                  {authLoading ? (
+                    <ActivityIndicator color={Colors.yellow} style={{marginTop: 16}} />
+                  ) : (
+                    <TouchableOpacity style={styles.modalSubmitBtn} onPress={handleSendMagicLink} accessibilityRole="button" accessibilityLabel="Send magic link">
+                      <Text style={styles.modalSubmitText}>Send magic link</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
-              <View style={styles.modalDivider}>
-                <View style={styles.modalDividerLine} />
-                <Text style={styles.modalDividerText}>or</Text>
-                <View style={styles.modalDividerLine} />
-              </View>
-              <TouchableOpacity
-                onPress={() => { setAuthMode(m => m === 'login' ? 'register' : 'login'); setAuthError(''); }}
-                accessibilityRole="button"
-                style={styles.modalSecondaryBtn}>
-                <Text style={styles.modalSecondaryText}>
-                  {authMode === 'login' ? 'Register' : 'Log in'}
-                </Text>
-              </TouchableOpacity>
             </View>
           </KeyboardAvoidingView>
         </Modal>

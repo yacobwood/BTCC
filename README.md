@@ -852,7 +852,7 @@ The test suite covers all major stores, utilities, components and screens. Key f
 - `jest.mock` factory variables must be prefixed with `mock` (e.g. `mockDbOn`) to avoid babel-jest hoisting TDZ errors
 - When mocking a module that exports both a provider and a hook, always spread `jest.requireActual()` so `AllProviders` still has the real provider
 - `useAuth` is not in `AllProviders` - mock it directly in screen tests with `jest.mock('../../src/store/auth', ...)`
-- Auth modal submit button has `accessibilityLabel="Log in to account"` (login) or `"Create account"` (register) to distinguish it from the modal title
+- Auth modal uses magic link (passwordless) - the submit button has `accessibilityLabel="Send magic link"`; after sending it shows a "Check your inbox" confirmation state
 
 ### Untested Areas
 
@@ -916,8 +916,11 @@ Configured in `AppNavigator.js` under the `linking` object.
 | `btccfanhub://drivers/driver-slug` | DriverDetail |
 | `btccfanhub://results/5` | RoundResults for round 5 |
 | `https://btcchub.vercel.app/...` | Same routes via universal links |
+| `https://btcchub-af77a.firebaseapp.com/...` | Magic link auth completion (handled in `AuthProvider`) |
 
 Notification deep links use the `data` payload fields (`type`, `slug`, `round`) mapped in `notifNavigation.js`.
+
+Magic link auth links are intercepted in `AuthProvider` via `Linking.getInitialURL()` (cold start) and `Linking.addEventListener('url', ...)` (warm start). The pending email is stored in `AsyncStorage` under `magic_link_pending_email` between the user requesting the link and tapping it. If the current user is anonymous, `linkWithCredential` upgrades the existing account rather than creating a new one. Firebase wraps the action URL inside `/__/auth/links?link=INNER_URL` - `AuthProvider` unwraps this before passing to the Firebase Auth SDK. The auth modal in `SettingsScreen` auto-closes when `isAnonymous` changes to `false` via a `useEffect` dependency on the context value.
 
 ---
 

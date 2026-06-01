@@ -54,6 +54,9 @@ const mockAuth = {
   signInWithCredential: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
   signInWithEmailAndPassword: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
   createUserWithEmailAndPassword: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
+  sendSignInLinkToEmail: jest.fn(() => Promise.resolve()),
+  isSignInWithEmailLink: jest.fn(() => false),
+  signInWithEmailLink: jest.fn(() => Promise.resolve({user: {...mockAuthUser, isAnonymous: false}})),
   signOut: jest.fn(() => Promise.resolve()),
   GoogleAuthProvider: {credential: jest.fn(() => ({providerId: 'google.com'}))},
   AppleAuthProvider: {credential: jest.fn(() => ({providerId: 'apple.com'}))},
@@ -62,7 +65,10 @@ jest.mock('@react-native-firebase/auth', () => {
   const fn = jest.fn(() => mockAuth);
   fn.GoogleAuthProvider = mockAuth.GoogleAuthProvider;
   fn.AppleAuthProvider = mockAuth.AppleAuthProvider;
-  fn.EmailAuthProvider = {credential: jest.fn(() => ({providerId: 'password'}))};
+  fn.EmailAuthProvider = {
+    credential: jest.fn(() => ({providerId: 'password'})),
+    credentialWithLink: jest.fn(() => ({providerId: 'emailLink'})),
+  };
   return {__esModule: true, default: fn};
 });
 
@@ -256,6 +262,16 @@ jest.mock('./src/components/CachedImage', () => {
   };
 });
 jest.mock('./src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
+
+// ── React Native Linking ──────────────────────────────────────────────────────
+// Patch Linking so AuthProvider's magic-link useEffect doesn't crash in tests.
+const {Linking} = require('react-native');
+if (!Linking.getInitialURL || !Linking.getInitialURL.mock) {
+  Linking.getInitialURL = jest.fn(() => Promise.resolve(null));
+}
+if (!Linking.addEventListener || !Linking.addEventListener.mock) {
+  Linking.addEventListener = jest.fn(() => ({remove: jest.fn()}));
+}
 
 // ── Asset stubs ───────────────────────────────────────────────────────────────
 jest.mock('./src/assets/driverImages', () => ({getDriverImage: () => null}));
