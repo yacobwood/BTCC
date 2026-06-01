@@ -348,5 +348,27 @@ describe('AuthProvider', () => {
       expect(mockAuthInstance.signInWithEmailLink).not.toHaveBeenCalled();
       expect(auth.EmailAuthProvider.credentialWithLink).not.toHaveBeenCalled();
     });
+
+    it('falls back to signInWithEmailLink when linkWithCredential throws auth/email-already-in-use', async () => {
+      const mockAuthInstance = auth();
+      const linkFn = jest.fn(() => {
+        const err = new Error('email already in use');
+        err.code = 'auth/email-already-in-use';
+        return Promise.reject(err);
+      });
+      const anonUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], linkWithCredential: linkFn};
+
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => { cb(anonUser); return jest.fn(); });
+      mockAuthInstance.currentUser = anonUser;
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(true);
+      AsyncStorage.getItem.mockResolvedValueOnce('user@example.com');
+      Linking.getInitialURL.mockResolvedValueOnce(MAGIC_URL);
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(linkFn).toHaveBeenCalled();
+      expect(mockAuthInstance.signInWithEmailLink).toHaveBeenCalledWith('user@example.com', MAGIC_URL);
+    });
   });
 });

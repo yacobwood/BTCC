@@ -72,8 +72,16 @@ export function AuthProvider({children}) {
         const currentUser = auth().currentUser;
         if (currentUser?.isAnonymous) {
           const credential = auth.EmailAuthProvider.credentialWithLink(email, url);
-          const result = await currentUser.linkWithCredential(credential);
-          setUser(result.user);
+          try {
+            const result = await currentUser.linkWithCredential(credential);
+            setUser(result.user);
+          } catch (linkErr) {
+            if (linkErr.code === 'auth/email-already-in-use') {
+              await auth().signInWithEmailLink(email, url);
+            } else {
+              throw linkErr;
+            }
+          }
         } else {
           await auth().signInWithEmailLink(email, url);
         }
