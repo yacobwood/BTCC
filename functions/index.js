@@ -992,6 +992,16 @@ exports.sendMagicLinkEmail = onRequest(
       res.status(500).json({error: e.code || 'Failed to generate link'}); return;
     }
 
+    // Firebase wraps the action URL in /__/auth/links?link=<actionUrl>.
+    // Extract the action URL directly so the app only needs to unwrap one level.
+    let actionUrl = link;
+    try {
+      const inner = new URL(link).searchParams.get('link');
+      if (inner) actionUrl = inner;
+    } catch {}
+
+    const deepLink = `https://btcchub.vercel.app/magic-link?link=${encodeURIComponent(actionUrl)}`;
+
     const html = `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -1029,7 +1039,7 @@ exports.sendMagicLinkEmail = onRequest(
       <table class="btn" cellpadding="0" cellspacing="0" style="margin:0 0 32px 0;">
         <tr>
           <td style="background:#FEBD02;border-radius:8px;">
-            <a href="btccfanhub://magic-link?link=${encodeURIComponent(link)}" style="display:inline-block;padding:14px 36px;color:#080912;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">Sign in to BTCC Hub &rarr;</a>
+            <a href="${deepLink}" style="display:inline-block;padding:14px 36px;color:#080912;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">Sign in to BTCC Hub &rarr;</a>
           </td>
         </tr>
       </table>
