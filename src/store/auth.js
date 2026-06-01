@@ -53,12 +53,10 @@ export function AuthProvider({children}) {
   useEffect(() => {
     function unwrapAuthUrl(url) {
       // Custom scheme from email button: btccfanhub://magic-link?link=<encoded-firebase-url>
+      // Use regex rather than new URL() — Hermes doesn't parse custom schemes reliably.
       if (url.startsWith('btccfanhub://magic-link')) {
-        try {
-          const inner = new URL(url).searchParams.get('link');
-          if (inner) {return decodeURIComponent(inner);}
-        } catch {}
-        return null;
+        const match = url.match(/[?&]link=([^&]*)/);
+        return match ? decodeURIComponent(match[1]) : null;
       }
       // Firebase wraps the action URL: /__/auth/links?link=/__/auth/action?mode=signIn&oobCode=...
       try {
@@ -71,7 +69,7 @@ export function AuthProvider({children}) {
     async function handleUrl(raw) {
       if (!raw) {return;}
       const url = unwrapAuthUrl(raw);
-      if (!auth().isSignInWithEmailLink(url)) {return;}
+      if (!url || !auth().isSignInWithEmailLink(url)) {return;}
       const email = await AsyncStorage.getItem(MAGIC_LINK_EMAIL_KEY);
       if (!email) {return;}
       try {

@@ -394,6 +394,7 @@ describe('AuthProvider', () => {
 
     it('is a no-op when btccfanhub:// URL has no inner link param', async () => {
       const mockAuthInstance = auth();
+      // No ?link= param — unwrapAuthUrl returns null, handleUrl exits early
       Linking.getInitialURL.mockResolvedValueOnce('btccfanhub://magic-link');
 
       await act(async () => { renderProvider(); });
