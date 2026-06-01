@@ -992,15 +992,9 @@ exports.sendMagicLinkEmail = onRequest(
       res.status(500).json({error: e.code || 'Failed to generate link'}); return;
     }
 
-    // Firebase wraps the action URL in /__/auth/links?link=<actionUrl>.
-    // Extract the action URL directly so the app only needs to unwrap one level.
-    let actionUrl = link;
-    try {
-      const inner = new URL(link).searchParams.get('link');
-      if (inner) actionUrl = inner;
-    } catch {}
-
-    const deepLink = `https://btcchub.vercel.app/magic-link?link=${encodeURIComponent(actionUrl)}`;
+    // Pass the full Firebase links URL — the native SDK's signInWithEmailLink
+    // and credentialWithLink require the complete /__/auth/links?link=... form.
+    const deepLink = `https://btcchub.vercel.app/magic-link?link=${encodeURIComponent(link)}`;
 
     const html = `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">

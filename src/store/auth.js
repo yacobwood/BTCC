@@ -52,17 +52,20 @@ export function AuthProvider({children}) {
 
   useEffect(() => {
     function unwrapAuthUrl(url) {
-      // Custom scheme from email button: btccfanhub://magic-link?link=<encoded-firebase-url>
-      // Use regex rather than new URL() — Hermes doesn't parse custom schemes reliably.
+      // btccfanhub://magic-link?link=<encoded-full-links-url>
+      // Use regex — Hermes doesn't parse custom schemes with new URL() reliably.
       if (url.startsWith('btccfanhub://magic-link')) {
         const match = url.match(/[?&]link=([^&]*)/);
         return match ? decodeURIComponent(match[1]) : null;
       }
-      // Firebase wraps the action URL: /__/auth/links?link=/__/auth/action?mode=signIn&oobCode=...
+      // https wrapper (btcchub.vercel.app/magic-link): extract the embedded links URL.
+      // searchParams.get() already decodes one level — do NOT call decodeURIComponent
+      // again or the nested %3D/%26 encoding inside the links URL gets corrupted.
       try {
         const inner = new URL(url).searchParams.get('link');
-        if (inner) {return decodeURIComponent(inner);}
+        if (inner) {return inner;}
       } catch {}
+      // Firebase domain direct (/__/auth/links?link=...): pass through as-is.
       return url;
     }
 
