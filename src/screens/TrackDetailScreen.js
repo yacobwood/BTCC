@@ -510,7 +510,7 @@ export default function TrackDetailScreen({route, navigation}) {
         };
         return (
           <View style={styles.scheduleCard}>
-            {dayOrder.filter(d => byDay[d]).map(day => (
+            {!showFullTimetable && dayOrder.filter(d => byDay[d]).map(day => (
               <View key={day}>
                 <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
                 {byDay[day].map((s, i) => (
@@ -524,7 +524,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
             {fullTimetable.length > 0 && (
               <>
-                <View style={styles.timetableToggleDivider} />
+                {!showFullTimetable && <View style={styles.timetableToggleDivider} />}
                 <TouchableOpacity
                   style={styles.timetableToggle}
                   onPress={() => {
@@ -544,7 +544,6 @@ export default function TrackDetailScreen({route, navigation}) {
 
             {showFullTimetable && (
               <>
-                <View style={styles.timetableToggleDivider} />
                 {dayOrder.filter(d => fullByDay[d]).map(day => (
                   <View key={`full-${day}`}>
                     <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
