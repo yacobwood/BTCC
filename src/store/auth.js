@@ -76,18 +76,22 @@ export function AuthProvider({children}) {
           try {
             const result = await currentUser.linkWithCredential(credential);
             setUser(result.user);
+            Analytics.signInCompleted('email_link');
           } catch (linkErr) {
             if (linkErr.code === 'auth/email-already-in-use') {
               await auth().signInWithEmailLink(email, url);
+              Analytics.signInCompleted('email_link');
             } else {
               throw linkErr;
             }
           }
         } else {
           await auth().signInWithEmailLink(email, url);
+          Analytics.signInCompleted('email_link');
         }
         await AsyncStorage.removeItem(MAGIC_LINK_EMAIL_KEY);
       } catch (e) {
+        Analytics.signInFailed('email_link', e?.code);
         console.error('Magic link completion error:', e);
       }
     }
@@ -112,29 +116,41 @@ export function AuthProvider({children}) {
   }
 
   async function signInWithGoogle() {
-    await GoogleSignin.hasPlayServices();
-    const {data} = await GoogleSignin.signIn();
-    const credential = auth.GoogleAuthProvider.credential(data.idToken);
-    if (user?.isAnonymous) {
-      await user.linkWithCredential(credential);
-    } else {
-      await auth().signInWithCredential(credential);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const {data} = await GoogleSignin.signIn();
+      const credential = auth.GoogleAuthProvider.credential(data.idToken);
+      if (user?.isAnonymous) {
+        await user.linkWithCredential(credential);
+      } else {
+        await auth().signInWithCredential(credential);
+      }
+      Analytics.signInCompleted('google');
+    } catch (e) {
+      Analytics.signInFailed('google', e?.code);
+      throw e;
     }
   }
 
   async function signInWithApple() {
-    const appleReq = await appleAuth.performRequest({
-      requestedOperation: appleAuth.Operation.LOGIN,
-      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-    });
-    const credential = auth.AppleAuthProvider.credential(
-      appleReq.identityToken,
-      appleReq.nonce,
-    );
-    if (user?.isAnonymous) {
-      await user.linkWithCredential(credential);
-    } else {
-      await auth().signInWithCredential(credential);
+    try {
+      const appleReq = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+      const credential = auth.AppleAuthProvider.credential(
+        appleReq.identityToken,
+        appleReq.nonce,
+      );
+      if (user?.isAnonymous) {
+        await user.linkWithCredential(credential);
+      } else {
+        await auth().signInWithCredential(credential);
+      }
+      Analytics.signInCompleted('apple');
+    } catch (e) {
+      Analytics.signInFailed('apple', e?.code);
+      throw e;
     }
   }
 

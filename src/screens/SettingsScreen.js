@@ -67,6 +67,7 @@ export default function SettingsScreen({navigation}) {
     setAuthError('');
     setAuthSent(false);
     setAuthModalVisible(true);
+    Analytics.signInModalOpened();
   };
 
   const handleSendMagicLink = async () => {
@@ -76,11 +77,14 @@ export default function SettingsScreen({navigation}) {
     }
     setAuthLoading(true);
     setAuthError('');
+    Analytics.magicLinkRequested();
     try {
       await sendMagicLink(authEmail.trim());
       setAuthSent(true);
+      Analytics.magicLinkSent();
     } catch (e) {
       const code = e?.code;
+      Analytics.magicLinkFailed(code);
       if (code === 'auth/invalid-email') {
         setAuthError("That doesn't look like a valid email address.");
       } else if (code === 'auth/network-request-failed') {
@@ -99,7 +103,7 @@ export default function SettingsScreen({navigation}) {
       'Your preferences are saved. You will be signed in anonymously until you link an account again.',
       [
         {text: 'Cancel', style: 'cancel'},
-        {text: 'Sign out', style: 'destructive', onPress: () => signOut().catch(() => {})},
+        {text: 'Sign out', style: 'destructive', onPress: () => { Analytics.signedOut(); signOut().catch(() => {}); }},
       ],
     );
   };

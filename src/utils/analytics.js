@@ -40,6 +40,14 @@ export const Analytics = {
   notificationTypeToggled: (type, enabled) => logEvent(fa(),'notification_type_toggled', {type, enabled: enabled ? 'true' : 'false'}),
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
 
+  signInModalOpened: () => logEvent(fa(), 'sign_in_modal_opened'),
+  magicLinkRequested: () => logEvent(fa(), 'magic_link_requested'),
+  magicLinkSent: () => logEvent(fa(), 'magic_link_sent'),
+  magicLinkFailed: (errorCode) => logEvent(fa(), 'magic_link_failed', {error_code: errorCode || 'unknown'}),
+  signInCompleted: (method) => logEvent(fa(), 'login', {method}),
+  signInFailed: (method, errorCode) => logEvent(fa(), 'sign_in_failed', {method, error_code: errorCode || 'unknown'}),
+  signedOut: () => logEvent(fa(), 'sign_out'),
+
   bugReportSubmitted: (category) => logEvent(fa(),'bug_report_submitted', {category}),
 
   roadmapVoted: (itemId) => logEvent(fa(),'roadmap_voted', {item_id: itemId}),
