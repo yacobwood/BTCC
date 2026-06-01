@@ -920,7 +920,9 @@ Configured in `AppNavigator.js` under the `linking` object.
 
 Notification deep links use the `data` payload fields (`type`, `slug`, `round`) mapped in `notifNavigation.js`.
 
-Magic link auth links are intercepted in `AuthProvider` via `Linking.getInitialURL()` (cold start) and `Linking.addEventListener('url', ...)` (warm start). The pending email is stored in `AsyncStorage` under `magic_link_pending_email` between the user requesting the link and tapping it. If the current user is anonymous, `linkWithCredential` upgrades the existing account rather than creating a new one. Firebase wraps the action URL inside `/__/auth/links?link=INNER_URL` - `AuthProvider` unwraps this before passing to the Firebase Auth SDK. The auth modal in `SettingsScreen` auto-closes when `isAnonymous` changes to `false` via a `useEffect` dependency on the context value.
+Magic link auth links are intercepted in `AuthProvider` via `Linking.getInitialURL()` (cold start) and `Linking.addEventListener('url', ...)` (warm start). The pending email is stored in `AsyncStorage` under `magic_link_pending_email` between the user requesting the link and tapping it. If the current user is anonymous, `linkWithCredential` upgrades the existing account rather than creating a new one. The auth modal in `SettingsScreen` auto-closes when `isAnonymous` changes to `false` via a `useEffect` dependency on the context value.
+
+**Email flow:** The `sendMagicLinkEmail` Cloud Function generates a plain Firebase action URL (`/__/auth/action?mode=signIn&oobCode=...`) with no `handleCodeInApp`/Dynamic Links wrapper (Firebase Dynamic Links were shut down August 2025). The button in the email links directly to `btcchub-af77a.firebaseapp.com` - Firebase automatically serves `assetlinks.json` for that domain, so the verified App Link intercepts the tap in Gmail's Chrome Custom Tab and opens the app. `isSignInWithEmailLink` is `await`ed (it is async in the native bridge); without `await` the Promise is always truthy and sign-in is attempted for every URL.
 
 ---
 

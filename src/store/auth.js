@@ -58,21 +58,15 @@ export function AuthProvider({children}) {
         const match = url.match(/[?&]link=([^&]*)/);
         return match ? decodeURIComponent(match[1]) : null;
       }
-      // https wrapper (btcchub.vercel.app/magic-link): extract the embedded links URL.
-      // searchParams.get() already decodes one level — do NOT call decodeURIComponent
-      // again or the nested %3D/%26 encoding inside the links URL gets corrupted.
-      try {
-        const inner = new URL(url).searchParams.get('link');
-        if (inner) {return inner;}
-      } catch {}
-      // Firebase domain direct (/__/auth/links?link=...): pass through as-is.
+      // Firebase domain direct (btcchub-af77a.firebaseapp.com): pass through as-is.
       return url;
     }
 
     async function handleUrl(raw) {
       if (!raw) {return;}
       const url = unwrapAuthUrl(raw);
-      if (!url || !auth().isSignInWithEmailLink(url)) {return;}
+      const isLink = url ? await auth().isSignInWithEmailLink(url) : false;
+      if (!url || !isLink) {return;}
       const email = await AsyncStorage.getItem(MAGIC_LINK_EMAIL_KEY);
       if (!email) {return;}
       try {

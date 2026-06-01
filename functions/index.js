@@ -977,11 +977,11 @@ exports.sendMagicLinkEmail = onRequest(
       res.status(400).json({error: 'Invalid email address'}); return;
     }
 
+    // handleCodeInApp / android / iOS omitted: Firebase Dynamic Links were shut down
+    // Aug 2025. We open the app ourselves via the btcchub.vercel.app intermediary,
+    // so we just need a plain action URL the native SDK's signInWithEmailLink accepts.
     const actionCodeSettings = {
       url: 'https://btcchub-af77a.firebaseapp.com',
-      handleCodeInApp: true,
-      iOS: {bundleId: 'com.btcchub.app'},
-      android: {packageName: 'com.btccfanhub', installIfNotAvailable: false},
     };
 
     let link;
@@ -992,9 +992,10 @@ exports.sendMagicLinkEmail = onRequest(
       res.status(500).json({error: e.code || 'Failed to generate link'}); return;
     }
 
-    // Pass the full Firebase links URL — the native SDK's signInWithEmailLink
-    // and credentialWithLink require the complete /__/auth/links?link=... form.
-    const deepLink = `https://btcchub.vercel.app/magic-link?link=${encodeURIComponent(link)}`;
+    // Use the Firebase action URL directly as the button href.
+    // btcchub-af77a.firebaseapp.com has a verified App Link (Firebase serves assetlinks.json
+    // automatically), so Gmail's Chrome Custom Tab will intercept and open the app.
+    const deepLink = link;
 
     const html = `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
