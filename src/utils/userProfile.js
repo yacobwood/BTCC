@@ -109,9 +109,9 @@ export async function loadProfile(uid) {
 export async function saveProfile(uid, partial) {
   try {
     const doc = toFirestore(partial);
-    const fieldPaths = Object.keys(doc.fields).join(',');
+    const fieldPaths = Object.keys(doc.fields).map(f => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&');
     const headers = await authHeaders();
-    const url = `${docUrl(uid)}&updateMask.fieldPaths=${fieldPaths}`;
+    const url = `${docUrl(uid)}&${fieldPaths}`;
     const res = await fetch(url, {method: 'PATCH', headers, body: JSON.stringify(doc)});
     if (!res.ok) {
       const body = await res.text();

@@ -118,6 +118,17 @@ describe('userProfile', () => {
       // The field path must not be just "fields"
       expect(url).not.toMatch(/updateMask\.fieldPaths=fields$/);
     });
+
+    it('passes each field as a separate updateMask.fieldPaths param, not comma-joined', async () => {
+      await saveProfile(UID, {unitKm: true, commenterName: 'Jake'});
+
+      const [url] = global.fetch.mock.calls[0];
+      // Must NOT have a comma inside any updateMask.fieldPaths value
+      expect(url).not.toMatch(/updateMask\.fieldPaths=[^&]*,[^&]*/);
+      // Must have two separate updateMask.fieldPaths entries
+      const matches = url.match(/updateMask\.fieldPaths=/g);
+      expect(matches).toHaveLength(2);
+    });
   });
 
   describe('uploadLocalProfile', () => {
