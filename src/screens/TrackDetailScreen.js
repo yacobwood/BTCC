@@ -510,6 +510,25 @@ export default function TrackDetailScreen({route, navigation}) {
         };
         return (
           <View style={styles.scheduleCard}>
+            {fullTimetable.length > 0 && (
+              <View style={styles.timetableSegmentRow}>
+                <TouchableOpacity
+                  style={[styles.timetableSegment, !showFullTimetable && styles.timetableSegmentActive]}
+                  onPress={() => setShowFullTimetable(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.timetableSegmentText, !showFullTimetable && styles.timetableSegmentTextActive]}>BTCC</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.timetableSegment, showFullTimetable && styles.timetableSegmentActive]}
+                  onPress={() => { setShowFullTimetable(true); Analytics.fullTimetableExpanded(track.venue); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.timetableSegmentText, showFullTimetable && styles.timetableSegmentTextActive]}>Full weekend</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             {!showFullTimetable && dayOrder.filter(d => byDay[d]).map(day => (
               <View key={day}>
                 <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
@@ -522,58 +541,34 @@ export default function TrackDetailScreen({route, navigation}) {
               </View>
             ))}
 
-            {fullTimetable.length > 0 && (
-              <>
-                {!showFullTimetable && <View style={styles.timetableToggleDivider} />}
-                <TouchableOpacity
-                  style={styles.timetableToggle}
-                  onPress={() => {
-                    const next = !showFullTimetable;
-                    setShowFullTimetable(next);
-                    if (next) Analytics.fullTimetableExpanded(track.venue);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.timetableToggleText}>
-                    {showFullTimetable ? 'Hide full weekend timetable' : 'Show full weekend timetable'}
-                  </Text>
-                  <Icon name={showFullTimetable ? 'expand-less' : 'expand-more'} size={20} color={Colors.textSecondary} />
-                </TouchableOpacity>
-              </>
-            )}
-
-            {showFullTimetable && (
-              <>
-                {dayOrder.filter(d => fullByDay[d]).map(day => (
-                  <View key={`full-${day}`}>
-                    <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
-                    {fullByDay[day].map((s, i) => {
-                      if (!s.series) {
-                        return (
-                          <View key={i} style={styles.sessionRow}>
-                            <Text style={styles.fullEventName}>{s.session}</Text>
-                            <Text style={styles.sessionTime}>{formatTime(s)}</Text>
-                          </View>
-                        );
-                      }
-                      const btcc = isBtcc(s);
-                      return (
-                        <View key={i} style={styles.sessionRow}>
-                          <View style={{flex: 1}}>
-                            <Text style={btcc ? styles.sessionName : styles.fullSeriesSession}>{s.session}</Text>
-                            {!btcc && <Text style={styles.fullSeriesName}>{s.series}</Text>}
-                          </View>
-                          <View style={{alignItems: 'flex-end'}}>
-                            <Text style={styles.sessionTime}>{formatTime(s)}</Text>
-                            {formatLaps(s) && <Text style={styles.fullSeriesLaps}>{formatLaps(s)}</Text>}
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                ))}
-              </>
-            )}
+            {showFullTimetable && dayOrder.filter(d => fullByDay[d]).map(day => (
+              <View key={`full-${day}`}>
+                <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
+                {fullByDay[day].map((s, i) => {
+                  if (!s.series) {
+                    return (
+                      <View key={i} style={styles.sessionRow}>
+                        <Text style={styles.fullEventName}>{s.session}</Text>
+                        <Text style={styles.sessionTime}>{formatTime(s)}</Text>
+                      </View>
+                    );
+                  }
+                  const btcc = isBtcc(s);
+                  return (
+                    <View key={i} style={styles.sessionRow}>
+                      <View style={{flex: 1}}>
+                        <Text style={btcc ? styles.sessionName : styles.fullSeriesSession}>{s.session}</Text>
+                        {!btcc && <Text style={styles.fullSeriesName}>{s.series}</Text>}
+                      </View>
+                      <View style={{alignItems: 'flex-end'}}>
+                        <Text style={styles.sessionTime}>{formatTime(s)}</Text>
+                        {formatLaps(s) && <Text style={styles.fullSeriesLaps}>{formatLaps(s)}</Text>}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
           </View>
         );
       }
@@ -902,9 +897,11 @@ const styles = StyleSheet.create({
   sessionRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: 'rgba(42,45,68,0.4)'},
   sessionName: {color: '#fff', fontSize: 14, fontWeight: '600'},
   sessionTime: {color: Colors.textSecondary, fontSize: 14, fontWeight: '700'},
-  timetableToggleDivider: {height: 1, backgroundColor: 'rgba(42,45,68,0.6)', marginHorizontal: -14},
-  timetableToggle: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 2},
-  timetableToggleText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '600'},
+  timetableSegmentRow: {flexDirection: 'row', gap: 8},
+  timetableSegment: {paddingHorizontal: 14, height: 34, borderRadius: 20, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.outline, justifyContent: 'center'},
+  timetableSegmentActive: {backgroundColor: Colors.yellow, borderColor: Colors.yellow},
+  timetableSegmentText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '600'},
+  timetableSegmentTextActive: {color: Colors.navy},
   fullSeriesSession: {color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '600'},
   fullSeriesName: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
   fullSeriesLaps: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
