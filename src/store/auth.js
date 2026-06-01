@@ -52,11 +52,17 @@ export function AuthProvider({children}) {
 
   useEffect(() => {
     function unwrapAuthUrl(url) {
+      // Custom scheme from email button: btccfanhub://magic-link?link=<encoded-firebase-url>
+      if (url.startsWith('btccfanhub://magic-link')) {
+        try {
+          const inner = new URL(url).searchParams.get('link');
+          if (inner) {return decodeURIComponent(inner);}
+        } catch {}
+        return null;
+      }
       // Firebase wraps the action URL: /__/auth/links?link=/__/auth/action?mode=signIn&oobCode=...
-      // Extract the inner URL so the SDK receives the actual sign-in parameters.
       try {
-        const parsed = new URL(url);
-        const inner = parsed.searchParams.get('link');
+        const inner = new URL(url).searchParams.get('link');
         if (inner) {return decodeURIComponent(inner);}
       } catch {}
       return url;

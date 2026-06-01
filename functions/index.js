@@ -1029,7 +1029,7 @@ exports.sendMagicLinkEmail = onRequest(
       <table class="btn" cellpadding="0" cellspacing="0" style="margin:0 0 32px 0;">
         <tr>
           <td style="background:#FEBD02;border-radius:8px;">
-            <a href="${link}" style="display:inline-block;padding:14px 36px;color:#080912;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">Sign in to BTCC Hub &rarr;</a>
+            <a href="btccfanhub://magic-link?link=${encodeURIComponent(link)}" style="display:inline-block;padding:14px 36px;color:#080912;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">Sign in to BTCC Hub &rarr;</a>
           </td>
         </tr>
       </table>

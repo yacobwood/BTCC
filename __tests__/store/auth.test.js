@@ -370,5 +370,36 @@ describe('AuthProvider', () => {
       expect(linkFn).toHaveBeenCalled();
       expect(mockAuthInstance.signInWithEmailLink).toHaveBeenCalledWith('user@example.com', MAGIC_URL);
     });
+
+    it('unwraps btccfanhub:// custom scheme URL and uses the inner Firebase link', async () => {
+      const mockAuthInstance = auth();
+      const linkFn = jest.fn(() => Promise.resolve({user: {uid: 'test-uid-123', isAnonymous: false, providerData: []}}));
+      const anonUser = {uid: 'test-uid-123', isAnonymous: true, providerData: [], linkWithCredential: linkFn};
+
+      const customSchemeUrl = `btccfanhub://magic-link?link=${encodeURIComponent(MAGIC_URL)}`;
+
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => { cb(anonUser); return jest.fn(); });
+      mockAuthInstance.currentUser = anonUser;
+      mockAuthInstance.isSignInWithEmailLink.mockReturnValueOnce(true);
+      AsyncStorage.getItem.mockResolvedValueOnce('user@example.com');
+      Linking.getInitialURL.mockResolvedValueOnce(customSchemeUrl);
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      // Must pass the inner Firebase URL to the SDK, not the custom scheme wrapper
+      expect(auth.EmailAuthProvider.credentialWithLink).toHaveBeenCalledWith('user@example.com', MAGIC_URL);
+      expect(linkFn).toHaveBeenCalled();
+    });
+
+    it('is a no-op when btccfanhub:// URL has no inner link param', async () => {
+      const mockAuthInstance = auth();
+      Linking.getInitialURL.mockResolvedValueOnce('btccfanhub://magic-link');
+
+      await act(async () => { renderProvider(); });
+      await act(async () => {});
+
+      expect(mockAuthInstance.isSignInWithEmailLink).not.toHaveBeenCalled();
+    });
   });
 });
