@@ -110,6 +110,14 @@ export function parseCalendar(json) {
         day: s.day || '',
         time: s.time || '',
       })),
+      fullTimetable: (r.fullTimetable || []).map(s => ({
+        day: s.day || '',
+        time: s.time || '',
+        endTime: s.endTime || null,
+        series: s.series || null,
+        session: s.session || '',
+        laps: s.laps || null,
+      })),
     };
   });
   return {

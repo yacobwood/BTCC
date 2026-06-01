@@ -276,7 +276,7 @@ Lists AI-generated weekly digest articles from hub_news.json filtered to the Wee
 Renders all rounds from `calendar.json`. Highlights the current/next active round. Tapping a round navigates to TrackDetail.
 
 **TrackDetailScreen** ([src/screens/TrackDetailScreen.js](src/screens/TrackDetailScreen.js))
-Hero image, WeatherAPI weather widget (gated on `track_weather` flag), track facts (length, corners, first BTCC year), About section, BTCC Fact, session schedule with day/time, lap records (qualifying + race), YouTube race replay links (gated to UK users only via locale check), and a UK map pin showing circuit location. A "Live Timing" button appears during active race weekends when `tslEventId` is set and the flag is enabled.
+Hero image, WeatherAPI weather widget (gated on `track_weather` flag), track facts (length, corners, first BTCC year), About section, BTCC Fact, session schedule with day/time, lap records (qualifying + race), YouTube race replay links (gated to UK users only via locale check), and a UK map pin showing circuit location. A "Live Timing" button appears during active race weekends when `tslEventId` is set and the flag is enabled. An expandable "Show full weekend timetable" toggle inside the schedule card shows all support series (Porsche Sprint Challenge, MINI CHALLENGE, Scottish Legends etc.) alongside BTCC when `fullTimetable` is populated in `calendar.json` for that round.
 
 **LiveTimingScreen** ([src/screens/LiveTimingScreen.js](src/screens/LiveTimingScreen.js))
 WebView embedding the TSL live timing interface. Only rendered when `live_timing_in_app` feature flag is true.

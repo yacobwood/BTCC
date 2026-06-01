@@ -142,6 +142,8 @@ export default function TrackDetailScreen({route, navigation}) {
   const isPastRaceWeekend = !!track.tslEventId && trackEnd && today > trackEnd;
 
   const sessions = track.sessions || [];
+  const fullTimetable = track.fullTimetable || [];
+  const [showFullTimetable, setShowFullTimetable] = useState(false);
   const [weather, setWeather] = useState(null);
   const [racesFinished, setRacesFinished] = useState(false);
   const detectedBroadcaster = useBroadcaster();
@@ -487,14 +489,25 @@ export default function TrackDetailScreen({route, navigation}) {
         return <Text style={styles.sectionTitle}>WEEKEND TIMETABLE</Text>;
 
       case 'schedule': {
-        // Group sessions by day
         const byDay = {};
         sessions.forEach(s => {
           if (!byDay[s.day]) byDay[s.day] = [];
           byDay[s.day].push(s);
         });
+        const fullByDay = {};
+        fullTimetable.forEach(s => {
+          if (!fullByDay[s.day]) fullByDay[s.day] = [];
+          fullByDay[s.day].push(s);
+        });
         const dayOrder = ['SAT', 'SUN'];
         const dayLabel = {SAT: 'Saturday', SUN: 'Sunday'};
+        const isBtcc = s => s.series?.includes('British Touring Car Championship');
+        const formatTime = s => s.endTime ? `${s.time} – ${s.endTime}` : s.time;
+        const formatLaps = s => {
+          if (!s.laps) return null;
+          if (String(s.laps).includes('min')) return s.laps;
+          return `${s.laps} laps`;
+        };
         return (
           <View style={styles.scheduleCard}>
             {dayOrder.filter(d => byDay[d]).map(day => (
@@ -508,6 +521,60 @@ export default function TrackDetailScreen({route, navigation}) {
                 ))}
               </View>
             ))}
+
+            {fullTimetable.length > 0 && (
+              <>
+                <View style={styles.timetableToggleDivider} />
+                <TouchableOpacity
+                  style={styles.timetableToggle}
+                  onPress={() => {
+                    const next = !showFullTimetable;
+                    setShowFullTimetable(next);
+                    if (next) Analytics.fullTimetableExpanded(track.venue);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.timetableToggleText}>
+                    {showFullTimetable ? 'Hide full weekend timetable' : 'Show full weekend timetable'}
+                  </Text>
+                  <Icon name={showFullTimetable ? 'expand-less' : 'expand-more'} size={20} color={Colors.textSecondary} />
+                </TouchableOpacity>
+              </>
+            )}
+
+            {showFullTimetable && (
+              <>
+                <View style={styles.timetableToggleDivider} />
+                {dayOrder.filter(d => fullByDay[d]).map(day => (
+                  <View key={`full-${day}`}>
+                    <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
+                    {fullByDay[day].map((s, i) => {
+                      if (!s.series) {
+                        return (
+                          <View key={i} style={styles.sessionRow}>
+                            <Text style={styles.fullEventName}>{s.session}</Text>
+                            <Text style={styles.sessionTime}>{formatTime(s)}</Text>
+                          </View>
+                        );
+                      }
+                      const btcc = isBtcc(s);
+                      return (
+                        <View key={i} style={styles.sessionRow}>
+                          <View style={{flex: 1}}>
+                            <Text style={btcc ? styles.sessionName : styles.fullSeriesSession}>{s.session}</Text>
+                            {!btcc && <Text style={styles.fullSeriesName}>{s.series}</Text>}
+                          </View>
+                          <View style={{alignItems: 'flex-end'}}>
+                            <Text style={styles.sessionTime}>{formatTime(s)}</Text>
+                            {formatLaps(s) && <Text style={styles.fullSeriesLaps}>{formatLaps(s)}</Text>}
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                ))}
+              </>
+            )}
           </View>
         );
       }
@@ -836,6 +903,13 @@ const styles = StyleSheet.create({
   sessionRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: 'rgba(42,45,68,0.4)'},
   sessionName: {color: '#fff', fontSize: 14, fontWeight: '600'},
   sessionTime: {color: Colors.textSecondary, fontSize: 14, fontWeight: '700'},
+  timetableToggleDivider: {height: 1, backgroundColor: 'rgba(42,45,68,0.6)', marginHorizontal: -14},
+  timetableToggle: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 2},
+  timetableToggleText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '600'},
+  fullSeriesSession: {color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '600'},
+  fullSeriesName: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
+  fullSeriesLaps: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
+  fullEventName: {color: Colors.textSecondary, fontSize: 13, fontStyle: 'italic'},
   sectorName: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 10},
   cornerRow: {flexDirection: 'row', marginBottom: 12},
   cornerNum: {

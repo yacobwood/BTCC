@@ -202,6 +202,34 @@
           "day": "SUN",
           "time": "17:20"
         }
+      ],
+      "fullTimetable": [
+        { "day": "SAT", "time": "09:00", "endTime": "09:10", "series": "Scottish Legends Championship", "session": "Free Practice", "laps": null },
+        { "day": "SAT", "time": "09:20", "endTime": "09:40", "series": "CTCRC Group 1 Touring Cars", "session": "Qualifying", "laps": null },
+        { "day": "SAT", "time": "09:50", "endTime": "10:20", "series": "Porsche Sprint Challenge Great Britain", "session": "Qualifying", "laps": null },
+        { "day": "SAT", "time": "10:30", "endTime": "11:10", "series": "Kwik Fit British Touring Car Championship", "session": "Free Practice", "laps": null },
+        { "day": "SAT", "time": "11:40", "series": "Scottish Legends Championship", "session": "Race", "laps": "6" },
+        { "day": "SAT", "time": "12:05", "endTime": "12:25", "series": "MINI CHALLENGE", "session": "Qualifying", "laps": null },
+        { "day": "SAT", "time": "12:25", "endTime": "13:25", "series": null, "session": "Lunch Break", "laps": null },
+        { "day": "SAT", "time": "13:25", "series": "CTCRC Group 1 Touring Cars", "session": "Race", "laps": "20 mins" },
+        { "day": "SAT", "time": "14:00", "endTime": "14:35", "series": "Kwik Fit British Touring Car Championship", "session": "Qualifying", "laps": null },
+        { "day": "SAT", "time": "15:05", "series": "Kwik Fit British Touring Car Championship", "session": "Qualifying Race", "laps": "10" },
+        { "day": "SAT", "time": "15:35", "series": "Scottish Legends Championship", "session": "Race", "laps": "6" },
+        { "day": "SAT", "time": "16:00", "series": "Porsche Sprint Challenge Great Britain", "session": "Race", "laps": "20 mins" },
+        { "day": "SAT", "time": "16:35", "series": "MINI CHALLENGE", "session": "Race", "laps": "20 mins" },
+        { "day": "SAT", "time": "17:10", "series": "CTCRC Group 1 Touring Cars", "session": "Race", "laps": "20 mins" },
+        { "day": "SAT", "time": "17:50", "series": "Scottish Legends Championship", "session": "Race", "laps": "8" },
+        { "day": "SUN", "time": "10:30", "endTime": "11:05", "series": null, "session": "Pit Lane Walkabout", "laps": null },
+        { "day": "SUN", "time": "12:25", "series": "Kwik Fit British Touring Car Championship", "session": "Race 1", "laps": "15" },
+        { "day": "SUN", "time": "13:10", "series": "Scottish Legends Championship", "session": "Race", "laps": "6" },
+        { "day": "SUN", "time": "13:30", "series": "Porsche Sprint Challenge Great Britain", "session": "Race", "laps": "20 mins" },
+        { "day": "SUN", "time": "14:05", "series": "MINI CHALLENGE", "session": "Race", "laps": "20 mins" },
+        { "day": "SUN", "time": "14:55", "series": "Kwik Fit British Touring Car Championship", "session": "Race 2", "laps": "15" },
+        { "day": "SUN", "time": "15:35", "series": "Scottish Legends Championship", "session": "Race", "laps": "6" },
+        { "day": "SUN", "time": "15:55", "series": "CTCRC Group 1 Touring Cars", "session": "Race", "laps": "20 mins" },
+        { "day": "SUN", "time": "16:30", "series": "Porsche Sprint Challenge Great Britain", "session": "Race", "laps": "20 mins" },
+        { "day": "SUN", "time": "17:20", "series": "Kwik Fit British Touring Car Championship", "session": "Race 3", "laps": "15" },
+        { "day": "SUN", "time": "17:55", "series": "Scottish Legends Championship", "session": "Race", "laps": "8" }
       ]
     },
     {

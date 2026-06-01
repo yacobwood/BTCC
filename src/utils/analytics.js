@@ -14,6 +14,7 @@ export const Analytics = {
   trackDetailViewed: (round, venue) => logEvent(fa(),'track_detail_viewed', {round, venue}),
   raceClicked: (round, venue) => logEvent(fa(),'race_clicked', {round, venue}),
   liveTimingOpened: (venue) => logEvent(fa(),'live_timing_opened', {venue}),
+  fullTimetableExpanded: (venue) => logEvent(fa(),'full_timetable_expanded', {venue}),
 
   resultsYearChanged: (year) => logEvent(fa(),'results_year_changed', {year}),
   resultsTabChanged: (year, tab) => logEvent(fa(),'results_tab_changed', {year, tab}),
