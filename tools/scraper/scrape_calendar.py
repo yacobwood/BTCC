@@ -136,12 +136,15 @@ def merge_into_calendar(schedule: list[dict], dry_run: bool) -> None:
 
     for i, s in enumerate(schedule):
         if i < len(rounds):
-            old = rounds[i]
             rounds[i]["startDate"] = s["startDate"]
             rounds[i]["endDate"] = s["endDate"]
             rounds[i]["venue"] = s["venue"]
+            if "fullTimetable" in s:
+                rounds[i]["fullTimetable"] = s["fullTimetable"]
             if not dry_run:
-                print(f"  Round {s['round']}: {s['venue']}  {s['startDate']} → {s['endDate']}")
+                ft_count = len(s.get("fullTimetable") or [])
+                ft_str = f"  ({ft_count} timetable entries)" if ft_count else ""
+                print(f"  Round {s['round']}: {s['venue']}  {s['startDate']} → {s['endDate']}{ft_str}")
         else:
             print(f"  Round {s['round']}: {s['venue']} (no existing slot, skipped)")
 
@@ -160,19 +163,39 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Print updates only, do not write")
     args = ap.parse_args()
 
+    # Import timetable scraper here to avoid circular-import issues if ever called as module
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location(
+        "scrape_full_timetable",
+        Path(__file__).parent / "scrape_full_timetable.py",
+    )
+    _ft = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_ft)
+
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True)
         page = browser.new_page()
+
         schedule = scrape_calendar(page, args.season)
+        if not schedule:
+            print("No calendar events scraped — check btcc.net/calendar/ structure.", file=sys.stderr)
+            browser.close()
+            sys.exit(1)
+
+        print(f"\nScraped {len(schedule)} rounds for {args.season}")
+        for s in schedule:
+            print(f"  {s['round']}. {s['venue']}  {s['startDate']} – {s['endDate']}")
+
+        print("\nScraping full weekend timetables …")
+        for s in schedule:
+            slug = _ft.VENUE_SLUG.get(s["venue"])
+            if not slug:
+                continue
+            entries = _ft.scrape_circuit_timetable(page, slug)
+            if entries:
+                s["fullTimetable"] = entries
+
         browser.close()
-
-    if not schedule:
-        print("No calendar events scraped — check btcc.net/calendar/ structure.", file=sys.stderr)
-        sys.exit(1)
-
-    print(f"Scraped {len(schedule)} rounds for {args.season}")
-    for s in schedule:
-        print(f"  {s['round']}. {s['venue']}  {s['startDate']} – {s['endDate']}")
 
     merge_into_calendar(schedule, args.dry_run)
 
