@@ -2784,7 +2784,8 @@ async function saveDigestEdit(andPublish = false) {
 
 function saveAndPublishDigest() { saveDigestEdit(true); }
 
-const TRIGGER_DIGEST_URL = 'https://us-central1-btcchub-af77a.cloudfunctions.net/triggerDigest';
+const TRIGGER_DIGEST_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/triggerDigest';
+const DISMISS_ERROR_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/dismissError';
 const TRIGGER_DIGEST_SECRET = 'btcchub-digest-trigger-2026';
 
 async function triggerDigestGenerate(type) {
@@ -3856,19 +3857,32 @@ async function dismissError(id) {
   if (remaining === 0) badge.style.display = 'none';
   else { badge.textContent = remaining; }
   try {
-    await fetch(`${FS_BASE_URL}/errors/${id}?key=${FS_API_KEY}&updateMask.fieldPaths=resolved`, {
-      method: 'PATCH', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({fields: {resolved: {booleanValue: true}}}),
+    const res = await fetch(DISMISS_ERROR_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({id}),
     });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
   } catch (e) { console.error('dismiss failed:', e); }
 }
 
 async function dismissAllErrors() {
   const cards = Array.from(document.querySelectorAll('[id^="err-"]:not([data-resolved])'));
   if (!cards.length) return;
-  const ids = cards.map(el => el.id.replace('err-', ''));
+  cards.forEach(card => {
+    card.setAttribute('data-resolved', 'true');
+    Object.assign(card.style, {borderLeftColor: '#22c55e', opacity: '0.6'});
+    card.querySelector('button')?.remove();
+  });
   document.getElementById('errors-badge').style.display = 'none';
-  await Promise.all(ids.map(id => dismissError(id)));
+  try {
+    const res = await fetch(DISMISS_ERROR_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({all: true}),
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+  } catch (e) { console.error('dismissAll failed:', e); }
 }
 
 // ── Chat moderation ──────────────────────────────────────────────────────────

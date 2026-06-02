@@ -595,6 +595,8 @@ Firestore transactions prevent duplicate sends. First-time detection (when `last
 
 **Error alerting:** every `logError` call uses `alert: true`. For per-minute checks (news/hub/podcast/FCM) the error is upserted at a fixed key and the email is only sent on first occurrence or when the error recurs after being marked resolved in the admin FIRESTORE tab. One-off failures (syncAnalytics, notifyResultsUpdate, digest generation) always email. All alerts go to `btcchub@gmail.com` via `GMAIL_APP_PASSWORD` secret.
 
+**Resolving errors:** the admin FIRESTORE tab Dismiss button calls the `dismissError` Cloud Function (Admin SDK, bypasses rules) via `POST /dismissError` with `x-admin-secret`. The `errors` collection has `allow write: if false` for clients - direct REST PATCH from the admin page was silently rejected by Firestore rules, so writes are routed through the function instead. "Dismiss all" sends `{all: true}` and the function batch-updates all unresolved docs.
+
 ### weeklyDigest (Monday 8am)
 
 1. Scrapes: Reddit r/BTCC, btcc.net WordPress, Autosport RSS, Motorsport.com RSS, Touring Car Times RSS

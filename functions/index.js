@@ -856,6 +856,34 @@ exports.syncAnalytics = onSchedule(
   }},
 );
 
+// ── Error dismissal — called from admin page ──────────────────────────────────
+exports.dismissError = onRequest(
+  {cors: ['https://yacobwood.github.io']},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+
+    const {id, all} = req.body || {};
+    const db = getFirestore();
+    try {
+      if (all) {
+        const snap = await db.collection('errors').where('resolved', '==', false).get();
+        const batch = db.batch();
+        snap.docs.forEach(doc => batch.update(doc.ref, {resolved: true}));
+        await batch.commit();
+        res.status(200).json({ok: true, count: snap.size});
+      } else {
+        if (!id) { res.status(400).json({ok: false, error: 'id required'}); return; }
+        await db.collection('errors').doc(id).update({resolved: true});
+        res.status(200).json({ok: true});
+      }
+    } catch (e) {
+      console.error('dismissError failed:', e);
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
+);
+
 // ── Results cache invalidation — called by GitHub Actions scraper ─────────────
 // Sends a silent FCM data message to the 'results_live' topic so all app
 // clients immediately discard their cached results and fetch fresh data.
