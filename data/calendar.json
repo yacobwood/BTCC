@@ -2363,86 +2363,108 @@
       "fullTimetable": [
         {
           "day": "SAT",
-          "time": "09:10",
+          "time": "09:00",
           "endTime": "09:30",
-          "series": "Caterham Seven 310R Championship",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "09:45",
-          "endTime": "10:20",
-          "series": "Wera Tools F4 British Championship certified by FIA",
+          "time": "09:40",
+          "endTime": "10:00",
+          "series": "Caterham Seven Championship UK",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "10:35",
-          "endTime": "11:15",
+          "time": "10:10",
+          "endTime": "10:50",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:45",
-          "endTime": "12:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 1",
+          "time": "11:15",
+          "endTime": "11:40",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "12:20",
-          "endTime": "12:50",
+          "time": "11:50",
+          "endTime": "12:10",
           "series": "MINI CHALLENGE",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
+          "time": "12:20",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "12:55",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "13:45",
+          "endTime": "14:20",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "15:05",
+          "time": "14:50",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying Race",
-          "laps": "18"
+          "laps": "10"
         },
         {
           "day": "SAT",
-          "time": "15:35",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
+          "time": "15:20",
+          "endTime": "15:50",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying",
+          "laps": null
         },
         {
           "day": "SAT",
-          "time": "16:10",
+          "time": "16:00",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "16:45",
+          "time": "16:35",
           "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "17:15",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 2",
-          "laps": null
+          "time": "17:10",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "17:45",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
         },
         {
           "day": "SUN",
@@ -2455,41 +2477,41 @@
         {
           "day": "SUN",
           "time": "10:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "34"
-        },
-        {
-          "day": "SUN",
-          "time": "10:40",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "11:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "11:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        },
-        {
-          "day": "SUN",
-          "time": "12:10",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "12:40",
+          "time": "10:30",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "11:10",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "11:25",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "15"
+        },
+        {
+          "day": "SUN",
+          "time": "12:05",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "17"
+        },
+        {
+          "day": "SUN",
+          "time": "12:45",
           "endTime": "13:15",
           "series": null,
           "session": "Lunch Break",
@@ -2498,65 +2520,65 @@
         {
           "day": "SUN",
           "time": "13:15",
-          "series": "MINI CHALLENGE",
+          "series": "Caterham Seven Championship UK",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
           "time": "13:50",
-          "series": "Porsche Carrera Cup Great Britain",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
-          "laps": "34"
+          "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "14:30",
+          "time": "14:20",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "14:45",
+          "time": "14:35",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "24"
+          "laps": "15"
         },
         {
           "day": "SUN",
-          "time": "15:25",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:00",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:35",
+          "time": "15:15",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "25 mins"
         },
         {
           "day": "SUN",
-          "time": "17:15",
+          "time": "15:50",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:20",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "17"
+        },
+        {
+          "day": "SUN",
+          "time": "17:00",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "17:30",
+          "time": "17:15",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "24"
+          "laps": "15"
         }
       ]
     }

@@ -28,7 +28,7 @@ VENUE_SLUG = {
     "Donington Park":    "donington-park",
     "Donington Park GP": "donington-park-gp",
     "Brands Hatch Indy": "brands-hatch",
-    "Brands Hatch GP":   "brands-hatch",
+    "Brands Hatch GP":   "brands-hatch-gp",
     "Snetterton":        "snetterton",
     "Oulton Park":       "oulton-park",
     "Thruxton":          "thruxton",
