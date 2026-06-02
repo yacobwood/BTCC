@@ -10,7 +10,8 @@
       "id": "1",
       "title": "Centralised Merch",
       "description": "A page with all drivers and teams merchandise",
-      "status": "planned"
+      "status": "done",
+      "doneAt": "2026-06-02"
     },
     {
       "id": "3",
