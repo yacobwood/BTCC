@@ -557,8 +557,8 @@ export default function TrackDetailScreen({route, navigation}) {
                   return (
                     <View key={i} style={styles.sessionRow}>
                       <View style={{flex: 1}}>
-                        <Text style={btcc ? styles.sessionName : styles.fullSeriesSession}>{s.session}</Text>
-                        <Text style={btcc ? styles.fullBtccLabel : styles.fullSeriesName}>{btcc ? 'BTCC' : s.series}</Text>
+                        <Text style={btcc ? styles.fullBtccLabel : styles.sessionName}>{btcc ? 'BTCC' : s.series}</Text>
+                        <Text style={styles.fullSeriesName}>{s.session}</Text>
                       </View>
                       <View style={{alignItems: 'flex-end'}}>
                         <Text style={styles.sessionTime}>{formatTime(s)}</Text>
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
   timetableSegmentTextActive: {color: Colors.navy},
   fullSeriesSession: {color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '600'},
   fullSeriesName: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
-  fullBtccLabel: {color: Colors.yellow, fontSize: 11, fontWeight: '700', marginTop: 2},
+  fullBtccLabel: {color: Colors.yellow, fontSize: 14, fontWeight: '700'},
   fullSeriesLaps: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
   fullEventName: {color: Colors.textSecondary, fontSize: 13, fontStyle: 'italic'},
   sectorName: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 10},
