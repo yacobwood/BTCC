@@ -26,7 +26,7 @@ CALENDAR_JSON = DATA_DIR / "calendar.json"
 # Map calendar.json venue names to btcc.net circuit URL slugs
 VENUE_SLUG = {
     "Donington Park":    "donington-park",
-    "Donington Park GP": "donington-park",
+    "Donington Park GP": "donington-park-gp",
     "Brands Hatch Indy": "brands-hatch",
     "Brands Hatch GP":   "brands-hatch",
     "Snetterton":        "snetterton",
