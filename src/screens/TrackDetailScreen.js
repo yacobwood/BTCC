@@ -514,14 +514,14 @@ export default function TrackDetailScreen({route, navigation}) {
               <View style={styles.timetableSegmentRow}>
                 <TouchableOpacity
                   style={[styles.timetableSegment, !showFullTimetable && styles.timetableSegmentActive]}
-                  onPress={() => { setShowFullTimetable(false); Analytics.fullTimetableCollapsed(track.venue); }}
+                  onPress={() => { if (showFullTimetable) { setShowFullTimetable(false); Analytics.fullTimetableCollapsed(track.venue); } }}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.timetableSegmentText, !showFullTimetable && styles.timetableSegmentTextActive]}>BTCC</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.timetableSegment, showFullTimetable && styles.timetableSegmentActive]}
-                  onPress={() => { setShowFullTimetable(true); Analytics.fullTimetableExpanded(track.venue); }}
+                  onPress={() => { if (!showFullTimetable) { setShowFullTimetable(true); Analytics.fullTimetableExpanded(track.venue); } }}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.timetableSegmentText, showFullTimetable && styles.timetableSegmentTextActive]}>Full weekend</Text>
