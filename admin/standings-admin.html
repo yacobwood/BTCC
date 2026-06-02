@@ -3810,24 +3810,23 @@ async function loadErrors() {
       }))
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
-    const unresolvedCount = docs.filter(d => !d.resolved).length;
+    const unresolved = docs.filter(d => !d.resolved);
     const badge = document.getElementById('errors-badge');
-    if (unresolvedCount > 0) { badge.textContent = unresolvedCount; badge.style.display = 'inline'; }
+    if (unresolved.length > 0) { badge.textContent = unresolved.length; badge.style.display = 'inline'; }
     else { badge.style.display = 'none'; }
 
-    if (docs.length === 0) {
+    if (unresolved.length === 0) {
       el.innerHTML = '<div class="section-note" style="text-align:center;padding:24px 0;color:var(--green)">✓ No errors</div>';
       return;
     }
-    el.innerHTML = docs.map(d => `
-      <div class="card" style="margin-bottom:8px;border-left:3px solid ${d.resolved ? '#22c55e' : '#E3000B'};${d.resolved ? 'opacity:0.6' : ''}" id="err-${d.id}"${d.resolved ? ' data-resolved="true"' : ''}>
+    el.innerHTML = unresolved.map(d => `
+      <div class="card" style="margin-bottom:8px;border-left:3px solid #E3000B" id="err-${d.id}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
           <div>
-            <span style="background:${d.resolved ? 'rgba(34,197,94,0.12)' : 'rgba(227,0,11,0.12)'};color:${d.resolved ? '#22c55e' : '#f87171'};font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:6px">${escHtml(d.fn)}</span>
+            <span style="background:rgba(227,0,11,0.12);color:#f87171;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:6px">${escHtml(d.fn)}</span>
             <span style="color:var(--text-sec);font-size:11px">${d.timestamp ? new Date(d.timestamp).toLocaleString('en-GB') : '—'}</span>
-            ${d.resolved ? '<span style="color:#22c55e;font-size:10px;font-weight:700;margin-left:6px">✓ RESOLVED</span>' : ''}
           </div>
-          ${!d.resolved ? `<button class="btn-sm" onclick="dismissError('${d.id}')" style="color:var(--text-sec)">Dismiss</button>` : ''}
+          <button class="btn-sm" onclick="dismissError('${d.id}')" style="color:var(--text-sec)">Dismiss</button>
         </div>
         <div style="color:var(--text);font-size:13px;font-weight:600;margin-bottom:4px">${escHtml(d.message)}</div>
         ${d.stack ? `<details><summary style="font-size:11px;color:var(--text-sec);cursor:pointer;margin-top:4px">Stack trace</summary><pre style="font-size:10px;color:var(--text-sec);overflow-x:auto;margin-top:6px;white-space:pre-wrap;word-break:break-all">${escHtml(d.stack.slice(0,1200))}</pre></details>` : ''}
