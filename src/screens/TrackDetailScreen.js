@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
   timetableSegmentTextActive: {color: Colors.navy},
   fullSeriesSession: {color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '600'},
   fullSeriesName: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
-  fullBtccLabel: {color: Colors.yellow, fontSize: 14, fontWeight: '700'},
+  fullBtccLabel: {color: '#fff', fontSize: 14, fontWeight: '700'},
   fullSeriesLaps: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
   fullEventName: {color: Colors.textSecondary, fontSize: 13, fontStyle: 'italic'},
   sectorName: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 10},
