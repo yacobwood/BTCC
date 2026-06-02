@@ -514,7 +514,7 @@ export default function TrackDetailScreen({route, navigation}) {
               <View style={styles.timetableSegmentRow}>
                 <TouchableOpacity
                   style={[styles.timetableSegment, !showFullTimetable && styles.timetableSegmentActive]}
-                  onPress={() => setShowFullTimetable(false)}
+                  onPress={() => { setShowFullTimetable(false); Analytics.fullTimetableCollapsed(track.venue); }}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.timetableSegmentText, !showFullTimetable && styles.timetableSegmentTextActive]}>BTCC</Text>

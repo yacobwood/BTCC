@@ -294,6 +294,42 @@ describe('parseCalendar', () => {
     expect(parseCalendar(json).rounds[0].tslEventId).toBe(0);
   });
 
+  // ── fullTimetable ──────────────────────────────────────────────────────────────
+
+  test('parses fullTimetable entries preserving all fields', () => {
+    const json = {rounds: [{round: 1, venue: 'Test Track', fullTimetable: [
+      {day: 'SAT', time: '09:00', endTime: '09:30', series: 'Mini Challenge', session: 'Qualifying', laps: null},
+      {day: 'SAT', time: '11:40', series: 'Scottish Legends Championship', session: 'Race', laps: '6'},
+      {day: 'SUN', time: '12:25', series: 'Kwik Fit British Touring Car Championship', session: 'Race 1', laps: '15'},
+    ]}]};
+    const ft = parseCalendar(json).rounds[0].fullTimetable;
+    expect(ft).toHaveLength(3);
+    expect(ft[0]).toEqual({day: 'SAT', time: '09:00', endTime: '09:30', series: 'Mini Challenge', session: 'Qualifying', laps: null});
+    expect(ft[1]).toEqual({day: 'SAT', time: '11:40', endTime: null, series: 'Scottish Legends Championship', session: 'Race', laps: '6'});
+    expect(ft[2]).toEqual({day: 'SUN', time: '12:25', endTime: null, series: 'Kwik Fit British Touring Car Championship', session: 'Race 1', laps: '15'});
+  });
+
+  test('parses fullTimetable null-series event rows', () => {
+    const json = {rounds: [{round: 1, venue: 'Test Track', fullTimetable: [
+      {day: 'SUN', time: '10:30', endTime: '11:05', series: null, session: 'Pit Lane Walkabout', laps: null},
+    ]}]};
+    const ft = parseCalendar(json).rounds[0].fullTimetable;
+    expect(ft[0].series).toBeNull();
+    expect(ft[0].session).toBe('Pit Lane Walkabout');
+  });
+
+  test('fullTimetable defaults to empty array when absent', () => {
+    const json = {rounds: [{round: 1, venue: 'Test Track'}]};
+    expect(parseCalendar(json).rounds[0].fullTimetable).toEqual([]);
+  });
+
+  test('fullTimetable endTime defaults to null when absent from entry', () => {
+    const json = {rounds: [{round: 1, venue: 'Test Track', fullTimetable: [
+      {day: 'SAT', time: '11:40', series: 'Scottish Legends Championship', session: 'Race', laps: '6'},
+    ]}]};
+    expect(parseCalendar(json).rounds[0].fullTimetable[0].endTime).toBeNull();
+  });
+
   test('parses multiple rounds independently', () => {
     const json = {rounds: [
       {round: 1, venue: 'Test Track',      startDate: '2027-04-10', endDate: '2027-04-11'},
