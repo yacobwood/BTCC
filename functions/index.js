@@ -314,7 +314,7 @@ exports.sendSessionNotifications = onSchedule(
           await messaging.send({
             topic: 'news_alerts',
             android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000},
-            apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
+            apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
             data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
           });
           console.log(`Hub notification sent OK: "${notifyPayload.title}"`);
