@@ -104,7 +104,8 @@ tools/scraper/.venv/
 !.yarn/versions
 payload.json
 
-# Firebase debug logs
+# Firebase debug logs and local hosting cache
+.firebase/
 firebase-debug.log
 firestore-debug.log
 
