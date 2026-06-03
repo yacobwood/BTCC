@@ -65,36 +65,40 @@ class TimetableWidgetFactory(private val context: Context) : RemoteViewsService.
 
     override fun getViewAt(position: Int): RemoteViews {
         return when (val item = items.getOrNull(position)) {
-            is ListItem.Header -> RemoteViews(context.packageName, R.layout.widget_timetable_header_row).apply {
-                setTextViewText(R.id.row_day_header, item.day)
-                setFillInIntent(R.id.row_root, Intent())
+            is ListItem.Header -> {
+                val rv = RemoteViews(context.packageName, R.layout.widget_timetable_header_row)
+                rv.setTextViewText(R.id.row_day_header, item.day)
+                rv.setFillInIntent(R.id.row_root, Intent())
+                rv
             }
-            is ListItem.Session -> RemoteViews(context.packageName, R.layout.widget_timetable_row).apply {
-                setFillInIntent(R.id.row_root, Intent())
+            is ListItem.Session -> {
+                val rv = RemoteViews(context.packageName, R.layout.widget_timetable_row)
+                rv.setFillInIntent(R.id.row_root, Intent())
                 val series = item.series
                 val isBtcc = series?.contains("British Touring Car Championship") == true
                 if (series != null) {
-                    setTextViewText(R.id.row_series, series)
-                    setTextViewText(R.id.row_session_type, item.session)
-                    setInt(R.id.row_series, "setTextColor", if (isBtcc) 0xFFFFFFFF.toInt() else 0xCCFFFFFF.toInt())
-                    setViewVisibility(R.id.row_series, View.VISIBLE)
-                    setViewVisibility(R.id.row_session_type, View.VISIBLE)
-                    setViewVisibility(R.id.row_event, View.GONE)
+                    rv.setTextViewText(R.id.row_series, series)
+                    rv.setTextViewText(R.id.row_session_type, item.session)
+                    rv.setInt(R.id.row_series, "setTextColor", if (isBtcc) 0xFFFFFFFF.toInt() else 0xCCFFFFFF.toInt())
+                    rv.setViewVisibility(R.id.row_series, View.VISIBLE)
+                    rv.setViewVisibility(R.id.row_session_type, View.VISIBLE)
+                    rv.setViewVisibility(R.id.row_event, View.GONE)
                 } else {
-                    setTextViewText(R.id.row_event, item.session)
-                    setViewVisibility(R.id.row_series, View.GONE)
-                    setViewVisibility(R.id.row_session_type, View.GONE)
-                    setViewVisibility(R.id.row_event, View.VISIBLE)
+                    rv.setTextViewText(R.id.row_event, item.session)
+                    rv.setViewVisibility(R.id.row_series, View.GONE)
+                    rv.setViewVisibility(R.id.row_session_type, View.GONE)
+                    rv.setViewVisibility(R.id.row_event, View.VISIBLE)
                 }
                 val timeStr = if (item.endTime != null) "${item.time} - ${item.endTime}" else item.time
-                setTextViewText(R.id.row_time, timeStr)
+                rv.setTextViewText(R.id.row_time, timeStr)
                 if (item.laps != null) {
                     val lapsDisplay = if (item.laps.matches(Regex("\\d+"))) "${item.laps} laps" else item.laps
-                    setTextViewText(R.id.row_laps, lapsDisplay)
-                    setViewVisibility(R.id.row_laps, View.VISIBLE)
+                    rv.setTextViewText(R.id.row_laps, lapsDisplay)
+                    rv.setViewVisibility(R.id.row_laps, View.VISIBLE)
                 } else {
-                    setViewVisibility(R.id.row_laps, View.GONE)
+                    rv.setViewVisibility(R.id.row_laps, View.GONE)
                 }
+                rv
             }
             null -> RemoteViews(context.packageName, R.layout.widget_timetable_row)
         }
