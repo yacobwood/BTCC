@@ -49,7 +49,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:singleLine="true"
                     android:layout_marginTop="2dp" />
@@ -75,7 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#FEBD02"
-                    android:textSize="32sp"
+                    android:textSize="38sp"
                     android:textStyle="bold" />
 
                 <TextView
