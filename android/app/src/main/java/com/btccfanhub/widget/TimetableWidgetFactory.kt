@@ -68,12 +68,12 @@ class TimetableWidgetFactory(private val context: Context) : RemoteViewsService.
             is ListItem.Header -> {
                 val rv = RemoteViews(context.packageName, R.layout.widget_timetable_header_row)
                 rv.setTextViewText(R.id.row_day_header, item.day)
-                rv.setFillInIntent(R.id.row_root, Intent())
+                rv.setOnClickFillInIntent(R.id.row_root, Intent())
                 rv
             }
             is ListItem.Session -> {
                 val rv = RemoteViews(context.packageName, R.layout.widget_timetable_row)
-                rv.setFillInIntent(R.id.row_root, Intent())
+                rv.setOnClickFillInIntent(R.id.row_root, Intent())
                 val series = item.series
                 val isBtcc = series?.contains("British Touring Car Championship") == true
                 if (series != null) {
