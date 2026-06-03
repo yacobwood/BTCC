@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 
 /**
  * Draws team-themed livery bitmaps for widget backgrounds.
@@ -23,7 +22,6 @@ object LiveryRenderer {
         // Cap pixel dimensions to avoid TransactionTooLargeException in RemoteViews
         val w = (widthDp * density).toInt().coerceIn(80, 800)
         val h = (heightDp * density).toInt().coerceIn(40, 600)
-        val cornerRadius = 16f * density
 
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
@@ -31,11 +29,6 @@ object LiveryRenderer {
 
         val wf = w.toFloat()
         val hf = h.toFloat()
-
-        val clipPath = Path().apply {
-            addRoundRect(RectF(0f, 0f, wf, hf), cornerRadius, cornerRadius, Path.Direction.CW)
-        }
-        canvas.clipPath(clipPath)
 
         // Base colour fill
         paint.color = theme.previewColor.toInt()
