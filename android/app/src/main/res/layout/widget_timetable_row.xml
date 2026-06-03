@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
-            android:textSize="11sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:maxLines="1"
             android:ellipsize="end" />
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#BFFFFFFF"
-            android:textSize="9sp" />
+            android:textSize="11sp" />
 
         <!-- Non-series event row (e.g. "Lunch Break") — shown when series is null -->
         <TextView
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#B3FFFFFF"
-            android:textSize="11sp"
+            android:textSize="13sp"
             android:textStyle="italic"
             android:visibility="gone" />
     </LinearLayout>
@@ -56,14 +56,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#CCFFFFFF"
-            android:textSize="11sp" />
+            android:textSize="13sp" />
 
         <TextView
             android:id="@+id/row_laps"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#B3FFFFFF"
-            android:textSize="9sp"
+            android:textSize="11sp"
             android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>
