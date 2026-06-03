@@ -140,7 +140,7 @@ class TimetableWidget : AppWidgetProvider() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
         }
-        views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, widgetId, tapIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+        views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, widgetId, tapIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE))
 
         if (cal == null) {
             views.setTextViewText(R.id.widget_venue, "BTCC Hub")
@@ -173,7 +173,7 @@ class TimetableWidget : AppWidgetProvider() {
 
         views.setPendingIntentTemplate(
             R.id.widget_timetable_list,
-            PendingIntent.getActivity(context, widgetId + 1000, tapIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
+            PendingIntent.getActivity(context, widgetId + 1000, tapIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE),
         )
 
         return views
