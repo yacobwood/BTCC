@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/row_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Series name — shown when series is non-null -->
+        <TextView
+            android:id="@+id/row_series"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- Session type label (e.g. "Free Practice", "Race") -->
+        <TextView
+            android:id="@+id/row_session_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#BFFFFFFF"
+            android:textSize="9sp" />
+
+        <!-- Non-series event row (e.g. "Lunch Break") — shown when series is null -->
+        <TextView
+            android:id="@+id/row_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B3FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="end"
+        android:layout_marginStart="8dp">
+
+        <TextView
+            android:id="@+id/row_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#CCFFFFFF"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/row_laps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B3FFFFFF"
+            android:textSize="9sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>
