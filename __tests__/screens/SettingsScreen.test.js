@@ -69,9 +69,9 @@ describe('SettingsScreen', () => {
       expect(getByText('NOTIFICATIONS')).toBeTruthy();
     });
 
-    it('renders the UNIT DISPLAY section', async () => {
+    it('renders the DISPLAY section', async () => {
       const {getByText} = await renderSettings();
-      expect(getByText('UNIT DISPLAY')).toBeTruthy();
+      expect(getByText('DISPLAY')).toBeTruthy();
     });
 
     it('renders top-level notification rows', async () => {
