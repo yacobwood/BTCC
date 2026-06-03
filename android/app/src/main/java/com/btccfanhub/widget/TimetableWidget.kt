@@ -130,10 +130,17 @@ class TimetableWidget : AppWidgetProvider() {
             views.setImageViewBitmap(R.id.widget_livery, LiveryRenderer.buildLiveryBitmap(context, widthDp, heightDp, theme))
         } catch (_: Exception) {}
 
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        val isWeekend = cal != null && LocalDate.now() >= cal.startDate && cal.round != 0
+        val tapIntent = if (isWeekend) {
+            Intent(Intent.ACTION_VIEW, Uri.parse("btccfanhub://live-timing/${cal!!.round}")).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+        } else {
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
         }
-        views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+        views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(context, widgetId, tapIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
 
         if (cal == null) {
             views.setTextViewText(R.id.widget_venue, "BTCC Hub")
@@ -149,7 +156,6 @@ class TimetableWidget : AppWidgetProvider() {
         views.setTextViewText(R.id.widget_date, cal.dateRange)
 
         val days = ChronoUnit.DAYS.between(LocalDate.now(), cal.startDate)
-        val isWeekend = LocalDate.now() >= cal.startDate
         when {
             isWeekend -> { views.setTextViewText(R.id.widget_days, "RACE"); views.setTextViewText(R.id.widget_days_label, "WEEKEND") }
             days <= 0L -> { views.setTextViewText(R.id.widget_days, "TODAY"); views.setTextViewText(R.id.widget_days_label, "") }
@@ -165,9 +171,6 @@ class TimetableWidget : AppWidgetProvider() {
         views.setRemoteAdapter(R.id.widget_timetable_list, serviceIntent)
         views.setEmptyView(R.id.widget_timetable_list, R.id.widget_timetable_empty)
 
-        val tapIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
         views.setPendingIntentTemplate(
             R.id.widget_timetable_list,
             PendingIntent.getActivity(context, widgetId + 1000, tapIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
