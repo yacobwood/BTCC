@@ -21,6 +21,7 @@ import CachedImage from '../components/CachedImage';
 import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
+import {useSettings} from '../store/settings';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useLiveUrls, ensureHttps} from '../store/liveUrls';
 import {fetchResults, fetchCalendar} from '../api/client';
@@ -120,6 +121,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
   if (!track) return null;
   const {useKm} = useUnits();
+  const {settings} = useSettings();
   const {track_weather, live_updates, broadcaster_override} = useFeatureFlags();
   const liveUrls = useLiveUrls();
   const insets = useSafeAreaInsets();
@@ -502,12 +504,66 @@ export default function TrackDetailScreen({route, navigation}) {
         const dayOrder = ['SAT', 'SUN'];
         const dayLabel = {SAT: 'Saturday', SUN: 'Sunday'};
         const isBtcc = s => s.series?.includes('British Touring Car Championship');
-        const formatTime = s => s.endTime ? `${s.time} – ${s.endTime}` : s.time;
+        const to12h = t => { const [h, m] = t.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')}${h >= 12 ? 'pm' : 'am'}`; };
+        const fmt = t => settings.use12HourTime ? to12h(t) : t;
+        const formatTime = s => s.endTime ? `${fmt(s.time)} – ${fmt(s.endTime)}` : fmt(s.time);
         const formatLaps = s => {
           if (!s.laps) return null;
           if (String(s.laps).includes('min')) return s.laps;
           return `${s.laps} laps`;
         };
+        const btccDays = dayOrder.filter(d => byDay[d]);
+        const fullDays = dayOrder.filter(d => fullByDay[d]);
+
+        const toSessionDt = (day, timeStr) => {
+          const base = day === 'SAT' ? track.startDate : track.endDate;
+          const [y, mo, dd] = base.split('-').map(Number);
+          const [h, m] = timeStr.split(':').map(Number);
+          return new Date(y, mo - 1, dd, h, m, 0, 0);
+        };
+
+        const orderedFull = ['SAT', 'SUN']
+          .filter(d => fullByDay[d])
+          .flatMap(day => fullByDay[day].map(s => ({...s, day})));
+
+        let highlightIdx = -1;
+        let pastBoundaryIdx = 0;
+
+        if (orderedFull.length > 0) {
+          const now = new Date();
+          for (let i = 0; i < orderedFull.length; i++) {
+            const s = orderedFull[i];
+            const startDt = toSessionDt(s.day, s.time);
+            const endDt = s.endTime ? toSessionDt(s.day, s.endTime) : null;
+            let ended;
+            if (endDt) {
+              ended = now >= endDt;
+            } else {
+              const nextS = orderedFull[i + 1];
+              const nextStartDt = nextS ? toSessionDt(nextS.day, nextS.time) : null;
+              const fallback = new Date(startDt.getTime() + 60 * 60 * 1000);
+              ended = now >= (nextStartDt && nextStartDt < fallback ? nextStartDt : fallback);
+            }
+            if (ended) {
+              pastBoundaryIdx = i + 1;
+            } else {
+              const dayFirstIdx = orderedFull.findIndex(s2 => s2.day === s.day);
+              if (i === dayFirstIdx && now < startDt.getTime() - 3600000) {
+                // Before 1hr window — day hasn't started yet, no highlight
+              } else {
+                highlightIdx = i;
+              }
+              break;
+            }
+          }
+        }
+
+        const fullKey = s => `${s.day}||${s.time}||${s.session}||${s.series || ''}`;
+        const fullStatusMap = new Map();
+        orderedFull.forEach((s, i) => {
+          fullStatusMap.set(fullKey(s), i < pastBoundaryIdx ? 'past' : i === highlightIdx ? 'highlighted' : 'normal');
+        });
+
         return (
           <View style={styles.scheduleCard}>
             {fullTimetable.length > 0 && (
@@ -529,38 +585,51 @@ export default function TrackDetailScreen({route, navigation}) {
               </View>
             )}
 
-            {!showFullTimetable && dayOrder.filter(d => byDay[d]).map(day => (
+            {!showFullTimetable && btccDays.map((day, dayIdx) => (
               <View key={day}>
                 <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
-                {byDay[day].map((s, i) => (
-                  <View key={i} style={styles.sessionRow}>
-                    <Text style={styles.sessionName}>{s.name}</Text>
-                    <Text style={styles.sessionTime}>{s.time}</Text>
-                  </View>
-                ))}
+                {byDay[day].map((s, i) => {
+                  const isLast = dayIdx === btccDays.length - 1 && i === byDay[day].length - 1;
+                  return (
+                    <View key={i} style={[styles.sessionRow, isLast && styles.sessionRowLast]}>
+                      <Text style={styles.sessionName}>{s.name}</Text>
+                      <Text style={styles.sessionTime}>{fmt(s.time)}</Text>
+                    </View>
+                  );
+                })}
               </View>
             ))}
 
-            {showFullTimetable && dayOrder.filter(d => fullByDay[d]).map(day => (
+            {showFullTimetable && fullDays.map((day, dayIdx) => (
               <View key={`full-${day}`}>
                 <Text style={styles.scheduleDay}>{dayLabel[day] || day}</Text>
                 {fullByDay[day].map((s, i) => {
+                  const isLast = dayIdx === fullDays.length - 1 && i === fullByDay[day].length - 1;
+                  const status = fullStatusMap.get(fullKey(s)) || 'normal';
+                  const rowStyle = [
+                    styles.sessionRow,
+                    isLast && styles.sessionRowLast,
+                    status === 'past' && {opacity: 0.35},
+                    status === 'highlighted' && {overflow: 'visible'},
+                  ];
                   if (!s.series) {
                     return (
-                      <View key={i} style={styles.sessionRow}>
-                        <Text style={styles.fullEventName}>{s.session}</Text>
-                        <Text style={styles.sessionTime}>{formatTime(s)}</Text>
+                      <View key={i} style={rowStyle}>
+                        {status === 'highlighted' && <View style={styles.fullSessionHighlightBar} />}
+                        <Text style={[styles.fullEventName, {flex: 1, marginEnd: 10}]}>{s.session}</Text>
+                        <Text style={[styles.sessionTime, {minWidth: 88, textAlign: 'right'}]}>{formatTime(s)}</Text>
                       </View>
                     );
                   }
                   const btcc = isBtcc(s);
                   return (
-                    <View key={i} style={styles.sessionRow}>
-                      <View style={{flex: 1}}>
-                        <Text style={btcc ? styles.fullBtccLabel : styles.sessionName}>{btcc ? 'BTCC' : s.series}</Text>
+                    <View key={i} style={rowStyle}>
+                      {status === 'highlighted' && <View style={styles.fullSessionHighlightBar} />}
+                      <View style={{flex: 1, marginEnd: 10}}>
+                        <Text style={btcc ? styles.fullBtccLabel : styles.sessionName}>{s.series}</Text>
                         <Text style={styles.fullSeriesName}>{s.session}</Text>
                       </View>
-                      <View style={{alignItems: 'flex-end'}}>
+                      <View style={{alignItems: 'flex-end', minWidth: 88}}>
                         <Text style={styles.sessionTime}>{formatTime(s)}</Text>
                         {formatLaps(s) && <Text style={styles.fullSeriesLaps}>{formatLaps(s)}</Text>}
                       </View>
@@ -895,6 +964,7 @@ const styles = StyleSheet.create({
   scheduleCard: {backgroundColor: Colors.card, borderRadius: 10, padding: 14, gap: 14},
   scheduleDay: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 8},
   sessionRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: 'rgba(42,45,68,0.4)'},
+  sessionRowLast: {borderBottomWidth: 0},
   sessionName: {color: '#fff', fontSize: 14, fontWeight: '600'},
   sessionTime: {color: Colors.textSecondary, fontSize: 14, fontWeight: '700'},
   timetableSegmentRow: {flexDirection: 'row', gap: 8},
@@ -907,6 +977,7 @@ const styles = StyleSheet.create({
   fullBtccLabel: {color: '#fff', fontSize: 14, fontWeight: '700'},
   fullSeriesLaps: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
   fullEventName: {color: Colors.textSecondary, fontSize: 13, fontStyle: 'italic'},
+  fullSessionHighlightBar: {position: 'absolute', left: -14, top: 0, bottom: 0, width: 3, backgroundColor: '#FEBD02', borderRadius: 2},
   sectorName: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 10},
   cornerRow: {flexDirection: 'row', marginBottom: 12},
   cornerNum: {

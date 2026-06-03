@@ -37,6 +37,7 @@ data class TimetableCalInfo(
     val rStart: Int,
     val rEnd: Int,
     val round: Int,
+    val tslEventId: Int,
     val timetable: List<TimetableRow> = emptyList(),
 )
 
@@ -130,9 +131,9 @@ class TimetableWidget : AppWidgetProvider() {
             views.setImageViewBitmap(R.id.widget_livery, LiveryRenderer.buildLiveryBitmap(context, widthDp, heightDp, theme))
         } catch (_: Exception) {}
 
-        val isWeekend = cal != null && LocalDate.now() >= cal.startDate && cal.round != 0
+        val isWeekend = cal != null && LocalDate.now() >= cal.startDate && cal.tslEventId != 0
         val tapIntent = if (isWeekend) {
-            Intent(Intent.ACTION_VIEW, Uri.parse("btccfanhub://live-timing/${cal!!.round}")).apply {
+            Intent(Intent.ACTION_VIEW, Uri.parse("btccfanhub://live-timing/${cal!!.tslEventId}")).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
         } else {
@@ -223,6 +224,7 @@ class TimetableWidget : AppWidgetProvider() {
                             rStart = rStart,
                             rEnd = rStart + 2,
                             round = round,
+                            tslEventId = r.optInt("tslEventId", 0),
                             timetable = timetable,
                         )
                     }

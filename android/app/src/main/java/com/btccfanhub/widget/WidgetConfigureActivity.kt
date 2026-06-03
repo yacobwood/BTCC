@@ -238,6 +238,7 @@ class WidgetConfigureActivity : Activity() {
         val widgetSize = when (info?.provider?.className) {
             SmallWidget::class.java.name -> WidgetSize.SMALL
             LargeWidget::class.java.name -> WidgetSize.LARGE
+            TimetableWidget::class.java.name -> WidgetSize.TIMETABLE
             else -> WidgetSize.MEDIUM
         }
         WidgetPrefs.saveSize(this, appWidgetId, widgetSize)

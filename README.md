@@ -310,7 +310,7 @@ Per-round detail. `SwipeableTabs` with lazy loading across all sessions: Free Pr
 Menu screen. Static rows: Records, Settings, About BTCC (InfoPage), Roadmap, Partners, Feedback (BugReport). Flag-gated rows: Radio and Podcasts (both require `podcasts_enabled` or `radio_tab` flags).
 
 **SettingsScreen** ([src/screens/SettingsScreen.js](src/screens/SettingsScreen.js))
-All notification toggles with parent/child hierarchy (toggling a parent enables/disables all children). Spoiler-free mode toggle. Unit system (km/miles). Device ID and FCM token display for admin/debugging.
+All notification toggles with parent/child hierarchy (toggling a parent enables/disables all children). Spoiler-free mode toggle. Display settings (km/miles distance unit; 12hr/24hr time format). Device ID and FCM token display for admin/debugging.
 
 **RadioScreen** ([src/screens/RadioScreen.js](src/screens/RadioScreen.js))
 List of live radio streams from `radio.json`. Platform-specific playback: iOS uses `react-native-track-player`, Android uses a native `RadioService`. A Stop button appears in the header when a station is playing.

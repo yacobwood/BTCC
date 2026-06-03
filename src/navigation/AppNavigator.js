@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {NavigationContainer, useNavigation, getStateFromPath as defaultGetStateFromPath} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {CommonActions} from '@react-navigation/native';
@@ -167,6 +167,26 @@ const linking = {
         },
       },
     },
+  },
+  // Ensure live-timing deep links always have CalendarList in the back stack so
+  // the user can navigate back and Fabric has a consistent parent to render into.
+  getStateFromPath(path, options) {
+    const m = path.match(/^live-timing\/(.+)/);
+    if (m) {
+      return {
+        routes: [{
+          name: 'Calendar',
+          state: {
+            routes: [
+              {name: 'CalendarList'},
+              {name: 'LiveTiming', params: {eventId: m[1]}},
+            ],
+            index: 1,
+          },
+        }],
+      };
+    }
+    return defaultGetStateFromPath(path, options);
   },
 };
 

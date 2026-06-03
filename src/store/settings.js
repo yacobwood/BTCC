@@ -72,6 +72,7 @@ const STORAGE_KEYS = {
   spoilerFree:         'setting_spoiler_free',
   spoilerFreeExpiry:   'setting_spoiler_free_expiry',
   chatFab:             'setting_chat_fab',
+  use12HourTime:       'setting_12hr_time',
 };
 
 const defaults = {
@@ -100,6 +101,7 @@ const defaults = {
   spoilerFree:         false,
   spoilerFreeExpiry:   null,
   chatFab:             true,
+  use12HourTime:       false,
 };
 
 function isEffective(settings, key) {

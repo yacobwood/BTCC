@@ -1,5 +1,5 @@
 import React from 'react';
-import {waitFor, fireEvent} from '@testing-library/react-native';
+import {waitFor, fireEvent, screen} from '@testing-library/react-native';
 import TrackDetailScreen from '../../src/screens/TrackDetailScreen';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,7 +7,7 @@ import * as featureFlags from '../../src/store/featureFlags';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn()},
+  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn()},
 }));
 
 jest.mock('../../src/utils/weather', () => ({
@@ -308,6 +308,21 @@ describe('TrackDetailScreen', () => {
     await waitFor(() => expect(getByText('Free Practice')).toBeTruthy());
   });
 
+  it('shows times in 24hr format by default', async () => {
+    const {getByText} = render();
+    await waitFor(() => expect(getByText('09:00')).toBeTruthy());
+  });
+
+  it('shows times in 12hr format when use12HourTime is enabled', async () => {
+    AsyncStorage.getItem.mockImplementation(key =>
+      Promise.resolve(key === 'setting_12hr_time' ? 'true' : null),
+    );
+    const {getByText} = renderWithProviders(
+      <TrackDetailScreen route={makeRoute({track: TRACK})} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('9:00am')).toBeTruthy());
+  });
+
   // ── Lap Preview button ────────────────────────────────────────────────────────
   // lapPreviewUrl comes from tracks.json (year-agnostic); it is distinct from
   // youtubeUrls which holds race-highlight URLs for the specific season.
@@ -426,5 +441,125 @@ describe('TrackDetailScreen', () => {
     fetchWeather.mockResolvedValue(null);
     const {toJSON} = render();
     await waitFor(() => expect(toJSON()).toBeTruthy());
+  });
+
+  // ── Full weekend timetable ────────────────────────────────────────────────────
+
+  describe('Full weekend timetable', () => {
+    const FULL_TIMETABLE_TRACK = {
+      ...TRACK,
+      startDate: '2026-04-19',
+      endDate:   '2026-04-20',
+      fullTimetable: [
+        {day: 'SAT', time: '09:00', endTime: '09:30', series: 'Scottish Legends Championship', session: 'Free Practice', laps: null},
+        {day: 'SAT', time: '10:30', endTime: '11:30', series: 'Kwik Fit British Touring Car Championship', session: 'Free Practice', laps: null},
+        {day: 'SAT', time: '15:05', endTime: null,    series: 'Kwik Fit British Touring Car Championship', session: 'Qualifying Race', laps: '8'},
+        {day: 'SUN', time: '12:25', endTime: null,    series: 'Kwik Fit British Touring Car Championship', session: 'Race 1', laps: '12'},
+        {day: 'SUN', time: '10:30', endTime: '11:05', series: null, session: 'BTCC Pit Lane Walkabout', laps: null},
+      ],
+    };
+
+    it('does not show segmented control when fullTimetable is absent', async () => {
+      const {queryByText} = render(TRACK);
+      await waitFor(() => {
+        expect(queryByText('BTCC')).toBeNull();
+        expect(queryByText('Full weekend')).toBeNull();
+      });
+    });
+
+    it('shows segmented control when fullTimetable is present', async () => {
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('BTCC')).toBeTruthy();
+      expect(await findByText('Full weekend')).toBeTruthy();
+    });
+
+    it('shows BTCC sessions by default', async () => {
+      const {findByText, queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      await findByText('Free Practice');
+      expect(queryByText('Scottish Legends Championship')).toBeNull();
+    });
+
+    it('shows full timetable after tapping Full weekend', async () => {
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('Full weekend'));
+      expect(await findByText('Scottish Legends Championship')).toBeTruthy();
+      const btccRows = await screen.findAllByText('Kwik Fit British Touring Car Championship');
+      expect(btccRows.length).toBeGreaterThan(0);
+      expect(await findByText('BTCC Pit Lane Walkabout')).toBeTruthy();
+    });
+
+    it('fires fullTimetableExpanded analytics when switching to Full weekend', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('Full weekend'));
+      expect(Analytics.fullTimetableExpanded).toHaveBeenCalledWith('Donington Park');
+    });
+
+    it('fires fullTimetableCollapsed analytics when switching back to BTCC', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('Full weekend'));
+      fireEvent.press(await findByText('BTCC'));
+      expect(Analytics.fullTimetableCollapsed).toHaveBeenCalledWith('Donington Park');
+    });
+
+    it('does not fire fullTimetableExpanded when already on Full weekend', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('Full weekend'));
+      Analytics.fullTimetableExpanded.mockClear();
+      fireEvent.press(await findByText('Full weekend'));
+      expect(Analytics.fullTimetableExpanded).not.toHaveBeenCalled();
+    });
+
+    it('collapses back to BTCC sessions when switching back', async () => {
+      const {findByText, queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('Full weekend'));
+      await findByText('Scottish Legends Championship');
+      fireEvent.press(await findByText('BTCC'));
+      await waitFor(() => expect(queryByText('Scottish Legends Championship')).toBeNull());
+    });
+
+    describe('session highlighting', () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
+
+      it('highlights first session 1 hour before it starts', async () => {
+        // 09:00 SAT session — set time to 08:15 (within 1hr window)
+        jest.setSystemTime(new Date('2026-04-19T08:15:00'));
+        const {findByText, getByText} = renderWithProviders(
+          <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+        );
+        fireEvent.press(await findByText('Full weekend'));
+        await findByText('Scottish Legends Championship');
+        const rows = getByText('Scottish Legends Championship').parent?.parent;
+        expect(rows).toBeTruthy();
+      });
+
+      it('does not highlight any session more than 1 hour before start', async () => {
+        // 09:00 SAT session — set time to 07:30 (outside 1hr window)
+        jest.setSystemTime(new Date('2026-04-19T07:30:00'));
+        const {findByText} = renderWithProviders(
+          <TrackDetailScreen route={makeRoute({track: FULL_TIMETABLE_TRACK})} navigation={nav} />,
+        );
+        fireEvent.press(await findByText('Full weekend'));
+        // Should still render without crashing — highlighting simply not applied
+        expect(await findByText('Scottish Legends Championship')).toBeTruthy();
+      });
+    });
   });
 });

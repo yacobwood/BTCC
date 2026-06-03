@@ -119,6 +119,23 @@
               android:resource="@xml/widget_large_info" />
       </receiver>
 
+      <receiver
+          android:name=".widget.TimetableWidget"
+          android:exported="true"
+          android:label="BTCC Timetable">
+          <intent-filter>
+              <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          </intent-filter>
+          <meta-data
+              android:name="android.appwidget.provider"
+              android:resource="@xml/widget_timetable_info" />
+      </receiver>
+
+      <service
+          android:name=".widget.TimetableWidgetService"
+          android:exported="false"
+          android:permission="android.permission.BIND_REMOTEVIEWS" />
+
       <service
           android:name=".service.RadioService"
           android:foregroundServiceType="mediaPlayback"

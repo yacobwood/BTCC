@@ -4,5 +4,6 @@
     <string name="widget_small_description">BTCC small countdown</string>
     <string name="widget_medium_description">BTCC medium countdown</string>
     <string name="widget_large_description">BTCC large countdown with schedule</string>
+    <string name="widget_timetable_description">BTCC full weekend timetable</string>
     <string name="attribution_radio_audio">Live Radio Playback</string>
 </resources>

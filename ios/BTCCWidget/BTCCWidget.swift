@@ -24,6 +24,19 @@ struct SessionInfo: Identifiable {
     let time: String
 }
 
+struct FullTimetableRow: Identifiable {
+    let id = UUID()
+    let day: String
+    let time: String
+    let endTime: String?
+    let series: String?
+    let session: String
+    let laps: String?
+
+    var isBtcc: Bool { series?.contains("British Touring Car Championship") == true }
+    var displayTime: String { endTime != nil ? "\(time) - \(endTime!)" : time }
+}
+
 struct RoundInfo {
     let venue: String
     let startDate: Date
@@ -32,6 +45,7 @@ struct RoundInfo {
     let roundStart: Int
     let roundEnd: Int
     let sessions: [SessionInfo]
+    let fullTimetable: [FullTimetableRow]
     let lat: Double
     let lng: Double
     let layoutImageUrl: String?
@@ -116,10 +130,21 @@ private func parseCalendar(_ data: Data) -> RoundInfo? {
         let sessions = sessArr.map {
             SessionInfo(name: $0["name"] as? String ?? "", day: $0["day"] as? String ?? "", time: $0["time"] as? String ?? "TBA")
         }
+        let ftArr = r["fullTimetable"] as? [[String: Any]] ?? []
+        let fullTimetable = ftArr.map { s in
+            FullTimetableRow(
+                day: s["day"] as? String ?? "",
+                time: s["time"] as? String ?? "",
+                endTime: s["endTime"] as? String,
+                series: s["series"] as? String,
+                session: s["session"] as? String ?? "",
+                laps: s["laps"] as? String
+            )
+        }
         let dateRange = "\(dayFmt.string(from: startDate)) - \(dayFmt.string(from: endDate)) \(monthYearFmt.string(from: endDate))"
         let raceRec = r["raceRecord"] as? [String: Any]
         return RoundInfo(venue: venue, startDate: startDate, endDate: endDate, dateRange: dateRange,
-                         roundStart: rs, roundEnd: rs + 2, sessions: sessions,
+                         roundStart: rs, roundEnd: rs + 2, sessions: sessions, fullTimetable: fullTimetable,
                          lat: r["lat"] as? Double ?? 0, lng: r["lng"] as? Double ?? 0,
                          layoutImageUrl: r["layoutImageUrl"] as? String,
                          lengthMiles: r["lengthMiles"] as? String,
@@ -187,7 +212,7 @@ struct BTCCProvider: TimelineProvider {
     func placeholder(in context: Context) -> BTCCEntry { BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil) }
 
     func getSnapshot(in context: Context, completion: @escaping (BTCCEntry) -> Void) {
-        loadEntry(completion: completion)
+        btccLoadEntry(completion: completion)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<BTCCEntry>) -> Void) {
@@ -206,54 +231,72 @@ struct BTCCProvider: TimelineProvider {
             defaults.set(pending, forKey: "btcc_widget_pending_sizes")
         }
 
-        loadEntry { entry in
+        btccLoadEntry { entry in
             let refresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
             completion(Timeline(entries: [entry], policy: .after(refresh)))
         }
     }
 
-    private func loadEntry(completion: @escaping (BTCCEntry) -> Void) {
-        guard let url = URL(string: "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json") else {
+}
+
+private func btccLoadEntry(completion: @escaping (BTCCEntry) -> Void) {
+    guard let url = URL(string: "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json") else {
+        completion(BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil)); return
+    }
+    URLSession.shared.dataTask(with: url) { data, _, _ in
+        let calData: Data?
+        if let data = data {
+            cacheCalendarData(data)
+            calData = data
+        } else {
+            calData = cachedCalendarData()
+        }
+        let round = calData.flatMap { parseCalendar($0) }
+        guard let r = round else {
             completion(BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil)); return
         }
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            // Use fresh data if available, otherwise fall back to cache
-            let calData: Data?
-            if let data = data {
-                cacheCalendarData(data)
-                calData = data
-            } else {
-                calData = cachedCalendarData()
+        let days = Calendar.current.dateComponents([.day], from: Date(), to: r.startDate).day ?? 999
+        let fetchWeatherAndFinish = { (layoutImage: UIImage?) in
+            guard r.lat != 0, days <= 7 else {
+                completion(BTCCEntry(date: Date(), round: round, weather: [], layoutImage: layoutImage)); return
             }
-            let round = calData.flatMap { parseCalendar($0) }
-            guard let r = round else {
-                completion(BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil)); return
+            fetchWeather(lat: r.lat, lng: r.lng, start: r.startDate, end: r.endDate) { weather in
+                completion(BTCCEntry(date: Date(), round: round, weather: weather, layoutImage: layoutImage))
             }
-            let days = Calendar.current.dateComponents([.day], from: Date(), to: r.startDate).day ?? 999
-            let fetchWeatherAndFinish = { (layoutImage: UIImage?) in
-                guard r.lat != 0, days <= 7 else {
-                    completion(BTCCEntry(date: Date(), round: round, weather: [], layoutImage: layoutImage)); return
+        }
+        if let imgUrlStr = r.layoutImageUrl, let imgUrl = URL(string: imgUrlStr) {
+            URLSession.shared.dataTask(with: imgUrl) { imgData, _, _ in
+                let image: UIImage?
+                if let imgData = imgData, let fresh = UIImage(data: imgData) {
+                    cacheLayoutImage(fresh, for: imgUrlStr)
+                    image = fresh
+                } else {
+                    image = cachedLayoutImage(for: imgUrlStr)
                 }
-                // Weather is best-effort  -  no cache, empty is acceptable offline
-                fetchWeather(lat: r.lat, lng: r.lng, start: r.startDate, end: r.endDate) { weather in
-                    completion(BTCCEntry(date: Date(), round: round, weather: weather, layoutImage: layoutImage))
-                }
-            }
-            if let imgUrlStr = r.layoutImageUrl, let imgUrl = URL(string: imgUrlStr) {
-                URLSession.shared.dataTask(with: imgUrl) { imgData, _, _ in
-                    let image: UIImage?
-                    if let imgData = imgData, let fresh = UIImage(data: imgData) {
-                        cacheLayoutImage(fresh, for: imgUrlStr)
-                        image = fresh
-                    } else {
-                        image = cachedLayoutImage(for: imgUrlStr)
-                    }
-                    fetchWeatherAndFinish(image)
-                }.resume()
-            } else {
-                fetchWeatherAndFinish(nil)
-            }
-        }.resume()
+                fetchWeatherAndFinish(image)
+            }.resume()
+        } else {
+            fetchWeatherAndFinish(nil)
+        }
+    }.resume()
+}
+
+// MARK: - Timetable Widget Provider
+
+struct BTCCTimetableProvider: TimelineProvider {
+    func placeholder(in context: Context) -> BTCCEntry { BTCCEntry(date: Date(), round: nil, weather: [], layoutImage: nil) }
+    func getSnapshot(in context: Context, completion: @escaping (BTCCEntry) -> Void) { btccLoadEntry(completion: completion) }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<BTCCEntry>) -> Void) {
+        var pending = defaults.stringArray(forKey: "btcc_widget_pending_sizes") ?? []
+        if !pending.contains("timetable") {
+            pending.append("timetable")
+            defaults.set(pending, forKey: "btcc_widget_pending_sizes")
+        }
+        btccLoadEntry { entry in
+            let refresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
+            completion(Timeline(entries: [entry], policy: .after(refresh)))
+        }
     }
 }
 
@@ -529,6 +572,125 @@ struct BTCCWidgetEntryView: View {
     }
 }
 
+// MARK: - Timetable Widget Views
+
+struct TimetableDaySection: View {
+    let header: String
+    let rows: [FullTimetableRow]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(header)
+                .font(.system(size: 9, weight: .black))
+                .foregroundColor(yellowColor)
+                .padding(.bottom, 5)
+            ForEach(rows) { row in
+                HStack(alignment: .top) {
+                    if let series = row.series {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(series)
+                                .font(.system(size: 10, weight: row.isBtcc ? .bold : .medium))
+                                .foregroundColor(row.isBtcc ? .white : .white.opacity(0.85))
+                                .lineLimit(1)
+                            Text(row.session)
+                                .font(.system(size: 8))
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                    } else {
+                        Text(row.session)
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.4))
+                            .italic()
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(row.displayTime)
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.6))
+                        if let laps = row.laps {
+                            Text(laps)
+                                .font(.system(size: 8))
+                                .foregroundColor(.white.opacity(0.4))
+                        }
+                    }
+                }
+                .padding(.vertical, 3)
+            }
+        }
+    }
+}
+
+struct TimetableView: View {
+    let entry: BTCCEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header — identical to LargeView
+            HStack(alignment: .center, spacing: 0) {
+                VStack(spacing: 2) {
+                    if let r = entry.round {
+                        if r.isRaceWeekend {
+                            Text("RACE").font(.system(size: 16, weight: .black)).foregroundColor(yellowColor)
+                            Text("WKND").font(.system(size: 8, weight: .bold)).foregroundColor(.white.opacity(0.65))
+                        } else {
+                            let d = r.daysToGo
+                            Text(d <= 0 ? "TODAY" : "\(d)").font(.system(size: 24, weight: .black)).foregroundColor(yellowColor)
+                            Text(d <= 0 ? "" : (d == 1 ? "DAY" : "DAYS")).font(.system(size: 8, weight: .bold)).foregroundColor(.white.opacity(0.65))
+                        }
+                    } else {
+                        Text("--").font(.system(size: 24, weight: .black)).foregroundColor(yellowColor)
+                    }
+                }
+                .frame(width: 68)
+
+                Rectangle().fill(Color.white.opacity(0.15)).frame(width: 1, height: 50)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    if let r = entry.round {
+                        Text("ROUNDS \(r.roundStart)–\(r.roundEnd) · FULL TIMETABLE")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white.opacity(0.55))
+                        Text(r.venue).font(.system(size: 14, weight: .black)).foregroundColor(.white).lineLimit(1)
+                        Text(r.dateRange).font(.system(size: 11)).foregroundColor(.white.opacity(0.7))
+                    } else {
+                        Text("BTCC Hub").font(.system(size: 14, weight: .black)).foregroundColor(.white)
+                    }
+                }
+                .padding(.leading, 12)
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 14)
+
+            Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1).padding(.horizontal, 14).padding(.vertical, 8)
+
+            // Full timetable rows grouped by day
+            if let r = entry.round, !r.fullTimetable.isEmpty {
+                let sat = r.fullTimetable.filter { $0.day == "SAT" }
+                let sun = r.fullTimetable.filter { $0.day == "SUN" }
+                VStack(alignment: .leading, spacing: 0) {
+                    if !sat.isEmpty {
+                        TimetableDaySection(header: "SATURDAY", rows: sat)
+                        if !sun.isEmpty { Spacer().frame(height: 6) }
+                    }
+                    if !sun.isEmpty {
+                        TimetableDaySection(header: "SUNDAY", rows: sun)
+                    }
+                }
+                .padding(.horizontal, 14)
+            } else {
+                Text("No timetable data")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.horizontal, 14)
+            }
+
+            Spacer(minLength: 0)
+            Rectangle().fill(yellowColor).frame(height: 3)
+        }
+    }
+}
+
 // MARK: - Widget
 
 struct BTCCWidget: Widget {
@@ -546,7 +708,24 @@ struct BTCCWidget: Widget {
 }
 
 
+struct BTCCTimetableWidget: Widget {
+    let kind = "BTCCTimetableWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: BTCCTimetableProvider()) { entry in
+            TimetableView(entry: entry)
+                .containerBackground(navyColor, for: .widget)
+        }
+        .configurationDisplayName("BTCC Timetable")
+        .description("Full weekend timetable including all support series.")
+        .supportedFamilies([.systemLarge])
+    }
+}
+
 @main
 struct BTCCWidgetBundle: WidgetBundle {
-    var body: some Widget { BTCCWidget() }
+    var body: some Widget {
+        BTCCWidget()
+        BTCCTimetableWidget()
+    }
 }

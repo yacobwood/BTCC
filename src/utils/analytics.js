@@ -41,6 +41,7 @@ export const Analytics = {
 
   notificationTypeToggled: (type, enabled) => logEvent(fa(),'notification_type_toggled', {type, enabled: enabled ? 'true' : 'false'}),
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
+  timeFormatChanged: (format) => logEvent(fa(),'time_format_changed', {format}),
 
   signInModalOpened: () => logEvent(fa(), 'sign_in_modal_opened'),
   magicLinkRequested: () => logEvent(fa(), 'magic_link_requested'),

@@ -305,30 +305,24 @@ export default function SettingsScreen({navigation}) {
         )}
 
         <View style={styles.divider} />
-        <Text style={styles.sectionTitle}>UNIT DISPLAY</Text>
+        <Text style={styles.sectionTitle}>DISPLAY</Text>
 
-        <View style={styles.settingRow}>
-          <View style={{flex: 1}}>
-            <Text style={styles.settingLabel}>Distance</Text>
-            <Text style={styles.settingDesc}>Unit used for circuit distances</Text>
-          </View>
-          <View style={styles.pillRow}>
-            <TouchableOpacity
-              style={[styles.pill, useKm && styles.pillActive]}
-              onPress={() => { Analytics.unitSystemChanged('km'); toggleUnits(true); }}
-              accessibilityRole="button"
-              accessibilityLabel="Switch to km">
-              <Text style={[styles.pillText, useKm && styles.pillTextActive]}>km</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.pill, !useKm && styles.pillActive]}
-              onPress={() => { Analytics.unitSystemChanged('miles'); toggleUnits(false); }}
-              accessibilityRole="button"
-              accessibilityLabel="Switch to miles">
-              <Text style={[styles.pillText, !useKm && styles.pillTextActive]}>miles</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <PillRow
+          label="Distance"
+          description="Unit used for circuit distances"
+          options={[
+            {label: 'km',    active: useKm,  onPress: () => { Analytics.unitSystemChanged('km');    toggleUnits(true);  }, accessibilityLabel: 'Switch to km'},
+            {label: 'miles', active: !useKm, onPress: () => { Analytics.unitSystemChanged('miles'); toggleUnits(false); }, accessibilityLabel: 'Switch to miles'},
+          ]}
+        />
+        <PillRow
+          label="Time format"
+          description="How session times are shown in the timetable"
+          options={[
+            {label: '12hr', active: settings.use12HourTime,  onPress: () => { Analytics.timeFormatChanged('12hr'); setSetting('use12HourTime', true);  }, accessibilityLabel: 'Switch to 12-hour time'},
+            {label: '24hr', active: !settings.use12HourTime, onPress: () => { Analytics.timeFormatChanged('24hr'); setSetting('use12HourTime', false); }, accessibilityLabel: 'Switch to 24-hour time'},
+          ]}
+        />
 
         {debug_mode && (
           <>
@@ -476,6 +470,29 @@ function SettingRow({label, description, value, onToggle}) {
   );
 }
 
+function PillRow({label, description, options}) {
+  return (
+    <View style={styles.settingRow}>
+      <View style={{flex: 1}}>
+        <Text style={styles.settingLabel}>{label}</Text>
+        {description ? <Text style={styles.settingDesc}>{description}</Text> : null}
+      </View>
+      <View style={styles.pillRow}>
+        {options.map(opt => (
+          <TouchableOpacity
+            key={opt.label}
+            style={[styles.pill, opt.active && styles.pillActive]}
+            onPress={opt.onPress}
+            accessibilityRole="button"
+            accessibilityLabel={opt.accessibilityLabel}>
+            <Text style={[styles.pillText, opt.active && styles.pillTextActive]}>{opt.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 // Parent group header with its own toggle
 function GroupRow({label, description, value, onToggle}) {
   return (
@@ -611,8 +628,6 @@ const styles = StyleSheet.create({
   deviceIdText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 4},
   debugBtn: {paddingVertical: 8, paddingHorizontal: 12, backgroundColor: Colors.surface, borderRadius: 8, marginBottom: 8, alignSelf: 'flex-start'},
   debugBtnText: {color: Colors.yellow, fontSize: 13, fontWeight: '600'},
-  tokenRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12},
-  tokenText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 2},
   authBtn: {flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: Colors.surface, borderRadius: 8, alignSelf: 'flex-start'},
   authBtnText: {color: Colors.yellow, fontSize: 14, fontWeight: '600'},
   modalOverlay: {flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)'},
@@ -623,10 +638,4 @@ const styles = StyleSheet.create({
   modalError: {color: '#ff6b6b', fontSize: 13, marginBottom: 4},
   modalSubmitBtn: {marginTop: 8, backgroundColor: Colors.yellow, borderRadius: 8, paddingVertical: 12, alignItems: 'center'},
   modalSubmitText: {color: Colors.background, fontWeight: '700', fontSize: 15},
-  modalToggleText: {color: Colors.textSecondary, fontSize: 13},
-  modalDivider: {flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 4},
-  modalDividerLine: {flex: 1, height: 1, backgroundColor: Colors.outline},
-  modalDividerText: {color: Colors.textSecondary, fontSize: 13, marginHorizontal: 10},
-  modalSecondaryBtn: {marginTop: 8, borderWidth: 1, borderColor: Colors.outline, borderRadius: 10, paddingVertical: 13, alignItems: 'center'},
-  modalSecondaryText: {color: Colors.textPrimary, fontSize: 15, fontWeight: '600'},
 });
