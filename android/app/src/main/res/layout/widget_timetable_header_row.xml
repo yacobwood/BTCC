@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#FEBD02"
-        android:textSize="11sp"
+        android:textSize="13sp"
         android:textStyle="bold"
         android:letterSpacing="0.1" />
 </LinearLayout>
