@@ -3201,7 +3201,8 @@
               "time": "13:08.462",
               "gap": "",
               "bestLap": "48.013",
-              "points": 0
+              "points": 0,
+              "status": "DNF"
             }
           ],
           "grid": [
@@ -3623,6 +3624,7 @@
               "gap": "",
               "bestLap": "52.382",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -3637,6 +3639,7 @@
               "gap": "",
               "bestLap": "53.360",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -3651,6 +3654,7 @@
               "gap": "",
               "bestLap": "1:04.981",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             }
           ],
@@ -4030,6 +4034,7 @@
               "gap": "4.766",
               "bestLap": "55.534",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -4044,6 +4049,7 @@
               "gap": "12.355",
               "bestLap": "55.639",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -4058,6 +4064,7 @@
               "gap": "",
               "bestLap": "56.156",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -4072,8 +4079,8 @@
               "gap": "",
               "bestLap": "55.767",
               "points": 0,
-              "leadLap": false,
-              "fastestLap": false
+              "status": "DNF",
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -4087,6 +4094,7 @@
               "gap": "",
               "bestLap": "56.044",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -4101,6 +4109,7 @@
               "gap": "",
               "bestLap": "",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             }
           ],
@@ -4536,6 +4545,7 @@
               "gap": "",
               "bestLap": "48.544",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             },
             {
@@ -4550,6 +4560,7 @@
               "gap": "",
               "bestLap": "47.912",
               "points": 0,
+              "status": "DNF",
               "leadLap": false
             }
           ],
@@ -5539,7 +5550,8 @@
               "time": "13:55.602",
               "gap": "",
               "bestLap": "1:57.426",
-              "points": 0
+              "points": 0,
+              "status": "DNF"
             },
             {
               "pos": 0,
@@ -5552,7 +5564,8 @@
               "time": "15:07.218",
               "gap": "",
               "bestLap": "1:57.301",
-              "points": 0
+              "points": 0,
+              "status": "DNF"
             }
           ],
           "grid": [
@@ -6002,7 +6015,9 @@
               "gap": "",
               "bestLap": "",
               "points": 0,
-              "leadLap": false
+              "status": "DQ",
+              "leadLap": false,
+              "fastestLap": false
             }
           ],
           "grid": [
@@ -6451,6 +6466,7 @@
               "gap": "",
               "bestLap": "1:57.626",
               "points": 1,
+              "status": "DNF",
               "leadLap": true
             }
           ],
