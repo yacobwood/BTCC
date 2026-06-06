@@ -7753,19 +7753,6 @@
             },
             {
               "pos": 11,
-              "no": 132,
-              "cl": "I",
-              "driver": "James DORLIN",
-              "team": "Restart Racing",
-              "car": "Hyundai i30N",
-              "laps": 13,
-              "time": "21:03.864",
-              "gap": "11.085",
-              "bestLap": "1:26.009",
-              "points": 3
-            },
-            {
-              "pos": 12,
               "no": 3,
               "cl": "M",
               "driver": "Tom CHILTON",
@@ -7775,10 +7762,10 @@
               "time": "21:04.480",
               "gap": "11.701",
               "bestLap": "1:25.664",
-              "points": 2
+              "points": 3
             },
             {
-              "pos": 13,
+              "pos": 12,
               "no": 11,
               "cl": "M",
               "driver": "Ricky COLLARD",
@@ -7791,7 +7778,7 @@
               "points": 2
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 99,
               "cl": "I",
               "driver": "Charles RAINFORD",
@@ -7801,10 +7788,10 @@
               "time": "21:06.213",
               "gap": "13.434",
               "bestLap": "1:26.098",
-              "points": 1
+              "points": 2
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 15,
               "cl": "M",
               "driver": "Lewis SELBY",
@@ -7817,7 +7804,7 @@
               "points": 1
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 2,
               "cl": "I",
               "driver": "Daryl DE LEON",
@@ -7827,10 +7814,10 @@
               "time": "21:07.148",
               "gap": "14.369",
               "bestLap": "1:25.936",
-              "points": 0
+              "points": 1
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 32,
               "cl": "M",
               "driver": "Daniel ROWBOTTOM",
@@ -7840,6 +7827,19 @@
               "time": "21:07.954",
               "gap": "15.175",
               "bestLap": "1:26.108",
+              "points": 0
+            },
+            {
+              "pos": 17,
+              "no": 132,
+              "cl": "I",
+              "driver": "James DORLIN",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 13,
+              "time": "21:08.864",
+              "gap": "16.085",
+              "bestLap": "1:26.009",
               "points": 0
             },
             {
@@ -8103,51 +8103,51 @@
             },
             {
               "pos": 11,
-              "no": 132,
-              "cl": "",
-              "driver": "James DORLIN",
-              "team": ""
-            },
-            {
-              "pos": 12,
               "no": 3,
               "cl": "",
               "driver": "Tom CHILTON",
               "team": ""
             },
             {
-              "pos": 13,
+              "pos": 12,
               "no": 11,
               "cl": "",
               "driver": "Ricky COLLARD",
               "team": ""
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 99,
               "cl": "",
               "driver": "Charles RAINFORD",
               "team": ""
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 15,
               "cl": "",
               "driver": "Lewis SELBY",
               "team": ""
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 2,
               "cl": "",
               "driver": "Daryl DE LEON",
               "team": ""
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 32,
               "cl": "",
               "driver": "Daniel ROWBOTTOM",
+              "team": ""
+            },
+            {
+              "pos": 17,
+              "no": 132,
+              "cl": "",
+              "driver": "James DORLIN",
               "team": ""
             },
             {
