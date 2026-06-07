@@ -2,11 +2,12 @@ name: Scrape BTCC Results
 
 on:
   schedule:
-    # Every 5 min Sat/Sun 09:00–18:00 UTC — is_race_weekend.py gates execution
-    # to the actual session window (first session BST−5min → last session BST+90min).
-    # Earliest window open: 09:05 UTC (BH GP FP 10:10 BST). Latest close: 18:00 UTC (R3 17:30 BST+90min).
-    - cron: "*/5 9-18 * * 6"
-    - cron: "*/5 9-18 * * 0"
+    # Every 2 min Sat/Sun 09:00–19:00 UTC — is_race_weekend.py gates execution
+    # to per-session windows (session BST+15min → session BST+90min), skipping
+    # sessions whose results are already committed. Stops as soon as each
+    # session's data lands. Latest possible close: 19:00 UTC (R3 17:30 BST+90min).
+    - cron: "*/2 9-19 * * 6"
+    - cron: "*/2 9-19 * * 0"
   workflow_dispatch:
     inputs:
       year:
@@ -64,7 +65,11 @@ jobs:
           [ -z "$YEAR" ] && YEAR=2026
           ROUND="${{ github.event.inputs.round }}"
           ARGS="$YEAR"
-          [ -n "$ROUND" ] && ARGS="$ARGS --round $ROUND"
+          if [ -n "$ROUND" ]; then
+            ARGS="$ARGS --round $ROUND"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            ARGS="$ARGS --today"
+          fi
           python tools/scraper/scrape_tsl.py $ARGS
 
       - name: Commit updated data

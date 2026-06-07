@@ -29,13 +29,65 @@ except ImportError:
     sys.exit(1)
 
 YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2026
-ROUND_FILTER = None
+ROUND_FILTER    = None
+SESSION_FILTER  = None  # None = all sessions; set of labels = only those
+TODAY_MODE      = "--today" in sys.argv
+
 for i, arg in enumerate(sys.argv):
     if arg == "--round" and i + 1 < len(sys.argv):
         ROUND_FILTER = int(sys.argv[i + 1])
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR   = REPO_ROOT / "data"
+
+if TODAY_MODE and ROUND_FILTER is None:
+    # Auto-detect today's round and restrict scraping to today's incomplete sessions
+    _cal = json.loads((REPO_ROOT / "data" / "calendar.json").read_text())
+    _today = datetime.date.today()
+    _today_round = None
+    _is_sunday   = False
+    for _r in _cal.get("rounds", []):
+        try:
+            _start = datetime.date.fromisoformat(_r["startDate"])
+            _end   = datetime.date.fromisoformat(_r["endDate"])
+        except (KeyError, ValueError):
+            continue
+        if _start <= _today <= _end:
+            _today_round = _r["round"]
+            _is_sunday   = _today == _end
+            break
+
+    if _today_round is None:
+        print("--today: no race today — exiting")
+        sys.exit(0)
+
+    ROUND_FILTER = _today_round
+    _today_day   = "SUN" if _is_sunday else "SAT"
+
+    _sched = json.loads((REPO_ROOT / "data" / "schedule.json").read_text())
+    _round_sessions = next(
+        (r["sessions"] for r in _sched.get("rounds", []) if r["round"] == _today_round),
+        []
+    )
+    _today_labels = {s["name"] for s in _round_sessions if s.get("day") == _today_day}
+
+    _results_path = REPO_ROOT / "data" / f"results{YEAR}.json"
+    _already_done = set()
+    if _results_path.exists():
+        _existing = json.loads(_results_path.read_text())
+        for _rnd in _existing.get("rounds", []):
+            if _rnd.get("round") == _today_round:
+                for _race in _rnd.get("races", []):
+                    if _race.get("results"):
+                        _already_done.add(_race["label"])
+                break
+
+    SESSION_FILTER = _today_labels - _already_done
+    if not SESSION_FILTER:
+        print(f"--today: all sessions for Round {_today_round} {_today_day} already scraped — exiting")
+        sys.exit(0)
+
+    print(f"--today: Round {_today_round} {_today_day}, sessions to scrape: {sorted(SESSION_FILTER)}")
 
 TSL_BASE = "https://www.tsl-timing.com/file/?f=TOCA/{year}/{tsl}{suffix}.pdf"
 
@@ -385,7 +437,7 @@ def parse_laps_led(text):
 
 # ── Round scraper ─────────────────────────────────────────────────────────────
 
-def scrape_round(info):
+def scrape_round(info, session_filter=None):
     tsl = info["tsl"]
     print(f"\nRound {info['round']}: {info['venue']}  (TSL {tsl})")
 
@@ -393,6 +445,9 @@ def scrape_round(info):
     races = []
     any_results = False
     for label, suffix in SESSION_SUFFIXES.items():
+        if session_filter is not None and label not in session_filter:
+            races.append({"label": label, "results": [], "grid": []})
+            continue
         url = TSL_BASE.format(year=YEAR, tsl=tsl, suffix=f"{suffix}trg")
         print(f"  {label} → {url}")
         data = fetch_pdf(url)
@@ -983,17 +1038,20 @@ def main():
                 output_rounds.append(make_stub(info))
             continue
 
-        scraped = scrape_round(info)
+        scraped = scrape_round(info, session_filter=SESSION_FILTER)
         if scraped:
-            # Carry forward grids and youtubeUrls from previous runs
+            # Carry forward results, grids and youtubeUrls from previous runs
             if info["round"] in existing_rounds:
                 ex_round = existing_rounds[info["round"]]
                 scraped["youtubeUrls"] = ex_round.get("youtubeUrls", [None] * 6)
                 existing_map = {r["label"]: r for r in ex_round.get("races", [])}
                 for race in scraped["races"]:
                     ex = existing_map.get(race["label"])
-                    if ex and ex.get("grid") and not race.get("grid"):
-                        race["grid"] = ex["grid"]
+                    if ex:
+                        if ex.get("grid") and not race.get("grid"):
+                            race["grid"] = ex["grid"]
+                        if ex.get("results") and not race.get("results"):
+                            race["results"] = ex["results"]
             else:
                 scraped["youtubeUrls"] = [None] * 6
             output_rounds.append(scraped)
