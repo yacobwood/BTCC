@@ -8493,8 +8493,9 @@
               "time": "21:30.959",
               "gap": "",
               "bestLap": "1:24.254",
-              "points": 21,
-              "fastestLap": true
+              "points": 22,
+              "fastestLap": true,
+              "leadLap": true
             },
             {
               "pos": 2,
@@ -8507,7 +8508,8 @@
               "time": "21:50.292",
               "gap": "19.333",
               "bestLap": "1:25.886",
-              "points": 17
+              "points": 17,
+              "leadLap": false
             },
             {
               "pos": 3,
@@ -8520,7 +8522,8 @@
               "time": "21:50.663",
               "gap": "19.704",
               "bestLap": "1:25.934",
-              "points": 15
+              "points": 16,
+              "leadLap": true
             },
             {
               "pos": 4,
@@ -8533,7 +8536,8 @@
               "time": "21:52.705",
               "gap": "21.746",
               "bestLap": "1:25.559",
-              "points": 13
+              "points": 13,
+              "leadLap": false
             },
             {
               "pos": 5,
@@ -8546,7 +8550,8 @@
               "time": "21:54.513",
               "gap": "23.554",
               "bestLap": "1:25.766",
-              "points": 11
+              "points": 11,
+              "leadLap": false
             },
             {
               "pos": 6,
@@ -8559,7 +8564,8 @@
               "time": "21:54.866",
               "gap": "23.907",
               "bestLap": "1:25.293",
-              "points": 10
+              "points": 10,
+              "leadLap": false
             },
             {
               "pos": 7,
@@ -8572,7 +8578,8 @@
               "time": "21:55.285",
               "gap": "24.326",
               "bestLap": "1:25.820",
-              "points": 9
+              "points": 9,
+              "leadLap": false
             },
             {
               "pos": 8,
@@ -8585,7 +8592,8 @@
               "time": "21:55.712",
               "gap": "24.753",
               "bestLap": "1:25.209",
-              "points": 8
+              "points": 8,
+              "leadLap": false
             },
             {
               "pos": 9,
@@ -8598,7 +8606,8 @@
               "time": "21:57.678",
               "gap": "26.719",
               "bestLap": "1:25.660",
-              "points": 7
+              "points": 7,
+              "leadLap": false
             },
             {
               "pos": 10,
@@ -8611,7 +8620,8 @@
               "time": "21:58.486",
               "gap": "27.527",
               "bestLap": "1:25.676",
-              "points": 6
+              "points": 6,
+              "leadLap": false
             },
             {
               "pos": 11,
@@ -8624,7 +8634,8 @@
               "time": "21:59.116",
               "gap": "28.157",
               "bestLap": "1:25.787",
-              "points": 5
+              "points": 5,
+              "leadLap": false
             },
             {
               "pos": 12,
@@ -8637,7 +8648,8 @@
               "time": "21:59.734",
               "gap": "28.775",
               "bestLap": "1:25.220",
-              "points": 4
+              "points": 4,
+              "leadLap": false
             },
             {
               "pos": 13,
@@ -8650,7 +8662,8 @@
               "time": "22:00.196",
               "gap": "29.237",
               "bestLap": "1:25.677",
-              "points": 3
+              "points": 3,
+              "leadLap": false
             },
             {
               "pos": 14,
@@ -8663,7 +8676,8 @@
               "time": "22:01.090",
               "gap": "30.131",
               "bestLap": "1:25.803",
-              "points": 2
+              "points": 2,
+              "leadLap": false
             },
             {
               "pos": 15,
@@ -8676,7 +8690,8 @@
               "time": "22:01.791",
               "gap": "30.832",
               "bestLap": "1:25.864",
-              "points": 1
+              "points": 1,
+              "leadLap": false
             },
             {
               "pos": 16,
@@ -8689,7 +8704,8 @@
               "time": "22:02.035",
               "gap": "31.076",
               "bestLap": "1:26.340",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 17,
@@ -8702,7 +8718,8 @@
               "time": "22:05.154",
               "gap": "34.195",
               "bestLap": "1:26.125",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 18,
@@ -8715,7 +8732,8 @@
               "time": "22:05.214",
               "gap": "34.255",
               "bestLap": "1:24.905",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 19,
@@ -8728,7 +8746,8 @@
               "time": "22:13.963",
               "gap": "43.004",
               "bestLap": "1:26.146",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 20,
@@ -8741,7 +8760,8 @@
               "time": "22:33.593",
               "gap": "",
               "bestLap": "1:26.224",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 21,
@@ -8754,7 +8774,8 @@
               "time": "21:38.182",
               "gap": "",
               "bestLap": "1:25.296",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             }
           ],
           "grid": [
@@ -8910,7 +8931,155 @@
         {
           "label": "Race 3",
           "results": [],
-          "grid": []
+          "grid": [
+            {
+              "pos": 1,
+              "no": 77,
+              "cl": "",
+              "driver": "Sam OSBORNE",
+              "team": ""
+            },
+            {
+              "pos": 2,
+              "no": 99,
+              "cl": "",
+              "driver": "Charles RAINFORD",
+              "team": ""
+            },
+            {
+              "pos": 3,
+              "no": 17,
+              "cl": "",
+              "driver": "Dexter PATTERSON",
+              "team": ""
+            },
+            {
+              "pos": 4,
+              "no": 11,
+              "cl": "",
+              "driver": "Ricky COLLARD",
+              "team": ""
+            },
+            {
+              "pos": 5,
+              "no": 50,
+              "cl": "",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": ""
+            },
+            {
+              "pos": 6,
+              "no": 52,
+              "cl": "",
+              "driver": "Gordon SHEDDEN",
+              "team": ""
+            },
+            {
+              "pos": 7,
+              "no": 88,
+              "cl": "",
+              "driver": "Mikey DOBLE",
+              "team": ""
+            },
+            {
+              "pos": 8,
+              "no": 2,
+              "cl": "",
+              "driver": "Daryl DE LEON",
+              "team": ""
+            },
+            {
+              "pos": 9,
+              "no": 27,
+              "cl": "",
+              "driver": "Dan CAMMISH",
+              "team": ""
+            },
+            {
+              "pos": 10,
+              "no": 80,
+              "cl": "",
+              "driver": "Tom INGRAM",
+              "team": ""
+            },
+            {
+              "pos": 11,
+              "no": 116,
+              "cl": "",
+              "driver": "Ashley SUTTON",
+              "team": ""
+            },
+            {
+              "pos": 12,
+              "no": 22,
+              "cl": "",
+              "driver": "Chris SMILEY",
+              "team": ""
+            },
+            {
+              "pos": 13,
+              "no": 32,
+              "cl": "",
+              "driver": "Daniel ROWBOTTOM",
+              "team": ""
+            },
+            {
+              "pos": 14,
+              "no": 132,
+              "cl": "",
+              "driver": "James DORLIN",
+              "team": ""
+            },
+            {
+              "pos": 15,
+              "no": 15,
+              "cl": "",
+              "driver": "Lewis SELBY",
+              "team": ""
+            },
+            {
+              "pos": 16,
+              "no": 66,
+              "cl": "",
+              "driver": "Josh COOK",
+              "team": ""
+            },
+            {
+              "pos": 17,
+              "no": 19,
+              "cl": "",
+              "driver": "Max BUXTON",
+              "team": ""
+            },
+            {
+              "pos": 18,
+              "no": 3,
+              "cl": "",
+              "driver": "Tom CHILTON",
+              "team": ""
+            },
+            {
+              "pos": 19,
+              "no": 33,
+              "cl": "",
+              "driver": "Adam MORGAN",
+              "team": ""
+            },
+            {
+              "pos": 20,
+              "no": 28,
+              "cl": "",
+              "driver": "Nicolas HAMILTON",
+              "team": ""
+            },
+            {
+              "pos": 21,
+              "no": 16,
+              "cl": "",
+              "driver": "Aiden MOFFAT",
+              "team": ""
+            }
+          ]
         }
       ],
       "youtubeUrls": [
