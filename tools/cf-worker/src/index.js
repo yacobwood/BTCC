@@ -69,27 +69,12 @@ async function commitFile(githubToken, content, sha) {
   console.log(`Committed live_status.json: ${res.status}`);
 }
 
-async function dispatchScrape(githubToken) {
-  const res = await fetch(
-    `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/scrape-results.yml/dispatches`,
-    {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'btcc-cf-worker', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ref: 'main' }),
-    }
-  );
-  console.log(`Dispatched scrape: ${res.status}`);
-}
-
 export default {
   async scheduled(event, env, ctx) {
     if (!isRaceWeekend()) {
       console.log('Not a race weekend — skipping');
       return;
     }
-
-    // Dispatch results scrape
-    await dispatchScrape(env.GITHUB_TOKEN);
 
     // Check YouTube for a live BTCC broadcast
     const live = await checkLive(env.YOUTUBE_API_KEY);
