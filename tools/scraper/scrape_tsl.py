@@ -651,6 +651,14 @@ def _detect_ptstrg_layout(all_pages):
                 min_qr_x = min(min_qr_x, x)
     return "new" if min_qr_x < 400 else "old"
 
+def _detect_section_layout(elems):
+    """Detect layout for a specific section by finding the 'Pos' header x position.
+    Some sections (e.g. JST) use old-format bounds even when the drivers section is new-format."""
+    for y, x, t in elems:
+        if t.strip() == "Pos":
+            return "new" if x < 25 else "old"
+    return None  # fall back to global layout
+
 def _ptstrg_col_x(rnd, label, layout):
     lo = _PTSTRG_LAYOUTS[layout]
     return lo["base_x"] + (rnd - 1) * lo["rnd_w"] + lo["offsets"].get(label, 0.0)
@@ -844,7 +852,7 @@ def parse_championship_pdf(pdf_bytes):
         "teams":             _parse_team_rows(section_elems["teams"]),
         "manufacturers":     _parse_team_rows(section_elems["manufacturers"]),
         "independentsTeams": _parse_team_rows(section_elems["independentsTeams"]),
-        "jst":               _parse_driver_rows(section_elems["jst"], layout),
+        "jst":               _parse_driver_rows(section_elems["jst"], _detect_section_layout(section_elems["jst"]) or layout),
         "per_race_points":   per_race,
         "scored_sessions":   scored_sessions,
     }
