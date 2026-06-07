@@ -72,6 +72,12 @@ jobs:
           fi
           python tools/scraper/scrape_tsl.py $ARGS
 
+      - name: Pull latest before committing
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.raceday.outputs.in_session_window == 'true'
+        run: git pull --rebase origin main
+
       - name: Commit updated data
         id: commit
         if: |
