@@ -140,7 +140,7 @@ function Badge({cell, hasData}) {
   if (!cell) return (
     <View style={{width: CELL_W, height: CELL_H, justifyContent: 'center', alignItems: 'center'}}>
       {hasData ? (
-        <View style={[styles.badge, {borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)'}]}>
+        <View style={[styles.badge, {backgroundColor: 'rgba(239,68,68,0.2)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.45)'}]}>
           <Text style={styles.dneText}>DNE</Text>
         </View>
       ) : null}
@@ -181,7 +181,8 @@ const KEY_ITEMS = [
   {label: '3', desc: '3rd place', style: badgeStyle(3, 1, '')},
   {label: '4', desc: 'Points finish', style: badgeStyle(4, 1, '')},
   {label: 'DNF', desc: 'Did not finish', style: badgeStyle(0, 1, '', null)},
-  {label: 'DNS', desc: 'Did not start', style: badgeStyle(0, 0, '')},
+  {label: 'DNS', desc: 'Did not start', style: badgeStyle(0, 0, '', 'DNS')},
+  {label: 'DNE', desc: 'Did not enter', style: {bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)', text: '#FCA5A5', solid: false}},
   {label: 'DQ', desc: 'Disqualified', style: badgeStyle(0, 1, '', 'DQ')},
 ];
 
@@ -544,7 +545,7 @@ const styles = StyleSheet.create({
   dneText: {
     fontSize: 8,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.2)',
+    color: '#FCA5A5',
     letterSpacing: 0.3,
   },
   bonusLabel: {
