@@ -751,13 +751,22 @@ def _parse_driver_rows(elems, layout):
 
 def _parse_team_rows(elems):
     """Parse a team/manufacturer championship section into a list of entry dicts."""
+    # Detect layout from 'Pos' header: new format has Pos at x<25, old at x~40
+    layout = _detect_section_layout(elems) or "old"
+    if layout == "new":
+        pts_range  = (222, 242)
+        name_range = (40, 220)
+    else:
+        pts_range  = (460, 510)
+        name_range = (95, 450)
+
     entries = []
     pos = 1
     for _y, row_elems in sorted(_group_by_y(elems).items(), reverse=True):
-        pts_text = _find_text(row_elems, 460, 510, r"^\d+$")
+        pts_text = _find_text(row_elems, *pts_range, r"^\d+$")
         if not pts_text:
             continue
-        name = _find_text(row_elems, 95, 450, r"[A-Za-z]")
+        name = _find_text(row_elems, *name_range, r"[A-Za-z]")
         if not name:
             continue
         entries.append({"pos": pos, "team": name, "points": _to_int(pts_text)})
