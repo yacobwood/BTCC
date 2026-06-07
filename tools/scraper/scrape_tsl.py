@@ -1192,11 +1192,6 @@ def main():
     except Exception as e:
         print(f"  WARNING: team stats scrape failed: {e}", file=sys.stderr)
 
-    print("\n[team totals]")
-    try:
-        _compute_team_totals(DATA_DIR)
-    except Exception as e:
-        print(f"  WARNING: team totals failed: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
