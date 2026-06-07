@@ -128,7 +128,7 @@ export default function RoundResultsScreen({route, navigation}) {
 
   const makeRenderResult = (gridMap) => ({item}) => {
     const isDNF = item.position === 0 || item.time === 'DNF';
-    const isDNS = isDNF && item.laps === 0 && item.status !== 'DQ';
+    const isDNS = isDNF && item.status === 'DNS';
     const posLabel = item.status === 'DQ' ? 'DQ' : isDNS ? 'DNS' : isDNF ? 'DNF' : item.position;
     const fav = isFavourite(item.driver);
     const posColor = item.position === 1 ? '#FFD700'
