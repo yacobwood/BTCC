@@ -50,18 +50,14 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
 }
 
 export async function fetchCalendar(year = 2026, forceRefresh = false) {
-  if (year === 2027) return BUNDLED_CALENDAR_2027;
+  const url = year === 2026
+    ? 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json'
+    : `${BASE_GITHUB}/calendar${year}.json`;
+  const fallback = year === 2027 ? BUNDLED_CALENDAR_2027 : BUNDLED_CALENDAR;
   try {
-    return await fetchJson(
-      'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json',
-      `calendar_${year}`,
-      forceRefresh,
-      /* staleFallback */ true,
-      /* staleFirst */ false,
-      10 * 60 * 1000,
-    );
+    return await fetchJson(url, `calendar_${year}`, forceRefresh, /* staleFallback */ true, /* staleFirst */ false, 10 * 60 * 1000);
   } catch {
-    return BUNDLED_CALENDAR;
+    return fallback;
   }
 }
 

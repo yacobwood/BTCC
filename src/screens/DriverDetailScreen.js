@@ -19,7 +19,7 @@ import {getDriverImage} from '../assets/driverImages';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
-import {fetchResults, fetchStandings} from '../api/client';
+import {fetchResults, fetchStandings, fetchDrivers} from '../api/client';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -44,9 +44,21 @@ function calcAge(dateStr) {
 export default function DriverDetailScreen({route, navigation}) {
   const driverParam = route.params?.driver ?? null;
   const slugParam = route.params?.slug ?? null;
-  const driver = driverParam ?? (slugParam
-    ? BUNDLED_DRIVERS.drivers.find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam)
-    : null);
+  const [driver, setDriver] = useState(
+    driverParam ?? (slugParam
+      ? BUNDLED_DRIVERS.drivers.find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam)
+      : null),
+  );
+
+  // For deep-link navigation (slug only), refresh driver data from the network
+  // so profile corrections in drivers.json are visible without a rebuild.
+  useEffect(() => {
+    if (!slugParam || driverParam) return;
+    fetchDrivers().then(data => {
+      const found = (data?.drivers || []).find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam);
+      if (found) setDriver(found);
+    }).catch(() => {});
+  }, []);
 
   if (!driver) return null;
   const {isFavourite, toggle: toggleFav} = useFavouriteDriver();
