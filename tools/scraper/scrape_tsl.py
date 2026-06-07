@@ -614,22 +614,49 @@ def _to_int(s):
         return 0
 
 
-# Per-race column layout in ptstrg PDFs (calibrated from 262103ptstrg.pdf)
-# x = _PTSTRG_BASE_X + (round - 1) * _PTSTRG_RND_W + session_offset
-_PTSTRG_BASE_X  = 641.0   # x-centre of round-1 QR column header
-_PTSTRG_RND_W   = 138.6   # x-distance between successive round QR columns
-_PTSTRG_OFFSETS = {       # x-offset from QR within each round
-    "Qualifying Race": 0.0,
-    "Race 1":          31.2,
-    "Race 2":          67.2,
-    "Race 3":         103.2,
+# Per-race column layout — two known PDF scales:
+#   Old (large): calibrated from 262103ptstrg.pdf (Snetterton R3); QR first within each round
+#   New (small): calibrated from 262303ptstrg.pdf (Oulton R4 onwards); R1/R2/R3 before QR
+_PTSTRG_LAYOUTS = {
+    "old": {
+        "base_x":  641.0,
+        "rnd_w":   138.6,
+        "offsets": {"Qualifying Race": 0.0, "Race 1": 31.2, "Race 2": 67.2, "Race 3": 103.2},
+        "col_tol": (-10, 25),
+        "driver_bounds": {
+            "pos":    (40,  60),  "car":  (70, 115), "driver": (100, 215),
+            "nat":   (260, 295),  "cls": (315, 340),  "total": (355, 400),
+            "wins":  (510, 555),  "snds": (555, 600), "thrds": (600, 641),
+        },
+    },
+    "new": {
+        "base_x":  312.6,
+        "rnd_w":    55.4,
+        "offsets": {"Qualifying Race": 0.0, "Race 1": -43.0, "Race 2": -28.6, "Race 3": -14.2},
+        "col_tol": (-8, 12),
+        "driver_bounds": {
+            "pos":   (15,  28),  "car":  (28,  50), "driver": (40, 115),
+            "nat":  (104, 122),  "cls": (124, 138),  "total": (138, 162),
+            "wins": (200, 220),  "snds": (220, 238), "thrds": (236, 258),
+        },
+    },
 }
 
-def _ptstrg_col_x(rnd, label):
-    return _PTSTRG_BASE_X + (rnd - 1) * _PTSTRG_RND_W + _PTSTRG_OFFSETS.get(label, 0.0)
+def _detect_ptstrg_layout(all_pages):
+    """Detect old vs new PDF scale by finding minimum QR column x across all pages."""
+    min_qr_x = float("inf")
+    for page_elems in all_pages:
+        for y, x, t in page_elems:
+            if t.strip() == "QR":
+                min_qr_x = min(min_qr_x, x)
+    return "new" if min_qr_x < 400 else "old"
+
+def _ptstrg_col_x(rnd, label, layout):
+    lo = _PTSTRG_LAYOUTS[layout]
+    return lo["base_x"] + (rnd - 1) * lo["rnd_w"] + lo["offsets"].get(label, 0.0)
 
 
-def _parse_ptstrg_per_race(section_elems, num_rounds):
+def _parse_ptstrg_per_race(section_elems, num_rounds, layout):
     """
     Extract per-race points from the drivers championship section.
     Returns (per_race, scored_sessions) where:
@@ -638,22 +665,25 @@ def _parse_ptstrg_per_race(section_elems, num_rounds):
     Only sessions with at least one non-zero value are in scored_sessions, so
     future-round columns (all zeros) are never mistaken for real data.
     """
+    lo = _PTSTRG_LAYOUTS[layout]
+    db = lo["driver_bounds"]
+    tol_lo, tol_hi = lo["col_tol"]
     per_race = {}
     scored_sessions = set()
-    labels = list(_PTSTRG_OFFSETS.keys())
+    labels = list(lo["offsets"].keys())
 
     for _y, row_elems in sorted(_group_by_y(section_elems).items(), reverse=True):
-        if not _find_text(row_elems, 40, 60, r"^\d+$"):
+        if not _find_text(row_elems, *db["pos"], r"^\d+$"):
             continue  # not a driver row
 
-        car_raw = _find_text(row_elems, 70, 115)
+        car_raw = _find_text(row_elems, *db["car"])
         driver = ""
         if car_raw:
             m = re.match(r"^(\d+)\s+(.+)$", car_raw)
             if m:
                 driver = m.group(2).strip()
         if not driver:
-            driver = _find_text(row_elems, 100, 215) or ""
+            driver = _find_text(row_elems, *db["driver"]) or ""
         if not driver:
             continue
         driver = DRIVER_NAME_MAP.get(driver, driver)
@@ -661,8 +691,8 @@ def _parse_ptstrg_per_race(section_elems, num_rounds):
         driver_pts = {}
         for rnd in range(1, num_rounds + 1):
             for label in labels:
-                cx = _ptstrg_col_x(rnd, label)
-                val = _find_text(row_elems, cx - 10, cx + 25, r"^\d+$")
+                cx = _ptstrg_col_x(rnd, label, layout)
+                val = _find_text(row_elems, cx + tol_lo, cx + tol_hi, r"^\d+$")
                 pts = int(val) if val else 0
                 driver_pts[(rnd, label)] = pts
                 if pts > 0:
@@ -672,18 +702,18 @@ def _parse_ptstrg_per_race(section_elems, num_rounds):
     return per_race, scored_sessions
 
 
-def _parse_driver_rows(elems):
+def _parse_driver_rows(elems, layout):
     """Parse a driver-type championship section into a list of entry dicts."""
+    db = _PTSTRG_LAYOUTS[layout]["driver_bounds"]
     entries = []
     for _y, row_elems in sorted(_group_by_y(elems).items(), reverse=True):
-        pos_text = _find_text(row_elems, 40, 60, r"^\d+$")
+        pos_text = _find_text(row_elems, *db["pos"], r"^\d+$")
         if not pos_text:
             continue
         pos = int(pos_text)
 
-        # Car number at x≈79; P1 3-digit cars get merged with driver name at x≈76
         car, driver = "", ""
-        car_raw = _find_text(row_elems, 70, 115)
+        car_raw = _find_text(row_elems, *db["car"])
         if car_raw:
             m = re.match(r"^(\d+)\s+(.+)$", car_raw)
             if m:
@@ -691,15 +721,15 @@ def _parse_driver_rows(elems):
             else:
                 car = car_raw.strip()
         if not driver:
-            driver = _find_text(row_elems, 100, 215) or ""
+            driver = _find_text(row_elems, *db["driver"]) or ""
 
         driver = DRIVER_NAME_MAP.get(driver, driver)
-        nat   = _find_text(row_elems, 260, 295, r"^[A-Z]{3}$") or ""
-        cls   = _find_text(row_elems, 315, 340, r"^[MI]$") or ""
-        total = _to_int(_find_text(row_elems, 355, 400, r"^\d+$"))
-        wins  = _to_int(_find_text(row_elems, 510, 555, r"^\d+$"))
-        snds  = _to_int(_find_text(row_elems, 555, 600, r"^\d+$"))
-        thrds = _to_int(_find_text(row_elems, 600, 641, r"^\d+$"))
+        nat   = _find_text(row_elems, *db["nat"], r"^[A-Z]{3}$") or ""
+        cls   = _find_text(row_elems, *db["cls"], r"^[MI]$") or ""
+        total = _to_int(_find_text(row_elems, *db["total"], r"^\d+$"))
+        wins  = _to_int(_find_text(row_elems, *db["wins"], r"^\d+$"))
+        snds  = _to_int(_find_text(row_elems, *db["snds"], r"^\d+$"))
+        thrds = _to_int(_find_text(row_elems, *db["thrds"], r"^\d+$"))
 
         if driver:
             entries.append({
@@ -802,16 +832,19 @@ def parse_championship_pdf(pdf_bytes):
                     if x < 641:
                         section_elems[key].append((y, x, t))
 
+    layout = _detect_ptstrg_layout(all_pages)
+    print(f"  [ptstrg] detected layout: {layout}")
+
     per_race, scored_sessions = _parse_ptstrg_per_race(
-        section_elems_full["standings"], num_rounds=len(ROUNDS[YEAR])
+        section_elems_full["standings"], num_rounds=len(ROUNDS[YEAR]), layout=layout
     )
 
     result = {
-        "standings":         _parse_driver_rows(section_elems["standings"]),
+        "standings":         _parse_driver_rows(section_elems["standings"], layout),
         "teams":             _parse_team_rows(section_elems["teams"]),
         "manufacturers":     _parse_team_rows(section_elems["manufacturers"]),
         "independentsTeams": _parse_team_rows(section_elems["independentsTeams"]),
-        "jst":               _parse_driver_rows(section_elems["jst"]),
+        "jst":               _parse_driver_rows(section_elems["jst"], layout),
         "per_race_points":   per_race,
         "scored_sessions":   scored_sessions,
     }
