@@ -67,7 +67,7 @@ jobs:
           ARGS="$YEAR"
           if [ -n "$ROUND" ]; then
             ARGS="$ARGS --round $ROUND"
-          elif [ "${{ github.event_name }}" = "schedule" ]; then
+          else
             ARGS="$ARGS --today"
           fi
           python tools/scraper/scrape_tsl.py $ARGS
