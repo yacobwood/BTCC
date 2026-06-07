@@ -147,7 +147,7 @@ function Badge({cell, hasData}) {
     </View>
   );
   const s = badgeStyle(cell.pos, cell.laps, cell.time, cell.status);
-  const isDNS = cell.pos === 0 && cell.laps === 0 && cell.status !== 'DQ';
+  const isDNS = cell.pos === 0 && cell.status === 'DNS';
   const bonus = isDNS ? 0 : bonusCount(cell);
   const bonusText = bonus > 0
     ? BONUS_DOTS.filter(({key}) => cell[key]).map(({label}) => label).join(' ')
