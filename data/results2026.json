@@ -8569,20 +8569,6 @@
             },
             {
               "pos": 7,
-              "no": 50,
-              "cl": "I",
-              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
-              "team": "Laser Tools Racing with MB Motorsport",
-              "car": "Toyota Corolla GR Sport",
-              "laps": 15,
-              "time": "21:55.285",
-              "gap": "24.326",
-              "bestLap": "1:25.820",
-              "points": 9,
-              "leadLap": false
-            },
-            {
-              "pos": 8,
               "no": 11,
               "cl": "M",
               "driver": "Ricky COLLARD",
@@ -8592,11 +8578,11 @@
               "time": "21:55.712",
               "gap": "24.753",
               "bestLap": "1:25.209",
-              "points": 8,
+              "points": 9,
               "leadLap": false
             },
             {
-              "pos": 9,
+              "pos": 8,
               "no": 17,
               "cl": "I",
               "driver": "Dexter PATTERSON",
@@ -8606,11 +8592,11 @@
               "time": "21:57.678",
               "gap": "26.719",
               "bestLap": "1:25.660",
-              "points": 7,
+              "points": 8,
               "leadLap": false
             },
             {
-              "pos": 10,
+              "pos": 9,
               "no": 99,
               "cl": "I",
               "driver": "Charles RAINFORD",
@@ -8620,11 +8606,11 @@
               "time": "21:58.486",
               "gap": "27.527",
               "bestLap": "1:25.676",
-              "points": 6,
+              "points": 7,
               "leadLap": false
             },
             {
-              "pos": 11,
+              "pos": 10,
               "no": 77,
               "cl": "M",
               "driver": "Sam OSBORNE",
@@ -8634,11 +8620,11 @@
               "time": "21:59.116",
               "gap": "28.157",
               "bestLap": "1:25.787",
-              "points": 5,
+              "points": 6,
               "leadLap": false
             },
             {
-              "pos": 12,
+              "pos": 11,
               "no": 22,
               "cl": "I",
               "driver": "Chris SMILEY",
@@ -8648,11 +8634,11 @@
               "time": "21:59.734",
               "gap": "28.775",
               "bestLap": "1:25.220",
-              "points": 4,
+              "points": 5,
               "leadLap": false
             },
             {
-              "pos": 13,
+              "pos": 12,
               "no": 32,
               "cl": "M",
               "driver": "Daniel ROWBOTTOM",
@@ -8662,11 +8648,11 @@
               "time": "22:00.196",
               "gap": "29.237",
               "bestLap": "1:25.677",
-              "points": 3,
+              "points": 4,
               "leadLap": false
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 132,
               "cl": "I",
               "driver": "James DORLIN",
@@ -8676,11 +8662,11 @@
               "time": "22:01.090",
               "gap": "30.131",
               "bestLap": "1:25.803",
-              "points": 2,
+              "points": 3,
               "leadLap": false
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 15,
               "cl": "M",
               "driver": "Lewis SELBY",
@@ -8690,11 +8676,11 @@
               "time": "22:01.791",
               "gap": "30.832",
               "bestLap": "1:25.864",
-              "points": 1,
+              "points": 2,
               "leadLap": false
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 66,
               "cl": "M",
               "driver": "Josh COOK",
@@ -8704,11 +8690,11 @@
               "time": "22:02.035",
               "gap": "31.076",
               "bestLap": "1:26.340",
-              "points": 0,
+              "points": 1,
               "leadLap": false
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 19,
               "cl": "M",
               "driver": "Max BUXTON",
@@ -8722,7 +8708,7 @@
               "leadLap": false
             },
             {
-              "pos": 18,
+              "pos": 17,
               "no": 3,
               "cl": "M",
               "driver": "Tom CHILTON",
@@ -8732,6 +8718,20 @@
               "time": "22:05.214",
               "gap": "34.255",
               "bestLap": "1:24.905",
+              "points": 0,
+              "leadLap": false
+            },
+            {
+              "pos": 18,
+              "no": 50,
+              "cl": "I",
+              "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 15,
+              "time": "22:05.285",
+              "gap": "34.326",
+              "bestLap": "1:25.820",
               "points": 0,
               "leadLap": false
             },

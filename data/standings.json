@@ -8,8 +8,8 @@
       "class": "M",
       "points": 220,
       "wins": 5,
-      "seconds": 4,
-      "thirds": 0,
+      "seconds": 5,
+      "thirds": 4,
       "team": "NAPA Racing UK"
     },
     {
@@ -20,7 +20,7 @@
       "class": "M",
       "points": 172,
       "wins": 1,
-      "seconds": 3,
+      "seconds": 1,
       "thirds": 3,
       "team": "Team VERTU"
     },
@@ -44,8 +44,8 @@
       "class": "I",
       "points": 137,
       "wins": 2,
-      "seconds": 0,
-      "thirds": 1,
+      "seconds": 2,
+      "thirds": 0,
       "team": "WSR"
     },
     {
@@ -56,8 +56,8 @@
       "class": "M",
       "points": 124,
       "wins": 0,
-      "seconds": 3,
-      "thirds": 2,
+      "seconds": 0,
+      "thirds": 3,
       "team": "Team VERTU"
     },
     {
@@ -69,7 +69,7 @@
       "points": 113,
       "wins": 0,
       "seconds": 0,
-      "thirds": 2,
+      "thirds": 0,
       "team": "WSR"
     },
     {
@@ -80,8 +80,8 @@
       "class": "I",
       "points": 110,
       "wins": 1,
-      "seconds": 0,
-      "thirds": 1,
+      "seconds": 1,
+      "thirds": 0,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
@@ -92,8 +92,8 @@
       "class": "M",
       "points": 105,
       "wins": 0,
-      "seconds": 1,
-      "thirds": 0,
+      "seconds": 0,
+      "thirds": 1,
       "team": "Speedworks Corolla Racing"
     },
     {
@@ -104,8 +104,8 @@
       "class": "I",
       "points": 97,
       "wins": 1,
-      "seconds": 0,
-      "thirds": 1,
+      "seconds": 1,
+      "thirds": 0,
       "team": "Laser Tools Racing with MB Motorsport"
     },
     {
@@ -128,7 +128,7 @@
       "class": "I",
       "points": 80,
       "wins": 1,
-      "seconds": 0,
+      "seconds": 1,
       "thirds": 0,
       "team": "Laser Tools Racing with MB Motorsport"
     },
@@ -141,7 +141,7 @@
       "points": 79,
       "wins": 0,
       "seconds": 0,
-      "thirds": 1,
+      "thirds": 0,
       "team": "Team VERTU"
     },
     {
@@ -253,31 +253,124 @@
       "team": "Speedworks Corolla Racing"
     }
   ],
-  "teams": [],
-  "manufacturers": [],
-  "independentsTeams": [],
+  "teams": [
+    {
+      "pos": 1,
+      "team": "NAPA Racing UK",
+      "points": 334
+    },
+    {
+      "pos": 2,
+      "team": "WSR",
+      "points": 228
+    },
+    {
+      "pos": 3,
+      "team": "Team VERTU",
+      "points": 216
+    },
+    {
+      "pos": 4,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "points": 186
+    },
+    {
+      "pos": 5,
+      "team": "Laser Tools Racing with MB Motorsport",
+      "points": 168
+    },
+    {
+      "pos": 6,
+      "team": "Cataclean Plato Racing",
+      "points": 132
+    },
+    {
+      "pos": 7,
+      "team": "Restart Racing",
+      "points": 129
+    },
+    {
+      "pos": 8,
+      "team": "Speedworks Corolla Racing",
+      "points": 103
+    },
+    {
+      "pos": 9,
+      "team": "Steel Seal with Power Maxed Racing",
+      "points": 69
+    }
+  ],
+  "manufacturers": [
+    {
+      "pos": 1,
+      "points": 387,
+      "manufacturer": "Alliance Racing / Ford"
+    },
+    {
+      "pos": 2,
+      "points": 269,
+      "manufacturer": "EXCELR8 Motorsport / Hyundai"
+    },
+    {
+      "pos": 3,
+      "points": 237,
+      "manufacturer": "Mercedes"
+    },
+    {
+      "pos": 4,
+      "points": 216,
+      "manufacturer": "Toyota"
+    }
+  ],
+  "independentsTeams": [
+    {
+      "pos": 1,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "points": 200
+    },
+    {
+      "pos": 2,
+      "team": "WSR",
+      "points": 199
+    },
+    {
+      "pos": 3,
+      "team": "Laser Tools Racing with MB Motorsport",
+      "points": 184
+    },
+    {
+      "pos": 4,
+      "team": "Restart Racing",
+      "points": 170
+    },
+    {
+      "pos": 5,
+      "team": "Steel Seal with Power Maxed Racing",
+      "points": 137
+    }
+  ],
   "jst": [
     {
       "pos": 1,
       "car": "17",
       "driver": "Dexter PATTERSON",
-      "nat": "",
-      "class": "",
-      "points": 0,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 6,
+      "nat": "GBR",
+      "class": "I",
+      "points": 195,
+      "wins": 6,
+      "seconds": 2,
+      "thirds": 2,
       "team": "Steel Seal with Power Maxed Racing"
     },
     {
       "pos": 2,
       "car": "132",
       "driver": "James DORLIN",
-      "nat": "",
-      "class": "",
-      "points": 0,
-      "wins": 0,
-      "seconds": 0,
+      "nat": "GBR",
+      "class": "I",
+      "points": 188,
+      "wins": 3,
+      "seconds": 2,
       "thirds": 3,
       "team": "Restart Racing"
     },
@@ -285,35 +378,35 @@
       "pos": 3,
       "car": "77",
       "driver": "Sam OSBORNE",
-      "nat": "",
-      "class": "",
-      "points": 0,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 2,
+      "nat": "GBR",
+      "class": "M",
+      "points": 166,
+      "wins": 2,
+      "seconds": 3,
+      "thirds": 5,
       "team": "NAPA Racing UK"
     },
     {
       "pos": 4,
       "car": "28",
       "driver": "Nicolas HAMILTON",
-      "nat": "",
-      "class": "",
-      "points": 0,
+      "nat": "GBR",
+      "class": "M",
+      "points": 132,
       "wins": 0,
-      "seconds": 0,
-      "thirds": 0,
+      "seconds": 3,
+      "thirds": 1,
       "team": "Team VERTU"
     },
     {
       "pos": 5,
       "car": "15",
       "driver": "Lewis SELBY",
-      "nat": "",
-      "class": "",
-      "points": 0,
-      "wins": 0,
-      "seconds": 0,
+      "nat": "GBR",
+      "class": "M",
+      "points": 129,
+      "wins": 1,
+      "seconds": 2,
       "thirds": 1,
       "team": "NAPA Racing UK"
     },
@@ -321,9 +414,9 @@
       "pos": 6,
       "car": "19",
       "driver": "Max BUXTON",
-      "nat": "",
-      "class": "",
-      "points": 0,
+      "nat": "GBR",
+      "class": "M",
+      "points": 106,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -333,5 +426,5 @@
   "season": "2026",
   "round": 4,
   "venue": "Oulton Park",
-  "updated": "2026-06-07T17:06:44Z"
+  "updated": "2026-06-07T18:09:55Z"
 }
