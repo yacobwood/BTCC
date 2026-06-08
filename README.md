@@ -587,7 +587,7 @@ The main workhorse function. Runs every minute and handles two categories of wor
 - Post-session results: triggered when session results land in `results{year}.json`
 
 **Always runs (every minute, regardless of race day):**
-- News alerts: polls `btcc.net/wp-json/wp/v2/posts?per_page=1`, compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability).
+- News alerts: polls `btcc.net/wp-json/wp/v2/posts?per_page=1`, compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout (WordPress API can be slow).
 - Hub news alerts: polls `hub_news.json`, compares latest `id` to Firestore `state/hub_news.lastId`. Sends to `news_alerts`. Excludes "Weekly Digest" category articles.
 - Podcast alerts: polls Buzzsprout RSS, compares `guid` to Firestore state. Sends to `podcast_alerts`.
 

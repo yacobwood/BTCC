@@ -169,7 +169,7 @@ test('fetches from NEWS_URL with correct User-Agent header', async () => {
 
   expect(fetchFn).toHaveBeenCalledWith(
     NEWS_URL,
-    10000,
+    20000,
     expect.objectContaining({headers: expect.objectContaining({'User-Agent': expect.stringContaining('BTCCHub')})}),
   );
 });

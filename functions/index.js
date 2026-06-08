@@ -76,7 +76,7 @@ const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data
 const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
 // Wrap fetch with a hard timeout so a hanging external service never causes a 504.
-// Cloud Run kills the function at 60s; with 10s per request we stay well inside that.
+// Cloud Run kills the function at 60s; default 10s, btcc.net WordPress uses 20s.
 function fetchWithTimeout(url, ms = 10000, options = {}) {
   return fetch(url, {...options, signal: AbortSignal.timeout(ms)});
 }

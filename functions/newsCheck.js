@@ -6,7 +6,7 @@ function decodeHtmlEntities(str) {
 }
 
 async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
-  const newsRes = await fetchFn(NEWS_URL, 10000, {headers: {'User-Agent': NEWS_USER_AGENT}});
+  const newsRes = await fetchFn(NEWS_URL, 20000, {headers: {'User-Agent': NEWS_USER_AGENT}});
   const articles = await newsRes.json();
   const latest = articles?.[0];
 
