@@ -111,3 +111,6 @@ firestore-debug.log
 
 # Bundled iOS driver images (generated assets, not source)
 ios/assets/
+
+# Claude Code local config
+.claude/
