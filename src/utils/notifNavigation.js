@@ -1,5 +1,6 @@
 import {CommonActions} from '@react-navigation/native';
 import {getSeasonData} from '../assets/seasonData';
+import {markRead} from './digestRead';
 
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
@@ -128,6 +129,7 @@ export function navigateFromData(navigationRef, data) {
       fetchHubPost(id)
         .then(article => {
           if (article) {
+            markRead(id);
             navigationRef.dispatch(
               CommonActions.reset({
                 index: 0,

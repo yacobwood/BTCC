@@ -591,6 +591,22 @@ async function runDigest(label, promptIntro) {
   // draft for admin review first. The admin publishes it manually via the
   // admin panel, which triggers the digest_alerts notification at that point.
   console.log(`${label}: digest draft committed for ${today}: ${title}`);
+
+  try {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {user: 'btcchub@gmail.com', pass: process.env.GMAIL_APP_PASSWORD},
+    });
+    await transporter.sendMail({
+      from: '"BTCC Hub" <btcchub@gmail.com>',
+      to: 'btcchub@gmail.com',
+      subject: `[BTCC Hub] ${label} digest ready to review`,
+      text: `A new ${label} digest draft is ready for review and publishing.\n\nTitle: ${title}\n\nReview and publish at:\nhttps://yacobwood.github.io/BTCC/admin/standings-admin.html`,
+    });
+  } catch (emailErr) {
+    console.warn('Digest ready email failed (non-fatal):', emailErr.message);
+  }
 }
 
 // ── Weekly digest — every Monday at 8am ──────────────────────

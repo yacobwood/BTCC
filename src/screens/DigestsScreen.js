@@ -49,6 +49,13 @@ export default function DigestsScreen({navigation}) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const unsub = navigation.addListener('focus', () => {
+      getReadIds().then(setReadIds);
+    });
+    return unsub;
+  }, [navigation]);
+
   // Group by month  -  assign episode numbers oldest-first
   const listData = useMemo(() => {
     const sorted = [...digests].sort((a, b) => new Date(a.sortDate) - new Date(b.sortDate));
