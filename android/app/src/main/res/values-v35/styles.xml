@@ -1,0 +1,11 @@
+<resources>
+    <!-- On API 35+, android:navigationBarColor and android:statusBarColor are deprecated.
+         EdgeToEdge.enable() in MainActivity makes the window edge-to-edge; insets are
+         handled by react-native-safe-area-context on the JS side. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:windowBackground">@color/splash_blue</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_blue</item>
+    </style>
+</resources>
