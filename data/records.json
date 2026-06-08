@@ -315,7 +315,7 @@
     {
       "driver": "Ashley Sutton",
       "starts": 309,
-      "wins": 51,
+      "wins": 52,
       "podiums": 122,
       "poles": 13,
       "fastestLaps": 58,
@@ -333,7 +333,7 @@
       "consecutivePoints": 29,
       "racesLed": 62,
       "hatTricks": 4,
-      "winPct": 0.1650485436893204,
+      "winPct": 0.16828478964401294,
       "podiumPct": 0.3948220064724919,
       "pointsPerStart": 11.407766990291263,
       "dnfPct": 0.06472491909385113
@@ -497,7 +497,7 @@
     {
       "driver": "Dan Cammish",
       "starts": 249,
-      "wins": 16,
+      "wins": 17,
       "podiums": 63,
       "poles": 8,
       "fastestLaps": 12,
@@ -515,7 +515,7 @@
       "consecutivePoints": 30,
       "racesLed": 21,
       "hatTricks": 2,
-      "winPct": 0.0642570281124498,
+      "winPct": 0.06827309236947791,
       "podiumPct": 0.25301204819277107,
       "pointsPerStart": 8.473895582329318,
       "dnfPct": 0.1646586345381526
@@ -2707,7 +2707,7 @@
     {
       "driver": "Charles Rainford",
       "starts": 42,
-      "wins": 2,
+      "wins": 3,
       "podiums": 6,
       "poles": 1,
       "fastestLaps": 5,
@@ -2725,7 +2725,7 @@
       "consecutivePoints": 7,
       "racesLed": 5,
       "hatTricks": 0,
-      "winPct": 0.047619047619047616,
+      "winPct": 0.07142857142857142,
       "podiumPct": 0.14285714285714285,
       "pointsPerStart": 6.785714285714286,
       "dnfPct": 0.09523809523809523
