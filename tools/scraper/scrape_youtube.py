@@ -164,14 +164,16 @@ def search_itv_channel(venue):
     if video_id:
         return video_id, title
 
-    print(f"Channel feed had no match - falling back to YouTube search for '{venue}'...")
-    search_query = f"ytsearch10:full races {venue} BTCC 2026 ITV Sport"
+    print(f"Channel feed had no match - falling back to channel search for '{venue}'...")
+    venue_slug = venue.replace(" ", "+")
+    channel_search_url = f"https://www.youtube.com/@ITVSportExtra/search?query=full+races+{venue_slug}+BTCC"
     result = yt_dlp(
         "--flat-playlist",
         "--dump-json",
-        search_query,
+        "--playlist-end", "10",
+        channel_search_url,
     )
-    return _parse_yt_dlp_entries(result.stdout, venue_words, "YouTube search")
+    return _parse_yt_dlp_entries(result.stdout, venue_words, "channel search")
 
 
 def get_chapters(video_id):
