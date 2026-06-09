@@ -207,9 +207,13 @@ def search_itv_channel(venue):
 def get_chapters(video_id):
     """Return list of chapter dicts from yt-dlp metadata, or []."""
     url = f"https://www.youtube.com/watch?v={video_id}"
-    result = yt_dlp("--dump-json", "--no-playlist", url)
-    info = json.loads(result.stdout)
-    return info.get("chapters") or []
+    try:
+        result = yt_dlp("--dump-json", "--no-playlist", url)
+        info = json.loads(result.stdout)
+        return info.get("chapters") or []
+    except subprocess.CalledProcessError as e:
+        print(f"Could not fetch video metadata (geo-restricted?): {e}")
+        return []
 
 
 def chapters_to_timestamps(chapters):
@@ -283,13 +287,17 @@ def detect_race_timestamps(video_id):
 
     try:
         print("Downloading video (360p, ~300MB - this will take several minutes)...")
-        yt_dlp(
-            "-f", "18/worst",
-            "--extractor-args", "youtube:player_client=android",
-            "-o", video_path,
-            "--no-playlist",
-            url,
-        )
+        try:
+            yt_dlp(
+                "-f", "18/worst",
+                "--extractor-args", "youtube:player_client=android",
+                "-o", video_path,
+                "--no-playlist",
+                url,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Could not download video (geo-restricted?): {e}")
+            return None, None
 
         print("Extracting 1fps frames at 80x45...")
         subprocess.run(
@@ -384,10 +392,11 @@ def main():
         print("No chapters found - falling back to green-screen detection.")
         t2, t3 = detect_race_timestamps(video_id)
         if t2 is None:
-            print("ERROR: Could not detect race timestamps.")
-            sys.exit(1)
-        t1 = 0
-        print(f"Detected - Race 1: 0s (start), Race 2: {t2}s, Race 3: {t3}s")
+            print("WARNING: Could not detect race timestamps (geo-restricted?) - storing base URL for all races.")
+            t1, t2, t3 = 0, 0, 0
+        else:
+            t1 = 0
+            print(f"Detected - Race 1: 0s (start), Race 2: {t2}s, Race 3: {t3}s")
 
     r1_url, r2_url, r3_url = build_urls(video_id, t1, t2, t3)
 
