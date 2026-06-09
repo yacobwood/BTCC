@@ -33,6 +33,7 @@ CALENDAR_JSON = ROOT / "data" / "calendar.json"
 RESULTS_JSON  = ROOT / "data" / "results2026.json"
 
 ITV_CHANNEL   = "https://www.youtube.com/@ITVSportExtra/videos"
+ITV_BTCC_PLAYLIST = "https://www.youtube.com/playlist?list=PLWBnF3ljAG8MXqRv0KmdKoMDL1rCOJujs"
 TITLE_PATTERN = re.compile(r"full races.*btcc 2026", re.IGNORECASE)
 
 # --- green detection thresholds (BTCC title card) ---
@@ -153,27 +154,25 @@ def search_itv_channel(venue):
     """
     venue_words = [w.lower() for w in venue.split() if len(w) > 3]
 
-    print(f"Searching ITV Sport Extra channel for '{venue}'...")
+    print(f"Searching ITV Sport Extra BTCC playlist for '{venue}'...")
+    result = yt_dlp(
+        "--flat-playlist",
+        "--dump-json",
+        "--playlist-end", "20",
+        ITV_BTCC_PLAYLIST,
+    )
+    video_id, title = _parse_yt_dlp_entries(result.stdout, venue_words, "BTCC playlist")
+    if video_id:
+        return video_id, title
+
+    print(f"BTCC playlist had no match - falling back to channel feed for '{venue}'...")
     result = yt_dlp(
         "--flat-playlist",
         "--dump-json",
         "--playlist-end", "40",
         ITV_CHANNEL,
     )
-    video_id, title = _parse_yt_dlp_entries(result.stdout, venue_words, "channel feed")
-    if video_id:
-        return video_id, title
-
-    print(f"Channel feed had no match - falling back to channel search for '{venue}'...")
-    venue_slug = venue.replace(" ", "+")
-    channel_search_url = f"https://www.youtube.com/@ITVSportExtra/search?query=full+races+{venue_slug}+BTCC"
-    result = yt_dlp(
-        "--flat-playlist",
-        "--dump-json",
-        "--playlist-end", "10",
-        channel_search_url,
-    )
-    return _parse_yt_dlp_entries(result.stdout, venue_words, "channel search")
+    return _parse_yt_dlp_entries(result.stdout, venue_words, "channel feed")
 
 
 def get_chapters(video_id):
