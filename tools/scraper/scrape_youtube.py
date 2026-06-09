@@ -208,7 +208,7 @@ def get_chapters(video_id):
     """Return list of chapter dicts from yt-dlp metadata, or []."""
     url = f"https://www.youtube.com/watch?v={video_id}"
     try:
-        result = yt_dlp("--dump-json", "--no-playlist", url)
+        result = yt_dlp("--dump-json", "--no-playlist", "--geo-bypass-country", "GB", url)
         info = json.loads(result.stdout)
         return info.get("chapters") or []
     except subprocess.CalledProcessError as e:
@@ -291,6 +291,7 @@ def detect_race_timestamps(video_id):
             yt_dlp(
                 "-f", "18/worst",
                 "--extractor-args", "youtube:player_client=android",
+                "--geo-bypass-country", "GB",
                 "-o", video_path,
                 "--no-playlist",
                 url,
