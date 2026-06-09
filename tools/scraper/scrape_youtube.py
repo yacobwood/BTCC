@@ -154,17 +154,21 @@ def get_uploads_url():
     result = yt_dlp(
         "--flat-playlist",
         "--dump-json",
-        "--playlist-items", "1",
+        "--playlist-end", "1",
         ITV_CHANNEL,
     )
     for line in result.stdout.strip().splitlines():
         try:
             entry = json.loads(line)
             cid = entry.get("channel_id", "")
+            print(f"  [uploads discovery] channel_id from first entry: '{cid}'")
             if cid.startswith("UC"):
-                return f"https://www.youtube.com/playlist?list=UU{cid[2:]}"
+                url = f"https://www.youtube.com/playlist?list=UU{cid[2:]}"
+                print(f"  [uploads discovery] uploads URL: {url}")
+                return url
         except json.JSONDecodeError:
             pass
+    print("  [uploads discovery] could not determine uploads URL - no channel_id found")
     return None
 
 
