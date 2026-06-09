@@ -160,18 +160,15 @@ def get_uploads_url():
     for line in result.stdout.strip().splitlines():
         try:
             entry = json.loads(line)
-            print(f"  [uploads discovery] entry keys: {list(entry.keys())}")
-            for key in ("channel_id", "uploader_id", "uploader_url", "channel_url"):
-                val = entry.get(key, "")
-                print(f"  [uploads discovery] {key}: '{val}'")
-            cid = entry.get("channel_id", "")
+            cid = entry.get("playlist_channel_id", "")
+            print(f"  [uploads discovery] playlist_channel_id: '{cid}'")
             if cid.startswith("UC"):
                 url = f"https://www.youtube.com/playlist?list=UU{cid[2:]}"
                 print(f"  [uploads discovery] uploads URL: {url}")
                 return url
         except json.JSONDecodeError:
             pass
-    print("  [uploads discovery] could not determine uploads URL - no channel_id found")
+    print("  [uploads discovery] could not determine uploads URL")
     return None
 
 
