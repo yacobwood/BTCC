@@ -33,7 +33,6 @@ CALENDAR_JSON = ROOT / "data" / "calendar.json"
 RESULTS_JSON  = ROOT / "data" / "results2026.json"
 
 ITV_CHANNEL   = "https://www.youtube.com/@ITVSportExtra/videos"
-ITV_BTCC_PLAYLIST = "https://www.youtube.com/playlist?list=PLWBnF3ljAG8MXqRv0KmdKoMDL1rCOJujs"
 TITLE_PATTERN = re.compile(r"full races.*btcc 2026", re.IGNORECASE)
 
 # --- green detection thresholds (BTCC title card) ---
@@ -145,27 +144,53 @@ def _parse_yt_dlp_entries(stdout, venue_words, source_label):
     return None, None
 
 
-def search_itv_channel(venue):
-    """Return (video_id, title) for the BTCC full-races video matching venue.
+def get_uploads_url():
+    """Return the uploads playlist URL for ITV Sport Extra.
 
-    Tries the ITV Sport Extra channel feed first, then falls back to a YouTube
-    keyword search. The fallback catches cases where yt-dlp's flat-playlist
-    feed omits freshly-uploaded videos.
+    Every YouTube channel has an uploads playlist at UU{channel_id[2:]} which
+    returns all uploads in strict reverse-chronological order - unlike the
+    channel /videos tab which yt-dlp fetches as a mixed shelf.
     """
-    venue_words = [w.lower() for w in venue.split() if len(w) > 3]
-
-    print(f"Searching ITV Sport Extra BTCC playlist for '{venue}'...")
     result = yt_dlp(
         "--flat-playlist",
         "--dump-json",
-        "--playlist-end", "20",
-        ITV_BTCC_PLAYLIST,
+        "--playlist-items", "1",
+        ITV_CHANNEL,
     )
-    video_id, title = _parse_yt_dlp_entries(result.stdout, venue_words, "BTCC playlist")
-    if video_id:
-        return video_id, title
+    for line in result.stdout.strip().splitlines():
+        try:
+            entry = json.loads(line)
+            cid = entry.get("channel_id", "")
+            if cid.startswith("UC"):
+                return f"https://www.youtube.com/playlist?list=UU{cid[2:]}"
+        except json.JSONDecodeError:
+            pass
+    return None
 
-    print(f"BTCC playlist had no match - falling back to channel feed for '{venue}'...")
+
+def search_itv_channel(venue):
+    """Return (video_id, title) for the BTCC full-races video matching venue.
+
+    Fetches the 5 most recent uploads from ITV Sport Extra via the channel's
+    uploads playlist (UU...), which is always sorted newest-first. Falls back
+    to the general channel feed if the uploads URL cannot be resolved.
+    """
+    venue_words = [w.lower() for w in venue.split() if len(w) > 3]
+
+    uploads_url = get_uploads_url()
+    if uploads_url:
+        print(f"Searching ITV Sport Extra recent uploads for '{venue}'...")
+        result = yt_dlp(
+            "--flat-playlist",
+            "--dump-json",
+            "--playlist-end", "5",
+            uploads_url,
+        )
+        video_id, title = _parse_yt_dlp_entries(result.stdout, venue_words, "recent uploads")
+        if video_id:
+            return video_id, title
+        print("No match in recent uploads - falling back to channel feed...")
+
     result = yt_dlp(
         "--flat-playlist",
         "--dump-json",
