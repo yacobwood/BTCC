@@ -120,18 +120,10 @@ def resolve_cookies(cookies_arg):
     return ["--cookies-from-browser", "safari"]
 
 
-def search_itv_channel(venue):
-    """Return (video_id, title) for the BTCC full-races video matching venue."""
-    print(f"Searching ITV Sport Extra channel for '{venue}'...")
-    result = yt_dlp(
-        "--flat-playlist",
-        "--dump-json",
-        "--playlist-end", "40",
-        ITV_CHANNEL,
-    )
-    venue_words = [w.lower() for w in venue.split() if len(w) > 3]
-    lines = result.stdout.strip().splitlines()
-    print(f"yt-dlp returned {len(lines)} lines of output")
+def _parse_yt_dlp_entries(stdout, venue_words, source_label):
+    """Parse yt-dlp --dump-json output and return (video_id, title) for the first matching entry."""
+    lines = stdout.strip().splitlines()
+    print(f"yt-dlp returned {len(lines)} lines of output ({source_label})")
     for line in lines:
         try:
             entry = json.loads(line)
@@ -150,6 +142,36 @@ def search_itv_channel(venue):
             return video_id, title
         print(f"          ^ title matched but venue words {venue_words} not found")
     return None, None
+
+
+def search_itv_channel(venue):
+    """Return (video_id, title) for the BTCC full-races video matching venue.
+
+    Tries the ITV Sport Extra channel feed first, then falls back to a YouTube
+    keyword search. The fallback catches cases where yt-dlp's flat-playlist
+    feed omits freshly-uploaded videos.
+    """
+    venue_words = [w.lower() for w in venue.split() if len(w) > 3]
+
+    print(f"Searching ITV Sport Extra channel for '{venue}'...")
+    result = yt_dlp(
+        "--flat-playlist",
+        "--dump-json",
+        "--playlist-end", "40",
+        ITV_CHANNEL,
+    )
+    video_id, title = _parse_yt_dlp_entries(result.stdout, venue_words, "channel feed")
+    if video_id:
+        return video_id, title
+
+    print(f"Channel feed had no match - falling back to YouTube search for '{venue}'...")
+    search_query = f"ytsearch10:full races {venue} BTCC 2026 ITV Sport"
+    result = yt_dlp(
+        "--flat-playlist",
+        "--dump-json",
+        search_query,
+    )
+    return _parse_yt_dlp_entries(result.stdout, venue_words, "YouTube search")
 
 
 def get_chapters(video_id):
