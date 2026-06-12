@@ -1105,7 +1105,7 @@
           "day": "SAT",
           "time": "09:00",
           "endTime": "09:20",
-          "series": "MINI CHALLENGE Trophy",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
           "session": "Qualifying",
           "laps": null
         },
@@ -1113,7 +1113,7 @@
           "day": "SAT",
           "time": "09:30",
           "endTime": "09:45",
-          "series": "Porsche Carrera Cup Great Britain",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
           "session": "Qualifying 1",
           "laps": null
         },
@@ -1128,31 +1128,31 @@
         {
           "day": "SAT",
           "time": "10:25",
-          "endTime": "11:05",
+          "endTime": "11:15",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:20",
-          "endTime": "11:45",
+          "time": "11:25",
+          "endTime": "11:50",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:55",
-          "endTime": "12:15",
+          "time": "12:00",
+          "endTime": "12:20",
           "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "12:25",
-          "series": "MINI CHALLENGE Trophy",
+          "time": "12:30",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
           "session": "Race",
           "laps": "20 mins"
         },
@@ -1160,7 +1160,7 @@
           "day": "SAT",
           "time": "13:30",
           "endTime": "13:45",
-          "series": "Porsche Carrera Cup Great Britain",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
           "session": "Qualifying 2",
           "laps": null
         },
@@ -1203,7 +1203,7 @@
         {
           "day": "SAT",
           "time": "17:20",
-          "series": "MINI CHALLENGE Trophy",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
           "session": "Race",
           "laps": "20 mins"
         },
@@ -1218,7 +1218,7 @@
         {
           "day": "SUN",
           "time": "10:50",
-          "series": "Porsche Carrera Cup Great Britain",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
           "session": "Race",
           "laps": "22"
         },
@@ -1261,7 +1261,7 @@
         {
           "day": "SUN",
           "time": "13:50",
-          "series": "MINI CHALLENGE Trophy",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
           "session": "Race",
           "laps": "20 mins"
         },
@@ -1282,7 +1282,7 @@
         {
           "day": "SUN",
           "time": "15:20",
-          "series": "Porsche Carrera Cup Great Britain",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
           "session": "Race",
           "laps": "22"
         },
@@ -1640,24 +1640,24 @@
       "fullTimetable": [
         {
           "day": "SAT",
-          "time": "09:30",
-          "endTime": "09:55",
+          "time": "09:35",
+          "endTime": "10:00",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "10:05",
-          "endTime": "10:35",
+          "time": "10:15",
+          "endTime": "10:45",
           "series": "MINI CHALLENGE Trophy",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "10:45",
-          "endTime": "11:25",
+          "time": "11:00",
+          "endTime": "11:40",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
