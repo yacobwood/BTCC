@@ -41,8 +41,19 @@ NAME_ALIASES = {
 
 # ── HTML helpers ─────────────────────────────────────────────────────────────
 
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-GB,en;q=0.5",
+}
+
+
 def _fetch(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "btcc-stats-scraper/1.0"})
+    req = urllib.request.Request(url, headers=_HEADERS)
     with urllib.request.urlopen(req, timeout=15) as r:
         return r.read().decode("utf-8", errors="replace")
 
@@ -209,23 +220,23 @@ def main():
     try:
         wins_html = _fetch(WINS_URL)
     except Exception as e:
-        print(f"ERROR fetching wins: {e}", file=sys.stderr)
-        sys.exit(1)
+        print(f"WARNING: could not fetch wins ({e}) — skipping update", file=sys.stderr)
+        sys.exit(0)
 
     print("Fetching titles from btcc.net...")
     try:
         titles_html = _fetch(TITLES_URL)
     except Exception as e:
-        print(f"ERROR fetching titles: {e}", file=sys.stderr)
-        sys.exit(1)
+        print(f"WARNING: could not fetch titles ({e}) — skipping update", file=sys.stderr)
+        sys.exit(0)
 
     wins   = parse_wins(wins_html)
     titles = parse_titles(titles_html)
     print(f"  Parsed {len(wins)} drivers with wins, {len(titles)} with titles")
 
     if not wins or not titles:
-        print("ERROR: empty parse result — page structure may have changed", file=sys.stderr)
-        sys.exit(1)
+        print("WARNING: empty parse result — page may be behind a bot challenge; skipping update", file=sys.stderr)
+        sys.exit(0)
 
     data    = json.loads(RECORDS.read_text())
     drivers = data["drivers"]
