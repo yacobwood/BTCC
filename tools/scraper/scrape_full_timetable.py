@@ -11,17 +11,23 @@ import argparse
 import json
 import re
 import sys
+import urllib.request
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Optional
 
-try:
-    from playwright.sync_api import sync_playwright
-except ImportError:
-    print("Install playwright: pip install playwright && playwright install chromium", file=sys.stderr)
-    sys.exit(1)
-
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
+
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-GB,en;q=0.5",
+}
 
 # Map calendar.json venue names to btcc.net circuit URL slugs
 VENUE_SLUG = {
@@ -37,13 +43,8 @@ VENUE_SLUG = {
     "Silverstone":       "silverstone",
 }
 
-# Series name fragments that identify BTCC rows (for normalisation only — stored as-is)
-_BTCC_MARKERS = ("british touring car",)
-
-# Non-series events that have no championship column
 _NULL_SERIES = {"", "-", "—", "–"}
 
-# Keywords that identify a motorsport series name (used to classify 3-column rows)
 _SERIES_MARKERS = (
     "championship", "challenge", "touring cars", "touring car",
     "cup", "series", "trophy", "legends", "mini challenge",
@@ -51,7 +52,6 @@ _SERIES_MARKERS = (
 
 
 def looks_like_series(text: str) -> bool:
-    """Return True if text reads like a championship/series name rather than an event description."""
     lower = text.lower()
     return any(marker in lower for marker in _SERIES_MARKERS)
 
@@ -61,9 +61,7 @@ def parse_time(raw: str) -> tuple:
     raw = raw.strip()
     m = re.match(r"(\d{1,2}:\d{2})\s*[–\-]\s*(\d{1,2}:\d{2})", raw)
     if m:
-        t1 = m.group(1).zfill(5)
-        t2 = m.group(2).zfill(5)
-        return t1, t2
+        return m.group(1).zfill(5), m.group(2).zfill(5)
     m = re.match(r"(\d{1,2}:\d{2})", raw)
     if m:
         return m.group(1).zfill(5), None
@@ -77,74 +75,80 @@ def parse_laps(raw: str) -> Optional[str]:
     return raw
 
 
-def scrape_circuit_timetable(page, slug: str) -> list[dict]:
+def _fetch(url: str) -> str:
+    req = urllib.request.Request(url, headers=_HEADERS)
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.read().decode("utf-8", errors="replace")
+
+
+class _TimetableParser(HTMLParser):
+    """Walk a btcc.net circuit page, tracking day headings then extracting table rows."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.current_day: Optional[str] = None
+        self._in_heading = False
+        self._in_table = False
+        self._in_cell = False
+        self._current_row: list[str] = []
+        self._current_cell = ""
+        self.raw_rows: list[dict] = []
+
+    def handle_starttag(self, tag, attrs):
+        if re.match(r"h[1-6]$", tag):
+            self._in_heading = True
+        elif tag == "table" and not self._in_table:
+            self._in_table = True
+        elif self._in_table and tag in ("td", "th"):
+            self._in_cell = True
+            self._current_cell = ""
+        elif self._in_table and tag == "tr":
+            self._current_row = []
+
+    def handle_endtag(self, tag):
+        if re.match(r"h[1-6]$", tag):
+            self._in_heading = False
+        elif tag == "table":
+            self._in_table = False
+        elif self._in_table and tag in ("td", "th"):
+            self._in_cell = False
+            self._current_row.append(self._current_cell.strip().replace("\xa0", " "))
+        elif self._in_table and tag == "tr":
+            if self._current_row and self.current_day:
+                self.raw_rows.append({"day": self.current_day, "cells": list(self._current_row)})
+            self._current_row = []
+
+    def handle_data(self, data):
+        if self._in_heading:
+            text = data.strip()
+            if re.search(r"\bsaturday\b", text, re.I):
+                self.current_day = "SAT"
+            elif re.search(r"\bsunday\b", text, re.I):
+                self.current_day = "SUN"
+        if self._in_cell:
+            self._current_cell += data
+
+
+def scrape_circuit_timetable(slug: str) -> list[dict]:
     url = f"https://btcc.net/circuit/{slug}/"
     print(f"    Fetching {url} …")
     try:
-        page.goto(url, wait_until="networkidle", timeout=30_000)
-        page.wait_for_timeout(2_000)
+        html = _fetch(url)
     except Exception as e:
         print(f"    Failed to load {url}: {e}", file=sys.stderr)
         return []
 
-    # Extract raw rows via JavaScript DOM walk.
-    # btcc.net circuit pages have day headings (h2/h3/p containing "Saturday"/"Sunday")
-    # followed by <table> elements with timetable rows.
-    #
-    # Saturday tables have 4 columns: Time | Activity | Championship | Laps
-    # Sunday tables may have 3 columns: Time | Championship/Activity | Laps
-    # Some non-series rows (Lunch Break, Pit Lane Opens) have a blank championship column.
-    raw_rows = page.evaluate("""() => {
-        const result = [];
-        const dayRe = /\\b(saturday|sunday)\\b/i;
-        let currentDay = null;
-
-        // Traverse the full body to track day headings then tables in document order
-        function walk(el) {
-            const tag = (el.tagName || '').toLowerCase();
-
-            // Day heading detection: small elements whose text is predominantly a day name
-            if (['h1','h2','h3','h4','h5','p','div','span','strong','b'].includes(tag)) {
-                const text = (el.textContent || '').replace(/\\s+/g, ' ').trim();
-                if (text.length < 80 && dayRe.test(text)) {
-                    currentDay = /saturday/i.test(text) ? 'SAT' : 'SUN';
-                }
-            }
-
-            if (tag === 'table' && currentDay) {
-                const rows = Array.from(el.querySelectorAll('tbody tr'));
-                rows.forEach(tr => {
-                    const cells = Array.from(tr.querySelectorAll('td, th'))
-                        .map(td => td.textContent.replace(/\\s+/g, ' ').trim());
-                    if (cells.length >= 2) {
-                        result.push({ day: currentDay, cells });
-                    }
-                });
-                return; // don't recurse into table children for day heading
-            }
-
-            for (const child of el.children) {
-                walk(child);
-            }
-        }
-
-        walk(document.body);
-        return result;
-    }""")
+    parser = _TimetableParser()
+    parser.feed(html)
 
     entries = []
-    for row in raw_rows:
+    for row in parser.raw_rows:
         cells = row["cells"]
         day = row["day"]
 
-        # Determine column layout by count
         if len(cells) == 4:
-            # Time | Activity | Championship | Laps
             raw_time, session, series_raw, raw_laps = cells[0], cells[1], cells[2], cells[3]
         elif len(cells) == 3:
-            # Time | Activity-or-Championship | Laps
-            # If the middle cell looks like a series name, treat it as series (session = "Race").
-            # Otherwise it's a non-series event (Pit Lane Opens, Lunch Break, etc.).
             raw_time, mid, raw_laps = cells[0], cells[1], cells[2]
             if looks_like_series(mid):
                 session, series_raw = "Race", mid
@@ -163,7 +167,6 @@ def scrape_circuit_timetable(page, slug: str) -> list[dict]:
 
         series_raw = series_raw.strip()
         series = None if series_raw in _NULL_SERIES else series_raw
-
         laps = parse_laps(raw_laps)
 
         entry: dict = {"day": day, "time": start}
@@ -172,11 +175,9 @@ def scrape_circuit_timetable(page, slug: str) -> list[dict]:
         entry["series"] = series
         entry["session"] = session
         entry["laps"] = laps
-
         entries.append(entry)
 
-    # Deduplicate: btcc.net sometimes repeats rows if they appear in multiple DOM sections
-    seen = set()
+    seen: set = set()
     deduped = []
     for e in entries:
         key = (e["day"], e["time"], e.get("series"), e["session"])
@@ -201,40 +202,34 @@ def main():
     rounds = data.get("rounds", [])
     updated = 0
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        page = browser.new_page()
+    for r in rounds:
+        if args.round and r["round"] != args.round:
+            continue
 
-        for r in rounds:
-            if args.round and r["round"] != args.round:
-                continue
+        venue = r.get("venue", "")
+        slug = VENUE_SLUG.get(venue)
+        if not slug:
+            print(f"Round {r['round']} ({venue}): no slug mapping — skipping")
+            continue
 
-            venue = r.get("venue", "")
-            slug = VENUE_SLUG.get(venue)
-            if not slug:
-                print(f"Round {r['round']} ({venue}): no slug mapping — skipping")
-                continue
+        print(f"Round {r['round']} — {venue}")
+        entries = scrape_circuit_timetable(slug)
 
-            print(f"Round {r['round']} — {venue}")
-            entries = scrape_circuit_timetable(page, slug)
+        if not entries:
+            print(f"    No timetable found — leaving existing data unchanged")
+            continue
 
-            if not entries:
-                print(f"    No timetable found — leaving existing data unchanged")
-                continue
+        sat = sum(1 for e in entries if e["day"] == "SAT")
+        sun = sum(1 for e in entries if e["day"] == "SUN")
+        print(f"    {len(entries)} entries  (Sat: {sat}  Sun: {sun})")
+        for e in entries:
+            laps_str = f"  [{e['laps']}]" if e["laps"] else ""
+            end_str = f" – {e['endTime']}" if e.get("endTime") else ""
+            series_str = e["series"] or "(event)"
+            print(f"      {e['day']}  {e['time']}{end_str}  {series_str} — {e['session']}{laps_str}")
 
-            sat = sum(1 for e in entries if e["day"] == "SAT")
-            sun = sum(1 for e in entries if e["day"] == "SUN")
-            print(f"    {len(entries)} entries  (Sat: {sat}  Sun: {sun})")
-            for e in entries:
-                laps_str = f"  [{e['laps']}]" if e["laps"] else ""
-                end_str = f" – {e['endTime']}" if e.get("endTime") else ""
-                series_str = e["series"] or "(event)"
-                print(f"      {e['day']}  {e['time']}{end_str}  {series_str} — {e['session']}{laps_str}")
-
-            r["fullTimetable"] = entries
-            updated += 1
-
-        browser.close()
+        r["fullTimetable"] = entries
+        updated += 1
 
     if args.dry_run:
         print(f"\nDry run — {updated} round(s) would be updated.")

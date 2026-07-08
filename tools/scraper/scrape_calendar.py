@@ -8,17 +8,15 @@ Usage:
     python scrape_calendar.py [--season YEAR] [--dry-run]
 """
 
+from __future__ import annotations
+
 import argparse
+import importlib.util
 import json
 import re
 import sys
+import urllib.request
 from pathlib import Path
-
-try:
-    from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
-except ImportError:
-    print("Install playwright: pip install playwright && playwright install chromium", file=sys.stderr)
-    sys.exit(1)
 
 CALENDAR_URL = "https://btcc.net/calendar/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -30,13 +28,26 @@ MONTH = {
     "jul": "07", "aug": "08", "sep": "09", "oct": "10", "nov": "11", "dec": "12",
 }
 
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-GB,en;q=0.5",
+}
+
+
+def _fetch(url: str) -> str:
+    req = urllib.request.Request(url, headers=_HEADERS)
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.read().decode("utf-8", errors="replace")
+
 
 def parse_date_range(text: str, year: int) -> tuple[str, str] | None:
-    """
-    Parse e.g. "18 Apr-19 Apr" or "18 Apr - 19 Apr" into (startDate, endDate) as ISO.
-    """
+    """Parse e.g. "18 Apr-19 Apr" or "18 Apr - 19 Apr" into (startDate, endDate) as ISO."""
     text = text.strip()
-    # e.g. "18 Apr-19 Apr" or "18 Apr - 19 Apr"
     m = re.match(r"(\d{1,2})\s*([A-Za-z]{3})\s*[-–]\s*(\d{1,2})\s*([A-Za-z]{3})", text)
     if not m:
         return None
@@ -53,64 +64,37 @@ def parse_date_range(text: str, year: int) -> tuple[str, str] | None:
     )
 
 
-def scrape_calendar(page, year: int) -> list[dict]:
-    """Fetch btcc.net calendar and return list of {round, venue, startDate, endDate}."""
+def scrape_calendar(year: int) -> list[dict]:
+    """Fetch btcc.net/calendar/ and return list of {round, venue, startDate, endDate}."""
     print(f"Fetching {CALENDAR_URL} …")
-    page.goto(CALENDAR_URL, wait_until="networkidle", timeout=30_000)
-    page.wait_for_timeout(2_000)
+    html = _fetch(CALENDAR_URL)
 
-    # Calendar page: links like "18 Apr-19 Apr Donington Park" or similar
-    # We'll get all links that look like calendar events (contain a date pattern and venue)
-    text = page.content()
-    # Fallback: evaluate in page to find links with date-like text
-    events = page.evaluate("""(year) => {
-        const links = Array.from(document.querySelectorAll('a[href*="circuit"]'));
-        const out = [];
-        const monthMap = { jan:'01', feb:'02', mar:'03', apr:'04', may:'05', jun:'06',
-            jul:'07', aug:'08', sep:'09', oct:'10', nov:'11', dec:'12' };
-        links.forEach((a, i) => {
-            let t = a.textContent.replace(/\\s+/g, ' ').trim();
-            const match = t.match(/(\\d{1,2})\\s*([A-Za-z]{3})\\s*[-–]\\s*(\\d{1,2})\\s*([A-Za-z]{3})\\s*(.+)/);
-            if (match) {
-                const [, d1, m1, d2, m2, venue] = match;
-                const mon = (s) => (monthMap[s.toLowerCase().slice(0,3)] || '01');
-                out.push({
-                    round: i + 1,
-                    venue: venue.trim(),
-                    startDate: year + '-' + mon(m1) + '-' + d1.padStart(2,'0'),
-                    endDate:   year + '-' + mon(m2) + '-' + d2.padStart(2,'0')
-                });
-            }
-        });
-        return out;
-    }""", year)
+    events = []
+    # Each round is an <a href="https://btcc.net/circuit/..."> block.
+    # Dates live in two ct-span elements inside circuitDatesText divs.
+    # Venue is in a mainHeading text block.
+    for block_m in re.finditer(
+        r'<a\b[^>]*href="https://btcc\.net/circuit/([^"]+)"[^>]*>(.*?)</a>',
+        html, re.DOTALL
+    ):
+        _slug, content = block_m.groups()
 
-    if events:
-        return events
+        date_spans = re.findall(r'class="ct-span"[^>]*>\s*(\d{1,2}\s+[A-Za-z]{3})\s*<', content)
+        venue_m = re.search(r'mainHeading"[^>]*>.*?<span[^>]*>\s*([^<]+)\s*</span>', content, re.DOTALL)
 
-    # Fallback: regex on full page text
-    results = []
-    # Pattern: "18 Apr-19 Apr" or "18 Apr - 19 Apr" followed by venue name (until next link or end)
-    pattern = re.compile(
-        r"(\d{1,2})\s*([A-Za-z]{3})\s*[-–]\s*(\d{1,2})\s*([A-Za-z]{3})\s*([A-Za-z][^\n\[\]]*?)(?=\s*\[\d|$)",
-        re.IGNORECASE,
-    )
-    for m in pattern.finditer(text):
-        d1, mon1, d2, mon2, venue = m.groups()
-        venue = venue.strip()
-        if len(venue) < 3:
-            continue
-        mon1 = mon1.lower()[:3]
-        mon2 = mon2.lower()[:3]
-        m1, m2 = MONTH.get(mon1), MONTH.get(mon2)
-        if m1 and m2:
-            results.append({
-                "round": len(results) + 1,
-                "venue": venue,
-                "startDate": f"{year}-{m1}-{int(d1):02d}",
-                "endDate": f"{year}-{m2}-{int(d2):02d}",
-            })
-    return results
+        if len(date_spans) >= 2 and venue_m:
+            d1, d2 = date_spans[0].strip(), date_spans[1].strip()
+            venue = venue_m.group(1).strip()
+            parsed = parse_date_range(f"{d1}-{d2}", year)
+            if parsed:
+                events.append({
+                    "round": len(events) + 1,
+                    "venue": venue,
+                    "startDate": parsed[0],
+                    "endDate": parsed[1],
+                })
+
+    return events
 
 
 def merge_into_calendar(schedule: list[dict], dry_run: bool) -> None:
@@ -163,8 +147,6 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Print updates only, do not write")
     args = ap.parse_args()
 
-    # Import timetable scraper here to avoid circular-import issues if ever called as module
-    import importlib.util
     _spec = importlib.util.spec_from_file_location(
         "scrape_full_timetable",
         Path(__file__).parent / "scrape_full_timetable.py",
@@ -172,30 +154,23 @@ def main():
     _ft = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_ft)
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        page = browser.new_page()
+    schedule = scrape_calendar(args.season)
+    if not schedule:
+        print("No calendar events scraped — check btcc.net/calendar/ structure.", file=sys.stderr)
+        sys.exit(1)
 
-        schedule = scrape_calendar(page, args.season)
-        if not schedule:
-            print("No calendar events scraped — check btcc.net/calendar/ structure.", file=sys.stderr)
-            browser.close()
-            sys.exit(1)
+    print(f"\nScraped {len(schedule)} rounds for {args.season}")
+    for s in schedule:
+        print(f"  {s['round']}. {s['venue']}  {s['startDate']} – {s['endDate']}")
 
-        print(f"\nScraped {len(schedule)} rounds for {args.season}")
-        for s in schedule:
-            print(f"  {s['round']}. {s['venue']}  {s['startDate']} – {s['endDate']}")
-
-        print("\nScraping full weekend timetables …")
-        for s in schedule:
-            slug = _ft.VENUE_SLUG.get(s["venue"])
-            if not slug:
-                continue
-            entries = _ft.scrape_circuit_timetable(page, slug)
-            if entries:
-                s["fullTimetable"] = entries
-
-        browser.close()
+    print("\nScraping full weekend timetables …")
+    for s in schedule:
+        slug = _ft.VENUE_SLUG.get(s["venue"])
+        if not slug:
+            continue
+        entries = _ft.scrape_circuit_timetable(slug)
+        if entries:
+            s["fullTimetable"] = entries
 
     merge_into_calendar(schedule, args.dry_run)
 
