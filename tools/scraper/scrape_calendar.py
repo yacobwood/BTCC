@@ -64,10 +64,14 @@ def parse_date_range(text: str, year: int) -> tuple[str, str] | None:
     )
 
 
-def scrape_calendar(year: int) -> list[dict]:
-    """Fetch btcc.net/calendar/ and return list of {round, venue, startDate, endDate}."""
+def scrape_calendar(year: int) -> list[dict] | None:
+    """Fetch btcc.net/calendar/ and return list of {round, venue, startDate, endDate}, or None on fetch failure."""
     print(f"Fetching {CALENDAR_URL} …")
-    html = _fetch(CALENDAR_URL)
+    try:
+        html = _fetch(CALENDAR_URL)
+    except Exception as e:
+        print(f"WARNING: could not fetch calendar ({e}) — skipping update", file=sys.stderr)
+        return None
 
     events = []
     # Each round is an <a href="https://btcc.net/circuit/..."> block.
@@ -155,9 +159,11 @@ def main():
     _spec.loader.exec_module(_ft)
 
     schedule = scrape_calendar(args.season)
+    if schedule is None:
+        sys.exit(0)
     if not schedule:
-        print("No calendar events scraped — check btcc.net/calendar/ structure.", file=sys.stderr)
-        sys.exit(1)
+        print("WARNING: no calendar events parsed — page structure may have changed", file=sys.stderr)
+        sys.exit(0)
 
     print(f"\nScraped {len(schedule)} rounds for {args.season}")
     for s in schedule:
