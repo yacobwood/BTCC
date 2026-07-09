@@ -18,9 +18,10 @@ import argparse
 import json
 import re
 import sys
-import urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
+
+from curl_cffi import requests as cffi_requests
 
 WINS_URL   = "https://btcc.net/history/statistics/drivers/"
 TITLES_URL = "https://btcc.net/history/champions/btcc-titles/"
@@ -41,21 +42,10 @@ NAME_ALIASES = {
 
 # ── HTML helpers ─────────────────────────────────────────────────────────────
 
-_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/126.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-GB,en;q=0.5",
-}
-
-
 def _fetch(url: str) -> str:
-    req = urllib.request.Request(url, headers=_HEADERS)
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return r.read().decode("utf-8", errors="replace")
+    r = cffi_requests.get(url, impersonate="chrome120", timeout=15)
+    r.raise_for_status()
+    return r.text
 
 
 def _strip_tags(html: str) -> str:
