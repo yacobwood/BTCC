@@ -4,10 +4,13 @@
 name: Scrape BTCC News
 
 on:
-  schedule:
-    # Every 5 minutes - keeps notification lag close to the previous
-    # live-check behaviour.
-    - cron: "*/5 * * * *"
+  # Schedule disabled 2026-07-11: btcc.net/Cloudflare started blocking curl_cffi
+  # requests from GitHub Actions' IP range entirely (403 on every path, not just
+  # this one - scrape-calendar.yml hits the same block despite being unrelated
+  # and unchanged). Re-enable the cron below once that access issue is resolved -
+  # see project_scraper_reliability_audit memory / ask Claude for context.
+  # schedule:
+  #   - cron: "*/5 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -34,6 +37,24 @@ jobs:
 
       - name: Install dependencies
         run: pip install curl_cffi
+
+      - name: Debug fetch (temporary diagnostic)
+        continue-on-error: true
+        run: |
+          python3 -c "
+          from curl_cffi import requests as r
+          resp = r.get('https://www.btcc.net/news/', impersonate='chrome120', timeout=15)
+          print('STATUS:', resp.status_code)
+          print('HEADERS:')
+          for k, v in resp.headers.items():
+              print(f'  {k}: {v}')
+          print('BODY (first 1500 chars):')
+          print(resp.text[:1500])
+          "
+          echo '--- plain curl for comparison ---'
+          curl -sv -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://www.btcc.net/news/ -o /tmp/plain.html 2>&1 | tail -30
+          echo '--- plain curl body head ---'
+          head -c 1000 /tmp/plain.html
 
       - name: Scrape news
         run: python tools/scraper/scrape_news.py
