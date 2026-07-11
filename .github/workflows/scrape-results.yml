@@ -17,6 +17,9 @@ on:
       round:
         description: "Specific round to scrape (leave blank for all)"
         type: number
+      override_reverse_grid_draw:
+        description: "Manually set Race 3 reverse-grid draw number (6-12) for the specified round. Use when TSL amended the grid PDF after the scrape window closed."
+        type: number
 
 concurrency:
   group: scrape-results
@@ -57,6 +60,8 @@ jobs:
         run: pip install pdfminer.six
 
       - name: Scrape results and compute standings
+        id: scrape
+        continue-on-error: true
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.in_session_window == 'true'
@@ -64,11 +69,15 @@ jobs:
           YEAR="${{ github.event.inputs.year }}"
           [ -z "$YEAR" ] && YEAR=2026
           ROUND="${{ github.event.inputs.round }}"
+          DRAW="${{ github.event.inputs.override_reverse_grid_draw }}"
           ARGS="$YEAR"
           if [ -n "$ROUND" ]; then
             ARGS="$ARGS --round $ROUND"
           else
             ARGS="$ARGS --today"
+          fi
+          if [ -n "$DRAW" ]; then
+            ARGS="$ARGS --set-draw $DRAW"
           fi
           python tools/scraper/scrape_tsl.py $ARGS
 
@@ -102,3 +111,23 @@ jobs:
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
             -d "{\"year\":\"${YEAR}\"}" \
             "https://us-central1-btcchub-af77a.cloudfunctions.net/notifyResultsUpdate" || echo "Notify failed (non-fatal)"
+
+      # scrape_tsl.py already writes results/standings before compute_records or
+      # team-stats can fail, so the commit step above still runs and saves the
+      # good data even when the scrape step below reports failure. These two
+      # steps only make sure that failure is still reported and the job/run
+      # itself shows red, instead of the whole thing silently looking green.
+      - name: Report failure
+        if: steps.scrape.outcome == 'failure'
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"scrape-results\",\"message\":\"Results scrape failed (results/standings were still committed if produced) - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
+
+      - name: Fail job if scrape step failed
+        if: steps.scrape.outcome == 'failure'
+        run: exit 1

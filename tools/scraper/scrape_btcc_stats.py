@@ -210,23 +210,23 @@ def main():
     try:
         wins_html = _fetch(WINS_URL)
     except Exception as e:
-        print(f"WARNING: could not fetch wins ({e}) — skipping update", file=sys.stderr)
-        sys.exit(0)
+        print(f"ERROR: could not fetch wins ({e})", file=sys.stderr)
+        sys.exit(1)
 
     print("Fetching titles from btcc.net...")
     try:
         titles_html = _fetch(TITLES_URL)
     except Exception as e:
-        print(f"WARNING: could not fetch titles ({e}) — skipping update", file=sys.stderr)
-        sys.exit(0)
+        print(f"ERROR: could not fetch titles ({e})", file=sys.stderr)
+        sys.exit(1)
 
     wins   = parse_wins(wins_html)
     titles = parse_titles(titles_html)
     print(f"  Parsed {len(wins)} drivers with wins, {len(titles)} with titles")
 
     if not wins or not titles:
-        print("WARNING: empty parse result — page may be behind a bot challenge; skipping update", file=sys.stderr)
-        sys.exit(0)
+        print("ERROR: empty parse result - page may be behind a bot challenge", file=sys.stderr)
+        sys.exit(1)
 
     data    = json.loads(RECORDS.read_text())
     drivers = data["drivers"]

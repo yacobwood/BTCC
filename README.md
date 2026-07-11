@@ -594,7 +594,9 @@ The main workhorse function. Runs every minute and handles two categories of wor
 
 Firestore transactions prevent duplicate sends. First-time detection (when `lastId` is null) stores the ID but does NOT send a notification.
 
-**Error alerting:** every `logError` call uses `alert: true`. For per-minute checks (news/hub/podcast/FCM) the error is upserted at a fixed key and the email is only sent on first occurrence or when the error recurs after being marked resolved in the admin FIRESTORE tab. One-off failures (syncAnalytics, notifyResultsUpdate, digest generation) always email. All alerts go to `btcchub@gmail.com` via `GMAIL_APP_PASSWORD` secret.
+**Error alerting:** every `logError` call uses `alert: true`. For per-minute checks (news/hub/podcast/FCM) the error is upserted at a fixed key and the email is only sent on first occurrence or when the error recurs after being marked resolved in the admin FIRESTORE tab. One-off failures (syncAnalytics, notifyResultsUpdate, digest generation) always email. All alerts go to `btcchub@gmail.com` via `GMAIL_APP_PASSWORD` secret - **this secret must be explicitly declared in a function's `secrets: [...]` option to be injected into `process.env`** (Firebase Functions v2 does not bind Secret Manager secrets to a function unless it asks for them). `sendSessionNotifications`, `syncAnalytics` and `notifyResultsUpdate` were missing this declaration until 2026-07-11, so every alert from them silently wrote to Firestore but never emailed - fixed by adding `secrets: ['GMAIL_APP_PASSWORD']` to each.
+
+**Scraper failure alerting:** `reportScraperFailure` (HTTP, `SCRAPER_SECRET`-gated) lets the GitHub Actions scraper workflows report into this same pipeline, since a failed workflow run has no way to email on its own. Every scraper workflow has a final `if: failure()` step (see [§19](#19-python-scrapers)) that POSTs `{workflow, message, runUrl}` to it, which calls `logError` with `key: scraper-<workflow>` - same dedup-until-resolved behaviour as the per-minute checks above, and shows up in the same admin FIRESTORE tab.
 
 **Resolving errors:** the admin FIRESTORE tab Dismiss button calls the `dismissError` Cloud Function (Admin SDK, bypasses rules) via `POST /dismissError` with `x-admin-secret`. The `errors` collection has `allow write: if false` for clients - direct REST PATCH from the admin page was silently rejected by Firestore rules, so writes are routed through the function instead. "Dismiss all" sends `{all: true}` and the function batch-updates all unresolved docs.
 
@@ -783,11 +785,15 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update data files on GitHub.
 
-**scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session. Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py`.
+**Failure handling convention:** every scraper invoked by a workflow exits non-zero on a real failure (fetch error, empty/unparseable response) and exits 0 only when there was legitimately nothing new to do. Each of those workflows has a final `if: failure()` step that reports to the `reportScraperFailure` Cloud Function (see [§12](#12-firebase-cloud-functions)), which emails `btcchub@gmail.com` and logs to the same admin FIRESTORE tab as Cloud Function errors. `scrape_tsl.py` is the one exception to "fetch happens before write": `compute_records.py`/`scrape_team_stats.py` run as an internal sub-step *after* `results{year}.json`/`standings.json` are already written, so its workflow (`scrape-results.yml`) uses `continue-on-error` on the scrape step so the commit step still saves that good data even when a sub-step fails, then explicitly fails the job afterward so the run still shows red and alerts.
 
-**compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Applies official wins/championships overrides from btcc.net for modern drivers. Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape.
+**scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session. Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py` then `scrape_team_stats.py`.
 
-**scrape_calendar.py** - Parses the BTCC calendar to update `calendar.json` with round dates, venues and session times.
+**compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape. **Not standalone-safe:** it only knows about 2004+ timeline data, so running it alone temporarily reverts the official wins/championships overrides that `scrape_btcc_stats.py` applies for drivers active before 2004 (e.g. Jason Plato) - it self-heals at the next daily `scrape_btcc_stats.py` run, but don't run it in isolation and expect the result to be final.
+
+**scrape_btcc_stats.py** - Daily official-stats override pass. Fetches all-time wins (`btcc.net/history/statistics/drivers/`) and championship counts (`btcc.net/history/champions/btcc-titles/`) via `curl_cffi` Chrome impersonation and patches them into `records.json` on top of whatever `compute_records.py` last computed - this is what makes pre-2004 career totals correct. Runs daily at 06:00 UTC via `scrape-btcc-stats.yml`.
+
+**scrape_calendar.py** - Parses the BTCC calendar to update `calendar.json` with round dates, venues and session times. Internally calls `scrape_full_timetable.py` per round to populate support-series timetables.
 
 **scrape_news.py** - Fetches the latest btcc.net WordPress post via `curl_cffi` Chrome impersonation (needed to bypass Cloudflare's TLS fingerprinting) and writes it to `news.json`. Runs every 5 minutes via `scrape-news.yml` so `sendSessionNotifications` can read it from GitHub instead of hitting btcc.net directly.
 
@@ -795,7 +801,11 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 
 **scrape_youtube.py** - Associates YouTube race replay URLs with rounds in the results JSON.
 
-**merge_schedule.py** - Merges schedule data from multiple sources.
+**scrape_team_stats.py** - Fetches race/win totals per team from `btcc.net/team/<slug>/` and writes them into `data/drivers.json`. Called automatically by `scrape_tsl.py` after each scrape (also runnable standalone). Currently reachable via plain `urllib` - unlike the other btcc.net endpoints, this path isn't behind the Cloudflare challenge that requires `curl_cffi`, though that could change.
+
+**merge_schedule.py** - Merges scraped session times from `schedule.json` into `calendar.json`. Run after `scrape_schedule.py` as a separate step in `scrape-schedule.yml`.
+
+**build_team_map.py / backfill_team_names.py** - One-off historical data-migration tools, not on any schedule. `build_team_map.py` regenerates `team_name_map.json` from `drivers.json`; `backfill_team_names.py` uses that map to resolve car-model strings into real team names across `results2014.json`-`results2023.json`. Re-run manually only when historical driver/team data changes.
 
 ---
 

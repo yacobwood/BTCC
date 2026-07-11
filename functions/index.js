@@ -156,7 +156,7 @@ function getUKDateString(date, offsetDays = 0) {
 }
 
 exports.sendSessionNotifications = onSchedule(
-  {schedule: 'every 1 minutes', timeZone: 'Europe/London'},
+  {schedule: 'every 1 minutes', timeZone: 'Europe/London', secrets: ['GMAIL_APP_PASSWORD']},
   async () => {
     const now = new Date();
     const uk = getUKTimeParts(now);
@@ -788,7 +788,7 @@ exports.trimChat = onValueCreated(
 const GA4_PROPERTY_ID = '528813863';
 
 exports.syncAnalytics = onSchedule(
-  {schedule: '0 8 * * *', timeZone: 'Europe/London'},
+  {schedule: '0 8 * * *', timeZone: 'Europe/London', secrets: ['GMAIL_APP_PASSWORD']},
   async () => { try {
     const db = getFirestore();
     const auth = new GoogleAuth({scopes: ['https://www.googleapis.com/auth/analytics.readonly']});
@@ -907,7 +907,7 @@ exports.dismissError = onRequest(
 const SCRAPER_SECRET = process.env.SCRAPER_SECRET;
 
 exports.notifyResultsUpdate = onRequest(
-  {secrets: ['SCRAPER_SECRET']},
+  {secrets: ['SCRAPER_SECRET', 'GMAIL_APP_PASSWORD']},
   async (req, res) => {
     if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
     if (!SCRAPER_SECRET || req.headers['x-scraper-secret'] !== SCRAPER_SECRET) {
@@ -927,6 +927,34 @@ exports.notifyResultsUpdate = onRequest(
     } catch (e) {
       console.error('notifyResultsUpdate failed:', e);
       await logError('notifyResultsUpdate', e.message, e, {alert: true});
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
+);
+
+// Scraper failure reporting - called from GitHub Actions workflows on
+// `if: failure()`, since none of them have their own way to alert us.
+// Reuses the same logError/email pipeline as Cloud Function errors, so
+// scraper failures show up in the same admin FIRESTORE tab.
+exports.reportScraperFailure = onRequest(
+  {secrets: ['SCRAPER_SECRET', 'GMAIL_APP_PASSWORD']},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+    if (!SCRAPER_SECRET || req.headers['x-scraper-secret'] !== SCRAPER_SECRET) {
+      res.status(401).send('Unauthorized'); return;
+    }
+    const {workflow, message, runUrl} = req.body || {};
+    if (!workflow) { res.status(400).json({ok: false, error: 'workflow required'}); return; }
+    try {
+      await logError(
+        `scraper:${workflow}`,
+        message || 'Workflow failed - see run log',
+        {stack: runUrl || ''},
+        {key: `scraper-${workflow}`, alert: true},
+      );
+      res.status(200).json({ok: true});
+    } catch (e) {
+      console.error('reportScraperFailure failed:', e);
       res.status(500).json({ok: false, error: e.message});
     }
   },

@@ -40,11 +40,11 @@ def scrape_news() -> list | None:
     try:
         posts = _fetch(NEWS_URL)
     except Exception as e:
-        print(f"WARNING: could not fetch news ({e}) - skipping update", file=sys.stderr)
+        print(f"ERROR: could not fetch news ({e})", file=sys.stderr)
         return None
 
     if not isinstance(posts, list):
-        print(f"WARNING: unexpected response shape - skipping update", file=sys.stderr)
+        print(f"ERROR: unexpected response shape", file=sys.stderr)
         return None
 
     return posts
@@ -57,7 +57,7 @@ def main():
 
     posts = scrape_news()
     if posts is None:
-        sys.exit(0)
+        sys.exit(1)
 
     print(f"Scraped {len(posts)} post(s)")
     for p in posts:

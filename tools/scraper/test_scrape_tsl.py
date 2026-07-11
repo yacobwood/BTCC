@@ -211,6 +211,134 @@ class TestFastestLapDriver(unittest.TestCase):
         self.assertIsNone(s.fastest_lap_driver([]))
 
 
+# ── merge_scraped_with_existing ───────────────────────────────────────────────
+
+def make_grid(*car_nos):
+    """Build a minimal grid list from an ordered sequence of car numbers."""
+    return [{'pos': i + 1, 'no': no, 'cl': '', 'driver': f'Driver{no}', 'team': ''} for i, no in enumerate(car_nos)]
+
+def make_scraped_round(r3_grid=None, r3_results=None, r3_draw=None):
+    r3 = {'label': 'Race 3', 'results': r3_results or [], 'grid': r3_grid or []}
+    if r3_draw is not None:
+        r3['reverseGridDraw'] = r3_draw
+    return {
+        'round': 1, 'venue': 'Test', 'date': '01 Jan', 'youtubeUrls': [],
+        'races': [{'label': 'Race 1', 'results': [], 'grid': []}, r3],
+    }
+
+def make_existing_round(r3_grid=None, r3_results=None, r3_draw=None, youtube=None):
+    r3 = {'label': 'Race 3', 'results': r3_results or [], 'grid': r3_grid or []}
+    if r3_draw is not None:
+        r3['reverseGridDraw'] = r3_draw
+    return {
+        'round': 1, 'venue': 'Test', 'date': '01 Jan',
+        'youtubeUrls': youtube or ['https://yt/r1', None, None, None, None, None],
+        'races': [{'label': 'Race 1', 'results': [], 'grid': []}, r3],
+    }
+
+
+class TestMergeScrapedWithExisting(unittest.TestCase):
+
+    def _r3(self, scraped):
+        return next(r for r in scraped['races'] if r['label'] == 'Race 3')
+
+    def test_new_grid_overwrites_old_when_fetch_succeeds(self):
+        # TSL amendment scenario: new fetch returns a different grid
+        old_grid = make_grid(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 11, 12)  # top-10 reversed (wrong)
+        new_grid = make_grid(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12)  # top-11 reversed (correct)
+        scraped  = make_scraped_round(r3_grid=new_grid)
+        existing = make_existing_round(r3_grid=old_grid)
+        s.merge_scraped_with_existing(scraped, existing)
+        result_nos = [g['no'] for g in self._r3(scraped)['grid']]
+        self.assertEqual(result_nos[0], 11)  # Smiley (R2 P11) at P1
+
+    def test_old_grid_preserved_when_new_fetch_empty(self):
+        # Transient fetch failure: new scrape returns empty grid
+        old_grid = make_grid(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12)
+        scraped  = make_scraped_round(r3_grid=[])
+        existing = make_existing_round(r3_grid=old_grid)
+        s.merge_scraped_with_existing(scraped, existing)
+        result_nos = [g['no'] for g in self._r3(scraped)['grid']]
+        self.assertEqual(result_nos[0], 11)
+
+    def test_grid_change_detection_logs_warning(self, ):
+        # Grid change between runs should print a warning
+        import io
+        old_grid = make_grid(10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 11, 12)
+        new_grid = make_grid(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12)
+        scraped  = make_scraped_round(r3_grid=new_grid)
+        existing = make_existing_round(r3_grid=old_grid)
+        import unittest.mock as mock
+        with mock.patch('builtins.print') as mock_print:
+            s.merge_scraped_with_existing(scraped, existing)
+        printed = ' '.join(str(c) for c in mock_print.call_args_list)
+        self.assertIn('grid CHANGED', printed)
+
+    def test_reverseGridDraw_preserved_from_existing(self):
+        # Explicit override carried forward when new scrape has no draw set
+        old_grid = make_grid(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12)
+        scraped  = make_scraped_round(r3_grid=old_grid)
+        existing = make_existing_round(r3_grid=old_grid, r3_draw=11)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped).get('reverseGridDraw'), 11)
+
+    def test_reverseGridDraw_not_overwritten_when_new_has_value(self):
+        # New scrape already has a draw value; existing's value must not clobber it
+        old_grid = make_grid(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12)
+        scraped  = make_scraped_round(r3_grid=old_grid, r3_draw=11)
+        existing = make_existing_round(r3_grid=old_grid, r3_draw=8)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped).get('reverseGridDraw'), 11)
+
+    def test_youtube_urls_carried_forward(self):
+        urls = ['https://yt/r1', 'https://yt/r2', None, None, None, None]
+        scraped  = make_scraped_round()
+        existing = make_existing_round(youtube=urls)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(scraped['youtubeUrls'], urls)
+
+    def test_old_results_preserved_when_new_empty(self):
+        results = [make_result('Sutton', 1)]
+        scraped  = make_scraped_round(r3_results=[])
+        existing = make_existing_round(r3_results=results)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped)['results'], results)
+
+    def test_new_results_not_overwritten_by_old(self):
+        old_results = [make_result('Sutton', 1)]
+        new_results = [make_result('Ingram', 1)]
+        scraped  = make_scraped_round(r3_results=new_results)
+        existing = make_existing_round(r3_results=old_results)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped)['results'][0]['driver'], 'Ingram')
+
+
+# ── apply_draw_override ───────────────────────────────────────────────────────
+
+class TestApplyDrawOverride(unittest.TestCase):
+
+    def _r3(self, rounds, round_num=1):
+        rnd = next(r for r in rounds if r['round'] == round_num)
+        return next(r for r in rnd['races'] if r['label'] == 'Race 3')
+
+    def test_sets_reverseGridDraw_on_race3(self):
+        rounds = [make_scraped_round()]
+        s.apply_draw_override(rounds, round_num=1, draw=11)
+        self.assertEqual(self._r3(rounds).get('reverseGridDraw'), 11)
+
+    def test_overwrites_existing_draw_value(self):
+        rounds = [make_scraped_round(r3_draw=10)]
+        s.apply_draw_override(rounds, round_num=1, draw=11)
+        self.assertEqual(self._r3(rounds).get('reverseGridDraw'), 11)
+
+    def test_does_not_touch_other_rounds(self):
+        r1 = make_scraped_round()
+        r2 = {**make_scraped_round(), 'round': 2}
+        s.apply_draw_override([r1, r2], round_num=1, draw=11)
+        r2_r3 = next(r for r in r2['races'] if r['label'] == 'Race 3')
+        self.assertIsNone(r2_r3.get('reverseGridDraw'))
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

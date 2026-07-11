@@ -32,10 +32,13 @@ YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2026
 ROUND_FILTER    = None
 SESSION_FILTER  = None  # None = all sessions; set of labels = only those
 TODAY_MODE      = "--today" in sys.argv
+SET_DRAW        = None  # --set-draw N: write reverseGridDraw on Race 3 of ROUND_FILTER
 
 for i, arg in enumerate(sys.argv):
     if arg == "--round" and i + 1 < len(sys.argv):
         ROUND_FILTER = int(sys.argv[i + 1])
+    if arg == "--set-draw" and i + 1 < len(sys.argv):
+        SET_DRAW = int(sys.argv[i + 1])
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR   = REPO_ROOT / "data"
@@ -82,7 +85,13 @@ if TODAY_MODE and ROUND_FILTER is None:
                         _already_done.add(_race["label"])
                 break
 
-    SESSION_FILTER = _today_labels - _already_done
+    # Sessions needing results fetched (not yet committed)
+    _needs_results = _today_labels - _already_done
+    # Sessions with grid PDFs always stay in the filter even after results land —
+    # TSL occasionally amends grid PDFs (e.g. corrected reverse-grid draw number)
+    # and we need to re-fetch within the scrape window to catch those updates.
+    _grid_labels = {"Qualifying Race", "Race 1", "Race 2", "Race 3"}
+    SESSION_FILTER = _needs_results | (_today_labels & _grid_labels)
     if not SESSION_FILTER:
         print(f"--today: all sessions for Round {_today_round} {_today_day} already scraped — exiting")
         sys.exit(0)
@@ -1070,6 +1079,49 @@ def update_calendar_records(output_rounds, year):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+def merge_scraped_with_existing(scraped, existing_round):
+    """Carry forward grids, results and reverseGridDraw from a previous scrape run.
+
+    Rules (in priority order):
+    - New grid overwrites old grid when the fetch succeeds (catches TSL amendments).
+      If the car-number order changed, a warning is printed.
+    - Old grid is kept when the new fetch returned empty (transient failure).
+    - New results overwrite old results when present; old results kept otherwise.
+    - reverseGridDraw is preserved from the existing round when not set on the new scrape.
+    - youtubeUrls are always carried forward (never re-scraped).
+    """
+    scraped["youtubeUrls"] = existing_round.get("youtubeUrls", [None] * 6)
+    existing_map = {r["label"]: r for r in existing_round.get("races", [])}
+    for race in scraped["races"]:
+        ex = existing_map.get(race["label"])
+        if not ex:
+            continue
+        if ex.get("grid") and not race.get("grid"):
+            race["grid"] = ex["grid"]
+        elif ex.get("grid") and race.get("grid"):
+            old_nos = [g["no"] for g in sorted(ex["grid"], key=lambda g: g["pos"])]
+            new_nos = [g["no"] for g in sorted(race["grid"], key=lambda g: g["pos"])]
+            if old_nos != new_nos:
+                print(f"  *** {race['label']} grid CHANGED (TSL amendment?) old={old_nos[:3]}... new={new_nos[:3]}...")
+        if ex.get("results") and not race.get("results"):
+            race["results"] = ex["results"]
+        # Preserve an explicitly-set reverseGridDraw override
+        if ex.get("reverseGridDraw") is not None and race.get("reverseGridDraw") is None:
+            race["reverseGridDraw"] = ex["reverseGridDraw"]
+    return scraped
+
+
+def apply_draw_override(output_rounds, round_num, draw):
+    """Write reverseGridDraw on Race 3 of round_num (--set-draw recovery path)."""
+    for rnd in output_rounds:
+        if rnd["round"] == round_num:
+            for race in rnd.get("races", []):
+                if race["label"] == "Race 3":
+                    race["reverseGridDraw"] = draw
+                    print(f"  --set-draw: Round {round_num} Race 3 reverseGridDraw = {draw}")
+            break
+
+
 def main():
     if YEAR not in ROUNDS:
         print(f"Year {YEAR} not configured.", file=sys.stderr)
@@ -1104,18 +1156,8 @@ def main():
 
         scraped = scrape_round(info, session_filter=SESSION_FILTER)
         if scraped:
-            # Carry forward results, grids and youtubeUrls from previous runs
             if info["round"] in existing_rounds:
-                ex_round = existing_rounds[info["round"]]
-                scraped["youtubeUrls"] = ex_round.get("youtubeUrls", [None] * 6)
-                existing_map = {r["label"]: r for r in ex_round.get("races", [])}
-                for race in scraped["races"]:
-                    ex = existing_map.get(race["label"])
-                    if ex:
-                        if ex.get("grid") and not race.get("grid"):
-                            race["grid"] = ex["grid"]
-                        if ex.get("results") and not race.get("results"):
-                            race["results"] = ex["results"]
+                merge_scraped_with_existing(scraped, existing_rounds[info["round"]])
             else:
                 scraped["youtubeUrls"] = [None] * 6
             output_rounds.append(scraped)
@@ -1123,6 +1165,9 @@ def main():
             output_rounds.append(existing_rounds[info["round"]])
         else:
             output_rounds.append(make_stub(info))
+
+    if SET_DRAW is not None and ROUND_FILTER is not None:
+        apply_draw_override(output_rounds, ROUND_FILTER, SET_DRAW)
 
     results_out = {"season": str(YEAR), "rounds": output_rounds}
     results_path.write_text(json.dumps(results_out, indent=2))
@@ -1199,6 +1244,8 @@ def main():
     print("\n[track records]")
     update_calendar_records(output_rounds, YEAR)
 
+    sub_step_failed = False
+
     print("\n[all-time records]")
     try:
         import importlib.util
@@ -1209,7 +1256,8 @@ def main():
         spec.loader.exec_module(mod)
         mod.main()
     except Exception as e:
-        print(f"  WARNING: compute_records failed: {e}", file=sys.stderr)
+        print(f"  ERROR: compute_records failed: {e}", file=sys.stderr)
+        sub_step_failed = True
 
     print("\n[team stats]")
     try:
@@ -1221,8 +1269,14 @@ def main():
         spec.loader.exec_module(mod)
         mod.main()
     except Exception as e:
-        print(f"  WARNING: team stats scrape failed: {e}", file=sys.stderr)
+        print(f"  ERROR: team stats scrape failed: {e}", file=sys.stderr)
+        sub_step_failed = True
 
+    # results.json/standings.json are already written above - fail only now,
+    # after the good data is safely on disk, so CI still commits it while
+    # still reporting the run as failed (and emailing) for the broken sub-step.
+    if sub_step_failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

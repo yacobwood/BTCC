@@ -60,7 +60,7 @@ def scrape_calendar(year: int) -> list[dict] | None:
     try:
         html = _fetch(CALENDAR_URL)
     except Exception as e:
-        print(f"WARNING: could not fetch calendar ({e}) — skipping update", file=sys.stderr)
+        print(f"ERROR: could not fetch calendar ({e})", file=sys.stderr)
         return None
 
     events = []
@@ -150,10 +150,10 @@ def main():
 
     schedule = scrape_calendar(args.season)
     if schedule is None:
-        sys.exit(0)
+        sys.exit(1)
     if not schedule:
-        print("WARNING: no calendar events parsed — page structure may have changed", file=sys.stderr)
-        sys.exit(0)
+        print("ERROR: no calendar events parsed - page structure may have changed", file=sys.stderr)
+        sys.exit(1)
 
     print(f"\nScraped {len(schedule)} rounds for {args.season}")
     for s in schedule:
