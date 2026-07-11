@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-BTCC News Scraper - latest WordPress posts from btcc.net's REST API.
-Writes the raw response to data/news.json so the sendSessionNotifications
-Cloud Function can read it from GitHub instead of hitting btcc.net directly
-(Cloudflare blocks non-browser TLS clients, which the Cloud Function's
-runtime fetch cannot impersonate).
+BTCC News Scraper - latest article from btcc.net's news page.
+Writes a WordPress-REST-API-shaped array to data/news.json so the
+sendSessionNotifications Cloud Function can read it from GitHub instead of
+hitting btcc.net directly (Cloudflare blocks the Cloud Function's runtime
+fetch, which cannot impersonate a browser TLS fingerprint).
+
+Scrapes the rendered /news/ page rather than the /wp-json/ REST API: the
+REST endpoint returns 403 from GitHub Actions' runner IPs even with
+curl_cffi's Chrome impersonation, while the plain HTML page (like the
+calendar/stats pages the other scrapers already use) does not.
 
 Usage:
     python scrape_news.py [--dry-run]
@@ -14,44 +19,62 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
 from curl_cffi import requests as cffi_requests
 
-NEWS_URL = (
-    "https://www.btcc.net/wp-json/wp/v2/posts"
-    "?per_page=1&_fields=id,title,slug,featured_media,_links"
-    "&_embed=wp:featuredmedia"
-)
+NEWS_URL = "https://www.btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 NEWS_JSON = DATA_DIR / "news.json"
 
+ARTICLE_RE = re.compile(r'<article class="wpgb-card[^"]*wpgb-post-(\d+)".*?</article>', re.DOTALL)
+TITLE_RE = re.compile(r'blogBlockTitle"><a href="https://btcc\.net/([a-z0-9-]+)/">([^<]+)</a>')
+IMAGE_RE = re.compile(r'<a href="(https://btcc\.net/wp-content/uploads/[^"]+)"[^>]*data-type="image"')
 
-def _fetch(url: str) -> list:
+
+def _fetch(url: str) -> str:
     r = cffi_requests.get(url, impersonate="chrome120", timeout=15)
     r.raise_for_status()
-    return r.json()
+    return r.text
 
 
 def scrape_news() -> list | None:
-    """Fetch the latest btcc.net posts, or None on fetch failure."""
+    """Fetch btcc.net/news/ and return the latest article in WP-REST-API shape, or None on failure."""
     print(f"Fetching {NEWS_URL} …")
     try:
-        posts = _fetch(NEWS_URL)
+        html = _fetch(NEWS_URL)
     except Exception as e:
         print(f"ERROR: could not fetch news ({e})", file=sys.stderr)
         return None
 
-    if not isinstance(posts, list):
-        print(f"ERROR: unexpected response shape", file=sys.stderr)
+    article_m = ARTICLE_RE.search(html)
+    if not article_m:
+        print("ERROR: no article card found - page structure may have changed", file=sys.stderr)
         return None
+    post_id, block = article_m.group(1), article_m.group(0)
 
-    return posts
+    title_m = TITLE_RE.search(block)
+    if not title_m:
+        print("ERROR: could not extract title/slug from article card", file=sys.stderr)
+        return None
+    slug, title = title_m.group(1), title_m.group(2)
+
+    image_m = IMAGE_RE.search(block)
+    image_url = image_m.group(1) if image_m else None
+
+    post = {
+        "id": int(post_id),
+        "slug": slug,
+        "title": {"rendered": title},
+        "_embedded": {"wp:featuredmedia": [{"source_url": image_url}]} if image_url else {},
+    }
+    return [post]
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Scrape latest BTCC news posts into data/news.json")
+    ap = argparse.ArgumentParser(description="Scrape latest BTCC news post into data/news.json")
     ap.add_argument("--dry-run", action="store_true", help="Print result only, do not write")
     args = ap.parse_args()
 
