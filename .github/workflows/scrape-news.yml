@@ -1,0 +1,48 @@
+# Runs the news scraper on a schedule so the sendSessionNotifications Cloud
+# Function can read the latest btcc.net article from GitHub instead of
+# hitting btcc.net directly at runtime (Cloudflare blocks that).
+name: Scrape BTCC News
+
+on:
+  schedule:
+    # Every 5 minutes - keeps notification lag close to the previous
+    # live-check behaviour.
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: scrape-news
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Pull latest
+        run: git pull --rebase origin main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install curl_cffi
+
+      - name: Scrape news
+        run: python tools/scraper/scrape_news.py
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update news from btcc.net [skip ci]"
+          file_pattern: data/news.json
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: "--force-with-lease"

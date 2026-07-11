@@ -492,8 +492,8 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 
 | Source | URL/Location | Data |
 |---|---|---|
-| GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
-| BTCC WordPress | `https://www.btcc.net/wp-json/wp/v2` | News articles |
+| GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, news, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
+| BTCC WordPress | `https://www.btcc.net/wp-json/wp/v2` | News articles - scraped into `news.json` by `scrape_news.py` (Cloudflare blocks direct fetches from the Cloud Function; see [§19](#19-python-scrapers)) |
 | Buzzsprout RSS | Configured URL | Podcast episodes |
 | WeatherAPI | API key in config | Current weather at circuit location |
 | TSL SignalR | Live timing hub endpoint | Session live timing entries |
@@ -515,6 +515,7 @@ Stored in [data/](data/) directory. Served via GitHub raw CDN. Some are also bun
 | `results{year}.json` | Full results for a season (2004 - 2026), including grids from TSL PDFs |
 | `flags.json` | Feature flags + per-device overrides |
 | `hub_news.json` | Hub-curated news posts including AI-generated digests |
+| `news.json` | Latest btcc.net WordPress article (raw REST API response), scraped every 5 minutes so `sendSessionNotifications` can read it without hitting btcc.net directly |
 | `roadmap.json` | Feature roadmap items with status |
 | `radio.json` | Live radio station URLs |
 | `blacklist.json` | Profanity filter word list |
@@ -587,7 +588,7 @@ The main workhorse function. Runs every minute and handles two categories of wor
 - Post-session results: triggered when session results land in `results{year}.json`
 
 **Always runs (every minute, regardless of race day):**
-- News alerts: polls `btcc.net/wp-json/wp/v2/posts?per_page=1`, compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout (WordPress API can be slow).
+- News alerts: polls `news.json` on the GitHub raw CDN (scraped from `btcc.net/wp-json/wp/v2/posts?per_page=1` every 5 minutes by `scrape_news.py` - Cloudflare blocks the Cloud Function's runtime fetch from hitting btcc.net directly, see [§19](#19-python-scrapers)), compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout.
 - Hub news alerts: polls `hub_news.json`, compares latest `id` to Firestore `state/hub_news.lastId`. Sends to `news_alerts`. Excludes "Weekly Digest" category articles.
 - Podcast alerts: polls Buzzsprout RSS, compares `guid` to Firestore state. Sends to `podcast_alerts`.
 
@@ -787,6 +788,8 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 **compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Applies official wins/championships overrides from btcc.net for modern drivers. Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape.
 
 **scrape_calendar.py** - Parses the BTCC calendar to update `calendar.json` with round dates, venues and session times.
+
+**scrape_news.py** - Fetches the latest btcc.net WordPress post via `curl_cffi` Chrome impersonation (needed to bypass Cloudflare's TLS fingerprinting) and writes it to `news.json`. Runs every 5 minutes via `scrape-news.yml` so `sendSessionNotifications` can read it from GitHub instead of hitting btcc.net directly.
 
 **scrape_schedule.py** - Updates `schedule.json` with precise session start times for Cloud Function pre-session alert timing.
 

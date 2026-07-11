@@ -1,0 +1,239 @@
+[
+  {
+    "id": 112542,
+    "slug": "7-eleven-ash-sutton",
+    "title": {
+      "rendered": "7-Eleven: Ash Sutton"
+    },
+    "featured_media": 112543,
+    "_links": {
+      "self": [
+        {
+          "href": "https://btcc.net/wp-json/wp/v2/posts/112542",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://btcc.net/wp-json/wp/v2/posts"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://btcc.net/wp-json/wp/v2/types/post"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://btcc.net/wp-json/wp/v2/users/4"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://btcc.net/wp-json/wp/v2/comments?post=112542"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://btcc.net/wp-json/wp/v2/posts/112542/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 112544,
+          "href": "https://btcc.net/wp-json/wp/v2/posts/112542/revisions/112544"
+        }
+      ],
+      "wp:featuredmedia": [
+        {
+          "embeddable": true,
+          "href": "https://btcc.net/wp-json/wp/v2/media/112543"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://btcc.net/wp-json/wp/v2/media?parent=112542"
+        }
+      ],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https://btcc.net/wp-json/wp/v2/categories?post=112542"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https://btcc.net/wp-json/wp/v2/tags?post=112542"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 112543,
+          "date": "2026-07-10T15:01:09",
+          "slug": "sutton-1tr33202-1",
+          "type": "attachment",
+          "link": "https://btcc.net/7-eleven-ash-sutton/sutton-1tr33202-1/",
+          "title": {
+            "rendered": "Sutton-1TR33202 (1)"
+          },
+          "author": 4,
+          "featured_media": 0,
+          "meta_box": [],
+          "caption": {
+            "rendered": ""
+          },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image/jpeg",
+          "media_details": {
+            "width": 2347,
+            "height": 1562,
+            "file": "2026/07/Sutton-1TR33202-1-scaled-e1783695686451.jpg",
+            "filesize": 584708,
+            "sizes": {
+              "medium": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-300x200.jpg",
+                "width": 300,
+                "height": 200,
+                "filesize": 55496,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-300x200.jpg"
+              },
+              "large": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-1024x682.jpg",
+                "width": 1024,
+                "height": 682,
+                "filesize": 175315,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-1024x682.jpg"
+              },
+              "thumbnail": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-150x150.jpg",
+                "width": 150,
+                "height": 150,
+                "filesize": 44120,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-150x150.jpg"
+              },
+              "medium_large": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-768x511.jpg",
+                "width": 768,
+                "height": 511,
+                "filesize": 124376,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-768x511.jpg"
+              },
+              "1536x1536": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-1536x1022.jpg",
+                "width": 1536,
+                "height": 1022,
+                "filesize": 299143,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-1536x1022.jpg"
+              },
+              "2048x2048": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-2048x1363.jpg",
+                "width": 2048,
+                "height": 1363,
+                "filesize": 449811,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-2048x1363.jpg"
+              },
+              "wpgb-lqip": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451-wpgb-lqip.jpg",
+                "width": 42,
+                "height": 0,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451-wpgb-lqip.jpg"
+              },
+              "full": {
+                "file": "Sutton-1TR33202-1-scaled-e1783695686451.jpg",
+                "width": 2347,
+                "height": 1562,
+                "mime_type": "image/jpeg",
+                "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451.jpg"
+              }
+            },
+            "image_meta": {
+              "aperture": "2.8",
+              "credit": "Tom Banks",
+              "camera": "Canon EOS R3",
+              "caption": "",
+              "created_timestamp": "1776618510",
+              "copyright": "Tom BANKS Photography",
+              "focal_length": "200",
+              "iso": "640",
+              "shutter_speed": "0.0005",
+              "title": "",
+              "orientation": "0",
+              "keywords": [],
+              "alt": ""
+            },
+            "original_image": "Sutton-1TR33202-1.jpg"
+          },
+          "source_url": "https://btcc.net/wp-content/uploads/2026/07/Sutton-1TR33202-1-scaled-e1783695686451.jpg",
+          "_links": {
+            "self": [
+              {
+                "href": "https://btcc.net/wp-json/wp/v2/media/112543",
+                "targetHints": {
+                  "allow": [
+                    "GET"
+                  ]
+                }
+              }
+            ],
+            "collection": [
+              {
+                "href": "https://btcc.net/wp-json/wp/v2/media"
+              }
+            ],
+            "about": [
+              {
+                "href": "https://btcc.net/wp-json/wp/v2/types/attachment"
+              }
+            ],
+            "author": [
+              {
+                "embeddable": true,
+                "href": "https://btcc.net/wp-json/wp/v2/users/4"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 112542,
+                "href": "https://btcc.net/wp-json/wp/v2/posts/112542"
+              }
+            ],
+            "curies": [
+              {
+                "name": "wp",
+                "href": "https://api.w.org/{rel}",
+                "templated": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

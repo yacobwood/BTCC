@@ -1,12 +1,14 @@
-const NEWS_URL = 'https://www.btcc.net/wp-json/wp/v2/posts?per_page=1&_fields=id,title,slug,featured_media,_links&_embed=wp:featuredmedia';
-const NEWS_USER_AGENT = 'Mozilla/5.0 (compatible; BTCCHub/1.0)';
+// Scraped from btcc.net by tools/scraper/scrape_news.py and republished here -
+// Cloudflare blocks non-browser TLS clients (JA3 fingerprinting) regardless of
+// User-Agent, which this function's runtime fetch cannot impersonate.
+const NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/news.json';
 
 function decodeHtmlEntities(str) {
   return str.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)));
 }
 
 async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
-  const newsRes = await fetchFn(NEWS_URL, 20000, {headers: {'User-Agent': NEWS_USER_AGENT}});
+  const newsRes = await fetchFn(NEWS_URL, 20000);
   const articles = await newsRes.json();
   const latest = articles?.[0];
 
