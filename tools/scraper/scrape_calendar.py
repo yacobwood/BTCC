@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-from curl_cffi import requests as cffi_requests
+from btcc_relay import fetch_via_relay
 
 CALENDAR_URL = "https://btcc.net/calendar/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -30,9 +30,7 @@ MONTH = {
 }
 
 def _fetch(url: str) -> str:
-    r = cffi_requests.get(url, impersonate="chrome120", timeout=15)
-    r.raise_for_status()
-    return r.text
+    return fetch_via_relay(url).text
 
 
 def parse_date_range(text: str, year: int) -> tuple[str, str] | None:

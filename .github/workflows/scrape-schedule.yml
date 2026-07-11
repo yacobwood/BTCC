@@ -8,11 +8,7 @@ on:
 
 jobs:
   scrape:
-    # btcc.net's hosting WAF blocks GitHub-hosted runner IPs entirely (2026-07-11,
-    # see project_btcc_waf_ip_block memory) - runs on a self-hosted runner instead.
-    # That runner is macOS, so the Ubuntu-only apt-get audio dep is dropped below;
-    # Playwright doesn't need it there.
-    runs-on: [self-hosted, btcc-local]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
@@ -20,16 +16,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
       - name: Install dependencies
-        run: |
-          pip3 install -r tools/scraper/requirements.txt
-          python3 -m playwright install chromium
+        run: pip install curl_cffi
 
       - name: Scrape session schedule
-        run: python3 tools/scraper/scrape_schedule.py
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: python tools/scraper/scrape_schedule.py
 
       - name: Merge sessions into app calendar
-        run: python3 tools/scraper/merge_schedule.py
+        run: python tools/scraper/merge_schedule.py
 
       - name: Commit updated schedule
         uses: stefanzweifel/git-auto-commit-action@v7

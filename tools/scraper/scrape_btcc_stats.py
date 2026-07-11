@@ -21,7 +21,7 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-from curl_cffi import requests as cffi_requests
+from btcc_relay import fetch_via_relay
 
 WINS_URL   = "https://btcc.net/history/statistics/drivers/"
 TITLES_URL = "https://btcc.net/history/champions/btcc-titles/"
@@ -43,9 +43,7 @@ NAME_ALIASES = {
 # ── HTML helpers ─────────────────────────────────────────────────────────────
 
 def _fetch(url: str) -> str:
-    r = cffi_requests.get(url, impersonate="chrome120", timeout=15)
-    r.raise_for_status()
-    return r.text
+    return fetch_via_relay(url).text
 
 
 def _strip_tags(html: str) -> str:

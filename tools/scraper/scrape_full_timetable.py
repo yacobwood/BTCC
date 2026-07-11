@@ -15,7 +15,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Optional
 
-from curl_cffi import requests as cffi_requests
+from btcc_relay import fetch_via_relay
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
@@ -67,9 +67,7 @@ def parse_laps(raw: str) -> Optional[str]:
 
 
 def _fetch(url: str) -> str:
-    r = cffi_requests.get(url, impersonate="chrome120", timeout=15)
-    r.raise_for_status()
-    return r.text
+    return fetch_via_relay(url).text
 
 
 class _TimetableParser(HTMLParser):

@@ -1,13 +1,14 @@
 # Runs the news scraper on a schedule so the sendSessionNotifications Cloud
 # Function can read the latest btcc.net article from GitHub instead of
-# hitting btcc.net directly at runtime (blocked at runtime - see below).
+# hitting btcc.net directly at runtime. The scraper itself fetches through
+# the btcc-relay Cloudflare Worker (see cf-worker/), since btcc.net blocks
+# direct requests from GitHub Actions' IPs - see project_btcc_waf_ip_block memory.
 name: Scrape BTCC News
 
 on:
   schedule:
     # Every 5 minutes - keeps notification lag close to the previous
-    # live-check behaviour. Runs on a self-hosted runner (see below) since
-    # btcc.net's hosting WAF blocks GitHub-hosted runner IPs entirely.
+    # live-check behaviour.
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
@@ -17,9 +18,7 @@ concurrency:
 
 jobs:
   scrape:
-    # btcc.net's hosting WAF blocks GitHub-hosted runner IPs entirely (2026-07-11,
-    # see project_btcc_waf_ip_block memory) - runs on a self-hosted runner instead.
-    runs-on: [self-hosted, btcc-local]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
@@ -30,11 +29,18 @@ jobs:
       - name: Pull latest
         run: git pull --rebase origin main
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
       - name: Install dependencies
-        run: pip3 install curl_cffi
+        run: pip install curl_cffi
 
       - name: Scrape news
-        run: python3 tools/scraper/scrape_news.py
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: python tools/scraper/scrape_news.py
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7

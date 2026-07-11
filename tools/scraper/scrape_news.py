@@ -3,13 +3,15 @@
 BTCC News Scraper - latest article from btcc.net's news page.
 Writes a WordPress-REST-API-shaped array to data/news.json so the
 sendSessionNotifications Cloud Function can read it from GitHub instead of
-hitting btcc.net directly (Cloudflare blocks the Cloud Function's runtime
-fetch, which cannot impersonate a browser TLS fingerprint).
+hitting btcc.net directly at runtime.
 
-Scrapes the rendered /news/ page rather than the /wp-json/ REST API: the
-REST endpoint returns 403 from GitHub Actions' runner IPs even with
-curl_cffi's Chrome impersonation, while the plain HTML page (like the
-calendar/stats pages the other scrapers already use) does not.
+Scrapes the rendered /news/ page rather than the /wp-json/ REST API (which
+returned 403 even through the relay - WordPress REST endpoints are
+commonly locked down harder than plain pages). Fetches through the
+btcc-relay Cloudflare Worker (see btcc_relay.py): btcc.net's origin blocks
+direct requests from GitHub Actions/GCP with a 403 regardless of TLS
+fingerprint, but requests routed through Cloudflare's own network - which
+btcc.net sits behind - are trusted.
 
 Usage:
     python scrape_news.py [--dry-run]
@@ -23,7 +25,7 @@ import re
 import sys
 from pathlib import Path
 
-from curl_cffi import requests as cffi_requests
+from btcc_relay import fetch_via_relay
 
 NEWS_URL = "https://www.btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -35,9 +37,7 @@ IMAGE_RE = re.compile(r'<a href="(https://btcc\.net/wp-content/uploads/[^"]+)"[^
 
 
 def _fetch(url: str) -> str:
-    r = cffi_requests.get(url, impersonate="chrome120", timeout=15)
-    r.raise_for_status()
-    return r.text
+    return fetch_via_relay(url).text
 
 
 def scrape_news() -> list | None:

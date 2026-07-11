@@ -17,9 +17,7 @@ concurrency:
 
 jobs:
   scrape:
-    # btcc.net's hosting WAF blocks GitHub-hosted runner IPs entirely (2026-07-11,
-    # see project_btcc_waf_ip_block memory) - runs on a self-hosted runner instead.
-    runs-on: [self-hosted, btcc-local]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
@@ -30,16 +28,23 @@ jobs:
       - name: Pull latest
         run: git pull --rebase origin main
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
       - name: Install dependencies
-        run: pip3 install curl_cffi
+        run: pip install curl_cffi
 
       - name: Run scraper
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
           ARGS=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="--dry-run"
           fi
-          python3 tools/scraper/scrape_btcc_stats.py $ARGS
+          python tools/scraper/scrape_btcc_stats.py $ARGS
 
       - name: Commit updated records
         if: github.event.inputs.dry_run != 'true'
