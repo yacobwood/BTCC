@@ -25,19 +25,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
       - name: Install dependencies
-        run: pip install curl_cffi
+        run: pip3 install curl_cffi
 
       - name: Scrape calendar
         run: |
           SEASON="${{ github.event.inputs.season }}"
           [ -z "$SEASON" ] && SEASON=2026
-          python tools/scraper/scrape_calendar.py --season "$SEASON"
+          python3 tools/scraper/scrape_calendar.py --season "$SEASON"
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7

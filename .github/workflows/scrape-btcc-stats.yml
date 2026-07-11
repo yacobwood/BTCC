@@ -30,13 +30,8 @@ jobs:
       - name: Pull latest
         run: git pull --rebase origin main
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
       - name: Install dependencies
-        run: pip install curl_cffi
+        run: pip3 install curl_cffi
 
       - name: Run scraper
         run: |
@@ -44,7 +39,7 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="--dry-run"
           fi
-          python tools/scraper/scrape_btcc_stats.py $ARGS
+          python3 tools/scraper/scrape_btcc_stats.py $ARGS
 
       - name: Commit updated records
         if: github.event.inputs.dry_run != 'true'
