@@ -15,7 +15,9 @@ on:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    # btcc.net's hosting WAF blocks GitHub-hosted runner IPs entirely (2026-07-11,
+    # see project_btcc_waf_ip_block memory) - runs on a self-hosted runner instead.
+    runs-on: [self-hosted, btcc-local]
     permissions:
       contents: write
 
