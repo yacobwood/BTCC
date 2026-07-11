@@ -493,7 +493,7 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | Source | URL/Location | Data |
 |---|---|---|
 | GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, news, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
-| BTCC WordPress | `https://www.btcc.net/wp-json/wp/v2` | News articles - scraped into `news.json` by `scrape_news.py` (Cloudflare blocks direct fetches from the Cloud Function; see [§19](#19-python-scrapers)) |
+| BTCC WordPress | `https://www.btcc.net/news/` | News articles - scraped into `news.json` by `scrape_news.py` through the btcc-relay Cloudflare Worker (btcc.net blocks direct fetches from the Cloud Function; see [§19](#19-python-scrapers)) |
 | Buzzsprout RSS | Configured URL | Podcast episodes |
 | WeatherAPI | API key in config | Current weather at circuit location |
 | TSL SignalR | Live timing hub endpoint | Session live timing entries |
@@ -588,7 +588,7 @@ The main workhorse function. Runs every minute and handles two categories of wor
 - Post-session results: triggered when session results land in `results{year}.json`
 
 **Always runs (every minute, regardless of race day):**
-- News alerts: polls `news.json` on the GitHub raw CDN (scraped from `btcc.net/wp-json/wp/v2/posts?per_page=1` every 5 minutes by `scrape_news.py` - Cloudflare blocks the Cloud Function's runtime fetch from hitting btcc.net directly, see [§19](#19-python-scrapers)), compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout.
+- News alerts: polls `news.json` on the GitHub raw CDN (scraped from `btcc.net/news/` every 5 minutes by `scrape_news.py` through the btcc-relay Cloudflare Worker - btcc.net blocks the Cloud Function's runtime fetch from hitting it directly, see [§19](#19-python-scrapers)), compares latest `id` to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout.
 - Hub news alerts: polls `hub_news.json`, compares latest `id` to Firestore `state/hub_news.lastId`. Sends to `news_alerts`. Excludes "Weekly Digest" category articles.
 - Podcast alerts: polls Buzzsprout RSS, compares `guid` to Firestore state. Sends to `podcast_alerts`.
 
@@ -785,23 +785,25 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update data files on GitHub.
 
+**Fetching btcc.net - the relay:** btcc.net's origin only fully trusts traffic that has already passed through Cloudflare's own network (btcc.net sits behind Cloudflare, confirmed via response headers). Direct requests from GitHub Actions, GCP, or any other well-known cloud/datacenter IP range get a 403 regardless of TLS fingerprint - `curl_cffi`'s Chrome impersonation does not help, since this is an IP-level trust decision, not fingerprint detection. `cf-worker/worker.js` is a small Cloudflare Worker that relays fetches to btcc.net from inside Cloudflare's trusted network; `tools/scraper/btcc_relay.py`'s `fetch_via_relay(url)` is what every btcc.net-facing scraper below calls instead of fetching directly. It requires a `SCRAPER_SECRET` env var (matches the Worker's own secret, gating it against abuse as an open proxy) - already wired into every workflow below. See [§12](#12-firebase-cloud-functions) for the Worker's Cloudflare-side setup.
+
 **Failure handling convention:** every scraper invoked by a workflow exits non-zero on a real failure (fetch error, empty/unparseable response) and exits 0 only when there was legitimately nothing new to do. Each of those workflows has a final `if: failure()` step that reports to the `reportScraperFailure` Cloud Function (see [§12](#12-firebase-cloud-functions)), which emails `btcchub@gmail.com` and logs to the same admin FIRESTORE tab as Cloud Function errors. `scrape_tsl.py` is the one exception to "fetch happens before write": `compute_records.py`/`scrape_team_stats.py` run as an internal sub-step *after* `results{year}.json`/`standings.json` are already written, so its workflow (`scrape-results.yml`) uses `continue-on-error` on the scrape step so the commit step still saves that good data even when a sub-step fails, then explicitly fails the job afterward so the run still shows red and alerts.
 
-**scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session. Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py` then `scrape_team_stats.py`.
+**scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session (not btcc.net, so unaffected by the relay/WAF situation above). Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py` then `scrape_team_stats.py`.
 
 **compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape. **Not standalone-safe:** it only knows about 2004+ timeline data, so running it alone temporarily reverts the official wins/championships overrides that `scrape_btcc_stats.py` applies for drivers active before 2004 (e.g. Jason Plato) - it self-heals at the next daily `scrape_btcc_stats.py` run, but don't run it in isolation and expect the result to be final.
 
-**scrape_btcc_stats.py** - Daily official-stats override pass. Fetches all-time wins (`btcc.net/history/statistics/drivers/`) and championship counts (`btcc.net/history/champions/btcc-titles/`) via `curl_cffi` Chrome impersonation and patches them into `records.json` on top of whatever `compute_records.py` last computed - this is what makes pre-2004 career totals correct. Runs daily at 06:00 UTC via `scrape-btcc-stats.yml`.
+**scrape_btcc_stats.py** - Daily official-stats override pass. Fetches all-time wins (`btcc.net/history/statistics/drivers/`) and championship counts (`btcc.net/history/champions/btcc-titles/`) through the relay and patches them into `records.json` on top of whatever `compute_records.py` last computed - this is what makes pre-2004 career totals correct. Runs daily at 06:00 UTC via `scrape-btcc-stats.yml`.
 
 **scrape_calendar.py** - Parses the BTCC calendar to update `calendar.json` with round dates, venues and session times. Internally calls `scrape_full_timetable.py` per round to populate support-series timetables.
 
-**scrape_news.py** - Fetches the latest btcc.net WordPress post via `curl_cffi` Chrome impersonation (needed to bypass Cloudflare's TLS fingerprinting) and writes it to `news.json`. Runs every 5 minutes via `scrape-news.yml` so `sendSessionNotifications` can read it from GitHub instead of hitting btcc.net directly.
+**scrape_news.py** - Fetches the latest btcc.net article (scraping the rendered `/news/` page, not the `/wp-json/` REST API, which is blocked separately from the relay itself) through the relay and writes it to `news.json`. Runs every 5 minutes via `scrape-news.yml` so `sendSessionNotifications` can read it from GitHub instead of hitting btcc.net directly.
 
-**scrape_schedule.py** - Updates `schedule.json` with precise session start times for Cloud Function pre-session alert timing.
+**scrape_schedule.py** - Updates `schedule.json` with precise BTCC session start times (Free Practice/Qualifying/Qualifying Race/Race 1-3) for Cloud Function pre-session alert timing. Reuses `scrape_full_timetable.py`'s table parser rather than driving a headless browser - the weekend timetable page is fully server-rendered, so a Playwright dependency was never actually necessary.
 
 **scrape_youtube.py** - Associates YouTube race replay URLs with rounds in the results JSON.
 
-**scrape_team_stats.py** - Fetches race/win totals per team from `btcc.net/team/<slug>/` and writes them into `data/drivers.json`. Called automatically by `scrape_tsl.py` after each scrape (also runnable standalone). Currently reachable via plain `urllib` - unlike the other btcc.net endpoints, this path isn't behind the Cloudflare challenge that requires `curl_cffi`, though that could change.
+**scrape_team_stats.py** - Fetches race/win totals per team from `btcc.net/team/<slug>/` and writes them into `data/drivers.json`. Called automatically by `scrape_tsl.py` after each scrape (also runnable standalone). Still uses plain `urllib`, not the relay - confirmed working from a local machine, but not yet verified running from GitHub Actions specifically (its actual invocation is gated behind `scrape-results.yml`'s race-weekend condition, untested since the relay was introduced). If it starts failing from CI, route it through `btcc_relay.fetch_via_relay()` like the others.
 
 **merge_schedule.py** - Merges scraped session times from `schedule.json` into `calendar.json`. Run after `scrape_schedule.py` as a separate step in `scrape-schedule.yml`.
 
