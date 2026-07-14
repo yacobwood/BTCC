@@ -124,19 +124,21 @@ class TestComputeStandingsFallback(unittest.TestCase):
         standings = self._standings([make_round(1, [make_race('Qualifying Race', [r])])])
         self.assertEqual(standings['Alice']['points'], 10)
 
-    # Wins counting — QR wins now count
+    # Wins counting — QR results do NOT count towards wins/podiums
 
     def test_race_win_counted(self):
         r = make_result('Alice', pos=1, points=20)
         standings = self._standings([make_round(1, [make_race('Race 1', [r])])])
         self.assertEqual(standings['Alice']['wins'], 1)
 
-    def test_qualifying_race_win_counted(self):
-        """Regression: QR wins were previously excluded. They now count."""
+    def test_qualifying_race_win_not_counted(self):
+        """Regression (2026-07-14): QR wins were briefly counted, which was wrong —
+        btcc.net reported Sutton's Oulton Park Race 2 win as his "fifth victory of
+        2026", a tally that only reconciles when QR results are excluded from wins."""
         r = make_result('Alice', pos=1, points=10)
         standings = self._standings([make_round(1, [make_race('Qualifying Race', [r])])])
-        self.assertEqual(standings['Alice']['wins'], 1,
-            'QR wins should be counted — removed the is_qual_race guard on driver_wins')
+        self.assertEqual(standings['Alice']['wins'], 0,
+            'QR wins must not be counted — only Race 1/2/3 count towards official wins/podiums')
 
     def test_wins_across_sessions_cumulate(self):
         qr = make_result('Alice', pos=1, points=10)
@@ -148,7 +150,7 @@ class TestComputeStandingsFallback(unittest.TestCase):
             make_race('Race 2', [r2]),
         ])]
         standings = self._standings(rounds)
-        self.assertEqual(standings['Alice']['wins'], 2)
+        self.assertEqual(standings['Alice']['wins'], 1)
 
     def test_podiums_counted_for_non_winners(self):
         r = make_result('Bob', pos=2, points=17)

@@ -906,6 +906,19 @@
       "class": "M"
     },
     {
+      "number": 29,
+      "name": "Lewis Gilbert",
+      "team": "WSR",
+      "car": "BMW 330i M Sport",
+      "imageUrl": "https://btcc.net/wp-content/uploads/2026/07/Gilbert-nobkgrnd-scaled.png",
+      "nationality": "Scottish",
+      "bio": "Lewis Gilbert is a Scottish racing driver born on 24 June 2004 in Dalry, North Ayrshire. A hugely successful junior karter, he claimed the IAME Euro Series X30 Junior title in 2018 and won the Kartmasters British GP in the Rotax Junior class the same year, later adding runner-up finishes in Senior Max class finals as he progressed through the junior ranks.\n\nAfter testing Formula 4 and Formula Regional machinery, Gilbert made his car racing debut in the GB3 Championship with Arden Motorsport earlier in 2026, recording a string of top-ten finishes in his rookie campaign.\n\nHe now steps up to the BTCC mid-season, joining WSR for the remainder of 2026 alongside race winners Charles Rainford and Daryl De Leon in the team's expanded three-car BMW line-up. Making his series debut at Thruxton, Gilbert arrives with just half a season of car racing experience but a wealth of karting pedigree, and is eligible for the Jack Sears Trophy as well as the Independent Championship.",
+      "dateOfBirth": "2004-06-24",
+      "birthplace": "Dalry, Scotland",
+      "history": [],
+      "class": "I"
+    },
+    {
       "number": 32,
       "name": "Daniel Rowbottom",
       "team": "Cataclean Plato Racing",
@@ -1555,6 +1568,80 @@
       ],
       "dateOfBirth": "1979-02-15",
       "birthplace": "Edinburgh, Scotland",
+      "class": "I"
+    },
+    {
+      "number": 55,
+      "name": "Nick Halstead",
+      "team": "Power Maxed Racing",
+      "car": "Audi A3 Saloon",
+      "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/2026-Halstead-Nick-0H5A0744-cut-out-scaled.png",
+      "nationality": "British",
+      "bio": "Nick Halstead is a British racing driver born on 9 April 1972 in Kent. Before turning to motorsport he built a career as a technology entrepreneur, founding companies including TweetMeme, DataSift and InfoSum - success that funded a racing career he only started in 2017, considerably later than most of his rivals.\n\nHe progressed quickly through club racing, winning the Am category of the Ginetta GT5 Challenge before stepping up to the Ginetta GT4 SuperCup, where he took five wins and sixteen podiums in his debut season. Halstead made his BTCC bow as a Croft substitute in 2021 before landing his first full-time seat in 2023 with Bristol Street Motors with EXCELR8, remaining with the Hyundai-powered team through 2024.\n\nHe joined Power Maxed Racing partway through 2025, only for the team's entire touring car fleet to be destroyed in a factory fire that August - forcing him to see out the year in a borrowed Cupra Leon before relocating to Australia to continue racing. Halstead now returns to Power Maxed Racing for the second half of 2026, arriving from the Knockhill round in the team's new Audi A3 Saloon as it expands to a four-car entry for the first time in its history - a return that symbolically marks twelve months since the fire that could have ended the team altogether.",
+      "dateOfBirth": "1972-04-09",
+      "birthplace": "Kent",
+      "history": [
+        {
+          "year": 2025,
+          "team": "Motor Parts Direct with Power Maxed Racing",
+          "car": "Vauxhall Astra / Cupra León",
+          "pos": 27,
+          "points": 4,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0,
+          "teams": [
+            {
+              "name": "Motor Parts Direct with Power Maxed Racing",
+              "car": "Vauxhall Astra",
+              "races": 11
+            },
+            {
+              "name": "Motor Parts Direct with Power Maxed Racing",
+              "car": "Cupra León",
+              "races": 12
+            }
+          ],
+          "dnfs": 4
+        },
+        {
+          "year": 2024,
+          "team": "Team Bristol Street Motors",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 22,
+          "points": 7,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0,
+          "dnfs": 2
+        },
+        {
+          "year": 2023,
+          "team": "Bristol Street Motors with EXCELR8",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 30,
+          "points": -5,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0,
+          "dnfs": 0
+        },
+        {
+          "year": 2021,
+          "team": "Excelr8 with TradePriceCars.com",
+          "car": "Hyundai i30 Fastback N",
+          "pos": 34,
+          "points": 0,
+          "wins": 0,
+          "podiums": 0,
+          "poles": 0,
+          "fastestLaps": 0,
+          "dnfs": 0
+        }
+      ],
       "class": "I"
     },
     {

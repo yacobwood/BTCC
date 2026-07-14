@@ -8,8 +8,8 @@
       "class": "M",
       "points": 220,
       "wins": 5,
-      "seconds": 5,
-      "thirds": 4,
+      "seconds": 4,
+      "thirds": 0,
       "team": "NAPA Racing UK"
     },
     {
@@ -20,7 +20,7 @@
       "class": "M",
       "points": 172,
       "wins": 1,
-      "seconds": 1,
+      "seconds": 3,
       "thirds": 3,
       "team": "Team VERTU"
     },
@@ -44,8 +44,8 @@
       "class": "I",
       "points": 137,
       "wins": 2,
-      "seconds": 2,
-      "thirds": 0,
+      "seconds": 0,
+      "thirds": 1,
       "team": "WSR"
     },
     {
@@ -56,8 +56,8 @@
       "class": "M",
       "points": 124,
       "wins": 0,
-      "seconds": 0,
-      "thirds": 3,
+      "seconds": 3,
+      "thirds": 2,
       "team": "Team VERTU"
     },
     {
@@ -69,7 +69,7 @@
       "points": 113,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0,
+      "thirds": 2,
       "team": "WSR"
     },
     {
@@ -80,8 +80,8 @@
       "class": "I",
       "points": 110,
       "wins": 1,
-      "seconds": 1,
-      "thirds": 0,
+      "seconds": 0,
+      "thirds": 1,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
@@ -92,8 +92,8 @@
       "class": "M",
       "points": 105,
       "wins": 0,
-      "seconds": 0,
-      "thirds": 1,
+      "seconds": 1,
+      "thirds": 0,
       "team": "Speedworks Corolla Racing"
     },
     {
@@ -104,8 +104,8 @@
       "class": "I",
       "points": 97,
       "wins": 1,
-      "seconds": 1,
-      "thirds": 0,
+      "seconds": 0,
+      "thirds": 1,
       "team": "Laser Tools Racing with MB Motorsport"
     },
     {
@@ -128,7 +128,7 @@
       "class": "I",
       "points": 80,
       "wins": 1,
-      "seconds": 1,
+      "seconds": 0,
       "thirds": 0,
       "team": "Laser Tools Racing with MB Motorsport"
     },
@@ -141,7 +141,7 @@
       "points": 79,
       "wins": 0,
       "seconds": 0,
-      "thirds": 0,
+      "thirds": 1,
       "team": "Team VERTU"
     },
     {
@@ -357,9 +357,9 @@
       "nat": "GBR",
       "class": "I",
       "points": 195,
-      "wins": 6,
-      "seconds": 2,
-      "thirds": 2,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
       "team": "Steel Seal with Power Maxed Racing"
     },
     {
@@ -369,9 +369,9 @@
       "nat": "GBR",
       "class": "I",
       "points": 188,
-      "wins": 3,
-      "seconds": 2,
-      "thirds": 3,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
       "team": "Restart Racing"
     },
     {
@@ -381,9 +381,9 @@
       "nat": "GBR",
       "class": "M",
       "points": 166,
-      "wins": 2,
-      "seconds": 3,
-      "thirds": 5,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
       "team": "NAPA Racing UK"
     },
     {
@@ -394,8 +394,8 @@
       "class": "M",
       "points": 132,
       "wins": 0,
-      "seconds": 3,
-      "thirds": 1,
+      "seconds": 0,
+      "thirds": 0,
       "team": "Team VERTU"
     },
     {
@@ -405,9 +405,9 @@
       "nat": "GBR",
       "class": "M",
       "points": 129,
-      "wins": 1,
-      "seconds": 2,
-      "thirds": 1,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
       "team": "NAPA Racing UK"
     },
     {

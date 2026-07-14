@@ -916,13 +916,40 @@ def _apply_per_race_points(rounds, per_race, scored_sessions):
                 # Drivers not in per_race (wildcards not in championship) are unchanged
 
 
+
+# Wins/podiums are tracked only for the three main races of a round — the
+# Qualifying Race is a scored sprint (see POINTS_QUALIFYING) but its results
+# don't count as a "win"/"podium" in official BTCC statistics (verified against
+# btcc.net reporting Ashley Sutton's Oulton Park Race 2 result as his "fifth
+# victory of 2026" — a tally that only matches when QR results are excluded).
+PODIUM_SESSIONS = {"Race 1", "Race 2", "Race 3"}
+
+
+def compute_win_podium_tallies(rounds):
+    """Return {driver: {wins, seconds, thirds}} counted from Race 1/2/3 only."""
+    from collections import defaultdict
+    tallies = defaultdict(lambda: {"wins": 0, "seconds": 0, "thirds": 0})
+    for rnd in rounds:
+        for race in rnd["races"]:
+            if race["label"] not in PODIUM_SESSIONS:
+                continue
+            for r in race.get("results", []):
+                d = r.get("driver")
+                if not d:
+                    continue
+                if r["pos"] == 1:
+                    tallies[d]["wins"] += 1
+                elif r["pos"] == 2:
+                    tallies[d]["seconds"] += 1
+                elif r["pos"] == 3:
+                    tallies[d]["thirds"] += 1
+    return tallies
+
+
 def compute_standings_fallback(rounds):
     """Compute standings from race results. Used when the championship PDF is unavailable."""
     from collections import defaultdict
     driver_pts    = defaultdict(int)
-    driver_wins   = defaultdict(int)
-    driver_2nds   = defaultdict(int)
-    driver_3rds   = defaultdict(int)
     driver_team   = {}
     driver_car    = {}
     driver_cl     = {}
@@ -957,10 +984,7 @@ def compute_standings_fallback(rounds):
                 driver_cl[d]    = r.get("cl", "")
                 team_pts[r.get("team", "")] += pts
 
-                if pos == 1: driver_wins[d] += 1
-                elif pos == 2: driver_2nds[d] += 1
-                elif pos == 3: driver_3rds[d] += 1
-
+    driver_tallies = compute_win_podium_tallies(rounds)
     drivers = sorted(driver_pts.items(), key=lambda x: -x[1])
     teams   = sorted(team_pts.items(),   key=lambda x: -x[1])
 
@@ -977,9 +1001,9 @@ def compute_standings_fallback(rounds):
                 "car":     driver_car[name],
                 "class":   driver_cl.get(name, ""),
                 "points":  pts,
-                "wins":    driver_wins[name],
-                "seconds": driver_2nds[name],
-                "thirds":  driver_3rds[name],
+                "wins":    driver_tallies[name]["wins"],
+                "seconds": driver_tallies[name]["seconds"],
+                "thirds":  driver_tallies[name]["thirds"],
             }
             for i, (name, pts) in enumerate(drivers, 1)
         ],
@@ -1224,6 +1248,17 @@ def main():
     standings["round"]   = latest["round"] if latest else 0
     standings["venue"]   = latest["venue"] if latest else ""
     standings["updated"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Always derive wins/seconds/thirds from the scraped race results rather than
+    # the championship PDF's own columns — the PDF's Pos/Total (points) columns
+    # are reliably detected, but its Wins/2nds/3rds columns have been observed to
+    # drift out of alignment (see project memory: results/standings mismatch,
+    # fixed 2026-07-14). Race-result-derived tallies are the trustworthy source.
+    driver_tallies = compute_win_podium_tallies(output_rounds)
+    for row in standings.get("standings", []) + standings.get("jst", []):
+        t = driver_tallies.get(row["driver"])
+        if t:
+            row["wins"], row["seconds"], row["thirds"] = t["wins"], t["seconds"], t["thirds"]
 
     # Strip internal working fields that aren't JSON-serializable (tuple keys/sets)
     standings.pop("per_race_points", None)
