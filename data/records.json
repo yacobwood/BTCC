@@ -3,14 +3,14 @@
     {
       "driver": "Jason Plato",
       "starts": 539,
-      "wins": 83,
+      "wins": 97,
       "podiums": 183,
       "poles": 36,
       "fastestLaps": 70,
       "dnfs": 60,
       "points": 4358,
       "seasons": 18,
-      "championships": 1,
+      "championships": 2,
       "bestSeasonWins": 8,
       "bestSeasonPodiums": 17,
       "bestSeasonPoles": 5,
@@ -21,7 +21,7 @@
       "consecutivePoints": 40,
       "racesLed": 23,
       "hatTricks": 13,
-      "winPct": 0.15398886827458255,
+      "winPct": 0.17996289424860853,
       "podiumPct": 0.3395176252319109,
       "pointsPerStart": 8.08534322820037,
       "dnfPct": 0.11131725417439703
@@ -29,7 +29,7 @@
     {
       "driver": "Colin Turkington",
       "starts": 536,
-      "wins": 71,
+      "wins": 72,
       "podiums": 186,
       "poles": 31,
       "fastestLaps": 72,
@@ -47,7 +47,7 @@
       "consecutivePoints": 38,
       "racesLed": 65,
       "hatTricks": 16,
-      "winPct": 0.13246268656716417,
+      "winPct": 0.13432835820895522,
       "podiumPct": 0.34701492537313433,
       "pointsPerStart": 9.798507462686567,
       "dnfPct": 0.07835820895522388
@@ -81,7 +81,7 @@
     {
       "driver": "Matt Neal",
       "starts": 505,
-      "wins": 52,
+      "wins": 63,
       "podiums": 169,
       "poles": 11,
       "fastestLaps": 39,
@@ -99,7 +99,7 @@
       "consecutivePoints": 37,
       "racesLed": 17,
       "hatTricks": 3,
-      "winPct": 0.10297029702970296,
+      "winPct": 0.12475247524752475,
       "podiumPct": 0.3346534653465347,
       "pointsPerStart": 8.354455445544554,
       "dnfPct": 0.12673267326732673
@@ -289,7 +289,7 @@
     {
       "driver": "Ashley Sutton",
       "starts": 313,
-      "wins": 53,
+      "wins": 52,
       "podiums": 124,
       "poles": 13,
       "fastestLaps": 59,
@@ -307,7 +307,7 @@
       "consecutivePoints": 29,
       "racesLed": 63,
       "hatTricks": 4,
-      "winPct": 0.16932907348242812,
+      "winPct": 0.16613418530351437,
       "podiumPct": 0.3961661341853035,
       "pointsPerStart": 11.408945686900958,
       "dnfPct": 0.06389776357827476
@@ -497,7 +497,7 @@
     {
       "driver": "Dan Cammish",
       "starts": 253,
-      "wins": 18,
+      "wins": 17,
       "podiums": 66,
       "poles": 8,
       "fastestLaps": 13,
@@ -515,15 +515,15 @@
       "consecutivePoints": 30,
       "racesLed": 23,
       "hatTricks": 2,
-      "winPct": 0.07114624505928854,
+      "winPct": 0.06719367588932806,
       "podiumPct": 0.2608695652173913,
       "pointsPerStart": 8.58102766798419,
       "dnfPct": 0.16205533596837945
     },
     {
-      "driver": "\u00c1r\u00f3n Taylor-Smith",
+      "driver": "Árón Taylor-Smith",
       "starts": 241,
-      "wins": 1,
+      "wins": 5,
       "podiums": 10,
       "poles": 0,
       "fastestLaps": 3,
@@ -541,7 +541,7 @@
       "consecutivePoints": 30,
       "racesLed": 1,
       "hatTricks": 0,
-      "winPct": 0.004149377593360996,
+      "winPct": 0.02074688796680498,
       "podiumPct": 0.04149377593360996,
       "pointsPerStart": 4.186721991701245,
       "dnfPct": 0.13692946058091288
@@ -679,7 +679,7 @@
     {
       "driver": "Daniel Rowbottom",
       "starts": 196,
-      "wins": 6,
+      "wins": 5,
       "podiums": 21,
       "poles": 3,
       "fastestLaps": 5,
@@ -697,7 +697,7 @@
       "consecutivePoints": 16,
       "racesLed": 7,
       "hatTricks": 0,
-      "winPct": 0.030612244897959183,
+      "winPct": 0.025510204081632654,
       "podiumPct": 0.10714285714285714,
       "pointsPerStart": 5.801020408163265,
       "dnfPct": 0.11224489795918367
@@ -1613,7 +1613,7 @@
       "dnfPct": 0.4
     },
     {
-      "driver": "\u00c1r\u00f3n Smith",
+      "driver": "Árón Smith",
       "starts": 90,
       "wins": 3,
       "podiums": 12,
@@ -2603,7 +2603,7 @@
     {
       "driver": "Charles Rainford",
       "starts": 46,
-      "wins": 4,
+      "wins": 3,
       "podiums": 7,
       "poles": 1,
       "fastestLaps": 5,
@@ -2621,7 +2621,7 @@
       "consecutivePoints": 9,
       "racesLed": 6,
       "hatTricks": 0,
-      "winPct": 0.08695652173913043,
+      "winPct": 0.06521739130434782,
       "podiumPct": 0.15217391304347827,
       "pointsPerStart": 6.869565217391305,
       "dnfPct": 0.08695652173913043
@@ -3461,7 +3461,7 @@
     {
       "driver": "Rob Huff",
       "starts": 30,
-      "wins": 2,
+      "wins": 4,
       "podiums": 3,
       "poles": 0,
       "fastestLaps": 0,
@@ -3479,7 +3479,7 @@
       "consecutivePoints": 19,
       "racesLed": 4,
       "hatTricks": 0,
-      "winPct": 0.06666666666666667,
+      "winPct": 0.13333333333333333,
       "podiumPct": 0.1,
       "pointsPerStart": 6.5,
       "dnfPct": 0.1
@@ -3643,7 +3643,7 @@
     {
       "driver": "Andy Priaulx",
       "starts": 27,
-      "wins": 2,
+      "wins": 3,
       "podiums": 8,
       "poles": 2,
       "fastestLaps": 1,
@@ -3661,7 +3661,7 @@
       "consecutivePoints": 9,
       "racesLed": 3,
       "hatTricks": 0,
-      "winPct": 0.07407407407407407,
+      "winPct": 0.1111111111111111,
       "podiumPct": 0.2962962962962963,
       "pointsPerStart": 9.222222222222221,
       "dnfPct": 0.1111111111111111
@@ -3953,7 +3953,7 @@
       "dnfPct": 0.375
     },
     {
-      "driver": "\u00c1r\u00f3n Taylor-smith",
+      "driver": "Árón Taylor-smith",
       "starts": 16,
       "wins": 1,
       "podiums": 1,
@@ -4085,7 +4085,7 @@
     {
       "driver": "Alan Morrison",
       "starts": 12,
-      "wins": 0,
+      "wins": 1,
       "podiums": 0,
       "poles": 0,
       "fastestLaps": 0,
@@ -4103,7 +4103,7 @@
       "consecutivePoints": 5,
       "racesLed": 0,
       "hatTricks": 0,
-      "winPct": 0.0,
+      "winPct": 0.08333333333333333,
       "podiumPct": 0.0,
       "pointsPerStart": 1.3333333333333333,
       "dnfPct": 0.25
@@ -4371,7 +4371,7 @@
     {
       "driver": "Kelvin Burt",
       "starts": 6,
-      "wins": 0,
+      "wins": 2,
       "podiums": 0,
       "poles": 0,
       "fastestLaps": 0,
@@ -4389,7 +4389,7 @@
       "consecutivePoints": 2,
       "racesLed": 0,
       "hatTricks": 0,
-      "winPct": 0.0,
+      "winPct": 0.3333333333333333,
       "podiumPct": 0.0,
       "pointsPerStart": 1.8333333333333333,
       "dnfPct": 0.5
@@ -6460,7 +6460,7 @@
       "historical": true
     },
     {
-      "driver": "Paul O\u2019Neill",
+      "driver": "Paul O’Neill",
       "starts": 0,
       "wins": 2,
       "podiums": 0,
@@ -7162,7 +7162,7 @@
       "historical": true
     },
     {
-      "driver": "Mike O\u2019Brien",
+      "driver": "Mike O’Brien",
       "starts": 0,
       "wins": 1,
       "podiums": 0,
