@@ -96,11 +96,11 @@ const DriverCard = React.memo(DriverCardInner, (prev, next) => prev.item === nex
 // Isolated so DriversScreen doesn't subscribe to favouriteDriver context.
 // When a fav toggles, only this component re-renders — PagerView receives no
 // new children and no native view recreations happen on Android.
-const DriversGrid = React.memo(function DriversGrid({drivers, listRef, navigation}) {
-  const {isFavourite} = useFavouriteDriver();
+function DriverGridSection({title, drivers, isFavourite, navigation, hideWhenEmpty = false}) {
+  if (hideWhenEmpty && !drivers.length) return null;
   return (
-    <ScrollView ref={listRef} contentContainerStyle={{padding: 16, paddingBottom: 20}}>
-      <Text style={styles.countLabel}>{drivers.length} CONFIRMED</Text>
+    <>
+      <Text style={styles.countLabel}>{title}</Text>
       <View style={styles.driversGrid}>
         {drivers.map(item => (
           <View key={String(item.number)} style={styles.driverGridItem}>
@@ -112,6 +112,38 @@ const DriversGrid = React.memo(function DriversGrid({drivers, listRef, navigatio
           </View>
         ))}
       </View>
+    </>
+  );
+}
+
+const DriversGrid = React.memo(function DriversGrid({drivers, listRef, navigation}) {
+  const {isFavourite} = useFavouriteDriver();
+  // currentlyRacing !== false (not simply "=== true"): absent/undefined must
+  // default to "currently racing" so data that hasn't been through parseGrid()
+  // isn't silently miscategorized as a past driver.
+  const activeDrivers = drivers.filter(d => d.currentlyRacing !== false);
+  // Kept visible rather than removed outright when a driver leaves their seat
+  // mid-season (e.g. moves to a reserve/development role) - still raced this
+  // year, just not part of the active grid right now.
+  const pastDrivers = drivers.filter(d => d.currentlyRacing === false);
+  return (
+    <ScrollView ref={listRef} contentContainerStyle={{padding: 16, paddingBottom: 20}}>
+      <DriverGridSection
+        title={`${activeDrivers.length} CONFIRMED`}
+        drivers={activeDrivers}
+        isFavourite={isFavourite}
+        navigation={navigation}
+      />
+      {pastDrivers.length > 0 && (
+        <View style={{marginTop: 24}}>
+          <DriverGridSection
+            title="NOT CURRENTLY RACING · RACED IN 2026"
+            drivers={pastDrivers}
+            isFavourite={isFavourite}
+            navigation={navigation}
+          />
+        </View>
+      )}
     </ScrollView>
   );
 });

@@ -201,11 +201,20 @@ describe('drivers.json <-> standings.json consistency', () => {
       .filter(d => d.team)
       .map(d => formatDriverName(d.name))
       .filter(norm => !standingsMap[norm]);
-    // Each absent driver must have class 'I' (independent, may not have registered for championship)
-    // or be documented — fail loudly if a new M-class driver goes missing
+    // A driver with zero appearances in results2026.json's completed rounds
+    // hasn't had a chance to debut yet (e.g. a mid-season signing whose first
+    // round is still upcoming) - that's an expected reason to be missing from
+    // standings, distinct from an M-class driver who raced before and then
+    // mysteriously vanished, which this test should still catch.
+    const hasRacedThisSeason = norm =>
+      RESULTS.rounds.some(rnd => rnd.races.some(race =>
+        (race.results || []).some(r => formatDriverName(r.driver) === norm)));
+    // Each absent driver must have class 'I' (independent, may not have registered for championship),
+    // not yet have raced this season, or be documented — fail loudly if a
+    // previously-racing M-class driver goes missing
     const unexplained = missing.filter(norm => {
       const dr = driversMap[norm];
-      return dr && dr.class !== 'I';
+      return dr && dr.class !== 'I' && hasRacedThisSeason(norm);
     });
     expect(unexplained).toEqual([]);
   });

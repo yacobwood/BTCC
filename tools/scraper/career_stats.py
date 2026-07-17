@@ -96,9 +96,28 @@ def get_pos(result):
     return result.get("pos", result.get("position", 0)) or 0
 
 
+def normalize_name(name):
+    """Convert "Firstname SURNAME" (TSL/results{year}.json convention, e.g.
+    "Max BUXTON", "Daryl DE LEON") to the natural title-case drivers.json
+    itself uses (e.g. "Max Buxton", "Daryl De Leon"). season_{year}.json
+    bundles are already title-case, so this is a no-op for them - but without
+    it, this module silently fails to match ANY driver from the current
+    season's results{year}.json, which uses the all-caps-surname convention."""
+    parts = name.split()
+    if not parts:
+        return name
+    return parts[0] + ' ' + ' '.join(w.title() for w in parts[1:])
+
+
 def get_driver(result):
-    name = (result.get("driver") or "").strip()
-    return DRIVER_NAME_ALIASES.get(name, name)
+    # Alias lookup happens on the raw (stripped, un-normalized) name first -
+    # DRIVER_NAME_ALIASES is keyed by each bundle's exact original spelling
+    # (e.g. "Daryl DeLeon", not title-cased "Deleon"), so normalizing before
+    # the alias check would silently break the match.
+    raw = (result.get("driver") or "").strip()
+    if raw in DRIVER_NAME_ALIASES:
+        return DRIVER_NAME_ALIASES[raw]
+    return normalize_name(raw)
 
 
 def load_year_rounds(year):

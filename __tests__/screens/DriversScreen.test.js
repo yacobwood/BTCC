@@ -2,7 +2,7 @@ import React from 'react';
 import {act, fireEvent} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DriversScreen from '../../src/screens/DriversScreen';
-import {renderWithProviders, makeNav, MOCK_GRID} from './testUtils';
+import {renderWithProviders, makeNav, MOCK_GRID, MOCK_DRIVERS_RAW} from './testUtils';
 
 jest.mock('../../src/api/client', () => ({fetchDrivers: jest.fn()}));
 jest.mock('../../src/api/parsers', () => ({parseGrid: jest.fn()}));
@@ -112,6 +112,39 @@ describe('DriversScreen', () => {
       await act(async () => { fireEvent.press(getByLabelText('DRIVERS tab')); });
       // Drivers must still be present — offscreenPageLimit keeps the page mounted
       expect(getByText('Tom INGRAM')).toBeTruthy();
+    });
+  });
+
+  describe('not currently racing section', () => {
+    // A driver who's moved out of their seat mid-season (e.g. to a reserve
+    // role) keeps their profile and last team, but drops out of the main
+    // "CONFIRMED" grid into a separate section below it - never removed
+    // outright, since they did race this season.
+    const gridWithPastDriver = {
+      ...MOCK_GRID,
+      drivers: [
+        ...MOCK_DRIVERS_RAW,
+        {name: 'Max Buxton', number: 21, team: 'Speedworks Corolla Racing', imageUrl: null, cardBgUrl: null, currentlyRacing: false},
+      ],
+    };
+
+    it('active drivers are counted separately from a past driver', async () => {
+      parseGrid.mockReturnValue(gridWithPastDriver);
+      const utils = renderWithProviders(<DriversScreen navigation={nav} />);
+      await utils.findByText(`${MOCK_DRIVERS_RAW.length} CONFIRMED`);
+      expect(utils.getByText('NOT CURRENTLY RACING · RACED IN 2026')).toBeTruthy();
+    });
+
+    it('past driver still renders as a pressable card', async () => {
+      parseGrid.mockReturnValue(gridWithPastDriver);
+      const {getByLabelText, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText(`${MOCK_DRIVERS_RAW.length} CONFIRMED`);
+      expect(getByLabelText('Max Buxton, Speedworks Corolla Racing, number 21')).toBeTruthy();
+    });
+
+    it('past drivers section is absent when every driver is currently racing', async () => {
+      const {queryByText} = await renderDrivers();
+      expect(queryByText('NOT CURRENTLY RACING · RACED IN 2026')).toBeNull();
     });
   });
 

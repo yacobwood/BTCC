@@ -182,6 +182,11 @@ export function parseGrid(json) {
       bio: d.bio || '',
       dateOfBirth: d.dateOfBirth || '',
       birthplace: d.birthplace || '',
+      // false only when a driver has left their seat mid-season (e.g. moved to
+      // a reserve/development role) - they stay in the roster and keep their
+      // last team/car for display, but drop out of that team's active driver
+      // list below. Absent/true means "currently racing" as normal.
+      currentlyRacing: d.currentlyRacing !== false,
       history: parseDriverHistory(d.history),
     }, rawTeams));
   const teams = (json.teams || []).map(t => ({
@@ -202,7 +207,10 @@ export function parseGrid(json) {
     totalWins: t.totalWins || 0,
     history: t.history || [],
     carSpecs: t.carSpecs || null,
-    drivers: drivers.filter(d => d.team === t.name),
+    // currentlyRacing check excludes a driver who's moved to a reserve role
+    // but still has this team recorded as their last one - their old team's
+    // roster/detail page should only show who's actually racing for it now.
+    drivers: drivers.filter(d => d.team === t.name && d.currentlyRacing),
   }));
   return {drivers, teams};
 }
