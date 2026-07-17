@@ -16,9 +16,10 @@ jest.mock('../../src/utils/analytics', () => ({
 jest.mock('../../src/api/client', () => ({
   fetchResults: jest.fn(),
   fetchStandings: jest.fn(),
+  fetchDrivers: jest.fn(),
 }));
 
-const {fetchResults, fetchStandings} = require('../../src/api/client');
+const {fetchResults, fetchStandings, fetchDrivers} = require('../../src/api/client');
 const REAL_DRIVERS = require('../../data/drivers.json').drivers;
 
 const nav = makeNav();
@@ -113,6 +114,26 @@ describe('DriverDetailScreen', () => {
       <DriverDetailScreen route={route} navigation={nav} />,
     );
     await waitFor(() => expect(getByText(/Tom Ingram/)).toBeTruthy());
+  });
+
+  // Regression: a driver reached via slug (deep link / share link) used to read
+  // raw, unparsed JSON directly (no cls/cardBgUrl/lightCardBg, champion instead
+  // of isChampion), silently losing the class chip, champion gold styling and
+  // header background - while the exact same driver reached by tapping a card
+  // (the `driver` param path, tested throughout this file) rendered correctly.
+  it('deep-link (slug) navigation shows the same class chip as the normal navigation path', async () => {
+    const rawTeams = [{name: 'WSR', cardBgUrl: 'https://example.com/wsr.png', lightCardBg: true}];
+    const rawDriver = {
+      name: 'A Driver', number: 29, team: 'WSR', class: 'I',
+      history: [{year: 2020, team: 'WSR', champion: true}],
+    };
+    fetchDrivers.mockResolvedValue({drivers: [rawDriver], teams: rawTeams});
+
+    const route = makeRoute({slug: 'a-driver'});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('Independents')).toBeTruthy());
   });
 
   // Rookie driver - the bug: history.length === 0 used to hide the entire SEASON HISTORY section

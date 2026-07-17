@@ -70,7 +70,7 @@ function DriverCardInner({item, onPress, fav}) {
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
-        <Text style={[styles.driverNumberBg, [2,16,17,88,99].includes(item.number) && {color: '#000'}]}>{item.number}</Text>
+        <Text style={[styles.driverNumberBg, item.lightCardBg && {color: '#000'}]}>{item.number}</Text>
         {bundled ? (
           <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
         ) : item.imageUrl ? (

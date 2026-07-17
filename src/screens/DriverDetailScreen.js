@@ -12,14 +12,18 @@ import {
 } from 'react-native';
 
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
+const BUNDLED_CALENDAR = require('../../data/calendar.json');
+const CURRENT_SEASON = BUNDLED_CALENDAR.season;
 import Svg, {Polyline, Line, Circle, Text as SvgText} from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {getDriverImage} from '../assets/driverImages';
+import CachedImage from '../components/CachedImage';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {fetchResults, fetchStandings, fetchDrivers} from '../api/client';
+import {attachTeamDisplayFields, parseDriverHistory} from '../api/parsers';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -41,12 +45,25 @@ function calcAge(dateStr) {
   return age;
 }
 
+// Deep-link lookups read raw JSON directly (not via parseGrid()), so the found
+// driver is missing cls/cardBgUrl/lightCardBg and has unshaped history entries
+// (champion, not isChampion) unless run through the same helpers parseGrid()
+// uses - otherwise the class chip, champion gold styling and header
+// background silently disappear only for deep-linked profiles.
+function shapeDeepLinkedDriver(rawDriver, rawTeams) {
+  if (!rawDriver) return rawDriver;
+  return attachTeamDisplayFields({...rawDriver, history: parseDriverHistory(rawDriver.history)}, rawTeams);
+}
+
 export default function DriverDetailScreen({route, navigation}) {
   const driverParam = route.params?.driver ?? null;
   const slugParam = route.params?.slug ?? null;
   const [driver, setDriver] = useState(
     driverParam ?? (slugParam
-      ? BUNDLED_DRIVERS.drivers.find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam)
+      ? shapeDeepLinkedDriver(
+          BUNDLED_DRIVERS.drivers.find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam),
+          BUNDLED_DRIVERS.teams,
+        )
       : null),
   );
 
@@ -56,21 +73,29 @@ export default function DriverDetailScreen({route, navigation}) {
     if (!slugParam || driverParam) return;
     fetchDrivers().then(data => {
       const found = (data?.drivers || []).find(d => d.name.toLowerCase().replace(/\s+/g, '-') === slugParam);
-      if (found) setDriver(found);
+      if (found) setDriver(shapeDeepLinkedDriver(found, data?.teams));
     }).catch(() => {});
   }, []);
 
-  if (!driver) return null;
+  // Regression: this used to sit before the hooks below, so a deep-linked
+  // driver (which starts null and populates async once fetchDrivers()
+  // resolves) called a different number of hooks on its first render than on
+  // every render after - a React rules-of-hooks violation that crashes the
+  // screen. Every hook must run unconditionally on every render; only the
+  // early return may depend on `driver`, and it must come after all of them.
   const {isFavourite, toggle: toggleFav} = useFavouriteDriver();
-  const fav = isFavourite(driver.name);
+  const fav = driver ? isFavourite(driver.name) : false;
   const insets = useSafeAreaInsets();
 
-  const [season2026, setSeason2026] = useState(null);
+  const [liveSeason, setLiveSeason] = useState(null);
 
-  useEffect(() => { Analytics.screen('driver_detail:' + driver.name); }, []);
+  useEffect(() => {
+    if (!driver) return;
+    Analytics.screen('driver_detail:' + driver.name);
+  }, [driver?.name]);
 
   useFocusEffect(useCallback(() => {
-    if (!driver.team || (driver.history || []).some(h => h.year === 2026)) return;
+    if (!driver || !driver.team || (driver.history || []).some(h => h.year === CURRENT_SEASON)) return;
     fetchStandings(true).then(sData => {
       const entry = (sData.standings || []).find(
         s => formatDriverName(s.driver) === formatDriverName(driver.name),
@@ -78,29 +103,31 @@ export default function DriverDetailScreen({route, navigation}) {
       const pts = entry ? (entry.points || 0) : 0;
       const w   = entry ? (entry.wins || 0) : 0;
       const p   = entry ? w + (entry.seconds || 0) + (entry.thirds || 0) : 0;
-      fetchResults(2026).then(rData => {
+      fetchResults(CURRENT_SEASON).then(rData => {
         let fastestLaps = 0, poles = 0, dnfs = 0;
         for (const round of (rData.rounds || [])) {
           for (const race of (round.races || [])) {
             const e = (race.results || []).find(r => formatDriverName(r.driver) === formatDriverName(driver.name));
             if (!e) continue;
             const isRace = race.label === 'Race 1' || race.label === 'Race 2' || race.label === 'Race 3';
-            if (e.pos === 0) dnfs++;
+            if (e.pos === 0 && isRace) dnfs++;
             if (e.pole) poles++;
             if (e.fastestLap && isRace) fastestLaps++;
           }
         }
-        setSeason2026({wins: w, podiums: p, points: pts, fastestLaps, poles, dnfs});
-      }).catch(() => setSeason2026({wins: w, podiums: p, points: pts, fastestLaps: 0, poles: 0, dnfs: 0}));
-    }).catch(() => setSeason2026({wins: 0, podiums: 0, points: 0, fastestLaps: 0, poles: 0, dnfs: 0}));
-  }, [driver.name, driver.team]));
+        setLiveSeason({wins: w, podiums: p, points: pts, fastestLaps, poles, dnfs});
+      }).catch(() => setLiveSeason({wins: w, podiums: p, points: pts, fastestLaps: 0, poles: 0, dnfs: 0}));
+    }).catch(() => setLiveSeason({wins: 0, podiums: 0, points: 0, fastestLaps: 0, poles: 0, dnfs: 0}));
+  }, [driver?.name, driver?.team]));
+
+  if (!driver) return null;
 
   const history = driver.history || [];
-  // Whether 2026 is a live season (not yet in history JSON)
-  const has2026InHistory = history.some(h => h.year === 2026);
-  const live = (!has2026InHistory && season2026) ? season2026 : null;
+  // Whether the current season is a live season (not yet in history JSON)
+  const hasCurrentSeasonInHistory = history.some(h => h.year === CURRENT_SEASON);
+  const live = (!hasCurrentSeasonInHistory && liveSeason) ? liveSeason : null;
 
-  // Career stats  -  merge live 2026 on top of historical data
+  // Career stats  -  merge the live current season on top of historical data
   const totalSeasons = history.length + (live ? 1 : 0);
   const totalWins = history.reduce((s, h) => s + h.wins, 0) + (live?.wins || 0);
   const totalPodiums = history.reduce((s, h) => s + h.podiums, 0) + (live?.podiums || 0);
@@ -119,7 +146,7 @@ export default function DriverDetailScreen({route, navigation}) {
   const onShare = async () => {
     const slug = driver.name.toLowerCase().replace(/\s+/g, '-');
     Analytics.screen('driver_detail_share:' + driver.name);
-    await Share.share({message: `${driver.name} - 2026 BTCC\n\nbtccfanhub://drivers/${slug}`});
+    await Share.share({message: `${driver.name} - ${CURRENT_SEASON} BTCC\n\nbtccfanhub://drivers/${slug}`});
   };
 
   return (
@@ -130,11 +157,11 @@ export default function DriverDetailScreen({route, navigation}) {
           source={driver.cardBgUrl ? {uri: driver.cardBgUrl} : undefined}
           style={styles.headerBg}
           resizeMode="stretch">
-          <Text style={[styles.headerNumber, [2,16,17,88,99].includes(driver.number) && {color: '#000'}]}>{driver.number}</Text>
+          <Text style={[styles.headerNumber, driver.lightCardBg && {color: '#000'}]}>{driver.number}</Text>
           {bundledImg ? (
             <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
           ) : driver.imageUrl ? (
-            <Image source={{uri: driver.imageUrl.replace(/(\.[a-z]+)$/i, '-300x300$1')}} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
+            <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
           ) : null}
         </ImageBackground>
         <View style={styles.headerFooter}>
@@ -229,11 +256,11 @@ export default function DriverDetailScreen({route, navigation}) {
           {(driver.team || history.length > 0) && (
             <Text style={styles.sectionTitle}>SEASON HISTORY</Text>
           )}
-          {driver.team && !history.some(h => h.year === 2026) && (
+          {driver.team && !history.some(h => h.year === CURRENT_SEASON) && (
             <View style={[styles.historyRow, {borderLeftWidth: 3, borderLeftColor: Colors.textSecondary}]}>
               <View style={styles.historyTopLine}>
                 <View style={styles.historyYearCol}>
-                  <Text style={styles.historyYear}>2026</Text>
+                  <Text style={styles.historyYear}>{CURRENT_SEASON}</Text>
                 </View>
                 <View style={styles.inProgressBadge}>
                   <Text style={styles.inProgressText}>IN PROGRESS</Text>
@@ -241,13 +268,13 @@ export default function DriverDetailScreen({route, navigation}) {
               </View>
               <Text style={styles.historyTeam}>{driver.team}</Text>
               {driver.car ? <Text style={styles.historyCar}>{driver.car}</Text> : null}
-              {season2026 && (
+              {liveSeason && (
                 <View style={styles.historyBadges}>
-                  <View style={styles.badgePts}><Text style={styles.badgePtsText}>{season2026.points} pts</Text></View>
-                  {season2026.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{season2026.wins} W</Text></View>}
-                  {season2026.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{season2026.podiums} P</Text></View>}
-                  {season2026.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{season2026.fastestLaps} FL</Text></View>}
-                  {season2026.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{season2026.dnfs} DNF</Text></View>}
+                  <View style={styles.badgePts}><Text style={styles.badgePtsText}>{liveSeason.points} pts</Text></View>
+                  {liveSeason.wins > 0 && <View style={styles.badgeWin}><Text style={styles.badgeWinText}>{liveSeason.wins} W</Text></View>}
+                  {liveSeason.podiums > 0 && <View style={styles.badgePodium}><Text style={styles.badgePodiumText}>{liveSeason.podiums} P</Text></View>}
+                  {liveSeason.fastestLaps > 0 && <View style={styles.badgeFL}><Text style={styles.badgeFLText}>{liveSeason.fastestLaps} FL</Text></View>}
+                  {liveSeason.dnfs > 0 && <View style={styles.badgeDNF}><Text style={styles.badgeDNFText}>{liveSeason.dnfs} DNF</Text></View>}
                 </View>
               )}
             </View>

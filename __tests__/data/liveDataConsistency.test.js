@@ -704,6 +704,224 @@ describe('drivers.json history <-> historical results files (2022-2025)', () => 
   }
 });
 
+// ── 10b. Driver history points <-> season bundle files (2004-2025) ────────────
+// Regression: drivers.json history[].points had never been checked against
+// anything at all - a wrong value (Nick Halstead's 2023 entry, sourced from an
+// unreliable external site) sat undetected because the "Season" tab renders
+// from src/assets/data/season_{year}.json (not data/results{year}.json, which
+// the wins/podiums check above uses, and which is itself incomplete for some
+// years - see project memory). This checks against the same bundle the app
+// actually displays, so a divergence here means two screens would disagree.
+
+// Historical name variants in season_{year}.json that don't match current
+// drivers.json spelling - see tools/scraper/career_stats.py's identical map.
+// Without this, these driver-years silently skip validation entirely (the
+// `computed === undefined` guard below treats a name miss the same as
+// "didn't race that year"), rather than actually being checked.
+const DRIVER_NAME_ALIASES = {
+  'Daryl DELEON': 'Daryl DE LEON',
+  'Árón SMITH': 'Árón TAYLOR-SMITH',
+};
+
+function aliasedName(rawName) {
+  const norm = formatDriverName(rawName);
+  return DRIVER_NAME_ALIASES[norm] || norm;
+}
+
+const BUNDLE_YEARS = Array.from({length: 2025 - 2004 + 1}, (_, i) => 2004 + i);
+
+describe('drivers.json history points <-> season bundle files', () => {
+  function buildSeasonPoints(year) {
+    const data = require(`../../src/assets/data/season_${year}.json`);
+    const totals = {};
+    for (const rnd of data.rounds || []) {
+      for (const race of rnd.races || []) {
+        for (const e of race.results || []) {
+          if (!e.driver) continue;
+          const k = aliasedName(e.driver);
+          totals[k] = (totals[k] || 0) + (e.points || 0);
+        }
+      }
+    }
+    return totals;
+  }
+
+  for (const year of BUNDLE_YEARS) {
+    it(`${year}: driver history points match the season bundle (what the Season tab displays)`, () => {
+      const totals = buildSeasonPoints(year);
+      const mismatches = [];
+      for (const d of DRIVERS) {
+        const h = (d.history || []).find(e => e.year === year);
+        if (!h) continue;
+        const norm = aliasedName(d.name);
+        const computed = totals[norm];
+        if (computed === undefined) continue; // driver didn't race that year in the bundle
+        if (h.points !== computed) {
+          mismatches.push(`${d.name}: history_points=${h.points} season_bundle_points=${computed}`);
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+  }
+});
+
+// ── 10c. Driver history wins/podiums/fastestLaps/dnfs/pos <-> season bundle ────
+// Ports tools/scraper/career_stats.py's computation into JS so the same
+// invariants are enforced in CI, not just when someone remembers to re-run the
+// Python tool. Keep the two implementations in sync if either changes.
+//
+// poles is checked as a floor (stored >= computed), not an exact match: pole
+// flags are confirmed missing for a large fraction of historical driver-years
+// (e.g. Tom Chilton's 2004 season has zero pole flags set anywhere in the raw
+// data despite being on record elsewhere as a 2-pole season), so the computed
+// figure only ever undercounts, never overcounts - see project memory
+// (project_history_points_consistency_fix.md) for the Wikipedia cross-check
+// that filled in the gaps this floor check can't catch on its own.
+
+describe('drivers.json history wins/podiums/fastestLaps/dnfs/pos <-> season bundle', () => {
+  function buildYearStandings(year) {
+    const data = require(`../../src/assets/data/season_${year}.json`);
+    const rounds = data.rounds || [];
+    const stats = {};
+    const get = name => (stats[name] = stats[name] || {
+      points: 0, wins: 0, seconds: 0, thirds: 0, podiums: 0,
+      poles: 0, fastestLaps: 0, dnfs: 0,
+    });
+
+    for (const rnd of rounds) {
+      for (const race of rnd.races || []) {
+        for (const e of race.results || []) {
+          if (!e.driver) continue;
+          const s = get(aliasedName(e.driver));
+          s.points += e.points || 0; // every session counts towards points, including QR
+          if (!SCORING_RACES.has(race.label)) continue; // wins/podiums/FL: Race 1/2/3 only
+          const pos = e.pos ?? 0;
+          if (pos === 1) { s.wins++; s.podiums++; }
+          else if (pos === 2) { s.seconds++; s.podiums++; }
+          else if (pos === 3) { s.thirds++; s.podiums++; }
+          if (e.fl || e.fastestLap) s.fastestLaps++;
+        }
+      }
+    }
+
+    // Poles: one per round, first flagged entry found across podium sessions.
+    for (const rnd of rounds) {
+      let poleDriver = null;
+      for (const race of rnd.races || []) {
+        if (!SCORING_RACES.has(race.label)) continue;
+        for (const e of race.results || []) {
+          if (e.p || e.pole) { poleDriver = aliasedName(e.driver); break; }
+        }
+        if (poleDriver) break;
+      }
+      if (poleDriver) get(poleDriver).poles++;
+    }
+
+    // DNFs: whole-round-blank heuristic (see career_stats.py docstring - a
+    // driver who left the series mid-season can have dozens of placeholder
+    // pos=0/laps=0 entries for rounds never actually entered).
+    for (const rnd of rounds) {
+      const entriesByDriver = {};
+      for (const race of rnd.races || []) {
+        if (!SCORING_RACES.has(race.label)) continue;
+        for (const e of race.results || []) {
+          if (!e.driver) continue;
+          const name = aliasedName(e.driver);
+          (entriesByDriver[name] = entriesByDriver[name] || []).push(e);
+        }
+      }
+      for (const [name, entries] of Object.entries(entriesByDriver)) {
+        const wholeRoundBlank = entries.every(e => (e.pos ?? 0) === 0 && (e.laps || 0) === 0);
+        if (wholeRoundBlank) continue;
+        for (const e of entries) {
+          if ((e.pos ?? 0) === 0) get(name).dnfs++;
+        }
+      }
+    }
+
+    // Rank by (points desc, wins desc, seconds desc, thirds desc, name) per
+    // reg 1.6.9-1.6.10 - verified this identifies the correct champion for
+    // all 22/22 years 2004-2025 (see tools/scraper/career_stats.py).
+    // Plain `<`/`>` (codepoint order), not localeCompare - must match Python's
+    // default string comparison exactly, or the two implementations silently
+    // disagree on the arbitrary final tiebreak for fully-tied backmarkers
+    // (confirmed: localeCompare's accent-aware collation reordered a driver
+    // with an accented name relative to career_stats.py's codepoint sort).
+    const ranked = Object.entries(stats).sort((a, b) =>
+      b[1].points - a[1].points || b[1].wins - a[1].wins ||
+      b[1].seconds - a[1].seconds || b[1].thirds - a[1].thirds ||
+      (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+    ranked.forEach(([, s], i) => { s.pos = i + 1; });
+
+    return stats;
+  }
+
+  for (const year of BUNDLE_YEARS) {
+    const standings = buildYearStandings(year);
+
+    it(`${year}: driver history wins/podiums/fastestLaps/dnfs/pos match the season bundle`, () => {
+      const mismatches = [];
+      for (const d of DRIVERS) {
+        const h = (d.history || []).find(e => e.year === year);
+        if (!h) continue;
+        const computed = standings[aliasedName(d.name)];
+        if (!computed) continue;
+        for (const field of ['wins', 'podiums', 'fastestLaps', 'dnfs', 'pos']) {
+          if (h[field] !== computed[field]) {
+            mismatches.push(`${d.name} ${field}: history=${h[field]} computed=${computed[field]}`);
+          }
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+
+    it(`${year}: driver history poles is never less than the season bundle can prove (known-incomplete floor)`, () => {
+      const mismatches = [];
+      for (const d of DRIVERS) {
+        const h = (d.history || []).find(e => e.year === year);
+        if (!h) continue;
+        const computed = standings[aliasedName(d.name)];
+        if (!computed) continue;
+        if ((h.poles || 0) < computed.poles) {
+          mismatches.push(`${d.name}: history_poles=${h.poles || 0} < season_bundle_floor=${computed.poles}`);
+        }
+      }
+      expect(mismatches).toEqual([]);
+    });
+  }
+});
+
+// ── 10d. Champion identification regression (cross-validates the tiebreak) ────
+// If this ever fails, the ranking logic above (or its Python twin) has
+// drifted from reg 1.6.9-1.6.10's actual tiebreak rule.
+
+describe('drivers.json history champion identification', () => {
+  const CHAMPIONS = {
+    2004: 'James Thompson', 2005: 'Matt Neal', 2006: 'Matt Neal',
+    2007: 'Fabrizio Giovanardi', 2008: 'Fabrizio Giovanardi', 2009: 'Colin Turkington',
+    2010: 'Jason Plato', 2011: 'Matt Neal', 2012: 'Gordon Shedden',
+    2013: 'Andrew Jordan', 2014: 'Colin Turkington', 2015: 'Gordon Shedden',
+    2016: 'Gordon Shedden', 2017: 'Ashley Sutton', 2018: 'Colin Turkington',
+    2019: 'Colin Turkington', 2020: 'Ashley Sutton', 2021: 'Ashley Sutton',
+    2022: 'Tom Ingram', 2023: 'Ashley Sutton', 2024: 'Jake Hill', 2025: 'Tom Ingram',
+  };
+
+  it('a driver in the current roster with a stored champion=true entry has pos=1 for that year', () => {
+    const mismatches = [];
+    for (const d of DRIVERS) {
+      for (const h of d.history || []) {
+        if (h.champion && h.pos !== 1) {
+          mismatches.push(`${d.name} ${h.year}: champion=true but pos=${h.pos}`);
+        }
+        if (!h.champion && h.pos === 1 && CHAMPIONS[h.year]) {
+          mismatches.push(`${d.name} ${h.year}: pos=1 but champion is not true`);
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+});
+
 // ── 11. results2026.json <-> standings.json — points totals ───────────────────
 
 describe('11. results2026.json <-> standings.json — points totals', () => {

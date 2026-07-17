@@ -41,6 +41,7 @@ import SnettertonLayout       from '../assets/tracks/Snetterton.svg';
 import ThrutonLayout          from '../assets/tracks/Thruxton.svg';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
+const CURRENT_SEASON = BUNDLED_CALENDAR.season;
 
 const BUNDLED_TRACK_LAYOUTS = {
   'Brands Hatch GP':   BrandsHatchGPLayout,
@@ -89,7 +90,7 @@ export default function TrackDetailScreen({route, navigation}) {
   // Can receive full track object (normal nav) or just round number (deep link)
   const trackParam = route.params?.track ?? null;
   const roundParam = route.params?.round ? parseInt(route.params.round, 10) : null;
-  const year = route.params?.year ?? 2026;
+  const year = route.params?.year ?? CURRENT_SEASON;
   const [track, setTrack] = useState(() => {
     // trackParam from CalendarScreen may be a raw calendar round (no corners/length).
     // Always resolve initial state through parseCalendar so tracks.json data is merged in.

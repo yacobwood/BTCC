@@ -20,7 +20,7 @@
           "points": 149,
           "wins": 1,
           "podiums": 2,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 0,
           "dnfs": 3
         }
@@ -44,9 +44,9 @@
           "points": 230,
           "wins": 2,
           "podiums": 6,
-          "poles": 3,
+          "poles": 1,
           "fastestLaps": 3,
-          "dnfs": 5
+          "dnfs": 6
         },
         {
           "year": 2024,
@@ -64,13 +64,13 @@
           "year": 2023,
           "team": "Bristol Street Motors with Excelr8",
           "car": "Hyundai i30 Fastback N",
-          "pos": 14,
-          "points": 97,
+          "pos": 15,
+          "points": 102,
           "wins": 1,
           "podiums": 1,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 3
+          "dnfs": 4
         },
         {
           "year": 2022,
@@ -82,7 +82,7 @@
           "podiums": 0,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 5
+          "dnfs": 4
         },
         {
           "year": 2021,
@@ -104,7 +104,7 @@
           "points": 184,
           "wins": 0,
           "podiums": 3,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 1
         },
@@ -124,11 +124,11 @@
           "year": 2018,
           "team": "Team Shredded Wheat Racing with Gallagher",
           "car": "Ford Focus RS",
-          "pos": 3,
-          "points": 266,
+          "pos": 4,
+          "points": 255,
           "wins": 1,
           "podiums": 6,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 3,
           "dnfs": 1
         },
@@ -137,10 +137,10 @@
           "team": "Power Maxed Racing",
           "car": "Vauxhall Astra",
           "pos": 15,
-          "points": 100,
+          "points": 103,
           "wins": 0,
           "podiums": 1,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 1,
           "dnfs": 2
         },
@@ -152,7 +152,7 @@
           "points": 135,
           "wins": 2,
           "podiums": 3,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 1,
           "dnfs": 2
         },
@@ -164,21 +164,21 @@
           "points": 191,
           "wins": 3,
           "podiums": 7,
-          "poles": 6,
-          "fastestLaps": 4,
-          "dnfs": 3
+          "poles": 4,
+          "fastestLaps": 2,
+          "dnfs": 4
         },
         {
           "year": 2009,
           "team": "Team Aon",
           "car": "",
-          "pos": 13,
-          "points": 55,
+          "pos": 11,
+          "points": 72,
           "wins": 0,
           "podiums": 3,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 6
+          "dnfs": 7
         },
         {
           "year": 2008,
@@ -212,7 +212,7 @@
           "points": 139,
           "wins": 0,
           "podiums": 5,
-          "poles": 4,
+          "poles": 1,
           "fastestLaps": 2,
           "dnfs": 7
         },
@@ -224,9 +224,9 @@
           "points": 175,
           "wins": 4,
           "podiums": 9,
-          "poles": 4,
+          "poles": 2,
           "fastestLaps": 2,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2004,
@@ -236,7 +236,7 @@
           "points": 116,
           "wins": 2,
           "podiums": 5,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 3
         },
@@ -289,7 +289,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 2
         },
         {
           "year": 2022,
@@ -300,7 +301,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2018,
@@ -311,7 +313,8 @@
           "wins": 0,
           "podiums": 1,
           "poles": 0,
-          "fastestLaps": 0
+          "fastestLaps": 0,
+          "dnfs": 1
         }
       ],
       "class": "M"
@@ -342,20 +345,20 @@
           "year": 2025,
           "team": "LKQ Euro Car Parts Racing with WSR",
           "car": "BMW 330e M Sport",
-          "pos": 11,
-          "points": 166,
+          "pos": 12,
+          "points": 165,
           "wins": 0,
           "podiums": 0,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 0
+          "dnfs": 1
         },
         {
           "year": 2024,
           "team": "LKQ Euro Car Parts with SYNETIQ",
           "car": "Toyota Corolla GR Sport",
           "pos": 13,
-          "points": 138,
+          "points": 143,
           "wins": 1,
           "podiums": 2,
           "poles": 0,
@@ -366,13 +369,13 @@
           "year": 2023,
           "team": "One Motorsport with Starline Racing",
           "car": "Honda Civic Type R",
-          "pos": 16,
+          "pos": 17,
           "points": 87,
           "wins": 0,
           "podiums": 1,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 4
+          "dnfs": 3
         },
         {
           "year": 2022,
@@ -408,7 +411,7 @@
           "podiums": 0,
           "poles": 2,
           "fastestLaps": 0,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2019,
@@ -432,19 +435,19 @@
               "races": 15
             }
           ],
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2018,
           "team": "Laser Tools Racing",
           "car": "Mercedes-Benz A-Class",
-          "pos": 16,
+          "pos": 15,
           "points": 117,
           "wins": 1,
           "podiums": 3,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 3
+          "dnfs": 4
         },
         {
           "year": 2017,
@@ -454,7 +457,7 @@
           "points": 121,
           "wins": 2,
           "podiums": 2,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
           "dnfs": 5
         },
@@ -480,7 +483,7 @@
           "podiums": 1,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 4
+          "dnfs": 3
         },
         {
           "year": 2014,
@@ -492,13 +495,13 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 4
+          "dnfs": 3
         },
         {
           "year": 2013,
           "team": "PPCGB.com / Kraftwerk Racing",
           "car": "Chevrolet Cruze LT / Volkswagen CC",
-          "pos": 30,
+          "pos": 28,
           "points": 3,
           "wins": 0,
           "podiums": 0,
@@ -516,7 +519,7 @@
               "races": 6
             }
           ],
-          "dnfs": 0
+          "dnfs": 1
         }
       ],
       "dateOfBirth": "1996-09-28",
@@ -541,8 +544,8 @@
           "wins": 0,
           "podiums": 0,
           "poles": 0,
-          "fastestLaps": 1,
-          "dnfs": 3
+          "fastestLaps": 0,
+          "dnfs": 4
         },
         {
           "year": 2023,
@@ -618,7 +621,7 @@
           "podiums": 1,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 4
+          "dnfs": 6
         },
         {
           "year": 2024,
@@ -630,7 +633,7 @@
           "podiums": 0,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 5
+          "dnfs": 4
         },
         {
           "year": 2021,
@@ -673,12 +676,12 @@
           "team": "BTC Norlin Racing",
           "car": "Honda Civic Type R",
           "pos": 13,
-          "points": 152,
+          "points": 155,
           "wins": 1,
           "podiums": 2,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 4
+          "dnfs": 5
         },
         {
           "year": 2017,
@@ -690,19 +693,19 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 4
         },
         {
           "year": 2016,
           "team": "TLC Racing",
           "car": "Toyota Avensis",
-          "pos": 30,
+          "pos": 31,
           "points": 0,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 0
+          "dnfs": 1
         }
       ],
       "dateOfBirth": "1992-04-06",
@@ -726,7 +729,7 @@
           "points": 307,
           "wins": 3,
           "podiums": 10,
-          "poles": 4,
+          "poles": 2,
           "fastestLaps": 2,
           "dnfs": 4
         },
@@ -738,7 +741,7 @@
           "points": 346,
           "wins": 1,
           "podiums": 9,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 3,
           "dnfs": 0
         },
@@ -750,9 +753,9 @@
           "points": 253,
           "wins": 3,
           "podiums": 6,
-          "poles": 5,
-          "fastestLaps": 2,
-          "dnfs": 2
+          "poles": 2,
+          "fastestLaps": 1,
+          "dnfs": 3
         },
         {
           "year": 2022,
@@ -762,7 +765,7 @@
           "points": 207,
           "wins": 1,
           "podiums": 4,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
           "dnfs": 1
         },
@@ -786,7 +789,7 @@
           "points": 334,
           "wins": 4,
           "podiums": 10,
-          "poles": 6,
+          "poles": 2,
           "fastestLaps": 3,
           "dnfs": 1
         },
@@ -794,11 +797,11 @@
           "year": 2019,
           "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
-          "pos": 3,
+          "pos": 2,
           "points": 318,
           "wins": 2,
           "podiums": 14,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 3,
           "dnfs": 1
         },
@@ -806,11 +809,11 @@
           "year": 2018,
           "team": "Halfords Yuasa Racing",
           "car": "Honda Civic Type R",
-          "pos": 10,
-          "points": 218,
+          "pos": 8,
+          "points": 216,
           "wins": 2,
           "podiums": 7,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
           "dnfs": 1
         }
@@ -840,13 +843,13 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 7
+          "dnfs": 9
         },
         {
           "year": 2023,
           "team": "Go-Fix with Autoaid Breakdown",
           "car": "CUPRA Leon",
-          "pos": 24,
+          "pos": 25,
           "points": 10,
           "wins": 0,
           "podiums": 0,
@@ -870,31 +873,31 @@
           "year": 2021,
           "team": "ROKiT Racing with iQuoto Online Trading",
           "car": "CUPRA Leon",
-          "pos": 30,
+          "pos": 33,
           "points": 0,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 6
+          "dnfs": 7
         },
         {
           "year": 2020,
           "team": "Team HARD",
           "car": "Volkswagen CC",
-          "pos": 0,
+          "pos": 29,
           "points": 1,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 10
+          "dnfs": 9
         },
         {
           "year": 2019,
           "team": "ROKiT Motorbase",
           "car": "Ford Focus ST",
-          "pos": 0,
+          "pos": 32,
           "points": 0,
           "wins": 0,
           "podiums": 0,
@@ -932,12 +935,12 @@
           "team": "NAPA Racing UK",
           "car": "Ford Focus ST",
           "pos": 5,
-          "points": 277,
+          "points": 276,
           "wins": 3,
           "podiums": 8,
           "poles": 1,
           "fastestLaps": 1,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2024,
@@ -984,14 +987,14 @@
           "wins": 1,
           "podiums": 4,
           "poles": 3,
-          "fastestLaps": 2,
+          "fastestLaps": 1,
           "dnfs": 2
         },
         {
           "year": 2019,
           "team": "Cataclean Racing with Ciceley Motorsport",
           "car": "Mercedes-Benz A-Class",
-          "pos": 27,
+          "pos": 28,
           "points": 5,
           "wins": 0,
           "podiums": 0,
@@ -1035,7 +1038,7 @@
           "podiums": 1,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2023,
@@ -1047,7 +1050,7 @@
           "podiums": 4,
           "poles": 2,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2022,
@@ -1059,7 +1062,7 @@
           "podiums": 2,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 3
+          "dnfs": 5
         },
         {
           "year": 2021,
@@ -1071,7 +1074,7 @@
           "podiums": 4,
           "poles": 2,
           "fastestLaps": 0,
-          "dnfs": 5
+          "dnfs": 4
         },
         {
           "year": 2020,
@@ -1105,7 +1108,7 @@
           "points": 232,
           "wins": 3,
           "podiums": 6,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 2,
           "dnfs": 4
         },
@@ -1119,7 +1122,7 @@
           "podiums": 4,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 6
+          "dnfs": 7
         },
         {
           "year": 2016,
@@ -1129,8 +1132,8 @@
           "points": 241,
           "wins": 2,
           "podiums": 5,
-          "poles": 1,
-          "fastestLaps": 3,
+          "poles": 2,
+          "fastestLaps": 4,
           "dnfs": 3
         },
         {
@@ -1141,7 +1144,7 @@
           "points": 267,
           "wins": 1,
           "podiums": 7,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 3,
           "dnfs": 0
         },
@@ -1165,9 +1168,9 @@
           "points": 233,
           "wins": 0,
           "podiums": 1,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 2,
-          "dnfs": 3
+          "dnfs": 4
         },
         {
           "year": 2012,
@@ -1177,9 +1180,9 @@
           "points": 50,
           "wins": 0,
           "podiums": 0,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 12
+          "dnfs": 13
         }
       ],
       "dateOfBirth": "1988-10-28",
@@ -1199,13 +1202,13 @@
           "year": 2025,
           "team": "Toyota Gazoo Racing UK with IAA",
           "car": "Toyota Corolla GR Sport",
-          "pos": 17,
-          "points": 103,
+          "pos": 16,
+          "points": 118,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 6
+          "dnfs": 7
         },
         {
           "year": 2024,
@@ -1229,7 +1232,7 @@
           "podiums": 2,
           "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 5
+          "dnfs": 6
         },
         {
           "year": 2022,
@@ -1241,7 +1244,7 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 3
+          "dnfs": 4
         },
         {
           "year": 2021,
@@ -1259,7 +1262,7 @@
           "year": 2017,
           "team": "MG RCiB Insurance Racing",
           "car": "MG6 GT",
-          "pos": 27,
+          "pos": 26,
           "points": 25,
           "wins": 0,
           "podiums": 0,
@@ -1275,21 +1278,21 @@
           "points": 132,
           "wins": 1,
           "podiums": 3,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 1,
-          "dnfs": 5
+          "dnfs": 7
         },
         {
           "year": 2015,
           "team": "Team BMR",
           "car": "Volkswagen CC",
           "pos": 11,
-          "points": 122,
+          "points": 209,
           "wins": 0,
-          "podiums": 3,
+          "podiums": 6,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2014,
@@ -1299,7 +1302,7 @@
           "points": 201,
           "wins": 2,
           "podiums": 3,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 2,
           "dnfs": 3
         },
@@ -1325,14 +1328,14 @@
           "podiums": 2,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 7
+          "dnfs": 5
         },
         {
           "year": 2011,
           "team": "",
           "car": "",
-          "pos": 0,
-          "points": 0,
+          "pos": 31,
+          "points": 1,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
@@ -1357,20 +1360,20 @@
           "year": 2025,
           "team": "Toyota Gazoo Racing UK with IAA",
           "car": "Toyota Corolla GR Sport",
-          "pos": 9,
+          "pos": 10,
           "points": 177,
           "wins": 1,
           "podiums": 3,
           "poles": 1,
           "fastestLaps": 0,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2022,
           "team": "Halfords Racing with Cataclean",
           "car": "Honda Civic Type R",
           "pos": 7,
-          "points": 248,
+          "points": 249,
           "wins": 2,
           "podiums": 6,
           "poles": 1,
@@ -1385,8 +1388,8 @@
           "points": 251,
           "wins": 2,
           "podiums": 9,
-          "poles": 2,
-          "fastestLaps": 3,
+          "poles": 1,
+          "fastestLaps": 4,
           "dnfs": 4
         },
         {
@@ -1398,7 +1401,7 @@
           "wins": 3,
           "podiums": 8,
           "poles": 0,
-          "fastestLaps": 4,
+          "fastestLaps": 3,
           "dnfs": 2
         },
         {
@@ -1409,7 +1412,7 @@
           "points": 308,
           "wins": 4,
           "podiums": 10,
-          "poles": 4,
+          "poles": 3,
           "fastestLaps": 3,
           "champion": true,
           "dnfs": 3
@@ -1419,11 +1422,11 @@
           "team": "Honda Yuasa Racing",
           "car": "Honda Civic Type R",
           "pos": 1,
-          "points": 348,
+          "points": 347,
           "wins": 4,
           "podiums": 11,
           "poles": 2,
-          "fastestLaps": 6,
+          "fastestLaps": 5,
           "champion": true,
           "dnfs": 2
         },
@@ -1447,9 +1450,9 @@
           "points": 390,
           "wins": 5,
           "podiums": 18,
-          "poles": 3,
-          "fastestLaps": 6,
-          "dnfs": 1
+          "poles": 1,
+          "fastestLaps": 5,
+          "dnfs": 3
         },
         {
           "year": 2012,
@@ -1459,10 +1462,10 @@
           "points": 408,
           "wins": 8,
           "podiums": 16,
-          "poles": 0,
-          "fastestLaps": 8,
+          "poles": 3,
+          "fastestLaps": 9,
           "champion": true,
-          "dnfs": 2
+          "dnfs": 4
         },
         {
           "year": 2011,
@@ -1472,9 +1475,9 @@
           "points": 249,
           "wins": 6,
           "podiums": 13,
-          "poles": 4,
+          "poles": 3,
           "fastestLaps": 2,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2010,
@@ -1484,20 +1487,20 @@
           "points": 218,
           "wins": 5,
           "podiums": 12,
-          "poles": 4,
+          "poles": 2,
           "fastestLaps": 4,
-          "dnfs": 3
+          "dnfs": 4
         },
         {
           "year": 2009,
           "team": "Club Seat",
           "car": "Mercedes-Benz A-Class / Infiniti Q50",
-          "pos": 14,
-          "points": 7,
+          "pos": 16,
+          "points": 34,
           "wins": 0,
-          "podiums": 0,
+          "podiums": 1,
           "poles": 0,
-          "fastestLaps": 1,
+          "fastestLaps": 2,
           "teams": [
             {
               "name": "Team Dynamics",
@@ -1515,7 +1518,7 @@
               "races": 6
             }
           ],
-          "dnfs": 4
+          "dnfs": 5
         },
         {
           "year": 2008,
@@ -1525,7 +1528,7 @@
           "points": 144,
           "wins": 2,
           "podiums": 4,
-          "poles": 4,
+          "poles": 2,
           "fastestLaps": 0,
           "dnfs": 3
         },
@@ -1537,8 +1540,8 @@
           "points": 200,
           "wins": 4,
           "podiums": 10,
-          "poles": 5,
-          "fastestLaps": 6,
+          "poles": 2,
+          "fastestLaps": 5,
           "dnfs": 10
         },
         {
@@ -1549,9 +1552,9 @@
           "points": 204,
           "wins": 4,
           "podiums": 10,
-          "poles": 5,
-          "fastestLaps": 9,
-          "dnfs": 6
+          "poles": 3,
+          "fastestLaps": 8,
+          "dnfs": 5
         },
         {
           "year": 2001,
@@ -1561,7 +1564,7 @@
           "points": 30,
           "wins": 0,
           "podiums": 1,
-          "poles": 0,
+          "poles": 2,
           "fastestLaps": 0,
           "dnfs": 0
         }
@@ -1584,7 +1587,7 @@
         {
           "year": 2025,
           "team": "Motor Parts Direct with Power Maxed Racing",
-          "car": "Vauxhall Astra / Cupra León",
+          "car": "Vauxhall Astra / Cupra Le\u00f3n",
           "pos": 27,
           "points": 4,
           "wins": 0,
@@ -1599,11 +1602,11 @@
             },
             {
               "name": "Motor Parts Direct with Power Maxed Racing",
-              "car": "Cupra León",
+              "car": "Cupra Le\u00f3n",
               "races": 12
             }
           ],
-          "dnfs": 4
+          "dnfs": 6
         },
         {
           "year": 2024,
@@ -1615,25 +1618,25 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 4
         },
         {
           "year": 2023,
           "team": "Bristol Street Motors with EXCELR8",
           "car": "Hyundai i30 Fastback N",
-          "pos": 30,
-          "points": -5,
+          "pos": 24,
+          "points": 10,
           "wins": 0,
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 0
+          "dnfs": 4
         },
         {
           "year": 2021,
           "team": "Excelr8 with TradePriceCars.com",
           "car": "Hyundai i30 Fastback N",
-          "pos": 34,
+          "pos": 32,
           "points": 0,
           "wins": 0,
           "podiums": 0,
@@ -1657,12 +1660,12 @@
           "year": 2025,
           "team": "Toyota Gazoo Racing UK with IAA",
           "car": "Honda Civic / Toyota Corolla",
-          "pos": 12,
-          "points": 84,
+          "pos": 8,
+          "points": 190,
           "wins": 1,
           "podiums": 4,
           "poles": 0,
-          "fastestLaps": 0,
+          "fastestLaps": 1,
           "teams": [
             {
               "name": "One Motorsport",
@@ -1675,7 +1678,7 @@
               "races": 9
             }
           ],
-          "dnfs": 3
+          "dnfs": 2
         },
         {
           "year": 2024,
@@ -1721,9 +1724,9 @@
           "points": 303,
           "wins": 5,
           "podiums": 8,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 7,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2020,
@@ -1733,9 +1736,9 @@
           "points": 196,
           "wins": 3,
           "podiums": 4,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 4,
-          "dnfs": 3
+          "dnfs": 4
         },
         {
           "year": 2019,
@@ -1753,20 +1756,20 @@
           "year": 2018,
           "team": "Power Maxed TAG Racing",
           "car": "Vauxhall Astra",
-          "pos": 6,
-          "points": 246,
+          "pos": 5,
+          "points": 235,
           "wins": 2,
           "podiums": 6,
           "poles": 3,
-          "fastestLaps": 3,
-          "dnfs": 3
+          "fastestLaps": 2,
+          "dnfs": 4
         },
         {
           "year": 2017,
           "team": "Team Parker Racing with Maximum Motorsport",
           "car": "Ford Focus ST / MG 6 GT",
-          "pos": 18,
-          "points": 58,
+          "pos": 16,
+          "points": 84,
           "wins": 0,
           "podiums": 0,
           "poles": 1,
@@ -1783,7 +1786,7 @@
               "races": 18
             }
           ],
-          "dnfs": 2
+          "dnfs": 10
         },
         {
           "year": 2016,
@@ -1794,8 +1797,8 @@
           "wins": 0,
           "podiums": 2,
           "poles": 0,
-          "fastestLaps": 1,
-          "dnfs": 2
+          "fastestLaps": 0,
+          "dnfs": 5
         },
         {
           "year": 2015,
@@ -1805,9 +1808,9 @@
           "points": 95,
           "wins": 0,
           "podiums": 1,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 4
+          "dnfs": 2
         }
       ],
       "dateOfBirth": "1991-06-15",
@@ -1827,13 +1830,13 @@
           "year": 2025,
           "team": "NAPA Racing UK",
           "car": "Ford Focus ST",
-          "pos": 16,
+          "pos": 17,
           "points": 108,
           "wins": 1,
           "podiums": 1,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2024,
@@ -1845,7 +1848,7 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2023,
@@ -1863,7 +1866,7 @@
           "year": 2022,
           "team": "Apec Racing with Beavis Morgan",
           "car": "Ford Focus ST",
-          "pos": 25,
+          "pos": 27,
           "points": 1,
           "wins": 0,
           "podiums": 0,
@@ -1881,7 +1884,7 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 1
+          "dnfs": 2
         },
         {
           "year": 2020,
@@ -1899,7 +1902,7 @@
           "year": 2019,
           "team": "Excelr8 Motorsport",
           "car": "MG6 GT",
-          "pos": 30,
+          "pos": 31,
           "points": 2,
           "wins": 0,
           "podiums": 0,
@@ -1929,8 +1932,8 @@
           "points": 462,
           "wins": 7,
           "podiums": 18,
-          "poles": 5,
-          "fastestLaps": 8,
+          "poles": 3,
+          "fastestLaps": 9,
           "champion": true,
           "dnfs": 1
         },
@@ -1942,9 +1945,9 @@
           "points": 413,
           "wins": 6,
           "podiums": 15,
-          "poles": 7,
+          "poles": 4,
           "fastestLaps": 10,
-          "dnfs": 0
+          "dnfs": 2
         },
         {
           "year": 2023,
@@ -1955,8 +1958,8 @@
           "wins": 2,
           "podiums": 17,
           "poles": 0,
-          "fastestLaps": 4,
-          "dnfs": 0
+          "fastestLaps": 5,
+          "dnfs": 1
         },
         {
           "year": 2022,
@@ -1966,8 +1969,8 @@
           "points": 394,
           "wins": 6,
           "podiums": 12,
-          "poles": 5,
-          "fastestLaps": 7,
+          "poles": 4,
+          "fastestLaps": 8,
           "champion": true,
           "dnfs": 0
         },
@@ -1991,7 +1994,7 @@
           "points": 326,
           "wins": 3,
           "podiums": 11,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 4,
           "dnfs": 3
         },
@@ -2003,7 +2006,7 @@
           "points": 245,
           "wins": 4,
           "podiums": 4,
-          "poles": 4,
+          "poles": 2,
           "fastestLaps": 1,
           "dnfs": 1
         },
@@ -2012,12 +2015,12 @@
           "team": "Speedworks Motorsport",
           "car": "Toyota Avensis",
           "pos": 2,
-          "points": 292,
+          "points": 277,
           "wins": 3,
           "podiums": 9,
           "poles": 0,
           "fastestLaps": 5,
-          "dnfs": 5
+          "dnfs": 4
         },
         {
           "year": 2017,
@@ -2027,7 +2030,7 @@
           "points": 311,
           "wins": 4,
           "podiums": 9,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 2,
           "dnfs": 4
         },
@@ -2036,10 +2039,10 @@
           "team": "Speedworks Motorsport",
           "car": "Toyota Avensis",
           "pos": 10,
-          "points": 219,
+          "points": 220,
           "wins": 2,
           "podiums": 6,
-          "poles": 4,
+          "poles": 3,
           "fastestLaps": 0,
           "dnfs": 6
         },
@@ -2048,7 +2051,7 @@
           "team": "Speedworks Motorsport",
           "car": "Toyota Avensis",
           "pos": 13,
-          "points": 173,
+          "points": 176,
           "wins": 0,
           "podiums": 2,
           "poles": 1,
@@ -2065,7 +2068,7 @@
           "podiums": 0,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 7
+          "dnfs": 8
         }
       ],
       "dateOfBirth": "1993-08-20",
@@ -2098,7 +2101,7 @@
             }
           ],
           "pos": 18,
-          "points": 100,
+          "points": 105,
           "wins": 1,
           "podiums": 1,
           "poles": 0,
@@ -2115,13 +2118,13 @@
           "podiums": 1,
           "poles": 0,
           "fastestLaps": 0,
-          "dnfs": 2
+          "dnfs": 3
         },
         {
           "year": 2023,
           "team": "CarStore Power Maxed Racing",
           "car": "Vauxhall Astra",
-          "pos": 20,
+          "pos": 21,
           "points": 63,
           "wins": 0,
           "podiums": 0,
@@ -2149,13 +2152,13 @@
           "year": 2025,
           "team": "LKQ Euro Car Parts Racing with WSR",
           "car": "BMW 330e M Sport",
-          "pos": 8,
+          "pos": 9,
           "points": 179,
           "wins": 1,
           "podiums": 3,
           "poles": 1,
           "fastestLaps": 3,
-          "dnfs": 2
+          "dnfs": 3
         }
       ],
       "class": "I"
@@ -2174,11 +2177,11 @@
           "team": "NAPA Racing UK",
           "car": "Ford Focus ST",
           "pos": 2,
-          "points": 428,
+          "points": 426,
           "wins": 5,
           "podiums": 17,
-          "poles": 3,
-          "fastestLaps": 7,
+          "poles": 1,
+          "fastestLaps": 6,
           "dnfs": 0
         },
         {
@@ -2201,7 +2204,7 @@
           "points": 446,
           "wins": 12,
           "podiums": 20,
-          "poles": 10,
+          "poles": 6,
           "fastestLaps": 12,
           "champion": true,
           "dnfs": 3
@@ -2214,7 +2217,7 @@
           "points": 382,
           "wins": 3,
           "podiums": 12,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 4,
           "dnfs": 1
         },
@@ -2239,7 +2242,7 @@
           "points": 350,
           "wins": 5,
           "podiums": 10,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 10,
           "champion": true,
           "dnfs": 0
@@ -2252,7 +2255,7 @@
           "points": 233,
           "wins": 1,
           "podiums": 6,
-          "poles": 3,
+          "poles": 1,
           "fastestLaps": 1,
           "dnfs": 1
         },
@@ -2260,23 +2263,23 @@
           "year": 2018,
           "team": "Adrian Flux Subaru Racing",
           "car": "Subaru Levorg GT",
-          "pos": 4,
+          "pos": 3,
           "points": 256,
           "wins": 6,
           "podiums": 8,
-          "poles": 3,
-          "fastestLaps": 4,
-          "dnfs": 1
+          "poles": 1,
+          "fastestLaps": 3,
+          "dnfs": 2
         },
         {
           "year": 2017,
           "team": "Adrian Flux Subaru Racing",
           "car": "Subaru Levorg GT",
           "pos": 1,
-          "points": 372,
+          "points": 375,
           "wins": 6,
           "podiums": 15,
-          "poles": 3,
+          "poles": 1,
           "fastestLaps": 4,
           "champion": true,
           "dnfs": 2
@@ -2286,12 +2289,12 @@
           "team": "MG Racing RCIB Insurance",
           "car": "MG6 GT",
           "pos": 13,
-          "points": 162,
+          "points": 161,
           "wins": 1,
           "podiums": 2,
           "poles": 2,
           "fastestLaps": 2,
-          "dnfs": 5
+          "dnfs": 6
         }
       ],
       "dateOfBirth": "1994-01-15",
@@ -2593,7 +2596,8 @@
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-WSR-racing400-x-400-WSR.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/De-Leon-1.png",
       "totalRaces": 779,
-      "totalWins": 129
+      "totalWins": 129,
+      "lightCardBg": true
     },
     {
       "name": "LKQ Euro Car Parts with Power Maxed Racing",
@@ -2661,7 +2665,8 @@
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-LKQ400-x-400-LKQ.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-OS100883-cut-out.png",
       "totalRaces": 20,
-      "totalWins": 1
+      "totalWins": 1,
+      "lightCardBg": true
     },
     {
       "name": "Cataclean Plato Racing",
@@ -2788,7 +2793,24 @@
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-power-maxed-racing-new-colours400-x-400-PMR-dexter.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Patterson.png",
       "totalRaces": 290,
-      "totalWins": 6
+      "totalWins": 6,
+      "lightCardBg": true
+    },
+    {
+      "name": "Power Maxed Racing",
+      "car": "Audi A3 Saloon",
+      "entries": 1,
+      "bio": "Power Maxed Racing's fourth 2026 entry marks the team's first four-car BTCC line-up, with Nick Halstead returning from the Knockhill round onwards to complete the season. No title sponsor has yet been confirmed for the car, which races under the team's own Power Maxed Racing identity.\n\nFounded in Coventry by Shaun Hollamby in 2010, Power Maxed Racing has grown from a single-car independent outfit into one of the championship's most ambitious multi-car operations, now fielding cars across three liveries in pursuit of BTCC honours.",
+      "base": "Coventry, West Midlands",
+      "founded": 2010,
+      "driversChampionships": 0,
+      "teamsChampionships": 0,
+      "history": [],
+      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-LKQ400-x-400-LKQ.png",
+      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/2026-Halstead-Nick-0H5A0744-cut-out-scaled.png",
+      "totalRaces": 290,
+      "totalWins": 6,
+      "lightCardBg": true
     }
   ]
 }

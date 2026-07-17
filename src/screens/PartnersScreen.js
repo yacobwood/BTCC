@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,76 +11,20 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
+import {fetchPartners} from '../api/client';
 
-const PARTNERS = [
-  {
-    id: 'kwik-fit',
-    name: 'Kwik Fit',
-    role: 'Title Sponsor',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/Kwikfit.jpg',
-    description: 'Kwik Fit has been the Title Sponsor of the BTCC since 2019. One of the UK\'s leading automotive retailers, with over 600 centres offering tyres, MOTs, and car servicing.',
-    url: 'https://www.kwik-fit.com/',
-  },
-  {
-    id: 'goodyear',
-    name: 'Goodyear',
-    role: 'Tyre Supplier',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/Goodyear.jpg',
-    description: 'Founded in 1898, Goodyear has been the exclusive tyre supplier to the BTCC since 2020. Their Dunlop brand supplied the championship from 2003–2019.',
-    url: 'https://www.goodyear.eu/',
-  },
-  {
-    id: 'liqui-moly',
-    name: 'Liqui Moly',
-    role: 'Oil & Lubricants Partner',
-    logo: 'https://btcc.net/wp-content/uploads/2024/07/Liqui-Moly-Logo-RGB.png',
-    description: 'German manufacturer specialising in motor oils, additives, and car care products. Official oil and lubricants partner of the BTCC since mid-2024.',
-    url: 'https://www.liqui-moly.com/en/gb/',
-  },
-  {
-    id: 'barc',
-    name: 'BARC',
-    role: 'British Automobile Racing Club',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/BARC.jpg',
-    description: 'The BARC is one of the UK\'s leading motorsport organisations, overseeing a wide range of racing events and providing official support to the championship.',
-    url: 'http://barc.net/',
-  },
-  {
-    id: 'motorsport-uk',
-    name: 'Motorsport UK',
-    role: 'Governing Body',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/Motorsport-UK-logo.png',
-    description: 'The governing body for four-wheel motorsport in the UK, promoting the development, safety, and sustainability of the sport at all levels.',
-    url: 'https://www.motorsportuk.org/',
-  },
-  {
-    id: 'autocar',
-    name: 'Autocar',
-    role: 'Media Partner',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/Autocar_logo.png',
-    description: 'The world\'s oldest car magazine, established in 1895. Autocar has been the BTCC\'s official media partner for over a decade.',
-    url: 'http://autocar.co.uk/',
-  },
-  {
-    id: 'dread',
-    name: 'Dread',
-    role: 'Official Merchandise',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/Dread-1.jpg',
-    description: 'UK-based supplier of premium race team clothing and motorsport merchandise, known for quality and durability.',
-    url: 'https://shop.dread.cc/',
-  },
-  {
-    id: 'alcosense',
-    name: 'AlcoSense',
-    role: 'Alcohol Testing Partner',
-    logo: 'https://btcc.net/wp-content/uploads/2024/03/Alcosense-Logo-scaled.jpeg',
-    description: 'Official alcohol testing partner since 2014, making the BTCC the first major racing series to introduce mandatory driver breathalyser testing.',
-    url: 'http://alcosense.co.uk/',
-  },
-];
+const BUNDLED_PARTNERS = require('../../data/partners.json');
 
 export default function PartnersScreen({navigation}) {
+  // Bundled snapshot renders instantly; a live fetch swaps it in only if it
+  // actually returns something, so a sponsor change updates without needing
+  // an app release, and a cold/offline fetch never leaves the screen blank.
+  const [partners, setPartners] = useState(BUNDLED_PARTNERS);
+
   useEffect(() => { Analytics.screen('partners'); }, []);
+  useEffect(() => {
+    fetchPartners().then(data => { if (Array.isArray(data) && data.length) setPartners(data); }).catch(() => {});
+  }, []);
 
   const renderPartner = ({item}) => (
     <View style={styles.card}>
@@ -113,7 +57,7 @@ export default function PartnersScreen({navigation}) {
       </View>
       <View style={styles.yellowDivider} />
       <FlatList
-        data={PARTNERS}
+        data={partners}
         keyExtractor={item => item.id}
         renderItem={renderPartner}
         contentContainerStyle={{padding: 16, paddingBottom: 30}}

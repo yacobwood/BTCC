@@ -21,6 +21,9 @@ import {
   fetchHubPosts,
   peekArticlesCache,
   fetchLiveStatus,
+  fetchBlacklist,
+  fetchMerchStores,
+  fetchPartners,
 } from '../../src/api/client';
 
 describe('fetchCalendar', () => {
@@ -69,8 +72,10 @@ describe('fetchDrivers', () => {
 
     const result = await fetchDrivers();
 
-    // staleFirst=true: no maxAge argument — any cached data regardless of age
-    expect(cacheRead).toHaveBeenCalledWith('drivers', undefined);
+    // Bounded staleness (not staleFirst): a maxAge is passed so a cache older than
+    // this gets treated as a miss, forcing a blocking re-fetch instead of serving
+    // indefinitely stale data if a background refresh ever silently fails.
+    expect(cacheRead).toHaveBeenCalledWith('drivers', 60 * 60 * 1000);
     expect(result).toEqual({drivers: [{name: 'Cached Driver'}]});
   });
 
@@ -337,6 +342,15 @@ describe('fetchArticleBySlug', () => {
     const result = await fetchArticleBySlug('any-slug');
     expect(result).toBeNull();
   });
+
+  it('uses a bounded cache, not staleFirst', async () => {
+    const article = {id: 2, slug: 'cached-article'};
+    cacheRead.mockResolvedValueOnce(article);
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve([article])});
+    const result = await fetchArticleBySlug('cached-article');
+    expect(cacheRead).toHaveBeenCalledWith('article_cached-article', 60 * 60 * 1000);
+    expect(result).toEqual(article);
+  });
 });
 
 describe('fetchLiveStatus', () => {
@@ -368,14 +382,16 @@ describe('fetchLiveStatus', () => {
     expect(cacheWrite).toHaveBeenCalledWith('live_status', status);
   });
 
-  it('uses stale-first cache — serves cached value with no age limit', async () => {
+  it('serves cached value within the 2-minute bound, but bounded (not staleFirst)', async () => {
     const cached = {active: false, liveUrl: null};
     cacheRead.mockResolvedValueOnce(cached);
     // Background revalidation fetch
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(cached)});
     const result = await fetchLiveStatus();
-    // staleFirst passes undefined as maxAge so any cached value is returned regardless of age
-    expect(cacheRead).toHaveBeenCalledWith('live_status', undefined);
+    // Bounded staleness: a 2-minute maxAge is passed and enforced (staleFirst=false),
+    // so a cache older than that would be treated as a miss and force a real fetch —
+    // unlike staleFirst, which would silently ignore this bound and serve any age.
+    expect(cacheRead).toHaveBeenCalledWith('live_status', 2 * 60 * 1000);
     expect(result).toEqual(cached);
   });
 
@@ -384,5 +400,90 @@ describe('fetchLiveStatus', () => {
     cacheRead.mockResolvedValueOnce(null);
     const result = await fetchLiveStatus();
     expect(result).toBeNull();
+  });
+});
+
+describe('fetchBlacklist', () => {
+  it('fetches from blacklist.json URL', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(['word'])});
+    await fetchBlacklist();
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('blacklist.json'));
+  });
+
+  it('uses a bounded 24h cache, not staleFirst', async () => {
+    cacheRead.mockResolvedValueOnce(['cached-word']);
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(['cached-word'])});
+    const result = await fetchBlacklist();
+    expect(cacheRead).toHaveBeenCalledWith('blacklist', 24 * 60 * 60 * 1000);
+    expect(result).toEqual(['cached-word']);
+  });
+
+  it('falls back to bundled blacklist when fetch fails and no cache exists', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    cacheRead.mockResolvedValueOnce(null);
+    const result = await fetchBlacklist();
+    expect(result).toBeDefined();
+  });
+});
+
+describe('fetchMerchStores', () => {
+  it('fetches from merch.json URL', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({stores: {}})});
+    await fetchMerchStores();
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('merch.json'));
+  });
+
+  it('uses a bounded 48h cache, not staleFirst', async () => {
+    const stores = {uk: [{name: 'Shop'}]};
+    cacheRead.mockResolvedValueOnce({stores});
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({stores})});
+    const result = await fetchMerchStores();
+    expect(cacheRead).toHaveBeenCalledWith('merch_stores', 48 * 60 * 60 * 1000);
+    expect(result).toEqual(stores);
+  });
+
+  it('falls back to bundled merch stores when fetch fails and no cache exists', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    cacheRead.mockResolvedValueOnce(null);
+    const result = await fetchMerchStores();
+    expect(result).toBeDefined();
+  });
+});
+
+describe('fetchPartners', () => {
+  it('fetches from partners.json URL', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve([{id: 'x'}])});
+    await fetchPartners();
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('partners.json'));
+  });
+
+  it('returns the live array when the fetch succeeds', async () => {
+    const live = [{id: 'new-sponsor', name: 'New Sponsor'}];
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(live)});
+    const result = await fetchPartners();
+    expect(result).toEqual(live);
+  });
+
+  it('falls back to the bundled snapshot when the response is not an array', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({})});
+    const result = await fetchPartners();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('falls back to the bundled snapshot when fetch fails and no cache exists', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    cacheRead.mockResolvedValueOnce(null);
+    const result = await fetchPartners();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('uses a bounded 48h cache, not staleFirst', async () => {
+    const cached = [{id: 'cached-sponsor'}];
+    cacheRead.mockResolvedValueOnce(cached);
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(cached)});
+    await fetchPartners();
+    expect(cacheRead).toHaveBeenCalledWith('partners', 48 * 60 * 60 * 1000);
   });
 });

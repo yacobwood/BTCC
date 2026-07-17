@@ -19,6 +19,9 @@ import {useBroadcaster} from '../utils/broadcaster';
 import {useLiveUrls, ensureHttps} from '../store/liveUrls';
 import {useFeatureFlags} from '../store/featureFlags';
 
+const BUNDLED_CALENDAR = require('../../data/calendar.json');
+const CURRENT_SEASON = BUNDLED_CALENDAR.season;
+
 const RED = '#E3000B';
 
 function formatDateRange(start, end) {
@@ -48,7 +51,7 @@ function firstRaceNumber(round) {
 export default function CalendarScreen({navigation}) {
   const liveUrls = useLiveUrls();
   const {broadcaster_override} = useFeatureFlags();
-  const [selectedYear, setSelectedYear] = useState(2026);
+  const [selectedYear, setSelectedYear] = useState(CURRENT_SEASON);
   const [calendar, setCalendar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -326,7 +329,7 @@ export default function CalendarScreen({navigation}) {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.yearSelector}>
-          {[2026, 2027].map(yr => (
+          {[CURRENT_SEASON, CURRENT_SEASON + 1].map(yr => (
             <TouchableOpacity
               key={yr}
               style={[styles.yearPill, selectedYear === yr && styles.yearPillActive]}

@@ -127,35 +127,63 @@ export function parseCalendar(json) {
   };
 }
 
+// Shapes one raw driver-history entry into the app's field names/defaults
+// (champion -> isChampion, numeric defaults). Shared by parseGrid() and any
+// single-driver lookup that bypasses it (e.g. DriverDetailScreen's deep-link
+// path, which reads raw JSON directly).
+export function parseDriverHistory(history) {
+  return (history || []).map(h => ({
+    year: h.year,
+    team: h.team || '',
+    car: h.car || '',
+    pos: h.pos || 0,
+    points: h.points || 0,
+    wins: h.wins || 0,
+    podiums: h.podiums || 0,
+    poles: h.poles || 0,
+    fastestLaps: h.fastestLaps || 0,
+    dnfs: h.dnfs || 0,
+    isChampion: h.champion || false,
+  }));
+}
+
+// Attaches the display fields that depend on cross-referencing a driver's
+// team against the (raw) teams array - cls (Independents/Main chip),
+// cardBgUrl/lightCardBg (header background + number text color). Exported so
+// a single driver reached outside the full-roster parse (e.g.
+// DriverDetailScreen's deep-link lookup, which reads raw JSON directly) can
+// still get the same display fields as one reached via parseGrid() - without
+// this, those profiles silently lost the class chip, champion gold styling
+// and header background image.
+export function attachTeamDisplayFields(driver, rawTeams) {
+  const team = (rawTeams || []).find(t => t.name === driver.team);
+  const {class: rawClass, ...rest} = driver; // `class` is raw-shape only; output uses `cls`
+  return {
+    ...rest,
+    cls: driver.cls || rawClass || '',
+    cardBgUrl: team?.cardBgUrl || '',
+    lightCardBg: team?.lightCardBg || false,
+  };
+}
+
 // Parse drivers JSON
 export function parseGrid(json) {
+  const rawTeams = json.teams || [];
   const drivers = (json.drivers || [])
     .filter(d => d.team && d.team.trim())
-    .map(d => ({
+    .map(d => attachTeamDisplayFields({
       number: d.number || 0,
       name: d.name || '',
       team: d.team || '',
       car: d.car || '',
       imageUrl: d.imageUrl || '',
       nationality: d.nationality || 'British',
-      cls: d.class || '',
+      class: d.class || '',
       bio: d.bio || '',
       dateOfBirth: d.dateOfBirth || '',
       birthplace: d.birthplace || '',
-      history: (d.history || []).map(h => ({
-        year: h.year,
-        team: h.team || '',
-        car: h.car || '',
-        pos: h.pos || 0,
-        points: h.points || 0,
-        wins: h.wins || 0,
-        podiums: h.podiums || 0,
-        poles: h.poles || 0,
-        fastestLaps: h.fastestLaps || 0,
-        dnfs: h.dnfs || 0,
-        isChampion: h.champion || false,
-      })),
-    }));
+      history: parseDriverHistory(d.history),
+    }, rawTeams));
   const teams = (json.teams || []).map(t => ({
     name: t.name || '',
     car: t.car || '',
@@ -165,6 +193,7 @@ export function parseGrid(json) {
     points2025: t.points2025 || 0,
     carImageUrl: t.carImageUrl || '',
     cardBgUrl: t.cardBgUrl || '',
+    lightCardBg: t.lightCardBg || false,
     founded: t.founded || 0,
     base: t.base || '',
     driversChampionships: t.driversChampionships || 0,
@@ -175,10 +204,6 @@ export function parseGrid(json) {
     carSpecs: t.carSpecs || null,
     drivers: drivers.filter(d => d.team === t.name),
   }));
-  // Attach each team's cardBgUrl to its drivers
-  const teamBgMap = {};
-  teams.forEach(t => { teamBgMap[t.name] = t.cardBgUrl; });
-  drivers.forEach(d => { d.cardBgUrl = teamBgMap[d.team] || ''; });
   return {drivers, teams};
 }
 
@@ -239,6 +264,7 @@ export function parseResults(json) {
         label,
         date: race.date || null,
         fullRaceUrl: race.fullRaceUrl || null,
+        reverseGridDraw: race.reverseGridDraw ?? null,
         grid: (race.grid || []).map(g => ({
           pos: g.pos,
           no: g.no,

@@ -78,6 +78,13 @@ describe('SeasonTable', () => {
     await waitFor(() => expect(getByText('DON')).toBeTruthy());
   });
 
+  it('abbreviates "Thruxton 2" (regression: fell through to the full string, overflowing the column)', async () => {
+    const results = [{...RESULTS[0], venue: 'Thruxton 2'}];
+    const {getByText, queryByText} = renderWithProviders(<SeasonTable results={results} />);
+    await waitFor(() => expect(getByText('THR2')).toBeTruthy());
+    expect(queryByText('Thruxton 2')).toBeNull();
+  });
+
   it('includes Qualifying Race column when QR data present', async () => {
     const {getByText} = renderWithProviders(<SeasonTable results={RESULTS_QR} />);
     await waitFor(() => expect(getByText('QR')).toBeTruthy());

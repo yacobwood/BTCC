@@ -1,4 +1,4 @@
-import {parseArticle, formatDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults} from '../src/api/parsers';
+import {parseArticle, formatDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields} from '../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
@@ -399,6 +399,83 @@ describe('parseGrid', () => {
     expect(grid.teams[0].totalWins).toBe(0);
     expect(grid.teams[0].carSpecs).toBeNull();
   });
+
+  test('shapes driver history: champion renamed to isChampion, numeric fields defaulted', () => {
+    const json = {
+      drivers: [{
+        number: 1, name: 'A Driver', team: 'Team A', car: 'Car',
+        history: [
+          {year: 2016, team: 'Old Team', car: 'Old Car', pos: 1, points: 308, wins: 4, podiums: 10, poles: 4, fastestLaps: 3, champion: true},
+          {year: 2017, team: 'Old Team', car: 'Old Car'}, // no stats at all - must default, not crash
+        ],
+      }],
+      teams: [{name: 'Team A', car: 'Car', entries: 1}],
+    };
+    const [driver] = parseGrid(json).drivers;
+    expect(driver.history[0]).toEqual({
+      year: 2016, team: 'Old Team', car: 'Old Car', pos: 1, points: 308,
+      wins: 4, podiums: 10, poles: 4, fastestLaps: 3, dnfs: 0, isChampion: true,
+    });
+    expect(driver.history[1]).toEqual({
+      year: 2017, team: 'Old Team', car: 'Old Car', pos: 0, points: 0,
+      wins: 0, podiums: 0, poles: 0, fastestLaps: 0, dnfs: 0, isChampion: false,
+    });
+  });
+});
+
+describe('parseDriverHistory', () => {
+  test('renames champion to isChampion and defaults every numeric field', () => {
+    const shaped = parseDriverHistory([{year: 2020, champion: true}]);
+    expect(shaped).toEqual([{
+      year: 2020, team: '', car: '', pos: 0, points: 0, wins: 0,
+      podiums: 0, poles: 0, fastestLaps: 0, dnfs: 0, isChampion: true,
+    }]);
+  });
+
+  test('returns an empty array for null/undefined input', () => {
+    expect(parseDriverHistory(null)).toEqual([]);
+    expect(parseDriverHistory(undefined)).toEqual([]);
+  });
+});
+
+describe('attachTeamDisplayFields', () => {
+  const rawTeams = [
+    {name: 'WSR', cardBgUrl: 'https://example.com/wsr.png', lightCardBg: true},
+    {name: 'Restart Racing', cardBgUrl: 'https://example.com/restart.png', lightCardBg: false},
+  ];
+
+  test('attaches cls from raw `class`, and cardBgUrl/lightCardBg from the matching team', () => {
+    const raw = {name: 'A Driver', team: 'WSR', class: 'I'};
+    const shaped = attachTeamDisplayFields(raw, rawTeams);
+    expect(shaped.cls).toBe('I');
+    expect(shaped.cardBgUrl).toBe('https://example.com/wsr.png');
+    expect(shaped.lightCardBg).toBe(true);
+  });
+
+  test('preserves an already-shaped `cls` field rather than requiring raw `class`', () => {
+    const shaped = attachTeamDisplayFields({name: 'A Driver', team: 'Restart Racing', cls: 'M'}, rawTeams);
+    expect(shaped.cls).toBe('M');
+    expect(shaped.lightCardBg).toBe(false);
+  });
+
+  test('defaults to empty/false when the driver has no matching team', () => {
+    const shaped = attachTeamDisplayFields({name: 'A Driver', team: 'Unknown Team'}, rawTeams);
+    expect(shaped.cls).toBe('');
+    expect(shaped.cardBgUrl).toBe('');
+    expect(shaped.lightCardBg).toBe(false);
+  });
+
+  test('is what closes the deep-link dual-shape bug: raw driver + raw teams produces the same display fields parseGrid() would', () => {
+    const json = {
+      drivers: [{number: 1, name: 'A Driver', team: 'WSR', car: 'Car', class: 'I'}],
+      teams: rawTeams,
+    };
+    const viaParseGrid = parseGrid(json).drivers[0];
+    const viaDeepLink = attachTeamDisplayFields(json.drivers[0], json.teams);
+    expect(viaDeepLink.cls).toBe(viaParseGrid.cls);
+    expect(viaDeepLink.cardBgUrl).toBe(viaParseGrid.cardBgUrl);
+    expect(viaDeepLink.lightCardBg).toBe(viaParseGrid.lightCardBg);
+  });
 });
 
 describe('parseStandings', () => {
@@ -530,6 +607,24 @@ describe('parseResults', () => {
     expect(result.points).toBe(0);
     expect(result.pole).toBe(true);   // flag preserved for display
     expect(result.leadLap).toBe(true);
+  });
+
+  test('reverseGridDraw is passed through when set and defaults to null', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [
+          {label: 'Race 3', reverseGridDraw: 11, results: [], grid: []},
+          {label: 'Race 2', results: [], grid: []},
+        ],
+      }],
+    };
+    const [round] = parseResults(json);
+    const r3 = round.races.find(r => r.label === 'Race 3');
+    const r2 = round.races.find(r => r.label === 'Race 2');
+    expect(r3.reverseGridDraw).toBe(11);
+    expect(r2.reverseGridDraw).toBeNull();
   });
 
   test('DQ status field is passed through from raw result', () => {

@@ -81,7 +81,7 @@ export default function TeamDetailScreen({route, navigation}) {
             {team.drivers.map(d => {
               const fav = isFavourite(d.name);
               const bundled = getDriverImage(d.number);
-              const blackNumber = [2,16,17,88,99].includes(d.number);
+              const blackNumber = team.lightCardBg;
               return (
                 <TouchableOpacity
                   key={d.number}

@@ -28,6 +28,7 @@ const VENUE_ABBR = {
   'Brands Hatch GP':   'BHGP',
   'Snetterton':        'SNE',
   'Thruxton':          'THR',
+  'Thruxton 2':        'THR2',
   'Oulton Park':       'OUL',
   'Croft':             'CRO',
   'Knockhill':         'KNO',

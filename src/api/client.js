@@ -10,6 +10,7 @@ const BUNDLED_CALENDAR_2027 = require('../../data/calendar2027.json');
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
 const BUNDLED_BLACKLIST = require('../../data/blacklist.json');
 const BUNDLED_MERCH = require('../../data/merch.json');
+const BUNDLED_PARTNERS = require('../../data/partners.json');
 
 // Stale-while-revalidate: serve from cache immediately, refresh in background.
 // If the cached entry is older than MAX_AGE_MS, treat as a cache miss so the
@@ -63,7 +64,9 @@ export async function fetchCalendar(year = 2026, forceRefresh = false) {
 
 export async function fetchBlacklist() {
   try {
-    return await fetchJson(`${BASE_GITHUB}/blacklist.json`, 'blacklist', false, false, /* staleFirst */ true);
+    // Bounded (not staleFirst): a moderation-list fix needs to actually land on
+    // devices rather than potentially sticking on the old list forever.
+    return await fetchJson(`${BASE_GITHUB}/blacklist.json`, 'blacklist', false, /* staleFallback */ true, /* staleFirst */ false, 24 * 60 * 60 * 1000);
   } catch {
     return BUNDLED_BLACKLIST;
   }
@@ -71,7 +74,10 @@ export async function fetchBlacklist() {
 
 export async function fetchDrivers() {
   try {
-    return await fetchJson(`${BASE_GITHUB}/drivers.json`, 'drivers', false, false, /* staleFirst */ true);
+    // Bounded staleness (not staleFirst): a cache older than MAX_AGE_MS forces a
+    // blocking re-fetch instead of serving indefinitely if the one background
+    // refresh attempt ever silently fails (roster count stuck stale otherwise).
+    return await fetchJson(`${BASE_GITHUB}/drivers.json`, 'drivers', false, /* staleFallback */ true, /* staleFirst */ false, MAX_AGE_MS);
   } catch {
     // Cold install + no network: fall back to the bundled snapshot
     return BUNDLED_DRIVERS;
@@ -84,7 +90,11 @@ export async function fetchStandings(forceRefresh = false) {
 
 export async function fetchLiveStatus() {
   try {
-    return await fetchJson(`${BASE_GITHUB}/live_status.json`, 'live_status', false, false, /* staleFirst */ true, 2 * 60 * 1000);
+    // staleFirst must stay false here: fetchJson ignores maxAgeMs entirely when
+    // staleFirst is true, which would silently defeat the 2-minute bound below —
+    // exactly the "stuck stale forever" failure this data (race-day live state)
+    // can least afford.
+    return await fetchJson(`${BASE_GITHUB}/live_status.json`, 'live_status', false, false, /* staleFirst */ false, 2 * 60 * 1000);
   } catch {
     return null;
   }
@@ -96,10 +106,19 @@ export async function fetchResults(year = 2026, forceRefresh = false) {
 
 export async function fetchMerchStores() {
   try {
-    const data = await fetchJson(`${BASE_GITHUB}/merch.json`, 'merch_stores', false, false, /* staleFirst */ true);
+    const data = await fetchJson(`${BASE_GITHUB}/merch.json`, 'merch_stores', false, /* staleFallback */ true, /* staleFirst */ false, 48 * 60 * 60 * 1000);
     return data.stores || {};
   } catch {
     return BUNDLED_MERCH.stores || {};
+  }
+}
+
+export async function fetchPartners() {
+  try {
+    const data = await fetchJson(`${BASE_GITHUB}/partners.json`, 'partners', false, /* staleFallback */ true, /* staleFirst */ false, 48 * 60 * 60 * 1000);
+    return Array.isArray(data) ? data : BUNDLED_PARTNERS;
+  } catch {
+    return BUNDLED_PARTNERS;
   }
 }
 
@@ -184,7 +203,7 @@ export async function fetchHubPosts() {
 
 export async function fetchArticleBySlug(slug) {
   const cacheKey = `article_${slug}`;
-  return fetchJson(`${BASE_WP}/posts?slug=${slug}&_embed=1`, cacheKey, false, /* staleFallback */ true, /* staleFirst */ true)
+  return fetchJson(`${BASE_WP}/posts?slug=${slug}&_embed=1`, cacheKey, false, /* staleFallback */ true, /* staleFirst */ false, MAX_AGE_MS)
     .then(arr => (Array.isArray(arr) ? arr[0] ?? null : arr))
     .catch(() => null);
 }
