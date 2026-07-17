@@ -401,4 +401,20 @@ describe('TeamDetailScreen', () => {
     );
     await waitFor(() => expect(queryByText('CAR SPECS')).toBeNull());
   });
+
+  it('driver photo uses CachedImage when imageUrl is set and no bundled image exists', async () => {
+    // getDriverImage is mocked to return null (jest.setup.js), so imageUrl triggers CachedImage.
+    // Regression: this used to be a raw <Image> requesting a hardcoded "-300x300" WordPress
+    // thumbnail suffix with no fallback - a 404 on that specific size (as happened for Ryan
+    // Bensley's photo) silently rendered nothing. CachedImage retries the full-size original.
+    const teamWithPhoto = {
+      ...TEAM,
+      drivers: [{name: 'Tom Ingram', number: 80, imageUrl: 'https://btcc.net/wp-content/uploads/driver.jpg'}],
+    };
+    const route = makeRoute({team: teamWithPhoto});
+    const {getAllByTestId} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1));
+  });
 });

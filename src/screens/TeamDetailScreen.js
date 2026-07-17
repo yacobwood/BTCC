@@ -18,6 +18,7 @@ import {getDriverImage} from '../assets/driverImages';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
+import CachedImage from '../components/CachedImage';
 
 export default function TeamDetailScreen({route, navigation}) {
   const {team} = route.params;
@@ -98,7 +99,7 @@ export default function TeamDetailScreen({route, navigation}) {
                     {bundled ? (
                       <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
                     ) : d.imageUrl ? (
-                      <Image source={{uri: d.imageUrl.replace(/(\.[a-z]+)$/i, '-300x300$1')}} style={styles.driverPhoto} resizeMode="contain" />
+                      <CachedImage uri={d.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
                     ) : null}
                     {fav && <View style={styles.favBadge}><Icon name="star" size={12} color={Colors.yellow} /></View>}
                   </ImageBackground>
