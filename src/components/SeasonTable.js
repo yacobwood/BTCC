@@ -43,7 +43,10 @@ function badgeStyle(pos, laps, time, status) {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.4)',
     text: '#FCA5A5', label: 'DQ', solid: false,
   };
-  if (pos === 0 && status === 'DNS') return {
+  // 'NC' (Not Classified) is TSL's actual status token for a driver who didn't
+  // start/wasn't classified - the scraper never produces a literal 'DNS' value,
+  // so treat NC as the real-world equivalent to avoid this badge being dead code.
+  if (pos === 0 && (status === 'DNS' || status === 'NC')) return {
     bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.45)',
     text: '#FCA5A5', label: 'DNS', solid: false,
   };
@@ -148,7 +151,7 @@ function Badge({cell, hasData}) {
     </View>
   );
   const s = badgeStyle(cell.pos, cell.laps, cell.time, cell.status);
-  const isDNS = cell.pos === 0 && cell.status === 'DNS';
+  const isDNS = cell.pos === 0 && (cell.status === 'DNS' || cell.status === 'NC');
   const bonus = isDNS ? 0 : bonusCount(cell);
   const bonusText = bonus > 0
     ? BONUS_DOTS.filter(({key}) => cell[key]).map(({label}) => label).join(' ')

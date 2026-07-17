@@ -161,15 +161,14 @@ test('decodes HTML entities in article title', async () => {
   expect(sentTitle).toBe('BTCC’s Best Race');
 });
 
-test('fetches from NEWS_URL with correct User-Agent header', async () => {
+test('fetches from NEWS_URL with a 20s timeout', async () => {
+  // No custom User-Agent needed here - NEWS_URL is GitHub raw content (already
+  // scraped from btcc.net by scrape_news.py), not a direct btcc.net request, so
+  // there's no Cloudflare fingerprinting to work around at this call site.
   const fetchFn = makeFetch([ARTICLE]);
   const db = makeDb({lastId: 7});
 
   await checkBtccNews({fetchFn, db, messaging: makeMessaging(), logHistory: jest.fn()});
 
-  expect(fetchFn).toHaveBeenCalledWith(
-    NEWS_URL,
-    20000,
-    expect.objectContaining({headers: expect.objectContaining({'User-Agent': expect.stringContaining('BTCCHub')})}),
-  );
+  expect(fetchFn).toHaveBeenCalledWith(NEWS_URL, 20000);
 });

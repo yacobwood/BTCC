@@ -3,10 +3,10 @@
  *
  * Tests run against the real handler with global.fetch mocked.
  * Response order mirrors what the handler calls in sequence:
- *   1. dispatch scrape (POST workflows dispatch)
- *   2. YouTube search API
- *   3. GET current live_status.json from GitHub
- *   4. PUT live_status.json to GitHub (only when state changes)
+ *   1. YouTube search API
+ *   2. GET current live_status.json from GitHub
+ *   3. PUT live_status.json to GitHub (only when state changes)
+ * (dispatchScrape was removed - scraping now runs on its own cron, see a2e995fe)
  */
 
 import handler from '../../tools/cf-worker/src/index.js';
@@ -28,7 +28,6 @@ const ghFile = (content, sha = 'abc') => ({
   json: () => Promise.resolve({sha, content: btoa(JSON.stringify(content))}),
 });
 const ghPutOk = () => ({status: 200, ok: true, json: () => Promise.resolve({})});
-const dispatchOk = () => ({status: 204, ok: true});
 
 describe('CF Worker scheduled handler', () => {
   beforeEach(() => {
@@ -46,24 +45,8 @@ describe('CF Worker scheduled handler', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('always dispatches the scrape workflow', async () => {
-    global.fetch
-      .mockResolvedValueOnce(dispatchOk())          // dispatch scrape
-      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytOffline())}) // YouTube
-      .mockResolvedValueOnce(ghNotFound())           // GET live_status.json
-      .mockResolvedValueOnce(ghPutOk());             // PUT live_status.json
-
-    await handler.scheduled({}, ENV, CTX);
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('scrape-results.yml/dispatches'),
-      expect.objectContaining({method: 'POST'}),
-    );
-  });
-
   it('commits active=true with liveUrl when YouTube reports a live stream', async () => {
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytLive('live999', 'BTCC Brands Hatch'))})
       .mockResolvedValueOnce(ghNotFound())
       .mockResolvedValueOnce(ghPutOk());
@@ -83,7 +66,6 @@ describe('CF Worker scheduled handler', () => {
 
   it('commits active=false when no live stream is found', async () => {
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytOffline())})
       .mockResolvedValueOnce(ghNotFound())
       .mockResolvedValueOnce(ghPutOk());
@@ -103,7 +85,6 @@ describe('CF Worker scheduled handler', () => {
   it('skips the PUT commit when state has not changed', async () => {
     // Current file already says active=false — YouTube also returns offline
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytOffline())})
       .mockResolvedValueOnce(ghFile({active: false, liveUrl: null}, 'sha1'));
     // No 4th mock needed — PUT should not be called
@@ -119,7 +100,6 @@ describe('CF Worker scheduled handler', () => {
   it('includes the existing sha when updating an existing file', async () => {
     // Current file says active=false, YouTube now reports live — state changes
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytLive())})
       .mockResolvedValueOnce(ghFile({active: false, liveUrl: null}, 'existing-sha'))
       .mockResolvedValueOnce(ghPutOk());
@@ -135,7 +115,6 @@ describe('CF Worker scheduled handler', () => {
 
   it('uses the correct Authorization header for GitHub calls', async () => {
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytOffline())})
       .mockResolvedValueOnce(ghNotFound())
       .mockResolvedValueOnce(ghPutOk());
@@ -150,7 +129,6 @@ describe('CF Worker scheduled handler', () => {
 
   it('uses the correct YouTube API key in the search URL', async () => {
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytOffline())})
       .mockResolvedValueOnce(ghNotFound())
       .mockResolvedValueOnce(ghPutOk());
@@ -164,7 +142,6 @@ describe('CF Worker scheduled handler', () => {
 
   it('treats a live stream without "BTCC" in the title as inactive', async () => {
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(ytLive('xyz789', 'ITV Sport Special Coverage'))})
       .mockResolvedValueOnce(ghNotFound())
       .mockResolvedValueOnce(ghPutOk());
@@ -183,7 +160,6 @@ describe('CF Worker scheduled handler', () => {
 
   it('still commits offline status even when YouTube API call fails', async () => {
     global.fetch
-      .mockResolvedValueOnce(dispatchOk())
       .mockResolvedValueOnce({ok: false, status: 403})  // YouTube error
       .mockResolvedValueOnce(ghNotFound())
       .mockResolvedValueOnce(ghPutOk());

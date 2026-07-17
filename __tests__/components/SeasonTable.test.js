@@ -148,10 +148,21 @@ describe('SeasonTable badge display', () => {
     await waitFor(() => expect(getAllByText('DNF').length).toBeGreaterThan(0));
   });
 
-  it('shows DNS label for did-not-start entry (pos=0, laps=0)', async () => {
+  it('shows DNS label for a status:NC entry - the real TSL token for did-not-start/not-classified', async () => {
+    // The scraper's status regex only ever recognizes DNF/DQ/NC/RET - it never
+    // emits a literal 'DNS' value, so NC is the real-world case this covers.
+    const ncResults = [{
+      round: 1, venue: 'Thruxton',
+      races: [{label: 'Race 1', results: [{driver: 'Test Driver', position: 0, laps: 0, status: 'NC', points: 0, fastestLap: false, leadLap: false, pole: false, team: 'Test'}]}],
+    }];
+    const {getAllByText} = renderWithProviders(<SeasonTable results={ncResults} />);
+    await waitFor(() => expect(getAllByText('DNS').length).toBeGreaterThan(0));
+  });
+
+  it('shows DNS label for a literal status:DNS entry', async () => {
     const dnsResults = [{
       round: 1, venue: 'Thruxton',
-      races: [{label: 'Race 1', results: [{driver: 'Test Driver', position: 0, laps: 0, time: 'DNS', points: 0, fastestLap: false, leadLap: false, pole: false, team: 'Test'}]}],
+      races: [{label: 'Race 1', results: [{driver: 'Test Driver', position: 0, laps: 0, status: 'DNS', points: 0, fastestLap: false, leadLap: false, pole: false, team: 'Test'}]}],
     }];
     const {getAllByText} = renderWithProviders(<SeasonTable results={dnsResults} />);
     await waitFor(() => expect(getAllByText('DNS').length).toBeGreaterThan(0));
