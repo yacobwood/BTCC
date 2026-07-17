@@ -287,7 +287,7 @@ WebView embedding the TSL live timing interface. Only rendered when `live_timing
 Two-tab view: Drivers (card grid with number, photo, team, car class) and Teams (team cards with car image). Drivers can be starred as favourites. Tapping navigates to DriverDetail or TeamDetail. A driver whose `currentlyRacing` field in `drivers.json` is `false` (e.g. moved out of their seat mid-season to a reserve/development role) drops out of the main "N CONFIRMED" grid into a separate "NOT CURRENTLY RACING · RACED IN 2026" section below it, and is excluded from their last team's driver roster on TeamDetailScreen - kept visible rather than deleted, since they did race that season.
 
 **DriverDetailScreen** ([src/screens/DriverDetailScreen.js](src/screens/DriverDetailScreen.js))
-Full driver profile: photo, number, nationality, team, car, DOB (with live age calculation), birthplace, bio text, career statistics (wins/podiums/poles/fastest laps per year), and computed live 2026 championship standings from results data. Favourite toggle. History rendered as a scrollable year table.
+Full driver profile: photo, number, nationality, team, car, DOB (with live age calculation), birthplace, current residence (`livesIn` field - only shown when set, since btcc.net leaves it blank for some drivers), bio text, career statistics (wins/podiums/poles/fastest laps per year), and computed live 2026 championship standings from results data. Favourite toggle. History rendered as a scrollable year table.
 
 **TeamDetailScreen** ([src/screens/TeamDetailScreen.js](src/screens/TeamDetailScreen.js))
 Team profile: car image, bio, founded year, base, current drivers, championships won, historical standings.

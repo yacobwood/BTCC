@@ -81,6 +81,25 @@ describe('DriverDetailScreen', () => {
     await waitFor(() => expect(getAllByText('Team Ingram').length).toBeGreaterThan(0));
   });
 
+  it('displays the Lives in row when livesIn is set', async () => {
+    const route = makeRoute({driver: {...DRIVER, livesIn: 'Coventry'}});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('Lives in')).toBeTruthy();
+      expect(getByText('Coventry')).toBeTruthy();
+    });
+  });
+
+  it('does not render the Lives in row when livesIn is absent', async () => {
+    const route = makeRoute({driver: DRIVER});
+    const {queryByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(queryByText('Lives in')).toBeNull());
+  });
+
   it('shows career history year entries', async () => {
     const route = makeRoute({driver: DRIVER});
     const {getByText} = renderWithProviders(

@@ -182,6 +182,7 @@ export function parseGrid(json) {
       bio: d.bio || '',
       dateOfBirth: d.dateOfBirth || '',
       birthplace: d.birthplace || '',
+      livesIn: d.livesIn || '',
       // false only when a driver has left their seat mid-season (e.g. moved to
       // a reserve/development role) - they stay in the roster and keep their
       // last team/car for display, but drop out of that team's active driver

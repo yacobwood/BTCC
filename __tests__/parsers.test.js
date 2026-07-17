@@ -361,6 +361,19 @@ describe('parseGrid', () => {
     expect(grid.teams[0].drivers).toHaveLength(1);
   });
 
+  test('passes through livesIn, defaults to empty string when absent', () => {
+    const json = {
+      drivers: [
+        {number: 54, name: 'Ryan Bensley', team: 'Speedworks', car: 'Toyota', livesIn: 'Kings Lynn'},
+        {number: 2, name: 'No Lives In', team: 'Speedworks', car: 'Toyota'},
+      ],
+      teams: [{name: 'Speedworks', car: 'Toyota', entries: 2}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.drivers.find(d => d.name === 'Ryan Bensley').livesIn).toBe('Kings Lynn');
+    expect(grid.drivers.find(d => d.name === 'No Lives In').livesIn).toBe('');
+  });
+
   test('filters drivers without team', () => {
     const json = {
       drivers: [

@@ -192,7 +192,7 @@ export default function DriverDetailScreen({route, navigation}) {
           ) : null}
 
           {/* Personal info */}
-          {(age || driver.birthplace) ? (
+          {(age || driver.birthplace || driver.livesIn) ? (
             <View style={styles.card}>
               {age && dobFormatted ? (
                 <View style={styles.infoRow}>
@@ -205,6 +205,13 @@ export default function DriverDetailScreen({route, navigation}) {
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Birthplace</Text>
                   <Text style={styles.infoValue}>{driver.birthplace}</Text>
+                </View>
+              ) : null}
+              {(age || driver.birthplace) && driver.livesIn ? <View style={styles.infoDivider} /> : null}
+              {driver.livesIn ? (
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Lives in</Text>
+                  <Text style={styles.infoValue}>{driver.livesIn}</Text>
                 </View>
               ) : null}
             </View>
