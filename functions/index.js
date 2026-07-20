@@ -386,8 +386,39 @@ exports.sendSessionNotifications = onSchedule(
   },
 );
 
+// ── Shared digest prompt intros ───────────────────────────────
+// Used by weeklyDigest/raceWeekendDigest (scheduled) and triggerDigest (manual admin
+// button) so all three stay in sync - the two used to keep separate copies, which is
+// how the manual trigger drifted onto stale wording after a prompt fix.
+function weeklyDigestPromptIntro() {
+  return (
+    `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
+    `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
+    `Use British English throughout. ` +
+    `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
+    `Let the length be dictated entirely by how much genuinely happened this week - never pad, stretch thin material or invent a paragraph just to hit a target. A quiet week might only justify 2 or 3 focused paragraphs; a dramatic one might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+    `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
+    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
+    `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`
+  );
+}
+
+function raceWeekendPromptIntro(round) {
+  return (
+    `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
+    `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
+    `Use British English throughout. ` +
+    (round ? `This weekend the BTCC heads to ${round.venue} (${round.location}). ` : '') +
+    `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
+    `Let the length be dictated entirely by how much there genuinely is to say - never pad, stretch thin material or invent a paragraph just to hit a target. A round with few storylines might only justify 2 or 3 focused paragraphs; one with plenty going on might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+    `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
+    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
+    `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`
+  );
+}
+
 // ── Shared digest logic ───────────────────────────────────────
-async function runDigest(label, promptIntro) {
+async function runDigest(label, promptIntro, {force = false} = {}) {
   const today = getUKDateString(new Date());
   const postId = `digest-${today}`;
 
@@ -405,10 +436,17 @@ async function runDigest(label, promptIntro) {
   const fileData = await fileRes.json();
   const hubNews = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
 
-  // Skip if today's digest already exists (retry guard)
-  if (hubNews.posts.some(p => p.id === postId)) {
+  // Skip if today's digest already exists (retry guard). Manual admin triggers can
+  // pass {force: true} to regenerate instead - but only over an existing draft,
+  // never silently clobbering something already published or scheduled.
+  const existingIndex = hubNews.posts.findIndex(p => p.id === postId);
+  const existing = existingIndex !== -1 ? hubNews.posts[existingIndex] : null;
+  if (existing && !force) {
     console.log(`${label}: ${postId} already exists, skipping`);
     return;
+  }
+  if (existing && existing.status !== 'draft') {
+    throw new Error(`${postId} is already '${existing.status}' - refusing to overwrite. Unpublish it first if you want to regenerate.`);
   }
 
   const sources = [];
@@ -573,7 +611,11 @@ async function runDigest(label, promptIntro) {
     status: 'draft',
   };
 
-  hubNews.posts.unshift(newPost);
+  if (existingIndex !== -1) {
+    hubNews.posts[existingIndex] = newPost;
+  } else {
+    hubNews.posts.unshift(newPost);
+  }
 
   const updatedContent = Buffer.from(JSON.stringify(hubNews, null, 2)).toString('base64');
   const putRes = await fetchWithTimeout(GITHUB_API, 10000, {
@@ -622,17 +664,7 @@ exports.weeklyDigest = onSchedule(
   },
   async () => {
     try {
-      await runDigest(
-        'weeklyDigest',
-        `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
-        `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
-        `Use British English throughout. ` +
-        `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
-        `Let the length be dictated entirely by how much genuinely happened this week - never pad, stretch thin material or invent a paragraph just to hit a target. A quiet week might only justify 2 or 3 focused paragraphs; a dramatic one might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-        `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
-        `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-        `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`,
-      );
+      await runDigest('weeklyDigest', weeklyDigestPromptIntro());
     } catch (e) {
       console.error('weeklyDigest failed:', e);
       await logError('weeklyDigest', e.message, e, {alert: true});
@@ -658,18 +690,7 @@ exports.raceWeekendDigest = onSchedule(
         console.log(`raceWeekendDigest: no round on ${saturdayStr}, skipping`);
         return;
       }
-      await runDigest(
-        'raceWeekendDigest',
-        `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
-        `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
-        `Use British English throughout. ` +
-        `This weekend the BTCC heads to ${round.venue} (${round.location}). ` +
-        `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
-        `Let the length be dictated entirely by how much there genuinely is to say - never pad, stretch thin material or invent a paragraph just to hit a target. A round with few storylines might only justify 2 or 3 focused paragraphs; one with plenty going on might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-        `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
-        `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-        `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`,
-      );
+      await runDigest('raceWeekendDigest', raceWeekendPromptIntro(round));
     } catch (e) {
       console.error('raceWeekendDigest failed:', e);
       await logError('raceWeekendDigest', e.message, e, {alert: true});
@@ -701,30 +722,9 @@ exports.triggerDigest = onRequest(
             const end = new Date(r.endDate || r.startDate);
             return now >= start && now <= end;
           });
-        await runDigest(
-          'triggerDigest:race',
-          `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
-          `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
-          `Use British English throughout. ` +
-          (round ? `This weekend the BTCC heads to ${round.venue} (${round.location}). ` : '') +
-          `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
-          `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-          `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
-          `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-          `Do not include the title in the body.\n\n`,
-        );
+        await runDigest('triggerDigest:race', raceWeekendPromptIntro(round), {force: true});
       } else {
-        await runDigest(
-          'triggerDigest:weekly',
-          `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
-          `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
-          `Use British English throughout. ` +
-          `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
-          `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-          `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
-          `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-          `Do not include the title in the body.\n\n`,
-        );
+        await runDigest('triggerDigest:weekly', weeklyDigestPromptIntro(), {force: true});
       }
       res.status(200).json({ok: true});
     } catch (e) {
