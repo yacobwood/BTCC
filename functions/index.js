@@ -498,14 +498,18 @@ async function runDigest(label, promptIntro) {
     .map((s, i) => `[${i + 1}] ${s.source}: "${s.title}"\n${s.text || '(no excerpt)'}`)
     .join('\n\n');
 
-  // Build cross-reference context from previous digest articles
+  // Build cross-reference context from previous digest articles.
+  // Drafts are excluded — a status of 'draft' means it was never (or not yet) shown to readers,
+  // so it shouldn't count as "already covered" for repetition purposes. Missing status defaults
+  // to published, matching the admin panel's convention (see standings-admin.html).
+  const isVisible = p => p.status !== 'draft';
   const prevDigests = hubNews.posts
-    .filter(p => p.category === 'Weekly Digest' && p.id !== postId)
-    .slice(0, 8);
+    .filter(p => p.category === 'Weekly Digest' && p.id !== postId && isVisible(p))
+    .slice(0, 12);
   const prevDigestBlock = prevDigests.length
     ? prevDigests.map(p => {
-        const plain = (p.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 600);
-        return `  • "${p.title}"\n    ${plain}`;
+        const plain = (p.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1500);
+        return `  • "${p.title}" (${p.pubDate?.slice(0, 10) || 'undated'})\n    ${plain}`;
       }).join('\n\n')
     : '  (none yet — this is the first digest)';
 
@@ -529,8 +533,8 @@ async function runDigest(label, promptIntro) {
           `- Express opinions and reactions — this is a fan writing for fans, not a wire report\n` +
           `- The app is called "BTCC Hub" — never refer to it as "BTCC Fan Hub"\n` +
           `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
-          hubNews.posts.slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
-          `- Do not repeat a topic, story or driver storyline from a previous digest unless genuinely new information has emerged. If revisiting a recurring story, acknowledge only what has changed and move on:\n` +
+          hubNews.posts.filter(isVisible).slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
+          `- Before writing anything, read every previous digest below in full and mentally list the specific topics, storylines and driver narratives each one already covered. Your new digest must not repeat any of them. A story is only fair game again if something genuinely new has happened since that digest was published (a new result, a new statement, a new incident) - and even then, spend at most a sentence on the recap before moving straight to what's new. If, after checking, nothing new has happened on a given storyline this week, leave it out entirely rather than restating it. Do not cover a topic just because it's the most obvious one available - covering fewer, genuinely fresh stories is better than covering a full spread that repeats last time:\n` +
           prevDigestBlock + '\n\n' +
           `Respond with ONLY valid JSON in exactly this format (no markdown, no extra text):\n` +
           `{"title":"<short punchy headline>","content":"<HTML body>","description":"<one sentence summary>"}\n\n` +
@@ -624,7 +628,7 @@ exports.weeklyDigest = onSchedule(
         `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
         `Use British English throughout. ` +
         `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
-        `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+        `Let the length be dictated entirely by how much genuinely happened this week - never pad, stretch thin material or invent a paragraph just to hit a target. A quiet week might only justify 2 or 3 focused paragraphs; a dramatic one might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
         `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
         `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`,
@@ -661,7 +665,7 @@ exports.raceWeekendDigest = onSchedule(
         `Use British English throughout. ` +
         `This weekend the BTCC heads to ${round.venue} (${round.location}). ` +
         `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
-        `Write 5 to 7 paragraphs. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
+        `Let the length be dictated entirely by how much there genuinely is to say - never pad, stretch thin material or invent a paragraph just to hit a target. A round with few storylines might only justify 2 or 3 focused paragraphs; one with plenty going on might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
         `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
         `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
         `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`,
