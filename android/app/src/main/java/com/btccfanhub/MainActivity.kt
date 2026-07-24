@@ -1,7 +1,7 @@
 package com.btccfanhub
 
 import android.os.Bundle
-import androidx.activity.EdgeToEdge
+import androidx.core.view.WindowCompat
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -27,7 +27,7 @@ class MainActivity : ReactActivity() {
    * react-native-screens cannot handle (causes IllegalStateException on resume).
    */
   override fun onCreate(savedInstanceState: Bundle?) {
-    EdgeToEdge.enable(this)
+    WindowCompat.setDecorFitsSystemWindows(window, false)
     super.onCreate(null)
   }
 }
