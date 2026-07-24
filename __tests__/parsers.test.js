@@ -1,4 +1,4 @@
-import {parseArticle, formatDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields} from '../src/api/parsers';
+import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields} from '../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
@@ -85,6 +85,33 @@ describe('formatDate', () => {
   test('returns empty string for null/undefined', () => {
     expect(formatDate(null)).toBe('');
     expect(formatDate(undefined)).toBe('');
+  });
+});
+
+describe('formatFullDate', () => {
+  test('formats to ordinal-day, full-month, date-only', () => {
+    expect(formatFullDate('2026-07-20T08:00:00')).toBe('20th July 2026');
+  });
+
+  test('uses st/nd/rd/th suffixes correctly, including the 11th-13th exception', () => {
+    expect(formatFullDate('2026-07-01')).toBe('1st July 2026');
+    expect(formatFullDate('2026-07-02')).toBe('2nd July 2026');
+    expect(formatFullDate('2026-07-03')).toBe('3rd July 2026');
+    expect(formatFullDate('2026-07-11')).toBe('11th July 2026');
+    expect(formatFullDate('2026-07-12')).toBe('12th July 2026');
+    expect(formatFullDate('2026-07-13')).toBe('13th July 2026');
+    expect(formatFullDate('2026-07-21')).toBe('21st July 2026');
+  });
+
+  test('drops the time component entirely', () => {
+    expect(formatFullDate('2026-07-20T23:45:00')).not.toMatch(/\d{2}:\d{2}/);
+  });
+
+  test('returns empty string on invalid or missing input', () => {
+    expect(formatFullDate('not-a-date')).toBe('');
+    expect(formatFullDate('')).toBe('');
+    expect(formatFullDate(null)).toBe('');
+    expect(formatFullDate(undefined)).toBe('');
   });
 });
 

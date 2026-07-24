@@ -6,7 +6,7 @@ const fa = () => { if (!_fa) _fa = getAnalytics(); return _fa; };
 export const Analytics = {
   screen: (name, extra) => logEvent(fa(), 'screen_view', {screen_name: name, firebase_screen_class: name.split(':')[0], ...extra}),
 
-  articleClicked: (title, position, source, trafficSource = 'organic') => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position, ...(source ? {source} : {}), traffic_source: trafficSource}),
+  articleClicked: (title, position, source, trafficSource = 'organic', publishDate) => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position, ...(source ? {source} : {}), traffic_source: trafficSource, ...(publishDate ? {publish_date: publishDate} : {})}),
   articleShared: (title) => logEvent(fa(),'share', {content_type: 'article', item_id: title?.substring(0, 100) || ''}),
   articleScrollDepth: (title, depth) => logEvent(fa(),'article_scroll_depth', {item_name: title?.substring(0, 100), depth_percent: depth}),
   articleExternalLinkClicked: (title, url) => logEvent(fa(),'article_external_link_clicked', {item_name: title?.substring(0, 100), url: url?.substring(0, 100)}),
@@ -19,6 +19,7 @@ export const Analytics = {
 
   resultsYearChanged: (year) => logEvent(fa(),'results_year_changed', {year}),
   resultsTabChanged: (year, tab) => logEvent(fa(),'results_tab_changed', {year, tab}),
+  resultsChampionshipChanged: (year, championship) => logEvent(fa(), 'results_championship_changed', {year, championship}),
   roundResultsViewed: (year, round) => logEvent(fa(),'round_results_viewed', {year, round}),
 
   driverClicked: (name) => logEvent(fa(),'driver_clicked', {driver_name: name}),

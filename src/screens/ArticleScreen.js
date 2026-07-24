@@ -25,7 +25,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {fetchArticleBySlug, fetchBlacklist} from '../api/client';
-import {parseArticle} from '../api/parsers';
+import {parseArticle, formatFullDate} from '../api/parsers';
 import auth from '@react-native-firebase/auth';
 import {useAuth} from '../store/auth';
 import {claimUsername, validateUsername, loadProfile, saveProfile} from '../utils/userProfile';
@@ -662,20 +662,30 @@ export default function ArticleScreen({route, navigation}) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState(null);
   const [commenterName, setCommenterName] = useState(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const myAuthorIdRef = useRef('anonymous');
 
-  useEffect(() => {
-    const needsFetch = !validParam;
+  const loadArticle = useCallback(() => {
     const resolvedSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null) || articleParam?.id || null;
-    if (needsFetch && resolvedSlug) {
-      fetchArticleBySlug(resolvedSlug).then(raw => {
-        if (raw) setArticle(parseArticle(raw));
-      }).catch(() => {});
-    }
-  }, []);
+    if (!resolvedSlug) return () => {};
+    let cancelled = false;
+    setLoadFailed(false);
+    fetchArticleBySlug(resolvedSlug).then(raw => {
+      if (cancelled) return;
+      if (raw) setArticle(parseArticle(raw));
+      // Not found yet (e.g. a just-published article the mirror hasn't
+      // picked up) - surface a retry state instead of spinning forever.
+      else setLoadFailed(true);
+    }).catch(() => { if (!cancelled) setLoadFailed(true); });
+    return () => { cancelled = true; };
+  }, [slug, articleParam]);
 
   useEffect(() => {
-    if (article) Analytics.screen('article:' + article.title?.substring(0, 50), trafficSource ? {traffic_source: trafficSource} : undefined);
+    if (!validParam) return loadArticle();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (article) Analytics.screen('article:' + article.title?.substring(0, 50), {...(trafficSource ? {traffic_source: trafficSource} : {}), ...(article.sortDate ? {publish_date: article.sortDate} : {})});
   }, [article]);
 
   useEffect(() => {
@@ -783,6 +793,26 @@ export default function ArticleScreen({route, navigation}) {
   };
 
   if (!article || !html) {
+    if (loadFailed) {
+      return (
+        <View style={[styles.container, styles.loadFailedContainer]}>
+          <Text style={styles.loadFailedTitle}>Couldn't load this article</Text>
+          <Text style={styles.loadFailedBody}>It may still be publishing - try again in a moment.</Text>
+          <View style={styles.loadFailedActions}>
+            <TouchableOpacity onPress={loadArticle} style={styles.loadFailedRetryBtn} accessibilityLabel="Retry loading article" accessibilityRole="button">
+              <Text style={styles.loadFailedRetryText}>Retry</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('NewsFeed')}
+              style={styles.loadFailedBackBtn}
+              accessibilityLabel="Go back"
+              accessibilityRole="button">
+              <Text style={styles.loadFailedBackText}>Go back</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
     return (
       <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
         <ActivityIndicator color={Colors.yellow} size="large" />
@@ -845,17 +875,18 @@ function sanitise(html) {
 
 function buildHtml(article, topPad) {
   const content = sanitise(article.content || '');
+  const headerDate = formatFullDate(article.sortDate || article.pubDate);
   const heroSection = article.imageUrl
     ? `<div class="hero" style="background-image:url('${article.imageUrl}');">
          <div class="hero-gradient"></div>
          <div class="hero-text">
            <h1>${article.title}</h1>
-           <p class="date">${article.pubDate}</p>
+           <p class="date">${headerDate}</p>
          </div>
        </div>`
     : `<div style="padding:${topPad + 50}px 16px 0;">
          <h1>${article.title}</h1>
-         <p class="date">${article.pubDate}</p>
+         <p class="date">${headerDate}</p>
        </div>`;
 
   return `<!DOCTYPE html><html><head>
@@ -990,6 +1021,14 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
+  loadFailedContainer: {justifyContent: 'center', alignItems: 'center', padding: 24},
+  loadFailedTitle: {color: '#fff', fontSize: 17, fontWeight: '800', textAlign: 'center', marginBottom: 8},
+  loadFailedBody: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginBottom: 24},
+  loadFailedActions: {flexDirection: 'row', gap: 12},
+  loadFailedRetryBtn: {paddingHorizontal: 20, paddingVertical: 12, borderRadius: 24, backgroundColor: Colors.yellow},
+  loadFailedRetryText: {color: '#020255', fontSize: 15, fontWeight: '700'},
+  loadFailedBackBtn: {paddingHorizontal: 20, paddingVertical: 12, borderRadius: 24, borderWidth: 1, borderColor: Colors.outline},
+  loadFailedBackText: {color: Colors.textSecondary, fontSize: 15, fontWeight: '600'},
   webview: {flex: 1, backgroundColor: Colors.background},
   topBar: {
     position: 'absolute',

@@ -37,6 +37,7 @@ export function makeNav(overrides = {}) {
   return {
     navigate: jest.fn(),
     goBack: jest.fn(),
+    canGoBack: jest.fn(() => true),
     dispatch: jest.fn(),
     addListener: jest.fn(() => jest.fn()),
     getParent: jest.fn(() => ({addListener: jest.fn(() => jest.fn())})),

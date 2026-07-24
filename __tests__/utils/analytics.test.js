@@ -43,6 +43,23 @@ describe('Analytics', () => {
       });
     });
 
+    it('articleClicked includes publish_date when provided', () => {
+      Analytics.articleClicked('BTCC opener', 2, undefined, undefined, '2026-07-20T10:00:00Z');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'select_content', {
+        content_type: 'article',
+        item_id: 'BTCC opener',
+        position: 2,
+        traffic_source: 'organic',
+        publish_date: '2026-07-20T10:00:00Z',
+      });
+    });
+
+    it('articleClicked omits publish_date when not provided', () => {
+      Analytics.articleClicked('BTCC opener', 2);
+      const call = logEvent.mock.calls[0][2];
+      expect(call).not.toHaveProperty('publish_date');
+    });
+
     it('articleClicked truncates title to 100 chars', () => {
       const longTitle = 'A'.repeat(150);
       Analytics.articleClicked(longTitle, 0);

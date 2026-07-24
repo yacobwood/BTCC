@@ -43,6 +43,24 @@ export function formatDate(date) {
   }
 }
 
+// e.g. "20th July 2026" - date only, no time, ordinal day + full month name
+export function formatFullDate(date) {
+  if (!date) return '';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const day = d.getDate();
+    const suffix = day % 10 === 1 && day !== 11 ? 'st'
+      : day % 10 === 2 && day !== 12 ? 'nd'
+      : day % 10 === 3 && day !== 13 ? 'rd'
+      : 'th';
+    const month = d.toLocaleDateString('en-GB', {month: 'long'});
+    return `${day}${suffix} ${month} ${d.getFullYear()}`;
+  } catch {
+    return '';
+  }
+}
+
 export function decodeEntities(text) {
   return text
     .replace(/&amp;/g, '&')

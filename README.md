@@ -68,7 +68,7 @@ Current version: **2.14.1** (versionCode 66)
 | Backend storage | Firestore (comments, reactions, bug reports, roadmap votes) |
 | Backend logic | Firebase Cloud Functions (Node.js) |
 | Data hosting | GitHub raw file CDN (`raw.githubusercontent.com`) |
-| News source | BTCC.net WordPress REST API |
+| News source | GitHub-mirrored btcc.net article snapshot (`articles.json` - see [§19](#19-python-scrapers); btcc.net's own WordPress REST API returns 401 for every client) |
 | Podcast source | Buzzsprout RSS |
 | Weather | WeatherAPI |
 | Live timing | TSL SignalR |
@@ -262,10 +262,10 @@ All screens use `animation: 'none'` - no page transition animations. This is del
 ### News Stack
 
 **NewsScreen** ([src/screens/NewsScreen.js](src/screens/NewsScreen.js))
-Combines two feeds: official btcc.net WordPress articles (via REST API) and curated hub posts (from `hub_news.json` on GitHub). Features: search with debounce, pagination, hideDigests filter toggle, real-time Firestore reactions (emoji voting). Hub news requires `hub_news_enabled` feature flag. Article cards show category, date and featured image. Favourite driver highlighting applied when a driver's name appears in article title.
+Combines two feeds: official btcc.net articles (from the GitHub-mirrored `articles.json` snapshot - see [§19](#19-python-scrapers); btcc.net's own WordPress REST API returns 401 for every client, so the app never hits it directly) and curated hub posts (from `hub_news.json` on GitHub). Features: search with debounce (filters the mirrored ~50 articles client-side by title/content, not a live btcc.net search), pagination, hideDigests filter toggle, real-time Firestore reactions (emoji voting). Hub news requires `hub_news_enabled` feature flag. Article cards show category, date and featured image. Favourite driver highlighting applied when a driver's name appears in article title.
 
 **ArticleScreen** ([src/screens/ArticleScreen.js](src/screens/ArticleScreen.js))
-WebView article reader for btcc.net articles. Adds Firestore comments (with commenter name input and optimistic posting), like/dislike reactions, share button and external link option. Tracks scroll depth for Firebase Analytics. Accepts either a full article object or just a `slug` parameter (fetches by slug if needed). Signed-in users can edit and delete their own comments - edit uses Firestore REST PATCH with `updateMask.fieldPaths` to update only `text` and `editedAt` without touching reactions. Edited comments show an "edited" label. Delete uses Firestore REST DELETE and removes the item from local state optimistically.
+WebView article reader for btcc.net articles. Adds Firestore comments (with commenter name input and optimistic posting), like/dislike reactions, share button and external link option. Tracks scroll depth for Firebase Analytics. Accepts either a full article object or just a `slug` parameter (looked up in the `articles.json` mirror if needed). If the slug isn't found (e.g. a just-published article the mirror hasn't picked up yet in its 5-minute refresh cycle) or the lookup fails, shows a "Couldn't load this article" retry state instead of spinning forever. Signed-in users can edit and delete their own comments - edit uses Firestore REST PATCH with `updateMask.fieldPaths` to update only `text` and `editedAt` without touching reactions. Edited comments show an "edited" label. Delete uses Firestore REST DELETE and removes the item from local state optimistically.
 
 **DigestsScreen** ([src/screens/DigestsScreen.js](src/screens/DigestsScreen.js))
 Lists AI-generated weekly digest articles from hub_news.json filtered to the Weekly Digest category.
@@ -460,7 +460,7 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | Calendar | `calendar_{year}` | 10 minutes |
 | Standings | `standings` | 5 minutes |
 | Results | `results_{year}` | 5 minutes |
-| Articles page | `news_p{page}` | 1 hour |
+| Articles mirror | `articles_mirror` | 5 minutes |
 | Hub posts | `hub_posts` | 5 minutes |
 | Live status | `live_status` | 2 minutes |
 
@@ -472,10 +472,10 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | `fetchDrivers()` | GitHub or bundled JSON | staleFirst; bundled fallback |
 | `fetchStandings(forceRefresh?)` | GitHub | staleFallback |
 | `fetchResults(year, forceRefresh?)` | GitHub | 5-minute cache |
-| `fetchArticles(page, perPage, search)` | WordPress REST API | No cache for search queries |
+| `fetchArticles(page, perPage, search)` | GitHub (`articles.json` mirror) | Paginates and search-filters the mirrored array client-side - btcc.net's own wp-json REST API returns 401 for every client, so this never hits btcc.net directly (see [§19](#19-python-scrapers)) |
 | `peekArticlesCache(page)` | AsyncStorage only | Returns stale data without network call |
 | `fetchHubPosts()` | GitHub + device ID filter | Handles published/scheduled/draft states |
-| `fetchArticleBySlug(slug)` | WordPress REST API | staleFirst |
+| `fetchArticleBySlug(slug)` | GitHub (`articles.json` mirror) | Looks up the slug in the same mirrored array as `fetchArticles`; returns null if not (yet) present |
 | `fetchBlacklist()` | GitHub or bundled JSON | staleFirst |
 | `fetchLiveStatus()` | GitHub | 2-minute cache; returns null on error |
 
@@ -492,8 +492,8 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 
 | Source | URL/Location | Data |
 |---|---|---|
-| GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, news, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
-| BTCC WordPress | `https://www.btcc.net/news/` | News articles - scraped into `news.json` by `scrape_news.py` through the btcc-relay Cloudflare Worker (btcc.net blocks direct fetches from the Cloud Function; see [§19](#19-python-scrapers)) |
+| GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, news, articles, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
+| BTCC WordPress | `https://www.btcc.net/news/` + `https://www.btcc.net/feed/` | News articles - scraped into `news.json` (latest headline, for the notification trigger) and `articles.json` (latest ~50 full articles, for the app's News tab and article deep-links) by `scrape_news.py`/`scrape_articles.py` through the btcc-relay Cloudflare Worker. Neither hits `/wp-json/` - that REST API returns 401 for every client, even routed through the relay, so the scrapers read the rendered `/news/` listing page and the `/feed/` RSS feed instead (see [§19](#19-python-scrapers)) |
 | Buzzsprout RSS | Configured URL | Podcast episodes |
 | WeatherAPI | API key in config | Current weather at circuit location |
 | TSL SignalR | Live timing hub endpoint | Session live timing entries |
@@ -515,7 +515,8 @@ Stored in [data/](data/) directory. Served via GitHub raw CDN. Some are also bun
 | `results{year}.json` | Full results for a season (2004 - 2026), including grids from TSL PDFs |
 | `flags.json` | Feature flags + per-device overrides |
 | `hub_news.json` | Hub-curated news posts including AI-generated digests |
-| `news.json` | Latest btcc.net WordPress article (raw REST API response), scraped every 5 minutes so `sendSessionNotifications` can read it without hitting btcc.net directly |
+| `news.json` | Latest btcc.net article (WP-REST-shaped), scraped every 5 minutes so `sendSessionNotifications` can read it without hitting btcc.net directly |
+| `articles.json` | Latest ~50 btcc.net articles in full (title, content, image, category), scraped every 5 minutes so the app's News tab, search and article deep-links can read them without hitting btcc.net's wp-json REST API, which returns 401 for every client |
 | `roadmap.json` | Feature roadmap items with status |
 | `radio.json` | Live radio station URLs |
 | `blacklist.json` | Profanity filter word list |
@@ -755,13 +756,15 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 **analytics.js** - Firebase Analytics event helpers wrapping `logEvent()` calls. Note: the `widget_configured` event (Android, params: `size` and `theme`) and `widget_size_used` event (iOS, param: `size`) are fired natively - not via this module. Android fires from `WidgetConfigureActivity.kt` at configure time. iOS queues the family in the shared App Group UserDefaults during `getTimeline` and the main app flushes to Firebase in `AppDelegate.didFinishLaunchingWithOptions`.
 
+`articleClicked` (event: `select_content`, `content_type: 'article'`) takes an optional 5th `publishDate` argument that logs as `publish_date` (only included when present). All call sites that have the full article object (NewsScreen hero/grid/list, DigestsScreen) pass `article.sortDate`. `ArticleScreen`'s own `Analytics.screen('article:...')` call also includes `publish_date` from `article.sortDate` when available. The notification deep-link path in `App.tsx` only has an article ID/slug (no full article object), so it cannot supply `publish_date`. Since this is an event parameter, GA4 only captures it going forward from when this shipped (2026-07-21) - it does not backfill `publish_date` onto previously logged events, so older `select_content`/`screen_view` rows in GA4 will show `(not set)` for it.
+
 **backgroundPrefetch.js** - Prefetches driver and article images into the React Native image cache on app start.
 
 **broadcaster.js** - Simple event emitter for cross-component state broadcast.
 
 **deviceId.js** - Generates a stable anonymous UUID stored in AsyncStorage. Used for hub post draft previews and roadmap vote deduplication.
 
-**digestRead.js** - Tracks which digest article IDs have been read (AsyncStorage).
+**digestRead.js** - Tracks which digest article IDs have been read (AsyncStorage). Syncs to the signed-in user's Firestore profile (`digestReadIds` field via `userProfile.js`) so read state carries across devices; anonymous users only get local persistence.
 
 **driverName.js** - Formats driver names as "Firstname LASTNAME" (e.g. `Tom INGRAM`). Used consistently across all screens for display.
 
@@ -800,6 +803,8 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 **scrape_calendar.py** - Parses the BTCC calendar to update `calendar.json` with round dates, venues and session times. Internally calls `scrape_full_timetable.py` per round to populate support-series timetables.
 
 **scrape_news.py** - Fetches the latest btcc.net article (scraping the rendered `/news/` page, not the `/wp-json/` REST API, which is blocked separately from the relay itself) through the relay and writes it to `news.json`. Runs every 5 minutes via `scrape-news.yml` so `sendSessionNotifications` can read it from GitHub instead of hitting btcc.net directly.
+
+**scrape_articles.py** - Mirrors the latest ~50 btcc.net articles in full (not just the single latest headline `scrape_news.py` tracks) to `articles.json`, so the app itself never needs to hit btcc.net's wp-json REST API - which now returns 401 Unauthorized for every client, not just cloud/datacenter IPs, confirmed by testing both through and around the relay. Combines two endpoints, neither of them wp-json: the rendered `/news/` listing page (one request, gives slug + featured image for ~50 articles) and the `/feed/` RSS feed (paginated via `?paged=N`, gives full HTML content per article via `content:encoded`). Merges the two by slug into a WP-REST-API-shaped array so `src/api/parsers.js`'s existing `parseArticle()` needed no changes. Runs every 5 minutes in the same `scrape-news.yml` workflow as `scrape_news.py`, so the full mirror stays roughly as fresh as the notification trigger.
 
 **scrape_schedule.py** - Updates `schedule.json` with precise BTCC session start times (Free Practice/Qualifying/Qualifying Race/Race 1-3) for Cloud Function pre-session alert timing. Reuses `scrape_full_timetable.py`'s table parser rather than driving a headless browser - the weekend timetable page is fully server-rendered, so a Playwright dependency was never actually necessary.
 

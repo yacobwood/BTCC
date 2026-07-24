@@ -225,6 +225,71 @@ describe('NewsScreen', () => {
     });
   });
 
+  describe('pagination', () => {
+    // Flattens the FlatList's transformed `data` prop (hero/grid/compact groups)
+    // back into a plain, display-order list of article titles.
+    function titlesInDisplayOrder(data) {
+      const titles = [];
+      data.forEach(item => {
+        if (item.type === 'hero') titles.push(item.article.title);
+        else if (item.type === 'grid') item.articles.forEach(a => titles.push(a.title));
+        else if (item.type === 'compact') titles.push(item.article.title);
+      });
+      return titles;
+    }
+
+    it('re-sorts hub posts against later pages instead of leaving them stuck at the page-1 boundary', async () => {
+      // Page 1 (20 articles, newest first) merges with the hub post once, on initial load.
+      const page1 = Array.from({length: 20}, (_, i) => {
+        const day = String(20 - i).padStart(2, '0');
+        return {
+          id: `p1-${i}`, title: `Page1 Article ${i}`, imageUrl: null,
+          source: 'btcc.net', category: 'LATEST NEWS',
+          pubDate: `${20 - i} Jul 2026`, sortDate: `2026-07-${day}`,
+        };
+      });
+      // Older than every page-1 article, so it correctly sorts to the tail on initial load.
+      const hubPost = {
+        id: 'hub-1', title: 'A Day in the Paddock', imageUrl: null,
+        source: 'BTCC Hub', category: 'Paddock',
+        pubDate: '13 Apr 2026', sortDate: '2026-04-13',
+      };
+      // Page 2 is older than page 1 but newer than the hub post - it must land
+      // BEFORE the hub post once appended, not after.
+      const page2 = [{
+        id: 'p2-0', title: 'Newer Than The Hub Post', imageUrl: null,
+        source: 'btcc.net', category: 'LATEST NEWS',
+        pubDate: '30 Jun 2026', sortDate: '2026-06-30',
+      }];
+
+      fetchHubPosts.mockResolvedValue([hubPost]);
+      fetchArticles
+        .mockImplementationOnce(() => Promise.resolve(page1))
+        .mockImplementationOnce(() => Promise.resolve(page2));
+
+      const {getByTestId} = renderWithProviders(<NewsScreen navigation={nav} />);
+      // FlatList virtualizes rendering, so item #21 (the hub post) won't be in the
+      // visible text tree - assert against the underlying `data` prop instead.
+      await waitFor(() => {
+        expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+          .toContain('A Day in the Paddock');
+      });
+
+      await act(async () => {
+        fireEvent(getByTestId('news-flatlist'), 'onEndReached');
+      });
+      await waitFor(() => {
+        expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+          .toContain('Newer Than The Hub Post');
+      });
+
+      const titles = titlesInDisplayOrder(getByTestId('news-flatlist').props.data);
+      const hubIndex = titles.indexOf('A Day in the Paddock');
+      const page2Index = titles.indexOf('Newer Than The Hub Post');
+      expect(page2Index).toBeLessThan(hubIndex);
+    });
+  });
+
   describe('search', () => {
     it('search input appears when search icon is pressed', async () => {
       const {getByLabelText, queryByPlaceholderText} = renderNews();

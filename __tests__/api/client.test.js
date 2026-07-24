@@ -138,46 +138,53 @@ describe('fetchResults', () => {
 });
 
 describe('fetchArticles', () => {
-  it('fetches from WordPress API with default pagination', async () => {
+  it('fetches the GitHub-mirrored articles.json (btcc.net wp-json is blocked)', async () => {
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve([])});
 
     await fetchArticles();
 
     const url = global.fetch.mock.calls[0][0];
-    expect(url).toContain('btcc.net/wp-json/wp/v2/posts');
-    expect(url).toContain('per_page=20');
-    expect(url).toContain('page=1');
-    expect(url).toContain('_embed=1');
+    expect(url).toContain('articles.json');
   });
 
-  it('includes search param when provided', async () => {
-    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve([])});
+  it('paginates the mirrored array client-side', async () => {
+    const all = Array.from({length: 25}, (_, i) => ({id: i, title: {rendered: `Post ${i}`}, content: {rendered: ''}}));
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(all)});
 
-    await fetchArticles(1, 20, 'Ingram win');
+    const page1 = await fetchArticles(1, 20);
+    expect(page1).toHaveLength(20);
+    expect(page1[0].id).toBe(0);
 
-    const url = global.fetch.mock.calls[0][0];
-    expect(url).toContain('search=Ingram%20win');
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(all)});
+    const page2 = await fetchArticles(2, 20);
+    expect(page2).toHaveLength(5);
+    expect(page2[0].id).toBe(20);
   });
 
-  it('does NOT cache search results', async () => {
-    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve([])});
+  it('filters by search query client-side (title or content match)', async () => {
+    const all = [
+      {id: 1, title: {rendered: 'Ingram wins Donington'}, content: {rendered: ''}},
+      {id: 2, title: {rendered: 'Cammish takes pole'}, content: {rendered: 'mentions Ingram in the writeup'}},
+      {id: 3, title: {rendered: 'Unrelated story'}, content: {rendered: ''}},
+    ];
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(all)});
 
-    await fetchArticles(1, 20, 'search query');
+    const result = await fetchArticles(1, 20, 'Ingram');
 
-    expect(cacheWrite).not.toHaveBeenCalled();
+    expect(result.map(p => p.id)).toEqual([1, 2]);
   });
 
-  it('caches non-search results with page-specific key', async () => {
+  it('caches the mirror under a single shared key', async () => {
     const articles = [{id: 1}, {id: 2}];
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(articles)});
 
     await fetchArticles(2);
 
-    expect(cacheWrite).toHaveBeenCalledWith('news_p2', articles);
+    expect(cacheWrite).toHaveBeenCalledWith('articles_mirror', articles);
   });
 
-  it('falls back to cached page on network error', async () => {
-    const cached = [{id: 99}];
+  it('falls back to the cached mirror on network error', async () => {
+    const cached = [{id: 99, title: {rendered: 'Cached'}, content: {rendered: ''}}];
     // First cacheRead: cache miss (no fresh data). Then fetch fails. Then staleFallback cacheRead: returns stale.
     cacheRead.mockResolvedValueOnce(null).mockResolvedValueOnce(cached);
     global.fetch.mockResolvedValueOnce({ok: false});
@@ -199,7 +206,7 @@ describe('fetchArticles', () => {
 });
 
 describe('peekArticlesCache', () => {
-  it('reads cache without any max-age restriction', async () => {
+  it('reads the shared mirror cache without any max-age restriction', async () => {
     const stale = [{id: 7, title: 'Old article'}];
     cacheRead.mockResolvedValueOnce(stale);
 
@@ -207,7 +214,7 @@ describe('peekArticlesCache', () => {
 
     expect(result).toEqual(stale);
     // Must be called without a maxAgeMs argument so even expired entries are returned
-    expect(cacheRead).toHaveBeenCalledWith('news_p1');
+    expect(cacheRead).toHaveBeenCalledWith('articles_mirror');
   });
 
   it('returns null when nothing is cached', async () => {
@@ -216,10 +223,12 @@ describe('peekArticlesCache', () => {
     expect(result).toBeNull();
   });
 
-  it('uses the correct cache key for the given page', async () => {
-    cacheRead.mockResolvedValueOnce(null);
-    await peekArticlesCache(3);
-    expect(cacheRead).toHaveBeenCalledWith('news_p3');
+  it('slices the given page out of the shared cached mirror', async () => {
+    const all = Array.from({length: 25}, (_, i) => ({id: i}));
+    cacheRead.mockResolvedValueOnce(all);
+    const result = await peekArticlesCache(2, 20);
+    expect(result).toHaveLength(5);
+    expect(result[0].id).toBe(20);
   });
 
   it('makes no network request', async () => {
@@ -313,42 +322,44 @@ describe('fetchHubPosts', () => {
 });
 
 describe('fetchArticleBySlug', () => {
-  it('fetches a single article by slug', async () => {
+  it('finds the matching article within the mirrored array', async () => {
     const article = {id: 1, slug: 'test-article'};
     global.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve([article]),
+      json: () => Promise.resolve([{id: 0, slug: 'other'}, article]),
     });
 
     const result = await fetchArticleBySlug('test-article');
 
-    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('slug=test-article'));
+    const url = global.fetch.mock.calls[0][0];
+    expect(url).toContain('articles.json');
     expect(result).toEqual(article);
   });
 
-  it('returns null when no article found for slug', async () => {
+  it('returns null when no article in the mirror matches the slug', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve([]),
+      json: () => Promise.resolve([{id: 1, slug: 'something-else'}]),
     });
 
     const result = await fetchArticleBySlug('does-not-exist');
     expect(result).toBeNull();
   });
 
-  it('returns null when fetch fails', async () => {
+  it('returns null when fetch fails and no cache exists', async () => {
     global.fetch.mockResolvedValueOnce({ok: false});
+    cacheRead.mockResolvedValueOnce(null);
 
     const result = await fetchArticleBySlug('any-slug');
     expect(result).toBeNull();
   });
 
-  it('uses a bounded cache, not staleFirst', async () => {
+  it('uses the shared mirror cache, bounded to its 5-minute refresh cadence', async () => {
     const article = {id: 2, slug: 'cached-article'};
-    cacheRead.mockResolvedValueOnce(article);
+    cacheRead.mockResolvedValueOnce([article]);
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve([article])});
     const result = await fetchArticleBySlug('cached-article');
-    expect(cacheRead).toHaveBeenCalledWith('article_cached-article', 60 * 60 * 1000);
+    expect(cacheRead).toHaveBeenCalledWith('articles_mirror', 5 * 60 * 1000);
     expect(result).toEqual(article);
   });
 });

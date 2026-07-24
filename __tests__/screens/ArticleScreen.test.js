@@ -2,6 +2,7 @@ import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ArticleScreen from '../../src/screens/ArticleScreen';
+import {Analytics} from '../../src/utils/analytics';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
@@ -19,6 +20,7 @@ jest.mock('../../src/api/parsers', () => ({
     pubDate: '1 Jan 2026',
     imageUrl: null,
   })),
+  formatFullDate: jest.fn(() => '1st January 2026'),
 }));
 
 // WebView mock — supports firing onLoad and onMessage via test IDs.
@@ -188,6 +190,23 @@ describe('ArticleScreen', () => {
     });
   });
 
+  // ── Analytics ────────────────────────────────────────────────────────────────
+
+  describe('analytics tracking', () => {
+    it('screen_view includes publish_date when article has a sortDate', () => {
+      renderArticle({article: {...FULL_ARTICLE, sortDate: '2026-04-19T14:00:00Z'}});
+      expect(Analytics.screen).toHaveBeenCalledWith(
+        'article:Ingram wins at Donington',
+        {publish_date: '2026-04-19T14:00:00Z'},
+      );
+    });
+
+    it('screen_view omits publish_date when article has no sortDate', () => {
+      renderArticle();
+      expect(Analytics.screen).toHaveBeenCalledWith('article:Ingram wins at Donington', {});
+    });
+  });
+
   // ── Slug-based fetch ────────────────────────────────────────────────────────
 
   describe('slug-based article fetch', () => {
@@ -239,6 +258,58 @@ describe('ArticleScreen', () => {
       await waitFor(() => {
         expect(getByTestId('webview')).toBeTruthy();
       });
+    });
+  });
+
+  // ── Failed / not-found slug fetch — regression for the infinite-spinner bug ──
+  // where a slug not (yet) in the GitHub article mirror resolved to `null` and
+  // ArticleScreen had no branch to handle it, leaving the ActivityIndicator
+  // spinning forever instead of surfacing an error.
+
+  describe('slug fetch failure', () => {
+    it('shows a retry state instead of spinning forever when the slug is not found', async () => {
+      fetchArticleBySlug.mockResolvedValue(null);
+
+      const {getByText} = renderArticle({article: undefined, slug: 'not-mirrored-yet'});
+
+      await waitFor(() => {
+        expect(getByText("Couldn't load this article")).toBeTruthy();
+      });
+    });
+
+    it('shows the same retry state when fetchArticleBySlug rejects', async () => {
+      fetchArticleBySlug.mockRejectedValue(new Error('network error'));
+
+      const {getByText} = renderArticle({article: undefined, slug: 'any-slug'});
+
+      await waitFor(() => {
+        expect(getByText("Couldn't load this article")).toBeTruthy();
+      });
+    });
+
+    it('pressing Retry calls fetchArticleBySlug again', async () => {
+      fetchArticleBySlug.mockResolvedValue(null);
+
+      const {getByText, getByLabelText} = renderArticle({article: undefined, slug: 'not-mirrored-yet'});
+      await waitFor(() => expect(getByText("Couldn't load this article")).toBeTruthy());
+
+      fetchArticleBySlug.mockResolvedValue(RAW_WP_ARTICLE);
+      fireEvent.press(getByLabelText('Retry loading article'));
+
+      await waitFor(() => {
+        expect(fetchArticleBySlug).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('pressing Go back navigates away from the failed article', async () => {
+      fetchArticleBySlug.mockResolvedValue(null);
+
+      const {getByText, getByLabelText} = renderArticle({article: undefined, slug: 'not-mirrored-yet'});
+      await waitFor(() => expect(getByText("Couldn't load this article")).toBeTruthy());
+
+      fireEvent.press(getByLabelText('Go back'));
+
+      expect(nav.goBack).toHaveBeenCalled();
     });
   });
 

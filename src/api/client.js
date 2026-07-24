@@ -3,7 +3,6 @@ import {formatDate} from './parsers';
 import auth from '@react-native-firebase/auth';
 
 const BASE_GITHUB = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data';
-const BASE_WP = 'https://www.btcc.net/wp-json/wp/v2';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const BUNDLED_CALENDAR_2027 = require('../../data/calendar2027.json');
@@ -127,17 +126,40 @@ export async function fetchRecords() {
 }
 
 
+// btcc.net's own wp-json REST API now returns 401 for every client, so the
+// news list/search/article-by-slug all read this GitHub-mirrored snapshot
+// (tools/scraper/scrape_articles.py) instead of hitting btcc.net directly.
+// It's refreshed every 5 minutes and holds the ~50 most recent articles in
+// full (title, content, image) - see project_wp_rest_api_lockdown memory.
+const ARTICLES_URL = `${BASE_GITHUB}/articles.json`;
+const ARTICLES_CACHE_KEY = 'articles_mirror';
+const ARTICLES_MAX_AGE_MS = 5 * 60 * 1000; // matches the scraper's own refresh cadence
+
+async function fetchArticlesMirror(forceRefresh = false) {
+  const all = await fetchJson(ARTICLES_URL, ARTICLES_CACHE_KEY, forceRefresh, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
+  return Array.isArray(all) ? all : [];
+}
+
 export async function fetchArticles(page = 1, perPage = 20, search = '', forceRefresh = false) {
-  let url = `${BASE_WP}/posts?per_page=${perPage}&page=${page}&_embed=1`;
-  if (search) url += `&search=${encodeURIComponent(search)}`;
-  const cacheKey = search ? null : `news_p${page}`;
-  return fetchJson(url, cacheKey, forceRefresh, /* staleFallback */ true);
+  const all = await fetchArticlesMirror(forceRefresh);
+  const q = search.trim().toLowerCase();
+  // Client-side substring match over the mirrored set - only covers the ~50
+  // most recent articles, not btcc.net's full history like the old WP search did.
+  const filtered = q
+    ? all.filter(p => (p.title?.rendered || '').toLowerCase().includes(q) || (p.content?.rendered || '').toLowerCase().includes(q))
+    : all;
+  const start = (page - 1) * perPage;
+  return filtered.slice(start, start + perPage);
 }
 
 // Returns any cached articles for a page without triggering a network request.
 // Used by NewsScreen to show stale data instantly before fetching fresh data.
-export async function peekArticlesCache(page = 1) {
-  return cacheRead(`news_p${page}`); // no maxAge  -  any cached data regardless of age
+export async function peekArticlesCache(page = 1, perPage = 20) {
+  const cached = await cacheRead(ARTICLES_CACHE_KEY); // no maxAge  -  any cached data regardless of age
+  if (!Array.isArray(cached)) return null;
+  const start = (page - 1) * perPage;
+  const slice = cached.slice(start, start + perPage);
+  return slice.length ? slice : null;
 }
 
 const HUB_CACHE_KEY = 'hub_posts';
@@ -202,8 +224,10 @@ export async function fetchHubPosts() {
 }
 
 export async function fetchArticleBySlug(slug) {
-  const cacheKey = `article_${slug}`;
-  return fetchJson(`${BASE_WP}/posts?slug=${slug}&_embed=1`, cacheKey, false, /* staleFallback */ true, /* staleFirst */ false, MAX_AGE_MS)
-    .then(arr => (Array.isArray(arr) ? arr[0] ?? null : arr))
-    .catch(() => null);
+  try {
+    const all = await fetchArticlesMirror();
+    return all.find(p => p.slug === slug) ?? null;
+  } catch {
+    return null;
+  }
 }

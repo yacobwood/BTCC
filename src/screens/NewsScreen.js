@@ -25,6 +25,9 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
 const logoImg = require('../assets/logo_long.png');
 
+const byDateDesc = (a, b) =>
+  new Date(b.sortDate || b.pubDate || 0) - new Date(a.sortDate || a.pubDate || 0);
+
 export default function NewsScreen({navigation}) {
   const {hub_news_enabled} = useFeatureFlags();
   const {favourites} = useFavouriteDriver();
@@ -78,13 +81,9 @@ export default function NewsScreen({navigation}) {
       ]);
       const parsed = raw.map(parseArticle);
       if (append) {
-        setArticles(prev => [...prev, ...parsed]);
+        setArticles(prev => [...prev, ...parsed].sort(byDateDesc));
       } else {
-        const merged = [...(hubPosts || []), ...parsed].sort((a, b) => {
-          const da = new Date(a.sortDate || a.pubDate || 0);
-          const db = new Date(b.sortDate || b.pubDate || 0);
-          return db - da;
-        });
+        const merged = [...(hubPosts || []), ...parsed].sort(byDateDesc);
         setArticles(merged);
         // Prefetch at the thumbnail sizes CachedImage will actually request so
         // Android's OkHttp disk cache is warm for the exact URLs rendered.
@@ -188,13 +187,13 @@ export default function NewsScreen({navigation}) {
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
       case 'hero':
-        return <HeroCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'hero', item.article.source); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
+        return <HeroCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'hero', item.article.source, undefined, item.article.sortDate); openArticle(item.article); }} onRefresh={onRefresh} onSearchClick={() => { Analytics.searchOpened(); setSearchActive(true); }} />;
       case 'grid':
-        return <GridRow articles={item.articles} favourite={favourites} onPress={(article) => { Analytics.articleClicked(article.title, 'grid', article.source); openArticle(article); }} />;
+        return <GridRow articles={item.articles} favourite={favourites} onPress={(article) => { Analytics.articleClicked(article.title, 'grid', article.source, undefined, article.sortDate); openArticle(article); }} />;
       case 'moreHeader':
         return <Text style={styles.moreHeader}>MORE STORIES</Text>;
       case 'compact':
-        return <CompactCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source); openArticle(item.article); }} />;
+        return <CompactCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source, undefined, item.article.sortDate); openArticle(item.article); }} />;
       case 'digestBanner':
         return (
           <DigestBanner
