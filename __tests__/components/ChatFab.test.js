@@ -39,6 +39,16 @@ jest.mock('../../src/store/featureFlags', () => ({
   FeatureFlagsProvider: ({children}) => children,
 }));
 
+// Control the chatFab setting directly rather than going through the real
+// SettingsProvider's async multi-key AsyncStorage load (~24 sequential awaits).
+// That load races waitFor's fixed timeout under full-suite CPU contention -
+// this mock makes chatFab synchronously available like defaults.chatFab.
+var mockChatFabSetting = true;
+jest.mock('../../src/store/settings', () => ({
+  useSettings: () => ({settings: {chatFab: mockChatFabSetting}, setSetting: jest.fn()}),
+  SettingsProvider: ({children}) => children,
+}));
+
 function triggerSnapshot(timestamp) {
   const snap = {forEach: cb => cb({val: () => ({timestamp, hidden: false})})};
   const onCall = mockDbOn.mock.calls[0];
@@ -57,6 +67,7 @@ describe('ChatFab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLiveChat = false;
+    mockChatFabSetting = true;
     AsyncStorage.getItem.mockResolvedValue(null);
     mockDbOn.mockImplementation(() => {});
   });
@@ -71,9 +82,7 @@ describe('ChatFab', () => {
 
   it('renders nothing when chatFab setting is false even if live_chat is true', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockImplementation(key =>
-      key === 'setting_chat_fab' ? Promise.resolve('false') : Promise.resolve(null),
-    );
+    mockChatFabSetting = false;
     const {queryByLabelText} = renderFab();
     await waitFor(() => expect(queryByLabelText(/open live chat/i)).toBeNull());
   });
@@ -234,9 +243,7 @@ describe('ChatFab', () => {
 
   it('respects chatFab setting: renders nothing when chatFab is false', async () => {
     mockLiveChat = true;
-    AsyncStorage.getItem.mockImplementation(key =>
-      key === 'setting_chat_fab' ? Promise.resolve('false') : Promise.resolve(null),
-    );
+    mockChatFabSetting = false;
     const {queryByLabelText} = renderFab();
     await waitFor(() => expect(queryByLabelText(/open live chat/i)).toBeNull());
   });
