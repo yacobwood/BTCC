@@ -10054,19 +10054,6 @@
             },
             {
               "pos": 6,
-              "no": 52,
-              "cl": "I",
-              "driver": "Gordon SHEDDEN",
-              "team": "Laser Tools Racing with MB Motorsport",
-              "car": "Toyota Corolla GR Sport",
-              "laps": 14,
-              "time": "19:34.995",
-              "gap": "8.882",
-              "bestLap": "1:17.388",
-              "points": 5
-            },
-            {
-              "pos": 7,
               "no": 33,
               "cl": "M",
               "driver": "Adam MORGAN",
@@ -10079,7 +10066,7 @@
               "points": 5
             },
             {
-              "pos": 8,
+              "pos": 7,
               "no": 32,
               "cl": "M",
               "driver": "Daniel ROWBOTTOM",
@@ -10089,6 +10076,19 @@
               "time": "19:38.240",
               "gap": "12.127",
               "bestLap": "1:17.384",
+              "points": 5
+            },
+            {
+              "pos": 8,
+              "no": 52,
+              "cl": "I",
+              "driver": "Gordon SHEDDEN",
+              "team": "Laser Tools Racing with MB Motorsport",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 14,
+              "time": "19:39.995",
+              "gap": "13.882",
+              "bestLap": "1:17.388",
               "points": 4
             },
             {
