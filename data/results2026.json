@@ -10926,20 +10926,6 @@
             },
             {
               "pos": 2,
-              "no": 66,
-              "cl": "M",
-              "driver": "Josh COOK",
-              "team": "Speedworks Corolla Racing",
-              "car": "Toyota Corolla GR Sport",
-              "laps": 16,
-              "time": "20:55.358",
-              "gap": "8.557",
-              "bestLap": "1:16.618",
-              "points": 17,
-              "leadLap": false
-            },
-            {
-              "pos": 3,
               "no": 27,
               "cl": "M",
               "driver": "Dan CAMMISH",
@@ -10949,6 +10935,20 @@
               "time": "20:56.106",
               "gap": "9.305",
               "bestLap": "1:16.680",
+              "points": 17,
+              "leadLap": false
+            },
+            {
+              "pos": 3,
+              "no": 66,
+              "cl": "M",
+              "driver": "Josh COOK",
+              "team": "Speedworks Corolla Racing",
+              "car": "Toyota Corolla GR Sport",
+              "laps": 16,
+              "time": "20:55.358",
+              "gap": "",
+              "bestLap": "1:16.618",
               "points": 15,
               "leadLap": false
             },
@@ -11080,20 +11080,6 @@
             },
             {
               "pos": 13,
-              "no": 2,
-              "cl": "I",
-              "driver": "Daryl DE LEON",
-              "team": "WSR",
-              "car": "BMW 330i M Sport",
-              "laps": 16,
-              "time": "21:08.679",
-              "gap": "21.878",
-              "bestLap": "1:17.367",
-              "points": 3,
-              "leadLap": false
-            },
-            {
-              "pos": 14,
               "no": 99,
               "cl": "I",
               "driver": "Charles RAINFORD",
@@ -11103,6 +11089,20 @@
               "time": "21:09.752",
               "gap": "22.951",
               "bestLap": "1:17.217",
+              "points": 3,
+              "leadLap": false
+            },
+            {
+              "pos": 14,
+              "no": 2,
+              "cl": "I",
+              "driver": "Daryl DE LEON",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 16,
+              "time": "21:08.679",
+              "gap": "",
+              "bestLap": "1:17.367",
               "points": 2,
               "leadLap": false
             },
@@ -11466,16 +11466,16 @@
             },
             {
               "pos": 13,
-              "no": 2,
+              "no": 99,
               "cl": "",
-              "driver": "Daryl DE LEON",
+              "driver": "Charles RAINFORD",
               "team": ""
             },
             {
               "pos": 14,
-              "no": 99,
+              "no": 2,
               "cl": "",
-              "driver": "Charles RAINFORD",
+              "driver": "Daryl DE LEON",
               "team": ""
             },
             {
