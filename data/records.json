@@ -211,7 +211,7 @@
     {
       "driver": "Tom Ingram",
       "starts": 373,
-      "wins": 41,
+      "wins": 42,
       "podiums": 121,
       "poles": 15,
       "fastestLaps": 51,
@@ -229,7 +229,7 @@
       "consecutivePoints": 36,
       "racesLed": 65,
       "hatTricks": 4,
-      "winPct": 0.10991957104557641,
+      "winPct": 0.1126005361930295,
       "podiumPct": 0.32439678284182305,
       "pointsPerStart": 10.233243967828418,
       "dnfPct": 0.09919571045576407
@@ -263,7 +263,7 @@
     {
       "driver": "Josh Cook",
       "starts": 343,
-      "wins": 21,
+      "wins": 22,
       "podiums": 59,
       "poles": 4,
       "fastestLaps": 26,
@@ -281,7 +281,7 @@
       "consecutivePoints": 24,
       "racesLed": 29,
       "hatTricks": 1,
-      "winPct": 0.061224489795918366,
+      "winPct": 0.0641399416909621,
       "podiumPct": 0.17201166180758018,
       "pointsPerStart": 7.440233236151603,
       "dnfPct": 0.13119533527696792
@@ -289,7 +289,7 @@
     {
       "driver": "Ashley Sutton",
       "starts": 313,
-      "wins": 52,
+      "wins": 53,
       "podiums": 124,
       "poles": 13,
       "fastestLaps": 59,
@@ -307,7 +307,7 @@
       "consecutivePoints": 29,
       "racesLed": 63,
       "hatTricks": 4,
-      "winPct": 0.16613418530351437,
+      "winPct": 0.16932907348242812,
       "podiumPct": 0.3961661341853035,
       "pointsPerStart": 11.408945686900958,
       "dnfPct": 0.06389776357827476
