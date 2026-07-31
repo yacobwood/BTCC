@@ -14,6 +14,14 @@ WordPress post IDs, so `id` is now the article slug (safe: every consumer
 of article.id already treats it as an opaque string - see
 project_wp_rest_api_lockdown / project_vercel_migration memory).
 
+Article images (btcc.net/api/media/<uuid>) are behind the exact same
+Vercel challenge as the page itself, so the app's own Image component
+(a plain HTTPS GET from the user's phone, no JS engine) can't load them
+directly either - confirmed as the cause of a live "no article images"
+report. Images are mirrored into data/media/news/ during the scrape (see
+btcc_playwright.get_with_media/save_mirrored_image) and served from
+GitHub raw instead, same as every other piece of scraped data.
+
 Usage:
     python scrape_news.py [--dry-run]
 """
@@ -26,26 +34,25 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import fetch_rendered
+from btcc_playwright import RenderedFetcher, save_mirrored_image
 
 NEWS_URL = "https://www.btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 NEWS_JSON = DATA_DIR / "news.json"
+MEDIA_DIR = DATA_DIR / "media" / "news"
+MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
 TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
 IMAGE_RE = re.compile(r'<img[^>]*src="(/api/media/[^"]+)"')
 
 
-def _fetch(url: str) -> str:
-    return fetch_rendered(url, wait_selector="article.news-card")
-
-
 def scrape_news() -> list | None:
     """Fetch btcc.net/news/ and return the latest article in WP-REST-API shape, or None on failure."""
     print(f"Fetching {NEWS_URL} …")
     try:
-        html = _fetch(NEWS_URL)
+        with RenderedFetcher() as fetcher:
+            html, media = fetcher.get_with_media(NEWS_URL, wait_selector="article.news-card")
     except Exception as e:
         print(f"ERROR: could not fetch news ({e})", file=sys.stderr)
         return None
@@ -63,7 +70,9 @@ def scrape_news() -> list | None:
     slug, title = title_m.group(1), title_m.group(2)
 
     image_m = IMAGE_RE.search(block)
-    image_url = f"https://btcc.net{image_m.group(1)}" if image_m else None
+    media_url = f"https://btcc.net{image_m.group(1)}" if image_m else None
+    filename = save_mirrored_image(media, media_url, MEDIA_DIR)
+    image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
 
     post = {
         "id": slug,

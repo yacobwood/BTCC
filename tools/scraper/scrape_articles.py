@@ -25,6 +25,15 @@ safe, since every consumer of article.id (NewsScreen, DigestsScreen,
 digestRead.js, newsCheck.js) already treats it as an opaque string, never
 a number.
 
+Article images (btcc.net/api/media/<uuid>) are behind the exact same
+Vercel challenge as the page itself, so the app's own Image component
+(a plain HTTPS GET from the user's phone, no JS engine) can't load them
+directly either - confirmed as the cause of a live "no article images"
+report. Images are mirrored into data/media/news/ during the scrape (see
+btcc_playwright.get_with_media/save_mirrored_image) and served from
+GitHub raw instead - only for articles without an already-mirrored image,
+same bounded-cost pattern as the full-content fetch below.
+
 Usage:
     python scrape_articles.py [--dry-run] [--refresh-all]
 """
@@ -37,11 +46,13 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher
+from btcc_playwright import RenderedFetcher, save_mirrored_image
 
 NEWS_URL = "https://www.btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ARTICLES_JSON = DATA_DIR / "articles.json"
+MEDIA_DIR = DATA_DIR / "media" / "news"
+MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
 TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
@@ -69,9 +80,10 @@ def parse_display_date(text: str) -> str:
     return f"{year}-{month:02d}-{int(day):02d}T00:00:00"
 
 
-def scrape_card_list(fetcher: RenderedFetcher) -> list[dict]:
-    """Fetch /news/ and return card metadata for every article found."""
-    html = fetcher.get(NEWS_URL, wait_selector="article.news-card")
+def scrape_card_list(fetcher: RenderedFetcher) -> tuple[list[dict], dict]:
+    """Fetch /news/ and return card metadata for every article found, plus the
+    captured media dict (see btcc_playwright.get_with_media) for mirroring."""
+    html, media = fetcher.get_with_media(NEWS_URL, wait_selector="article.news-card")
     cards = []
     for m in ARTICLE_RE.finditer(html):
         block = m.group(0)
@@ -85,11 +97,11 @@ def scrape_card_list(fetcher: RenderedFetcher) -> list[dict]:
         cards.append({
             "slug": slug,
             "title": title,
-            "image": f"https://btcc.net{image_m.group(1)}" if image_m else None,
+            "media_url": f"https://btcc.net{image_m.group(1)}" if image_m else None,
             "excerpt": excerpt_m.group(1).strip() if excerpt_m else "",
             "date": parse_display_date(date_m.group(1)) if date_m else "",
         })
-    return cards
+    return cards, media
 
 
 def fetch_article_body(fetcher: RenderedFetcher, slug: str) -> str:
@@ -114,7 +126,7 @@ def build_articles(refresh_all: bool) -> list[dict]:
     existing = load_existing() if not refresh_all else {}
 
     with RenderedFetcher() as fetcher:
-        cards = scrape_card_list(fetcher)
+        cards, media = scrape_card_list(fetcher)
         if not cards:
             return []
 
@@ -134,9 +146,16 @@ def build_articles(refresh_all: bool) -> list[dict]:
                 date_iso = card["date"]
                 category = ""
 
+            prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
+            if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
+                image_url = prior_image
+            else:
+                filename = save_mirrored_image(media, card["media_url"], MEDIA_DIR)
+                image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
+
             embedded = {}
-            if card["image"]:
-                embedded["wp:featuredmedia"] = [{"source_url": card["image"]}]
+            if image_url:
+                embedded["wp:featuredmedia"] = [{"source_url": image_url}]
             if category:
                 embedded["wp:term"] = [[{"name": category}]]
 
@@ -153,6 +172,25 @@ def build_articles(refresh_all: bool) -> list[dict]:
 
     posts.sort(key=lambda p: p["date"], reverse=True)
     return posts
+
+
+def prune_orphaned_images(posts: list[dict]) -> int:
+    """Delete mirrored images that no longer belong to any current post - the
+    /news/ page only ever shows ~25 cards, so old articles' images would
+    otherwise accumulate in the repo forever. Returns the number removed."""
+    if not MEDIA_DIR.exists():
+        return 0
+    referenced = set()
+    for p in posts:
+        url = p.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
+        if url and url.startswith(MEDIA_RAW_BASE):
+            referenced.add(url.rsplit("/", 1)[-1])
+    removed = 0
+    for f in MEDIA_DIR.iterdir():
+        if f.is_file() and f.name not in referenced:
+            f.unlink()
+            removed += 1
+    return removed
 
 
 def main():
@@ -173,6 +211,10 @@ def main():
     if args.dry_run:
         print("Dry run - no file written.")
         return
+
+    removed = prune_orphaned_images(posts)
+    if removed:
+        print(f"Pruned {removed} orphaned mirrored image(s)")
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     with open(ARTICLES_JSON, "w") as f:
