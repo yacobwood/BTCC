@@ -1294,18 +1294,11 @@ def main():
         print(f"  ERROR: compute_records failed: {e}", file=sys.stderr)
         sub_step_failed = True
 
-    print("\n[team stats]")
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "scrape_team_stats", Path(__file__).parent / "scrape_team_stats.py"
-        )
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        mod.main()
-    except Exception as e:
-        print(f"  ERROR: team stats scrape failed: {e}", file=sys.stderr)
-        sub_step_failed = True
+    # Team stats (totalRaces/totalWins in drivers.json) used to be scraped here
+    # too, but that meant launching a headless browser on every 2-minute
+    # results-scrape tick during a live race weekend (see scrape_team_stats.py
+    # docstring for why it now needs one). Split into its own periodic
+    # scrape-team-stats.yml workflow instead.
 
     # results.json/standings.json are already written above - fail only now,
     # after the good data is safely on disk, so CI still commits it while

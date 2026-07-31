@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_relay import fetch_via_relay
+from btcc_playwright import fetch_rendered
 
 CALENDAR_URL = "https://btcc.net/calendar/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -30,13 +30,13 @@ MONTH = {
 }
 
 def _fetch(url: str) -> str:
-    return fetch_via_relay(url).text
+    return fetch_rendered(url, wait_selector='a[href^="/circuit/"]')
 
 
 def parse_date_range(text: str, year: int) -> tuple[str, str] | None:
     """Parse e.g. "18 Apr-19 Apr" or "18 Apr - 19 Apr" into (startDate, endDate) as ISO."""
     text = text.strip()
-    m = re.match(r"(\d{1,2})\s*([A-Za-z]{3})\s*[-–]\s*(\d{1,2})\s*([A-Za-z]{3})", text)
+    m = re.match(r"(\d{1,2})\s*([A-Za-z]{3,4})\s*[-–]\s*(\d{1,2})\s*([A-Za-z]{3,4})", text)
     if not m:
         return None
     d1, mon1, d2, mon2 = m.groups()
@@ -62,29 +62,31 @@ def scrape_calendar(year: int) -> list[dict] | None:
         return None
 
     events = []
-    # Each round is an <a href="https://btcc.net/circuit/..."> block.
-    # Dates live in two ct-span elements inside circuitDatesText divs.
-    # Venue is in a mainHeading text block.
+    # Each round is an <a href="/circuit/{slug}/"> card. Dates live in two
+    # bare <span> elements inside calendar-date; venue is the card's <h2>.
+    # NOTE: card order in the HTML is NOT chronological (a grid/layout
+    # artifact, confirmed against the live page) - sort by date below
+    # rather than trusting encounter order for round numbers.
     for block_m in re.finditer(
-        r'<a\b[^>]*href="https://btcc\.net/circuit/([^"]+)"[^>]*>(.*?)</a>',
+        r'<a\b[^>]*href="/circuit/[^"]+/"[^>]*>(.*?)</a>',
         html, re.DOTALL
     ):
-        _slug, content = block_m.groups()
+        content = block_m.group(1)
 
-        date_spans = re.findall(r'class="ct-span"[^>]*>\s*(\d{1,2}\s+[A-Za-z]{3})\s*<', content)
-        venue_m = re.search(r'mainHeading"[^>]*>.*?<span[^>]*>\s*([^<]+)\s*</span>', content, re.DOTALL)
+        # btcc.net abbreviates most months to 3 letters but September to 4 ("SEPT") - allow both.
+        date_spans = re.findall(r'<span>(\d{1,2}\s+[A-Za-z]{3,4})</span>', content)
+        venue_m = re.search(r'<h2>([^<]+)</h2>', content)
 
         if len(date_spans) >= 2 and venue_m:
             d1, d2 = date_spans[0].strip(), date_spans[1].strip()
             venue = venue_m.group(1).strip()
             parsed = parse_date_range(f"{d1}-{d2}", year)
             if parsed:
-                events.append({
-                    "round": len(events) + 1,
-                    "venue": venue,
-                    "startDate": parsed[0],
-                    "endDate": parsed[1],
-                })
+                events.append({"venue": venue, "startDate": parsed[0], "endDate": parsed[1]})
+
+    events.sort(key=lambda e: e["startDate"])
+    for i, e in enumerate(events, start=1):
+        e["round"] = i
 
     return events
 

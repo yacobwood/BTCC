@@ -1,3 +1,7 @@
+# Runs on a self-hosted runner (see scrape-news.yml comment /
+# project_vercel_migration memory) since btcc.net's Vercel bot-challenge
+# blocks GitHub-hosted runner IPs even with headless Chromium - interim
+# fix until btcc.net's dev allowlists us.
 name: Scrape BTCC Session Schedule
 
 on:
@@ -8,7 +12,7 @@ on:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, btcc-mac]
     permissions:
       contents: write
 
@@ -16,21 +20,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: pip install curl_cffi
-
       - name: Scrape session schedule
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
-        run: python tools/scraper/scrape_schedule.py
+        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_schedule.py
 
       - name: Merge sessions into app calendar
-        run: python tools/scraper/merge_schedule.py
+        run: ~/.btcc-scraper-venv/bin/python tools/scraper/merge_schedule.py
 
       - name: Commit updated schedule
         uses: stefanzweifel/git-auto-commit-action@v7
