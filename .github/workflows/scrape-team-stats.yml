@@ -1,22 +1,23 @@
+# Team race/win totals (drivers.json totalRaces/totalWins) used to be
+# scraped as a post-step of every scrape-results.yml run, but that meant
+# launching a headless browser on every 2-minute results tick during a
+# live race weekend. Split out into its own daily job instead - team
+# totals only change once a race weekend's results are final anyway.
+#
 # Runs on a self-hosted runner (see scrape-news.yml comment /
 # project_vercel_migration memory) since btcc.net's Vercel bot-challenge
 # blocks GitHub-hosted runner IPs even with headless Chromium - interim
 # fix until btcc.net's dev allowlists us.
-name: Scrape BTCC Official Stats
+name: Scrape BTCC Team Stats
 
 on:
   schedule:
-    # Daily at 06:00 UTC — well outside race windows to avoid commit conflicts
-    - cron: "0 6 * * *"
+    # Daily at 06:30 UTC - same window as scrape-btcc-stats.yml.
+    - cron: "30 6 * * *"
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Dry run (print changes without writing)"
-        type: boolean
-        default: false
 
 concurrency:
-  group: scrape-btcc-stats
+  group: scrape-team-stats
   cancel-in-progress: false
 
 jobs:
@@ -33,21 +34,13 @@ jobs:
         run: git pull --rebase origin main
 
       - name: Run scraper
-        env:
-          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
-        run: |
-          ARGS=""
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            ARGS="--dry-run"
-          fi
-          ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_btcc_stats.py $ARGS
+        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_team_stats.py
 
-      - name: Commit updated records
-        if: github.event.inputs.dry_run != 'true'
+      - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: update all-time records from btcc.net [skip ci]"
-          file_pattern: "data/records.json"
+          commit_message: "chore: update team stats from btcc.net [skip ci]"
+          file_pattern: "data/drivers.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
@@ -60,5 +53,5 @@ jobs:
           curl -sf -X POST \
             -H "Content-Type: application/json" \
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
-            -d "{\"workflow\":\"scrape-btcc-stats\",\"message\":\"Official stats scrape failed\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            -d "{\"workflow\":\"scrape-team-stats\",\"message\":\"Team stats scrape failed\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
             "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"

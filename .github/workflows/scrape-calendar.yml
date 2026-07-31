@@ -1,5 +1,8 @@
 # Runs the calendar scraper on a schedule. Picks up new calendar data
-# automatically when btcc.net publishes it.
+# automatically when btcc.net publishes it. Runs on a self-hosted runner
+# (see scrape-news.yml comment / project_vercel_migration memory) since
+# btcc.net's Vercel bot-challenge blocks GitHub-hosted runner IPs even with
+# headless Chromium - interim fix until btcc.net's dev allowlists us.
 name: Scrape BTCC Calendar
 
 on:
@@ -15,7 +18,7 @@ on:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, btcc-mac]
     permissions:
       contents: write
 
@@ -23,23 +26,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          pip install playwright
-          playwright install --with-deps chromium
-
       - name: Scrape calendar
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
           SEASON="${{ github.event.inputs.season }}"
           [ -z "$SEASON" ] && SEASON=2026
-          python tools/scraper/scrape_calendar.py --season "$SEASON"
+          ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_calendar.py --season "$SEASON"
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
