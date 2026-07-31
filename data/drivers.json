@@ -2450,8 +2450,8 @@
       "birthplace": "Aylesbury, Buckinghamshire",
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-Napa400-x-400-Napa-Ash-_-Dan-C.jpg",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/sutton-2.png",
-      "totalRaces": 185,
-      "totalWins": 52
+      "totalRaces": 187,
+      "totalWins": 59
     },
     {
       "name": "Team VERTU",
@@ -2503,8 +2503,8 @@
       ],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-Vertu-400-x-400-Vertu.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Ingram-2.png",
-      "totalRaces": 242,
-      "totalWins": 39
+      "totalRaces": 244,
+      "totalWins": 40
     },
     {
       "name": "Speedworks Corolla Racing",
@@ -2576,8 +2576,8 @@
       ],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2025/08/Team-driver-graphics-toyota-gazoo-racing400-x-400-toyota-gazoo.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Cook-2.png",
-      "totalRaces": 390,
-      "totalWins": 27
+      "totalRaces": 392,
+      "totalWins": 31
     },
     {
       "name": "WSR",
@@ -2654,8 +2654,8 @@
       ],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-WSR-racing400-x-400-WSR.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/De-Leon-1.png",
-      "totalRaces": 779,
-      "totalWins": 129,
+      "totalRaces": 781,
+      "totalWins": 130,
       "lightCardBg": true
     },
     {
@@ -2723,7 +2723,7 @@
       ],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-LKQ400-x-400-LKQ.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-OS100883-cut-out.png",
-      "totalRaces": 20,
+      "totalRaces": 22,
       "totalWins": 1,
       "lightCardBg": true
     },
@@ -2741,8 +2741,8 @@
       "history": [],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-plato-racing400-x-400-plato-racing.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Scaled-Cutouts-Rowbottom.png",
-      "totalRaces": 20,
-      "totalWins": 2
+      "totalRaces": 22,
+      "totalWins": 0
     },
     {
       "name": "Restart Racing",
@@ -2821,7 +2821,7 @@
       ],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/04/Team-driver-graphics-restart-racing400-x-400-restart-racing.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/04/Smiley-2.png",
-      "totalRaces": 90,
+      "totalRaces": 82,
       "totalWins": 1
     },
     {
@@ -2833,8 +2833,8 @@
       "base": "Northwich, Cheshire",
       "driversChampionships": 1,
       "teamsChampionships": 0,
-      "totalRaces": 121,
-      "totalWins": 21,
+      "totalRaces": 123,
+      "totalWins": 24,
       "history": [],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-laser-tools400-x-400-laser-tools.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Taylor-Smith-3.png"
@@ -2851,7 +2851,7 @@
       "history": [],
       "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-power-maxed-racing-new-colours400-x-400-PMR-dexter.png",
       "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Patterson.png",
-      "totalRaces": 290,
+      "totalRaces": 292,
       "totalWins": 6,
       "lightCardBg": true
     },
