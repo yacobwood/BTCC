@@ -15,7 +15,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Optional
 
-from btcc_relay import fetch_via_relay
+from btcc_playwright import fetch_rendered
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
@@ -24,7 +24,7 @@ CALENDAR_JSON = DATA_DIR / "calendar.json"
 VENUE_SLUG = {
     "Donington Park":    "donington-park",
     "Donington Park GP": "donington-park-gp",
-    "Brands Hatch Indy": "brands-hatch",
+    "Brands Hatch Indy": "brands-hatch-indy",
     "Brands Hatch GP":   "brands-hatch-gp",
     "Snetterton":        "snetterton",
     "Oulton Park":       "oulton-park",
@@ -67,7 +67,7 @@ def parse_laps(raw: str) -> Optional[str]:
 
 
 def _fetch(url: str) -> str:
-    return fetch_via_relay(url).text
+    return fetch_rendered(url, wait_selector="#timetable")
 
 
 class _TimetableParser(HTMLParser):

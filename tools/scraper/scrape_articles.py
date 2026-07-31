@@ -1,27 +1,32 @@
 #!/usr/bin/env python3
 """
-BTCC full article mirror scraper - mirrors the latest ~50 btcc.net articles
+BTCC full article mirror scraper - mirrors the latest btcc.net articles
 (title, full content, image, category) to data/articles.json so the app's
 News tab and article deep-links can read from GitHub instead of hitting
-btcc.net's WordPress REST API directly. That REST API (/wp-json/*) now
-returns 401 Unauthorized for every client, unauthenticated or not, while
-plain HTML pages still load fine - see project_wp_rest_api_lockdown memory.
+btcc.net directly.
 
-Two btcc.net endpoints are used instead, neither of them wp-json:
-  - /news/            HTML listing page - gives slug + featured image for
-                       the latest ~50 articles in a single request.
-  - /feed/?paged=N     WordPress RSS feed - gives full HTML content
-                       (content:encoded), ~10 items per page, not blocked.
+btcc.net moved off WordPress entirely to a Vercel-hosted React app
+(2026-07-31): the old /wp-json/ REST API, and the /feed/ RSS feed this
+scraper used for full article content, are both gone. It also now issues
+a Vercel BotID JS challenge (HTTP 429) to any request that can't execute
+JavaScript, so every fetch here goes through headless Chromium (see
+btcc_playwright.py) rather than a direct HTTP request.
 
-Merged by slug into a WP-REST-API-shaped array matching what
-src/api/parsers.js's parseArticle() already expects, so the client only
-needed a new data source, not a new parser.
+Two btcc.net pages are used instead:
+  - /news/            rendered listing page - slug, title, excerpt, date
+                       and featured image for each card (~25 per load).
+  - /<slug>/           each article's own page - full body HTML, fetched
+                       only for slugs not already in data/articles.json
+                       (existing articles keep their cached content; a
+                       full-site backfill only happens once).
 
-Fetches through the btcc-relay Cloudflare Worker (see btcc_relay.py) since
-btcc.net's origin separately blocks GitHub Actions/GCP IPs with a 403.
+There are no more WordPress post IDs, so `id` is now the article slug -
+safe, since every consumer of article.id (NewsScreen, DigestsScreen,
+digestRead.js, newsCheck.js) already treats it as an opaque string, never
+a number.
 
 Usage:
-    python scrape_articles.py [--dry-run]
+    python scrape_articles.py [--dry-run] [--refresh-all]
 """
 
 from __future__ import annotations
@@ -30,137 +35,133 @@ import argparse
 import json
 import re
 import sys
-from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
-from xml.etree import ElementTree
 
-from btcc_relay import fetch_via_relay
+from btcc_playwright import RenderedFetcher
 
 NEWS_URL = "https://www.btcc.net/news/"
-FEED_URL = "https://www.btcc.net/feed/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ARTICLES_JSON = DATA_DIR / "articles.json"
 
-MAX_RSS_PAGES = 6   # ~60 items fetched - comfortably covers the /news/ page's 50 cards
-TARGET_COUNT = 50   # matches the number of cards the /news/ listing page returns
+ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
+TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
+IMAGE_RE = re.compile(r'<img[^>]*src="(/api/media/[^"]+)"')
+EXCERPT_RE = re.compile(r'<div class="news-card-footer"><p>([^<]*)</p>')
+DATE_RE = re.compile(r'<time class="date">([^<]+)</time>')
+BODY_RE = re.compile(r'<div class="article-body">(.*?)</div>\s*</article>', re.DOTALL)
 
-ARTICLE_RE = re.compile(r'<article class="wpgb-card[^"]*wpgb-post-(\d+)".*?</article>', re.DOTALL)
-TITLE_RE = re.compile(r'blogBlockTitle"><a href="https://btcc\.net/([a-z0-9-]+)/">([^<]+)</a>')
-IMAGE_RE = re.compile(r'<a href="(https://btcc\.net/wp-content/uploads/[^"]+)"[^>]*data-type="image"')
-
-CONTENT_TAG = "{http://purl.org/rss/1.0/modules/content/}encoded"
-
-
-def _fetch(url: str) -> str:
-    return fetch_via_relay(url).text
+_DISPLAY_DATE_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)\s+([A-Za-z]+)\s+(\d{4})")
+_MONTHS = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
+}
 
 
-def scrape_images_by_slug() -> dict:
-    """Fetch /news/ and return {slug: image_url} for every article card found."""
-    try:
-        html = _fetch(NEWS_URL)
-    except Exception as e:
-        print(f"WARNING: could not fetch news listing ({e}) - articles will have no images", file=sys.stderr)
-        return {}
-    images = {}
+def parse_display_date(text: str) -> str:
+    """Parse "30th July 2026" into an ISO date string, or '' if unparseable."""
+    m = _DISPLAY_DATE_RE.search(text)
+    if not m:
+        return ""
+    day, month_name, year = m.groups()
+    month = _MONTHS.get(month_name.lower())
+    if not month:
+        return ""
+    return f"{year}-{month:02d}-{int(day):02d}T00:00:00"
+
+
+def scrape_card_list(fetcher: RenderedFetcher) -> list[dict]:
+    """Fetch /news/ and return card metadata for every article found."""
+    html = fetcher.get(NEWS_URL, wait_selector="article.news-card")
+    cards = []
     for m in ARTICLE_RE.finditer(html):
         block = m.group(0)
         title_m = TITLE_RE.search(block)
         if not title_m:
             continue
+        slug, title = title_m.group(1), title_m.group(2)
         image_m = IMAGE_RE.search(block)
-        if image_m:
-            images[title_m.group(1)] = image_m.group(1)
-    return images
-
-
-def _slug_from_link(link: str) -> str:
-    return link.rstrip("/").rsplit("/", 1)[-1]
-
-
-def _id_from_guid(guid: str) -> int:
-    qs = parse_qs(urlparse(guid).query)
-    return int(qs["p"][0]) if "p" in qs else 0
-
-
-def scrape_rss_items() -> list:
-    """Fetch RSS feed pages until TARGET_COUNT items are gathered or a page runs short."""
-    items_by_id = {}
-    for page in range(1, MAX_RSS_PAGES + 1):
-        url = FEED_URL if page == 1 else f"{FEED_URL}?paged={page}"
-        try:
-            xml_text = _fetch(url)
-        except Exception as e:
-            print(f"WARNING: could not fetch feed page {page} ({e})", file=sys.stderr)
-            break
-        try:
-            root = ElementTree.fromstring(xml_text)
-        except ElementTree.ParseError as e:
-            print(f"WARNING: feed page {page} did not parse as XML ({e})", file=sys.stderr)
-            break
-        page_items = root.findall("./channel/item")
-        if not page_items:
-            break
-        for item in page_items:
-            link = (item.findtext("link") or "").strip()
-            guid = (item.findtext("guid") or "").strip()
-            post_id = _id_from_guid(guid)
-            if not link or not post_id:
-                continue
-            pub_date_raw = (item.findtext("pubDate") or "").strip()
-            try:
-                date_iso = parsedate_to_datetime(pub_date_raw).isoformat()
-            except (TypeError, ValueError):
-                date_iso = ""
-            items_by_id[post_id] = {
-                "id": post_id,
-                "slug": _slug_from_link(link),
-                "link": link,
-                "title": (item.findtext("title") or "").strip(),
-                "date": date_iso,
-                "category": (item.findtext("category") or "").strip(),
-                "description": (item.findtext("description") or "").strip(),
-                "content": (item.findtext(CONTENT_TAG) or "").strip(),
-            }
-        if len(page_items) < 10 or len(items_by_id) >= TARGET_COUNT:
-            break
-    return list(items_by_id.values())
-
-
-def build_articles() -> list:
-    images = scrape_images_by_slug()
-    items = scrape_rss_items()
-
-    posts = []
-    for it in items:
-        embedded = {}
-        image_url = images.get(it["slug"])
-        if image_url:
-            embedded["wp:featuredmedia"] = [{"source_url": image_url}]
-        if it["category"]:
-            embedded["wp:term"] = [[{"name": it["category"]}]]
-        posts.append({
-            "id": it["id"],
-            "slug": it["slug"],
-            "link": it["link"],
-            "date": it["date"],
-            "title": {"rendered": it["title"]},
-            "excerpt": {"rendered": it["description"]},
-            "content": {"rendered": it["content"]},
-            "_embedded": embedded,
+        excerpt_m = EXCERPT_RE.search(block)
+        date_m = DATE_RE.search(block)
+        cards.append({
+            "slug": slug,
+            "title": title,
+            "image": f"https://btcc.net{image_m.group(1)}" if image_m else None,
+            "excerpt": excerpt_m.group(1).strip() if excerpt_m else "",
+            "date": parse_display_date(date_m.group(1)) if date_m else "",
         })
+    return cards
+
+
+def fetch_article_body(fetcher: RenderedFetcher, slug: str) -> str:
+    """Fetch a single article page and return its body's inner HTML."""
+    url = f"https://btcc.net/{slug}/"
+    html = fetcher.get(url, wait_selector="div.article-body")
+    m = BODY_RE.search(html)
+    return m.group(1).strip() if m else ""
+
+
+def load_existing() -> dict:
+    if not ARTICLES_JSON.exists():
+        return {}
+    try:
+        posts = json.loads(ARTICLES_JSON.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return {p["slug"]: p for p in posts if p.get("slug")}
+
+
+def build_articles(refresh_all: bool) -> list[dict]:
+    existing = load_existing() if not refresh_all else {}
+
+    with RenderedFetcher() as fetcher:
+        cards = scrape_card_list(fetcher)
+        if not cards:
+            return []
+
+        posts = []
+        for card in cards:
+            slug = card["slug"]
+            prior = existing.get(slug)
+            has_content = bool(prior and prior.get("content", {}).get("rendered"))
+
+            if has_content:
+                content_html = prior["content"]["rendered"]
+                date_iso = prior.get("date") or card["date"]
+                category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
+            else:
+                print(f"  Fetching full content: {slug}")
+                content_html = fetch_article_body(fetcher, slug)
+                date_iso = card["date"]
+                category = ""
+
+            embedded = {}
+            if card["image"]:
+                embedded["wp:featuredmedia"] = [{"source_url": card["image"]}]
+            if category:
+                embedded["wp:term"] = [[{"name": category}]]
+
+            posts.append({
+                "id": slug,
+                "slug": slug,
+                "link": f"https://btcc.net/{slug}/",
+                "date": date_iso,
+                "title": {"rendered": card["title"]},
+                "excerpt": {"rendered": card["excerpt"]},
+                "content": {"rendered": content_html},
+                "_embedded": embedded,
+            })
 
     posts.sort(key=lambda p: p["date"], reverse=True)
-    return posts[:TARGET_COUNT]
+    return posts
 
 
 def main():
     ap = argparse.ArgumentParser(description="Mirror the latest BTCC articles into data/articles.json")
     ap.add_argument("--dry-run", action="store_true", help="Print result only, do not write")
+    ap.add_argument("--refresh-all", action="store_true", help="Re-fetch full content for every article, not just new ones")
     args = ap.parse_args()
 
-    posts = build_articles()
+    posts = build_articles(args.refresh_all)
     if not posts:
         print("ERROR: scraped zero articles - refusing to overwrite data/articles.json", file=sys.stderr)
         sys.exit(1)

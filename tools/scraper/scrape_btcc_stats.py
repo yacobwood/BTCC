@@ -21,7 +21,7 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-from btcc_relay import fetch_via_relay
+from btcc_playwright import fetch_rendered
 
 WINS_URL   = "https://btcc.net/history/statistics/drivers/"
 TITLES_URL = "https://btcc.net/history/champions/btcc-titles/"
@@ -43,7 +43,7 @@ NAME_ALIASES = {
 # ── HTML helpers ─────────────────────────────────────────────────────────────
 
 def _fetch(url: str) -> str:
-    return fetch_via_relay(url).text
+    return fetch_rendered(url, wait_selector=".history-editorial")
 
 
 def _strip_tags(html: str) -> str:

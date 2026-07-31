@@ -29,7 +29,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install curl_cffi
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
 
       - name: Scrape calendar
         env:

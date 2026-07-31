@@ -5,9 +5,9 @@ Extracts BTCC's own session times (Free Practice, Qualifying, Qualifying
 Race, Race 1/2/3) from each circuit page's weekend timetable and merges
 them into data/schedule.json.
 
-Reuses scrape_full_timetable.py's page parser (fetched through the
-btcc-relay Cloudflare Worker - see btcc_relay.py) since the same timetable
-already contains BTCC's own rows alongside support-series ones; this just
+Reuses scrape_full_timetable.py's page parser (fetched with headless
+Chromium - see btcc_playwright.py) since the same timetable already
+contains BTCC's own rows alongside support-series ones; this just
 filters them down and assigns session names.
 
 Usage:

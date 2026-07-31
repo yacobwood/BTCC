@@ -57,7 +57,9 @@ jobs:
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.in_session_window == 'true'
-        run: pip install pdfminer.six
+        run: |
+          pip install pdfminer.six playwright
+          playwright install --with-deps chromium
 
       - name: Scrape results and compute standings
         id: scrape

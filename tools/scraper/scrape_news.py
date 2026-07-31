@@ -5,13 +5,14 @@ Writes a WordPress-REST-API-shaped array to data/news.json so the
 sendSessionNotifications Cloud Function can read it from GitHub instead of
 hitting btcc.net directly at runtime.
 
-Scrapes the rendered /news/ page rather than the /wp-json/ REST API (which
-returned 403 even through the relay - WordPress REST endpoints are
-commonly locked down harder than plain pages). Fetches through the
-btcc-relay Cloudflare Worker (see btcc_relay.py): btcc.net's origin blocks
-direct requests from GitHub Actions/GCP with a 403 regardless of TLS
-fingerprint, but requests routed through Cloudflare's own network - which
-btcc.net sits behind - are trusted.
+btcc.net moved off WordPress entirely to a Vercel-hosted React app
+(2026-07-31). It now issues a Vercel BotID JS challenge (HTTP 429) to any
+request that can't execute JavaScript, so this fetches through headless
+Chromium (see btcc_playwright.py) rather than a direct/relayed HTTP
+request. The /news/ page's card markup is also entirely new - no more
+WordPress post IDs, so `id` is now the article slug (safe: every consumer
+of article.id already treats it as an opaque string - see
+project_wp_rest_api_lockdown / project_vercel_migration memory).
 
 Usage:
     python scrape_news.py [--dry-run]
@@ -25,19 +26,19 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_relay import fetch_via_relay
+from btcc_playwright import fetch_rendered
 
 NEWS_URL = "https://www.btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 NEWS_JSON = DATA_DIR / "news.json"
 
-ARTICLE_RE = re.compile(r'<article class="wpgb-card[^"]*wpgb-post-(\d+)".*?</article>', re.DOTALL)
-TITLE_RE = re.compile(r'blogBlockTitle"><a href="https://btcc\.net/([a-z0-9-]+)/">([^<]+)</a>')
-IMAGE_RE = re.compile(r'<a href="(https://btcc\.net/wp-content/uploads/[^"]+)"[^>]*data-type="image"')
+ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
+TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
+IMAGE_RE = re.compile(r'<img[^>]*src="(/api/media/[^"]+)"')
 
 
 def _fetch(url: str) -> str:
-    return fetch_via_relay(url).text
+    return fetch_rendered(url, wait_selector="article.news-card")
 
 
 def scrape_news() -> list | None:
@@ -53,7 +54,7 @@ def scrape_news() -> list | None:
     if not article_m:
         print("ERROR: no article card found - page structure may have changed", file=sys.stderr)
         return None
-    post_id, block = article_m.group(1), article_m.group(0)
+    block = article_m.group(0)
 
     title_m = TITLE_RE.search(block)
     if not title_m:
@@ -62,10 +63,10 @@ def scrape_news() -> list | None:
     slug, title = title_m.group(1), title_m.group(2)
 
     image_m = IMAGE_RE.search(block)
-    image_url = image_m.group(1) if image_m else None
+    image_url = f"https://btcc.net{image_m.group(1)}" if image_m else None
 
     post = {
-        "id": int(post_id),
+        "id": slug,
         "slug": slug,
         "title": {"rendered": title},
         "_embedded": {"wp:featuredmedia": [{"source_url": image_url}]} if image_url else {},
