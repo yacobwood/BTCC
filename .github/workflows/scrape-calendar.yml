@@ -1,14 +1,24 @@
-# Runs the calendar scraper on a schedule. Picks up new calendar data
-# automatically when btcc.net publishes it. Runs on a self-hosted runner
-# (see scrape-news.yml comment / project_vercel_migration memory) since
-# btcc.net's Vercel bot-challenge blocks GitHub-hosted runner IPs even with
-# headless Chromium - interim fix until btcc.net's dev allowlists us.
+# Runs the calendar + session-schedule scrapers on a schedule. Picks up new
+# calendar data automatically when btcc.net publishes it. Runs on a
+# self-hosted runner (see scrape-news.yml comment / project_vercel_migration
+# memory) since btcc.net's Vercel bot-challenge blocks GitHub-hosted runner
+# IPs even with headless Chromium - interim fix until btcc.net's dev
+# allowlists us.
+#
+# Weekly, not daily: per btcc.net's own dev, "calendar doesn't get updated
+# often, once set at season launch kinda stays that way most of the time" -
+# and race results/standings only move on race weekends, so a Monday check
+# reliably catches anything from the weekend just gone. Scrape_schedule.py
+# runs right after this as a pure local transform of the fullTimetable this
+# step just wrote to calendar.json - it used to independently re-fetch the
+# same ~10 circuit pages a second time on its own schedule, doubling load on
+# btcc.net for no reason.
 name: Scrape BTCC Calendar
 
 on:
   schedule:
-    # Daily 09:00 UTC.
-    - cron: "0 9 * * *"
+    # Weekly, Monday 09:00 UTC.
+    - cron: "0 9 * * 1"
   workflow_dispatch:
     inputs:
       season:
@@ -34,11 +44,17 @@ jobs:
           [ -z "$SEASON" ] && SEASON=2026
           ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_calendar.py --season "$SEASON"
 
+      - name: Derive session schedule (no network - reuses calendar.json's fullTimetable)
+        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_schedule.py
+
+      - name: Merge sessions into app calendar
+        run: ~/.btcc-scraper-venv/bin/python tools/scraper/merge_schedule.py
+
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: update calendar from btcc.net [skip ci]"
-          file_pattern: data/calendar.json
+          commit_message: "chore: update calendar and schedule from btcc.net [skip ci]"
+          file_pattern: "data/calendar.json data/schedule.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 

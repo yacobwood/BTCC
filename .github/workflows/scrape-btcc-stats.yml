@@ -2,12 +2,17 @@
 # project_vercel_migration memory) since btcc.net's Vercel bot-challenge
 # blocks GitHub-hosted runner IPs even with headless Chromium - interim
 # fix until btcc.net's dev allowlists us.
+#
+# Weekly, not daily: all-time wins/titles only meaningfully change right
+# after a race weekend (roughly biweekly), and btcc.net's own dev confirmed
+# results/standings only move on race weekends - a Monday check reliably
+# catches anything from the weekend just gone.
 name: Scrape BTCC Official Stats
 
 on:
   schedule:
-    # Daily at 06:00 UTC — well outside race windows to avoid commit conflicts
-    - cron: "0 6 * * *"
+    # Weekly, Monday 06:00 UTC — well outside race windows to avoid commit conflicts
+    - cron: "0 6 * * 1"
   workflow_dispatch:
     inputs:
       dry_run:

@@ -2,20 +2,21 @@
 """
 BTCC Session Schedule Scraper
 Extracts BTCC's own session times (Free Practice, Qualifying, Qualifying
-Race, Race 1/2/3) from each circuit page's weekend timetable and merges
-them into data/schedule.json.
+Race, Race 1/2/3) from each round's weekend timetable and merges them
+into data/schedule.json.
 
-Reuses scrape_full_timetable.py's page parser (fetched with headless
-Chromium - see btcc_playwright.py) since the same timetable already
-contains BTCC's own rows alongside support-series ones; this just
-filters them down and assigns session names.
+Used to fetch each circuit page itself (duplicating scrape_calendar.py,
+which already fetches the same pages to populate calendar.json's
+fullTimetable) - now a pure local transform of calendar.json's
+fullTimetable instead, so this makes zero network requests. Run this
+after scrape_calendar.py (same job, same workflow) so it sees the
+freshly-written fullTimetable.
 
 Usage:
     python scrape_schedule.py [--dry-run]
 """
 
 import argparse
-import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -25,15 +26,6 @@ SCHEDULE_JSON = DATA_DIR / "schedule.json"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
 
 BTCC_KEYWORDS = ("british touring car", "btcc", "kwik fit")
-
-
-def _load_full_timetable_module():
-    spec = importlib.util.spec_from_file_location(
-        "scrape_full_timetable", Path(__file__).parent / "scrape_full_timetable.py"
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
 
 
 def classify_btcc_sessions(entries):
@@ -102,18 +94,15 @@ def main():
         print("No rounds in calendar.json - run scrape_calendar.py first.", file=sys.stderr)
         sys.exit(1)
 
-    ft = _load_full_timetable_module()
-
     scraped = {}
     for r in rounds:
         round_num = r.get("round")
         venue     = r.get("venue", "")
-        slug      = ft.VENUE_SLUG.get(venue)
-        if not slug:
-            print(f"  Round {round_num} ({venue}): no slug mapping - skipping")
+        entries   = r.get("fullTimetable")
+        if not entries:
+            print(f"  Round {round_num} ({venue}): no fullTimetable in calendar.json - skipping")
             continue
         print(f"\nRound {round_num}: {venue}")
-        entries = ft.scrape_circuit_timetable(slug)
         sessions = classify_btcc_sessions(entries)
         for s in sessions:
             print(f"    {s['day']} {s['time']}  {s['name']}")

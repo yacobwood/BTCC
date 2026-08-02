@@ -1,8 +1,10 @@
 # Team race/win totals (drivers.json totalRaces/totalWins) used to be
 # scraped as a post-step of every scrape-results.yml run, but that meant
 # launching a headless browser on every 2-minute results tick during a
-# live race weekend. Split out into its own daily job instead - team
-# totals only change once a race weekend's results are final anyway.
+# live race weekend. Split out into its own weekly job instead - team
+# totals only change once a race weekend's results are final anyway, and
+# btcc.net's own dev confirmed results/standings only move on race
+# weekends, so a Monday check reliably catches anything new.
 #
 # Runs on a self-hosted runner (see scrape-news.yml comment /
 # project_vercel_migration memory) since btcc.net's Vercel bot-challenge
@@ -12,8 +14,8 @@ name: Scrape BTCC Team Stats
 
 on:
   schedule:
-    # Daily at 06:30 UTC - same window as scrape-btcc-stats.yml.
-    - cron: "30 6 * * *"
+    # Weekly, Monday 06:30 UTC - same window as scrape-btcc-stats.yml.
+    - cron: "30 6 * * 1"
   workflow_dispatch:
 
 concurrency:
