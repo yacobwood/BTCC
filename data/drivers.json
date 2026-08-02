@@ -2448,8 +2448,8 @@
       ],
       "dateOfBirth": "1980-07-18",
       "birthplace": "Aylesbury, Buckinghamshire",
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-Napa400-x-400-Napa-Ash-_-Dan-C.jpg",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/sutton-2.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/13d3a13b-0c31-4c1a-ab38-c82ad5c736f2.jpg",
+      "carImageUrl": "",
       "totalRaces": 187,
       "totalWins": 59
     },
@@ -2501,8 +2501,8 @@
           "points": 773
         }
       ],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-Vertu-400-x-400-Vertu.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Ingram-2.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/48596bd3-d345-4186-9b90-9952670db3dd.jpg",
+      "carImageUrl": "",
       "totalRaces": 244,
       "totalWins": 40
     },
@@ -2574,8 +2574,8 @@
           "points": 266
         }
       ],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2025/08/Team-driver-graphics-toyota-gazoo-racing400-x-400-toyota-gazoo.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Cook-2.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/afc09fd8-f502-45f5-adfe-c80a281e9106.jpg",
+      "carImageUrl": "",
       "totalRaces": 392,
       "totalWins": 31
     },
@@ -2652,8 +2652,8 @@
           "points": 462
         }
       ],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-WSR-racing400-x-400-WSR.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/De-Leon-1.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/e1b2d279-4af6-4453-8ab5-ee5aa548cd86.jpg",
+      "carImageUrl": "",
       "totalRaces": 781,
       "totalWins": 130,
       "lightCardBg": true
@@ -2721,8 +2721,8 @@
           "points": 190
         }
       ],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-LKQ400-x-400-LKQ.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Doble-OS100883-cut-out.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/10e0e9fc-5dd5-4d4c-81da-2f998152ad24.jpg",
+      "carImageUrl": "",
       "totalRaces": 22,
       "totalWins": 1,
       "lightCardBg": true
@@ -2739,8 +2739,8 @@
       "driversChampionships": 0,
       "teamsChampionships": 0,
       "history": [],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-plato-racing400-x-400-plato-racing.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Scaled-Cutouts-Rowbottom.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/6f3b9c89-ba02-4a02-a430-9aa531bf315b.png",
+      "carImageUrl": "",
       "totalRaces": 22,
       "totalWins": 0
     },
@@ -2819,8 +2819,8 @@
           "points": 386
         }
       ],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/04/Team-driver-graphics-restart-racing400-x-400-restart-racing.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/04/Smiley-2.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/ecd5b8a1-78cb-4c9c-9a57-ed9dfd68fd38.jpg",
+      "carImageUrl": "",
       "totalRaces": 82,
       "totalWins": 1
     },
@@ -2836,8 +2836,8 @@
       "totalRaces": 123,
       "totalWins": 24,
       "history": [],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-laser-tools400-x-400-laser-tools.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Taylor-Smith-3.png"
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/ba5a3ab5-88ec-42ce-8859-7bf4aa2529d8.jpg",
+      "carImageUrl": ""
     },
     {
       "name": "Steel Seal with Power Maxed Racing",
@@ -2849,8 +2849,8 @@
       "driversChampionships": 0,
       "teamsChampionships": 0,
       "history": [],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-power-maxed-racing-new-colours400-x-400-PMR-dexter.png",
-      "carImageUrl": "https://btcc.net/wp-content/uploads/2024/03/Patterson.png",
+      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/7c93ecc4-fc27-4cb2-ba41-a484e2074449.jpg",
+      "carImageUrl": "",
       "totalRaces": 292,
       "totalWins": 6,
       "lightCardBg": true
@@ -2865,7 +2865,7 @@
       "driversChampionships": 0,
       "teamsChampionships": 0,
       "history": [],
-      "cardBgUrl": "https://btcc.net/wp-content/uploads/2024/03/Team-driver-graphics-LKQ400-x-400-LKQ.png",
+      "cardBgUrl": "",
       "carImageUrl": "",
       "totalRaces": 290,
       "totalWins": 6,

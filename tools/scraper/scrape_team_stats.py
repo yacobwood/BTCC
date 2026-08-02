@@ -11,6 +11,16 @@ Chromium (see btcc_playwright.py) instead of plain urllib. The counter
 markup also changed - stats are plain `<strong>N</strong><h3>Label</h3>`
 pairs now (no more `data-end` attribute).
 
+Also mirrors each team's feature image into data/media/teams/ and sets it
+as cardBgUrl, since the old cardBgUrl/carImageUrl (bespoke WordPress
+media-library graphics, e.g. "Team-driver-graphics-Napa400-x-400...")
+point at a dead wp-content/uploads path that now 429s the same as
+everything else on the old site. There's no equivalent per-team car
+cutout image on the new site (only per-driver photos, and a generic
+non-team-specific striped backdrop shared across every driver card) - so
+carImageUrl is cleared to '' rather than left pointing at a dead URL;
+DriversScreen/TeamDetailScreen already null-check it before rendering.
+
 Run manually or call main() from scrape_tsl.py after each scrape.
 """
 
@@ -18,10 +28,12 @@ import json
 import re
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher
+from btcc_playwright import RenderedFetcher, save_mirrored_image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
+MEDIA_DIR = REPO_ROOT / "data" / "media" / "teams"
+MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams"
 
 # Current team name in drivers.json -> btcc.net slug
 TEAM_SLUGS: dict[str, str] = {
@@ -37,16 +49,26 @@ TEAM_SLUGS: dict[str, str] = {
 }
 
 STAT_RE = re.compile(r'<strong>(\d+)</strong>\s*<h3>([^<]+)</h3>')
+FEATURE_IMAGE_RE = re.compile(r'<img class="team-feature-image"[^>]*src="(/api/media/[^"]+)"')
 BASE_URL = "https://btcc.net/team/"
 
 
-def _fetch_team_stats(fetcher: RenderedFetcher, slug: str) -> dict[str, int]:
+def _fetch_team_page(fetcher: RenderedFetcher, slug: str) -> tuple[dict[str, int], str | None]:
+    """Return ({stat_name: value}, mirrored_image_url_or_None) for a team page."""
     url = BASE_URL + slug + "/"
-    html = fetcher.get(url, wait_selector=".team-summary-stats")
-    return {
+    html, media = fetcher.get_with_media(url, wait_selector=".team-summary-stats")
+
+    stats = {
         m.group(2).strip().split()[0].lower(): int(m.group(1))
         for m in STAT_RE.finditer(html)
     }
+
+    image_m = FEATURE_IMAGE_RE.search(html)
+    media_url = f"https://btcc.net{image_m.group(1)}" if image_m else None
+    filename = save_mirrored_image(media, media_url, MEDIA_DIR)
+    image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
+
+    return stats, image_url
 
 
 def main() -> None:
@@ -60,10 +82,14 @@ def main() -> None:
             if not slug:
                 continue
             try:
-                stats = _fetch_team_stats(fetcher, slug)
+                stats, image_url = _fetch_team_page(fetcher, slug)
                 team["totalRaces"] = stats.get("races", team.get("totalRaces", 0))
                 team["totalWins"]  = stats.get("wins",  team.get("totalWins",  0))
-                print(f"  {name}: {team['totalRaces']} races, {team['totalWins']} wins")
+                if image_url:
+                    team["cardBgUrl"] = image_url
+                team["carImageUrl"] = ""
+                print(f"  {name}: {team['totalRaces']} races, {team['totalWins']} wins"
+                      + (", image mirrored" if image_url else ", no feature image found"))
                 updated += 1
             except Exception as e:
                 print(f"  WARNING: could not fetch stats for {name}: {e}")
