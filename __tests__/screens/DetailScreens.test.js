@@ -111,6 +111,26 @@ describe('DriverDetailScreen', () => {
     });
   });
 
+  it('extends the career chart Y-axis past P20 when a season position is worse', async () => {
+    // Regression: the chart's gridlines/labels used to be a hardcoded
+    // [1, 5, 10, 15, 20] array that could only be filtered down, never
+    // extended - a driver with a season finish worse than P20 (e.g. a
+    // backmarker season) plotted correctly but with no nearby gridline.
+    const driver = {
+      ...DRIVER,
+      history: [
+        {year: 2019, team: 'X', pos: 19},
+        {year: 2020, team: 'X', pos: 12},
+        {year: 2021, team: 'X', pos: 33},
+      ],
+    };
+    const route = makeRoute({driver});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('P30')).toBeTruthy());
+  });
+
   it('toggles favourite when star button is pressed', async () => {
     AsyncStorage.getItem.mockImplementation(key => {
       if (key === 'favourite_drivers') return Promise.resolve(JSON.stringify([]));

@@ -370,7 +370,8 @@ function CareerTimeline({history}) {
   const xOf = i => PL + (i / (entries.length - 1)) * plotW;
   const yOf = pos => PT + ((pos - 1) / (maxPos - 1)) * plotH;
 
-  const ticks = [1, 5, 10, 15, 20].filter(v => v <= maxPos + 1);
+  const ticks = [1];
+  for (let v = 5; v <= maxPos; v += 5) ticks.push(v);
   const linePoints = entries.map((h, i) => `${xOf(i)},${yOf(h.pos)}`).join(' ');
 
   const dotColor = h =>
