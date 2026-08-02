@@ -37,6 +37,7 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
       style={style}
       resizeMode={resizeMode}
       onError={handleError}
+      fadeDuration={0}
       {...props}
     />
   );

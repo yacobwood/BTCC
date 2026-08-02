@@ -33,10 +33,10 @@ function DriverAvatar({number, imageUrl, size = 58}) {
   const imgStyle = {width: size, height: size * 1.6, borderRadius: 0, position: 'absolute', top: 0, left: 0, right: 0};
   const wrapStyle = {width: size, height: size, borderRadius: size / 2, overflow: 'hidden', backgroundColor: Colors.surface};
   if (bundled) {
-    return <View style={wrapStyle}><Image source={bundled} style={imgStyle} resizeMode="cover" /></View>;
+    return <View style={wrapStyle}><Image source={bundled} style={imgStyle} resizeMode="cover" fadeDuration={0} /></View>;
   }
   if (imageUrl) {
-    return <View style={wrapStyle}><Image source={{uri: thumbUrl(imageUrl)}} style={imgStyle} resizeMode="cover" /></View>;
+    return <View style={wrapStyle}><Image source={{uri: thumbUrl(imageUrl)}} style={imgStyle} resizeMode="cover" fadeDuration={0} /></View>;
   }
   return (
     <View style={[wrapStyle, {justifyContent: 'center', alignItems: 'center'}]}>
@@ -66,13 +66,14 @@ function DriverCardInner({item, onPress, fav}) {
             style={StyleSheet.absoluteFill}
             resizeMode="stretch"
             onError={handleBgError}
+            fadeDuration={0}
           />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
         <Text style={[styles.driverNumberBg, item.lightCardBg && {color: '#000'}]}>{item.number}</Text>
         {bundled ? (
-          <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" />
+          <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={0} />
         ) : item.imageUrl ? (
           <CachedImage uri={item.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
         ) : null}

@@ -156,10 +156,11 @@ export default function DriverDetailScreen({route, navigation}) {
         <ImageBackground
           source={driver.cardBgUrl ? {uri: driver.cardBgUrl} : undefined}
           style={styles.headerBg}
-          resizeMode="stretch">
+          resizeMode="stretch"
+          fadeDuration={0}>
           <Text style={[styles.headerNumber, driver.lightCardBg && {color: '#000'}]}>{driver.number}</Text>
           {bundledImg ? (
-            <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
+            <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fadeDuration={0} />
           ) : driver.imageUrl ? (
             <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
           ) : null}
