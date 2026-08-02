@@ -21,11 +21,16 @@ on:
 
 concurrency:
   group: scrape-news
-  cancel-in-progress: false
+  # true, not false: this runs every 5 minutes on a single self-hosted
+  # runner shared with every other btcc.net-facing scraper, so a slow or
+  # stuck run must not let queued-up ticks pile up behind it - cancel the
+  # stale one and let the freshest tick through instead.
+  cancel-in-progress: true
 
 jobs:
   scrape:
     runs-on: [self-hosted, btcc-mac]
+    timeout-minutes: 10
     permissions:
       contents: write
 

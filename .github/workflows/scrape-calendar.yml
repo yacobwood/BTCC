@@ -29,6 +29,7 @@ on:
 jobs:
   scrape:
     runs-on: [self-hosted, btcc-mac]
+    timeout-minutes: 15
     permissions:
       contents: write
 
