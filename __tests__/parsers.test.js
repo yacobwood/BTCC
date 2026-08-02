@@ -388,6 +388,17 @@ describe('parseGrid', () => {
     expect(grid.teams[0].drivers).toHaveLength(1);
   });
 
+  test('passes through a driver-level cardBgUrl, overriding the team-derived one', () => {
+    const json = {
+      drivers: [
+        {number: 55, name: 'Nick Halstead', team: 'Speedworks', car: 'Toyota', cardBgUrl: 'https://example.com/own.png'},
+      ],
+      teams: [{name: 'Speedworks', car: 'Toyota', entries: 1, cardBgUrl: 'https://example.com/team.png'}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.drivers[0].cardBgUrl).toBe('https://example.com/own.png');
+  });
+
   test('passes through livesIn, defaults to empty string when absent', () => {
     const json = {
       drivers: [
@@ -503,6 +514,22 @@ describe('attachTeamDisplayFields', () => {
     expect(shaped.cls).toBe('');
     expect(shaped.cardBgUrl).toBe('');
     expect(shaped.lightCardBg).toBe(false);
+  });
+
+  // Regression: a team page on btcc.net can be shared by multiple sub-liveries
+  // with different card colours (e.g. "Steel Seal with Power Maxed Racing"),
+  // so team-only lookup got those specific drivers' cards wrong. A driver's
+  // own cardBgUrl (scraped from btcc.net's /drivers/ listing) must win.
+  test('prefers the driver\'s own cardBgUrl over the team-derived one', () => {
+    const raw = {name: 'A Driver', team: 'WSR', cardBgUrl: 'https://example.com/own.png'};
+    const shaped = attachTeamDisplayFields(raw, rawTeams);
+    expect(shaped.cardBgUrl).toBe('https://example.com/own.png');
+  });
+
+  test('falls back to the team cardBgUrl when the driver has none of their own', () => {
+    const raw = {name: 'A Driver', team: 'WSR', cardBgUrl: ''};
+    const shaped = attachTeamDisplayFields(raw, rawTeams);
+    expect(shaped.cardBgUrl).toBe('https://example.com/wsr.png');
   });
 
   test('is what closes the deep-link dual-shape bug: raw driver + raw teams produces the same display fields parseGrid() would', () => {

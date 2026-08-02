@@ -82,7 +82,11 @@ class RenderedFetcher:
             page.close()
 
     def get_with_media(
-        self, url: str, wait_selector: str | None = None, timeout: int = 30000
+        self,
+        url: str,
+        wait_selector: str | None = None,
+        timeout: int = 30000,
+        scroll_through: bool = False,
     ) -> tuple[str, dict[str, tuple[bytes, str]]]:
         """Like get(), but also returns {btcc.net/api/media/<uuid> URL: (bytes, content_type)}
         for every image loaded during navigation.
@@ -96,6 +100,12 @@ class RenderedFetcher:
         bytes have to be captured from the responses the browser already made
         while rendering the page, by walking each image response back through
         its redirect chain to the original btcc.net media URL.
+
+        Pass scroll_through=True for long listing pages (e.g. /drivers/) whose
+        images use loading="lazy" - the browser only requests those once they're
+        actually near the viewport, so a fixed-size page load silently misses
+        every image below the fold. Scrolling to the bottom in steps triggers
+        the same lazy-load the images would get from a real visit.
         """
         media: dict[str, tuple[bytes, str]] = {}
 
@@ -123,6 +133,15 @@ class RenderedFetcher:
                 page.wait_for_selector(wait_selector, timeout=timeout)
             else:
                 page.wait_for_timeout(1200)
+            if scroll_through:
+                prev_height = 0
+                for _ in range(30):
+                    height = page.evaluate("document.body.scrollHeight")
+                    if height == prev_height:
+                        break
+                    prev_height = height
+                    page.evaluate(f"window.scrollTo(0, {height})")
+                    page.wait_for_timeout(400)
             return page.content(), media
         finally:
             page.close()

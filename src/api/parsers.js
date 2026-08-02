@@ -173,13 +173,20 @@ export function parseDriverHistory(history) {
 // still get the same display fields as one reached via parseGrid() - without
 // this, those profiles silently lost the class chip, champion gold styling
 // and header background image.
+//
+// cardBgUrl prefers the driver's own value (scrape_driver_backgrounds.py,
+// mirrored from btcc.net's own /drivers/ listing) over the team-derived
+// one: most drivers' cards match their team's colour, but not always - a
+// team page can be shared by multiple sub-liveries with different card
+// colours (e.g. "Steel Seal with Power Maxed Racing"), so team-only
+// lookup got those specific drivers wrong.
 export function attachTeamDisplayFields(driver, rawTeams) {
   const team = (rawTeams || []).find(t => t.name === driver.team);
   const {class: rawClass, ...rest} = driver; // `class` is raw-shape only; output uses `cls`
   return {
     ...rest,
     cls: driver.cls || rawClass || '',
-    cardBgUrl: team?.cardBgUrl || '',
+    cardBgUrl: driver.cardBgUrl || team?.cardBgUrl || '',
     lightCardBg: team?.lightCardBg || false,
   };
 }
@@ -195,6 +202,7 @@ export function parseGrid(json) {
       team: d.team || '',
       car: d.car || '',
       imageUrl: d.imageUrl || '',
+      cardBgUrl: d.cardBgUrl || '',
       nationality: d.nationality || 'British',
       class: d.class || '',
       bio: d.bio || '',

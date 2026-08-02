@@ -11,28 +11,20 @@ Chromium (see btcc_playwright.py) instead of plain urllib. The counter
 markup also changed - stats are plain `<strong>N</strong><h3>Label</h3>`
 pairs now (no more `data-end` attribute).
 
-Also mirrors each team's card-background graphic into data/media/teams/
-and sets it as cardBgUrl, since the old cardBgUrl/carImageUrl (bespoke
-WordPress media-library graphics, e.g.
-"Team-driver-graphics-Napa400-x-400...") point at a dead wp-content/uploads
-path that now 429s the same as everything else on the old site. The new
-site's team-driver-card-background image (an abstract, team-coloured
-diagonal-stripe graphic - confirmed against btcc.net's own live Drivers
-grid, which uses exactly this style per-team) is the right visual match
-for this: cardBgUrl renders full-bleed behind a driver/car cutout, so it
-needs to be a calm backdrop, not a literal photo. (team-feature-image,
-a sharp photo of the team's actual cars, was tried first and looked
-wrong once it started rendering - too busy for a background role.)
-
-carImageUrl (a transparent-background cutout of the actual car, shown
-resizeMode="contain" over cardBgUrl) is filled from that same team's
-first-listed driver's own profile page (driver-profile-car) - there's no
-per-team car cutout on the new site, only per-driver ones (each car's
-livery has that driver's name/number painted on it), but that matches
-how the old data worked too (carImageUrl was already always one specific
-driver's car, e.g. "sutton-2.png", "Ingram-2.png"). The driver slug is
-read straight off the team page's own driver-card links, not a separate
-lookup table, so this needs no driver-specific maintenance.
+Also mirrors each team's card-background graphic and car photo into
+data/media/teams/ and sets them as cardBgUrl/carImageUrl, since the old
+values (bespoke WordPress media-library graphics, e.g.
+"Team-driver-graphics-Napa400-x-400...") point at a dead
+wp-content/uploads path that now 429s the same as everything else on the
+old site. Both come from a single fetch of /teams/ - the site's own team
+listing page, which shows exactly the cardBgUrl+carImageUrl pairing
+already rendered together as one unit (confirmed against a live
+screenshot of that page). Earlier attempts guessed at a source instead
+(team-feature-image - a sharp photo, wrong for a background role; then a
+team's first-listed driver's own car - not necessarily the specific car
+the site itself shows for that team) and got it wrong both times; /teams/
+is the actual authoritative pairing, one request for all 9 teams instead
+of a fetch per team.
 
 Run manually or call main() from scrape_tsl.py after each scrape.
 """
@@ -47,7 +39,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
 MEDIA_DIR = REPO_ROOT / "data" / "media" / "teams"
 MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams"
-DRIVER_BASE_URL = "https://btcc.net/driver/"
+TEAMS_LISTING_URL = "https://btcc.net/teams/"
 
 # Current team name in drivers.json -> btcc.net slug
 TEAM_SLUGS: dict[str, str] = {
@@ -63,38 +55,43 @@ TEAM_SLUGS: dict[str, str] = {
 }
 
 STAT_RE = re.compile(r'<strong>(\d+)</strong>\s*<h3>([^<]+)</h3>')
-CARD_BG_RE = re.compile(r'class="[^"]*team-driver-card-background[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
-FIRST_DRIVER_RE = re.compile(r'<a class="team-driver-card" href="/driver/([a-z0-9-]+)/"')
-CAR_IMAGE_RE = re.compile(r'class="[^"]*driver-profile-car[^"]*"[^>]*src="(/api/media/[^"]+)"')
+TEAM_CARD_BLOCK_RE = re.compile(r'<a class="team-card" href="/team/([a-z0-9-]+)/">(.*?)</a>', re.DOTALL)
+TEAM_CARD_BG_RE = re.compile(r'class="[^"]*team-card-background[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
+# Named "-logo" on the site, but it's actually the full car photo shown on the card.
+TEAM_CARD_CAR_RE = re.compile(r'class="[^"]*team-card-logo[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
 BASE_URL = "https://btcc.net/team/"
 
 
-def _fetch_team_page(fetcher: RenderedFetcher, slug: str) -> tuple[dict[str, int], str | None, str | None]:
-    """Return ({stat_name: value}, mirrored_card_bg_url, mirrored_car_url) for a team page."""
-    url = BASE_URL + slug + "/"
-    html, media = fetcher.get_with_media(url, wait_selector=".team-summary-stats")
+def _fetch_team_images(fetcher: RenderedFetcher) -> dict[str, tuple[str | None, str | None]]:
+    """One fetch of /teams/ - return {slug: (mirrored_card_bg_url, mirrored_car_url)} for every team."""
+    html, media = fetcher.get_with_media(TEAMS_LISTING_URL, wait_selector="a.team-card")
 
-    stats = {
+    result = {}
+    for block_m in TEAM_CARD_BLOCK_RE.finditer(html):
+        slug, block = block_m.group(1), block_m.group(2)
+
+        bg_m = TEAM_CARD_BG_RE.search(block)
+        bg_media_url = f"https://btcc.net{bg_m.group(1)}" if bg_m else None
+        bg_filename = save_mirrored_image(media, bg_media_url, MEDIA_DIR)
+        bg_url = f"{MEDIA_RAW_BASE}/{bg_filename}" if bg_filename else None
+
+        car_m = TEAM_CARD_CAR_RE.search(block)
+        car_media_url = f"https://btcc.net{car_m.group(1)}" if car_m else None
+        car_filename = save_mirrored_image(media, car_media_url, MEDIA_DIR)
+        car_url = f"{MEDIA_RAW_BASE}/{car_filename}" if car_filename else None
+
+        result[slug] = (bg_url, car_url)
+
+    return result
+
+
+def _fetch_team_stats(fetcher: RenderedFetcher, slug: str) -> dict[str, int]:
+    url = BASE_URL + slug + "/"
+    html = fetcher.get(url, wait_selector=".team-summary-stats")
+    return {
         m.group(2).strip().split()[0].lower(): int(m.group(1))
         for m in STAT_RE.finditer(html)
     }
-
-    bg_m = CARD_BG_RE.search(html)
-    bg_media_url = f"https://btcc.net{bg_m.group(1)}" if bg_m else None
-    bg_filename = save_mirrored_image(media, bg_media_url, MEDIA_DIR)
-    bg_url = f"{MEDIA_RAW_BASE}/{bg_filename}" if bg_filename else None
-
-    car_url = None
-    driver_m = FIRST_DRIVER_RE.search(html)
-    if driver_m:
-        driver_url = DRIVER_BASE_URL + driver_m.group(1) + "/"
-        driver_html, driver_media = fetcher.get_with_media(driver_url, wait_selector=".driver-profile-cutout")
-        car_m = CAR_IMAGE_RE.search(driver_html)
-        car_media_url = f"https://btcc.net{car_m.group(1)}" if car_m else None
-        car_filename = save_mirrored_image(driver_media, car_media_url, MEDIA_DIR)
-        car_url = f"{MEDIA_RAW_BASE}/{car_filename}" if car_filename else None
-
-    return stats, bg_url, car_url
 
 
 def main() -> None:
@@ -102,18 +99,23 @@ def main() -> None:
     updated = 0
 
     with RenderedFetcher() as fetcher:
+        team_images = _fetch_team_images(fetcher)
+
         for team in data["teams"]:
             name = team["name"]
             slug = TEAM_SLUGS.get(name)
             if not slug:
                 continue
             try:
-                stats, bg_url, car_url = _fetch_team_page(fetcher, slug)
+                stats = _fetch_team_stats(fetcher, slug)
                 team["totalRaces"] = stats.get("races", team.get("totalRaces", 0))
                 team["totalWins"]  = stats.get("wins",  team.get("totalWins",  0))
+
+                bg_url, car_url = team_images.get(slug, (None, None))
                 if bg_url:
                     team["cardBgUrl"] = bg_url
                 team["carImageUrl"] = car_url or ""
+
                 print(f"  {name}: {team['totalRaces']} races, {team['totalWins']} wins"
                       + (", background mirrored" if bg_url else ", no card background found")
                       + (", car image mirrored" if car_url else ", no car image found"))

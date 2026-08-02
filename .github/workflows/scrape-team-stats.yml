@@ -36,14 +36,17 @@ jobs:
       - name: Pull latest
         run: git pull --rebase origin main
 
-      - name: Run scraper
+      - name: Run team stats scraper
         run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_team_stats.py
+
+      - name: Run driver background scraper
+        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_driver_backgrounds.py
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update team stats from btcc.net [skip ci]"
-          file_pattern: "data/drivers.json data/media/teams/"
+          file_pattern: "data/drivers.json data/media/teams/ data/media/drivers/"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
