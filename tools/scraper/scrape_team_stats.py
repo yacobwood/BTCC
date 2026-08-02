@@ -11,15 +11,22 @@ Chromium (see btcc_playwright.py) instead of plain urllib. The counter
 markup also changed - stats are plain `<strong>N</strong><h3>Label</h3>`
 pairs now (no more `data-end` attribute).
 
-Also mirrors each team's feature image into data/media/teams/ and sets it
-as cardBgUrl, since the old cardBgUrl/carImageUrl (bespoke WordPress
-media-library graphics, e.g. "Team-driver-graphics-Napa400-x-400...")
-point at a dead wp-content/uploads path that now 429s the same as
-everything else on the old site. There's no equivalent per-team car
-cutout image on the new site (only per-driver photos, and a generic
-non-team-specific striped backdrop shared across every driver card) - so
-carImageUrl is cleared to '' rather than left pointing at a dead URL;
-DriversScreen/TeamDetailScreen already null-check it before rendering.
+Also mirrors each team's card-background graphic into data/media/teams/
+and sets it as cardBgUrl, since the old cardBgUrl/carImageUrl (bespoke
+WordPress media-library graphics, e.g.
+"Team-driver-graphics-Napa400-x-400...") point at a dead wp-content/uploads
+path that now 429s the same as everything else on the old site. The new
+site's team-driver-card-background image (an abstract, team-coloured
+diagonal-stripe graphic - confirmed against btcc.net's own live Drivers
+grid, which uses exactly this style per-team) is the right visual match
+for this: cardBgUrl renders full-bleed behind a driver/car cutout, so it
+needs to be a calm backdrop, not a literal photo. (team-feature-image,
+a sharp photo of the team's actual cars, was tried first and looked
+wrong once it started rendering - too busy for a background role.) No
+equivalent per-team car cutout image exists on the new site (only
+per-driver photos) - so carImageUrl is cleared to '' rather than left
+pointing at a dead URL; DriversScreen/TeamDetailScreen already null-check
+it before rendering.
 
 Run manually or call main() from scrape_tsl.py after each scrape.
 """
@@ -49,7 +56,7 @@ TEAM_SLUGS: dict[str, str] = {
 }
 
 STAT_RE = re.compile(r'<strong>(\d+)</strong>\s*<h3>([^<]+)</h3>')
-FEATURE_IMAGE_RE = re.compile(r'<img class="team-feature-image"[^>]*src="(/api/media/[^"]+)"')
+CARD_BG_RE = re.compile(r'class="[^"]*team-driver-card-background[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
 BASE_URL = "https://btcc.net/team/"
 
 
@@ -63,7 +70,7 @@ def _fetch_team_page(fetcher: RenderedFetcher, slug: str) -> tuple[dict[str, int
         for m in STAT_RE.finditer(html)
     }
 
-    image_m = FEATURE_IMAGE_RE.search(html)
+    image_m = CARD_BG_RE.search(html)
     media_url = f"https://btcc.net{image_m.group(1)}" if image_m else None
     filename = save_mirrored_image(media, media_url, MEDIA_DIR)
     image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
@@ -89,7 +96,7 @@ def main() -> None:
                     team["cardBgUrl"] = image_url
                 team["carImageUrl"] = ""
                 print(f"  {name}: {team['totalRaces']} races, {team['totalWins']} wins"
-                      + (", image mirrored" if image_url else ", no feature image found"))
+                      + (", image mirrored" if image_url else ", no card background found"))
                 updated += 1
             except Exception as e:
                 print(f"  WARNING: could not fetch stats for {name}: {e}")
