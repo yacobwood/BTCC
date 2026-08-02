@@ -73,6 +73,7 @@ async function sendErrorEmail(fn, message, err) {
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
+const ARTICLES_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/articles.json';
 const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
 // Wrap fetch with a hard timeout so a hanging external service never causes a 504.
@@ -473,12 +474,16 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
     console.error('Reddit scrape failed:', e);
   }
 
-  // ── BTCC.net WordPress API ──────────────────────────────────
+  // ── BTCC.net articles (GitHub mirror) ────────────────────────
+  // btcc.net moved off WordPress to a Vercel-hosted React app (2026-07-31)
+  // and confirmed directly with the site's own dev that wp-json is
+  // permanently gone, not just temporarily blocked - so this reads the
+  // same GitHub-mirrored articles.json every other btcc.net-sourced
+  // feature already uses (see newsCheck.js, src/api/client.js) instead of
+  // fetching btcc.net live. See project_vercel_migration memory.
   try {
-    const posts = await fetchWithTimeout(
-      'https://www.btcc.net/wp-json/wp/v2/posts?per_page=15&_fields=title,excerpt,link&orderby=date',
-    ).then(r => r.json());
-    for (const post of posts) {
+    const posts = await fetchWithTimeout(ARTICLES_URL).then(r => r.json());
+    for (const post of posts.slice(0, 15)) {
       const excerpt = post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? '';
       sources.push({
         source: 'BTCC.net',
@@ -488,7 +493,7 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
       });
     }
   } catch (e) {
-    console.error('BTCC.net scrape failed:', e);
+    console.error('BTCC.net articles fetch failed:', e);
   }
 
   // ── RSS helper ──────────────────────────────────────────────
