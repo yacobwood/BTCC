@@ -881,6 +881,73 @@ exports.syncAnalytics = onSchedule(
   }},
 );
 
+// ── Analytics weekly export — permanent historical record ─────
+// syncAnalytics above only ever keeps a rolling 30-day snapshot (one
+// Firestore doc, overwritten daily) - nothing preserves older weeks
+// anywhere under our own control once GA4's own reporting window moves
+// on. This appends one immutable document per week instead, keyed by
+// the week's start date, so we have a permanent, ever-growing archive
+// independent of GA4's own data retention settings.
+//
+// Doesn't capture GA4's "Retained users" - that comes from a separate
+// cohort-based Retention report (a different request shape,
+// cohortSpec), not a plain metric on runReport. Worth adding if it's
+// ever actually needed; newUsers/activeUsers/sessions/totalUsers cover
+// everything else on the Looker Studio dashboard.
+exports.exportAnalyticsHistory = onSchedule(
+  {schedule: '5 8 * * 1', timeZone: 'Europe/London', secrets: ['GMAIL_APP_PASSWORD']},
+  async () => { try {
+    const db = getFirestore();
+    const auth = new GoogleAuth({scopes: ['https://www.googleapis.com/auth/analytics.readonly']});
+    const client = await auth.getClient();
+    const {token} = await client.getAccessToken();
+
+    const runReport = async (body) => {
+      const res = await fetchWithTimeout(
+        `https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport`,
+        15000,
+        {method: 'POST', headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}, body: JSON.stringify(body)},
+      );
+      const json = await res.json();
+      if (json.error) throw new Error(`GA4 API error: ${JSON.stringify(json.error)}`);
+      return json;
+    };
+
+    const [weekReport, allTimeReport] = await Promise.all([
+      // The 7 days just gone
+      runReport({
+        dateRanges: [{startDate: '7daysAgo', endDate: 'yesterday'}],
+        metrics: [{name: 'newUsers'}, {name: 'activeUsers'}, {name: 'sessions'}],
+      }),
+      // Running total since GA4 tracking began - an early fixed start date is
+      // safe, GA4 just returns whatever's actually available from there.
+      runReport({
+        dateRanges: [{startDate: '2024-01-01', endDate: 'yesterday'}],
+        metrics: [{name: 'totalUsers'}],
+      }),
+    ]);
+
+    const weekRow = weekReport.rows?.[0];
+    const allTimeRow = allTimeReport.rows?.[0];
+    const weekStart = getUKDateString(new Date(), -7);
+
+    await db.collection('analytics_history').doc(weekStart).set({
+      weekStart,
+      weekEnd: getUKDateString(new Date(), -1),
+      exportedAt: new Date().toISOString(),
+      newUsers: parseInt(weekRow?.metricValues?.[0]?.value || '0'),
+      activeUsers: parseInt(weekRow?.metricValues?.[1]?.value || '0'),
+      sessions: parseInt(weekRow?.metricValues?.[2]?.value || '0'),
+      totalUsersAllTime: parseInt(allTimeRow?.metricValues?.[0]?.value || '0'),
+    });
+
+    console.log('exportAnalyticsHistory: done', weekStart);
+  } catch (e) {
+    console.error('exportAnalyticsHistory failed:', e);
+    await logError('exportAnalyticsHistory', e.message, e, {alert: true});
+  }},
+);
+
 // ── Error dismissal — called from admin page ──────────────────────────────────
 exports.dismissError = onRequest(
   {cors: ['https://yacobwood.github.io']},
