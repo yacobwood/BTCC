@@ -40,6 +40,7 @@ const LOCKED_WRITE_COLLECTIONS = [
   'roadmap_submissions',
   'roadmap_votes',
   'analytics_history',
+  'analytics_daily_history',
 ];
 
 describe('firestore.rules', () => {

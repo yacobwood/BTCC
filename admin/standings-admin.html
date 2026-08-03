@@ -1545,6 +1545,11 @@ select.input { cursor: pointer; }
   </div>
 
   <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">DAILY NEW / ACTIVE / RETURNING USERS</div></div>
+    <div id="ga-daily-chart"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
     <div class="card-header"><div class="section-label">NEW USERS PER WEEK</div></div>
     <div id="ga-weekly-trend"><div class="section-note">Loading…</div></div>
   </div>
@@ -3672,20 +3677,136 @@ function gaBar(label, value, max, color) {
   </div>`;
 }
 
+// Firestore's listDocuments caps each response to a server-chosen page size
+// regardless of the pageSize param requested - analytics_daily_history grows
+// by roughly a document a day forever, so unlike this file's other (bounded)
+// collections it will eventually need more than one page.
+async function fsListAll(collection, pageSize = 300) {
+  let docs = [];
+  let pageToken = '';
+  do {
+    const url = `${FS_BASE_URL}/${collection}?key=${FS_API_KEY}&pageSize=${pageSize}` + (pageToken ? `&pageToken=${pageToken}` : '');
+    const r = await fetch(url);
+    const d = await r.json();
+    docs = docs.concat(d.documents || []);
+    pageToken = d.nextPageToken || '';
+  } while (pageToken);
+  return docs;
+}
+
+function niceMax(v) {
+  if (v <= 10) return 10;
+  const pow = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / pow;
+  const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return step * pow;
+}
+
+function buildDailyLineChart(days, rounds) {
+  if (!days.length) return '<div class="section-note">No daily data yet.</div>';
+
+  const W = 800, H = 300, padL = 40, padR = 12, padT = 16, padB = 32;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const n = days.length;
+  const maxVal = niceMax(Math.max(...days.map(d => Math.max(d.newUsers, d.activeUsers, d.returning)), 10));
+
+  const xFor = i => padL + (n <= 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+  const yFor = v => padT + plotH - (Math.min(v, maxVal) / maxVal) * plotH;
+
+  const line = (key, color) => {
+    const pts = days.map((d, i) => `${xFor(i).toFixed(1)},${yFor(d[key]).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" />`;
+  };
+
+  let gridSvg = '';
+  for (let f = 0; f <= 4; f++) {
+    const v = Math.round((maxVal * f) / 4);
+    const y = yFor(v);
+    gridSvg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" y2="${y.toFixed(1)}" stroke="var(--outline-lo)" stroke-width="1" />`;
+    gridSvg += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--text-sec)">${v}</text>`;
+  }
+
+  const labelCount = Math.min(7, n);
+  let xLabelSvg = '';
+  for (let k = 0; k < labelCount; k++) {
+    const i = labelCount === 1 ? 0 : Math.round((k / (labelCount - 1)) * (n - 1));
+    const short = (days[i].date || '').slice(5).replace('-', '/');
+    // Edge labels are anchored inward (not centered) so they don't extend
+    // past the viewBox and get silently clipped by SVG's default overflow:hidden.
+    const anchor = k === 0 ? 'start' : (k === labelCount - 1 ? 'end' : 'middle');
+    xLabelSvg += `<text x="${xFor(i).toFixed(1)}" y="${H - padB + 14}" text-anchor="${anchor}" font-size="9" fill="var(--text-sec)">${short}</text>`;
+  }
+
+  const firstDate = days[0].date, lastDate = days[n - 1].date;
+  const roundPositions = (rounds || [])
+    .filter(rnd => rnd.startDate && rnd.startDate >= firstDate && rnd.startDate <= lastDate)
+    .map(rnd => ({rnd, idx: days.findIndex(d => d.date >= rnd.startDate)}))
+    .filter(({idx}) => idx !== -1)
+    .map(({rnd, idx}) => ({rnd, x: xFor(idx)}));
+
+  // Greedy 2-row bin-pack: a label goes on row 0 unless that row's last
+  // label hasn't cleared this x position yet, in which case it drops to
+  // row 1. Distance-between-markers alone isn't enough to judge this -
+  // a long venue name (e.g. "Brands Hatch Indy") can still overlap the
+  // next marker even when the markers themselves are comfortably apart -
+  // so this estimates each label's actual rendered width from its length.
+  let roundSvg = '';
+  const rowEnds = [-Infinity, -Infinity];
+  roundPositions.forEach(({rnd, x}) => {
+    const label = rnd.venue || '';
+    const estWidth = label.length * 5.3 + 8;
+    const row = x >= rowEnds[0] ? 0 : (x >= rowEnds[1] ? 1 : 0);
+    rowEnds[row] = x + estWidth;
+    const labelY = padT + 11 + row * 11;
+    roundSvg += `<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" y2="${H - padB}" stroke="#c9b880" stroke-width="8" opacity="0.35" />`;
+    roundSvg += `<text x="${(x + 5).toFixed(1)}" y="${labelY.toFixed(1)}" font-size="9" fill="#e8dfc0">${escHtml(label)}</text>`;
+  });
+
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+      ${gridSvg}
+      ${roundSvg}
+      ${line('newUsers', 'var(--yellow)')}
+      ${line('activeUsers', '#60A5FA')}
+      ${line('returning', '#A78BFA')}
+      ${xLabelSvg}
+    </svg>
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:11px">
+      <span style="color:var(--yellow)">● New users</span>
+      <span style="color:#60A5FA">● Active users</span>
+      <span style="color:#A78BFA">● Returning (active − new)</span>
+    </div>`;
+}
+
 async function loadWebsiteAnalytics() {
   ['stat-ga-total', 'stat-ga-new', 'stat-ga-active', 'stat-ga-sessions'].forEach(id => {
     document.getElementById(id).textContent = '…';
   });
-  ['ga-weekly-trend', 'ga-sources-list', 'ga-platform-list'].forEach(id => {
+  ['ga-daily-chart', 'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list'].forEach(id => {
     document.getElementById(id).innerHTML = '<div class="section-note">Loading…</div>';
   });
 
   try {
-    const r = await fetch(`${FS_BASE_URL}/analytics_history?key=${FS_API_KEY}&pageSize=60`);
-    const d = await r.json();
+    const [historyRes, dailyDocs, calendarRes] = await Promise.all([
+      fetch(`${FS_BASE_URL}/analytics_history?key=${FS_API_KEY}&pageSize=60`).then(r => r.json()),
+      fsListAll('analytics_daily_history'),
+      fetch(CALENDAR_URL + '?t=' + Date.now()).then(r => r.json()).catch(() => ({rounds: []})),
+    ]);
+    const d = historyRes;
     const weeks = (d.documents || [])
       .map(doc => fsFields(doc.fields || {}))
       .sort((a, b) => (a.weekStart || '').localeCompare(b.weekStart || ''));
+
+    // Merge the one-time backfill with each week's own dailyBreakdown -
+    // the weekly docs take priority on overlapping dates since they're the
+    // ongoing live source, the backfill only fills in everything earlier.
+    const dailyMap = {};
+    dailyDocs.map(doc => fsFields(doc.fields || {})).forEach(day => { if (day.date) dailyMap[day.date] = day; });
+    weeks.forEach(w => (w.dailyBreakdown || []).forEach(day => { if (day.date) dailyMap[day.date] = day; }));
+    const allDays = Object.values(dailyMap)
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+      .map(day => ({...day, returning: Math.max((day.activeUsers || 0) - (day.newUsers || 0), 0)}));
+    document.getElementById('ga-daily-chart').innerHTML = buildDailyLineChart(allDays, calendarRes.rounds || []);
 
     if (!weeks.length) {
       const empty = '<div class="section-note">No data yet - the first weekly export runs Monday.</div>';
@@ -3731,6 +3852,7 @@ async function loadWebsiteAnalytics() {
     }
   } catch (e) {
     const failMsg = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
+    document.getElementById('ga-daily-chart').innerHTML = failMsg;
     document.getElementById('ga-weekly-trend').innerHTML = failMsg;
     document.getElementById('ga-sources-list').innerHTML = failMsg;
     document.getElementById('ga-platform-list').innerHTML = failMsg;

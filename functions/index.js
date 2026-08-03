@@ -960,12 +960,18 @@ exports.exportAnalyticsHistory = onSchedule(
     ]);
 
     const overviewRow = overviewReport.rows?.[0];
-    const dailyBreakdown = (dailyReport.rows || []).map(row => ({
-      date: row.dimensionValues?.[0]?.value,
-      newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
-      activeUsers: parseInt(row.metricValues?.[1]?.value || '0'),
-      sessions: parseInt(row.metricValues?.[2]?.value || '0'),
-    }));
+    const dailyBreakdown = (dailyReport.rows || []).map(row => {
+      const raw = row.dimensionValues?.[0]?.value || '';
+      return {
+        // Reformatted to YYYY-MM-DD (GA4 returns bare YYYYMMDD) so these
+        // dates match analytics_daily_history's format and dedupe/merge
+        // correctly instead of appearing as separate, wrongly-sorted days.
+        date: `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`,
+        newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+        activeUsers: parseInt(row.metricValues?.[1]?.value || '0'),
+        sessions: parseInt(row.metricValues?.[2]?.value || '0'),
+      };
+    });
     const topSources = (sourcesReport.rows || []).map(row => ({
       source: row.dimensionValues?.[0]?.value,
       medium: row.dimensionValues?.[1]?.value,
@@ -1023,6 +1029,70 @@ exports.exportAnalyticsHistory = onSchedule(
     console.error('exportAnalyticsHistory failed:', e);
     await logError('exportAnalyticsHistory', e.message, e, {alert: true});
   }},
+);
+
+// ── One-time daily history backfill — admin-triggered, not scheduled ──
+// exportAnalyticsHistory only captures day-by-day data from its own first
+// run onward (2026-07-27+). This fills analytics_daily_history with every
+// earlier day GA4 still has, so the admin dashboard's daily chart can show
+// the full season instead of starting mid-way through. Re-running it is
+// safe - each date's doc is just overwritten - so it also works to extend
+// the backfill further back later if needed.
+exports.backfillAnalyticsDaily = onRequest(
+  {secrets: ['GMAIL_APP_PASSWORD']},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+
+    try {
+      const db = getFirestore();
+      const auth = new GoogleAuth({scopes: ['https://www.googleapis.com/auth/analytics.readonly']});
+      const client = await auth.getClient();
+      const {token} = await client.getAccessToken();
+
+      const gaRes = await fetchWithTimeout(
+        `https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport`,
+        30000,
+        {
+          method: 'POST',
+          headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            dateRanges: [{startDate: '2024-01-01', endDate: 'yesterday'}],
+            dimensions: [{name: 'date'}],
+            metrics: [{name: 'newUsers'}, {name: 'activeUsers'}, {name: 'sessions'}],
+            orderBys: [{dimension: {dimensionName: 'date'}}],
+            limit: 5000,
+          }),
+        },
+      );
+      const gaJson = await gaRes.json();
+      if (gaJson.error) throw new Error(`GA4 API error: ${JSON.stringify(gaJson.error)}`);
+
+      const days = (gaJson.rows || []).map(row => {
+        const raw = row.dimensionValues?.[0]?.value || '';
+        return {
+          date: `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`,
+          newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+          activeUsers: parseInt(row.metricValues?.[1]?.value || '0'),
+          sessions: parseInt(row.metricValues?.[2]?.value || '0'),
+        };
+      });
+
+      const dailyRef = db.collection('analytics_daily_history');
+      for (let i = 0; i < days.length; i += 500) {
+        const batch = db.batch();
+        days.slice(i, i + 500).forEach(d => batch.set(dailyRef.doc(d.date), d));
+        await batch.commit();
+      }
+
+      console.log('backfillAnalyticsDaily: done', days.length, 'days');
+      res.status(200).json({ok: true, days: days.length});
+    } catch (e) {
+      console.error('backfillAnalyticsDaily failed:', e);
+      await logError('backfillAnalyticsDaily', e.message, e, {alert: true});
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
 );
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
