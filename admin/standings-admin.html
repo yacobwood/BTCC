@@ -254,6 +254,8 @@ body {
 }
 .card-header .section-label { flex: 1; }
 
+#analytics-stat-cards, #ga-stat-cards { grid-template-columns: 1fr 1fr; }
+
 /* ── Stat grid (dashboard) ── */
 .stat-grid {
   display: grid;
@@ -698,6 +700,12 @@ select.input { cursor: pointer; }
   .tab-panel { max-width: 760px; padding: 24px 32px; }
   .scrapers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .scrapers-grid .scraper-card { margin-bottom: 0; }
+
+  /* Analytics has real charts to show, so it gets more room than the
+     form-like tabs (roadmap editor, push composer) that .tab-panel's
+     760px cap is really sized for. */
+  #panel-analytics { max-width: 1200px; }
+  #analytics-stat-cards, #ga-stat-cards { grid-template-columns: repeat(4, 1fr); }
 }
 </style>
 </head>
@@ -1515,7 +1523,7 @@ select.input { cursor: pointer; }
     <button class="btn-sm" onclick="loadAnalytics()">↻ REFRESH</button>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px" id="analytics-stat-cards">
+  <div style="display:grid;gap:10px;margin-bottom:16px" id="analytics-stat-cards">
     <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">TOTAL VOTES</div><div id="stat-votes" style="font-size:28px;font-weight:900;color:var(--yellow)">—</div></div>
     <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">BUG REPORTS</div><div id="stat-bugs" style="font-size:28px;font-weight:900;color:var(--red)">—</div></div>
     <div class="card" style="text-align:center"><div class="section-note" style="margin-bottom:4px">PUSHES SENT</div><div id="stat-pushes" style="font-size:28px;font-weight:900;color:#60A5FA">—</div></div>
@@ -1537,7 +1545,7 @@ select.input { cursor: pointer; }
     <div id="analytics-pushes-list"><div class="section-note">Loading…</div></div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0" id="ga-stat-cards">
+  <div style="display:grid;gap:10px;margin:16px 0" id="ga-stat-cards">
     <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">TOTAL USERS (ALL TIME)</div><div id="stat-ga-total" style="font-size:28px;font-weight:900;color:var(--yellow)">—</div></div>
     <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">NEW USERS (7D)</div><div id="stat-ga-new" style="font-size:28px;font-weight:900;color:var(--green)">—</div></div>
     <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">ACTIVE USERS (7D)</div><div id="stat-ga-active" style="font-size:28px;font-weight:900;color:#60A5FA">—</div></div>
