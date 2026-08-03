@@ -892,6 +892,13 @@ exports.syncAnalytics = onSchedule(
 // totals, a daily breakdown, acquisition sources and platform/OS split,
 // not just a handful of headline numbers.
 //
+// Only ever fetches one week of GA4 data per run - totalUsersAllTime is
+// accumulated by reading the previous week's own stored figure and
+// adding this week's newUsers to it, rather than re-querying GA4's
+// entire history every week (which would only get slower and larger
+// over time). Only the very first run ever, with no prior week stored
+// yet, does a one-time full-history GA4 fetch to seed that baseline.
+//
 // Doesn't capture GA4's "Retained users" - that comes from a separate
 // cohort-based Retention report (a different request shape, cohortSpec),
 // not a plain metric on runReport. Also doesn't touch GA4's own Data
@@ -920,7 +927,7 @@ exports.exportAnalyticsHistory = onSchedule(
 
     const weekRange = [{startDate: '7daysAgo', endDate: 'yesterday'}];
 
-    const [overviewReport, dailyReport, sourcesReport, platformReport, allTimeReport] = await Promise.all([
+    const [overviewReport, dailyReport, sourcesReport, platformReport] = await Promise.all([
       runReport({
         dateRanges: weekRange,
         metrics: [
@@ -950,12 +957,6 @@ exports.exportAnalyticsHistory = onSchedule(
         metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
         orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
       }),
-      // Running total since GA4 tracking began - an early fixed start date is
-      // safe, GA4 just returns whatever's actually available from there.
-      runReport({
-        dateRanges: [{startDate: '2024-01-01', endDate: 'yesterday'}],
-        metrics: [{name: 'totalUsers'}],
-      }),
     ]);
 
     const overviewRow = overviewReport.rows?.[0];
@@ -977,21 +978,41 @@ exports.exportAnalyticsHistory = onSchedule(
       activeUsers: parseInt(row.metricValues?.[0]?.value || '0'),
       sessions: parseInt(row.metricValues?.[1]?.value || '0'),
     }));
-    const allTimeRow = allTimeReport.rows?.[0];
+    const newUsersThisWeek = parseInt(overviewRow?.metricValues?.[0]?.value || '0');
+
+    // Running total is accumulated from last week's own stored figure
+    // rather than re-querying GA4's entire history every week (which only
+    // gets larger and slower over time) - only the very first run ever,
+    // with no prior week stored yet, needs a one-time full-history GA4
+    // fetch to establish a baseline.
+    const historyRef = db.collection('analytics_history');
+    const prevSnap = await historyRef.orderBy('weekStart', 'desc').limit(1).get();
+
+    let totalUsersAllTime;
+    if (!prevSnap.empty) {
+      totalUsersAllTime = (prevSnap.docs[0].data().totalUsersAllTime || 0) + newUsersThisWeek;
+    } else {
+      const bootstrapReport = await runReport({
+        dateRanges: [{startDate: '2024-01-01', endDate: 'yesterday'}],
+        metrics: [{name: 'totalUsers'}],
+      });
+      totalUsersAllTime = parseInt(bootstrapReport.rows?.[0]?.metricValues?.[0]?.value || '0');
+    }
+
     const weekStart = getUKDateString(new Date(), -7);
 
-    await db.collection('analytics_history').doc(weekStart).set({
+    await historyRef.doc(weekStart).set({
       weekStart,
       weekEnd: getUKDateString(new Date(), -1),
       exportedAt: new Date().toISOString(),
-      newUsers: parseInt(overviewRow?.metricValues?.[0]?.value || '0'),
+      newUsers: newUsersThisWeek,
       activeUsers: parseInt(overviewRow?.metricValues?.[1]?.value || '0'),
       sessions: parseInt(overviewRow?.metricValues?.[2]?.value || '0'),
       screenPageViews: parseInt(overviewRow?.metricValues?.[3]?.value || '0'),
       averageSessionDuration: parseFloat(overviewRow?.metricValues?.[4]?.value || '0'),
       engagementRate: parseFloat(overviewRow?.metricValues?.[5]?.value || '0'),
       bounceRate: parseFloat(overviewRow?.metricValues?.[6]?.value || '0'),
-      totalUsersAllTime: parseInt(allTimeRow?.metricValues?.[0]?.value || '0'),
+      totalUsersAllTime,
       dailyBreakdown,
       topSources,
       platformBreakdown,
