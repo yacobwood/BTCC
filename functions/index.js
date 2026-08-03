@@ -887,13 +887,18 @@ exports.syncAnalytics = onSchedule(
 // anywhere under our own control once GA4's own reporting window moves
 // on. This appends one immutable document per week instead, keyed by
 // the week's start date, so we have a permanent, ever-growing archive
-// independent of GA4's own data retention settings.
+// independent of GA4's own data retention settings - as much of GA4's
+// own data as the readonly scope already granted can reach: overview
+// totals, a daily breakdown, acquisition sources and platform/OS split,
+// not just a handful of headline numbers.
 //
 // Doesn't capture GA4's "Retained users" - that comes from a separate
-// cohort-based Retention report (a different request shape,
-// cohortSpec), not a plain metric on runReport. Worth adding if it's
-// ever actually needed; newUsers/activeUsers/sessions/totalUsers cover
-// everything else on the Looker Studio dashboard.
+// cohort-based Retention report (a different request shape, cohortSpec),
+// not a plain metric on runReport. Also doesn't touch GA4's own Data
+// Retention setting (2 vs 14 months) or BigQuery Export - both are
+// one-time GA4 Admin console changes that need a broader analytics.edit
+// scope than this function has (or should have, for a scheduled job that
+// only ever needs to read).
 exports.exportAnalyticsHistory = onSchedule(
   {schedule: '5 8 * * 1', timeZone: 'Europe/London', secrets: ['GMAIL_APP_PASSWORD']},
   async () => { try {
@@ -913,11 +918,37 @@ exports.exportAnalyticsHistory = onSchedule(
       return json;
     };
 
-    const [weekReport, allTimeReport] = await Promise.all([
-      // The 7 days just gone
+    const weekRange = [{startDate: '7daysAgo', endDate: 'yesterday'}];
+
+    const [overviewReport, dailyReport, sourcesReport, platformReport, allTimeReport] = await Promise.all([
       runReport({
-        dateRanges: [{startDate: '7daysAgo', endDate: 'yesterday'}],
+        dateRanges: weekRange,
+        metrics: [
+          {name: 'newUsers'}, {name: 'activeUsers'}, {name: 'sessions'},
+          {name: 'screenPageViews'}, {name: 'averageSessionDuration'},
+          {name: 'engagementRate'}, {name: 'bounceRate'},
+        ],
+      }),
+      // Day-by-day within the week, so the archive keeps the same shape of
+      // detail the daily Looker Studio chart shows, not just a weekly total.
+      runReport({
+        dateRanges: weekRange,
+        dimensions: [{name: 'date'}],
         metrics: [{name: 'newUsers'}, {name: 'activeUsers'}, {name: 'sessions'}],
+        orderBys: [{dimension: {dimensionName: 'date'}}],
+      }),
+      runReport({
+        dateRanges: weekRange,
+        dimensions: [{name: 'sessionSource'}, {name: 'sessionMedium'}],
+        metrics: [{name: 'newUsers'}, {name: 'sessions'}],
+        orderBys: [{metric: {metricName: 'newUsers'}, desc: true}],
+        limit: 10,
+      }),
+      runReport({
+        dateRanges: weekRange,
+        dimensions: [{name: 'platform'}, {name: 'operatingSystem'}],
+        metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
+        orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
       }),
       // Running total since GA4 tracking began - an early fixed start date is
       // safe, GA4 just returns whatever's actually available from there.
@@ -927,7 +958,25 @@ exports.exportAnalyticsHistory = onSchedule(
       }),
     ]);
 
-    const weekRow = weekReport.rows?.[0];
+    const overviewRow = overviewReport.rows?.[0];
+    const dailyBreakdown = (dailyReport.rows || []).map(row => ({
+      date: row.dimensionValues?.[0]?.value,
+      newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+      activeUsers: parseInt(row.metricValues?.[1]?.value || '0'),
+      sessions: parseInt(row.metricValues?.[2]?.value || '0'),
+    }));
+    const topSources = (sourcesReport.rows || []).map(row => ({
+      source: row.dimensionValues?.[0]?.value,
+      medium: row.dimensionValues?.[1]?.value,
+      newUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+      sessions: parseInt(row.metricValues?.[1]?.value || '0'),
+    }));
+    const platformBreakdown = (platformReport.rows || []).map(row => ({
+      platform: row.dimensionValues?.[0]?.value,
+      operatingSystem: row.dimensionValues?.[1]?.value,
+      activeUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+      sessions: parseInt(row.metricValues?.[1]?.value || '0'),
+    }));
     const allTimeRow = allTimeReport.rows?.[0];
     const weekStart = getUKDateString(new Date(), -7);
 
@@ -935,10 +984,17 @@ exports.exportAnalyticsHistory = onSchedule(
       weekStart,
       weekEnd: getUKDateString(new Date(), -1),
       exportedAt: new Date().toISOString(),
-      newUsers: parseInt(weekRow?.metricValues?.[0]?.value || '0'),
-      activeUsers: parseInt(weekRow?.metricValues?.[1]?.value || '0'),
-      sessions: parseInt(weekRow?.metricValues?.[2]?.value || '0'),
+      newUsers: parseInt(overviewRow?.metricValues?.[0]?.value || '0'),
+      activeUsers: parseInt(overviewRow?.metricValues?.[1]?.value || '0'),
+      sessions: parseInt(overviewRow?.metricValues?.[2]?.value || '0'),
+      screenPageViews: parseInt(overviewRow?.metricValues?.[3]?.value || '0'),
+      averageSessionDuration: parseFloat(overviewRow?.metricValues?.[4]?.value || '0'),
+      engagementRate: parseFloat(overviewRow?.metricValues?.[5]?.value || '0'),
+      bounceRate: parseFloat(overviewRow?.metricValues?.[6]?.value || '0'),
       totalUsersAllTime: parseInt(allTimeRow?.metricValues?.[0]?.value || '0'),
+      dailyBreakdown,
+      topSources,
+      platformBreakdown,
     });
 
     console.log('exportAnalyticsHistory: done', weekStart);
