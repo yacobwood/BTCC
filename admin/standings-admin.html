@@ -1536,6 +1536,28 @@ select.input { cursor: pointer; }
     <div class="card-header"><div class="section-label">RECENT PUSHES</div></div>
     <div id="analytics-pushes-list"><div class="section-note">Loading…</div></div>
   </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0" id="ga-stat-cards">
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">TOTAL USERS (ALL TIME)</div><div id="stat-ga-total" style="font-size:28px;font-weight:900;color:var(--yellow)">—</div></div>
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">NEW USERS (7D)</div><div id="stat-ga-new" style="font-size:28px;font-weight:900;color:var(--green)">—</div></div>
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">ACTIVE USERS (7D)</div><div id="stat-ga-active" style="font-size:28px;font-weight:900;color:#60A5FA">—</div></div>
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">SESSIONS (7D)</div><div id="stat-ga-sessions" style="font-size:28px;font-weight:900;color:var(--red)">—</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">NEW USERS PER WEEK</div></div>
+    <div id="ga-weekly-trend"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">TOP SOURCES (7D)</div></div>
+    <div id="ga-sources-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">PLATFORM BREAKDOWN (7D)</div></div>
+    <div id="ga-platform-list"><div class="section-note">Loading…</div></div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════ ERRORS ══════════════════ -->
@@ -3506,6 +3528,8 @@ async function saveRoadmap(silent) {
 // ══════════════════════════════ ANALYTICS ══════════════════════════════
 
 async function loadAnalytics() {
+  loadWebsiteAnalytics();
+
   // Reset stats
   ['stat-votes','stat-bugs','stat-pushes','stat-ideas'].forEach(id => {
     document.getElementById(id).textContent = '…';
@@ -3614,6 +3638,104 @@ async function loadAnalytics() {
 
 // escHtml is an alias for htmlEsc (defined above) — kept for call-site compatibility
 const escHtml = htmlEsc;
+
+// Firestore REST documents wrap every value in a type tag (stringValue,
+// integerValue, mapValue, arrayValue...) - analytics_history nests arrays of
+// maps (topSources, platformBreakdown) so the flat doc.fields?.x?.stringValue
+// pattern used elsewhere in this file can't reach into them.
+function fsValue(v) {
+  if (!v) return null;
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return parseInt(v.integerValue, 10);
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('mapValue' in v) return fsFields(v.mapValue.fields || {});
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(fsValue);
+  return null;
+}
+function fsFields(fields) {
+  const out = {};
+  for (const k in fields) out[k] = fsValue(fields[k]);
+  return out;
+}
+
+function gaBar(label, value, max, color) {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  return `<div style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <span style="color:var(--text);font-size:13px">${escHtml(label)}</span>
+      <span style="color:${color};font-size:13px;font-weight:700">${value}</span>
+    </div>
+    <div style="background:var(--outline);border-radius:4px;height:6px">
+      <div style="background:${color};height:6px;border-radius:4px;width:${pct}%;transition:width .3s"></div>
+    </div>
+  </div>`;
+}
+
+async function loadWebsiteAnalytics() {
+  ['stat-ga-total', 'stat-ga-new', 'stat-ga-active', 'stat-ga-sessions'].forEach(id => {
+    document.getElementById(id).textContent = '…';
+  });
+  ['ga-weekly-trend', 'ga-sources-list', 'ga-platform-list'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="section-note">Loading…</div>';
+  });
+
+  try {
+    const r = await fetch(`${FS_BASE_URL}/analytics_history?key=${FS_API_KEY}&pageSize=60`);
+    const d = await r.json();
+    const weeks = (d.documents || [])
+      .map(doc => fsFields(doc.fields || {}))
+      .sort((a, b) => (a.weekStart || '').localeCompare(b.weekStart || ''));
+
+    if (!weeks.length) {
+      const empty = '<div class="section-note">No data yet - the first weekly export runs Monday.</div>';
+      document.getElementById('ga-weekly-trend').innerHTML = empty;
+      document.getElementById('ga-sources-list').innerHTML = empty;
+      document.getElementById('ga-platform-list').innerHTML = empty;
+      return;
+    }
+
+    const latest = weeks[weeks.length - 1];
+    document.getElementById('stat-ga-total').textContent = (latest.totalUsersAllTime || 0).toLocaleString();
+    document.getElementById('stat-ga-new').textContent = latest.newUsers || 0;
+    document.getElementById('stat-ga-active').textContent = latest.activeUsers || 0;
+    document.getElementById('stat-ga-sessions').textContent = latest.sessions || 0;
+
+    // ── Weekly trend, most recent first ──
+    const recentWeeks = weeks.slice().reverse().slice(0, 12);
+    const maxNew = Math.max(...recentWeeks.map(w => w.newUsers || 0), 1);
+    document.getElementById('ga-weekly-trend').innerHTML = recentWeeks
+      .map(w => gaBar(`${w.weekStart || '?'} → ${w.weekEnd || '?'}`, w.newUsers || 0, maxNew, 'var(--yellow)'))
+      .join('');
+
+    // ── Top sources, latest week ──
+    const sources = (latest.topSources || []).slice(0, 8);
+    if (sources.length) {
+      const maxSrc = Math.max(...sources.map(s => s.newUsers || 0), 1);
+      document.getElementById('ga-sources-list').innerHTML = sources
+        .map(s => gaBar(`${s.source || '(direct)'} / ${s.medium || '(none)'}`, s.newUsers || 0, maxSrc, '#60A5FA'))
+        .join('');
+    } else {
+      document.getElementById('ga-sources-list').innerHTML = '<div class="section-note">No source data for this week.</div>';
+    }
+
+    // ── Platform breakdown, latest week ──
+    const platforms = (latest.platformBreakdown || []).slice(0, 8);
+    if (platforms.length) {
+      const maxPlat = Math.max(...platforms.map(p => p.activeUsers || 0), 1);
+      document.getElementById('ga-platform-list').innerHTML = platforms
+        .map(p => gaBar(`${p.platform || 'Unknown'} / ${p.operatingSystem || 'Unknown'}`, p.activeUsers || 0, maxPlat, 'var(--green)'))
+        .join('');
+    } else {
+      document.getElementById('ga-platform-list').innerHTML = '<div class="section-note">No platform data for this week.</div>';
+    }
+  } catch (e) {
+    const failMsg = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
+    document.getElementById('ga-weekly-trend').innerHTML = failMsg;
+    document.getElementById('ga-sources-list').innerHTML = failMsg;
+    document.getElementById('ga-platform-list').innerHTML = failMsg;
+  }
+}
 
 // ══════════════════════════════ BUG REPORTS ══════════════════════════════
 

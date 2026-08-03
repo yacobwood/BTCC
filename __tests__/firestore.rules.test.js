@@ -39,6 +39,7 @@ const LOCKED_WRITE_COLLECTIONS = [
   'push_history',
   'roadmap_submissions',
   'roadmap_votes',
+  'analytics_history',
 ];
 
 describe('firestore.rules', () => {

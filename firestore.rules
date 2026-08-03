@@ -8,6 +8,7 @@ service cloud.firestore {
     match /push_history/{doc}        { allow read: if true; allow write: if false; }
     match /roadmap_submissions/{doc} { allow read: if true; allow write: if false; }
     match /roadmap_votes/{doc}       { allow read: if true; allow write: if false; }
+    match /analytics_history/{doc}   { allow read: if true; allow write: if false; }
 
     // App writes — state tracking for notification deduplication
     match /state/{doc}   { allow read: if true; allow write: if false; }
@@ -22,6 +23,9 @@ service cloud.firestore {
 
     // Article reactions — direct Firestore increment writes from the app
     match /article_reactions/{doc} { allow read: if true; allow write: if true; }
+
+    // Article view counts — direct Firestore increment writes from the app, one per open
+    match /article_views/{doc} { allow read: if true; allow write: if true; }
 
     // Article comments — app reads/writes; deletes are direct
     match /article_comments/{doc} { allow read: if true; allow write: if true; }
