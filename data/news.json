@@ -1,16 +1,10 @@
 [
   {
-    "id": "pole-victory-and-podium-for-speedworks-corolla-racing-at-thruxton",
-    "slug": "pole-victory-and-podium-for-speedworks-corolla-racing-at-thruxton",
+    "id": "action-packed-knockhill-awaits-for-laser-tools-racing-with-mb-motorsport",
+    "slug": "action-packed-knockhill-awaits-for-laser-tools-racing-with-mb-motorsport",
     "title": {
-      "rendered": "Pole, Victory and Podium for Speedworks Corolla Racing at Thruxton"
+      "rendered": "Action-Packed Knockhill Awaits for Laser Tools Racing with MB Motorsport"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/9033d46e-ef2d-4a54-b5c7-a69a0194014d.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
