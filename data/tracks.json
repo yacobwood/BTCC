@@ -11,7 +11,7 @@
     "cornersRight": 6,
     "about": "One of Britain's most historic circuits, dating back to 1931. The National layout features the infamous Craner Curves - a sweeping downhill chicane that rewards commitment - alongside the Old Hairpin and the fast Schwantz Curve. The circuit also hosted a famous Formula 1 European Grand Prix in 1993, remembered for Ayrton Senna's extraordinary opening lap.",
     "btccFact": "Donington opens the BTCC season almost every year, meaning the winner of the first race here is often considered the early championship favourite.",
-    "imageUrl": "https://btcc.net/wp-content/uploads/2025/04/Start-0H5A6101-scaled.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/8ac02d13-521c-4db4-a74a-0e6cd93a3576.png",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/2-Donington-Park-1.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/04/start-0H5A1735-scaled-e1745785780179.jpg",
@@ -96,7 +96,7 @@
     "cornersRight": 7,
     "about": "The short, intense Indy loop of the legendary Brands Hatch circuit. Paddock Hill Bend is one of the most famous corners in British motorsport - blind, downhill, and off-camber - providing spectacular action on the opening lap. The tight Druids hairpin and Clark Curve create close-quarters racing throughout the field.",
     "btccFact": "The BTCC visits Brands Hatch twice each season - on the shorter Indy circuit in spring and the full Grand Prix layout for the season finale in October.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2025-brands-hatch-indy/Rainford-0Q3A3551.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/2ef8f9fb-9720-421f-bf94-1725b1925820.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/750x625.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/05/Cook-0H5A4404-scaled.jpg",
@@ -179,7 +179,7 @@
     "cornersRight": 8,
     "about": "Built on a former Second World War airfield in the flat Norfolk countryside, Snetterton is one of the longest circuits on the BTCC calendar. The Bentley Straight offers tyre-testing high-speed running, while technical sections like the Senna Chicane and Coram Corner reward smooth, committed driving. Setup compromise between straight-line speed and mechanical grip is key.",
     "btccFact": "Snetterton's long straights mean it's one of the circuits where power advantage makes the biggest difference - teams running higher-powered cars often shine here.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2025-snetterton/Hall-5L0A0145.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/51a19231-dcd6-49eb-b6e8-135339532937.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/6-Snetterton.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/05/Doble-0Q3A8800-scaled.jpg",
@@ -283,7 +283,7 @@
     "cornersRight": 5,
     "about": "A consistent driver favourite. Set in the rolling Cheshire countryside, Oulton Park combines sweeping fast corners with elevation changes that put the car through its paces. Cascades is a breathtaking flat-out downhill right-hander, while the Knickerbrook complex and Lodge Corner reward precision. It's the type of track that exposes both talent and machinery.",
     "btccFact": "Oulton Park has produced some of the most memorable BTCC moments of recent seasons, with its undulating nature leading to unpredictable results and dramatic incidents.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2025-oulton-park/Hill-0Q3A8357.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/67cb616a-474e-46db-b119-8a35f19e554e.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/4-Oulton-Park-1.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/07/Ingram-0Q3A3136-scaled-e1753783962919.jpg",
@@ -400,9 +400,9 @@
     "corners": 10,
     "cornersLeft": 3,
     "cornersRight": 7,
-    "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Noble\u2013Church complex is taken at high speed in a single flowing line, while Campbell/Cobb is among the most demanding high-speed sequences in domestic racing.",
+    "about": "Britain's fastest circuit, built on a wartime airfield in Hampshire. Wide, fast, and almost entirely flat, Thruxton is a circuit where bravery is rewarded. The sweeping Noble–Church complex is taken at high speed in a single flowing line, while Campbell/Cobb is among the most demanding high-speed sequences in domestic racing.",
     "btccFact": "Average lap speeds at Thruxton are the highest of any BTCC venue, regularly exceeding 120 mph. It's a true driver's circuit where mechanical sympathy under sustained high loads is paramount.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2024-thruxton/Hill-0Q3A5641.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/38b90529-7ffa-4e75-9451-96519213f8b9.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/3-Thruxton.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/07/Cook-0H5A7560-scaled-e1753397162433.jpg",
@@ -494,7 +494,7 @@
     "cornersRight": 6,
     "about": "Scotland's National Motorsport Centre, tucked into the Fife hills. Compact and technically demanding, Knockhill is unlike any other circuit on the calendar - the undulating gradient means cars are constantly loaded and unloaded through corners, making the rear of a touring car particularly lively. The blind crest at Clark's Corner demands total commitment.",
     "btccFact": "The Knockhill crowd is famously passionate, and the circuit's compact nature means fans can see virtually the entire lap from the hillside spectator banks - making it a fantastic atmosphere for a race meeting.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/knockhill-2024/1-DJI_20240812121003_0175_D-1.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/6c1ec922-f0f0-4e49-84c3-a79c44387c20.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/knockhill-2020-03.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/08/Release_start-0Q3A1361-scaled.jpg",
@@ -577,7 +577,7 @@
     "cornersRight": 7,
     "about": "The full Grand Prix layout extends the National circuit with the Melbourne Loop and the Foggy/Goddards complex, significantly increasing lap length and introducing additional technical challenge. The extra section adds meaningful overtaking opportunities and changes the strategic picture for tyre management. It last hosted a Formula 1 race in 1993.",
     "btccFact": "Donington GP provides a fascinating contrast with Round 1 at the same venue - drivers who struggled on the National loop earlier in the season can find the extra GP section suits their driving style far better.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2024-donington-park-gp/Morgan-.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/8ac02d13-521c-4db4-a74a-0e6cd93a3576.png",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2022/11/Donington-GP-detailed-map-1.png",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/08/Chilton-0Q3A4225-scaled-e1756572398593.jpg",
@@ -673,7 +673,7 @@
     "cornersRight": 10,
     "about": "A classic British club circuit with roots going back to the 1960s, built on a former RAF airfield in North Yorkshire. Croft combines fast sections with tight chicanes and the iconic Hairpin - one of the best overtaking spots on the calendar. Its relative geographical isolation gives it a distinct, grassroots motorsport atmosphere.",
     "btccFact": "Hairpin at Croft is consistently one of the best places for late-braking overtakes in the BTCC, and it regularly produces race-defining moments.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2025-croft/Ingram-start-DG5_0722.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/65688b60-f0f2-4a9e-b4b9-3267b5937074.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/5-Croft-1.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/09/Plato-0H5A4492-scaled-e1758724319601.jpg",
@@ -766,7 +766,7 @@
     "cornersRight": 6,
     "about": "The home of British motorsport. Silverstone's National circuit layout used by the BTCC is compact and fast, built around the back half of the famous GP track. Copse and Beckett's demand commitment at high speed, while Brooklands at the end of Wellington Straight provides the main overtaking opportunity. The short lap rewards clean, consistent driving over a full race distance.",
     "btccFact": "Silverstone is where championship battles are frequently decided. The points available at this penultimate round mean that going into the Brands Hatch finale with a significant lead - or deficit - can completely shape the outcome.",
-    "imageUrl": "https://btcc.net/wp-content/gallery/2024-silverstone/start-0Q3A9981.jpg",
+    "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/tracks/9f3441d6-fa37-43da-a307-0f0fa2cdf585.jpg",
     "layoutImageUrl": "https://btcc.net/wp-content/uploads/2024/03/9-Silverstone.jpg",
     "raceImages": [
       "https://btcc.net/wp-content/uploads/2025/10/Rainford-0Q3A3688-scaled.jpg",
