@@ -1,10 +1,16 @@
 [
   {
-    "id": "action-packed-knockhill-awaits-for-laser-tools-racing-with-mb-motorsport",
-    "slug": "action-packed-knockhill-awaits-for-laser-tools-racing-with-mb-motorsport",
+    "id": "tv-knockhill-2026",
+    "slug": "tv-knockhill-2026",
     "title": {
-      "rendered": "Action-Packed Knockhill Awaits for Laser Tools Racing with MB Motorsport"
+      "rendered": "Where to Watch: Knockhill"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/6e49b532-1d8c-415a-96a4-bcbf06e20723.jpg"
+        }
+      ]
+    }
   }
 ]
