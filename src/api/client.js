@@ -185,6 +185,14 @@ export async function peekArticlesCache(page = 1) {
 
 const HUB_CACHE_KEY = 'hub_posts';
 const HUB_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+// hub_news.json has no size cap of its own (unlike articles/, capped at
+// MAX_ARTICLES=500 by scrape_articles.py) - it's admin-curated, not scraped,
+// so nothing currently prunes it. Capping here keeps it from ever being able
+// to grow larger than the article archive it's merged into on the News tab -
+// if it ever did, every hub post beyond this many would still load in full
+// on every fetch regardless of how deep the user actually scrolls, the exact
+// problem the article per-page split was built to avoid.
+const MAX_HUB_POSTS = 500;
 
 function mapHubPosts(data, uid) {
   const now = Date.now();
@@ -214,7 +222,9 @@ function mapHubPosts(data, uid) {
       ].filter(Boolean).join('\n'),
       source: p.source || 'btcc hub',
       sourceUrl: p.sourceUrl || null,
-    }));
+    }))
+    .sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate))
+    .slice(0, MAX_HUB_POSTS);
 }
 
 export async function fetchHubPosts() {

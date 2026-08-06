@@ -321,6 +321,30 @@ describe('fetchHubPosts', () => {
     expect(sortDate).toBeGreaterThanOrEqual(before);
     expect(sortDate).toBeLessThanOrEqual(after);
   });
+
+  it('returns posts newest-first regardless of source order', async () => {
+    const older = {id: 'a', title: 'Older', status: 'published', pubDate: '2026-01-01T00:00:00', source: 'btcc hub'};
+    const newer = {id: 'b', title: 'Newer', status: 'published', pubDate: '2026-06-01T00:00:00', source: 'btcc hub'};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [older, newer]})});
+    const result = await fetchHubPosts();
+    expect(result.map(p => p.id)).toEqual(['b', 'a']);
+  });
+
+  it('caps at 500 posts, keeping the newest - hub_news.json has no size limit of its own', async () => {
+    const posts = Array.from({length: 501}, (_, i) => ({
+      id: String(i),
+      title: `Post ${i}`,
+      status: 'published',
+      // i=0 is oldest, i=500 is newest
+      pubDate: new Date(2020, 0, i + 1).toISOString(),
+      source: 'btcc hub',
+    }));
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts})});
+    const result = await fetchHubPosts();
+    expect(result).toHaveLength(500);
+    expect(result[0].id).toBe('500'); // newest kept
+    expect(result.map(p => p.id)).not.toContain('0'); // oldest dropped
+  });
 });
 
 describe('fetchArticleBySlug', () => {
