@@ -175,6 +175,72 @@ class RenderedFetcher:
         finally:
             page.close()
 
+    def get_with_media_paginated(
+        self,
+        url: str,
+        next_selector: str,
+        max_clicks: int,
+        wait_selector: str | None = None,
+        timeout: int = 30000,
+    ) -> tuple[str, dict[str, tuple[bytes, str]]]:
+        """Like get_with_media(), but repeatedly clicks next_selector up to
+        max_clicks times before returning - for a listing whose "page 2/3/.."
+        links are actually client-side infinite-scroll triggers that *append*
+        more cards to the same DOM rather than navigating to a separate page
+        (confirmed on btcc.net/news/: a direct page.goto("/page/2/") silently
+        re-renders page 1's content, but clicking the in-page link appends a
+        genuinely new batch).
+
+        Stops early (rather than raising) once a click no longer grows the
+        card count - confirmed this listing's own infinite-scroll component
+        hits an unrecoverable client-side error after 2 successful expansions
+        (a real site bug, "Minified React error #419", a hydration mismatch)
+        and every click after that succeeds with no further effect. Counts
+        growth via `wait_selector` matches before/after each click, so it's
+        agnostic to what the listing's actual card markup looks like.
+        """
+        media: dict[str, tuple[bytes, str]] = {}
+
+        def on_response(response):
+            content_type = response.headers.get("content-type", "")
+            if not content_type.startswith("image/"):
+                return
+            request = response.request
+            while request.redirected_from:
+                request = request.redirected_from
+            is_relevant = "/api/media/" in request.url or "supabase.co/storage/" in request.url
+            if is_relevant and request.url not in media:
+                try:
+                    media[request.url] = (response.body(), content_type)
+                except Exception:
+                    pass
+
+        page = self._browser.new_page(user_agent=_USER_AGENT)
+        page.on("response", on_response)
+        try:
+            resp = page.goto(url, wait_until="load", timeout=timeout)
+            if resp is None or not resp.ok:
+                status = resp.status if resp else "?"
+                raise RuntimeError(f"HTTP {status} fetching {url}")
+            if wait_selector:
+                page.wait_for_selector(wait_selector, timeout=timeout)
+
+            prev_count = page.locator(wait_selector).count() if wait_selector else 0
+            for _ in range(max_clicks):
+                try:
+                    page.click(next_selector, timeout=5000)
+                except Exception:
+                    break
+                page.wait_for_timeout(2000)
+                count = page.locator(wait_selector).count() if wait_selector else prev_count + 1
+                if count <= prev_count:
+                    break
+                prev_count = count
+
+            return page.content(), media
+        finally:
+            page.close()
+
 
 def fetch_rendered(url: str, wait_selector: str | None = None, timeout: int = 30000) -> str:
     """One-off fetch for scripts that only need a single page."""

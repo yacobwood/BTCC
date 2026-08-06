@@ -134,21 +134,45 @@ def scrape_card_list(fetcher: RenderedFetcher, url: str = NEWS_URL) -> tuple[lis
 
 
 def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], dict]:
-    """Crawl /news/ plus /news/page/2/ .. /news/page/<num_pages>/, merging
-    every page's cards and media dict. Used only for a one-off deep backfill -
-    the routine 5-minute run only ever needs page 1."""
-    all_cards, all_media = [], {}
+    """Load /news/ and click its in-page "Next" link up to num_pages-1 times,
+    each click appending another ~25-card batch to the same DOM (confirmed:
+    a direct page.goto("/news/page/<n>/") does NOT work - it silently
+    re-renders page 1's content instead of page n's; only clicking the
+    listing's own pagination link actually advances it). Used only for a
+    one-off deep backfill - the routine 5-minute run only ever needs page 1.
+
+    In practice this listing's own infinite-scroll component hits an
+    unrecoverable client-side bug after 2 successful clicks (confirmed: a
+    real "Minified React error #419" hydration mismatch, not anything on
+    our end) and every click after that succeeds with no further effect -
+    get_with_media_paginated stops early once a click stops growing the
+    card count, so num_pages beyond what btcc.net can actually deliver is
+    harmless to ask for, just capped at whatever it actually yields (as of
+    2026-08 that's ~75 cards / 3 pages worth, not num_pages*25)."""
+    html, media = fetcher.get_with_media_paginated(
+        NEWS_URL, next_selector='nav.pagination a:has-text("Next")',
+        max_clicks=num_pages - 1, wait_selector="article.news-card",
+    )
+    cards = []
     seen_slugs = set()
-    for page in range(1, num_pages + 1):
-        url = NEWS_URL if page == 1 else f"https://www.btcc.net/news/page/{page}/"
-        print(f"  Listing page {page}/{num_pages}: {url}")
-        cards, media = scrape_card_list(fetcher, url)
-        all_media.update(media)
-        for card in cards:
-            if card["slug"] not in seen_slugs:
-                seen_slugs.add(card["slug"])
-                all_cards.append(card)
-    return all_cards, all_media
+    for m in ARTICLE_RE.finditer(html):
+        block = m.group(0)
+        title_m = TITLE_RE.search(block)
+        if not title_m or title_m.group(1) in seen_slugs:
+            continue
+        seen_slugs.add(title_m.group(1))
+        slug, title = title_m.group(1), title_m.group(2)
+        image_m = IMAGE_RE.search(block)
+        excerpt_m = EXCERPT_RE.search(block)
+        date_m = DATE_RE.search(block)
+        cards.append({
+            "slug": slug,
+            "title": title,
+            "media_url": resolve_media_url(image_m.group(1)) if image_m else None,
+            "excerpt": excerpt_m.group(1).strip() if excerpt_m else "",
+            "date": parse_display_date(date_m.group(1)) if date_m else "",
+        })
+    return cards, media
 
 
 def fetch_article_body(fetcher: RenderedFetcher, slug: str) -> str:
