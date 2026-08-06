@@ -2991,7 +2991,7 @@ async function dispatchArticleNotif(article) {
       title: article.title || (isDigest ? 'BTCC Monday Roundup' : 'New BTCC Hub Article'),
       body: article.description || '',
       data: JSON.stringify(isDigest
-        ? {type: 'hub', id: article.id, channel: 'news'}
+        ? {type: 'digest', id: article.id, channel: 'news'}
         : {type: 'hub', id: article.id}),
       image_url: article.imageUrl || '',
     };
