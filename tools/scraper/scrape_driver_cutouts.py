@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""
+scrape_driver_cutouts.py
+Refreshes each currently-racing driver's bundled cutout photo in
+src/assets/driver_images/<number>.webp from their btcc.net profile page.
+
+Most drivers' cutout photos are bundled directly into the app (see
+src/assets/driverImages.js, getDriverImage()) rather than fetched live -
+this keeps grid/detail screens instant and sidesteps the dead
+wp-content/uploads imageUrl fallback entirely (see scrape_driver_images.py,
+which only covers a driver newly signed mid-season before they get a
+bundled asset). When btcc.net publishes an updated photo for an existing
+driver, the bundled .webp goes stale until it's re-scraped - this does
+that for every driver already in driverImages.js's bundled map.
+
+Discovers each driver's btcc.net slug from the /drivers/ listing page
+(same mechanism as scrape_driver_backgrounds.py, by matching each card's
+name rather than a hardcoded slug map) so it doesn't need updating when
+the roster changes, then visits each driver's own page for their profile
+cutout (same .driver-profile-cutout selector scrape_driver_images.py
+uses) and converts it to .webp via Pillow, resized to fit the existing
+~300x450 bundled convention, to match the current bundle format/size.
+
+Only touches drivers already in driverImages.js's bundled map - a driver
+without one yet (e.g. Ryan Bensley) still relies on scrape_driver_images.py's
+imageUrl fallback until they get a bundled entry added manually.
+
+Usage:
+    python scrape_driver_cutouts.py
+"""
+
+import io
+import json
+import re
+from pathlib import Path
+
+from PIL import Image
+
+from btcc_playwright import RenderedFetcher
+
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
+IMAGES_DIR = REPO_ROOT / "src" / "assets" / "driver_images"
+DRIVERS_LISTING_URL = "https://btcc.net/drivers/"
+BASE_URL = "https://btcc.net/driver/"
+TARGET_SIZE = (300, 450)
+
+# btcc.net's display name -> drivers.json's canonical name, where they differ.
+NAME_ALIASES = {
+    "Nic Hamilton": "Nicolas Hamilton",
+}
+
+CARD_BLOCK_RE = re.compile(r'<a class="driver-card" href="/driver/([a-z0-9-]+)/">(.*?)</a>', re.DOTALL)
+NAME_RE = re.compile(r'<h1>([^<]+)</h1>')
+CUTOUT_RE = re.compile(r'class="[^"]*driver-profile-cutout[^"]*"[^>]*src="(/api/media/[^"]+)"')
+
+
+def _discover_slugs(fetcher: RenderedFetcher) -> dict[str, str]:
+    """{drivers.json name: btcc.net slug} for every driver on the /drivers/ listing."""
+    html, _ = fetcher.get_with_media(DRIVERS_LISTING_URL, wait_selector="a.driver-card", scroll_through=True)
+    slugs = {}
+    for block_m in CARD_BLOCK_RE.finditer(html):
+        slug, block = block_m.group(1), block_m.group(2)
+        name_m = NAME_RE.search(block)
+        if not name_m:
+            continue
+        site_name = name_m.group(1).strip()
+        slugs[NAME_ALIASES.get(site_name, site_name)] = slug
+    return slugs
+
+
+def main() -> None:
+    data = json.loads(DRIVERS_PATH.read_text(encoding="utf-8"))
+    bundled_numbers = {int(p.stem) for p in IMAGES_DIR.glob("*.webp")}
+
+    with RenderedFetcher() as fetcher:
+        slugs = _discover_slugs(fetcher)
+
+        updated = 0
+        for drv in data["drivers"]:
+            number = drv.get("number")
+            if number not in bundled_numbers:
+                continue
+            slug = slugs.get(drv["name"])
+            if not slug:
+                print(f"  WARNING: no /drivers/ listing match for {drv['name']}, skipping")
+                continue
+            try:
+                url = BASE_URL + slug + "/"
+                html, media = fetcher.get_with_media(url, wait_selector=".driver-profile-cutout")
+                m = CUTOUT_RE.search(html)
+                if not m:
+                    print(f"  WARNING: no cutout found for {drv['name']}")
+                    continue
+                media_url = f"https://btcc.net{m.group(1)}"
+                entry = media.get(media_url)
+                if not entry:
+                    print(f"  WARNING: cutout image not captured for {drv['name']}")
+                    continue
+                body, _content_type = entry
+                img = Image.open(io.BytesIO(body)).convert("RGBA")
+                img.thumbnail(TARGET_SIZE, Image.LANCZOS)
+                img.save(IMAGES_DIR / f"{number}.webp", "WEBP")
+                print(f"  {drv['name']}: cutout refreshed ({img.size[0]}x{img.size[1]})")
+                updated += 1
+            except Exception as e:
+                print(f"  WARNING: could not fetch cutout for {drv['name']}: {e}")
+
+    print(f"Updated {updated}/{len(bundled_numbers)} bundled driver cutout(s)")
+
+
+if __name__ == "__main__":
+    main()
