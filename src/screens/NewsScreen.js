@@ -295,10 +295,26 @@ export default function NewsScreen({navigation}) {
         ref={flatListRef}
         testID="news-flatlist"
         data={listData}
-        keyExtractor={(item, i) => item.article?.id ? String(item.article.id) : `section-${i}`}
+        // A 'grid' item has no single .article - keying it by its first
+        // article's id (rather than array index i) keeps the key stable
+        // across recomputes, so FlatList doesn't recycle a cell into
+        // showing briefly-wrong content for a row that shifted position.
+        keyExtractor={(item, i) => {
+          if (item.article?.id) return String(item.article.id);
+          if (item.articles?.length) return `grid-${item.articles[0].id}`;
+          return `${item.type}-${i}`;
+        }}
         renderItem={renderItem}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
+        // Android defaults this to true, which detaches off-screen views at
+        // the native level - CachedImage just wraps RN's plain Image (no
+        // in-memory cache of its own, see CachedImage.js), so a detached-then
+        // reattached image cell shows a blank flash while it re-resolves,
+        // even though the bytes are already sitting in the native disk
+        // cache. Explicitly false so scrolling a card back into view doesn't
+        // visibly reload its image.
+        removeClippedSubviews={false}
         windowSize={10}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
