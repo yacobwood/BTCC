@@ -166,15 +166,26 @@ export default function NewsScreen({navigation}) {
     navigation.navigate('Article', {article, trafficSource: 'organic'});
   };
 
-  // Merges hubPosts into articles, but only once loaded articles have
-  // actually reached a hub post's date - otherwise an old hub post would
-  // appear immediately (fetched up front on page 1) skipping over the
-  // entire date range between it and today that just hasn't loaded yet,
-  // reading as a confusing, unearned jump in the timeline. Once article
-  // pagination is fully exhausted (hasMore false) there's nothing left to
-  // wait for, so every remaining hub post becomes eligible regardless of
-  // date. Weekly Digest posts are exempt from gating entirely - they only
-  // ever render as a banner/count (see listData below), never inline, so
+  // Merges hubPosts into articles, but only once a loaded article's date
+  // has actually reached a hub post's date - otherwise an old hub post
+  // would appear immediately (fetched up front on page 1) skipping over
+  // the entire date range between it and today that just hasn't loaded
+  // yet, reading as a confusing, unearned jump in the timeline.
+  //
+  // Deliberately no "article pagination exhausted -> show everything
+  // regardless of date" fallback: hasMore=false only means our own mirror
+  // (capped, backfilled to whatever depth it's currently reached) has run
+  // dry, never that btcc.net itself has no more/older articles. Treating
+  // "our mirror ran out" as "there's nothing older on the real site" was
+  // exactly the bug this replaced - it dumped every remaining hub post in
+  // at the mirror's current boundary, faking a gap-free jump from, say,
+  // 17 Apr straight to 14 May when the mirror simply hasn't backfilled
+  // that range yet. A hub post whose date the mirror never reaches just
+  // stays hidden from this feed - same as an article beyond however deep
+  // the archive currently goes.
+  //
+  // Weekly Digest posts are exempt from gating entirely - they only ever
+  // render as a banner/count (see listData below), never inline, so
   // there's nothing to prematurely reveal.
   const visibleArticles = useMemo(() => {
     if (!hubPosts.length) return articles;
@@ -183,12 +194,11 @@ export default function NewsScreen({navigation}) {
       : null;
     const eligibleHub = hubPosts.filter(h => {
       if (h.category === 'Weekly Digest') return true;
-      if (!hasMore) return true;
       if (!oldestArticleDate) return false;
       return new Date(h.sortDate) >= oldestArticleDate;
     });
     return eligibleHub.length ? [...articles, ...eligibleHub].sort(byDateDesc) : articles;
-  }, [articles, hubPosts, hasMore]);
+  }, [articles, hubPosts]);
 
   // Hooks must be declared before any early returns (Rules of Hooks).
   const listData = useMemo(() => {

@@ -321,7 +321,7 @@ describe('NewsScreen', () => {
       expect(hubIndex).toBeLessThan(page2Index);
     });
 
-    it('reveals every remaining hub post once article pagination is exhausted, even if older than anything loaded', async () => {
+    it('keeps a hub post hidden even once article pagination is exhausted - the mirror running dry is not proof there\'s nothing older on the real site', async () => {
       const page1 = Array.from({length: 20}, (_, i) => {
         const day = String(20 - i).padStart(2, '0');
         return {
@@ -330,9 +330,10 @@ describe('NewsScreen', () => {
           pubDate: `${20 - i} Jul 2026`, sortDate: `2026-07-${day}`,
         };
       });
-      // Older than every page-1 article, and there's nothing left to paginate
-      // (page 2 returns fewer than 20, so hasMore becomes false) - the archive
-      // is exhausted, so this must appear at the tail regardless of its date.
+      // Older than every loaded article. Page 2 returns fewer than 20, so
+      // hasMore becomes false - but that only means our mirror stopped
+      // backfilling here, not that btcc.net has nothing between this date
+      // and 30 Jun, so it must stay hidden rather than flood in at the tail.
       const hubPost = {
         id: 'hub-1', title: 'A Day in the Paddock', imageUrl: null,
         source: 'BTCC Hub', category: 'Paddock',
@@ -361,10 +362,10 @@ describe('NewsScreen', () => {
 
       await waitFor(() => {
         expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
-          .toContain('A Day in the Paddock');
+          .toContain('Last Article');
       });
-      const titles = titlesInDisplayOrder(getByTestId('news-flatlist').props.data);
-      expect(titles.indexOf('Last Article')).toBeLessThan(titles.indexOf('A Day in the Paddock'));
+      expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+        .not.toContain('A Day in the Paddock');
     });
   });
 
