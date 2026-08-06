@@ -63,9 +63,16 @@ describe('CachedImage', () => {
     expect(getCachedImg(tree)).toBeNull();
   });
 
-  it('shows the fallback after an image load error', () => {
+  it('retries up to MAX_RETRIES times before showing the fallback', () => {
     const tree = render(<CachedImage uri={WP_URI} style={{width: 100, height: 100}} />);
-    // src === uri (no targetWidth) → onError sets errored = true → fallback renders
+    // src === uri (no targetWidth): the first two errors are tolerated as retries
+    // (a cell recycling mid-request looks identical to a real failure, so a lone
+    // error shouldn't immediately give up) and the Image stays mounted.
+    act(() => { getCachedImg(tree).props.onError(); });
+    expect(getCachedImg(tree)).toBeTruthy();
+    act(() => { getCachedImg(tree).props.onError(); });
+    expect(getCachedImg(tree)).toBeTruthy();
+    // Third error exhausts MAX_RETRIES (2) → errored = true → fallback renders
     act(() => { getCachedImg(tree).props.onError(); });
     expect(getCachedImg(tree)).toBeNull();
   });
@@ -95,12 +102,15 @@ describe('CachedImage', () => {
     expect(getCachedImg(tree).props.source.uri).toBe(WP_URI);
   });
 
-  it('shows fallback after second error (original uri 404)', () => {
+  it('shows fallback after exhausting retries on the original uri (thumbnail also 404s)', () => {
     const tree = render(
       <CachedImage uri={WP_URI} style={{width: 100, height: 100}} targetWidth={200} />,
     );
-    act(() => { getCachedImg(tree).props.onError(); }); // thumb → original
-    act(() => { getCachedImg(tree).props.onError(); }); // original → errored = true
+    act(() => { getCachedImg(tree).props.onError(); }); // thumb → original (not a retry)
+    act(() => { getCachedImg(tree).props.onError(); }); // retry 1
+    act(() => { getCachedImg(tree).props.onError(); }); // retry 2
+    expect(getCachedImg(tree)).toBeTruthy(); // still retrying on the original uri
+    act(() => { getCachedImg(tree).props.onError(); }); // retries exhausted → errored = true
     expect(getCachedImg(tree)).toBeNull();
   });
 

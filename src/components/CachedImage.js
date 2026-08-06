@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react';
+import React, {useState, useMemo, useCallback, useRef} from 'react';
 import {Image, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -13,14 +13,35 @@ function wpThumb(uri, targetPx) {
   return uri.replace(/(\.[a-z]+)$/i, `-${size}x${size}$1`);
 }
 
+// A cell scrolling in/out of a FlatList's render window fast enough to
+// cancel an in-flight image request looks identical to a real load failure
+// to RN's Image - with no retry, one transient blip permanently shows the
+// broken-image icon for a URL that's perfectly fine. Retrying a few times
+// covers that without masking a genuinely dead URL forever.
+const MAX_RETRIES = 2;
+
 // Simple wrapper that uses React Native's built-in Image with prefetch support.
 // Pass `targetWidth` to automatically request the smallest adequate WP thumbnail.
 export default function CachedImage({uri, style, resizeMode = 'cover', targetWidth, ...props}) {
   const [src, setSrc] = useState(() => targetWidth ? wpThumb(uri, targetWidth) : uri);
   const [errored, setErrored] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const retriesRef = useRef(0);
   const source = useMemo(() => ({uri: src}), [src]);
   const handleError = useCallback(() => {
-    if (src !== uri) { setSrc(uri); } else { setErrored(true); }
+    if (src !== uri) {
+      setSrc(uri);
+      return;
+    }
+    if (retriesRef.current < MAX_RETRIES) {
+      retriesRef.current += 1;
+      // source.uri is unchanged, so bumping retryCount alone wouldn't make
+      // RN's Image actually re-attempt anything - it's used in the key
+      // below purely to force a fresh mount, which does.
+      setRetryCount(retriesRef.current);
+    } else {
+      setErrored(true);
+    }
   }, [src, uri]);
 
   if (!uri || errored) {
@@ -33,6 +54,7 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
 
   return (
     <Image
+      key={retryCount}
       source={source}
       style={style}
       resizeMode={resizeMode}

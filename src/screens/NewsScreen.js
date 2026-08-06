@@ -89,6 +89,15 @@ export default function NewsScreen({navigation}) {
       if (fetchedHubPosts) setHubPosts(fetchedHubPosts);
       if (append) {
         setArticles(prev => [...prev, ...parsed].sort(byDateDesc));
+        // Same reason as the initial-load prefetch below: without this, a
+        // freshly-appended page's ~20 images all fire cold, uncoordinated
+        // native Image requests the moment their cells mount, and any one
+        // that times out or gets cancelled by fast scrolling (see
+        // CachedImage's lack of retry, fixed separately) shows permanently
+        // broken instead of just loading a little late. An appended page
+        // only ever renders as compact rows (hero/grid are filled from the
+        // very first 3 items of the whole list, never from a later page).
+        prefetchImages(parsed.map(a => a.imageUrl).filter(Boolean), 150);
       } else {
         setArticles(parsed);
         // Prefetch at the thumbnail sizes CachedImage will actually request so
