@@ -238,8 +238,8 @@ describe('NewsScreen', () => {
       return titles;
     }
 
-    it('re-sorts hub posts against later pages instead of leaving them stuck at the page-1 boundary', async () => {
-      // Page 1 (20 articles, newest first) merges with the hub post once, on initial load.
+    it('hides a hub post older than every loaded article instead of letting it jump the queue', async () => {
+      // Page 1 (20 articles, newest first) - a full page, so hasMore stays true.
       const page1 = Array.from({length: 20}, (_, i) => {
         const day = String(20 - i).padStart(2, '0');
         return {
@@ -248,16 +248,98 @@ describe('NewsScreen', () => {
           pubDate: `${20 - i} Jul 2026`, sortDate: `2026-07-${day}`,
         };
       });
-      // Older than every page-1 article, so it correctly sorts to the tail on initial load.
+      // Older than every page-1 article, and articles are still loading (hasMore
+      // true) - must NOT appear yet, since nothing has actually reached this date.
       const hubPost = {
         id: 'hub-1', title: 'A Day in the Paddock', imageUrl: null,
         source: 'BTCC Hub', category: 'Paddock',
         pubDate: '13 Apr 2026', sortDate: '2026-04-13',
       };
-      // Page 2 is older than page 1 but newer than the hub post - it must land
-      // BEFORE the hub post once appended, not after.
+      fetchHubPosts.mockResolvedValue([hubPost]);
+      fetchArticles.mockResolvedValue(page1);
+
+      const {getByTestId} = renderWithProviders(<NewsScreen navigation={nav} />);
+      await waitFor(() => {
+        expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+          .toContain('Page1 Article 0');
+      });
+      // FlatList virtualizes rendering, so absence in the text tree alone
+      // wouldn't prove anything - assert against the underlying `data` prop.
+      expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+        .not.toContain('A Day in the Paddock');
+    });
+
+    it('reveals a hub post once a loaded article actually reaches its date', async () => {
+      const page1 = Array.from({length: 20}, (_, i) => {
+        const day = String(20 - i).padStart(2, '0');
+        return {
+          id: `p1-${i}`, title: `Page1 Article ${i}`, imageUrl: null,
+          source: 'btcc.net', category: 'LATEST NEWS',
+          pubDate: `${20 - i} Jul 2026`, sortDate: `2026-07-${day}`,
+        };
+      });
+      const hubPost = {
+        id: 'hub-1', title: 'A Day in the Paddock', imageUrl: null,
+        source: 'BTCC Hub', category: 'Paddock',
+        pubDate: '13 Apr 2026', sortDate: '2026-04-13',
+      };
+      // A full 20-article page older than the hub post - hasMore stays true
+      // throughout, so this must be the hub post's date being reached that
+      // reveals it, not the archive running out.
+      const page2 = Array.from({length: 20}, (_, i) => ({
+        id: `p2-${i}`, title: `Page2 Article ${i}`, imageUrl: null,
+        source: 'btcc.net', category: 'LATEST NEWS',
+        pubDate: `${20 - i} Mar 2026`, sortDate: `2026-03-${String(20 - i).padStart(2, '0')}`,
+      }));
+
+      fetchHubPosts.mockResolvedValue([hubPost]);
+      fetchArticles
+        .mockImplementationOnce(() => Promise.resolve(page1))
+        .mockImplementationOnce(() => Promise.resolve(page2));
+
+      const {getByTestId} = renderWithProviders(<NewsScreen navigation={nav} />);
+      await waitFor(() => {
+        expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+          .toContain('Page1 Article 0');
+      });
+      expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+        .not.toContain('A Day in the Paddock');
+
+      await act(async () => {
+        fireEvent(getByTestId('news-flatlist'), 'onEndReached');
+      });
+
+      await waitFor(() => {
+        expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
+          .toContain('A Day in the Paddock');
+      });
+      // The hub post (13 Apr) is newer than every page-2 article (all March),
+      // so it must land before them once revealed, not appended after.
+      const titles = titlesInDisplayOrder(getByTestId('news-flatlist').props.data);
+      const hubIndex = titles.indexOf('A Day in the Paddock');
+      const page2Index = titles.indexOf('Page2 Article 0');
+      expect(hubIndex).toBeLessThan(page2Index);
+    });
+
+    it('reveals every remaining hub post once article pagination is exhausted, even if older than anything loaded', async () => {
+      const page1 = Array.from({length: 20}, (_, i) => {
+        const day = String(20 - i).padStart(2, '0');
+        return {
+          id: `p1-${i}`, title: `Page1 Article ${i}`, imageUrl: null,
+          source: 'btcc.net', category: 'LATEST NEWS',
+          pubDate: `${20 - i} Jul 2026`, sortDate: `2026-07-${day}`,
+        };
+      });
+      // Older than every page-1 article, and there's nothing left to paginate
+      // (page 2 returns fewer than 20, so hasMore becomes false) - the archive
+      // is exhausted, so this must appear at the tail regardless of its date.
+      const hubPost = {
+        id: 'hub-1', title: 'A Day in the Paddock', imageUrl: null,
+        source: 'BTCC Hub', category: 'Paddock',
+        pubDate: '13 Apr 2026', sortDate: '2026-04-13',
+      };
       const page2 = [{
-        id: 'p2-0', title: 'Newer Than The Hub Post', imageUrl: null,
+        id: 'p2-0', title: 'Last Article', imageUrl: null,
         source: 'btcc.net', category: 'LATEST NEWS',
         pubDate: '30 Jun 2026', sortDate: '2026-06-30',
       }];
@@ -268,25 +350,21 @@ describe('NewsScreen', () => {
         .mockImplementationOnce(() => Promise.resolve(page2));
 
       const {getByTestId} = renderWithProviders(<NewsScreen navigation={nav} />);
-      // FlatList virtualizes rendering, so item #21 (the hub post) won't be in the
-      // visible text tree - assert against the underlying `data` prop instead.
       await waitFor(() => {
         expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
-          .toContain('A Day in the Paddock');
+          .toContain('Page1 Article 0');
       });
 
       await act(async () => {
         fireEvent(getByTestId('news-flatlist'), 'onEndReached');
       });
+
       await waitFor(() => {
         expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
-          .toContain('Newer Than The Hub Post');
+          .toContain('A Day in the Paddock');
       });
-
       const titles = titlesInDisplayOrder(getByTestId('news-flatlist').props.data);
-      const hubIndex = titles.indexOf('A Day in the Paddock');
-      const page2Index = titles.indexOf('Newer Than The Hub Post');
-      expect(page2Index).toBeLessThan(hubIndex);
+      expect(titles.indexOf('Last Article')).toBeLessThan(titles.indexOf('A Day in the Paddock'));
     });
   });
 

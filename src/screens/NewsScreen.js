@@ -32,6 +32,7 @@ export default function NewsScreen({navigation}) {
   const {hub_news_enabled} = useFeatureFlags();
   const {favourites} = useFavouriteDriver();
   const [articles, setArticles] = useState([]);
+  const [hubPosts, setHubPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
@@ -75,19 +76,24 @@ export default function NewsScreen({navigation}) {
     // Phase 2  -  fetch fresh data from the network and update the list.
     // forceRefresh=true bypasses the fetchJson cache so this always hits the network.
     try {
-      const [raw, hubPosts] = await Promise.all([
+      const [raw, fetchedHubPosts] = await Promise.all([
         fetchArticles(p, 20, '', /* forceRefresh */ true),
         p === 1 && !append && hubNewsEnabledRef.current ? fetchHubPosts() : Promise.resolve(null),
       ]);
       const parsed = raw.map(parseArticle);
+      // Kept separate from `articles` (merged into the visible list by the
+      // gated `visibleArticles` memo below) rather than mixed in here - an
+      // old hub post must not jump the queue and appear before the
+      // (not-yet-loaded) articles between it and today just because it was
+      // fetched up front on page 1.
+      if (fetchedHubPosts) setHubPosts(fetchedHubPosts);
       if (append) {
         setArticles(prev => [...prev, ...parsed].sort(byDateDesc));
       } else {
-        const merged = [...(hubPosts || []), ...parsed].sort(byDateDesc);
-        setArticles(merged);
+        setArticles(parsed);
         // Prefetch at the thumbnail sizes CachedImage will actually request so
         // Android's OkHttp disk cache is warm for the exact URLs rendered.
-        const allImageUrls = merged.map(a => a.imageUrl);
+        const allImageUrls = parsed.map(a => a.imageUrl);
         prefetchImages(allImageUrls.slice(0, 1).filter(Boolean), 768);   // hero
         prefetchImages(allImageUrls.slice(1, 3).filter(Boolean), 300);   // grid
         prefetchImages(allImageUrls.slice(3).filter(Boolean), 150);      // compact list
@@ -160,13 +166,37 @@ export default function NewsScreen({navigation}) {
     navigation.navigate('Article', {article, trafficSource: 'organic'});
   };
 
+  // Merges hubPosts into articles, but only once loaded articles have
+  // actually reached a hub post's date - otherwise an old hub post would
+  // appear immediately (fetched up front on page 1) skipping over the
+  // entire date range between it and today that just hasn't loaded yet,
+  // reading as a confusing, unearned jump in the timeline. Once article
+  // pagination is fully exhausted (hasMore false) there's nothing left to
+  // wait for, so every remaining hub post becomes eligible regardless of
+  // date. Weekly Digest posts are exempt from gating entirely - they only
+  // ever render as a banner/count (see listData below), never inline, so
+  // there's nothing to prematurely reveal.
+  const visibleArticles = useMemo(() => {
+    if (!hubPosts.length) return articles;
+    const oldestArticleDate = articles.length
+      ? new Date(articles[articles.length - 1].sortDate || articles[articles.length - 1].pubDate || 0)
+      : null;
+    const eligibleHub = hubPosts.filter(h => {
+      if (h.category === 'Weekly Digest') return true;
+      if (!hasMore) return true;
+      if (!oldestArticleDate) return false;
+      return new Date(h.sortDate) >= oldestArticleDate;
+    });
+    return eligibleHub.length ? [...articles, ...eligibleHub].sort(byDateDesc) : articles;
+  }, [articles, hubPosts, hasMore]);
+
   // Hooks must be declared before any early returns (Rules of Hooks).
   const listData = useMemo(() => {
     if (searchActive && searchQuery.length >= 2) {
       return searchResults.map(a => ({type: 'compact', article: a}));
     }
-    const digests = articles.filter(a => a.category === 'Weekly Digest');
-    const nonDigests = articles.filter(a => a.category !== 'Weekly Digest');
+    const digests = visibleArticles.filter(a => a.category === 'Weekly Digest');
+    const nonDigests = visibleArticles.filter(a => a.category !== 'Weekly Digest');
     const hero = nonDigests[0] ?? null;
     const gridArticles = nonDigests.slice(1, 3);
     const remaining = nonDigests.slice(3);
@@ -182,7 +212,7 @@ export default function NewsScreen({navigation}) {
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  }, [articles, searchActive, searchQuery, searchResults, digestReadIds]);
+  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds]);
 
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
