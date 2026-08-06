@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-BTCC full article mirror scraper - mirrors the latest btcc.net articles
-(title, full content, image, category) to data/articles.json so the app's
-News tab and article deep-links can read from GitHub instead of hitting
-btcc.net directly.
+BTCC full article mirror scraper - mirrors btcc.net articles (title, full
+content, image, category) into data/articles/ so the app's News tab and
+article deep-links can read from GitHub instead of hitting btcc.net
+directly.
 
 btcc.net moved off WordPress entirely to a Vercel-hosted React app
 (2026-07-31): the old /wp-json/ REST API, and the /feed/ RSS feed this
@@ -12,13 +12,38 @@ a Vercel BotID JS challenge (HTTP 429) to any request that can't execute
 JavaScript, so every fetch here goes through headless Chromium (see
 btcc_playwright.py) rather than a direct HTTP request.
 
-Two btcc.net pages are used instead:
-  - /news/            rendered listing page - slug, title, excerpt, date
-                       and featured image for each card (~25 per load).
+Two btcc.net pages are used:
+  - /news/, /news/page/<n>/   rendered listing pages - slug, title,
+                       excerpt, date and featured image for each card
+                       (~25 per load).
   - /<slug>/           each article's own page - full body HTML, fetched
-                       only for slugs not already in data/articles.json
-                       (existing articles keep their cached content; a
-                       full-site backfill only happens once).
+                       only for slugs not already mirrored (existing
+                       articles keep their cached content).
+
+Output shape mirrors the old wp-json REST API's own per-page/per-slug
+fetch granularity (see git history: fetchArticles() used to hit
+`?per_page=20&page=N`, fetchArticleBySlug() hit `?slug=X`, each cached
+under its own key) rather than one ever-growing blob - that's what let the
+old system show a genuinely deep, lazily-loaded archive without every
+page load paying for the whole thing:
+  - data/articles/page_<n>.json   PAGE_SIZE articles each, newest first.
+  - data/articles/index.json      {slug: page_number} for every mirrored
+                                   article, so a slug-based lookup (deep
+                                   links, notifications) only has to fetch
+                                   this small index plus the one page file
+                                   that actually contains it.
+A prior version of this scraper wrote a single data/articles.json capped
+at MAX_ARTICLES - that made every list fetch, search, and slug lookup
+download the *entire* archive's full HTML content regardless of which
+page was actually requested (checked: ~500 articles ≈ 3MB, re-fetched and
+re-cached every 5 minutes whenever the News tab was open). Splitting into
+per-page files fixes that: a normal list fetch only ever downloads the
+one ~20-article page it asked for.
+
+Each run's ~25 freshly-scraped cards are merged into whatever's already
+mirrored (new slugs added, existing ones keep their cached content/image)
+before being re-partitioned into page files - MAX_ARTICLES still bounds
+total repo/image growth, oldest articles dropped past that.
 
 There are no more WordPress post IDs, so `id` is now the article slug -
 safe, since every consumer of article.id (NewsScreen, DigestsScreen,
@@ -35,7 +60,7 @@ GitHub raw instead - only for articles without an already-mirrored image,
 same bounded-cost pattern as the full-content fetch below.
 
 Usage:
-    python scrape_articles.py [--dry-run] [--refresh-all]
+    python scrape_articles.py [--dry-run] [--refresh-all] [--backfill-pages N]
 """
 
 from __future__ import annotations
@@ -46,17 +71,20 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher, save_mirrored_image
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
 
 NEWS_URL = "https://www.btcc.net/news/"
+PAGE_SIZE = 20  # must match src/api/client.js's fetchArticles() perPage
+MAX_ARTICLES = 500
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-ARTICLES_JSON = DATA_DIR / "articles.json"
+ARTICLES_DIR = DATA_DIR / "articles"
+INDEX_JSON = ARTICLES_DIR / "index.json"
 MEDIA_DIR = DATA_DIR / "media" / "news"
 MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
 TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
-IMAGE_RE = re.compile(r'<img[^>]*src="(/api/media/[^"]+)"')
+IMAGE_RE = re.compile(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 EXCERPT_RE = re.compile(r'<div class="news-card-footer"><p>([^<]*)</p>')
 DATE_RE = re.compile(r'<time class="date">([^<]+)</time>')
 BODY_RE = re.compile(r'<div class="article-body">(.*?)</div>\s*</article>', re.DOTALL)
@@ -80,10 +108,11 @@ def parse_display_date(text: str) -> str:
     return f"{year}-{month:02d}-{int(day):02d}T00:00:00"
 
 
-def scrape_card_list(fetcher: RenderedFetcher) -> tuple[list[dict], dict]:
-    """Fetch /news/ and return card metadata for every article found, plus the
-    captured media dict (see btcc_playwright.get_with_media) for mirroring."""
-    html, media = fetcher.get_with_media(NEWS_URL, wait_selector="article.news-card")
+def scrape_card_list(fetcher: RenderedFetcher, url: str = NEWS_URL) -> tuple[list[dict], dict]:
+    """Fetch a /news/ listing page (page 1 or /news/page/<n>/) and return card
+    metadata for every article found, plus the captured media dict (see
+    btcc_playwright.get_with_media) for mirroring."""
+    html, media = fetcher.get_with_media(url, wait_selector="article.news-card")
     cards = []
     for m in ARTICLE_RE.finditer(html):
         block = m.group(0)
@@ -97,11 +126,29 @@ def scrape_card_list(fetcher: RenderedFetcher) -> tuple[list[dict], dict]:
         cards.append({
             "slug": slug,
             "title": title,
-            "media_url": f"https://btcc.net{image_m.group(1)}" if image_m else None,
+            "media_url": resolve_media_url(image_m.group(1)) if image_m else None,
             "excerpt": excerpt_m.group(1).strip() if excerpt_m else "",
             "date": parse_display_date(date_m.group(1)) if date_m else "",
         })
     return cards, media
+
+
+def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], dict]:
+    """Crawl /news/ plus /news/page/2/ .. /news/page/<num_pages>/, merging
+    every page's cards and media dict. Used only for a one-off deep backfill -
+    the routine 5-minute run only ever needs page 1."""
+    all_cards, all_media = [], {}
+    seen_slugs = set()
+    for page in range(1, num_pages + 1):
+        url = NEWS_URL if page == 1 else f"https://www.btcc.net/news/page/{page}/"
+        print(f"  Listing page {page}/{num_pages}: {url}")
+        cards, media = scrape_card_list(fetcher, url)
+        all_media.update(media)
+        for card in cards:
+            if card["slug"] not in seen_slugs:
+                seen_slugs.add(card["slug"])
+                all_cards.append(card)
+    return all_cards, all_media
 
 
 def fetch_article_body(fetcher: RenderedFetcher, slug: str) -> str:
@@ -113,28 +160,44 @@ def fetch_article_body(fetcher: RenderedFetcher, slug: str) -> str:
 
 
 def load_existing() -> dict:
-    if not ARTICLES_JSON.exists():
-        return {}
-    try:
-        posts = json.loads(ARTICLES_JSON.read_text())
-    except (json.JSONDecodeError, OSError):
-        return {}
-    return {p["slug"]: p for p in posts if p.get("slug")}
+    """Read every data/articles/page_<n>.json and return {slug: post} across
+    all of them - the full previously-mirrored archive, regardless of how
+    many pages it currently spans."""
+    existing = {}
+    if not ARTICLES_DIR.exists():
+        return existing
+    for page_file in ARTICLES_DIR.glob("page_*.json"):
+        try:
+            posts = json.loads(page_file.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        for p in posts:
+            if p.get("slug"):
+                existing[p["slug"]] = p
+    return existing
 
 
-def build_articles(refresh_all: bool) -> list[dict]:
-    existing = load_existing() if not refresh_all else {}
+def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
+    # Always load the full accumulated archive - refresh_all forces today's
+    # listing cards to refetch their content below, but must never wipe out
+    # everything older than today's ~25 cards that's already been accumulated.
+    existing = load_existing()
 
     with RenderedFetcher() as fetcher:
-        cards, media = scrape_card_list(fetcher)
+        if backfill_pages > 1:
+            cards, media = scrape_pages(fetcher, backfill_pages)
+        else:
+            cards, media = scrape_card_list(fetcher)
         if not cards:
             return []
 
-        posts = []
-        for card in cards:
+        merged = dict(existing)
+        for i, card in enumerate(cards):
+            if backfill_pages > 1 and i % 25 == 0:
+                print(f"  Processing article {i + 1}/{len(cards)}...")
             slug = card["slug"]
             prior = existing.get(slug)
-            has_content = bool(prior and prior.get("content", {}).get("rendered"))
+            has_content = not refresh_all and bool(prior and prior.get("content", {}).get("rendered"))
 
             if has_content:
                 content_html = prior["content"]["rendered"]
@@ -159,7 +222,7 @@ def build_articles(refresh_all: bool) -> list[dict]:
             if category:
                 embedded["wp:term"] = [[{"name": category}]]
 
-            posts.append({
+            merged[slug] = {
                 "id": slug,
                 "slug": slug,
                 "link": f"https://btcc.net/{slug}/",
@@ -168,16 +231,16 @@ def build_articles(refresh_all: bool) -> list[dict]:
                 "excerpt": {"rendered": card["excerpt"]},
                 "content": {"rendered": content_html},
                 "_embedded": embedded,
-            })
+            }
 
-    posts.sort(key=lambda p: p["date"], reverse=True)
-    return posts
+    posts = sorted(merged.values(), key=lambda p: p["date"], reverse=True)
+    return posts[:MAX_ARTICLES]
 
 
 def prune_orphaned_images(posts: list[dict]) -> int:
-    """Delete mirrored images that no longer belong to any current post - the
-    /news/ page only ever shows ~25 cards, so old articles' images would
-    otherwise accumulate in the repo forever. Returns the number removed."""
+    """Delete mirrored images that no longer belong to any current post - once
+    an article ages out past MAX_ARTICLES its image is now orphaned and would
+    otherwise sit in the repo forever. Returns the number removed."""
     if not MEDIA_DIR.exists():
         return 0
     referenced = set()
@@ -193,15 +256,45 @@ def prune_orphaned_images(posts: list[dict]) -> int:
     return removed
 
 
+def write_pages(posts: list[dict]) -> int:
+    """Partition posts (already sorted newest-first) into page_<n>.json files
+    of PAGE_SIZE each, write index.json mapping slug -> page number, and
+    remove any stale page files left over from a previously-larger archive.
+    Returns the number of page files written."""
+    ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
+
+    num_pages = max(1, -(-len(posts) // PAGE_SIZE))  # ceil division
+    index = {}
+    for page_num in range(1, num_pages + 1):
+        chunk = posts[(page_num - 1) * PAGE_SIZE : page_num * PAGE_SIZE]
+        with open(ARTICLES_DIR / f"page_{page_num}.json", "w") as f:
+            json.dump(chunk, f, indent=2)
+        for p in chunk:
+            index[p["slug"]] = page_num
+
+    # Remove page files beyond the current count (archive shrank, or a prior
+    # run wrote more pages than this one needs).
+    for f in ARTICLES_DIR.glob("page_*.json"):
+        n = int(f.stem.split("_")[1])
+        if n > num_pages:
+            f.unlink()
+
+    with open(INDEX_JSON, "w") as f:
+        json.dump(index, f, indent=2)
+
+    return num_pages
+
+
 def main():
-    ap = argparse.ArgumentParser(description="Mirror the latest BTCC articles into data/articles.json")
+    ap = argparse.ArgumentParser(description="Mirror BTCC articles into data/articles/page_<n>.json + index.json")
     ap.add_argument("--dry-run", action="store_true", help="Print result only, do not write")
-    ap.add_argument("--refresh-all", action="store_true", help="Re-fetch full content for every article, not just new ones")
+    ap.add_argument("--refresh-all", action="store_true", help="Re-fetch full content for today's listing cards even if already cached (does not affect older accumulated articles)")
+    ap.add_argument("--backfill-pages", type=int, default=1, help="Crawl this many /news/ listing pages (~25 articles each) instead of just page 1 - one-off deep backfill, not for routine runs")
     args = ap.parse_args()
 
-    posts = build_articles(args.refresh_all)
+    posts = build_articles(args.refresh_all, args.backfill_pages)
     if not posts:
-        print("ERROR: scraped zero articles - refusing to overwrite data/articles.json", file=sys.stderr)
+        print("ERROR: scraped zero articles - refusing to overwrite data/articles/", file=sys.stderr)
         sys.exit(1)
 
     print(f"Scraped {len(posts)} article(s)")
@@ -216,10 +309,8 @@ def main():
     if removed:
         print(f"Pruned {removed} orphaned mirrored image(s)")
 
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with open(ARTICLES_JSON, "w") as f:
-        json.dump(posts, f, indent=2)
-    print(f"Wrote {ARTICLES_JSON}")
+    num_pages = write_pages(posts)
+    print(f"Wrote {num_pages} page file(s) + index.json to {ARTICLES_DIR}")
 
 
 if __name__ == "__main__":

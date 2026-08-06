@@ -34,7 +34,7 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher, save_mirrored_image
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
 
 NEWS_URL = "https://www.btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -44,7 +44,7 @@ MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/med
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
 TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
-IMAGE_RE = re.compile(r'<img[^>]*src="(/api/media/[^"]+)"')
+IMAGE_RE = re.compile(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 
 
 def scrape_news() -> list | None:
@@ -70,7 +70,7 @@ def scrape_news() -> list | None:
     slug, title = title_m.group(1), title_m.group(2)
 
     image_m = IMAGE_RE.search(block)
-    media_url = f"https://btcc.net{image_m.group(1)}" if image_m else None
+    media_url = resolve_media_url(image_m.group(1)) if image_m else None
     filename = save_mirrored_image(media, media_url, MEDIA_DIR)
     image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
 

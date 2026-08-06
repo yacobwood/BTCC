@@ -28,13 +28,36 @@ _EXT_BY_CONTENT_TYPE = {
     "image/gif": "gif",
 }
 
+# Matches an <img src="..."> value in either shape a btcc.net page might use:
+# btcc.net's own stable /api/media/<uuid> redirector (relative path), or a
+# Supabase Storage signed URL embedded directly (already absolute). Capture
+# the whole match so callers can tell which shape they got.
+MEDIA_SRC_RE_FRAGMENT = r'(?:/api/media/[^"]+|https://[a-z0-9-]+\.supabase\.co/storage/[^"]+)'
+
+
+def resolve_media_url(src: str) -> str:
+    """Turn a matched <img src> value into an absolute URL - prefixes
+    btcc.net's own domain onto a relative /api/media/<uuid> path, or returns
+    an already-absolute Supabase Storage URL unchanged."""
+    return f"https://btcc.net{src}" if src.startswith("/") else src
+
 
 def save_mirrored_image(
     media: dict[str, tuple[bytes, str]], media_url: str | None, out_dir: Path
 ) -> str | None:
     """Save a captured btcc.net media image (from get_with_media's result) into
-    out_dir, named by its /api/media/<uuid>. Returns the saved filename, or None
-    if media_url is falsy or wasn't captured (e.g. the image failed to load)."""
+    out_dir, named by its identifying path segment. Returns the saved filename,
+    or None if media_url is falsy or wasn't captured (e.g. the image failed to
+    load).
+
+    media_url is one of two shapes depending on the page: btcc.net's own
+    stable /api/media/<uuid> redirector (no extension in the URL), or - some
+    pages now embed this directly - a Supabase Storage signed URL whose last
+    path segment already ends in a real filename+extension before a `?token=`
+    query string. Strip any query string and any extension already present
+    before appending the one derived from content-type, so the /api/media/
+    case (unaffected) and the Supabase case (would otherwise double up, e.g.
+    "name.jpg.jpg") both end up with exactly one correct extension."""
     if not media_url:
         return None
     entry = media.get(media_url)
@@ -42,8 +65,9 @@ def save_mirrored_image(
         return None
     body, content_type = entry
     ext = _EXT_BY_CONTENT_TYPE.get(content_type.split(";")[0].strip(), "jpg")
-    uuid = media_url.rstrip("/").rsplit("/", 1)[-1]
-    filename = f"{uuid}.{ext}"
+    last_segment = media_url.split("?", 1)[0].rstrip("/").rsplit("/", 1)[-1]
+    stem = last_segment.rsplit(".", 1)[0] if "." in last_segment else last_segment
+    filename = f"{stem}.{ext}"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / filename).write_bytes(body)
     return filename
@@ -88,18 +112,22 @@ class RenderedFetcher:
         timeout: int = 30000,
         scroll_through: bool = False,
     ) -> tuple[str, dict[str, tuple[bytes, str]]]:
-        """Like get(), but also returns {btcc.net/api/media/<uuid> URL: (bytes, content_type)}
-        for every image loaded during navigation.
+        """Like get(), but also returns {image URL: (bytes, content_type)} for
+        every image loaded during navigation, keyed by whichever of two URL
+        shapes a given page actually uses: btcc.net's own stable /api/media/
+        <uuid> redirector (most pages), or - some pages embed it directly
+        instead of going through that redirector - a Supabase Storage signed
+        URL (ylxmhtbmzvpwyvkmomex.supabase.co/storage/...).
 
-        btcc.net's own images (/api/media/<uuid>, which redirect to signed Supabase
-        Storage URLs) are behind the exact same Vercel challenge as the page itself
-        - confirmed a plain request (even Playwright's own out-of-band
+        Both are behind the exact same Vercel challenge as the page itself -
+        confirmed a plain request (even Playwright's own out-of-band
         page.request, which shares cookies with the browser) still gets 429'd,
         while the real in-page <img> requests the browser makes during navigation
         succeed. So there's no way to fetch an image URL after the fact - the
         bytes have to be captured from the responses the browser already made
         while rendering the page, by walking each image response back through
-        its redirect chain to the original btcc.net media URL.
+        its redirect chain to the original URL (a no-op for the direct-Supabase
+        case, which was never redirected).
 
         Pass scroll_through=True for long listing pages (e.g. /drivers/) whose
         images use loading="lazy" - the browser only requests those once they're
@@ -116,7 +144,8 @@ class RenderedFetcher:
             request = response.request
             while request.redirected_from:
                 request = request.redirected_from
-            if "/api/media/" in request.url and request.url not in media:
+            is_relevant = "/api/media/" in request.url or "supabase.co/storage/" in request.url
+            if is_relevant and request.url not in media:
                 try:
                     media[request.url] = (response.body(), content_type)
                 except Exception:

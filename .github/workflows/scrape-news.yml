@@ -55,7 +55,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update news from btcc.net [skip ci]"
-          file_pattern: "data/news.json data/articles.json data/media/news/"
+          file_pattern: "data/news.json data/articles/ data/media/news/"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"

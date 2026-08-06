@@ -73,7 +73,11 @@ async function sendErrorEmail(fn, message, err) {
 const CALENDAR_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/schedule.json';
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
-const ARTICLES_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/articles.json';
+// Just the newest page - articles.json was split into per-page files
+// (data/articles/page_<n>.json) so a list/search/slug fetch never has to
+// download the whole archive; this digest-context use only ever wants the
+// most recent handful anyway (sliced to 15 below).
+const ARTICLES_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/articles/page_1.json';
 const PODCAST_RSS_URL = 'https://rss.buzzsprout.com/1065916.rss';
 
 // Wrap fetch with a hard timeout so a hanging external service never causes a 504.
@@ -478,7 +482,7 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
   // btcc.net moved off WordPress to a Vercel-hosted React app (2026-07-31)
   // and confirmed directly with the site's own dev that wp-json is
   // permanently gone, not just temporarily blocked - so this reads the
-  // same GitHub-mirrored articles.json every other btcc.net-sourced
+  // same GitHub-mirrored article pages every other btcc.net-sourced
   // feature already uses (see newsCheck.js, src/api/client.js) instead of
   // fetching btcc.net live. See project_vercel_migration memory.
   try {

@@ -129,37 +129,58 @@ export async function fetchRecords() {
 // btcc.net's own wp-json REST API now returns 401 for every client, so the
 // news list/search/article-by-slug all read this GitHub-mirrored snapshot
 // (tools/scraper/scrape_articles.py) instead of hitting btcc.net directly.
-// It's refreshed every 5 minutes and holds the ~50 most recent articles in
-// full (title, content, image) - see project_wp_rest_api_lockdown memory.
-const ARTICLES_URL = `${BASE_GITHUB}/articles.json`;
-const ARTICLES_CACHE_KEY = 'articles_mirror';
+// Mirrored as one file per page (data/articles/page_<n>.json, PAGE_SIZE each)
+// plus a slug->page index (data/articles/index.json), matching the old
+// wp-json shape this replaced (`?per_page=20&page=N`, `?slug=X`, each cached
+// under its own key) rather than one ever-growing blob - a normal list fetch
+// only ever downloads the one page it actually asked for, regardless of how
+// deep the archive goes. An earlier version mirrored a single capped-size
+// articles.json instead; that made every fetch - list, search, or a single
+// slug lookup - download the *entire* archive's full content every time.
+const ARTICLES_BASE = `${BASE_GITHUB}/articles`;
 const ARTICLES_MAX_AGE_MS = 5 * 60 * 1000; // matches the scraper's own refresh cadence
 
-async function fetchArticlesMirror(forceRefresh = false) {
-  const all = await fetchJson(ARTICLES_URL, ARTICLES_CACHE_KEY, forceRefresh, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
-  return Array.isArray(all) ? all : [];
+async function fetchArticlesPage(page, forceRefresh = false) {
+  try {
+    const posts = await fetchJson(`${ARTICLES_BASE}/page_${page}.json`, `news_p${page}`, forceRefresh, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
+    return Array.isArray(posts) ? posts : [];
+  } catch {
+    return [];
+  }
 }
 
+async function fetchArticlesIndex() {
+  try {
+    const index = await fetchJson(`${ARTICLES_BASE}/index.json`, 'articles_index', false, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
+    return index && typeof index === 'object' ? index : {};
+  } catch {
+    return {};
+  }
+}
+
+// perPage is accepted for interface compatibility with existing call sites
+// but otherwise unused - it must match PAGE_SIZE in scrape_articles.py (20)
+// since a list fetch just returns that page's file as-is, not a re-sliced
+// count. Search ignores page/perPage entirely and returns every match.
 export async function fetchArticles(page = 1, perPage = 20, search = '', forceRefresh = false) {
-  const all = await fetchArticlesMirror(forceRefresh);
   const q = search.trim().toLowerCase();
-  // Client-side substring match over the mirrored set - only covers the ~50
-  // most recent articles, not btcc.net's full history like the old WP search did.
-  const filtered = q
-    ? all.filter(p => (p.title?.rendered || '').toLowerCase().includes(q) || (p.content?.rendered || '').toLowerCase().includes(q))
-    : all;
-  const start = (page - 1) * perPage;
-  return filtered.slice(start, start + perPage);
+  if (!q) return fetchArticlesPage(page, forceRefresh);
+
+  // Search has no server to hit anymore (see above), so it fetches every
+  // mirrored page and filters client-side - a heavier, deliberate one-off
+  // cost only paid when the user actually searches, not on every list fetch.
+  const index = await fetchArticlesIndex();
+  const pageNumbers = [...new Set(Object.values(index))];
+  const pages = await Promise.all(pageNumbers.map(n => fetchArticlesPage(n)));
+  const all = pages.flat();
+  return all.filter(p => (p.title?.rendered || '').toLowerCase().includes(q) || (p.content?.rendered || '').toLowerCase().includes(q));
 }
 
-// Returns any cached articles for a page without triggering a network request.
+// Returns any cached page of articles without triggering a network request.
 // Used by NewsScreen to show stale data instantly before fetching fresh data.
-export async function peekArticlesCache(page = 1, perPage = 20) {
-  const cached = await cacheRead(ARTICLES_CACHE_KEY); // no maxAge  -  any cached data regardless of age
-  if (!Array.isArray(cached)) return null;
-  const start = (page - 1) * perPage;
-  const slice = cached.slice(start, start + perPage);
-  return slice.length ? slice : null;
+export async function peekArticlesCache(page = 1) {
+  const cached = await cacheRead(`news_p${page}`); // no maxAge  -  any cached data regardless of age
+  return Array.isArray(cached) && cached.length ? cached : null;
 }
 
 const HUB_CACHE_KEY = 'hub_posts';
@@ -225,8 +246,11 @@ export async function fetchHubPosts() {
 
 export async function fetchArticleBySlug(slug) {
   try {
-    const all = await fetchArticlesMirror();
-    return all.find(p => p.slug === slug) ?? null;
+    const index = await fetchArticlesIndex();
+    const page = index[slug];
+    if (!page) return null;
+    const posts = await fetchArticlesPage(page);
+    return posts.find(p => p.slug === slug) ?? null;
   } catch {
     return null;
   }
