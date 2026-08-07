@@ -1,0 +1,51 @@
+# Every scraper that has to render btcc.net through real JS (news, articles,
+# calendar, team stats) depends on the single self-hosted "btcc-mac" runner -
+# see scrape-news.yml's comment for why a GitHub-hosted runner can't do this
+# job. None of those workflows can ever detect a fully offline runner: their
+# failure alert only fires from an `if: failure()` step, which requires a job
+# to have actually started. A runner that's simply unreachable never starts
+# one, so an outage was previously silent. This workflow runs on the
+# *GitHub-hosted* pool specifically so it keeps working even when btcc-mac
+# is the thing that's down, and checks the runner's own reported status via
+# the API instead.
+name: Runner Heartbeat
+
+on:
+  schedule:
+    - cron: "0 * * * *" # hourly
+  workflow_dispatch:
+
+permissions:
+  actions: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check btcc-mac runner status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          runners=$(curl -sf \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runners")
+
+          status=$(echo "$runners" | jq -r '.runners[] | select(.labels[].name == "btcc-mac") | .status' | head -1)
+
+          if [ -z "$status" ]; then
+            message="btcc-mac runner not found in the registered runners list at all"
+          elif [ "$status" != "online" ]; then
+            message="btcc-mac runner is reporting status '${status}' (expected 'online')"
+          else
+            echo "btcc-mac is online - nothing to do."
+            exit 0
+          fi
+
+          echo "$message"
+          curl -sf -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"runner-heartbeat\",\"message\":\"${message}\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
