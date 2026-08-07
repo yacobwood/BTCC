@@ -114,7 +114,7 @@ jobs:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
           YEAR: ${{ github.event.inputs.year || '2026' }}
         run: |
-          curl -sf -X POST \
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Content-Type: application/json" \
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
             -d "{\"year\":\"${YEAR}\"}" \
@@ -130,7 +130,7 @@ jobs:
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
-          curl -sf -X POST \
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Content-Type: application/json" \
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
             -d "{\"workflow\":\"scrape-results\",\"message\":\"Results scrape failed (results/standings were still committed if produced) - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
