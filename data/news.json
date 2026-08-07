@@ -1,16 +1,10 @@
 [
   {
-    "id": "driven-by-sport-welcomes-families-to-thruxton",
-    "slug": "driven-by-sport-welcomes-families-to-thruxton",
+    "id": "team-vertu-targets-top-step-in-scotland",
+    "slug": "team-vertu-targets-top-step-in-scotland",
     "title": {
-      "rendered": "Driven by Sport welcomes families to Thruxton"
+      "rendered": "Team VERTU Targets Top Step in Scotland"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c814e281-ad26-491d-beea-f332a5bc732f-1-2MDH4813.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
