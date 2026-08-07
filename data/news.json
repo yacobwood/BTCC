@@ -5,12 +5,6 @@
     "title": {
       "rendered": "Driven by Sport welcomes families to Thruxton"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c814e281-ad26-491d-beea-f332a5bc732f-1-2MDH4813.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
