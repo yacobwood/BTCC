@@ -36,7 +36,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update race YouTube links [skip ci]"
-          file_pattern: data/results2026.json
+          file_pattern: "data/results2026.json data/calendar.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 

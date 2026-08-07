@@ -95,7 +95,15 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"
-          file_pattern: "data/results*.json data/standings.json"
+          # records.json is deliberately excluded here even though scrape_tsl.py
+          # calls compute_records.py on every tick: that recompute undercounts
+          # wins/championships for any driver whose career spans pre-2004 (no
+          # season JSON exists to see those), relying on scrape_btcc_stats.py's
+          # separate daily run to patch the correct official totals back in
+          # afterward. Committing the raw per-tick output would ship wrong
+          # legendary-driver stats (confirmed: a test run dropped Jason Plato's
+          # wins from 97 to 83) until the next daily override run corrected it.
+          file_pattern: "data/results*.json data/standings.json data/calendar.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
