@@ -79,6 +79,14 @@ MAX_ARTICLES = 500
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ARTICLES_DIR = DATA_DIR / "articles"
 INDEX_JSON = ARTICLES_DIR / "index.json"
+# Every currently-installed app build still runs the pre-split client.js,
+# which fetches this single flat file directly - deleting it the moment the
+# per-page split shipped 404'd the News tab for every live user, since the
+# fix (the new per-page client.js) can only reach devices via a store
+# release. Keep writing it, unchanged in shape, until a release ships that
+# no longer requests it - remove only after confirming via app version
+# analytics that no build older than that release is still active.
+LEGACY_ARTICLES_JSON = DATA_DIR / "articles.json"
 MEDIA_DIR = DATA_DIR / "media" / "news"
 MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
 
@@ -309,6 +317,12 @@ def write_pages(posts: list[dict]) -> int:
     return num_pages
 
 
+def write_legacy_flat_file(posts: list[dict]) -> None:
+    """Compatibility shim - see LEGACY_ARTICLES_JSON comment above."""
+    with open(LEGACY_ARTICLES_JSON, "w") as f:
+        json.dump(posts, f, indent=2)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Mirror BTCC articles into data/articles/page_<n>.json + index.json")
     ap.add_argument("--dry-run", action="store_true", help="Print result only, do not write")
@@ -335,6 +349,9 @@ def main():
 
     num_pages = write_pages(posts)
     print(f"Wrote {num_pages} page file(s) + index.json to {ARTICLES_DIR}")
+
+    write_legacy_flat_file(posts)
+    print(f"Wrote {LEGACY_ARTICLES_JSON} (compatibility shim for pre-split app builds)")
 
 
 if __name__ == "__main__":
