@@ -16,9 +16,11 @@ and doesn't help here since it can't execute JavaScript either.
 
 from __future__ import annotations
 
+import io
 import sys
 from pathlib import Path
 
+from PIL import Image
 from playwright.sync_api import sync_playwright
 
 _EXT_BY_CONTENT_TYPE = {
@@ -27,6 +29,17 @@ _EXT_BY_CONTENT_TYPE = {
     "image/webp": "webp",
     "image/gif": "gif",
 }
+
+# btcc.net's Supabase-hosted images are inconsistently pre-sized at the
+# source - some are already web-sized, some are untouched DSLR originals
+# (confirmed: a 5499x3666, 3.4MB original mirrored verbatim, ~15x the size
+# of a normal mirrored photo, loading slowly enough on-device to look like
+# a missing image entirely). Unlike btcc.net/wp-content/uploads/ URLs,
+# these never get resized by CachedImage's wpThumb() either - it only
+# rewrites that one URL shape - so whatever size is mirrored here is
+# exactly what every phone downloads and decodes. Capping the long edge
+# matches WP_SIZES's own largest tier in CachedImage.js.
+_MAX_DIMENSION = 1024
 
 # Matches an <img src="..."> value in either shape a btcc.net page might use:
 # btcc.net's own stable /api/media/<uuid> redirector (relative path), or a
@@ -69,8 +82,28 @@ def save_mirrored_image(
     stem = last_segment.rsplit(".", 1)[0] if "." in last_segment else last_segment
     filename = f"{stem}.{ext}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / filename).write_bytes(body)
+    (out_dir / filename).write_bytes(_downscale(body, ext))
     return filename
+
+
+def _downscale(body: bytes, ext: str) -> bytes:
+    """Shrink an image to _MAX_DIMENSION on its long edge, preserving aspect
+    ratio and format. Returns the original bytes unchanged if it's already
+    smaller, or if PIL can't decode it (never block a mirror on a decode
+    quirk - malformed bytes just get written verbatim, same as before)."""
+    try:
+        img = Image.open(io.BytesIO(body))
+        if max(img.size) <= _MAX_DIMENSION:
+            return body
+        img.thumbnail((_MAX_DIMENSION, _MAX_DIMENSION), Image.LANCZOS)
+        out = io.BytesIO()
+        if ext in ("jpg", "jpeg"):
+            img.convert("RGB").save(out, format="JPEG", quality=85)
+        else:
+            img.save(out, format=img.format)
+        return out.getvalue()
+    except Exception:
+        return body
 
 _USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
