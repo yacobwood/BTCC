@@ -13,7 +13,13 @@
     "content": {
       "rendered": "<p>There was double joy for both Scotland and Power Maxed Racing in the Kwik Fit British Touring Car Championship Practice Session at Knockhill as Aiden Moffat led home Audi stablemate Dexter Patterson at the top of the timesheets.</p><p>More to follow\u2026</p>"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/6fa99425-ab1d-4cfe-9a37-e46e32cdb116-Moffat-1TR36741.jpg"
+        }
+      ]
+    }
   },
   {
     "id": "team-vertu-targets-top-step-in-scotland",
@@ -852,28 +858,6 @@
     }
   },
   {
-    "id": "btcc-newcomer-lewis-gilbert-to-complete-2026-season-with-wsr",
-    "slug": "btcc-newcomer-lewis-gilbert-to-complete-2026-season-with-wsr",
-    "link": "https://btcc.net/btcc-newcomer-lewis-gilbert-to-complete-2026-season-with-wsr/",
-    "date": "2026-07-13T00:00:00",
-    "title": {
-      "rendered": "BTCC newcomer Lewis Gilbert to complete 2026 season with WSR"
-    },
-    "excerpt": {
-      "rendered": "WSR has today (13 July) announced an expanded three-car line-up..."
-    },
-    "content": {
-      "rendered": "<p>WSR has today (13 July) announced an expanded three-car line-up for the remainder of the 2026 Kwik Fit British Touring Car Championship as Scottish single-seater racer Lewis Gilbert joins the team.<br><br>Lewis, 22, joins BTCC race winners Charles Rainford and Daryl De Leon at WSR and will make his championship debut at Thruxton (25/26 July).<br><br>His signing means that the 18-time series champions will run a trio of BMW 330i M Sport race cars as the push for more wins and podium finishes gathers momentum.<br><br>Lewis, from Dalry, North Ayrshire, is a European Champion kart racer, having won the Euro Series X30 Junior title in 2018 as well as the Kartmasters British GP crown in the Rotax Junior class the same year.<br><br>Those accolades came in only his second season of high-level karting. More recently, he was runner-up in a number of Senior Max class finals.<br><br>After testing F4 and Formula Regional cars, he made his car racing debut earlier this year in the GB3 Series and has recorded multiple top-ten finishes to date.<br><br>He will test his WSR BMW for the first time at Snetterton later this week before making his race debut at Thruxton the following weekend. His status as a Rookie means he will be eligible for the Jack Sears Trophy as well the overall and Independent Championships.<br><br><strong>Lewis Gilbert said:</strong> \u201cI\u2019m thrilled to make my touring car debut with WSR and to join the BTCC \u2013 a series I\u2019ve watched and loved for a long time. I\u2019m only half a season into my car-racing career and already fortunate to be in a position to move into the BTCC, which has been a long-term aim since I started karting. WSR are the most successful team ever in the BTCC and with all the championships they won in single-seaters before that and the experience they have, I know I\u2019m in the best place possible. I definitely feel like I\u2019m in at the deep end with the fastest circuit on the calendar \u2013 Thruxton \u2013 first, and then my home track at Knockhill, which couldn\u2019t be more different, straight after. But with the knowledge around me at WSR, I\u2019m really looking forward to the challenge.\u201d</p>\n\n\n\n<p><strong>Dick Bennetts, Team Principal, said:</strong> \u201cWe\u2019re very pleased to welcome Lewis to WSR. Throughout our history we\u2019ve developed a strong track record of working with young drivers and turning them into champions, whether it be Colin Turkington and Jake Hill in touring cars, or Ayrton Senna and Mika Hakkinen in Formula 3. Lewis is the latest in a long line of such young talents, and he makes the switch from single-seaters to touring cars with a huge amount of promise waiting to be untapped. He\u2019s probably quite a new name to many BTCC supporters, but we think he\u2019ll be a fast learner and definitely has the potential to surprise quite a few people during the second half of the year.\u201d</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c11cf79a-8803-4424-b614-243c3ff27adb-Gilbert-1MDH0063-scaled-e1783957397923.png"
-        }
-      ]
-    }
-  },
-  {
     "id": "7-eleven-ricky-collard",
     "slug": "7-eleven-ricky-collard",
     "link": "https://btcc.net/7-eleven-ricky-collard/",
@@ -891,6 +875,28 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/ebd8973b-e156-410b-9953-55b5c0e02a38-Collard-1TR33649-scaled-e1783952371762.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "btcc-newcomer-lewis-gilbert-to-complete-2026-season-with-wsr",
+    "slug": "btcc-newcomer-lewis-gilbert-to-complete-2026-season-with-wsr",
+    "link": "https://btcc.net/btcc-newcomer-lewis-gilbert-to-complete-2026-season-with-wsr/",
+    "date": "2026-07-13T00:00:00",
+    "title": {
+      "rendered": "BTCC newcomer Lewis Gilbert to complete 2026 season with WSR"
+    },
+    "excerpt": {
+      "rendered": "WSR has today (13 July) announced an expanded three-car line-up..."
+    },
+    "content": {
+      "rendered": "<p>WSR has today (13 July) announced an expanded three-car line-up for the remainder of the 2026 Kwik Fit British Touring Car Championship as Scottish single-seater racer Lewis Gilbert joins the team.<br><br>Lewis, 22, joins BTCC race winners Charles Rainford and Daryl De Leon at WSR and will make his championship debut at Thruxton (25/26 July).<br><br>His signing means that the 18-time series champions will run a trio of BMW 330i M Sport race cars as the push for more wins and podium finishes gathers momentum.<br><br>Lewis, from Dalry, North Ayrshire, is a European Champion kart racer, having won the Euro Series X30 Junior title in 2018 as well as the Kartmasters British GP crown in the Rotax Junior class the same year.<br><br>Those accolades came in only his second season of high-level karting. More recently, he was runner-up in a number of Senior Max class finals.<br><br>After testing F4 and Formula Regional cars, he made his car racing debut earlier this year in the GB3 Series and has recorded multiple top-ten finishes to date.<br><br>He will test his WSR BMW for the first time at Snetterton later this week before making his race debut at Thruxton the following weekend. His status as a Rookie means he will be eligible for the Jack Sears Trophy as well the overall and Independent Championships.<br><br><strong>Lewis Gilbert said:</strong> \u201cI\u2019m thrilled to make my touring car debut with WSR and to join the BTCC \u2013 a series I\u2019ve watched and loved for a long time. I\u2019m only half a season into my car-racing career and already fortunate to be in a position to move into the BTCC, which has been a long-term aim since I started karting. WSR are the most successful team ever in the BTCC and with all the championships they won in single-seaters before that and the experience they have, I know I\u2019m in the best place possible. I definitely feel like I\u2019m in at the deep end with the fastest circuit on the calendar \u2013 Thruxton \u2013 first, and then my home track at Knockhill, which couldn\u2019t be more different, straight after. But with the knowledge around me at WSR, I\u2019m really looking forward to the challenge.\u201d</p>\n\n\n\n<p><strong>Dick Bennetts, Team Principal, said:</strong> \u201cWe\u2019re very pleased to welcome Lewis to WSR. Throughout our history we\u2019ve developed a strong track record of working with young drivers and turning them into champions, whether it be Colin Turkington and Jake Hill in touring cars, or Ayrton Senna and Mika Hakkinen in Formula 3. Lewis is the latest in a long line of such young talents, and he makes the switch from single-seaters to touring cars with a huge amount of promise waiting to be untapped. He\u2019s probably quite a new name to many BTCC supporters, but we think he\u2019ll be a fast learner and definitely has the potential to surprise quite a few people during the second half of the year.\u201d</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c11cf79a-8803-4424-b614-243c3ff27adb-Gilbert-1MDH0063-scaled-e1783957397923.png"
         }
       ]
     }

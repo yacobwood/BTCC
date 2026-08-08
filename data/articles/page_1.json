@@ -13,7 +13,13 @@
     "content": {
       "rendered": "<p>There was double joy for both Scotland and Power Maxed Racing in the Kwik Fit British Touring Car Championship Practice Session at Knockhill as Aiden Moffat led home Audi stablemate Dexter Patterson at the top of the timesheets.</p><p>More to follow\u2026</p>"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/6fa99425-ab1d-4cfe-9a37-e46e32cdb116-Moffat-1TR36741.jpg"
+        }
+      ]
+    }
   },
   {
     "id": "team-vertu-targets-top-step-in-scotland",
