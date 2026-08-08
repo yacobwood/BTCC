@@ -58,6 +58,22 @@ describe('CachedImage', () => {
     expect(source1).toBe(source2);
   });
 
+  it('recovers when a recycled instance is given a new uri after a previous error', () => {
+    // FlatList/PagerView reuse component instances across list items rather than
+    // remounting - a single dead image anywhere must not permanently poison every
+    // later item recycled into that same instance.
+    const tree = render(<CachedImage uri={EXT_URI} style={{width: 100, height: 100}} />);
+    act(() => { getCachedImg(tree).props.onError(); });
+    act(() => { getCachedImg(tree).props.onError(); });
+    act(() => { getCachedImg(tree).props.onError(); });
+    expect(getCachedImg(tree)).toBeNull(); // errored = true
+
+    tree.rerender(<CachedImage uri="https://example.com/a-different-valid-image.jpg" style={{width: 100, height: 100}} />);
+    const node = getCachedImg(tree);
+    expect(node).toBeTruthy();
+    expect(node.props.source.uri).toBe('https://example.com/a-different-valid-image.jpg');
+  });
+
   it('shows the fallback (no image element) when uri is null', () => {
     const tree = render(<CachedImage uri={null} style={{width: 100, height: 100}} />);
     expect(getCachedImg(tree)).toBeNull();

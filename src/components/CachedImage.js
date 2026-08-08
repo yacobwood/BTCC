@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback, useRef} from 'react';
+import React, {useState, useMemo, useCallback, useRef, useEffect} from 'react';
 import {Image, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -27,6 +27,18 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
   const [errored, setErrored] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const retriesRef = useRef(0);
+
+  // FlatList/PagerView recycle component instances across list items rather
+  // than remounting - without this, a single dead image anywhere poisons
+  // every subsequent item that instance gets reused for, since errored/src
+  // would otherwise carry over from whatever uri this instance last showed.
+  useEffect(() => {
+    setSrc(targetWidth ? wpThumb(uri, targetWidth) : uri);
+    setErrored(false);
+    retriesRef.current = 0;
+    setRetryCount(0);
+  }, [uri, targetWidth]);
+
   const source = useMemo(() => ({uri: src}), [src]);
   const handleError = useCallback(() => {
     if (src !== uri) {
