@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Moffat leads Scottish one-two at Knockhill"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/6fa99425-ab1d-4cfe-9a37-e46e32cdb116-Moffat-1TR36741.jpg"
+        }
+      ]
+    }
   }
 ]
