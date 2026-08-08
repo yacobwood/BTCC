@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Team VERTU Targets Top Step in Scotland"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/26ded0e8-8ed3-45f3-9f77-5be60028c48e-ingram-011A0064.jpg-1-.jpg"
+        }
+      ]
+    }
   }
 ]
