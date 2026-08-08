@@ -1613,7 +1613,7 @@
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/drivers/a5ed8537-c279-460d-b4f8-485d4e54970b.png"
     },
     {
-      "number": 54,
+      "number": 7,
       "name": "Ryan Bensley",
       "team": "Speedworks Corolla Racing",
       "car": "Toyota Corolla GR Sport",
@@ -1643,7 +1643,7 @@
     {
       "number": 55,
       "name": "Nick Halstead",
-      "team": "Power Maxed Racing",
+      "team": "Steel Seal with Power Maxed Racing",
       "car": "Audi A3 Saloon",
       "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/2026-Halstead-Nick-0H5A0744-cut-out-scaled.png",
       "nationality": "British",
@@ -2408,6 +2408,14 @@
       "birthplace": "Barnsley, South Yorkshire",
       "livesIn": "Barnsley",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/drivers/6d860d71-e228-47a6-a3a0-d461ae97d2c8.png"
+    },
+    {
+      "number": 18,
+      "name": "Senna Proctor",
+      "team": "NAPA Racing UK",
+      "car": "Ford Focus Titanium",
+      "nationality": "British",
+      "class": "M"
     }
   ],
   "teams": [

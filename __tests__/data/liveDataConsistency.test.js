@@ -284,8 +284,13 @@ describe('standings.json <-> results2026.json — win and podium counts', () => 
     expect(falseZeroWins).toEqual([]);
   });
 
-  it('results2026.json has data for each completed round (rounds 1..standings.round)', () => {
-    for (let r = 1; r <= STANDINGS.round; r++) {
+  it('results2026.json has full scoring-race data for every round strictly before standings.round', () => {
+    // standings.round is set the moment a round has ANY session data at all
+    // (see scrape_tsl.py's compute_standings_fallback) - as soon as Friday
+    // practice/qualifying is scraped, not only once Sunday's races finish -
+    // so the round currently in progress is allowed to still be missing R1-3.
+    // Only rounds strictly before it are unambiguously in the past.
+    for (let r = 1; r < STANDINGS.round; r++) {
       const rnd = RESULTS.rounds.find(rnd => rnd.round === r);
       expect(rnd).toBeDefined();
       const hasResults = (rnd?.races || []).some(race =>
@@ -293,6 +298,13 @@ describe('standings.json <-> results2026.json — win and podium counts', () => 
       );
       expect(hasResults).toBe(true);
     }
+  });
+
+  it('results2026.json has at least some session data for standings.round itself', () => {
+    const rnd = RESULTS.rounds.find(rnd => rnd.round === STANDINGS.round);
+    expect(rnd).toBeDefined();
+    const hasAnyResults = (rnd?.races || []).some(race => (race.results || []).length > 0);
+    expect(hasAnyResults).toBe(true);
   });
 });
 
