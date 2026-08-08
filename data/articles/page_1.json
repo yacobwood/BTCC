@@ -1,5 +1,21 @@
 [
   {
+    "id": "moffat-leads-scottish-one-two-at-knockhill",
+    "slug": "moffat-leads-scottish-one-two-at-knockhill",
+    "link": "https://btcc.net/moffat-leads-scottish-one-two-at-knockhill/",
+    "date": "2026-08-08T00:00:00",
+    "title": {
+      "rendered": "Moffat leads Scottish one-two at Knockhill"
+    },
+    "excerpt": {
+      "rendered": "There was double joy for both Scotland and Power Maxed..."
+    },
+    "content": {
+      "rendered": "<p>There was double joy for both Scotland and Power Maxed Racing in the Kwik Fit British Touring Car Championship Practice Session at Knockhill as Aiden Moffat led home Audi stablemate Dexter Patterson at the top of the timesheets.</p><p>More to follow\u2026</p>"
+    },
+    "_embedded": {}
+  },
+  {
     "id": "team-vertu-targets-top-step-in-scotland",
     "slug": "team-vertu-targets-top-step-in-scotland",
     "link": "https://btcc.net/team-vertu-targets-top-step-in-scotland/",
@@ -413,28 +429,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112649-d95b6919-e6cd-4283-8b12-3ee79e9e2731-e1784968018327.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "7-eleven-josh-cook",
-    "slug": "7-eleven-josh-cook",
-    "link": "https://btcc.net/7-eleven-josh-cook/",
-    "date": "2026-07-24T00:00:00",
-    "title": {
-      "rendered": "7-Eleven: Josh Cook"
-    },
-    "excerpt": {
-      "rendered": "Continuing the 7-Eleven series, we turn to one of the..."
-    },
-    "content": {
-      "rendered": "<p>Continuing the 7-Eleven series, we turn to one of the 11 different drivers to reach the podium so far in 2026: Speedworks Corolla Racing's Josh Cook. The 21-time race winner has taken a single trip to the rostrum this year, coming at Oulton Park.</p><p><strong>Oulton Park Island</strong></p><p>Cook's podium arrived in Race 1; the Toyota Corolla GR Sport driver locked in a battle for the lead from the first lap alongside race winner Dan Cammish (NAPA Racing UK) and Tom Ingram (Team VERTU). The #66 held his own through a safety car restart that reset the race to 16 laps, but couldn't find a way past Cammish at the front, eventually settling for second at the flag, his first podium of the campaign.</p><figure class=\"wp-block-embed wp-block-embed-youtube\" data-url=\"https://www.youtube-nocookie.com/embed/4snE0wcPiH0?rel=0\"><iframe src=\"https://www.youtube-nocookie.com/embed/4snE0wcPiH0?rel=0\" title=\"YouTube video\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share\"></iframe></figure><p>Cook sits eighth in the Drivers' Championship as the mid-season break comes to a close, with the grid back in action at Thruxton (25/26 July) this weekend.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112638-112640-cook-cammish-podium-011A7171.jpg-1-scaled-e1784885910994.jpg"
         }
       ]
     }
