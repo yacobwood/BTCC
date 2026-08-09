@@ -1,10 +1,16 @@
 [
   {
-    "id": "chilton-charges-to-first-victory-of-2026-at-knockhill",
-    "slug": "chilton-charges-to-first-victory-of-2026-at-knockhill",
+    "id": "breakthrough-weekend-for-cataclean-plato-racing",
+    "slug": "breakthrough-weekend-for-cataclean-plato-racing",
     "title": {
-      "rendered": "Chilton charges to first victory of 2026 at Knockhill"
+      "rendered": "Breakthrough weekend for Cataclean Plato Racing"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/0afd1ebd-f0bd-434d-a0d8-c76bc4144e63-BTCC-R6TB1980.jpg"
+        }
+      ]
+    }
   }
 ]
