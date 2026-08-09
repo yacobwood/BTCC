@@ -12962,7 +12962,8 @@
               "time": "27:30.398",
               "gap": "",
               "bestLap": "55.971",
-              "points": 20
+              "points": 21,
+              "leadLap": true
             },
             {
               "pos": 2,
@@ -12975,7 +12976,8 @@
               "time": "27:31.321",
               "gap": "0.923",
               "bestLap": "55.677",
-              "points": 17
+              "points": 17,
+              "leadLap": false
             },
             {
               "pos": 3,
@@ -12988,7 +12990,8 @@
               "time": "27:32.223",
               "gap": "1.825",
               "bestLap": "55.981",
-              "points": 15
+              "points": 15,
+              "leadLap": false
             },
             {
               "pos": 4,
@@ -13002,7 +13005,8 @@
               "gap": "2.471",
               "bestLap": "55.452",
               "points": 14,
-              "fastestLap": true
+              "fastestLap": true,
+              "leadLap": false
             },
             {
               "pos": 5,
@@ -13015,7 +13019,8 @@
               "time": "27:33.014",
               "gap": "2.616",
               "bestLap": "55.864",
-              "points": 11
+              "points": 11,
+              "leadLap": false
             },
             {
               "pos": 6,
@@ -13028,7 +13033,8 @@
               "time": "27:34.491",
               "gap": "4.093",
               "bestLap": "56.484",
-              "points": 10
+              "points": 10,
+              "leadLap": false
             },
             {
               "pos": 7,
@@ -13041,7 +13047,8 @@
               "time": "27:35.138",
               "gap": "4.740",
               "bestLap": "56.016",
-              "points": 9
+              "points": 9,
+              "leadLap": false
             },
             {
               "pos": 8,
@@ -13054,7 +13061,8 @@
               "time": "27:35.818",
               "gap": "5.420",
               "bestLap": "56.342",
-              "points": 8
+              "points": 8,
+              "leadLap": false
             },
             {
               "pos": 9,
@@ -13067,7 +13075,8 @@
               "time": "27:37.030",
               "gap": "6.632",
               "bestLap": "56.297",
-              "points": 7
+              "points": 7,
+              "leadLap": false
             },
             {
               "pos": 10,
@@ -13080,7 +13089,8 @@
               "time": "27:37.879",
               "gap": "7.481",
               "bestLap": "56.284",
-              "points": 6
+              "points": 6,
+              "leadLap": false
             },
             {
               "pos": 11,
@@ -13093,7 +13103,8 @@
               "time": "27:37.985",
               "gap": "7.587",
               "bestLap": "56.314",
-              "points": 5
+              "points": 5,
+              "leadLap": false
             },
             {
               "pos": 12,
@@ -13106,7 +13117,8 @@
               "time": "27:39.089",
               "gap": "8.691",
               "bestLap": "55.953",
-              "points": 4
+              "points": 4,
+              "leadLap": false
             },
             {
               "pos": 13,
@@ -13119,7 +13131,8 @@
               "time": "27:39.554",
               "gap": "9.156",
               "bestLap": "56.199",
-              "points": 3
+              "points": 3,
+              "leadLap": false
             },
             {
               "pos": 14,
@@ -13132,7 +13145,8 @@
               "time": "27:40.099",
               "gap": "9.701",
               "bestLap": "56.290",
-              "points": 2
+              "points": 2,
+              "leadLap": false
             },
             {
               "pos": 15,
@@ -13145,7 +13159,8 @@
               "time": "27:40.406",
               "gap": "10.008",
               "bestLap": "55.785",
-              "points": 1
+              "points": 1,
+              "leadLap": false
             },
             {
               "pos": 16,
@@ -13158,7 +13173,8 @@
               "time": "27:40.598",
               "gap": "10.200",
               "bestLap": "56.232",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 17,
@@ -13171,7 +13187,8 @@
               "time": "27:42.340",
               "gap": "11.942",
               "bestLap": "56.117",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 18,
@@ -13184,7 +13201,8 @@
               "time": "27:45.202",
               "gap": "14.804",
               "bestLap": "55.908",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 19,
@@ -13197,7 +13215,8 @@
               "time": "27:45.791",
               "gap": "15.393",
               "bestLap": "56.083",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 20,
@@ -13210,7 +13229,8 @@
               "time": "27:51.720",
               "gap": "21.322",
               "bestLap": "57.679",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 21,
@@ -13223,7 +13243,8 @@
               "time": "27:55.912",
               "gap": "25.514",
               "bestLap": "55.916",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 22,
@@ -13236,7 +13257,8 @@
               "time": "27:45.199",
               "gap": "",
               "bestLap": "57.011",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 0,
@@ -13250,7 +13272,8 @@
               "gap": "",
               "bestLap": "56.386",
               "points": 0,
-              "status": "DNF"
+              "status": "DNF",
+              "leadLap": false
             }
           ],
           "grid": [
