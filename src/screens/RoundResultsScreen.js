@@ -21,7 +21,12 @@ import {parseResults} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 import {detectBroadcaster} from '../utils/broadcaster';
 
+// The require() path itself must stay a static literal (Metro can't resolve a
+// dynamic year here) - but every comparison below derives the current season
+// from the bundle's own `season` field, so only this one line needs editing
+// when a new season's results file is bundled, not every comparison site.
 const BUNDLED_RESULTS = require('../../data/results2026.json');
+const CURRENT_SEASON = Number(BUNDLED_RESULTS.season);
 const BUNDLED_YOUTUBE_URLS = Object.fromEntries(
   (BUNDLED_RESULTS.rounds || []).map(r => [r.round, r.youtubeUrls || []])
 );
@@ -51,6 +56,20 @@ export function buildReverseGrid(races, reversalCount) {
   const reversed = classified.slice(0, reversalCount).reverse();
   const rest = classified.slice(reversalCount);
   return [...reversed, ...rest, ...dnfs].map((r, i) => ({...r, gridPos: i + 1, r2Pos: r.position}));
+}
+
+// Compute the predicted grid for Race 1/Race 2 straight from the previous
+// session's finishing order, per reg 3.4.1.b, for use before TSL has published
+// the official grid PDF. Classified finishers keep their finishing order;
+// non-classified competitors follow, ordered by laps covered (descending).
+export function buildStraightGrid(sourceRace) {
+  if (!sourceRace?.results?.length) return null;
+  const classified = sourceRace.results.filter(r => r.position > 0);
+  if (!classified.length) return null;
+  const dnfs = sourceRace.results
+    .filter(r => r.position === 0)
+    .sort((a, b) => (b.laps || 0) - (a.laps || 0));
+  return [...classified, ...dnfs].map((r, i) => ({driver: r.driver, pos: i + 1}));
 }
 
 // Build a map of driver -> grid position for a given race.
@@ -104,7 +123,7 @@ export default function RoundResultsScreen({route, navigation}) {
   }, []);
 
   const refresh = useCallback(async () => {
-    if (year < 2026) return;
+    if (year < CURRENT_SEASON) return;
     try {
       const raw = await fetchResults(year, true);
       const parsed = parseResults(raw);
@@ -114,7 +133,7 @@ export default function RoundResultsScreen({route, navigation}) {
   }, [year, round.round]);
 
   useEffect(() => {
-    if (year < 2026) return;
+    if (year < CURRENT_SEASON) return;
     refresh();
     const interval = setInterval(refresh, POLL_INTERVAL_MS);
     const appSub = AppState.addEventListener('change', state => {
@@ -226,6 +245,22 @@ export default function RoundResultsScreen({route, navigation}) {
                 return <QualGroupsTab key={i} races={races} isFavourite={isFavourite} />;
               }
             }
+            if (race.label === 'Race 1' || race.label === 'Race 2') {
+              const sourceLabel = race.label === 'Race 1' ? 'Qualifying Race' : 'Race 1';
+              const predictedGrid = buildStraightGrid(races.find(r => r.label === sourceLabel));
+              if (predictedGrid) {
+                return (
+                  <StartingGridTab
+                    key={i}
+                    race={{...race, grid: predictedGrid}}
+                    races={races}
+                    isFavourite={isFavourite}
+                    predicted
+                    sourceLabel={sourceLabel}
+                  />
+                );
+              }
+            }
           }
 
           if (!race?.results?.length) {
@@ -243,7 +278,7 @@ export default function RoundResultsScreen({route, navigation}) {
                 renderItem={makeRenderResult(gridMap)}
                 contentContainerStyle={{padding: 16, paddingBottom: 20}}
                 ListHeaderComponent={(() => {
-                  const urls = round.youtubeUrls?.length ? round.youtubeUrls : (year === 2026 ? (BUNDLED_YOUTUBE_URLS[round.round] || []) : []);
+                  const urls = round.youtubeUrls?.length ? round.youtubeUrls : (year === CURRENT_SEASON ? (BUNDLED_YOUTUBE_URLS[round.round] || []) : []);
                   const raceUrlMap = {'Free Practice': urls[0], 'Qualifying': urls[1], 'Qualifying Race': urls[2], 'Race 1': urls[3], 'Race 2': urls[4], 'Race 3': urls[5]};
                   const url = IS_UK ? raceUrlMap[race?.label] : null;
                   if (!url) return null;
@@ -286,10 +321,14 @@ export function detectReversalCount(races, gridDrivers) {
   return null;
 }
 
-function StartingGridTab({race, races, isFavourite}) {
+function StartingGridTab({race, races, isFavourite, predicted, sourceLabel}) {
   const sorted = [...race.grid].sort((a, b) => a.pos - b.pos);
   const isR3 = race.label === 'Race 3';
-  const reversalCount = isR3 ? detectReversalCount(races, sorted.map(g => g.driver)) : null;
+  // Use explicit draw number if set (covers TSL grid PDF amendments caught after the window);
+  // fall back to inferring from grid vs R2 order.
+  const reversalCount = isR3
+    ? (race.reverseGridDraw ?? detectReversalCount(races, sorted.map(g => g.driver)))
+    : null;
   const teamMap = {};
   races.forEach(r => (r.results || []).forEach(d => { if (d.driver && d.team) teamMap[d.driver] = d.team; }));
   const leftItems = sorted.filter(g => g.pos % 2 === 1);
@@ -298,7 +337,8 @@ function StartingGridTab({race, races, isFavourite}) {
   return (
     <View style={{flex: 1}}>
       <View style={styles.reverseHeader}>
-        <Text style={styles.reverseTitle}>Official Starting Grid</Text>
+        <Text style={styles.reverseTitle}>{predicted ? 'Predicted Starting Grid' : 'Official Starting Grid'}</Text>
+        {predicted && <Text style={styles.reverseSubtitle}>Based on {sourceLabel} finishing order</Text>}
       </View>
       <ScrollView contentContainerStyle={{paddingTop: 12, paddingHorizontal: 16, paddingBottom: 20}}>
         <View style={{flexDirection: 'row', gap: GRID_GAP}}>

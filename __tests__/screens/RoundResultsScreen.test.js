@@ -391,6 +391,19 @@ describe('RoundResultsScreen', () => {
       expect(queryByText(/reversed/)).toBeNull();
     });
 
+    it('uses reverseGridDraw field instead of inferring from grid when set', () => {
+      // Grid would infer draw=6, but reverseGridDraw:8 is the explicit override
+      // (simulates TSL amending the grid PDF after the scrape window closed)
+      const overrideRound = {
+        ...GRID_ROUND,
+        races: GRID_ROUND.races.map(r =>
+          r.label === 'Race 3' ? {...r, reverseGridDraw: 8} : r,
+        ),
+      };
+      const {getByText} = renderRound({round: overrideRound, initialRace: 5});
+      expect(getByText('Top 8 reversed (draw: 8)')).toBeTruthy();
+    });
+
     it('highlights favourite driver in the grid', async () => {
       const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5, favourites: ['Foxtrot Driver']});
       await waitFor(() => getByText('Foxtrot DRIVER'));
@@ -401,6 +414,106 @@ describe('RoundResultsScreen', () => {
       const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5, favourites: ['Foxtrot Driver']});
       await waitFor(() => getByText('Alpha DRIVER'));
       expect(getByText('Alpha DRIVER')).not.toHaveStyle({color: '#FEBD02'});
+    });
+  });
+
+  // ── Predicted grid tab (R1/R2, before the official TSL grid PDF is published) ─
+  //
+  // Reg 3.4.1.b: R1's grid is the Qualifying Race finishing order; R2's grid is
+  // the Race 1 finishing order. Non-classified competitors go after the last
+  // classified competitor, ordered by laps covered (descending).
+
+  const PREDICTED_R1_GRID_ROUND = {
+    round: 2,
+    venue: 'Brands Hatch Indy',
+    date: '10–11 May 2026',
+    races: [
+      {label: 'Free Practice',   results: []},
+      {label: 'Qualifying',      results: []},
+      {
+        label: 'Qualifying Race',
+        results: [
+          {driver: 'Alpha Driver', position: 1, laps: 15, team: 'Team Alpha', points: 25, time: '20:00', gap: null, bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Beta Driver',  position: 2, laps: 15, team: 'Team Beta',  points: 18, time: '20:01', gap: '1.0', bestLap: '1:24', fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Gamma Wilson', position: 0, laps: 10, team: 'Team Gamma', points: 0,  time: 'DNF',   gap: null, bestLap: null,     fastestLap: false, leadLap: false, pole: false},
+          {driver: 'Delta Foster', position: 0, laps: 14, team: 'Team Delta', points: 0,  time: 'DNF',   gap: null, bestLap: null,     fastestLap: false, leadLap: false, pole: false},
+        ],
+      },
+      {label: 'Race 1', results: [], grid: []},
+      {label: 'Race 2', results: [], grid: []},
+      {label: 'Race 3', results: []},
+    ],
+  };
+
+  describe('predicted grid tab (Race 1, before official grid published)', () => {
+    it('shows Predicted Starting Grid heading', () => {
+      const {getByText} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 3});
+      expect(getByText('Predicted Starting Grid')).toBeTruthy();
+    });
+
+    it('shows subtitle referencing the Qualifying Race', () => {
+      const {getByText} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 3});
+      expect(getByText('Based on Qualifying Race finishing order')).toBeTruthy();
+    });
+
+    it('keeps classified finishers in finishing order', () => {
+      const {getByText} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 3});
+      expect(getByText('Alpha DRIVER')).toBeTruthy();
+      expect(getByText('Beta DRIVER')).toBeTruthy();
+    });
+
+    it('places DNF drivers after classified, ordered by laps covered descending', () => {
+      const {UNSAFE_queryAllByType} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 3});
+      const {Text} = require('react-native');
+      const names = UNSAFE_queryAllByType(Text)
+        .map(el => el.props.children)
+        .filter(c => typeof c === 'string' && (c.includes('WILSON') || c.includes('FOSTER')));
+      const fosterIdx = names.findIndex(n => n.includes('FOSTER'));
+      const wilsonIdx = names.findIndex(n => n.includes('WILSON'));
+      // Delta Foster (14 laps) must appear before Gamma Wilson (10 laps)
+      expect(fosterIdx).toBeGreaterThan(-1);
+      expect(wilsonIdx).toBeGreaterThan(fosterIdx);
+    });
+
+    it('cross-references team names from the Qualifying Race results', () => {
+      const {getByText} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 3});
+      expect(getByText('Team Alpha')).toBeTruthy();
+    });
+
+    it('does not show a reversal badge (R1 grid is not reversed)', () => {
+      const {queryByText} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 3});
+      expect(queryByText(/reversed/)).toBeNull();
+    });
+
+    it('Race 2 falls back to the plain empty state when Race 1 also has no results', () => {
+      const {getByText} = renderRound({round: PREDICTED_R1_GRID_ROUND, initialRace: 4});
+      expect(getByText('Nothing to see here. Literally.')).toBeTruthy();
+    });
+  });
+
+  const PREDICTED_R2_GRID_ROUND = {
+    ...PREDICTED_R1_GRID_ROUND,
+    races: PREDICTED_R1_GRID_ROUND.races.map(r => {
+      if (r.label === 'Qualifying Race') return {...r, results: []};
+      if (r.label === 'Race 1') {
+        return {
+          label: 'Race 1',
+          results: [
+            {driver: 'Alpha Driver', position: 1, laps: 20, team: 'Team Alpha', points: 25, time: '30:00', gap: null, bestLap: '1:23', fastestLap: false, leadLap: false, pole: false},
+            {driver: 'Beta Driver',  position: 2, laps: 20, team: 'Team Beta',  points: 18, time: '30:01', gap: '1.0', bestLap: '1:23', fastestLap: false, leadLap: false, pole: false},
+          ],
+        };
+      }
+      return r;
+    }),
+  };
+
+  describe('predicted grid tab (Race 2, before official grid published)', () => {
+    it('shows Predicted Starting Grid based on Race 1 finishing order', () => {
+      const {getByText} = renderRound({round: PREDICTED_R2_GRID_ROUND, initialRace: 4});
+      expect(getByText('Predicted Starting Grid')).toBeTruthy();
+      expect(getByText('Based on Race 1 finishing order')).toBeTruthy();
+      expect(getByText('Alpha DRIVER')).toBeTruthy();
     });
   });
 
