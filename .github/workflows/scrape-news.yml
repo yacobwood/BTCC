@@ -46,16 +46,45 @@ jobs:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_news.py
 
+      # Committed immediately, before the much slower article-mirror step
+      # below - sendSessionNotifications (every 1 min) can only react to
+      # whatever data/news.json currently says, so this fast,
+      # notification-critical update must never be held hostage by (or
+      # discarded along with) the per-article Playwright fetches that
+      # follow. Root cause of a real incident (2026-08-09, see
+      # project_notification_delay_fix memory): on a race weekend several
+      # articles publish in quick succession, so "Scrape full article
+      # mirror" can need multiple never-before-cached Playwright fetches
+      # and run past 5 minutes - cancel-in-progress then killed the whole
+      # job before it ever reached the old single end-of-job commit,
+      # discarding this step's already-successful output right along with
+      # it. Repeated every 5 minutes for ~5 hours with nothing landing at
+      # all, so notifications for genuinely new articles sat hours-stale.
+      - name: Commit news update
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update news.json from btcc.net [skip ci]"
+          file_pattern: "data/news.json"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: "--force-with-lease"
+
       - name: Scrape full article mirror
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_articles.py
 
-      - name: Commit updated data
+      # Re-sync first - real time may have passed inside the article-mirror
+      # step above (it's the slow one), and other workflows (e.g. live
+      # results, every 2 minutes on a race weekend) push to main constantly.
+      - name: Pull latest before article commit
+        run: git pull --rebase origin main
+
+      - name: Commit article mirror
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: update news from btcc.net [skip ci]"
-          file_pattern: "data/news.json data/articles.json data/articles/ data/media/news/"
+          commit_message: "chore: update article mirror from btcc.net [skip ci]"
+          file_pattern: "data/articles.json data/articles/ data/media/news/"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
