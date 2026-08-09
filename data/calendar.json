@@ -1322,14 +1322,16 @@
       "startDate": "2026-08-08",
       "endDate": "2026-08-09",
       "qualifyingRecord": {
-        "driver": "Adam MORGAN",
-        "time": "50.830",
-        "year": 2026
+        "driver": "Rory Butcher",
+        "time": "50.451s",
+        "speed": "90.40 mph",
+        "year": 2019
       },
       "raceRecord": {
-        "driver": "Ashley SUTTON",
-        "time": "55.452",
-        "year": 2026
+        "driver": "Ashley Sutton",
+        "time": "50.876s",
+        "speed": "89.65 mph",
+        "year": 2020
       },
       "sessions": [
         {

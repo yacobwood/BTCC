@@ -122,6 +122,33 @@ describe('TrackDetailScreen', () => {
     await waitFor(() => expect(getByText(/1:22.000/)).toBeTruthy());
   });
 
+  // Regression: lapTimeSecs() used to require a "M:SS.mmm" colon format and
+  // returned null for anything else, so short circuits like Knockhill (whose
+  // records are bare seconds, e.g. "50.876") silently lost their computed
+  // average-speed line - the parser couldn't read its own stored data.
+  it('computes average speed from a bare-decimal (no colon) time when no speed is stored', async () => {
+    const shortCircuitTrack = {
+      ...TRACK,
+      lengthMiles: '1.0 miles',
+      raceRecord: {driver: 'Ashley Sutton', time: '50.000', year: 2020},
+    };
+    const {getByText} = render(shortCircuitTrack);
+    await waitFor(() => expect(getByText('Avg 72.00 mph')).toBeTruthy());
+  });
+
+  // Regression: some older calendar.json records have a trailing unit suffix
+  // baked into the stored string (e.g. "50.451s") - the parser must tolerate
+  // that rather than treating the whole value as unparseable.
+  it('computes average speed from a time with a trailing unit suffix', async () => {
+    const trackWithSuffix = {
+      ...TRACK,
+      lengthMiles: '1.0 miles',
+      qualifyingRecord: {driver: 'Rory Butcher', time: '50.000s', year: 2019},
+    };
+    const {getByText} = render(trackWithSuffix);
+    await waitFor(() => expect(getByText('Avg 72.00 mph')).toBeTruthy());
+  });
+
   it('renders back button and navigates back when pressed', async () => {
     const {getByLabelText} = render();
     await waitFor(() => getByLabelText('Go back'));

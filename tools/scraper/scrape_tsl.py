@@ -559,12 +559,19 @@ def scrape_round(info, session_filter=None):
 # ── Standings computation ─────────────────────────────────────────────────────
 
 def lap_to_secs(t):
+    """Parse "M:SS.mmm" or bare "SS.mmm" to seconds, tolerating a trailing
+    unit suffix (e.g. "50.876s" from older manually-seeded calendar.json
+    records) rather than failing to parse the whole string. Returns inf
+    on genuinely invalid input (e.g. "DNS")."""
     try:
         t = t.strip()
-        if ":" in t:
-            m, s = t.split(":")
-            return int(m) * 60 + float(s)
-        return float(t)
+        m = re.match(r"^(\d+):(\d+(?:\.\d+)?)", t)
+        if m:
+            return int(m.group(1)) * 60 + float(m.group(2))
+        m = re.match(r"^(\d+(?:\.\d+)?)", t)
+        if m:
+            return float(m.group(1))
+        return float("inf")
     except Exception:
         return float("inf")
 

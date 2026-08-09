@@ -56,12 +56,17 @@ const BUNDLED_TRACK_LAYOUTS = {
   'Thruxton':          ThrutonLayout,
 };
 
-// Parse "M:SS.mmm" lap time to seconds, returns null on failure
+// Parse "M:SS.mmm" or bare "SS.mmm" lap time to seconds, tolerating a
+// trailing unit suffix (e.g. "50.876s" from older manually-seeded calendar
+// records). Returns null on failure. Short circuits (e.g. Knockhill) store
+// bare seconds with no colon, so the colon-only pattern this used to require
+// silently failed for every one of their records.
 function lapTimeSecs(str) {
   if (!str) return null;
-  const m = str.match(/^(\d+):(\d+\.\d+)$/);
-  if (!m) return null;
-  return parseInt(m[1], 10) * 60 + parseFloat(m[2]);
+  const colon = str.match(/^(\d+):(\d+(?:\.\d+)?)/);
+  if (colon) return parseInt(colon[1], 10) * 60 + parseFloat(colon[2]);
+  const secs = str.match(/^(\d+(?:\.\d+)?)/);
+  return secs ? parseFloat(secs[1]) : null;
 }
 
 function formatDateRange(start, end) {

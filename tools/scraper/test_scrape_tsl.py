@@ -8,7 +8,9 @@ Run with:
     python tools/scraper/test_scrape_tsl.py
 """
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -182,6 +184,13 @@ class TestLapToSecs(unittest.TestCase):
         self.assertEqual(s.lap_to_secs(''), float('inf'))
         self.assertEqual(s.lap_to_secs('DNS'), float('inf'))
 
+    def test_trailing_unit_suffix_still_parses(self):
+        # Regression: some calendar.json records were manually seeded with a
+        # trailing unit ("50.876s"), which used to make float(t) raise and
+        # silently fall through to inf - treating a real record as "no record".
+        self.assertAlmostEqual(s.lap_to_secs('50.876s'), 50.876)
+        self.assertAlmostEqual(s.lap_to_secs('1:23.456s'), 83.456)
+
 
 # ── fastest_lap_driver ────────────────────────────────────────────────────────
 
@@ -208,6 +217,93 @@ class TestFastestLapDriver(unittest.TestCase):
             make_result('Bob',   pos=2, bestLap='47.100'),
         ]
         self.assertEqual(s.fastest_lap_driver(results), 'Bob')
+
+
+# ── update_calendar_records ─────────────────────────────────────────────────
+#
+# Regression coverage for a live data-integrity bug (2026-08-09): Knockhill's
+# calendar.json records had a trailing unit suffix baked into the stored time
+# ("50.876s"), which lap_to_secs() used to fail to parse (see above), silently
+# treating a genuine 2020 record as "no record" and letting a slower 2026 lap
+# overwrite it as a false "new record". These tests write a real temp
+# calendar.json (never the repo's own file) and drive update_calendar_records()
+# against it end to end.
+
+class TestUpdateCalendarRecords(unittest.TestCase):
+
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmpdir.cleanup)
+        self._orig_data_dir = s.DATA_DIR
+        s.DATA_DIR = Path(self.tmpdir.name)
+        self.addCleanup(lambda: setattr(s, 'DATA_DIR', self._orig_data_dir))
+        self.calendar_path = s.DATA_DIR / 'calendar.json'
+
+    def _write_calendar(self, qualifying_record, race_record):
+        self.calendar_path.write_text(json.dumps({
+            'rounds': [{
+                'round': 1,
+                'venue': 'Test Circuit',
+                'lengthMiles': '1.0 miles',
+                'qualifyingRecord': qualifying_record,
+                'raceRecord': race_record,
+            }],
+        }))
+
+    def _read_round(self):
+        return json.loads(self.calendar_path.read_text())['rounds'][0]
+
+    def test_does_not_overwrite_faster_stored_record_with_slower_new_time(self):
+        # The exact live bug: stored records carry a trailing "s" suffix.
+        self._write_calendar(
+            qualifying_record={'driver': 'Rory Butcher', 'time': '50.451s', 'year': 2019},
+            race_record={'driver': 'Ashley Sutton', 'time': '50.876s', 'year': 2020},
+        )
+        rounds = [make_round(1, [
+            make_race('Qualifying', [make_result('New Driver', pos=1, bestLap='50.830')]),
+            make_race('Race 1',     [make_result('New Driver', pos=1, bestLap='55.452')]),
+        ])]
+        s.update_calendar_records(rounds, 2026)
+        rnd = self._read_round()
+        self.assertEqual(rnd['qualifyingRecord']['driver'], 'Rory Butcher')
+        self.assertEqual(rnd['raceRecord']['driver'], 'Ashley Sutton')
+
+    def test_overwrites_when_new_time_is_genuinely_faster(self):
+        self._write_calendar(
+            qualifying_record={'driver': 'Rory Butcher', 'time': '50.451s', 'year': 2019},
+            race_record={'driver': 'Ashley Sutton', 'time': '50.876s', 'year': 2020},
+        )
+        rounds = [make_round(1, [
+            make_race('Qualifying', [make_result('New Driver', pos=1, bestLap='50.100')]),
+            make_race('Race 1',     [make_result('New Driver', pos=1, bestLap='50.500')]),
+        ])]
+        s.update_calendar_records(rounds, 2026)
+        rnd = self._read_round()
+        self.assertEqual(rnd['qualifyingRecord']['driver'], 'New Driver')
+        self.assertEqual(rnd['qualifyingRecord']['time'], '50.100')
+        self.assertEqual(rnd['raceRecord']['driver'], 'New Driver')
+        self.assertEqual(rnd['raceRecord']['time'], '50.500')
+
+    def test_sets_a_record_when_none_was_stored(self):
+        self._write_calendar(qualifying_record={}, race_record={})
+        rounds = [make_round(1, [
+            make_race('Qualifying', [make_result('New Driver', pos=1, bestLap='50.100')]),
+        ])]
+        s.update_calendar_records(rounds, 2026)
+        rnd = self._read_round()
+        self.assertEqual(rnd['qualifyingRecord']['driver'], 'New Driver')
+
+    def test_uses_fastest_lap_across_race_1_2_and_3(self):
+        self._write_calendar(qualifying_record={}, race_record={})
+        rounds = [make_round(1, [
+            make_race('Race 1', [make_result('Alice', pos=1, bestLap='51.000')]),
+            make_race('Race 2', [make_result('Bob',   pos=1, bestLap='49.000')]),  # fastest overall
+            make_race('Race 3', [make_result('Carol', pos=1, bestLap='50.000')]),
+        ])]
+        s.update_calendar_records(rounds, 2026)
+        rnd = self._read_round()
+        self.assertEqual(rnd['raceRecord']['driver'], 'Bob')
+        self.assertEqual(rnd['raceRecord']['time'], '49.000')
 
     def test_returns_none_when_no_finishers(self):
         self.assertIsNone(s.fastest_lap_driver([]))
