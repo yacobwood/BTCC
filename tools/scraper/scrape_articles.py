@@ -75,6 +75,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
@@ -240,11 +241,35 @@ def needs_full_refetch(prior_content_html: str, refresh_all: bool) -> bool:
     return "more to follow" in prior_content_html.lower()
 
 
+def resolve_first_seen(prior: dict | None, now_iso: str) -> str:
+    """Returns the timestamp a post should sort by: an already-mirrored
+    article keeps whatever it was first stamped with (so re-scraping it on a
+    later run never reshuffles its position), a genuinely new one gets this
+    run's own current time.
+
+    btcc.net's /news/ listing only exposes a bare display date (no time of
+    day) and - confirmed live, 2026-08-09 - doesn't reliably list newest
+    first across different content types either: a same-day quotes/features
+    piece ("Qualifying in Quotes: Knockhill", published ~10:30) outranked
+    two later race-report articles (published ~20:00 and ~22:40) because the
+    final sort below can only break same-day ties by whatever order the
+    listing page happened to present them in that run. Our own scrape
+    cadence (every 5 minutes) tracks true publish order far more precisely
+    than the site's own day-only date field ever could, so firstSeenAt - not
+    "date" - is what actually lets same-day articles sort correctly relative
+    to each other. See project_notification_delay_fix memory."""
+    if prior and prior.get("firstSeenAt"):
+        return prior["firstSeenAt"]
+    return now_iso
+
+
 def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
     # Always load the full accumulated archive - refresh_all forces today's
     # listing cards to refetch their content below, but must never wipe out
     # everything older than today's ~25 cards that's already been accumulated.
     existing = load_existing()
+
+    now_iso = datetime.now(timezone.utc).isoformat()
 
     with RenderedFetcher() as fetcher:
         if backfill_pages > 1:
@@ -291,13 +316,16 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
                 "slug": slug,
                 "link": f"https://btcc.net/{slug}/",
                 "date": date_iso,
+                "firstSeenAt": resolve_first_seen(prior, now_iso),
                 "title": {"rendered": card["title"]},
                 "excerpt": {"rendered": card["excerpt"]},
                 "content": {"rendered": content_html},
                 "_embedded": embedded,
             }
 
-    posts = sorted(merged.values(), key=lambda p: p["date"], reverse=True)
+    # firstSeenAt (not date) is the real sort key - see resolve_first_seen.
+    # Falls back to date for anything mirrored before this field existed.
+    posts = sorted(merged.values(), key=lambda p: p.get("firstSeenAt") or p["date"], reverse=True)
     return posts[:MAX_ARTICLES]
 
 

@@ -3,7 +3,7 @@
 
 import unittest
 
-from scrape_articles import needs_full_refetch, parse_display_date, scrape_card_list
+from scrape_articles import needs_full_refetch, parse_display_date, resolve_first_seen, scrape_card_list
 
 
 class TestParseDisplayDate(unittest.TestCase):
@@ -56,6 +56,32 @@ class TestNeedsFullRefetch(unittest.TestCase):
         # `bool(prior_content)` - this function only governs the "we have
         # something, is it good enough" decision.
         self.assertFalse(needs_full_refetch("", refresh_all=False))
+
+
+# ── resolve_first_seen ───────────────────────────────────────────────────────
+#
+# Regression coverage: btcc.net's /news/ listing only exposes a bare display
+# date (no time) and doesn't reliably list newest-first across different
+# content types - confirmed live, 2026-08-09: a same-day quotes/features
+# piece outranked two later race-report articles because the final sort
+# could only break same-day ties by whatever order that run's listing
+# happened to present them in. firstSeenAt (this run's own clock, stamped
+# once and never moved) is what actually fixes same-day ordering.
+
+class TestResolveFirstSeen(unittest.TestCase):
+
+    def test_new_article_gets_this_runs_current_time(self):
+        self.assertEqual(resolve_first_seen(None, "2026-08-09T22:39:03+00:00"), "2026-08-09T22:39:03+00:00")
+
+    def test_already_mirrored_article_keeps_its_original_stamp(self):
+        prior = {"firstSeenAt": "2026-08-09T09:30:02+00:00"}
+        self.assertEqual(resolve_first_seen(prior, "2026-08-09T22:39:03+00:00"), "2026-08-09T09:30:02+00:00")
+
+    def test_prior_without_firstseenat_falls_back_to_now(self):
+        # A slug mirrored before this field existed - treat it like new
+        # rather than crashing on a missing key.
+        prior = {"date": "2026-08-08T00:00:00"}
+        self.assertEqual(resolve_first_seen(prior, "2026-08-09T22:39:03+00:00"), "2026-08-09T22:39:03+00:00")
 
 
 # ── scrape_card_list ─────────────────────────────────────────────────────────
