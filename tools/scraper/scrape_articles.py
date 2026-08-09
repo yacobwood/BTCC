@@ -17,8 +17,14 @@ Two btcc.net pages are used:
                        excerpt, date and featured image for each card
                        (~25 per load).
   - /<slug>/           each article's own page - full body HTML, fetched
-                       only for slugs not already mirrored (existing
-                       articles keep their cached content).
+                       only for slugs not already mirrored, UNLESS the
+                       cached content is itself a "More to follow..."
+                       stub (btcc.net's own convention for a live
+                       race-weekend report published before the session
+                       result lands) - see needs_full_refetch(). Without
+                       that check a stub is "already mirrored" forever;
+                       two Snetterton reports sat unfinished for 2.5+
+                       months before this existed.
 
 Output shape mirrors the old wp-json REST API's own per-page/per-slug
 fetch granularity (see git history: fetchArticles() used to hit
@@ -209,6 +215,21 @@ def load_existing() -> dict:
     return existing
 
 
+def needs_full_refetch(prior_content_html: str, refresh_all: bool) -> bool:
+    """True when a slug's cached content should be re-fetched even though we
+    already have something stored for it: either the caller explicitly asked
+    for a full refresh, or the cached content is itself a placeholder btcc.net
+    hasn't finished writing yet. "More to follow..." is btcc.net's own literal
+    convention for a live race-weekend report published before the session
+    result is in - without this check, once a stub like that is scraped it's
+    treated as fully cached forever (confirmed: two Snetterton reports sat
+    unfinished for 2.5+ months before this existed, since nothing ever told
+    the scraper to look again)."""
+    if refresh_all:
+        return True
+    return "more to follow" in prior_content_html.lower()
+
+
 def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
     # Always load the full accumulated archive - refresh_all forces today's
     # listing cards to refetch their content below, but must never wipe out
@@ -229,7 +250,8 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
                 print(f"  Processing article {i + 1}/{len(cards)}...")
             slug = card["slug"]
             prior = existing.get(slug)
-            has_content = not refresh_all and bool(prior and prior.get("content", {}).get("rendered"))
+            prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
+            has_content = bool(prior_content) and not needs_full_refetch(prior_content, refresh_all)
 
             if has_content:
                 content_html = prior["content"]["rendered"]
