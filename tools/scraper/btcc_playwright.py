@@ -196,14 +196,27 @@ class RenderedFetcher:
             else:
                 page.wait_for_timeout(1200)
             if scroll_through:
-                prev_height = 0
-                for _ in range(30):
+                # Step down in viewport-height increments rather than jumping
+                # straight to the bottom in one go. A single jump only brings
+                # content near the *final* scroll position into view, so
+                # native loading="lazy" images anywhere in the middle of a
+                # static (non-growing) page - most of them, on a long listing -
+                # never cross the viewport and never get requested. Re-checking
+                # scrollHeight each step still handles a genuinely growing
+                # (infinite-scroll) page: the loop keeps walking as long as
+                # there's more height to cover.
+                viewport_height = page.evaluate("window.innerHeight") or 800
+                pos = 0
+                for _ in range(60):
+                    pos += viewport_height
+                    page.evaluate(f"window.scrollTo(0, {pos})")
+                    page.wait_for_timeout(500)
                     height = page.evaluate("document.body.scrollHeight")
-                    if height == prev_height:
+                    if pos >= height:
                         break
-                    prev_height = height
-                    page.evaluate(f"window.scrollTo(0, {height})")
-                    page.wait_for_timeout(400)
+                # Let whichever images the final scroll step just triggered
+                # actually finish their network round-trip before capturing.
+                page.wait_for_timeout(800)
             return page.content(), media
         finally:
             page.close()

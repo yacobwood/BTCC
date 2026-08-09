@@ -125,8 +125,18 @@ def parse_display_date(text: str) -> str:
 def scrape_card_list(fetcher: RenderedFetcher, url: str = NEWS_URL) -> tuple[list[dict], dict]:
     """Fetch a /news/ listing page (page 1 or /news/page/<n>/) and return card
     metadata for every article found, plus the captured media dict (see
-    btcc_playwright.get_with_media) for mirroring."""
-    html, media = fetcher.get_with_media(url, wait_selector="article.news-card")
+    btcc_playwright.get_with_media) for mirroring.
+
+    scroll_through=True: the listing's card images use loading="lazy" - without
+    scrolling, only the hero card (already in the initial viewport) actually
+    gets its image requested/captured; every card lower down silently gets
+    media_url=None. Since a successfully-captured image is what gets carried
+    forward on later runs (not a missing one), any article whose *first* scrape
+    happens to land it below the fold - e.g. two other articles already
+    published ahead of it that day - is missing an image permanently, with
+    nothing to ever retrigger a re-capture. Confirmed live: two Race 1 reports
+    both missing images the same day they were first scraped."""
+    html, media = fetcher.get_with_media(url, wait_selector="article.news-card", scroll_through=True)
     cards = []
     for m in ARTICLE_RE.finditer(html):
         block = m.group(0)
