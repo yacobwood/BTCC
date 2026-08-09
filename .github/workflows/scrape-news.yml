@@ -77,8 +77,14 @@ jobs:
       # Re-sync first - real time may have passed inside the article-mirror
       # step above (it's the slow one), and other workflows (e.g. live
       # results, every 2 minutes on a race weekend) push to main constantly.
+      # --autostash is required here (unlike the earlier "Pull latest" step):
+      # scrape_articles.py has already written local, uncommitted changes by
+      # this point, and a plain rebase refuses to run against a dirty working
+      # tree ("cannot pull with rebase: you have unstaged changes" - broke
+      # run #486 the first time this shipped without it). Autostash shelves
+      # those changes for the rebase and restores them straight after.
       - name: Pull latest before article commit
-        run: git pull --rebase origin main
+        run: git pull --rebase --autostash origin main
 
       - name: Commit article mirror
         uses: stefanzweifel/git-auto-commit-action@v7
