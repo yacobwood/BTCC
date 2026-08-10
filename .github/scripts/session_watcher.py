@@ -190,6 +190,94 @@ def get_top_finisher(year, round_num, label):
         return None
 
 
+# ── Race 3 grid-order notification ────────────────────────────────────────────
+#
+# Triggered by Race 2 completing, but announces Race 3's starting grid, not
+# Race 2's result - kept separate from handle_session_complete's normal
+# results-notification flow below. Race 3's grid needs both Race 2's
+# finishing order AND a separately-timed reversal-count draw: per BTCC reg
+# 3.4.1.b, the number of positions reversed is "picked at random by someone
+# nominated by the Administrator as soon as practical after the finish of
+# that Race" - distinct wording from "as soon as possible" used elsewhere in
+# the same regulation, and framed as its own event, not an automatic
+# byproduct of Race 2's result going final. So this polls for Race 3's own
+# grid actually appearing rather than assuming it's ready the instant Race 2
+# finishes.
+
+def find_race3(results_data, round_num):
+    """Pure - given already-loaded results<year>.json data, return Race 3's
+    race dict for the given round, or None if the round/race isn't found."""
+    rnd = next((r for r in results_data.get("rounds", []) if r.get("round") == round_num), None)
+    if not rnd:
+        return None
+    return next((r for r in rnd.get("races", []) if r.get("label") == "Race 3"), None)
+
+
+def race3_grid_ready(results_data, round_num):
+    """Pure - True once Race 3's official starting grid has actually been
+    published (a non-empty `grid` array), not merely once Race 2's
+    finishing order is known."""
+    race3 = find_race3(results_data, round_num)
+    return bool(race3 and race3.get("grid"))
+
+
+def race3_pole_sitter(results_data, round_num):
+    """Pure - driver name starting Race 3 from pole (grid position 1), or
+    None if the grid isn't published yet or has no pos==1 entry."""
+    race3 = find_race3(results_data, round_num)
+    if not race3 or not race3.get("grid"):
+        return None
+    pole = next((g for g in race3["grid"] if g.get("pos") == 1), None)
+    return pole.get("driver") if pole else None
+
+
+def load_results(year):
+    path = os.path.join(REPO_ROOT, "data", f"results{year}.json")
+    with open(path) as f:
+        return json.load(f)
+
+
+RACE3_GRID_POLL_INTERVAL_S = 120
+RACE3_GRID_MAX_WAIT_MINUTES = 20
+
+
+def watch_for_race3_grid(year, round_num, venue):
+    """Runs in its own thread after Race 2 completes. Deliberately does NOT
+    re-run the scraper itself - scrape-results.yml's own 2-minute polling
+    (see project_grid_window_scheduling_fix memory) is already what fetches
+    and commits Race 3's grid PDF once TSL publishes it; running the
+    scraper here too would risk two processes racing to commit the same
+    results file. This only re-pulls and re-reads the committed file,
+    watching for the moment Race 3's grid appears, then fires a
+    notification once - if it never appears within the wait window, this
+    exits quietly rather than notifying about a grid that isn't real yet."""
+    deadline = time.time() + RACE3_GRID_MAX_WAIT_MINUTES * 60
+    while time.time() < deadline:
+        subprocess.run(["git", "pull", "--rebase"], cwd=REPO_ROOT, capture_output=True)
+        try:
+            data = load_results(year)
+        except Exception:
+            data = None
+
+        if data and race3_grid_ready(data, round_num):
+            pole = race3_pole_sitter(data, round_num)
+            title = f"Race 3 Grid Set — Round {round_num}"
+            body = (
+                f"{pole} starts Race 3 from pole at {venue}" if pole
+                else f"Race 3's starting grid is now set at {venue}"
+            )
+            send_fcm(
+                "pre_race3_grid", title, body, "race3_grid",
+                extra_data={"type": "results", "round": str(round_num), "year": str(year), "race": "3"},
+            )
+            log.info(f"Race 3 grid notification sent: {body}")
+            return
+
+        time.sleep(RACE3_GRID_POLL_INTERVAL_S)
+
+    log.warning(f"Race 3 grid never appeared within {RACE3_GRID_MAX_WAIT_MINUTES} min - no notification sent")
+
+
 # ── Session-complete handler ──────────────────────────────────────────────────
 
 def handle_session_complete(session, year, round_num, venue):
@@ -215,6 +303,17 @@ def handle_session_complete(session, year, round_num, venue):
         return
 
     commit_and_push(round_num)
+
+    # Separate from, and not gated on, this session's own results
+    # notification below - Race 3's grid is its own concern, watched in a
+    # background thread so it doesn't block handling of whatever session
+    # completes next.
+    if label == "Race 2":
+        threading.Thread(
+            target=watch_for_race3_grid,
+            args=(year, round_num, venue),
+            daemon=True,
+        ).start()
 
     if not do_notify:
         log.info(f"  No results notification for {label} (Q1 partial or disabled)")
