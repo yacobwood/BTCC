@@ -1567,9 +1567,14 @@ select.input { cursor: pointer; }
     <div id="ga-sources-list"><div class="section-note">Loading…</div></div>
   </div>
 
-  <div class="card">
+  <div class="card" style="margin-bottom:12px">
     <div class="card-header"><div class="section-label">PLATFORM BREAKDOWN (7D)</div></div>
     <div id="ga-platform-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">WHERE IN THE UK (7D)</div></div>
+    <div id="ga-uk-list"><div class="section-note">Loading…</div></div>
   </div>
 </div>
 
@@ -3790,7 +3795,7 @@ async function loadWebsiteAnalytics() {
   ['stat-ga-total', 'stat-ga-new', 'stat-ga-active', 'stat-ga-sessions'].forEach(id => {
     document.getElementById(id).textContent = '…';
   });
-  ['ga-daily-chart', 'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list'].forEach(id => {
+  ['ga-daily-chart', 'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list', 'ga-uk-list'].forEach(id => {
     document.getElementById(id).innerHTML = '<div class="section-note">Loading…</div>';
   });
 
@@ -3821,6 +3826,7 @@ async function loadWebsiteAnalytics() {
       document.getElementById('ga-weekly-trend').innerHTML = empty;
       document.getElementById('ga-sources-list').innerHTML = empty;
       document.getElementById('ga-platform-list').innerHTML = empty;
+      document.getElementById('ga-uk-list').innerHTML = empty;
       return;
     }
 
@@ -3858,12 +3864,27 @@ async function loadWebsiteAnalytics() {
     } else {
       document.getElementById('ga-platform-list').innerHTML = '<div class="section-note">No platform data for this week.</div>';
     }
+
+    // ── Where in the UK, latest week ──
+    // ukCities won't exist on weeks exported before this field was added -
+    // those simply fall through to the "no data" branch below rather than
+    // erroring, same as topSources/platformBreakdown do on very old docs.
+    const ukCities = (latest.ukCities || []).slice(0, 8);
+    if (ukCities.length) {
+      const maxCity = Math.max(...ukCities.map(c => c.activeUsers || 0), 1);
+      document.getElementById('ga-uk-list').innerHTML = ukCities
+        .map(c => gaBar(c.city && c.city !== '(not set)' ? c.city : 'Unresolved location', c.activeUsers || 0, maxCity, '#A78BFA'))
+        .join('');
+    } else {
+      document.getElementById('ga-uk-list').innerHTML = '<div class="section-note">No UK location data for this week.</div>';
+    }
   } catch (e) {
     const failMsg = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
     document.getElementById('ga-daily-chart').innerHTML = failMsg;
     document.getElementById('ga-weekly-trend').innerHTML = failMsg;
     document.getElementById('ga-sources-list').innerHTML = failMsg;
     document.getElementById('ga-platform-list').innerHTML = failMsg;
+    document.getElementById('ga-uk-list').innerHTML = failMsg;
   }
 }
 
