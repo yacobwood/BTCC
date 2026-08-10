@@ -2480,9 +2480,9 @@
       "dateOfBirth": "1980-07-18",
       "birthplace": "Aylesbury, Buckinghamshire",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/8f8a089f-ad1d-454c-95fc-af85b4d73316.jpg",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/764cd92d-83c8-4cf3-a80a-abcfc13de3f4.png",
-      "totalRaces": 187,
-      "totalWins": 59
+      "carImageUrl": "",
+      "totalRaces": 171,
+      "totalWins": 51
     },
     {
       "name": "Team VERTU",
@@ -2533,9 +2533,9 @@
         }
       ],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/8a32c109-be0b-4bb3-ba62-acebb5324658.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/d010affd-43ce-4f5a-b3cf-8284732bbe46.png",
-      "totalRaces": 244,
-      "totalWins": 40
+      "carImageUrl": "",
+      "totalRaces": 228,
+      "totalWins": 39
     },
     {
       "name": "Speedworks Corolla Racing",
@@ -2606,9 +2606,9 @@
         }
       ],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/2221d1eb-6e09-4d2a-b841-7c8f24bd2834.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/1bfee4f0-df19-42cb-ab73-c0b97c5f2051.png",
-      "totalRaces": 392,
-      "totalWins": 31
+      "carImageUrl": "",
+      "totalRaces": 376,
+      "totalWins": 29
     },
     {
       "name": "WSR",
@@ -2684,9 +2684,9 @@
         }
       ],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/fb14d9a9-f3cf-469a-925b-6ade28c790c2.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/f925a5a6-4fb1-4a33-8afb-3b60ec9e9b17.png",
-      "totalRaces": 781,
-      "totalWins": 130,
+      "carImageUrl": "",
+      "totalRaces": 765,
+      "totalWins": 127,
       "lightCardBg": true
     },
     {
@@ -2753,9 +2753,9 @@
         }
       ],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/cb32c7ab-ea58-4f6f-8969-b5d6825fb5a9.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/9a97f442-9273-4361-8735-b2543c815b29.png",
-      "totalRaces": 22,
-      "totalWins": 1,
+      "carImageUrl": "",
+      "totalRaces": 6,
+      "totalWins": 0,
       "lightCardBg": true
     },
     {
@@ -2771,9 +2771,9 @@
       "teamsChampionships": 0,
       "history": [],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/5f2d7917-fddb-43cf-92b9-4cb883ddd70b.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/d045fc9d-add8-498a-849d-807e88178ae5.png",
-      "totalRaces": 22,
-      "totalWins": 0
+      "carImageUrl": "",
+      "totalRaces": 6,
+      "totalWins": 1
     },
     {
       "name": "Restart Racing",
@@ -2851,8 +2851,8 @@
         }
       ],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/6d860d71-e228-47a6-a3a0-d461ae97d2c8.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/76ba1def-1843-4677-a313-2c4180593f41.png",
-      "totalRaces": 82,
+      "carImageUrl": "",
+      "totalRaces": 66,
       "totalWins": 1
     },
     {
@@ -2864,11 +2864,11 @@
       "base": "Northwich, Cheshire",
       "driversChampionships": 1,
       "teamsChampionships": 0,
-      "totalRaces": 123,
-      "totalWins": 24,
+      "totalRaces": 107,
+      "totalWins": 22,
       "history": [],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/a5ed8537-c279-460d-b4f8-485d4e54970b.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/4278da2a-3a1b-4f6e-bcaf-33078ed073f6.png"
+      "carImageUrl": ""
     },
     {
       "name": "Steel Seal with Power Maxed Racing",
@@ -2881,8 +2881,8 @@
       "teamsChampionships": 0,
       "history": [],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/0e8fbf18-3dda-41fd-9a05-4c269eb516ef.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/066ea554-08fc-4fa6-9e7b-7c8401a5e0de.png",
-      "totalRaces": 292,
+      "carImageUrl": "",
+      "totalRaces": 276,
       "totalWins": 6,
       "lightCardBg": true
     },
