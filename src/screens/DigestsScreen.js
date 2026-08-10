@@ -80,7 +80,7 @@ export default function DigestsScreen({navigation}) {
   const allRead = digests.length > 0 && digests.every(a => readIds.has(String(a.id)));
 
   const openArticle = article => {
-    Analytics.articleClicked(article.title, 'digest', article.source);
+    Analytics.articleClicked(article.title, 'digest', article.source, undefined, article.sortDate);
     markRead(article.id).then(() =>
       setReadIds(prev => new Set([...prev, String(article.id)])),
     );
