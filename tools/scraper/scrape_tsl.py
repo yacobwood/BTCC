@@ -891,6 +891,11 @@ def parse_championship_pdf(pdf_bytes):
         "teams":             _parse_team_rows(section_elems["teams"]),
         "manufacturers":     _parse_team_rows(section_elems["manufacturers"]),
         "independentsTeams": _parse_team_rows(section_elems["independentsTeams"]),
+        # "Independents Trophy for Drivers" (Sporting Regs 1.6.2.b) - a genuinely
+        # separate points table, not the "standings" rows filtered by class. Was
+        # detected via _CHAMP_SECTIONS/_DRIVER_SECTIONS above but never made it
+        # into the output dict, so the app had no real data to show for it.
+        "independents":      _parse_driver_rows(section_elems["independents"]),
         "jst":               _parse_driver_rows(section_elems["jst"]),
         "per_race_points":   per_race,
         "scored_sessions":   scored_sessions,
@@ -1231,10 +1236,12 @@ def main():
                 standings = parse_championship_pdf(champ_data)
                 if standings:
                     print(f"  parsed ({len(standings['standings'])} drivers, "
+                          f"{len(standings.get('independents', []))} Independents, "
                           f"{len(standings.get('jst', []))} JST, "
                           f"{len(standings.get('scored_sessions', []))} scored sessions)")
-                    _backfill_teams(standings["standings"], output_rounds)
-                    _backfill_teams(standings["jst"],       output_rounds)
+                    _backfill_teams(standings["standings"],    output_rounds)
+                    _backfill_teams(standings["independents"], output_rounds)
+                    _backfill_teams(standings["jst"],          output_rounds)
                     # Override computed per-race points with championship PDF values
                     per_race       = standings.get("per_race_points", {})
                     scored_sessions = standings.get("scored_sessions", set())
@@ -1261,6 +1268,12 @@ def main():
     # are reliably detected, but its Wins/2nds/3rds columns have been observed to
     # drift out of alignment (see project memory: results/standings mismatch,
     # fixed 2026-07-14). Race-result-derived tallies are the trustworthy source.
+    #
+    # NOTE: "independents" is deliberately excluded here. compute_win_podium_tallies
+    # counts outright (whole-grid) finishing positions, but the Independents Trophy's
+    # Wins/2nds/3rds are a class tally (best-placed independent in a race) - a
+    # different metric the app doesn't otherwise compute. The PDF's own columns for
+    # this section are trusted as-is; revisit if they're ever seen to drift too.
     driver_tallies = compute_win_podium_tallies(output_rounds)
     for row in standings.get("standings", []) + standings.get("jst", []):
         t = driver_tallies.get(row["driver"])
@@ -1277,6 +1290,11 @@ def main():
     print(f"\nDriver standings (top 10):")
     for s in standings["standings"][:10]:
         print(f"  {s['pos']:>2}. {s['driver']:<30} {s['points']} pts  W{s['wins']} 2nd{s['seconds']} 3rd{s['thirds']}")
+
+    if standings.get("independents"):
+        print(f"\nIndependents' Trophy for Drivers:")
+        for s in standings["independents"]:
+            print(f"  {s['pos']:>2}. {s['driver']:<30} {s['points']} pts  W{s['wins']} 2nd{s['seconds']} 3rd{s['thirds']}")
 
     if standings.get("jst"):
         print(f"\nJack Sears Trophy:")

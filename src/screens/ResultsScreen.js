@@ -26,6 +26,9 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite, cacheReadTimestamp} from '../store/cache';
 
+const BUNDLED_CALENDAR = require('../../data/calendar.json');
+const CURRENT_SEASON = BUNDLED_CALENDAR.season;
+
 export function computeSeasonStats(rounds) {
   const map = {};
   for (const round of rounds) {
@@ -103,7 +106,7 @@ function formatAge(ms) {
   return `${Math.floor(mins / 60)}h ago`;
 }
 
-const YEARS = Array.from({length: 2026 - 2004 + 1}, (_, i) => 2026 - i);
+const YEARS = Array.from({length: CURRENT_SEASON - 2004 + 1}, (_, i) => CURRENT_SEASON - i);
 const ITEM_H = 52;
 const VISIBLE = 5; // must be odd
 const PICKER_H = ITEM_H * VISIBLE;
@@ -153,11 +156,15 @@ const YearWheelPicker = memo(({year, onChange}) => {
 export default function ResultsScreen({navigation, route}) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const seasonStart = new Date(2026, 3, 18); // April 18 2026 local midnight
+  // Parsed as local-midnight components (not `new Date(isoString)`, which is UTC
+  // midnight and could shift the day boundary depending on the user's timezone).
+  const [startY, startM, startD] = BUNDLED_CALENDAR.seasonStartDate.split('-').map(Number);
+  const seasonStart = new Date(startY, startM - 1, startD);
   const seasonStarted = today >= seasonStart;
 
-  const [year, setYear] = useState(seasonStarted ? 2026 : 2025);
-  const [driverFilter, setDriverFilter] = useState('all');
+  const [year, setYear] = useState(seasonStarted ? CURRENT_SEASON : CURRENT_SEASON - 1);
+  const [championship, setChampionship] = useState('btcc'); // 'btcc' | 'independents' | 'jst'
+  const [teamsChampionship, setTeamsChampionship] = useState('teams'); // 'teams' | 'independentsTeams' | 'manufacturers'
   const {isFavourite} = useFavouriteDriver();
   const [standings, setStandings] = useState(null);
   const [results, setResults] = useState([]);
@@ -234,19 +241,19 @@ export default function ResultsScreen({navigation, route}) {
 
   const load = useCallback(async (y = year, forceRefresh = false) => {
     // Bundled years handled by applyBundledYear  -  called synchronously in button handlers
-    if (y >= 2004 && y <= 2025) {
+    if (y >= 2004 && y <= CURRENT_SEASON - 1) {
       applyBundledYear(y);
       return;
     }
 
-    // 2026: stale-while-revalidate from cache, then fetch
+    // Current season: stale-while-revalidate from cache, then fetch
     setBundledStats(null);
     setDataFreshnessMs(null);
 
       if (!forceRefresh) {
         const [cachedResults, cachedStandings] = await Promise.all([
           cacheRead(`results_${y}`),
-          y === 2026 && seasonStarted ? cacheRead('standings') : Promise.resolve(null),
+          y === CURRENT_SEASON && seasonStarted ? cacheRead('standings') : Promise.resolve(null),
         ]);
         if (cachedResults) {
           const parsedResults = parseResults(cachedResults);
@@ -262,11 +269,11 @@ export default function ResultsScreen({navigation, route}) {
           if (ts) setDataFreshnessMs(ts);
         } else {
           setStandings(null);
-          if (y === 2026) setLoading(true);
+          if (y === CURRENT_SEASON) setLoading(true);
         }
       } else {
         setStandings(null);
-        if (y === 2026) setLoading(true);
+        if (y === CURRENT_SEASON) setLoading(true);
       }
 
       try {
@@ -275,7 +282,7 @@ export default function ResultsScreen({navigation, route}) {
         setResults(parsedResults);
         cacheWrite(`results_${y}`, resRaw);
 
-        if (y === 2026 && seasonStarted) {
+        if (y === CURRENT_SEASON && seasonStarted) {
           const raw = await fetchStandings(forceRefresh);
           const s = parseStandings(raw);
           const teamMap = buildTeamMap(parsedResults);
@@ -295,18 +302,17 @@ export default function ResultsScreen({navigation, route}) {
     resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
     statsListRef.current?.scrollToOffset({offset: 0, animated: false});
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
-    if (year === 2026) load(2026, true);
+    if (year === CURRENT_SEASON) load(CURRENT_SEASON, true);
   }, [year]));
 
   const changeYear = useCallback((newYear) => {
     Analytics.resultsYearChanged(newYear);
-    if (newYear >= 2004 && newYear <= 2025) {
+    if (newYear >= 2004 && newYear <= CURRENT_SEASON - 1) {
       applyBundledYear(newYear);
     } else {
       setLoading(true);
     }
     setYear(newYear);
-    setDriverFilter('all');
     setShowYearPicker(false);
   }, [applyBundledYear]);
 
@@ -343,7 +349,7 @@ export default function ResultsScreen({navigation, route}) {
     }
   }, [route?.params?.openRound, route?.params?.openYear, loading, results, year]));
   useEffect(() => {
-    if (year >= 2004 && year <= 2025) {
+    if (year >= 2004 && year <= CURRENT_SEASON - 1) {
       load(year);
       return;
     }
@@ -359,19 +365,22 @@ export default function ResultsScreen({navigation, route}) {
   }, [load, year]);
 
   const canGoOlder = year > 2004;
-  const canGoNewer = year < 2026;
+  const canGoNewer = year < CURRENT_SEASON;
 
-  const hasClassification = useMemo(() => (standings?.drivers || []).some(d => d.cls), [standings]);
-
+  // Each of these is a genuinely separate scored championship (Sporting Regs
+  // 1.6) with its own points/wins - not the main table filtered by class. See
+  // project memory: independents_trophy_standings_fix.
   const driverStandings = useMemo(() => {
-    if (driverFilter === 'JST') return standings?.jst || [];
-    const all = standings?.drivers || [];
-    if (driverFilter === 'all' || !hasClassification) return all;
-    return all
-      .filter(d => d.cls === driverFilter)
-      .map((d, i) => ({...d, position: i + 1}));
-  }, [standings, driverFilter, hasClassification]);
-  const teamStandings = standings?.teams || [];
+    if (championship === 'independents') return standings?.independents || [];
+    if (championship === 'jst') return standings?.jst || [];
+    return standings?.drivers || [];
+  }, [standings, championship]);
+
+  const teamStandings = useMemo(() => {
+    if (teamsChampionship === 'independentsTeams') return standings?.independentsTeams || [];
+    if (teamsChampionship === 'manufacturers') return standings?.manufacturers || [];
+    return standings?.teams || [];
+  }, [standings, teamsChampionship]);
   const liveRound = standings?.round || 0;
 
   const seasonStats = useMemo(() => {
@@ -395,7 +404,7 @@ export default function ResultsScreen({navigation, route}) {
     if (progressionCache.current[year]) return progressionCache.current[year];
     const {series, pointLabels: labels} = computeProgression(results);
     const computed = {progression: series, pointLabels: labels};
-    if (year !== 2026) progressionCache.current[year] = computed; // don't cache live year
+    if (year !== CURRENT_SEASON) progressionCache.current[year] = computed; // don't cache live year
     return computed;
   }, [year, results]);
 
@@ -415,8 +424,10 @@ export default function ResultsScreen({navigation, route}) {
           <Text style={{color: '#fff', fontSize: 15, fontWeight: '900'}}>{item.points} pts</Text>
           {(item.wins > 0 || item.seconds > 0 || item.thirds > 0) && (
             <View style={{flexDirection: 'row', gap: 6, marginTop: 3, alignItems: 'center'}}>
-              {driverFilter === 'JST' && (
-                <Text style={{color: Colors.textSecondary, fontSize: 9, fontWeight: '800', letterSpacing: 0.5}}>JST</Text>
+              {championship !== 'btcc' && (
+                <Text style={{color: Colors.textSecondary, fontSize: 9, fontWeight: '800', letterSpacing: 0.5}}>
+                  {championship === 'jst' ? 'JST' : 'IND'}
+                </Text>
               )}
               {item.wins > 0 && (
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 2}}>
@@ -441,7 +452,7 @@ export default function ResultsScreen({navigation, route}) {
         </View>
       </View>
     );
-  }, [isFavourite, driverFilter]);
+  }, [isFavourite, championship]);
 
   const renderTeamStanding = useCallback(({item}) => (
     <View style={styles.standingRow}>
@@ -516,14 +527,14 @@ export default function ResultsScreen({navigation, route}) {
   const hasData = results.some(r => r.races.some(race => race.results.length > 0));
 
   const renderTabContent = (t) => {
-    // Show season not started OR no live data for 2026
-    if (year === 2026 && (t === 0 || t === 1 || t === 3 || t === 4 || t === 5)) {
+    // Show season not started OR no live data for the current season
+    if (year === CURRENT_SEASON && (t === 0 || t === 1 || t === 3 || t === 4 || t === 5)) {
       if (!seasonStarted) {
         return (
           <View style={styles.center}>
             <Icon name="emoji-events" size={48} color={Colors.outline} />
-            <Text style={[styles.emptyText, {marginTop: 16, fontSize: 16, fontWeight: '700'}]}>2026 Season</Text>
-            <Text style={[styles.emptyText, {marginTop: 8}]}>Starts 18 April 2026</Text>
+            <Text style={[styles.emptyText, {marginTop: 16, fontSize: 16, fontWeight: '700'}]}>{CURRENT_SEASON} Season</Text>
+            <Text style={[styles.emptyText, {marginTop: 8}]}>Starts {seasonStart.toLocaleDateString('en-GB', {day: 'numeric', month: 'long', year: 'numeric'})}</Text>
             <Text style={[styles.emptyText, {marginTop: 4}]}>
               {Math.ceil((seasonStart - today) / (1000 * 60 * 60 * 24))} days to go
             </Text>
@@ -534,7 +545,7 @@ export default function ResultsScreen({navigation, route}) {
         return (
           <View style={styles.center}>
             <Icon name="emoji-events" size={48} color={Colors.outline} />
-            <Text style={[styles.emptyText, {marginTop: 16, fontSize: 16, fontWeight: '700'}]}>2026 Season</Text>
+            <Text style={[styles.emptyText, {marginTop: 16, fontSize: 16, fontWeight: '700'}]}>{CURRENT_SEASON} Season</Text>
             <Text style={[styles.emptyText, {marginTop: 8}]}>Standings will appear once the season begins</Text>
           </View>
         );
@@ -553,19 +564,23 @@ export default function ResultsScreen({navigation, route}) {
       case 0:
         return (
           <>
-            {hasClassification && (
+            {(standings?.independents?.length > 0 || standings?.jst?.length > 0) && (
               <View style={styles.filterRow}>
                 {[
-                  ['all', 'All'], ['M', 'Main'], ['I', 'Independents'],
-                  ...(standings?.jst?.length ? [['JST', 'Jack Sears']] : []),
+                  ['btcc', 'BTCC Championship'],
+                  ...(standings?.independents?.length ? [['independents', "Independents' Trophy"]] : []),
+                  ...(standings?.jst?.length ? [['jst', 'Jack Sears Trophy']] : []),
                 ].map(([val, label]) => (
                   <TouchableOpacity
                     key={val}
-                    style={[styles.filterPill, driverFilter === val && styles.filterPillActive]}
-                    onPress={() => setDriverFilter(val)}
+                    style={[styles.filterPill, championship === val && styles.filterPillActive]}
+                    onPress={() => {
+                      setChampionship(val);
+                      Analytics.resultsChampionshipChanged(year, val);
+                    }}
                     accessibilityRole="button"
-                    accessibilityLabel={`Show ${label} standings`}>
-                    <Text style={[styles.filterPillText, driverFilter === val && styles.filterPillTextActive]}>
+                    accessibilityLabel={`Show ${label}`}>
+                    <Text style={[styles.filterPillText, championship === val && styles.filterPillTextActive]}>
                       {label}
                     </Text>
                   </TouchableOpacity>
@@ -588,17 +603,42 @@ export default function ResultsScreen({navigation, route}) {
         );
       case 1:
         return (
-          <FlatList
-            ref={teamsListRef}
-            data={teamStandings}
-            keyExtractor={(item) => item.name}
-            renderItem={renderTeamStanding}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
-            onScroll={onListScroll}
-            scrollEventThrottle={100}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
-            ListEmptyComponent={<Text style={styles.emptyText}>No team standings available for {year}</Text>}
-          />
+          <>
+            {(standings?.independentsTeams?.length > 0 || standings?.manufacturers?.length > 0) && (
+              <View style={styles.filterRow}>
+                {[
+                  ['teams', 'Teams Championship'],
+                  ...(standings?.independentsTeams?.length ? [['independentsTeams', "Independents' Teams"]] : []),
+                  ...(standings?.manufacturers?.length ? [['manufacturers', 'Manufacturers']] : []),
+                ].map(([val, label]) => (
+                  <TouchableOpacity
+                    key={val}
+                    style={[styles.filterPill, teamsChampionship === val && styles.filterPillActive]}
+                    onPress={() => {
+                      setTeamsChampionship(val);
+                      Analytics.resultsChampionshipChanged(year, val);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Show ${label}`}>
+                    <Text style={[styles.filterPillText, teamsChampionship === val && styles.filterPillTextActive]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            <FlatList
+              ref={teamsListRef}
+              data={teamStandings}
+              keyExtractor={(item) => item.name}
+              renderItem={renderTeamStanding}
+              contentContainerStyle={{padding: 16, paddingBottom: 20}}
+              onScroll={onListScroll}
+              scrollEventThrottle={100}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
+              ListEmptyComponent={<Text style={styles.emptyText}>No team standings available for {year}</Text>}
+            />
+          </>
         );
       case 2:
         return (
@@ -658,7 +698,7 @@ export default function ResultsScreen({navigation, route}) {
       <View style={[styles.header, {flexDirection: 'row', alignItems: 'center'}]}>
         <Text style={[styles.headerTitle, {flex: 1}]}>SEASON</Text>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
-          {year === 2026 && dataFreshnessMs !== null && (
+          {year === CURRENT_SEASON && dataFreshnessMs !== null && (
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}>
               <Icon name="access-time" size={11} color={Colors.textSecondary} />
               <Text style={{color: Colors.textSecondary, fontSize: 11, fontWeight: '600'}}>

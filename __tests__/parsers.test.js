@@ -766,4 +766,54 @@ describe('parseStandings', () => {
     expect(s.jst).toEqual([]);
     expect(s.independentsTeams).toEqual([]);
   });
+
+  // Independents' Trophy for Drivers (Sporting Regs 1.6.2.b) is a separately
+  // scored table - the scraper detected its PDF section but dropped it before
+  // writing standings.json, so the app had nothing real to show. See also the
+  // Manufacturers/Constructors Championship, which was scraped but never parsed.
+  test('returns independents (drivers) and manufacturers arrays', () => {
+    const json = {
+      season: '2026',
+      round: 5,
+      standings: [],
+      teams: [],
+      independents: [{pos: 1, driver: 'Mikey DOBLE', team: 'LKQ Euro Car Parts', class: 'I', points: 264, wins: 5, seconds: 2, thirds: 3}],
+      manufacturers: [{pos: 1, manufacturer: 'Ford', points: 564}],
+    };
+    const s = parseStandings(json);
+    expect(s.independents).toHaveLength(1);
+    expect(s.independents[0].name).toBe('Mikey DOBLE');
+    expect(s.independents[0].points).toBe(264);
+    expect(s.independents[0].wins).toBe(5);
+    expect(s.manufacturers).toHaveLength(1);
+    expect(s.manufacturers[0].name).toBe('Ford');
+    expect(s.manufacturers[0].points).toBe(564);
+  });
+
+  test('independents points are not just the overall standings filtered by class', () => {
+    // Same driver, two different tables: the Drivers' Championship credits
+    // outright finishing position (with bonus points); the Independents' Trophy
+    // credits the same base points table but with no bonus points - so the two
+    // totals for one driver are expected to differ, not mirror each other.
+    const json = {
+      season: '2026',
+      round: 8,
+      standings: [{pos: 5, driver: 'Charles RAINFORD', team: 'WSR', class: 'I', points: 169, wins: 2}],
+      teams: [],
+      independents: [{pos: 3, driver: 'Charles RAINFORD', team: 'WSR', class: 'I', points: 227, wins: 2}],
+    };
+    const s = parseStandings(json);
+    const overall = s.drivers.find(d => d.name === 'Charles RAINFORD');
+    const independent = s.independents.find(d => d.name === 'Charles RAINFORD');
+    expect(overall.points).toBe(169);
+    expect(independent.points).toBe(227);
+    expect(independent.points).not.toBe(overall.points);
+  });
+
+  test('returns empty independents and manufacturers when absent', () => {
+    const json = {season: '2026', round: 0, standings: [], teams: []};
+    const s = parseStandings(json);
+    expect(s.independents).toEqual([]);
+    expect(s.manufacturers).toEqual([]);
+  });
 });

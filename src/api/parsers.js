@@ -256,18 +256,21 @@ export function parseStandings(json) {
     seconds: d.seconds || 0,
     thirds: d.thirds || 0,
   });
-  const drivers = (json.standings || []).map(mapDriver);
-  const jst     = (json.jst      || []).map(mapDriver);
-  const teams = (json.teams || []).map((t, i) => ({
+  // Independents' Trophy for Drivers (Sporting Regs 1.6.2.b) - a separately
+  // scored table, not the main Drivers' Championship filtered by class.
+  const drivers      = (json.standings    || []).map(mapDriver);
+  const jst          = (json.jst          || []).map(mapDriver);
+  const independents = (json.independents || []).map(mapDriver);
+
+  const mapTeam = (t, i) => ({
     position: t.pos || i + 1,
-    name: t.team || '',
+    name: t.team || t.manufacturer || '',
     points: t.points || 0,
-  }));
-  const independentsTeams = (json.independentsTeams || []).map((t, i) => ({
-    position: t.pos || i + 1,
-    name: t.team || '',
-    points: t.points || 0,
-  }));
+  });
+  const teams             = (json.teams             || []).map(mapTeam);
+  const independentsTeams = (json.independentsTeams || []).map(mapTeam);
+  const manufacturers     = (json.manufacturers     || []).map(mapTeam);
+
   return {
     season: json.season || '2026',
     round: json.round || 0,
@@ -275,7 +278,9 @@ export function parseStandings(json) {
     drivers,
     teams,
     jst,
+    independents,
     independentsTeams,
+    manufacturers,
   };
 }
 

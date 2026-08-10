@@ -70,7 +70,7 @@ Current version: **2.14.1** (versionCode 66)
 | Data hosting | GitHub raw file CDN (`raw.githubusercontent.com`) |
 | News source | GitHub-mirrored btcc.net article snapshot (`data/articles/page_<n>.json` + `index.json` - see [§19](#19-python-scrapers); btcc.net is now a Vercel-hosted React app with no public REST API, so the app never hits it directly) |
 | Podcast source | Buzzsprout RSS |
-| Weather | WeatherAPI |
+| Weather | Open-Meteo (free, no API key) |
 | Live timing | TSL SignalR |
 | Radio (iOS) | react-native-track-player |
 | Radio (Android) | Native RadioService NativeModule |
@@ -137,7 +137,7 @@ BTCC/
 │       ├── reviewPrompt.js    Decides when to trigger in-app review
 │       ├── signalr.js         TSL SignalR client for live timing
 │       ├── timeAgo.js         Relative time formatting
-│       └── weather.js         WeatherAPI fetch + temperature/condition helpers
+│       └── weather.js         Open-Meteo daily + hourly fetch, temperature/condition helpers
 ├── data/                      Bundled + GitHub-served JSON data files
 ├── functions/
 │   └── index.js               All Firebase Cloud Functions
@@ -276,7 +276,9 @@ Lists AI-generated weekly digest articles from hub_news.json filtered to the Wee
 Renders all rounds from `calendar.json`. Highlights the current/next active round. Tapping a round navigates to TrackDetail.
 
 **TrackDetailScreen** ([src/screens/TrackDetailScreen.js](src/screens/TrackDetailScreen.js))
-Hero image, WeatherAPI weather widget (gated on `track_weather` flag), track facts (length, corners, first BTCC year), About section, BTCC Fact, session schedule with day/time, lap records (qualifying + race), YouTube race replay links (gated to UK users only via locale check), and a UK map pin showing circuit location. A "Live Timing" button appears during active race weekends when `tslEventId` is set and the flag is enabled. An expandable "Show full weekend timetable" toggle inside the schedule card shows all support series (Porsche Sprint Challenge, MINI CHALLENGE, Scottish Legends etc.) alongside BTCC when `fullTimetable` is populated in `calendar.json` for that round.
+Hero image, Open-Meteo weather widget (gated on `track_weather` flag), track facts (length, corners, first BTCC year), About section, BTCC Fact, session schedule with day/time, lap records (qualifying + race), YouTube race replay links (gated to UK users only via locale check), and a UK map pin showing circuit location. A "Live Timing" button appears during active race weekends when `tslEventId` is set and the flag is enabled. An expandable "Show full weekend timetable" toggle inside the schedule card shows all support series (Porsche Sprint Challenge, MINI CHALLENGE, Scottish Legends etc.) alongside BTCC when `fullTimetable` is populated in `calendar.json` for that round.
+
+The weather widget defaults to a daily summary (one card per race-weekend day) and refetches every 5 minutes plus on app foreground (`WEATHER_POLL_INTERVAL_MS`) so it stays current through a live weekend, not just on first load - `fetchWeather()`'s own cache is 30 minutes, so most polls are cheap cache hits, they just shorten how long a fresh forecast takes to reach the screen. When hourly data is available a "Daily / By session" toggle appears (same segmented-control pattern as the full-weekend-timetable toggle): "By session" cross-references `track.sessions` against the hourly forecast to show a horizontally-scrollable weather chip for each BTCC session's actual start time, rather than one vague summary for the whole day.
 
 **LiveTimingScreen** ([src/screens/LiveTimingScreen.js](src/screens/LiveTimingScreen.js))
 WebView embedding the TSL live timing interface. Only rendered when `live_timing_in_app` feature flag is true.
@@ -370,7 +372,7 @@ Per-device overrides are keyed by FCM token inside the `overrides` object in `fl
 | `update_available` | true | Enable update prompt |
 | `update_min_version_ios` | 0 | iOS minimum build number |
 | `update_min_version_android` | 66 | Android minimum build number |
-| `track_weather` | - | Enable WeatherAPI widget |
+| `track_weather` | - | Enable Open-Meteo weather widget |
 | `live_updates` | - | Enable live scoring updates |
 
 ### SettingsContext ([src/store/settings.js](src/store/settings.js))
@@ -495,7 +497,7 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, news, articles, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
 | btcc.net (Vercel) | `https://www.btcc.net/news/` + per-article pages | News articles - scraped into `news.json` (latest headline, for the notification trigger) and `data/articles/page_<n>.json` + `index.json` (accumulated article archive, for the app's News tab and article deep-links) by `scrape_news.py`/`scrape_articles.py` via headless Chromium (see [§19](#19-python-scrapers)) |
 | Buzzsprout RSS | Configured URL | Podcast episodes |
-| WeatherAPI | API key in config | Current weather at circuit location |
+| Open-Meteo | `api.open-meteo.com/v1/forecast` (free, no API key) | Daily + hourly forecast for the circuit's lat/lng over its race weekend |
 | TSL SignalR | Live timing hub endpoint | Session live timing entries |
 | Firebase Realtime DB | Firebase project | Community chat messages |
 | Firestore | Firebase project | Article comments, reactions, bug reports, roadmap votes, notification state tracking |
@@ -511,7 +513,7 @@ Stored in [data/](data/) directory. Served via GitHub raw CDN. Some are also bun
 | `calendar.json` | 2026 season rounds with venues, dates, sessions, track guide, records |
 | `calendar2027.json` | 2027 calendar (bundled, for advance planning) |
 | `drivers.json` | All 2026 drivers and teams - names, numbers, images, bios, DOBs, career history |
-| `standings.json` | Current season driver and team standings |
+| `standings.json` | Current season standings, scraped from the TSL championship PDF's six tables: Drivers, Independents' Trophy for Drivers, Jack Sears Trophy, Teams, Independents' Teams, Manufacturers/Constructors. The Independents' Trophy and Jack Sears Trophy are separately-scored classifications (Sporting Regs §1.6), not the Drivers' Championship filtered by class - see `parseStandings()` in `src/api/parsers.js` |
 | `results{year}.json` | Full results for a season (2004 - 2026), including grids from TSL PDFs |
 | `flags.json` | Feature flags + per-device overrides |
 | `hub_news.json` | Hub-curated news posts including AI-generated digests |
@@ -788,7 +790,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 **timeAgo.js** - Returns relative time strings ("2 hours ago", "3 days ago") from a date string.
 
-**weather.js** - Fetches forecast weather from Open-Meteo for a circuit's lat/lng over its race weekend dates. Only fetches when the round is within 7 days and not a past weekend. Uses a manual AbortController for the 8-second timeout (AbortSignal.timeout is unreliable on Android/Hermes). Helpers for WMO weather code descriptions, icons and icon colours. The same 7-day limit applies in BTCCWidget.swift (iOS) and LargeWidget.kt (Android) - these are independent constants that must be kept in sync manually.
+**weather.js** - Fetches forecast weather from Open-Meteo for a circuit's lat/lng over its race weekend dates. Only fetches when the round is within 7 days and not a past weekend. Uses a manual AbortController for the 8-second timeout (AbortSignal.timeout is unreliable on Android/Hermes). Helpers for WMO weather code descriptions, icons and icon colours. The same 7-day limit applies in BTCCWidget.swift (iOS) and LargeWidget.kt (Android) - these are independent constants that must be kept in sync manually (the widgets stay daily-only, bare-array shape - the hourly addition below is TrackDetailScreen-only, deliberately not propagated there). `fetchWeather()` returns `{daily, hourly}` (2026-08-09, breaking change from a bare daily array) - `hourly` drives the session-aligned forecast in TrackDetailScreen (see [§6](#6-screens-reference)). Cache reduced from 3 hours to 30 minutes for the same reason: a race-weekend forecast is worth checking through the day, not settling for what was true hours ago.
 
 ---
 
@@ -803,6 +805,8 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 **scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session (not btcc.net, so unaffected by the Vercel-challenge/self-hosted-runner situation above). Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py`. (Team stats used to run here too - see `scrape_team_stats.py` below for why that moved out.) Every PDF suffix (`SESSION_SUFFIXES`, `GRID_SUFFIXES`, `CHAMPIONSHIP_SUFFIX`) gets `trg` appended at the point of use (`f"{suffix}trg"`) - TSL's touring-car category disambiguator, needed because a single TOCA event ID covers BTCC plus several support series sharing the same file namespace.
 
 **scrape_articles.py** - Mirrors full btcc.net article content into `data/articles/page_<n>.json` + `index.json` (see file's own docstring for the per-page split rationale). A slug already in the accumulated archive normally keeps its cached content rather than re-fetching every run (`scrape-news.yml` runs every 5 minutes) - `needs_full_refetch()` is the one exception: if the cached content is itself btcc.net's own literal `"More to follow..."` stub (published before a live race-weekend session's result was in), it's re-fetched on every run regardless of age, since a stub with no further signal would otherwise be treated as "done" forever. Fixed 2026-08-09 - two Snetterton reports had sat unfinished for 2.5+ months, and Knockhill's own FP/qualifying reports were stuck the same way the day this was found. `--refresh-all` (CLI-only, never used by the scheduled workflow) forces every page-1 card to re-fetch regardless of stub status, for a manual full catch-up.
+
+**Championship standings** (`parse_championship_pdf()`, called by `scrape_tsl.py` after every scrape) - parses the TSL championship PDF (`CHAMPIONSHIP_SUFFIX`, e.g. `ptstrg`) into `data/standings.json`. The PDF holds six distinct scored tables (Drivers, Manufacturers/Constructors, Teams, Independents' Teams, Independents' Trophy for Drivers, Jack Sears Trophy - `_CHAMP_SECTIONS`), each column-detected independently via its own header row. The **Independents' Trophy for Drivers** section was detected and parsed (it's in `_DRIVER_SECTIONS`) but never written into the output dict - fixed 2026-08-10, having gone unnoticed because the app's Results screen was papering over the gap by filtering the main Drivers' Championship array by `cls === 'I'` and just relabelling it "Independents", which happened to look plausible but showed the wrong points/wins (Sporting Regs §1.6.2.b scores the Independents' Trophy on the same finishing-position points table as the main championship, minus the pole/fastest-lap/race-leader bonus points - not a re-ranking of the main table). `standings["independents"]`'s own Wins/2nds/3rds columns are trusted as scraped (a class tally: best-placed independent per race) rather than overridden with the outright-finish tallies used for `standings`/`jst`, since those are a different metric. `Manufacturers/Constructors` was already being written to the JSON but the app-side parser (`parseStandings()` in `src/api/parsers.js`) never read it, so it also went unused until the same fix.
 
 **Track lap records** (`update_calendar_records()`, called by `scrape_tsl.py` after every scrape) - compares each round's fastest `bestLap` (Qualifying for `qualifyingRecord`, fastest of Race 1/2/3 for `raceRecord`) against the stored record in `calendar.json` and overwrites only when genuinely faster. `lap_to_secs()` parses `"M:SS.mmm"` or bare `"SS.mmm"`, tolerating a trailing unit suffix (some older records were manually seeded as `"50.876s"`) - before 2026-08-09 it didn't, so `float(t)` raised on that suffix, silently returned `inf` for the *stored* record, and let literally any freshly-scraped lap overwrite it as a false "new record" regardless of whether it was actually faster (this hit Knockhill live in production; Silverstone's records carried the same `"s"`-suffixed formatting and would have hit the same bug at its own race weekend). `src/screens/TrackDetailScreen.js` has its own client-side `lapTimeSecs()` for a "live record" preview during a race weekend, fixed the same day - it previously required a colon (`"M:SS.mmm"`) and returned `null` for any bare-seconds record, which is how every short circuit (Knockhill, Brands Hatch Indy) actually stores its sub-two-minute times, so their live-record speed calculation silently never ran.
 
@@ -852,6 +856,7 @@ A single-page web admin UI with tabs for:
 - **Live** - Edit Saturday and Sunday live stream URLs per region (UK, International, US) in `live_urls.json`. Watch Live button only shows when a URL is set for the user's region and day.
 - **Hub News** - Compose and publish hub news posts to `hub_news.json`
 - **Digests** - Manually trigger the AI digest generation via `triggerDigest` Cloud Function
+- **Analytics** - GA4-backed charts sourced from the `analytics_history`/`analytics_daily_history` Firestore collections (populated weekly by the `exportAnalyticsHistory` Cloud Function): daily/weekly user trends, top acquisition sources, platform/OS breakdown and a UK city-level "where users are browsing from" breakdown (`ukCities`, filtered to `country == United Kingdom`, top 10 cities by active users)
 
 All writes go directly to the GitHub repository via the GitHub API (authenticated with a personal access token stored locally in the browser).
 

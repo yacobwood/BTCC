@@ -1,4 +1,8 @@
 {
+  "season": "2026",
+  "round": 6,
+  "venue": "Knockhill",
+  "updated": "2026-08-09T18:55:56Z",
   "standings": [
     {
       "pos": 1,
@@ -397,6 +401,140 @@
       "points": 224
     }
   ],
+  "independents": [
+    {
+      "pos": 1,
+      "car": "88",
+      "driver": "Mikey DOBLE",
+      "nat": "GBR",
+      "class": "I",
+      "points": 264,
+      "wins": 5,
+      "seconds": 2,
+      "thirds": 3,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing"
+    },
+    {
+      "pos": 2,
+      "car": "2",
+      "driver": "Daryl DE LEON",
+      "nat": "PHL",
+      "class": "I",
+      "points": 228,
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 2,
+      "team": "WSR"
+    },
+    {
+      "pos": 3,
+      "car": "99",
+      "driver": "Charles RAINFORD",
+      "nat": "GBR",
+      "class": "I",
+      "points": 227,
+      "wins": 2,
+      "seconds": 5,
+      "thirds": 1,
+      "team": "WSR"
+    },
+    {
+      "pos": 4,
+      "car": "52",
+      "driver": "Gordon SHEDDEN",
+      "nat": "GBR",
+      "class": "I",
+      "points": 223,
+      "wins": 4,
+      "seconds": 1,
+      "thirds": 4,
+      "team": "Laser Tools Racing with MB Motorsport"
+    },
+    {
+      "pos": 5,
+      "car": "17",
+      "driver": "Dexter PATTERSON",
+      "nat": "GBR",
+      "class": "I",
+      "points": 203,
+      "wins": 1,
+      "seconds": 1,
+      "thirds": 3,
+      "team": "Steel Seal with Power Maxed Racing"
+    },
+    {
+      "pos": 6,
+      "car": "132",
+      "driver": "James DORLIN",
+      "nat": "GBR",
+      "class": "I",
+      "points": 199,
+      "wins": 2,
+      "seconds": 1,
+      "thirds": 1,
+      "team": "Restart Racing"
+    },
+    {
+      "pos": 7,
+      "car": "22",
+      "driver": "Chris SMILEY",
+      "nat": "GBR",
+      "class": "I",
+      "points": 192,
+      "wins": 0,
+      "seconds": 2,
+      "thirds": 2,
+      "team": "Restart Racing"
+    },
+    {
+      "pos": 8,
+      "car": "50",
+      "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+      "nat": "IRL",
+      "class": "I",
+      "points": 187,
+      "wins": 2,
+      "seconds": 0,
+      "thirds": 2,
+      "team": "Laser Tools Racing with MB Motorsport"
+    },
+    {
+      "pos": 9,
+      "car": "16",
+      "driver": "Aiden MOFFAT",
+      "nat": "GBR",
+      "class": "I",
+      "points": 183,
+      "wins": 1,
+      "seconds": 3,
+      "thirds": 0,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing"
+    },
+    {
+      "pos": 10,
+      "car": "29",
+      "driver": "Lewis GILBERT",
+      "nat": "GBR",
+      "class": "I",
+      "points": 30,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "team": "WSR"
+    },
+    {
+      "pos": 11,
+      "car": "55",
+      "driver": "Nick HALSTEAD",
+      "nat": "GBR",
+      "class": "I",
+      "points": 22,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "team": "Steel Seal with Power Maxed Racing"
+    }
+  ],
   "jst": [
     {
       "pos": 1,
@@ -506,9 +644,5 @@
       "thirds": 0,
       "team": "Steel Seal with Power Maxed Racing"
     }
-  ],
-  "season": "2026",
-  "round": 6,
-  "venue": "Knockhill",
-  "updated": "2026-08-09T18:55:56Z"
+  ]
 }

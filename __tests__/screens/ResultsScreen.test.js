@@ -6,7 +6,7 @@ import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), resultsYearChanged: jest.fn(), resultsTabChanged: jest.fn(), pullToRefresh: jest.fn(), scrollToTop: jest.fn()},
+  Analytics: {screen: jest.fn(), resultsYearChanged: jest.fn(), resultsTabChanged: jest.fn(), resultsChampionshipChanged: jest.fn(), pullToRefresh: jest.fn(), scrollToTop: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({
@@ -168,6 +168,131 @@ describe('ResultsScreen', () => {
     await waitFor(() => getByLabelText('Select season'));
     fireEvent.press(getByLabelText('Select season'));
     await waitFor(() => expect(getByText('SELECT SEASON')).toBeTruthy());
+  });
+
+  // ── Championship toggle ───────────────────────────────────────────────────────
+
+  it('shows BTCC Championship pill when there is another championship to switch to', async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 220, wins: 7, cls: 'M'}],
+      teams: [], jst: [],
+      independents: [{position: 1, name: 'Mikey Doble', team: 'LKQ Euro Car Parts', points: 264, wins: 5, cls: 'I'}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText('Show BTCC Championship'));
+  });
+
+  it("shows Independents' Trophy pill when standings have independents data", async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 220, wins: 7, cls: 'M'}],
+      teams: [], jst: [],
+      independents: [{position: 1, name: 'Mikey Doble', team: 'LKQ Euro Car Parts', points: 264, wins: 5, cls: 'I'}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText("Show Independents' Trophy"));
+  });
+
+  it("switches to Independents' Trophy standings when its pill is pressed, and shows independents-specific points", async () => {
+    // Same driver as in the main table, but with a different points/wins total -
+    // proves the Independents' Trophy is its own scored table, not the overall
+    // Drivers' Championship filtered by class (see Sporting Regs 1.6.2.b).
+    parseStandings.mockReturnValue({
+      drivers: [{position: 5, name: 'Charles Rainford', team: 'WSR', points: 169, wins: 2, cls: 'I'}],
+      teams: [], jst: [],
+      independents: [{position: 3, name: 'Charles Rainford', team: 'WSR', points: 227, wins: 2, cls: 'I'}],
+      season: '2026', round: 8, venue: 'Snetterton',
+    });
+    const {getByLabelText, getByText} = renderResults();
+    await waitFor(() => getByLabelText("Show Independents' Trophy"));
+    fireEvent.press(getByLabelText("Show Independents' Trophy"));
+    await waitFor(() => expect(getByText('227 pts')).toBeTruthy());
+  });
+
+  it('hides the championship pill row entirely when there is only one table to show', async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 220, wins: 7, cls: 'M'}],
+      teams: [], jst: [], independents: [],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {queryByLabelText} = renderResults();
+    await waitFor(() => expect(queryByLabelText('Show BTCC Championship')).toBeNull());
+  });
+
+  it('shows Jack Sears Trophy pill when standings have jst data', async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 220, wins: 7, cls: 'M'}],
+      teams: [],
+      jst: [{position: 1, name: 'Dexter Patterson', team: 'Power Maxed Racing', points: 195, wins: 6, cls: 'I'}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText('Show Jack Sears Trophy'));
+  });
+
+  it('switches to JST standings when Jack Sears Trophy pill is pressed', async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 220, wins: 7, cls: 'M'}],
+      teams: [],
+      jst: [{position: 1, name: 'Dexter Patterson', team: 'Power Maxed Racing', points: 195, wins: 6, cls: 'I'}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByLabelText, getByText, queryByText} = renderResults();
+    await waitFor(() => getByLabelText('Show Jack Sears Trophy'));
+    expect(queryByText(/Sutton/i)).toBeTruthy();
+    fireEvent.press(getByLabelText('Show Jack Sears Trophy'));
+    await waitFor(() => expect(getByText(/Patterson/i)).toBeTruthy());
+    expect(queryByText(/Sutton/i)).toBeNull();
+  });
+
+  // ── Teams tab: Teams / Independents' Teams / Manufacturers ─────────────────────
+
+  it("shows Independents' Teams pill on the Teams tab when that data exists", async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 327}],
+      teams: [{position: 1, name: 'NAPA Racing UK', points: 493}], jst: [],
+      independentsTeams: [{position: 1, name: 'LKQ Euro Car Parts with Power Maxed Racing', points: 300}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByText, getByLabelText} = renderResults();
+    await waitFor(() => getByText('TEAMS'));
+    fireEvent.press(getByText('TEAMS'));
+    await waitFor(() => getByLabelText("Show Independents' Teams"));
+  });
+
+  it("switches to Independents' Teams standings when its pill is pressed", async () => {
+    parseStandings.mockReturnValue({
+      // Driver's team is deliberately different from the Teams tab entry below,
+      // so "NAPA Racing UK" only ever matches the Teams tab list (SwipeableTabs
+      // renders every tab's content at once in this test harness).
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'Team VERTU', points: 327}],
+      teams: [{position: 1, name: 'NAPA Racing UK', points: 493}], jst: [],
+      independentsTeams: [{position: 1, name: 'LKQ Euro Car Parts with Power Maxed Racing', points: 300}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByText, getByLabelText, queryByText} = renderResults();
+    await waitFor(() => getByText('TEAMS'));
+    fireEvent.press(getByText('TEAMS'));
+    await waitFor(() => getByLabelText("Show Independents' Teams"));
+    expect(queryByText('NAPA Racing UK')).toBeTruthy();
+    fireEvent.press(getByLabelText("Show Independents' Teams"));
+    await waitFor(() => expect(getByText(/LKQ Euro Car Parts/i)).toBeTruthy());
+    expect(queryByText('NAPA Racing UK')).toBeNull();
+  });
+
+  it('fires resultsChampionshipChanged analytics when switching championship', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 220, wins: 7, cls: 'M'}],
+      teams: [],
+      jst: [{position: 1, name: 'Dexter Patterson', team: 'Power Maxed Racing', points: 195, wins: 6, cls: 'I'}],
+      season: '2026', round: 4, venue: 'Oulton Park',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText('Show Jack Sears Trophy'));
+    fireEvent.press(getByLabelText('Show Jack Sears Trophy'));
+    expect(Analytics.resultsChampionshipChanged).toHaveBeenCalledWith(expect.any(Number), 'jst');
   });
 
   // ── Loading state for live year ───────────────────────────────────────────────
