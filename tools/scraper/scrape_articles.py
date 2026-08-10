@@ -241,7 +241,30 @@ def needs_full_refetch(prior_content_html: str, refresh_all: bool) -> bool:
     return "more to follow" in prior_content_html.lower()
 
 
-def resolve_first_seen(prior: dict | None, now_iso: str) -> str:
+def sort_posts(posts: list[dict]) -> list[dict]:
+    """Sort posts newest-first by firstSeenAt (falling back to date for
+    anything mirrored before that field existed), tie-breaking on the
+    article's own date when firstSeenAt is identical.
+
+    The tie-break matters more than it looks: `now_iso` in build_articles is
+    computed once per scrape run and reused for every slug resolve_first_seen
+    stamps as newly-seen that run - so any run that first-discovers more than
+    one new article (routine on a busy race weekend, not just a one-off
+    backfill) ties them all at the exact same instant. Confirmed live
+    2026-08-10: a single bulk firstSeenAt backfill the day before tied ~9
+    articles spanning 26 Jul-9 Aug at one identical timestamp, and sorting on
+    firstSeenAt alone left them ordered by arbitrary dict-insertion order
+    instead of date - "Ingram takes top spot at Thruxton" (26 Jul) outranked
+    "Moffat leads Scottish one-two at Knockhill" (8 Aug) in the News tab
+    hero slot for hours, self-reinforcing on every re-scrape since a stub
+    getting its full content filled in via needs_full_refetch does not
+    change its already-stamped firstSeenAt. date alone can't fully replace
+    firstSeenAt (same-day articles need it - see resolve_first_seen), but as
+    a tie-break it correctly separates anything firstSeenAt can't."""
+    return sorted(posts, key=lambda p: (p.get("firstSeenAt") or p["date"], p.get("date") or ""), reverse=True)
+
+
+def resolve_first_seen(prior: dict | None, now_iso: str, date_iso: str = "") -> str:
     """Returns the timestamp a post should sort by: an already-mirrored
     article keeps whatever it was first stamped with (so re-scraping it on a
     later run never reshuffles its position), a genuinely new one gets this
@@ -257,9 +280,20 @@ def resolve_first_seen(prior: dict | None, now_iso: str) -> str:
     cadence (every 5 minutes) tracks true publish order far more precisely
     than the site's own day-only date field ever could, so firstSeenAt - not
     "date" - is what actually lets same-day articles sort correctly relative
-    to each other. See project_notification_delay_fix memory."""
-    if prior and prior.get("firstSeenAt"):
-        return prior["firstSeenAt"]
+    to each other. See project_notification_delay_fix memory.
+
+    Crucially: an already-known slug (prior is not None) that simply
+    predates firstSeenAt existing yet falls back to date_iso, NOT now_iso -
+    confirmed live 2026-08-10: firstSeenAt shipped the day before this, so
+    the very next routine run found ~20 already-mirrored articles (spanning
+    real dates from 26 Jul to 8 Aug) all still missing the new field and,
+    under the old `prior and prior.get("firstSeenAt")` check, treated every
+    one of them as "genuinely new" - stamping all ~20 with that single run's
+    one shared now_iso and letting them outrank even the 5 correctly
+    ground-truth-backfilled Knockhill articles from hours earlier that same
+    day. now_iso must stay reserved for slugs with no prior entry at all."""
+    if prior is not None:
+        return prior.get("firstSeenAt") or date_iso
     return now_iso
 
 
@@ -316,16 +350,16 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
                 "slug": slug,
                 "link": f"https://btcc.net/{slug}/",
                 "date": date_iso,
-                "firstSeenAt": resolve_first_seen(prior, now_iso),
+                "firstSeenAt": resolve_first_seen(prior, now_iso, date_iso),
                 "title": {"rendered": card["title"]},
                 "excerpt": {"rendered": card["excerpt"]},
                 "content": {"rendered": content_html},
                 "_embedded": embedded,
             }
 
-    # firstSeenAt (not date) is the real sort key - see resolve_first_seen.
-    # Falls back to date for anything mirrored before this field existed.
-    posts = sorted(merged.values(), key=lambda p: p.get("firstSeenAt") or p["date"], reverse=True)
+    # firstSeenAt (not date) is the primary sort key - see resolve_first_seen
+    # and sort_posts (date tie-break).
+    posts = sort_posts(list(merged.values()))
     return posts[:MAX_ARTICLES]
 
 

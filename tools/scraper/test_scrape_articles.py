@@ -3,7 +3,7 @@
 
 import unittest
 
-from scrape_articles import needs_full_refetch, parse_display_date, resolve_first_seen, scrape_card_list
+from scrape_articles import needs_full_refetch, parse_display_date, resolve_first_seen, scrape_card_list, sort_posts
 
 
 class TestParseDisplayDate(unittest.TestCase):
@@ -77,11 +77,93 @@ class TestResolveFirstSeen(unittest.TestCase):
         prior = {"firstSeenAt": "2026-08-09T09:30:02+00:00"}
         self.assertEqual(resolve_first_seen(prior, "2026-08-09T22:39:03+00:00"), "2026-08-09T09:30:02+00:00")
 
-    def test_prior_without_firstseenat_falls_back_to_now(self):
-        # A slug mirrored before this field existed - treat it like new
-        # rather than crashing on a missing key.
+    def test_prior_without_firstseenat_falls_back_to_date_not_now(self):
+        # Regression coverage: confirmed live 2026-08-10 - firstSeenAt shipped
+        # the day before this, so the very next routine run found ~20
+        # already-mirrored articles (real dates spanning 26 Jul-8 Aug) still
+        # missing the new field. The old code treated "already known but not
+        # yet stamped" the same as "genuinely new" and gave all ~20 that
+        # run's one shared now_iso, letting them outrank even hours-old
+        # ground-truth-backfilled same-day articles. An already-known slug
+        # (prior is not None) must fall back to its own date, never now_iso -
+        # only a slug with no prior entry at all is genuinely new.
         prior = {"date": "2026-08-08T00:00:00"}
-        self.assertEqual(resolve_first_seen(prior, "2026-08-09T22:39:03+00:00"), "2026-08-09T22:39:03+00:00")
+        self.assertEqual(
+            resolve_first_seen(prior, "2026-08-09T22:39:03+00:00", "2026-08-08T00:00:00"),
+            "2026-08-08T00:00:00",
+        )
+
+    def test_prior_without_firstseenat_or_date_falls_back_to_passed_date_iso(self):
+        # date_iso is build_articles' already-resolved date for this slug
+        # (prior's stored date, or the freshly-scraped card's date if prior
+        # somehow has neither) - resolve_first_seen doesn't need its own
+        # fallback chain for it, just needs to prefer it over now_iso.
+        prior = {}
+        self.assertEqual(
+            resolve_first_seen(prior, "2026-08-09T22:39:03+00:00", "2026-08-05T00:00:00"),
+            "2026-08-05T00:00:00",
+        )
+
+
+# ── sort_posts ───────────────────────────────────────────────────────────────
+#
+# Regression coverage: confirmed live 2026-08-10 - a single bulk firstSeenAt
+# backfill tied ~9 articles spanning 26 Jul-9 Aug at one identical timestamp
+# (resolve_first_seen preserves a slug's original stamp forever, and
+# build_articles computes `now_iso` once per run and reuses it for every
+# newly-discovered slug that run, so any run that first-discovers more than
+# one new article ties them the same way - not just a one-off backfill
+# artifact). Sorting on firstSeenAt alone left the tied group ordered by
+# arbitrary dict-insertion order instead of date: a 26 Jul article outranked
+# an 8 Aug one in the News tab hero slot for hours, and kept doing so on
+# every re-scrape since a stub getting its full content filled in via
+# needs_full_refetch does not change its already-stamped firstSeenAt.
+
+class TestSortPosts(unittest.TestCase):
+
+    def test_sorts_by_first_seen_when_distinct(self):
+        older = {"slug": "a", "date": "2026-08-01T00:00:00", "firstSeenAt": "2026-08-01T10:00:00+00:00"}
+        newer = {"slug": "b", "date": "2026-08-02T00:00:00", "firstSeenAt": "2026-08-02T10:00:00+00:00"}
+        self.assertEqual([p["slug"] for p in sort_posts([older, newer])], ["b", "a"])
+
+    def test_breaks_tied_first_seen_by_date(self):
+        # Reproduces the live 2026-08-10 bug: three articles tied at the exact
+        # same firstSeenAt (a shared bulk-backfill/single-run-discovery
+        # instant) must still land in true calendar-date order, not whatever
+        # order they happened to be inserted in.
+        tied = "2026-08-09T23:47:15+00:00"
+        thruxton = {"slug": "ingram-thruxton", "date": "2026-07-26T00:00:00", "firstSeenAt": tied}
+        knockhill_moffat = {"slug": "moffat-knockhill", "date": "2026-08-08T00:00:00", "firstSeenAt": tied}
+        knockhill_chilton = {"slug": "chilton-knockhill", "date": "2026-08-09T00:00:00", "firstSeenAt": tied}
+        result = sort_posts([thruxton, knockhill_moffat, knockhill_chilton])
+        self.assertEqual(
+            [p["slug"] for p in result],
+            ["chilton-knockhill", "moffat-knockhill", "ingram-thruxton"],
+        )
+
+    def test_distinct_first_seen_wins_over_date_even_if_older_by_date(self):
+        # firstSeenAt stays the primary key - a same-day quotes piece
+        # first-seen earlier in the day must still rank below a later
+        # same-day race report that was first-seen after it, which is the
+        # whole reason firstSeenAt exists over date (see resolve_first_seen).
+        # Here the two aren't same-day, to isolate that firstSeenAt still
+        # wins over date's own ordering, not just over an exact date tie.
+        seen_first_but_dated_later = {
+            "slug": "dated-later", "date": "2026-08-10T00:00:00", "firstSeenAt": "2026-08-09T09:00:00+00:00",
+        }
+        seen_second_but_dated_earlier = {
+            "slug": "dated-earlier", "date": "2026-08-01T00:00:00", "firstSeenAt": "2026-08-09T22:00:00+00:00",
+        }
+        result = sort_posts([seen_first_but_dated_later, seen_second_but_dated_earlier])
+        self.assertEqual([p["slug"] for p in result], ["dated-earlier", "dated-later"])
+
+    def test_falls_back_to_date_when_first_seen_missing(self):
+        # Anything mirrored before firstSeenAt existed - resolve_first_seen's
+        # own fallback, exercised here through the full sort.
+        no_stamp = {"slug": "legacy", "date": "2026-08-05T00:00:00"}
+        stamped = {"slug": "current", "date": "2026-08-01T00:00:00", "firstSeenAt": "2026-08-09T00:00:00+00:00"}
+        result = sort_posts([no_stamp, stamped])
+        self.assertEqual([p["slug"] for p in result], ["current", "legacy"])
 
 
 # ── scrape_card_list ─────────────────────────────────────────────────────────
