@@ -297,12 +297,12 @@ describe('userProfile', () => {
       expect(result).toBe('ok');
     });
 
-    it('releases old username via DELETE before claiming new one', async () => {
-      // DELETE old name
-      global.fetch.mockResolvedValueOnce({ok: true, status: 200});
-      // POST commit for new name
+    it('releases old username via DELETE only after successfully claiming the new one', async () => {
+      // POST commit for new name succeeds
       global.fetch.mockResolvedValueOnce({ok: true, status: 200, json: jest.fn(() => Promise.resolve({}))});
       // saveProfile PATCH
+      global.fetch.mockResolvedValueOnce({ok: true, status: 200});
+      // DELETE old name
       global.fetch.mockResolvedValueOnce({ok: true, status: 200});
 
       await claimUsername(UID, 'NewName', 'OldName');
@@ -312,6 +312,38 @@ describe('userProfile', () => {
       );
       expect(deleteFetch).toBeDefined();
       expect(deleteFetch[0]).toContain('oldname');
+
+      // The old name must only be released after the new one is confirmed claimed
+      const deleteIndex = global.fetch.mock.calls.findIndex(([, opts]) => opts?.method === 'DELETE');
+      const postIndex = global.fetch.mock.calls.findIndex(([, opts]) => opts?.method === 'POST');
+      expect(deleteIndex).toBeGreaterThan(postIndex);
+    });
+
+    // Regression coverage: releasing the old name before confirming the new
+    // claim would leave the caller holding neither name on a failed/contested
+    // rename, briefly freeing the old one up for someone else to grab while
+    // this caller's own local state still thinks they own it.
+    it('does not release the old username when the new claim is "taken"', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: false, status: 409,
+        json: jest.fn(() => Promise.resolve({error: {status: 'FAILED_PRECONDITION'}})),
+      });
+      global.fetch.mockResolvedValueOnce({
+        ok: true, status: 200,
+        json: jest.fn(() => Promise.resolve({fields: {uid: {stringValue: 'other-uid'}}})),
+      });
+
+      const result = await claimUsername(UID, 'TakenName', 'OldName');
+      expect(result).toBe('taken');
+      expect(global.fetch.mock.calls.find(([, opts]) => opts?.method === 'DELETE')).toBeUndefined();
+    });
+
+    it('does not release the old username when the new claim errors', async () => {
+      global.fetch.mockRejectedValueOnce(new Error('network'));
+
+      const result = await claimUsername(UID, 'AnyName', 'OldName');
+      expect(result).toBe('error');
+      expect(global.fetch.mock.calls.find(([, opts]) => opts?.method === 'DELETE')).toBeUndefined();
     });
 
     it('returns "taken" when commit fails with FAILED_PRECONDITION and doc belongs to another user', async () => {

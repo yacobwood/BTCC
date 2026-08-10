@@ -342,7 +342,9 @@ Generic page renderer for `pages.json` content. Sections support `text` (body) a
 **ChatScreen** ([src/screens/ChatScreen.js](src/screens/ChatScreen.js))
 Firebase Realtime Database community chat. 200 message limit (enforced by `trimChat` Cloud Function). Profanity filter via `blacklist.json`. 3-flag auto-hide via atomic RTDB transaction (prevents race conditions from concurrent flags). Name prompt on first post (stored as `commenter_name` in AsyncStorage, plus uniqueness-claimed in Firestore for signed-in users via `claimUsername()`). 24 character display name limit, 500 character message limit. Security rules in `database.rules.json` enforce field types, length limits, immutability of text/author/timestamp after creation, and that flagCount can only increase and hidden can only go true - never back to false. Opened via `ChatFab` floating button (not a tab). Accepts an `onClose` prop that shows a back arrow in the header when provided.
 
-**Retroactive rename:** each message's own `authorName` field is an immutable snapshot (the rules reject any attempt to edit it after creation), so renaming only ever changed future messages - past ones kept showing whatever name you had when you sent them. Fixed 2026-08-10 by adding a live `/chat/authorNames/{authorId} -> name` map, written whenever a user (re)names themselves and read once on mount alongside the message listener; `resolveAuthorName()` looks up the message's `authorId` in that map and falls back to the message's own stored `authorName` only for authors who've never (re)named themselves since the map existed. Reply mentions (`@Name`) also resolve through this so they tag someone's current name, not a stale one.
+**Retroactive rename:** each message's own `authorName` field is an immutable snapshot (the rules reject any attempt to edit it after creation), so renaming only ever changed future messages - past ones kept showing whatever name you had when you sent them. Fixed 2026-08-10 by adding a live `/chat/authorNames/{authorId} -> name` map, written whenever a user (re)names themselves and read once on mount alongside the message listener; `resolveAuthorName()` looks up the message's `authorId` in that map and falls back to the message's own stored `authorName` only for authors who've never (re)named themselves since the map existed. Reply mentions (`@Name`) also resolve through this so they tag someone's current name, not a stale one. Typed `@mentions` in a message body are plain text, not parsed/resolved - only the Reply button's inserted mention is live.
+
+**Username release-on-rename ordering:** `claimUsername()` frees a user's old Firestore `usernames/{name}` doc when they rename, so abandoned names become available again rather than being squatted on forever. Until 2026-08-10 it released the old name *before* confirming the new claim succeeded - a failed/contested claim (someone else grabs the new name a moment earlier, a network blip) left the caller holding neither name, silently freeing the old one for anyone else to grab while the caller's own local state still believed they owned it, undermining the uniqueness guarantee the whole system exists for. Fixed by claiming the new name first (the existing server-enforced precondition already makes that safe) and only releasing the old one once that succeeds.
 
 **Ban system:** Admins can ban users via the Chat tab in the admin panel. Bans are stored at `/chat/bans/{authorId}` (authorId = first 8 chars of FCM token). The `onChatBan` Cloud Function triggers on creation, hides all existing messages from the banned user, and writes a `ban_notice` system message. The banned user sees a locked input row instead of the text field. Temporary bans (1h / 24h / 7d) expire automatically via `expiresAt` timestamp checked client-side; permanent bans have `expiresAt: null`. Unbanning deletes the `/chat/bans/{authorId}` node.
 
@@ -477,7 +479,7 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | `fetchStandings(forceRefresh?)` | GitHub | staleFallback |
 | `fetchResults(year, forceRefresh?)` | GitHub | 5-minute cache |
 | `fetchArticles(page, perPage, search)` | GitHub (`articles/page_<n>.json`) | No search: fetches just that one page file, cached under its own `news_p<n>` key - never downloads the rest of the archive. With search: fetches `index.json` plus every distinct page it references, filters client-side (a deliberate one-off cost only paid when actually searching). btcc.net has no public REST API, so none of this ever hits btcc.net directly (see [§19](#19-python-scrapers)) |
-| `peekArticlesCache(page)` | AsyncStorage only | Returns that page's stale cache without a network call |
+| `peekArticlesCache(page)` | AsyncStorage only | Returns that page's cache without a network call, bounded to one 5-minute scrape cycle (older entries return null) - see [§24](#24-known-architecture-decisions) |
 | `fetchHubPosts()` | GitHub + device ID filter | Handles published/scheduled/draft states |
 | `fetchArticleBySlug(slug)` | GitHub (`articles/index.json` + one `page_<n>.json`) | Looks up the slug's page number in the index, then fetches only that one page file - never the whole archive; returns null if not (yet) present |
 | `fetchBlacklist()` | GitHub or bundled JSON | staleFirst |
@@ -985,6 +987,8 @@ Magic link auth links are intercepted in `AuthProvider` via `Linking.getInitialU
 
 **stale-while-revalidate everywhere** - The app always shows something immediately (cached data) and refreshes in the background. This is the primary UX pattern for all data fetching.
 
+**News tab's stale peek is age-bounded, not unconditional** - `peekArticlesCache()` (used by `NewsScreen`'s Phase 1 instant-render before the Phase 2 network fetch) only returns a cached page-1 snapshot younger than `ARTICLES_MAX_AGE_MS` (5 minutes, matching the scraper's own refresh cadence). A cache older than that is likely to already have a different top-of-feed order than the live mirror, and showing it just to have it immediately replaced by a re-ordered hero/grid a moment later reads as a visible bug ("flash of different articles") rather than a perceived-performance win. Past that age, `NewsScreen` falls through to its normal loading spinner instead.
+
 **GitHub as CDN** - `raw.githubusercontent.com` serves all data files. This is free, fast and allows the admin web UI to update data by committing to the repository without a traditional backend.
 
 **Platform-split radio** - iOS uses `react-native-track-player` for background audio. Android uses a native Java `RadioService` NativeModule because React Native's background capabilities differ significantly between platforms.
@@ -999,4 +1003,4 @@ Magic link auth links are intercepted in `AuthProvider` via `Linking.getInitialU
 
 ---
 
-*This document is kept up to date with every code change. Last updated: 2026-05-16*
+*This document is kept up to date with every code change. Last updated: 2026-08-10*

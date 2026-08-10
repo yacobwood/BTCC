@@ -149,7 +149,13 @@ export async function checkUsernameAvailable(name, uid) {
   }
 }
 
-// Atomically releases the old username and claims the new one.
+// Claims the new username first (server-enforced precondition guarantees no
+// collision), then releases the old one only once that succeeds - claiming
+// first and releasing second (rather than the reverse) means a failed or
+// contested claim never leaves the caller holding neither name, which would
+// briefly free the old one up for someone else to grab while this caller's
+// own local state still thinks they own it (see project memory:
+// chat_rename_release_order_fix).
 // Returns 'ok' | 'taken' | 'error'
 export async function claimUsername(uid, newName, oldName) {
   const normalized = newName.toLowerCase().trim();
@@ -158,16 +164,6 @@ export async function claimUsername(uid, newName, oldName) {
   if (normalized === oldNormalized) return 'ok';
 
   const headers = await authHeaders();
-
-  // Release old username — best-effort, security rules prevent others deleting it
-  if (oldNormalized) {
-    try {
-      await fetch(
-        `${USERNAMES_BASE}/${encodeURIComponent(oldNormalized)}?key=${FIREBASE_API_KEY}`,
-        {method: 'DELETE', headers},
-      );
-    } catch {}
-  }
 
   // Claim new username with server-enforced precondition: doc must not exist
   const write = {
@@ -190,23 +186,30 @@ export async function claimUsername(uid, newName, oldName) {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      if (body?.error?.status === 'FAILED_PRECONDITION') {
-        // Doc exists — check if it belongs to this uid (e.g. re-claiming after reinstall)
-        const owner = await checkUsernameAvailable(newName, uid);
-        if (owner === 'yours') {
-          await saveProfile(uid, {commenterName: newName.trim()});
-          return 'ok';
-        }
-        return 'taken';
-      }
-      return 'error';
+      if (body?.error?.status !== 'FAILED_PRECONDITION') return 'error';
+      // Doc exists — check if it belongs to this uid (e.g. re-claiming after reinstall)
+      const owner = await checkUsernameAvailable(newName, uid);
+      if (owner !== 'yours') return 'taken';
     }
 
     await saveProfile(uid, {commenterName: newName.trim()});
-    return 'ok';
   } catch {
     return 'error';
   }
+
+  // New name is safely claimed (or was already ours) - now release the old
+  // one. Best-effort: security rules prevent anyone but its owner deleting
+  // it, and a failure here just leaves it reserved rather than causing harm.
+  if (oldNormalized) {
+    try {
+      await fetch(
+        `${USERNAMES_BASE}/${encodeURIComponent(oldNormalized)}?key=${FIREBASE_API_KEY}`,
+        {method: 'DELETE', headers},
+      );
+    } catch {}
+  }
+
+  return 'ok';
 }
 
 // On first sign-in, upload current AsyncStorage preferences to Firestore.
