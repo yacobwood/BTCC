@@ -57,8 +57,10 @@ export default function NewsScreen({navigation}) {
     setError(null);
 
     // Phase 1  -  show any cached articles immediately so the user never stares at a spinner
-    // for content they've already seen. Skipped when force=true (pull-to-refresh) because
-    // the user explicitly asked for fresh data, or when paginating.
+    // for content they've already seen. peekArticlesCache is itself bounded to one scrape
+    // cycle (see client.js) so this never shows a snapshot old enough to visibly reorder
+    // once Phase 2 lands. Skipped when force=true (pull-to-refresh) because the user
+    // explicitly asked for fresh data, or when paginating.
     let shownStale = false;
     if (p === 1 && !append && !force) {
       const staleRaw = await peekArticlesCache(1);

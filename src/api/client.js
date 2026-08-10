@@ -16,10 +16,18 @@ const BUNDLED_PARTNERS = require('../../data/partners.json');
 // user never sees data more than an hour stale.
 const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
-// staleFallback: on network error, return any cached value (even expired) rather than throwing
+// staleFallback: on network error, return a cached value rather than throwing - but only if
+//               it's still within maxAgeMs. A forceRefresh=true caller (e.g. NewsScreen's Phase
+//               2, or any pull-to-refresh) skips the age-checked branch below entirely and comes
+//               straight here on failure, so this is often the *only* age check a stale entry
+//               ever gets for that call. Bounding it (rather than "any cached value, even
+//               expired") is what stops a transient network blip from resurfacing an
+//               arbitrarily old snapshot - see the News tab "flash of different articles" fix.
 // staleFirst:   serve ANY cached value immediately (no age limit) and always refresh in background;
 //               only blocks on network when there is truly nothing cached (cold install).
 //               Use for content where showing slightly old data beats a long spinner (e.g. news).
+//               Only governs this initial read - the staleFallback catch-path below is always
+//               age-checked regardless of staleFirst.
 async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = false, staleFirst = false, maxAgeMs = MAX_AGE_MS) {
   if (cacheKey && !forceRefresh) {
     const ageLimit = staleFirst ? undefined : maxAgeMs;
@@ -42,7 +50,7 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
     return data;
   } catch (e) {
     if (staleFallback && cacheKey) {
-      const stale = await cacheRead(cacheKey);
+      const stale = await cacheRead(cacheKey, maxAgeMs);
       if (stale) return stale;
     }
     throw e;
@@ -176,10 +184,19 @@ export async function fetchArticles(page = 1, perPage = 20, search = '', forceRe
   return all.filter(p => (p.title?.rendered || '').toLowerCase().includes(q) || (p.content?.rendered || '').toLowerCase().includes(q));
 }
 
-// Returns any cached page of articles without triggering a network request.
-// Used by NewsScreen to show stale data instantly before fetching fresh data.
+// Returns a cached page of articles (if fresh enough) without triggering a
+// network request. Used by NewsScreen to show stale data instantly before
+// fetching fresh data. Bounded to ARTICLES_MAX_AGE_MS (same as the scraper's
+// own refresh cadence) rather than "any cached data regardless of age" - a
+// cache older than one scrape cycle is likely to already have a different
+// top-of-feed order than the live mirror, and showing it instantly just to
+// have NewsScreen's Phase 2 fetch immediately replace it with a re-ordered
+// hero/grid reads as a bug ("flash of different articles") rather than a
+// perf win. Past that age it's better to fall through to NewsScreen's
+// spinner and show the live order the first time, instead of showing a
+// snapshot of it.
 export async function peekArticlesCache(page = 1) {
-  const cached = await cacheRead(`news_p${page}`); // no maxAge  -  any cached data regardless of age
+  const cached = await cacheRead(`news_p${page}`, ARTICLES_MAX_AGE_MS);
   return Array.isArray(cached) && cached.length ? cached : null;
 }
 

@@ -195,6 +195,20 @@ describe('fetchArticles', () => {
     expect(result).toEqual(cached);
   });
 
+  it('bounds the network-error fallback to ARTICLES_MAX_AGE_MS rather than any cached age', async () => {
+    // A network blip mid-reload (e.g. Fast Refresh cycling) must not resurface a
+    // snapshot older than one scrape cycle - see the News tab "flash of different
+    // articles" fix. Previously this second cacheRead call had no maxAge argument
+    // at all, so a network failure could serve an arbitrarily old cached page.
+    const cached = [{id: 99, title: {rendered: 'Cached'}, content: {rendered: ''}}];
+    cacheRead.mockResolvedValueOnce(null).mockResolvedValueOnce(cached);
+    global.fetch.mockResolvedValueOnce({ok: false});
+
+    await fetchArticles(1);
+
+    expect(cacheRead).toHaveBeenNthCalledWith(2, 'news_p1', 5 * 60 * 1000);
+  });
+
   it('forceRefresh bypasses cache and always hits the network', async () => {
     const fresh = [{id: 42}];
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(fresh)});
@@ -208,15 +222,23 @@ describe('fetchArticles', () => {
 });
 
 describe('peekArticlesCache', () => {
-  it('reads that page\'s own cache key without any max-age restriction', async () => {
+  // ARTICLES_MAX_AGE_MS in client.js - kept in sync with the scraper's own
+  // 5-minute refresh cadence. A cache older than this is likely to already
+  // have a different top-of-feed order than the live mirror, so it's no
+  // longer safe to show instantly (see NewsScreen's "flash of different
+  // articles" fix, 2026-08-10).
+  const ARTICLES_MAX_AGE_MS = 5 * 60 * 1000;
+
+  it('reads that page\'s own cache key bounded to one scrape cycle', async () => {
     const stale = [{id: 7, title: 'Old article'}];
     cacheRead.mockResolvedValueOnce(stale);
 
     const result = await peekArticlesCache(1);
 
     expect(result).toEqual(stale);
-    // Must be called without a maxAgeMs argument so even expired entries are returned
-    expect(cacheRead).toHaveBeenCalledWith('news_p1');
+    // Must pass a maxAgeMs bound so an entry older than one scrape cycle is
+    // treated as a miss rather than returned regardless of age.
+    expect(cacheRead).toHaveBeenCalledWith('news_p1', ARTICLES_MAX_AGE_MS);
   });
 
   it('returns null when nothing is cached', async () => {
@@ -225,11 +247,20 @@ describe('peekArticlesCache', () => {
     expect(result).toBeNull();
   });
 
+  it('returns null when the cache entry has aged past the bound (cacheRead enforces this)', async () => {
+    // cacheRead itself returns null once maxAgeMs is exceeded (see cache.test.js) -
+    // peekArticlesCache just needs to pass the bound through and handle the null.
+    cacheRead.mockResolvedValueOnce(null);
+    const result = await peekArticlesCache(1);
+    expect(cacheRead).toHaveBeenCalledWith('news_p1', ARTICLES_MAX_AGE_MS);
+    expect(result).toBeNull();
+  });
+
   it('reads a different page\'s own key for a later page', async () => {
     const page2 = [{id: 20}];
     cacheRead.mockResolvedValueOnce(page2);
     const result = await peekArticlesCache(2);
-    expect(cacheRead).toHaveBeenCalledWith('news_p2');
+    expect(cacheRead).toHaveBeenCalledWith('news_p2', ARTICLES_MAX_AGE_MS);
     expect(result).toEqual(page2);
   });
 
