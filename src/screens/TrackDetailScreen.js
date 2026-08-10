@@ -13,7 +13,6 @@ import {
   Linking,
   Share,
   AppState,
-  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -782,12 +781,12 @@ export default function TrackDetailScreen({route, navigation}) {
             {showHourlyWeather && weatherDays.map(day => (
               <View key={day} style={{marginBottom: 12}}>
                 <Text style={styles.weatherSessionDayLabel}>{weatherDayLabel[day]}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap: 8}}>
+                <View style={{flexDirection: 'row', gap: 8}}>
                   {sessions.filter(s => s.day === day).map((s, i) => {
                     const entry = nearestHourlyEntry(weather.hourly, track, s.day, s.time);
                     if (!entry) return null;
                     return (
-                      <View key={i} style={styles.weatherSessionChip}>
+                      <View key={i} style={[styles.weatherSessionChip, {flex: 1}]}>
                         <Text style={styles.weatherSessionName}>{shortSessionName(s.name)}</Text>
                         <Text style={styles.weatherSessionTime}>{formatSessionTime(s.time, settings.use12HourTime)}</Text>
                         <Icon name={weatherIcon(entry.weatherCode)} size={20} color={weatherIconColor(entry.weatherCode)} />
@@ -801,7 +800,7 @@ export default function TrackDetailScreen({route, navigation}) {
                       </View>
                     );
                   })}
-                </ScrollView>
+                </View>
               </View>
             ))}
           </View>
