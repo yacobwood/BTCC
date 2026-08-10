@@ -48,6 +48,13 @@
           ".write": true,
           ".validate": "!newData.exists() || newData.hasChildren(['bannedAt', 'duration', 'authorName'])"
         }
+      },
+      "authorNames": {
+        ".read": true,
+        "$authorId": {
+          ".write": "auth != null && auth.uid === $authorId",
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30"
+        }
       }
     }
   }

@@ -25,6 +25,7 @@ jest.mock('../../src/utils/timeAgo', () => ({
 // Variable names must be prefixed with "mock" to be accessible from a hoisted jest.mock factory
 var mockDbOn, mockDbOff, mockDbPush, mockDbUpdate, mockDbRemove, mockDbTransaction, mockDbRef;
 var mockBanOn, mockBanOff, mockBanRef;
+var mockNamesOn, mockNamesOff, mockNamesSet, mockNamesRef;
 
 jest.mock('@react-native-firebase/database', () => {
   mockDbOn          = jest.fn();
@@ -50,9 +51,14 @@ jest.mock('@react-native-firebase/database', () => {
   mockBanOn  = jest.fn();
   mockBanOff = jest.fn();
   mockBanRef = {on: mockBanOn, off: mockBanOff};
+  mockNamesOn  = jest.fn();
+  mockNamesOff = jest.fn();
+  mockNamesSet = jest.fn(() => Promise.resolve());
+  mockNamesRef = {on: mockNamesOn, off: mockNamesOff, set: mockNamesSet};
   const db = jest.fn(() => ({
     ref: jest.fn(path => {
       if (path && path.startsWith('/chat/bans/')) return mockBanRef;
+      if (path && path.startsWith('/chat/authorNames')) return mockNamesRef;
       return mockDbRef;
     }),
   }));
@@ -75,6 +81,12 @@ function triggerBan(banData) {
   if (onCall) onCall[1](snap);
 }
 
+function triggerAuthorNames(namesMap) {
+  const snap = {val: () => namesMap};
+  const onCall = mockNamesOn.mock.calls[0];
+  if (onCall) onCall[1](snap);
+}
+
 function renderChat() {
   AsyncStorage.getItem.mockResolvedValue(null);
   return renderWithProviders(<ChatScreen />);
@@ -89,6 +101,9 @@ describe('ChatScreen', () => {
     mockDbOn.mockImplementation(() => {});
     mockBanOn.mockImplementation(() => {});
     mockBanOff.mockImplementation(() => {});
+    mockNamesOn.mockImplementation(() => {});
+    mockNamesOff.mockImplementation(() => {});
+    mockNamesSet.mockResolvedValue();
     mockDbPush.mockResolvedValue({});
     mockDbRemove.mockResolvedValue({});
     mockDbTransaction.mockImplementation(cb => {
@@ -213,6 +228,59 @@ describe('ChatScreen', () => {
       ]);
     });
     await waitFor(() => expect(queryByText(/ #[a-zA-Z0-9]{4}/)).toBeNull());
+  });
+
+  // ── Retroactive rename ───────────────────────────────────────────────────────
+  // authorName on a message is an immutable snapshot (enforced by
+  // database.rules.json), so a rename can only apply to past messages via a
+  // live authorId -> current name lookup, not by editing the message itself.
+
+  it('resolves the current name for an author via the live authorNames map, not the stale message snapshot', async () => {
+    const {getByText, queryByText} = renderChat();
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Great race!', authorName: 'OldName', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
+      triggerAuthorNames({xyz: 'NewName'});
+    });
+    await waitFor(() => expect(getByText(/NewName/)).toBeTruthy());
+    expect(queryByText(/OldName/)).toBeNull();
+  });
+
+  it('falls back to the stored authorName when the author has no entry in the authorNames map', async () => {
+    const {getByText} = renderChat();
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
+      triggerAuthorNames({someoneElse: 'Whatever'});
+    });
+    await waitFor(() => expect(getByText(/Gordon/)).toBeTruthy());
+  });
+
+  it('reply mention uses the resolved current name, not the stale message snapshot', async () => {
+    const {getByText, getAllByLabelText, getByPlaceholderText} = renderChat();
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Great race!', authorName: 'OldName', authorId: 'other123', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
+      triggerAuthorNames({other123: 'NewName'});
+    });
+    await waitFor(() => getByText(/NewName/));
+    fireEvent.press(getAllByLabelText('Reply')[0]);
+    expect(getByPlaceholderText(/say something/i).props.value).toBe('@NewName ');
+  });
+
+  it('writes the new name to /chat/authorNames/{authorId} when a name is set', async () => {
+    const {getByLabelText, getByPlaceholderText, getByText} = renderChat();
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => getByPlaceholderText(/say something/i));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'Hello!');
+    fireEvent.press(getByLabelText('Send message'));
+    await waitFor(() => getByText(/Choose a display name/i));
+    fireEvent.changeText(getByPlaceholderText(/Fan #/i), 'Speedster');
+    fireEvent.press(getByLabelText('Set name'));
+    await waitFor(() => expect(mockNamesSet).toHaveBeenCalledWith('Speedster'));
   });
 
   it('renders a relative timestamp for each message', async () => {

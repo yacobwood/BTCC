@@ -36,6 +36,12 @@ export default function ChatScreen({onClose} = {}) {
     if (insets.bottom > 0) setStableBottom(insets.bottom);
   }, [insets.bottom]);
   const [messages, setMessages] = useState(null); // null = loading
+  // authorId -> current display name, kept live so a rename applies to that
+  // author's past messages too - each message's own `authorName` field is
+  // an immutable snapshot (enforced by database.rules.json) and only used
+  // as a fallback for authors who've never (re)named themselves since this
+  // map existed.
+  const [authorNames, setAuthorNames] = useState({});
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
   const [commenterName, setCommenterName] = useState(null);
@@ -86,8 +92,20 @@ export default function ChatScreen({onClose} = {}) {
       setMessages(msgs.filter(m => !m.hidden).reverse()); // newest first for inverted list
     });
 
-    return () => ref.off('value');
+    // Live authorId -> current name map, so renames apply retroactively
+    const namesRef = DB.ref('/chat/authorNames');
+    namesRef.on('value', snap => { setAuthorNames(snap.val() || {}); });
+
+    return () => { ref.off('value'); namesRef.off('value'); };
   }, []);
+
+  // Current display name for a given message, resolved live by authorId -
+  // falls back to that message's own stored snapshot for authors who
+  // haven't (re)named themselves since the authorNames map existed.
+  const resolveAuthorName = useCallback(
+    (msg) => authorNames[msg.authorId] || msg.authorName,
+    [authorNames],
+  );
 
   useEffect(() => {
     if (myAuthorId === 'anonymous') return;
@@ -127,6 +145,10 @@ export default function ChatScreen({onClose} = {}) {
 
     setNameError('');
     setCommenterName(trimmed);
+    // Best-effort - if this write fails (offline, rules hiccup), the new name
+    // still applies to future messages via commenterName; only the retroactive
+    // relabelling of past messages is missed.
+    DB.ref(`/chat/authorNames/${myAuthorIdRef.current}`).set(trimmed).catch(() => {});
     return trimmed;
   };
 
@@ -251,10 +273,11 @@ export default function ChatScreen({onClose} = {}) {
       );
     }
     const isOwn = item.authorId === myAuthorId;
+    const authorName = resolveAuthorName(item);
     return (
       <View style={styles.msgRow}>
         <View style={styles.msgMeta}>
-          <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{item.authorName}</Text>
+          <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{authorName}</Text>
           <Text style={styles.msgTime}>{timeAgo(item.timestamp)}</Text>
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
@@ -265,7 +288,7 @@ export default function ChatScreen({onClose} = {}) {
             </TouchableOpacity>
           )}
           {!isOwn && (
-            <TouchableOpacity onPress={() => handleReply(item.authorName)} accessibilityLabel="Reply" style={styles.msgActionBtn}>
+            <TouchableOpacity onPress={() => handleReply(authorName)} accessibilityLabel="Reply" style={styles.msgActionBtn}>
               <Icon name="reply" size={13} color={Colors.textSecondary} />
             </TouchableOpacity>
           )}
