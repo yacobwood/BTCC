@@ -1,6 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
+import {saveProfile} from './userProfile';
 
 const KEY = 'digest_read_ids';
+
+function syncToProfile(ids) {
+  const user = auth().currentUser;
+  if (user && !user.isAnonymous) {
+    saveProfile(user.uid, {digestReadIds: ids}).catch(() => {});
+  }
+}
 
 export async function getReadIds() {
   try {
@@ -15,13 +24,17 @@ export async function markRead(id) {
   try {
     const ids = await getReadIds();
     ids.add(String(id));
-    await AsyncStorage.setItem(KEY, JSON.stringify([...ids]));
+    const list = [...ids];
+    await AsyncStorage.setItem(KEY, JSON.stringify(list));
+    syncToProfile(list);
   } catch {}
 }
 
 export async function markAllRead(ids) {
   try {
-    await AsyncStorage.setItem(KEY, JSON.stringify(ids.map(String)));
+    const list = ids.map(String);
+    await AsyncStorage.setItem(KEY, JSON.stringify(list));
+    syncToProfile(list);
   } catch {}
 }
 
@@ -29,6 +42,8 @@ export async function markUnread(id) {
   try {
     const ids = await getReadIds();
     ids.delete(String(id));
-    await AsyncStorage.setItem(KEY, JSON.stringify([...ids]));
+    const list = [...ids];
+    await AsyncStorage.setItem(KEY, JSON.stringify(list));
+    syncToProfile(list);
   } catch {}
 }

@@ -152,6 +152,20 @@ describe('userProfile', () => {
       AsyncStorage.multiGet.mockResolvedValueOnce([]);
       await expect(uploadLocalProfile(UID)).resolves.toBeUndefined();
     });
+
+    it('parses digest_read_ids as an array before uploading', async () => {
+      AsyncStorage.multiGet.mockResolvedValueOnce([
+        ['digest_read_ids', '["101","102"]'],
+      ]);
+
+      await uploadLocalProfile(UID);
+
+      const [, options] = global.fetch.mock.calls[0];
+      const body = JSON.parse(options.body);
+      expect(body.fields.digestReadIds).toEqual({
+        arrayValue: {values: [{stringValue: '101'}, {stringValue: '102'}]},
+      });
+    });
   });
 
   describe('applyProfileToStorage', () => {
@@ -162,6 +176,15 @@ describe('userProfile', () => {
           ['use_km', 'true'],
           ['commenter_name', 'Jake'],
           ['favourite_drivers', '["Tom Ingram"]'],
+        ]),
+      );
+    });
+
+    it('writes digestReadIds back to AsyncStorage as a JSON array', async () => {
+      await applyProfileToStorage({digestReadIds: ['101', '102']});
+      expect(AsyncStorage.multiSet).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          ['digest_read_ids', '["101","102"]'],
         ]),
       );
     });
@@ -184,16 +207,30 @@ describe('userProfile', () => {
       expect(validateUsername('ab')).toBe('Must be at least 3 characters');
     });
 
-    it('rejects names longer than 20 characters', () => {
-      expect(validateUsername('abcdefghijklmnopqrstu')).toBe('Must be 20 characters or fewer');
+    it('rejects names longer than 24 characters', () => {
+      expect(validateUsername('abcdefghijklmnopqrstuvwxy')).toBe('Must be 24 characters or fewer');
     });
 
     it('accepts names with spaces', () => {
       expect(validateUsername('BTCC Hub Admin')).toBeNull();
     });
 
+    it('accepts names with hyphens, apostrophes and periods', () => {
+      expect(validateUsername("Jean-Luc")).toBeNull();
+      expect(validateUsername("O'Brien")).toBeNull();
+      expect(validateUsername('J. Wood')).toBeNull();
+    });
+
     it('rejects names with special characters', () => {
-      expect(validateUsername('jake@wood')).toBe('Letters, numbers, spaces and underscores only');
+      expect(validateUsername('jake@wood')).toBe(
+        'Letters, numbers, spaces, underscores, hyphens, apostrophes and periods only',
+      );
+    });
+
+    it('rejects names with a forward slash', () => {
+      expect(validateUsername('jake/wood')).toBe(
+        'Letters, numbers, spaces, underscores, hyphens, apostrophes and periods only',
+      );
     });
 
     it('trims whitespace before validating', () => {

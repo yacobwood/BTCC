@@ -10,6 +10,7 @@ const COLLECTION = 'users';
 // AsyncStorage keys that map to profile fields
 const PROFILE_ASYNC_KEYS = {
   favouriteDrivers:   'favourite_drivers',
+  digestReadIds:      'digest_read_ids',
   unitKm:             'use_km',
   spoilerFree:        'setting_spoiler_free',
   commenterName:      'commenter_name',
@@ -127,8 +128,8 @@ export async function saveProfile(uid, partial) {
 export function validateUsername(name) {
   const trimmed = name.trim();
   if (trimmed.length < 3) return 'Must be at least 3 characters';
-  if (trimmed.length > 20) return 'Must be 20 characters or fewer';
-  if (!/^[a-zA-Z0-9_ ]+$/.test(trimmed)) return 'Letters, numbers, spaces and underscores only';
+  if (trimmed.length > 24) return 'Must be 24 characters or fewer';
+  if (!/^[a-zA-Z0-9_ '.-]+$/.test(trimmed)) return "Letters, numbers, spaces, underscores, hyphens, apostrophes and periods only";
   return null;
 }
 
@@ -219,7 +220,7 @@ export async function uploadLocalProfile(uid) {
         k => PROFILE_ASYNC_KEYS[k] === storageKey,
       );
       if (!profileKey || raw === null) continue;
-      if (profileKey === 'favouriteDrivers') {
+      if (profileKey === 'favouriteDrivers' || profileKey === 'digestReadIds') {
         try { profile[profileKey] = JSON.parse(raw); } catch {}
       } else if (profileKey === 'unitKm' || profileKey === 'spoilerFree' || profileKey.startsWith('pre') || profileKey.startsWith('results') || profileKey === 'newsAlerts' || profileKey === 'digestAlerts' || profileKey === 'weekendPreview' || profileKey === 'standingsUpdate' || profileKey === 'podcastAlerts') {
         profile[profileKey] = raw === 'true';
@@ -238,7 +239,7 @@ export async function applyProfileToStorage(profile) {
     for (const [profileKey, storageKey] of Object.entries(PROFILE_ASYNC_KEYS)) {
       const val = profile[profileKey];
       if (val === undefined) continue;
-      if (profileKey === 'favouriteDrivers') {
+      if (profileKey === 'favouriteDrivers' || profileKey === 'digestReadIds') {
         pairs.push([storageKey, JSON.stringify(val)]);
       } else {
         pairs.push([storageKey, String(val)]);

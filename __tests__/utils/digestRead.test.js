@@ -1,9 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
+import {saveProfile} from '../../src/utils/userProfile';
 import {getReadIds, markRead, markAllRead, markUnread} from '../../src/utils/digestRead';
+
+jest.mock('../../src/utils/userProfile', () => ({
+  saveProfile: jest.fn(() => Promise.resolve()),
+}));
 
 const KEY = 'digest_read_ids';
 
 describe('digestRead', () => {
+  afterEach(() => {
+    auth().currentUser.isAnonymous = true;
+  });
+
   describe('getReadIds', () => {
     it('returns empty Set when storage is empty', async () => {
       AsyncStorage.getItem.mockResolvedValueOnce(null);
@@ -79,6 +89,33 @@ describe('digestRead', () => {
       await markUnread(99);
       const [, saved] = AsyncStorage.setItem.mock.calls[0];
       expect(JSON.parse(saved)).toEqual(['1']);
+    });
+  });
+
+  describe('cloud sync', () => {
+    it('does not sync to a Firestore profile for an anonymous user', async () => {
+      await markRead(2);
+      expect(saveProfile).not.toHaveBeenCalled();
+    });
+
+    it('syncs read ids to the Firestore profile when signed in', async () => {
+      auth().currentUser.isAnonymous = false;
+      AsyncStorage.getItem.mockResolvedValueOnce(JSON.stringify(['1']));
+      await markRead(2);
+      expect(saveProfile).toHaveBeenCalledWith('test-uid-123', {digestReadIds: ['1', '2']});
+    });
+
+    it('syncs markAllRead to the Firestore profile when signed in', async () => {
+      auth().currentUser.isAnonymous = false;
+      await markAllRead([10, 20]);
+      expect(saveProfile).toHaveBeenCalledWith('test-uid-123', {digestReadIds: ['10', '20']});
+    });
+
+    it('syncs markUnread to the Firestore profile when signed in', async () => {
+      auth().currentUser.isAnonymous = false;
+      AsyncStorage.getItem.mockResolvedValueOnce(JSON.stringify(['1', '2']));
+      await markUnread(2);
+      expect(saveProfile).toHaveBeenCalledWith('test-uid-123', {digestReadIds: ['1']});
     });
   });
 });

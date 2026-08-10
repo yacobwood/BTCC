@@ -133,7 +133,7 @@ export default function ChatScreen({onClose} = {}) {
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text) return;
-    if (text.length > 300) { setInputError('Message too long (max 300 characters)'); return; }
+    if (text.length > 500) { setInputError('Message too long (max 500 characters)'); return; }
     if (containsProfanity(text, blacklist)) { setInputError('Message contains disallowed content'); return; }
     setInputError('');
 
@@ -308,7 +308,7 @@ export default function ChatScreen({onClose} = {}) {
             placeholder="Your display name"
             placeholderTextColor={Colors.textSecondary}
             autoFocus
-            maxLength={20}
+            maxLength={24}
             returnKeyType="done"
             onSubmitEditing={handleNameSet}
           />
@@ -363,7 +363,7 @@ export default function ChatScreen({onClose} = {}) {
             placeholder={`Fan #${myAuthorIdRef.current.slice(-4)}`}
             placeholderTextColor={Colors.textSecondary}
             autoFocus
-            maxLength={20}
+            maxLength={24}
             returnKeyType="done"
             onSubmitEditing={handleNameSet}
           />
@@ -389,7 +389,7 @@ export default function ChatScreen({onClose} = {}) {
                 placeholder="Say something..."
                 placeholderTextColor={Colors.textSecondary}
                 multiline
-                maxLength={320}
+                maxLength={520}
                 returnKeyType="default"
               />
               <TouchableOpacity

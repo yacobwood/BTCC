@@ -378,25 +378,25 @@ describe('ChatScreen', () => {
     expect(mockDbPush).not.toHaveBeenCalled();
   });
 
-  it('accepts a message of exactly 300 characters', async () => {
+  it('accepts a message of exactly 500 characters', async () => {
     AsyncStorage.getItem.mockImplementation(key =>
       key === 'commenter_name' ? Promise.resolve('Tom') : Promise.resolve(null),
     );
     const {getByLabelText, getByPlaceholderText, queryByText} = renderWithProviders(<ChatScreen />);
     await act(async () => { triggerMessages([]); });
     await waitFor(() => getByPlaceholderText(/say something/i));
-    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(300));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(500));
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() => expect(mockDbPush).toHaveBeenCalled());
     expect(queryByText(/too long/i)).toBeNull();
   });
 
-  it('shows error for message over 300 characters', async () => {
+  it('shows error for message over 500 characters', async () => {
     AsyncStorage.getItem.mockResolvedValue('Test User');
     const {getByText, getByLabelText, getByPlaceholderText} = renderChat();
     await act(async () => { triggerMessages([]); });
     await waitFor(() => getByPlaceholderText(/say something/i));
-    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(301));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(501));
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() => expect(getByText(/too long/i)).toBeTruthy());
   });
@@ -406,7 +406,7 @@ describe('ChatScreen', () => {
     const {getByLabelText, getByPlaceholderText} = renderChat();
     await act(async () => { triggerMessages([]); });
     await waitFor(() => getByPlaceholderText(/say something/i));
-    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(301));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(501));
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() => {});
     expect(mockDbPush).not.toHaveBeenCalled();
@@ -438,7 +438,7 @@ describe('ChatScreen', () => {
     const {getByLabelText, getByPlaceholderText, queryByText} = renderChat();
     await act(async () => { triggerMessages([]); });
     await waitFor(() => getByPlaceholderText(/say something/i));
-    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(301));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'x'.repeat(501));
     fireEvent.press(getByLabelText('Send message'));
     await waitFor(() => queryByText(/too long/i));
     // Now type to clear the error
