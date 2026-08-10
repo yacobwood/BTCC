@@ -1,5 +1,5 @@
 import React from 'react';
-import {waitFor, fireEvent, screen} from '@testing-library/react-native';
+import {waitFor, fireEvent, screen, act} from '@testing-library/react-native';
 import TrackDetailScreen from '../../src/screens/TrackDetailScreen';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,7 +7,7 @@ import * as featureFlags from '../../src/store/featureFlags';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn()},
+  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn()},
 }));
 
 jest.mock('../../src/utils/weather', () => ({
@@ -587,6 +587,125 @@ describe('TrackDetailScreen', () => {
         // Should still render without crashing — highlighting simply not applied
         expect(await findByText('Scottish Legends Championship')).toBeTruthy();
       });
+    });
+  });
+
+  describe('Weather forecast', () => {
+    const WEATHER_TRACK = {
+      ...TRACK,
+      startDate: '2026-04-25',
+      endDate:   '2026-04-26',
+      sessions: [
+        {name: 'Free Practice', time: '09:00', day: 'SAT'},
+        {name: 'Race 1',        time: '14:00', day: 'SUN'},
+      ],
+    };
+
+    const DAILY_ONLY = {
+      daily: [
+        {date: '2026-04-25', weatherCode: 1,  tempMax: 18, tempMin: 10, precipProb: 5,  windMax: 12},
+        {date: '2026-04-26', weatherCode: 61, tempMax: 14, tempMin: 9,  precipProb: 70, windMax: 23},
+      ],
+      hourly: [],
+    };
+
+    const WITH_HOURLY = {
+      daily: DAILY_ONLY.daily,
+      hourly: [
+        {time: '2026-04-25T09:00', weatherCode: 2,  temp: 12, precipProb: 10, windSpeed: 15},
+        {time: '2026-04-26T14:00', weatherCode: 61, temp: 15, precipProb: 80, windSpeed: 20},
+      ],
+    };
+
+    let flagsSpy;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-04-20T10:00:00Z'));
+      flagsSpy = jest.spyOn(featureFlags, 'useFeatureFlags').mockReturnValue({
+        track_weather: true, live_updates: false, live_chat: false,
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      flagsSpy.mockRestore();
+    });
+
+    it('renders the daily forecast cards', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(DAILY_ONLY);
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('18°')).toBeTruthy();
+    });
+
+    it('does not show the Daily/By session toggle when there is no hourly data', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(DAILY_ONLY);
+      const {findByText, queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      await findByText('18°');
+      expect(queryByText('By session')).toBeNull();
+    });
+
+    it('shows the toggle and defaults to Daily when hourly data is present', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('By session')).toBeTruthy();
+      expect(await findByText('18°')).toBeTruthy(); // daily still showing by default
+    });
+
+    it('switching to By session shows a weather chip per session', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, getByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      expect(await findByText('FP')).toBeTruthy();
+      expect(getByText('R1')).toBeTruthy();
+      expect(getByText('12°')).toBeTruthy();
+      expect(getByText('15°')).toBeTruthy();
+    });
+
+    it('fires weatherHourlyExpanded when switching to By session', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      expect(Analytics.weatherHourlyExpanded).toHaveBeenCalledWith('Donington Park');
+    });
+
+    it('fires weatherHourlyCollapsed when switching back to Daily', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      fireEvent.press(await findByText('Daily'));
+      expect(Analytics.weatherHourlyCollapsed).toHaveBeenCalledWith('Donington Park');
+    });
+
+    it('refetches weather again after the poll interval elapses', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(DAILY_ONLY);
+      renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      await waitFor(() => expect(fetchWeather).toHaveBeenCalledTimes(1));
+      await act(async () => { jest.advanceTimersByTime(5 * 60 * 1000); });
+      expect(fetchWeather).toHaveBeenCalledTimes(2);
     });
   });
 });

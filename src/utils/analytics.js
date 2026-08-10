@@ -16,6 +16,8 @@ export const Analytics = {
   liveTimingOpened: (venue) => logEvent(fa(),'live_timing_opened', {venue}),
   fullTimetableExpanded: (venue) => logEvent(fa(),'full_timetable_expanded', {venue}),
   fullTimetableCollapsed: (venue) => logEvent(fa(),'full_timetable_collapsed', {venue}),
+  weatherHourlyExpanded: (venue) => logEvent(fa(),'weather_hourly_expanded', {venue}),
+  weatherHourlyCollapsed: (venue) => logEvent(fa(),'weather_hourly_collapsed', {venue}),
 
   resultsYearChanged: (year) => logEvent(fa(),'results_year_changed', {year}),
   resultsTabChanged: (year, tab) => logEvent(fa(),'results_tab_changed', {year, tab}),

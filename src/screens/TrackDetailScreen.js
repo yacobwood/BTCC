@@ -12,6 +12,8 @@ import {
   Animated,
   Linking,
   Share,
+  AppState,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -42,6 +44,7 @@ import ThrutonLayout          from '../assets/tracks/Thruxton.svg';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const CURRENT_SEASON = BUNDLED_CALENDAR.season;
+const WEATHER_POLL_INTERVAL_MS = 5 * 60 * 1000;
 
 const BUNDLED_TRACK_LAYOUTS = {
   'Brands Hatch GP':   BrandsHatchGPLayout,
@@ -81,6 +84,32 @@ function formatDateRange(start, end) {
 
 function firstRaceNumber(round) {
   return (round - 1) * 3 + 1;
+}
+
+// Open-Meteo's hourly `time` values are local "YYYY-MM-DDTHH:00" strings (no
+// minutes/seconds) for the requested timezone - match a session's start time
+// to the same-hour entry. Session times are always on the hour or half-hour,
+// so rounding down to the hour is precise enough for a forecast anyway.
+function nearestHourlyEntry(hourly, track, day, timeStr) {
+  if (!hourly?.length) return null;
+  const dateStr = day === 'SAT' ? track.startDate : track.endDate;
+  const [h] = timeStr.split(':');
+  const prefix = `${dateStr}T${h.padStart(2, '0')}:00`;
+  return hourly.find(entry => entry.time === prefix) || null;
+}
+
+function shortSessionName(name) {
+  if (name === 'Free Practice') return 'FP';
+  if (name === 'Qualifying') return 'Qual';
+  if (name === 'Qualifying Race') return 'Q Race';
+  const m = name.match(/^Race (\d)$/);
+  return m ? `R${m[1]}` : name;
+}
+
+function formatSessionTime(timeStr, use12Hour) {
+  if (!use12Hour) return timeStr;
+  const [h, m] = timeStr.split(':').map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')}${h >= 12 ? 'pm' : 'am'}`;
 }
 
 function roundLength(str) {
@@ -153,6 +182,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const fullTimetable = track.fullTimetable || [];
   const [showFullTimetable, setShowFullTimetable] = useState(false);
   const [weather, setWeather] = useState(null);
+  const [showHourlyWeather, setShowHourlyWeather] = useState(false);
   const [racesFinished, setRacesFinished] = useState(false);
   const detectedBroadcaster = useBroadcaster();
   const broadcaster = broadcaster_override || detectedBroadcaster;
@@ -167,14 +197,27 @@ export default function TrackDetailScreen({route, navigation}) {
   useEffect(() => { Analytics.screen('track_detail'); Analytics.trackDetailViewed(track.round, track.venue); }, []);
 
 
+  // Refetch periodically (not just once on mount) so the forecast keeps up to
+  // date through the day - fetchWeather() has its own 30-minute cache, so a
+  // poll that lands on a still-fresh cache entry is cheap, it just re-renders
+  // sooner once a new one is actually available. Also refreshes immediately
+  // whenever the app comes back to the foreground, same pattern as the
+  // results-polling elsewhere in the app.
   useEffect(() => {
     if (!track_weather || isPastRaceWeekend) return;
-    if (track.lat && track.lng && track.startDate && track.endDate) {
+    if (!(track.lat && track.lng && track.startDate && track.endDate)) return;
+    const refresh = () => {
       fetchWeather(track.lat, track.lng, track.startDate, track.endDate).then(w => {
         if (w) setWeather(w);
       });
-    }
-  }, [track.lat, track.lng, track.startDate, track.endDate, track_weather]);
+    };
+    refresh();
+    const interval = setInterval(refresh, WEATHER_POLL_INTERVAL_MS);
+    const appSub = AppState.addEventListener('change', state => {
+      if (state === 'active') refresh();
+    });
+    return () => { clearInterval(interval); appSub.remove(); };
+  }, [track.lat, track.lng, track.startDate, track.endDate, track_weather, isPastRaceWeekend]);
 
   // Show Results button and load round data once this specific round has results.
   // For past weekends the date alone is sufficient; for live weekends we check the
@@ -277,7 +320,7 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     // Weather forecast (feature-flagged)
-    if (track_weather && weather && weather.length > 0) {
+    if (track_weather && weather?.daily?.length > 0) {
       items.push({type: 'weatherHeader'});
       items.push({type: 'weather'});
     }
@@ -678,39 +721,92 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'weatherHeader':
         return <Text style={styles.sectionTitle}>WEATHER FORECAST</Text>;
 
-      case 'weather':
+      case 'weather': {
+        const hasHourly = weather?.hourly?.length > 0;
+        const weatherDayLabel = {SAT: 'Saturday', SUN: 'Sunday'};
+        const weatherDays = ['SAT', 'SUN'].filter(day => sessions.some(s => s.day === day));
         return (
-          <View style={styles.weatherRow}>
-            {(weather || []).filter(day => new Date(day.date) >= today).map((day, i) => {
-              const d = new Date(day.date);
-              const dayName = d.toLocaleDateString('en-GB', {weekday: 'short'});
-              return (
-                <View key={i} style={styles.weatherDay}>
-                  <Text style={styles.weatherDayLabel}>{dayName}</Text>
-                  <Icon name={weatherIcon(day.weatherCode)} size={26} color={weatherIconColor(day.weatherCode)} />
-                  <Text style={styles.weatherDesc}>{weatherDescription(day.weatherCode)}</Text>
-                  <View style={styles.weatherTemps}>
-                    <Text style={styles.weatherTemp}>{day.tempMax}°</Text>
-                    <Text style={styles.weatherTempSep}>/</Text>
-                    <Text style={styles.weatherTempLow}>{day.tempMin}°</Text>
-                  </View>
-                  {day.precipProb > 0 && (
-                    <View style={styles.weatherStat}>
-                      <Icon name="water-drop" size={11} color="#5BA3FF" />
-                      <Text style={styles.weatherRain}>{day.precipProb}%</Text>
+          <View>
+            {hasHourly && (
+              <View style={[styles.timetableSegmentRow, {marginBottom: 12}]}>
+                <TouchableOpacity
+                  style={[styles.timetableSegment, !showHourlyWeather && styles.timetableSegmentActive]}
+                  onPress={() => { if (showHourlyWeather) { setShowHourlyWeather(false); Analytics.weatherHourlyCollapsed(track.venue); } }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.timetableSegmentText, !showHourlyWeather && styles.timetableSegmentTextActive]}>Daily</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.timetableSegment, showHourlyWeather && styles.timetableSegmentActive]}
+                  onPress={() => { if (!showHourlyWeather) { setShowHourlyWeather(true); Analytics.weatherHourlyExpanded(track.venue); } }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.timetableSegmentText, showHourlyWeather && styles.timetableSegmentTextActive]}>By session</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!showHourlyWeather && (
+              <View style={styles.weatherRow}>
+                {weather.daily.filter(day => new Date(day.date) >= today).map((day, i) => {
+                  const d = new Date(day.date);
+                  const dayName = d.toLocaleDateString('en-GB', {weekday: 'short'});
+                  return (
+                    <View key={i} style={styles.weatherDay}>
+                      <Text style={styles.weatherDayLabel}>{dayName}</Text>
+                      <Icon name={weatherIcon(day.weatherCode)} size={26} color={weatherIconColor(day.weatherCode)} />
+                      <Text style={styles.weatherDesc}>{weatherDescription(day.weatherCode)}</Text>
+                      <View style={styles.weatherTemps}>
+                        <Text style={styles.weatherTemp}>{day.tempMax}°</Text>
+                        <Text style={styles.weatherTempSep}>/</Text>
+                        <Text style={styles.weatherTempLow}>{day.tempMin}°</Text>
+                      </View>
+                      {day.precipProb > 0 && (
+                        <View style={styles.weatherStat}>
+                          <Icon name="water-drop" size={11} color="#5BA3FF" />
+                          <Text style={styles.weatherRain}>{day.precipProb}%</Text>
+                        </View>
+                      )}
+                      <View style={styles.weatherStat}>
+                        <Icon name="air" size={11} color={Colors.textSecondary} />
+                        <Text style={styles.weatherWind}>
+                          {useKm ? `${day.windMax} km/h` : `${Math.round(day.windMax * 0.621)} mph`}
+                        </Text>
+                      </View>
                     </View>
-                  )}
-                  <View style={styles.weatherStat}>
-                    <Icon name="air" size={11} color={Colors.textSecondary} />
-                    <Text style={styles.weatherWind}>
-                      {useKm ? `${day.windMax} km/h` : `${Math.round(day.windMax * 0.621)} mph`}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
+                  );
+                })}
+              </View>
+            )}
+
+            {showHourlyWeather && weatherDays.map(day => (
+              <View key={day} style={{marginBottom: 12}}>
+                <Text style={styles.weatherSessionDayLabel}>{weatherDayLabel[day]}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap: 8}}>
+                  {sessions.filter(s => s.day === day).map((s, i) => {
+                    const entry = nearestHourlyEntry(weather.hourly, track, s.day, s.time);
+                    if (!entry) return null;
+                    return (
+                      <View key={i} style={styles.weatherSessionChip}>
+                        <Text style={styles.weatherSessionName}>{shortSessionName(s.name)}</Text>
+                        <Text style={styles.weatherSessionTime}>{formatSessionTime(s.time, settings.use12HourTime)}</Text>
+                        <Icon name={weatherIcon(entry.weatherCode)} size={20} color={weatherIconColor(entry.weatherCode)} />
+                        <Text style={styles.weatherSessionTemp}>{entry.temp}°</Text>
+                        {entry.precipProb > 0 && (
+                          <View style={styles.weatherStat}>
+                            <Icon name="water-drop" size={9} color="#5BA3FF" />
+                            <Text style={styles.weatherSessionRain}>{entry.precipProb}%</Text>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            ))}
           </View>
         );
+      }
 
       case 'layoutHeader':
         return <Text style={styles.sectionTitle}>CIRCUIT LAYOUT</Text>;
@@ -1023,6 +1119,12 @@ const styles = StyleSheet.create({
   weatherStat: {flexDirection: 'row', alignItems: 'center', gap: 3},
   weatherRain: {color: '#5BA3FF', fontSize: 11, fontWeight: '700'},
   weatherWind: {color: Colors.textSecondary, fontSize: 11},
+  weatherSessionDayLabel: {color: Colors.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase'},
+  weatherSessionChip: {backgroundColor: Colors.card, borderRadius: 10, padding: 8, alignItems: 'center', gap: 3, minWidth: 68},
+  weatherSessionName: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},
+  weatherSessionTime: {color: '#fff', fontSize: 11, fontWeight: '600'},
+  weatherSessionTemp: {color: '#fff', fontSize: 14, fontWeight: '800'},
+  weatherSessionRain: {color: '#5BA3FF', fontSize: 10, fontWeight: '700'},
   racePhoto: {width: '100%', height: 200, borderRadius: 10, marginBottom: 10},
 
   // Carousel dots

@@ -39,8 +39,14 @@ export function weatherIconColor(code) {
 import {cacheRead, cacheWrite} from '../store/cache';
 
 const MAX_FORECAST_DAYS = 7;
-const WEATHER_CACHE_MAX_AGE = 3 * 60 * 60 * 1000; // 3 hours
+// Shorter than a typical "check the week ahead" cache on purpose: a race
+// weekend forecast is exactly the kind of thing worth re-checking through the
+// day rather than settling for whatever was true hours ago.
+const WEATHER_CACHE_MAX_AGE = 30 * 60 * 1000; // 30 minutes
 
+// fetchWeather() returns {daily, hourly} rather than a bare array (breaking
+// change from the daily-only shape) so the same call can drive both the
+// day-summary cards and the session-aligned hourly forecast.
 export async function fetchWeather(lat, lng, startDate, endDate) {
   const today = new Date();
   const start = new Date(startDate);
@@ -55,7 +61,10 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
   } catch {}
 
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe/London&start_date=${startDate}&end_date=${endDate}`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
+      `&hourly=weather_code,temperature_2m,precipitation_probability,wind_speed_10m` +
+      `&timezone=Europe/London&start_date=${startDate}&end_date=${endDate}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     if (timeoutId?.unref) timeoutId.unref();
@@ -65,7 +74,7 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
     const json = await res.json();
     const d = json.daily;
     if (!d?.time) return null;
-    const result = d.time.map((date, i) => ({
+    const daily = d.time.map((date, i) => ({
       date,
       weatherCode: d.weather_code[i],
       tempMax: Math.round(d.temperature_2m_max[i]),
@@ -73,6 +82,15 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
       precipProb: d.precipitation_probability_max[i],
       windMax: Math.round(d.wind_speed_10m_max[i]),
     }));
+    const h = json.hourly;
+    const hourly = h?.time ? h.time.map((time, i) => ({
+      time,
+      weatherCode: h.weather_code[i],
+      temp: Math.round(h.temperature_2m[i]),
+      precipProb: h.precipitation_probability[i],
+      windSpeed: Math.round(h.wind_speed_10m[i]),
+    })) : [];
+    const result = {daily, hourly};
     cacheWrite(cacheKey, result).catch(() => {});
     return result;
   } catch { return null; }
