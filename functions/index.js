@@ -1,5 +1,6 @@
 // v2
 const {checkBtccNews} = require('./newsCheck');
+const {buildSessionAlertPayload} = require('./sessionAlerts');
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onRequest} = require('firebase-functions/v2/https');
 const {onValueCreated} = require('firebase-functions/v2/database');
@@ -211,19 +212,21 @@ exports.sendSessionNotifications = onSchedule(
             const topic = SESSION_TOPICS[session.name];
             if (!topic) continue;
 
+            const {body, data} = buildSessionAlertPayload(session, round, now);
+
             sends.push(
               messaging.send({
                 topic,
                 notification: {
                   title: `${session.name} — Starting in 15 mins`,
-                  body: `${session.name} at ${round.venue} is about to get underway`,
+                  body,
                 },
                 android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
                 apns: {payload: {aps: {sound: 'default'}}},
-                ...(round.tslEventId ? {data: {type: 'livetiming', eventId: String(round.tslEventId)}} : {}),
+                ...(data ? {data} : {}),
               }),
             );
-            logPushHistory(`${session.name} — Starting in 15 mins`, `${session.name} at ${round.venue} is about to get underway`, topic);
+            logPushHistory(`${session.name} — Starting in 15 mins`, body, topic);
           }
         }
 
@@ -893,8 +896,8 @@ exports.syncAnalytics = onSchedule(
 // the week's start date, so we have a permanent, ever-growing archive
 // independent of GA4's own data retention settings - as much of GA4's
 // own data as the readonly scope already granted can reach: overview
-// totals, a daily breakdown, acquisition sources and platform/OS split,
-// not just a handful of headline numbers.
+// totals, a daily breakdown, acquisition sources, platform/OS split and
+// a UK city breakdown, not just a handful of headline numbers.
 //
 // Only ever fetches one week of GA4 data per run - totalUsersAllTime is
 // accumulated by reading the previous week's own stored figure and
@@ -931,7 +934,7 @@ exports.exportAnalyticsHistory = onSchedule(
 
     const weekRange = [{startDate: '7daysAgo', endDate: 'yesterday'}];
 
-    const [overviewReport, dailyReport, sourcesReport, platformReport] = await Promise.all([
+    const [overviewReport, dailyReport, sourcesReport, platformReport, ukCitiesReport] = await Promise.all([
       runReport({
         dateRanges: weekRange,
         metrics: [
@@ -961,6 +964,19 @@ exports.exportAnalyticsHistory = onSchedule(
         metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
         orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
       }),
+      // Where in the UK users are browsing from - city-level, filtered to
+      // country == United Kingdom so international noise doesn't crowd out
+      // the breakdown the admin page actually wants to show.
+      runReport({
+        dateRanges: weekRange,
+        dimensions: [{name: 'city'}],
+        metrics: [{name: 'activeUsers'}, {name: 'sessions'}],
+        dimensionFilter: {
+          filter: {fieldName: 'country', stringFilter: {value: 'United Kingdom', matchType: 'EXACT'}},
+        },
+        orderBys: [{metric: {metricName: 'activeUsers'}, desc: true}],
+        limit: 10,
+      }),
     ]);
 
     const overviewRow = overviewReport.rows?.[0];
@@ -985,6 +1001,14 @@ exports.exportAnalyticsHistory = onSchedule(
     const platformBreakdown = (platformReport.rows || []).map(row => ({
       platform: row.dimensionValues?.[0]?.value,
       operatingSystem: row.dimensionValues?.[1]?.value,
+      activeUsers: parseInt(row.metricValues?.[0]?.value || '0'),
+      sessions: parseInt(row.metricValues?.[1]?.value || '0'),
+    }));
+    // GA4 returns '(not set)' for sessions it can't resolve to a city (VPNs,
+    // some mobile carriers) - kept as-is rather than filtered out, so the
+    // admin chart's totals still reconcile with activeUsers elsewhere.
+    const ukCities = (ukCitiesReport.rows || []).map(row => ({
+      city: row.dimensionValues?.[0]?.value,
       activeUsers: parseInt(row.metricValues?.[0]?.value || '0'),
       sessions: parseInt(row.metricValues?.[1]?.value || '0'),
     }));
@@ -1026,6 +1050,7 @@ exports.exportAnalyticsHistory = onSchedule(
       dailyBreakdown,
       topSources,
       platformBreakdown,
+      ukCities,
     });
 
     console.log('exportAnalyticsHistory: done', weekStart);
