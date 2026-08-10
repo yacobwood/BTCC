@@ -24,6 +24,7 @@ const LEAF_TOPICS = {
   preRaceRace1:      'pre_race1',
   preRaceRace2:      'pre_race2',
   preRaceRace3:      'pre_race3',
+  preRaceRace3Grid:  'pre_race3_grid',
   resultsFP:         'results_fp',
   resultsQualifying: 'results_qualifying',
   resultsQRace:      'results_qrace',
@@ -128,6 +129,7 @@ describe('SettingsProvider', () => {
       expect(getHook().settings.preRaceRace1).toBe(false);
       expect(getHook().settings.preRaceRace2).toBe(false);
       expect(getHook().settings.preRaceRace3).toBe(false);
+      expect(getHook().settings.preRaceRace3Grid).toBe(false);
       expect(AsyncStorage.removeItem).toHaveBeenCalledWith('setting_race_alerts');
     });
 
@@ -206,6 +208,7 @@ describe('SettingsProvider', () => {
       expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race1');
       expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race2');
       expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race3');
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race3_grid');
       // Other pre-race topics not affected
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'pre_fp');
     });
@@ -336,6 +339,60 @@ describe('SettingsProvider', () => {
       let getHook;
       await act(async () => { getHook = renderProvider(); });
       expect(getHook().settings.digestAlerts).toBe(false);
+    });
+  });
+
+  describe('preRaceRace3Grid', () => {
+    // Race 3's grid isn't known until it's derived from Race 2's finishing
+    // order (and, per BTCC reg 3.4.1.b, a separately-drawn reversal count) -
+    // triggered by Race 2 completing, but it's forward-looking information
+    // about an upcoming race, not the outcome of one, so unlike its
+    // resultsRace* siblings it must NOT be blocked by spoiler-free mode.
+
+    it('defaults to true', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.preRaceRace3Grid).toBe(true);
+    });
+
+    it('subscribes to pre_race3_grid topic by default', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      await act(async () => { renderProvider(); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race3_grid');
+    });
+
+    it('persists to AsyncStorage under setting_pre_race_race3_grid', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('preRaceRace3Grid', false); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_pre_race_race3_grid', 'false');
+    });
+
+    it('unsubscribes from pre_race3_grid when disabled', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('preRaceRace3Grid', false); });
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race3_grid');
+    });
+
+    it('is gated by the same preRace/preRaceRace parents as its siblings', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_pre_race_race') return Promise.resolve('false');
+        return Promise.resolve(null);
+      });
+      await act(async () => { renderProvider(); });
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race3_grid');
+    });
+
+    it('is NOT unsubscribed by spoiler-free mode, unlike results_race3', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'pre_race3_grid');
+      expect(unsubscribeFromTopic).not.toHaveBeenCalledWith(expect.anything(), 'pre_race3_grid');
     });
   });
 
