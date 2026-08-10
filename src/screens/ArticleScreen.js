@@ -72,6 +72,35 @@ async function submitReaction(slug, type, delta = 1) {
   if (!res.ok) throw new Error('reaction failed');
 }
 
+// ─── View count helpers ───────────────────────────────────────────────────────
+
+async function fetchViews(slug) {
+  try {
+    const r = await fetch(`${FS_BASE}/article_views/${encodeURIComponent(slug)}?key=${API_KEY}`);
+    if (!r.ok) return 0;
+    const doc = await r.json();
+    return parseInt(doc?.fields?.views?.integerValue || 0, 10);
+  } catch {
+    return 0;
+  }
+}
+
+async function recordView(slug) {
+  const res = await fetch(`${FS_BASE}:commit?key=${API_KEY}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      writes: [{
+        transform: {
+          document: `projects/${PROJECT_ID}/databases/(default)/documents/article_views/${encodeURIComponent(slug)}`,
+          fieldTransforms: [{fieldPath: 'views', increment: {integerValue: '1'}}],
+        },
+      }],
+    }),
+  });
+  if (!res.ok) throw new Error('view record failed');
+}
+
 // ─── Comments helpers ─────────────────────────────────────────────────────────
 
 async function fetchComments(slug) {
@@ -696,12 +725,16 @@ export default function ArticleScreen({route, navigation}) {
 
   const onWebViewLoad = async () => {
     if (!articleSlug || !webviewRef.current) return;
-    const [reactionsData, rawReactions, savedName, commentsData] = await Promise.all([
+    const [reactionsData, viewsData, rawReactions, savedName, commentsData] = await Promise.all([
       fetchReactions(articleSlug),
+      fetchViews(articleSlug),
       AsyncStorage.getItem(REACTIONS_KEY).catch(() => null),
       AsyncStorage.getItem(COMMENTER_NAME_KEY).catch(() => null),
       fetchComments(articleSlug),
     ]);
+    // Every open counts as a view, including repeat opens by the same person - fire
+    // and forget so a slow/failed write never blocks reactions/comments from loading.
+    recordView(articleSlug).catch(() => {});
 
     // Author identity
     const currentUser = auth().currentUser;
@@ -732,6 +765,7 @@ export default function ArticleScreen({route, navigation}) {
     webviewRef.current.injectJavaScript(`
       updateReactions(${reactionsData.likes}, ${reactionsData.dislikes}, ${JSON.stringify(mine)});
       updateCommentCount(${commentsData.length});
+      updateViews(${viewsData + 1});
       true;
     `);
 
@@ -933,7 +967,8 @@ export function buildHtml(article, topPad) {
       .source-line { margin-top:24px; padding-top:16px; border-top:1px solid #2A2D44; font-size:12px; color:#8B949E; word-break:break-all; }
       .source-line a { color:#8B949E; text-decoration:underline; }
       .reactions { margin:16px 16px 0; padding:16px 0; border-top:1px solid rgba(255,255,255,0.1); }
-      .reactions-label { font-size:12px; font-weight:700; color:#8B949E; letter-spacing:0.5px; text-align:center; margin-bottom:16px; text-transform:uppercase; }
+      .reactions-label { font-size:12px; font-weight:700; color:#8B949E; letter-spacing:0.5px; text-align:center; margin-bottom:4px; text-transform:uppercase; }
+      .views-count { font-size:12px; color:#8B949E; text-align:center; margin-bottom:16px; }
       .reactions-btns { display:flex; justify-content:center; gap:12px; }
       .reaction-btn { display:flex; align-items:center; justify-content:center; gap:8px; flex:1; padding:12px 0; border-radius:32px; background:rgba(255,255,255,0.08); border:none; color:#fff; font-size:15px; font-weight:700; cursor:pointer; transition:background 0.15s,color 0.15s; -webkit-tap-highlight-color:transparent; }
       .reaction-btn.active { background:#FEBD02; color:#020255; }
@@ -949,6 +984,7 @@ export function buildHtml(article, topPad) {
     </div>
     <div class="reactions">
       <p class="reactions-label">Did you enjoy this article?</p>
+      <p class="views-count"><span id="count-views">0 views</span></p>
       <div class="reactions-btns">
         <button id="btn-dislikes" class="reaction-btn" onclick="react('dislikes')">
           <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
@@ -983,6 +1019,10 @@ export function buildHtml(article, topPad) {
 
       function updateCommentCount(n) {
         document.getElementById('comment-count').textContent = n;
+      }
+
+      function updateViews(n) {
+        document.getElementById('count-views').textContent = n + ' view' + (n === 1 ? '' : 's');
       }
 
       function revertReaction(type, prev) {

@@ -21,6 +21,7 @@ const rules = fs.readFileSync(path.resolve(__dirname, '../firestore.rules'), 'ut
 const APP_WRITE_COLLECTIONS = [
   'article_reactions',
   'article_comments',
+  'article_views',
   'chat/bans',
   'chat/reports',
   'chat/messages',

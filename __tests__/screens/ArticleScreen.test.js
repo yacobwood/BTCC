@@ -393,6 +393,58 @@ describe('ArticleScreen', () => {
     });
   });
 
+  // ── View count ───────────────────────────────────────────────────────────────
+
+  describe('view count', () => {
+    it('fetches the current view count for the article on load', async () => {
+      const {getByTestId} = renderArticle();
+
+      await act(async () => { getByTestId('webview-load').props.onPress(); });
+
+      await waitFor(() => {
+        const getCall = global.fetch.mock.calls.find(
+          ([url, opts]) => typeof url === 'string' && url.includes('article_views') && !opts?.method,
+        );
+        expect(getCall).toBeTruthy();
+      });
+    });
+
+    it('records a view (+1) every time the article is opened, even repeat opens', async () => {
+      const {getByTestId} = renderArticle();
+
+      await act(async () => { getByTestId('webview-load').props.onPress(); });
+
+      await waitFor(() => {
+        const commitCall = global.fetch.mock.calls.find(([url, opts]) => {
+          if (typeof url !== 'string' || !url.includes(':commit') || opts?.method !== 'POST') return false;
+          return JSON.parse(opts.body).writes[0].transform.document.includes('article_views');
+        });
+        expect(commitCall).toBeTruthy();
+        const body = JSON.parse(commitCall[1].body);
+        const transform = body.writes[0].transform.fieldTransforms[0];
+        expect(transform.fieldPath).toBe('views');
+        expect(transform.increment.integerValue).toBe('1');
+      });
+    });
+
+    it('uses the correct project ID in the view-count commit document path', async () => {
+      const {getByTestId} = renderArticle();
+
+      await act(async () => { getByTestId('webview-load').props.onPress(); });
+
+      await waitFor(() => {
+        const commitCall = global.fetch.mock.calls.find(([url, opts]) => {
+          if (typeof url !== 'string' || !url.includes(':commit') || opts?.method !== 'POST') return false;
+          return JSON.parse(opts.body).writes[0].transform.document.includes('article_views');
+        });
+        expect(commitCall).toBeTruthy();
+        const docPath = JSON.parse(commitCall[1].body).writes[0].transform.document;
+        expect(docPath).toContain('btcchub-af77a');
+        expect(docPath).not.toContain('undefined');
+      });
+    });
+  });
+
   // ── Reactions persistence (AsyncStorage) ────────────────────────────────────
 
   describe('reaction persistence', () => {
