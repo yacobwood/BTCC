@@ -38,7 +38,7 @@ export function weatherIconColor(code) {
 
 import {cacheRead, cacheWrite} from '../store/cache';
 
-const MAX_FORECAST_DAYS = 7;
+const MAX_FORECAST_DAYS = 10;
 // Shorter than a typical "check the week ahead" cache on purpose: a race
 // weekend forecast is exactly the kind of thing worth re-checking through the
 // day rather than settling for whatever was true hours ago.
