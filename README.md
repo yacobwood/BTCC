@@ -49,7 +49,7 @@ BTCC Hub is a React Native mobile application for fans of the British Touring Ca
 
 The app is published on both the Apple App Store and Google Play Store.
 
-Current version: **2.20.3** (versionCode 81)
+Current version: **2.20.4** (versionCode 82)
 
 ---
 
