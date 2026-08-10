@@ -123,6 +123,16 @@ describe('Analytics', () => {
       Analytics.weatherHourlyCollapsed('Knockhill');
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_hourly_collapsed', {venue: 'Knockhill'});
     });
+
+    it('weatherDetailExpanded logs with venue', () => {
+      Analytics.weatherDetailExpanded('Knockhill');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_detail_expanded', {venue: 'Knockhill'});
+    });
+
+    it('weatherDetailCollapsed logs with venue', () => {
+      Analytics.weatherDetailCollapsed('Knockhill');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_detail_collapsed', {venue: 'Knockhill'});
+    });
   });
 
   describe('results events', () => {

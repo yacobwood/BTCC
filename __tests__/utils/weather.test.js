@@ -2,6 +2,7 @@ import {
   weatherDescription,
   weatherIcon,
   weatherIconColor,
+  windDirectionCompass,
   fetchWeather,
 } from '../../src/utils/weather';
 
@@ -106,6 +107,30 @@ describe('weatherIconColor', () => {
   });
 });
 
+// ── windDirectionCompass ─────────────────────────────────────────────────────────
+describe('windDirectionCompass', () => {
+  it('returns N for 0 degrees', () => {
+    expect(windDirectionCompass(0)).toBe('N');
+  });
+
+  it('returns E for 90 degrees', () => {
+    expect(windDirectionCompass(90)).toBe('E');
+  });
+
+  it('returns SW for 225 degrees', () => {
+    expect(windDirectionCompass(225)).toBe('SW');
+  });
+
+  it('wraps 360 back to N', () => {
+    expect(windDirectionCompass(360)).toBe('N');
+  });
+
+  it('rounds to the nearest 8-point compass direction', () => {
+    // 200 degrees is closer to S (180, distance 20) than SW (225, distance 25)
+    expect(windDirectionCompass(200)).toBe('S');
+  });
+});
+
 // ── fetchWeather ───────────────────────────────────────────────────────────────
 const MOCK_RESPONSE = {
   daily: {
@@ -122,6 +147,11 @@ const MOCK_RESPONSE = {
     temperature_2m: [9.6, 9.1, 13.7],
     precipitation_probability: [0, 5, 65],
     wind_speed_10m: [8.2, 9.9, 21.4],
+    wind_gusts_10m: [10.1, 12.4, 30.2],
+    wind_direction_10m: [200, 210, 225],
+    apparent_temperature: [8.0, 8.5, 12.9],
+    relative_humidity_2m: [70, 72, 88],
+    cloud_cover: [40, 55, 95],
   },
 };
 
@@ -202,6 +232,43 @@ describe('fetchWeather', () => {
       temp: 14,
       precipProb: 65,
       windSpeed: 21,
+      windGust: 30,
+      windDir: 225,
+      feelsLike: 13,
+      humidity: 88,
+      cloudCover: 95,
+    });
+  });
+
+  it('falls back detail fields to their base equivalents when Open-Meteo omits them', async () => {
+    // Older/partial responses (or a future API change) might not include the
+    // detail fields - fetchWeather should still return a usable entry rather
+    // than NaN/undefined creeping into the UI.
+    const partial = {
+      daily: MOCK_RESPONSE.daily,
+      hourly: {
+        time: ['2025-05-04T00:00'],
+        weather_code: [1],
+        temperature_2m: [9.6],
+        precipitation_probability: [0],
+        wind_speed_10m: [8.2],
+      },
+    };
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(partial)});
+
+    const result = await fetchWeather(52.07, -1.02, '2025-05-04', '2025-05-05');
+
+    expect(result.hourly[0]).toEqual({
+      time: '2025-05-04T00:00',
+      weatherCode: 1,
+      temp: 10,
+      precipProb: 0,
+      windSpeed: 8,
+      windGust: 8, // falls back to windSpeed
+      windDir: 0,
+      feelsLike: 10, // falls back to temp
+      humidity: 0,
+      cloudCover: 0,
     });
   });
 

@@ -18,6 +18,8 @@ export const Analytics = {
   fullTimetableCollapsed: (venue) => logEvent(fa(),'full_timetable_collapsed', {venue}),
   weatherHourlyExpanded: (venue) => logEvent(fa(),'weather_hourly_expanded', {venue}),
   weatherHourlyCollapsed: (venue) => logEvent(fa(),'weather_hourly_collapsed', {venue}),
+  weatherDetailExpanded: (venue) => logEvent(fa(),'weather_detail_expanded', {venue}),
+  weatherDetailCollapsed: (venue) => logEvent(fa(),'weather_detail_collapsed', {venue}),
 
   resultsYearChanged: (year) => logEvent(fa(),'results_year_changed', {year}),
   resultsTabChanged: (year, tab) => logEvent(fa(),'results_tab_changed', {year, tab}),

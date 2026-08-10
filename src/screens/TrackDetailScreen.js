@@ -17,7 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
-import {fetchWeather, weatherDescription, weatherIcon, weatherIconColor} from '../utils/weather';
+import {fetchWeather, weatherDescription, weatherIcon, weatherIconColor, windDirectionCompass} from '../utils/weather';
 import CachedImage from '../components/CachedImage';
 import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
@@ -182,6 +182,7 @@ export default function TrackDetailScreen({route, navigation}) {
   const [showFullTimetable, setShowFullTimetable] = useState(false);
   const [weather, setWeather] = useState(null);
   const [showHourlyWeather, setShowHourlyWeather] = useState(false);
+  const [weatherDetailExpanded, setWeatherDetailExpanded] = useState(false);
   const [racesFinished, setRacesFinished] = useState(false);
   const detectedBroadcaster = useBroadcaster();
   const broadcaster = broadcaster_override || detectedBroadcaster;
@@ -727,21 +728,39 @@ export default function TrackDetailScreen({route, navigation}) {
         return (
           <View>
             {hasHourly && (
-              <View style={[styles.timetableSegmentRow, {marginBottom: 12}]}>
-                <TouchableOpacity
-                  style={[styles.timetableSegment, !showHourlyWeather && styles.timetableSegmentActive]}
-                  onPress={() => { if (showHourlyWeather) { setShowHourlyWeather(false); Analytics.weatherHourlyCollapsed(track.venue); } }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.timetableSegmentText, !showHourlyWeather && styles.timetableSegmentTextActive]}>Daily</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.timetableSegment, showHourlyWeather && styles.timetableSegmentActive]}
-                  onPress={() => { if (!showHourlyWeather) { setShowHourlyWeather(true); Analytics.weatherHourlyExpanded(track.venue); } }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.timetableSegmentText, showHourlyWeather && styles.timetableSegmentTextActive]}>By session</Text>
-                </TouchableOpacity>
+              <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8}}>
+                <View style={[styles.timetableSegmentRow, {flex: 1, marginBottom: 0}]}>
+                  <TouchableOpacity
+                    style={[styles.timetableSegment, !showHourlyWeather && styles.timetableSegmentActive]}
+                    onPress={() => { if (showHourlyWeather) { setShowHourlyWeather(false); Analytics.weatherHourlyCollapsed(track.venue); } }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.timetableSegmentText, !showHourlyWeather && styles.timetableSegmentTextActive]}>Daily</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.timetableSegment, showHourlyWeather && styles.timetableSegmentActive]}
+                    onPress={() => { if (!showHourlyWeather) { setShowHourlyWeather(true); Analytics.weatherHourlyExpanded(track.venue); } }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.timetableSegmentText, showHourlyWeather && styles.timetableSegmentTextActive]}>By session</Text>
+                  </TouchableOpacity>
+                </View>
+                {showHourlyWeather && (
+                  <TouchableOpacity
+                    style={styles.weatherDetailToggle}
+                    onPress={() => {
+                      const next = !weatherDetailExpanded;
+                      setWeatherDetailExpanded(next);
+                      if (next) Analytics.weatherDetailExpanded(track.venue);
+                      else Analytics.weatherDetailCollapsed(track.venue);
+                    }}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={weatherDetailExpanded ? 'Show less weather detail' : 'Show more weather detail'}
+                  >
+                    <Icon name={weatherDetailExpanded ? 'unfold-less' : 'unfold-more'} size={18} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 
@@ -795,6 +814,31 @@ export default function TrackDetailScreen({route, navigation}) {
                           <View style={styles.weatherStat}>
                             <Icon name="water-drop" size={9} color="#5BA3FF" />
                             <Text style={styles.weatherSessionRain}>{entry.precipProb}%</Text>
+                          </View>
+                        )}
+                        {weatherDetailExpanded && (
+                          <View style={styles.weatherSessionDetail}>
+                            <View style={styles.weatherStat}>
+                              <Icon name="thermostat" size={9} color={Colors.textSecondary} />
+                              <Text style={styles.weatherSessionDetailText}>Feels {entry.feelsLike}°</Text>
+                            </View>
+                            <View style={styles.weatherStat}>
+                              <Icon name="air" size={9} color={Colors.textSecondary} />
+                              <Text style={styles.weatherSessionDetailText}>
+                                {useKm ? `${entry.windSpeed} km/h` : `${Math.round(entry.windSpeed * 0.621)} mph`}
+                                {entry.windGust > entry.windSpeed &&
+                                  ` (g${useKm ? entry.windGust : Math.round(entry.windGust * 0.621)})`}
+                                {' '}{windDirectionCompass(entry.windDir)}
+                              </Text>
+                            </View>
+                            <View style={styles.weatherStat}>
+                              <Icon name="opacity" size={9} color={Colors.textSecondary} />
+                              <Text style={styles.weatherSessionDetailText}>{entry.humidity}% humidity</Text>
+                            </View>
+                            <View style={styles.weatherStat}>
+                              <Icon name="filter-drama" size={9} color={Colors.textSecondary} />
+                              <Text style={styles.weatherSessionDetailText}>{entry.cloudCover}% cloud</Text>
+                            </View>
                           </View>
                         )}
                       </View>
@@ -1124,6 +1168,9 @@ const styles = StyleSheet.create({
   weatherSessionTime: {color: '#fff', fontSize: 11, fontWeight: '600'},
   weatherSessionTemp: {color: '#fff', fontSize: 14, fontWeight: '800'},
   weatherSessionRain: {color: '#5BA3FF', fontSize: 10, fontWeight: '700'},
+  weatherDetailToggle: {padding: 8, borderRadius: 8, backgroundColor: Colors.card},
+  weatherSessionDetail: {marginTop: 4, gap: 3, alignItems: 'center', borderTopWidth: 1, borderTopColor: Colors.outline, paddingTop: 6, width: '100%'},
+  weatherSessionDetailText: {color: Colors.textSecondary, fontSize: 9, fontWeight: '600'},
   racePhoto: {width: '100%', height: 200, borderRadius: 10, marginBottom: 10},
 
   // Carousel dots

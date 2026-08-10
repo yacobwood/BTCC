@@ -26,6 +26,15 @@ export function weatherIcon(code) {
   return WMO_ICONS[code] || 'cloud';
 }
 
+const COMPASS_POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+// Open-Meteo gives wind direction as the compass bearing it's blowing FROM,
+// in degrees (0-360). 8-point compass is plenty of precision for a race
+// weekend weather chip.
+export function windDirectionCompass(deg) {
+  return COMPASS_POINTS[Math.round(((deg % 360) / 45)) % 8];
+}
+
 export function weatherIconColor(code) {
   if (code === 0 || code === 1) return '#F5C842'; // sunny  -  warm amber
   if (code === 2)               return '#A0B4C8'; // partly cloudy  -  light blue-grey
@@ -63,7 +72,8 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
       `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
-      `&hourly=weather_code,temperature_2m,precipitation_probability,wind_speed_10m` +
+      `&hourly=weather_code,temperature_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m,` +
+      `wind_direction_10m,apparent_temperature,relative_humidity_2m,cloud_cover` +
       `&timezone=Europe/London&start_date=${startDate}&end_date=${endDate}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -89,6 +99,13 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
       temp: Math.round(h.temperature_2m[i]),
       precipProb: h.precipitation_probability[i],
       windSpeed: Math.round(h.wind_speed_10m[i]),
+      // Detail fields - only surfaced in TrackDetailScreen's expanded by-session
+      // view, but fetched unconditionally since there's no separate cheap query.
+      windGust: Math.round(h.wind_gusts_10m?.[i] ?? h.wind_speed_10m[i]),
+      windDir: Math.round(h.wind_direction_10m?.[i] ?? 0),
+      feelsLike: Math.round(h.apparent_temperature?.[i] ?? h.temperature_2m[i]),
+      humidity: Math.round(h.relative_humidity_2m?.[i] ?? 0),
+      cloudCover: Math.round(h.cloud_cover?.[i] ?? 0),
     })) : [];
     const result = {daily, hourly};
     cacheWrite(cacheKey, result).catch(() => {});

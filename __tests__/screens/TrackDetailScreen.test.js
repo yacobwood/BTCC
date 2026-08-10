@@ -7,14 +7,15 @@ import * as featureFlags from '../../src/store/featureFlags';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn()},
+  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn()},
 }));
 
 jest.mock('../../src/utils/weather', () => ({
-  fetchWeather:       jest.fn().mockResolvedValue(null),
-  weatherDescription: jest.fn(() => 'Partly cloudy'),
-  weatherIcon:        jest.fn(() => 'wb-cloudy'),
-  weatherIconColor:   jest.fn(() => '#fff'),
+  fetchWeather:         jest.fn().mockResolvedValue(null),
+  weatherDescription:   jest.fn(() => 'Partly cloudy'),
+  weatherIcon:          jest.fn(() => 'wb-cloudy'),
+  weatherIconColor:     jest.fn(() => '#fff'),
+  windDirectionCompass: jest.fn(() => 'NE'),
 }));
 
 jest.mock('../../src/api/client', () => ({
@@ -612,8 +613,8 @@ describe('TrackDetailScreen', () => {
     const WITH_HOURLY = {
       daily: DAILY_ONLY.daily,
       hourly: [
-        {time: '2026-04-25T09:00', weatherCode: 2,  temp: 12, precipProb: 10, windSpeed: 15},
-        {time: '2026-04-26T14:00', weatherCode: 61, temp: 15, precipProb: 80, windSpeed: 20},
+        {time: '2026-04-25T09:00', weatherCode: 2,  temp: 12, precipProb: 10, windSpeed: 15, windGust: 22, windDir: 90,  feelsLike: 10, humidity: 65, cloudCover: 40},
+        {time: '2026-04-26T14:00', weatherCode: 61, temp: 15, precipProb: 80, windSpeed: 20, windGust: 35, windDir: 225, feelsLike: 12, humidity: 90, cloudCover: 95},
       ],
     };
 
@@ -695,6 +696,80 @@ describe('TrackDetailScreen', () => {
       fireEvent.press(await findByText('By session'));
       fireEvent.press(await findByText('Daily'));
       expect(Analytics.weatherHourlyCollapsed).toHaveBeenCalledWith('Donington Park');
+    });
+
+    it('does not show the detail toggle in Daily mode', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, queryByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      await findByText('18°');
+      expect(queryByLabelText('Show more weather detail')).toBeNull();
+    });
+
+    it('shows the detail toggle after switching to By session', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      expect(await findByLabelText('Show more weather detail')).toBeTruthy();
+    });
+
+    it('pressing the detail toggle reveals wind/humidity/cloud detail per session', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, findByLabelText, getByText, queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      expect(queryByText('65% humidity')).toBeNull();
+      fireEvent.press(await findByLabelText('Show more weather detail'));
+      expect(getByText('65% humidity')).toBeTruthy();
+      expect(getByText('90% humidity')).toBeTruthy();
+      expect(getByText('40% cloud')).toBeTruthy();
+      expect(getByText('Feels 10°')).toBeTruthy();
+    });
+
+    it('pressing the detail toggle again hides the detail rows', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, findByLabelText, queryByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      fireEvent.press(await findByLabelText('Show more weather detail'));
+      await findByLabelText('Show less weather detail');
+      fireEvent.press(await findByLabelText('Show less weather detail'));
+      expect(queryByText('65% humidity')).toBeNull();
+    });
+
+    it('fires weatherDetailExpanded/Collapsed analytics when toggling detail', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      fireEvent.press(await findByLabelText('Show more weather detail'));
+      expect(Analytics.weatherDetailExpanded).toHaveBeenCalledWith('Donington Park');
+      fireEvent.press(await findByLabelText('Show less weather detail'));
+      expect(Analytics.weatherDetailCollapsed).toHaveBeenCalledWith('Donington Park');
+    });
+
+    it('hides the detail toggle again after switching back to Daily', async () => {
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, findByLabelText, queryByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      fireEvent.press(await findByText('By session'));
+      await findByLabelText('Show more weather detail');
+      fireEvent.press(await findByText('Daily'));
+      expect(queryByLabelText('Show more weather detail')).toBeNull();
     });
 
     it('refetches weather again after the poll interval elapses', async () => {
