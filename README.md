@@ -390,7 +390,6 @@ preRace (parent)
     preRaceRace1    → pre_race1
     preRaceRace2    → pre_race2
     preRaceRace3    → pre_race3
-    preRaceRace3Grid → pre_race3_grid
 
 results (parent)
   resultsFP         → results_fp
@@ -553,7 +552,6 @@ All notification subscriptions are topic-based (not individual tokens), managed 
 | `pre_qualifying` | 15 minutes before Qualifying |
 | `pre_qrace` | 15 minutes before Qualifying Race |
 | `pre_race1/2/3` | 15 minutes before Race 1/2/3 |
-| `pre_race3_grid` | Race 3's starting grid is published (fires after Race 2 completes - not spoiler-gated, since it's forward-looking, not a result) |
 | `results_fp/qualifying/etc` | Session results posted |
 | `broadcast` | All users (unconditional subscription) |
 
@@ -588,8 +586,7 @@ The main workhorse function. Runs every minute and handles two categories of wor
 - Pre-session alerts: 15 minutes before each session start time from `schedule.json`
 - Friday 9am: race weekend preview notification to `weekend_preview` topic
 - Tuesday 9am: standings update notification to `standings_update` topic
-
-Session results/grid notifications are a separate mechanism entirely - `.github/scripts/session_watcher.py` (Python, connected to TSL's live-timing SignalR feed, not this Cloud Function) sends those on `sessioncomplete` events, since it needs to react the moment a session actually finishes rather than poll once a minute. See [§19](#19-python-scrapers).
+- Post-session results: triggered when session results land in `results{year}.json`
 
 **Always runs (every minute, regardless of race day):**
 - News alerts: polls `news.json` on the GitHub raw CDN (scraped from `btcc.net/news/` every 5 minutes by `scrape_news.py` via headless Chromium - btcc.net's Vercel bot-challenge blocks the Cloud Function's runtime fetch from hitting it directly, see [§19](#19-python-scrapers)), compares latest `id` (now the article slug, not a WordPress post ID) to Firestore `state/news.lastId`. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout.
@@ -603,15 +600,6 @@ Firestore transactions prevent duplicate sends. First-time detection (when `last
 **Scraper failure alerting:** `reportScraperFailure` (HTTP, `SCRAPER_SECRET`-gated) lets the GitHub Actions scraper workflows report into this same pipeline, since a failed workflow run has no way to email on its own. Every scraper workflow has a final `if: failure()` step (see [§19](#19-python-scrapers)) that POSTs `{workflow, message, runUrl}` to it, which calls `logError` with `key: scraper-<workflow>` - same dedup-until-resolved behaviour as the per-minute checks above, and shows up in the same admin FIRESTORE tab.
 
 **Resolving errors:** the admin FIRESTORE tab Dismiss button calls the `dismissError` Cloud Function (Admin SDK, bypasses rules) via `POST /dismissError` with `x-admin-secret`. The `errors` collection has `allow write: if false` for clients - direct REST PATCH from the admin page was silently rejected by Firestore rules, so writes are routed through the function instead. "Dismiss all" sends `{all: true}` and the function batch-updates all unresolved docs.
-
-### notifyResultsUpdate (HTTP, `SCRAPER_SECRET`-gated)
-
-Called by `scrape-results.yml` every time it actually commits a results change (not on every 2-minute tick, only when `changes_detected == 'true'`). Two independent jobs, each in its own try/catch so one failing never affects the other:
-
-1. Sends a silent `results_live` data message (no visible notification) so app clients discard their cached results and refetch.
-2. Calls `checkRace3Grid()` (`functions/race3Grid.js`, injected-deps for testability - see `__tests__/functions/race3Grid.test.js`) - checks every round in `results{year}.json` for whether Race 3's starting grid has just become available (a non-empty `grid` field, not merely Race 2 having results - per reg 3.4.1.b the reverse-grid reversal count is a separately-timed draw, not automatic once Race 2's finishing order is final) and sends a one-time `pre_race3_grid` notification per round the first time it's detected (Firestore doc `state/race3grid_<year>_<round>` guards against re-sending). Payload is `{type: 'results', round, year, race: '3'}`, reusing `notifNavigation.js`'s existing race-index deep-link handling unchanged.
-
-**This is the mechanism that actually runs in production for Race 3 grid alerts** - `.github/scripts/session_watcher.py` implements the same idea (see [§19](#19-python-scrapers)) but that workflow hasn't actually run since May 2026, confirmed via GitHub Actions run history (its auto-trigger cron is commented out and nothing else currently dispatches it). Both implementations are correct and kept in sync; only this one is reachable today.
 
 ### weeklyDigest (Monday 8am)
 
@@ -818,8 +806,6 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 **Track lap records** (`update_calendar_records()`, called by `scrape_tsl.py` after every scrape) - compares each round's fastest `bestLap` (Qualifying for `qualifyingRecord`, fastest of Race 1/2/3 for `raceRecord`) against the stored record in `calendar.json` and overwrites only when genuinely faster. `lap_to_secs()` parses `"M:SS.mmm"` or bare `"SS.mmm"`, tolerating a trailing unit suffix (some older records were manually seeded as `"50.876s"`) - before 2026-08-09 it didn't, so `float(t)` raised on that suffix, silently returned `inf` for the *stored* record, and let literally any freshly-scraped lap overwrite it as a false "new record" regardless of whether it was actually faster (this hit Knockhill live in production; Silverstone's records carried the same `"s"`-suffixed formatting and would have hit the same bug at its own race weekend). `src/screens/TrackDetailScreen.js` has its own client-side `lapTimeSecs()` for a "live record" preview during a race weekend, fixed the same day - it previously required a colon (`"M:SS.mmm"`) and returned `null` for any bare-seconds record, which is how every short circuit (Knockhill, Brands Hatch Indy) actually stores its sub-two-minute times, so their live-record speed calculation silently never ran.
 
 **is_race_weekend.py** (`.github/scripts/`) - Gates `scrape-results.yml`'s actual scraping steps: the workflow cron fires every 2 minutes Sat/Sun 09:00-19:00 UTC regardless, but each step only runs `if: steps.raceday.outputs.in_session_window == 'true'`. `compute_session_windows()` opens a `[start+15min, start+90min]` window per session by default. Grid-bearing sessions (`PRECEDING_SESSION` map: Qualifying Race ← Qualifying, Race 1 ← Qualifying Race, Race 2 ← Race 1, Race 3 ← Race 2) also open their window early, as soon as the preceding session's results are committed, through to the same `w_end` - per reg 3.4.1.a/b the grid is published as soon as the preceding session finishes, normally hours before the grid-bearing session's own start. Before this fix (2026-08-09), the window for e.g. Race 1's grid never opened until 15 minutes *into* Race 1 itself, so the official grid was never actually fetchable before the race started - the client-side "Predicted Starting Grid" fallback (see [§14](#14-starting-grid-system)) existed to cover exactly that gap, and still serves as the fallback for any case where the real grid is fetched late for other reasons (TSL delay, workflow hiccup, etc).
-
-**session_watcher.py** (`.github/scripts/`) - Connects to TSL's SignalR live-timing feed for a race day and reacts to `sessioncomplete` events: fires a "Starting in 15 mins" pre-session alert, and on each session's completion waits 3 minutes for the PDF, scrapes+commits, then sends that session's results notification. When the completed session is **Race 2** it also spawns a background thread (`watch_for_race3_grid`) that polls for Race 3's own grid to appear and sends a `pre_race3_grid` notification once it does - same idea, pure-function-tested (`find_race3`, `race3_grid_ready`, `race3_pole_sitter` in `test_session_watcher.py`), as `functions/race3Grid.js`'s `checkRace3Grid()` (see [§12](#12-firebase-cloud-functions)). **Not currently reachable in production**: `.github/workflows/session-watcher.yml` requires either a manual `workflow_dispatch` or an auto-dispatch from `race-day-start.yml`, and confirmed via GitHub Actions run history it hasn't actually run since May 2026 (its cron auto-trigger is commented out, and `race-day-start.yml` produced no runs at all on Knockhill's own race weekend). Every pre-session/results notification a user actually receives today comes from `sendSessionNotifications`'s per-minute poll and `notifyResultsUpdate` instead - this file's implementation is left in place, correct but dormant, in case the workflow is ever reactivated.
 
 **compute_records.py** - All-time records computer. Reads all bundled season JSONs (2004-2025) and the live `results{year}.json` file to compute every stat shown on the RecordsScreen (wins, podiums, poles, streaks, consecutive finishes, hat tricks, etc.). Preserves `historical: true` entries (pre-2004 era drivers) from the existing `records.json`. Writes `records.json`. Called automatically by `scrape_tsl.py` after each scrape. **Not standalone-safe:** it only knows about 2004+ timeline data, so running it alone temporarily reverts the official wins/championships overrides that `scrape_btcc_stats.py` applies for drivers active before 2004 (e.g. Jason Plato) - it self-heals at the next daily `scrape_btcc_stats.py` run, but don't run it in isolation and expect the result to be final.
 

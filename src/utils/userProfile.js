@@ -31,7 +31,6 @@ const PROFILE_ASYNC_KEYS = {
   preRaceRace1:       'setting_pre_race_race1',
   preRaceRace2:       'setting_pre_race_race2',
   preRaceRace3:       'setting_pre_race_race3',
-  preRaceRace3Grid:   'setting_pre_race_race3_grid',
   results:            'setting_results',
   resultsFP:          'setting_results_fp',
   resultsQualifying:  'setting_results_qualifying',

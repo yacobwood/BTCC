@@ -225,13 +225,6 @@ export default function SettingsScreen({navigation}) {
           onToggle={toggle('preRaceRace3')}
           parentEnabled={settings.preRace && settings.preRaceRace}
         />
-        <SubSubRow
-          label="Race 3 grid order"
-          accessibilityLabel="Pre-race Race 3 grid order"
-          value={settings.preRaceRace3Grid}
-          onToggle={toggle('preRaceRace3Grid')}
-          parentEnabled={settings.preRace && settings.preRaceRace}
-        />
 
         {/* ── Results ── */}
         <GroupRow

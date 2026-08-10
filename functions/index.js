@@ -1,6 +1,5 @@
 // v2
 const {checkBtccNews} = require('./newsCheck');
-const {checkRace3Grid} = require('./race3Grid');
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onRequest} = require('firebase-functions/v2/https');
 const {onValueCreated} = require('firebase-functions/v2/database');
@@ -1156,20 +1155,6 @@ exports.notifyResultsUpdate = onRequest(
       console.error('notifyResultsUpdate failed:', e);
       await logError('notifyResultsUpdate', e.message, e, {alert: true});
       res.status(500).json({ok: false, error: e.message});
-    }
-
-    // Separate try/catch - a failure here must never affect the response
-    // (or lack of one) to the calling GitHub Action above, which has
-    // already been sent by this point. This is the actual, live-running
-    // Race 3 grid-order check - triggered by scrape-results.yml committing
-    // a genuine results change, not by .github/scripts/session_watcher.py
-    // (which implements the same idea but hasn't actually run since
-    // May 2026 - see race3Grid.js's own header comment for the full story).
-    try {
-      await checkRace3Grid({fetchFn: fetchWithTimeout, db: getFirestore(), messaging: getMessaging(), logHistory: logPushHistory, year});
-    } catch (e) {
-      console.error('checkRace3Grid failed:', e);
-      await logError('notifyResultsUpdate', e.message, e, {key: 'check-race3-grid', alert: true});
     }
   },
 );

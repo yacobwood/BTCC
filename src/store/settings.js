@@ -17,7 +17,6 @@ const LEAF_TOPICS = {
   preRaceRace1:      'pre_race1',
   preRaceRace2:      'pre_race2',
   preRaceRace3:      'pre_race3',
-  preRaceRace3Grid:  'pre_race3_grid',
   resultsFP:         'results_fp',
   resultsQualifying: 'results_qualifying',
   resultsQRace:      'results_qrace',
@@ -39,7 +38,6 @@ const PARENT_CHAIN = {
   preRaceRace1:      ['preRace', 'preRaceRace'],
   preRaceRace2:      ['preRace', 'preRaceRace'],
   preRaceRace3:      ['preRace', 'preRaceRace'],
-  preRaceRace3Grid:  ['preRace', 'preRaceRace'],
   resultsFP:         ['results'],
   resultsQualifying: ['results'],
   resultsQRace:      ['results'],
@@ -62,7 +60,6 @@ const STORAGE_KEYS = {
   preRaceRace1:        'setting_pre_race_race1',
   preRaceRace2:        'setting_pre_race_race2',
   preRaceRace3:        'setting_pre_race_race3',
-  preRaceRace3Grid:    'setting_pre_race_race3_grid',
   results:             'setting_results',
   resultsFP:           'setting_results_fp',
   resultsQualifying:   'setting_results_qualifying',
@@ -92,7 +89,6 @@ const defaults = {
   preRaceRace1:        true,
   preRaceRace2:        true,
   preRaceRace3:        true,
-  preRaceRace3Grid:    true,
   results:             true,
   resultsFP:           true,
   resultsQualifying:   true,
@@ -146,7 +142,7 @@ function nextMondayNight() {
 const SYNCED_KEYS = new Set([
   'newsAlerts', 'digestAlerts', 'weekendPreview', 'standingsUpdate', 'podcastAlerts',
   'preRace', 'preRaceFP', 'preRaceQualifying', 'preRaceQRace', 'preRaceRace',
-  'preRaceRace1', 'preRaceRace2', 'preRaceRace3', 'preRaceRace3Grid',
+  'preRaceRace1', 'preRaceRace2', 'preRaceRace3',
   'results', 'resultsFP', 'resultsQualifying', 'resultsQRace', 'resultsRace',
   'resultsRace1', 'resultsRace2', 'resultsRace3',
   'spoilerFree',
@@ -163,7 +159,7 @@ export function SettingsProvider({children}) {
       const loaded = {...defaults};
       // Migrate legacy single topics → new granular keys
       const legacyMap = {
-        setting_race_alerts:      ['preRaceRace', 'preRaceRace1', 'preRaceRace2', 'preRaceRace3', 'preRaceRace3Grid'],
+        setting_race_alerts:      ['preRaceRace', 'preRaceRace1', 'preRaceRace2', 'preRaceRace3'],
         setting_qualifying_alerts: ['preRaceQualifying', 'preRaceQRace'],
         setting_fp_alerts:         ['preRaceFP'],
         setting_results_alerts:    ['results', 'resultsFP', 'resultsQualifying', 'resultsQRace', 'resultsRace', 'resultsRace1', 'resultsRace2', 'resultsRace3'],
