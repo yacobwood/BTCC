@@ -113,6 +113,16 @@ describe('Analytics', () => {
       Analytics.liveTimingOpened('Brands Hatch');
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'live_timing_opened', {venue: 'Brands Hatch'});
     });
+
+    it('weatherHourlyExpanded logs with venue', () => {
+      Analytics.weatherHourlyExpanded('Knockhill');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_hourly_expanded', {venue: 'Knockhill'});
+    });
+
+    it('weatherHourlyCollapsed logs with venue', () => {
+      Analytics.weatherHourlyCollapsed('Knockhill');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_hourly_collapsed', {venue: 'Knockhill'});
+    });
   });
 
   describe('results events', () => {
