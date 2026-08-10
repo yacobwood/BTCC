@@ -873,8 +873,21 @@ function sanitise(html) {
     .replace(/\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*"/g, '');
 }
 
-function buildHtml(article, topPad) {
+// Exported (in addition to the default component) so its source-attribution
+// logic can be unit tested directly - the shared WebView test mock doesn't
+// capture the `source` prop's html string, and changing that for every other
+// test in this file just to reach this one string wasn't worth it.
+export function buildHtml(article, topPad) {
   const content = sanitise(article.content || '');
+  // Hub posts carry their own explicit external sourceUrl (e.g. a credited
+  // Reddit thread); regular btcc.net-scraped articles never set that field
+  // but do have `link` (the original btcc.net article URL) - fall back to
+  // it so every btcc.net article gets a source attribution too, not just
+  // hub posts. Label stays as the raw URL for hub's own sourceUrl (existing
+  // behaviour, unchanged) but shows a clean "btcc.net" for the fallback
+  // case rather than the full article URL.
+  const sourceUrl = article.sourceUrl || (article.source === 'btcc.net' ? article.link : null);
+  const sourceLabel = article.sourceUrl || 'btcc.net';
   const headerDate = formatFullDate(article.sortDate || article.pubDate);
   const heroSection = article.imageUrl
     ? `<div class="hero" style="background-image:url('${article.imageUrl}');">
@@ -932,7 +945,7 @@ function buildHtml(article, topPad) {
     <div class="divider"></div>
     <div class="content">
       ${content}
-      ${article.sourceUrl ? `<p class="source-line">Source: <a href="${article.sourceUrl}">${article.sourceUrl}</a></p>` : ''}
+      ${sourceUrl ? `<p class="source-line">Source: <a href="${sourceUrl}">${sourceLabel}</a></p>` : ''}
     </div>
     <div class="reactions">
       <p class="reactions-label">Did you enjoy this article?</p>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ArticleScreen from '../../src/screens/ArticleScreen';
+import ArticleScreen, {buildHtml} from '../../src/screens/ArticleScreen';
 import {Analytics} from '../../src/utils/analytics';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 
@@ -519,6 +519,39 @@ describe('ArticleScreen', () => {
         expect(stored['ingram-wins-donington']).toBe('likes');
       });
     });
+  });
+});
+
+// ─── buildHtml: source attribution footer ──────────────────────────────────
+//
+// Hub posts carry their own explicit external sourceUrl (e.g. a credited
+// Reddit thread) and already got a "Source: <url>" footer. Regular
+// btcc.net-scraped articles never set sourceUrl, so they got no attribution
+// at all - this covers the fallback to `link` for exactly that case, plus
+// confirms hub posts' existing behaviour is unchanged.
+
+describe('buildHtml source attribution', () => {
+  const BASE = {title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'};
+
+  it('shows a clean "btcc.net" source link for regular scraped articles', () => {
+    const html = buildHtml({...BASE, source: 'btcc.net', link: 'https://btcc.net/some-article/'}, 0);
+    expect(html).toContain('<a href="https://btcc.net/some-article/">btcc.net</a>');
+  });
+
+  it('keeps showing the raw sourceUrl for hub posts, unchanged', () => {
+    const html = buildHtml({...BASE, source: 'btcc hub', sourceUrl: 'https://reddit.com/r/BTCC/abc123', link: 'https://btcchub.app/post/1'}, 0);
+    expect(html).toContain('<a href="https://reddit.com/r/BTCC/abc123">https://reddit.com/r/BTCC/abc123</a>');
+  });
+
+  it('prefers an explicit sourceUrl over link even for a btcc.net-sourced item', () => {
+    const html = buildHtml({...BASE, source: 'btcc.net', sourceUrl: 'https://example.com/original', link: 'https://btcc.net/some-article/'}, 0);
+    expect(html).toContain('<a href="https://example.com/original">https://example.com/original</a>');
+    expect(html).not.toContain('btcc.net/some-article');
+  });
+
+  it('shows no source-line at all when there is nothing to attribute', () => {
+    const html = buildHtml({...BASE, source: 'btcc hub', link: null}, 0);
+    expect(html).not.toContain('class="source-line"');
   });
 });
 
