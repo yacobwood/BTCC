@@ -2386,8 +2386,14 @@ async function sendTestNotif(channel, title, body, data = {}, imageUrl = '') {
 }
 
 async function sendNewsTest() {
-  const slug = document.getElementById('test-news-slug').value.trim();
-  if (!slug) { alert('Enter an article slug first'); return; }
+  const rawSlug = document.getElementById('test-news-slug').value.trim();
+  if (!rawSlug) { alert('Enter an article slug first'); return; }
+  // Accept a bare slug, a path (leading/trailing slashes), or a full URL - same
+  // slug-extraction the app itself uses on a notification tap (see ArticleScreen.js)
+  // - data/articles/index.json keys are always bare slugs, so anything else here
+  // sends a notification that can never resolve, regardless of mirror timing.
+  const slug = rawSlug.replace(/\/$/, '').split('/').pop();
+  document.getElementById('test-news-slug').value = slug;
   const statusEl = document.getElementById('fcm-test-status');
   statusEl.style.color = 'var(--text-sec)'; statusEl.textContent = 'Fetching article…';
   let title = document.getElementById('test-news-title').value.trim() || 'New BTCC Article';
