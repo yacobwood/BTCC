@@ -297,8 +297,12 @@
           "body": "Because the two layouts handle so differently, TOCA does not treat every car the same on the scales or in the parts bin - see Minimum Weight and Brake Discs below for the exact numbers each type is allowed."
         },
         {
+          "type": "text",
+          "body": "The regulations single out rear-wheel-drive cars in one other way: once stationary on the grid after the formation lap(s), RWD cars must engage a specific \"RWD Start Strategy\" issued by TOCA bulletin - a launch procedure the front-wheel-drive cars around them don't need."
+        },
+        {
           "type": "callout",
-          "body": "Currently the WSR-run BMW 330i M Sport is the only rear-wheel-drive car on the grid. Every other manufacturer runs a front-wheel-drive layout, so watching how the BMW drivers adapt their braking and cornering lines compared to the rest of the field is one of the more interesting technical subplots of a BTCC weekend."
+          "body": "Currently the WSR-run BMW 330i M Sport is the only rear-wheel-drive car on the grid. Every other manufacturer runs a front-wheel-drive layout, so watching how the BMW drivers adapt their braking, cornering lines and grid starts compared to the rest of the field is one of the more interesting technical subplots of a BTCC weekend."
         },
         {
           "type": "heading",
