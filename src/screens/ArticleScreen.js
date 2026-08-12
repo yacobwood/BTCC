@@ -694,12 +694,16 @@ export default function ArticleScreen({route, navigation}) {
   const [loadFailed, setLoadFailed] = useState(false);
   const myAuthorIdRef = useRef('anonymous');
 
-  const loadArticle = useCallback(() => {
+  const loadArticle = useCallback((forceRefresh = false) => {
     const resolvedSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null) || articleParam?.id || null;
     if (!resolvedSlug) return () => {};
     let cancelled = false;
     setLoadFailed(false);
-    fetchArticleBySlug(resolvedSlug).then(raw => {
+    // Retry passes forceRefresh=true - a miss on first load may just be a stale,
+    // pre-commit cached copy of the article index, so a plain re-fetch could keep
+    // serving that same cached miss for up to 5 more minutes without it.
+    const fetchPromise = forceRefresh ? fetchArticleBySlug(resolvedSlug, true) : fetchArticleBySlug(resolvedSlug);
+    fetchPromise.then(raw => {
       if (cancelled) return;
       if (raw) setArticle(parseArticle(raw));
       // Not found yet (e.g. a just-published article the mirror hasn't
@@ -833,7 +837,7 @@ export default function ArticleScreen({route, navigation}) {
           <Text style={styles.loadFailedTitle}>Couldn't load this article</Text>
           <Text style={styles.loadFailedBody}>It may still be publishing - try again in a moment.</Text>
           <View style={styles.loadFailedActions}>
-            <TouchableOpacity onPress={loadArticle} style={styles.loadFailedRetryBtn} accessibilityLabel="Retry loading article" accessibilityRole="button">
+            <TouchableOpacity onPress={() => loadArticle(true)} style={styles.loadFailedRetryBtn} accessibilityLabel="Retry loading article" accessibilityRole="button">
               <Text style={styles.loadFailedRetryText}>Retry</Text>
             </TouchableOpacity>
             <TouchableOpacity

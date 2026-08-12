@@ -1,4 +1,4 @@
-const {checkBtccNews, NEWS_URL} = require('../../functions/newsCheck');
+const {checkBtccNews, NEWS_URL, ARTICLES_INDEX_URL} = require('../../functions/newsCheck');
 
 const ARTICLE = {
   id: 42,
@@ -23,10 +23,24 @@ function makeMessaging() {
   return {send: jest.fn().mockResolvedValue('msg-id-1')};
 }
 
-function makeFetch(articles, status = 200) {
-  return jest.fn().mockResolvedValue({
-    status,
-    json: jest.fn().mockResolvedValue(articles),
+function indexFromArticles(articles) {
+  const index = {};
+  (Array.isArray(articles) ? articles : []).forEach(a => { if (a?.slug) index[a.slug] = 1; });
+  return index;
+}
+
+// By default the mocked article mirror already contains whatever slug is in
+// `articles`, so tests unrelated to the mirror-gating behaviour don't need to
+// know it exists. Pass indexOverride (e.g. {}) to simulate the mirror lagging
+// behind the notification, or a rejecting/erroring fetchFn to simulate the
+// index fetch itself failing.
+function makeFetch(articles, status = 200, indexOverride) {
+  const index = indexOverride !== undefined ? indexOverride : indexFromArticles(articles);
+  return jest.fn((url) => {
+    if (url === ARTICLES_INDEX_URL) {
+      return Promise.resolve({ok: true, json: jest.fn().mockResolvedValue(index)});
+    }
+    return Promise.resolve({status, json: jest.fn().mockResolvedValue(articles)});
   });
 }
 
@@ -171,4 +185,68 @@ test('fetches from NEWS_URL with a 20s timeout', async () => {
   await checkBtccNews({fetchFn, db, messaging: makeMessaging(), logHistory: jest.fn()});
 
   expect(fetchFn).toHaveBeenCalledWith(NEWS_URL, 20000);
+});
+
+// ── Article-mirror gating — regression for notifications linking to a slug
+// the mirror (data/articles/index.json) hasn't picked up yet, which sent
+// users to ArticleScreen's "couldn't load this article" screen. ──────────────
+
+test('defers the notification when the slug is not yet in the article mirror', async () => {
+  const db = makeDb({lastId: 7});
+  const messaging = makeMessaging();
+  const logHistory = jest.fn();
+  const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+  // Empty index: mirror hasn't caught up to this article yet
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE], 200, {}), db, messaging, logHistory});
+
+  expect(messaging.send).not.toHaveBeenCalled();
+  expect(logHistory).not.toHaveBeenCalled();
+  // pendingSend must stay set (not cleared) so the next tick retries
+  expect(db._docRef.update).not.toHaveBeenCalled();
+  expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deferred'));
+  consoleSpy.mockRestore();
+});
+
+test('sends on a later tick once the mirror catches up (pendingSend retry)', async () => {
+  const pending = {title: ARTICLE.title.rendered, imageUrl: null, slug: ARTICLE.slug};
+  // Simulates the state left behind by the deferred run above: lastId already
+  // advanced, pendingSend still set
+  const db = makeDb({lastId: ARTICLE.id, pendingSend: pending});
+  const messaging = makeMessaging();
+  const logHistory = jest.fn();
+
+  // Now the mirror has the slug
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE], 200, {[ARTICLE.slug]: 1}), db, messaging, logHistory});
+
+  expect(messaging.send).toHaveBeenCalledTimes(1);
+  expect(db._docRef.update).toHaveBeenCalledWith({pendingSend: null});
+  expect(logHistory).toHaveBeenCalled();
+});
+
+test('treats an index fetch failure as not-yet-mirrored and defers rather than sending', async () => {
+  const db = makeDb({lastId: 7});
+  const messaging = makeMessaging();
+  const fetchFn = jest.fn((url) => {
+    if (url === ARTICLES_INDEX_URL) return Promise.reject(new Error('network error'));
+    return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([ARTICLE])});
+  });
+
+  await checkBtccNews({fetchFn, db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).not.toHaveBeenCalled();
+  expect(db._docRef.update).not.toHaveBeenCalled();
+});
+
+test('treats a non-ok index response as not-yet-mirrored and defers', async () => {
+  const db = makeDb({lastId: 7});
+  const messaging = makeMessaging();
+  const fetchFn = jest.fn((url) => {
+    if (url === ARTICLES_INDEX_URL) return Promise.resolve({ok: false, status: 404});
+    return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([ARTICLE])});
+  });
+
+  await checkBtccNews({fetchFn, db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).not.toHaveBeenCalled();
 });

@@ -157,9 +157,9 @@ async function fetchArticlesPage(page, forceRefresh = false) {
   }
 }
 
-async function fetchArticlesIndex() {
+async function fetchArticlesIndex(forceRefresh = false) {
   try {
-    const index = await fetchJson(`${ARTICLES_BASE}/index.json`, 'articles_index', false, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
+    const index = await fetchJson(`${ARTICLES_BASE}/index.json`, 'articles_index', forceRefresh, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
     return index && typeof index === 'object' ? index : {};
   } catch {
     return {};
@@ -271,12 +271,18 @@ export async function fetchHubPosts() {
   }
 }
 
-export async function fetchArticleBySlug(slug) {
+// forceRefresh skips both the index's and the page's 5-minute cache entirely -
+// used by ArticleScreen's Retry button, since a slug that just 404'd may have
+// been looked up against a stale, pre-commit copy of the index (the article
+// mirror commits well after the notification that links to it goes out; see
+// newsCheck.js's isSlugMirrored). A plain re-render would otherwise keep
+// serving that same cached miss for up to 5 more minutes.
+export async function fetchArticleBySlug(slug, forceRefresh = false) {
   try {
-    const index = await fetchArticlesIndex();
+    const index = await fetchArticlesIndex(forceRefresh);
     const page = index[slug];
     if (!page) return null;
-    const posts = await fetchArticlesPage(page);
+    const posts = await fetchArticlesPage(page, forceRefresh);
     return posts.find(p => p.slug === slug) ?? null;
   } catch {
     return null;

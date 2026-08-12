@@ -301,6 +301,23 @@ describe('ArticleScreen', () => {
       });
     });
 
+    // Regression: a Retry that replays the same cached (pre-mirror-commit)
+    // index just reproduces the same miss - the retry must force a real fetch.
+    it('pressing Retry forces a cache bypass (forceRefresh=true), unlike the initial load', async () => {
+      fetchArticleBySlug.mockResolvedValue(null);
+
+      const {getByText, getByLabelText} = renderArticle({article: undefined, slug: 'not-mirrored-yet'});
+      await waitFor(() => expect(getByText("Couldn't load this article")).toBeTruthy());
+      expect(fetchArticleBySlug).toHaveBeenNthCalledWith(1, 'not-mirrored-yet');
+
+      fetchArticleBySlug.mockResolvedValue(RAW_WP_ARTICLE);
+      fireEvent.press(getByLabelText('Retry loading article'));
+
+      await waitFor(() => {
+        expect(fetchArticleBySlug).toHaveBeenNthCalledWith(2, 'not-mirrored-yet', true);
+      });
+    });
+
     it('pressing Go back navigates away from the failed article', async () => {
       fetchArticleBySlug.mockResolvedValue(null);
 

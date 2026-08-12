@@ -421,6 +421,26 @@ describe('fetchArticleBySlug', () => {
     expect(cacheRead).toHaveBeenCalledWith('articles_index', 5 * 60 * 1000);
     expect(result).toEqual(article);
   });
+
+  // Regression: ArticleScreen's Retry button needs a real network hit, not a
+  // replay of the same cached miss that got the user to the retry screen -
+  // see newsCheck.js's isSlugMirrored for why a plain-cached index can be
+  // stale relative to a just-published article.
+  it('forceRefresh=true skips the index cache entirely', async () => {
+    const article = {id: 3, slug: 'just-published'};
+    // forceRefresh must skip the cacheRead call outright (not just ignore a
+    // hit) - queuing a would-be cache-hit value here would go unconsumed and
+    // leak into whichever test runs next, since cacheRead's default mock has
+    // no per-test reset.
+    global.fetch
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve({'just-published': 1})})
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve([article])});
+
+    const result = await fetchArticleBySlug('just-published', true);
+
+    expect(cacheRead).not.toHaveBeenCalled();
+    expect(result).toEqual(article);
+  });
 });
 
 describe('fetchLiveStatus', () => {
