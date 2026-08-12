@@ -5,6 +5,12 @@
     "title": {
       "rendered": "WSR in top six on challenging Knockhill weekend"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/61af84ff-0801-4c88-a068-bcda7f523e30-Rainford-1TR38355.jpg"
+        }
+      ]
+    }
   }
 ]
