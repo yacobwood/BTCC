@@ -8,7 +8,7 @@ jest.unmock('../App');
 
 // Stub out side-effect-heavy utils so this smoke test stays fast
 jest.mock('../src/utils/backgroundPrefetch', () => ({runBackgroundPrefetch: jest.fn()}));
-jest.mock('../src/utils/notifNavigation',    () => ({navigateFromData: jest.fn()}));
+jest.mock('../src/utils/notifNavigation',    () => ({navigateFromData: jest.fn(), handleNotificationOpen: jest.fn()}));
 jest.mock('@react-native-firebase/database', () => {
   const ref = {
     orderByChild: jest.fn().mockReturnThis(),

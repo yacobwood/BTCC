@@ -12,8 +12,13 @@ jest.mock('../../src/assets/seasonData', () => ({
   getSeasonData: jest.fn(),
 }));
 
-import {navigateFromData} from '../../src/utils/notifNavigation';
+jest.mock('../../src/utils/analytics', () => ({
+  Analytics: {notificationOpened: jest.fn(), articleClicked: jest.fn()},
+}));
+
+import {navigateFromData, handleNotificationOpen} from '../../src/utils/notifNavigation';
 import {getSeasonData} from '../../src/assets/seasonData';
+import {Analytics} from '../../src/utils/analytics';
 
 // A sample round object matching the shape stored in season data
 const MOCK_ROUND = {
@@ -374,6 +379,55 @@ describe('notification tap integration scenarios', () => {
     const ref = makeRef();
     navigateFromData(ref, {channel: 'qualifying'});
 
+    expect(ref.navigate).not.toHaveBeenCalled();
+    expect(ref.dispatch).not.toHaveBeenCalled();
+  });
+});
+
+// ── handleNotificationOpen ───────────────────────────────────────────────────
+// The single entry point every press-handling path is meant to share (App.tsx's
+// notifee foreground/cold-start listeners, the RNFirebase messaging listeners,
+// and index.js's notifee background handler) - regression coverage for the
+// background-tap case having had no equivalent call at all (see index.js).
+
+describe('handleNotificationOpen', () => {
+  it('tracks notificationOpened and navigates for a non-article type', () => {
+    const ref = makeRef();
+    handleNotificationOpen(ref, {type: 'roadmap'});
+
+    expect(Analytics.notificationOpened).toHaveBeenCalledWith('roadmap');
+    expect(Analytics.articleClicked).not.toHaveBeenCalled();
+    expect(ref.dispatch).toHaveBeenCalledWith(
+      resetTo('More', nestedState([{name: 'MoreMenu'}, {name: 'Roadmap'}])),
+    );
+  });
+
+  it('also tracks articleClicked for article notification types (news/hub/digest)', () => {
+    const ref = makeRef();
+    handleNotificationOpen(ref, {type: 'news', slug: 'btcc-2026-season-preview'});
+
+    expect(Analytics.notificationOpened).toHaveBeenCalledWith('news');
+    expect(Analytics.articleClicked).toHaveBeenCalledWith('btcc-2026-season-preview', 'notification', undefined, 'notification');
+    expect(ref.dispatch).toHaveBeenCalledWith(
+      resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'Article', params: {slug: 'btcc-2026-season-preview', trafficSource: 'notification'}}])),
+    );
+  });
+
+  it('falls back to id, then type, as the tracked article id when slug is absent', () => {
+    const ref = makeRef();
+    handleNotificationOpen(ref, {type: 'hub', id: 'hub-post-42'});
+
+    expect(Analytics.articleClicked).toHaveBeenCalledWith('hub-post-42', 'notification', undefined, 'notification');
+  });
+
+  it('is a no-op (no analytics, no navigation) when data is undefined', () => {
+    // The exact shape notifee/RNFirebase listeners pass through when there was
+    // nothing to report (e.g. getInitialNotification resolving null)
+    const ref = makeRef();
+    handleNotificationOpen(ref, undefined);
+
+    expect(Analytics.notificationOpened).not.toHaveBeenCalled();
+    expect(Analytics.articleClicked).not.toHaveBeenCalled();
     expect(ref.navigate).not.toHaveBeenCalled();
     expect(ref.dispatch).not.toHaveBeenCalled();
   });

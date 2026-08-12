@@ -1,13 +1,37 @@
 import {CommonActions} from '@react-navigation/native';
 import {getSeasonData} from '../assets/seasonData';
 import {markRead} from './digestRead';
+import {Analytics} from './analytics';
 
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
+
+const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest']);
 
 function fetchHubPost(id) {
   return fetch(HUB_NEWS_URL + '?t=' + Date.now())
     .then(r => r.json())
     .then(data => data.posts?.find(p => String(p.id) === String(id)) || null);
+}
+
+/**
+ * Single entry point for "a notification was pressed" - tracks analytics, then
+ * navigates. Shared by every press-handling path (App.tsx's notifee foreground
+ * and cold-start listeners, the RNFirebase messaging listeners, and index.js's
+ * notifee background handler) so a press while the app is merely backgrounded
+ * gets identical tracking and routing to every other lifecycle state, rather
+ * than a second, easily-drifted copy of this logic living in the native entry
+ * point (which can't import from App.tsx without dragging in its full,
+ * globally-mocked-in-tests provider tree).
+ */
+export function handleNotificationOpen(navigationRef, data) {
+  if (data) {
+    Analytics.notificationOpened(data.type);
+    if (ARTICLE_NOTIF_TYPES.has(data.type)) {
+      const articleId = data.slug || data.id || data.type;
+      Analytics.articleClicked(articleId, 'notification', undefined, 'notification');
+    }
+  }
+  navigateFromData(navigationRef, data);
 }
 
 /**

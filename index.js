@@ -1,8 +1,9 @@
 import {AppRegistry, Platform} from 'react-native';
 import {getMessaging, setBackgroundMessageHandler} from '@react-native-firebase/messaging';
-import notifee, {AndroidStyle} from '@notifee/react-native';
+import notifee, {AndroidStyle, EventType} from '@notifee/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import App from './App';
+import App, {navigationRef} from './App';
+import {handleNotificationOpen} from './src/utils/notifNavigation';
 import {name as appName} from './app.json';
 
 const TrackPlayer = Platform.OS === 'ios' ? require('react-native-track-player').default : null;
@@ -42,10 +43,19 @@ if (Platform.OS === 'android') {
   });
 }
 
-// Required by notifee — must be registered before the app starts.
-// Navigation is handled via notifee.getInitialNotification() in App.tsx
-// which reads the press data from notifee's native layer (no race condition).
-notifee.onBackgroundEvent(async () => {});
+// Required by notifee - must be registered before the app starts.
+// This is NOT redundant with App.tsx's notifee.getInitialNotification() polling:
+// that API only ever reports the notification that cold-started the app (killed
+// -> tapped -> launched). It does not, and structurally cannot, fire again for a
+// notification tapped while the app is merely backgrounded (still alive, just not
+// foreground) - that's exactly what this handler is for. Previously a no-op stub,
+// which meant a background-state tap just foregrounded the app with no navigation
+// at all - fixed 2026-08-12.
+notifee.onBackgroundEvent(async ({type, detail}) => {
+  if (type === EventType.PRESS) {
+    handleNotificationOpen(navigationRef, detail.notification?.data);
+  }
+});
 
 AppRegistry.registerComponent(appName, () => App);
 if (Platform.OS === 'ios' && TrackPlayer) {

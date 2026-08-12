@@ -195,16 +195,19 @@ On every app launch:
 
 ### 4.4 Notification Routing
 
-Four separate notification entry points are wired in `App.tsx`:
+Five separate notification entry points are wired across `App.tsx` and `index.js`:
 
 | State | Handler |
 |---|---|
-| App killed - Notifee press | `notifee.getInitialNotification()` |
-| App background - FCM tap | `onNotificationOpenedApp()` |
-| App killed - FCM tap | `getInitialNotification()` |
-| App foregrounded | `notifee.onForegroundEvent()` |
+| App killed - Notifee press | `notifee.getInitialNotification()` (`App.tsx`) |
+| App backgrounded - Notifee press | `notifee.onBackgroundEvent()` (`index.js`) |
+| App background - FCM tap | `onNotificationOpenedApp()` (`App.tsx`) |
+| App killed - FCM tap | `getInitialNotification()` (`App.tsx`) |
+| App foregrounded | `notifee.onForegroundEvent()` (`App.tsx`) |
 
-All four call `navigateFromData(navigationRef, data)` from [src/utils/notifNavigation.js](src/utils/notifNavigation.js).
+Since the real production news/podcast/broadcast notifications are data-only FCM messages (no top-level `notification` field - see `functions/newsCheck.js`/`send-test-notif.yml`), what the user actually sees and taps is a **Notifee**-displayed local notification built by `index.js`'s `setBackgroundMessageHandler` - so the two Notifee rows above are the ones that matter for those in practice, not the two FCM-tap rows (those only fire for a message with its own top-level `notification` payload, which none of this app's senders currently use).
+
+All five call `handleNotificationOpen(navigationRef, data)` from [src/utils/notifNavigation.js](src/utils/notifNavigation.js), which tracks `notificationOpened`/`articleClicked` analytics before delegating to `navigateFromData()`. **Fixed 2026-08-12:** `notifee.onBackgroundEvent()` in `index.js` was a no-op stub (`async () => {}`), on the mistaken assumption that `App.tsx`'s `getInitialNotification()` polling covered every lifecycle state - it structurally can't, since that API only ever reports the notification that cold-started the app. The practical symptom: tapping a notification while the app was open-but-backgrounded just foregrounded the app with no navigation at all.
 
 A foreground FCM message with `type: 'results_refresh'` deletes the cached results entry rather than showing a notification, so the next screen open fetches fresh data.
 

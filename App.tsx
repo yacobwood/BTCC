@@ -15,10 +15,9 @@ import {LiveUrlsProvider} from './src/store/liveUrls';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import {cacheEvictStale, cacheDelete} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
-import {navigateFromData} from './src/utils/notifNavigation';
+import {handleNotificationOpen} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
-import {Analytics} from './src/utils/analytics';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
@@ -28,17 +27,8 @@ import {AuthProvider} from './src/store/auth';
 
 export const navigationRef = createNavigationContainerRef();
 
-const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest']);
-
 function _navigate(data: Record<string, string> | undefined) {
-  if (data) {
-    Analytics.notificationOpened(data.type);
-    if (ARTICLE_NOTIF_TYPES.has(data.type)) {
-      const articleId = data.slug || data.id || data.type;
-      Analytics.articleClicked(articleId, 'notification', undefined, 'notification');
-    }
-  }
-  navigateFromData(navigationRef as any, data);
+  handleNotificationOpen(navigationRef as any, data);
 }
 
 // Keep old name for any legacy call sites
