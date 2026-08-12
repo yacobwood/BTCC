@@ -286,6 +286,22 @@
         },
         {
           "type": "heading",
+          "body": "Front-Wheel Drive vs Rear-Wheel Drive"
+        },
+        {
+          "type": "text",
+          "body": "NGTC rules allow both front-wheel-drive (FWD) and rear-wheel-drive (RWD) cars to race wheel-to-wheel in the same championship, which is unusual among touring car series. In a front-wheel-drive car the engine sends its power through the same wheels that steer, which tends to make the car more stable under braking but prone to losing traction out of slow corners. In a rear-wheel-drive car the front wheels steer while the rear wheels do all the driving, giving better traction on corner exit at the cost of being more likely to slide if the driver is too aggressive on the throttle."
+        },
+        {
+          "type": "text",
+          "body": "Because the two layouts handle so differently, TOCA does not treat every car the same on the scales or in the parts bin - see Minimum Weight and Brake Discs below for the exact numbers each type is allowed."
+        },
+        {
+          "type": "callout",
+          "body": "Currently the WSR-run BMW 330i M Sport is the only rear-wheel-drive car on the grid. Every other manufacturer runs a front-wheel-drive layout, so watching how the BMW drivers adapt their braking and cornering lines compared to the rest of the field is one of the more interesting technical subplots of a BTCC weekend."
+        },
+        {
+          "type": "heading",
           "body": "The Engine"
         },
         {
