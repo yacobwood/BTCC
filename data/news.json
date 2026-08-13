@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Restart Racing battle through Knockhill race day"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/cec2ce1e-c3e3-4844-a35e-4e9056a48006-smiley-DG5_7217-1-.jpg"
+        }
+      ]
+    }
   }
 ]
