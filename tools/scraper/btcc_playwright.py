@@ -330,5 +330,5 @@ def fetch_rendered(url: str, wait_selector: str | None = None, timeout: int = 30
 
 
 if __name__ == "__main__":
-    target = sys.argv[1] if len(sys.argv) > 1 else "https://www.btcc.net/news/"
+    target = sys.argv[1] if len(sys.argv) > 1 else "https://btcc.net/news/"
     print(fetch_rendered(target)[:500])

@@ -36,7 +36,7 @@ from pathlib import Path
 
 from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
 
-NEWS_URL = "https://www.btcc.net/news/"
+NEWS_URL = "https://btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 NEWS_JSON = DATA_DIR / "news.json"
 MEDIA_DIR = DATA_DIR / "media" / "news"
