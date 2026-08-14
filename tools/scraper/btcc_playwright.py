@@ -158,10 +158,24 @@ class RenderedFetcher:
         self._browser.close()
         self._pw.stop()
 
-    def get(self, url: str, wait_selector: str | None = None, timeout: int = 30000) -> str:
+    def get(
+        self,
+        url: str,
+        wait_selector: str | None = None,
+        timeout: int = 30000,
+        referer: str | None = None,
+    ) -> str:
+        """referer: pass the page a caller navigated *from* (e.g. a listing
+        page's URL) when fetching a page a real user would have reached by
+        clicking a link there - a bare page.goto() to a brand-new URL never
+        sets one on its own, unlike a real in-page navigation. Confirmed
+        (2026-08-14) this specific gap - not scroll behaviour or elapsed
+        time - as the one consistent difference between the individual-
+        article fetch that reliably 429'd right after the listing scrape and
+        the ones later in the same run that didn't."""
         page = self._context.new_page()
         try:
-            resp = page.goto(url, wait_until="load", timeout=timeout)
+            resp = page.goto(url, wait_until="load", timeout=timeout, referer=referer)
             if resp is None or not resp.ok:
                 status = resp.status if resp else "?"
                 raise RuntimeError(f"HTTP {status} fetching {url}")

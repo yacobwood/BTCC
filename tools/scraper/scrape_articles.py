@@ -75,6 +75,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -200,12 +201,31 @@ def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], 
     return cards, media
 
 
-def fetch_article_body(fetcher: RenderedFetcher, slug: str) -> str:
-    """Fetch a single article page and return its body's inner HTML."""
+def fetch_article_body(fetcher: RenderedFetcher, slug: str, retries: int = 2) -> str | None:
+    """Fetch a single article page and return its body's inner HTML, or None
+    if every attempt failed.
+
+    Retries with a short backoff before giving up rather than raising -
+    confirmed 2026-08-14 that an individual article fetch can still
+    intermittently hit Vercel's BotID challenge even with a persisted
+    session, the correct (bare, not www.) hostname, and referer=NEWS_URL
+    set (a real visitor reaches this page by clicking a card link on the
+    listing page, not by teleporting to it) - none of those individually
+    or combined made it fully reliable. Callers should treat None as "try
+    again next run", not something that should crash the whole batch."""
     url = f"https://btcc.net/{slug}/"
-    html = fetcher.get(url, wait_selector="div.article-body")
-    m = BODY_RE.search(html)
-    return m.group(1).strip() if m else ""
+    last_error: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            html = fetcher.get(url, wait_selector="div.article-body", referer=NEWS_URL)
+            m = BODY_RE.search(html)
+            return m.group(1).strip() if m else ""
+        except Exception as e:  # noqa: BLE001 - genuinely want to retry any failure here
+            last_error = e
+            if attempt < retries:
+                time.sleep(5 * (attempt + 1))
+    print(f"  WARNING: giving up on {slug} after {retries + 1} attempt(s): {last_error}", file=sys.stderr)
+    return None
 
 
 def load_existing() -> dict:
@@ -329,8 +349,24 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
             else:
                 print(f"  Fetching full content: {slug}")
                 content_html = fetch_article_body(fetcher, slug)
-                date_iso = card["date"]
-                category = ""
+                if content_html is None:
+                    # Every attempt failed (see fetch_article_body's retry) -
+                    # don't let one flaky article sink every other card in
+                    # this batch. Keep serving whatever was cached before
+                    # (a stale stub is still better than nothing, and this
+                    # slug gets retried fresh next run); if there's nothing
+                    # cached at all, skip it entirely this run rather than
+                    # writing a broken/empty entry - the card is still in
+                    # `cards` so the next run tries it again from scratch.
+                    if prior_content:
+                        content_html = prior_content
+                        date_iso = prior.get("date") or card["date"]
+                        category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
+                    else:
+                        continue
+                else:
+                    date_iso = card["date"]
+                    category = ""
 
             prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
             if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
