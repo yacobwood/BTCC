@@ -1,10 +1,16 @@
 [
   {
-    "id": "restart-racing-battle-through-knockhill-race-day",
-    "slug": "restart-racing-battle-through-knockhill-race-day",
+    "id": "team-vertu-takes-victory-from-bruising-knockhill-weekend",
+    "slug": "team-vertu-takes-victory-from-bruising-knockhill-weekend",
     "title": {
-      "rendered": "Restart Racing battle through Knockhill race day"
+      "rendered": "Team VERTU takes victory from bruising Knockhill weekend"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/ff1171a1-8f7b-49ea-931d-a209196639a0-chiltopn-0T9A3733.jpg"
+        }
+      ]
+    }
   }
 ]
