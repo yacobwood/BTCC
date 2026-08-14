@@ -694,27 +694,52 @@ export default function ArticleScreen({route, navigation}) {
   const [loadFailed, setLoadFailed] = useState(false);
   const myAuthorIdRef = useRef('anonymous');
 
-  const loadArticle = useCallback((forceRefresh = false) => {
+  const loadArticle = useCallback((forceRefresh = false, isInitialLoad = false) => {
     const resolvedSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null) || articleParam?.id || null;
     if (!resolvedSlug) return () => {};
     let cancelled = false;
     setLoadFailed(false);
-    // Retry passes forceRefresh=true - a miss on first load may just be a stale,
-    // pre-commit cached copy of the article index, so a plain re-fetch could keep
-    // serving that same cached miss for up to 5 more minutes without it.
-    const fetchPromise = forceRefresh ? fetchArticleBySlug(resolvedSlug, true) : fetchArticleBySlug(resolvedSlug);
-    fetchPromise.then(raw => {
+
+    const attempt = (isSilentRetry) => {
+      // Retry passes forceRefresh=true - a miss on first load may just be a stale,
+      // pre-commit cached copy of the article index, so a plain re-fetch could keep
+      // serving that same cached miss for up to 5 more minutes without it. The
+      // silent auto-retry below (isSilentRetry) needs this exact same bypass -
+      // confirmed via live device trace (2026-08-13) that without it, the "retry"
+      // just re-reads the identical stale cache entry and reliably misses twice.
+      const bypassCache = forceRefresh || isSilentRetry;
+      const fetchPromise = bypassCache ? fetchArticleBySlug(resolvedSlug, true) : fetchArticleBySlug(resolvedSlug);
+      fetchPromise.then(raw => {
+        if (cancelled) return;
+        if (raw) { setArticle(parseArticle(raw)); return; }
+        onMiss(isSilentRetry);
+      }).catch(() => { if (!cancelled) onMiss(isSilentRetry); });
+    };
+
+    // A miss on the very first, automatic (mount-triggered) attempt might just be the
+    // same stale-cached-index race the manual Retry button already accounts for
+    // above - a notification can fire before the slower article-mirror commit lands
+    // (see project_notification_publish_race_fix), and the on-device cache can still
+    // be serving that pre-commit snapshot for up to 5 more minutes. One immediate,
+    // cache-bypassing re-attempt before surfacing the failure screen. Manual
+    // Retry-button presses (isInitialLoad=false) already force their own refresh
+    // and don't get a second silent layer stacked on top.
+    const onMiss = (wasSilentRetry) => {
       if (cancelled) return;
-      if (raw) setArticle(parseArticle(raw));
-      // Not found yet (e.g. a just-published article the mirror hasn't
-      // picked up) - surface a retry state instead of spinning forever.
-      else setLoadFailed(true);
-    }).catch(() => { if (!cancelled) setLoadFailed(true); });
+      if (isInitialLoad && !wasSilentRetry) { attempt(true); return; }
+      // Still not found after the cache-bypassing retry (e.g. a just-published
+      // article the mirror genuinely hasn't picked up yet) - surface a retry
+      // state instead of spinning forever.
+      Analytics.articleLoadFailed(resolvedSlug, isInitialLoad ? 'initial_retry_exhausted' : 'manual_retry_failed');
+      setLoadFailed(true);
+    };
+
+    attempt(false);
     return () => { cancelled = true; };
   }, [slug, articleParam]);
 
   useEffect(() => {
-    if (!validParam) return loadArticle();
+    if (!validParam) return loadArticle(false, true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

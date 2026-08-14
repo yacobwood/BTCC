@@ -10,6 +10,14 @@ export const Analytics = {
   articleShared: (title) => logEvent(fa(),'share', {content_type: 'article', item_id: title?.substring(0, 100) || ''}),
   articleScrollDepth: (title, depth) => logEvent(fa(),'article_scroll_depth', {item_name: title?.substring(0, 100), depth_percent: depth}),
   articleExternalLinkClicked: (title, url) => logEvent(fa(),'article_external_link_clicked', {item_name: title?.substring(0, 100), url: url?.substring(0, 100)}),
+  // error_code is coarse by necessity: fetchArticleBySlug's own internal try/catch
+  // (and fetchArticlesIndex/fetchArticlesPage/fetchJson beneath it) always resolves
+  // to null rather than rethrowing, so "not yet mirrored" and "network/DNS failure"
+  // are indistinguishable by the time this fires - see the 2026-08-13 cold-start
+  // investigation. Good enough to tell how often/which slugs fail without needing
+  // an adb logcat session to even notice; a real error_code would need that whole
+  // chain to stop swallowing its underlying error first.
+  articleLoadFailed: (slug, errorCode) => logEvent(fa(),'article_load_failed', {item_id: slug?.substring(0, 100) || '', error_code: errorCode || 'unknown'}),
 
   trackDetailViewed: (round, venue) => logEvent(fa(),'track_detail_viewed', {round, venue}),
   raceClicked: (round, venue) => logEvent(fa(),'race_clicked', {round, venue}),

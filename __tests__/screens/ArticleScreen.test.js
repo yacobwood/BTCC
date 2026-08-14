@@ -56,7 +56,7 @@ jest.mock('../../src/utils/notifications', () => ({
 }));
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), articleShared: jest.fn()},
+  Analytics: {screen: jest.fn(), articleShared: jest.fn(), articleLoadFailed: jest.fn()},
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -275,6 +275,7 @@ describe('ArticleScreen', () => {
       await waitFor(() => {
         expect(getByText("Couldn't load this article")).toBeTruthy();
       });
+      expect(Analytics.articleLoadFailed).toHaveBeenCalledWith('not-mirrored-yet', 'initial_retry_exhausted');
     });
 
     it('shows the same retry state when fetchArticleBySlug rejects', async () => {
@@ -291,13 +292,15 @@ describe('ArticleScreen', () => {
       fetchArticleBySlug.mockResolvedValue(null);
 
       const {getByText, getByLabelText} = renderArticle({article: undefined, slug: 'not-mirrored-yet'});
+      // Initial mount load gets a silent auto-retry before failing (see below),
+      // so 2 calls have already happened by the time the failure screen shows.
       await waitFor(() => expect(getByText("Couldn't load this article")).toBeTruthy());
 
       fetchArticleBySlug.mockResolvedValue(RAW_WP_ARTICLE);
       fireEvent.press(getByLabelText('Retry loading article'));
 
       await waitFor(() => {
-        expect(fetchArticleBySlug).toHaveBeenCalledTimes(2);
+        expect(fetchArticleBySlug).toHaveBeenCalledTimes(3);
       });
     });
 
@@ -308,14 +311,38 @@ describe('ArticleScreen', () => {
 
       const {getByText, getByLabelText} = renderArticle({article: undefined, slug: 'not-mirrored-yet'});
       await waitFor(() => expect(getByText("Couldn't load this article")).toBeTruthy());
+      // Call 1 is the initial mount load (no forceRefresh); call 2 is its silent
+      // auto-retry, which must itself bypass the cache too - otherwise it just
+      // re-reads the same stale index and reliably misses twice (confirmed live,
+      // 2026-08-13). Call 3 is the manual Retry button, same bypass.
       expect(fetchArticleBySlug).toHaveBeenNthCalledWith(1, 'not-mirrored-yet');
+      expect(fetchArticleBySlug).toHaveBeenNthCalledWith(2, 'not-mirrored-yet', true);
 
       fetchArticleBySlug.mockResolvedValue(RAW_WP_ARTICLE);
       fireEvent.press(getByLabelText('Retry loading article'));
 
       await waitFor(() => {
-        expect(fetchArticleBySlug).toHaveBeenNthCalledWith(2, 'not-mirrored-yet', true);
+        expect(fetchArticleBySlug).toHaveBeenNthCalledWith(3, 'not-mirrored-yet', true);
       });
+    });
+
+    // A notification can fire before the slower article-mirror commit lands, so the
+    // on-device cache can still be serving a pre-commit snapshot of the index for up
+    // to 5 minutes - the automatic initial load's silent retry must bypass that cache
+    // (forceRefresh=true) to have any chance of succeeding. Root-caused live via
+    // device trace 2026-08-13 after an earlier version of this retry didn't do that.
+    it('silently retries once on the initial load before showing the failure screen', async () => {
+      fetchArticleBySlug.mockResolvedValueOnce(null).mockResolvedValueOnce(RAW_WP_ARTICLE);
+
+      const {queryByText, getByTestId} = renderArticle({article: undefined, slug: 'cold-start-slug'});
+
+      await waitFor(() => {
+        expect(fetchArticleBySlug).toHaveBeenCalledTimes(2);
+      });
+      expect(fetchArticleBySlug).toHaveBeenNthCalledWith(1, 'cold-start-slug');
+      expect(fetchArticleBySlug).toHaveBeenNthCalledWith(2, 'cold-start-slug', true);
+      expect(queryByText("Couldn't load this article")).toBeNull();
+      expect(getByTestId('webview')).toBeTruthy();
     });
 
     it('pressing Go back navigates away from the failed article', async () => {
