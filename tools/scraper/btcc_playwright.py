@@ -17,7 +17,9 @@ and doesn't help here since it can't execute JavaScript either.
 from __future__ import annotations
 
 import io
+import random
 import sys
+import time
 from pathlib import Path
 
 from PIL import Image
@@ -110,21 +112,54 @@ _USER_AGENT = (
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 )
 
+# Persists cookies/localStorage across separate script runs (this file's own
+# machine-local state directory, matching ~/.btcc-scraper-venv's pattern -
+# outside the git checkout so a `git clean`/rebase can never touch it).
+# Root-caused 2026-08-13/14: this scraper's self-hosted-runner IP started
+# getting Vercel's BotID challenge (429, x-vercel-mitigated: challenge)
+# consistently after weeks of clean runs, on every path on the domain
+# (even /robots.txt) - not a code regression, and not fixed by any request
+# header or TLS trick. A brand-new, cookie-less headless browser launched
+# fresh every 5 minutes, forever, is itself a strong behavioral signal to
+# modern bot-scoring: a real returning visitor's browser carries session
+# cookies (including whatever token a solved JS challenge sets) so it isn't
+# re-challenged from scratch on every visit. Persisting storage_state gives
+# this scraper the same "returning session" continuity a real user has.
+_STORAGE_STATE_PATH = Path.home() / ".btcc-scraper-state" / "storage_state.json"
+
+# Small random delay before the first request of a run - the underlying
+# GitHub Actions cron already isn't perfectly on-time, but the fetch itself
+# firing at an exact 5-minute mark, every time, for weeks, is an unusually
+# regular cadence for a "real visitor" to have. Cheap to add, doesn't hurt.
+_MAX_STARTUP_JITTER_SECONDS = 45
+
 
 class RenderedFetcher:
-    """Reuses one headless browser across several fetches in the same script run."""
+    """Reuses one headless browser (and one browser context, so cookies persist
+    within a run) across several fetches in the same script run."""
 
     def __enter__(self) -> "RenderedFetcher":
+        time.sleep(random.uniform(0, _MAX_STARTUP_JITTER_SECONDS))
         self._pw = sync_playwright().start()
         self._browser = self._pw.chromium.launch(headless=True)
+        storage_state = str(_STORAGE_STATE_PATH) if _STORAGE_STATE_PATH.exists() else None
+        self._context = self._browser.new_context(user_agent=_USER_AGENT, storage_state=storage_state)
         return self
 
     def __exit__(self, *exc) -> None:
+        # Best-effort: never let a state-save failure mask the real exception
+        # (if any) from the `with` block, or block browser/playwright teardown.
+        try:
+            _STORAGE_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            self._context.storage_state(path=str(_STORAGE_STATE_PATH))
+        except Exception:
+            pass
+        self._context.close()
         self._browser.close()
         self._pw.stop()
 
     def get(self, url: str, wait_selector: str | None = None, timeout: int = 30000) -> str:
-        page = self._browser.new_page(user_agent=_USER_AGENT)
+        page = self._context.new_page()
         try:
             resp = page.goto(url, wait_until="load", timeout=timeout)
             if resp is None or not resp.ok:
@@ -184,7 +219,7 @@ class RenderedFetcher:
                 except Exception:
                     pass
 
-        page = self._browser.new_page(user_agent=_USER_AGENT)
+        page = self._context.new_page()
         page.on("response", on_response)
         try:
             resp = page.goto(url, wait_until="load", timeout=timeout)
@@ -261,7 +296,7 @@ class RenderedFetcher:
                 except Exception:
                     pass
 
-        page = self._browser.new_page(user_agent=_USER_AGENT)
+        page = self._context.new_page()
         page.on("response", on_response)
         try:
             resp = page.goto(url, wait_until="load", timeout=timeout)
