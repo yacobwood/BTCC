@@ -75,11 +75,11 @@ import argparse
 import json
 import re
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 
 from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
+from scrapfly_fallback import fetch_via_scrapfly
 
 NEWS_URL = "https://btcc.net/news/"
 PAGE_SIZE = 20  # must match src/api/client.js's fetchArticles() perPage
@@ -201,31 +201,37 @@ def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], 
     return cards, media
 
 
-def fetch_article_body(fetcher: RenderedFetcher, slug: str, retries: int = 2) -> str | None:
+def fetch_article_body(fetcher: RenderedFetcher, slug: str, retries: int | None = None) -> str | None:
     """Fetch a single article page and return its body's inner HTML, or None
     if every attempt failed.
 
-    Retries with a short backoff before giving up rather than raising -
+    Retrying with backoff before giving up is now RenderedFetcher's own
+    built-in default behavior (see btcc_playwright.py), not local logic -
     confirmed 2026-08-14 that an individual article fetch can still
     intermittently hit Vercel's BotID challenge even with a persisted
-    session, the correct (bare, not www.) hostname, and referer=NEWS_URL
-    set (a real visitor reaches this page by clicking a card link on the
-    listing page, not by teleporting to it) - none of those individually
-    or combined made it fully reliable. Callers should treat None as "try
-    again next run", not something that should crash the whole batch."""
+    session, the correct (bare, not www.) hostname, and referer=NEWS_URL set
+    (a real visitor reaches this page by clicking a card link on the listing
+    page, not by teleporting to it) - none of those individually or combined
+    made it fully reliable, so every btcc.net-facing scraper retries by
+    default now, not just this one.
+
+    Once RenderedFetcher's own retries are exhausted, falls back to
+    fetch_via_scrapfly (a bounded, measured trial - see scrapfly_fallback.py
+    - scoped to exactly this fetch path, since it's the one with a confirmed
+    history of residual flakiness even with every free-tier fix already
+    applied). A no-op if that trial isn't configured. Callers should treat
+    None as "try again next run", not something that should crash the whole
+    batch."""
     url = f"https://btcc.net/{slug}/"
-    last_error: Exception | None = None
-    for attempt in range(retries + 1):
-        try:
-            html = fetcher.get(url, wait_selector="div.article-body", referer=NEWS_URL)
-            m = BODY_RE.search(html)
-            return m.group(1).strip() if m else ""
-        except Exception as e:  # noqa: BLE001 - genuinely want to retry any failure here
-            last_error = e
-            if attempt < retries:
-                time.sleep(5 * (attempt + 1))
-    print(f"  WARNING: giving up on {slug} after {retries + 1} attempt(s): {last_error}", file=sys.stderr)
-    return None
+    try:
+        html = fetcher.get(url, wait_selector="div.article-body", referer=NEWS_URL, retries=retries)
+    except Exception as e:
+        print(f"  WARNING: RenderedFetcher gave up on {slug} ({e}) - trying Scrapfly fallback", file=sys.stderr)
+        html = fetch_via_scrapfly(url, referer=NEWS_URL, label=slug)
+        if html is None:
+            return None
+    m = BODY_RE.search(html)
+    return m.group(1).strip() if m else ""
 
 
 def load_existing() -> dict:
@@ -325,27 +331,20 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
-    # Wall-clock budget for the whole fetch loop below, independent of any
-    # single article's own retry count. Root-caused 2026-08-17: this is the
-    # only scraper on the shared self-hosted runner (btcc-mac - just one
-    # registered, so exactly one job runs at a time across every scraper
-    # workflow) whose worst-case runtime scales with how many articles are
-    # currently failing, unbounded - fetch_article_body's own per-article
-    # retry (3 attempts, up to ~135s worst case each) has no ceiling on how
-    # many articles hit that worst case in the same run. On a bad btcc.net
-    # block day that turned into single runs actively executing for over an
-    # hour, which - because only one runner exists - starved every other
-    # scraper queued behind it (confirmed: a scrape-team-stats run sat queued
-    # for 20+ minutes behind one such run, then itself failed on the same
-    # 429 the moment it finally got the runner). Once this budget is spent,
-    # remaining articles skip straight to the existing cached-content/skip
-    # fallback with no further fetch attempts, so a bad block day degrades to
-    # "finishes quickly with partial data" instead of "occupies the only
-    # runner for however long the block lasts."
-    _MAX_FETCH_BUDGET_SECONDS = 150
-    start_time = time.monotonic()
-    budget_exhausted = False
-
+    # RenderedFetcher's own budget_seconds (default 150s, see
+    # btcc_playwright.py) now covers this loop, not local bookkeeping here.
+    # Root-caused 2026-08-17: this was the only scraper on the shared
+    # self-hosted runner (btcc-mac - just one registered, so exactly one job
+    # runs at a time across every scraper workflow) with any ceiling at all
+    # on how many articles' worth of retries a single bad-block-day run could
+    # burn through - every other scraper had no such ceiling either, which
+    # is why the budget moved into the shared helper instead of staying
+    # local to this one script. Once it's spent, remaining articles skip
+    # straight to the existing cached-content/skip fallback with no further
+    # fetch attempts, so a bad block day degrades to "finishes quickly with
+    # partial data" instead of "occupies the only runner for however long
+    # the block lasts" (confirmed: a scrape-team-stats run once sat queued
+    # for 20+ minutes behind exactly this kind of unbounded run).
     with RenderedFetcher() as fetcher:
         if backfill_pages > 1:
             cards, media = scrape_pages(fetcher, backfill_pages)
@@ -355,6 +354,7 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
             return []
 
         merged = dict(existing)
+        budget_warned = False
         for i, card in enumerate(cards):
             if backfill_pages > 1 and i % 25 == 0:
                 print(f"  Processing article {i + 1}/{len(cards)}...")
@@ -368,11 +368,14 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
                 date_iso = prior.get("date") or card["date"]
                 category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
             else:
-                if not budget_exhausted and time.monotonic() - start_time > _MAX_FETCH_BUDGET_SECONDS:
-                    print("  WARNING: fetch time budget exhausted - skipping remaining fetches for this run")
-                    budget_exhausted = True
-
-                if budget_exhausted:
+                # Loop keeps running past budget exhaustion (never breaks) -
+                # remaining cards still need visiting to preserve whatever
+                # cached content they already have below; only new *fetch
+                # attempts* stop.
+                if fetcher.over_budget():
+                    if not budget_warned:
+                        print("  WARNING: fetch time budget exhausted - skipping remaining fetches for this run")
+                        budget_warned = True
                     content_html = None
                 else:
                     print(f"  Fetching full content: {slug}")

@@ -21,7 +21,7 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-from btcc_playwright import fetch_rendered
+from btcc_playwright import RenderedFetcher
 
 WINS_URL   = "https://btcc.net/history/statistics/drivers/"
 TITLES_URL = "https://btcc.net/history/champions/btcc-titles/"
@@ -41,10 +41,6 @@ NAME_ALIASES = {
 
 
 # ── HTML helpers ─────────────────────────────────────────────────────────────
-
-def _fetch(url: str) -> str:
-    return fetch_rendered(url, wait_selector=".history-editorial")
-
 
 def _strip_tags(html: str) -> str:
     """Remove all HTML tags and decode common entities."""
@@ -204,26 +200,41 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Print changes without writing")
     args = ap.parse_args()
 
-    print("Fetching wins from btcc.net...")
-    try:
-        wins_html = _fetch(WINS_URL)
-    except Exception as e:
-        print(f"ERROR: could not fetch wins ({e})", file=sys.stderr)
-        sys.exit(1)
+    # One shared browser for both fetches, each isolated in its own
+    # try/except - previously a wins-fetch failure sys.exit(1)'d before even
+    # attempting titles, so one side being briefly 429'd threw away an
+    # otherwise-successful update to the other.
+    wins_html = titles_html = None
+    with RenderedFetcher() as fetcher:
+        print("Fetching wins from btcc.net...")
+        try:
+            wins_html = fetcher.get(WINS_URL, wait_selector=".history-editorial")
+        except Exception as e:
+            print(f"ERROR: could not fetch wins ({e})", file=sys.stderr)
 
-    print("Fetching titles from btcc.net...")
-    try:
-        titles_html = _fetch(TITLES_URL)
-    except Exception as e:
-        print(f"ERROR: could not fetch titles ({e})", file=sys.stderr)
-        sys.exit(1)
+        print("Fetching titles from btcc.net...")
+        try:
+            # referer=WINS_URL: less proven than scrape_articles.py's
+            # listing->article referer fix (these are sibling /history/...
+            # pages, not a card-click relationship) - included because it's
+            # cheap and plausible, not because it's been confirmed to matter.
+            titles_html = fetcher.get(TITLES_URL, wait_selector=".history-editorial", referer=WINS_URL)
+        except Exception as e:
+            print(f"ERROR: could not fetch titles ({e})", file=sys.stderr)
 
-    wins   = parse_wins(wins_html)
-    titles = parse_titles(titles_html)
+    if wins_html is None and titles_html is None:
+        sys.exit(1)  # both fetches failed outright - nothing to do
+
+    wins   = parse_wins(wins_html) if wins_html else {}
+    titles = parse_titles(titles_html) if titles_html else {}
     print(f"  Parsed {len(wins)} drivers with wins, {len(titles)} with titles")
 
-    if not wins or not titles:
-        print("ERROR: empty parse result - page may be behind a bot challenge", file=sys.stderr)
+    # A page that fetched successfully but parsed to zero rows usually means
+    # its structure changed (still worth failing loudly on) - distinct from a
+    # genuine fetch failure on the *other* side, which is no longer fatal by
+    # itself now that the two fetches are isolated above.
+    if (wins_html is not None and not wins) or (titles_html is not None and not titles):
+        print("ERROR: fetched a page but parsed no rows - structure may have changed", file=sys.stderr)
         sys.exit(1)
 
     data    = json.loads(RECORDS.read_text())

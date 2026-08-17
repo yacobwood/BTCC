@@ -25,7 +25,7 @@ import json
 import re
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher, save_mirrored_image
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
@@ -38,8 +38,16 @@ DRIVER_SLUGS: dict[str, str] = {
     "Ryan Bensley": "ryan-bensley",
 }
 
-CUTOUT_RE = re.compile(r'class="[^"]*driver-profile-cutout[^"]*"[^>]*src="(/api/media/[^"]+)"')
+# Root-caused live 2026-08-17: a driver's profile cutout <img> now sometimes
+# uses a direct Supabase Storage signed URL instead of the /api/media/<uuid>
+# redirector - see scrape_driver_cutouts.py's own CUTOUT_RE comment, same fix.
+CUTOUT_RE = re.compile(r'class="[^"]*driver-profile-cutout[^"]*"[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 BASE_URL = "https://btcc.net/driver/"
+
+# This script doesn't fetch the /drivers/ listing itself, but it's a real
+# link relationship - scrape_driver_backgrounds.py/scrape_driver_cutouts.py
+# both confirm the listing's cards link directly to /driver/<slug>/.
+_DRIVERS_LISTING_REFERER = "https://btcc.net/drivers/"
 
 
 def main() -> None:
@@ -51,11 +59,16 @@ def main() -> None:
             slug = DRIVER_SLUGS.get(drv["name"])
             if not slug:
                 continue
+            if fetcher.over_budget():
+                print("  WARNING: fetch time budget exhausted - skipping remaining drivers this run")
+                break
             try:
                 url = BASE_URL + slug + "/"
-                html, media = fetcher.get_with_media(url, wait_selector=".driver-profile-cutout")
+                html, media = fetcher.get_with_media(
+                    url, wait_selector=".driver-profile-cutout", referer=_DRIVERS_LISTING_REFERER
+                )
                 m = CUTOUT_RE.search(html)
-                media_url = f"https://btcc.net{m.group(1)}" if m else None
+                media_url = resolve_media_url(m.group(1)) if m else None
                 filename = save_mirrored_image(media, media_url, MEDIA_DIR)
                 if filename:
                     drv["imageUrl"] = f"{MEDIA_RAW_BASE}/{filename}"

@@ -32,11 +32,12 @@ Usage:
 import io
 import json
 import re
+import sys
 from pathlib import Path
 
 from PIL import Image
 
-from btcc_playwright import RenderedFetcher
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
@@ -52,7 +53,12 @@ NAME_ALIASES = {
 
 CARD_BLOCK_RE = re.compile(r'<a class="driver-card" href="/driver/([a-z0-9-]+)/">(.*?)</a>', re.DOTALL)
 NAME_RE = re.compile(r'<h1>([^<]+)</h1>')
-CUTOUT_RE = re.compile(r'class="[^"]*driver-profile-cutout[^"]*"[^>]*src="(/api/media/[^"]+)"')
+# Root-caused live 2026-08-17: a driver's profile cutout <img> now sometimes
+# uses a direct Supabase Storage signed URL instead of the /api/media/<uuid>
+# redirector - confirmed live (tom-ingram's cutout uses the Supabase shape
+# directly, even though /api/media/ URLs still appear elsewhere on the same
+# page for other images).
+CUTOUT_RE = re.compile(r'class="[^"]*driver-profile-cutout[^"]*"[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 
 
 def _discover_slugs(fetcher: RenderedFetcher) -> dict[str, str]:
@@ -74,7 +80,11 @@ def main() -> None:
     bundled_numbers = {int(p.stem) for p in IMAGES_DIR.glob("*.webp")}
 
     with RenderedFetcher() as fetcher:
-        slugs = _discover_slugs(fetcher)
+        try:
+            slugs = _discover_slugs(fetcher)
+        except Exception as e:
+            print(f"ERROR: could not fetch drivers listing ({e})", file=sys.stderr)
+            sys.exit(1)
 
         updated = 0
         for drv in data["drivers"]:
@@ -85,14 +95,19 @@ def main() -> None:
             if not slug:
                 print(f"  WARNING: no /drivers/ listing match for {drv['name']}, skipping")
                 continue
+            if fetcher.over_budget():
+                print("  WARNING: fetch time budget exhausted - skipping remaining drivers this run")
+                break
             try:
                 url = BASE_URL + slug + "/"
-                html, media = fetcher.get_with_media(url, wait_selector=".driver-profile-cutout")
+                html, media = fetcher.get_with_media(
+                    url, wait_selector=".driver-profile-cutout", referer=DRIVERS_LISTING_URL
+                )
                 m = CUTOUT_RE.search(html)
                 if not m:
                     print(f"  WARNING: no cutout found for {drv['name']}")
                     continue
-                media_url = f"https://btcc.net{m.group(1)}"
+                media_url = resolve_media_url(m.group(1))
                 entry = media.get(media_url)
                 if not entry:
                     print(f"  WARNING: cutout image not captured for {drv['name']}")

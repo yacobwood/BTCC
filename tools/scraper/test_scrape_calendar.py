@@ -10,9 +10,20 @@ calendar scrape until caught by testing against the actual rendered page
 """
 
 import unittest
-from unittest.mock import patch
 
 from scrape_calendar import parse_date_range, scrape_calendar
+
+
+class FakeFetcher:
+    """Minimal stand-in for RenderedFetcher - scrape_calendar() only ever
+    calls .get(url, **kwargs) on whatever fetcher it's given, so a real
+    Playwright browser isn't needed to test the call itself (same
+    convention as test_scrape_articles.py's own FakeFetcher)."""
+    def __init__(self, html):
+        self.html = html
+
+    def get(self, url, **kwargs):
+        return self.html
 
 
 class TestParseDateRange(unittest.TestCase):
@@ -72,19 +83,22 @@ class TestScrapeCalendarOrdering(unittest.TestCase):
     </div>
     """
 
-    @patch("scrape_calendar._fetch")
-    def test_rounds_sorted_chronologically_not_by_dom_order(self, mock_fetch):
-        mock_fetch.return_value = self.CALENDAR_HTML
-        events = scrape_calendar(2026)
+    def test_rounds_sorted_chronologically_not_by_dom_order(self):
+        events = scrape_calendar(FakeFetcher(self.CALENDAR_HTML), 2026)
         self.assertEqual([e["venue"] for e in events], ["Donington Park", "Thruxton", "Croft"])
         self.assertEqual([e["round"] for e in events], [1, 2, 3])
 
-    @patch("scrape_calendar._fetch")
-    def test_september_round_not_dropped(self, mock_fetch):
-        mock_fetch.return_value = self.CALENDAR_HTML
-        events = scrape_calendar(2026)
+    def test_september_round_not_dropped(self):
+        events = scrape_calendar(FakeFetcher(self.CALENDAR_HTML), 2026)
         venues = [e["venue"] for e in events]
         self.assertIn("Croft", venues)
+
+    def test_returns_none_rather_than_raising_on_fetch_failure(self):
+        class _RaisingFetcher:
+            def get(self, url, **kwargs):
+                raise RuntimeError("HTTP 429 fetching https://btcc.net/calendar/")
+
+        self.assertIsNone(scrape_calendar(_RaisingFetcher(), 2026))
 
 
 if __name__ == "__main__":

@@ -26,6 +26,15 @@ on:
         type: number
         default: 2026
 
+concurrency:
+  group: scrape-calendar
+  # false, not true: unlike scrape-news.yml (every 5 minutes, where a stale
+  # run should always lose to a fresher one), this only runs weekly - a
+  # manual workflow_dispatch overlapping the Monday cron should queue behind
+  # whichever started first, not cancel it outright. Matches
+  # scrape-btcc-stats.yml/scrape-team-stats.yml's own concurrency setting.
+  cancel-in-progress: false
+
 jobs:
   scrape:
     runs-on: [self-hosted, btcc-mac]

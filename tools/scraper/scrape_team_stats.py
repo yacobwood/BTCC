@@ -33,7 +33,7 @@ import json
 import re
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher, save_mirrored_image
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
@@ -56,9 +56,15 @@ TEAM_SLUGS: dict[str, str] = {
 
 STAT_RE = re.compile(r'<strong>(\d+)</strong>\s*<h3>([^<]+)</h3>')
 TEAM_CARD_BLOCK_RE = re.compile(r'<a class="team-card" href="/team/([a-z0-9-]+)/">(.*?)</a>', re.DOTALL)
-TEAM_CARD_BG_RE = re.compile(r'class="[^"]*team-card-background[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
+# Root-caused live 2026-08-17: team-card images now sometimes come straight
+# from a Supabase Storage signed URL instead of always going through the
+# /api/media/<uuid> redirector - confirmed live via drivers.json already
+# having a cardBgUrl from an older run (when the redirector shape still
+# applied) while carImageUrl had apparently never once populated, since
+# TEAM_CARD_CAR_RE's /api/media/-only pattern silently matched nothing.
+TEAM_CARD_BG_RE = re.compile(r'class="[^"]*team-card-background[^"]*"[^>]*>\s*<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 # Named "-logo" on the site, but it's actually the full car photo shown on the card.
-TEAM_CARD_CAR_RE = re.compile(r'class="[^"]*team-card-logo[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
+TEAM_CARD_CAR_RE = re.compile(r'class="[^"]*team-card-logo[^"]*"[^>]*>\s*<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 BASE_URL = "https://btcc.net/team/"
 
 
@@ -71,12 +77,12 @@ def _fetch_team_images(fetcher: RenderedFetcher) -> dict[str, tuple[str | None, 
         slug, block = block_m.group(1), block_m.group(2)
 
         bg_m = TEAM_CARD_BG_RE.search(block)
-        bg_media_url = f"https://btcc.net{bg_m.group(1)}" if bg_m else None
+        bg_media_url = resolve_media_url(bg_m.group(1)) if bg_m else None
         bg_filename = save_mirrored_image(media, bg_media_url, MEDIA_DIR)
         bg_url = f"{MEDIA_RAW_BASE}/{bg_filename}" if bg_filename else None
 
         car_m = TEAM_CARD_CAR_RE.search(block)
-        car_media_url = f"https://btcc.net{car_m.group(1)}" if car_m else None
+        car_media_url = resolve_media_url(car_m.group(1)) if car_m else None
         car_filename = save_mirrored_image(media, car_media_url, MEDIA_DIR)
         car_url = f"{MEDIA_RAW_BASE}/{car_filename}" if car_filename else None
 
@@ -87,7 +93,7 @@ def _fetch_team_images(fetcher: RenderedFetcher) -> dict[str, tuple[str | None, 
 
 def _fetch_team_stats(fetcher: RenderedFetcher, slug: str) -> dict[str, int]:
     url = BASE_URL + slug + "/"
-    html = fetcher.get(url, wait_selector=".team-summary-stats")
+    html = fetcher.get(url, wait_selector=".team-summary-stats", referer=TEAMS_LISTING_URL)
     return {
         m.group(2).strip().split()[0].lower(): int(m.group(1))
         for m in STAT_RE.finditer(html)
@@ -99,13 +105,23 @@ def main() -> None:
     updated = 0
 
     with RenderedFetcher() as fetcher:
-        team_images = _fetch_team_images(fetcher)
+        try:
+            team_images = _fetch_team_images(fetcher)
+        except Exception as e:
+            # Degrade rather than crash: the per-team stats loop below is an
+            # independently valuable data source and shouldn't be sacrificed
+            # to a secondary image-mirroring failure.
+            print(f"  WARNING: could not fetch team images ({e}) - continuing without background/car images this run")
+            team_images = {}
 
         for team in data["teams"]:
             name = team["name"]
             slug = TEAM_SLUGS.get(name)
             if not slug:
                 continue
+            if fetcher.over_budget():
+                print("  WARNING: fetch time budget exhausted - skipping remaining teams this run")
+                break
             try:
                 stats = _fetch_team_stats(fetcher, slug)
                 team["totalRaces"] = stats.get("races", team.get("totalRaces", 0))

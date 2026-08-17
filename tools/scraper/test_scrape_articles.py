@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
 """Tests for scrape_articles.py's display-date parsing."""
 
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
-from scrape_articles import needs_full_refetch, parse_display_date, resolve_first_seen, scrape_card_list, sort_posts
+import scrape_articles
+from scrape_articles import (
+    NEWS_URL,
+    build_articles,
+    fetch_article_body,
+    needs_full_refetch,
+    parse_display_date,
+    resolve_first_seen,
+    scrape_card_list,
+    sort_posts,
+)
 
 
 class TestParseDisplayDate(unittest.TestCase):
@@ -178,15 +191,35 @@ class TestSortPosts(unittest.TestCase):
 class FakeFetcher:
     """Minimal stand-in for RenderedFetcher - scrape_card_list only ever calls
     .get_with_media(url, **kwargs) on whatever fetcher it's given, so a real
-    Playwright browser isn't needed to test the call itself."""
-    def __init__(self, html='<html><body></body></html>', media=None):
+    Playwright browser isn't needed to test the call itself. get()/
+    over_budget()/__enter__/__exit__ extend this same fake for
+    fetch_article_body/build_articles coverage below - harmless additions,
+    since scrape_card_list's own test above never calls them."""
+    def __init__(self, html='<html><body></body></html>', media=None, get_error=None, over_budget=False):
         self.html = html
         self.media = media or {}
         self.calls = []
+        self.get_error = get_error
+        self._over_budget = over_budget
 
     def get_with_media(self, url, **kwargs):
         self.calls.append({'url': url, **kwargs})
         return self.html, self.media
+
+    def get(self, url, **kwargs):
+        self.calls.append({'url': url, **kwargs})
+        if self.get_error:
+            raise self.get_error
+        return '<div class="article-body">Full content.</div>'
+
+    def over_budget(self):
+        return self._over_budget
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
 
 
 class TestScrapeCardList(unittest.TestCase):
@@ -196,6 +229,70 @@ class TestScrapeCardList(unittest.TestCase):
         scrape_card_list(fetcher)
         self.assertEqual(len(fetcher.calls), 1)
         self.assertTrue(fetcher.calls[0].get('scroll_through'))
+
+
+# ── fetch_article_body / build_articles ──────────────────────────────────────
+#
+# Regression coverage for the 2026-08-17 refactor onto btcc_playwright.py's
+# now-shared retry/budget logic (see test_btcc_playwright.py for the retry
+# mechanics themselves) - these confirm fetch_article_body/build_articles
+# still behave the same from the outside: None on total failure, referer
+# still passed, and a budget that's already exhausted still skips fetching a
+# brand-new (nothing cached) slug entirely rather than fetching regardless.
+
+class TestFetchArticleBody(unittest.TestCase):
+    """The Scrapfly fallback (scrapfly_fallback.fetch_via_scrapfly) is
+    mocked directly at its scrape_articles-side import in every test here -
+    its own no-op/success/failure behavior is covered independently in
+    test_scrapfly_fallback.py; what matters here is *when* it's called."""
+
+    @patch("scrape_articles.fetch_via_scrapfly", return_value=None)
+    def test_returns_none_rather_than_raising_when_every_attempt_fails(self, mock_scrapfly):
+        fetcher = FakeFetcher(get_error=RuntimeError("HTTP 429 fetching article"))
+        self.assertIsNone(fetch_article_body(fetcher, "some-slug"))
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_passes_referer_to_the_listing_page(self, mock_scrapfly):
+        fetcher = FakeFetcher()
+        fetch_article_body(fetcher, "some-slug")
+        self.assertEqual(fetcher.calls[0]["referer"], NEWS_URL)
+        # RenderedFetcher succeeded outright - the fallback must never fire.
+        mock_scrapfly.assert_not_called()
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_scrapfly_fallback_only_fires_after_rendered_fetcher_is_exhausted(self, mock_scrapfly):
+        mock_scrapfly.return_value = '<div class="article-body">Fallback content.</div></article>'
+        fetcher = FakeFetcher(get_error=RuntimeError("HTTP 429 fetching article"))
+        result = fetch_article_body(fetcher, "some-slug")
+        mock_scrapfly.assert_called_once()
+        self.assertEqual(mock_scrapfly.call_args.kwargs.get("referer"), NEWS_URL)
+        self.assertEqual(mock_scrapfly.call_args.kwargs.get("label"), "some-slug")
+        self.assertEqual(result, "Fallback content.")
+
+
+class TestBuildArticlesBudget(unittest.TestCase):
+
+    NEWS_CARD_HTML = (
+        '<article class="news-card">'
+        '<h3><a href="/race-1-report/">Race 1 Report</a></h3>'
+        '<time class="date">1st August 2026</time>'
+        '</article>'
+    )
+
+    def test_skips_fetching_a_brand_new_slug_when_budget_already_exhausted(self):
+        fetcher = FakeFetcher(html=self.NEWS_CARD_HTML, over_budget=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "RenderedFetcher", lambda **kw: fetcher), \
+                 patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"):
+                posts = build_articles(refresh_all=False)
+        # Nothing was ever cached for this slug and the budget was already
+        # exhausted, so it's skipped entirely this run (see build_articles'
+        # own "if prior_content: ... else: continue" fallback) - the article
+        # body fetch (wait_selector="div.article-body") must never happen.
+        self.assertEqual(posts, [])
+        body_fetch_calls = [c for c in fetcher.calls if c.get("wait_selector") == "div.article-body"]
+        self.assertEqual(body_fetch_calls, [])
 
 
 if __name__ == "__main__":

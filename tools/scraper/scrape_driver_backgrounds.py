@@ -22,9 +22,10 @@ Usage:
 
 import json
 import re
+import sys
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher, save_mirrored_image
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
@@ -38,7 +39,14 @@ NAME_ALIASES = {
 }
 
 CARD_BLOCK_RE = re.compile(r'<a class="driver-card" href="/driver/([a-z0-9-]+)/">(.*?)</a>', re.DOTALL)
-CARD_BG_RE = re.compile(r'class="[^"]*driver-card-background[^"]*"[^>]*>\s*<img[^>]*src="(/api/media/[^"]+)"')
+# Root-caused live 2026-08-17: driver-card backgrounds now sometimes come
+# straight from a Supabase Storage signed URL instead of always going
+# through the /api/media/<uuid> redirector (confirmed live - a WSR-branded
+# card background embedded the Supabase URL directly) - every single driver
+# card was silently failing this regex before the MEDIA_SRC_RE_FRAGMENT
+# widening, even though cardBgUrl was previously populated from an older
+# run when every image still used the redirector shape.
+CARD_BG_RE = re.compile(r'class="[^"]*driver-card-background[^"]*"[^>]*>\s*<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 NAME_RE = re.compile(r'<h1>([^<]+)</h1>')
 
 
@@ -48,9 +56,17 @@ def main() -> None:
     matched_names = set()
 
     with RenderedFetcher() as fetcher:
-        html, media = fetcher.get_with_media(
-            DRIVERS_LISTING_URL, wait_selector="a.driver-card", scroll_through=True
-        )
+        # This is the one and only network call this script makes - unlike
+        # scrape_team_stats.py's discovery fetch, there's no independent
+        # secondary loop to keep running without it, so a failure here is
+        # fatal (fetcher.get_with_media already retries with backoff first).
+        try:
+            html, media = fetcher.get_with_media(
+                DRIVERS_LISTING_URL, wait_selector="a.driver-card", scroll_through=True
+            )
+        except Exception as e:
+            print(f"ERROR: could not fetch drivers listing ({e})", file=sys.stderr)
+            sys.exit(1)
 
         updated = 0
         for block_m in CARD_BLOCK_RE.finditer(html):
@@ -66,7 +82,7 @@ def main() -> None:
                 continue
 
             bg_m = CARD_BG_RE.search(block)
-            media_url = f"https://btcc.net{bg_m.group(1)}" if bg_m else None
+            media_url = resolve_media_url(bg_m.group(1)) if bg_m else None
             filename = save_mirrored_image(media, media_url, MEDIA_DIR)
             if filename:
                 drv["cardBgUrl"] = f"{MEDIA_RAW_BASE}/{filename}"

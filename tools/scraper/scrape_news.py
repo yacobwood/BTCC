@@ -51,7 +51,12 @@ def scrape_news() -> list | None:
     """Fetch btcc.net/news/ and return the latest article in WP-REST-API shape, or None on failure."""
     print(f"Fetching {NEWS_URL} …")
     try:
-        with RenderedFetcher() as fetcher:
+        # retries=3 (one more than RenderedFetcher's own default of 2): this
+        # is the single most business-critical scrape - it drives live push
+        # notifications and runs every 5 minutes - so a missed tick has a
+        # direct notification-latency cost, and the extra attempt costs
+        # well under a minute against this workflow's 10-minute timeout.
+        with RenderedFetcher(retries=3) as fetcher:
             html, media = fetcher.get_with_media(NEWS_URL, wait_selector="article.news-card")
     except Exception as e:
         print(f"ERROR: could not fetch news ({e})", file=sys.stderr)

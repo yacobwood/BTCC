@@ -30,7 +30,7 @@ import json
 import re
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher, save_mirrored_image
+from btcc_playwright import RenderedFetcher, resolve_media_url, save_mirrored_image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 TRACKS_PATH = REPO_ROOT / "data" / "tracks.json"
@@ -52,8 +52,23 @@ TRACK_SLUGS: dict[str, str] = {
     "Silverstone": "silverstone",
 }
 
-HERO_RE = re.compile(r'circuit-profile-hero[^>]*?(/api/media/[0-9a-f-]+)', re.IGNORECASE)
+# Root-caused live 2026-08-17: the hero image isn't an <img src="...">, it's
+# a CSS background-image: url(&quot;...&quot;) inside the hero element's own
+# style="..." attribute - confirmed live, the URL is now a Supabase Storage
+# signed URL rather than the old /api/media/<uuid> redirector shape this
+# regex originally assumed, and even the redirector shape would never have
+# had a literal "-quote after it here (it's HTML-entity-escaped as &quot;
+# inside a style attribute, not a bare src="..." attribute) - so this was
+# silently matching nothing regardless of which URL shape the page used.
+HERO_RE = re.compile(r'circuit-profile-hero[^>]*?url\(&quot;(.+?)&quot;\)', re.IGNORECASE)
 BASE_URL = "https://btcc.net/circuit/"
+
+# This script doesn't fetch a listing page itself, but btcc.net/calendar/'s
+# round cards do link directly to /circuit/<slug>/ (confirmed by
+# scrape_calendar.py's own href="/circuit/..." parsing) - a real link
+# relationship, even though less proven than scrape_articles.py's
+# listing->article referer fix (which was confirmed by live A/B testing).
+_CALENDAR_REFERER = "https://btcc.net/calendar/"
 
 
 def main() -> None:
@@ -66,11 +81,16 @@ def main() -> None:
             if track is None:
                 print(f"  WARNING: {venue!r} not found in tracks.json, skipping")
                 continue
+            if fetcher.over_budget():
+                print("  WARNING: fetch time budget exhausted - skipping remaining tracks this run")
+                break
             try:
                 url = BASE_URL + slug + "/"
-                html, media = fetcher.get_with_media(url, wait_selector=".circuit-profile-hero")
+                html, media = fetcher.get_with_media(
+                    url, wait_selector=".circuit-profile-hero", referer=_CALENDAR_REFERER
+                )
                 m = HERO_RE.search(html)
-                media_url = f"https://btcc.net{m.group(1)}" if m else None
+                media_url = resolve_media_url(m.group(1)) if m else None
                 filename = save_mirrored_image(media, media_url, MEDIA_DIR)
                 if filename:
                     track["imageUrl"] = f"{MEDIA_RAW_BASE}/{filename}"
