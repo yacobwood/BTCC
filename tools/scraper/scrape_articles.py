@@ -325,6 +325,27 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
+    # Wall-clock budget for the whole fetch loop below, independent of any
+    # single article's own retry count. Root-caused 2026-08-17: this is the
+    # only scraper on the shared self-hosted runner (btcc-mac - just one
+    # registered, so exactly one job runs at a time across every scraper
+    # workflow) whose worst-case runtime scales with how many articles are
+    # currently failing, unbounded - fetch_article_body's own per-article
+    # retry (3 attempts, up to ~135s worst case each) has no ceiling on how
+    # many articles hit that worst case in the same run. On a bad btcc.net
+    # block day that turned into single runs actively executing for over an
+    # hour, which - because only one runner exists - starved every other
+    # scraper queued behind it (confirmed: a scrape-team-stats run sat queued
+    # for 20+ minutes behind one such run, then itself failed on the same
+    # 429 the moment it finally got the runner). Once this budget is spent,
+    # remaining articles skip straight to the existing cached-content/skip
+    # fallback with no further fetch attempts, so a bad block day degrades to
+    # "finishes quickly with partial data" instead of "occupies the only
+    # runner for however long the block lasts."
+    _MAX_FETCH_BUDGET_SECONDS = 150
+    start_time = time.monotonic()
+    budget_exhausted = False
+
     with RenderedFetcher() as fetcher:
         if backfill_pages > 1:
             cards, media = scrape_pages(fetcher, backfill_pages)
@@ -347,16 +368,25 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
                 date_iso = prior.get("date") or card["date"]
                 category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
             else:
-                print(f"  Fetching full content: {slug}")
-                content_html = fetch_article_body(fetcher, slug)
+                if not budget_exhausted and time.monotonic() - start_time > _MAX_FETCH_BUDGET_SECONDS:
+                    print("  WARNING: fetch time budget exhausted - skipping remaining fetches for this run")
+                    budget_exhausted = True
+
+                if budget_exhausted:
+                    content_html = None
+                else:
+                    print(f"  Fetching full content: {slug}")
+                    content_html = fetch_article_body(fetcher, slug)
+
                 if content_html is None:
-                    # Every attempt failed (see fetch_article_body's retry) -
-                    # don't let one flaky article sink every other card in
-                    # this batch. Keep serving whatever was cached before
-                    # (a stale stub is still better than nothing, and this
-                    # slug gets retried fresh next run); if there's nothing
-                    # cached at all, skip it entirely this run rather than
-                    # writing a broken/empty entry - the card is still in
+                    # Every attempt failed (see fetch_article_body's retry), or
+                    # the time budget above ran out before this slug even got
+                    # an attempt - either way, don't let it sink every other
+                    # card in this batch. Keep serving whatever was cached
+                    # before (a stale stub is still better than nothing, and
+                    # this slug gets retried fresh next run); if there's
+                    # nothing cached at all, skip it entirely this run rather
+                    # than writing a broken/empty entry - the card is still in
                     # `cards` so the next run tries it again from scratch.
                     if prior_content:
                         content_html = prior_content
