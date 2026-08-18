@@ -5,12 +5,6 @@
     "title": {
       "rendered": "A Statement"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/8ac4f976-19d1-42c8-9574-b03fd3402371-Snetterton-094A9589.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
