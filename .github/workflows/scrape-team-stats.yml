@@ -6,6 +6,12 @@
 # btcc.net's own dev confirmed results/standings only move on race
 # weekends, so a Monday check reliably catches anything new.
 #
+# Used to also run scrape_driver_backgrounds.py as a second step here (it
+# shared this job's weekly cadence) - archived 2026-08-18 along with
+# driver/team card-background and car-image live scraping generally, in
+# favour of a hand-curated image set (see tools/scraper/archive/README.md).
+# Only the team stats scrape remains.
+#
 # Runs on a self-hosted runner (see scrape-news.yml comment /
 # project_vercel_migration memory) since btcc.net's Vercel bot-challenge
 # blocks GitHub-hosted runner IPs even with headless Chromium - interim
@@ -39,36 +45,11 @@ jobs:
       - name: Run team stats scraper
         run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_team_stats.py
 
-      # Committed immediately, before the second scraper runs - previously
-      # both scripts ran as two steps sharing one commit at the very end, so
-      # a driver-backgrounds failure (a bare traceback before the 2026-08-17
-      # fix; now a clean sys.exit(1) - either way, no continue-on-error is
-      # set) skipped every step after it, including this commit, and threw
-      # away scrape_team_stats.py's already-successful update along with it.
-      # Mirrors scrape-news.yml's own early-commit pattern for the same
-      # reason (see its "Commit news update" step comment).
       - name: Commit team stats update
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update team stats from btcc.net [skip ci]"
-          file_pattern: "data/drivers.json data/media/teams/"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          push_options: "--force-with-lease"
-
-      - name: Run driver background scraper
-        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_driver_backgrounds.py
-
-      # Re-sync first, same reason/pattern as scrape-news.yml's "Pull latest
-      # before article commit" step - other workflows push to main constantly.
-      - name: Pull latest before driver background commit
-        run: git pull --rebase --autostash origin main
-
-      - name: Commit driver background update
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: "chore: update driver backgrounds from btcc.net [skip ci]"
-          file_pattern: "data/drivers.json data/media/drivers/"
+          file_pattern: "data/drivers.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"

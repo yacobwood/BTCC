@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """
+ARCHIVED 2026-08-18 - no longer run. imageUrl is now sourced from a
+hand-curated headshot set at data/driverImages/<number>.png instead of a
+live btcc.net fetch - see tools/scraper/archive/README.md. Kept for
+reference only.
+
 scrape_driver_images.py
 Mirrors a driver's cutout photo from their btcc.net profile page and sets
 it as imageUrl in data/drivers.json.

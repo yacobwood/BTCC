@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """
+ARCHIVED 2026-08-18 - no longer run. The bundled cutout set is now
+refreshed by hand from a hand-curated headshot set at
+data/driverImages/<number>.png instead of a live btcc.net fetch - see
+tools/scraper/archive/README.md. Kept for reference only.
+
 scrape_driver_cutouts.py
 Refreshes each currently-racing driver's bundled cutout photo in
 src/assets/driver_images/<number>.webp from their btcc.net profile page.

@@ -174,12 +174,16 @@ export function parseDriverHistory(history) {
 // this, those profiles silently lost the class chip, champion gold styling
 // and header background image.
 //
-// cardBgUrl prefers the driver's own value (scrape_driver_backgrounds.py,
-// mirrored from btcc.net's own /drivers/ listing) over the team-derived
-// one: most drivers' cards match their team's colour, but not always - a
-// team page can be shared by multiple sub-liveries with different card
-// colours (e.g. "Steel Seal with Power Maxed Racing"), so team-only
-// lookup got those specific drivers wrong.
+// cardBgUrl prefers the driver's own value (a hand-curated override, e.g.
+// Nicolas Hamilton's own VERTU card graphic) over the team-derived one:
+// most drivers' cards match their team's colour, but not always - a team
+// page can be shared by multiple sub-liveries with different card colours
+// (e.g. "Steel Seal with Power Maxed Racing"), so team-only lookup got
+// those specific drivers wrong. carImageUrl follows the same precedence
+// for consistency, even though no screen reads driver.carImageUrl yet -
+// every driver already has their own car cutout on disk (data/carImages/),
+// only team.carImageUrl (one representative driver per team) is consumed
+// today by TeamDetailScreen/DriversScreen's team tile/MerchScreen.
 export function attachTeamDisplayFields(driver, rawTeams) {
   const team = (rawTeams || []).find(t => t.name === driver.team);
   const {class: rawClass, ...rest} = driver; // `class` is raw-shape only; output uses `cls`
@@ -187,6 +191,7 @@ export function attachTeamDisplayFields(driver, rawTeams) {
     ...rest,
     cls: driver.cls || rawClass || '',
     cardBgUrl: driver.cardBgUrl || team?.cardBgUrl || '',
+    carImageUrl: driver.carImageUrl || team?.carImageUrl || '',
     lightCardBg: team?.lightCardBg || false,
   };
 }
@@ -203,6 +208,8 @@ export function parseGrid(json) {
       car: d.car || '',
       imageUrl: d.imageUrl || '',
       cardBgUrl: d.cardBgUrl || '',
+      carImageUrl: d.carImageUrl || '',
+      numberImageUrl: d.numberImageUrl || '',
       nationality: d.nationality || 'British',
       class: d.class || '',
       bio: d.bio || '',

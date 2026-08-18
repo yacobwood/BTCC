@@ -296,6 +296,22 @@ describe('DriverDetailScreen', () => {
     );
     await waitFor(() => expect(getByText('0 pts')).toBeTruthy());
   });
+
+  it('header number graphic uses CachedImage when numberImageUrl is set', async () => {
+    const route = makeRoute({driver: {...DRIVER, numberImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/80.png'}});
+    const {getAllByTestId} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1));
+  });
+
+  it('falls back to the plain-text number when numberImageUrl is absent', async () => {
+    const route = makeRoute({driver: DRIVER});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('80')).toBeTruthy());
+  });
 });
 
 // ─── All real drivers smoke test ──────────────────────────────────────────────
@@ -451,6 +467,18 @@ describe('TeamDetailScreen', () => {
       drivers: [{name: 'Tom Ingram', number: 80, imageUrl: 'https://btcc.net/wp-content/uploads/driver.jpg'}],
     };
     const route = makeRoute({team: teamWithPhoto});
+    const {getAllByTestId} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1));
+  });
+
+  it('driver number graphic uses CachedImage when numberImageUrl is set', async () => {
+    const teamWithNumberImage = {
+      ...TEAM,
+      drivers: [{name: 'Tom Ingram', number: 80, numberImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/80.png'}],
+    };
+    const route = makeRoute({team: teamWithNumberImage});
     const {getAllByTestId} = renderWithProviders(
       <TeamDetailScreen route={route} navigation={nav} />,
     );

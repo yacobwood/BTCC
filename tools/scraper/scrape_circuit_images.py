@@ -10,8 +10,9 @@ project_vercel_migration memory) and show as a broken image in
 TrackDetailScreen's hero (src/screens/TrackDetailScreen.js). The new site
 serves this image from a private Supabase Storage bucket behind a
 per-request signed URL that expires within the hour, via btcc.net's own
-stable /api/media/<uuid> redirector - same mechanism scrape_driver_images.py
-already mirrors, just a different page/selector.
+stable /api/media/<uuid> redirector - same mechanism the now-archived
+scrape_driver_images.py (tools/scraper/archive/) used to mirror, just a
+different page/selector.
 
 layoutImageUrl and raceImages are NOT handled here: every current track has
 a bundled SVG in BUNDLED_TRACK_LAYOUTS that takes priority, and the

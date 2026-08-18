@@ -399,6 +399,30 @@ describe('parseGrid', () => {
     expect(grid.drivers[0].cardBgUrl).toBe('https://example.com/own.png');
   });
 
+  test('passes through a driver-level carImageUrl, overriding the team-derived one', () => {
+    const json = {
+      drivers: [
+        {number: 55, name: 'Nick Halstead', team: 'Speedworks', car: 'Toyota', carImageUrl: 'https://example.com/own-car.png'},
+      ],
+      teams: [{name: 'Speedworks', car: 'Toyota', entries: 1, carImageUrl: 'https://example.com/team-car.png'}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.drivers[0].carImageUrl).toBe('https://example.com/own-car.png');
+  });
+
+  test('passes through numberImageUrl, defaults to empty string when absent', () => {
+    const json = {
+      drivers: [
+        {number: 55, name: 'Nick Halstead', team: 'Speedworks', car: 'Toyota', numberImageUrl: 'https://example.com/55.png'},
+        {number: 18, name: 'No Number Image', team: 'Speedworks', car: 'Toyota'},
+      ],
+      teams: [{name: 'Speedworks', car: 'Toyota', entries: 2}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.drivers.find(d => d.name === 'Nick Halstead').numberImageUrl).toBe('https://example.com/55.png');
+    expect(grid.drivers.find(d => d.name === 'No Number Image').numberImageUrl).toBe('');
+  });
+
   test('passes through livesIn, defaults to empty string when absent', () => {
     const json = {
       drivers: [
@@ -491,7 +515,7 @@ describe('parseDriverHistory', () => {
 
 describe('attachTeamDisplayFields', () => {
   const rawTeams = [
-    {name: 'WSR', cardBgUrl: 'https://example.com/wsr.png', lightCardBg: true},
+    {name: 'WSR', cardBgUrl: 'https://example.com/wsr.png', carImageUrl: 'https://example.com/wsr-car.png', lightCardBg: true},
     {name: 'Restart Racing', cardBgUrl: 'https://example.com/restart.png', lightCardBg: false},
   ];
 
@@ -530,6 +554,21 @@ describe('attachTeamDisplayFields', () => {
     const raw = {name: 'A Driver', team: 'WSR', cardBgUrl: ''};
     const shaped = attachTeamDisplayFields(raw, rawTeams);
     expect(shaped.cardBgUrl).toBe('https://example.com/wsr.png');
+  });
+
+  // carImageUrl mirrors cardBgUrl's precedence: every driver has their own car
+  // cutout on disk, but only a representative driver's file is set at team
+  // level today - a driver-level override must still win once a screen reads it.
+  test('prefers the driver\'s own carImageUrl over the team-derived one', () => {
+    const raw = {name: 'A Driver', team: 'WSR', carImageUrl: 'https://example.com/own-car.png'};
+    const shaped = attachTeamDisplayFields(raw, rawTeams);
+    expect(shaped.carImageUrl).toBe('https://example.com/own-car.png');
+  });
+
+  test('falls back to the team carImageUrl when the driver has none of their own', () => {
+    const raw = {name: 'A Driver', team: 'WSR', carImageUrl: ''};
+    const shaped = attachTeamDisplayFields(raw, rawTeams);
+    expect(shaped.carImageUrl).toBe('https://example.com/wsr-car.png');
   });
 
   test('is what closes the deep-link dual-shape bug: raw driver + raw teams produces the same display fields parseGrid() would', () => {

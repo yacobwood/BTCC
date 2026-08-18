@@ -97,7 +97,11 @@ export default function TeamDetailScreen({route, navigation}) {
                     style={styles.driverImageArea}
                     resizeMode="stretch"
                     fadeDuration={0}>
-                    <Text style={[styles.driverNumberBg, blackNumber && {color: '#000'}]}>{d.number}</Text>
+                    {d.numberImageUrl ? (
+                      <CachedImage uri={d.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
+                    ) : (
+                      <Text style={[styles.driverNumberBg, blackNumber && {color: '#000'}]}>{d.number}</Text>
+                    )}
                     {bundled ? (
                       <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={0} />
                     ) : d.imageUrl ? (
@@ -171,6 +175,9 @@ const styles = StyleSheet.create({
   driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
   driverPhoto: {width: '100%', height: '85%'},
   driverNumberBg: {position: 'absolute', top: -10, right: 5, fontSize: 90, fontWeight: '900', color: '#fff', lineHeight: 100},
+  // Branded number-graphic replacement for driverNumberBg above (used when
+  // the driver has a numberImageUrl) - same footprint as DriversScreen's tile.
+  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '68%', height: '55%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},

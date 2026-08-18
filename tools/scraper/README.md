@@ -83,13 +83,30 @@ across runs instead of reinstalling every time.
 | `scrape_articles.py` | btcc.net/news/ + each article page | `data/articles/*.json` + `data/media/news/` | Every 5 min, same run as above - `scrape-news.yml` |
 | `scrape_calendar.py` (+ `scrape_full_timetable.py`) | btcc.net/calendar/ + each circuit page | `data/calendar.json` | Weekly, Mon 09:00 UTC - `scrape-calendar.yml` |
 | `scrape_btcc_stats.py` | btcc.net/history/statistics/drivers/ + /history/champions/btcc-titles/ | `data/records.json` | Weekly, Mon 06:00 UTC - `scrape-btcc-stats.yml` |
-| `scrape_team_stats.py` | btcc.net/teams/ + each team page | `data/drivers.json` (`teams[]`) + `data/media/teams/` | Weekly, Mon 06:30 UTC - `scrape-team-stats.yml` |
-| `scrape_driver_backgrounds.py` | btcc.net/drivers/ (one listing fetch) | `data/drivers.json` (`cardBgUrl`) + `data/media/drivers/` | Weekly, same run as team stats - `scrape-team-stats.yml` |
+| `scrape_team_stats.py` | btcc.net/teams/ + each team page | `data/drivers.json` (`teams[].totalRaces`/`totalWins`) | Weekly, Mon 06:30 UTC - `scrape-team-stats.yml` |
 | `scrape_tsl.py` | tsl-timing.com PDFs (not btcc.net) | `data/results{year}.json`, `data/standings.json`, `data/calendar.json` (records) | Every 2 min on race weekends - `scrape-results.yml` (GitHub-hosted) |
 | `scrape_youtube.py` | youtube.com (ITV Sport Extra, not btcc.net) | `data/results2026.json`, `data/calendar.json` | Mon+Tue 10:00 UTC - `scrape-youtube.yml` (GitHub-hosted) |
 | `scrape_circuit_images.py` | btcc.net/circuit/\<slug\>/ per track | `data/tracks.json` (`imageUrl`) + `data/media/tracks/` | Manual only |
-| `scrape_driver_cutouts.py` | btcc.net/drivers/ + btcc.net/driver/\<slug\>/ | `src/assets/driver_images/<number>.webp` | Manual only |
-| `scrape_driver_images.py` | btcc.net/driver/\<slug\>/ (only entries in `DRIVER_SLUGS`) | `data/drivers.json` (`imageUrl`) + `data/media/drivers/` | Manual only - only needed for a driver without a bundled cutout yet |
+
+Driver headshots, per-driver car cutouts, number graphics and driver/team card
+backgrounds used to be live-scraped too (`scrape_driver_images.py`,
+`scrape_driver_cutouts.py`, `scrape_driver_backgrounds.py`, plus an image-mirroring
+step inside `scrape_team_stats.py`) - archived 2026-08-18 in favour of a
+hand-curated set committed straight into the repo. See "Hardcoded driver/team
+images" below and `tools/scraper/archive/README.md`.
+
+## Hardcoded driver/team images (not scraped)
+
+`data/driverImages/`, `data/carImages/`, `data/numberImages/` and
+`data/backgroundImages/` hold official team/driver graphics, named
+`<car number>.png` (or `<team-slug>.png`/`.jpg` for team-level backgrounds),
+referenced by `raw.githubusercontent.com` URL from `data/drivers.json` -
+`imageUrl`, `carImageUrl`, `numberImageUrl` (driver-level) and
+`cardBgUrl`/`carImageUrl` (team-level). No scraper writes these; replacing an
+image means dropping in a new file under the same name (or updating
+`drivers.json`'s URL if the name changes) and committing - no code change,
+no app release. See `tools/scraper/archive/README.md` for the full mapping
+and what each field replaced.
 
 ## Local-only utilities (no network fetch)
 

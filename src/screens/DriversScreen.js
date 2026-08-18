@@ -71,7 +71,11 @@ function DriverCardInner({item, onPress, fav}) {
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
-        <Text style={[styles.driverNumberBg, item.lightCardBg && {color: '#000'}]}>{item.number}</Text>
+        {item.numberImageUrl ? (
+          <CachedImage uri={item.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
+        ) : (
+          <Text style={[styles.driverNumberBg, item.lightCardBg && {color: '#000'}]}>{item.number}</Text>
+        )}
         {bundled ? (
           <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={0} />
         ) : item.imageUrl ? (
@@ -259,6 +263,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     lineHeight: 100,
   },
+  // Branded number-graphic replacement for driverNumberBg above (used when
+  // the driver has a numberImageUrl) - same top-right footprint, sized as a
+  // % of the square driverImageArea so it scales consistently at any tile size.
+  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '68%', height: '55%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},

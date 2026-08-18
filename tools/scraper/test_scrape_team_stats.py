@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Tests for scrape_team_stats.py - previously had zero coverage.
+"""Tests for scrape_team_stats.py.
 
-Two real gaps this closes: (1) _fetch_team_images (the /teams/ discovery
-fetch) had no isolation at all - any failure crashed the whole script, even
-though the per-team stats loop below it is an independently valuable data
-source; (2) _fetch_team_stats never passed a referer despite following
-directly from the /teams/ listing it just fetched."""
+Covers _fetch_team_stats' referer/parsing and main()'s per-team isolation
+(one team's fetch failing doesn't abort the rest) and fetch-budget cutoff.
+
+Used to also cover _fetch_team_images (the /teams/ card-background/car-photo
+mirror) - removed 2026-08-18 along with that function, when team
+cardBgUrl/carImageUrl moved to the hand-curated data/backgroundImages and
+data/carImages sets referenced directly from drivers.json instead."""
 
 import json
 import tempfile
@@ -20,18 +22,11 @@ TEAM_STATS_HTML = "<strong>150</strong><h3>Races</h3><strong>12</strong><h3>Wins
 
 
 class FakeFetcher:
-    def __init__(self, images_html="<html></html>", images_error=None, stats_html=TEAM_STATS_HTML, over_budget_after=None):
-        self.images_html = images_html
-        self.images_error = images_error
+    def __init__(self, stats_html=TEAM_STATS_HTML, over_budget_after=None):
         self.stats_html = stats_html
         self.get_calls = []
         self._budget_calls = 0
         self.over_budget_after = over_budget_after
-
-    def get_with_media(self, url, **kwargs):
-        if self.images_error:
-            raise self.images_error
-        return self.images_html, {}
 
     def get(self, url, **kwargs):
         self.get_calls.append({"url": url, **kwargs})
@@ -73,13 +68,11 @@ class TestMainIsolationAndBudget(unittest.TestCase):
                 s.main()
             return json.loads(drivers_path.read_text())
 
-    def test_team_stats_still_update_when_image_discovery_fails(self):
-        fetcher = FakeFetcher(images_error=RuntimeError("HTTP 429 fetching /teams/"))
+    def test_team_stats_update_correctly(self):
+        fetcher = FakeFetcher()
         result = self._run_main_with(fetcher, [{"name": "NAPA Racing UK", "totalRaces": 0, "totalWins": 0}])
         self.assertEqual(result["teams"][0]["totalRaces"], 150)
         self.assertEqual(result["teams"][0]["totalWins"], 12)
-        # No image data to apply, but that must not have blocked the stats update.
-        self.assertEqual(result["teams"][0].get("carImageUrl"), "")
 
     def test_over_budget_stops_the_per_team_loop(self):
         # over_budget_after=0: the very first check inside the loop already

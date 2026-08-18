@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """
+ARCHIVED 2026-08-18 - no longer run (and dropped from
+.github/workflows/scrape-team-stats.yml). Driver/team card backgrounds are
+now sourced from a hand-curated set at data/backgroundImages/ instead of a
+live btcc.net fetch - see tools/scraper/archive/README.md. Kept for
+reference only.
+
 scrape_driver_backgrounds.py
 Mirrors each currently-racing driver's own card-background graphic from
 btcc.net's /drivers/ listing page into data/media/drivers/ and sets it as

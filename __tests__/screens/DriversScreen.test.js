@@ -162,6 +162,23 @@ describe('DriversScreen', () => {
       expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
     });
 
+    it('driver number graphic uses CachedImage when numberImageUrl is set', async () => {
+      const gridWithNumberImage = {
+        ...MOCK_GRID,
+        drivers: [{...MOCK_GRID.drivers[0], numberImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/80.png'}],
+      };
+      parseGrid.mockReturnValue(gridWithNumberImage);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('falls back to the plain-text number when numberImageUrl is absent', async () => {
+      const {getByText} = await renderDrivers();
+      // MOCK_GRID's driver has no numberImageUrl - the styled number 80 renders as text.
+      expect(getByText('80')).toBeTruthy();
+    });
+
     it('team card background and car image both use CachedImage when URLs are set', async () => {
       const gridWithImages = {
         drivers: [],

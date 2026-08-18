@@ -158,7 +158,11 @@ export default function DriverDetailScreen({route, navigation}) {
           style={styles.headerBg}
           resizeMode="stretch"
           fadeDuration={0}>
-          <Text style={[styles.headerNumber, driver.lightCardBg && {color: '#000'}]}>{driver.number}</Text>
+          {driver.numberImageUrl ? (
+            <CachedImage uri={driver.numberImageUrl} style={styles.headerNumberImg} resizeMode="contain" />
+          ) : (
+            <Text style={[styles.headerNumber, driver.lightCardBg && {color: '#000'}]}>{driver.number}</Text>
+          )}
           {bundledImg ? (
             <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fadeDuration={0} />
           ) : driver.imageUrl ? (
@@ -447,6 +451,10 @@ const styles = StyleSheet.create({
     lineHeight: 200,
   },
   headerPhoto: {width: '100%', height: '90%'},
+  // Branded number-graphic replacement for headerNumber above (used when the
+  // driver has a numberImageUrl) - same top-right footprint, sized as a % of
+  // the square headerBg so it matches DriversScreen's tile-sized equivalent.
+  headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '68%', height: '55%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',
