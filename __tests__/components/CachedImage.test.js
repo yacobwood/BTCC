@@ -130,6 +130,21 @@ describe('CachedImage', () => {
     expect(getCachedImg(tree)).toBeNull();
   });
 
+  it('schedules each retry with a backoff delay instead of retrying immediately', () => {
+    // Root-caused live 2026-08-19: a screen mounting many CachedImages at
+    // once (the Teams grid, ~20 requests together) saw a few fail in
+    // rotation on otherwise-correct URLs - retrying the instant an image
+    // errors just re-hits the same request burst. Confirms a real delay is
+    // scheduled rather than retryCount being bumped synchronously.
+    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+    const tree = render(<CachedImage uri={EXT_URI} style={{width: 100, height: 100}} />);
+    act(() => { getCachedImg(tree).props.onError(); });
+    expect(setTimeoutSpy).toHaveBeenCalled();
+    const delay = setTimeoutSpy.mock.calls[setTimeoutSpy.mock.calls.length - 1][1];
+    expect(delay).toBeGreaterThan(0);
+    setTimeoutSpy.mockRestore();
+  });
+
   it('does not transform non-WP uris', () => {
     const tree = render(
       <CachedImage uri={EXT_URI} style={{width: 100, height: 100}} targetWidth={100} />,

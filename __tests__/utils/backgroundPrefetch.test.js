@@ -76,6 +76,25 @@ describe('runBackgroundPrefetch', () => {
     expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/rowbottom.jpg');
   });
 
+  it('prefetches driver cardBgUrl and numberImageUrl (network-only fields with no bundled fallback)', async () => {
+    fetchDrivers.mockResolvedValue({});
+    fetchArticles.mockResolvedValue([]);
+    parseGrid.mockReturnValue({
+      drivers: [
+        {name: 'Nicolas Hamilton', imageUrl: null, cardBgUrl: 'https://cdn.example.com/hamilton-bg.png', numberImageUrl: 'https://cdn.example.com/28.png'},
+      ],
+      teams: [],
+    });
+
+    runBackgroundPrefetch();
+    jest.advanceTimersByTime(3000);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/hamilton-bg.png');
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/28.png');
+  });
+
   it('prefetches article image URLs returned from API', async () => {
     fetchDrivers.mockResolvedValue({});
     parseGrid.mockReturnValue({drivers: [], teams: []});

@@ -19,6 +19,13 @@ function wpThumb(uri, targetPx) {
 // broken-image icon for a URL that's perfectly fine. Retrying a few times
 // covers that without masking a genuinely dead URL forever.
 const MAX_RETRIES = 2;
+// A screen that mounts many CachedImages at once (e.g. the Teams grid -
+// ~20 requests together) can transiently fail several simultaneously if
+// they're all retried the instant they error, since that just re-hits the
+// same request burst. A short, increasing delay between retries (2026-08-19,
+// root-caused live: Team VERTU/LKQ/Speedworks each failed once, in rotation,
+// on an otherwise-correct URL) gives the burst time to clear first.
+const RETRY_DELAY_MS = 400;
 
 // Simple wrapper that uses React Native's built-in Image with prefetch support.
 // Pass `targetWidth` to automatically request the smallest adequate WP thumbnail.
@@ -27,17 +34,27 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
   const [errored, setErrored] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const retriesRef = useRef(0);
+  const retryTimeoutRef = useRef(null);
 
   // FlatList/PagerView recycle component instances across list items rather
   // than remounting - without this, a single dead image anywhere poisons
   // every subsequent item that instance gets reused for, since errored/src
   // would otherwise carry over from whatever uri this instance last showed.
   useEffect(() => {
+    // Also cancel any retry still pending for the *previous* uri - otherwise
+    // a recycled instance could apply a stale delayed retry against the new
+    // image it's since moved on to.
+    if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
     setSrc(targetWidth ? wpThumb(uri, targetWidth) : uri);
     setErrored(false);
     retriesRef.current = 0;
     setRetryCount(0);
   }, [uri, targetWidth]);
+
+  // Cancel a pending retry if the component unmounts before it fires.
+  useEffect(() => () => {
+    if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+  }, []);
 
   const source = useMemo(() => ({uri: src}), [src]);
   const handleError = useCallback(() => {
@@ -47,10 +64,12 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
     }
     if (retriesRef.current < MAX_RETRIES) {
       retriesRef.current += 1;
+      const attempt = retriesRef.current;
       // source.uri is unchanged, so bumping retryCount alone wouldn't make
       // RN's Image actually re-attempt anything - it's used in the key
-      // below purely to force a fresh mount, which does.
-      setRetryCount(retriesRef.current);
+      // below purely to force a fresh mount, which does. Delayed (rather
+      // than immediate) so a request-burst failure gets a chance to clear.
+      retryTimeoutRef.current = setTimeout(() => setRetryCount(attempt), RETRY_DELAY_MS * attempt);
     } else {
       setErrored(true);
     }

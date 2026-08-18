@@ -22,6 +22,13 @@ async function prefetchDrivers() {
     const {drivers, teams} = parseGrid(raw);
     const urls = [
       ...drivers.map(d => thumbUrl(d.imageUrl)).filter(Boolean),
+      // cardBgUrl here is already team-cascaded (attachTeamDisplayFields), so
+      // most drivers duplicate their team's URL below - harmless (prefetch of
+      // an already-cached URL is a no-op), and it's what actually covers a
+      // driver-level override (e.g. Nicolas Hamilton, Daniel Lloyd) that
+      // differs from their team's, which teams.cardBgUrl alone would miss.
+      ...drivers.map(d => thumbUrl(d.cardBgUrl)).filter(Boolean),
+      ...drivers.map(d => thumbUrl(d.numberImageUrl)).filter(Boolean),
       ...teams.map(t => thumbUrl(t.carImageUrl)).filter(Boolean),
       ...teams.map(t => thumbUrl(t.cardBgUrl)).filter(Boolean),
     ];
