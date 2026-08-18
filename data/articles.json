@@ -846,6 +846,28 @@
     }
   },
   {
+    "id": "7-eleven-tom-chilton",
+    "slug": "7-eleven-tom-chilton",
+    "link": "https://btcc.net/7-eleven-tom-chilton/",
+    "date": "2026-07-22T00:00:00",
+    "title": {
+      "rendered": "7-Eleven: Tom Chilton"
+    },
+    "excerpt": {
+      "rendered": "Continuing the 7-Eleven series, we turn to one of the..."
+    },
+    "content": {
+      "rendered": "<p>Continuing the 7-Eleven series, we turn to one of the 11 different drivers to reach the podium so far in 2026: Team VERTU's Tom Chilton. Now in his 20th BTCC season and with well over 500 race starts to his name, the #3 Hyundai i30 Fastback N picked up his solitary podium of the campaign so far at Snetterton.</p><p><strong>Snetterton 300</strong></p><p>Chilton kept himself firmly in the podium picture throughout Sunday's Race 2, running strongly in the leading pack and always within touching distance of the rostrum. With teammate Ricky Collard (Team VERTU) already through to second after a move around the outside of Dan Cammish (NAPA Racing UK) into Brundle on lap eight, Chilton pounced at the same spot a lap later, this time up the inside, showing the pace and racecraft to make the move stick and complete a Team VERTU two-three, his first top-three finish of the 2026 season.</p><figure class=\"wp-block-embed wp-block-embed-youtube\" data-url=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\"><iframe src=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\" title=\"YouTube video\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share\"></iframe></figure><p>Chilton sits just outside the top ten in the Drivers' Championship as the mid-season break comes to a close, with the grid back in action at Thruxton (25/26 July) this weekend.</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112621-112622-chilton-0H5A7184-1-scaled-e1784728852898.jpg"
+        }
+      ]
+    }
+  },
+  {
     "id": "expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton",
     "slug": "expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton",
     "link": "https://btcc.net/expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton/",
@@ -907,28 +929,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112624-112625-Thruxton-0Q3A4321-1-scaled-e1784732227471.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "7-eleven-tom-chilton",
-    "slug": "7-eleven-tom-chilton",
-    "link": "https://btcc.net/7-eleven-tom-chilton/",
-    "date": "2026-07-22T00:00:00",
-    "title": {
-      "rendered": "7-Eleven: Tom Chilton"
-    },
-    "excerpt": {
-      "rendered": "Continuing the 7-Eleven series, we turn to one of the..."
-    },
-    "content": {
-      "rendered": "<p>Continuing the 7-Eleven series, we turn to one of the 11 different drivers to reach the podium so far in 2026: Team VERTU's Tom Chilton. Now in his 20th BTCC season and with well over 500 race starts to his name, the #3 Hyundai i30 Fastback N picked up his solitary podium of the campaign so far at Snetterton.</p><p><strong>Snetterton 300</strong></p><p>Chilton kept himself firmly in the podium picture throughout Sunday's Race 2, running strongly in the leading pack and always within touching distance of the rostrum. With teammate Ricky Collard (Team VERTU) already through to second after a move around the outside of Dan Cammish (NAPA Racing UK) into Brundle on lap eight, Chilton pounced at the same spot a lap later, this time up the inside, showing the pace and racecraft to make the move stick and complete a Team VERTU two-three, his first top-three finish of the 2026 season.</p><figure class=\"wp-block-embed wp-block-embed-youtube\" data-url=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\"><iframe src=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\" title=\"YouTube video\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share\"></iframe></figure><p>Chilton sits just outside the top ten in the Drivers' Championship as the mid-season break comes to a close, with the grid back in action at Thruxton (25/26 July) this weekend.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112621-112622-chilton-0H5A7184-1-scaled-e1784728852898.jpg"
         }
       ]
     }
@@ -1748,50 +1748,6 @@
     }
   },
   {
-    "id": "cammish-takes-maiden-oulton-park-victory",
-    "slug": "cammish-takes-maiden-oulton-park-victory",
-    "link": "https://btcc.net/cammish-takes-maiden-oulton-park-victory/",
-    "date": "2026-06-07T00:00:00",
-    "title": {
-      "rendered": "Cammish takes maiden Oulton Park victory"
-    },
-    "excerpt": {
-      "rendered": "NAPA Racing UK's Dan Cammish took victory in Round 10..."
-    },
-    "content": {
-      "rendered": "<p>NAPA Racing UK's Dan Cammish took victory in Round 10 of the 2026 Kwik Fit British Touring Car Championship at Oulton Park, taking his first tin top triumph at the Cheshire venue.</p>\n\n\n\n<p>Cammish continued his impressive weekend so far \u2013 following victory in yesterday's Qualifying Race \u2013 with a lights-to-flag success in Sunday's opener.</p>\n\n\n\n<p>Much like the 'Race to Pole', Cammish was pressured home by Speedworks Corolla Racing's Josh Cook with the pair duelling it out for much of the contest.</p>\n\n\n\n<p>Cammish's 18th BTCC win has been a long time coming after a mixed start to his 2026 campaign, but the talented Yorkshireman will be hoping that his performances around the 2.26-mile circuit will kickstart his championship challenge.</p>\n\n\n\n<p>Cook's second place wasn't straightforward as he firstly had to contend with contact involving four-time champion Ash Sutton, and in the latter stages of the race he was hounded home by reigning champion Tom Ingram.</p>\n\n\n\n<p>Team VERTU's Ingram completed the podium ahead of Laser Tools Racing with MB Motorsport's \u00c1r\u00f3n Taylor-Smith, with the latter also securing the Independent Drivers' win.</p>\n\n\n\n<p>The LKQ Euro Car Parts with Power Maxed Racing duo of Aiden Moffat and Mikey Doble enjoyed a fantastic and respectful battle for fifth and sixth as they brought home solid points for the Audi A3 Saloon squad.</p>\n\n\n\n<p>NAPA Racing UK's Sutton had a topsy-turvy race, which included an initial battle for second, a drop to eighth following the aforementioned contact with Cook, before scrapping back up the order and then back down again after going straight on at the chicane during a battle with Cataclean Plato Racing's Adam Morgan.</p>\n\n\n\n<p>Sutton eventually had to settle for a decent seventh whilst Morgan's race ended in the pitlane with a mechanical issue striking his Mercedes A35 Saloon.</p>\n\n\n\n<p>Tom Chilton (Team VERTU), Chris Smiley (Restart Racing) and Daryl De Leon (WSR) completed the top ten positions.</p>\n\n\n\n<p>Race 2 commences at 14:55 while the finale takes place at 17:20, with all the action being screened live across the UK on ITV4 and across the world via Racer (North America only) and YouTube. </p>\n\n\n\n<p><strong>Dan Cammish, NAPA Racing UK, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306856\"></div>\n\n\n\n<p><strong>Josh Cook, Speedworks Corolla Racing, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306862\"></div>\n\n\n\n<p><strong>Tom Ingram, Team VERTU, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306857\"></div>\n\n\n\n<p><strong>Race 1 \u2013 Oulton Park \u2013 Result:</strong></p>\n\n\n\n<figure class=\"wp-block-table\"><table><tbody><tr><th>P/</th><th>No/</th><th>Name/</th><th>Entry/</th><th>Laps/</th><th>Time/</th><th>Gap/</th><th>Best/</th><th>On/</th></tr><tr><td><strong>1</strong></td><td>27</td><td>Dan CAMMISH</td><td>NAPA Racing UK</td><td>16</td><td>23:42.703</td><td></td><td>1:24.583</td><td>9</td></tr><tr><td><strong>2</strong></td><td>66</td><td>Josh COOK</td><td>Speedworks Corolla Racing</td><td>16</td><td>23:43.418</td><td>0.715</td><td>1:24.776</td><td>6</td></tr><tr><td><strong>3</strong></td><td>80</td><td>Tom INGRAM</td><td>Team VERTU</td><td>16</td><td>23:43.876</td><td>1.173</td><td>1:24.977</td><td>7</td></tr><tr><td><strong>4</strong></td><td>50</td><td>\u00c1r\u00f3n TAYLOR-SMITH</td><td>Laser Tools Racing with MB Motorsport</td><td>16</td><td>23:49.334</td><td>6.631</td><td>1:25.056</td><td>6</td></tr><tr><td><strong>5</strong></td><td>16</td><td>Aiden MOFFAT</td><td>LKQ Euro Car Parts with Power Maxed Racing</td><td>16</td><td>23:53.390</td><td>10.687</td><td>1:25.222</td><td>6</td></tr><tr><td><strong>6</strong></td><td>88</td><td>Mikey DOBLE</td><td>LKQ Euro Car Parts with Power Maxed Racing</td><td>16</td><td>23:54.715</td><td>12.012</td><td>1:25.019</td><td>6</td></tr><tr><td><strong>7</strong></td><td>116</td><td>Ashley SUTTON</td><td>NAPA Racing UK</td><td>16</td><td>23:54.898</td><td>12.195</td><td>1:25.261</td><td>6</td></tr><tr><td><strong>8</strong></td><td>3</td><td>Tom CHILTON</td><td>Team VERTU</td><td>16</td><td>23:55.163</td><td>12.460</td><td>1:25.475</td><td>7</td></tr><tr><td><strong>9</strong></td><td>22</td><td>Chris SMILEY</td><td>Restart Racing</td><td>16</td><td>23:56.610</td><td>13.907</td><td>1:25.326</td><td>7</td></tr><tr><td><strong>10</strong></td><td>2</td><td>Daryl DE LEON</td><td>WSR</td><td>16</td><td>23:56.619</td><td>13.916</td><td>1:25.471</td><td>12</td></tr><tr><td><strong>11</strong></td><td>17</td><td>Dexter PATTERSON</td><td>Steel Seal with Power Maxed Racing</td><td>16</td><td>23:58.771</td><td>16.068</td><td>1:25.176</td><td>7</td></tr><tr><td><strong>12</strong></td><td>52</td><td>Gordon SHEDDEN</td><td>Laser Tools Racing with MB Motorsport</td><td>16</td><td>23:59.245</td><td>16.542</td><td>1:25.433</td><td>10</td></tr><tr><td><strong>13</strong></td><td>77</td><td>Sam OSBORNE</td><td>NAPA Racing UK</td><td>16</td><td>23:59.586</td><td>16.883</td><td>1:25.774</td><td>14</td></tr><tr><td><strong>14</strong></td><td>11</td><td>Ricky COLLARD</td><td>Team VERTU</td><td>16</td><td>24:03.558</td><td>20.855</td><td>1:26.108</td><td>7</td></tr><tr><td><strong>15</strong></td><td>99</td><td>Charles RAINFORD</td><td>WSR</td><td>16</td><td>24:04.499</td><td>21.796</td><td>1:26.104</td><td>14</td></tr><tr><td><strong>16</strong></td><td>32</td><td>Daniel ROWBOTTOM</td><td>Cataclean Plato Racing</td><td>16</td><td>24:06.511</td><td>23.808</td><td>1:26.366</td><td>11</td></tr><tr><td><strong>17</strong></td><td>132</td><td>James DORLIN</td><td>Restart Racing</td><td>16</td><td>24:11.875</td><td>29.172</td><td>1:26.526</td><td>11</td></tr><tr><td><strong>18</strong></td><td>19</td><td>Max BUXTON</td><td>Speedworks Corolla Racing</td><td>16</td><td>24:12.534</td><td>29.831</td><td>1:26.071</td><td>10</td></tr><tr><td><strong>19</strong></td><td>28</td><td>Nicolas HAMILTON</td><td>Team VERTU</td><td>16</td><td>24:21.425</td><td>38.722</td><td>1:26.648</td><td>6</td></tr><tr><td><strong>DNF</strong></td><td>33</td><td>Adam MORGAN</td><td>Cataclean Plato Racing</td><td>9</td><td>13:59.101</td><td>7 Laps</td><td>1:24.906</td><td>6</td></tr><tr><td><strong>DNF</strong></td><td>15</td><td>Lewis SELBY</td><td>NAPA Racing UK</td><td>4</td><td>8:29.862</td><td>12 Laps</td><td>1:38.779</td><td>1</td></tr></tbody></table></figure>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/7cb25382-2b26-4ab1-97c4-2c9a469086ee-cammish-A26I2369-scaled-e1780833451508.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "qualifying-race-in-quotes-oulton-park",
-    "slug": "qualifying-race-in-quotes-oulton-park",
-    "link": "https://btcc.net/qualifying-race-in-quotes-oulton-park/",
-    "date": "2026-06-07T00:00:00",
-    "title": {
-      "rendered": "Qualifying Race in Quotes: Oulton Park"
-    },
-    "excerpt": {
-      "rendered": "A first Qualifying Race win for Dan Cammish at Oulton..."
-    },
-    "content": {
-      "rendered": "<p>A first Qualifying Race win for Dan Cammish at Oulton Park with Josh Cook and Ash Sutton making up the top three places of another exciting 'Race to Pole' \u2013 we spoke with all three drivers after the action...</p>\n\n\n\n<p><strong>Dan Cammish, NAPA Racing UK, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306706\"></div>\n\n\n\n<p><strong>Josh Cook, Speedworks Corolla Racing, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19304594\"></div>\n\n\n\n<p><strong>Ash Sutton, NAPA Racing UK, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19304604\"></div>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/12360624-f9a7-4a2d-8fe1-02efb6df3d16-cook-0H5A8511-scaled.jpg"
-        }
-      ]
-    }
-  },
-  {
     "id": "share-of-the-spoils-at-oulton-park",
     "slug": "share-of-the-spoils-at-oulton-park",
     "link": "https://btcc.net/share-of-the-spoils-at-oulton-park/",
@@ -1853,6 +1809,50 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/69c931c4-c03e-4cd2-b637-1515ff131632-Ingram-sutton-Cammish-0H5A9666-scaled-e1780847090119.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cammish-takes-maiden-oulton-park-victory",
+    "slug": "cammish-takes-maiden-oulton-park-victory",
+    "link": "https://btcc.net/cammish-takes-maiden-oulton-park-victory/",
+    "date": "2026-06-07T00:00:00",
+    "title": {
+      "rendered": "Cammish takes maiden Oulton Park victory"
+    },
+    "excerpt": {
+      "rendered": "NAPA Racing UK's Dan Cammish took victory in Round 10..."
+    },
+    "content": {
+      "rendered": "<p>NAPA Racing UK's Dan Cammish took victory in Round 10 of the 2026 Kwik Fit British Touring Car Championship at Oulton Park, taking his first tin top triumph at the Cheshire venue.</p>\n\n\n\n<p>Cammish continued his impressive weekend so far \u2013 following victory in yesterday's Qualifying Race \u2013 with a lights-to-flag success in Sunday's opener.</p>\n\n\n\n<p>Much like the 'Race to Pole', Cammish was pressured home by Speedworks Corolla Racing's Josh Cook with the pair duelling it out for much of the contest.</p>\n\n\n\n<p>Cammish's 18th BTCC win has been a long time coming after a mixed start to his 2026 campaign, but the talented Yorkshireman will be hoping that his performances around the 2.26-mile circuit will kickstart his championship challenge.</p>\n\n\n\n<p>Cook's second place wasn't straightforward as he firstly had to contend with contact involving four-time champion Ash Sutton, and in the latter stages of the race he was hounded home by reigning champion Tom Ingram.</p>\n\n\n\n<p>Team VERTU's Ingram completed the podium ahead of Laser Tools Racing with MB Motorsport's \u00c1r\u00f3n Taylor-Smith, with the latter also securing the Independent Drivers' win.</p>\n\n\n\n<p>The LKQ Euro Car Parts with Power Maxed Racing duo of Aiden Moffat and Mikey Doble enjoyed a fantastic and respectful battle for fifth and sixth as they brought home solid points for the Audi A3 Saloon squad.</p>\n\n\n\n<p>NAPA Racing UK's Sutton had a topsy-turvy race, which included an initial battle for second, a drop to eighth following the aforementioned contact with Cook, before scrapping back up the order and then back down again after going straight on at the chicane during a battle with Cataclean Plato Racing's Adam Morgan.</p>\n\n\n\n<p>Sutton eventually had to settle for a decent seventh whilst Morgan's race ended in the pitlane with a mechanical issue striking his Mercedes A35 Saloon.</p>\n\n\n\n<p>Tom Chilton (Team VERTU), Chris Smiley (Restart Racing) and Daryl De Leon (WSR) completed the top ten positions.</p>\n\n\n\n<p>Race 2 commences at 14:55 while the finale takes place at 17:20, with all the action being screened live across the UK on ITV4 and across the world via Racer (North America only) and YouTube. </p>\n\n\n\n<p><strong>Dan Cammish, NAPA Racing UK, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306856\"></div>\n\n\n\n<p><strong>Josh Cook, Speedworks Corolla Racing, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306862\"></div>\n\n\n\n<p><strong>Tom Ingram, Team VERTU, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306857\"></div>\n\n\n\n<p><strong>Race 1 \u2013 Oulton Park \u2013 Result:</strong></p>\n\n\n\n<figure class=\"wp-block-table\"><table><tbody><tr><th>P/</th><th>No/</th><th>Name/</th><th>Entry/</th><th>Laps/</th><th>Time/</th><th>Gap/</th><th>Best/</th><th>On/</th></tr><tr><td><strong>1</strong></td><td>27</td><td>Dan CAMMISH</td><td>NAPA Racing UK</td><td>16</td><td>23:42.703</td><td></td><td>1:24.583</td><td>9</td></tr><tr><td><strong>2</strong></td><td>66</td><td>Josh COOK</td><td>Speedworks Corolla Racing</td><td>16</td><td>23:43.418</td><td>0.715</td><td>1:24.776</td><td>6</td></tr><tr><td><strong>3</strong></td><td>80</td><td>Tom INGRAM</td><td>Team VERTU</td><td>16</td><td>23:43.876</td><td>1.173</td><td>1:24.977</td><td>7</td></tr><tr><td><strong>4</strong></td><td>50</td><td>\u00c1r\u00f3n TAYLOR-SMITH</td><td>Laser Tools Racing with MB Motorsport</td><td>16</td><td>23:49.334</td><td>6.631</td><td>1:25.056</td><td>6</td></tr><tr><td><strong>5</strong></td><td>16</td><td>Aiden MOFFAT</td><td>LKQ Euro Car Parts with Power Maxed Racing</td><td>16</td><td>23:53.390</td><td>10.687</td><td>1:25.222</td><td>6</td></tr><tr><td><strong>6</strong></td><td>88</td><td>Mikey DOBLE</td><td>LKQ Euro Car Parts with Power Maxed Racing</td><td>16</td><td>23:54.715</td><td>12.012</td><td>1:25.019</td><td>6</td></tr><tr><td><strong>7</strong></td><td>116</td><td>Ashley SUTTON</td><td>NAPA Racing UK</td><td>16</td><td>23:54.898</td><td>12.195</td><td>1:25.261</td><td>6</td></tr><tr><td><strong>8</strong></td><td>3</td><td>Tom CHILTON</td><td>Team VERTU</td><td>16</td><td>23:55.163</td><td>12.460</td><td>1:25.475</td><td>7</td></tr><tr><td><strong>9</strong></td><td>22</td><td>Chris SMILEY</td><td>Restart Racing</td><td>16</td><td>23:56.610</td><td>13.907</td><td>1:25.326</td><td>7</td></tr><tr><td><strong>10</strong></td><td>2</td><td>Daryl DE LEON</td><td>WSR</td><td>16</td><td>23:56.619</td><td>13.916</td><td>1:25.471</td><td>12</td></tr><tr><td><strong>11</strong></td><td>17</td><td>Dexter PATTERSON</td><td>Steel Seal with Power Maxed Racing</td><td>16</td><td>23:58.771</td><td>16.068</td><td>1:25.176</td><td>7</td></tr><tr><td><strong>12</strong></td><td>52</td><td>Gordon SHEDDEN</td><td>Laser Tools Racing with MB Motorsport</td><td>16</td><td>23:59.245</td><td>16.542</td><td>1:25.433</td><td>10</td></tr><tr><td><strong>13</strong></td><td>77</td><td>Sam OSBORNE</td><td>NAPA Racing UK</td><td>16</td><td>23:59.586</td><td>16.883</td><td>1:25.774</td><td>14</td></tr><tr><td><strong>14</strong></td><td>11</td><td>Ricky COLLARD</td><td>Team VERTU</td><td>16</td><td>24:03.558</td><td>20.855</td><td>1:26.108</td><td>7</td></tr><tr><td><strong>15</strong></td><td>99</td><td>Charles RAINFORD</td><td>WSR</td><td>16</td><td>24:04.499</td><td>21.796</td><td>1:26.104</td><td>14</td></tr><tr><td><strong>16</strong></td><td>32</td><td>Daniel ROWBOTTOM</td><td>Cataclean Plato Racing</td><td>16</td><td>24:06.511</td><td>23.808</td><td>1:26.366</td><td>11</td></tr><tr><td><strong>17</strong></td><td>132</td><td>James DORLIN</td><td>Restart Racing</td><td>16</td><td>24:11.875</td><td>29.172</td><td>1:26.526</td><td>11</td></tr><tr><td><strong>18</strong></td><td>19</td><td>Max BUXTON</td><td>Speedworks Corolla Racing</td><td>16</td><td>24:12.534</td><td>29.831</td><td>1:26.071</td><td>10</td></tr><tr><td><strong>19</strong></td><td>28</td><td>Nicolas HAMILTON</td><td>Team VERTU</td><td>16</td><td>24:21.425</td><td>38.722</td><td>1:26.648</td><td>6</td></tr><tr><td><strong>DNF</strong></td><td>33</td><td>Adam MORGAN</td><td>Cataclean Plato Racing</td><td>9</td><td>13:59.101</td><td>7 Laps</td><td>1:24.906</td><td>6</td></tr><tr><td><strong>DNF</strong></td><td>15</td><td>Lewis SELBY</td><td>NAPA Racing UK</td><td>4</td><td>8:29.862</td><td>12 Laps</td><td>1:38.779</td><td>1</td></tr></tbody></table></figure>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/7cb25382-2b26-4ab1-97c4-2c9a469086ee-cammish-A26I2369-scaled-e1780833451508.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "qualifying-race-in-quotes-oulton-park",
+    "slug": "qualifying-race-in-quotes-oulton-park",
+    "link": "https://btcc.net/qualifying-race-in-quotes-oulton-park/",
+    "date": "2026-06-07T00:00:00",
+    "title": {
+      "rendered": "Qualifying Race in Quotes: Oulton Park"
+    },
+    "excerpt": {
+      "rendered": "A first Qualifying Race win for Dan Cammish at Oulton..."
+    },
+    "content": {
+      "rendered": "<p>A first Qualifying Race win for Dan Cammish at Oulton Park with Josh Cook and Ash Sutton making up the top three places of another exciting 'Race to Pole' \u2013 we spoke with all three drivers after the action...</p>\n\n\n\n<p><strong>Dan Cammish, NAPA Racing UK, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19306706\"></div>\n\n\n\n<p><strong>Josh Cook, Speedworks Corolla Racing, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19304594\"></div>\n\n\n\n<p><strong>Ash Sutton, NAPA Racing UK, said:</strong></p>\n\n\n\n<div id=\"buzzsprout-player-19304604\"></div>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/12360624-f9a7-4a2d-8fe1-02efb6df3d16-cook-0H5A8511-scaled.jpg"
         }
       ]
     }
