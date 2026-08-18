@@ -156,7 +156,7 @@ export default function DriverDetailScreen({route, navigation}) {
         <ImageBackground
           source={driver.cardBgUrl ? {uri: driver.cardBgUrl} : undefined}
           style={styles.headerBg}
-          resizeMode="stretch"
+          resizeMode="cover"
           fadeDuration={0}>
           {driver.numberImageUrl ? (
             <CachedImage uri={driver.numberImageUrl} style={styles.headerNumberImg} resizeMode="contain" />

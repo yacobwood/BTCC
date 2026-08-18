@@ -64,7 +64,7 @@ function DriverCardInner({item, onPress, fav}) {
           <Image
             source={bgSource}
             style={StyleSheet.absoluteFill}
-            resizeMode="stretch"
+            resizeMode="cover"
             onError={handleBgError}
             fadeDuration={0}
           />
