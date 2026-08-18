@@ -964,7 +964,7 @@
       "name": "Lewis Gilbert",
       "team": "WSR",
       "car": "BMW 330i M Sport",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/29.png",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/29.webp",
       "nationality": "Scottish",
       "bio": "Lewis, from Dalry, North Ayrshire, is a European Champion kart racer, having won the IAME Euro Series X30 Junior title in 2018 as well as the Kartmasters British GP crown in the Rotax Junior class the same year.\n\nThose accolades came in only his second season of high-level karting. Recently he was runner-up in a number of Senior Max class Class finals.\n\nAfter testing F4 and Formula Regional cars, he made his car racing debut earlier this year in the GB3 and has recorded multiple top-10 finishes to date.\n\nThe 22-year-old is making his debut in touring car racing in 2026, joining the Surrey-based squad WSR to drive the BMW 330i M Sport alongside Daryl De Leon and Charles Rainford.",
       "dateOfBirth": "2004-06-24",
@@ -972,7 +972,7 @@
       "history": [],
       "class": "I",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/29.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/29.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/29.png"
     },
     {
@@ -1647,7 +1647,7 @@
       "name": "Ryan Bensley",
       "team": "Speedworks Corolla Racing",
       "car": "Toyota Corolla GR Sport",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/7.png",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/7.webp",
       "nationality": "British",
       "bio": "Ryan Bensley has become a hugely popular paddock figure in the UK, taking an unconventional route in reaching his lifelong ambition of competing in the British Touring Car Championship.\n\nAfter initially following the traditional karting path – racing against future seven-time Formula 1 World Champion Lewis Hamilton – the King’s Lynn driver switched his focus to Stock Hatch, admitting that single-seater racing had never been of particular interest.\n\nHe claimed the championship in 2008 before stepping away from full-time competition, with his long-term sabbatical punctuated by Citroen C1 outings alongside BTCC race winner and good friend Josh Cook.\n\nBensley made a proper racing return in the Civic Cup in 2020 and 2021, before earning his TCR UK breakthrough three years later.\n\nA double top six finish at Donington Park in 2025 soon opened the door to a much greater opportunity… a one-off BTCC driver with Team VERTU at Snetterton.\n\nA points finish on his BTCC debut, backed up by a further two assured performances, quickly caught the attention of the paddock, highlighting his natural pace, rapid learning curve and strong technical feedback.\n\nNow, during the 2026 mid-season break, Bensley joins Speedworks Corolla Racing for the remainder of the campaign, taking the wheel of a Toyota Corolla GR Sport alongside Cook – the man he credits with being so instrumental in his career to date.",
       "history": [
@@ -1669,7 +1669,7 @@
       "class": "M",
       "livesIn": "Kings Lynn",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/7.png"
     },
     {
@@ -1747,7 +1747,7 @@
       "class": "I",
       "livesIn": "Hampshire",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/55.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/55.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/55.png"
     },
     {
@@ -2475,7 +2475,7 @@
       "name": "Daniel Lloyd",
       "team": "Restart Racing",
       "car": "Hyundai i30N",
-      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/123.png",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/123.webp",
       "nationality": "British",
       "bio": "Daniel Lloyd made his BTCC debut in 2010 with a one-off outing for Uniq Racing with Triple Eight at his home round, Croft, in the team's Vauxhall Vectra after the squad's title sponsor withdrew mid-season.\n\nHe returned to the grid full-time in 2016 with Eurotech Racing in a Honda Civic Type R, before partnering Árón Taylor-Smith at MG RCIB Insurance Racing in an MG6 GT for 2017. Staying with the Civic Type R for 2018, this time for BTC Norlin Racing, Lloyd took his maiden BTCC win at Croft.\n\nAfter time away from the championship, Lloyd returned in 2021 with Adrian Flux with Power Maxed Racing in a Vauxhall Astra, before his best season yet in 2022 with Bristol Street Motors with Excelr8 TradePriceCars.com, taking three wins in the Hyundai i30 Fastback N to finish 10th in the championship. He moved to Autobrite Direct with Millers Oils for 2023, racing a Cupra León.\n\nLloyd stepped away from driving again in 2024, before returning for 2025 with Restart Racing in the Hyundai i30 Fastback N, where a season-long battle with teammate Chris Smiley saw him take the Independent Drivers' honours.\n\nLloyd stepped back from the 2026 season at the start of the year to focus on his coaching commitments, staying on with Restart Racing in an advisory role. He returns to the cockpit for the final four rounds of 2026, taking over from James Dorlin at Restart Racing.",
       "history": [
@@ -2782,7 +2782,7 @@
         }
       ],
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/speedworks-corolla-racing.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.webp",
       "totalRaces": 376,
       "totalWins": 29
     },
