@@ -1,10 +1,19 @@
-import {AppRegistry, Platform} from 'react-native';
+import {AppRegistry, LogBox, Platform} from 'react-native';
 import {getMessaging, setBackgroundMessageHandler} from '@react-native-firebase/messaging';
 import notifee, {AndroidStyle, EventType} from '@notifee/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import App, {navigationRef} from './App';
 import {handleNotificationOpen} from './src/utils/notifNavigation';
 import {name as appName} from './app.json';
+
+// Suppresses both the in-app yellow-box warning overlay and the "Open
+// debugger to view warnings" notification banner during dev testing -
+// dev-only (LogBox is a no-op in release builds regardless). Runs before
+// AppRegistry.registerComponent, i.e. before the app ever renders, so it's
+// active for every warning the app itself can trigger.
+if (__DEV__) {
+  LogBox.ignoreAllLogs(true);
+}
 
 const TrackPlayer = Platform.OS === 'ios' ? require('react-native-track-player').default : null;
 

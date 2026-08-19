@@ -65,6 +65,28 @@ class TestScrapeNews(unittest.TestCase):
         with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html="<html></html>")):
             self.assertIsNone(scrape_news())
 
+    def test_strips_a_nested_tag_wrapped_around_the_title(self):
+        # 2026-08-18/19 overnight incident: 3 real scrape failures around a
+        # breaking-news story, most likely because the title was briefly
+        # wrapped in an inline tag (e.g. a "breaking" badge span) while the
+        # CMS was actively re-publishing it - the old [^<]+ capture had zero
+        # tolerance for that and hard-failed the whole scrape.
+        html = CARD_HTML.replace(
+            "<h3><a href=\"/race-1-report/\">Race 1 Report</a></h3>",
+            "<h3><a href=\"/race-1-report/\"><span class=\"badge\">Breaking</span> Race 1 Report</a></h3>",
+        )
+        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html=html)):
+            posts = scrape_news()
+        self.assertEqual(posts[0]["title"]["rendered"], "Breaking Race 1 Report")
+
+    def test_returns_none_when_title_is_tags_only(self):
+        html = CARD_HTML.replace(
+            "<h3><a href=\"/race-1-report/\">Race 1 Report</a></h3>",
+            "<h3><a href=\"/race-1-report/\"><span></span></a></h3>",
+        )
+        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html=html)):
+            self.assertIsNone(scrape_news())
+
     def test_constructs_fetcher_with_retries_3(self):
         # retries=3, not RenderedFetcher's own default of 2 - a missed
         # 5-minute tick has a direct notification-latency cost, so this

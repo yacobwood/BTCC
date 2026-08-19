@@ -230,6 +230,29 @@ class TestScrapeCardList(unittest.TestCase):
         self.assertEqual(len(fetcher.calls), 1)
         self.assertTrue(fetcher.calls[0].get('scroll_through'))
 
+    def test_strips_a_nested_tag_wrapped_around_the_title(self):
+        # 2026-08-18/19 overnight incident: see the matching comment on
+        # TITLE_RE - a title briefly wrapped in an inline tag (e.g. a
+        # "breaking" badge span) used to make the whole card silently
+        # unparseable instead of just losing the badge markup.
+        html = (
+            '<article class="news-card">'
+            '<h3><a href="/a-statement/"><span class="badge">Breaking</span> A Statement</a></h3>'
+            '</article>'
+        )
+        cards, _ = scrape_card_list(FakeFetcher(html=html))
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]['title'], 'Breaking A Statement')
+
+    def test_skips_a_card_whose_title_is_tags_only(self):
+        html = (
+            '<article class="news-card">'
+            '<h3><a href="/a-statement/"><span></span></a></h3>'
+            '</article>'
+        )
+        cards, _ = scrape_card_list(FakeFetcher(html=html))
+        self.assertEqual(cards, [])
+
 
 # ── fetch_article_body / build_articles ──────────────────────────────────────
 #

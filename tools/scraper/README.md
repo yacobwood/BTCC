@@ -27,6 +27,9 @@ block isn't about network identity, it's about being unable to execute JavaScrip
   `ubuntu-latest` - an interim fix until btcc.net's dev allowlists this project's traffic.
   `scrape_tsl.py` (TSL Timing PDFs) and `scrape_youtube.py` (YouTube) never touch btcc.net and
   stay on `ubuntu-latest`.
+- **`runner-heartbeat.yml`** (GitHub-hosted, hourly) is the only thing that can notice
+  `btcc-mac` itself going unreachable - every other workflow's `if: failure()` alert needs a job
+  to have actually started to fire at all. See "Self-hosted runner reliability" below.
 - **`cf-worker/`'s Cloudflare Worker relay is dead code, do not reuse it here.** It solved a
   *different*, now-obsolete problem: the old WordPress origin's IP-reputation WAF block
   (pre-dates the Vercel migration). A Worker can't execute a JS challenge either, so it can't
@@ -61,6 +64,29 @@ fresh one per item - each `__enter__` launches a new browser plus its own startu
 is itself a bot signal when repeated (root-caused 2026-08-13/14), and wastes shared-runner time
 on top of it. If your script loops over more than one URL, open `with RenderedFetcher() as
 fetcher:` once, outside the loop, and pass `fetcher` down.
+
+## Self-hosted runner reliability
+
+**2026-08-19 incident:** `btcc-mac` (a laptop, not a server) dropped onto battery power
+overnight and macOS suspended it into idle/maintenance sleep repeatedly for ~5 hours;
+`actions-runner`'s long-poll connection to GitHub froze mid-request each time and didn't error
+out until the machine woke back up, by which point `scrape-news.yml`'s `cancel-in-progress`
+concurrency group had already killed the stale queued run and queued a fresh one behind it - so
+every 5-minute tick queued, sat, and got cancelled without ever executing, for ~5 hours straight,
+and no news.json commit landed in that window.
+
+`runner-heartbeat.yml` (the workflow that exists specifically to catch `btcc-mac` going
+unreachable) **stayed "healthy" the entire outage**: its check only confirmed a `scrape-news`
+run had been *created* recently, and GitHub's own cron scheduler kept creating one every 5
+minutes regardless of whether any runner ever picked it up. Fixed by also checking whether the
+most recent run's job actually reached a runner (`jobs[0].started_at`) and whether the last 3
+runs were all cancelled before starting - either is now sufficient to alert on its own, since a
+single cancelled run (a slow-but-real scrape superseded by the next tick) is expected and
+benign, but three or more in a row queued-then-cancelled is not.
+
+This doesn't prevent the underlying outage (that's a physical "keep the laptop plugged in /
+awake" problem, not a code one) - it only closes the alerting blind spot so a recurrence gets
+reported instead of silently self-resolving hours later.
 
 ## Setup
 

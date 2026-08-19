@@ -99,7 +99,12 @@ MEDIA_DIR = DATA_DIR / "media" / "news"
 MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
-TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
+# [\s\S]*? + tag-strip, not [^<]+: see the matching comment in scrape_news.py
+# (2026-08-18/19, 7 intermittent failures across ~9.5 hours) - tolerates a
+# title briefly wrapped in an inline tag (e.g. a "breaking" badge span)
+# instead of silently dropping the whole card.
+TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([\s\S]*?)</a></h3>')
+TAG_RE = re.compile(r"<[^>]+>")
 IMAGE_RE = re.compile(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 EXCERPT_RE = re.compile(r'<div class="news-card-footer"><p>([^<]*)</p>')
 DATE_RE = re.compile(r'<time class="date">([^<]+)</time>')
@@ -145,7 +150,9 @@ def scrape_card_list(fetcher: RenderedFetcher, url: str = NEWS_URL) -> tuple[lis
         title_m = TITLE_RE.search(block)
         if not title_m:
             continue
-        slug, title = title_m.group(1), title_m.group(2)
+        slug, title = title_m.group(1), TAG_RE.sub("", title_m.group(2)).strip()
+        if not title:
+            continue
         image_m = IMAGE_RE.search(block)
         excerpt_m = EXCERPT_RE.search(block)
         date_m = DATE_RE.search(block)
@@ -187,7 +194,9 @@ def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], 
         if not title_m or title_m.group(1) in seen_slugs:
             continue
         seen_slugs.add(title_m.group(1))
-        slug, title = title_m.group(1), title_m.group(2)
+        slug, title = title_m.group(1), TAG_RE.sub("", title_m.group(2)).strip()
+        if not title:
+            continue
         image_m = IMAGE_RE.search(block)
         excerpt_m = EXCERPT_RE.search(block)
         date_m = DATE_RE.search(block)

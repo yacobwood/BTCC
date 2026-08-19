@@ -43,7 +43,18 @@ MEDIA_DIR = DATA_DIR / "media" / "news"
 MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
-TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([^<]+)</a></h3>')
+# Title capture is deliberately permissive ([\s\S]*?, not [^<]+) and stripped
+# of tags afterwards - 2026-08-18/19: "could not extract title/slug" hit 7
+# times spread across ~9.5 hours that evening (14:56 through 00:23), so this
+# is a recurring intermittent fragility, not a one-off tied to a single
+# story edit - most plausibly the CMS occasionally renders the title wrapped
+# in an inline tag (e.g. a "breaking" badge span) that the old [^<]+ capture
+# had zero tolerance for. Not reproducible on demand (page markup was back
+# to the plain <h3><a>Title</a></h3> shape by the time this was diagnosed),
+# so this is hardening against a recurrence, not a confirmed fix for a known
+# live cause.
+TITLE_RE = re.compile(r'<h3><a href="/([a-z0-9-]+)/">([\s\S]*?)</a></h3>')
+TAG_RE = re.compile(r"<[^>]+>")
 IMAGE_RE = re.compile(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 
 
@@ -72,7 +83,10 @@ def scrape_news() -> list | None:
     if not title_m:
         print("ERROR: could not extract title/slug from article card", file=sys.stderr)
         return None
-    slug, title = title_m.group(1), title_m.group(2)
+    slug, title = title_m.group(1), TAG_RE.sub("", title_m.group(2)).strip()
+    if not title:
+        print("ERROR: could not extract title/slug from article card", file=sys.stderr)
+        return None
 
     image_m = IMAGE_RE.search(block)
     media_url = resolve_media_url(image_m.group(1)) if image_m else None
