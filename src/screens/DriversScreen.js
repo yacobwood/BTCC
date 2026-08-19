@@ -73,7 +73,7 @@ function DriverCardInner({item, onPress, fav}) {
           <Text style={[styles.driverNumberBg, item.lightCardBg && {color: '#000'}]}>{item.number}</Text>
         )}
         {bundled ? (
-          <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={0} />
+          <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={150} />
         ) : item.imageUrl ? (
           <CachedImage uri={item.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
         ) : null}

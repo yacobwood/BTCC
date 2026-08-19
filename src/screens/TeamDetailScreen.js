@@ -100,7 +100,7 @@ export default function TeamDetailScreen({route, navigation}) {
                       <Text style={[styles.driverNumberBg, blackNumber && {color: '#000'}]}>{d.number}</Text>
                     )}
                     {bundled ? (
-                      <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={0} />
+                      <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={150} />
                     ) : d.imageUrl ? (
                       <CachedImage uri={d.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
                     ) : null}
