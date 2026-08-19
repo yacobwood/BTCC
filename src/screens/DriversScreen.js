@@ -199,7 +199,7 @@ export default function DriversScreen({navigation}) {
       accessibilityRole="button">
       <View style={styles.teamImageArea}>
         {item.cardBgUrl ? (
-          <CachedImage uri={item.cardBgThumbUrl || item.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <CachedImage uri={item.cardBgThumbUrl || item.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}

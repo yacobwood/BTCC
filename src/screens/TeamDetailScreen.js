@@ -34,7 +34,7 @@ export default function TeamDetailScreen({route, navigation}) {
           <ImageBackground
             source={team.cardBgUrl ? {uri: team.cardBgUrl} : undefined}
             style={[styles.carImageBg, {marginTop: insets.top + 8}]}
-            resizeMode="cover"
+            resizeMode="stretch"
             fadeDuration={0}>
             <Image source={{uri: team.carImageUrl}} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} fadeDuration={0} />
           </ImageBackground>
@@ -95,7 +95,7 @@ export default function TeamDetailScreen({route, navigation}) {
                   <ImageBackground
                     source={team.cardBgUrl ? {uri: team.cardBgUrl} : undefined}
                     style={styles.driverImageArea}
-                    resizeMode="cover"
+                    resizeMode="stretch"
                     fadeDuration={0}>
                     {d.numberImageUrl ? (
                       <CachedImage uri={d.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
