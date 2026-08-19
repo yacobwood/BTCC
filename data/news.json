@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Where to Watch: Donington Park GP"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/59dfda1b-4a79-4839-ae41-1182f2edfb56-Sutton--RL1_3854-2-.jpg"
+        }
+      ]
+    }
   }
 ]
