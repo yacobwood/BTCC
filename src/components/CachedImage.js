@@ -29,7 +29,11 @@ const RETRY_DELAY_MS = 400;
 
 // Simple wrapper that uses React Native's built-in Image with prefetch support.
 // Pass `targetWidth` to automatically request the smallest adequate WP thumbnail.
-export default function CachedImage({uri, style, resizeMode = 'cover', targetWidth, ...props}) {
+// Pass `fallback` to render something other than the default broken-image icon
+// once retries are exhausted - e.g. a plain colour wash for a decorative
+// background, where a small icon glyph would look more like a mistake than
+// the photo/car/number cases this default fallback was designed for.
+export default function CachedImage({uri, style, resizeMode = 'cover', targetWidth, fallback, ...props}) {
   const [src, setSrc] = useState(() => targetWidth ? wpThumb(uri, targetWidth) : uri);
   const [errored, setErrored] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -76,6 +80,7 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
   }, [src, uri]);
 
   if (!uri || errored) {
+    if (fallback) return fallback;
     return (
       <View style={[style, {backgroundColor: '#1a1a2e', justifyContent: 'center', alignItems: 'center'}]}>
         <Icon name="image-not-supported" size={24} color="#333" />

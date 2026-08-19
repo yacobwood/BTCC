@@ -79,6 +79,24 @@ describe('CachedImage', () => {
     expect(getCachedImg(tree)).toBeNull();
   });
 
+  it('renders a custom `fallback` node instead of the default icon once retries are exhausted', () => {
+    const {Text} = require('react-native');
+    const tree = render(
+      <CachedImage uri={EXT_URI} style={{width: 100, height: 100}} fallback={<Text>custom fallback</Text>} />,
+    );
+    act(() => { getCachedImg(tree).props.onError(); });
+    act(() => { getCachedImg(tree).props.onError(); });
+    act(() => { getCachedImg(tree).props.onError(); });
+    expect(getCachedImg(tree)).toBeNull();
+    expect(tree.getByText('custom fallback')).toBeTruthy();
+  });
+
+  it('renders a custom `fallback` node when uri is null', () => {
+    const {Text} = require('react-native');
+    const tree = render(<CachedImage uri={null} style={{width: 100, height: 100}} fallback={<Text>custom fallback</Text>} />);
+    expect(tree.getByText('custom fallback')).toBeTruthy();
+  });
+
   it('retries up to MAX_RETRIES times before showing the fallback', () => {
     const tree = render(<CachedImage uri={WP_URI} style={{width: 100, height: 100}} />);
     // src === uri (no targetWidth): the first two errors are tolerated as retries

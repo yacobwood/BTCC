@@ -179,6 +179,22 @@ describe('DriversScreen', () => {
       expect(getByText('80')).toBeTruthy();
     });
 
+    it('driver card background uses CachedImage (with retry) when cardBgUrl is set', async () => {
+      // Root-caused live 2026-08-19: this used to be a raw <Image> with a manual
+      // onError -> permanent grey-fallback handler, no retry at all - a single
+      // transient failure (e.g. a burst of ~24 driver tiles' images requesting
+      // at once) showed the fallback forever for that card. Confirms it now
+      // goes through CachedImage like every other remote image on this screen.
+      const gridWithBg = {
+        ...MOCK_GRID,
+        drivers: [{...MOCK_GRID.drivers[0], cardBgUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/team-vertu.png'}],
+      };
+      parseGrid.mockReturnValue(gridWithBg);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
+    });
+
     it('team card background and car image both use CachedImage when URLs are set', async () => {
       const gridWithImages = {
         drivers: [],

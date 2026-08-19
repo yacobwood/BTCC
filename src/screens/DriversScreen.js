@@ -48,10 +48,7 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 const TABS = ['DRIVERS', 'TEAMS'];
 
 function DriverCardInner({item, onPress, fav}) {
-  const [bgError, setBgError] = useState(false);
   const bundled = getDriverImage(item.number);
-  const bgSource = React.useMemo(() => item.cardBgUrl ? {uri: item.cardBgUrl} : null, [item.cardBgUrl]);
-  const handleBgError = React.useCallback(() => setBgError(true), []);
   return (
     <TouchableOpacity
       style={[styles.driverCard, fav && styles.driverCardFav]}
@@ -60,13 +57,12 @@ function DriverCardInner({item, onPress, fav}) {
       accessibilityLabel={`${item.name}, ${item.team}, number ${item.number}`}
       accessibilityRole="button">
       <View style={styles.driverImageArea}>
-        {bgSource && !bgError ? (
-          <Image
-            source={bgSource}
+        {item.cardBgUrl ? (
+          <CachedImage
+            uri={item.cardBgUrl}
             style={StyleSheet.absoluteFill}
             resizeMode="stretch"
-            onError={handleBgError}
-            fadeDuration={0}
+            fallback={<View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />}
           />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
