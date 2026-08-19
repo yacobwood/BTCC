@@ -68,6 +68,11 @@ react {
 task runJsTests(type: Exec) {
     commandLine '/Users/jakewood/.nvm/versions/node/v23.5.0/bin/npx', 'jest', '--no-coverage', '--passWithNoTests', '--forceExit'
     workingDir '../../'
+    // npx's own shebang (#!/usr/bin/env node) needs `node` resolvable via PATH -
+    // Gradle's spawned Exec process doesn't inherit the shell's nvm-managed PATH,
+    // so without this, npx itself fails to even start ("env: node: No such file
+    // or directory") before it ever gets to running jest.
+    environment 'PATH', "/Users/jakewood/.nvm/versions/node/v23.5.0/bin:${System.getenv('PATH')}"
     outputs.upToDateWhen { false }
 }
 
