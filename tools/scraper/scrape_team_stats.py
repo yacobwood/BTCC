@@ -42,7 +42,10 @@ TEAM_SLUGS: dict[str, str] = {
     "Speedworks Corolla Racing":                  "toyota-gazoo-racing-uk",
     "WSR":                                        "wsr",
     "LKQ Euro Car Parts with Power Maxed Racing": "lkq-euro-car-parts-with-power-maxed-racing",
-    "Cataclean Plato Racing":                     "plato-racing",
+    # 2026-08-19: renamed from "Cataclean Plato Racing" to "CPRL" - slug kept
+    # as-is (unconfirmed whether btcc.net's own URL changed too; only the
+    # display name is known to have changed at this point).
+    "CPRL":                                       "plato-racing",
     "Restart Racing":                             "restart-racing",
     "Laser Tools Racing with MB Motorsport":      "laser-tools-racing-with-mb-motorsport",
     "Steel Seal with Power Maxed Racing":         "motor-parts-direct-with-power-maxed-racing",
