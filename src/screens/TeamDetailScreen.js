@@ -32,7 +32,7 @@ export default function TeamDetailScreen({route, navigation}) {
         {team.carImageUrl ? (
           <View style={[styles.carImageBg, {marginTop: insets.top + 8}]}>
             {team.cardBgUrl ? (
-              <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+              <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
             ) : null}
             <CachedImage uri={team.carImageUrl} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} />
           </View>
@@ -92,7 +92,7 @@ export default function TeamDetailScreen({route, navigation}) {
                   accessibilityRole="button">
                   <View style={styles.driverImageArea}>
                     {team.cardBgUrl ? (
-                      <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+                      <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
                     ) : null}
                     {d.numberImageUrl ? (
                       <CachedImage uri={d.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />

@@ -63,6 +63,7 @@ function DriverCardInner({item, onPress, fav}) {
             style={StyleSheet.absoluteFill}
             resizeMode="stretch"
             fallback={<View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />}
+            collapsable={false}
           />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
@@ -195,7 +196,7 @@ export default function DriversScreen({navigation}) {
       accessibilityRole="button">
       <View style={styles.teamImageArea}>
         {item.cardBgUrl ? (
-          <CachedImage uri={item.cardBgThumbUrl || item.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+          <CachedImage uri={item.cardBgThumbUrl || item.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}

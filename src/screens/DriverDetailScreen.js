@@ -154,7 +154,7 @@ export default function DriverDetailScreen({route, navigation}) {
         {/* Header */}
         <View style={styles.headerBg}>
           {driver.cardBgUrl ? (
-            <CachedImage uri={driver.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+            <CachedImage uri={driver.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
           ) : null}
           {driver.numberImageUrl ? (
             <CachedImage uri={driver.numberImageUrl} style={styles.headerNumberImg} resizeMode="contain" />
