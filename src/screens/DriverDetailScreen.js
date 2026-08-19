@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Image,
-  ImageBackground,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -153,11 +152,10 @@ export default function DriverDetailScreen({route, navigation}) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{paddingBottom: 30}}>
         {/* Header */}
-        <ImageBackground
-          source={driver.cardBgUrl ? {uri: driver.cardBgUrl} : undefined}
-          style={styles.headerBg}
-          resizeMode="stretch"
-          fadeDuration={0}>
+        <View style={styles.headerBg}>
+          {driver.cardBgUrl ? (
+            <CachedImage uri={driver.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+          ) : null}
           {driver.numberImageUrl ? (
             <CachedImage uri={driver.numberImageUrl} style={styles.headerNumberImg} resizeMode="contain" />
           ) : (
@@ -168,7 +166,7 @@ export default function DriverDetailScreen({route, navigation}) {
           ) : driver.imageUrl ? (
             <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
           ) : null}
-        </ImageBackground>
+        </View>
         <View style={styles.headerFooter}>
           <View style={{flex: 1}}>
             <Text style={styles.name}>{formatDriverName(driver.name)}</Text>

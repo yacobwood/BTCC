@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Image,
-  ImageBackground,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
@@ -31,13 +30,12 @@ export default function TeamDetailScreen({route, navigation}) {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{paddingBottom: 30}}>
         {team.carImageUrl ? (
-          <ImageBackground
-            source={team.cardBgUrl ? {uri: team.cardBgUrl} : undefined}
-            style={[styles.carImageBg, {marginTop: insets.top + 8}]}
-            resizeMode="stretch"
-            fadeDuration={0}>
-            <Image source={{uri: team.carImageUrl}} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} fadeDuration={0} />
-          </ImageBackground>
+          <View style={[styles.carImageBg, {marginTop: insets.top + 8}]}>
+            {team.cardBgUrl ? (
+              <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+            ) : null}
+            <CachedImage uri={team.carImageUrl} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} />
+          </View>
         ) : <View style={{height: insets.top + 8}} />}
 
         <View style={styles.content}>
@@ -92,11 +90,10 @@ export default function TeamDetailScreen({route, navigation}) {
                   onPress={() => navigation.navigate('DriverDetail', {driver: d})}
                   accessibilityLabel={d.name}
                   accessibilityRole="button">
-                  <ImageBackground
-                    source={team.cardBgUrl ? {uri: team.cardBgUrl} : undefined}
-                    style={styles.driverImageArea}
-                    resizeMode="stretch"
-                    fadeDuration={0}>
+                  <View style={styles.driverImageArea}>
+                    {team.cardBgUrl ? (
+                      <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+                    ) : null}
                     {d.numberImageUrl ? (
                       <CachedImage uri={d.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
                     ) : (
@@ -108,7 +105,7 @@ export default function TeamDetailScreen({route, navigation}) {
                       <CachedImage uri={d.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
                     ) : null}
                     {fav && <View style={styles.favBadge}><Icon name="star" size={12} color={Colors.yellow} /></View>}
-                  </ImageBackground>
+                  </View>
                   <View style={styles.driverFooter}>
                     <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(d.name)}</Text>
                   </View>
