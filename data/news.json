@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Speedworks Corolla Racing ready to attack Donington GP circuit"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/b201b14b-602b-4b81-8707-0a37b89c075a-Cook-RL1_2345-2-.jpg"
+        }
+      ]
+    }
   }
 ]
