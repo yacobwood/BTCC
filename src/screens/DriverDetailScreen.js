@@ -452,16 +452,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -10,
     right: 5,
-    fontSize: 180,
+    fontSize: 160,
     fontWeight: '900',
     color: '#fff',
-    lineHeight: 200,
+    lineHeight: 180,
   },
   headerPhoto: {width: '100%', height: '90%'},
   // Branded number-graphic replacement for headerNumber above (used when the
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
   // the square headerBg so it matches DriversScreen's tile-sized equivalent.
-  headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '68%', height: '55%'},
+  headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',

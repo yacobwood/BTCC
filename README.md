@@ -320,7 +320,7 @@ Menu screen. A "Buy me a coffee" card renders first, above every section (Androi
 All notification toggles with parent/child hierarchy (toggling a parent enables/disables all children). Spoiler-free mode toggle. Display settings (km/miles distance unit; 12hr/24hr time format). Device ID and FCM token display for admin/debugging.
 
 **RadioScreen** ([src/screens/RadioScreen.js](src/screens/RadioScreen.js))
-List of live radio streams from `radio.json`. Platform-specific playback: iOS uses `react-native-track-player`, Android uses a native `RadioService`. A Stop button appears in the header when a station is playing.
+List of live radio streams from `radio.json`. Platform-specific playback: iOS uses `react-native-track-player`, Android uses a native `RadioService`. A Stop button appears in the header when a station is playing. Shows a "No stations available" empty state when the list is empty - true as of 2026-08-20, when talkSPORT/talkSPORT 2 (the only two stations that existed) were retired and `radio_tab` set to `false`, hiding "Online Radio" from the Listen menu entirely. TOCA Live Radio ([TocaRadioScreen](src/screens/TocaRadioScreen.js) below) is a separate, always-on feature and unaffected.
 
 **TocaRadioScreen** ([src/screens/TocaRadioScreen.js](src/screens/TocaRadioScreen.js))
 WebView embedding the Cre8Media TOCA Radio player. JavaScript injection intercepts audio stream URLs. Shows a connecting spinner for 15 seconds on load.
@@ -536,7 +536,7 @@ Stored in [data/](data/) directory. Served via GitHub raw CDN. Some are also bun
 | `news.json` | Latest btcc.net article (WP-REST-shaped), scraped every 5 minutes so `sendSessionNotifications` can read it without hitting btcc.net directly |
 | `articles/page_<n>.json` + `articles/index.json` | btcc.net article archive in full (title, content, image, category), accumulated over time (capped at 500 articles, oldest dropped) and split into ~20-article page files plus a slug→page index, so the app's News tab, search and article deep-links only ever fetch the one page they actually need instead of the whole archive - see [§19](#19-python-scrapers) |
 | `roadmap.json` | Feature roadmap items with status |
-| `radio.json` | Live radio station URLs |
+| `radio.json` | Live radio station URLs - empty since 2026-08-20 (talkSPORT/talkSPORT 2 retired, `radio_tab` flag set to `false`) |
 | `blacklist.json` | Profanity filter word list |
 | `live_status.json` | Whether a live session is in progress |
 | `schedule.json` | Session start times used by Cloud Functions for pre-session notifications |

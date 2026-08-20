@@ -70,11 +70,13 @@ describe('RadioScreen', () => {
     });
   });
 
-  it('falls back to bundled stations when fetch returns no stations', async () => {
+  it('shows the empty state when both the live fetch and the bundled fallback have no stations', async () => {
+    // Bundled data/radio.json is intentionally empty (talkSPORT/talkSPORT 2 -
+    // its only stations - were retired), so unlike before there's no non-empty
+    // fallback to mask a fetch failure with; the genuine empty state must show.
     setupFetch([]);
-    const {getAllByText} = renderWithProviders(<RadioScreen navigation={nav} />);
-    // Bundled radio.json always has at least one station so empty state never shows
-    await waitFor(() => expect(getAllByText(/talkSPORT/i).length).toBeGreaterThan(0));
+    const {getByText} = renderWithProviders(<RadioScreen navigation={nav} />);
+    await waitFor(() => expect(getByText('No stations available')).toBeTruthy());
   });
 
   // ── Playback ─────────────────────────────────────────────────────────────────

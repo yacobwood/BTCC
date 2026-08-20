@@ -552,4 +552,68 @@ describe('TeamDetailScreen', () => {
     );
     await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1));
   });
+
+  it('team sponsor logo renders on the hero (top-right, same treatment as the Grid/Merch tiles) when logoUrl is set', async () => {
+    // The hero only mounts at all when carImageUrl is set (see TeamDetailScreen.js) - the
+    // car and logo CachedImages both count here, so 2 is the floor, not the logo alone.
+    const teamWithLogo = {
+      ...TEAM,
+      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
+      logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
+    };
+    const route = makeRoute({team: teamWithLogo});
+    const {getAllByTestId} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(2));
+  });
+
+  it('no logo image renders on the hero when logoUrl is absent', async () => {
+    const teamWithCarOnly = {
+      ...TEAM,
+      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
+    };
+    const route = makeRoute({team: teamWithCarOnly});
+    const {getAllByTestId} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    // Just the car image - no separate logo CachedImage without logoUrl.
+    await waitFor(() => expect(getAllByTestId('cached-image').length).toBe(1));
+  });
+
+  it('uses the standard, larger logo box on the hero when team.smallLogo is not set', async () => {
+    const teamWithLogo = {
+      ...TEAM,
+      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
+      logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
+    };
+    const route = makeRoute({team: teamWithLogo});
+    const {getAllByTestId} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      const logoImg = getAllByTestId('cached-image').find(img => img.props.source.uri.includes('logoImages'));
+      expect(logoImg.props.style.width).toBe('55%');
+    });
+  });
+
+  it('uses the smaller logo box on the hero when team.smallLogo is set (e.g. Steel Seal)', async () => {
+    // Regression test: shrinking teamLogoImg directly (instead of adding this
+    // dedicated smallLogo-only override) shrank every other team's hero logo
+    // too - reported live after the first attempt at this fix.
+    const teamWithSmallLogo = {
+      ...TEAM,
+      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
+      logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
+      smallLogo: true,
+    };
+    const route = makeRoute({team: teamWithSmallLogo});
+    const {getAllByTestId} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      const logoImg = getAllByTestId('cached-image').find(img => img.props.source.uri.includes('logoImages'));
+      expect(logoImg.props.style.width).toBe('45%');
+    });
+  });
 });

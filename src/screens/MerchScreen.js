@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   carImage: {width: '100%', height: '85%'},
   // Matches DriversScreen.js's teamLogoImg (Grid -> Teams tab) exactly, positioned
   // opposite the top-left shopBadge below so the two never overlap.
-  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '45%', height: '28%'},
+  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', height: '34%'},
   shopBadge: {
     position: 'absolute',
     top: 8,

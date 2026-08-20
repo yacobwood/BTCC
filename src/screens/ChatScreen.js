@@ -23,9 +23,16 @@ import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
 import {timeAgo} from '../utils/timeAgo';
 import {containsProfanity} from '../utils/profanityFilter';
+import {cacheRead, cacheWrite} from '../store/cache';
 
 const COMMENTER_NAME_KEY = 'commenter_name';
 const MAX_MESSAGES = 200;
+// Bridges the gap before the live RTDB listener's first snapshot arrives -
+// bounded generously since the live listener always supersedes it within
+// moments once it fires; this only guards against showing chat history from
+// literally the last time the device was online if it's been unusually long.
+const MESSAGES_CACHE_KEY = 'chat_messages';
+const MESSAGES_CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
 export default function ChatScreen({onClose} = {}) {
   const {user} = useAuth();
@@ -84,12 +91,26 @@ export default function ChatScreen({onClose} = {}) {
     };
     init();
 
+    // Instant-render bridge: unlike every other data screen in this app,
+    // ChatScreen had no local cache at all - opening it always waited on a
+    // live round-trip against the full MAX_MESSAGES window with a blank
+    // spinner in the meantime, which is what "sometimes takes a while to
+    // load" actually was (RTDB connection/latency variance, not a bug).
+    // ChatFab's own listener keeps the RTDB connection warm in the
+    // background, but its query (limitToLast(1)) is a different cached
+    // query than this screen's, so it doesn't help here.
+    cacheRead(MESSAGES_CACHE_KEY, MESSAGES_CACHE_MAX_AGE_MS).then(cached => {
+      if (cached) setMessages(prev => (prev === null ? cached : prev));
+    }).catch(() => {});
+
     // Real-time listener
     const ref = DB.ref('/chat/messages');
     ref.orderByChild('timestamp').limitToLast(MAX_MESSAGES).on('value', snap => {
       const msgs = [];
       snap.forEach(c => msgs.push({id: c.key, ...c.val()}));
-      setMessages(msgs.filter(m => !m.hidden).reverse()); // newest first for inverted list
+      const visible = msgs.filter(m => !m.hidden).reverse(); // newest first for inverted list
+      setMessages(visible);
+      cacheWrite(MESSAGES_CACHE_KEY, visible);
     });
 
     // Live authorId -> current name map, so renames apply retroactively

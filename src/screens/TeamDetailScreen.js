@@ -34,6 +34,13 @@ export default function TeamDetailScreen({route, navigation}) {
             {team.cardBgUrl ? (
               <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
             ) : null}
+            {team.logoUrl ? (
+              <CachedImage
+                uri={team.logoUrl}
+                style={team.smallLogo ? styles.teamLogoImgSmall : styles.teamLogoImg}
+                resizeMode="contain"
+              />
+            ) : null}
             <CachedImage uri={team.carImageUrl} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} />
           </View>
         ) : <View style={{height: insets.top + 8}} />}
@@ -158,6 +165,20 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
   carImageBg: {width: '100%', aspectRatio: 2},
   carImage: {width: '100%', flex: 1, transform: [{scale: 1.15}]},
+  // Same top-right sponsor-logo treatment as DriversScreen/MerchScreen's team
+  // tiles - the % box works out to a similar absolute size here despite this
+  // hero being a wide 2:1 banner rather than a square tile (hero is roughly
+  // 2x the tile's width, offsetting its halved aspect ratio).
+  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', height: '34%'},
+  // Override for team.smallLogo (currently just Steel Seal): this hero's 2:1
+  // aspect makes its box proportionally *wider* than the tile's square box,
+  // so a wide edge-to-edge logo with no internal padding (Steel Seal's opaque
+  // jpg) becomes height-constrained under `contain` and fills the box's full
+  // height instead of shrinking to fit - oversized here even though the same
+  // logo looks fine on the tile screens (narrower box, constrained by width
+  // instead). Scoped to this one flag rather than shrinking teamLogoImg
+  // itself, which would shrink every other team's hero logo too.
+  teamLogoImgSmall: {position: 'absolute', top: 8, right: 8, width: '45%', height: '26%'},
   content: {padding: 16},
   teamName: {color: '#fff', fontSize: 24, fontWeight: '900'},
   teamCar: {color: Colors.textSecondary, fontSize: 14, marginTop: 4},
@@ -173,10 +194,10 @@ const styles = StyleSheet.create({
   driverCardFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'},
   driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
   driverPhoto: {width: '100%', height: '85%'},
-  driverNumberBg: {position: 'absolute', top: -10, right: 5, fontSize: 90, fontWeight: '900', color: '#fff', lineHeight: 100},
+  driverNumberBg: {position: 'absolute', top: -10, right: 5, fontSize: 80, fontWeight: '900', color: '#fff', lineHeight: 90},
   // Branded number-graphic replacement for driverNumberBg above (used when
   // the driver has a numberImageUrl) - same footprint as DriversScreen's tile.
-  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '68%', height: '55%'},
+  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},

@@ -1,16 +1,3 @@
 {
-  "stations": [
-    {
-      "name": "talkSPORT",
-      "tagline": "UK Sports Radio",
-      "streamUrl": "https://radio.talksport.com/stream",
-      "coverage": "Live BTCC commentary on race weekends"
-    },
-    {
-      "name": "talkSPORT 2",
-      "tagline": "UK Sports Radio",
-      "streamUrl": "https://radio.talksport.com/stream2",
-      "coverage": "Backup BTCC coverage on select weekends"
-    }
-  ]
+  "stations": []
 }

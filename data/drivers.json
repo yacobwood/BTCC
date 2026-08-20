@@ -3069,7 +3069,8 @@
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/17.png",
       "totalRaces": 276,
       "totalWins": 6,
-      "lightCardBg": true
+      "lightCardBg": true,
+      "smallLogo": true
     },
     {
       "name": "Power Maxed Racing",

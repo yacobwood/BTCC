@@ -258,15 +258,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -10,
     right: 5,
-    fontSize: 90,
+    fontSize: 80,
     fontWeight: '900',
     color: '#fff',
-    lineHeight: 100,
+    lineHeight: 90,
   },
   // Branded number-graphic replacement for driverNumberBg above (used when
   // the driver has a numberImageUrl) - same top-right footprint, sized as a
   // % of the square driverImageArea so it scales consistently at any tile size.
-  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '68%', height: '55%'},
+  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   // behind the car cutout) but sized down from that treatment - these are
   // third-party wordmarks of varying aspect ratio, not a big brand number
   // meant to dominate the tile, so contain within a modest corner box.
-  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '45%', height: '28%'},
+  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', height: '34%'},
   teamFooter: {padding: 10},
   teamName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   divider: {height: 1, backgroundColor: 'rgba(42,45,68,0.5)', marginVertical: 12},

@@ -128,6 +128,66 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(UNSAFE_queryByType(ActivityIndicator)).toBeNull());
   });
 
+  // ── Message cache (instant-render bridge, fixes "chat sometimes takes a while
+  // to load" - previously there was no local cache at all, so opening chat
+  // always blocked on a live RTDB round-trip with a blank spinner) ────────────────
+
+  describe('message cache', () => {
+    const CACHE_KEY = 'cache_chat_messages';
+    const cachedMsg = {id: 'cached-1', text: 'Cached hello', authorId: 'someone', authorName: 'Someone', timestamp: 500, flagCount: 0, hidden: false};
+    const liveMsg = {id: 'live-1', text: 'Live message', authorId: 'other', authorName: 'Other', timestamp: 1000, flagCount: 0, hidden: false};
+
+    it('renders cached messages instantly, before the live listener fires', async () => {
+      AsyncStorage.getItem.mockImplementation(key =>
+        key === CACHE_KEY
+          ? Promise.resolve(JSON.stringify({data: [cachedMsg], cachedAt: Date.now()}))
+          : Promise.resolve(null),
+      );
+      const {findByText, UNSAFE_queryByType} = renderWithProviders(<ChatScreen />);
+      await findByText('Cached hello');
+      const {ActivityIndicator} = require('react-native');
+      expect(UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+    });
+
+    it('a live snapshot replaces the cached messages once it arrives', async () => {
+      AsyncStorage.getItem.mockImplementation(key =>
+        key === CACHE_KEY
+          ? Promise.resolve(JSON.stringify({data: [cachedMsg], cachedAt: Date.now()}))
+          : Promise.resolve(null),
+      );
+      const {findByText, queryByText} = renderWithProviders(<ChatScreen />);
+      await findByText('Cached hello');
+      await act(async () => { triggerMessages([liveMsg]); });
+      await waitFor(() => expect(queryByText('Cached hello')).toBeNull());
+      expect(await findByText('Live message')).toBeTruthy();
+    });
+
+    it('a slow cache read does not clobber live data that already arrived (race guard)', async () => {
+      let resolveCache;
+      AsyncStorage.getItem.mockImplementation(key =>
+        key === CACHE_KEY
+          ? new Promise(resolve => { resolveCache = resolve; })
+          : Promise.resolve(null),
+      );
+      const {queryByText, findByText} = renderWithProviders(<ChatScreen />);
+      await act(async () => { triggerMessages([liveMsg]); });
+      await findByText('Live message');
+      // The cache read only resolves now, well after live data already landed.
+      await act(async () => {
+        resolveCache(JSON.stringify({data: [cachedMsg], cachedAt: Date.now()}));
+      });
+      expect(queryByText('Cached hello')).toBeNull();
+    });
+
+    it('writes each live snapshot to the cache for next time', async () => {
+      renderChat();
+      await act(async () => { triggerMessages([liveMsg]); });
+      await waitFor(() => {
+        expect(AsyncStorage.setItem).toHaveBeenCalledWith(CACHE_KEY, expect.stringContaining('Live message'));
+      });
+    });
+  });
+
   // ── Analytics and side-effects on mount ───────────────────────────────────────
 
   it('calls Analytics.screen("chat") on mount', async () => {

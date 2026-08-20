@@ -233,6 +233,11 @@ export function parseGrid(json) {
     carImageUrl: t.carImageUrl || '',
     cardBgUrl: t.cardBgUrl || '',
     logoUrl: t.logoUrl || '',
+    // True for a team whose logo asset is a wide, edge-to-edge image with no
+    // internal transparent padding (currently just Steel Seal) - see
+    // TeamDetailScreen.js's teamLogoImgSmall for why this needs a smaller box
+    // there specifically, without affecting every other team's hero logo.
+    smallLogo: t.smallLogo || false,
     lightCardBg: t.lightCardBg || false,
     founded: t.founded || 0,
     base: t.base || '',
