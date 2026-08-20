@@ -200,6 +200,9 @@ export default function DriversScreen({navigation}) {
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
+        {item.logoUrl ? (
+          <CachedImage uri={item.logoUrl} style={styles.teamLogoImg} resizeMode="contain" />
+        ) : null}
         {item.carImageUrl ? (
           <CachedImage uri={item.carThumbUrl || item.carImageUrl} style={styles.teamCarImage} resizeMode="contain" />
         ) : null}
@@ -270,6 +273,11 @@ const styles = StyleSheet.create({
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
   teamImageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
   teamCarImage: {width: '100%', height: '85%'},
+  // Sponsor/team logo, badge-positioned like driverNumberImg above (top-right,
+  // behind the car cutout) but sized down from that treatment - these are
+  // third-party wordmarks of varying aspect ratio, not a big brand number
+  // meant to dominate the tile, so contain within a modest corner box.
+  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '45%', height: '28%'},
   teamFooter: {padding: 10},
   teamName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   divider: {height: 1, backgroundColor: 'rgba(42,45,68,0.5)', marginVertical: 12},

@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Image,
   StyleSheet,
   Linking,
   Platform,
@@ -58,6 +57,28 @@ export default function MoreScreen({navigation}) {
         <Text style={styles.headerTitle}>MORE</Text>
       </View>
       <ScrollView ref={scrollRef} contentContainerStyle={{padding: 16}}>
+        {/* Support - kept at the very top of the screen for visibility */}
+        {Platform.OS !== 'ios' && (
+          <>
+            <TouchableOpacity
+              style={styles.coffeeCard}
+              activeOpacity={0.8}
+              onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://www.buymeacoffee.com/btcchub'); }}
+              accessibilityLabel="Buy me a coffee"
+              accessibilityRole="button">
+              <View style={styles.coffeeIconWrap}>
+                <Icon name="local-cafe" size={22} color="#000" />
+              </View>
+              <View style={{flex: 1}}>
+                <Text style={styles.coffeeTitle}>Buy me a coffee</Text>
+                <Text style={styles.coffeeSubtitle}>Enjoying the app? Consider supporting development.</Text>
+              </View>
+              <Icon name="chevron-right" size={24} color={Colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.divider} />
+          </>
+        )}
+
         {/* New to BTCC */}
         <Text style={styles.sectionTitle}>NEW HERE?</Text>
         {pages.filter(p => p.id === 'new-to-btcc').map(p => (
@@ -92,22 +113,6 @@ export default function MoreScreen({navigation}) {
         {/* Support */}
         <Text style={styles.sectionTitle}>SUPPORT</Text>
         <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
-        {Platform.OS !== 'ios' && (
-          <>
-            <TouchableOpacity
-              style={styles.coffeeBtn}
-              activeOpacity={0.8}
-              onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://www.buymeacoffee.com/btcchub'); }}
-              accessibilityLabel="Buy me a coffee"
-              accessibilityRole="button">
-              <Image
-                source={require('../assets/bmc-button.png')}
-                style={styles.coffeeBtnImg}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </>
-        )}
       </ScrollView>
     </View>
   );
@@ -135,6 +140,25 @@ const styles = StyleSheet.create({
   },
   rowLabel: {flex: 1, color: '#fff', fontSize: 15, fontWeight: '600', marginLeft: 16},
   divider: {height: 1, backgroundColor: Colors.outline, marginVertical: 16},
-  coffeeBtn: {marginTop: 4},
-  coffeeBtnImg: {width: 245, height: 69},
+  coffeeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.yellow,
+    padding: 14,
+    marginBottom: 4,
+  },
+  coffeeIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.yellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  coffeeTitle: {color: '#fff', fontSize: 15, fontWeight: '700'},
+  coffeeSubtitle: {color: Colors.textSecondary, fontSize: 12, marginTop: 2},
 });

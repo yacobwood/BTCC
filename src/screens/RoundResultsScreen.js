@@ -20,6 +20,7 @@ import {fetchResults} from '../api/client';
 import {parseResults} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 import {detectBroadcaster} from '../utils/broadcaster';
+import {ttbPositionMap, getTtbLaps, isSeasonOpenerRace1} from '../utils/ttb';
 
 // The require() path itself must stay a static literal (Metro can't resolve a
 // dynamic year here) - but every comparison below derives the current season
@@ -106,6 +107,11 @@ const POLL_INTERVAL_MS = 60 * 1000;
 export default function RoundResultsScreen({route, navigation}) {
   const {round: initialRound, year, initialRace, origin} = route.params;
   const [round, setRound] = useState(initialRound);
+  // Full season's rounds, kept alongside `round` so Race 1's TTB allocation
+  // (reg 1.11.1.a - Championship Order before this round) can be reconstructed
+  // from cumulative points across earlier rounds. Seeded from the bundled
+  // snapshot so it works offline; refreshed opportunistically below.
+  const [allRounds, setAllRounds] = useState(BUNDLED_RESULTS.rounds || []);
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
@@ -127,6 +133,7 @@ export default function RoundResultsScreen({route, navigation}) {
     try {
       const raw = await fetchResults(year, true);
       const parsed = parseResults(raw);
+      setAllRounds(parsed);
       const fresh = parsed.find(r => r.round === round.round);
       if (fresh) setRound(fresh);
     } catch (_) {}
@@ -234,7 +241,18 @@ export default function RoundResultsScreen({route, navigation}) {
           const hasResults = race?.results?.length > 0;
           if (!hasResults) {
             if (race.grid?.length) {
-              return <StartingGridTab key={i} race={race} races={races} isFavourite={isFavourite} />;
+              return (
+                <StartingGridTab
+                  key={i}
+                  race={race}
+                  races={races}
+                  isFavourite={isFavourite}
+                  venue={round.venue}
+                  roundNumber={round.round}
+                  allRounds={allRounds}
+                  showTtb={year === CURRENT_SEASON}
+                />
+              );
             }
             if (isR3) {
               return <ReverseGridTab key={i} races={races} isFavourite={isFavourite} />;
@@ -257,6 +275,10 @@ export default function RoundResultsScreen({route, navigation}) {
                     isFavourite={isFavourite}
                     predicted
                     sourceLabel={sourceLabel}
+                    venue={round.venue}
+                    roundNumber={round.round}
+                    allRounds={allRounds}
+                    showTtb={year === CURRENT_SEASON}
                   />
                 );
               }
@@ -321,7 +343,7 @@ export function detectReversalCount(races, gridDrivers) {
   return null;
 }
 
-function StartingGridTab({race, races, isFavourite, predicted, sourceLabel}) {
+function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venue, roundNumber, allRounds, showTtb}) {
   const sorted = [...race.grid].sort((a, b) => a.pos - b.pos);
   const isR3 = race.label === 'Race 3';
   // Use explicit draw number if set (covers TSL grid PDF amendments caught after the window);
@@ -331,6 +353,12 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel}) {
     : null;
   const teamMap = {};
   races.forEach(r => (r.results || []).forEach(d => { if (d.driver && d.team) teamMap[d.driver] = d.team; }));
+  // TOCA Turbo Boost allocation (reg 1.11.1) - null when the position source
+  // isn't available at all (e.g. an archive season, or Race 2 before Race 1
+  // has results). At the season opener every driver gets the max TTB tier
+  // (see ttb.js header comment) rather than no badge.
+  const ttbMap = showTtb ? ttbPositionMap(race, races, allRounds, roundNumber) : null;
+  const ttbSeasonOpener = showTtb && ttbMap && isSeasonOpenerRace1(race, allRounds, roundNumber);
   const leftItems = sorted.filter(g => g.pos % 2 === 1);
   const rightItems = sorted.filter(g => g.pos % 2 === 0);
   const rightOffset = (GRID_CARD_HEIGHT + GRID_GAP) / 2;
@@ -339,17 +367,22 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel}) {
       <View style={styles.reverseHeader}>
         <Text style={styles.reverseTitle}>{predicted ? 'Predicted Starting Grid' : 'Official Starting Grid'}</Text>
         {predicted && <Text style={styles.reverseSubtitle}>Based on {sourceLabel} finishing order</Text>}
+        {ttbMap && (
+          <Text style={styles.reverseSubtitle}>
+            {ttbSeasonOpener ? '⚡ Season opener - every driver gets max TOCA Turbo Boost' : '⚡ Laps of TOCA Turbo Boost available this race'}
+          </Text>
+        )}
       </View>
       <ScrollView contentContainerStyle={{paddingTop: 12, paddingHorizontal: 16, paddingBottom: 20}}>
         <View style={{flexDirection: 'row', gap: GRID_GAP}}>
           <View style={{flex: 1, gap: GRID_GAP}}>
             {leftItems.map(item => (
-              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} />
+              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} ttbLaps={ttbMap ? getTtbLaps(ttbMap[item.driver], venue) : null} />
             ))}
           </View>
           <View style={{flex: 1, gap: GRID_GAP, marginTop: rightOffset}}>
             {rightItems.map(item => (
-              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} />
+              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} ttbLaps={ttbMap ? getTtbLaps(ttbMap[item.driver], venue) : null} />
             ))}
           </View>
         </View>
@@ -410,7 +443,7 @@ function QualGroupsTab({races, isFavourite}) {
   );
 }
 
-function GridSlot({item, isFavourite, reversed, team}) {
+function GridSlot({item, isFavourite, reversed, team, ttbLaps}) {
   if (!item) return null;
   const fav = isFavourite(item.driver);
   return (
@@ -425,6 +458,12 @@ function GridSlot({item, isFavourite, reversed, team}) {
         </View>
         {team ? <Text style={styles.gridCar} numberOfLines={1}>{team}</Text> : null}
       </View>
+      {ttbLaps != null && (
+        <View style={styles.ttbBadge} accessibilityLabel={`${ttbLaps} laps of TOCA Turbo Boost`}>
+          <Icon name="flash-on" size={10} color={Colors.yellow} />
+          <Text style={styles.ttbBadgeText}>{ttbLaps}</Text>
+        </View>
+      )}
       {reversed && <Icon name="shuffle" size={10} color={Colors.textSecondary} />}
     </View>
   );
@@ -587,6 +626,12 @@ const styles = StyleSheet.create({
     borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
   },
   reversalBadgeText: {color: Colors.yellow, fontSize: 11, fontWeight: '600'},
+  ttbBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 2,
+    backgroundColor: `${Colors.yellow}18`, borderRadius: 6,
+    paddingHorizontal: 5, paddingVertical: 2,
+  },
+  ttbBadgeText: {color: Colors.yellow, fontSize: 10, fontWeight: '700'},
   qualGroupLabel: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 1.5, textAlign: 'center', marginBottom: 2},
   gridPos: {color: '#fff', fontSize: 16, fontWeight: '900', width: 24, textAlign: 'center'},
   gridDriver: {color: '#fff', fontSize: 12, fontWeight: '700'},

@@ -81,6 +81,38 @@ describe('DriverDetailScreen', () => {
     await waitFor(() => expect(getAllByText('Team Ingram').length).toBeGreaterThan(0));
   });
 
+  it('shows nationality, team, car and class as labelled key-fact tiles (same style as TeamDetailScreen)', async () => {
+    const driver = {...DRIVER, car: 'Toyota GR Yaris', cls: 'I'};
+    const route = makeRoute({driver});
+    const {getByText, getAllByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('Nationality')).toBeTruthy();
+      expect(getByText('British')).toBeTruthy();
+      expect(getByText('Team')).toBeTruthy();
+      expect(getAllByText('Team Ingram').length).toBeGreaterThan(0);
+      expect(getByText('Car')).toBeTruthy();
+      expect(getAllByText('Toyota GR Yaris').length).toBeGreaterThan(0);
+      expect(getByText('Class')).toBeTruthy();
+      expect(getByText('Independents')).toBeTruthy();
+    });
+  });
+
+  it('hides the Car/Class tile row entirely when the driver has neither', async () => {
+    // DRIVER has no car/cls set - the second key-facts row must not render
+    // (previously the chip row simply omitted whichever chips were absent;
+    // an empty tile row would look broken rather than just being absent).
+    const route = makeRoute({driver: DRIVER});
+    const {queryByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(queryByText('Car')).toBeNull();
+      expect(queryByText('Class')).toBeNull();
+    });
+  });
+
   it('displays the Lives in row when livesIn is set', async () => {
     const route = makeRoute({driver: {...DRIVER, livesIn: 'Coventry'}});
     const {getByText} = renderWithProviders(
@@ -426,6 +458,42 @@ describe('TeamDetailScreen', () => {
       <TeamDetailScreen route={route} navigation={nav} />,
     );
     await waitFor(() => expect(getByText('Northampton')).toBeTruthy());
+  });
+
+  it('shows the Cars tile on its own second row, even when the team has no race results yet', async () => {
+    // Cars moved off the Founded/Base row (which now only fits those two) onto
+    // the same row as Races/Wins - but Cars must still render when a brand new
+    // team hasn't raced yet and Races/Wins are hidden.
+    const newTeam = {...TEAM, totalRaces: 0, totalWins: 0};
+    const route = makeRoute({team: newTeam});
+    const {getByText, queryByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(getByText('Cars')).toBeTruthy());
+    expect(queryByText('Races')).toBeNull();
+    expect(queryByText('Wins')).toBeNull();
+  });
+
+  it('gives the Base stat tile extra width so long "Town, County" values don\'t wrap mid-word', async () => {
+    // Regression test: "Wellingborough, Northamptonshire" (CPRL) was wrapping
+    // across 3 lines and breaking "Northamptonshire" mid-word because the Base
+    // tile shared equal flex with the much shorter Founded/Cars tiles.
+    const teamWithLongBase = {...TEAM, base: 'Wellingborough, Northamptonshire'};
+    const route = makeRoute({team: teamWithLongBase});
+    const {UNSAFE_getAllByType} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    const {View} = require('react-native');
+    await waitFor(() => {
+      const baseBox = UNSAFE_getAllByType(View).find(v =>
+        [].concat(v.props.children || []).some(
+          c => c?.props?.children === 'Wellingborough, Northamptonshire',
+        ),
+      );
+      expect(baseBox).toBeTruthy();
+      const flatStyle = [].concat(baseBox.props.style || []);
+      expect(flatStyle.some(s => (s?.flex || 0) >= 2)).toBe(true);
+    });
   });
 
   it('renders CAR SPECS section when carSpecs are present', async () => {

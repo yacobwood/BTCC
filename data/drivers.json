@@ -2655,6 +2655,7 @@
       ],
       "dateOfBirth": "1980-07-18",
       "birthplace": "Aylesbury, Buckinghamshire",
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/napa-racing-uk.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/napa-racing-uk.jpg",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/15.png",
       "totalRaces": 171,
@@ -2708,6 +2709,7 @@
           "points": 773
         }
       ],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-vertu.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/team-vertu.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/3.png",
       "totalRaces": 228,
@@ -2781,6 +2783,7 @@
           "points": 266
         }
       ],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/speedworks-corolla-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/speedworks-corolla-racing.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.webp",
       "totalRaces": 376,
@@ -2859,6 +2862,7 @@
           "points": 462
         }
       ],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/wsr.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/wsr.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/2.png",
       "totalRaces": 765,
@@ -2928,6 +2932,7 @@
           "points": 190
         }
       ],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/lkq-euro-car-parts-with-power-maxed-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/lkq-euro-car-parts-with-power-maxed-racing.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/16.png",
       "totalRaces": 6,
@@ -2938,7 +2943,7 @@
       "name": "CPRL",
       "car": "Mercedes-AMG A35 Saloon",
       "entries": 2,
-      "bio": "CPRL is a new team on the 2026 BTCC grid, formed after the sale of the former Cataclean Plato Racing outfit – the team founded by BTCC legend Jason Plato – with Dave Kelly now at the helm as Team Principal.\n\nMaking its debut in 2026, CPRL brings Mercedes-Benz back to the BTCC with its pair of A35 Saloons piloted by multiple race winners Dan Rowbottom and Adam Morgan.\n\nWith multiple race winners across numerous seasons in the UK's premier motorsport series, the new outfit looks to use front-running expertise in the squad as it embarks on its first season of competitive championship racing.",
+      "bio": "CPRL (Cataclean Plato Racing Limited) is a new team on the 2026 BTCC grid, formed after the sale of the former Cataclean Plato Racing outfit – the team founded by BTCC legend Jason Plato – with Dave Kelly now at the helm as Team Principal.\n\nMaking its debut in 2026, CPRL brings Mercedes-Benz back to the BTCC with its pair of A35 Saloons piloted by multiple race winners Dan Rowbottom and Adam Morgan.\n\nWith multiple race winners across numerous seasons in the UK's premier motorsport series, the new outfit looks to use front-running expertise in the squad as it embarks on its first season of competitive championship racing.",
       "standing2025": 0,
       "points2025": 0,
       "founded": 2026,
@@ -2946,6 +2951,7 @@
       "driversChampionships": 0,
       "teamsChampionships": 0,
       "history": [],
+      "logoUrl": "",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/cprl.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/32.webp",
       "totalRaces": 6,
@@ -3026,6 +3032,7 @@
           "points": 386
         }
       ],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/restart-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/restart-racing.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/22.png",
       "totalRaces": 66,
@@ -3043,6 +3050,7 @@
       "totalRaces": 107,
       "totalWins": 22,
       "history": [],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/laser-tools-racing-with-mb-motorsport.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/laser-tools-racing-with-mb-motorsport.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/50.png"
     },
@@ -3056,6 +3064,7 @@
       "driversChampionships": 0,
       "teamsChampionships": 0,
       "history": [],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/steel-seal-with-power-maxed-racing.jpg",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/steel-seal-with-power-maxed-racing.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/17.png",
       "totalRaces": 276,
@@ -3072,6 +3081,7 @@
       "driversChampionships": 0,
       "teamsChampionships": 0,
       "history": [],
+      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/power-maxed-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/0e8fbf18-3dda-41fd-9a05-4c269eb516ef.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/066ea554-08fc-4fa6-9e7b-7c8401a5e0de.webp",
       "totalRaces": 290,

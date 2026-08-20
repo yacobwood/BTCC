@@ -170,13 +170,6 @@ export default function DriverDetailScreen({route, navigation}) {
         <View style={styles.headerFooter}>
           <View style={{flex: 1}}>
             <Text style={styles.name}>{formatDriverName(driver.name)}</Text>
-            <View style={styles.chipsRow}>
-              <Chip text={driver.nationality} />
-              {driver.team ? <Chip text={driver.team} /> : null}
-              {driver.car ? <Chip text={driver.car} /> : null}
-              {driver.cls === 'I' ? <Chip text="Independents" /> : null}
-              {driver.cls === 'M' ? <Chip text="Main Championship" /> : null}
-            </View>
           </View>
           <TouchableOpacity
             onPress={() => { Analytics.favouriteToggled(driver.name, !fav); toggleFav(driver.name); }}
@@ -187,6 +180,21 @@ export default function DriverDetailScreen({route, navigation}) {
         </View>
 
         <View style={styles.content}>
+          {/* Key facts */}
+          <View style={styles.keyFacts}>
+            <View style={styles.statsRow}>
+              {driver.nationality ? <StatBox label="Nationality" value={driver.nationality} /> : null}
+              {driver.team ? <StatBox label="Team" value={driver.team} /> : null}
+            </View>
+            {(driver.car || driver.cls === 'I' || driver.cls === 'M') && (
+              <View style={styles.statsRow}>
+                {driver.car ? <StatBox label="Car" value={driver.car} /> : null}
+                {driver.cls === 'I' ? <StatBox label="Class" value="Independents" /> : null}
+                {driver.cls === 'M' ? <StatBox label="Class" value="Main Championship" /> : null}
+              </View>
+            )}
+          </View>
+
           {/* Bio */}
           {driver.bio ? (
             <View style={styles.card}>
@@ -415,10 +423,11 @@ function CareerTimeline({history}) {
   );
 }
 
-function Chip({text}) {
+function StatBox({label, value, flexGrow = 1}) {
   return (
-    <View style={styles.chip}>
-      <Text style={styles.chipText}>{text}</Text>
+    <View style={[styles.statBox, {flex: flexGrow}]}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
@@ -463,9 +472,16 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.outline,
   },
   name: {color: '#fff', fontSize: 20, fontWeight: '900'},
-  chipsRow: {flexDirection: 'row', marginTop: 6, gap: 6, flexWrap: 'wrap'},
-  chip: {backgroundColor: Colors.card, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3},
-  chipText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '600'},
+  // Wraps the stat-tile rows so every gap in this section is the same 16px:
+  // `content`'s own padding supplies the gap above the first row, `gap`
+  // supplies the row-to-row gap, and marginBottom supplies the gap below -
+  // `statsRow` itself carries no vertical margin, or the top row would get
+  // double spacing (content padding + its own marginTop).
+  keyFacts: {marginBottom: 16, gap: 16},
+  statsRow: {flexDirection: 'row', gap: 8},
+  statBox: {flex: 1, backgroundColor: Colors.card, borderRadius: 10, padding: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Colors.outline},
+  statValue: {color: Colors.yellow, fontSize: 15, fontWeight: '900', textAlign: 'center'},
+  statLabel: {color: Colors.textSecondary, fontSize: 12, marginTop: 2, textAlign: 'center'},
 
   // Content
   content: {padding: 16},

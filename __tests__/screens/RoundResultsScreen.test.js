@@ -415,6 +415,60 @@ describe('RoundResultsScreen', () => {
       await waitFor(() => getByText('Alpha DRIVER'));
       expect(getByText('Alpha DRIVER')).not.toHaveStyle({color: '#FEBD02'});
     });
+
+    // ── TTB (TOCA Turbo Boost) badge - reg 1.11.1 ───────────────────────────────
+    // GRID_ROUND is round 2 at Brands Hatch Indy (a "B circuit" per reg 1.11.1.b).
+    // Race 3's TTB position comes from Race 2's finishing order in the same
+    // round: Alpha P1 -> Foxtrot P6, so their B-circuit TTB laps run 4 -> 10.
+
+    it('shows the TTB legend line when boost laps are available', () => {
+      const {getByText} = renderRound({round: GRID_ROUND, initialRace: 5});
+      expect(getByText('⚡ Laps of TOCA Turbo Boost available this race')).toBeTruthy();
+    });
+
+    it('shows each driver’s TTB laps using the B-circuit scale', () => {
+      const {getByLabelText} = renderRound({round: GRID_ROUND, initialRace: 5});
+      expect(getByLabelText('4 laps of TOCA Turbo Boost')).toBeTruthy(); // Alpha: R2 P1
+      expect(getByLabelText('5 laps of TOCA Turbo Boost')).toBeTruthy(); // Beta: R2 P2
+      expect(getByLabelText('10 laps of TOCA Turbo Boost')).toBeTruthy(); // Foxtrot: R2 P6
+    });
+
+    it('does not show TTB badge/legend for a season other than the current one', () => {
+      const {queryByText, queryByLabelText} = renderRound({round: GRID_ROUND, initialRace: 5, year: 2024});
+      expect(queryByText(/Turbo Boost/)).toBeNull();
+      expect(queryByLabelText(/Turbo Boost/)).toBeNull();
+    });
+
+    it('gives every driver the max TTB tier on Race 1 at round 1 (season opener - no Championship Order to rank by yet)', () => {
+      const round1Race1Grid = {
+        ...GRID_ROUND,
+        round: 1,
+        races: GRID_ROUND.races.map(r =>
+          r.label === 'Race 1'
+            ? {...r, grid: [{pos: 1, no: 1, cl: 'M', driver: 'Alpha Driver', team: ''}, {pos: 2, no: 2, cl: 'M', driver: 'Beta Driver', team: ''}]}
+            : r,
+        ),
+      };
+      const {getByText, getAllByLabelText} = renderRound({round: round1Race1Grid, initialRace: 3});
+      expect(getByText('⚡ Season opener - every driver gets max TOCA Turbo Boost')).toBeTruthy();
+      // Brands Hatch Indy is a B circuit -> P8+ row is 14 laps, for both drivers.
+      expect(getAllByLabelText('14 laps of TOCA Turbo Boost')).toHaveLength(2);
+    });
+
+    it('does not show TTB badge/legend on Race 1 at round 1 for an archive season', () => {
+      const round1Race1Grid = {
+        ...GRID_ROUND,
+        round: 1,
+        races: GRID_ROUND.races.map(r =>
+          r.label === 'Race 1'
+            ? {...r, grid: [{pos: 1, no: 1, cl: 'M', driver: 'Alpha Driver', team: ''}]}
+            : r,
+        ),
+      };
+      const {queryByText, queryByLabelText} = renderRound({round: round1Race1Grid, initialRace: 3, year: 2024});
+      expect(queryByText(/Turbo Boost/)).toBeNull();
+      expect(queryByLabelText(/Turbo Boost/)).toBeNull();
+    });
   });
 
   // ── Predicted grid tab (R1/R2, before the official TSL grid PDF is published) ─

@@ -232,6 +232,7 @@ export function parseGrid(json) {
     points2025: t.points2025 || 0,
     carImageUrl: t.carImageUrl || '',
     cardBgUrl: t.cardBgUrl || '',
+    logoUrl: t.logoUrl || '',
     lightCardBg: t.lightCardBg || false,
     founded: t.founded || 0,
     base: t.base || '',

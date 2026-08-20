@@ -291,11 +291,13 @@ WebView embedding the TSL live timing interface. Only rendered when `live_timing
 **DriversScreen** ([src/screens/DriversScreen.js](src/screens/DriversScreen.js))
 Two-tab view: Drivers (card grid with number, photo, team, car class) and Teams (team cards with car image). Drivers can be starred as favourites. Tapping navigates to DriverDetail or TeamDetail. A driver whose `currentlyRacing` field in `drivers.json` is `false` (e.g. moved out of their seat mid-season to a reserve/development role) drops out of the main "N CONFIRMED" grid into a separate "NOT CURRENTLY RACING · RACED IN 2026" section below it, and is excluded from their last team's driver roster on TeamDetailScreen - kept visible rather than deleted, since they did race that season.
 
+Team cards also overlay the team's sponsor logo (`logoUrl`) top-right on the card background, behind the car cutout - the same positional treatment as the driver cards' number graphic (`numberImageUrl`), just sized down since these are third-party wordmark logos of varying aspect ratio rather than a single dominant brand number. Teams with no logo file yet (e.g. CPRL as of 2026-08-20) simply render without one - no placeholder. `MerchScreen.js`'s tiles use the identical `teamLogoImg` treatment for parity (see below).
+
 **DriverDetailScreen** ([src/screens/DriverDetailScreen.js](src/screens/DriverDetailScreen.js))
-Full driver profile: photo, number, nationality, team, car, DOB (with live age calculation), birthplace, current residence (`livesIn` field - only shown when set, since btcc.net leaves it blank for some drivers), bio text, career statistics (wins/podiums/poles/fastest laps per year), and computed live 2026 championship standings from results data. Favourite toggle. History rendered as a scrollable year table.
+Full driver profile: photo, number, DOB (with live age calculation), birthplace, current residence (`livesIn` field - only shown when set, since btcc.net leaves it blank for some drivers), bio text, career statistics (wins/podiums/poles/fastest laps per year), and computed live 2026 championship standings from results data. Nationality/team/car/class render as labelled `StatBox` tiles (bordered card, bold yellow value, grey label) in two rows - same visual pattern as TeamDetailScreen's stat tiles, replacing the previous unlabelled pill chips. Favourite toggle. History rendered as a scrollable year table.
 
 **TeamDetailScreen** ([src/screens/TeamDetailScreen.js](src/screens/TeamDetailScreen.js))
-Team profile: car image, bio, founded year, base, current drivers, championships won, historical standings.
+Team profile: car image, bio, current drivers, championships won, historical standings. Founded/base render in one stat-tile row, Cars/Races/Wins in a second (Cars always shows even before a team's first race of the season; Races/Wins only appear together once the team has actually raced). The Base tile carries `flexGrow={2}` so a long "Town, County" value (e.g. "Wellingborough, Northamptonshire") gets enough width to wrap at a word boundary instead of breaking mid-word - the two short tiles it shares a row with don't need the extra space.
 
 ### Results Stack
 
@@ -312,7 +314,7 @@ Per-round detail. `SwipeableTabs` with lazy loading across all sessions: Free Pr
 ### More Stack
 
 **MoreScreen** ([src/screens/MoreScreen.js](src/screens/MoreScreen.js))
-Menu screen. Static rows: Records, Settings, About BTCC (InfoPage), Roadmap, Partners, Feedback (BugReport). Flag-gated rows: Radio and Podcasts (both require `podcasts_enabled` or `radio_tab` flags).
+Menu screen. A "Buy me a coffee" card renders first, above every section (Android only - excluded on iOS, likely to avoid App Store scrutiny of external donation links, though that hasn't been re-verified against current guidelines) - styled as an in-app CTA card (icon + title + subtitle) rather than the raw buymeacoffee.com badge image it used to be. Static rows below it: Records, Settings, About BTCC (InfoPage), Roadmap, Partners, Feedback (BugReport). Flag-gated rows: Radio and Podcasts (both require `podcasts_enabled` or `radio_tab` flags).
 
 **SettingsScreen** ([src/screens/SettingsScreen.js](src/screens/SettingsScreen.js))
 All notification toggles with parent/child hierarchy (toggling a parent enables/disables all children). Spoiler-free mode toggle. Display settings (km/miles distance unit; 12hr/24hr time format). Device ID and FCM token display for admin/debugging.
@@ -353,6 +355,13 @@ Firebase Realtime Database community chat. 200 message limit (enforced by `trimC
 
 **ListenScreen** ([src/screens/ListenScreen.js](src/screens/ListenScreen.js))
 Entry point routing to Radio and Podcasts sections.
+
+**MerchScreen** ([src/screens/MerchScreen.js](src/screens/MerchScreen.js))
+Reached via MoreScreen's "Team Merch" row. Reuses `parseGrid()`'s teams list - the same `cardBgUrl`/`carImageUrl` fields DriversScreen's Grid -> Teams tab renders - filtered down to teams with at least one store in `fetchMerchStores()`'s `merch.json` map. A single-store team opens that store's URL directly via `Linking.openURL` (wrapped by `withTracking()`, which appends `utm_source=btcchub&utm_medium=app&utm_campaign=merch`); a multi-store team opens a `StorePickerModal` bottom sheet instead, listing every store by name.
+
+Tile background image must use `resizeMode="stretch"` (not `"cover"`) and `collapsable={false}`, matching DriversScreen's team tile exactly - `cardBgUrl` is a pre-rendered graphic with diagonal stripes and corner decorations baked in near its edges, not something drawn in CSS/JS, so `"cover"` crops most of that away and leaves what looks like a flat colour swatch. Fixed 2026-08-20: this screen was added in a separate commit after the Teams-tab redesign that introduced the `"stretch"` requirement, so it never picked the fix up and had visibly plainer tiles than the Grid tab's teams.
+
+Tiles also overlay each team's sponsor logo (`team.logoUrl`, top-right, behind the car cutout) - added 2026-08-20, matching DriversScreen's team card treatment exactly so the two screens stay in visual sync.
 
 ---
 
@@ -654,7 +663,34 @@ No bonus points in QR.
 - **QR / Race 3:** Reverse of top N from previous session (N determined by draw 6 to 12)
 
 R3 reverse grid detection (`detectReversalCount` in RoundResultsScreen) compares the actual TSL grid against reversed R2 top-N for N in range 12 down to 6.
-i cant see it
+
+### TTB (TOCA Turbo Boost) Allocation
+
+Implemented in [src/utils/ttb.js](src/utils/ttb.js), per reg 1.11.1. Shown as a ⚡ badge on each driver's card in the Starting Grid tab (Race 1/2/3 only - current season only).
+
+Laps of boost available per race is a sliding scale by position - P1 gets fewest, P8+ gets most - split by circuit type:
+
+| Pos | A circuits | B circuits |
+|---|---|---|
+| 1 | 1 | 4 |
+| 2 | 2 | 5 |
+| 3 | 3 | 6 |
+| 4 | 4 | 7 |
+| 5 | 5 | 8 |
+| 6 | 6 | 10 |
+| 7 | 8 | 12 |
+| 8+ | 10 | 14 |
+
+"B circuits" (more laps) are Brands Hatch Indy, Knockhill and Silverstone; every other venue is an "A circuit". Ties on points get the same rank (standard competition ranking - next distinct value skips ahead by the number tied), per reg 1.11.1.b.
+
+Position source per race:
+- **Race 1** - Championship Order (cumulative points from every earlier round this season, reconstructed from `results{year}.json` since there's no historical standings-by-round snapshot). The regs don't define what happens at Round 1 (no prior round to rank by) - every other "no Championship Order yet" clause in these regs hands that gap to Co-ordinator discretion rather than a computed rule. Per user confirmation (not a quoted regulation - flagged as an inference in `ttb.js`), the season opener gives every driver the max TTB tier instead: legend reads "Season opener - every driver gets max TOCA Turbo Boost" (`isSeasonOpenerRace1()`).
+- **Race 2** - Race 1's finishing order, same round
+- **Race 3** - Race 2's finishing order, same round
+
+Non-classified results (DNF/DQ/DNS) are ranked after classified finishers by laps covered (descending) - the same convention `buildStraightGrid()`/`buildReverseGrid()` already use for grid derivation.
+
+**Not modelled** (both explicitly left to Administrator discretion by the regs, so there's no data-derivable formula): Late Entry TTB for cars registered after 13 Mar 2026 or missing rounds (1.11.1.c.i), and substitute-driver TTB carryover (1.11.1.c.ii). Guest-driver results are also supposed to be excluded from Race 2/3 position numbering (1.11.1.a), but guest entries aren't flagged in the results data, so they're currently counted as a normal finisher. Feature is gated to the current season only (`year === CURRENT_SEASON`) since the same scale isn't verified against older seasons' regs.
 
 ---
 
@@ -685,6 +721,7 @@ Safety net: if a re-run of the scraper returns an empty grid (transient fetch fa
 - Right column offset: `(GRID_CARD_HEIGHT + GRID_GAP) / 2 = 29px` to vertically centre between adjacent left cards
 - Shuffle icon on reversed-grid cards; yellow highlight reserved for favourites only
 - Reversal badge at list bottom when R3 reverse is detected ("Top 8 reversed (draw: 8)")
+- ⚡ TTB badge per driver card (laps of TOCA Turbo Boost available this race) - see [§13](#13-scoring-and-race-format)
 
 ### Empty State Logic
 
@@ -796,6 +833,8 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 **signalr.js** - TSL SignalR client. Handles WebSocket negotiation, handshake, `registerForEvent`, session/entry parsing, pong responses (type 6), reconnection and teardown.
 
 **timeAgo.js** - Returns relative time strings ("2 hours ago", "3 days ago") from a date string.
+
+**ttb.js** - TOCA Turbo Boost (race-lap boost allocation) calculations - see [§13](#13-scoring-and-race-format).
 
 **weather.js** - Fetches forecast weather from Open-Meteo for a circuit's lat/lng over its race weekend dates. Only fetches when the round is within `MAX_FORECAST_DAYS` (10 days, raised from 7 on 2026-08-10 - Open-Meteo's free tier forecasts up to 16 days out, so 10 is comfortably within range) and not a past weekend. Uses a manual AbortController for the 8-second timeout (AbortSignal.timeout is unreliable on Android/Hermes). Helpers for WMO weather code descriptions, icons and icon colours. **BTCCWidget.swift** (iOS) and **LargeWidget.kt** (Android) - the home-screen widgets, a separate surface from TrackDetailScreen - each have their own independent `7`-day constant that was deliberately left as-is in that same change, since it wasn't part of what was asked; keep this in mind if the widgets' cutoff is ever revisited, since all three constants must still be kept in sync manually. (The widgets also stay daily-only, bare-array shape - the hourly addition below is TrackDetailScreen-only, deliberately not propagated there.) `fetchWeather()` returns `{daily, hourly}` (2026-08-09, breaking change from a bare daily array) - `hourly` drives the session-aligned forecast in TrackDetailScreen (see [§6](#6-screens-reference)). Cache reduced from 3 hours to 30 minutes for the same reason: a race-weekend forecast is worth checking through the day, not settling for what was true hours ago.
 

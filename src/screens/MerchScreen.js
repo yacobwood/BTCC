@@ -164,11 +164,15 @@ export default function MerchScreen({navigation}) {
                     <CachedImage
                       uri={team.cardBgThumbUrl || team.cardBgUrl}
                       style={StyleSheet.absoluteFill}
-                      resizeMode="cover"
+                      resizeMode="stretch"
+                      collapsable={false}
                     />
                   ) : (
                     <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
                   )}
+                  {team.logoUrl ? (
+                    <CachedImage uri={team.logoUrl} style={styles.teamLogoImg} resizeMode="contain" />
+                  ) : null}
                   {team.carImageUrl ? (
                     <CachedImage
                       uri={team.carThumbUrl || team.carImageUrl}
@@ -219,6 +223,9 @@ const styles = StyleSheet.create({
   card: {width: CARD_WIDTH, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
   imageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
   carImage: {width: '100%', height: '85%'},
+  // Matches DriversScreen.js's teamLogoImg (Grid -> Teams tab) exactly, positioned
+  // opposite the top-left shopBadge below so the two never overlap.
+  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '45%', height: '28%'},
   shopBadge: {
     position: 'absolute',
     top: 8,

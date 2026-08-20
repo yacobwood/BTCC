@@ -44,15 +44,17 @@ export default function TeamDetailScreen({route, navigation}) {
 
           <View style={styles.statsRow}>
             {team.founded > 0 && <StatBox label="Founded" value={String(team.founded)} />}
-            {team.base ? <StatBox label="Base" value={team.base} /> : null}
-            <StatBox label="Cars" value={String(team.entries)} />
+            {team.base ? <StatBox label="Base" value={team.base} flexGrow={2} /> : null}
           </View>
-          {(team.totalRaces > 0 || team.totalWins > 0) && (
-            <View style={styles.statsRow}>
-              <StatBox label="Races" value={String(team.totalRaces)} />
-              <StatBox label="Wins" value={String(team.totalWins)} />
-            </View>
-          )}
+          <View style={styles.statsRow}>
+            <StatBox label="Cars" value={String(team.entries)} />
+            {(team.totalRaces > 0 || team.totalWins > 0) && (
+              <>
+                <StatBox label="Races" value={String(team.totalRaces)} />
+                <StatBox label="Wins" value={String(team.totalWins)} />
+              </>
+            )}
+          </View>
 
           {team.bio ? (
             <View style={styles.card}>
@@ -143,9 +145,9 @@ export default function TeamDetailScreen({route, navigation}) {
   );
 }
 
-function StatBox({label, value}) {
+function StatBox({label, value, flexGrow = 1}) {
   return (
-    <View style={styles.statBox}>
+    <View style={[styles.statBox, {flex: flexGrow}]}>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -160,9 +162,9 @@ const styles = StyleSheet.create({
   teamName: {color: '#fff', fontSize: 24, fontWeight: '900'},
   teamCar: {color: Colors.textSecondary, fontSize: 14, marginTop: 4},
   statsRow: {flexDirection: 'row', marginTop: 16, gap: 8},
-  statBox: {flex: 1, backgroundColor: Colors.card, borderRadius: 10, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: Colors.outline},
-  statValue: {color: Colors.yellow, fontSize: 13, fontWeight: '900', textAlign: 'center'},
-  statLabel: {color: Colors.textSecondary, fontSize: 10, marginTop: 2, textAlign: 'center'},
+  statBox: {flex: 1, backgroundColor: Colors.card, borderRadius: 10, padding: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Colors.outline},
+  statValue: {color: Colors.yellow, fontSize: 15, fontWeight: '900', textAlign: 'center'},
+  statLabel: {color: Colors.textSecondary, fontSize: 12, marginTop: 2, textAlign: 'center'},
   card: {backgroundColor: Colors.card, borderRadius: 10, padding: 14, marginTop: 12},
   bioText: {color: Colors.textSecondary, fontSize: 14, lineHeight: 22},
   sectionTitle: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginTop: 24, marginBottom: 12},

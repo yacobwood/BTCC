@@ -212,5 +212,32 @@ describe('DriversScreen', () => {
       // cardBgUrl and carImageUrl each render a CachedImage
       expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(2);
     });
+
+    it('team logo renders via CachedImage when logoUrl is set', async () => {
+      const gridWithLogo = {
+        drivers: [],
+        teams: [{
+          name: 'Team Ingram',
+          cardBgUrl: null,
+          carImageUrl: null,
+          logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
+        }],
+      };
+      parseGrid.mockReturnValue(gridWithLogo);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('0 CONFIRMED');
+      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('no logo image renders when logoUrl is absent (e.g. CPRL, no logo file yet)', async () => {
+      const gridWithoutLogo = {
+        drivers: [],
+        teams: [{name: 'CPRL', cardBgUrl: null, carImageUrl: null, logoUrl: ''}],
+      };
+      parseGrid.mockReturnValue(gridWithoutLogo);
+      const {queryAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('0 CONFIRMED');
+      expect(queryAllByTestId('cached-image').length).toBe(0);
+    });
   });
 });

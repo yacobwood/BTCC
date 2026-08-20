@@ -112,4 +112,34 @@ describe('MoreScreen', () => {
     const {queryByLabelText} = renderMore();
     await waitFor(() => expect(queryByLabelText('Buy me a coffee')).toBeNull());
   });
+
+  it('shows the restyled card title and supporting copy', async () => {
+    // Regression: this used to be a bare buymeacoffee.com badge image with no
+    // in-app text at all - promoting it also means it should read like an
+    // app-native CTA, not a stamped-in web badge.
+    Platform.OS = 'android';
+    const {getByText} = renderMore();
+    await waitFor(() => {
+      expect(getByText('Buy me a coffee')).toBeTruthy();
+      expect(getByText('Enjoying the app? Consider supporting development.')).toBeTruthy();
+    });
+    Platform.OS = 'ios';
+  });
+
+  it('renders Buy Me a Coffee as the very first thing on the screen', async () => {
+    // Regression: it used to render below Feedback & Bugs, at the very
+    // bottom of the screen - it should now appear before every other
+    // section, including "NEW HERE?" (the first section title otherwise).
+    Platform.OS = 'android';
+    const {getByLabelText, toJSON} = renderMore();
+    await waitFor(() => getByLabelText('Buy me a coffee'));
+    const rendered = JSON.stringify(toJSON());
+    const coffeeIndex = rendered.indexOf('Buy me a coffee');
+    const newHereIndex = rendered.indexOf('NEW HERE?');
+    const feedbackIndex = rendered.indexOf('Feedback & Bugs');
+    expect(coffeeIndex).toBeGreaterThan(-1);
+    expect(coffeeIndex).toBeLessThan(newHereIndex);
+    expect(coffeeIndex).toBeLessThan(feedbackIndex);
+    Platform.OS = 'ios';
+  });
 });
