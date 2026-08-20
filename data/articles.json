@@ -1773,28 +1773,6 @@
     }
   },
   {
-    "id": "the-captured-moments-oulton-park",
-    "slug": "the-captured-moments-oulton-park",
-    "link": "https://btcc.net/the-captured-moments-oulton-park/",
-    "date": "2026-06-09T00:00:00",
-    "title": {
-      "rendered": "The Captured Moments: Oulton Park"
-    },
-    "excerpt": {
-      "rendered": "A handpicked selection of standout images from the fourth weekend..."
-    },
-    "content": {
-      "rendered": "<p>A handpicked selection of standout images from the fourth weekend of the 2026 Kwik Fit British Touring Car Championship at Oulton Park.</p>\n\n\n\n<p>Across three dramatic races, the 2.26-mile Island circuit delivered everything you could expect: three different winners, close-quarter racing, and defining moments in every race. From the pressure of the \u2018Race to Pole\u2019 to wet-weather showers and the reverse-grid mix-up, the weekend produced a constant flow of scenes worth capturing.</p>\n\n\n\n<p>Rather than a full archive, this collection represents a curated edit of the most striking and atmosphere-rich frames from across the weekend, selected to reflect the intensity, character, and detail that defined the event.</p>\n\n\n\n<p>Three different winners across three races underlined the unpredictability of the weekend, with Dan Cammish becoming the seventh different winner in the first ten races, Ash Sutton continuing to win at every venue this year, and Charles Rainford so far tripling his career win tally from his 2026 triumphs.</p>\n\n\n\n<p>What follows is the edit, 25 moments from Oulton Park, presented in its defining images.</p>\n\n\n\n[ngg src=\"galleries\" ids=\"383\" display=\"tile\"]"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/ece2dd43-198e-408d-a8fe-676d0e54521e-btcc-0H5A0452.jpg-scaled-e1781022106851.jpg"
-        }
-      ]
-    }
-  },
-  {
     "id": "podium-hat-trick-carries-ingram-closer-to-championship-lead",
     "slug": "podium-hat-trick-carries-ingram-closer-to-championship-lead",
     "link": "https://btcc.net/podium-hat-trick-carries-ingram-closer-to-championship-lead/",
@@ -1812,6 +1790,28 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/7b5443fa-7e3c-490e-9709-ed7b53da0b16-Ingram-031A9054-1-scaled-e1781004421195.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "the-captured-moments-oulton-park",
+    "slug": "the-captured-moments-oulton-park",
+    "link": "https://btcc.net/the-captured-moments-oulton-park/",
+    "date": "2026-06-09T00:00:00",
+    "title": {
+      "rendered": "The Captured Moments: Oulton Park"
+    },
+    "excerpt": {
+      "rendered": "A handpicked selection of standout images from the fourth weekend..."
+    },
+    "content": {
+      "rendered": "<p>A handpicked selection of standout images from the fourth weekend of the 2026 Kwik Fit British Touring Car Championship at Oulton Park.</p>\n\n\n\n<p>Across three dramatic races, the 2.26-mile Island circuit delivered everything you could expect: three different winners, close-quarter racing, and defining moments in every race. From the pressure of the \u2018Race to Pole\u2019 to wet-weather showers and the reverse-grid mix-up, the weekend produced a constant flow of scenes worth capturing.</p>\n\n\n\n<p>Rather than a full archive, this collection represents a curated edit of the most striking and atmosphere-rich frames from across the weekend, selected to reflect the intensity, character, and detail that defined the event.</p>\n\n\n\n<p>Three different winners across three races underlined the unpredictability of the weekend, with Dan Cammish becoming the seventh different winner in the first ten races, Ash Sutton continuing to win at every venue this year, and Charles Rainford so far tripling his career win tally from his 2026 triumphs.</p>\n\n\n\n<p>What follows is the edit, 25 moments from Oulton Park, presented in its defining images.</p>\n\n\n\n[ngg src=\"galleries\" ids=\"383\" display=\"tile\"]"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/ece2dd43-198e-408d-a8fe-676d0e54521e-btcc-0H5A0452.jpg-scaled-e1781022106851.jpg"
         }
       ]
     }
