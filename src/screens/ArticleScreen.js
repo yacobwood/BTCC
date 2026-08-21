@@ -643,7 +643,7 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
                 <TouchableOpacity
                   onPress={handleSend}
                   disabled={!input.trim()}
-                  style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
+                  style={styles.sendBtn}
                   accessibilityLabel="Send comment"
                   accessibilityRole="button">
                   <Icon name="send" size={20} color={input.trim() ? Colors.yellow : Colors.textSecondary} />
