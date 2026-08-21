@@ -437,29 +437,6 @@
     }
   },
   {
-    "id": "driven-by-sport-welcomes-families-to-thruxton",
-    "slug": "driven-by-sport-welcomes-families-to-thruxton",
-    "link": "https://btcc.net/driven-by-sport-welcomes-families-to-thruxton/",
-    "date": "2026-08-05T00:00:00",
-    "firstSeenAt": "2026-08-05T00:00:00",
-    "title": {
-      "rendered": "Driven by Sport welcomes families to Thruxton"
-    },
-    "excerpt": {
-      "rendered": "The new-for-2026 community initiative, Driven by Sport presented by Kwik..."
-    },
-    "content": {
-      "rendered": "<p>The new-for-2026 community initiative, Driven by Sport presented by Kwik Fit, continued its successful inaugural year with an engaging and inspiring event at Thruxton Circuit last month.</p><p></p><p>Held in the school holidays for the first time, the event offered a fresh BTCC-inspired experience, with local children attending alongside their parents and a number of competition winners securing places through the BTCC website and social media channels.</p><p></p><p>Guests once again enjoyed a broad range of STEM-led and interactive activities, each offering an engaging insight into the many roles and career opportunities available across motorsport.</p><p></p><p>These included engineering, first aid, car design, tyre technology, television presenting and, of course, the ever-popular sim racing experience. Furthermore, it wasn\u2019t just the kids joining in with the fun this time around as the parents took on the challenges too, making for an unforgettable family experience for those in attendance.</p><p></p><p>Attendees also had the opportunity to meet BTCC driver Dan Rowbottom, get close to the championship\u2019s racing cars and enjoy a behind-the-scenes look at life inside the BTCC paddock. In particular, guests got to speak to Power Maxed Racing driver Mikey Doble and his team in their garage, with the opportunity to apply \u2018Driven by Sport\u2019 stickers to one of the cars seen across the world all weekend.</p><p></p><p>The hands-on career discovery programme for school-age students combines education and entertainment through immersive, motorsport-themed experiences delivered by industry professionals, showcasing the many pathways into the sport.</p><p></p><p>The Thruxton event formed part of a growing programme of community-focused activities organised by the BTCC, including school and hospital visits, charitable events and further Driven by Sport experiences.</p><p></p><p>By welcoming parents and the wider BTCC community on this occasion, the programme \u2013 presented by BTCC Title Partner Kwik Fit \u2013 was able to introduce an even broader audience to the diverse skills and careers that contribute to the success of the championship.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c814e281-ad26-491d-beea-f332a5bc732f-1-2MDH4813.jpg"
-        }
-      ]
-    }
-  },
-  {
     "id": "wsr-raring-to-go-as-gilbert-faces-home-soil-debut",
     "slug": "wsr-raring-to-go-as-gilbert-faces-home-soil-debut",
     "link": "https://btcc.net/wsr-raring-to-go-as-gilbert-faces-home-soil-debut/",
@@ -478,6 +455,29 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/482624e3-9a0b-4de9-9e4e-cdd09a96af71-gilbert-DD103173.jpg.jpg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "driven-by-sport-welcomes-families-to-thruxton",
+    "slug": "driven-by-sport-welcomes-families-to-thruxton",
+    "link": "https://btcc.net/driven-by-sport-welcomes-families-to-thruxton/",
+    "date": "2026-08-05T00:00:00",
+    "firstSeenAt": "2026-08-05T00:00:00",
+    "title": {
+      "rendered": "Driven by Sport welcomes families to Thruxton"
+    },
+    "excerpt": {
+      "rendered": "The new-for-2026 community initiative, Driven by Sport presented by Kwik..."
+    },
+    "content": {
+      "rendered": "<p>The new-for-2026 community initiative, Driven by Sport presented by Kwik Fit, continued its successful inaugural year with an engaging and inspiring event at Thruxton Circuit last month.</p><p></p><p>Held in the school holidays for the first time, the event offered a fresh BTCC-inspired experience, with local children attending alongside their parents and a number of competition winners securing places through the BTCC website and social media channels.</p><p></p><p>Guests once again enjoyed a broad range of STEM-led and interactive activities, each offering an engaging insight into the many roles and career opportunities available across motorsport.</p><p></p><p>These included engineering, first aid, car design, tyre technology, television presenting and, of course, the ever-popular sim racing experience. Furthermore, it wasn\u2019t just the kids joining in with the fun this time around as the parents took on the challenges too, making for an unforgettable family experience for those in attendance.</p><p></p><p>Attendees also had the opportunity to meet BTCC driver Dan Rowbottom, get close to the championship\u2019s racing cars and enjoy a behind-the-scenes look at life inside the BTCC paddock. In particular, guests got to speak to Power Maxed Racing driver Mikey Doble and his team in their garage, with the opportunity to apply \u2018Driven by Sport\u2019 stickers to one of the cars seen across the world all weekend.</p><p></p><p>The hands-on career discovery programme for school-age students combines education and entertainment through immersive, motorsport-themed experiences delivered by industry professionals, showcasing the many pathways into the sport.</p><p></p><p>The Thruxton event formed part of a growing programme of community-focused activities organised by the BTCC, including school and hospital visits, charitable events and further Driven by Sport experiences.</p><p></p><p>By welcoming parents and the wider BTCC community on this occasion, the programme \u2013 presented by BTCC Title Partner Kwik Fit \u2013 was able to introduce an even broader audience to the diverse skills and careers that contribute to the success of the championship.</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c814e281-ad26-491d-beea-f332a5bc732f-1-2MDH4813.jpg"
         }
       ]
     }
@@ -872,6 +872,28 @@
     }
   },
   {
+    "id": "speedworks-corolla-racing-ready-to-resume-at-uks-fastest-circuit",
+    "slug": "speedworks-corolla-racing-ready-to-resume-at-uks-fastest-circuit",
+    "link": "https://btcc.net/speedworks-corolla-racing-ready-to-resume-at-uks-fastest-circuit/",
+    "date": "2026-07-23T00:00:00",
+    "title": {
+      "rendered": "Speedworks Corolla Racing ready to resume at UK's fastest circuit"
+    },
+    "excerpt": {
+      "rendered": "The 2026 Kwik Fit British Touring Car Championship returns to..."
+    },
+    "content": {
+      "rendered": "<p>The 2026 Kwik Fit British Touring Car Championship returns to action this weekend at the high-speed Thruxton Circuit, with Speedworks Corolla Racing looking to build on the encouraging performances shown before the summer break.</p><p>Following a productive first half of the season, the Cheshire-based squad arrives at one of the championship's fastest and most demanding venues determined to convert its evident pace into another strong haul of championship points.</p><p>The weekend also marks an exciting new chapter for the team, as Ryan Bensley makes his Speedworks Corolla Racing debut alongside multiple BTCC race winner Josh Cook.</p><p>Thruxton has long been regarded as one of Cook's strongest circuits. The Bath driver has enjoyed considerable success around the Hampshire venue throughout his BTCC career, earning the nickname \"King of Thruxton\" thanks to a series of memorable victories and front-running performances over recent seasons.</p><p>With the Toyota Corolla GR Sport continuing to demonstrate impressive race pace throughout 2026, Cook heads into the weekend full of confidence as he targets another strong points haul in front of what is expected to be another capacity crowd.</p><p>For Bensley, the weekend represents the fulfilment of another career milestone. Following his appointment during the championship's summer break, the talented driver will make his first competitive appearance for Speedworks Corolla Racing, having already impressed during previous BTCC outings.</p><p>While adapting to a new team, new engineers and a new car presents an understandable challenge, Bensley arrives with confidence after previously enjoying success at Thruxton, giving him valuable knowledge of one of Britain's quickest racing circuits.</p><p>The summer break has also provided valuable time for the team to regroup, analyse the opening half of the campaign and prepare for the busy run of races that now lies ahead.</p><p>With both drivers eager to get back behind the wheel and the entire team refreshed following the short break, anticipation is high as the second half of the 2026 season gets underway.</p><p><strong>Christian Dick, Team Principal, Speedworks Corolla Racing, said:</strong><em>\"It's great to finally be going racing again after the summer break. Everyone has worked incredibly hard behind the scenes over the last few weeks and there's a real sense of excitement throughout the team heading into Thruxton.</em></p><p><em>\"Josh has always been exceptionally strong there and it's a circuit that really suits both his driving style and the characteristics of the Corolla. He's earned the reputation as the 'King of Thruxton' for good reason, and we're looking forward to seeing what we can achieve together this weekend.</em></p><p><em>\"We're also delighted to welcome Ryan for his first race weekend with the team. He's settled in brilliantly already and we're all excited to see him out on track. There'll naturally be plenty to learn as he gets familiar with the car and the team, but we're confident he'll adapt quickly and show the pace we know he's capable of.</em></p><p><em>\"The first half of the season demonstrated the potential of our package. Now it's about maintaining that momentum, continuing to improve and making the most of every opportunity over the remaining rounds.\"</em></p><p><strong>Josh Cook, Driver, Speedworks Corolla Racing, said:</strong> <em>\"It's always special racing at Thruxton. I've enjoyed some fantastic moments there over the years and it's definitely one of the circuits I look forward to most on the calendar.</em></p><p><em>\"The Corolla has shown strong pace this season and hopefully we can hit the ground running after the summer break. It's a circuit where confidence is everything, so we'll be looking to maximise every session and put ourselves in the mix from the outset.\"</em></p><p><strong>Ryan Bensley, Driver, Speedworks Corolla Racing, said:</strong> <em>\"I genuinely can't wait to get started. Joining Speedworks Corolla Racing is a fantastic opportunity and everyone's made me feel incredibly welcome from day one.</em></p><p><em>\"Thruxton is actually one of my favourite circuits and somewhere I've enjoyed success before, so to make my debut with the team there makes it even more special.</em></p><p><em>\"There's obviously a lot to learn with a new team and a new car, but I'm looking forward to working closely with Josh and the engineers, building confidence throughout the weekend and hopefully putting it all together.\"</em></p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112634-112636-cook-RL2_7641-1-scaled-e1784819256410.jpg"
+        }
+      ]
+    }
+  },
+  {
     "id": "7-eleven-dan-cammish",
     "slug": "7-eleven-dan-cammish",
     "link": "https://btcc.net/7-eleven-dan-cammish/",
@@ -911,28 +933,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112628-112629-Taylor-Smith-JSB_4046-2-scaled-e1784794073545.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "speedworks-corolla-racing-ready-to-resume-at-uks-fastest-circuit",
-    "slug": "speedworks-corolla-racing-ready-to-resume-at-uks-fastest-circuit",
-    "link": "https://btcc.net/speedworks-corolla-racing-ready-to-resume-at-uks-fastest-circuit/",
-    "date": "2026-07-23T00:00:00",
-    "title": {
-      "rendered": "Speedworks Corolla Racing ready to resume at UK's fastest circuit"
-    },
-    "excerpt": {
-      "rendered": "The 2026 Kwik Fit British Touring Car Championship returns to..."
-    },
-    "content": {
-      "rendered": "<p>The 2026 Kwik Fit British Touring Car Championship returns to action this weekend at the high-speed Thruxton Circuit, with Speedworks Corolla Racing looking to build on the encouraging performances shown before the summer break.</p><p>Following a productive first half of the season, the Cheshire-based squad arrives at one of the championship's fastest and most demanding venues determined to convert its evident pace into another strong haul of championship points.</p><p>The weekend also marks an exciting new chapter for the team, as Ryan Bensley makes his Speedworks Corolla Racing debut alongside multiple BTCC race winner Josh Cook.</p><p>Thruxton has long been regarded as one of Cook's strongest circuits. The Bath driver has enjoyed considerable success around the Hampshire venue throughout his BTCC career, earning the nickname \"King of Thruxton\" thanks to a series of memorable victories and front-running performances over recent seasons.</p><p>With the Toyota Corolla GR Sport continuing to demonstrate impressive race pace throughout 2026, Cook heads into the weekend full of confidence as he targets another strong points haul in front of what is expected to be another capacity crowd.</p><p>For Bensley, the weekend represents the fulfilment of another career milestone. Following his appointment during the championship's summer break, the talented driver will make his first competitive appearance for Speedworks Corolla Racing, having already impressed during previous BTCC outings.</p><p>While adapting to a new team, new engineers and a new car presents an understandable challenge, Bensley arrives with confidence after previously enjoying success at Thruxton, giving him valuable knowledge of one of Britain's quickest racing circuits.</p><p>The summer break has also provided valuable time for the team to regroup, analyse the opening half of the campaign and prepare for the busy run of races that now lies ahead.</p><p>With both drivers eager to get back behind the wheel and the entire team refreshed following the short break, anticipation is high as the second half of the 2026 season gets underway.</p><p><strong>Christian Dick, Team Principal, Speedworks Corolla Racing, said:</strong><em>\"It's great to finally be going racing again after the summer break. Everyone has worked incredibly hard behind the scenes over the last few weeks and there's a real sense of excitement throughout the team heading into Thruxton.</em></p><p><em>\"Josh has always been exceptionally strong there and it's a circuit that really suits both his driving style and the characteristics of the Corolla. He's earned the reputation as the 'King of Thruxton' for good reason, and we're looking forward to seeing what we can achieve together this weekend.</em></p><p><em>\"We're also delighted to welcome Ryan for his first race weekend with the team. He's settled in brilliantly already and we're all excited to see him out on track. There'll naturally be plenty to learn as he gets familiar with the car and the team, but we're confident he'll adapt quickly and show the pace we know he's capable of.</em></p><p><em>\"The first half of the season demonstrated the potential of our package. Now it's about maintaining that momentum, continuing to improve and making the most of every opportunity over the remaining rounds.\"</em></p><p><strong>Josh Cook, Driver, Speedworks Corolla Racing, said:</strong> <em>\"It's always special racing at Thruxton. I've enjoyed some fantastic moments there over the years and it's definitely one of the circuits I look forward to most on the calendar.</em></p><p><em>\"The Corolla has shown strong pace this season and hopefully we can hit the ground running after the summer break. It's a circuit where confidence is everything, so we'll be looking to maximise every session and put ourselves in the mix from the outset.\"</em></p><p><strong>Ryan Bensley, Driver, Speedworks Corolla Racing, said:</strong> <em>\"I genuinely can't wait to get started. Joining Speedworks Corolla Racing is a fantastic opportunity and everyone's made me feel incredibly welcome from day one.</em></p><p><em>\"Thruxton is actually one of my favourite circuits and somewhere I've enjoyed success before, so to make my debut with the team there makes it even more special.</em></p><p><em>\"There's obviously a lot to learn with a new team and a new car, but I'm looking forward to working closely with Josh and the engineers, building confidence throughout the weekend and hopefully putting it all together.\"</em></p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112634-112636-cook-RL2_7641-1-scaled-e1784819256410.jpg"
         }
       ]
     }
