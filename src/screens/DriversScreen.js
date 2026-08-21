@@ -28,6 +28,21 @@ function thumbUrl(url, size = '150x150') {
   return url.replace(/(\.[a-z]+)$/i, `-${size}$1`);
 }
 
+// Matches driverGridItem's own width formula below - needed as a plain
+// number (not a '%' string) for the car badge's rotation math just below,
+// since percentages nest multiplicatively (a child's '46%' means 46% of its
+// *immediate parent's* resolved size, not of driverImageArea) - swapping
+// width/height for a rotated element needs both figures resolved against
+// the same base, which plain pixel numbers give for free and percentages
+// don't once there's a wrapper view in between.
+const TILE_W = (SCREEN_WIDTH - 32 - 10) / 2;
+// driverImageArea is a square (aspectRatio: 1), so TILE_W doubles as its
+// height too - these are all derived from that one figure.
+const CAR_SIDE_TOP = TILE_W * 0.5; // roughly where the number graphic ends
+const CAR_SIDE_MARGIN = 4;
+const CAR_SIDE_W = TILE_W * 0.24; // final (post-rotation) width of the strip
+const CAR_SIDE_H = TILE_W - CAR_SIDE_TOP - CAR_SIDE_MARGIN; // fills down to the tile's bottom edge
+
 function DriverAvatar({number, imageUrl, size = 58}) {
   const bundled = getDriverImage(number);
   const imgStyle = {width: size, height: size * 1.6, borderRadius: 0, position: 'absolute', top: 0, left: 0, right: 0};
@@ -110,13 +125,26 @@ function DriverCardInner({item, onPress, fav}) {
             Steel Seal with Power Maxed Racing fields both Dexter Patterson's
             car and Nick Halstead's separately-liveried "Ask GVT" one), the
             driver's OWN car - not a shared team image - has to live on their
-            tile. Bottom-right, opposite the driver photo (shifted left/
-            narrowed above so it doesn't extend under here) - a dedicated
-            strip below the photo worked but made every tile noticeably
-            taller; tucking the car into the corner the narrower photo leaves
-            clear avoids the collision without that extra height. */}
+            tile. Runs vertically down the right side, under the number,
+            rotated -90deg (anti-clockwise) - a landscape car cutout (1.5:1)
+            reads as a tall strip once rotated, filling the column the
+            narrowed/left-aligned driver photo leaves clear without competing
+            with the number above it. driverCarSide is the wrapper at the
+            slot's *final* (post-rotation) size; driverCarSideImg inside it
+            is sized pre-rotation with width/height swapped, so contain fits
+            the car into that swapped box and the rotation then lands it
+            exactly in the wrapper's footprint - percentages can't express
+            this swap directly (a child's % is relative to its own parent,
+            not driverImageArea), hence TILE_W as a plain pixel number. */}
         {item.carImageUrl ? (
-          <CachedImage uri={carThumbUrl(item.carImageUrl)} style={styles.driverCarImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
+          <View style={styles.driverCarSide}>
+            <CachedImage
+              uri={carThumbUrl(item.carImageUrl)}
+              style={styles.driverCarSideImg}
+              resizeMode="contain"
+              accessibilityLabel={`${item.name}'s car`}
+            />
+          </View>
         ) : null}
       </View>
       <View style={styles.driverFooter}>
@@ -316,15 +344,25 @@ const styles = StyleSheet.create({
   // % of the square driverImageArea so it scales consistently at any tile size.
   driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
-  // Driver's own car cutout, bottom-right - opposite the photo, which is now
-  // narrowed/left-aligned above specifically to leave this corner clear. A
-  // dedicated strip below the photo (the previous version of this) also
-  // avoided the collision but made every tile noticeably taller; this gets
-  // the same non-overlapping result within the existing square footprint.
-  // 50%/33% (~1.5 aspect, matching the car cutout's own, up from an initial
-  // 42%/28% pass) rather than a plain square box, so contain doesn't
-  // letterbox it.
-  driverCarImg: {position: 'absolute', bottom: 4, right: 4, width: '50%', height: '33%'},
+  // Wrapper at the *final* (post-rotation) size and position: a vertical
+  // strip down the right side, starting roughly where the number graphic
+  // ends and filling down to the tile's bottom edge. Centers its child so
+  // the swapped-and-rotated image (below) lands inside this exact footprint
+  // without any position math of its own.
+  driverCarSide: {
+    position: 'absolute',
+    top: CAR_SIDE_TOP,
+    right: CAR_SIDE_MARGIN,
+    width: CAR_SIDE_W,
+    height: CAR_SIDE_H,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Pre-rotation size - width/height swapped from driverCarSide above, since
+  // a landscape car cutout (1.5:1) needs to be laid out in portrait *before*
+  // rotating -90deg (anti-clockwise) for `contain` to fit it against the
+  // swapped box rather than the final one.
+  driverCarSideImg: {width: CAR_SIDE_H, height: CAR_SIDE_W, transform: [{rotate: '-90deg'}]},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},

@@ -39,6 +39,16 @@ function carThumbUrl(url) {
   return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
 }
 
+// headerBg is full screen width with no horizontal padding before it, and
+// square (aspectRatio: 1), so this one figure doubles as its height too -
+// see DriversScreen.js's identical TILE_W comment for why these need to be
+// plain pixel numbers (not '%' strings) for the rotated car strip's math.
+const HEADER_W = Dimensions.get('window').width;
+const CAR_SIDE_TOP = HEADER_W * 0.5; // roughly where the number graphic ends
+const CAR_SIDE_MARGIN = 8;
+const CAR_SIDE_W = HEADER_W * 0.24; // final (post-rotation) width of the strip
+const CAR_SIDE_H = HEADER_W - CAR_SIDE_TOP - CAR_SIDE_MARGIN; // fills down to the header's bottom edge
+
 function formatDob(dateStr) {
   if (!dateStr) return null;
   try {
@@ -179,11 +189,22 @@ export default function DriverDetailScreen({route, navigation}) {
           ) : driver.imageUrl ? (
             <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
           ) : null}
-          {/* Same corner-badge treatment as DriversScreen's tile - the driver's
-              own car, not a shared team one, since a team can field more than
-              one livery (see that screen's comment for the full story). */}
+          {/* Same treatment as DriversScreen's tile - the driver's own car,
+              not a shared team one, since a team can field more than one
+              livery (see that screen's comment for the full story), running
+              vertically down the right side under the number, rotated
+              -90deg. headerCarSide is the wrapper at the slot's final
+              (post-rotation) size; headerCarSideImg inside it is sized
+              pre-rotation with width/height swapped. */}
           {driver.carImageUrl ? (
-            <CachedImage uri={carThumbUrl(driver.carImageUrl)} style={styles.headerCarImg} resizeMode="contain" accessibilityLabel={`${driver.name}'s car`} />
+            <View style={styles.headerCarSide}>
+              <CachedImage
+                uri={carThumbUrl(driver.carImageUrl)}
+                style={styles.headerCarSideImg}
+                resizeMode="contain"
+                accessibilityLabel={`${driver.name}'s car`}
+              />
+            </View>
           ) : null}
         </View>
         <View style={styles.headerFooter}>
@@ -467,9 +488,9 @@ const styles = StyleSheet.create({
 
   // Header
   // alignItems: 'flex-start' (not 'center') so the narrower headerPhoto below
-  // sits against the left edge, leaving the bottom-right corner clear for
-  // headerCarImg - same quadrant arrangement as DriversScreen's tile
-  // (driver left, number top-right, car bottom-right).
+  // sits against the left edge, leaving the right side clear for
+  // headerCarSide - same arrangement as DriversScreen's tile (driver left,
+  // number top-right, car running down the right side under it).
   headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'flex-start'},
   headerNumber: {
     position: 'absolute',
@@ -490,14 +511,24 @@ const styles = StyleSheet.create({
   // DriversScreen's tile-sized equivalent) - too dominant once the car badge
   // below grew into a real showcase size of its own.
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
-  // Bottom-right (not bottom-left) - now matches DriversScreen's tile
-  // quadrant layout exactly: driver photo left, number top-right, car
-  // bottom-right in the corner the narrowed/left-aligned photo leaves clear,
-  // rather than an overlay competing with the photo for the same space. Same
-  // 50%/33% proportions as the tile's driverCarImg (~1.5 aspect, matching the
-  // car cutout's own) - this header is much bigger in absolute terms, so the
-  // car still reads as a real showcase, it just no longer overlaps the photo.
-  headerCarImg: {position: 'absolute', bottom: 8, right: 8, width: '50%', height: '33%'},
+  // Wrapper at the *final* (post-rotation) size and position - a vertical
+  // strip down the right side, starting roughly where the number graphic
+  // ends and filling down to the header's bottom edge. Same idea as
+  // DriversScreen's tile equivalent, just scaled to this much bigger header.
+  headerCarSide: {
+    position: 'absolute',
+    top: CAR_SIDE_TOP,
+    right: CAR_SIDE_MARGIN,
+    width: CAR_SIDE_W,
+    height: CAR_SIDE_H,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Pre-rotation size - width/height swapped from headerCarSide above, since
+  // a landscape car cutout (1.5:1) needs to be laid out in portrait *before*
+  // rotating -90deg (anti-clockwise) for `contain` to fit it against the
+  // swapped box rather than the final one.
+  headerCarSideImg: {width: CAR_SIDE_H, height: CAR_SIDE_W, transform: [{rotate: '-90deg'}]},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',
