@@ -306,9 +306,12 @@ const styles = StyleSheet.create({
   driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   // Driver's own car cutout, badge-sized into the bottom-left corner - deliberately
-  // small/secondary to the driver photo, and confined to a quadrant so it never
-  // collides with the top-right number badge/favBadge above.
-  driverCarImg: {position: 'absolute', bottom: 4, left: 4, width: '46%', height: '30%'},
+  // secondary to the driver photo, and confined to a quadrant so it never
+  // collides with the top-right number badge/favBadge above. 58%/38% (~1.53
+  // aspect, close to the car cutout's own ~1.5) rather than a plain square box,
+  // so contain doesn't letterbox it - sized up from an initial 46%/30% pass
+  // that read as too small on-device.
+  driverCarImg: {position: 'absolute', bottom: 4, left: 4, width: '58%', height: '38%'},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},

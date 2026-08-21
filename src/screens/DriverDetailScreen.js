@@ -481,12 +481,14 @@ const styles = StyleSheet.create({
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
   // the square headerBg so it matches DriversScreen's tile-sized equivalent.
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
-  // Smaller % than DriversScreen's driverCarImg (46%/30%) - this header is
-  // full screen width rather than a half-width tile, so the same percentage
-  // would roughly double the badge's absolute on-screen size. These figures
-  // keep it close to that same absolute footprint instead of ballooning just
-  // because the container got bigger.
-  headerCarImg: {position: 'absolute', bottom: 8, left: 8, width: '22%', height: '14%'},
+  // An initial pass (22%/14%) deliberately kept this close to the tile's own
+  // absolute badge size, reasoning the full-width header would otherwise
+  // double it for no reason - read as too small on-device regardless, so
+  // this is a real, deliberately larger showcase size for the one-driver
+  // profile page, not just matched to the tile's smaller footprint. 48%/32%
+  // (~1.5 aspect, matching the car cutout's own ~1.5) rather than a plain
+  // square box, so contain doesn't letterbox it.
+  headerCarImg: {position: 'absolute', bottom: 8, left: 8, width: '48%', height: '32%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',
