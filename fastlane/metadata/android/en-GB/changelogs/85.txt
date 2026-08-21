@@ -1,0 +1,8 @@
+• Live Chat now sends you a push notification when someone @mentions you, with an autocomplete dropdown to pick names as you type
+• Chat messages older than 14 days are automatically cleared to keep the room tidy
+• Fixed Live Chat sometimes being slow to load
+• Removed talkSPORT and talkSPORT 2 from Radio, which are no longer available
+• Added sponsor logos to team tiles and profile pages
+• Fixed Merch tile artwork appearing stretched instead of cropped
+• Slightly reduced the size of driver number overlays on driver tiles
+• Bug fixes and performance improvements
