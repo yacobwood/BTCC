@@ -18,16 +18,7 @@ function wpThumb(uri, targetPx) {
 // to RN's Image - with no retry, one transient blip permanently shows the
 // broken-image icon for a URL that's perfectly fine. Retrying a few times
 // covers that without masking a genuinely dead URL forever.
-// Widened 2026-08-21 from 2: the Drivers grid mounts ~70 concurrent image
-// requests at once (3 per tile x ~23 drivers, non-virtualized - see
-// DriversScreen.js), well past the ~20-request Teams-grid burst this was
-// originally tuned for. 2 retries (1.2s of backoff) confirmed live as still
-// not enough runway for a request queued behind that much front-of-line
-// traffic - it kept exhausting before the backlog cleared. More retries costs
-// a genuinely-dead URL a longer wait before showing the fallback icon, which
-// is the right tradeoff against a real image just needing more time to get a
-// turn.
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 2;
 // A screen that mounts many CachedImages at once (e.g. the Teams grid -
 // ~20 requests together) can transiently fail several simultaneously if
 // they're all retried the instant they error, since that just re-hits the
@@ -79,11 +70,9 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
     // used to overwrite retryTimeoutRef with only the latest timer, so an
     // error arriving before the previous retry had actually fired left that
     // earlier timeout orphaned (unreachable by the unmount cleanup below,
-    // since only the ref's current value gets cleared). Real network errors
-    // are naturally spaced out enough that this rarely triggered live, but it
-    // showed up as leaked timers keeping Jest workers alive once MAX_RETRIES
-    // grew large enough for a test to legitimately fire onError several
-    // times in a tight loop.
+    // since only the ref's current value gets cleared). Rare in practice
+    // (real network errors are naturally spaced out enough), but a real bug
+    // regardless - fixed 2026-08-21 while investigating an unrelated report.
     if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
     if (retriesRef.current < MAX_RETRIES) {
       retriesRef.current += 1;

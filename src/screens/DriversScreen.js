@@ -47,42 +47,31 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 
 const TABS = ['DRIVERS', 'TEAMS'];
 
-// The grid below is a plain ScrollView + .map(), not a virtualized list - every
-// tile mounts (and fires its network images) at once regardless of scroll
-// position, so "list position" is really "request-queue position" once there
-// are more concurrent image requests than the device's HTTP client will open
-// connections for at once. Adding the car badge (below) made that burst ~50%
-// bigger (2 network images/tile -> 3), which showed up live as cars towards
-// the bottom of the list losing the race for a connection slot and exhausting
-// CachedImage's retry budget before it ever cleared.
-//
-// A first pass at staggering (60ms/position, 1.2s cap) wasn't enough margin -
-// confirmed live: driver photos and card backgrounds (declared earlier in each
-// tile's JSX, so first in the request queue every time) kept loading fine even
-// deep in the list, but the car badge specifically kept showing CachedImage's
-// permanent fallback icon past roughly the 18th tile. Car badges are always
-// queued behind the *entire* photo/background burst (~46 requests, declared
-// before any badge in every tile), not just behind badges ahead of them - so
-// the tail needs enough delay to actually clear that whole front-of-queue
-// backlog, not just a modest offset from its neighbours. Widened to give that
-// real headroom instead of guessing again from a still-too-small number.
-const CAR_BADGE_STAGGER_MS = 150;
-const CAR_BADGE_MAX_DELAY_MS = 3000;
+// Rewrites a data/carImages/ URL to its pre-generated small thumbnail
+// (<name>-thumb.webp, ~400px wide, alongside every full-size file) - see
+// `scripts/generate_car_thumbs.py`. Root cause of car badges failing on a
+// long Drivers grid (confirmed live via a device log capture, not guessed):
+// Android's image pipeline decodes to an uncompressed bitmap sized off pixel
+// dimensions, not file size, so every car image - already WebP-compressed to
+// ~90KB on disk - still costs 1536x1024x4 bytes = 6MB of *decoded* memory
+// each. 23 drivers x 6MB blows straight through Fresco's ~192MB pool on its
+// own, and unlike cardBgUrl (shared across a team's drivers, so Fresco
+// dedupes and decodes it once), every car image is unique per driver, so
+// there's no reuse to fall back on - whichever tiles' decodes land after the
+// pool is already full just fail, which is why it looked like "the bottom of
+// the list" specifically. WebP file-size compression never touched this (file
+// size and decoded bitmap size are unrelated); staggering/retrying the
+// network request didn't help either (a retried decode into an already-full
+// pool fails the same way). The actual fix is decoding something small enough
+// that 23 of them never gets close to the cap - a badge rendering at ~80px
+// on screen doesn't need a 1536x1024 source.
+function carThumbUrl(url) {
+  if (!url) return url;
+  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+}
 
-function DriverCardInner({item, onPress, fav, index = 0}) {
+function DriverCardInner({item, onPress, fav}) {
   const bundled = getDriverImage(item.number);
-  // No point scheduling a delay (or even a timer at all - a driver with no
-  // car image on record, e.g. a reserve, never renders the badge either way)
-  // unless there's actually a badge coming.
-  const hasCarBadge = Boolean(item.carImageUrl);
-  const [carBadgeReady, setCarBadgeReady] = useState(!hasCarBadge || index === 0);
-  useEffect(() => {
-    if (!hasCarBadge || carBadgeReady) return;
-    const delay = Math.min(index * CAR_BADGE_STAGGER_MS, CAR_BADGE_MAX_DELAY_MS);
-    const t = setTimeout(() => setCarBadgeReady(true), delay);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return (
     <TouchableOpacity
       style={[styles.driverCard, fav && styles.driverCardFav]}
@@ -123,8 +112,8 @@ function DriverCardInner({item, onPress, fav, index = 0}) {
             driver's OWN car - not a shared team image - has to live on their
             tile. Bottom-left keeps it clear of the top-right number/logo
             badge and the top-right favBadge above. */}
-        {item.carImageUrl && carBadgeReady ? (
-          <CachedImage uri={item.carImageUrl} style={styles.driverCarImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
+        {item.carImageUrl ? (
+          <CachedImage uri={carThumbUrl(item.carImageUrl)} style={styles.driverCarImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
         ) : null}
       </View>
       <View style={styles.driverFooter}>
@@ -134,11 +123,9 @@ function DriverCardInner({item, onPress, fav, index = 0}) {
   );
 }
 
-// Only re-render when item data, fav status or list position changes - onPress
-// is intentionally excluded from the comparison because it's recreated on
-// every parent render.
-const DriverCard = React.memo(DriverCardInner, (prev, next) =>
-  prev.item === next.item && prev.fav === next.fav && prev.index === next.index);
+// Only re-render when item data or fav status changes - onPress is intentionally excluded
+// from the comparison because it's recreated on every parent render.
+const DriverCard = React.memo(DriverCardInner, (prev, next) => prev.item === next.item && prev.fav === next.fav);
 
 // Isolated so DriversScreen doesn't subscribe to favouriteDriver context.
 // When a fav toggles, only this component re-renders — PagerView receives no
@@ -149,12 +136,11 @@ function DriverGridSection({title, drivers, isFavourite, navigation, hideWhenEmp
     <>
       <Text style={styles.countLabel}>{title}</Text>
       <View style={styles.driversGrid}>
-        {drivers.map((item, index) => (
+        {drivers.map(item => (
           <View key={String(item.number)} style={styles.driverGridItem}>
             <DriverCard
               item={item}
               fav={isFavourite(item.name)}
-              index={index}
               onPress={() => { Analytics.driverClicked(item.name); navigation.navigate('DriverDetail', {driver: item}); }}
             />
           </View>

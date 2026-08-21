@@ -57,7 +57,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 // ─── The custom memo comparator (copied from DriversScreen) ──────────────────
 const cardMemoComparator = (prev, next) =>
-  prev.item === next.item && prev.fav === next.fav && prev.index === next.index;
+  prev.item === next.item && prev.fav === next.fav;
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
@@ -102,33 +102,23 @@ describe('custom React.memo comparator', () => {
     // This is the core guard: DriversScreen re-renders (new closures for onPress)
     // but the card should not re-render if item and fav haven't changed.
     expect(cardMemoComparator(
-      {item, fav: false, index: 0, onPress: () => {}},
-      {item, fav: false, index: 0, onPress: () => {}},  // different function reference
+      {item, fav: false, onPress: () => {}},
+      {item, fav: false, onPress: () => {}},  // different function reference
     )).toBe(true);
   });
 
   it('triggers re-render when fav changes — star badge and name colour must update', () => {
     expect(cardMemoComparator(
-      {item, fav: false, index: 0, onPress: jest.fn()},
-      {item, fav: true,  index: 0, onPress: jest.fn()},
+      {item, fav: false, onPress: jest.fn()},
+      {item, fav: true,  onPress: jest.fn()},
     )).toBe(false);
   });
 
   it('triggers re-render when item reference changes — new driver data loaded', () => {
     const updatedItem = {...item, name: 'Tom Chilton (updated)'};
     expect(cardMemoComparator(
-      {item,        fav: false, index: 0, onPress: jest.fn()},
-      {item: updatedItem, fav: false, index: 0, onPress: jest.fn()},
-    )).toBe(false);
-  });
-
-  it('triggers re-render when index changes - e.g. a driver above it drops out of the list', () => {
-    // index drives the car-badge load stagger (see CAR_BADGE_STAGGER_MS in
-    // DriversScreen.js) - a card that shifts position needs a fresh delay
-    // calculation, not the one computed for its old slot.
-    expect(cardMemoComparator(
-      {item, fav: false, index: 2, onPress: jest.fn()},
-      {item, fav: false, index: 1, onPress: jest.fn()},
+      {item,        fav: false, onPress: jest.fn()},
+      {item: updatedItem, fav: false, onPress: jest.fn()},
     )).toBe(false);
   });
 });

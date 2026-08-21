@@ -1,5 +1,5 @@
 import React from 'react';
-import {act, fireEvent, waitFor} from '@testing-library/react-native';
+import {act, fireEvent} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DriversScreen from '../../src/screens/DriversScreen';
 import {renderWithProviders, makeNav, MOCK_GRID, MOCK_DRIVERS_RAW} from './testUtils';
@@ -316,6 +316,36 @@ describe('DriversScreen', () => {
       expect(carImages.length).toBe(1);
     });
 
+    // Root cause of a real on-device failure (confirmed via a device log
+    // capture, not guessed): Android decodes an image to an uncompressed
+    // bitmap sized off its pixel dimensions, not its file size, so the
+    // full-resolution 1536x1024 car cutout costs ~6MB of decoded memory per
+    // driver even though the WebP file itself is only ~90KB - and unlike
+    // cardBgUrl (shared across a team's drivers, so it only decodes once),
+    // every car image is unique per driver, with no reuse to fall back on.
+    // ~23 of those blew straight through Android's image-decode memory pool,
+    // which looked on-device like cars towards the bottom of a long list
+    // failing to load. The tile only ever needs to render this badge at
+    // ~80px, so it requests the small pre-generated -thumb variant instead
+    // of the full-size original.
+    it("requests the small -thumb variant of the driver's car, not the full-size original", async () => {
+      const gridWithCar = {
+        drivers: [{
+          name: 'Nick Halstead', number: 55, team: 'Steel Seal with Power Maxed Racing',
+          imageUrl: null, cardBgUrl: null,
+          carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
+        }],
+        teams: [],
+      };
+      parseGrid.mockReturnValue(gridWithCar);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      const carImage = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('carImages'));
+      expect(carImage.props.source.uri).toBe(
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb.webp',
+      );
+    });
+
     it('renders no car image when the driver has no carImageUrl', async () => {
       const gridWithoutCar = {
         drivers: [{name: 'Max Buxton', number: 19, team: 'NAPA Racing UK', imageUrl: null, cardBgUrl: null, carImageUrl: ''}],
@@ -345,20 +375,13 @@ describe('DriversScreen', () => {
       parseGrid.mockReturnValue(gridWithTeammates);
       const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('2 CONFIRMED');
-      // Car badges past the first tile mount on a short stagger (see
-      // CAR_BADGE_STAGGER_MS in DriversScreen.js) so a big grid doesn't fire
-      // every tile's 3rd network image in the same instant - real timers here,
-      // so just poll past that real (if brief) delay instead of asserting
-      // synchronously.
-      await waitFor(() => {
-        const carUris = getAllByTestId('cached-image')
-          .map(img => img.props.source.uri)
-          .filter(uri => uri?.includes('carImages'));
-        expect(carUris.sort()).toEqual([
-          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
-          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
-        ]);
-      });
+      const carUris = getAllByTestId('cached-image')
+        .map(img => img.props.source.uri)
+        .filter(uri => uri?.includes('carImages'));
+      expect(carUris.sort()).toEqual([
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb.webp',
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson-thumb.png',
+      ]);
     });
   });
 });

@@ -662,9 +662,12 @@ describe('TeamDetailScreen', () => {
         const carUris = getAllByTestId('cached-image')
           .map(img => img.props.source.uri)
           .filter(uri => uri?.includes('carImages'));
+        // Rewritten to the -thumb variant (see TeamDetailScreen.js's
+        // carThumbUrl) - a car card here only ever renders at a couple
+        // hundred px, not the full-size original's 1536x1024.
         expect(carUris.sort()).toEqual([
-          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
-          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
+          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb.webp',
+          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson-thumb.png',
         ]);
       });
     });
@@ -706,7 +709,7 @@ describe('TeamDetailScreen', () => {
         const carUris = getAllByTestId('cached-image')
           .map(img => img.props.source.uri)
           .filter(uri => uri?.includes('carImages'));
-        expect(carUris).toEqual(['https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.png']);
+        expect(carUris).toEqual(['https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram-thumb.png']);
       });
     });
 

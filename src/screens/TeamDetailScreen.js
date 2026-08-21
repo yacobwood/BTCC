@@ -31,6 +31,21 @@ const SPONSOR_TIERS = [
   {key: 'decal', label: 'ALSO ON THE CAR'},
 ];
 
+// Rewrites a data/carImages/ URL to its pre-generated small thumbnail
+// (<name>-thumb.webp - see scripts/generate_car_thumb.py). A car cutout here
+// only ever renders at a couple hundred px, well under the full-size
+// 1536x1024 original's decoded-bitmap cost (6MB regardless of how well the
+// file itself compresses) - see DriversScreen.js's carThumbUrl for the full
+// story (root-caused live: that cost is what exhausted Android's image
+// decode pool on a 23-driver grid). This screen only ever shows 2-4 cars at
+// once so it was never actually hitting that cap, but there's no reason to
+// decode 15x more bitmap than the card needs just because the number here
+// happens to be small.
+function carThumbUrl(url) {
+  if (!url) return url;
+  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+}
+
 export default function TeamDetailScreen({route, navigation}) {
   const {team} = route.params;
   const insets = useSafeAreaInsets();
@@ -66,7 +81,7 @@ export default function TeamDetailScreen({route, navigation}) {
               <View style={styles.carsRow}>
                 {cars.map(d => (
                   <View key={d.number} style={styles.carCard}>
-                    <CachedImage uri={d.carImageUrl} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${d.name}'s car`} />
+                    <CachedImage uri={carThumbUrl(d.carImageUrl)} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${d.name}'s car`} />
                     <Text style={styles.carCaption} numberOfLines={1}>{formatDriverName(d.name)}</Text>
                   </View>
                 ))}
