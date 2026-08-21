@@ -301,6 +301,12 @@ export default function SettingsScreen({navigation}) {
               value={settings.chatFab}
               onToggle={(v) => setSetting('chatFab', v)}
             />
+            <SettingRow
+              label="Mention notifications"
+              description="Get notified when someone @mentions you in Live Chat"
+              value={settings.chatMentions}
+              onToggle={toggle('chatMentions')}
+            />
           </>
         )}
 

@@ -2,6 +2,7 @@ import React from 'react';
 import {act, create} from 'react-test-renderer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
+import {syncChatMentionToken} from '../../src/utils/notifications';
 import {SettingsProvider, useSettings} from '../../src/store/settings';
 
 jest.mock('../../src/store/auth', () => ({
@@ -9,6 +10,9 @@ jest.mock('../../src/store/auth', () => ({
 }));
 jest.mock('../../src/utils/userProfile', () => ({
   saveProfile: jest.fn(() => Promise.resolve()),
+}));
+jest.mock('../../src/utils/notifications', () => ({
+  syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));
 
 // All leaf keys that map to FCM topics
@@ -415,6 +419,82 @@ describe('SettingsProvider', () => {
       let getHook;
       await act(async () => { getHook = renderProvider(); });
       expect(getHook().settings.spoilerFreeExpiry).toBe(isoDate);
+    });
+  });
+
+  describe('chatMentions', () => {
+    beforeEach(() => {
+      syncChatMentionToken.mockClear();
+      const {useAuth} = require('../../src/store/auth');
+      useAuth.mockReturnValue({user: null, isAnonymous: true});
+    });
+
+    it('defaults to true', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.chatMentions).toBe(true);
+    });
+
+    it('loads chatMentions=false from storage', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_chat_mentions') return Promise.resolve('false');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      expect(getHook().settings.chatMentions).toBe(false);
+    });
+
+    it('registers the device token on load using the signed-in uid', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      const {useAuth} = require('../../src/store/auth');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      await act(async () => { renderProvider(); });
+
+      expect(syncChatMentionToken).toHaveBeenCalledWith('test-uid', true);
+    });
+
+    it('persists the new value to AsyncStorage', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('chatMentions', false); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_chat_mentions', 'false');
+    });
+
+    it('removes the device token when disabled via setSetting', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      syncChatMentionToken.mockClear();
+
+      await act(async () => { getHook().setSetting('chatMentions', false); });
+
+      expect(syncChatMentionToken).toHaveBeenCalledWith('test-uid', false);
+    });
+
+    it('does not call syncChatMentionToken for an unrelated setting change', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      syncChatMentionToken.mockClear();
+
+      await act(async () => { getHook().setSetting('newsAlerts', false); });
+
+      expect(syncChatMentionToken).not.toHaveBeenCalled();
+    });
+
+    it('does not call saveProfile for chatMentions (not synced across devices)', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      saveProfile.mockClear();
+
+      await act(async () => { getHook().setSetting('chatMentions', false); });
+
+      expect(saveProfile).not.toHaveBeenCalled();
     });
   });
 

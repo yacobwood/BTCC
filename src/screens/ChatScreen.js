@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -64,6 +64,11 @@ export default function ChatScreen({onClose} = {}) {
   const [banInfo, setBanInfo] = useState(null);
   const listRef = useRef(null);
   const inputRef = useRef(null);
+  // @mention autocomplete: cursorPos tracks the cursor so the mention query
+  // (derived below, alongside chatParticipants) is computed relative to
+  // where the user is actually typing, not just the end of the input - a
+  // mention can be typed anywhere mid-message, not only at the start.
+  const [cursorPos, setCursorPos] = useState(0);
 
   useEffect(() => {
     fetchBlacklist().then(setBlacklist).catch(() => {});
@@ -127,6 +132,105 @@ export default function ChatScreen({onClose} = {}) {
     (msg) => authorNames[msg.authorId] || msg.authorName,
     [authorNames],
   );
+
+  // Everyone with a visible message in the currently loaded chat history,
+  // by their current (live) name, alphabetically - source for the @mention
+  // autocomplete list. Excludes yourself (mentioning yourself never
+  // notifies anyone - see resolveMentionedAuthorIds in
+  // functions/chatMentions.js) and ban_notice system messages (authorId
+  // 'system' never has a real name registered).
+  const chatParticipants = useMemo(() => {
+    if (!messages) return [];
+    const seen = new Set();
+    const names = [];
+    for (const msg of messages) {
+      if (msg.type === 'ban_notice' || msg.authorId === myAuthorId) continue;
+      const name = resolveAuthorName(msg);
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      names.push(name);
+    }
+    return names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  }, [messages, myAuthorId, resolveAuthorName]);
+
+  // Derived synchronously during render rather than via a useEffect+setState
+  // pair - the earlier version set mentionQuery/mentionStart from an effect
+  // that only ran after the input-change render had already committed,
+  // forcing a second render pass for every keystroke (and for the @ button
+  // and Reply, which set input/cursorPos programmatically) before the
+  // dropdown could appear. That extra round trip was invisible in fast dev
+  // conditions but read as a real, noticeable delay on-device. Computing it
+  // inline means the mention state is correct in the very same render that
+  // picked up the new input/cursor position - no lag, no intermediate frame
+  // where the text has updated but the mention state hasn't caught up yet.
+  //
+  // Finds the nearest "@" at or before the cursor with no line break since,
+  // and treats everything between it and the cursor as the in-progress
+  // mention query.
+  const mentionMatch = useMemo(() => {
+    const uptoCursor = input.slice(0, cursorPos);
+    const atIndex = uptoCursor.lastIndexOf('@');
+    if (atIndex === -1) return null;
+    const between = uptoCursor.slice(atIndex + 1);
+    if (between.includes('\n')) return null;
+    return {start: atIndex, query: between};
+  }, [input, cursorPos]);
+  const mentionQuery = mentionMatch?.query ?? null;
+  const mentionStart = mentionMatch?.start ?? null;
+
+  // Naturally closes itself once the query no longer prefixes any candidate
+  // - e.g. once a full name plus its trailing space has been typed - without
+  // needing to special-case "the user just finished typing a mention".
+  const mentionCandidates = useMemo(() => {
+    if (mentionQuery === null) return [];
+    const q = mentionQuery.toLowerCase();
+    return chatParticipants.filter(name => name.toLowerCase().startsWith(q));
+  }, [mentionQuery, chatParticipants]);
+
+  const selectMention = useCallback((name) => {
+    if (mentionStart === null) return;
+    const before = input.slice(0, mentionStart);
+    const after = input.slice(cursorPos);
+    const mention = `@${name} `;
+    const newText = `${before}${mention}${after}`;
+    const newCursor = before.length + mention.length;
+    setInput(newText);
+    setCursorPos(newCursor);
+    // No explicit "close the dropdown" step needed - mentionMatch/mentionQuery
+    // recompute for the new input+cursorPos on the next render, and since the
+    // inserted text always ends in a space, the new query ("Name ") no
+    // longer prefixes any candidate, so mentionCandidates comes back empty
+    // and the dropdown hides itself the same way it would after normal typing.
+    Analytics.chatMentionSuggestionSelected();
+    // Controlled `selection` isn't used on the TextInput day-to-day (it fights
+    // normal typing), so the native cursor is repositioned imperatively just
+    // this once, after the text it needs to land after has actually committed.
+    requestAnimationFrame(() => {
+      inputRef.current?.setNativeProps({selection: {start: newCursor, end: newCursor}});
+    });
+  }, [input, mentionStart, cursorPos]);
+
+  // Inserts "@" at the last known cursor position and focuses the input -
+  // the existing mentionQuery effect picks up the new "@" on its own and
+  // opens the suggestion dropdown with the full participant list, exactly
+  // as if the user had typed "@" themselves.
+  const insertMentionTrigger = useCallback(() => {
+    const before = input.slice(0, cursorPos);
+    const after = input.slice(cursorPos);
+    const newText = `${before}@${after}`;
+    const newCursor = cursorPos + 1;
+    setInput(newText);
+    setCursorPos(newCursor);
+    // Deferred rather than called immediately - see the identical comment in
+    // handleReply. Same root cause here: .focus() synchronously kicking off
+    // the native show-keyboard animation appears to hold up the "@" actually
+    // painting until that gets underway.
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setNativeProps({selection: {start: newCursor, end: newCursor}});
+    });
+  }, [input, cursorPos]);
 
   useEffect(() => {
     if (myAuthorId === 'anonymous') return;
@@ -248,8 +352,22 @@ export default function ChatScreen({onClose} = {}) {
   };
 
   const handleReply = useCallback((authorName) => {
-    setInput(`@${authorName} `);
-    inputRef.current?.focus();
+    const text = `@${authorName} `;
+    setInput(text);
+    // Keep the derived mention state in sync with the replacement text
+    // rather than whatever cursor position was left over from before this
+    // full-input replacement, which could otherwise briefly reopen the
+    // suggestion dropdown against a stale slice of the new text.
+    setCursorPos(text.length);
+    // Deferred rather than called immediately: when the input wasn't already
+    // focused, .focus() kicks off the native show-keyboard animation
+    // synchronously, and on this device that appears to visibly hold up the
+    // text update committing until the animation gets underway - a quarter
+    // to half a second of the "@Name " text seeming not to appear at all.
+    // Letting the text change paint first, then focusing, decouples the two.
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
   }, []);
 
   const handleFlag = async (msgId) => {
@@ -423,13 +541,41 @@ export default function ChatScreen({onClose} = {}) {
         </View>
       ) : (
           <View style={[styles.inputRow, {paddingBottom: stableBottom + 12}]}>
+            {mentionQuery !== null && mentionCandidates.length > 0 && (
+              <View style={styles.mentionList} testID="mention-suggestions">
+                <FlatList
+                  data={mentionCandidates}
+                  keyExtractor={item => item}
+                  keyboardShouldPersistTaps="handled"
+                  style={styles.mentionListInner}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      style={styles.mentionItem}
+                      onPress={() => selectMention(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Mention ${item}`}>
+                      <Icon name="alternate-email" size={13} color={Colors.textSecondary} />
+                      <Text style={styles.mentionItemText}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
             {inputError ? <Text style={styles.inputError}>{inputError}</Text> : null}
             <View style={styles.inputInner}>
+              <TouchableOpacity
+                onPress={insertMentionTrigger}
+                accessibilityLabel="Mention someone"
+                accessibilityRole="button"
+                style={styles.mentionBtn}>
+                <Icon name="alternate-email" size={18} color={Colors.textSecondary} />
+              </TouchableOpacity>
               <TextInput
                 ref={inputRef}
                 style={styles.textInput}
                 value={input}
                 onChangeText={t => { setInput(t); if (inputError) setInputError(''); }}
+                onSelectionChange={e => setCursorPos(e.nativeEvent.selection.start)}
                 placeholder="Say something..."
                 placeholderTextColor={Colors.textSecondary}
                 multiline
@@ -440,7 +586,7 @@ export default function ChatScreen({onClose} = {}) {
                 onPress={handleSend}
                 disabled={!input.trim()}
                 accessibilityLabel="Send message"
-                style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}>
+                style={styles.sendBtn}>
                 <Icon name="send" size={20} color={input.trim() ? Colors.yellow : Colors.textSecondary} />
               </TouchableOpacity>
             </View>
@@ -540,7 +686,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   inputError: {color: '#ff6b6b', fontSize: 12, marginBottom: 6, paddingHorizontal: 4},
+
+  // @mention autocomplete
+  mentionList: {
+    maxHeight: 160,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+    borderRadius: 10,
+    backgroundColor: Colors.card,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  mentionListInner: {flexGrow: 0},
+  mentionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
+  },
+  mentionItemText: {color: '#fff', fontSize: 14},
+
   inputInner: {flexDirection: 'row', alignItems: 'flex-end', gap: 8},
+  mentionBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.outline,
+  },
   textInput: {
     flex: 1,
     backgroundColor: Colors.surface,
@@ -560,7 +735,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     borderWidth: 1, borderColor: Colors.outline,
   },
-  sendBtnDisabled: {opacity: 0.4},
 
   systemMsg: {
     paddingHorizontal: 16,

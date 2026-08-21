@@ -3,6 +3,7 @@ import {render, fireEvent, waitFor, act} from '@testing-library/react-native';
 import {AllProviders} from '../screens/testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ChatFab from '../../src/components/ChatFab';
+import {requestOpenChat} from '../../src/utils/chatBridge';
 
 jest.mock('../../src/screens/ChatScreen', () => ({
   __esModule: true,
@@ -191,6 +192,16 @@ describe('ChatFab', () => {
         expect.any(String),
       ),
     );
+  });
+
+  it('opens the modal when chatBridge.requestOpenChat is called externally', async () => {
+    // Simulates a tapped chat-mention notification (notifNavigation.js) reaching
+    // ChatFab, which owns the chat Modal's open state locally.
+    mockLiveChat = true;
+    const {getByTestId} = renderFab();
+    await waitFor(() => expect(mockDbOn).toHaveBeenCalled());
+    act(() => { requestOpenChat(); });
+    await waitFor(() => expect(getByTestId('chat-screen')).toBeTruthy());
   });
 
   it('pressing the close FAB inside the modal closes it', async () => {

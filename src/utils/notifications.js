@@ -2,6 +2,7 @@ import {getMessaging, getToken, onMessage, requestPermission} from '@react-nativ
 import notifee, {AndroidImportance, AndroidStyle} from '@notifee/react-native';
 import {Platform, PermissionsAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import database from '@react-native-firebase/database';
 
 export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'general', name: 'General', importance: AndroidImportance.HIGH});
@@ -12,6 +13,7 @@ export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'results', name: 'Results Alerts', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'weekend_preview', name: 'Weekend Preview', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'standings', name: 'Standings Update', importance: AndroidImportance.HIGH});
+  await notifee.createChannel({id: 'chat_mentions', name: 'Chat Mentions', importance: AndroidImportance.HIGH});
   // Delete and recreate to force importance upgrade on existing installs
   await notifee.deleteChannel('podcasts');
   await notifee.createChannel({id: 'podcasts', name: 'Podcast Alerts', importance: AndroidImportance.HIGH});
@@ -33,6 +35,29 @@ export async function getFCMToken() {
     const token = await getToken(messaging);
     return token;
   } catch (e) { return null; }
+}
+
+// Registers (or removes) this device's FCM token at /chat/deviceTokens/{uid}
+// so the onChatMention Cloud Function can reach this user when someone
+// @mentions their current chat display name. Unlike every other
+// notification in the app - which is a topic subscription managed by
+// settings.js's syncAllTopics - a mention is a targeted send to one specific
+// person, so it needs this per-user token registry instead of a topic.
+// `uid` is the same Firebase Auth id already used as chat's authorId
+// (ChatScreen.js), so it stays correct across a rename and even across
+// linking an anonymous account to Google/Apple (the uid itself never
+// changes on link - see store/auth.js).
+export async function syncChatMentionToken(uid, enabled) {
+  if (!uid) return;
+  const ref = database().ref(`/chat/deviceTokens/${uid}`);
+  try {
+    if (!enabled) {
+      await ref.remove();
+      return;
+    }
+    const token = await getFCMToken();
+    if (token) await ref.set(token);
+  } catch {}
 }
 
 export function onForegroundMessage(callback) {

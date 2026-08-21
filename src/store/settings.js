@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getMessaging, subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
 import {useAuth} from './auth';
 import {saveProfile} from '../utils/userProfile';
+import {syncChatMentionToken} from '../utils/notifications';
 
 // Leaf settings that map 1:1 to an FCM topic
 const LEAF_TOPICS = {
@@ -72,6 +73,7 @@ const STORAGE_KEYS = {
   spoilerFree:         'setting_spoiler_free',
   spoilerFreeExpiry:   'setting_spoiler_free_expiry',
   chatFab:             'setting_chat_fab',
+  chatMentions:        'setting_chat_mentions',
   use12HourTime:       'setting_12hr_time',
 };
 
@@ -101,6 +103,7 @@ const defaults = {
   spoilerFree:         false,
   spoilerFreeExpiry:   null,
   chatFab:             true,
+  chatMentions:        true,
   use12HourTime:       false,
 };
 
@@ -181,6 +184,7 @@ export function SettingsProvider({children}) {
       }
       setSettings(loaded);
       syncAllTopics(loaded);
+      syncChatMentionToken(user?.uid, loaded.chatMentions);
     })();
   }, [user]);
 
@@ -203,6 +207,8 @@ export function SettingsProvider({children}) {
       }
       // Re-sync all leaf topics since parent state may have changed
       syncAllTopics(next);
+      // Not a topic - registers/removes this device's own token directly (see notifications.js)
+      if (key === 'chatMentions') syncChatMentionToken(user?.uid, next.chatMentions);
       return next;
     });
   }, [user]);

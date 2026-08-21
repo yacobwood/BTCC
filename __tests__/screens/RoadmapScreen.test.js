@@ -10,6 +10,7 @@ jest.mock('../../src/utils/analytics', () => ({
 
 jest.mock('../../src/utils/notifications', () => ({
   getFCMToken: jest.fn().mockResolvedValue('test-token-abcd1234'),
+  syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));
 
 const ROADMAP_ITEMS = [

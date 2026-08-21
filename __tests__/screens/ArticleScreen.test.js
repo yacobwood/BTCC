@@ -53,6 +53,7 @@ jest.mock('react-native-webview', () => {
 
 jest.mock('../../src/utils/notifications', () => ({
   getFCMToken: jest.fn().mockResolvedValue(null),
+  syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('../../src/utils/analytics', () => ({

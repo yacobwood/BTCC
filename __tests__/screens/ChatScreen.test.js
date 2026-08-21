@@ -6,7 +6,7 @@ import {renderWithProviders} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), chatMessageSent: jest.fn(), chatMessageFlagged: jest.fn()},
+  Analytics: {screen: jest.fn(), chatMessageSent: jest.fn(), chatMessageFlagged: jest.fn(), chatMentionSuggestionSelected: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({
@@ -16,6 +16,7 @@ jest.mock('../../src/api/client', () => ({
 jest.mock('../../src/utils/notifications', () => ({
   getFCMToken: jest.fn().mockResolvedValue('test-fcm-token-abc12345'),
   onForegroundMessage: jest.fn(() => jest.fn()),
+  syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('../../src/utils/timeAgo', () => ({
@@ -1015,5 +1016,251 @@ describe('ChatScreen', () => {
     await act(async () => { triggerMessages([]); });
     unmount();
     expect(mockBanOff).toHaveBeenCalled();
+  });
+
+  // ── @mention autocomplete ────────────────────────────────────────────────────
+  // onChangeText alone doesn't move the tracked cursor position (a separate
+  // onSelectionChange prop) - real typing moves both together, so these tests
+  // fire a matching selectionChange with the cursor at the end of the new text
+  // to simulate that, except where a specific mid-string cursor is the point.
+  describe('@mention autocomplete', () => {
+    function typeText(input, text) {
+      fireEvent.changeText(input, text);
+      fireEvent(input, 'selectionChange', {nativeEvent: {selection: {start: text.length, end: text.length}}});
+    }
+
+    it('shows every other chat participant when "@" is typed with nothing after it', async () => {
+      const {getByPlaceholderText, getByLabelText, queryByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 2000, flagCount: 0, hidden: false},
+          {id: '2', text: 'yo', authorName: 'Bob', authorId: 'b1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@');
+      await waitFor(() => expect(queryByLabelText('Mention Alice')).toBeTruthy());
+      expect(getByLabelText('Mention Bob')).toBeTruthy();
+    });
+
+    it('lists suggestions alphabetically regardless of message order', async () => {
+      const {getByPlaceholderText, getByLabelText, getAllByRole} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Zoe', authorId: 'z1', timestamp: 3000, flagCount: 0, hidden: false},
+          {id: '2', text: 'hi', authorName: 'mike', authorId: 'm1', timestamp: 2000, flagCount: 0, hidden: false},
+          {id: '3', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@');
+      await waitFor(() => getByLabelText('Mention Alice'));
+      const labels = getAllByRole('button')
+        .map(b => b.props.accessibilityLabel)
+        .filter(label => label?.startsWith('Mention ') && label !== 'Mention someone');
+      expect(labels).toEqual(['Mention Alice', 'Mention mike', 'Mention Zoe']);
+    });
+
+    it('filters candidates as more characters are typed after "@"', async () => {
+      const {getByPlaceholderText, getByLabelText, queryByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 2000, flagCount: 0, hidden: false},
+          {id: '2', text: 'yo', authorName: 'Bob', authorId: 'b1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@a');
+      await waitFor(() => expect(queryByLabelText('Mention Alice')).toBeTruthy());
+      expect(queryByLabelText('Mention Bob')).toBeNull();
+    });
+
+    it('matches case-insensitively', async () => {
+      const {getByPlaceholderText, getByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@AL');
+      await waitFor(() => expect(getByLabelText('Mention Alice')).toBeTruthy());
+    });
+
+    it('hides the dropdown once the query matches nobody', async () => {
+      const {getByPlaceholderText, queryByTestId} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@zzz');
+      await waitFor(() => expect(queryByTestId('mention-suggestions')).toBeNull());
+    });
+
+    it('excludes your own name from the suggestion list', async () => {
+      const {getByPlaceholderText, queryByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          // Default mocked auth uid is 'test-uid-123' (see "derives authorId" test above)
+          {id: '1', text: 'hi', authorName: 'Me', authorId: 'test-uid-123', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@');
+      await waitFor(() => expect(queryByLabelText('Mention Me')).toBeNull());
+    });
+
+    it('excludes the system ban_notice author from suggestions', async () => {
+      const {getByPlaceholderText, queryByLabelText, getByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'Someone has been banned for 1h.', authorId: 'system', authorName: 'BTCC Hub Admin', timestamp: 2000, flagCount: 0, hidden: false, type: 'ban_notice'},
+          {id: '2', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@');
+      await waitFor(() => expect(getByLabelText('Mention Alice')).toBeTruthy());
+      expect(queryByLabelText('Mention BTCC Hub Admin')).toBeNull();
+    });
+
+    it('lists each author once even if they have multiple messages', async () => {
+      const {getByPlaceholderText, getAllByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'second', authorName: 'Alice', authorId: 'a1', timestamp: 2000, flagCount: 0, hidden: false},
+          {id: '2', text: 'first', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@');
+      await waitFor(() => expect(getAllByLabelText('Mention Alice')).toHaveLength(1));
+    });
+
+    it('resolves suggestions by current live name, not a stale message snapshot', async () => {
+      const {getByPlaceholderText, getByLabelText, queryByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'OldName', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+        triggerAuthorNames({a1: 'NewName'});
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@');
+      await waitFor(() => expect(getByLabelText('Mention NewName')).toBeTruthy());
+      expect(queryByLabelText('Mention OldName')).toBeNull();
+    });
+
+    it('selecting a suggestion inserts "@Name " and closes the dropdown', async () => {
+      const {getByPlaceholderText, getByLabelText, queryByTestId} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@a');
+      await waitFor(() => getByLabelText('Mention Alice'));
+      fireEvent.press(getByLabelText('Mention Alice'));
+      expect(getByPlaceholderText(/say something/i).props.value).toBe('@Alice ');
+      await waitFor(() => expect(queryByTestId('mention-suggestions')).toBeNull());
+    });
+
+    it('tracks chatMentionSuggestionSelected when a suggestion is picked', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {getByPlaceholderText, getByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@a');
+      await waitFor(() => getByLabelText('Mention Alice'));
+      fireEvent.press(getByLabelText('Mention Alice'));
+      expect(Analytics.chatMentionSuggestionSelected).toHaveBeenCalled();
+    });
+
+    it('inserting a mention mid-message preserves the text before and after it', async () => {
+      const {getByPlaceholderText, getByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      // "hey @ check this" with the cursor placed right after "@" (index 5)
+      fireEvent.changeText(input, 'hey @ check this');
+      fireEvent(input, 'selectionChange', {nativeEvent: {selection: {start: 5, end: 5}}});
+      await waitFor(() => getByLabelText('Mention Alice'));
+      fireEvent.press(getByLabelText('Mention Alice'));
+      expect(getByPlaceholderText(/say something/i).props.value).toBe('hey @Alice  check this');
+    });
+
+    it('does not show suggestions once the query no longer matches after a full name is typed', async () => {
+      const {getByPlaceholderText, queryByTestId} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, '@Alice ');
+      await waitFor(() => expect(queryByTestId('mention-suggestions')).toBeNull());
+    });
+
+    it('does not show suggestions when there is no "@" in the input', async () => {
+      const {getByPlaceholderText, queryByTestId} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+      });
+      const input = await waitFor(() => getByPlaceholderText(/say something/i));
+      typeText(input, 'hello there');
+      expect(queryByTestId('mention-suggestions')).toBeNull();
+    });
+
+    // ── @ button ──────────────────────────────────────────────────────────────
+    describe('@ button', () => {
+      it('renders a "Mention someone" button next to the input', async () => {
+        const {getByPlaceholderText, getByLabelText} = renderChat();
+        await act(async () => { triggerMessages([]); });
+        await waitFor(() => getByPlaceholderText(/say something/i));
+        expect(getByLabelText('Mention someone')).toBeTruthy();
+      });
+
+      it('pressing it inserts "@" into an empty input', async () => {
+        const {getByPlaceholderText, getByLabelText} = renderChat();
+        await act(async () => { triggerMessages([]); });
+        await waitFor(() => getByPlaceholderText(/say something/i));
+        fireEvent.press(getByLabelText('Mention someone'));
+        expect(getByPlaceholderText(/say something/i).props.value).toBe('@');
+      });
+
+      it('pressing it opens the suggestion dropdown with the full participant list', async () => {
+        const {getByPlaceholderText, getByLabelText} = renderChat();
+        await act(async () => {
+          triggerMessages([
+            {id: '1', text: 'hi', authorName: 'Alice', authorId: 'a1', timestamp: 1000, flagCount: 0, hidden: false},
+          ]);
+        });
+        await waitFor(() => getByPlaceholderText(/say something/i));
+        fireEvent.press(getByLabelText('Mention someone'));
+        await waitFor(() => expect(getByLabelText('Mention Alice')).toBeTruthy());
+      });
+
+      it('inserts "@" at the last known cursor position, not always at the end', async () => {
+        const {getByPlaceholderText, getByLabelText} = renderChat();
+        await act(async () => { triggerMessages([]); });
+        const input = await waitFor(() => getByPlaceholderText(/say something/i));
+        fireEvent.changeText(input, 'hey  check this');
+        fireEvent(input, 'selectionChange', {nativeEvent: {selection: {start: 4, end: 4}}});
+        fireEvent.press(getByLabelText('Mention someone'));
+        expect(getByPlaceholderText(/say something/i).props.value).toBe('hey @ check this');
+      });
+    });
   });
 });

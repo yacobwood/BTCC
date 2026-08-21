@@ -55,6 +55,13 @@
           ".write": "auth != null && auth.uid === $authorId",
           ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30"
         }
+      },
+      "deviceTokens": {
+        ".read": false,
+        "$authorId": {
+          ".write": "auth != null && auth.uid === $authorId",
+          ".validate": "newData.isString() && newData.val().length > 0"
+        }
       }
     }
   }

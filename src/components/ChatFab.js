@@ -10,6 +10,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
+import {onOpenChatRequest} from '../utils/chatBridge';
 import ChatScreen from '../screens/ChatScreen';
 
 const LAST_READ_KEY = 'chat_last_read';
@@ -105,6 +106,13 @@ export default function ChatFab({bottomOffset = 0}) {
     setHasUnread(false);
     setOpen(false);
   };
+
+  // Lets a tapped chat-mention notification open the sheet from outside the
+  // component tree - see chatBridge.js for why this can't just be a
+  // react-navigation route.
+  useEffect(() => {
+    return onOpenChatRequest(() => openChat());
+  }, []);
 
   if (!live_chat || !settings.chatFab) return null;
 

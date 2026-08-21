@@ -79,6 +79,7 @@ export const Analytics = {
 
   chatMessageSent: () => logEvent(fa(),'chat_message_sent'),
   chatMessageFlagged: () => logEvent(fa(),'chat_message_flagged'),
+  chatMentionSuggestionSelected: () => logEvent(fa(),'chat_mention_suggestion_selected'),
 
   adImpression: (placement) => logEvent(fa(),'ad_impression', {placement}),
   adClicked: (placement) => logEvent(fa(),'ad_clicked', {placement}),

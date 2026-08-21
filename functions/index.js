@@ -1,12 +1,14 @@
 // v2
 const {checkBtccNews} = require('./newsCheck');
 const {buildSessionAlertPayload} = require('./sessionAlerts');
+const {resolveMentionedAuthorIds} = require('./chatMentions');
+const {selectMessagesToTrim} = require('./chatTrim');
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onRequest} = require('firebase-functions/v2/https');
 const {onValueCreated} = require('firebase-functions/v2/database');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getFirestore, FieldValue} = require('firebase-admin/firestore');
-const {getDatabase} = require('firebase-admin/database');
+const {getDatabaseWithUrl} = require('firebase-admin/database');
 const {getAuth} = require('firebase-admin/auth');
 const {initializeApp} = require('firebase-admin/app');
 const {GoogleAuth} = require('google-auth-library');
@@ -754,7 +756,7 @@ exports.onChatBan = onValueCreated(
     try {
       const authorId = event.params.authorId;
       const ban = event.data.val();
-      const db = getDatabase('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
+      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
       const messagesRef = db.ref('/chat/messages');
 
       const snap = await messagesRef.orderByChild('authorId').equalTo(authorId).once('value');
@@ -778,18 +780,84 @@ exports.onChatBan = onValueCreated(
   },
 );
 
-// Trim live chat to last 200 messages when a new one is written
+// Notify a mentioned user (@DisplayName) when a new chat message tags them.
+// Mention resolution is plain-text against the live /chat/authorNames map
+// (see chatMentions.js) rather than a structured mention field, since
+// tagging is composed as free text via the reply button's "@Name " prefill
+// (ChatScreen.js handleReply) with no dedicated compose UI. Delivery is a
+// single targeted FCM send to the device token the mentioned user's app
+// last registered at /chat/deviceTokens/{authorId} (written by
+// syncChatMentionToken in src/utils/notifications.js) - unlike every other
+// notification in this app, which is a topic broadcast.
+exports.onChatMention = onValueCreated(
+  {ref: '/chat/messages/{msgId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
+  async (event) => {
+    try {
+      const msg = event.data.val();
+      if (!msg || msg.type === 'ban_notice' || !msg.text || !msg.text.includes('@')) return;
+
+      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
+      const namesSnap = await db.ref('/chat/authorNames').once('value');
+      const mentionedIds = resolveMentionedAuthorIds(msg.text, namesSnap.val(), msg.authorId);
+      if (mentionedIds.length === 0) return;
+
+      const tokensSnap = await db.ref('/chat/deviceTokens').once('value');
+      const tokens = tokensSnap.val() || {};
+      const messaging = getMessaging();
+      const staleTokenUpdates = {};
+      const body = msg.text.length > 100 ? `${msg.text.slice(0, 97)}...` : msg.text;
+
+      await Promise.all(mentionedIds.map(async authorId => {
+        const token = tokens[authorId];
+        if (!token) return;
+        try {
+          await messaging.send({
+            token,
+            notification: {
+              title: 'You were mentioned in Live Chat',
+              body: `${msg.authorName}: ${body}`,
+            },
+            data: {type: 'chat'},
+            android: {notification: {channelId: 'chat_mentions'}},
+          });
+        } catch (e) {
+          // Device uninstalled the app or the token otherwise rotated out from
+          // under us - drop it so future mentions don't keep retrying a dead token.
+          if (e.code === 'messaging/registration-token-not-registered' || e.code === 'messaging/invalid-registration-token') {
+            staleTokenUpdates[authorId] = null;
+          } else {
+            console.error('onChatMention send failed for', authorId, e.message);
+          }
+        }
+      }));
+
+      if (Object.keys(staleTokenUpdates).length > 0) {
+        await db.ref('/chat/deviceTokens').update(staleTokenUpdates);
+      }
+    } catch (e) {
+      console.error('onChatMention failed:', e);
+    }
+  },
+);
+
+// Trim live chat: keep only the newest 200 messages, and drop anything
+// older than 14 days regardless of count (see chatTrim.js for the rule).
+// Event-driven off new messages, same as the count-only version before it -
+// during a genuinely quiet stretch with no new posts, cleanup of anything
+// that ages past 14 days waits for the next message to arrive and trigger
+// this again, rather than running on its own schedule.
 exports.trimChat = onValueCreated(
   {ref: '/chat/messages/{msgId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
   async () => {
     try {
-      const ref = getDatabase('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app').ref('/chat/messages');
+      const ref = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app').ref('/chat/messages');
       const snap = await ref.orderByChild('timestamp').once('value');
-      const keys = [];
-      snap.forEach(c => keys.push(c.key));
-      if (keys.length > 200) {
+      const entries = [];
+      snap.forEach(c => entries.push({key: c.key, timestamp: c.val()?.timestamp || 0}));
+      const keysToDelete = selectMessagesToTrim(entries, Date.now());
+      if (keysToDelete.length > 0) {
         const updates = {};
-        keys.slice(0, keys.length - 200).forEach(k => { updates[k] = null; });
+        keysToDelete.forEach(k => { updates[k] = null; });
         await ref.update(updates);
       }
     } catch (e) {

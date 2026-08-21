@@ -18,13 +18,29 @@ import {
   onForegroundMessage,
   checkForNewPodcast,
   showLocalNotification,
+  syncChatMentionToken,
 } from '../../src/utils/notifications';
+
+var mockTokenSet, mockTokenRemove, mockTokenRef;
+jest.mock('@react-native-firebase/database', () => {
+  mockTokenSet    = jest.fn(() => Promise.resolve());
+  mockTokenRemove = jest.fn(() => Promise.resolve());
+  mockTokenRef = {set: mockTokenSet, remove: mockTokenRemove};
+  return jest.fn(() => ({ref: jest.fn(() => mockTokenRef)}));
+});
 
 // ── setupNotificationChannels ──────────────────────────────────────────────────
 describe('setupNotificationChannels', () => {
-  it('creates all 9 notification channels', async () => {
+  it('creates all 10 notification channels', async () => {
     await setupNotificationChannels();
-    expect(notifee.createChannel).toHaveBeenCalledTimes(9);
+    expect(notifee.createChannel).toHaveBeenCalledTimes(10);
+  });
+
+  it('creates channel with id "chat_mentions" at HIGH importance', async () => {
+    await setupNotificationChannels();
+    expect(notifee.createChannel).toHaveBeenCalledWith(
+      expect.objectContaining({id: 'chat_mentions', importance: AndroidImportance.HIGH}),
+    );
   });
 
   it('creates channel with id "news"', async () => {
@@ -323,5 +339,43 @@ describe('checkForNewPodcast', () => {
     await checkForNewPodcast(true);
 
     expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+});
+
+// ── syncChatMentionToken ─────────────────────────────────────────────────────
+describe('syncChatMentionToken', () => {
+  beforeEach(() => {
+    mockTokenSet.mockClear();
+    mockTokenRemove.mockClear();
+  });
+
+  it('does nothing when uid is missing', async () => {
+    await syncChatMentionToken(null, true);
+    expect(mockTokenSet).not.toHaveBeenCalled();
+    expect(mockTokenRemove).not.toHaveBeenCalled();
+  });
+
+  it('writes the current FCM token when enabled', async () => {
+    getToken.mockResolvedValueOnce('device-token-123');
+    await syncChatMentionToken('uid1', true);
+    expect(mockTokenSet).toHaveBeenCalledWith('device-token-123');
+  });
+
+  it('does not write when enabled but no token is available', async () => {
+    getToken.mockResolvedValueOnce(null);
+    await syncChatMentionToken('uid1', true);
+    expect(mockTokenSet).not.toHaveBeenCalled();
+  });
+
+  it('removes the registered token when disabled', async () => {
+    await syncChatMentionToken('uid1', false);
+    expect(mockTokenRemove).toHaveBeenCalled();
+    expect(mockTokenSet).not.toHaveBeenCalled();
+  });
+
+  it('does not throw when the RTDB write fails', async () => {
+    getToken.mockResolvedValueOnce('device-token-123');
+    mockTokenSet.mockRejectedValueOnce(new Error('offline'));
+    await expect(syncChatMentionToken('uid1', true)).resolves.toBeUndefined();
   });
 });

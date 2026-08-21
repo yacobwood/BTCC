@@ -284,4 +284,5 @@ jest.mock('./src/utils/notifications', () => ({
   onForegroundMessage: jest.fn(() => jest.fn()),
   checkForNewPodcast: jest.fn(() => Promise.resolve()),
   showLocalNotification: jest.fn(() => Promise.resolve()),
+  syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));

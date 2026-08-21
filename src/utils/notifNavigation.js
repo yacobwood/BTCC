@@ -2,6 +2,7 @@ import {CommonActions} from '@react-navigation/native';
 import {getSeasonData} from '../assets/seasonData';
 import {markRead} from './digestRead';
 import {Analytics} from './analytics';
+import {requestOpenChat} from './chatBridge';
 
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
@@ -258,7 +259,12 @@ export function navigateFromData(navigationRef, data) {
       navigationRef.navigate('Results');
 
     } else if (type === 'chat') {
-      navigationRef.navigate('Chat');
+      // Live chat isn't a react-navigation route - it's a Modal owned by
+      // ChatFab (mounted globally in AppContent), so it can't be reached
+      // with navigate()/reset() like every other deep link here. This used
+      // to call navigationRef.navigate('Chat'), which was always a no-op
+      // since no 'Chat' route exists in AppNavigator.
+      requestOpenChat();
 
     } else if (type === 'more') {
       navigationRef.navigate('More');

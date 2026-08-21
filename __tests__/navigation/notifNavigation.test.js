@@ -16,9 +16,14 @@ jest.mock('../../src/utils/analytics', () => ({
   Analytics: {notificationOpened: jest.fn(), articleClicked: jest.fn()},
 }));
 
+jest.mock('../../src/utils/chatBridge', () => ({
+  requestOpenChat: jest.fn(),
+}));
+
 import {navigateFromData, handleNotificationOpen} from '../../src/utils/notifNavigation';
 import {getSeasonData} from '../../src/assets/seasonData';
 import {Analytics} from '../../src/utils/analytics';
+import {requestOpenChat} from '../../src/utils/chatBridge';
 
 // A sample round object matching the shape stored in season data
 const MOCK_ROUND = {
@@ -178,6 +183,20 @@ describe('navigateFromData', () => {
       expect(ref.dispatch).toHaveBeenCalledWith(
         resetTo('More', nestedState([{name: 'MoreMenu'}, {name: 'Podcasts'}])),
       );
+    });
+  });
+
+  describe('chat deeplinks', () => {
+    // Regression: this used to call navigationRef.navigate('Chat'), a no-op
+    // since 'Chat' isn't a route in AppNavigator - live chat is a Modal
+    // owned by ChatFab, opened via chatBridge instead.
+    it('requests chat open via chatBridge instead of navigating', () => {
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'chat'});
+
+      expect(requestOpenChat).toHaveBeenCalled();
+      expect(ref.navigate).not.toHaveBeenCalled();
+      expect(ref.dispatch).not.toHaveBeenCalled();
     });
   });
 
@@ -418,6 +437,14 @@ describe('handleNotificationOpen', () => {
     handleNotificationOpen(ref, {type: 'hub', id: 'hub-post-42'});
 
     expect(Analytics.articleClicked).toHaveBeenCalledWith('hub-post-42', 'notification', undefined, 'notification');
+  });
+
+  it('tracks notificationOpened and requests chat open for type="chat"', () => {
+    const ref = makeRef();
+    handleNotificationOpen(ref, {type: 'chat'});
+
+    expect(Analytics.notificationOpened).toHaveBeenCalledWith('chat');
+    expect(requestOpenChat).toHaveBeenCalled();
   });
 
   it('is a no-op (no analytics, no navigation) when data is undefined', () => {
