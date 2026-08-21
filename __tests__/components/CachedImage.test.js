@@ -63,9 +63,9 @@ describe('CachedImage', () => {
     // remounting - a single dead image anywhere must not permanently poison every
     // later item recycled into that same instance.
     const tree = render(<CachedImage uri={EXT_URI} style={{width: 100, height: 100}} />);
-    act(() => { getCachedImg(tree).props.onError(); });
-    act(() => { getCachedImg(tree).props.onError(); });
-    act(() => { getCachedImg(tree).props.onError(); });
+    for (let i = 0; i < 6; i++) { // MAX_RETRIES (5) tolerated, 6th exhausts it
+      act(() => { getCachedImg(tree).props.onError(); });
+    }
     expect(getCachedImg(tree)).toBeNull(); // errored = true
 
     tree.rerender(<CachedImage uri="https://example.com/a-different-valid-image.jpg" style={{width: 100, height: 100}} />);
@@ -84,9 +84,10 @@ describe('CachedImage', () => {
     const tree = render(
       <CachedImage uri={EXT_URI} style={{width: 100, height: 100}} fallback={<Text>custom fallback</Text>} />,
     );
-    act(() => { getCachedImg(tree).props.onError(); });
-    act(() => { getCachedImg(tree).props.onError(); });
-    act(() => { getCachedImg(tree).props.onError(); });
+    // MAX_RETRIES (5) tolerated errors, the 6th exhausts the budget.
+    for (let i = 0; i < 6; i++) {
+      act(() => { getCachedImg(tree).props.onError(); });
+    }
     expect(getCachedImg(tree)).toBeNull();
     expect(tree.getByText('custom fallback')).toBeTruthy();
   });
@@ -99,14 +100,16 @@ describe('CachedImage', () => {
 
   it('retries up to MAX_RETRIES times before showing the fallback', () => {
     const tree = render(<CachedImage uri={WP_URI} style={{width: 100, height: 100}} />);
-    // src === uri (no targetWidth): the first two errors are tolerated as retries
-    // (a cell recycling mid-request looks identical to a real failure, so a lone
-    // error shouldn't immediately give up) and the Image stays mounted.
-    act(() => { getCachedImg(tree).props.onError(); });
-    expect(getCachedImg(tree)).toBeTruthy();
-    act(() => { getCachedImg(tree).props.onError(); });
-    expect(getCachedImg(tree)).toBeTruthy();
-    // Third error exhausts MAX_RETRIES (2) → errored = true → fallback renders
+    // src === uri (no targetWidth): the first MAX_RETRIES (5) errors are
+    // tolerated as retries (a cell recycling mid-request looks identical to a
+    // real failure, so a lone error shouldn't immediately give up, and a big
+    // non-virtualized grid - see DriversScreen.js's car badge - can genuinely
+    // need several attempts to get a turn) and the Image stays mounted.
+    for (let i = 0; i < 5; i++) {
+      act(() => { getCachedImg(tree).props.onError(); });
+      expect(getCachedImg(tree)).toBeTruthy();
+    }
+    // 6th error exhausts MAX_RETRIES (5) → errored = true → fallback renders
     act(() => { getCachedImg(tree).props.onError(); });
     expect(getCachedImg(tree)).toBeNull();
   });
@@ -141,8 +144,9 @@ describe('CachedImage', () => {
       <CachedImage uri={WP_URI} style={{width: 100, height: 100}} targetWidth={200} />,
     );
     act(() => { getCachedImg(tree).props.onError(); }); // thumb → original (not a retry)
-    act(() => { getCachedImg(tree).props.onError(); }); // retry 1
-    act(() => { getCachedImg(tree).props.onError(); }); // retry 2
+    for (let i = 0; i < 5; i++) {
+      act(() => { getCachedImg(tree).props.onError(); }); // retries 1-5 (MAX_RETRIES)
+    }
     expect(getCachedImg(tree)).toBeTruthy(); // still retrying on the original uri
     act(() => { getCachedImg(tree).props.onError(); }); // retries exhausted → errored = true
     expect(getCachedImg(tree)).toBeNull();

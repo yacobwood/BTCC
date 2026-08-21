@@ -54,13 +54,20 @@ const TABS = ['DRIVERS', 'TEAMS'];
 // connections for at once. Adding the car badge (below) made that burst ~50%
 // bigger (2 network images/tile -> 3), which showed up live as cars towards
 // the bottom of the list losing the race for a connection slot and exhausting
-// CachedImage's retry budget before it ever cleared. Staggering just this new
-// image - not the pre-existing cardBg/numberImage, which already worked fine
-// at the smaller burst size - spreads the *added* demand out over time instead
-// of compounding the existing one all at once, without slowing down anything
-// that wasn't broken.
-const CAR_BADGE_STAGGER_MS = 60;
-const CAR_BADGE_MAX_DELAY_MS = 1200;
+// CachedImage's retry budget before it ever cleared.
+//
+// A first pass at staggering (60ms/position, 1.2s cap) wasn't enough margin -
+// confirmed live: driver photos and card backgrounds (declared earlier in each
+// tile's JSX, so first in the request queue every time) kept loading fine even
+// deep in the list, but the car badge specifically kept showing CachedImage's
+// permanent fallback icon past roughly the 18th tile. Car badges are always
+// queued behind the *entire* photo/background burst (~46 requests, declared
+// before any badge in every tile), not just behind badges ahead of them - so
+// the tail needs enough delay to actually clear that whole front-of-queue
+// backlog, not just a modest offset from its neighbours. Widened to give that
+// real headroom instead of guessing again from a still-too-small number.
+const CAR_BADGE_STAGGER_MS = 150;
+const CAR_BADGE_MAX_DELAY_MS = 3000;
 
 function DriverCardInner({item, onPress, fav, index = 0}) {
   const bundled = getDriverImage(item.number);
