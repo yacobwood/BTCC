@@ -67,11 +67,21 @@ from PIL import Image
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CAR_IMAGES_DIR = REPO_ROOT / "data" / "carImages"
 
-# ~400px wide is comfortably above what any current use (a ~80px driver-tile
-# badge, a ~175px TeamDetailScreen car card, DriverDetailScreen's full-width
-# banner) needs even at 3x pixel density, while landing at a few hundred KB
-# of decoded memory instead of 6MB.
+# ~400px wide is comfortably above what -thumb's actual uses (a ~80px
+# driver-tile badge, a ~175px TeamDetailScreen car card) need even at 3x
+# pixel density, while landing at a few hundred KB of decoded memory instead
+# of 6MB.
 THUMB_WIDTH = 400
+# -thumb-crop needs to be much bigger: DriverDetailScreen's banner renders at
+# ~94% of the full screen width, not a small badge/card. Found live
+# (2026-08-21, same day, after the crop's first ship looked "blurry"):
+# checked the actual numbers rather than guessed - a typical phone's screen
+# is ~1240 physical px wide at 3x density, so the banner displays at ~1166px,
+# while THUMB_WIDTH's 400px source was being upscaled ~2.9x to fill it. Only
+# one of these is ever decoded at a time on this screen (unlike -thumb's
+# original ~23-at-once decode-pool problem), so there's plenty of headroom to
+# go bigger without approaching that cap again.
+CROP_THUMB_WIDTH = 1200
 WEBP_QUALITY = 80
 # Extra room left around the car's own bounding box, as a fraction of that
 # box's own width/height, so the -thumb-crop variant doesn't sit flush
@@ -81,12 +91,12 @@ WEBP_QUALITY = 80
 CROP_MARGIN_FRAC = 0.05
 
 
-def cwebp_resize(src_path: Path, out_path: Path) -> None:
+def cwebp_resize(src_path: Path, out_path: Path, width: int) -> None:
     # cwebp resizes directly (and re-encodes to WebP regardless of the
     # source's own format), so this works whether the original is .webp,
     # .png or .jpg - matches every extension currently in data/carImages/.
     subprocess.run(
-        ["cwebp", "-quiet", "-q", str(WEBP_QUALITY), "-resize", str(THUMB_WIDTH), "0", str(src_path), "-o", str(out_path)],
+        ["cwebp", "-quiet", "-q", str(WEBP_QUALITY), "-resize", str(width), "0", str(src_path), "-o", str(out_path)],
         check=True,
     )
 
@@ -122,13 +132,13 @@ def generate_thumb(src_path: Path) -> None:
         return
 
     thumb_path = src_path.with_name(f"{src_path.stem}-thumb{src_path.suffix}")
-    cwebp_resize(src_path, thumb_path)
+    cwebp_resize(src_path, thumb_path, THUMB_WIDTH)
     print(f"{src_path.name} -> {thumb_path.name} ({thumb_path.stat().st_size // 1024}KB)")
 
     crop_thumb_path = src_path.with_name(f"{src_path.stem}-thumb-crop{src_path.suffix}")
     cropped_path = crop_to_content(src_path)
     try:
-        cwebp_resize(cropped_path, crop_thumb_path)
+        cwebp_resize(cropped_path, crop_thumb_path, CROP_THUMB_WIDTH)
     finally:
         if cropped_path != src_path:
             cropped_path.unlink(missing_ok=True)
