@@ -643,7 +643,7 @@ describe('TeamDetailScreen', () => {
     await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1));
   });
 
-  it('team sponsor logo renders on the hero (top-right, same treatment as the Grid/Merch tiles) when logoUrl is set', async () => {
+  it('team sponsor logo renders on the hero, centered above the car grid, when logoUrl is set', async () => {
     // The hero mounts whenever there's a logo or at least one driver car to show
     // (see TeamDetailScreen.js) - logoUrl alone is enough here, no car needed.
     const teamWithLogo = {
@@ -706,7 +706,12 @@ describe('TeamDetailScreen', () => {
       });
     });
 
-    it('shows each car\'s driver name as a caption', async () => {
+    // Regression guard: a driver-name caption used to sit under each car
+    // cutout, but it read poorly against some teams' hero backgrounds (e.g.
+    // NAPA Racing UK's gold) and was removed 2026-08-22, by request. Each
+    // driver's name still appears once, in the DRIVERS grid further down -
+    // just not duplicated here.
+    it('does not show a driver-name caption under each car', async () => {
       const teamWithTwoCars = {
         ...TEAM,
         drivers: [
@@ -718,12 +723,11 @@ describe('TeamDetailScreen', () => {
       const {getAllByText} = renderWithProviders(
         <TeamDetailScreen route={route} navigation={nav} />,
       );
-      // formatDriverName uppercases the surname. Each name appears twice - once
-      // as this caption, once more in the DRIVERS grid further down the same
-      // screen - so getAllByText (not getByText, which requires a single match).
+      // formatDriverName uppercases the surname - each name should appear
+      // exactly once (the DRIVERS grid entry), not twice (grid + caption).
       await waitFor(() => {
-        expect(getAllByText('Dexter PATTERSON').length).toBeGreaterThanOrEqual(1);
-        expect(getAllByText('Nick HALSTEAD').length).toBeGreaterThanOrEqual(1);
+        expect(getAllByText('Dexter PATTERSON').length).toBe(1);
+        expect(getAllByText('Nick HALSTEAD').length).toBe(1);
       });
     });
 
