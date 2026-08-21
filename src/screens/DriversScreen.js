@@ -257,16 +257,13 @@ const styles = StyleSheet.create({
   driverGridItem: {width: (SCREEN_WIDTH - 32 - 10) / 2},
   driverCard: {borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card, borderWidth: 1, borderColor: 'transparent'},
   driverCardFav: {borderColor: 'rgba(254,189,2,0.5)'},
-  // alignItems: 'flex-start' (not 'center') keeps the narrower driverPhoto
-  // below against the left edge rather than centered - the number/favBadge
-  // are absolute-positioned so this doesn't move them.
-  driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'flex-start'},
-  // Car badge removed (2026-08-21, by request - each driver's own liveried
-  // car now only shows on their profile page, not the grid tile). Width
-  // stays 60% (kept driver left rather than reverting to a full-width
-  // centered photo) but height goes back up to 100% now nothing below it
-  // needs the tile's bottom edge kept clear.
-  driverPhoto: {width: '60%', height: '100%'},
+  // Back to centered (by request) - the car badge that once justified
+  // left-aligning the photo (to keep the bottom-right corner clear for it)
+  // is gone from this tile entirely now, so there's nothing left it needs
+  // to stay clear of. Matches DriverDetailScreen's header, reverted the
+  // same way for the same reason.
+  driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
+  driverPhoto: {width: '100%', height: '100%'},
   driverNumberBg: {
     position: 'absolute',
     top: -10,
