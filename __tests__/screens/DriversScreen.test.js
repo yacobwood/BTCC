@@ -148,6 +148,42 @@ describe('DriversScreen', () => {
     });
   });
 
+  describe('reserve-only driver', () => {
+    // A one-off reserve/stand-in appearance (e.g. Senna Proctor covering Sam
+    // Osborne's seat for a single round) never held a full-season grid spot,
+    // so unlike the "not currently racing" case above they get no tile at
+    // all - not in CONFIRMED, not in the past-drivers section either - even
+    // though they still show up in the points standings (a separate,
+    // drivers.json-independent data source).
+    const gridWithReserveDriver = {
+      ...MOCK_GRID,
+      drivers: [
+        ...MOCK_DRIVERS_RAW,
+        {name: 'Senna Proctor', number: 18, team: 'NAPA Racing UK', imageUrl: null, cardBgUrl: null, reserveOnly: true},
+      ],
+    };
+
+    it('is excluded from the CONFIRMED count', async () => {
+      parseGrid.mockReturnValue(gridWithReserveDriver);
+      const utils = renderWithProviders(<DriversScreen navigation={nav} />);
+      await utils.findByText(`${MOCK_DRIVERS_RAW.length} CONFIRMED`);
+    });
+
+    it('renders no card anywhere on the screen', async () => {
+      parseGrid.mockReturnValue(gridWithReserveDriver);
+      const utils = renderWithProviders(<DriversScreen navigation={nav} />);
+      await utils.findByText(`${MOCK_DRIVERS_RAW.length} CONFIRMED`);
+      expect(utils.queryByLabelText('Senna Proctor, NAPA Racing UK, number 18')).toBeNull();
+    });
+
+    it('does not trigger the "not currently racing" section on its own', async () => {
+      parseGrid.mockReturnValue(gridWithReserveDriver);
+      const utils = renderWithProviders(<DriversScreen navigation={nav} />);
+      await utils.findByText(`${MOCK_DRIVERS_RAW.length} CONFIRMED`);
+      expect(utils.queryByText('NOT CURRENTLY RACING · RACED IN 2026')).toBeNull();
+    });
+  });
+
   describe('image caching', () => {
     it('driver photo uses CachedImage when imageUrl is set and no bundled image exists', async () => {
       // getDriverImage is mocked to return null (jest.setup.js), so imageUrl triggers CachedImage

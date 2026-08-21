@@ -2590,6 +2590,7 @@
       "car": "Ford Focus Titanium",
       "nationality": "British",
       "class": "M",
+      "reserveOnly": true,
       "carImageUrl": "",
       "numberImageUrl": ""
     }
@@ -2599,7 +2600,7 @@
       "name": "NAPA Racing UK",
       "car": "Ford Focus Titanium Saloon",
       "entries": 4,
-      "bio": "Operating under the Motorbase Performance banner, NAPA Racing UK are one of the most formidable outfits in the BTCC paddock. Founded in 2006 by David Bartrum in Sittingbourne, Kent, the team have built a reputation for extracting the maximum from Ford-powered machinery over two decades of competition.\n\nThe squad claimed back-to-back Drivers' and Teams' Championships in 2024 and 2025 with Jake Hill and Ashley Sutton respectively, cementing their status as the dominant force in the modern era. Their 2025 title haul, a clean sweep of Drivers', Teams' and Manufacturers' titles, was the team's most complete season to date.\n\nFor 2026 the team field four cars under the NAPA Auto Parts livery, running a quartet of highly experienced racers led by two-time champion Ashley Sutton. The distinctive yellow and blue colour scheme has become one of the most recognised sights in British motorsport.",
+      "bio": "Operating under the Motorbase Performance banner, NAPA Racing UK are one of the most formidable outfits in the BTCC paddock. Founded in 2006 by David Bartrum in Sittingbourne, Kent, the team have built a reputation for extracting the maximum from Ford-powered machinery over two decades of competition.\n\nThe squad claimed back-to-back Drivers' and Teams' Championships in 2024 and 2025 with Jake Hill and Ashley Sutton respectively, cementing their status as the dominant force in the modern era. Their 2025 title haul, a clean sweep of Drivers', Teams' and Manufacturers' titles, was the team's most complete season to date.\n\nFor 2026 the team field four cars under the NAPA Auto Parts livery, running a quartet of highly experienced racers led by two-time champion Ashley Sutton. The season also brought a change of machinery, with the squad switching to a saloon version of the Ford Focus never sold in the UK. The move was made possible when a homologation rule permitting cars not currently sold in the UK - originally due for 2027 - was brought forward a year with unanimous approval from all teams and organisers TOCA. The distinctive yellow and blue colour scheme has become one of the most recognised sights in British motorsport.",
       "standing2025": 1,
       "points2025": 775,
       "founded": 2006,
@@ -2659,7 +2660,113 @@
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/napa-racing-uk.jpg",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/15.png",
       "totalRaces": 171,
-      "totalWins": 51
+      "totalWins": 51,
+      "sponsors": [
+        {
+          "name": "NAPA Auto Parts",
+          "tier": "principal"
+        },
+        {
+          "name": "Valvoline VR1 Racing",
+          "tier": "principal"
+        },
+        {
+          "name": "Carlyle Tools",
+          "tier": "associate"
+        },
+        {
+          "name": "Mountune",
+          "tier": "technical"
+        },
+        {
+          "name": "Schaeffler",
+          "tier": "technical"
+        },
+        {
+          "name": "everywhen",
+          "tier": "decal"
+        },
+        {
+          "name": "OSRAM",
+          "tier": "decal"
+        },
+        {
+          "name": "Ring Automotive",
+          "tier": "decal"
+        },
+        {
+          "name": "G3 Vehicle Auctions",
+          "tier": "decal"
+        },
+        {
+          "name": "Approved Garages",
+          "tier": "decal"
+        },
+        {
+          "name": "Race Against Dementia",
+          "tier": "decal"
+        },
+        {
+          "name": "Autowave",
+          "tier": "decal"
+        },
+        {
+          "name": "Apec",
+          "tier": "decal"
+        },
+        {
+          "name": "BM Catalysts",
+          "tier": "decal"
+        },
+        {
+          "name": "Gates",
+          "tier": "decal"
+        },
+        {
+          "name": "NRF",
+          "tier": "decal"
+        },
+        {
+          "name": "Milwaukee",
+          "tier": "decal"
+        },
+        {
+          "name": "TOPDON",
+          "tier": "decal"
+        },
+        {
+          "name": "MOTIP",
+          "tier": "decal"
+        },
+        {
+          "name": "Turtle Wax",
+          "tier": "decal"
+        },
+        {
+          "name": "FibreKing",
+          "tier": "decal"
+        },
+        {
+          "name": "Tayna",
+          "tier": "decal"
+        },
+        {
+          "name": "Klipboard",
+          "tier": "decal"
+        },
+        {
+          "name": "OSO",
+          "tier": "decal"
+        },
+        {
+          "name": "Parts In Motion",
+          "tier": "decal"
+        },
+        {
+          "name": "The Green Group",
+          "tier": "decal"
+        }
+      ]
     },
     {
       "name": "Team VERTU",
@@ -2713,7 +2820,90 @@
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/team-vertu.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/3.png",
       "totalRaces": 228,
-      "totalWins": 39
+      "totalWins": 39,
+      "sponsors": [
+        {
+          "name": "Vertu",
+          "tier": "principal"
+        },
+        {
+          "name": "Hansford Sensors",
+          "tier": "principal"
+        },
+        {
+          "name": "Diamondbrite",
+          "tier": "principal"
+        },
+        {
+          "name": "Vans Direct",
+          "tier": "principal"
+        },
+        {
+          "name": "Birch Automotive",
+          "tier": "principal"
+        },
+        {
+          "name": "Draper Tools",
+          "tier": "principal"
+        },
+        {
+          "name": "Chatsbrook Finance",
+          "tier": "associate"
+        },
+        {
+          "name": "Octane",
+          "tier": "associate"
+        },
+        {
+          "name": "NGK",
+          "tier": "technical"
+        },
+        {
+          "name": "ITG",
+          "tier": "technical"
+        },
+        {
+          "name": "Goodridge",
+          "tier": "technical"
+        },
+        {
+          "name": "HEXIS",
+          "tier": "technical"
+        },
+        {
+          "name": "SMG NDT",
+          "tier": "decal"
+        },
+        {
+          "name": "CSGi",
+          "tier": "decal"
+        },
+        {
+          "name": "Canine Partners",
+          "tier": "decal"
+        },
+        {
+          "name": "Perfect Cellar",
+          "tier": "decal"
+        },
+        {
+          "name": "Piing",
+          "tier": "decal"
+        },
+        {
+          "name": "Scorpion",
+          "tier": "decal"
+        },
+        {
+          "name": "ABS",
+          "tier": "decal"
+        },
+        {
+          "name": "Wiperblades",
+          "tier": "decal"
+        }
+      ],
+      "sponsorsNote": "Team VERTU fields four cars - Draper Tools is Nicolas Hamilton's car-specific principal sponsor rather than shared across the team."
     },
     {
       "name": "Speedworks Corolla Racing",
@@ -2787,7 +2977,57 @@
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/speedworks-corolla-racing.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.webp",
       "totalRaces": 376,
-      "totalWins": 29
+      "totalWins": 29,
+      "sponsors": [
+        {
+          "name": "DCM Surfaces",
+          "tier": "principal"
+        },
+        {
+          "name": "British Army",
+          "tier": "associate"
+        },
+        {
+          "name": "Witham Motorsport / Toyota Financial Services",
+          "tier": "associate"
+        },
+        {
+          "name": "Teng Tools",
+          "tier": "associate"
+        },
+        {
+          "name": "FUCHS",
+          "tier": "technical"
+        },
+        {
+          "name": "Zircotec",
+          "tier": "technical"
+        },
+        {
+          "name": "Goodridge",
+          "tier": "technical"
+        },
+        {
+          "name": "K&N",
+          "tier": "decal"
+        },
+        {
+          "name": "Zetmet",
+          "tier": "decal"
+        },
+        {
+          "name": "Magnifire",
+          "tier": "decal"
+        },
+        {
+          "name": "Autoglym",
+          "tier": "decal"
+        },
+        {
+          "name": "DrivenNet",
+          "tier": "decal"
+        }
+      ]
     },
     {
       "name": "WSR",
@@ -2867,7 +3107,106 @@
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/2.png",
       "totalRaces": 765,
       "totalWins": 127,
-      "lightCardBg": true
+      "lightCardBg": true,
+      "sponsors": [
+        {
+          "name": "Cognition Land+Water",
+          "tier": "principal"
+        },
+        {
+          "name": "WI&A Gilbert Civil Engineering",
+          "tier": "principal"
+        },
+        {
+          "name": "Duckhams",
+          "tier": "technical"
+        },
+        {
+          "name": "Midlands 3D",
+          "tier": "associate"
+        },
+        {
+          "name": "EMIXA",
+          "tier": "associate"
+        },
+        {
+          "name": "Spark",
+          "tier": "associate"
+        },
+        {
+          "name": "Superhub",
+          "tier": "associate"
+        },
+        {
+          "name": "Racing Line Designs",
+          "tier": "associate"
+        },
+        {
+          "name": "UltraGrime",
+          "tier": "associate"
+        },
+        {
+          "name": "Declan Dawkins",
+          "tier": "associate"
+        },
+        {
+          "name": "Nomad Walling",
+          "tier": "associate"
+        },
+        {
+          "name": "Lynch",
+          "tier": "associate"
+        },
+        {
+          "name": "Apex Rental",
+          "tier": "decal"
+        },
+        {
+          "name": "Cobra Motorsport",
+          "tier": "technical"
+        },
+        {
+          "name": "K&N",
+          "tier": "technical"
+        },
+        {
+          "name": "OMP",
+          "tier": "technical"
+        },
+        {
+          "name": "Stulane",
+          "tier": "technical"
+        },
+        {
+          "name": "Samco Sport",
+          "tier": "technical"
+        },
+        {
+          "name": "Caged Laser Engineering",
+          "tier": "technical"
+        },
+        {
+          "name": "Specialist Vinyl Applications",
+          "tier": "technical"
+        },
+        {
+          "name": "Ravenol",
+          "tier": "decal"
+        },
+        {
+          "name": "D.M.J. Drainage",
+          "tier": "decal"
+        },
+        {
+          "name": "CCK",
+          "tier": "decal"
+        },
+        {
+          "name": "Label Giant",
+          "tier": "decal"
+        }
+      ],
+      "sponsorsNote": "WSR fields three cars this season - the #29 car (Lewis Gilbert, joined from round 5) carries a distinct principal livery (WI&A Gilbert Civil Engineering) rather than the Cognition Land+Water scheme run by the #2 and #99 cars."
     },
     {
       "name": "LKQ Euro Car Parts with Power Maxed Racing",
@@ -2937,7 +3276,69 @@
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/16.png",
       "totalRaces": 6,
       "totalWins": 0,
-      "lightCardBg": true
+      "lightCardBg": true,
+      "sponsors": [
+        {
+          "name": "LKQ Euro Car Parts",
+          "tier": "principal"
+        },
+        {
+          "name": "Power Maxed",
+          "tier": "principal"
+        },
+        {
+          "name": "Zircotec",
+          "tier": "technical"
+        },
+        {
+          "name": "Emissco",
+          "tier": "associate"
+        },
+        {
+          "name": "SuperHub",
+          "tier": "associate"
+        },
+        {
+          "name": "Pagid",
+          "tier": "technical"
+        },
+        {
+          "name": "Goodridge",
+          "tier": "technical"
+        },
+        {
+          "name": "Metamark",
+          "tier": "technical"
+        },
+        {
+          "name": "Doble Motorcycles",
+          "tier": "decal"
+        },
+        {
+          "name": "MPM Oil Company",
+          "tier": "decal"
+        },
+        {
+          "name": "GKR Scaffolding",
+          "tier": "decal"
+        },
+        {
+          "name": "CASES UK",
+          "tier": "decal"
+        },
+        {
+          "name": "H5 Air Conditioning Services",
+          "tier": "decal"
+        },
+        {
+          "name": "Optimal",
+          "tier": "decal"
+        },
+        {
+          "name": "Absolute Networks",
+          "tier": "decal"
+        }
+      ]
     },
     {
       "name": "CPRL",
@@ -2955,7 +3356,9 @@
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/cprl.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/32.webp",
       "totalRaces": 6,
-      "totalWins": 1
+      "totalWins": 1,
+      "sponsors": [],
+      "sponsorsNote": "CPRL's sponsor lineup is being rebuilt following the team's restructuring in August 2026 (Plato Racing Ltd entered administration on 11 August; Cataclean is providing interim funding while the team's future is confirmed). The car's livery is currently plain/unbranded and subject to change - check back once new partners are announced."
     },
     {
       "name": "Restart Racing",
@@ -3036,7 +3439,105 @@
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/restart-racing.png",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/22.png",
       "totalRaces": 66,
-      "totalWins": 1
+      "totalWins": 1,
+      "sponsors": [
+        {
+          "name": "Escapade",
+          "tier": "principal"
+        },
+        {
+          "name": "HID",
+          "tier": "principal"
+        },
+        {
+          "name": "Third Millennium",
+          "tier": "principal"
+        },
+        {
+          "name": "Deranged",
+          "tier": "associate"
+        },
+        {
+          "name": "Inspired Integrated Systems",
+          "tier": "associate"
+        },
+        {
+          "name": "Cranswick Country Foods",
+          "tier": "associate"
+        },
+        {
+          "name": "Eden Car Sales",
+          "tier": "associate"
+        },
+        {
+          "name": "Technology Desking",
+          "tier": "associate"
+        },
+        {
+          "name": "EXCELR8 Motorsport",
+          "tier": "technical"
+        },
+        {
+          "name": "Airtec Motorsport",
+          "tier": "technical"
+        },
+        {
+          "name": "Arai",
+          "tier": "technical"
+        },
+        {
+          "name": "Corbeau",
+          "tier": "technical"
+        },
+        {
+          "name": "Halo by Orthene",
+          "tier": "technical"
+        },
+        {
+          "name": "Ravenol",
+          "tier": "technical"
+        },
+        {
+          "name": "Unblurred Wraps",
+          "tier": "technical"
+        },
+        {
+          "name": "ABS",
+          "tier": "decal"
+        },
+        {
+          "name": "TORQ",
+          "tier": "decal"
+        },
+        {
+          "name": "Gedore",
+          "tier": "decal"
+        },
+        {
+          "name": "Greenlight",
+          "tier": "decal"
+        },
+        {
+          "name": "Pro Alloys",
+          "tier": "decal"
+        },
+        {
+          "name": "Longevity",
+          "tier": "decal"
+        },
+        {
+          "name": "Norlin",
+          "tier": "decal"
+        },
+        {
+          "name": "Jason Price",
+          "tier": "decal"
+        },
+        {
+          "name": "Magnet",
+          "tier": "decal"
+        }
+      ]
     },
     {
       "name": "Laser Tools Racing with MB Motorsport",
@@ -3052,12 +3553,139 @@
       "history": [],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/laser-tools-racing-with-mb-motorsport.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/laser-tools-racing-with-mb-motorsport.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/50.png"
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/50.png",
+      "sponsors": [
+        {
+          "name": "Laser Tools",
+          "tier": "principal"
+        },
+        {
+          "name": "MB Motorsport",
+          "tier": "principal"
+        },
+        {
+          "name": "Uniserve",
+          "tier": "principal"
+        },
+        {
+          "name": "ROKiT Oxygen",
+          "tier": "principal"
+        },
+        {
+          "name": "LIQUI MOLY",
+          "tier": "principal"
+        },
+        {
+          "name": "Price Forbes",
+          "tier": "associate"
+        },
+        {
+          "name": "Selco Builders Warehouse",
+          "tier": "associate"
+        },
+        {
+          "name": "Serve First",
+          "tier": "associate"
+        },
+        {
+          "name": "Carrier",
+          "tier": "associate"
+        },
+        {
+          "name": "J&D Pierce",
+          "tier": "associate"
+        },
+        {
+          "name": "Gratte Brothers",
+          "tier": "associate"
+        },
+        {
+          "name": "STP",
+          "tier": "associate"
+        },
+        {
+          "name": "Driver Reviews",
+          "tier": "associate"
+        },
+        {
+          "name": "Cobyex",
+          "tier": "technical"
+        },
+        {
+          "name": "NCPI Solutions",
+          "tier": "technical"
+        },
+        {
+          "name": "Taylor Project Services",
+          "tier": "technical"
+        },
+        {
+          "name": "Alpinestars",
+          "tier": "technical"
+        },
+        {
+          "name": "Harlequin Teamwear",
+          "tier": "technical"
+        },
+        {
+          "name": "Artisan Coffee Co.",
+          "tier": "decal"
+        },
+        {
+          "name": "Garage Style",
+          "tier": "decal"
+        },
+        {
+          "name": "Levrack",
+          "tier": "decal"
+        },
+        {
+          "name": "Pink Diesel",
+          "tier": "decal"
+        },
+        {
+          "name": "GameNation",
+          "tier": "decal"
+        },
+        {
+          "name": "Axtell",
+          "tier": "decal"
+        },
+        {
+          "name": "tapybl",
+          "tier": "decal"
+        },
+        {
+          "name": "Airtec",
+          "tier": "decal"
+        },
+        {
+          "name": "Agritech",
+          "tier": "decal"
+        },
+        {
+          "name": "Burnell Switchgear & Control",
+          "tier": "decal"
+        },
+        {
+          "name": "Lokring",
+          "tier": "decal"
+        },
+        {
+          "name": "Saturn",
+          "tier": "decal"
+        },
+        {
+          "name": "ecommerce intelligence",
+          "tier": "decal"
+        }
+      ],
+      "sponsorsNote": "Cars #50 (Árón Taylor-Smith) and #52 (Gordon Shedden) share the primary livery but carry a few different secondary decals - e.g. J&D Pierce and Gratte Brothers appear only on #52, Agritech and Burnell only on #50."
     },
     {
       "name": "Steel Seal with Power Maxed Racing",
       "car": "Audi A3 Saloon",
-      "entries": 1,
+      "entries": 2,
       "bio": "Steel Seal with Power Maxed Racing is the second BTCC entry run by Shaun Hollamby's Coventry-based Power Maxed Racing operation, carrying the Steel Seal head gasket repair brand as title sponsor. PMR have been a fixture in the BTCC since 2010, and their multi-car programme for 2026 reflects the team's growing ambition and commercial support.\n\nRunning Audi A3 Saloon machinery, the Steel Seal entry campaigns alongside their LKQ Euro Car Parts-backed sister car as part of a coordinated effort to score as many constructor points as possible across the season.",
       "base": "Coventry, West Midlands",
       "founded": 2010,
@@ -3070,24 +3698,74 @@
       "totalRaces": 276,
       "totalWins": 6,
       "lightCardBg": true,
-      "smallLogo": true
-    },
-    {
-      "name": "Power Maxed Racing",
-      "car": "Audi A3 Saloon",
-      "entries": 1,
-      "bio": "Power Maxed Racing's fourth 2026 entry marks the team's first four-car BTCC line-up, with Nick Halstead returning from the Knockhill round onwards to complete the season. No title sponsor has yet been confirmed for the car, which races under the team's own Power Maxed Racing identity.\n\nFounded in Coventry by Shaun Hollamby in 2010, Power Maxed Racing has grown from a single-car independent outfit into one of the championship's most ambitious multi-car operations, now fielding cars across three liveries in pursuit of BTCC honours.",
-      "base": "Coventry, West Midlands",
-      "founded": 2010,
-      "driversChampionships": 0,
-      "teamsChampionships": 0,
-      "history": [],
-      "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/power-maxed-racing.png",
-      "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/0e8fbf18-3dda-41fd-9a05-4c269eb516ef.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/teams/066ea554-08fc-4fa6-9e7b-7c8401a5e0de.webp",
-      "totalRaces": 290,
-      "totalWins": 6,
-      "lightCardBg": true
+      "smallLogo": true,
+      "sponsors": [
+        {
+          "name": "Steel Seal",
+          "tier": "principal"
+        },
+        {
+          "name": "Power Maxed",
+          "tier": "principal"
+        },
+        {
+          "name": "Awesome (VW Audi Group Specialists)",
+          "tier": "principal"
+        },
+        {
+          "name": "Eurol Lubricants",
+          "tier": "associate"
+        },
+        {
+          "name": "Goodridge",
+          "tier": "technical"
+        },
+        {
+          "name": "ABS Motorsport",
+          "tier": "technical"
+        },
+        {
+          "name": "Teng Tools",
+          "tier": "technical"
+        },
+        {
+          "name": "Eibach",
+          "tier": "technical"
+        },
+        {
+          "name": "Samco Sport",
+          "tier": "technical"
+        },
+        {
+          "name": "Zircotec",
+          "tier": "technical"
+        },
+        {
+          "name": "Metamark",
+          "tier": "technical"
+        },
+        {
+          "name": "Absolute Alignment",
+          "tier": "technical"
+        },
+        {
+          "name": "Emissco",
+          "tier": "decal"
+        },
+        {
+          "name": "sales-i",
+          "tier": "decal"
+        },
+        {
+          "name": "Maximum Networks",
+          "tier": "decal"
+        },
+        {
+          "name": "Gearbox & Clutch Xpress",
+          "tier": "decal"
+        }
+      ],
+      "sponsorsNote": "Covers Dexter Patterson's #17 car. Nick Halstead's #55 car (added mid-season) has been reported under a different \"AskGVT\" livery in press photos, but this could not be confirmed against the team's own sponsor announcements - flagged for a follow-up check once a clearer photo is available."
     }
   ]
 }

@@ -525,6 +525,62 @@ describe('TeamDetailScreen', () => {
     await waitFor(() => expect(queryByText('CAR SPECS')).toBeNull());
   });
 
+  it('renders SPONSORS section grouped by tier when sponsors are present', async () => {
+    const teamWithSponsors = {
+      ...TEAM,
+      sponsors: [
+        {name: 'Acme Racing', tier: 'principal'},
+        {name: 'Widgets Co', tier: 'technical'},
+        {name: 'Tiny Decal Ltd', tier: 'decal'},
+      ],
+    };
+    const route = makeRoute({team: teamWithSponsors});
+    const {getByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('SPONSORS')).toBeTruthy();
+      expect(getByText('PRINCIPAL PARTNERS')).toBeTruthy();
+      expect(getByText('Acme Racing')).toBeTruthy();
+      expect(getByText('TECHNICAL PARTNERS')).toBeTruthy();
+      expect(getByText('Widgets Co')).toBeTruthy();
+      expect(getByText('ALSO ON THE CAR')).toBeTruthy();
+      expect(getByText('Tiny Decal Ltd')).toBeTruthy();
+    });
+    // A tier with no sponsors in this team shouldn't get an empty group heading.
+    expect(getByText('SPONSORS')).toBeTruthy();
+  });
+
+  it('does not render an ASSOCIATE PARTNERS heading when no sponsor has that tier', async () => {
+    const teamWithSponsors = {...TEAM, sponsors: [{name: 'Acme Racing', tier: 'principal'}]};
+    const route = makeRoute({team: teamWithSponsors});
+    const {queryByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(queryByText('ASSOCIATE PARTNERS')).toBeNull());
+  });
+
+  it('renders the sponsorsNote caveat text when present, even with an empty sponsors list', async () => {
+    // e.g. CPRL post-restructuring: livery in flux, nothing confirmed yet to list.
+    const teamInFlux = {...TEAM, sponsors: [], sponsorsNote: "Livery in flux, check back soon."};
+    const route = makeRoute({team: teamInFlux});
+    const {getByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('SPONSORS')).toBeTruthy();
+      expect(getByText('Livery in flux, check back soon.')).toBeTruthy();
+    });
+  });
+
+  it('does not render SPONSORS section when sponsors is empty and there is no sponsorsNote', async () => {
+    const route = makeRoute({team: TEAM});
+    const {queryByText} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => expect(queryByText('SPONSORS')).toBeNull());
+  });
+
   it('driver photo uses CachedImage when imageUrl is set and no bundled image exists', async () => {
     // getDriverImage is mocked to return null (jest.setup.js), so imageUrl triggers CachedImage.
     // Regression: this used to be a raw <Image> requesting a hardcoded "-300x300" WordPress

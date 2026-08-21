@@ -436,6 +436,34 @@ describe('parseGrid', () => {
     expect(grid.drivers.find(d => d.name === 'No Lives In').livesIn).toBe('');
   });
 
+  test('passes through reserveOnly, defaults to false when absent', () => {
+    const json = {
+      drivers: [
+        {number: 18, name: 'Senna Proctor', team: 'NAPA Racing UK', car: 'Ford Focus', reserveOnly: true},
+        {number: 2, name: 'No Flag', team: 'NAPA Racing UK', car: 'Ford Focus'},
+      ],
+      teams: [{name: 'NAPA Racing UK', car: 'Ford Focus', entries: 4}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.drivers.find(d => d.name === 'Senna Proctor').reserveOnly).toBe(true);
+    expect(grid.drivers.find(d => d.name === 'No Flag').reserveOnly).toBe(false);
+  });
+
+  test('a reserveOnly driver is excluded from their team roster even though currentlyRacing defaults true', () => {
+    // Senna Proctor covered one round of Sam Osborne's seat at NAPA Racing UK -
+    // he never held a grid spot there, so the 4-entry team's roster should
+    // still list only its 4 confirmed drivers, not a 5th stand-in.
+    const json = {
+      drivers: [
+        {number: 18, name: 'Senna Proctor', team: 'NAPA Racing UK', car: 'Ford Focus', reserveOnly: true},
+        {number: 77, name: 'Sam Osborne', team: 'NAPA Racing UK', car: 'Ford Focus'},
+      ],
+      teams: [{name: 'NAPA Racing UK', car: 'Ford Focus', entries: 4}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.teams[0].drivers.map(d => d.name)).toEqual(['Sam Osborne']);
+  });
+
   test('filters drivers without team', () => {
     const json = {
       drivers: [
@@ -473,6 +501,27 @@ describe('parseGrid', () => {
     expect(grid.teams[0].totalRaces).toBe(0);
     expect(grid.teams[0].totalWins).toBe(0);
     expect(grid.teams[0].carSpecs).toBeNull();
+  });
+
+  test('passes through sponsors and sponsorsNote', () => {
+    const sponsors = [{name: 'Acme', tier: 'principal'}, {name: 'Widgets Co', tier: 'decal'}];
+    const json = {
+      drivers: [],
+      teams: [{name: 'Team A', car: 'Car', entries: 1, sponsors, sponsorsNote: 'Livery in flux'}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.teams[0].sponsors).toEqual(sponsors);
+    expect(grid.teams[0].sponsorsNote).toBe('Livery in flux');
+  });
+
+  test('defaults sponsors to an empty array and sponsorsNote to empty string when absent', () => {
+    const json = {
+      drivers: [],
+      teams: [{name: 'Team B', car: 'Car', entries: 1}],
+    };
+    const grid = parseGrid(json);
+    expect(grid.teams[0].sponsors).toEqual([]);
+    expect(grid.teams[0].sponsorsNote).toBe('');
   });
 
   test('shapes driver history: champion renamed to isChampion, numeric fields defaulted', () => {

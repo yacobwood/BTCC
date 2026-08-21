@@ -19,6 +19,18 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import CachedImage from '../components/CachedImage';
 
+// Sponsor tier -> section label, in display order. A team's `sponsors` array
+// (see parseGrid in api/parsers.js) tags each entry with one of these tiers;
+// grouping rather than one flat list keeps a 20-30 sponsor team (e.g. NAPA
+// Racing UK, Laser Tools Racing with MB Motorsport) scannable instead of a
+// wall of same-weight names.
+const SPONSOR_TIERS = [
+  {key: 'principal', label: 'PRINCIPAL PARTNERS'},
+  {key: 'associate', label: 'ASSOCIATE PARTNERS'},
+  {key: 'technical', label: 'TECHNICAL PARTNERS'},
+  {key: 'decal', label: 'ALSO ON THE CAR'},
+];
+
 export default function TeamDetailScreen({route, navigation}) {
   const {team} = route.params;
   const insets = useSafeAreaInsets();
@@ -138,6 +150,36 @@ export default function TeamDetailScreen({route, navigation}) {
               </View>
             </>
           )}
+
+          {((team.sponsors && team.sponsors.length > 0) || team.sponsorsNote) && (
+            <>
+              <Text style={styles.sectionTitle}>SPONSORS</Text>
+              <View style={styles.card}>
+                {team.sponsorsNote ? <Text style={styles.sponsorsNote}>{team.sponsorsNote}</Text> : null}
+                {SPONSOR_TIERS.map(({key, label}) => {
+                  const items = (team.sponsors || []).filter(s => s.tier === key);
+                  if (!items.length) return null;
+                  return (
+                    <View key={key} style={styles.sponsorGroup}>
+                      <Text style={styles.sponsorGroupLabel}>{label}</Text>
+                      <View style={styles.sponsorChips}>
+                        {items.map(s => (
+                          <View
+                            key={s.name}
+                            style={[styles.sponsorChip, key === 'principal' && styles.sponsorChipPrincipal]}>
+                            <Text
+                              style={[styles.sponsorChipText, key === 'principal' && styles.sponsorChipTextPrincipal]}>
+                              {s.name}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -208,6 +250,14 @@ const styles = StyleSheet.create({
   champRow: {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4},
   champLabel: {color: Colors.textSecondary, fontSize: 13},
   champValue: {color: Colors.yellow, fontSize: 14, fontWeight: '800'},
+  sponsorsNote: {color: Colors.textSecondary, fontSize: 12, fontStyle: 'italic', lineHeight: 18, marginBottom: 12},
+  sponsorGroup: {marginBottom: 12},
+  sponsorGroupLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 6},
+  sponsorChips: {flexDirection: 'row', flexWrap: 'wrap', gap: 6},
+  sponsorChip: {backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: Colors.outline},
+  sponsorChipPrincipal: {backgroundColor: 'rgba(254,189,2,0.12)', borderColor: 'rgba(254,189,2,0.4)'},
+  sponsorChipText: {color: '#fff', fontSize: 12, fontWeight: '600'},
+  sponsorChipTextPrincipal: {color: Colors.yellow, fontWeight: '800'},
   backBtn: {
     position: 'absolute',
     left: 12,

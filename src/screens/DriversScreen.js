@@ -122,12 +122,15 @@ const DriversGrid = React.memo(function DriversGrid({drivers, listRef, navigatio
   const {isFavourite} = useFavouriteDriver();
   // currentlyRacing !== false (not simply "=== true"): absent/undefined must
   // default to "currently racing" so data that hasn't been through parseGrid()
-  // isn't silently miscategorized as a past driver.
-  const activeDrivers = drivers.filter(d => d.currentlyRacing !== false);
+  // isn't silently miscategorized as a past driver. reserveOnly drivers are
+  // excluded from both lists below - a one-off stand-in (e.g. Senna Proctor
+  // covering a single round) never held a grid seat, so unlike a departed
+  // full-season driver they get no tile at all, in either section.
+  const activeDrivers = drivers.filter(d => d.currentlyRacing !== false && !d.reserveOnly);
   // Kept visible rather than removed outright when a driver leaves their seat
   // mid-season (e.g. moves to a reserve/development role) - still raced this
   // year, just not part of the active grid right now.
-  const pastDrivers = drivers.filter(d => d.currentlyRacing === false);
+  const pastDrivers = drivers.filter(d => d.currentlyRacing === false && !d.reserveOnly);
   return (
     <ScrollView ref={listRef} contentContainerStyle={{padding: 16, paddingBottom: 20}}>
       <DriverGridSection
