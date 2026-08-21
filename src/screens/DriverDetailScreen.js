@@ -27,38 +27,19 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
 // Rewrites a data/carImages/ URL to its pre-generated small thumbnail
-// (<name>-thumb.webp - see scripts/generate_car_thumb.py). Same rationale as
-// DriversScreen.js's identical helper: Android decodes an image to a bitmap
-// sized off pixel dimensions, not file size, so the full-size 1536x1024
-// original costs 6MB of decoded memory even though this screen only ever
-// shows one at a time. This screen never hit the multi-driver decode-pool
-// cap that motivated the fix there, but there's no reason to decode 15x more
-// bitmap than a corner badge needs just because only one is on screen here.
+// (<name>-thumb.webp - see scripts/generate_car_thumb.py), same helper
+// TeamDetailScreen.js keeps its own copy of. Android decodes an image to a
+// bitmap sized off pixel dimensions, not file size, so the full-size
+// 1536x1024 original costs 6MB of decoded memory even though this screen
+// only ever shows one at a time. This screen never hit the multi-driver
+// decode-pool cap that originally motivated the fix (DriversScreen's tile,
+// back when it rendered one per driver on a long grid), but there's no
+// reason to decode 15x more bitmap than this banner needs just because only
+// one is on screen here.
 function carThumbUrl(url) {
   if (!url) return url;
   return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
 }
-
-// headerBg is full screen width with no horizontal padding before it, and
-// square (aspectRatio: 1), so this one figure doubles as its height too.
-// Needed as a plain pixel number (not a '%' string) for the car column's
-// rotation math below - percentages nest multiplicatively (a child's '46%'
-// means 46% of its *immediate parent's* resolved size, not of headerBg), so
-// swapping width/height for a rotated element needs both figures resolved
-// against the same base, which plain pixel numbers give for free.
-const HEADER_W = Dimensions.get('window').width;
-const CAR_SIDE_MARGIN = 8;
-// Column now runs the full header height on the left (by request), not a
-// strip starting under the number - the number lives entirely on the right
-// now, so there's nothing on the left this column needs to leave clear at
-// the top any more. CAR_SIDE_TOP is just the top margin.
-const CAR_SIDE_TOP = CAR_SIDE_MARGIN;
-const CAR_SIDE_W = HEADER_W * 0.3; // final (post-rotation) width of the column
-const CAR_SIDE_H = HEADER_W - CAR_SIDE_TOP - CAR_SIDE_MARGIN; // fills the full header height, top to bottom
-// The driver photo sits centered in whatever's left to the right of the car
-// column, not centered in the whole header - otherwise a centered photo
-// wide enough to look right would overlap the car. See headerPhotoWrap.
-const PHOTO_REGION_LEFT = CAR_SIDE_W + CAR_SIDE_MARGIN * 2;
 
 function formatDob(dateStr) {
   if (!dateStr) return null;
@@ -195,36 +176,11 @@ export default function DriverDetailScreen({route, navigation}) {
           ) : (
             <Text style={[styles.headerNumber, driver.lightCardBg && {color: '#000'}]}>{driver.number}</Text>
           )}
-          {/* The driver's own car, not a shared team one, since a team can
-              field more than one livery (see DriversScreen's comment for the
-              full story) - now the app's one dedicated car showcase, since
-              the grid tile dropped its car entirely. Runs the full header
-              height down the left edge, rotated 90deg (clockwise) - flipped
-              from the previous -90deg (anti-clockwise) side-strip by
-              request, still a vertical column either way. headerCarSide is
-              the wrapper at the column's final (post-rotation) size;
-              headerCarSideImg inside it is sized pre-rotation with
-              width/height swapped, same reasoning as before. */}
-          {driver.carImageUrl ? (
-            <View style={styles.headerCarSide}>
-              <CachedImage
-                uri={carThumbUrl(driver.carImageUrl)}
-                style={styles.headerCarSideImg}
-                resizeMode="contain"
-                accessibilityLabel={`${driver.name}'s car`}
-              />
-            </View>
+          {bundledImg ? (
+            <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fadeDuration={150} />
+          ) : driver.imageUrl ? (
+            <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
           ) : null}
-          {/* Centered in the region to the right of the car column (not the
-              whole header - a photo wide enough to look right centered on
-              the full width would overlap the car), by request. */}
-          <View style={styles.headerPhotoWrap}>
-            {bundledImg ? (
-              <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fadeDuration={150} />
-            ) : driver.imageUrl ? (
-              <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
-            ) : null}
-          </View>
         </View>
         <View style={styles.headerFooter}>
           <View style={{flex: 1}}>
@@ -237,6 +193,24 @@ export default function DriverDetailScreen({route, navigation}) {
             <Icon name={fav ? 'star' : 'star-outline'} size={28} color={fav ? Colors.yellow : Colors.textSecondary} />
           </TouchableOpacity>
         </View>
+        {/* The driver's own car, not a shared team one, since a team can
+            field more than one livery (see DriversScreen's comment for the
+            full story). After four header arrangements that all fought the
+            header's square shape (bottom-left/bottom-right badges, then
+            rotated strips on the right and left), moved out of the header
+            entirely into its own full-bleed banner - shown at its natural,
+            unrotated landscape orientation, so there's no rotation math or
+            competing-for-space problem left to solve. */}
+        {driver.carImageUrl ? (
+          <View style={styles.carStrip}>
+            <CachedImage
+              uri={carThumbUrl(driver.carImageUrl)}
+              style={styles.carStripImg}
+              resizeMode="contain"
+              accessibilityLabel={`${driver.name}'s car`}
+            />
+          </View>
+        ) : null}
 
         <View style={styles.content}>
           {/* Key facts */}
@@ -506,10 +480,11 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
 
   // Header
-  // No alignItems/justifyContent needed for positioning any more - every
-  // direct child (car column, photo wrapper, number) is absolutely
-  // positioned within this square box, not laid out via flex flow.
-  headerBg: {width: '100%', aspectRatio: 1},
+  // Back to the simple driver + number layout this had before the car ever
+  // lived in this header (2026-08-21's various rotated-strip attempts all
+  // eventually moved out to carStrip below instead) - centered photo,
+  // number top-right, nothing else competing for the square's space.
+  headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
   headerNumber: {
     position: 'absolute',
     top: -4,
@@ -519,51 +494,27 @@ const styles = StyleSheet.create({
     color: '#fff',
     lineHeight: 128,
   },
-  // Sits centered inside headerPhotoWrap (the region to the right of the
-  // car column, not the whole header - see that style below) rather than
-  // being sized/positioned relative to headerBg directly.
-  headerPhoto: {width: '85%', height: '90%'},
-  // The region the driver photo centers within: everything to the right of
-  // the car column (PHOTO_REGION_LEFT), full header height. Centering here
-  // instead of across the whole header width is what keeps a wide-enough
-  // photo from overlapping the car column - "driver in the middle" means
-  // the middle of what's left after the car takes its column, not the
-  // middle of the full header.
-  headerPhotoWrap: {
-    position: 'absolute',
-    left: PHOTO_REGION_LEFT,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
+  headerPhoto: {width: '100%', height: '90%'},
   // Branded number-graphic replacement for headerNumber above (used when the
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
-  // the square headerBg. Unaffected by the car/photo rearrangement below -
-  // stays top-right throughout.
+  // the square headerBg.
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
-  // Wrapper at the *final* (post-rotation) size and position: a column down
-  // the LEFT edge (was the right, under the number) running the full header
-  // height (was a strip starting partway down) - both by request, once the
-  // grid tile dropped its own car and this became the app's one dedicated
-  // showcase for it.
-  headerCarSide: {
-    position: 'absolute',
-    top: CAR_SIDE_TOP,
-    left: CAR_SIDE_MARGIN,
-    width: CAR_SIDE_W,
-    height: CAR_SIDE_H,
+  // Full-bleed banner between the name row and the stat boxes - the car at
+  // its natural, unrotated landscape orientation, on its own tinted band
+  // rather than squeezed into the header. Same aspectRatio/background-tint
+  // idea DriversScreen's tile briefly used for its own car strip before
+  // that tile dropped the car entirely (see that screen's history) - proven
+  // to look right for this exact image shape.
+  carStrip: {
+    width: '100%',
+    aspectRatio: 2.6,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outline,
   },
-  // Pre-rotation size - width/height swapped from headerCarSide above, since
-  // a landscape car cutout (1.5:1) needs to be laid out in portrait *before*
-  // rotating for `contain` to fit it against the swapped box rather than the
-  // final one. Rotated 90deg (clockwise) rather than the tile's old -90deg
-  // (anti-clockwise) - a 180-degree flip, by request - while still landing
-  // as a vertical column either way.
-  headerCarSideImg: {width: CAR_SIDE_H, height: CAR_SIDE_W, transform: [{rotate: '90deg'}]},
+  carStripImg: {width: '85%', height: '85%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',
