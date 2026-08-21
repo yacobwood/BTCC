@@ -492,10 +492,11 @@ const styles = StyleSheet.create({
   // number top-right, nothing else competing for the square's space.
   headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
   // top lowered from -4 (by request) - was sitting right at/above the very
-  // top edge of the header, crowding the status bar/back button row.
+  // top edge of the header, crowding the status bar/back button row. First
+  // pass (-4 -> 56) overshot; halved back to -4 -> 26 by request.
   headerNumber: {
     position: 'absolute',
-    top: 56,
+    top: 26,
     right: 5,
     fontSize: 110,
     fontWeight: '900',
@@ -506,8 +507,9 @@ const styles = StyleSheet.create({
   // Branded number-graphic replacement for headerNumber above (used when the
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
   // the square headerBg. top lowered from 0 to match headerNumber above, by
-  // the same request.
-  headerNumberImg: {position: 'absolute', top: 60, right: 0, width: '45%', height: '36%'},
+  // the same request - same overshoot-then-halve as headerNumber (0 -> 60,
+  // then 0 -> 30).
+  headerNumberImg: {position: 'absolute', top: 30, right: 0, width: '45%', height: '36%'},
   // Full-bleed banner between the name row and the stat boxes - the car at
   // its natural, unrotated landscape orientation, on its own tinted band
   // rather than squeezed into the header.
