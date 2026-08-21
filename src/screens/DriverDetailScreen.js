@@ -466,7 +466,11 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
 
   // Header
-  headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
+  // alignItems: 'flex-start' (not 'center') so the narrower headerPhoto below
+  // sits against the left edge, leaving the bottom-right corner clear for
+  // headerCarImg - same quadrant arrangement as DriversScreen's tile
+  // (driver left, number top-right, car bottom-right).
+  headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'flex-start'},
   headerNumber: {
     position: 'absolute',
     top: -4,
@@ -476,19 +480,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     lineHeight: 128,
   },
-  headerPhoto: {width: '100%', height: '90%'},
+  // Narrowed from 100% and left-aligned (see headerBg) to match
+  // DriversScreen's tile layout - the driver on the left, car in the
+  // bottom-right corner this frees up, rather than overlapping it.
+  headerPhoto: {width: '60%', height: '90%'},
   // Branded number-graphic replacement for headerNumber above (used when the
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
   // the square headerBg. Shrunk from an initial 60%/48% (matched to
   // DriversScreen's tile-sized equivalent) - too dominant once the car badge
   // below grew into a real showcase size of its own.
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
-  // Went through two smaller passes (22%/14%, then 48%/32%) before landing
-  // here - this is a deliberate showcase size for the one-driver profile
-  // page, not matched to the tile's much smaller footprint. 68%/45% (~1.5
-  // aspect, matching the car cutout's own ~1.5) rather than a plain square
-  // box, so contain doesn't letterbox it.
-  headerCarImg: {position: 'absolute', bottom: 8, left: 8, width: '68%', height: '45%'},
+  // Bottom-right (not bottom-left) - now matches DriversScreen's tile
+  // quadrant layout exactly: driver photo left, number top-right, car
+  // bottom-right in the corner the narrowed/left-aligned photo leaves clear,
+  // rather than an overlay competing with the photo for the same space. Same
+  // 50%/33% proportions as the tile's driverCarImg (~1.5 aspect, matching the
+  // car cutout's own) - this header is much bigger in absolute terms, so the
+  // car still reads as a real showcase, it just no longer overlaps the photo.
+  headerCarImg: {position: 'absolute', bottom: 8, right: 8, width: '50%', height: '33%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',
