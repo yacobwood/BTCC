@@ -6,6 +6,19 @@ export function thumbUrl(url, size = '150x150') {
   return url.replace(/(\.[a-z]+)$/i, `-${size}$1`);
 }
 
+// Rewrite a data/carImages/ URL to its pre-generated small thumbnail
+// (<name>-thumb.webp - see scripts/generate_car_thumb.py). DriversScreen.js,
+// TeamDetailScreen.js and DriverDetailScreen.js each keep their own identical
+// copy of this for their own rendering (same convention as thumbUrl above vs.
+// this file's), but backgroundPrefetch.js needs the canonical one here so it
+// actually warms the cache for the URL those screens request - prefetching
+// the full-size original (as it did until 2026-08-21) prefetches a URL
+// nothing ever asks for any more.
+export function carThumbUrl(url) {
+  if (!url) return url;
+  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+}
+
 // Parse WordPress post into Article
 export function parseArticle(post) {
   const id = post.id;

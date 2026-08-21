@@ -1,4 +1,4 @@
-import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields} from '../src/api/parsers';
+import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields, carThumbUrl} from '../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
@@ -559,6 +559,27 @@ describe('parseDriverHistory', () => {
   test('returns an empty array for null/undefined input', () => {
     expect(parseDriverHistory(null)).toEqual([]);
     expect(parseDriverHistory(undefined)).toEqual([]);
+  });
+});
+
+describe('carThumbUrl', () => {
+  test('inserts -thumb before the extension', () => {
+    expect(carThumbUrl('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp'))
+      .toBe('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb.webp');
+  });
+
+  test('works regardless of the original file extension', () => {
+    // A few carImages/ entries predate the 2026-08-21 WebP conversion pass
+    // and haven't necessarily all been touched since - the thumb-generation
+    // script re-encodes to WebP either way, but this rewrite itself just
+    // swaps in "-thumb" ahead of whatever extension the URL already has.
+    expect(carThumbUrl('https://example.com/patterson.png')).toBe('https://example.com/patterson-thumb.png');
+  });
+
+  test('returns falsy input unchanged', () => {
+    expect(carThumbUrl('')).toBe('');
+    expect(carThumbUrl(null)).toBeNull();
+    expect(carThumbUrl(undefined)).toBeUndefined();
   });
 });
 

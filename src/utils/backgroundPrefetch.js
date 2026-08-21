@@ -1,6 +1,6 @@
 import {Image} from 'react-native';
 import {fetchDrivers, fetchArticles} from '../api/client';
-import {parseGrid, parseArticle, thumbUrl} from '../api/parsers';
+import {parseGrid, parseArticle, thumbUrl, carThumbUrl} from '../api/parsers';
 
 const PREFETCH_CONCURRENCY = 5;
 
@@ -30,13 +30,17 @@ async function prefetchDrivers() {
       ...drivers.map(d => thumbUrl(d.cardBgUrl)).filter(Boolean),
       ...drivers.map(d => thumbUrl(d.numberImageUrl)).filter(Boolean),
       // Driver-level, not team-level: each driver now shows their own car on
-      // their DriversScreen tile, and TeamDetailScreen's hero shows one card
-      // per driver too (see both screens) - team.carImageUrl alone would
-      // miss a driver whose own liveried car differs from it (e.g. Nick
-      // Halstead's "Ask GVT" car vs Steel Seal with Power Maxed Racing's
-      // team-level fallback), and this already covers that fallback case too
-      // since attachTeamDisplayFields resolves it onto the driver anyway.
-      ...drivers.map(d => thumbUrl(d.carImageUrl)).filter(Boolean),
+      // their DriversScreen tile, their own DriverDetailScreen header, and
+      // TeamDetailScreen's hero shows one card per driver too (see all
+      // three) - team.carImageUrl alone would miss a driver whose own
+      // liveried car differs from it (e.g. Nick Halstead's "Ask GVT" car vs
+      // Steel Seal with Power Maxed Racing's team-level fallback), and this
+      // already covers that fallback case too since attachTeamDisplayFields
+      // resolves it onto the driver anyway. carThumbUrl (not thumbUrl,
+      // which only rewrites btcc.net WordPress URLs and no-ops here) since
+      // that's the actual -thumb URL all three screens request, not the
+      // full-size original.
+      ...drivers.map(d => carThumbUrl(d.carImageUrl)).filter(Boolean),
       ...teams.map(t => thumbUrl(t.cardBgUrl)).filter(Boolean),
     ];
     await batchPrefetch(urls);

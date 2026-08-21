@@ -14,6 +14,7 @@ jest.mock('../../src/api/parsers', () => ({
   parseGrid:    jest.fn(),
   parseArticle: jest.fn(),
   thumbUrl:     jest.fn(url => url),
+  carThumbUrl:  jest.fn(url => (url ? url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1') : url)),
 }));
 
 import {Image} from 'react-native';
@@ -95,7 +96,7 @@ describe('runBackgroundPrefetch', () => {
     expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/28.png');
   });
 
-  it('prefetches each driver\'s own carImageUrl (now rendered on both their DriversScreen tile and their team\'s TeamDetailScreen hero)', async () => {
+  it('prefetches the -thumb variant of each driver\'s own carImageUrl (rendered on their DriversScreen tile, DriverDetailScreen header and their team\'s TeamDetailScreen hero)', async () => {
     fetchDrivers.mockResolvedValue({});
     fetchArticles.mockResolvedValue([]);
     parseGrid.mockReturnValue({
@@ -111,8 +112,10 @@ describe('runBackgroundPrefetch', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/patterson-car.png');
-    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/halstead-car.webp');
+    // carThumbUrl, not the full-size original - that's the actual URL every
+    // screen showing this driver's car requests (see DriversScreen.js).
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/patterson-car-thumb.png');
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/halstead-car-thumb.webp');
   });
 
   it('prefetches article image URLs returned from API', async () => {

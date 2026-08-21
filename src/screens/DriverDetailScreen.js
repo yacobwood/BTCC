@@ -26,6 +26,19 @@ import {attachTeamDisplayFields, parseDriverHistory} from '../api/parsers';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
+// Rewrites a data/carImages/ URL to its pre-generated small thumbnail
+// (<name>-thumb.webp - see scripts/generate_car_thumb.py). Same rationale as
+// DriversScreen.js's identical helper: Android decodes an image to a bitmap
+// sized off pixel dimensions, not file size, so the full-size 1536x1024
+// original costs 6MB of decoded memory even though this screen only ever
+// shows one at a time. This screen never hit the multi-driver decode-pool
+// cap that motivated the fix there, but there's no reason to decode 15x more
+// bitmap than a corner badge needs just because only one is on screen here.
+function carThumbUrl(url) {
+  if (!url) return url;
+  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+}
+
 function formatDob(dateStr) {
   if (!dateStr) return null;
   try {
@@ -165,6 +178,12 @@ export default function DriverDetailScreen({route, navigation}) {
             <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fadeDuration={150} />
           ) : driver.imageUrl ? (
             <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
+          ) : null}
+          {/* Same corner-badge treatment as DriversScreen's tile - the driver's
+              own car, not a shared team one, since a team can field more than
+              one livery (see that screen's comment for the full story). */}
+          {driver.carImageUrl ? (
+            <CachedImage uri={carThumbUrl(driver.carImageUrl)} style={styles.headerCarImg} resizeMode="contain" accessibilityLabel={`${driver.name}'s car`} />
           ) : null}
         </View>
         <View style={styles.headerFooter}>
@@ -462,6 +481,12 @@ const styles = StyleSheet.create({
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
   // the square headerBg so it matches DriversScreen's tile-sized equivalent.
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
+  // Smaller % than DriversScreen's driverCarImg (46%/30%) - this header is
+  // full screen width rather than a half-width tile, so the same percentage
+  // would roughly double the badge's absolute on-screen size. These figures
+  // keep it close to that same absolute footprint instead of ballooning just
+  // because the container got bigger.
+  headerCarImg: {position: 'absolute', bottom: 8, left: 8, width: '22%', height: '14%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',

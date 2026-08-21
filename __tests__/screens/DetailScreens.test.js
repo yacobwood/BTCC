@@ -344,6 +344,38 @@ describe('DriverDetailScreen', () => {
     );
     await waitFor(() => expect(getByText('80')).toBeTruthy());
   });
+
+  // Same corner-badge treatment as DriversScreen's tile (see that file for
+  // why: a team can field more than one livery, so the driver's own car -
+  // not a shared team image - has to render here).
+  it("shows the driver's own car via CachedImage, requesting the -thumb variant not the full-size original", async () => {
+    const route = makeRoute({driver: {
+      ...DRIVER,
+      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.webp',
+    }});
+    const {getAllByTestId} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      const carImage = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('carImages'));
+      expect(carImage).toBeTruthy();
+      expect(carImage.props.source.uri).toBe(
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram-thumb.webp',
+      );
+    });
+  });
+
+  it('shows no car image when carImageUrl is absent', async () => {
+    const route = makeRoute({driver: DRIVER});
+    const {queryAllByTestId, getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    // Wait for the screen to actually finish rendering before asserting an
+    // absence, or this could pass vacuously before data even loads.
+    await waitFor(() => expect(getByText(/Tom Ingram/)).toBeTruthy());
+    const carImages = queryAllByTestId('cached-image').filter(img => img.props.source.uri?.includes('carImages'));
+    expect(carImages.length).toBe(0);
+  });
 });
 
 // ─── All real drivers smoke test ──────────────────────────────────────────────
