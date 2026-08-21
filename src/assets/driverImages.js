@@ -2,6 +2,7 @@
 const driverImages = {
   2: require('./driver_images/2.webp'),
   3: require('./driver_images/3.webp'),
+  7: require('./driver_images/7.webp'),
   11: require('./driver_images/11.webp'),
   15: require('./driver_images/15.webp'),
   16: require('./driver_images/16.webp'),
@@ -22,6 +23,7 @@ const driverImages = {
   88: require('./driver_images/88.webp'),
   99: require('./driver_images/99.webp'),
   116: require('./driver_images/116.webp'),
+  123: require('./driver_images/123.webp'),
   132: require('./driver_images/132.webp'),
 };
 
