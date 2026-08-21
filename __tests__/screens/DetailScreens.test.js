@@ -345,10 +345,12 @@ describe('DriverDetailScreen', () => {
     await waitFor(() => expect(getByText('80')).toBeTruthy());
   });
 
-  // Same corner-badge treatment as DriversScreen's tile (see that file for
-  // why: a team can field more than one livery, so the driver's own car -
-  // not a shared team image - has to render here).
-  it("shows the driver's own car via CachedImage, requesting the -thumb variant not the full-size original", async () => {
+  // Full-width banner below the name row (see DriversScreen's history for
+  // why the car renders per-driver rather than a shared team image at all).
+  // Requests the -thumb-crop variant, not the plain -thumb TeamDetailScreen
+  // uses - this banner has no logo overlay to keep clear of, so it can crop
+  // out the padding TeamDetailScreen's cars deliberately keep.
+  it("shows the driver's own car via CachedImage, requesting the -thumb-crop variant", async () => {
     const route = makeRoute({driver: {
       ...DRIVER,
       carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.webp',
@@ -360,7 +362,7 @@ describe('DriverDetailScreen', () => {
       const carImage = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('carImages'));
       expect(carImage).toBeTruthy();
       expect(carImage.props.source.uri).toBe(
-        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram-thumb.webp',
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram-thumb-crop.webp',
       );
     });
   });

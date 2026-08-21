@@ -7,16 +7,26 @@ export function thumbUrl(url, size = '150x150') {
 }
 
 // Rewrite a data/carImages/ URL to its pre-generated small thumbnail
-// (<name>-thumb.webp - see scripts/generate_car_thumb.py). DriversScreen.js,
-// TeamDetailScreen.js and DriverDetailScreen.js each keep their own identical
-// copy of this for their own rendering (same convention as thumbUrl above vs.
-// this file's), but backgroundPrefetch.js needs the canonical one here so it
-// actually warms the cache for the URL those screens request - prefetching
-// the full-size original (as it did until 2026-08-21) prefetches a URL
-// nothing ever asks for any more.
+// (<name>-thumb.webp - see scripts/generate_car_thumb.py). TeamDetailScreen.js
+// keeps its own identical copy of this for its own rendering (same
+// convention as thumbUrl above vs. this file's), but backgroundPrefetch.js
+// needs the canonical one here so it actually warms the cache for the URL
+// that screen requests - prefetching the full-size original (as it did
+// until 2026-08-21) prefetches a URL nothing ever asks for any more.
 export function carThumbUrl(url) {
   if (!url) return url;
   return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+}
+
+// Same idea, but for the tighter -thumb-crop variant DriverDetailScreen.js's
+// full-width car banner uses instead of the plain -thumb above - that
+// banner has no logo overlay to keep clear of, so it crops out the padding
+// TeamDetailScreen's cards deliberately keep (see generate_car_thumb.py for
+// why two variants exist at all). DriverDetailScreen.js keeps its own copy
+// for rendering; this one exists so backgroundPrefetch.js can warm it too.
+export function carThumbCropUrl(url) {
+  if (!url) return url;
+  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb-crop$1');
 }
 
 // Parse WordPress post into Article

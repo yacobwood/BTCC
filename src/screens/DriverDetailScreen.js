@@ -26,19 +26,25 @@ import {attachTeamDisplayFields, parseDriverHistory} from '../api/parsers';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
-// Rewrites a data/carImages/ URL to its pre-generated small thumbnail
-// (<name>-thumb.webp - see scripts/generate_car_thumb.py), same helper
-// TeamDetailScreen.js keeps its own copy of. Android decodes an image to a
-// bitmap sized off pixel dimensions, not file size, so the full-size
-// 1536x1024 original costs 6MB of decoded memory even though this screen
-// only ever shows one at a time. This screen never hit the multi-driver
-// decode-pool cap that originally motivated the fix (DriversScreen's tile,
-// back when it rendered one per driver on a long grid), but there's no
-// reason to decode 15x more bitmap than this banner needs just because only
-// one is on screen here.
+// Rewrites a data/carImages/ URL to its pre-generated small thumbnail,
+// cropped tight to the visible car (<name>-thumb-crop.webp - see
+// scripts/generate_car_thumb.py). Deliberately NOT the same plain -thumb
+// file TeamDetailScreen.js's carImage uses - that file keeps its full
+// ~40%/16% top/bottom padding on purpose, since TeamDetailScreen's sponsor
+// logo overlays the top of the car cards and relies on that padding being
+// blank so it doesn't clash with the car artwork. This banner has no
+// overlay to protect, so it uses the cropped variant instead - carStrip's
+// aspectRatio below is tuned to that crop, not the padded original.
+// Android decodes an image to a bitmap sized off pixel dimensions, not file
+// size, so the full-size 1536x1024 original costs 6MB of decoded memory
+// even though this screen only ever shows one at a time. This screen never
+// hit the multi-driver decode-pool cap that originally motivated shrinking
+// these in the first place (DriversScreen's tile, back when it rendered one
+// per driver on a long grid), but there's no reason to decode 15x more
+// bitmap than this banner needs just because only one is on screen here.
 function carThumbUrl(url) {
   if (!url) return url;
-  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb-crop$1');
 }
 
 function formatDob(dateStr) {
@@ -504,15 +510,16 @@ const styles = StyleSheet.create({
   // rather than squeezed into the header.
   carStrip: {
     width: '100%',
-    // Matches the 1536x1024 canvas every data/carImages/ file is generated
-    // to (see carThumbUrl's comment above) - `contain` fits the whole
-    // canvas, transparent margins included, so a box shaped like the
-    // canvas itself lets the car fill nearly all of both axes. An earlier
-    // 2.6 box (wider than the image's real 1.5:1) capped the rendered car
-    // at roughly half the strip's width no matter how large carStripImg
-    // below was set, since `contain` was always height-bound against that
-    // mismatched box shape - widening carStripImg alone couldn't fix that.
-    aspectRatio: 1536 / 1024,
+    // 3.1 matches the -thumb files' own cropped aspect ratio (median 3.08,
+    // mean 3.09 across all 23 drivers, checked directly rather than
+    // assumed - see generate_car_thumb.py's crop step) so `contain` fills
+    // nearly all of both axes instead of being capped on one. Two earlier
+    // values got this wrong: 2.6 (an arbitrary banner shape, wider than
+    // any car actually was) and 1536/1024 (the *uncropped* canvas's own
+    // shape, before the crop step existed - the canvas was ~40% blank
+    // space above the car and ~16% below, so matching it just meant the
+    // padding rode along at full size instead of being removed).
+    aspectRatio: 3.1,
     backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',

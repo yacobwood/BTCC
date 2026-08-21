@@ -1,6 +1,6 @@
 import {Image} from 'react-native';
 import {fetchDrivers, fetchArticles} from '../api/client';
-import {parseGrid, parseArticle, thumbUrl, carThumbUrl} from '../api/parsers';
+import {parseGrid, parseArticle, thumbUrl, carThumbUrl, carThumbCropUrl} from '../api/parsers';
 
 const PREFETCH_CONCURRENCY = 5;
 
@@ -30,17 +30,18 @@ async function prefetchDrivers() {
       ...drivers.map(d => thumbUrl(d.cardBgUrl)).filter(Boolean),
       ...drivers.map(d => thumbUrl(d.numberImageUrl)).filter(Boolean),
       // Driver-level, not team-level: each driver now shows their own car on
-      // their DriversScreen tile, their own DriverDetailScreen header, and
-      // TeamDetailScreen's hero shows one card per driver too (see all
-      // three) - team.carImageUrl alone would miss a driver whose own
-      // liveried car differs from it (e.g. Nick Halstead's "Ask GVT" car vs
-      // Steel Seal with Power Maxed Racing's team-level fallback), and this
-      // already covers that fallback case too since attachTeamDisplayFields
-      // resolves it onto the driver anyway. carThumbUrl (not thumbUrl,
-      // which only rewrites btcc.net WordPress URLs and no-ops here) since
-      // that's the actual -thumb URL all three screens request, not the
-      // full-size original.
+      // TeamDetailScreen's hero (one card per driver) and their own
+      // DriverDetailScreen banner - team.carImageUrl alone would miss a
+      // driver whose own liveried car differs from it (e.g. Nick Halstead's
+      // "Ask GVT" car vs Steel Seal with Power Maxed Racing's team-level
+      // fallback), and this already covers that fallback case too since
+      // attachTeamDisplayFields resolves it onto the driver anyway. Both
+      // thumbnail variants get prefetched, not just one - carThumbUrl for
+      // TeamDetailScreen's plain -thumb, carThumbCropUrl for
+      // DriverDetailScreen's tighter -thumb-crop (see that file's comment
+      // for why they're different files, not just different sizes).
       ...drivers.map(d => carThumbUrl(d.carImageUrl)).filter(Boolean),
+      ...drivers.map(d => carThumbCropUrl(d.carImageUrl)).filter(Boolean),
       ...teams.map(t => thumbUrl(t.cardBgUrl)).filter(Boolean),
     ];
     await batchPrefetch(urls);

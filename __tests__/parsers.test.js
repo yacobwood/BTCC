@@ -1,4 +1,4 @@
-import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields, carThumbUrl} from '../src/api/parsers';
+import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl} from '../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
@@ -580,6 +580,23 @@ describe('carThumbUrl', () => {
     expect(carThumbUrl('')).toBe('');
     expect(carThumbUrl(null)).toBeNull();
     expect(carThumbUrl(undefined)).toBeUndefined();
+  });
+});
+
+describe('carThumbCropUrl', () => {
+  test('inserts -thumb-crop before the extension', () => {
+    expect(carThumbCropUrl('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp'))
+      .toBe('https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb-crop.webp');
+  });
+
+  test('works regardless of the original file extension', () => {
+    expect(carThumbCropUrl('https://example.com/patterson.png')).toBe('https://example.com/patterson-thumb-crop.png');
+  });
+
+  test('returns falsy input unchanged', () => {
+    expect(carThumbCropUrl('')).toBe('');
+    expect(carThumbCropUrl(null)).toBeNull();
+    expect(carThumbCropUrl(undefined)).toBeUndefined();
   });
 });
 

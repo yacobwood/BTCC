@@ -11,10 +11,11 @@ jest.mock('../../src/api/client', () => ({
 }));
 
 jest.mock('../../src/api/parsers', () => ({
-  parseGrid:    jest.fn(),
-  parseArticle: jest.fn(),
-  thumbUrl:     jest.fn(url => url),
-  carThumbUrl:  jest.fn(url => (url ? url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1') : url)),
+  parseGrid:       jest.fn(),
+  parseArticle:    jest.fn(),
+  thumbUrl:        jest.fn(url => url),
+  carThumbUrl:     jest.fn(url => (url ? url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1') : url)),
+  carThumbCropUrl: jest.fn(url => (url ? url.replace(/(\.[a-z0-9]+)$/i, '-thumb-crop$1') : url)),
 }));
 
 import {Image} from 'react-native';
@@ -96,7 +97,7 @@ describe('runBackgroundPrefetch', () => {
     expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/28.png');
   });
 
-  it('prefetches the -thumb variant of each driver\'s own carImageUrl (rendered on their DriversScreen tile, DriverDetailScreen header and their team\'s TeamDetailScreen hero)', async () => {
+  it('prefetches both thumbnail variants of each driver\'s own carImageUrl (the plain -thumb TeamDetailScreen\'s hero requests, and the -thumb-crop DriverDetailScreen\'s banner requests)', async () => {
     fetchDrivers.mockResolvedValue({});
     fetchArticles.mockResolvedValue([]);
     parseGrid.mockReturnValue({
@@ -112,10 +113,13 @@ describe('runBackgroundPrefetch', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    // carThumbUrl, not the full-size original - that's the actual URL every
-    // screen showing this driver's car requests (see DriversScreen.js).
+    // Not the full-size original - these are the actual URLs the two
+    // screens showing this driver's car request (see TeamDetailScreen.js
+    // and DriverDetailScreen.js).
     expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/patterson-car-thumb.png');
     expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/halstead-car-thumb.webp');
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/patterson-car-thumb-crop.png');
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/halstead-car-thumb-crop.webp');
   });
 
   it('prefetches article image URLs returned from API', async () => {
