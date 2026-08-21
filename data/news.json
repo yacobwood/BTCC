@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Donington Park next for WSR as Rainford reaches 50th BTCC start"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/bb17fd51-83b9-4106-8334-6e2cff06fbb6-Rainford-R6TB2076-4-.jpg"
+        }
+      ]
+    }
   }
 ]
