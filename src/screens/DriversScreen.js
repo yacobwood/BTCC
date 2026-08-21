@@ -298,8 +298,10 @@ const styles = StyleSheet.create({
   // doesn't move them.
   driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'flex-start'},
   // Narrowed from 100% so the tile reads driver-left/car-bottom-right rather
-  // than the photo spanning full width with the car overlaid on top of it.
-  driverPhoto: {width: '72%', height: '85%'},
+  // than the photo spanning full width with the car overlaid on top of it -
+  // 60% (down from an initial 72% pass) pushes the driver further left,
+  // leaving more room for a bigger driverCarImg.
+  driverPhoto: {width: '60%', height: '85%'},
   driverNumberBg: {
     position: 'absolute',
     top: -10,
@@ -319,9 +321,10 @@ const styles = StyleSheet.create({
   // dedicated strip below the photo (the previous version of this) also
   // avoided the collision but made every tile noticeably taller; this gets
   // the same non-overlapping result within the existing square footprint.
-  // 42%/28% (~1.5 aspect, matching the car cutout's own) rather than a plain
-  // square box, so contain doesn't letterbox it.
-  driverCarImg: {position: 'absolute', bottom: 4, right: 4, width: '42%', height: '28%'},
+  // 50%/33% (~1.5 aspect, matching the car cutout's own, up from an initial
+  // 42%/28% pass) rather than a plain square box, so contain doesn't
+  // letterbox it.
+  driverCarImg: {position: 'absolute', bottom: 4, right: 4, width: '50%', height: '33%'},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
