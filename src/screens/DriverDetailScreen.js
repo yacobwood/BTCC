@@ -501,20 +501,29 @@ const styles = StyleSheet.create({
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
   // Full-bleed banner between the name row and the stat boxes - the car at
   // its natural, unrotated landscape orientation, on its own tinted band
-  // rather than squeezed into the header. Same aspectRatio/background-tint
-  // idea DriversScreen's tile briefly used for its own car strip before
-  // that tile dropped the car entirely (see that screen's history) - proven
-  // to look right for this exact image shape.
+  // rather than squeezed into the header.
   carStrip: {
     width: '100%',
-    aspectRatio: 2.6,
+    // Matches the 1536x1024 canvas every data/carImages/ file is generated
+    // to (see carThumbUrl's comment above) - `contain` fits the whole
+    // canvas, transparent margins included, so a box shaped like the
+    // canvas itself lets the car fill nearly all of both axes. An earlier
+    // 2.6 box (wider than the image's real 1.5:1) capped the rendered car
+    // at roughly half the strip's width no matter how large carStripImg
+    // below was set, since `contain` was always height-bound against that
+    // mismatched box shape - widening carStripImg alone couldn't fix that.
+    aspectRatio: 1536 / 1024,
     backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline,
   },
-  carStripImg: {width: '85%', height: '85%'},
+  // Widened from 85% (by request, "almost full width") - now that
+  // carStrip's own aspect ratio matches the image, this box is what
+  // actually determines the car's rendered size, so widening it here
+  // works as expected.
+  carStripImg: {width: '94%', height: '94%'},
   headerFooter: {
     flexDirection: 'row',
     alignItems: 'center',
