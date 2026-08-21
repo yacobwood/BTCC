@@ -491,9 +491,11 @@ const styles = StyleSheet.create({
   // eventually moved out to carStrip below instead) - centered photo,
   // number top-right, nothing else competing for the square's space.
   headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
+  // top lowered from -4 (by request) - was sitting right at/above the very
+  // top edge of the header, crowding the status bar/back button row.
   headerNumber: {
     position: 'absolute',
-    top: -4,
+    top: 56,
     right: 5,
     fontSize: 110,
     fontWeight: '900',
@@ -503,8 +505,9 @@ const styles = StyleSheet.create({
   headerPhoto: {width: '100%', height: '90%'},
   // Branded number-graphic replacement for headerNumber above (used when the
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
-  // the square headerBg.
-  headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
+  // the square headerBg. top lowered from 0 to match headerNumber above, by
+  // the same request.
+  headerNumberImg: {position: 'absolute', top: 60, right: 0, width: '45%', height: '36%'},
   // Full-bleed banner between the name row and the stat boxes - the car at
   // its natural, unrotated landscape orientation, on its own tinted band
   // rather than squeezed into the header.
