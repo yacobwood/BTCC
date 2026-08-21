@@ -263,20 +263,26 @@ const styles = StyleSheet.create({
   // to stay clear of. Matches DriverDetailScreen's header, reverted the
   // same way for the same reason.
   driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
-  driverPhoto: {width: '100%', height: '100%'},
+  // 100% -> 90% (by request, "slightly smaller") - still centered via
+  // driverImageArea's alignItems above, just with a bit of breathing room
+  // on both axes instead of touching every edge of the tile.
+  driverPhoto: {width: '90%', height: '90%'},
+  // Shrunk (by request) - fontSize 80 -> 60, lineHeight 90 -> 68 proportionally.
   driverNumberBg: {
     position: 'absolute',
     top: -10,
     right: 5,
-    fontSize: 80,
+    fontSize: 60,
     fontWeight: '900',
     color: '#fff',
-    lineHeight: 90,
+    lineHeight: 68,
   },
   // Branded number-graphic replacement for driverNumberBg above (used when
   // the driver has a numberImageUrl) - same top-right footprint, sized as a
-  // % of the square driverImageArea so it scales consistently at any tile size.
-  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
+  // % of the square driverImageArea so it scales consistently at any tile
+  // size. Shrunk 60%/48% -> 45%/36% (by request) - same ratio
+  // DriverDetailScreen's header number used for its own shrink.
+  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
