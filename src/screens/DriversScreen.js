@@ -268,9 +268,16 @@ const styles = StyleSheet.create({
   // on both axes instead of touching every edge of the tile.
   driverPhoto: {width: '90%', height: '90%'},
   // Shrunk (by request) - fontSize 80 -> 60, lineHeight 90 -> 68 proportionally.
+  // top: -10 -> 0 (by request, "some numbers touching top, some not") -
+  // only the 3 drivers without a numberImageUrl (departed/reserve: Max
+  // Buxton, James Dorlin, Senna Proctor) ever render this plain-text
+  // fallback rather than driverNumberImg below, and the old -10 pushed
+  // theirs above the tile's own top edge, where driverCard's
+  // overflow: 'hidden' clipped it - every branded-graphic driver was
+  // already sitting flush at top: 0 with no such clipping.
   driverNumberBg: {
     position: 'absolute',
-    top: -10,
+    top: 0,
     right: 5,
     fontSize: 60,
     fontWeight: '900',
