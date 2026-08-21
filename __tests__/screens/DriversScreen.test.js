@@ -298,8 +298,12 @@ describe('DriversScreen', () => {
     });
   });
 
-  describe('driver tile car image (each driver shows their own car, not a shared team one)', () => {
-    it("renders the driver's own car via CachedImage when carImageUrl is set", async () => {
+  // Regression guard: the driver tile used to show the driver's own car as a
+  // rotated side badge, but that moved to the profile page only (2026-08-21,
+  // by request) so the tile could give the driver photo the full tile height
+  // instead. A driver with carImageUrl set must not resurrect it here.
+  describe("driver tile car image (removed 2026-08-21 - lives on the profile page only)", () => {
+    it('never renders a car image on the driver tile, even when carImageUrl is set', async () => {
       const gridWithCar = {
         drivers: [{
           name: 'Nick Halstead', number: 55, team: 'Steel Seal with Power Maxed Racing',
@@ -309,79 +313,11 @@ describe('DriversScreen', () => {
         teams: [],
       };
       parseGrid.mockReturnValue(gridWithCar);
-      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
-      await findByText('1 CONFIRMED');
-      const carImages = getAllByTestId('cached-image')
-        .filter(img => img.props.source.uri?.includes('carImages'));
-      expect(carImages.length).toBe(1);
-    });
-
-    // Root cause of a real on-device failure (confirmed via a device log
-    // capture, not guessed): Android decodes an image to an uncompressed
-    // bitmap sized off its pixel dimensions, not its file size, so the
-    // full-resolution 1536x1024 car cutout costs ~6MB of decoded memory per
-    // driver even though the WebP file itself is only ~90KB - and unlike
-    // cardBgUrl (shared across a team's drivers, so it only decodes once),
-    // every car image is unique per driver, with no reuse to fall back on.
-    // ~23 of those blew straight through Android's image-decode memory pool,
-    // which looked on-device like cars towards the bottom of a long list
-    // failing to load. The tile only ever needs to render this badge at
-    // ~80px, so it requests the small pre-generated -thumb variant instead
-    // of the full-size original.
-    it("requests the small -thumb variant of the driver's car, not the full-size original", async () => {
-      const gridWithCar = {
-        drivers: [{
-          name: 'Nick Halstead', number: 55, team: 'Steel Seal with Power Maxed Racing',
-          imageUrl: null, cardBgUrl: null,
-          carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
-        }],
-        teams: [],
-      };
-      parseGrid.mockReturnValue(gridWithCar);
-      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
-      await findByText('1 CONFIRMED');
-      const carImage = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('carImages'));
-      expect(carImage.props.source.uri).toBe(
-        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb.webp',
-      );
-    });
-
-    it('renders no car image when the driver has no carImageUrl', async () => {
-      const gridWithoutCar = {
-        drivers: [{name: 'Max Buxton', number: 19, team: 'NAPA Racing UK', imageUrl: null, cardBgUrl: null, carImageUrl: ''}],
-        teams: [],
-      };
-      parseGrid.mockReturnValue(gridWithoutCar);
       const {queryAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('1 CONFIRMED');
       const carImages = queryAllByTestId('cached-image')
         .filter(img => img.props.source.uri?.includes('carImages'));
       expect(carImages.length).toBe(0);
-    });
-
-    // Two teammates on a car-per-driver team (e.g. Steel Seal with Power Maxed
-    // Racing's Patterson vs. Halstead) must each keep their own distinct car
-    // image - a shared/fallback team car would defeat the point of this tile.
-    it('shows a different car image per teammate when their carImageUrl differs', async () => {
-      const gridWithTeammates = {
-        drivers: [
-          {name: 'Dexter Patterson', number: 17, team: 'Steel Seal with Power Maxed Racing', imageUrl: null, cardBgUrl: null,
-            carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png'},
-          {name: 'Nick Halstead', number: 55, team: 'Steel Seal with Power Maxed Racing', imageUrl: null, cardBgUrl: null,
-            carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp'},
-        ],
-        teams: [],
-      };
-      parseGrid.mockReturnValue(gridWithTeammates);
-      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
-      await findByText('2 CONFIRMED');
-      const carUris = getAllByTestId('cached-image')
-        .map(img => img.props.source.uri)
-        .filter(uri => uri?.includes('carImages'));
-      expect(carUris.sort()).toEqual([
-        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead-thumb.webp',
-        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson-thumb.png',
-      ]);
     });
   });
 });

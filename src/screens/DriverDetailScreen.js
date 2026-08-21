@@ -44,10 +44,15 @@ function carThumbUrl(url) {
 // see DriversScreen.js's identical TILE_W comment for why these need to be
 // plain pixel numbers (not '%' strings) for the rotated car strip's math.
 const HEADER_W = Dimensions.get('window').width;
-const CAR_SIDE_TOP = HEADER_W * 0.5; // roughly where the number graphic ends
+// Tightened from an initial 0.5 to 0.38 (by request, "full height between
+// the bottom and number") - 0.38 sits right where headerNumberImg's own 36%
+// height ends, so the strip starts immediately under the number instead of
+// leaving a gap above it, then (via CAR_SIDE_H below) runs all the way down
+// to the header's bottom edge.
+const CAR_SIDE_TOP = HEADER_W * 0.38;
 const CAR_SIDE_MARGIN = 8;
-const CAR_SIDE_W = HEADER_W * 0.24; // final (post-rotation) width of the strip
-const CAR_SIDE_H = HEADER_W - CAR_SIDE_TOP - CAR_SIDE_MARGIN; // fills down to the header's bottom edge
+const CAR_SIDE_W = HEADER_W * 0.34; // final (post-rotation) width of the strip - widened from 0.24, by request ("bigger")
+const CAR_SIDE_H = HEADER_W - CAR_SIDE_TOP - CAR_SIDE_MARGIN; // fills the full height between the number and the header's bottom edge
 
 function formatDob(dateStr) {
   if (!dateStr) return null;
@@ -512,8 +517,9 @@ const styles = StyleSheet.create({
   // below grew into a real showcase size of its own.
   headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
   // Wrapper at the *final* (post-rotation) size and position - a vertical
-  // strip down the right side, starting roughly where the number graphic
-  // ends and filling down to the header's bottom edge. Same idea as
+  // strip down the right side, starting immediately under the number graphic
+  // and filling the full height down to the header's bottom edge (by
+  // request - was a smaller badge starting halfway down). Same idea as
   // DriversScreen's tile equivalent, just scaled to this much bigger header.
   headerCarSide: {
     position: 'absolute',

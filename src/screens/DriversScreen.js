@@ -28,21 +28,6 @@ function thumbUrl(url, size = '150x150') {
   return url.replace(/(\.[a-z]+)$/i, `-${size}$1`);
 }
 
-// Matches driverGridItem's own width formula below - needed as a plain
-// number (not a '%' string) for the car badge's rotation math just below,
-// since percentages nest multiplicatively (a child's '46%' means 46% of its
-// *immediate parent's* resolved size, not of driverImageArea) - swapping
-// width/height for a rotated element needs both figures resolved against
-// the same base, which plain pixel numbers give for free and percentages
-// don't once there's a wrapper view in between.
-const TILE_W = (SCREEN_WIDTH - 32 - 10) / 2;
-// driverImageArea is a square (aspectRatio: 1), so TILE_W doubles as its
-// height too - these are all derived from that one figure.
-const CAR_SIDE_TOP = TILE_W * 0.5; // roughly where the number graphic ends
-const CAR_SIDE_MARGIN = 4;
-const CAR_SIDE_W = TILE_W * 0.24; // final (post-rotation) width of the strip
-const CAR_SIDE_H = TILE_W - CAR_SIDE_TOP - CAR_SIDE_MARGIN; // fills down to the tile's bottom edge
-
 function DriverAvatar({number, imageUrl, size = 58}) {
   const bundled = getDriverImage(number);
   const imgStyle = {width: size, height: size * 1.6, borderRadius: 0, position: 'absolute', top: 0, left: 0, right: 0};
@@ -61,29 +46,6 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 }
 
 const TABS = ['DRIVERS', 'TEAMS'];
-
-// Rewrites a data/carImages/ URL to its pre-generated small thumbnail
-// (<name>-thumb.webp, ~400px wide, alongside every full-size file) - see
-// `scripts/generate_car_thumbs.py`. Root cause of car badges failing on a
-// long Drivers grid (confirmed live via a device log capture, not guessed):
-// Android's image pipeline decodes to an uncompressed bitmap sized off pixel
-// dimensions, not file size, so every car image - already WebP-compressed to
-// ~90KB on disk - still costs 1536x1024x4 bytes = 6MB of *decoded* memory
-// each. 23 drivers x 6MB blows straight through Fresco's ~192MB pool on its
-// own, and unlike cardBgUrl (shared across a team's drivers, so Fresco
-// dedupes and decodes it once), every car image is unique per driver, so
-// there's no reuse to fall back on - whichever tiles' decodes land after the
-// pool is already full just fail, which is why it looked like "the bottom of
-// the list" specifically. WebP file-size compression never touched this (file
-// size and decoded bitmap size are unrelated); staggering/retrying the
-// network request didn't help either (a retried decode into an already-full
-// pool fails the same way). The actual fix is decoding something small enough
-// that 23 of them never gets close to the cap - a badge rendering at ~80px
-// on screen doesn't need a 1536x1024 source.
-function carThumbUrl(url) {
-  if (!url) return url;
-  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
-}
 
 function DriverCardInner({item, onPress, fav}) {
   const bundled = getDriverImage(item.number);
@@ -121,31 +83,6 @@ function DriverCardInner({item, onPress, fav}) {
             <Icon name="star" size={12} color={Colors.yellow} />
           </View>
         )}
-        {/* Now that a team's cars can carry different sponsor liveries (e.g.
-            Steel Seal with Power Maxed Racing fields both Dexter Patterson's
-            car and Nick Halstead's separately-liveried "Ask GVT" one), the
-            driver's OWN car - not a shared team image - has to live on their
-            tile. Runs vertically down the right side, under the number,
-            rotated -90deg (anti-clockwise) - a landscape car cutout (1.5:1)
-            reads as a tall strip once rotated, filling the column the
-            narrowed/left-aligned driver photo leaves clear without competing
-            with the number above it. driverCarSide is the wrapper at the
-            slot's *final* (post-rotation) size; driverCarSideImg inside it
-            is sized pre-rotation with width/height swapped, so contain fits
-            the car into that swapped box and the rotation then lands it
-            exactly in the wrapper's footprint - percentages can't express
-            this swap directly (a child's % is relative to its own parent,
-            not driverImageArea), hence TILE_W as a plain pixel number. */}
-        {item.carImageUrl ? (
-          <View style={styles.driverCarSide}>
-            <CachedImage
-              uri={carThumbUrl(item.carImageUrl)}
-              style={styles.driverCarSideImg}
-              resizeMode="contain"
-              accessibilityLabel={`${item.name}'s car`}
-            />
-          </View>
-        ) : null}
       </View>
       <View style={styles.driverFooter}>
         <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
@@ -320,16 +257,16 @@ const styles = StyleSheet.create({
   driverGridItem: {width: (SCREEN_WIDTH - 32 - 10) / 2},
   driverCard: {borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card, borderWidth: 1, borderColor: 'transparent'},
   driverCardFav: {borderColor: 'rgba(254,189,2,0.5)'},
-  // alignItems: 'flex-start' (not 'center') so the narrower driverPhoto below
-  // sits against the left edge, leaving the bottom-right corner clear for
-  // driverCarImg - the number/favBadge below are absolute-positioned so this
-  // doesn't move them.
+  // alignItems: 'flex-start' (not 'center') keeps the narrower driverPhoto
+  // below against the left edge rather than centered - the number/favBadge
+  // are absolute-positioned so this doesn't move them.
   driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'flex-start'},
-  // Narrowed from 100% so the tile reads driver-left/car-bottom-right rather
-  // than the photo spanning full width with the car overlaid on top of it -
-  // 60% (down from an initial 72% pass) pushes the driver further left,
-  // leaving more room for a bigger driverCarImg.
-  driverPhoto: {width: '60%', height: '85%'},
+  // Car badge removed (2026-08-21, by request - each driver's own liveried
+  // car now only shows on their profile page, not the grid tile). Width
+  // stays 60% (kept driver left rather than reverting to a full-width
+  // centered photo) but height goes back up to 100% now nothing below it
+  // needs the tile's bottom edge kept clear.
+  driverPhoto: {width: '60%', height: '100%'},
   driverNumberBg: {
     position: 'absolute',
     top: -10,
@@ -344,25 +281,6 @@ const styles = StyleSheet.create({
   // % of the square driverImageArea so it scales consistently at any tile size.
   driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
-  // Wrapper at the *final* (post-rotation) size and position: a vertical
-  // strip down the right side, starting roughly where the number graphic
-  // ends and filling down to the tile's bottom edge. Centers its child so
-  // the swapped-and-rotated image (below) lands inside this exact footprint
-  // without any position math of its own.
-  driverCarSide: {
-    position: 'absolute',
-    top: CAR_SIDE_TOP,
-    right: CAR_SIDE_MARGIN,
-    width: CAR_SIDE_W,
-    height: CAR_SIDE_H,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Pre-rotation size - width/height swapped from driverCarSide above, since
-  // a landscape car cutout (1.5:1) needs to be laid out in portrait *before*
-  // rotating -90deg (anti-clockwise) for `contain` to fit it against the
-  // swapped box rather than the final one.
-  driverCarSideImg: {width: CAR_SIDE_H, height: CAR_SIDE_W, transform: [{rotate: '-90deg'}]},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
