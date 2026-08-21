@@ -106,20 +106,19 @@ function DriverCardInner({item, onPress, fav}) {
             <Icon name="star" size={12} color={Colors.yellow} />
           </View>
         )}
+        {/* Now that a team's cars can carry different sponsor liveries (e.g.
+            Steel Seal with Power Maxed Racing fields both Dexter Patterson's
+            car and Nick Halstead's separately-liveried "Ask GVT" one), the
+            driver's OWN car - not a shared team image - has to live on their
+            tile. Bottom-right, opposite the driver photo (shifted left/
+            narrowed above so it doesn't extend under here) - a dedicated
+            strip below the photo worked but made every tile noticeably
+            taller; tucking the car into the corner the narrower photo leaves
+            clear avoids the collision without that extra height. */}
+        {item.carImageUrl ? (
+          <CachedImage uri={carThumbUrl(item.carImageUrl)} style={styles.driverCarImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
+        ) : null}
       </View>
-      {/* Now that a team's cars can carry different sponsor liveries (e.g.
-          Steel Seal with Power Maxed Racing fields both Dexter Patterson's
-          car and Nick Halstead's separately-liveried "Ask GVT" one), the
-          driver's OWN car - not a shared team image - has to live on their
-          tile. Its own strip below the photo, not overlaid on top of it -
-          overlaying (the first version of this) put the car directly on top
-          of the driver's legs/feet, which read as a rendering glitch rather
-          than a deliberate badge once it was sized up. */}
-      {item.carImageUrl ? (
-        <View style={styles.driverCarStrip}>
-          <CachedImage uri={carThumbUrl(item.carImageUrl)} style={styles.driverCarStripImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
-        </View>
-      ) : null}
       <View style={styles.driverFooter}>
         <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
       </View>
@@ -293,8 +292,14 @@ const styles = StyleSheet.create({
   driverGridItem: {width: (SCREEN_WIDTH - 32 - 10) / 2},
   driverCard: {borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card, borderWidth: 1, borderColor: 'transparent'},
   driverCardFav: {borderColor: 'rgba(254,189,2,0.5)'},
-  driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
-  driverPhoto: {width: '100%', height: '85%'},
+  // alignItems: 'flex-start' (not 'center') so the narrower driverPhoto below
+  // sits against the left edge, leaving the bottom-right corner clear for
+  // driverCarImg - the number/favBadge below are absolute-positioned so this
+  // doesn't move them.
+  driverImageArea: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'flex-start'},
+  // Narrowed from 100% so the tile reads driver-left/car-bottom-right rather
+  // than the photo spanning full width with the car overlaid on top of it.
+  driverPhoto: {width: '72%', height: '85%'},
   driverNumberBg: {
     position: 'absolute',
     top: -10,
@@ -309,22 +314,14 @@ const styles = StyleSheet.create({
   // % of the square driverImageArea so it scales consistently at any tile size.
   driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
-  // Driver's own car cutout, in its own strip below the photo rather than
-  // overlaid on top of it - an earlier absolute-positioned badge version put
-  // the car directly over the driver's legs/feet, which read as a rendering
-  // glitch once it was sized up rather than a deliberate badge. aspectRatio
-  // 2.6 keeps this a compact band (not a second hero image) while still
-  // giving the car real presence; surface-tinted so it doesn't look like a
-  // gap when a driver has no carImageUrl to show here at all.
-  driverCarStrip: {
-    width: '100%',
-    aspectRatio: 2.6,
-    backgroundColor: Colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-  },
-  driverCarStripImg: {width: '100%', height: '100%'},
+  // Driver's own car cutout, bottom-right - opposite the photo, which is now
+  // narrowed/left-aligned above specifically to leave this corner clear. A
+  // dedicated strip below the photo (the previous version of this) also
+  // avoided the collision but made every tile noticeably taller; this gets
+  // the same non-overlapping result within the existing square footprint.
+  // 42%/28% (~1.5 aspect, matching the car cutout's own) rather than a plain
+  // square box, so contain doesn't letterbox it.
+  driverCarImg: {position: 'absolute', bottom: 4, right: 4, width: '42%', height: '28%'},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
