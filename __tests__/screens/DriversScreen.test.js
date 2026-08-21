@@ -1,5 +1,5 @@
 import React from 'react';
-import {act, fireEvent} from '@testing-library/react-native';
+import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DriversScreen from '../../src/screens/DriversScreen';
 import {renderWithProviders, makeNav, MOCK_GRID, MOCK_DRIVERS_RAW} from './testUtils';
@@ -345,13 +345,20 @@ describe('DriversScreen', () => {
       parseGrid.mockReturnValue(gridWithTeammates);
       const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('2 CONFIRMED');
-      const carUris = getAllByTestId('cached-image')
-        .map(img => img.props.source.uri)
-        .filter(uri => uri?.includes('carImages'));
-      expect(carUris.sort()).toEqual([
-        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
-        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
-      ]);
+      // Car badges past the first tile mount on a short stagger (see
+      // CAR_BADGE_STAGGER_MS in DriversScreen.js) so a big grid doesn't fire
+      // every tile's 3rd network image in the same instant - real timers here,
+      // so just poll past that real (if brief) delay instead of asserting
+      // synchronously.
+      await waitFor(() => {
+        const carUris = getAllByTestId('cached-image')
+          .map(img => img.props.source.uri)
+          .filter(uri => uri?.includes('carImages'));
+        expect(carUris.sort()).toEqual([
+          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
+          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
+        ]);
+      });
     });
   });
 });

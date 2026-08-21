@@ -47,8 +47,35 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 
 const TABS = ['DRIVERS', 'TEAMS'];
 
-function DriverCardInner({item, onPress, fav}) {
+// The grid below is a plain ScrollView + .map(), not a virtualized list - every
+// tile mounts (and fires its network images) at once regardless of scroll
+// position, so "list position" is really "request-queue position" once there
+// are more concurrent image requests than the device's HTTP client will open
+// connections for at once. Adding the car badge (below) made that burst ~50%
+// bigger (2 network images/tile -> 3), which showed up live as cars towards
+// the bottom of the list losing the race for a connection slot and exhausting
+// CachedImage's retry budget before it ever cleared. Staggering just this new
+// image - not the pre-existing cardBg/numberImage, which already worked fine
+// at the smaller burst size - spreads the *added* demand out over time instead
+// of compounding the existing one all at once, without slowing down anything
+// that wasn't broken.
+const CAR_BADGE_STAGGER_MS = 60;
+const CAR_BADGE_MAX_DELAY_MS = 1200;
+
+function DriverCardInner({item, onPress, fav, index = 0}) {
   const bundled = getDriverImage(item.number);
+  // No point scheduling a delay (or even a timer at all - a driver with no
+  // car image on record, e.g. a reserve, never renders the badge either way)
+  // unless there's actually a badge coming.
+  const hasCarBadge = Boolean(item.carImageUrl);
+  const [carBadgeReady, setCarBadgeReady] = useState(!hasCarBadge || index === 0);
+  useEffect(() => {
+    if (!hasCarBadge || carBadgeReady) return;
+    const delay = Math.min(index * CAR_BADGE_STAGGER_MS, CAR_BADGE_MAX_DELAY_MS);
+    const t = setTimeout(() => setCarBadgeReady(true), delay);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <TouchableOpacity
       style={[styles.driverCard, fav && styles.driverCardFav]}
@@ -89,7 +116,7 @@ function DriverCardInner({item, onPress, fav}) {
             driver's OWN car - not a shared team image - has to live on their
             tile. Bottom-left keeps it clear of the top-right number/logo
             badge and the top-right favBadge above. */}
-        {item.carImageUrl ? (
+        {item.carImageUrl && carBadgeReady ? (
           <CachedImage uri={item.carImageUrl} style={styles.driverCarImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
         ) : null}
       </View>
@@ -100,9 +127,11 @@ function DriverCardInner({item, onPress, fav}) {
   );
 }
 
-// Only re-render when item data or fav status changes - onPress is intentionally excluded
-// from the comparison because it's recreated on every parent render.
-const DriverCard = React.memo(DriverCardInner, (prev, next) => prev.item === next.item && prev.fav === next.fav);
+// Only re-render when item data, fav status or list position changes - onPress
+// is intentionally excluded from the comparison because it's recreated on
+// every parent render.
+const DriverCard = React.memo(DriverCardInner, (prev, next) =>
+  prev.item === next.item && prev.fav === next.fav && prev.index === next.index);
 
 // Isolated so DriversScreen doesn't subscribe to favouriteDriver context.
 // When a fav toggles, only this component re-renders — PagerView receives no
@@ -113,11 +142,12 @@ function DriverGridSection({title, drivers, isFavourite, navigation, hideWhenEmp
     <>
       <Text style={styles.countLabel}>{title}</Text>
       <View style={styles.driversGrid}>
-        {drivers.map(item => (
+        {drivers.map((item, index) => (
           <View key={String(item.number)} style={styles.driverGridItem}>
             <DriverCard
               item={item}
               fav={isFavourite(item.name)}
+              index={index}
               onPress={() => { Analytics.driverClicked(item.name); navigation.navigate('DriverDetail', {driver: item}); }}
             />
           </View>
