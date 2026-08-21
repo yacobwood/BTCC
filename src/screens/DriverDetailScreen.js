@@ -469,18 +469,20 @@ const styles = StyleSheet.create({
   headerBg: {width: '100%', aspectRatio: 1, justifyContent: 'flex-end', alignItems: 'center'},
   headerNumber: {
     position: 'absolute',
-    top: -10,
+    top: -4,
     right: 5,
-    fontSize: 160,
+    fontSize: 110,
     fontWeight: '900',
     color: '#fff',
-    lineHeight: 180,
+    lineHeight: 128,
   },
   headerPhoto: {width: '100%', height: '90%'},
   // Branded number-graphic replacement for headerNumber above (used when the
   // driver has a numberImageUrl) - same top-right footprint, sized as a % of
-  // the square headerBg so it matches DriversScreen's tile-sized equivalent.
-  headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
+  // the square headerBg. Shrunk from an initial 60%/48% (matched to
+  // DriversScreen's tile-sized equivalent) - too dominant once the car badge
+  // below grew into a real showcase size of its own.
+  headerNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
   // Went through two smaller passes (22%/14%, then 48%/32%) before landing
   // here - this is a deliberate showcase size for the one-driver profile
   // page, not matched to the tile's much smaller footprint. 68%/45% (~1.5
