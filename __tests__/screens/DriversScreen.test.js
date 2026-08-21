@@ -6,6 +6,17 @@ import {renderWithProviders, makeNav, MOCK_GRID, MOCK_DRIVERS_RAW} from './testU
 
 jest.mock('../../src/api/client', () => ({fetchDrivers: jest.fn()}));
 jest.mock('../../src/api/parsers', () => ({parseGrid: jest.fn()}));
+// Local override, not just the global one - NumberBadge needs onLoad forwarded
+// through to assert its aspectRatio actually updates once the image "loads".
+jest.mock('../../src/components/CachedImage', () => {
+  const React = require('react');
+  const {Image} = require('react-native');
+  return {
+    __esModule: true,
+    default: ({uri, style, resizeMode, onLoad}) =>
+      React.createElement(Image, {source: {uri}, style, resizeMode, onLoad, testID: 'cached-image'}),
+  };
+});
 
 const {fetchDrivers} = require('../../src/api/client');
 const {parseGrid}    = require('../../src/api/parsers');
@@ -207,6 +218,30 @@ describe('DriversScreen', () => {
       const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('1 CONFIRMED');
       expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
+    });
+
+    // Regression guard (2026-08-22): a fixed width+height box on the number
+    // graphic let `contain` letterbox each number's file differently
+    // depending on how its own aspect ratio (single vs multi-digit numbers
+    // are very different shapes) compared to the box's - "some numbers
+    // touching the tile's top edge, some not". NumberBadge fixes this by
+    // sizing itself off the loaded image's own real aspect ratio instead.
+    it("sizes the number graphic off its own loaded aspect ratio, not a fixed box", async () => {
+      const gridWithNumberImage = {
+        ...MOCK_GRID,
+        drivers: [{...MOCK_GRID.drivers[0], numberImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/80.png'}],
+      };
+      parseGrid.mockReturnValue(gridWithNumberImage);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      const numberImg = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('numberImages'));
+      // Before the image "loads", it renders at the 1.5 placeholder ratio.
+      expect(numberImg.props.style).toEqual(expect.arrayContaining([expect.objectContaining({aspectRatio: 1.5})]));
+      // A wide, 3-digit-shaped number (200x100 = 2:1) should update to match
+      // once loaded - not stay pinned to a box tuned for some other shape.
+      act(() => { numberImg.props.onLoad({nativeEvent: {source: {width: 200, height: 100}}}); });
+      const reloaded = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('numberImages'));
+      expect(reloaded.props.style).toEqual(expect.arrayContaining([expect.objectContaining({aspectRatio: 2})]));
     });
 
     it('falls back to the plain-text number when numberImageUrl is absent', async () => {

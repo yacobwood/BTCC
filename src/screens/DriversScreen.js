@@ -47,6 +47,35 @@ function DriverAvatar({number, imageUrl, size = 58}) {
 
 const TABS = ['DRIVERS', 'TEAMS'];
 
+// Each numberImages/*.png/webp is its own hand-designed graphic with its own
+// aspect ratio - a single-digit number's file is far narrower than a
+// 3-digit one's. Squeezing all of them into one fixed width+height box let
+// `contain` fit each differently: a file narrower than the box (most
+// single/double-digit numbers) filled the box's full height and touched the
+// tile's top edge; a file wider than the box (most 2-3 digit numbers) got
+// letterboxed vertically instead, leaving a gap above it - "some numbers
+// touching top, some not" (2026-08-22, reported live, confirmed by checking
+// every file's actual aspect ratio rather than guessing). Sizing off the
+// loaded image's own measured aspect ratio instead - fixed height, width
+// computed to match - means every number fills the same height and sits
+// flush at the same top-right corner no matter how wide or narrow its own
+// graphic is. Local state is safe here since drivers.map() below keys each
+// card by driver number rather than recycling instances across items.
+function NumberBadge({uri}) {
+  const [ratio, setRatio] = useState(1.5); // reasonable placeholder until onLoad measures the real one
+  return (
+    <CachedImage
+      uri={uri}
+      resizeMode="contain"
+      onLoad={e => {
+        const {width, height} = e.nativeEvent?.source || {};
+        if (width && height) setRatio(width / height);
+      }}
+      style={[styles.driverNumberImg, {aspectRatio: ratio}]}
+    />
+  );
+}
+
 function DriverCardInner({item, onPress, fav}) {
   const bundled = getDriverImage(item.number);
   return (
@@ -69,7 +98,7 @@ function DriverCardInner({item, onPress, fav}) {
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
         {item.numberImageUrl ? (
-          <CachedImage uri={item.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
+          <NumberBadge uri={item.numberImageUrl} />
         ) : (
           <Text style={[styles.driverNumberBg, item.lightCardBg && {color: '#000'}]}>{item.number}</Text>
         )}
@@ -285,11 +314,15 @@ const styles = StyleSheet.create({
     lineHeight: 68,
   },
   // Branded number-graphic replacement for driverNumberBg above (used when
-  // the driver has a numberImageUrl) - same top-right footprint, sized as a
-  // % of the square driverImageArea so it scales consistently at any tile
-  // size. Shrunk 60%/48% -> 45%/36% (by request) - same ratio
-  // DriverDetailScreen's header number used for its own shrink.
-  driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '45%', height: '36%'},
+  // the driver has a numberImageUrl) - same top-right footprint, height a %
+  // of the square driverImageArea so it scales consistently at any tile
+  // size (shrunk 48% -> 36% by request - same ratio DriverDetailScreen's
+  // header number used for its own shrink). No width here any more - see
+  // NumberBadge above for why (2026-08-22): width is set per-instance via
+  // aspectRatio, computed from the loaded image's own real proportions,
+  // since a fixed width let `contain` letterbox each number's file
+  // differently depending on how its own aspect ratio compared to the box's.
+  driverNumberImg: {position: 'absolute', top: 0, right: 0, height: '36%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
