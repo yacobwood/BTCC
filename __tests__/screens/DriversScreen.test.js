@@ -231,25 +231,42 @@ describe('DriversScreen', () => {
       expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('team card background and car image both use CachedImage when URLs are set', async () => {
+    it('team card background renders via CachedImage when its URL is set', async () => {
       const gridWithImages = {
         drivers: [],
         teams: [{
           name: 'Team Ingram',
           cardBgUrl: 'https://www.btcc.net/wp-content/uploads/bg.jpg',
           cardBgThumbUrl: null,
-          carImageUrl: 'https://www.btcc.net/wp-content/uploads/car.jpg',
-          carThumbUrl: null,
         }],
       };
       parseGrid.mockReturnValue(gridWithImages);
       const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('0 CONFIRMED');
-      // cardBgUrl and carImageUrl each render a CachedImage
-      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(2);
+      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('team logo renders via CachedImage when logoUrl is set', async () => {
+    // Regression guard: a team tile used to show one "representative" car,
+    // which stopped being accurate once a team could field a different
+    // livery per driver (see the driver-tile carImageUrl tests below) -
+    // the tile now shows only the shared team logo, never a car.
+    it('never renders a car image on the team tile, even when carImageUrl is set', async () => {
+      const gridWithCar = {
+        drivers: [],
+        teams: [{
+          name: 'Steel Seal with Power Maxed Racing',
+          cardBgUrl: null,
+          carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
+          logoUrl: null,
+        }],
+      };
+      parseGrid.mockReturnValue(gridWithCar);
+      const {queryAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('0 CONFIRMED');
+      expect(queryAllByTestId('cached-image').length).toBe(0);
+    });
+
+    it('team logo renders large and centered via CachedImage when logoUrl is set', async () => {
       const gridWithLogo = {
         drivers: [],
         teams: [{
@@ -262,7 +279,11 @@ describe('DriversScreen', () => {
       parseGrid.mockReturnValue(gridWithLogo);
       const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('0 CONFIRMED');
-      expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1);
+      const images = getAllByTestId('cached-image');
+      expect(images.length).toBe(1);
+      // Large/centered (70% box, no absolute corner position), not the old
+      // small top-right badge it shared the tile with a car cutout.
+      expect(images[0].props.style.width).toBe('70%');
     });
 
     it('no logo image renders when logoUrl is absent (e.g. CPRL, no logo file yet)', async () => {
@@ -274,6 +295,63 @@ describe('DriversScreen', () => {
       const {queryAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
       await findByText('0 CONFIRMED');
       expect(queryAllByTestId('cached-image').length).toBe(0);
+    });
+  });
+
+  describe('driver tile car image (each driver shows their own car, not a shared team one)', () => {
+    it("renders the driver's own car via CachedImage when carImageUrl is set", async () => {
+      const gridWithCar = {
+        drivers: [{
+          name: 'Nick Halstead', number: 55, team: 'Steel Seal with Power Maxed Racing',
+          imageUrl: null, cardBgUrl: null,
+          carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
+        }],
+        teams: [],
+      };
+      parseGrid.mockReturnValue(gridWithCar);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      const carImages = getAllByTestId('cached-image')
+        .filter(img => img.props.source.uri?.includes('carImages'));
+      expect(carImages.length).toBe(1);
+    });
+
+    it('renders no car image when the driver has no carImageUrl', async () => {
+      const gridWithoutCar = {
+        drivers: [{name: 'Max Buxton', number: 19, team: 'NAPA Racing UK', imageUrl: null, cardBgUrl: null, carImageUrl: ''}],
+        teams: [],
+      };
+      parseGrid.mockReturnValue(gridWithoutCar);
+      const {queryAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('1 CONFIRMED');
+      const carImages = queryAllByTestId('cached-image')
+        .filter(img => img.props.source.uri?.includes('carImages'));
+      expect(carImages.length).toBe(0);
+    });
+
+    // Two teammates on a car-per-driver team (e.g. Steel Seal with Power Maxed
+    // Racing's Patterson vs. Halstead) must each keep their own distinct car
+    // image - a shared/fallback team car would defeat the point of this tile.
+    it('shows a different car image per teammate when their carImageUrl differs', async () => {
+      const gridWithTeammates = {
+        drivers: [
+          {name: 'Dexter Patterson', number: 17, team: 'Steel Seal with Power Maxed Racing', imageUrl: null, cardBgUrl: null,
+            carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png'},
+          {name: 'Nick Halstead', number: 55, team: 'Steel Seal with Power Maxed Racing', imageUrl: null, cardBgUrl: null,
+            carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp'},
+        ],
+        teams: [],
+      };
+      parseGrid.mockReturnValue(gridWithTeammates);
+      const {getAllByTestId, findByText} = renderWithProviders(<DriversScreen navigation={nav} />);
+      await findByText('2 CONFIRMED');
+      const carUris = getAllByTestId('cached-image')
+        .map(img => img.props.source.uri)
+        .filter(uri => uri?.includes('carImages'));
+      expect(carUris.sort()).toEqual([
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
+        'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
+      ]);
     });
   });
 });

@@ -170,15 +170,11 @@ export default function MerchScreen({navigation}) {
                   ) : (
                     <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
                   )}
+                  {/* Matches DriversScreen.js's Grid -> Teams tab tile: no car cutout here
+                      either, now that a team can field more than one livery - the logo is
+                      the one thing every one of its cars/drivers shares. */}
                   {team.logoUrl ? (
-                    <CachedImage uri={team.logoUrl} style={styles.teamLogoImg} resizeMode="contain" />
-                  ) : null}
-                  {team.carImageUrl ? (
-                    <CachedImage
-                      uri={team.carThumbUrl || team.carImageUrl}
-                      style={styles.carImage}
-                      resizeMode="contain"
-                    />
+                    <CachedImage uri={team.logoUrl} style={styles.teamLogoImgLarge} resizeMode="contain" />
                   ) : null}
                   <View style={styles.shopBadge}>
                     <Icon name="shopping-bag" size={11} color={Colors.navy} />
@@ -221,11 +217,16 @@ const styles = StyleSheet.create({
   emptyText: {color: Colors.textSecondary, fontSize: 14},
   grid: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
   card: {width: CARD_WIDTH, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
-  imageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
-  carImage: {width: '100%', height: '85%'},
-  // Matches DriversScreen.js's teamLogoImg (Grid -> Teams tab) exactly, positioned
-  // opposite the top-left shopBadge below so the two never overlap.
-  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', height: '34%'},
+  // centered (not flex-end) now that the logo, not a bottom-anchored car
+  // cutout, is the tile's one big graphic - matches DriversScreen.js's
+  // Grid -> Teams tab teamImageArea exactly.
+  imageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center'},
+  // Matches DriversScreen.js's teamLogoImgLarge (Grid -> Teams tab) exactly -
+  // large and centered, not a top-right corner badge, since removing the car
+  // cutout leaves nothing for a small logo to sit beside. The top-left
+  // shopBadge below stays clear of it either way (small corner chip vs. a
+  // centered box with margin on all sides).
+  teamLogoImgLarge: {width: '70%', height: '70%'},
   shopBadge: {
     position: 'absolute',
     top: 8,

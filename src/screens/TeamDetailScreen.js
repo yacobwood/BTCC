@@ -38,10 +38,19 @@ export default function TeamDetailScreen({route, navigation}) {
 
   useEffect(() => { Analytics.screen('team_detail:' + team.name); }, []);
 
+  // A single team.carImageUrl used to stand in for "the" team car, but a team
+  // can field a different livery per driver (e.g. Steel Seal with Power Maxed
+  // Racing: Dexter Patterson's car and Nick Halstead's separately-liveried
+  // "Ask GVT" one) - team.drivers is already the active, non-reserve roster
+  // (see parseGrid in api/parsers.js), each carrying their own resolved
+  // carImageUrl, so showing one card per driver here is both more accurate
+  // and needs no new data.
+  const cars = (team.drivers || []).filter(d => d.carImageUrl);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{paddingBottom: 30}}>
-        {team.carImageUrl ? (
+        {(cars.length > 0 || team.logoUrl) ? (
           <View style={[styles.carImageBg, {marginTop: insets.top + 8}]}>
             {team.cardBgUrl ? (
               <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
@@ -53,7 +62,16 @@ export default function TeamDetailScreen({route, navigation}) {
                 resizeMode="contain"
               />
             ) : null}
-            <CachedImage uri={team.carImageUrl} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${team.name} car`} />
+            {cars.length > 0 && (
+              <View style={styles.carsRow}>
+                {cars.map(d => (
+                  <View key={d.number} style={styles.carCard}>
+                    <CachedImage uri={d.carImageUrl} style={styles.carImage} resizeMode="contain" accessibilityLabel={`${d.name}'s car`} />
+                    <Text style={styles.carCaption} numberOfLines={1}>{formatDriverName(d.name)}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         ) : <View style={{height: insets.top + 8}} />}
 
@@ -205,22 +223,41 @@ function StatBox({label, value, flexGrow = 1}) {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
-  carImageBg: {width: '100%', aspectRatio: 2},
-  carImage: {width: '100%', flex: 1, transform: [{scale: 1.15}]},
+  // No fixed aspectRatio any more - a 4-car team (e.g. Team VERTU, NAPA Racing
+  // UK) needs more height than a 2-car one, so this sizes to carsRow's content
+  // instead; cardBgUrl's absoluteFill below still stretches to match whatever
+  // that ends up being.
+  carImageBg: {width: '100%', paddingTop: 10, paddingBottom: 14},
+  carsRow: {flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6, paddingHorizontal: 10},
+  // 46% rather than an even 50% so two cards plus the gap never wrap early on
+  // narrower screens; wraps to a second row for a 3-4 driver team (e.g. Team
+  // VERTU, NAPA Racing UK) instead of squeezing everyone into one line.
+  carCard: {width: '46%', alignItems: 'center'},
+  // aspectRatio (not a fixed height) so each car cutout's own 1536x1024
+  // (3:2) proportions hold regardless of how many rows this wraps into - a
+  // logo overlapping the top of a row is fine, same trick the old single-car
+  // hero relied on: these cutouts carry transparent sky padding above the
+  // car, so the corner logo still reads clearly through it.
+  carImage: {width: '100%', aspectRatio: 1.5},
+  carCaption: {color: Colors.textSecondary, fontSize: 11, fontWeight: '700', marginTop: 4},
   // Same top-right sponsor-logo treatment as DriversScreen/MerchScreen's team
-  // tiles - the % box works out to a similar absolute size here despite this
-  // hero being a wide 2:1 banner rather than a square tile (hero is roughly
-  // 2x the tile's width, offsetting its halved aspect ratio).
-  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', height: '34%'},
-  // Override for team.smallLogo (currently just Steel Seal): this hero's 2:1
-  // aspect makes its box proportionally *wider* than the tile's square box,
-  // so a wide edge-to-edge logo with no internal padding (Steel Seal's opaque
-  // jpg) becomes height-constrained under `contain` and fills the box's full
-  // height instead of shrinking to fit - oversized here even though the same
-  // logo looks fine on the tile screens (narrower box, constrained by width
+  // tiles, sized to the same box this always had - but as an aspectRatio
+  // rather than a height %, now that carImageBg's height is driven by how
+  // many cars it holds (1-4) instead of a fixed 2:1 banner. A height % would
+  // make the logo balloon for a 4-driver team's taller, two-row hero; the
+  // box's *width* is still 100%-of-screen-relative either way, so deriving
+  // height from width via aspectRatio (0.55 / 0.34 x the old 2:1 box) holds
+  // it at the same visual size regardless of driver count.
+  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', aspectRatio: 3.24},
+  // Override for team.smallLogo (currently just Steel Seal): this box is
+  // proportionally *wider* than the standard one above, so a wide edge-to-edge
+  // logo with no internal padding (Steel Seal's opaque jpg) becomes
+  // height-constrained under `contain` and fills the box's full height
+  // instead of shrinking to fit - oversized here even though the same logo
+  // looks fine on the tile screens (narrower box, constrained by width
   // instead). Scoped to this one flag rather than shrinking teamLogoImg
   // itself, which would shrink every other team's hero logo too.
-  teamLogoImgSmall: {position: 'absolute', top: 8, right: 8, width: '45%', height: '26%'},
+  teamLogoImgSmall: {position: 'absolute', top: 8, right: 8, width: '45%', aspectRatio: 3.46},
   content: {padding: 16},
   teamName: {color: '#fff', fontSize: 24, fontWeight: '900'},
   teamCar: {color: Colors.textSecondary, fontSize: 14, marginTop: 4},

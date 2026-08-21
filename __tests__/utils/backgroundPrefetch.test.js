@@ -95,6 +95,26 @@ describe('runBackgroundPrefetch', () => {
     expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/28.png');
   });
 
+  it('prefetches each driver\'s own carImageUrl (now rendered on both their DriversScreen tile and their team\'s TeamDetailScreen hero)', async () => {
+    fetchDrivers.mockResolvedValue({});
+    fetchArticles.mockResolvedValue([]);
+    parseGrid.mockReturnValue({
+      drivers: [
+        {name: 'Dexter Patterson', imageUrl: null, carImageUrl: 'https://cdn.example.com/patterson-car.png'},
+        {name: 'Nick Halstead',    imageUrl: null, carImageUrl: 'https://cdn.example.com/halstead-car.webp'},
+      ],
+      teams: [],
+    });
+
+    runBackgroundPrefetch();
+    jest.advanceTimersByTime(3000);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/patterson-car.png');
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example.com/halstead-car.webp');
+  });
+
   it('prefetches article image URLs returned from API', async () => {
     fetchDrivers.mockResolvedValue({});
     parseGrid.mockReturnValue({drivers: [], teams: []});

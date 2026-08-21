@@ -610,37 +610,124 @@ describe('TeamDetailScreen', () => {
   });
 
   it('team sponsor logo renders on the hero (top-right, same treatment as the Grid/Merch tiles) when logoUrl is set', async () => {
-    // The hero only mounts at all when carImageUrl is set (see TeamDetailScreen.js) - the
-    // car and logo CachedImages both count here, so 2 is the floor, not the logo alone.
+    // The hero mounts whenever there's a logo or at least one driver car to show
+    // (see TeamDetailScreen.js) - logoUrl alone is enough here, no car needed.
     const teamWithLogo = {
       ...TEAM,
-      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
       logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
     };
     const route = makeRoute({team: teamWithLogo});
     const {getAllByTestId} = renderWithProviders(
       <TeamDetailScreen route={route} navigation={nav} />,
     );
-    await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(2));
+    await waitFor(() => expect(getAllByTestId('cached-image').length).toBeGreaterThanOrEqual(1));
   });
 
   it('no logo image renders on the hero when logoUrl is absent', async () => {
     const teamWithCarOnly = {
       ...TEAM,
-      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
+      drivers: [{name: 'Tom Ingram', number: 80, imageUrl: null, carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.png'}],
     };
     const route = makeRoute({team: teamWithCarOnly});
     const {getAllByTestId} = renderWithProviders(
       <TeamDetailScreen route={route} navigation={nav} />,
     );
-    // Just the car image - no separate logo CachedImage without logoUrl.
-    await waitFor(() => expect(getAllByTestId('cached-image').length).toBe(1));
+    // Just the driver's car image - no separate logo CachedImage without logoUrl.
+    await waitFor(() => {
+      const images = getAllByTestId('cached-image');
+      expect(images.some(img => img.props.source.uri?.includes('logoImages'))).toBe(false);
+      expect(images.some(img => img.props.source.uri?.includes('carImages'))).toBe(true);
+    });
+  });
+
+  // A team's hero used to show one carImageUrl representing the whole team;
+  // it now shows one card per active driver's OWN car (team.drivers, already
+  // filtered to the current non-reserve roster by parseGrid) - accurate for
+  // a team fielding more than one livery, e.g. Steel Seal with Power Maxed
+  // Racing's Dexter Patterson vs. Nick Halstead's separately-liveried "Ask GVT" car.
+  describe('hero shows each driver\'s own car', () => {
+    it("renders one car image per driver, using each driver's own carImageUrl", async () => {
+      const teamWithTwoCars = {
+        ...TEAM,
+        drivers: [
+          {name: 'Dexter Patterson', number: 17, imageUrl: null, carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png'},
+          {name: 'Nick Halstead',    number: 55, imageUrl: null, carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp'},
+        ],
+      };
+      const route = makeRoute({team: teamWithTwoCars});
+      const {getAllByTestId} = renderWithProviders(
+        <TeamDetailScreen route={route} navigation={nav} />,
+      );
+      await waitFor(() => {
+        const carUris = getAllByTestId('cached-image')
+          .map(img => img.props.source.uri)
+          .filter(uri => uri?.includes('carImages'));
+        expect(carUris.sort()).toEqual([
+          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp',
+          'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png',
+        ]);
+      });
+    });
+
+    it('shows each car\'s driver name as a caption', async () => {
+      const teamWithTwoCars = {
+        ...TEAM,
+        drivers: [
+          {name: 'Dexter Patterson', number: 17, imageUrl: null, carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png'},
+          {name: 'Nick Halstead',    number: 55, imageUrl: null, carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp'},
+        ],
+      };
+      const route = makeRoute({team: teamWithTwoCars});
+      const {getAllByText} = renderWithProviders(
+        <TeamDetailScreen route={route} navigation={nav} />,
+      );
+      // formatDriverName uppercases the surname. Each name appears twice - once
+      // as this caption, once more in the DRIVERS grid further down the same
+      // screen - so getAllByText (not getByText, which requires a single match).
+      await waitFor(() => {
+        expect(getAllByText('Dexter PATTERSON').length).toBeGreaterThanOrEqual(1);
+        expect(getAllByText('Nick HALSTEAD').length).toBeGreaterThanOrEqual(1);
+      });
+    });
+
+    it('skips a driver with no carImageUrl of their own (e.g. a reserve with no car cutout yet)', async () => {
+      const teamWithOneCarMissing = {
+        ...TEAM,
+        drivers: [
+          {name: 'Tom Ingram', number: 80, imageUrl: null, carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.png'},
+          {name: 'Max Buxton', number: 19, imageUrl: null, carImageUrl: ''},
+        ],
+      };
+      const route = makeRoute({team: teamWithOneCarMissing});
+      const {getAllByTestId} = renderWithProviders(
+        <TeamDetailScreen route={route} navigation={nav} />,
+      );
+      await waitFor(() => {
+        const carUris = getAllByTestId('cached-image')
+          .map(img => img.props.source.uri)
+          .filter(uri => uri?.includes('carImages'));
+        expect(carUris).toEqual(['https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.png']);
+      });
+    });
+
+    it('shows the hero with no car cards when no driver has a carImageUrl and there is no logo either', async () => {
+      const teamWithNeither = {...TEAM, drivers: [{name: 'Max Buxton', number: 19, imageUrl: null, carImageUrl: ''}]};
+      const route = makeRoute({team: teamWithNeither});
+      const {queryAllByTestId} = renderWithProviders(
+        <TeamDetailScreen route={route} navigation={nav} />,
+      );
+      await waitFor(() => {
+        const carUris = queryAllByTestId('cached-image')
+          .map(img => img.props.source.uri)
+          .filter(uri => uri?.includes('carImages'));
+        expect(carUris).toEqual([]);
+      });
+    });
   });
 
   it('uses the standard, larger logo box on the hero when team.smallLogo is not set', async () => {
     const teamWithLogo = {
       ...TEAM,
-      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
       logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
     };
     const route = makeRoute({team: teamWithLogo});
@@ -659,7 +746,6 @@ describe('TeamDetailScreen', () => {
     // too - reported live after the first attempt at this fix.
     const teamWithSmallLogo = {
       ...TEAM,
-      carImageUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/team-ingram-car.png',
       logoUrl: 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-ingram.png',
       smallLogo: true,
     };

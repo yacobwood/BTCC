@@ -28,7 +28,7 @@
       "class": "I",
       "livesIn": "Cambridge",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/2.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/deleon.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/2.png"
     },
     {
@@ -274,7 +274,7 @@
       "class": "M",
       "livesIn": "Surrey",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/3.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/chilton.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/3.png"
     },
     {
@@ -327,7 +327,7 @@
       ],
       "class": "M",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/11.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/collard.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/11.png"
     },
     {
@@ -344,7 +344,7 @@
       "class": "M",
       "livesIn": "Lavendon",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/15.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/selby.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/15.png"
     },
     {
@@ -542,7 +542,7 @@
       "class": "I",
       "livesIn": "Midlothian",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/16.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/moffat.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/16.png"
     },
     {
@@ -596,7 +596,7 @@
       "class": "I",
       "livesIn": "Glasgow",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/17.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/17.png"
     },
     {
@@ -752,7 +752,7 @@
       "class": "I",
       "livesIn": "Carrickfergus",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/22.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/smiley.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/22.png"
     },
     {
@@ -866,7 +866,7 @@
       "class": "M",
       "livesIn": "Bracknell",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/27.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/cammish.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/27.png"
     },
     {
@@ -956,7 +956,7 @@
       "class": "M",
       "livesIn": "Hertfordshire",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/driver-28.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/28.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/hamilton.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/28.png"
     },
     {
@@ -972,7 +972,7 @@
       "history": [],
       "class": "I",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/29.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/gilbert.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/29.png"
     },
     {
@@ -1062,7 +1062,7 @@
       "class": "M",
       "livesIn": "Worcestershire",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/32.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/robottom.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/32.png"
     },
     {
@@ -1248,7 +1248,7 @@
       "class": "M",
       "livesIn": "Lancashire",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/33.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/morgan.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/33.png"
     },
     {
@@ -1410,7 +1410,7 @@
       "class": "I",
       "livesIn": "Dublin, IRL",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/50.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/taylorsmith.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/50.png"
     },
     {
@@ -1639,7 +1639,7 @@
       "birthplace": "Edinburgh, Scotland",
       "class": "I",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/52.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/shedden.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/52.png"
     },
     {
@@ -1669,7 +1669,7 @@
       "class": "M",
       "livesIn": "Kings Lynn",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/bensley.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/7.png"
     },
     {
@@ -1677,7 +1677,7 @@
       "name": "Nick Halstead",
       "team": "Steel Seal with Power Maxed Racing",
       "car": "Audi A3 Saloon",
-      "imageUrl": "https://btcc.net/wp-content/uploads/2024/03/2026-Halstead-Nick-0H5A0744-cut-out-scaled.png",
+      "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/55.webp",
       "nationality": "British",
       "bio": "Nick Halstead returns to the BTCC for 2026 with Power Maxed Racing. The newly numbered #55 was originally a relative latecomer to racing, making his competitive debut in 2017. Despite his late start, he quickly proved his talent by winning the Am category of the Ginetta GT5 Challenge in just his second season, showcasing his natural racing ability.\n\nFollowing his early success, Halstead became a regular on the BTCC support package, competing in the Ginetta GT4 Supercup. His debut season in the Supercup was particularly impressive, as he scored 16 podiums, including five race victories, establishing himself as a formidable competitor in the series. Building on this momentum, Halstead took on a new challenge in 2020, stepping up to the British GT Championship in the GT4 Pro/Am class. His performance was outstanding, and he finished the season in second, further cementing his status in British motorsport.\n\nIn 2021, Halstead made his British Touring Car Championship (BTCC) debut, stepping in for Rick Parfitt at Croft after Parfitt was unable to participate. Although it was a challenging introduction to the highly competitive BTCC field, Halstead showed steady improvement throughout race day, securing a best finish of 21st in the third race on the 2.13-mile circuit. This experience provided valuable insights into the demands of touring car racing, setting the stage for his future in the series.\n\nHalstead embarked on his first full season in the BTCC in 2023, joining the grid with defending champions BRISTOL STREET MOTORS with EXCELR8. Throughout the season, he demonstrated determination and growth, culminating in two points-scoring finishes. His best result came in the opening round at Donington Park, where he achieved a seventh-place finish, marking a significant milestone in his BTCC career.\n\nIn 2024, Halstead returned to the renamed Team BRISTOL STREET MOTORS with renewed focus and ambition. With the support of a strong team and a year of full-season BTCC competition under his belt, Halstead made further progress and continued his climb up the championship standings.\n\nHis most recent season saw Halstead make the switch to join Power Maxed Racing after missing the opening event. The 54-year-old would have his second-best season in the championship despite missing three races and switching from the Vauxhall Astra to the CUPRA Leon ahead of the Knockhill event.\n\nFor the current campaign, the newly numbered #55 rejoins Power Maxed Racing to pilot the Audi A3 Saloon. Halstead returns to the team after missing the opening half of the season, joining up with the squad from Knockhill onwards.",
       "dateOfBirth": "1972-04-09",
@@ -1747,7 +1747,7 @@
       "class": "I",
       "livesIn": "Hampshire",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/55.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/halstead.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/55.png"
     },
     {
@@ -1921,7 +1921,7 @@
       "class": "M",
       "livesIn": "Bristol",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/66.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/cook.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/66.png"
     },
     {
@@ -2023,7 +2023,7 @@
       "class": "M",
       "livesIn": "Nottinghamshire",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/77.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/osborne.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/77.png"
     },
     {
@@ -2187,7 +2187,7 @@
       "class": "M",
       "livesIn": "Coventry",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/80.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/ingram.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/80.png"
     },
     {
@@ -2253,7 +2253,7 @@
       "class": "I",
       "livesIn": "Surrey",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/88.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/doble.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/88.png"
     },
     {
@@ -2282,7 +2282,7 @@
       ],
       "class": "I",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/99.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/rainford.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/99.png"
     },
     {
@@ -2424,7 +2424,7 @@
       "class": "M",
       "livesIn": "Essex",
       "cardBgUrl": "",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/116.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/sutton.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/116.png"
     },
     {
@@ -2580,7 +2580,7 @@
       "dateOfBirth": "1992-03-04",
       "birthplace": "Huddersfield, West Yorkshire",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/driver-123.jpg",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/123.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/lloyd.png",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/123.png"
     },
     {
@@ -2658,7 +2658,7 @@
       "birthplace": "Aylesbury, Buckinghamshire",
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/napa-racing-uk.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/napa-racing-uk.jpg",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/15.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/selby.png",
       "totalRaces": 171,
       "totalWins": 51,
       "sponsors": [
@@ -2818,7 +2818,7 @@
       ],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-vertu.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/team-vertu.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/3.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/chilton.png",
       "totalRaces": 228,
       "totalWins": 39,
       "sponsors": [
@@ -2975,7 +2975,7 @@
       ],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/speedworks-corolla-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/speedworks-corolla-racing.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/7.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/bensley.webp",
       "totalRaces": 376,
       "totalWins": 29,
       "sponsors": [
@@ -3104,7 +3104,7 @@
       ],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/wsr.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/wsr.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/2.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/deleon.png",
       "totalRaces": 765,
       "totalWins": 127,
       "lightCardBg": true,
@@ -3273,7 +3273,7 @@
       ],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/lkq-euro-car-parts-with-power-maxed-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/lkq-euro-car-parts-with-power-maxed-racing.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/16.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/moffat.png",
       "totalRaces": 6,
       "totalWins": 0,
       "lightCardBg": true,
@@ -3354,7 +3354,7 @@
       "history": [],
       "logoUrl": "",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/cprl.webp",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/32.webp",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/robottom.webp",
       "totalRaces": 6,
       "totalWins": 1,
       "sponsors": [],
@@ -3437,7 +3437,7 @@
       ],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/restart-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/restart-racing.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/22.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/smiley.png",
       "totalRaces": 66,
       "totalWins": 1,
       "sponsors": [
@@ -3553,7 +3553,7 @@
       "history": [],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/laser-tools-racing-with-mb-motorsport.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/laser-tools-racing-with-mb-motorsport.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/50.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/taylorsmith.png",
       "sponsors": [
         {
           "name": "Laser Tools",
@@ -3694,7 +3694,7 @@
       "history": [],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/steel-seal-with-power-maxed-racing.jpg",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/steel-seal-with-power-maxed-racing.png",
-      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/17.png",
+      "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.png",
       "totalRaces": 276,
       "totalWins": 6,
       "lightCardBg": true,
@@ -3765,7 +3765,7 @@
           "tier": "decal"
         }
       ],
-      "sponsorsNote": "Covers Dexter Patterson's #17 car. Nick Halstead's #55 car (added mid-season) has been reported under a different \"AskGVT\" livery in press photos, but this could not be confirmed against the team's own sponsor announcements - flagged for a follow-up check once a clearer photo is available."
+      "sponsorsNote": "Covers Dexter Patterson's #17 car. Nick Halstead's #55 car (added mid-season) runs a separate \"Ask GVT\" title livery, confirmed 2026-08-21 via an official car photo - not reflected in the sponsor list above, which still describes Patterson's car only."
     }
   ]
 }

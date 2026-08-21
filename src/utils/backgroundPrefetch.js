@@ -29,7 +29,14 @@ async function prefetchDrivers() {
       // differs from their team's, which teams.cardBgUrl alone would miss.
       ...drivers.map(d => thumbUrl(d.cardBgUrl)).filter(Boolean),
       ...drivers.map(d => thumbUrl(d.numberImageUrl)).filter(Boolean),
-      ...teams.map(t => thumbUrl(t.carImageUrl)).filter(Boolean),
+      // Driver-level, not team-level: each driver now shows their own car on
+      // their DriversScreen tile, and TeamDetailScreen's hero shows one card
+      // per driver too (see both screens) - team.carImageUrl alone would
+      // miss a driver whose own liveried car differs from it (e.g. Nick
+      // Halstead's "Ask GVT" car vs Steel Seal with Power Maxed Racing's
+      // team-level fallback), and this already covers that fallback case too
+      // since attachTeamDisplayFields resolves it onto the driver anyway.
+      ...drivers.map(d => thumbUrl(d.carImageUrl)).filter(Boolean),
       ...teams.map(t => thumbUrl(t.cardBgUrl)).filter(Boolean),
     ];
     await batchPrefetch(urls);

@@ -83,6 +83,15 @@ function DriverCardInner({item, onPress, fav}) {
             <Icon name="star" size={12} color={Colors.yellow} />
           </View>
         )}
+        {/* Now that a team's cars can carry different sponsor liveries (e.g.
+            Steel Seal with Power Maxed Racing fields both Dexter Patterson's
+            car and Nick Halstead's separately-liveried "Ask GVT" one), the
+            driver's OWN car - not a shared team image - has to live on their
+            tile. Bottom-left keeps it clear of the top-right number/logo
+            badge and the top-right favBadge above. */}
+        {item.carImageUrl ? (
+          <CachedImage uri={item.carImageUrl} style={styles.driverCarImg} resizeMode="contain" accessibilityLabel={`${item.name}'s car`} />
+        ) : null}
       </View>
       <View style={styles.driverFooter}>
         <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
@@ -203,11 +212,13 @@ export default function DriversScreen({navigation}) {
         ) : (
           <View style={[StyleSheet.absoluteFill, {backgroundColor: Colors.surface}]} />
         )}
+        {/* A shared team tile can no longer show one car as "the" team car -
+            some teams field a different livery per driver (see driverCarImg
+            above), so a single cutout here would just be misleading about
+            which car it is. The logo is the one thing every entry shares,
+            so it takes over the whole tile instead of a small top-right badge. */}
         {item.logoUrl ? (
-          <CachedImage uri={item.logoUrl} style={styles.teamLogoImg} resizeMode="contain" />
-        ) : null}
-        {item.carImageUrl ? (
-          <CachedImage uri={item.carThumbUrl || item.carImageUrl} style={styles.teamCarImage} resizeMode="contain" />
+          <CachedImage uri={item.logoUrl} style={styles.teamLogoImgLarge} resizeMode="contain" />
         ) : null}
       </View>
       <View style={styles.teamFooter}>
@@ -271,16 +282,20 @@ const styles = StyleSheet.create({
   // % of the square driverImageArea so it scales consistently at any tile size.
   driverNumberImg: {position: 'absolute', top: 0, right: 0, width: '60%', height: '48%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
+  // Driver's own car cutout, badge-sized into the bottom-left corner - deliberately
+  // small/secondary to the driver photo, and confined to a quadrant so it never
+  // collides with the top-right number badge/favBadge above.
+  driverCarImg: {position: 'absolute', bottom: 4, left: 4, width: '46%', height: '30%'},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
-  teamImageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'flex-end', alignItems: 'center'},
-  teamCarImage: {width: '100%', height: '85%'},
-  // Sponsor/team logo, badge-positioned like driverNumberImg above (top-right,
-  // behind the car cutout) but sized down from that treatment - these are
-  // third-party wordmarks of varying aspect ratio, not a big brand number
-  // meant to dominate the tile, so contain within a modest corner box.
-  teamLogoImg: {position: 'absolute', top: 8, right: 8, width: '55%', height: '34%'},
+  // centered (not flex-end like driverImageArea) now that the logo, not a
+  // bottom-anchored car cutout, is the tile's one big graphic.
+  teamImageArea: {width: '100%', aspectRatio: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center'},
+  // Large and centered - each team can field more than one livery now (see
+  // driverCarImg above), so the tile no longer tries to show "the" team car;
+  // the logo is the one thing every one of its cars/drivers shares.
+  teamLogoImgLarge: {width: '70%', height: '70%'},
   teamFooter: {padding: 10},
   teamName: {color: '#fff', fontSize: 13, fontWeight: '800'},
   divider: {height: 1, backgroundColor: 'rgba(42,45,68,0.5)', marginVertical: 12},

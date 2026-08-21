@@ -180,10 +180,14 @@ export function parseDriverHistory(history) {
 // page can be shared by multiple sub-liveries with different card colours
 // (e.g. "Steel Seal with Power Maxed Racing"), so team-only lookup got
 // those specific drivers wrong. carImageUrl follows the same precedence
-// for consistency, even though no screen reads driver.carImageUrl yet -
-// every driver already has their own car cutout on disk (data/carImages/),
-// only team.carImageUrl (one representative driver per team) is consumed
-// today by TeamDetailScreen/DriversScreen's team tile/MerchScreen.
+// for consistency - every driver has their own car cutout on disk
+// (data/carImages/, named by surname), and since 2026-08-21 that resolved
+// per-driver value is what DriversScreen's driver tile and TeamDetailScreen's
+// hero actually render (one card per driver there, not one per team).
+// team.carImageUrl itself is now purely the fallback used above, for a
+// driver with no car cutout of their own yet - DriversScreen/MerchScreen's
+// team tiles dropped the car entirely (just the shared logo now), since a
+// single "representative" car can no longer describe a multi-livery team.
 export function attachTeamDisplayFields(driver, rawTeams) {
   const team = (rawTeams || []).find(t => t.name === driver.team);
   const {class: rawClass, ...rest} = driver; // `class` is raw-shape only; output uses `cls`
