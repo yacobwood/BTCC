@@ -778,6 +778,31 @@ def _parse_driver_rows(elems):
     return entries
 
 
+# Some teams' TSL championship PDFs keep printing a renamed team's old name
+# for its real season total while a *separate* row for the new name shows up
+# alongside it with 0 points - not a parsing bug, this is what the source PDF
+# itself contains while officials transition a mid-season name change (seen
+# 2026-08-22, Donington Park GP round 7: "Cataclean Plato Racing" pos 4/282pts
+# and "CPRL" pos 10/0pts both present in the same table). Without this, the
+# same team shows up twice on the Teams tab. See scrape_team_stats.py's
+# TEAM_SLUGS comment for the same rename on the drivers.json side.
+TEAM_NAME_ALIASES = {
+    "Cataclean Plato Racing": "CPRL",
+}
+
+
+def _normalize_team_entries(entries):
+    """Canonicalize aliased team names and merge any resulting duplicate rows
+    (summing points), then re-rank so pos stays a contiguous, points-descending
+    sequence. A no-op for any name not in TEAM_NAME_ALIASES."""
+    totals = {}
+    for e in entries:
+        name = TEAM_NAME_ALIASES.get(e["team"], e["team"])
+        totals[name] = totals.get(name, 0) + e["points"]
+    ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
+    return [{"pos": i + 1, "team": name, "points": points} for i, (name, points) in enumerate(ranked)]
+
+
 def _parse_team_rows(elems):
     """Parse a team/manufacturer championship section. Column positions are read
     from the section's own header text."""
@@ -803,7 +828,7 @@ def _parse_team_rows(elems):
             continue
         entries.append({"pos": pos, "team": name, "points": _to_int(pts_text)})
         pos += 1
-    return entries
+    return _normalize_team_entries(entries)
 
 
 def _backfill_teams(driver_list, output_rounds):

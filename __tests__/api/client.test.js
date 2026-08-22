@@ -441,6 +441,34 @@ describe('fetchArticleBySlug', () => {
     expect(cacheRead).not.toHaveBeenCalled();
     expect(result).toEqual(article);
   });
+
+  // Regression: skipping the app's own cache isn't enough - a plain fetch(url)
+  // repeated within raw.githubusercontent.com's Cache-Control: max-age=300
+  // window can still be served from a CDN edge cache for that exact URL, so
+  // forceRefresh must also cache-bust the request itself (2026-08-22, Ingram
+  // Donington Park FP notification: gate + retry both passed, article still
+  // 404'd on first tap).
+  it('forceRefresh cache-busts both the index and page requests, not just the app cache', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve({'just-published': 1})})
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve([{id: 3, slug: 'just-published'}])});
+
+    await fetchArticleBySlug('just-published', true);
+
+    expect(global.fetch.mock.calls[0][0]).toMatch(/articles\/index\.json\?_cb=\d+/);
+    expect(global.fetch.mock.calls[1][0]).toMatch(/articles\/page_1\.json\?_cb=\d+/);
+  });
+
+  it('does not cache-bust a plain (non-forced) request', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve({'some-slug': 1})})
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve([{id: 1, slug: 'some-slug'}])});
+
+    await fetchArticleBySlug('some-slug');
+
+    expect(global.fetch.mock.calls[0][0]).not.toContain('_cb=');
+    expect(global.fetch.mock.calls[1][0]).not.toContain('_cb=');
+  });
 });
 
 describe('fetchLiveStatus', () => {

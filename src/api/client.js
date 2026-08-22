@@ -43,7 +43,18 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
   }
   // No cache (or forced refresh)  -  fetch and wait
   try {
-    const res = await fetch(url);
+    // forceRefresh is meant to guarantee genuinely fresh data, but a plain
+    // fetch(url) can still be served from a CDN edge cache for that exact
+    // URL - raw.githubusercontent.com sends Cache-Control: max-age=300, so a
+    // repeat request within that window can return the same stale response
+    // forceRefresh was meant to bypass (confirmed live 2026-08-22: a push
+    // notification's article mirror gate and the phone's own fetch can hit
+    // two different edge nodes on two different 5-minute clocks, so the gate
+    // passing is no guarantee the requesting device's edge has caught up).
+    // Cache-bust with a unique URL, same fix fetchHubPosts already uses for
+    // hub_news.json, so this can never be satisfied from any HTTP cache.
+    const fetchUrl = forceRefresh ? `${url}${url.includes('?') ? '&' : '?'}_cb=${Date.now()}` : url;
+    const res = await fetch(fetchUrl);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (cacheKey) cacheWrite(cacheKey, data);

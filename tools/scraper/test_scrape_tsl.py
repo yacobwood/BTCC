@@ -437,6 +437,54 @@ class TestApplyDrawOverride(unittest.TestCase):
         self.assertIsNone(r2_r3.get('reverseGridDraw'))
 
 
+# ── _normalize_team_entries ──────────────────────────────────────────────────
+# Regression: 2026-08-22, Donington Park GP round 7 - the official TSL teams
+# championship PDF listed "Cataclean Plato Racing" (282pts) and its renamed
+# successor "CPRL" (0pts) as two separate rows for the same team, corrupting
+# the Teams tab with a phantom last-place duplicate.
+
+class TestNormalizeTeamEntries(unittest.TestCase):
+
+    def test_merges_aliased_name_into_canonical_name(self):
+        entries = [
+            {'pos': 4, 'team': 'Cataclean Plato Racing', 'points': 282},
+            {'pos': 10, 'team': 'CPRL', 'points': 0},
+        ]
+        result = s._normalize_team_entries(entries)
+        self.assertEqual([e['team'] for e in result].count('CPRL'), 1)
+        self.assertEqual([e for e in result if e['team'] == 'CPRL'][0]['points'], 282)
+
+    def test_reranks_contiguously_by_points_after_merge(self):
+        entries = [
+            {'pos': 1, 'team': 'Team VERTU', 'points': 333},
+            {'pos': 4, 'team': 'Cataclean Plato Racing', 'points': 282},
+            {'pos': 5, 'team': 'Restart Racing', 'points': 187},
+            {'pos': 10, 'team': 'CPRL', 'points': 0},
+        ]
+        result = s._normalize_team_entries(entries)
+        self.assertEqual([e['pos'] for e in result], [1, 2, 3])
+        self.assertEqual([e['points'] for e in result], sorted([e['points'] for e in result], reverse=True))
+
+    def test_no_op_when_no_alias_present(self):
+        entries = [
+            {'pos': 1, 'team': 'Team VERTU', 'points': 333},
+            {'pos': 2, 'team': 'WSR', 'points': 293},
+        ]
+        result = s._normalize_team_entries(entries)
+        self.assertEqual(result, entries)
+
+    def test_sums_points_of_multiple_rows_sharing_the_alias_target_name(self):
+        # Guards against a future alias mapping many old names onto one
+        # canonical name all appearing in the same table at once.
+        entries = [
+            {'pos': 3, 'team': 'Cataclean Plato Racing', 'points': 200},
+            {'pos': 7, 'team': 'CPRL', 'points': 50},
+        ]
+        result = s._normalize_team_entries(entries)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], {'pos': 1, 'team': 'CPRL', 'points': 250})
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()
