@@ -5,12 +5,6 @@
     "title": {
       "rendered": "Adam Morgan does the double!"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c04ceeba-35af-4bd0-89df-093331fd212a-Morgan-KY2A2789.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
