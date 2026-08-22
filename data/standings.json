@@ -6,7 +6,7 @@
       "driver": "Ashley SUTTON",
       "nat": "GBR",
       "class": "M",
-      "points": 327,
+      "points": 334,
       "wins": 7,
       "seconds": 6,
       "thirds": 0,
@@ -18,7 +18,7 @@
       "driver": "Tom INGRAM",
       "nat": "GBR",
       "class": "M",
-      "points": 246,
+      "points": 250,
       "wins": 2,
       "seconds": 3,
       "thirds": 3,
@@ -30,7 +30,7 @@
       "driver": "Dan CAMMISH",
       "nat": "GBR",
       "class": "M",
-      "points": 233,
+      "points": 239,
       "wins": 1,
       "seconds": 2,
       "thirds": 3,
@@ -42,7 +42,7 @@
       "driver": "Ricky COLLARD",
       "nat": "GBR",
       "class": "M",
-      "points": 180,
+      "points": 183,
       "wins": 0,
       "seconds": 3,
       "thirds": 3,
@@ -50,63 +50,63 @@
     },
     {
       "pos": 5,
-      "car": "99",
-      "driver": "Charles RAINFORD",
-      "nat": "GBR",
-      "class": "I",
-      "points": 169,
-      "wins": 2,
-      "seconds": 0,
-      "thirds": 1,
-      "team": "WSR"
-    },
-    {
-      "pos": 6,
-      "car": "88",
-      "driver": "Mikey DOBLE",
-      "nat": "GBR",
-      "class": "I",
-      "points": 167,
-      "wins": 1,
-      "seconds": 0,
-      "thirds": 1,
-      "team": "LKQ Euro Car Parts with Power Maxed Racing"
-    },
-    {
-      "pos": 7,
       "car": "66",
       "driver": "Josh COOK",
       "nat": "GBR",
       "class": "M",
-      "points": 164,
+      "points": 172,
       "wins": 1,
       "seconds": 1,
       "thirds": 1,
       "team": "Speedworks Corolla Racing"
     },
     {
-      "pos": 8,
+      "pos": 6,
       "car": "33",
       "driver": "Adam MORGAN",
       "nat": "GBR",
       "class": "M",
-      "points": 161,
+      "points": 171,
       "wins": 1,
       "seconds": 1,
       "thirds": 0,
       "team": "CPRL"
     },
     {
-      "pos": 9,
+      "pos": 7,
+      "car": "99",
+      "driver": "Charles RAINFORD",
+      "nat": "GBR",
+      "class": "I",
+      "points": 170,
+      "wins": 2,
+      "seconds": 0,
+      "thirds": 1,
+      "team": "WSR"
+    },
+    {
+      "pos": 8,
       "car": "32",
       "driver": "Daniel ROWBOTTOM",
       "nat": "GBR",
       "class": "M",
-      "points": 161,
+      "points": 170,
       "wins": 0,
       "seconds": 2,
       "thirds": 1,
       "team": "CPRL"
+    },
+    {
+      "pos": 9,
+      "car": "88",
+      "driver": "Mikey DOBLE",
+      "nat": "GBR",
+      "class": "I",
+      "points": 168,
+      "wins": 1,
+      "seconds": 0,
+      "thirds": 1,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
       "pos": 10,
@@ -114,7 +114,7 @@
       "driver": "Gordon SHEDDEN",
       "nat": "GBR",
       "class": "I",
-      "points": 150,
+      "points": 155,
       "wins": 1,
       "seconds": 0,
       "thirds": 2,
@@ -150,7 +150,7 @@
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 115,
+      "points": 118,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -162,7 +162,7 @@
       "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
       "nat": "IRL",
       "class": "I",
-      "points": 104,
+      "points": 109,
       "wins": 1,
       "seconds": 0,
       "thirds": 0,
@@ -174,7 +174,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 93,
+      "points": 95,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -186,7 +186,7 @@
       "driver": "Aiden MOFFAT",
       "nat": "GBR",
       "class": "I",
-      "points": 91,
+      "points": 93,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -210,7 +210,7 @@
       "driver": "Sam OSBORNE",
       "nat": "GBR",
       "class": "M",
-      "points": 54,
+      "points": 58,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -299,6 +299,18 @@
       "seconds": 0,
       "thirds": 0,
       "team": "Steel Seal with Power Maxed Racing"
+    },
+    {
+      "pos": 26,
+      "car": "123",
+      "driver": "Daniel LLOYD",
+      "nat": "GBR",
+      "class": "I",
+      "points": 0,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "team": "Restart Racing"
     }
   ],
   "teams": [
@@ -346,6 +358,11 @@
       "pos": 9,
       "team": "Steel Seal with Power Maxed Racing",
       "points": 115
+    },
+    {
+      "pos": 10,
+      "team": "CPRL",
+      "points": 0
     }
   ],
   "manufacturers": [
@@ -529,6 +546,18 @@
       "seconds": 0,
       "thirds": 0,
       "team": "Steel Seal with Power Maxed Racing"
+    },
+    {
+      "pos": 12,
+      "car": "123",
+      "driver": "Daniel LLOYD",
+      "nat": "GBR",
+      "class": "I",
+      "points": 0,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 0,
+      "team": "Restart Racing"
     }
   ],
   "jst": [
@@ -644,5 +673,5 @@
   "season": "2026",
   "round": 7,
   "venue": "Donington Park GP",
-  "updated": "2026-08-22T14:36:54Z"
+  "updated": "2026-08-22T14:43:01Z"
 }
