@@ -1,8 +1,4 @@
 {
-  "season": "2026",
-  "round": 6,
-  "venue": "Knockhill",
-  "updated": "2026-08-09T18:55:56Z",
   "standings": [
     {
       "pos": 1,
@@ -323,7 +319,7 @@
     },
     {
       "pos": 4,
-      "team": "CPRL",
+      "team": "Cataclean Plato Racing",
       "points": 282
     },
     {
@@ -644,5 +640,9 @@
       "thirds": 0,
       "team": "Steel Seal with Power Maxed Racing"
     }
-  ]
+  ],
+  "season": "2026",
+  "round": 6,
+  "venue": "Knockhill",
+  "updated": "2026-08-22T09:01:13Z"
 }
