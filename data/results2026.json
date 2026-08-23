@@ -16536,20 +16536,6 @@
             },
             {
               "pos": 5,
-              "no": 116,
-              "cl": "M",
-              "driver": "Ashley SUTTON",
-              "team": "NAPA Racing UK",
-              "car": "Ford Focus Titanium",
-              "laps": 14,
-              "time": "22:25.262",
-              "gap": "8.478",
-              "bestLap": "1:34.791",
-              "points": 11,
-              "leadLap": false
-            },
-            {
-              "pos": 6,
               "no": 99,
               "cl": "I",
               "driver": "Charles RAINFORD",
@@ -16559,11 +16545,11 @@
               "time": "22:26.580",
               "gap": "9.796",
               "bestLap": "1:34.522",
-              "points": 10,
+              "points": 11,
               "leadLap": false
             },
             {
-              "pos": 7,
+              "pos": 6,
               "no": 52,
               "cl": "I",
               "driver": "Gordon SHEDDEN",
@@ -16573,11 +16559,11 @@
               "time": "22:26.618",
               "gap": "9.834",
               "bestLap": "1:34.632",
-              "points": 9,
+              "points": 10,
               "leadLap": false
             },
             {
-              "pos": 8,
+              "pos": 7,
               "no": 66,
               "cl": "M",
               "driver": "Josh COOK",
@@ -16587,6 +16573,20 @@
               "time": "22:30.213",
               "gap": "13.429",
               "bestLap": "1:34.679",
+              "points": 9,
+              "leadLap": false
+            },
+            {
+              "pos": 8,
+              "no": 116,
+              "cl": "M",
+              "driver": "Ashley SUTTON",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 14,
+              "time": "22:30.262",
+              "gap": "13.478",
+              "bestLap": "1:34.791",
               "points": 8,
               "leadLap": false
             },
