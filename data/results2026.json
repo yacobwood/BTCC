@@ -15697,20 +15697,6 @@
             },
             {
               "pos": 13,
-              "no": 22,
-              "cl": "I",
-              "driver": "Chris SMILEY",
-              "team": "Restart Racing",
-              "car": "Hyundai i30N",
-              "laps": 17,
-              "time": "31:28.983",
-              "gap": "22.654",
-              "bestLap": "1:35.414",
-              "points": 3,
-              "leadLap": false
-            },
-            {
-              "pos": 14,
               "no": 15,
               "cl": "M",
               "driver": "Lewis SELBY",
@@ -15720,11 +15706,11 @@
               "time": "31:31.457",
               "gap": "25.128",
               "bestLap": "1:35.832",
-              "points": 2,
+              "points": 3,
               "leadLap": false
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 123,
               "cl": "I",
               "driver": "Daniel LLOYD",
@@ -15734,11 +15720,11 @@
               "time": "31:31.798",
               "gap": "25.469",
               "bestLap": "1:36.034",
-              "points": 1,
+              "points": 2,
               "leadLap": false
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 2,
               "cl": "I",
               "driver": "Daryl DE LEON",
@@ -15748,6 +15734,20 @@
               "time": "31:32.060",
               "gap": "25.731",
               "bestLap": "1:35.239",
+              "points": 1,
+              "leadLap": false
+            },
+            {
+              "pos": 16,
+              "no": 22,
+              "cl": "I",
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 17,
+              "time": "31:33.983",
+              "gap": "27.654",
+              "bestLap": "1:35.414",
               "points": 0,
               "leadLap": false
             },
@@ -15781,20 +15781,6 @@
             },
             {
               "pos": 19,
-              "no": 3,
-              "cl": "M",
-              "driver": "Tom CHILTON",
-              "team": "Team VERTU",
-              "car": "Hyundai i30N",
-              "laps": 17,
-              "time": "31:43.532",
-              "gap": "37.203",
-              "bestLap": "1:35.232",
-              "points": 0,
-              "leadLap": false
-            },
-            {
-              "pos": 20,
               "no": 55,
               "cl": "I",
               "driver": "Nick HALSTEAD",
@@ -15804,6 +15790,20 @@
               "time": "31:47.360",
               "gap": "41.031",
               "bestLap": "1:36.862",
+              "points": 0,
+              "leadLap": false
+            },
+            {
+              "pos": 20,
+              "no": 3,
+              "cl": "M",
+              "driver": "Tom CHILTON",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 17,
+              "time": "31:48.532",
+              "gap": "42.203",
+              "bestLap": "1:35.232",
               "points": 0,
               "leadLap": false
             },
@@ -16092,30 +16092,30 @@
             },
             {
               "pos": 13,
-              "no": 22,
-              "cl": "",
-              "driver": "Chris SMILEY",
-              "team": ""
-            },
-            {
-              "pos": 14,
               "no": 15,
               "cl": "",
               "driver": "Lewis SELBY",
               "team": ""
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 123,
               "cl": "",
               "driver": "Daniel LLOYD",
               "team": ""
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 2,
               "cl": "",
               "driver": "Daryl DE LEON",
+              "team": ""
+            },
+            {
+              "pos": 16,
+              "no": 22,
+              "cl": "",
+              "driver": "Chris SMILEY",
               "team": ""
             },
             {
@@ -16134,16 +16134,16 @@
             },
             {
               "pos": 19,
-              "no": 3,
+              "no": 55,
               "cl": "",
-              "driver": "Tom CHILTON",
+              "driver": "Nick HALSTEAD",
               "team": ""
             },
             {
               "pos": 20,
-              "no": 55,
+              "no": 3,
               "cl": "",
-              "driver": "Nick HALSTEAD",
+              "driver": "Tom CHILTON",
               "team": ""
             },
             {
@@ -16155,13 +16155,6 @@
             },
             {
               "pos": 22,
-              "no": 29,
-              "cl": "",
-              "driver": "Lewis GILBERT",
-              "team": ""
-            },
-            {
-              "pos": 23,
               "no": 77,
               "cl": "",
               "driver": "Sam OSBORNE",
