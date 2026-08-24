@@ -478,6 +478,35 @@ describe('TeamDetailScreen', () => {
     });
   });
 
+  // Regression (2026-08-24): same fix as DriversScreen's driver grid tiles -
+  // TouchableOpacity's built-in fade dims the whole card via per-layer paint
+  // compositing on Android (no offscreen buffer by default), briefly letting
+  // the opaque number graphic behind the driver photo show through it on
+  // press. Fixed by disabling the built-in fade and using a scrim overlay
+  // instead (see TeamDriverCard in TeamDetailScreen.js).
+  it('does not use a whole-tile opacity fade on a driver card press, and pressing in/out does not interfere with navigation', async () => {
+    const route = makeRoute({team: TEAM});
+    const {getByLabelText, UNSAFE_getAllByType} = renderWithProviders(
+      <TeamDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => getByLabelText('Tom Ingram'));
+    const {TouchableOpacity} = require('react-native');
+    // getByLabelText resolves to the underlying host view - activeOpacity/
+    // onPressIn/onPressOut are JS-level TouchableOpacity props that never
+    // reach it, so query the composite element itself.
+    const card = UNSAFE_getAllByType(TouchableOpacity).find(c => c.props.accessibilityLabel === 'Tom Ingram');
+    expect(card.props.activeOpacity).toBe(1);
+    expect(typeof card.props.onPressIn).toBe('function');
+    expect(typeof card.props.onPressOut).toBe('function');
+
+    card.props.onPressIn();
+    card.props.onPressOut();
+    fireEvent.press(getByLabelText('Tom Ingram'));
+    expect(nav.navigate).toHaveBeenCalledWith('DriverDetail', {
+      driver: expect.objectContaining({name: 'Tom Ingram'}),
+    });
+  });
+
   it('shows founded year in stats', async () => {
     const route = makeRoute({team: TEAM});
     const {getByText} = renderWithProviders(

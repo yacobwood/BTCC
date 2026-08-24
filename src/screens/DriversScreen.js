@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Dimensions,
+  Animated,
 } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -77,12 +78,27 @@ function NumberBadge({uri}) {
   );
 }
 
+// Press feedback is a dark scrim painted OVER the whole card, not a whole-tile
+// opacity fade. TouchableOpacity's own fade drops the entire subtree's alpha
+// via per-layer paint compositing on Android (no offscreen buffer by
+// default), which briefly lets the opaque number graphic underneath show
+// through the driver photo above it - reported live as "the number can
+// quickly be seen through his face" (2026-08-24). A scrim that only ever gets
+// MORE opaque on top of an unchanged, still-fully-opaque photo+number stack
+// can't produce that artifact - nothing beneath it ever has its own alpha
+// touched. activeOpacity={1} disables TouchableOpacity's built-in fade
+// entirely; onPressIn/onPressOut drive the scrim instead.
 function DriverCardInner({item, onPress, fav}) {
   const bundled = getDriverImage(item.number);
+  const pressAnim = useRef(new Animated.Value(0)).current;
+  const handlePressIn = () => Animated.timing(pressAnim, {toValue: 1, duration: 100, useNativeDriver: true}).start();
+  const handlePressOut = () => Animated.timing(pressAnim, {toValue: 0, duration: 100, useNativeDriver: true}).start();
   return (
     <TouchableOpacity
       style={[styles.driverCard, fav && styles.driverCardFav]}
-      activeOpacity={0.8}
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       onPress={onPress}
       accessibilityLabel={`${item.name}, ${item.team}, number ${item.number}`}
       accessibilityRole="button">
@@ -117,6 +133,7 @@ function DriverCardInner({item, onPress, fav}) {
       <View style={styles.driverFooter}>
         <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(item.name)}</Text>
       </View>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pressScrim, {opacity: pressAnim}]} />
     </TouchableOpacity>
   );
 }
@@ -325,6 +342,11 @@ const styles = StyleSheet.create({
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
+  // Press feedback overlay - see the comment on DriverCardInner for why this
+  // replaced a whole-card opacity fade. Painted as the card's last child so
+  // it sits above everything else; driverCard's own overflow:'hidden' clips
+  // it to the card's rounded corners.
+  pressScrim: {backgroundColor: 'rgba(0,0,0,0.25)'},
   teamCard: {width: (SCREEN_WIDTH - 32 - 10) / 2, borderRadius: 12, overflow: 'hidden', backgroundColor: Colors.card},
   // centered (not flex-end like driverImageArea) now that the logo, not a
   // bottom-anchored car cutout, is the tile's one big graphic.

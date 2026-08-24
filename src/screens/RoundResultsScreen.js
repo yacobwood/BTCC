@@ -21,7 +21,7 @@ import {fetchResults, fetchPenalties} from '../api/client';
 import {parseResults, parsePenalties} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 import {detectBroadcaster} from '../utils/broadcaster';
-import {ttbPositionMap, getTtbLaps, isSeasonOpenerRace1} from '../utils/ttb';
+import {ttbPositionMapForRace, isTtbSeasonOpener, getTtbBadge} from '../utils/ttb';
 
 // The require() path itself must stay a static literal (Metro can't resolve a
 // dynamic year here) - but every comparison below derives the current season
@@ -168,7 +168,7 @@ export default function RoundResultsScreen({route, navigation}) {
   const rStart = (round.round - 1) * 3 + 1;
   const rEnd = rStart + 2;
 
-  const makeRenderResult = (gridMap) => ({item}) => {
+  const makeRenderResult = (gridMap, ttbMap, race) => ({item}) => {
     const isDNF = item.position === 0 || item.time === 'DNF';
     const isDNS = isDNF && item.status === 'DNS';
     const posLabel = item.status === 'DQ' ? 'DQ' : isDNS ? 'DNS' : isDNF ? 'DNF' : item.position;
@@ -180,13 +180,18 @@ export default function RoundResultsScreen({route, navigation}) {
 
     const gridPos = gridMap?.[item.driver];
     const delta = (gridPos != null && !isDNF) ? gridPos - item.position : null;
+    // Same TOCA Turbo Boost allocation shown on the pre-race Starting Grid tab
+    // (reg 1.11.1) - a fixed pre-race number, not a live "laps consumed"
+    // counter (that would need per-lap deployment data this app doesn't have).
+    // getTtbBadge picks laps-of-boost or secs/lap depending on race.label.
+    const ttbBadge = getTtbBadge(race, ttbMap, item.driver, round.venue);
 
     return (
       <View style={[styles.resultRow, isDNF && styles.resultRowDNF, fav && styles.resultRowFav]} accessibilityLabel={`Position ${posLabel}, ${item.driver}, ${item.points} points`}>
         <Text style={[styles.pos, {color: isDNF ? Colors.textSecondary : posColor}]}>
           {posLabel}
         </Text>
-        <View style={{flex: 1}}>
+        <View style={{flex: 1, minWidth: 0}}>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
             {fav && <Icon name="star" size={11} color={Colors.yellow} />}
             <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>
@@ -197,7 +202,7 @@ export default function RoundResultsScreen({route, navigation}) {
             {item.pole && <Badge text="P" color={Colors.yellow} />}
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
-            <Text style={styles.teamName}>{item.team}</Text>
+            <Text style={styles.teamName} numberOfLines={1}>{item.team}</Text>
             {delta !== null && delta !== 0 && (
               <View style={styles.deltaRow}>
                 <Icon
@@ -208,6 +213,12 @@ export default function RoundResultsScreen({route, navigation}) {
                 <Text style={[styles.deltaText, {color: delta > 0 ? '#4ADE80' : '#F87171'}]}>
                   {Math.abs(delta)}
                 </Text>
+              </View>
+            )}
+            {ttbBadge && (
+              <View style={styles.ttbBadge} accessibilityLabel={ttbBadge.a11y}>
+                <Icon name="flash-on" size={10} color={Colors.yellow} />
+                <Text style={styles.ttbBadgeText}>{ttbBadge.label}</Text>
               </View>
             )}
           </View>
@@ -252,6 +263,11 @@ export default function RoundResultsScreen({route, navigation}) {
         lazy={true}
         pages={races.map((race, i) => {
           const gridMap = buildGridMap(races, i);
+          // Resolved once per race tab and reused by the post-race results
+          // list below - ttbPositionMapForRace() covers Race 1/2/3 (laps) and
+          // Qualifying/Qualifying Race (secs/lap), returning null for Free
+          // Practice or any other label, so this is a cheap no-op there.
+          const ttbMap = year === CURRENT_SEASON ? ttbPositionMapForRace(race, races, allRounds, round.round) : null;
           const isR3 = race?.label === 'Race 3';
           const isQual = race.label === 'Qualifying';
           const hasResults = race?.results?.length > 0;
@@ -313,7 +329,7 @@ export default function RoundResultsScreen({route, navigation}) {
               <FlatList
                 data={race.results}
                 keyExtractor={(_, idx) => String(idx)}
-                renderItem={makeRenderResult(gridMap)}
+                renderItem={makeRenderResult(gridMap, ttbMap, race)}
                 contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
                 ListHeaderComponent={(() => {
                   const urls = round.youtubeUrls?.length ? round.youtubeUrls : (year === CURRENT_SEASON ? (BUNDLED_YOUTUBE_URLS[round.round] || []) : []);
@@ -451,9 +467,11 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venu
   // TOCA Turbo Boost allocation (reg 1.11.1) - null when the position source
   // isn't available at all (e.g. an archive season, or Race 2 before Race 1
   // has results). At the season opener every driver gets the max TTB tier
-  // (see ttb.js header comment) rather than no badge.
-  const ttbMap = showTtb ? ttbPositionMap(race, races, allRounds, roundNumber) : null;
-  const ttbSeasonOpener = showTtb && ttbMap && isSeasonOpenerRace1(race, allRounds, roundNumber);
+  // (see ttb.js header comment) rather than no badge. Race 1/2/3 get a laps
+  // scale; Qualifying/Qualifying Race get a secs/lap scale - see getTtbBadge.
+  const ttbMap = showTtb ? ttbPositionMapForRace(race, races, allRounds, roundNumber) : null;
+  const ttbSeasonOpener = showTtb && ttbMap && isTtbSeasonOpener(race, allRounds, roundNumber);
+  const isQualifyingType = race.label === 'Qualifying' || race.label === 'Qualifying Race';
   const leftItems = sorted.filter(g => g.pos % 2 === 1);
   const rightItems = sorted.filter(g => g.pos % 2 === 0);
   const rightOffset = (GRID_CARD_HEIGHT + GRID_GAP) / 2;
@@ -464,7 +482,11 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venu
         {predicted && <Text style={styles.reverseSubtitle}>Based on {sourceLabel} finishing order</Text>}
         {ttbMap && (
           <Text style={styles.reverseSubtitle}>
-            {ttbSeasonOpener ? '⚡ Season opener - every driver gets max TOCA Turbo Boost' : '⚡ Laps of TOCA Turbo Boost available this race'}
+            {ttbSeasonOpener
+              ? '⚡ Season opener - every driver gets max TOCA Turbo Boost'
+              : isQualifyingType
+                ? '⚡ Seconds of TOCA Turbo Boost available per lap'
+                : '⚡ Laps of TOCA Turbo Boost available this race'}
           </Text>
         )}
       </View>
@@ -472,12 +494,12 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venu
         <View style={{flexDirection: 'row', gap: GRID_GAP}}>
           <View style={{flex: 1, gap: GRID_GAP}}>
             {leftItems.map(item => (
-              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} ttbLaps={ttbMap ? getTtbLaps(ttbMap[item.driver], venue) : null} />
+              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} ttbBadge={getTtbBadge(race, ttbMap, item.driver, venue)} />
             ))}
           </View>
           <View style={{flex: 1, gap: GRID_GAP, marginTop: rightOffset}}>
             {rightItems.map(item => (
-              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} ttbLaps={ttbMap ? getTtbLaps(ttbMap[item.driver], venue) : null} />
+              <GridSlot key={item.pos} item={item} isFavourite={isFavourite} reversed={reversalCount != null && item.pos <= reversalCount} team={teamMap[item.driver] || ''} ttbBadge={getTtbBadge(race, ttbMap, item.driver, venue)} />
             ))}
           </View>
         </View>
@@ -538,7 +560,7 @@ function QualGroupsTab({races, isFavourite}) {
   );
 }
 
-function GridSlot({item, isFavourite, reversed, team, ttbLaps}) {
+function GridSlot({item, isFavourite, reversed, team, ttbBadge}) {
   if (!item) return null;
   const fav = isFavourite(item.driver);
   return (
@@ -553,10 +575,10 @@ function GridSlot({item, isFavourite, reversed, team, ttbLaps}) {
         </View>
         {team ? <Text style={styles.gridCar} numberOfLines={1}>{team}</Text> : null}
       </View>
-      {ttbLaps != null && (
-        <View style={styles.ttbBadge} accessibilityLabel={`${ttbLaps} laps of TOCA Turbo Boost`}>
+      {ttbBadge && (
+        <View style={styles.ttbBadge} accessibilityLabel={ttbBadge.a11y}>
           <Icon name="flash-on" size={10} color={Colors.yellow} />
-          <Text style={styles.ttbBadgeText}>{ttbLaps}</Text>
+          <Text style={styles.ttbBadgeText}>{ttbBadge.label}</Text>
         </View>
       )}
       {reversed && <Icon name="shuffle" size={10} color={Colors.textSecondary} />}
@@ -679,7 +701,7 @@ const styles = StyleSheet.create({
   resultRowFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'},
   pos: {fontSize: 18, fontWeight: '900', width: 36, textAlign: 'center', marginRight: 8},
   driverName: {color: '#fff', fontSize: 14, fontWeight: '700'},
-  teamName: {color: Colors.textSecondary, fontSize: 11},
+  teamName: {color: Colors.textSecondary, fontSize: 11, flexShrink: 1},
   deltaRow: {flexDirection: 'row', alignItems: 'center', gap: 1},
   deltaText: {fontSize: 10, fontWeight: '800'},
   deltaFlat: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},

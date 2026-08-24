@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Animated,
 } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -45,6 +46,55 @@ const SPONSOR_TIERS = [
 function carThumbUrl(url) {
   if (!url) return url;
   return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
+}
+
+// Press feedback is a dark scrim painted OVER the whole card, not a whole-tile
+// opacity fade - same fix, same reason as DriverCardInner in
+// DriversScreen.js: TouchableOpacity's own fade drops the whole subtree's
+// alpha via per-layer paint compositing on Android (no offscreen buffer by
+// default), which briefly lets the opaque number graphic underneath show
+// through the driver photo above it - reported live as "the number can
+// quickly be seen through his face" (2026-08-24). A scrim that only ever gets
+// MORE opaque on top of an unchanged, still-fully-opaque photo+number stack
+// can't produce that artifact. Pulled out of the inline .map() below because
+// its per-instance press animation needs its own useRef, which a loop body
+// can't hold (Rules of Hooks).
+function TeamDriverCard({driver: d, fav, blackNumber, cardBgUrl, onPress}) {
+  const bundled = getDriverImage(d.number);
+  const pressAnim = useRef(new Animated.Value(0)).current;
+  const handlePressIn = () => Animated.timing(pressAnim, {toValue: 1, duration: 100, useNativeDriver: true}).start();
+  const handlePressOut = () => Animated.timing(pressAnim, {toValue: 0, duration: 100, useNativeDriver: true}).start();
+  return (
+    <TouchableOpacity
+      style={[styles.driverCard, fav && styles.driverCardFav]}
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+      accessibilityLabel={d.name}
+      accessibilityRole="button">
+      <View style={styles.driverImageArea}>
+        {cardBgUrl ? (
+          <CachedImage uri={cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
+        ) : null}
+        {d.numberImageUrl ? (
+          <CachedImage uri={d.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
+        ) : (
+          <Text style={[styles.driverNumberBg, blackNumber && {color: '#000'}]}>{d.number}</Text>
+        )}
+        {bundled ? (
+          <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={150} />
+        ) : d.imageUrl ? (
+          <CachedImage uri={d.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
+        ) : null}
+        {fav && <View style={styles.favBadge}><Icon name="star" size={12} color={Colors.yellow} /></View>}
+      </View>
+      <View style={styles.driverFooter}>
+        <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(d.name)}</Text>
+      </View>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pressScrim, {opacity: pressAnim}]} />
+    </TouchableOpacity>
+  );
 }
 
 export default function TeamDetailScreen({route, navigation}) {
@@ -132,40 +182,16 @@ export default function TeamDetailScreen({route, navigation}) {
 
           <Text style={styles.sectionTitle}>DRIVERS</Text>
           <View style={styles.driversGrid}>
-            {team.drivers.map(d => {
-              const fav = isFavourite(d.name);
-              const bundled = getDriverImage(d.number);
-              const blackNumber = team.lightCardBg;
-              return (
-                <TouchableOpacity
-                  key={d.number}
-                  style={[styles.driverCard, fav && styles.driverCardFav]}
-                  activeOpacity={0.8}
-                  onPress={() => navigation.navigate('DriverDetail', {driver: d})}
-                  accessibilityLabel={d.name}
-                  accessibilityRole="button">
-                  <View style={styles.driverImageArea}>
-                    {team.cardBgUrl ? (
-                      <CachedImage uri={team.cardBgUrl} style={StyleSheet.absoluteFill} resizeMode="stretch" collapsable={false} />
-                    ) : null}
-                    {d.numberImageUrl ? (
-                      <CachedImage uri={d.numberImageUrl} style={styles.driverNumberImg} resizeMode="contain" />
-                    ) : (
-                      <Text style={[styles.driverNumberBg, blackNumber && {color: '#000'}]}>{d.number}</Text>
-                    )}
-                    {bundled ? (
-                      <Image source={bundled} style={styles.driverPhoto} resizeMode="contain" fadeDuration={150} />
-                    ) : d.imageUrl ? (
-                      <CachedImage uri={d.imageUrl} targetWidth={300} style={styles.driverPhoto} resizeMode="contain" />
-                    ) : null}
-                    {fav && <View style={styles.favBadge}><Icon name="star" size={12} color={Colors.yellow} /></View>}
-                  </View>
-                  <View style={styles.driverFooter}>
-                    <Text style={[styles.driverName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(d.name)}</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+            {team.drivers.map(d => (
+              <TeamDriverCard
+                key={d.number}
+                driver={d}
+                fav={isFavourite(d.name)}
+                blackNumber={team.lightCardBg}
+                cardBgUrl={team.cardBgUrl}
+                onPress={() => navigation.navigate('DriverDetail', {driver: d})}
+              />
+            ))}
           </View>
 
           {(team.driversChampionships > 0 || team.teamsChampionships > 0) && (
@@ -292,6 +318,11 @@ const styles = StyleSheet.create({
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
+  // Press feedback overlay - see the comment on TeamDriverCard for why this
+  // replaced a whole-card opacity fade. Painted as the card's last child so
+  // it sits above everything else; driverCard's own overflow:'hidden' clips
+  // it to the card's rounded corners.
+  pressScrim: {backgroundColor: 'rgba(0,0,0,0.25)'},
   specRow: {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, alignItems: 'flex-start'},
   specRowBorder: {borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.outline},
   specLabel: {color: Colors.textSecondary, fontSize: 12, flex: 1},

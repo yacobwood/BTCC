@@ -64,6 +64,43 @@ describe('DriversScreen', () => {
         driver: expect.objectContaining({name: 'Tom Ingram'}),
       }));
     });
+
+    // Regression (2026-08-24): TouchableOpacity's built-in fade dims the whole
+    // card's subtree via per-layer paint compositing on Android (no offscreen
+    // buffer by default), which briefly let the opaque number graphic behind
+    // the driver photo show through it on press - "the number can quickly be
+    // seen through his face". Fixed by disabling the built-in fade entirely
+    // and using a dedicated scrim overlay instead (see DriverCardInner).
+    it('does not use a whole-tile opacity fade on press', async () => {
+      const {UNSAFE_getAllByType, getByLabelText} = await renderDrivers();
+      const {TouchableOpacity} = require('react-native');
+      // getByLabelText resolves to the underlying host view - activeOpacity/
+      // onPressIn/onPressOut are JS-level TouchableOpacity props that never
+      // reach it, so query the composite element itself.
+      const card = UNSAFE_getAllByType(TouchableOpacity).find(
+        c => c.props.accessibilityLabel === 'Tom Ingram, Team Ingram, number 80',
+      );
+      expect(getByLabelText('Tom Ingram, Team Ingram, number 80')).toBeTruthy();
+      expect(card.props.activeOpacity).toBe(1);
+      expect(typeof card.props.onPressIn).toBe('function');
+      expect(typeof card.props.onPressOut).toBe('function');
+    });
+
+    it('pressing in and out does not interfere with tapping through to DriverDetail', async () => {
+      const {UNSAFE_getAllByType, getByLabelText} = await renderDrivers();
+      const {TouchableOpacity} = require('react-native');
+      const card = UNSAFE_getAllByType(TouchableOpacity).find(
+        c => c.props.accessibilityLabel === 'Tom Ingram, Team Ingram, number 80',
+      );
+      await act(async () => {
+        card.props.onPressIn();
+        card.props.onPressOut();
+        fireEvent.press(getByLabelText('Tom Ingram, Team Ingram, number 80'));
+      });
+      expect(nav.navigate).toHaveBeenCalledWith('DriverDetail', expect.objectContaining({
+        driver: expect.objectContaining({name: 'Tom Ingram'}),
+      }));
+    });
   });
 
   describe('favourite driver highlighting', () => {

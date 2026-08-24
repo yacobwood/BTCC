@@ -1,0 +1,9 @@
+• Added a Judicial Decisions section to race results, showing BARC penalty rulings for each session
+• TOCA Turbo Boost badge now also shows for Qualifying and the Qualifying Race, and stays visible on results after the race finishes
+• Fixed a visual glitch where a driver's car number could briefly show through their photo when tapping a driver tile
+• Faster app loading and more reliable images, including when offline
+• Fixed the Calendar occasionally showing duplicated or incorrect rounds
+• Fixed Season standings sometimes showing car numbers instead of driver names
+• Fixed Lap Records showing incorrect times for cars that didn't finish a session
+• Fixed the floating chat button sometimes covering the last item on a screen
+• Bug fixes and performance improvements

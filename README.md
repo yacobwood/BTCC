@@ -298,6 +298,8 @@ A driver card's `carImageUrl` (added 2026-08-21) was originally shown on the til
 
 The tile's top-right number went through its own separate fix (2026-08-22): the branded number-graphic replacement (`driverNumberImg`, used for 22 of 23 drivers) originally sized itself with a fixed `width`/`height` box (`45%`/`36%`), letting `resizeMode="contain"` decide per-file which axis to letterbox depending on how each number's own real aspect ratio compared to that box's - single/double-digit numbers (aspect ratio close to or narrower than the box's) filled the box's full height and touched the tile's top edge, while most 2-3 digit numbers (noticeably wider files) got letterboxed vertically instead, leaving a gap above - "some numbers touching top, some not," confirmed by checking every file in `data/numberImages/`'s actual aspect ratio rather than guessing. Replaced with `NumberBadge`, a small component that measures the image's own aspect ratio via its `onLoad` event (`nativeEvent.source.width`/`height`) and sizes itself off that instead - fixed height, width computed via `aspectRatio` to match - so every number fills the same height and sits flush at the same top-right corner regardless of how wide or narrow its own graphic happens to be. `driverNumberImg`'s style lost its `width` entirely as a result; only `height: '36%'` remains, with `aspectRatio` applied per-instance.
 
+Tile/card press feedback (both `DriversScreen`'s `DriverCardInner` and `TeamDetailScreen`'s `TeamDriverCard`) is a dark scrim overlay, not `TouchableOpacity`'s own built-in opacity fade (fixed 2026-08-24, reported live: "the number can quickly be seen through his face"). Root cause: `TouchableOpacity` animates its opacity by wrapping its whole child subtree in one `Animated.View` and dropping *that view's* opacity, but on Android, reducing a View's opacity without offscreen-buffer compositing (`needsOffscreenAlphaCompositing`, which `TouchableOpacity` in this RN version doesn't forward to consumers at all - checked the installed `node_modules/react-native` source directly rather than assuming) applies the reduced alpha to each overlapping child's own paint call individually, rather than flattening the subtree to one opaque bitmap first. `driverImageArea`'s number graphic and driver photo are two such overlapping opaque siblings (the photo's `90%×90%`/`100%×85%` box fully covers the number's top-right `~60%×48%` box at rest) - at `opacity===1` the photo simply occludes the number as normal paint order, but mid-fade both layers are independently translucent and blend, letting the still-opaque number bleed through the now-see-through photo, specifically around the driver's head where the boxes overlap. Fixed by setting `activeOpacity={1}` (disables `TouchableOpacity`'s fade entirely, keeping it purely for tap/accessibility handling) and adding a separate `Animated.View` scrim (`pressScrim`, `rgba(0,0,0,0.25)`) as the card's last child, driven by its own `useRef(Animated.Value)` via `onPressIn`/`onPressOut` - since nothing underneath a scrim that only ever gets *more opaque on top* of an unchanged stack ever has its own alpha touched, the bleed-through can't happen by construction.
+
 Every car image still rendered anywhere in the app - `DriverDetailScreen`'s profile header and `TeamDetailScreen`'s per-driver cards, now that the tile no longer shows one at all - has its URL rewritten to a small pre-generated thumbnail (`carThumbUrl()`, `<name>-thumb.webp` alongside every full-size file in `data/carImages/` - see `scripts/generate_car_thumb.py`), not the full-size original. This was originally added for the driver tile specifically, back when it still rendered a car per driver: Android's image pipeline decodes to an uncompressed bitmap sized off pixel dimensions, not file size, so every car image - already WebP-compressed to ~90KB on disk - still cost 1536x1024x4 bytes = 6MB of *decoded* memory each, and unlike `cardBgUrl` (shared across a team's drivers, so Android decodes and caches it once), every car image was unique per driver with no reuse to fall back on - 23 of them on one non-virtualized grid blew straight through Android's ~192MB decode pool, confirmed live via a device log capture (`onError`'s actual native reason: `Pool hard cap violation`) rather than guessed. Two earlier attempts (staggering the badge's mount, widening `CachedImage`'s retry budget) didn't fix it and were reverted - both were trying to fix a request that hadn't gotten a turn yet, when the real failure was a *decode* that couldn't fit in memory no matter how long it waited or how many times it retried. Now that the driver tile no longer renders a car at all (see above), that specific 23-at-once crowding scenario doesn't exist on this screen any more - but the thumbnail is still exactly the right call on `DriverDetailScreen` and `TeamDetailScreen`, since neither needs 15x more bitmap than a corner strip or card actually displays, regardless of how many are ever on screen at once.
 
 `teams.map()` here renders every entry in `drivers.json`'s `teams` array with no drivers filter, so a team object with zero matching drivers still gets a tile - found and fixed 2026-08-20: a standalone `"Power Maxed Racing"` team entry (leftover from before Nick Halstead's mid-season car was assigned a livery) had no driver pointing to it at all, since both Dexter Patterson and Halstead race as `"Steel Seal with Power Maxed Racing"` - a phantom, driver-less 10th tile on the Grid -> Teams tab. Removed the orphaned entry and corrected Steel Seal's stale `entries` count (1 -> 2) to match its actual two current drivers.
@@ -704,9 +706,9 @@ R3 reverse grid detection (`detectReversalCount` in RoundResultsScreen) compares
 
 ### TTB (TOCA Turbo Boost) Allocation
 
-Implemented in [src/utils/ttb.js](src/utils/ttb.js), per reg 1.11.1. Shown as a ⚡ badge on each driver's card in the Starting Grid tab (Race 1/2/3 only - current season only).
+Implemented in [src/utils/ttb.js](src/utils/ttb.js), per reg 1.11.1. Reg 1.11.1.a: TTB applies in Qualifying and every Race, with "different operating methods" between them - two distinct metrics, dispatched by race label via `ttbPositionMapForRace()`/`getTtbBadge()`. Shown as a ⚡ badge (current season only): on each driver's card in the Starting Grid tab pre-race, and on each row of the results list once that race has results in. It's the same fixed pre-race allocation in both places, not a live "laps/seconds consumed" counter - the app has no per-lap boost-deployment feed to drive one.
 
-Laps of boost available per race is a sliding scale by position - P1 gets fewest, P8+ gets most - split by circuit type:
+**Races (1/2/3)** - laps of boost available for the whole race, a sliding scale by position (P1 gets fewest, P8+ gets most), split by circuit type:
 
 | Pos | A circuits | B circuits |
 |---|---|---|
@@ -730,7 +732,22 @@ Position source per race:
 
 Non-classified results (DNF/DQ/DNS) are ranked after classified finishers by laps covered (descending) - the same convention `buildStraightGrid()`/`buildReverseGrid()` already use for grid derivation.
 
-**Not modelled** (both explicitly left to Administrator discretion by the regs, so there's no data-derivable formula): Late Entry TTB for cars registered after 13 Mar 2026 or missing rounds (1.11.1.c.i), and substitute-driver TTB carryover (1.11.1.c.ii). Guest-driver results are also supposed to be excluded from Race 2/3 position numbering (1.11.1.a), but guest entries aren't flagged in the results data, so they're currently counted as a normal finisher. Feature is gated to the current season only (`year === CURRENT_SEASON`) since the same scale isn't verified against older seasons' regs.
+**Qualifying and the Qualifying Race** - a separate metric (`getTtbSeconds()`/`ttbQualifyingPositionMap()`): seconds per lap of boost available, one shared scale with no circuit split:
+
+| Pos | Secs/lap |
+|---|---|
+| 1 | 1 |
+| 2 | 3 |
+| 3 | 5 |
+| 4 | 7 |
+| 5 | 9 |
+| 6 | 11 |
+| 7 | 15 |
+| 8+ | 20 |
+
+Both sessions share Race 1's Championship Order position source - **not** each other's finishing order the way Race 2/3 use the prior race. This is a genuine trap in the regs' own table: despite the Qualifying Race being a race-format, points-scoring session, it's grouped with the plain Qualifying session under the seconds scale, not the Races laps scale. Round 1's Qualifying/Qualifying Race has the same "no Championship Order yet" gap as Race 1 - the regs state the reduction only applies "from the second Championship meeting", but don't say what happens instead at Round 1. `isSeasonOpenerQualifying()` applies the same max-tier-for-everyone convention as Race 1's by analogy, flagged as the same kind of inference, not a quoted rule.
+
+**Not modelled** (both explicitly left to Administrator discretion by the regs, so there's no data-derivable formula): Late Entry TTB for cars registered after 13 Mar 2026 or missing rounds (1.11.1.c.i), and substitute-driver TTB carryover (1.11.1.c.ii). Guest-driver results are also supposed to be excluded from Race 2/3 position numbering (1.11.1.a), but guest entries aren't flagged in the results data, so they're currently counted as a normal finisher. Also not modelled: reg 1.11.1.b's "Deployment Minimum Car Speed (KPH)" column (140kph at P1 down to 105kph at P8+) - a speed-gating condition on top of whichever allocation above applies. Left out because the table's own header for that column ("Qualifying & Race", singular "Race") is ambiguous about which sessions it covers, and there's no live speed-trace data in this app to apply it against regardless. Feature is gated to the current season only (`year === CURRENT_SEASON`) since the same scales aren't verified against older seasons' regs.
 
 ---
 
@@ -761,7 +778,7 @@ Safety net: if a re-run of the scraper returns an empty grid (transient fetch fa
 - Right column offset: `(GRID_CARD_HEIGHT + GRID_GAP) / 2 = 29px` to vertically centre between adjacent left cards
 - Shuffle icon on reversed-grid cards; yellow highlight reserved for favourites only
 - Reversal badge at list bottom when R3 reverse is detected ("Top 8 reversed (draw: 8)")
-- ⚡ TTB badge per driver card (laps of TOCA Turbo Boost available this race) - see [§13](#13-scoring-and-race-format)
+- ⚡ TTB badge per driver card (laps of TOCA Turbo Boost for Race 1/2/3, seconds/lap for the Qualifying Race) - see [§13](#13-scoring-and-race-format)
 
 ### Empty State Logic
 
@@ -911,7 +928,7 @@ Each prefetched URL is built to match **exactly** what its real render site requ
 
 **timeAgo.js** - Returns relative time strings ("2 hours ago", "3 days ago") from a date string.
 
-**ttb.js** - TOCA Turbo Boost (race-lap boost allocation) calculations - see [§13](#13-scoring-and-race-format).
+**ttb.js** - TOCA Turbo Boost calculations: laps-of-boost for Races, seconds/lap for Qualifying/Qualifying Race - see [§13](#13-scoring-and-race-format).
 
 **weather.js** - Fetches forecast weather from Open-Meteo for a circuit's lat/lng over its race weekend dates. Only fetches when the round is within `MAX_FORECAST_DAYS` (10 days, raised from 7 on 2026-08-10 - Open-Meteo's free tier forecasts up to 16 days out, so 10 is comfortably within range) and not a past weekend. Uses a manual AbortController for the 8-second timeout (AbortSignal.timeout is unreliable on Android/Hermes). Helpers for WMO weather code descriptions, icons and icon colours. **BTCCWidget.swift** (iOS) and **LargeWidget.kt** (Android) - the home-screen widgets, a separate surface from TrackDetailScreen - each have their own independent `7`-day constant that was deliberately left as-is in that same change, since it wasn't part of what was asked; keep this in mind if the widgets' cutoff is ever revisited, since all three constants must still be kept in sync manually. (The widgets also stay daily-only, bare-array shape - the hourly addition below is TrackDetailScreen-only, deliberately not propagated there.) `fetchWeather()` returns `{daily, hourly}` (2026-08-09, breaking change from a bare daily array) - `hourly` drives the session-aligned forecast in TrackDetailScreen (see [§6](#6-screens-reference)). Cache reduced from 3 hours to 30 minutes for the same reason: a race-weekend forecast is worth checking through the day, not settling for what was true hours ago.
 

@@ -115,6 +115,53 @@ describe('RoundResultsScreen', () => {
     });
   });
 
+  // ── TTB (TOCA Turbo Boost) badge on the post-race results list - reg 1.11.1 ──
+  //
+  // The Starting Grid tab's TTB badge (tested below under "starting grid tab")
+  // disappears once a race has results, since RoundResultsScreen swaps to the
+  // plain results FlatList at that point. This carries the same allocation
+  // (a fixed pre-race number, not a live "laps consumed" counter) onto that
+  // list. MOCK_ROUND's Race 2 finishes Ingram P1, Shedden P2, Cammish P3 (DQ,
+  // 0 laps - non-classified, sorted after the classified two). Donington Park
+  // is an "A circuit" per reg 1.11.1.b, so Race 3's TTB laps run 1 -> 2 -> 3.
+  describe('result rows — TTB badge (results already in)', () => {
+    it('shows TTB laps on the Race 3 results list, derived from the driver’s Race 2 finish', () => {
+      const {getByLabelText} = renderRound({initialRace: 5}); // Race 3
+      expect(getByLabelText('1 laps of TOCA Turbo Boost')).toBeTruthy(); // Ingram: R2 P1
+    });
+
+    it('shows no TTB badge for a driver who did not race in Race 2', () => {
+      const {queryAllByLabelText} = renderRound({initialRace: 5}); // Race 3
+      // Colin Turkington (Race 3 P1) isn't in Race 2's results at all - only
+      // Ingram's badge should render, not one per Race 3 finisher.
+      expect(queryAllByLabelText(/laps of TOCA Turbo Boost/)).toHaveLength(1);
+    });
+
+    it('does not show the TTB badge on the results list for an archive season', () => {
+      const {queryByLabelText} = renderRound({initialRace: 5, year: 2024});
+      expect(queryByLabelText(/Turbo Boost/)).toBeNull();
+    });
+
+    // Regression: a long team name (e.g. a full title-sponsor name) has no
+    // bounded width of its own, and RN flex children default to flexShrink:0 -
+    // so without truncation it renders at full natural width and pushes
+    // whatever comes after it (delta arrow, TTB badge) off the edge of the row
+    // instead of yielding to them.
+    it('truncates a long team name instead of letting it push the TTB badge off the row', () => {
+      const longNameRound = {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r =>
+          r.label === 'Race 3'
+            ? {...r, results: r.results.map(res => res.driver === 'Tom Ingram' ? {...res, team: 'LKQ Euro Car Parts with Power Maxed Racing'} : res)}
+            : r,
+        ),
+      };
+      const {getByText, getByLabelText} = renderRound({round: longNameRound, initialRace: 5});
+      expect(getByText('LKQ Euro Car Parts with Power Maxed Racing').props.numberOfLines).toBe(1);
+      expect(getByLabelText('1 laps of TOCA Turbo Boost')).toBeTruthy(); // badge still renders, not squeezed out
+    });
+  });
+
   describe('favourite driver', () => {
     it('favourite driver name renders in yellow', async () => {
       const {getByText} = renderRound({initialRace: 0, favourites: ['Tom Ingram']});
@@ -474,6 +521,74 @@ describe('RoundResultsScreen', () => {
       };
       const {queryByText, queryByLabelText} = renderRound({round: round1Race1Grid, initialRace: 3, year: 2024});
       expect(queryByText(/Turbo Boost/)).toBeNull();
+      expect(queryByLabelText(/Turbo Boost/)).toBeNull();
+    });
+  });
+
+  // ── TTB (TOCA Turbo Boost) - Qualifying / Qualifying Race secs/lap scale ────
+  //
+  // Reg 1.11.1.b: Qualifying and the Qualifying Race share Race 1's
+  // Championship-Order position source (not each other's finishing order the
+  // way Race 2/3 use the prior race), and use a seconds-per-lap scale instead
+  // of the Races laps scale. Real Championship-Order values can't be tested
+  // deterministically through the full screen at round 2+ here (allRounds is
+  // seeded from the real bundled season data, unmockable without a network
+  // fetch) - see ttbQualifyingPositionMap's own unit tests in ttb.test.js for
+  // that. These integration tests stick to the deterministic round-1
+  // season-opener case, same scoping the existing Race 1 tests above use.
+
+  describe('starting grid tab (Qualifying Race) — TTB secs/lap badge', () => {
+    const round1QualRaceGrid = {
+      ...GRID_ROUND,
+      round: 1,
+      races: GRID_ROUND.races.map(r =>
+        r.label === 'Qualifying Race'
+          ? {...r, grid: [{pos: 1, no: 1, cl: 'M', driver: 'Alpha Driver', team: ''}, {pos: 2, no: 2, cl: 'M', driver: 'Beta Driver', team: ''}]}
+          : r,
+      ),
+    };
+
+    it('shows the seconds legend line and gives every driver the max TTB tier (season opener)', () => {
+      const {getByText, getAllByLabelText} = renderRound({round: round1QualRaceGrid, initialRace: 2}); // Qualifying Race
+      expect(getByText('⚡ Season opener - every driver gets max TOCA Turbo Boost')).toBeTruthy();
+      // P8+ row of the secs/lap scale is 20, regardless of circuit type.
+      expect(getAllByLabelText('20 seconds of TOCA Turbo Boost per lap')).toHaveLength(2);
+    });
+
+    it('does not show TTB badge/legend for an archive season', () => {
+      const {queryByText, queryByLabelText} = renderRound({round: round1QualRaceGrid, initialRace: 2, year: 2024});
+      expect(queryByText(/Turbo Boost/)).toBeNull();
+      expect(queryByLabelText(/Turbo Boost/)).toBeNull();
+    });
+  });
+
+  describe('result rows — TTB secs/lap badge (Qualifying / Qualifying Race, results already in)', () => {
+    it('shows the max-tier seconds badge on the Qualifying results list (MOCK_ROUND is round 1)', () => {
+      const {getAllByLabelText} = renderRound({initialRace: 1}); // Qualifying
+      // Tom Ingram, Gordon Shedden both rostered from Qualifying's own results.
+      expect(getAllByLabelText('20 seconds of TOCA Turbo Boost per lap')).toHaveLength(2);
+    });
+
+    it('shows the max-tier seconds badge on the Qualifying Race results list', () => {
+      const qualRaceWithGrid = {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r =>
+          r.label === 'Qualifying Race'
+            ? {...r, grid: [{pos: 1, no: 80, cl: 'M', driver: 'Tom Ingram', team: ''}, {pos: 2, no: 52, cl: 'M', driver: 'Gordon Shedden', team: ''}, {pos: 3, no: 4, cl: 'M', driver: 'Colin Turkington', team: ''}]}
+            : r,
+        ),
+      };
+      const {getAllByLabelText} = renderRound({round: qualRaceWithGrid, initialRace: 2}); // Qualifying Race
+      expect(getAllByLabelText('20 seconds of TOCA Turbo Boost per lap')).toHaveLength(3);
+    });
+
+    it('does not show the seconds badge for an archive season', () => {
+      const {queryByLabelText} = renderRound({initialRace: 1, year: 2024});
+      expect(queryByLabelText(/Turbo Boost/)).toBeNull();
+    });
+
+    it('does not show a seconds badge on Free Practice (no TTB position source)', () => {
+      const {queryByLabelText} = renderRound({initialRace: 0});
       expect(queryByLabelText(/Turbo Boost/)).toBeNull();
     });
   });
