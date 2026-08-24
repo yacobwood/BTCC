@@ -17,6 +17,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
 import {useBroadcaster} from '../utils/broadcaster';
 import {useLiveUrls, ensureHttps} from '../store/liveUrls';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {useFeatureFlags} from '../store/featureFlags';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
@@ -445,7 +446,7 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
 
-  listContent: {paddingHorizontal: 16, paddingBottom: 24},
+  listContent: {paddingHorizontal: 16, paddingBottom: 24 + CHAT_FAB_CLEARANCE},
 
   // Section divider
   divider: {

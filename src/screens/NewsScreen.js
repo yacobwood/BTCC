@@ -23,6 +23,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 const logoImg = require('../assets/logo_long.png');
 
 // orderDate (parseArticle/mapHubPosts) is the feed-ordering key - falls back
@@ -347,7 +348,7 @@ export default function NewsScreen({navigation}) {
         ListFooterComponent={
           loadingMore ? <ActivityIndicator color={Colors.yellow} style={{padding: 16}} /> : null
         }
-        contentContainerStyle={{paddingBottom: 20}}
+        contentContainerStyle={{paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
       />
       )}
       {showScrollTop && (

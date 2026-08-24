@@ -11,14 +11,13 @@ import {Colors} from '../theme/colors';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useSettings} from '../store/settings';
 import {onOpenChatRequest} from '../utils/chatBridge';
+import {FAB_SIZE, FAB_BOTTOM_OFFSET} from '../utils/chatFabLayout';
 import ChatScreen from '../screens/ChatScreen';
 
 const LAST_READ_KEY = 'chat_last_read';
 const DB = database();
 
-const FAB_SIZE = 52;
 const FAB_RIGHT = 16;
-const FAB_BOTTOM_OFFSET = 12;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default function ChatFab({bottomOffset = 0}) {

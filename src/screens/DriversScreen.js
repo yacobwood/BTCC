@@ -22,6 +22,7 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import SwipeableTabs from '../components/SwipeableTabs';
 import CachedImage from '../components/CachedImage';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 function thumbUrl(url, size = '150x150') {
   if (!url || !url.includes('btcc.net/wp-content/uploads/')) return url;
@@ -161,7 +162,7 @@ const DriversGrid = React.memo(function DriversGrid({drivers, listRef, navigatio
   // year, just not part of the active grid right now.
   const pastDrivers = drivers.filter(d => d.currentlyRacing === false && !d.reserveOnly);
   return (
-    <ScrollView ref={listRef} contentContainerStyle={{padding: 16, paddingBottom: 20}}>
+    <ScrollView ref={listRef} contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
       <DriverGridSection
         title={`${activeDrivers.length} CONFIRMED`}
         drivers={activeDrivers}
@@ -260,7 +261,7 @@ export default function DriversScreen({navigation}) {
           <DriversGrid drivers={drivers} listRef={driversListRef} navigation={navigation} />,
           <ScrollView
             ref={teamsListRef}
-            contentContainerStyle={{padding: 16, paddingBottom: 20, gap: 10}}>
+            contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE, gap: 10}}>
             <Text style={styles.countLabel}>{teams.length} TEAMS</Text>
             <View style={styles.teamsGrid}>
               {teams.map(item => renderTeam({item}))}

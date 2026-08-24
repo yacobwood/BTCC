@@ -25,6 +25,7 @@ import SeasonTable from '../components/SeasonTable';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite, cacheReadTimestamp} from '../store/cache';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const CURRENT_SEASON = BUNDLED_CALENDAR.season;
@@ -592,7 +593,7 @@ export default function ResultsScreen({navigation, route}) {
               data={driverStandings}
               keyExtractor={(item) => item.name}
               renderItem={renderDriverStanding}
-              contentContainerStyle={{padding: 16, paddingBottom: 20}}
+              contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
               onScroll={onListScroll}
               scrollEventThrottle={100}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
@@ -632,7 +633,7 @@ export default function ResultsScreen({navigation, route}) {
               data={teamStandings}
               keyExtractor={(item) => item.name}
               renderItem={renderTeamStanding}
-              contentContainerStyle={{padding: 16, paddingBottom: 20}}
+              contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
               onScroll={onListScroll}
               scrollEventThrottle={100}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
@@ -647,7 +648,7 @@ export default function ResultsScreen({navigation, route}) {
             data={results}
             keyExtractor={item => String(item.round)}
             renderItem={renderRound}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
             onScroll={onListScroll}
             scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
@@ -661,7 +662,7 @@ export default function ResultsScreen({navigation, route}) {
             data={seasonStats}
             keyExtractor={(item) => item.name}
             renderItem={renderStat}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
             onScroll={onListScroll}
             scrollEventThrottle={100}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
@@ -680,7 +681,7 @@ export default function ResultsScreen({navigation, route}) {
           );
         }
         return (
-          <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20}} onScroll={onListScroll} scrollEventThrottle={100}>
+          <ScrollView ref={chartScrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}} onScroll={onListScroll} scrollEventThrottle={100}>
             <ProgressionChart
               series={progression}
               pointLabels={pointLabels}

@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useUnits} from '../store/units';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const pagesData = require('../assets/pages.json');
 
@@ -52,7 +53,7 @@ export default function InfoPageScreen({route, navigation}) {
         <Text style={styles.headerTitle}>{page.title.toUpperCase()}</Text>
       </View>
       <View style={styles.yellowDivider} />
-      <ScrollView contentContainerStyle={{padding: 16, paddingBottom: 30}}>
+      <ScrollView contentContainerStyle={{padding: 16, paddingBottom: 30 + CHAT_FAB_CLEARANCE}}>
         {(page.sections || []).map((section, i) => {
           const body = convertSpeeds(section.body || '', useKm);
           switch (section.type) {

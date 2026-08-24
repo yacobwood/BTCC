@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {fetchHubPosts} from '../api/client';
 import CachedImage from '../components/CachedImage';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {Analytics} from '../utils/analytics';
 import {getReadIds, markRead, markAllRead, markUnread} from '../utils/digestRead';
 
@@ -175,7 +176,7 @@ accessibilityLabel={article.title}
           data={listData}
           keyExtractor={item => item.key}
           renderItem={renderItem}
-          contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
           ListEmptyComponent={
             <Text style={styles.emptyText}>No digests found</Text>
           }

@@ -5,6 +5,7 @@ import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
 import {cacheRead, cacheWrite} from '../store/cache';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const BUNDLED_RADIO = require('../../data/radio.json');
 const RADIO_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/radio.json';
@@ -100,7 +101,7 @@ export default function RadioScreen({navigation}) {
           data={stations}
           keyExtractor={item => item.name}
           renderItem={renderStation}
-          contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
           ListEmptyComponent={<Text style={styles.emptyText}>No stations available</Text>}
         />
       )}

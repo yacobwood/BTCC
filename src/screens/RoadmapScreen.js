@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import auth from '@react-native-firebase/auth';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const ROADMAP_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/roadmap.json';
 const PROJECT_ID = 'btcchub-af77a';
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 1},
   loadingContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-  content: {padding: 16, paddingBottom: 48},
+  content: {padding: 16, paddingBottom: 48 + CHAT_FAB_CLEARANCE},
   sectionTitle: {
     color: Colors.textSecondary,
     fontSize: 11,

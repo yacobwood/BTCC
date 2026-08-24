@@ -37,6 +37,7 @@ import DoningtonGPLayout      from '../assets/tracks/Donington Park GP.svg';
 import DoningtonLayout        from '../assets/tracks/Donington Park National.svg';
 import KnockhillLayout        from '../assets/tracks/Knockhill.svg';
 import OultonParkLayout       from '../assets/tracks/Oulton Park.svg';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import SilvestoneLayout       from '../assets/tracks/Silverstone.svg';
 import SnettertonLayout       from '../assets/tracks/Snetterton.svg';
 import ThrutonLayout          from '../assets/tracks/Thruxton.svg';
@@ -919,7 +920,7 @@ export default function TrackDetailScreen({route, navigation}) {
         keyExtractor={(item, i) => item.key || `${item.type}-${i}`}
         renderItem={renderItem}
         stickyHeaderIndices={[stickyIndex]}
-        contentContainerStyle={{paddingBottom: 30, paddingHorizontal: 16}}
+        contentContainerStyle={{paddingBottom: 30 + CHAT_FAB_CLEARANCE, paddingHorizontal: 16}}
         ItemSeparatorComponent={() => <View style={{height: 10}} />}
         onScroll={Animated.event([{nativeEvent: {contentOffset: {y: scrollAnim}}}], {useNativeDriver: false})}
         scrollEventThrottle={16}

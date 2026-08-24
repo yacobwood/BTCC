@@ -23,6 +23,7 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {fetchResults, fetchStandings, fetchDrivers} from '../api/client';
 import {attachTeamDisplayFields, parseDriverHistory} from '../api/parsers';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -171,7 +172,7 @@ export default function DriverDetailScreen({route, navigation}) {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{paddingBottom: 30}}>
+      <ScrollView contentContainerStyle={{paddingBottom: 30 + CHAT_FAB_CLEARANCE}}>
         {/* Header */}
         <View style={styles.headerBg}>
           {driver.cardBgUrl ? (

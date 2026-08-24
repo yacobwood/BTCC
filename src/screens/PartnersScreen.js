@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {fetchPartners} from '../api/client';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const BUNDLED_PARTNERS = require('../../data/partners.json');
 
@@ -60,7 +61,7 @@ export default function PartnersScreen({navigation}) {
         data={partners}
         keyExtractor={item => item.id}
         renderItem={renderPartner}
-        contentContainerStyle={{padding: 16, paddingBottom: 30}}
+        contentContainerStyle={{padding: 16, paddingBottom: 30 + CHAT_FAB_CLEARANCE}}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={
           <Text style={styles.intro}>

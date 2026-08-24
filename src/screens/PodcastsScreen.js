@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const CACHE_KEY = 'podcasts_episodes';
 
@@ -232,7 +233,7 @@ export default function PodcastsScreen({navigation}) {
           renderItem={({item}) => item.type === 'header'
             ? <Text style={styles.monthHeader}>{item.label}</Text>
             : renderEpisode({item})}
-          contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
           ListEmptyComponent={<Text style={styles.emptyText}>No episodes found</Text>}
           onEndReached={onLoadMore}
           onEndReachedThreshold={0.5}

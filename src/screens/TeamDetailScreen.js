@@ -18,6 +18,7 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import CachedImage from '../components/CachedImage';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 // Sponsor tier -> section label, in display order. A team's `sponsors` array
 // (see parseGrid in api/parsers.js) tags each entry with one of these tiers;
@@ -64,7 +65,7 @@ export default function TeamDetailScreen({route, navigation}) {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{paddingBottom: 30}}>
+      <ScrollView contentContainerStyle={{paddingBottom: 30 + CHAT_FAB_CLEARANCE}}>
         {(cars.length > 0 || team.logoUrl) ? (
           <View style={[styles.carImageBg, {marginTop: insets.top + 8}]}>
             {team.cardBgUrl ? (

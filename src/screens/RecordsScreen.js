@@ -15,6 +15,7 @@ import {fetchRecords} from '../api/client';
 import {cacheRead} from '../store/cache';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const MIN_STARTS = 30;
@@ -194,7 +195,7 @@ export default function RecordsScreen({navigation}) {
             renderItem={renderRow(s, maxVal, data)}
             onScroll={e => setShowScrollTop(e.nativeEvent.contentOffset.y > 400)}
             scrollEventThrottle={100}
-            contentContainerStyle={{padding: 16, paddingBottom: 20}}
+            contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
             ListHeaderComponent={
               SECTION_DEFS[section].subtitle
                 ? <Text style={styles.subtitle}>{SECTION_DEFS[section].subtitle}</Text>
