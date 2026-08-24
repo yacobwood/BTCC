@@ -274,7 +274,7 @@ if (!Linking.addEventListener || !Linking.addEventListener.mock) {
 }
 
 // ── Asset stubs ───────────────────────────────────────────────────────────────
-jest.mock('./src/assets/driverImages', () => ({getDriverImage: () => null}));
+jest.mock('./src/assets/driverImages', () => ({getDriverImage: () => null, getDriverImageLarge: () => null}));
 jest.mock('./src/assets/teamImages', () => ({getTeamImage: () => null}));
 jest.mock('./src/assets/seasonData', () => ({getSeasonData: jest.fn(() => null)}));
 jest.mock('./src/utils/notifications', () => ({

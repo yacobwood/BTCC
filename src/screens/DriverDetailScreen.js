@@ -16,7 +16,7 @@ const CURRENT_SEASON = BUNDLED_CALENDAR.season;
 import Svg, {Polyline, Line, Circle, Text as SvgText} from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {getDriverImage} from '../assets/driverImages';
+import {getDriverImageLarge} from '../assets/driverImages';
 import CachedImage from '../components/CachedImage';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
@@ -162,7 +162,10 @@ export default function DriverDetailScreen({route, navigation}) {
   const age = calcAge(driver.dateOfBirth);
   const dobFormatted = formatDob(driver.dateOfBirth);
 
-  const bundledImg = getDriverImage(driver.number);
+  // Large variant, not the small one DriversScreen's tile/TeamDetailScreen's
+  // roster card use - see driverImages.js's own comment for why these need
+  // to be two different bundled sizes now, not one.
+  const bundledImg = getDriverImageLarge(driver.number);
 
   const onShare = async () => {
     const slug = driver.name.toLowerCase().replace(/\s+/g, '-');

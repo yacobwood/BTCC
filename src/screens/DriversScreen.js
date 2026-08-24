@@ -297,33 +297,31 @@ const styles = StyleSheet.create({
   // driverImageArea's alignItems above, just with a bit of breathing room
   // on both axes instead of touching every edge of the tile.
   driverPhoto: {width: '90%', height: '90%'},
-  // Shrunk (by request) - fontSize 80 -> 60, lineHeight 90 -> 68 proportionally.
-  // top: -10 -> 0 (by request, "some numbers touching top, some not") -
-  // only the 3 drivers without a numberImageUrl (departed/reserve: Max
-  // Buxton, James Dorlin, Senna Proctor) ever render this plain-text
-  // fallback rather than driverNumberImg below, and the old -10 pushed
-  // theirs above the tile's own top edge, where driverCard's
-  // overflow: 'hidden' clipped it - every branded-graphic driver was
-  // already sitting flush at top: 0 with no such clipping.
+  // Shrunk further and given top/right padding (by request, "smaller
+  // numbers, padding top and right") - fontSize 60 -> 46, lineHeight
+  // 68 -> 52 proportionally, top/right 0/5 -> 14/14. Kept in lockstep with
+  // driverNumberImg's top/right below - these two are the plain-text and
+  // branded-graphic renderings of the exact same thing, and diverging their
+  // positioning is exactly what caused the "some numbers touching top,
+  // some not" bug fixed earlier the same day.
   driverNumberBg: {
     position: 'absolute',
-    top: 0,
-    right: 5,
-    fontSize: 60,
+    top: 14,
+    right: 14,
+    fontSize: 46,
     fontWeight: '900',
     color: '#fff',
-    lineHeight: 68,
+    lineHeight: 52,
   },
-  // Branded number-graphic replacement for driverNumberBg above (used when
-  // the driver has a numberImageUrl) - same top-right footprint, height a %
-  // of the square driverImageArea so it scales consistently at any tile
-  // size (shrunk 48% -> 36% by request - same ratio DriverDetailScreen's
-  // header number used for its own shrink). No width here any more - see
+  // Branded number-graphic replacement for driverNumberBg above - same
+  // top/right padding as it (by request, see that comment), height a % of
+  // the square driverImageArea so it scales consistently at any tile size
+  // (shrunk further, 36% -> 28%, by the same request). No width here - see
   // NumberBadge above for why (2026-08-22): width is set per-instance via
   // aspectRatio, computed from the loaded image's own real proportions,
   // since a fixed width let `contain` letterbox each number's file
   // differently depending on how its own aspect ratio compared to the box's.
-  driverNumberImg: {position: 'absolute', top: 0, right: 0, height: '36%'},
+  driverNumberImg: {position: 'absolute', top: 14, right: 14, height: '28%'},
   favBadge: {position: 'absolute', top: 8, right: 8},
   driverFooter: {padding: 10},
   driverName: {color: '#fff', fontSize: 13, fontWeight: '800'},
