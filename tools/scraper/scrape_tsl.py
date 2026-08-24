@@ -630,6 +630,37 @@ def _to_int(s):
         return 0
 
 
+def _split_car_driver(row_elems, x_lo, x_hi):
+    """Extract (car, driver) from every text element between the Pos and Nat
+    columns, rather than trusting separate x_car/x_drv sub-boundaries.
+
+    The No./Driver header is sometimes rendered by pdfminer as one merged
+    text line ("No. Driver") instead of two - seen 2026-08-22, Donington Park
+    GP round 7's ptstrg PDF. When that happens _detect_col_positions can't
+    find either column, x_car/x_drv fall back to a too-narrow hardcoded
+    offset, and the old per-boundary lookup either missed the car number
+    entirely or - worse - matched it as the driver name (it's the first text
+    in x-order), silently turning every row below the leader into a bare car
+    number with no name. Splitting on content instead of on a boundary that
+    may not exist sidesteps the problem: a leading standalone number is the
+    car, a leading "<number> <name>" is pdfminer's own merge of the two
+    (seen on exactly the row this bug corrupted differently), and anything
+    else just isn't preceded by a number at all.
+    """
+    parts = sorted(((x, t) for _, x, t in row_elems if x_lo <= x < x_hi), key=lambda p: p[0])
+    if not parts:
+        return "", ""
+    first = parts[0][1]
+    rest = " ".join(t for _, t in parts[1:]).strip()
+    m = re.match(r"^(\d+)\s+(.+)$", first)
+    if m:
+        driver = (m.group(2) + " " + rest).strip() if rest else m.group(2).strip()
+        return m.group(1), driver
+    if re.match(r"^\d+$", first):
+        return first, rest
+    return "", (first + " " + rest).strip() if rest else first
+
+
 def _detect_col_positions(elems, col_names):
     """Scan section elements top-to-bottom for column header text.
     col_names is a set of strings; text is normalised by stripping trailing punctuation.
@@ -692,14 +723,7 @@ def _parse_ptstrg_per_race(section_elems, num_rounds):
         if not _find_text(row_elems, x_pos - 2, x_pos + T, r"^\d+$"):
             continue  # not a driver row
 
-        car_raw = _find_text(row_elems, x_car - 2, x_drv - 2)
-        driver  = ""
-        if car_raw:
-            m = re.match(r"^(\d+)\s+(.+)$", car_raw)
-            if m:
-                driver = m.group(2).strip()
-        if not driver:
-            driver = _find_text(row_elems, x_drv, x_nat - 5) or ""
+        _car, driver = _split_car_driver(row_elems, x_pos + T, x_nat - 5)
         if not driver:
             continue
         driver = DRIVER_NAME_MAP.get(driver, driver)
@@ -749,16 +773,7 @@ def _parse_driver_rows(elems):
             continue
         pos = int(pos_text)
 
-        car, driver = "", ""
-        car_raw = _find_text(row_elems, x_car - 2, x_drv - 2)
-        if car_raw:
-            m = re.match(r"^(\d+)\s+(.+)$", car_raw)
-            if m:
-                car, driver = m.group(1), m.group(2).strip()
-            else:
-                car = car_raw.strip()
-        if not driver:
-            driver = _find_text(row_elems, x_drv, x_nat - 5) or ""
+        car, driver = _split_car_driver(row_elems, x_pos + T, x_nat - 5)
 
         driver = DRIVER_NAME_MAP.get(driver, driver)
         nat   = _find_text(row_elems, x_nat  - 5,  x_nat  + 25, r"^[A-Z]{3}$") or ""
