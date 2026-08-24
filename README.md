@@ -20,16 +20,17 @@
 12. [Firebase Cloud Functions](#12-firebase-cloud-functions)
 13. [Scoring and Race Format](#13-scoring-and-race-format)
 14. [Starting Grid System](#14-starting-grid-system)
-15. [Feature Flags](#15-feature-flags)
-16. [Design System](#16-design-system)
-17. [Shared Components](#17-shared-components)
-18. [Utility Modules](#18-utility-modules)
-19. [Python Scrapers](#19-python-scrapers)
-20. [Admin Interface](#20-admin-interface)
-21. [Test Suite](#21-test-suite)
-22. [Build and Release](#22-build-and-release)
-23. [Deep Linking](#23-deep-linking)
-24. [Known Architecture Decisions](#24-known-architecture-decisions)
+15. [Judicial Decisions (Penalties) System](#15-judicial-decisions-penalties-system)
+16. [Feature Flags](#16-feature-flags)
+17. [Design System](#17-design-system)
+18. [Shared Components](#18-shared-components)
+19. [Utility Modules](#19-utility-modules)
+20. [Python Scrapers](#20-python-scrapers)
+21. [Admin Interface](#21-admin-interface)
+22. [Test Suite](#22-test-suite)
+23. [Build and Release](#23-build-and-release)
+24. [Deep Linking](#24-deep-linking)
+25. [Known Architecture Decisions](#25-known-architecture-decisions)
 
 ---
 
@@ -68,7 +69,7 @@ Current version: **2.20.8** (versionCode 86)
 | Backend storage | Firestore (comments, reactions, bug reports, roadmap votes) |
 | Backend logic | Firebase Cloud Functions (Node.js) |
 | Data hosting | GitHub raw file CDN (`raw.githubusercontent.com`) |
-| News source | GitHub-mirrored btcc.net article snapshot (`data/articles/page_<n>.json` + `index.json` - see [§19](#19-python-scrapers); btcc.net is now a Vercel-hosted React app with no public REST API, so the app never hits it directly) |
+| News source | GitHub-mirrored btcc.net article snapshot (`data/articles/page_<n>.json` + `index.json` - see [§20](#20-python-scrapers); btcc.net is now a Vercel-hosted React app with no public REST API, so the app never hits it directly) |
 | Podcast source | Buzzsprout RSS |
 | Weather | Open-Meteo (free, no API key) |
 | Live timing | TSL SignalR |
@@ -265,7 +266,7 @@ All screens use `animation: 'none'` - no page transition animations. This is del
 ### News Stack
 
 **NewsScreen** ([src/screens/NewsScreen.js](src/screens/NewsScreen.js))
-Combines two feeds: official btcc.net articles (from the GitHub-mirrored `data/articles/page_<n>.json` snapshot - see [§19](#19-python-scrapers); btcc.net is a Vercel-hosted React app with no public REST API, so the app never hits it directly) and curated hub posts (from `hub_news.json` on GitHub). Features: search with debounce (fetches every mirrored page and filters client-side by title/content, not a live btcc.net search - see §8's `fetchArticles` row for why that's a deliberate one-off cost only paid when actually searching), pagination (each page a separate ~20-article fetch, so scrolling deep into the archive doesn't cost more per page than scrolling the first one), hideDigests filter toggle, real-time Firestore reactions (emoji voting). Hub news requires `hub_news_enabled` feature flag. Article cards show category, date and featured image. Favourite driver highlighting applied when a driver's name appears in article title. Hero/feed ordering across the two sources uses each article's `orderDate` (added 2026-08-24), not `sortDate` - btcc.net's own `date` field has no time-of-day (always midnight), so two mirror articles published the same day used to tie on it, and any same-day hub post (whose `pubDate` does carry real time-of-day) always won that tie regardless of which was actually newer/seen more recently. `parseArticle` (`api/parsers.js`) sets a mirror article's `orderDate` from the scraper's `firstSeenAt` timestamp (falling back to `sortDate` for older archived articles that predate that field); `mapHubPosts` (`api/client.js`) just aliases a hub post's already-precise `pubDate` as both fields. `sortDate` itself is untouched by this and keeps meaning "official publish date" - it still drives the displayed article header date and the GA4 `publish_date` param ([§18](#18-utility-modules)), neither of which should reflect scrape-detection time.
+Combines two feeds: official btcc.net articles (from the GitHub-mirrored `data/articles/page_<n>.json` snapshot - see [§20](#20-python-scrapers); btcc.net is a Vercel-hosted React app with no public REST API, so the app never hits it directly) and curated hub posts (from `hub_news.json` on GitHub). Features: search with debounce (fetches every mirrored page and filters client-side by title/content, not a live btcc.net search - see §8's `fetchArticles` row for why that's a deliberate one-off cost only paid when actually searching), pagination (each page a separate ~20-article fetch, so scrolling deep into the archive doesn't cost more per page than scrolling the first one), hideDigests filter toggle, real-time Firestore reactions (emoji voting). Hub news requires `hub_news_enabled` feature flag. Article cards show category, date and featured image. Favourite driver highlighting applied when a driver's name appears in article title. Hero/feed ordering across the two sources uses each article's `orderDate` (added 2026-08-24), not `sortDate` - btcc.net's own `date` field has no time-of-day (always midnight), so two mirror articles published the same day used to tie on it, and any same-day hub post (whose `pubDate` does carry real time-of-day) always won that tie regardless of which was actually newer/seen more recently. `parseArticle` (`api/parsers.js`) sets a mirror article's `orderDate` from the scraper's `firstSeenAt` timestamp (falling back to `sortDate` for older archived articles that predate that field); `mapHubPosts` (`api/client.js`) just aliases a hub post's already-precise `pubDate` as both fields. `sortDate` itself is untouched by this and keeps meaning "official publish date" - it still drives the displayed article header date and the GA4 `publish_date` param ([§19](#19-utility-modules)), neither of which should reflect scrape-detection time.
 
 **ArticleScreen** ([src/screens/ArticleScreen.js](src/screens/ArticleScreen.js))
 WebView article reader for btcc.net articles. Adds Firestore comments (with commenter name input and optimistic posting), like/dislike reactions, a view counter, share button and external link option. Tracks scroll depth for Firebase Analytics. Accepts either a full article object or just a `slug` parameter (resolved via `data/articles/index.json` to find which page file actually holds it, if needed). If the slug isn't found (e.g. a just-published article the mirror hasn't picked up yet in its 5-minute refresh cycle) or the lookup fails, shows a "Couldn't load this article" retry state instead of spinning forever - but only after the very first automatic (mount-triggered) load has already gotten one immediate, cache-bypassing silent re-attempt, since a notification can fire before the slower article-mirror commit lands and the on-device cache can still be serving that pre-commit snapshot of the index for up to 5 minutes (same race the manual Retry button already accounted for below; root-caused live via device trace 2026-08-13 - an earlier version of this auto-retry re-read the same stale cache instead of bypassing it, so it reliably missed twice). Manual Retry-button presses don't get a second silent layer stacked on top. The initial load reads the index's normal 5-minute cache, but both the silent auto-retry and the manual Retry pass `forceRefresh=true` all the way through `fetchArticleBySlug` so neither can just replay the same cached miss. Signed-in users can edit and delete their own comments - edit uses Firestore REST PATCH with `updateMask.fieldPaths` to update only `text` and `editedAt` without touching reactions. Edited comments show an "edited" label. Delete uses Firestore REST DELETE and removes the item from local state optimistically. View count lives in `article_views/{slug}` (mirrors the `article_reactions` increment pattern: a Firestore `:commit` transform with `fieldTransforms: [{fieldPath: 'views', increment: 1}]`). Every WebView load records a view and re-fetches the total, shown next to the reaction buttons - no dedup, so the same person re-opening the article counts each time by design. A "Source: <link>" line renders at the bottom of the article body (`buildHtml()`, exported for direct unit testing) - hub posts show their own explicit `sourceUrl` verbatim (e.g. a credited Reddit thread), regular btcc.net-scraped articles fall back to a clean "btcc.net" label linking to `article.link`. Tapping it opens the system browser, not the in-app WebView (`onShouldStartLoad` only allows same-window navigation to the bare btcc.net root).
@@ -524,10 +525,11 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | `fetchDrivers()` | GitHub or bundled JSON | staleFirst; bundled fallback |
 | `fetchStandings(forceRefresh?)` | GitHub | staleFallback |
 | `fetchResults(year, forceRefresh?)` | GitHub | 5-minute cache |
-| `fetchArticles(page, perPage, search)` | GitHub (`articles/page_<n>.json`) | No search: fetches just that one page file, cached under its own `news_p<n>` key - never downloads the rest of the archive. With search: fetches `index.json` plus every distinct page it references, filters client-side (a deliberate one-off cost only paid when actually searching). btcc.net has no public REST API, so none of this ever hits btcc.net directly (see [§19](#19-python-scrapers)) |
-| `peekArticlesCache(page)` | AsyncStorage only | Returns that page's cache without a network call, bounded to one 5-minute scrape cycle (older entries return null) - see [§24](#24-known-architecture-decisions) |
+| `fetchPenalties(year, forceRefresh?)` | GitHub | 5-minute cache; a 404 (no decisions yet) resolves to `{season, rounds: []}` rather than throwing - see [§15](#15-judicial-decisions-penalties-system) |
+| `fetchArticles(page, perPage, search)` | GitHub (`articles/page_<n>.json`) | No search: fetches just that one page file, cached under its own `news_p<n>` key - never downloads the rest of the archive. With search: fetches `index.json` plus every distinct page it references, filters client-side (a deliberate one-off cost only paid when actually searching). btcc.net has no public REST API, so none of this ever hits btcc.net directly (see [§20](#20-python-scrapers)) |
+| `peekArticlesCache(page)` | AsyncStorage only | Returns that page's cache without a network call, bounded to one 5-minute scrape cycle (older entries return null) - see [§25](#25-known-architecture-decisions) |
 | `fetchHubPosts()` | GitHub + device ID filter | Handles published/scheduled/draft states |
-| `fetchArticleBySlug(slug, forceRefresh)` | GitHub (`articles/index.json` + one `page_<n>.json`) | Looks up the slug's page number in the index, then fetches only that one page file - never the whole archive; returns null if not (yet) present. `forceRefresh` (used by ArticleScreen's Retry and its own silent auto-retry) bypasses both files' 5-minute app-side cache entirely, not just a stale hit, and appends a `_cb=<timestamp>` cache-busting param so the request can't be served from `raw.githubusercontent.com`'s own `Cache-Control: max-age=300` CDN cache either - see [§24](#24-known-architecture-decisions) |
+| `fetchArticleBySlug(slug, forceRefresh)` | GitHub (`articles/index.json` + one `page_<n>.json`) | Looks up the slug's page number in the index, then fetches only that one page file - never the whole archive; returns null if not (yet) present. `forceRefresh` (used by ArticleScreen's Retry and its own silent auto-retry) bypasses both files' 5-minute app-side cache entirely, not just a stale hit, and appends a `_cb=<timestamp>` cache-busting param so the request can't be served from `raw.githubusercontent.com`'s own `Cache-Control: max-age=300` CDN cache either - see [§25](#25-known-architecture-decisions) |
 | `fetchBlacklist()` | GitHub or bundled JSON | staleFirst |
 | `fetchLiveStatus()` | GitHub | 2-minute cache; returns null on error |
 
@@ -545,10 +547,11 @@ Cache max age defaults to 1 hour. Overrides per endpoint:
 | Source | URL/Location | Data |
 |---|---|---|
 | GitHub raw CDN | `https://raw.githubusercontent.com/yacobwood/BTCC/main/data` | drivers, standings, results, hub_news, news, articles, flags, calendar, schedule, roadmap, radio, blacklist, live_status, team_map |
-| btcc.net (Vercel) | `https://www.btcc.net/news/` + per-article pages | News articles - scraped into `news.json` (latest headline, for the notification trigger) and `data/articles/page_<n>.json` + `index.json` (accumulated article archive, for the app's News tab and article deep-links) by `scrape_news.py`/`scrape_articles.py` via headless Chromium (see [§19](#19-python-scrapers)) |
+| btcc.net (Vercel) | `https://www.btcc.net/news/` + per-article pages | News articles - scraped into `news.json` (latest headline, for the notification trigger) and `data/articles/page_<n>.json` + `index.json` (accumulated article archive, for the app's News tab and article deep-links) by `scrape_news.py`/`scrape_articles.py` via headless Chromium (see [§20](#20-python-scrapers)) |
 | Buzzsprout RSS | Configured URL | Podcast episodes |
 | Open-Meteo | `api.open-meteo.com/v1/forecast` (free, no API key) | Daily + hourly forecast for the circuit's lat/lng over its race weekend |
 | TSL SignalR | Live timing hub endpoint | Session live timing entries |
+| BARC (WordPress) | `barc.net/online_noticeboard/*` + WP REST API | Judicial decision PDFs - scraped into `data/penalties{year}.json` by `scrape_penalties.py`, run the Monday morning after each round (see [§15](#15-judicial-decisions-penalties-system)) |
 | Firebase Realtime DB | Firebase project | Community chat messages |
 | Firestore | Firebase project | Article comments, reactions, bug reports, roadmap votes, notification state tracking |
 
@@ -565,10 +568,11 @@ Stored in [data/](data/) directory. Served via GitHub raw CDN. Some are also bun
 | `drivers.json` | All 2026 drivers and teams - names, numbers, images, bios, DOBs, career history |
 | `standings.json` | Current season standings, scraped from the TSL championship PDF's six tables: Drivers, Independents' Trophy for Drivers, Jack Sears Trophy, Teams, Independents' Teams, Manufacturers/Constructors. The Independents' Trophy and Jack Sears Trophy are separately-scored classifications (Sporting Regs §1.6), not the Drivers' Championship filtered by class - see `parseStandings()` in `src/api/parsers.js` |
 | `results{year}.json` | Full results for a season (2004 - 2026), including grids from TSL PDFs |
+| `penalties{year}.json` | BARC judicial decisions per round, keyed like `results{year}.json`: `{round, penalties: [{session, driver, carNo, ruleRef, facts, offence, decision, sanction, oneLiner, pdfUrl, confidence}]}` - see [§15](#15-judicial-decisions-penalties-system) |
 | `flags.json` | Feature flags + per-device overrides |
 | `hub_news.json` | Hub-curated news posts including AI-generated digests |
 | `news.json` | Latest btcc.net article (WP-REST-shaped), scraped every 5 minutes so `sendSessionNotifications` can read it without hitting btcc.net directly |
-| `articles/page_<n>.json` + `articles/index.json` | btcc.net article archive in full (title, content, image, category), accumulated over time (capped at 500 articles, oldest dropped) and split into ~20-article page files plus a slug→page index, so the app's News tab, search and article deep-links only ever fetch the one page they actually need instead of the whole archive - see [§19](#19-python-scrapers) |
+| `articles/page_<n>.json` + `articles/index.json` | btcc.net article archive in full (title, content, image, category), accumulated over time (capped at 500 articles, oldest dropped) and split into ~20-article page files plus a slug→page index, so the app's News tab, search and article deep-links only ever fetch the one page they actually need instead of the whole archive - see [§20](#20-python-scrapers) |
 | `roadmap.json` | Feature roadmap items with status |
 | `radio.json` | Live radio station URLs - empty since 2026-08-20 (talkSPORT/talkSPORT 2 retired, `radio_tab` flag set to `false`) |
 | `blacklist.json` | Profanity filter word list |
@@ -639,10 +643,10 @@ The main workhorse function. Runs every minute and handles two categories of wor
 - Friday 9am: race weekend preview notification to `weekend_preview` topic
 - Tuesday 9am: standings update notification to `standings_update` topic
 
-Session results notifications are a separate mechanism entirely - `.github/scripts/session_watcher.py` (Python, connected to TSL's live-timing SignalR feed, not this Cloud Function) sends those on `sessioncomplete` events, since it needs to react the moment a session actually finishes rather than poll once a minute. **Not currently reachable in production** though: confirmed via GitHub Actions run history that `session-watcher.yml` (which it needs dispatching from) hasn't actually run since May 2026 - its cron auto-trigger is commented out and nothing else dispatches it. See [§19](#19-python-scrapers).
+Session results notifications are a separate mechanism entirely - `.github/scripts/session_watcher.py` (Python, connected to TSL's live-timing SignalR feed, not this Cloud Function) sends those on `sessioncomplete` events, since it needs to react the moment a session actually finishes rather than poll once a minute. **Not currently reachable in production** though: confirmed via GitHub Actions run history that `session-watcher.yml` (which it needs dispatching from) hasn't actually run since May 2026 - its cron auto-trigger is commented out and nothing else dispatches it. See [§20](#20-python-scrapers).
 
 **Always runs (every minute, regardless of race day):**
-- News alerts: polls `news.json` on the GitHub raw CDN (scraped from `btcc.net/news/` every 5 minutes by `scrape_news.py` via headless Chromium - btcc.net's Vercel bot-challenge blocks the Cloud Function's runtime fetch from hitting it directly, see [§19](#19-python-scrapers)), compares latest `id` (now the article slug, not a WordPress post ID) to Firestore `state/news.lastId`. Before actually sending, checks that the slug is already in `data/articles/index.json` (`isSlugMirrored`) - `news.json` is committed well before the much slower `scrape_articles.py` mirror step in the same workflow run, so a slug can exist here for several minutes before `ArticleScreen`'s lookup can find it. If not yet mirrored, the send is skipped for this tick without clearing `pendingSend`, so the next 1-minute tick just retries once the mirror catches up - fixed 2026-08-11, root cause of notifications occasionally opening to a "couldn't load this article" screen. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout.
+- News alerts: polls `news.json` on the GitHub raw CDN (scraped from `btcc.net/news/` every 5 minutes by `scrape_news.py` via headless Chromium - btcc.net's Vercel bot-challenge blocks the Cloud Function's runtime fetch from hitting it directly, see [§20](#20-python-scrapers)), compares latest `id` (now the article slug, not a WordPress post ID) to Firestore `state/news.lastId`. Before actually sending, checks that the slug is already in `data/articles/index.json` (`isSlugMirrored`) - `news.json` is committed well before the much slower `scrape_articles.py` mirror step in the same workflow run, so a slug can exist here for several minutes before `ArticleScreen`'s lookup can find it. If not yet mirrored, the send is skipped for this tick without clearing `pendingSend`, so the next 1-minute tick just retries once the mirror catches up - fixed 2026-08-11, root cause of notifications occasionally opening to a "couldn't load this article" screen. Sends to `news_alerts` on change. Includes `slug` + `imageUrl` in payload. Logic lives in `functions/newsCheck.js` (injected deps for testability). Uses a 20-second fetch timeout.
 - Hub news alerts: polls `hub_news.json`, compares latest `id` to Firestore `state/hub_news.lastId`. Sends to `news_alerts`. Excludes "Weekly Digest" category articles.
 - Podcast alerts: polls Buzzsprout RSS, compares `guid` to Firestore state. Sends to `podcast_alerts`.
 
@@ -650,7 +654,7 @@ Firestore transactions prevent duplicate sends. First-time detection (when `last
 
 **Error alerting:** every `logError` call uses `alert: true`. For per-minute checks (news/hub/podcast/FCM) the error is upserted at a fixed key and the email is only sent on first occurrence or when the error recurs after being marked resolved in the admin FIRESTORE tab. One-off failures (syncAnalytics, notifyResultsUpdate, digest generation) always email. All alerts go to `btcchub@gmail.com` via `GMAIL_APP_PASSWORD` secret - **this secret must be explicitly declared in a function's `secrets: [...]` option to be injected into `process.env`** (Firebase Functions v2 does not bind Secret Manager secrets to a function unless it asks for them). `sendSessionNotifications`, `syncAnalytics` and `notifyResultsUpdate` were missing this declaration until 2026-07-11, so every alert from them silently wrote to Firestore but never emailed - fixed by adding `secrets: ['GMAIL_APP_PASSWORD']` to each.
 
-**Scraper failure alerting:** `reportScraperFailure` (HTTP, `SCRAPER_SECRET`-gated) lets the GitHub Actions scraper workflows report into this same pipeline, since a failed workflow run has no way to email on its own. Every scraper workflow has a final `if: failure()` step (see [§19](#19-python-scrapers)) that POSTs `{workflow, message, runUrl}` to it, which calls `logError` with `key: scraper-<workflow>` - same dedup-until-resolved behaviour as the per-minute checks above, and shows up in the same admin FIRESTORE tab.
+**Scraper failure alerting:** `reportScraperFailure` (HTTP, `SCRAPER_SECRET`-gated) lets the GitHub Actions scraper workflows report into this same pipeline, since a failed workflow run has no way to email on its own. Every scraper workflow has a final `if: failure()` step (see [§20](#20-python-scrapers)) that POSTs `{workflow, message, runUrl}` to it, which calls `logError` with `key: scraper-<workflow>` - same dedup-until-resolved behaviour as the per-minute checks above, and shows up in the same admin FIRESTORE tab.
 
 **Resolving errors:** the admin FIRESTORE tab Dismiss button calls the `dismissError` Cloud Function (Admin SDK, bypasses rules) via `POST /dismissError` with `x-admin-secret`. The `errors` collection has `allow write: if false` for clients - direct REST PATCH from the admin page was silently rejected by Firestore rules, so writes are routed through the function instead. "Dismiss all" sends `{all: true}` and the function batch-updates all unresolved docs.
 
@@ -776,7 +780,40 @@ if no results yet:
 
 ---
 
-## 15. Feature Flags
+## 15. Judicial Decisions (Penalties) System
+
+### Data Pipeline
+
+1. BARC (the BTCC's organising club) publishes every stewards' decision as a PDF on a per-round "Online Noticeboard" page, e.g. `barc.net/online_noticeboard/2026-snetterton-300-may-23-24/`
+2. `.github/workflows/scrape-penalties.yml` runs 07:00 UTC every Monday (the morning after a Sat/Sun round), gated by `.github/scripts/is_day_after_race.py` (checks `calendar.json` for a round whose `endDate` was yesterday)
+3. `tools/scraper/scrape_penalties.py`:
+   - Resolves the round's noticeboard page via BARC's WordPress REST API (`/wp-json/wp/v2/online_noticeboard`), matching on venue keyword + month + both day-of-month tokens (its own `search` param was tried and rejected - it silently ignores the collection scope on this site and returns ordinary news posts instead)
+   - Filters notices to ones naming "British Touring Car Championship" in full (the page lists every series racing that weekend; BTCC's own results/grid PDFs are labelled with the short "BTCC" form instead, so that filter alone separates a real judicial decision from everything else)
+   - Downloads and parses each linked PDF with layout-aware text extraction (same pdfminer technique as the grid PDFs in [§14](#14-starting-grid-system))
+4. Output written to `data/penalties{year}.json`, keyed by round: `{round, penalties: [{session, driver, carNo, ruleRef, facts, offence, decision, sanction, oneLiner, pdfUrl, confidence}]}`
+
+### PDF Parsing
+
+BARC changed their decision template mid-2026 season, so parsing is template-aware:
+- **Template A** ("BRITISH AUTOMOBILE RACING CLUB" header): prose form - "I find that you are guilty of contravening, {rule} ... In that {facts} ... I order that you should: {checkbox list}". Split at "In that": the part before is `offence` (rule citation), the part after is `facts` (plain-English incident description).
+- **Template B** ("BRITISH TOURING CAR CHAMPIONSHIP" header): labelled fields matching the output schema by name - Car No/Driver, Entrant, Session, **Facts**, **Offence**, **Decision** (checkbox list)
+- Both templates also have a **prose-only sub-variant** with no checkbox list at all (confirmed live: false-start penalties, appeal rulings that rescind an earlier penalty, and championship point deductions) - `_prose_order_text()` recovers the operative sentence from "I order that ..." directly in that case. There's no structural seam to split facts from offence in this sub-variant, so both stay `null` and the whole sentence goes into `decision` instead - closest in spirit, since it IS the operative sanction statement.
+
+`facts`/`offence`/`decision` are the PDF's own field values, verbatim (not summarised) - the app shows them as three labelled fields. `ruleRef` is just the short code pulled out of `offence` (e.g. "NCR 12.7.1.8") and `sanction` is a short humanized label derived from `decision` (see below) - both are compact conveniences alongside the verbatim fields, not replacements for them. `oneLiner` collapses driver/sanction/facts into one line and is used as accessibility text and as the sole fallback display when a document didn't parse in enough detail to populate facts/offence/decision individually (`confidence: "minimal"`).
+
+Every field beyond the driver/car header is genuinely optional - a document that doesn't match the checkbox-list shape still keeps its driver/car/session and falls back to the prose extractor, rather than being discarded. A document that doesn't even match a known template at all is still recorded with a generic "judicial decision issued" summary and a link to the PDF, rather than dropped.
+
+**Checkbox matching:** `decision` is whichever option's first line sits closest (by y-coordinate) to the literal "X" marker in the form's left margin - confirmed reliable (within ~1-9pt) across every real document tested. `humanize_sanction()` turns that raw text into `sanction`, a short label (e.g. "5s time penalty", "3-place grid penalty", "Written reprimand"), extracting a digit or spelled-out number tied specifically to the relevant keyword (avoids picking up an unrelated number elsewhere in the sentence, e.g. "...elapsed time for round 19" beside the real "five second" penalty).
+
+**Exclusions:** a notice is dropped entirely (not recorded even minimally) when the document itself states no judicial action was taken - e.g. "I feel that I am unable to take any judicial action..." - since recording it generically would misleadingly read as a penalty on a driver who was actually cleared (`_is_no_action()`).
+
+### App Display
+
+`RoundResultsScreen.js` fetches `penalties{year}.json` once per round (far less volatile than live results, so it isn't on the same 60-second results poll). Each session tab's results `FlatList` gets a `JudicialDecisionsCard` as its `ListFooterComponent`, filtered to that tab's own `race.label` - a penalty from Qualifying Race only shows on the Qualifying Race tab, not lumped into one flat per-round list. Renders nothing (no reserved space) when a session has no penalties, which is the common case. Each entry shows the driver/car line followed by labelled **Facts**/**Offence**/**Decision** fields (whichever are available - falls back to the collapsed `oneLiner` for a "minimal"-confidence entry with none of the three). Tapping "View decision →" opens BARC's own PDF via `Linking.openURL`.
+
+---
+
+## 16. Feature Flags
 
 Flags are served from `data/flags.json` on GitHub. The `FeatureFlagsProvider` fetches fresh flags on every app start with an 8-second abort timeout.
 
@@ -798,7 +835,7 @@ The admin page at https://yacobwood.github.io/BTCC/admin/standings-admin.html pr
 
 ---
 
-## 16. Design System
+## 17. Design System
 
 **File:** [src/theme/colors.js](src/theme/colors.js)
 
@@ -818,9 +855,11 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 ---
 
-## 17. Shared Components
+## 18. Shared Components
 
 **AdBanner** ([src/components/AdBanner.js](src/components/AdBanner.js)) - Google AdMob banner, gated by `banner_ad` feature flag. Hidden until first ad loads (`loaded` state). `BannerAd` handles refresh internally; manually calling `.load()` on tab switch interrupted the cycle and caused visible flashing.
+
+**ChatFab** ([src/components/ChatFab.js](src/components/ChatFab.js)) - Floating live-chat button, mounted once globally in `AppContent` (not per-screen), gated on the `live_chat` feature flag and the user's own "Chat button" setting. Positioned a fixed `12px` above the tab bar's own top edge (`bottom: bottomOffset + FAB_BOTTOM_OFFSET`, where `bottomOffset` is the exact same `TAB_BAR_HEIGHT + safeAreaBottom` value the tab bar's own height uses) - so its footprint relative to any screen's natural bottom edge is a fixed 12-64px zone regardless of device/safe-area, and it overlays every screen identically. Since it's an absolute-positioned overlay, a screen's own scrollable content can still scroll its last item underneath it - every screen with a bottom-of-content `paddingBottom` adds `CHAT_FAB_CLEARANCE` (exported from `src/utils/chatFabLayout.js`, a plain-constants file with zero imports) on top of its own value, so the true last item always clears the FAB (fixed 2026-08-24, reported live: a `RoundResultsScreen` judicial-decision card's "View decision" link was sitting half-behind the FAB). `chatFabLayout.js` is deliberately its own dependency-free module rather than exporting the constant straight from `ChatFab.js` itself - that file pulls in Firebase Realtime Database, AsyncStorage and keyboard listeners, and a first attempt at this fix that imported the constant directly from `ChatFab.js` broke 17 unrelated test suites (plain util-level tests with no Firebase mock configured) purely by being on the import chain.
 
 **CachedImage** ([src/components/CachedImage.js](src/components/CachedImage.js)) - Image component that rewrites btcc.net WordPress URLs to thumbnails (`-150x150` or `-768x768` suffix depending on display size). Provides a fallback placeholder on load error or null URI.
 
@@ -842,7 +881,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 ---
 
-## 18. Utility Modules
+## 19. Utility Modules
 
 **analytics.js** - Firebase Analytics event helpers wrapping `logEvent()` calls. Note: the `widget_configured` event (Android, params: `size` and `theme`) and `widget_size_used` event (iOS, param: `size`) are fired natively - not via this module. Android fires from `WidgetConfigureActivity.kt` at configure time. iOS queues the family in the shared App Group UserDefaults during `getTimeline` and the main app flushes to Firebase in `AppDelegate.didFinishLaunchingWithOptions`.
 
@@ -876,7 +915,7 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 
 ---
 
-## 19. Python Scrapers
+## 20. Python Scrapers
 
 Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update data files on GitHub.
 
@@ -886,6 +925,8 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 
 **scrape_tsl.py** - Main results and grid scraper. Fetches TSL timing PDFs for each session (not btcc.net, so unaffected by the Vercel-challenge/self-hosted-runner situation above). Parses race results and starting grids. Writes to `results{year}.json`. Non-finisher results carry `pos: 0`; disqualifications additionally carry `status: "DQ"`. At the end of each run it also updates circuit lap records in `calendar.json` and triggers `compute_records.py`. (Team stats used to run here too - see `scrape_team_stats.py` below for why that moved out.) Every PDF suffix (`SESSION_SUFFIXES`, `GRID_SUFFIXES`, `CHAMPIONSHIP_SUFFIX`) gets `trg` appended at the point of use (`f"{suffix}trg"`) - TSL's touring-car category disambiguator, needed because a single TOCA event ID covers BTCC plus several support series sharing the same file namespace.
 
+**scrape_penalties.py** - BARC judicial decision scraper - see [§15](#15-judicial-decisions-penalties-system) for the full pipeline/parsing writeup. Unlike every btcc.net-facing scraper above, BARC (`barc.net`) is a conventional server-rendered WordPress site with no JS bot-challenge (confirmed live), so this fetches with plain `urllib.request` and runs on `ubuntu-latest`, not the self-hosted `btcc-mac` runner. Its parsing/matching logic is covered by `test_scrape_penalties.py`, using line-layout fixtures transcribed from real documents fetched live while building it - real-data testing is what caught several bugs during development (fragile positional math, a number-extraction bug that picked up an unrelated "round 19" instead of "five seconds", a missing exoneration filter).
+
 **scrape_articles.py** - Mirrors full btcc.net article content into `data/articles/page_<n>.json` + `index.json` (see file's own docstring for the per-page split rationale). A slug already in the accumulated archive normally keeps its cached content rather than re-fetching every run (`scrape-news.yml` runs every 5 minutes) - `needs_full_refetch()` is the one exception: if the cached content is itself btcc.net's own literal `"More to follow..."` stub (published before a live race-weekend session's result was in), it's re-fetched on every run regardless of age, since a stub with no further signal would otherwise be treated as "done" forever. Fixed 2026-08-09 - two Snetterton reports had sat unfinished for 2.5+ months, and Knockhill's own FP/qualifying reports were stuck the same way the day this was found. `--refresh-all` (CLI-only, never used by the scheduled workflow) forces every page-1 card to re-fetch regardless of stub status, for a manual full catch-up.
 
 **Championship standings** (`parse_championship_pdf()`, called by `scrape_tsl.py` after every scrape) - parses the TSL championship PDF (`CHAMPIONSHIP_SUFFIX`, e.g. `ptstrg`) into `data/standings.json`. The PDF holds six distinct scored tables (Drivers, Manufacturers/Constructors, Teams, Independents' Teams, Independents' Trophy for Drivers, Jack Sears Trophy - `_CHAMP_SECTIONS`), each column-detected independently via its own header row. The **Independents' Trophy for Drivers** section was detected and parsed (it's in `_DRIVER_SECTIONS`) but never written into the output dict - fixed 2026-08-10, having gone unnoticed because the app's Results screen was papering over the gap by filtering the main Drivers' Championship array by `cls === 'I'` and just relabelling it "Independents", which happened to look plausible but showed the wrong points/wins (Sporting Regs §1.6.2.b scores the Independents' Trophy on the same finishing-position points table as the main championship, minus the pole/fastest-lap/race-leader bonus points - not a re-ranking of the main table). `standings["independents"]`'s own Wins/2nds/3rds columns are trusted as scraped (a class tally: best-placed independent per race) rather than overridden with the outright-finish tallies used for `standings`/`jst`, since those are a different metric. `Manufacturers/Constructors` was already being written to the JSON but the app-side parser (`parseStandings()` in `src/api/parsers.js`) never read it, so it also went unused until the same fix. `_parse_team_rows()` (used for the Teams, Manufacturers and Independents' Teams sections) runs its output through `_normalize_team_entries()` before returning - a mid-season team rename can leave the *source PDF itself* listing the same team twice in one table (real season total under the old name, a fresh zero-point row under the new one) while officials transition the change, not a parsing bug on our side. Hit live 2026-08-22 (Donington Park GP round 7): "Cataclean Plato Racing" (282pts) and "CPRL" (0pts) both appeared in the same Teams table, corrupting `data/standings.json` with a phantom last-place duplicate and briefly failing `liveDataConsistency.test.js`'s teams/standings cross-check. `TEAM_NAME_ALIASES` canonicalizes a known old name, and duplicate rows get summed and re-ranked into a contiguous points-descending `pos` sequence - same pattern as `scrape_team_stats.py`'s `TEAM_SLUGS` comment for the same rename on the drivers.json side.
@@ -893,6 +934,8 @@ Located in [tools/scraper/](tools/scraper/). Run manually or via CI to update da
 **Track lap records** (`update_calendar_records()`, called by `scrape_tsl.py` after every scrape) - compares each round's fastest `bestLap` (Qualifying for `qualifyingRecord`, fastest of Race 1/2/3 for `raceRecord`) against the stored record in `calendar.json` and overwrites only when genuinely faster. `lap_to_secs()` parses `"M:SS.mmm"` or bare `"SS.mmm"`, tolerating a trailing unit suffix (some older records were manually seeded as `"50.876s"`) - before 2026-08-09 it didn't, so `float(t)` raised on that suffix, silently returned `inf` for the *stored* record, and let literally any freshly-scraped lap overwrite it as a false "new record" regardless of whether it was actually faster (this hit Knockhill live in production; Silverstone's records carried the same `"s"`-suffixed formatting and would have hit the same bug at its own race weekend). `src/screens/TrackDetailScreen.js` has its own client-side `lapTimeSecs()` for a "live record" preview during a race weekend, fixed the same day - it previously required a colon (`"M:SS.mmm"`) and returned `null` for any bare-seconds record, which is how every short circuit (Knockhill, Brands Hatch Indy) actually stores its sub-two-minute times, so their live-record speed calculation silently never ran. **`bestLap` column bleed, fixed 2026-08-24:** `parse_classification()`'s BEST LAP x-range (`470 < x < 545`) was wide enough to also catch the AVG SPEED column TSL prints just to its left for race sessions (x≈477, mph, e.g. `"93.67"` - never itself captured into any field). A classified row always has both cells, so the wide lower bound only "worked" there by accident of pdfminer's element order; a non-classified/DNF row - which TSL doesn't compute a real best lap for after just 1-2 laps - has only the avg-speed cell, so it silently became the "best lap" instead. Donington Park GP round 7 recorded Daniel Rowbottom's Race 3 DNF as `bestLap: "83.35"` (his partial-stint mph) and it briefly became the circuit's `raceRecord`, displaying as a plain "83.35" on the Lap Records card instead of "M:SS.mmm" - the giveaway that something was off, since a genuine time always round-trips through `formatDate`-adjacent display code with its minute prefix intact. Narrowed to `495 < x < 545`, comfortably between the two columns and still catching genuine sub-minute race laps at Brands Hatch Indy/Knockhill (confirmed against real PDFs: both columns' x-position is unaffected by "M:SS.mmm" vs bare "SS.mmm" format). Along with the code fix, did a one-time correction of the 7 already-corrupted `bestLap` entries this had produced across rounds 1/4/5/6/7 (cleared to `""` - TSL genuinely has no best lap to show for those rows) and the 3 `raceRecord`s it had briefly won: round 1 (Donington Park) turned out to hold a genuine, previously-undetected 2026 improvement once the corrupted DNF entry was excluded (Ashley Sutton, `1:07.944`, beating the prior `1:08.011`/2025 record); rounds 5 (Thruxton) and 7 (Donington Park GP) reverted to their pre-corruption record, recovered from calendar.json's git history, since no genuine 2026 lap beat it.
 
 **is_race_weekend.py** (`.github/scripts/`) - Gates `scrape-results.yml`'s actual scraping steps: the workflow cron fires every 2 minutes Sat/Sun 09:00-19:00 UTC regardless, but each step only runs `if: steps.raceday.outputs.in_session_window == 'true'`. `compute_session_windows()` opens a `[start+15min, start+90min]` window per session by default. Grid-bearing sessions (`PRECEDING_SESSION` map: Qualifying Race ← Qualifying, Race 1 ← Qualifying Race, Race 2 ← Race 1, Race 3 ← Race 2) also open their window early, as soon as the preceding session's results are committed, through to the same `w_end` - per reg 3.4.1.a/b the grid is published as soon as the preceding session finishes, normally hours before the grid-bearing session's own start. Before this fix (2026-08-09), the window for e.g. Race 1's grid never opened until 15 minutes *into* Race 1 itself, so the official grid was never actually fetchable before the race started - the client-side "Predicted Starting Grid" fallback (see [§14](#14-starting-grid-system)) existed to cover exactly that gap, and still serves as the fallback for any case where the real grid is fetched late for other reasons (TSL delay, workflow hiccup, etc).
+
+**is_day_after_race.py** (`.github/scripts/`) - Gates `scrape-penalties.yml`: checks whether yesterday was a round's `endDate` in `calendar.json` and, if so, outputs that round number (tested in `test_is_day_after_race.py`). Unlike `is_race_weekend.py` above, this doesn't need a per-session window - BARC's decisions are posted live during the sessions themselves (confirmed by their own timestamps), so by Monday morning everything from that weekend is already up.
 
 **session_watcher.py** (`.github/scripts/`) - Connects to TSL's SignalR live-timing feed for a race day and reacts to `sessioncomplete` events: fires a "Starting in 15 mins" pre-session alert, and on each session's completion waits 3 minutes for the PDF, scrapes+commits, then sends that session's results notification. **Not currently reachable in production**: `.github/workflows/session-watcher.yml` requires either a manual `workflow_dispatch` or an auto-dispatch from `race-day-start.yml`, and confirmed via GitHub Actions run history it hasn't actually run since May 2026 (its cron auto-trigger is commented out, and `race-day-start.yml` produced no runs at all on a live race weekend it was checked against). Every pre-session/results notification a user actually receives today comes from `sendSessionNotifications` instead (see [§12](#12-firebase-cloud-functions)) - this file's implementation is left in place, correct but dormant, in case the workflow is ever reactivated.
 
@@ -932,7 +975,7 @@ Four `carImages/` files (`bensley.webp`, `gilbert.webp`, `halstead.webp`, `sutto
 
 ---
 
-## 20. Admin Interface
+## 21. Admin Interface
 
 **File:** [admin/standings-admin.html](admin/standings-admin.html)
 
@@ -952,7 +995,7 @@ All writes go directly to the GitHub repository via the GitHub API (authenticate
 
 ---
 
-## 21. Test Suite
+## 22. Test Suite
 
 **Runner:** Jest 29 + `@testing-library/react-native` 13
 
@@ -1001,7 +1044,7 @@ The test suite covers all major stores, utilities, components and screens. Key f
 
 ---
 
-## 22. Build and Release
+## 23. Build and Release
 
 ### Development
 
@@ -1043,7 +1086,7 @@ Fastlane is configured in [fastlane/](fastlane/) for automated builds and metada
 
 ---
 
-## 23. Deep Linking
+## 24. Deep Linking
 
 Configured in `AppNavigator.js` under the `linking` object.
 
@@ -1065,7 +1108,7 @@ Magic link auth links are intercepted in `AuthProvider` via `Linking.getInitialU
 
 ---
 
-## 24. Known Architecture Decisions
+## 25. Known Architecture Decisions
 
 **No page transition animations** - `animation: 'none'` is set globally in `screenOptions`. This is intentional for performance and must not be changed.
 

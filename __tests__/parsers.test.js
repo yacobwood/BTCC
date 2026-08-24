@@ -1,4 +1,4 @@
-import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl} from '../src/api/parsers';
+import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parsePenalties, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl} from '../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
@@ -961,5 +961,57 @@ describe('parseStandings', () => {
     const s = parseStandings(json);
     expect(s.independents).toEqual([]);
     expect(s.manufacturers).toEqual([]);
+  });
+});
+
+describe('parsePenalties', () => {
+  test('maps a round\'s penalties through with defaults filled in', () => {
+    const json = {
+      season: '2026',
+      rounds: [{
+        round: 3,
+        penalties: [{
+          session: 'Qualifying Race', driver: 'Charles Rainford', carNo: 99,
+          facts: 'contact was made with car 3 at the entry of turn 6',
+          offence: 'NCR 12.7.1.8 Causing a collision, repetition of serious mistakes or the appearance of a lack of control over the car',
+          decision: 'Be verbally warned',
+          sanction: 'Verbal warning', oneLiner: 'Charles Rainford (No. 99): Verbal warning - contact at Turn 6',
+          pdfUrl: 'https://www.barc.net/wp-content/uploads/decision.pdf',
+        }],
+      }],
+    };
+    const rounds = parsePenalties(json);
+    expect(rounds).toHaveLength(1);
+    expect(rounds[0].round).toBe(3);
+    expect(rounds[0].penalties[0]).toEqual({
+      session: 'Qualifying Race', driver: 'Charles Rainford', carNo: 99,
+      facts: 'contact was made with car 3 at the entry of turn 6',
+      offence: 'NCR 12.7.1.8 Causing a collision, repetition of serious mistakes or the appearance of a lack of control over the car',
+      decision: 'Be verbally warned',
+      sanction: 'Verbal warning', oneLiner: 'Charles Rainford (No. 99): Verbal warning - contact at Turn 6',
+      pdfUrl: 'https://www.barc.net/wp-content/uploads/decision.pdf',
+    });
+  });
+
+  test('a minimal-confidence entry (no facts/offence/decision) still comes through with nulls, not a crash', () => {
+    const json = {season: '2026', rounds: [{round: 2, penalties: [{driver: 'NAPA Racing', oneLiner: 'NAPA Racing: judicial decision issued - view document for details', pdfUrl: 'https://example.com/x.pdf'}]}]};
+    const rounds = parsePenalties(json);
+    expect(rounds[0].penalties[0].session).toBeNull();
+    expect(rounds[0].penalties[0].carNo).toBeNull();
+    expect(rounds[0].penalties[0].facts).toBeNull();
+    expect(rounds[0].penalties[0].offence).toBeNull();
+    expect(rounds[0].penalties[0].decision).toBeNull();
+    expect(rounds[0].penalties[0].sanction).toBeNull();
+  });
+
+  test('missing/empty input returns an empty array rather than throwing', () => {
+    expect(parsePenalties(null)).toEqual([]);
+    expect(parsePenalties(undefined)).toEqual([]);
+    expect(parsePenalties({})).toEqual([]);
+  });
+
+  test('a round with no penalties yet returns an empty penalties array', () => {
+    const rounds = parsePenalties({season: '2026', rounds: [{round: 8}]});
+    expect(rounds[0].penalties).toEqual([]);
   });
 });

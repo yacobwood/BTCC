@@ -421,3 +421,31 @@ export function parseResults(json) {
     }),
   }));
 }
+
+// tools/scraper/scrape_penalties.py's "confidence" field ("full"/"partial"/
+// "minimal") isn't surfaced in the UI - a penalty is shown either way, just
+// with a less detailed oneLiner when the source PDF didn't match a known
+// BARC template. Keyed by round to match parseResults' shape, so the app
+// can look a round's penalties up the same way it looks up its races.
+export function parsePenalties(json) {
+  return (json?.rounds || []).map(r => ({
+    round: r.round,
+    penalties: (r.penalties || []).map(p => ({
+      session: p.session || null,
+      driver: p.driver || '',
+      carNo: p.carNo ?? null,
+      // facts/offence/decision are the PDF's own labelled fields, verbatim
+      // (Template B's document literally uses these three headings; the
+      // scraper maps Template A's equivalent prose onto the same shape) -
+      // null for a document whose layout the scraper didn't recognise in
+      // enough detail to split them out, in which case oneLiner is the only
+      // available summary.
+      facts: p.facts || null,
+      offence: p.offence || null,
+      decision: p.decision || null,
+      sanction: p.sanction || null,
+      oneLiner: p.oneLiner || '',
+      pdfUrl: p.pdfUrl || null,
+    })),
+  }));
+}

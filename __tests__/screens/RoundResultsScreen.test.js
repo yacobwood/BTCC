@@ -1,4 +1,5 @@
 import React from 'react';
+import {Linking} from 'react-native';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RoundResultsScreen from '../../src/screens/RoundResultsScreen';
@@ -9,7 +10,13 @@ jest.mock('../../src/utils/broadcaster', () => ({
 }));
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), roundResultsViewed: jest.fn()},
+  Analytics: {
+    screen: jest.fn(),
+    roundResultsViewed: jest.fn(),
+    penaltiesShown: jest.fn(),
+    penaltyDocumentOpened: jest.fn(),
+    penaltyDocumentOpenFailed: jest.fn(),
+  },
 }));
 
 const nav = makeNav();
@@ -745,6 +752,98 @@ describe('RoundResultsScreen', () => {
       };
       const {queryByText} = renderRound({round: roundWithUrls, year: 2024, initialRace: RACE_1_TAB});
       expect(queryByText('Watch Full Race')).toBeTruthy();
+    });
+  });
+
+  describe('judicial decisions', () => {
+    const PENALTY_ONE_LINER = 'Tom Ingram (No. 80): 5s time penalty - track limits';
+    const PENALTY_PDF_URL = 'https://www.barc.net/wp-content/uploads/decision.pdf';
+    const PENALTIES_RESPONSE = {
+      season: '2026',
+      rounds: [{
+        round: 1, // matches MOCK_ROUND.round
+        penalties: [{
+          session: 'Free Practice', driver: 'Tom Ingram', carNo: 80,
+          sanction: '5s time penalty', oneLiner: PENALTY_ONE_LINER, pdfUrl: PENALTY_PDF_URL,
+        }],
+      }],
+    };
+
+    // The default global fetch mock (jest.setup.js) resolves {} for every
+    // URL - override just the penalties.json call so fetchResults' own
+    // fetch (still hit by the results-refresh effect) is unaffected.
+    function mockPenaltiesFetch(response = PENALTIES_RESPONSE) {
+      global.fetch.mockImplementation((url) =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(url.includes('penalties') ? response : {}),
+          text: () => Promise.resolve(''),
+        }),
+      );
+    }
+
+    it('shows the card on the session tab a penalty belongs to', async () => {
+      mockPenaltiesFetch();
+      const {findByText} = renderRound({initialRace: 0}); // Free Practice
+      expect(await findByText(PENALTY_ONE_LINER)).toBeTruthy();
+    });
+
+    it('shows Facts/Offence/Decision as labelled fields when the scraper split them out, not the collapsed oneLiner', async () => {
+      mockPenaltiesFetch({
+        season: '2026',
+        rounds: [{
+          round: 1,
+          penalties: [{
+            session: 'Free Practice', driver: 'Tom Ingram', carNo: 80,
+            facts: 'Contact was made with car 3 at turn 6',
+            offence: 'NCR 12.7.1.8 Causing a collision',
+            decision: 'Be penalised by the addition of 5 seconds to your race time.',
+            sanction: '5s time penalty', oneLiner: PENALTY_ONE_LINER, pdfUrl: PENALTY_PDF_URL,
+          }],
+        }],
+      });
+      const {findByText, queryByText} = renderRound({initialRace: 0});
+      expect(await findByText('Tom Ingram (No. 80)')).toBeTruthy();
+      expect(await findByText('Contact was made with car 3 at turn 6')).toBeTruthy();
+      expect(await findByText('NCR 12.7.1.8 Causing a collision')).toBeTruthy();
+      expect(await findByText('Be penalised by the addition of 5 seconds to your race time.')).toBeTruthy();
+      expect(queryByText(PENALTY_ONE_LINER)).toBeNull();
+    });
+
+    it('does not show a card on a session tab with no penalties of its own', async () => {
+      mockPenaltiesFetch();
+      const {findByText, queryByText} = renderRound({initialRace: 1}); // Qualifying
+      await findByText('Tom INGRAM'); // wait for the fetch/render cycle to settle
+      expect(queryByText(/Judicial Decision/)).toBeNull();
+    });
+
+    it('fires Analytics.penaltiesShown once the card renders', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      mockPenaltiesFetch();
+      const {findByText} = renderRound({initialRace: 0});
+      await findByText(/Judicial Decision/);
+      expect(Analytics.penaltiesShown).toHaveBeenCalledWith(1, 'Free Practice', 1);
+    });
+
+    it('opens the decision PDF and logs success on tap', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+      mockPenaltiesFetch();
+      const {findByText} = renderRound({initialRace: 0});
+      const link = await findByText('View decision →');
+      await act(async () => fireEvent.press(link));
+      await waitFor(() => expect(Linking.openURL).toHaveBeenCalledWith(PENALTY_PDF_URL));
+      expect(Analytics.penaltyDocumentOpened).toHaveBeenCalledWith(1, 'Free Practice');
+    });
+
+    it('logs failure when the PDF link fails to open', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('no handler'));
+      mockPenaltiesFetch();
+      const {findByText} = renderRound({initialRace: 0});
+      const link = await findByText('View decision →');
+      await act(async () => fireEvent.press(link));
+      await waitFor(() => expect(Analytics.penaltyDocumentOpenFailed).toHaveBeenCalledWith(1, 'Free Practice', 'no handler'));
     });
   });
 });

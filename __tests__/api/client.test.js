@@ -10,12 +10,18 @@ jest.mock('../../data/calendar.json', () => ({
   seasonStartDate: '2026-04-18',
 }));
 
+jest.mock('../../data/penalties2026.json', () => ({
+  season: '2026',
+  rounds: [{round: 1, penalties: [{session: 'Free Practice', driver: 'Bundled Driver', oneLiner: 'Bundled Driver: fallback data'}]}],
+}));
+
 import {cacheWrite, cacheRead} from '../../src/store/cache';
 import {
   fetchCalendar,
   fetchDrivers,
   fetchStandings,
   fetchResults,
+  fetchPenalties,
   fetchArticles,
   fetchArticleBySlug,
   fetchHubPosts,
@@ -134,6 +140,51 @@ describe('fetchResults', () => {
     await fetchResults(2024);
 
     expect(cacheWrite).toHaveBeenCalledWith('results_2024', data);
+  });
+});
+
+describe('fetchPenalties', () => {
+  it('defaults to year 2026', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({rounds: []})});
+
+    await fetchPenalties();
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('penalties2026.json'));
+  });
+
+  it('fetches the correct year', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({rounds: []})});
+
+    await fetchPenalties(2025);
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('penalties2025.json'));
+  });
+
+  it('uses year-specific cache key', async () => {
+    const data = {rounds: []};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(data)});
+
+    await fetchPenalties(2024);
+
+    expect(cacheWrite).toHaveBeenCalledWith('penalties_2024', data);
+  });
+
+  it('returns an empty-but-valid shape for a year with no bundled fallback', async () => {
+    global.fetch.mockResolvedValueOnce({ok: false, status: 404});
+    cacheRead.mockResolvedValueOnce(null); // no stale cache to fall back on either
+
+    const result = await fetchPenalties(2027);
+
+    expect(result).toEqual({season: '2027', rounds: []});
+  });
+
+  it('falls back to the bundled 2026 snapshot on network error, not an empty list', async () => {
+    global.fetch.mockResolvedValueOnce({ok: false, status: 404});
+    cacheRead.mockResolvedValueOnce(null);
+
+    const result = await fetchPenalties(2026);
+
+    expect(result.rounds[0].penalties[0].driver).toBe('Bundled Driver');
   });
 });
 

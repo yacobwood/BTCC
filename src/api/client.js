@@ -10,6 +10,7 @@ const BUNDLED_DRIVERS = require('../../data/drivers.json');
 const BUNDLED_BLACKLIST = require('../../data/blacklist.json');
 const BUNDLED_MERCH = require('../../data/merch.json');
 const BUNDLED_PARTNERS = require('../../data/partners.json');
+const BUNDLED_PENALTIES_2026 = require('../../data/penalties2026.json');
 
 // Stale-while-revalidate: serve from cache immediately, refresh in background.
 // If the cached entry is older than MAX_AGE_MS, treat as a cache miss so the
@@ -120,6 +121,20 @@ export async function fetchLiveStatus() {
 
 export async function fetchResults(year = 2026, forceRefresh = false) {
   return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, /* staleFallback */ true, false, 5 * 60 * 1000);
+}
+
+// Judicial decisions (tools/scraper/scrape_penalties.py, run the Monday
+// morning after each round). Same shape/cadence as fetchResults. Falls back
+// to the bundled 2026 snapshot on network error (same pattern as
+// fetchCalendar/fetchDrivers) rather than an empty list - a 404 is otherwise
+// expected and not an error for a year with no penalties.json committed yet
+// (e.g. before the first round of a new season has a decision to report).
+export async function fetchPenalties(year = 2026, forceRefresh = false) {
+  try {
+    return await fetchJson(`${BASE_GITHUB}/penalties${year}.json`, `penalties_${year}`, forceRefresh, /* staleFallback */ true, false, 5 * 60 * 1000);
+  } catch {
+    return year === 2026 ? BUNDLED_PENALTIES_2026 : {season: String(year), rounds: []};
+  }
 }
 
 export async function fetchMerchStores() {

@@ -10,14 +10,15 @@ import {
   AppState,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {useUnits} from '../store/units';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
-import {fetchResults} from '../api/client';
-import {parseResults} from '../api/parsers';
+import {fetchResults, fetchPenalties} from '../api/client';
+import {parseResults, parsePenalties} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 import {detectBroadcaster} from '../utils/broadcaster';
 import {ttbPositionMap, getTtbLaps, isSeasonOpenerRace1} from '../utils/ttb';
@@ -148,6 +149,21 @@ export default function RoundResultsScreen({route, navigation}) {
     });
     return () => { clearInterval(interval); appSub.remove(); };
   }, [refresh, year]);
+
+  // Judicial decisions (scrape_penalties.py, run the Monday after each round)
+  // change far less often than results - fetched once per year/round rather
+  // than on the same 60s poll as live results above.
+  const [penalties, setPenalties] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const raw = await fetchPenalties(year);
+      const parsed = parsePenalties(raw);
+      const forThisRound = parsed.find(r => r.round === round.round)?.penalties || [];
+      if (!cancelled) setPenalties(forThisRound);
+    })();
+    return () => { cancelled = true; };
+  }, [year, round.round]);
 
   const rStart = (round.round - 1) * 3 + 1;
   const rEnd = rStart + 2;
@@ -298,7 +314,7 @@ export default function RoundResultsScreen({route, navigation}) {
                 data={race.results}
                 keyExtractor={(_, idx) => String(idx)}
                 renderItem={makeRenderResult(gridMap)}
-                contentContainerStyle={{padding: 16, paddingBottom: 20}}
+                contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
                 ListHeaderComponent={(() => {
                   const urls = round.youtubeUrls?.length ? round.youtubeUrls : (year === CURRENT_SEASON ? (BUNDLED_YOUTUBE_URLS[round.round] || []) : []);
                   const raceUrlMap = {'Free Practice': urls[0], 'Qualifying': urls[1], 'Qualifying Race': urls[2], 'Race 1': urls[3], 'Race 2': urls[4], 'Race 3': urls[5]};
@@ -317,11 +333,90 @@ export default function RoundResultsScreen({route, navigation}) {
                     </TouchableOpacity>
                   );
                 })()}
+                ListFooterComponent={
+                  <JudicialDecisionsCard
+                    penalties={penalties.filter(p => p.session === race.label)}
+                    roundNumber={round.round}
+                    session={race.label}
+                  />
+                }
               />
             </View>
           );
         })}
       />
+    </View>
+  );
+}
+
+// One row per BARC judicial decision naming a BTCC driver in this session
+// (tools/scraper/scrape_penalties.py). oneLiner is pre-built by the scraper -
+// it's already "Driver (No. N): sanction - what happened" - this just adds
+// the link out to BARC's own PDF. Renders nothing when there's nothing to
+// show, so it costs no space on the (typical) incident-free session tab.
+function JudicialDecisionsCard({penalties, roundNumber, session}) {
+  useEffect(() => {
+    if (penalties.length) Analytics.penaltiesShown(roundNumber, session, penalties.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundNumber, session, penalties.length]);
+
+  if (!penalties.length) return null;
+
+  const openDecision = (p) => {
+    if (!p.pdfUrl) return;
+    Linking.openURL(p.pdfUrl)
+      .then(() => Analytics.penaltyDocumentOpened(roundNumber, session))
+      .catch((e) => Analytics.penaltyDocumentOpenFailed(roundNumber, session, e?.message));
+  };
+
+  return (
+    <View style={styles.penaltyCard}>
+      <View style={styles.penaltyCardHeader}>
+        <Icon name="gavel" size={14} color={Colors.yellow} />
+        <Text style={styles.penaltyCardTitle}>
+          Judicial Decision{penalties.length > 1 ? 's' : ''} ({penalties.length})
+        </Text>
+      </View>
+      {penalties.map((p, i) => {
+        // facts/offence/decision are the PDF's own labelled fields, verbatim -
+        // shown as-is rather than collapsed into oneLiner's condensed summary
+        // (which stays as the fallback for a document the scraper couldn't
+        // split into that level of detail - see confidence: "minimal").
+        const hasDetail = p.facts || p.offence || p.decision;
+        return (
+          <View key={i} style={styles.penaltyRow}>
+            <Text style={styles.penaltyDriverLine}>
+              {p.driver}{p.carNo ? ` (No. ${p.carNo})` : ''}
+            </Text>
+            {hasDetail ? (
+              <>
+                {p.facts && <PenaltyField label="Facts" value={p.facts} />}
+                {p.offence && <PenaltyField label="Offence" value={p.offence} />}
+                {p.decision && <PenaltyField label="Decision" value={p.decision} />}
+              </>
+            ) : (
+              <Text style={styles.penaltyOneLiner}>{p.oneLiner}</Text>
+            )}
+            {p.pdfUrl && (
+              <TouchableOpacity
+                onPress={() => openDecision(p)}
+                accessibilityRole="button"
+                accessibilityLabel={`View judicial decision document for ${p.driver}`}>
+                <Text style={styles.penaltyLink}>View decision →</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function PenaltyField({label, value}) {
+  return (
+    <View style={styles.penaltyField}>
+      <Text style={styles.penaltyFieldLabel}>{label.toUpperCase()}</Text>
+      <Text style={styles.penaltyFieldValue}>{value}</Text>
     </View>
   );
 }
@@ -373,7 +468,7 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venu
           </Text>
         )}
       </View>
-      <ScrollView contentContainerStyle={{paddingTop: 12, paddingHorizontal: 16, paddingBottom: 20}}>
+      <ScrollView contentContainerStyle={{paddingTop: 12, paddingHorizontal: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
         <View style={{flexDirection: 'row', gap: GRID_GAP}}>
           <View style={{flex: 1, gap: GRID_GAP}}>
             {leftItems.map(item => (
@@ -423,7 +518,7 @@ function QualGroupsTab({races, isFavourite}) {
         <Text style={styles.reverseTitle}>Qualifying Groups</Text>
         <Text style={styles.reverseSubtitle}>Odd FP finishers → Q1 · Even FP finishers → Q2</Text>
       </View>
-      <ScrollView contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 20}}>
+      <ScrollView contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
         <View style={{flexDirection: 'row', gap: GRID_GAP}}>
           <View style={{flex: 1, gap: GRID_GAP}}>
             <Text style={styles.qualGroupLabel}>Q1</Text>
@@ -528,7 +623,7 @@ function ReverseGridTab({races, isFavourite}) {
             </View>
           );
         }}
-        contentContainerStyle={{padding: 16, paddingBottom: 20}}
+        contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
       />
     </View>
   );
@@ -648,4 +743,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
+  penaltyCard: {
+    backgroundColor: `${Colors.yellow}0D`,
+    borderWidth: 1,
+    borderColor: `${Colors.yellow}33`,
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 4,
+  },
+  penaltyCardHeader: {flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8},
+  penaltyCardTitle: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 0.5},
+  penaltyRow: {
+    borderTopWidth: 1,
+    borderTopColor: `${Colors.yellow}1F`,
+    paddingTop: 8,
+    marginTop: 8,
+  },
+  penaltyDriverLine: {color: '#fff', fontSize: 13, fontWeight: '800', marginBottom: 6},
+  penaltyOneLiner: {color: '#fff', fontSize: 12.5, lineHeight: 18},
+  penaltyField: {marginTop: 6},
+  penaltyFieldLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1},
+  penaltyFieldValue: {color: '#fff', fontSize: 12.5, lineHeight: 18, marginTop: 2},
+  penaltyLink: {color: Colors.yellow, fontSize: 12, fontWeight: '700', marginTop: 10},
 });

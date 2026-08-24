@@ -1,0 +1,109 @@
+name: Scrape BTCC Penalties
+
+on:
+  schedule:
+    # 07:00 UTC every Monday (08:00 BST) - "the morning after race day".
+    # BARC posts judicial decision PDFs live during each session (confirmed
+    # by their own timestamps), so by Monday morning every decision from
+    # that weekend's round is already up - no need to poll during the race
+    # itself the way scrape-results.yml does. is_day_after_race.py still
+    # gates on the calendar so a Monday with no round ending the day before
+    # (e.g. between rounds) is a no-op.
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Season year to scrape (e.g. 2026)"
+        type: number
+        default: 2026
+      round:
+        description: "Specific round to scrape (leave blank to auto-detect the round that just finished)"
+        type: number
+
+concurrency:
+  group: scrape-penalties
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Check day after race
+        id: gate
+        run: python .github/scripts/is_day_after_race.py
+
+      - name: Pull latest before scraping
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.gate.outputs.is_day_after_race == 'true'
+        run: git pull --rebase origin main
+
+      - name: Set up Python
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.gate.outputs.is_day_after_race == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.gate.outputs.is_day_after_race == 'true'
+        run: pip install pdfminer.six
+
+      - name: Scrape penalties
+        id: scrape
+        continue-on-error: true
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.gate.outputs.is_day_after_race == 'true'
+        run: |
+          YEAR="${{ github.event.inputs.year }}"
+          [ -z "$YEAR" ] && YEAR=2026
+          ROUND="${{ github.event.inputs.round }}"
+          [ -z "$ROUND" ] && ROUND="${{ steps.gate.outputs.round }}"
+          if [ -z "$ROUND" ]; then
+            echo "No round to scrape (not the day after a round, and no --round given)."
+            exit 0
+          fi
+          python tools/scraper/scrape_penalties.py "$YEAR" --round "$ROUND"
+
+      - name: Pull latest before committing
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.gate.outputs.is_day_after_race == 'true'
+        run: git pull --rebase --autostash origin main
+
+      - name: Commit updated data
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          steps.gate.outputs.is_day_after_race == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} penalties [skip ci]"
+          file_pattern: "data/penalties*.json"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: "--force-with-lease"
+
+      - name: Report failure
+        if: steps.scrape.outcome == 'failure'
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"scrape-penalties\",\"message\":\"Penalties scrape failed - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
+
+      - name: Fail job if scrape step failed
+        if: steps.scrape.outcome == 'failure'
+        run: exit 1

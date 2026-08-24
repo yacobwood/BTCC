@@ -44,6 +44,9 @@ export const Analytics = {
   },
 
   gridTabSwitched: (tab) => logEvent(fa(),'grid_tab_switched', {tab}),
+  penaltiesShown: (round, session, count) => logEvent(fa(),'penalties_shown', {round, session, count}),
+  penaltyDocumentOpened: (round, session) => logEvent(fa(),'penalty_document_opened', {round, session}),
+  penaltyDocumentOpenFailed: (round, session, errorCode) => logEvent(fa(),'penalty_document_open_failed', {round, session, error_code: errorCode || 'unknown'}),
   newsSearched: (query) => logEvent(fa(),'search', {search_term: query?.substring(0, 100)}),
   searchOpened: () => logEvent(fa(),'search_opened'),
   searchClosed: () => logEvent(fa(),'search_closed'),
