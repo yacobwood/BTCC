@@ -2659,8 +2659,8 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/napa-racing-uk.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/napa-racing-uk.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/selby.webp",
-      "totalRaces": 171,
-      "totalWins": 51,
+      "totalRaces": 175,
+      "totalWins": 52,
       "sponsors": [
         {
           "name": "NAPA Auto Parts",
@@ -2819,7 +2819,7 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/team-vertu.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/team-vertu.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/chilton.webp",
-      "totalRaces": 228,
+      "totalRaces": 232,
       "totalWins": 39,
       "sponsors": [
         {
@@ -2976,7 +2976,7 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/speedworks-corolla-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/speedworks-corolla-racing.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/bensley.webp",
-      "totalRaces": 376,
+      "totalRaces": 380,
       "totalWins": 29,
       "sponsors": [
         {
@@ -3105,7 +3105,7 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/wsr.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/wsr.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/deleon.webp",
-      "totalRaces": 765,
+      "totalRaces": 769,
       "totalWins": 127,
       "lightCardBg": true,
       "sponsors": [
@@ -3274,7 +3274,7 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/lkq-euro-car-parts-with-power-maxed-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/lkq-euro-car-parts-with-power-maxed-racing.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/moffat.webp",
-      "totalRaces": 6,
+      "totalRaces": 10,
       "totalWins": 0,
       "lightCardBg": true,
       "sponsors": [
@@ -3355,8 +3355,8 @@
       "logoUrl": "",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/cprl.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/robottom.webp",
-      "totalRaces": 6,
-      "totalWins": 1,
+      "totalRaces": 22,
+      "totalWins": 0,
       "sponsors": [],
       "sponsorsNote": "CPRL's sponsor lineup is being rebuilt following the team's restructuring in August 2026 (Plato Racing Ltd entered administration on 11 August; Cataclean is providing interim funding while the team's future is confirmed). The car's livery is currently plain/unbranded and subject to change - check back once new partners are announced."
     },
@@ -3438,7 +3438,7 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/restart-racing.png",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/restart-racing.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/smiley.webp",
-      "totalRaces": 66,
+      "totalRaces": 70,
       "totalWins": 1,
       "sponsors": [
         {
@@ -3548,7 +3548,7 @@
       "base": "Northwich, Cheshire",
       "driversChampionships": 1,
       "teamsChampionships": 0,
-      "totalRaces": 107,
+      "totalRaces": 111,
       "totalWins": 22,
       "history": [],
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/laser-tools-racing-with-mb-motorsport.png",
@@ -3695,7 +3695,7 @@
       "logoUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/logoImages/steel-seal-with-power-maxed-racing.jpg",
       "cardBgUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/backgroundImages/steel-seal-with-power-maxed-racing.webp",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/patterson.webp",
-      "totalRaces": 276,
+      "totalRaces": 280,
       "totalWins": 6,
       "lightCardBg": true,
       "smallLogo": true,
