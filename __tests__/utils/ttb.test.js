@@ -99,6 +99,30 @@ describe('championshipOrderBeforeRound', () => {
     const ranks = championshipOrderBeforeRound(allRounds, 2);
     expect(ranks).toEqual({});
   });
+
+  it('folds a rosterDrivers entry with no earlier results in tied on zero points', () => {
+    const allRounds = [
+      {round: 1, races: [{label: 'Race 1', results: [
+        makeResult('Alice', 1, {points: 20}),
+        makeResult('Bob', 2, {points: 15}),
+        makeResult('Carl', 3, {points: 10}),
+      ]}]},
+    ];
+    // Dave (e.g. a mid-season replacement driver) never appeared in any
+    // earlier round's results at all - not even with 0 points - so he's
+    // missing from the points sum entirely. rosterDrivers should still rank
+    // him, tied for last with the rest of the field.
+    const ranks = championshipOrderBeforeRound(allRounds, 2, ['Alice', 'Bob', 'Carl', 'Dave']);
+    expect(ranks).toEqual({Alice: 1, Bob: 2, Carl: 3, Dave: 4});
+  });
+
+  it('does not invent a season-opener ranking from rosterDrivers alone', () => {
+    // Round 1 - no earlier round exists, so points stay empty regardless of
+    // the roster passed in. This must stay {} so ttbPositionMap's max-tier
+    // fallback still kicks in, rather than everyone tying at rank 1.
+    const ranks = championshipOrderBeforeRound([], 1, ['Alice', 'Bob']);
+    expect(ranks).toEqual({});
+  });
 });
 
 // ── finishingOrderMap ─────────────────────────────────────────────────────────
@@ -144,6 +168,20 @@ describe('ttbPositionMap', () => {
 
   it('Race 1 at round 1 with no grid data yet returns null', () => {
     expect(ttbPositionMap({label: 'Race 1', grid: []}, [], [], 1)).toBeNull();
+  });
+
+  it('Race 1 ranks a grid driver with no earlier-round results tied for last, not missing', () => {
+    // Regression: a mid-season replacement driver (e.g. Daniel Lloyd taking
+    // over from James Dorlin) has no results in any earlier round, so they
+    // were previously absent from the map entirely and got no TTB badge.
+    const allRounds = [{round: 1, races: [{label: 'Race 1', results: [
+      makeResult('Alice', 1, {points: 20}),
+      makeResult('Bob', 2, {points: 15}),
+    ]}]}];
+    const race = {label: 'Race 1', grid: [{pos: 1, driver: 'Alice'}, {pos: 2, driver: 'Bob'}, {pos: 3, driver: 'Dave'}]};
+    const map = ttbPositionMap(race, [], allRounds, 2);
+    expect(map).toEqual({Alice: 1, Bob: 2, Dave: 3});
+    expect(getTtbLaps(map.Dave, 'Donington Park')).not.toBeNull();
   });
 
   it('Race 2 uses Race 1 finishing order from the same round', () => {

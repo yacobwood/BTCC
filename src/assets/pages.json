@@ -148,6 +148,26 @@
         },
         {
           "type": "heading",
+          "body": "The Race Start"
+        },
+        {
+          "type": "text",
+          "body": "Once all cars are settled in position at the end of the Formation Lap(s), a 5 second board is shown to the grid. Five seconds after that board is withdrawn, the red lights come on - and somewhere between 2 and 7 seconds later, those lights go out to signal the start of the race. There is no fixed length to that final wait, so committing too early is a genuine risk."
+        },
+        {
+          "type": "heading",
+          "body": "Start Delayed"
+        },
+        {
+          "type": "text",
+          "body": "If the Starter needs to abort the start, a 'Start Delayed' board is shown and the countdown restarts. Cars are usually waved off on another Formation lap before the standard start procedure is tried again, and any empty grid positions left by cars that cannot restart cannot be filled."
+        },
+        {
+          "type": "callout",
+          "body": "Jumping the start is costly: moving after the 5 second board is shown but before the lights go out carries a minimum 10 second time penalty, and simply being out of position when the board appears is a minimum 5 seconds - enough to undo a good qualifying effort in either case."
+        },
+        {
+          "type": "heading",
           "body": "Safety Car Restarts"
         },
         {

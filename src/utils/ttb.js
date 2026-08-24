@@ -78,7 +78,16 @@ function rankByValueDesc(entries) {
 // Race 1's TTB position: Championship Order before this round, i.e. cumulative
 // points from every earlier round of the season. Returns {} for round 1 (no
 // earlier round exists) - callers should treat an empty map as "not available".
-export function championshipOrderBeforeRound(allRounds, roundNumber) {
+//
+// `rosterDrivers` (optional) is this round's own grid - anyone on it with no
+// results in any earlier round (e.g. a mid-season replacement making their
+// season debut, such as Daniel Lloyd stepping in for James Dorlin) has no
+// points to sum and would otherwise be silently missing from the returned
+// map, dropping their TTB badge entirely. They're folded in tied on zero
+// points instead, per reg 1.11.1.b's tie rule already applied below. Skipped
+// when `points` is still empty (the true season opener), which has its own
+// max-tier-for-everyone fallback in ttbPositionMap.
+export function championshipOrderBeforeRound(allRounds, roundNumber, rosterDrivers) {
   const points = {};
   (allRounds || [])
     .filter(r => r.round < roundNumber)
@@ -88,6 +97,11 @@ export function championshipOrderBeforeRound(allRounds, roundNumber) {
         points[res.driver] = (points[res.driver] || 0) + (res.points || 0);
       })
     ));
+  if (rosterDrivers && Object.keys(points).length) {
+    rosterDrivers.forEach(driver => {
+      if (driver && !(driver in points)) points[driver] = 0;
+    });
+  }
   const entries = Object.entries(points).map(([key, value]) => ({key, value}));
   return rankByValueDesc(entries);
 }
@@ -126,7 +140,8 @@ export function isSeasonOpenerRace1(race, allRounds, roundNumber) {
 // than returning null - see isSeasonOpenerRace1.
 export function ttbPositionMap(race, races, allRounds, roundNumber) {
   if (race.label === 'Race 1') {
-    const map = championshipOrderBeforeRound(allRounds, roundNumber);
+    const gridDrivers = (race.grid || []).map(g => g.driver).filter(Boolean);
+    const map = championshipOrderBeforeRound(allRounds, roundNumber, gridDrivers);
     if (Object.keys(map).length) return map;
     if (!race.grid?.length) return null;
     const maxTierMap = {};
