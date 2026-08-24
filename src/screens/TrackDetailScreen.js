@@ -125,12 +125,21 @@ export default function TrackDetailScreen({route, navigation}) {
   const roundParam = route.params?.round ? parseInt(route.params.round, 10) : null;
   const year = route.params?.year ?? CURRENT_SEASON;
   const [track, setTrack] = useState(() => {
-    // trackParam from CalendarScreen may be a raw calendar round (no corners/length).
-    // Always resolve initial state through parseCalendar so tracks.json data is merged in.
-    const targetRound = trackParam?.round ?? roundParam;
-    if (!targetRound) return trackParam || null;
+    // CalendarScreen always navigates with a full round object already run
+    // through parseCalendar (corners/length merged in from tracks.json), for
+    // whichever season the user had selected there - trust it as-is. Round
+    // numbers are reused every season but assigned to different venues (e.g.
+    // rounds 7/8 swap between 2026 and 2027), so re-deriving it here via a
+    // round-number lookup against the bundled *current*-season calendar would
+    // silently substitute the wrong circuit whenever trackParam is for a
+    // different season.
+    if (trackParam) return trackParam;
+    // Deep link / notification tap: only a round number, no season context.
+    // Resolve against the bundled current season as a synchronous fallback;
+    // the effect below refetches and corrects this if it's actually stale.
+    if (!roundParam) return null;
     const parsed = parseCalendar(BUNDLED_CALENDAR);
-    return parsed.rounds.find(r => r.round === targetRound) || trackParam || null;
+    return parsed.rounds.find(r => r.round === roundParam) || null;
   });
   const [raceUrls, setRaceUrls] = useState(() => track?.youtubeUrls || []);
 

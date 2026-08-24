@@ -329,6 +329,30 @@ describe('TrackDetailScreen', () => {
     await waitFor(() => expect(fetchCalendar).toHaveBeenCalledWith(2026, true));
   });
 
+  // Regression: round numbers are reused every season but assigned to
+  // different venues (e.g. round 7 = "Donington Park GP" in the bundled 2026
+  // calendar, but "Croft" in 2027). The initial render used to re-derive the
+  // track via a same-round lookup against the bundled (always-2026) calendar,
+  // silently discarding the already-correct trackParam and showing the wrong
+  // circuit until the year-aware refetch landed.
+  it('renders the passed track immediately for a round whose venue differs between seasons', async () => {
+    const croft2027 = {...TRACK, round: 7, venue: 'Croft'};
+    const {findAllByText, queryAllByText} = renderWithProviders(
+      <TrackDetailScreen route={makeRoute({track: croft2027, year: 2027})} navigation={nav} />,
+    );
+    expect((await findAllByText('Croft')).length).toBeGreaterThan(0);
+    expect(queryAllByText('Donington Park GP').length).toBe(0);
+  });
+
+  it('fires trackDetailViewed with the correct venue for a round whose venue differs between seasons', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    const croft2027 = {...TRACK, round: 7, venue: 'Croft'};
+    renderWithProviders(
+      <TrackDetailScreen route={makeRoute({track: croft2027, year: 2027})} navigation={nav} />,
+    );
+    await waitFor(() => expect(Analytics.trackDetailViewed).toHaveBeenCalledWith(7, 'Croft'));
+  });
+
   // ── Session times ─────────────────────────────────────────────────────────────
 
   it('renders session time from track data', async () => {
