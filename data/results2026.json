@@ -839,7 +839,7 @@
               "laps": 1,
               "time": "1:16.403",
               "gap": "",
-              "bestLap": "91.46",
+              "bestLap": "",
               "points": 0,
               "status": "DNF"
             }
@@ -1715,7 +1715,7 @@
               "laps": 2,
               "time": "3:29.976",
               "gap": "",
-              "bestLap": "67.21",
+              "bestLap": "",
               "points": 0,
               "status": "DNF",
               "leadLap": false
@@ -7879,7 +7879,7 @@
               "laps": 1,
               "time": "1:56.726",
               "gap": "",
-              "bestLap": "68.65",
+              "bestLap": "",
               "points": 0,
               "status": "DNF"
             }
@@ -11659,7 +11659,7 @@
               "laps": 2,
               "time": "3:31.068",
               "gap": "",
-              "bestLap": "80.36",
+              "bestLap": "",
               "points": 0,
               "status": "DNF",
               "leadLap": false
@@ -11689,7 +11689,7 @@
               "laps": 1,
               "time": "2:12.639",
               "gap": "",
-              "bestLap": "63.94",
+              "bestLap": "",
               "points": 0,
               "status": "DNF",
               "leadLap": false
@@ -13751,7 +13751,7 @@
               "laps": 1,
               "time": "1:05.056",
               "gap": "",
-              "bestLap": "70.11",
+              "bestLap": "",
               "points": 0,
               "status": "DNF",
               "leadLap": false
@@ -16770,7 +16770,7 @@
               "laps": 2,
               "time": "3:33.203",
               "gap": "",
-              "bestLap": "83.35",
+              "bestLap": "",
               "points": 0,
               "status": "DNF",
               "leadLap": false

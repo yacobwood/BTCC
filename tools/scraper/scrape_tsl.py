@@ -247,7 +247,12 @@ def parse_grid(pdf_bytes):
 #   DRIVER    85 < x < 235  (driver "(GBR)" or team name, 2 sub-rows)
 #   CAR       235 < x < 340 (car model)
 #   LAPS      340 < x < 380 (integer)
-#   BEST LAP  500 < x < 545 (m:ss.mmm)
+#   AVG SPEED x≈477 for races (mph, e.g. "93.67") - NOT captured into any field
+#             below; deliberately excluded from the BEST LAP range since its
+#             format ("SS.mmm", no colon) is indistinguishable by regex alone
+#             from a genuine sub-minute lap time (see BEST LAP note).
+#   BEST LAP  495 < x < 545 for races (x≈503-509), m:ss.mmm or bare ss.mmm at
+#             sub-minute circuits (Brands Hatch Indy, Knockhill)
 
 def parse_classification(pdf_bytes, label):
     """
@@ -343,8 +348,24 @@ def parse_classification(pdf_bytes, label):
                 # Gap to leader column (x≈418): e.g. "1.749", "12.034"
                 if re.match(r"^\d+\.\d+$", t):
                     gap = t
-            elif 470 < x < 545:
-                # BEST LAP column (x≈503 for races, x≈468 for qualifying)
+            elif 495 < x < 545:
+                # BEST LAP column (x≈503-509 for races). Lower bound must stay
+                # above the AVG SPEED column at x≈477 (mph, e.g. "93.67") -
+                # widening this to 470 (2026-05-09, sub-minute-circuit fix)
+                # let a non-classified/DNF row's avg-speed figure get
+                # mistaken for its best lap whenever that row has no genuine
+                # best-lap cell of its own (TSL doesn't compute one for a
+                # retirement after only 1-2 laps): classified rows always
+                # have both cells, so a permissive lower bound "worked" there
+                # only by accident of element order, but a DNF row with
+                # nothing at x≈503-509 has just the avg-speed text sitting
+                # alone in the wider window (seen 2026-08-24, Donington Park
+                # GP round 7 - Rowbottom's Race 3 DNF recorded "83.35", his
+                # partial-stint mph, as a "1:23.35" lap and briefly became the
+                # circuit's race lap record). Confirmed against real PDFs that
+                # this narrower bound still catches genuine sub-minute race
+                # laps at Brands Hatch Indy/Knockhill (x≈509 there too,
+                # regardless of "M:SS.mmm" vs bare "SS.mmm" format).
                 if re.match(r"^(?:\d+:)?\d{2}\.\d+$", t):
                     best_lap = t
             elif not is_race and 380 < x < 470:

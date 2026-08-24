@@ -219,6 +219,79 @@ class TestFastestLapDriver(unittest.TestCase):
         self.assertEqual(s.fastest_lap_driver(results), 'Bob')
 
 
+# ── parse_classification (BEST LAP column) ──────────────────────────────────
+#
+# Regression coverage for a live data-integrity bug (2026-08-24): the BEST LAP
+# column's x-range (470 < x < 545) was wide enough to also catch the AVG SPEED
+# column (x≈477, mph, e.g. "93.67") that races print just to its left. A
+# classified row always has both cells, so a permissive lower bound "worked"
+# there only because pdfminer happened to emit the true best-lap element after
+# the avg-speed one in the same row (last write wins). A non-classified/DNF
+# row - which TSL never computes a real best lap for after only 1-2 laps -
+# has only the avg-speed cell, so it silently became the "best lap" instead:
+# Donington Park GP round 7 recorded Daniel Rowbottom's Race 3 DNF as bestLap
+# "83.35" (his partial-stint mph), and it briefly became the circuit's race
+# lap record via update_calendar_records(). Verified against the real TSL PDF
+# before fixing: the avg-speed cell sits at x≈477, the genuine best-lap cell
+# at x≈503-509 - comfortably inside a narrower 495 < x < 545 window - for both
+# normal ("M:SS.mmm") and sub-minute ("SS.mmm", Brands Hatch Indy/Knockhill)
+# circuits alike.
+
+def _row_elements(y, pos_text, driver, avg_speed=None, best_lap=None):
+    """Build a synthetic (y, x, text) row matching real TSL PDF element
+    positions, for monkeypatching _pdf_elements without needing a real PDF.
+    pos_text is either a plain finish position ("1", car+class arrive as a
+    separate x≈34 element) or a combined "DNF/DQ/NC/RET NNN C" anchor token
+    (car+class embedded, x≈11.6, no separate element) - matching the two
+    real anchor shapes parse_classification recognises."""
+    is_anchor_combined = not pos_text[0].isdigit() or ' ' in pos_text
+    elements = [(y, 11.6 if is_anchor_combined else 20.2, pos_text)]
+    if not is_anchor_combined:
+        elements.append((y, 34.4, '32 M'))
+    elements += [
+        (y, 87.7, f'{driver} (GBR)'),
+        (y, 239.4, 'Mercedes A35 Saloon'),
+        (y, 344.6, '14'),
+    ]
+    if avg_speed:
+        elements.append((y, 477.4, avg_speed))
+    if best_lap:
+        elements.append((y, 503.5, best_lap))
+    return elements
+
+
+class TestParseClassificationBestLap(unittest.TestCase):
+
+    def _parse(self, elements, label='Race 1'):
+        import unittest.mock as mock
+        with mock.patch.object(s, '_pdf_elements', return_value=elements):
+            return s.parse_classification(b'fake-pdf-bytes', label)
+
+    def test_classified_row_takes_best_lap_not_avg_speed(self):
+        elements = _row_elements(717.3, pos_text='1', driver='Adam MORGAN',
+                                  avg_speed='93.67', best_lap='1:33.766')
+        results = self._parse(elements)
+        self.assertEqual(results[0]['bestLap'], '1:33.766')
+
+    def test_dnf_row_with_no_real_best_lap_stays_empty(self):
+        # The exact Donington Park GP round 7 scenario: only the avg-speed
+        # cell exists (no best-lap cell at all for an incomplete stint) -
+        # must NOT fall back to treating avg speed as the lap time.
+        elements = _row_elements(303.3, pos_text='DNF 32 M', driver='Daniel ROWBOTTOM',
+                                  avg_speed='83.35', best_lap=None)
+        results = self._parse(elements)
+        self.assertEqual(results[0]['bestLap'], '')
+
+    def test_dnf_row_with_genuine_sub_minute_best_lap_is_kept(self):
+        # Brands Hatch Indy/Knockhill: a DNF driver can have set a real
+        # sub-minute lap before retiring - must still be captured correctly,
+        # not confused with the avg-speed cell alongside it.
+        elements = _row_elements(697.5, pos_text='DNF 28 M', driver='Nicolas HAMILTON',
+                                  avg_speed='66.87', best_lap='52.382')
+        results = self._parse(elements)
+        self.assertEqual(results[0]['bestLap'], '52.382')
+
+
 # ── update_calendar_records ─────────────────────────────────────────────────
 #
 # Regression coverage for a live data-integrity bug (2026-08-09): Knockhill's
