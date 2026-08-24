@@ -298,9 +298,9 @@
     {
       "round": 2,
       "tslEventId": 261903,
-      "venue": "Donington Park",
-      "startDate": "2026-04-18",
-      "endDate": "2026-04-19",
+      "venue": "Brands Hatch Indy",
+      "startDate": "2026-05-09",
+      "endDate": "2026-05-10",
       "qualifyingRecord": {
         "driver": "Tom INGRAM",
         "time": "47.310",
@@ -335,7 +335,7 @@
         {
           "name": "Race 2",
           "day": "SUN",
-          "time": "14:40"
+          "time": "14:45"
         },
         {
           "name": "Race 3",
@@ -346,25 +346,17 @@
       "fullTimetable": [
         {
           "day": "SAT",
-          "time": "09:05",
-          "endTime": "09:15",
-          "series": "Legends Cars Elite Cup",
-          "session": "Free Practice",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:25",
-          "endTime": "09:45",
-          "series": "MINI CHALLENGE",
+          "time": "09:10",
+          "endTime": "09:30",
+          "series": "Caterham Seven 310R Championship",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "09:55",
-          "endTime": "10:25",
-          "series": "Porsche Sprint Challenge Great Britain",
+          "time": "09:45",
+          "endTime": "10:20",
+          "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Qualifying",
           "laps": null
         },
@@ -378,24 +370,17 @@
         },
         {
           "day": "SAT",
-          "time": "11:40",
-          "endTime": "12:05",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Qualifying",
+          "time": "11:45",
+          "endTime": "12:00",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying 1",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "12:15",
-          "series": "Legends Cars Elite Cup",
-          "session": "Race",
-          "laps": "10 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "12:35",
-          "endTime": "13:05",
-          "series": "Porsche Carrera Cup Great Britain",
+          "time": "12:20",
+          "endTime": "12:50",
+          "series": "MINI CHALLENGE",
           "session": "Qualifying",
           "laps": null
         },
@@ -412,68 +397,55 @@
           "time": "15:05",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying Race",
-          "laps": "13"
+          "laps": "18"
         },
         {
           "day": "SAT",
           "time": "15:35",
-          "series": "Legends Cars Elite Cup",
-          "session": "Race",
-          "laps": "10 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "15:55",
-          "series": "MINI CHALLENGE",
+          "series": "Caterham Seven 310R Championship",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "16:40",
-          "series": "Porsche Sprint Challenge Great Britain",
+          "time": "16:10",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:45",
+          "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
           "time": "17:15",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "17:50",
-          "series": "Legends Cars Elite Cup",
-          "session": "Race",
-          "laps": "12 mins"
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying 2",
+          "laps": null
         },
         {
           "day": "SUN",
-          "time": "09:10",
-          "series": "Legends Cars Elite Cup",
-          "session": "Race",
-          "laps": "10 mins"
+          "time": "09:00",
+          "endTime": "09:30",
+          "series": null,
+          "session": "Pit Lane Walkabout / Autograph Session",
+          "laps": null
         },
         {
           "day": "SUN",
-          "time": "09:30",
-          "series": "MINI CHALLENGE",
+          "time": "10:00",
+          "series": "Porsche Carrera Cup Great Britain",
           "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "10:05",
-          "series": "Porsche Sprint Challenge Great Britain",
-          "session": "Race",
-          "laps": "20 mins"
+          "laps": "34"
         },
         {
           "day": "SUN",
           "time": "10:40",
-          "series": "Wera Tools F4 British Championship certified by FIA",
+          "series": "Caterham Seven 310R Championship",
           "session": "Race",
           "laps": "20 mins"
         },
@@ -489,79 +461,71 @@
           "time": "11:30",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "18"
-        },
-        {
-          "day": "SUN",
-          "time": "12:10",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
           "laps": "24"
         },
         {
           "day": "SUN",
-          "time": "12:55",
-          "series": "Legends Cars Elite Cup",
-          "session": "Race",
-          "laps": "10 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "13:10",
-          "endTime": "13:50",
-          "series": null,
-          "session": "Lunch break",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:15",
-          "endTime": "13:40",
-          "series": null,
-          "session": "BTCC Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:50",
-          "series": "Porsche Sprint Challenge Great Britain",
+          "time": "12:10",
+          "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "14:25",
+          "time": "12:40",
+          "endTime": "13:15",
           "series": null,
-          "session": "BTCC Pit Lane Opens",
+          "session": "Lunch Break",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "14:40",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "18"
-        },
-        {
-          "day": "SUN",
-          "time": "15:20",
+          "time": "13:15",
           "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "15:55",
-          "series": "Wera Tools F4 British Championship certified by FIA",
+          "time": "13:50",
+          "series": "Porsche Carrera Cup Great Britain",
           "session": "Race",
-          "laps": "25 mins"
+          "laps": "34"
+        },
+        {
+          "day": "SUN",
+          "time": "14:30",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:45",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "24"
+        },
+        {
+          "day": "SUN",
+          "time": "15:25",
+          "series": "Caterham Seven 310R Championship",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:00",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
         },
         {
           "day": "SUN",
           "time": "16:35",
-          "series": "Porsche Carrera Cup Great Britain",
+          "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
-          "laps": "24"
+          "laps": "25 mins"
         },
         {
           "day": "SUN",
@@ -575,23 +539,16 @@
           "time": "17:30",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "18"
-        },
-        {
-          "day": "SUN",
-          "time": "18:10",
-          "series": "Legends Cars Elite Cup",
-          "session": "Race",
-          "laps": "12 mins"
+          "laps": "24"
         }
       ]
     },
     {
       "round": 3,
       "tslEventId": 262103,
-      "venue": "Brands Hatch Indy",
-      "startDate": "2026-05-09",
-      "endDate": "2026-05-10",
+      "venue": "Snetterton",
+      "startDate": "2026-05-23",
+      "endDate": "2026-05-24",
       "qualifyingRecord": {
         "driver": "Dan Cammish",
         "time": "1:53.750",
@@ -603,506 +560,6 @@
         "time": "1:54.871",
         "speed": "91.06 mph",
         "year": 2023
-      },
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:35"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:45"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "fullTimetable": [
-        {
-          "day": "SAT",
-          "time": "09:10",
-          "endTime": "09:30",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:45",
-          "endTime": "10:20",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "10:35",
-          "endTime": "11:15",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Free Practice",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "11:45",
-          "endTime": "12:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 1",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "12:20",
-          "endTime": "12:50",
-          "series": "MINI CHALLENGE",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "15:05",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying Race",
-          "laps": "18"
-        },
-        {
-          "day": "SAT",
-          "time": "15:35",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:10",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:45",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "17:15",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 2",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "09:00",
-          "endTime": "09:30",
-          "series": null,
-          "session": "Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "10:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "34"
-        },
-        {
-          "day": "SUN",
-          "time": "10:40",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "11:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "11:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        },
-        {
-          "day": "SUN",
-          "time": "12:10",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "12:40",
-          "endTime": "13:15",
-          "series": null,
-          "session": "Lunch Break",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:15",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "13:50",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "34"
-        },
-        {
-          "day": "SUN",
-          "time": "14:30",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "14:45",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        },
-        {
-          "day": "SUN",
-          "time": "15:25",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:00",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:35",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "25 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "17:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "17:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        }
-      ]
-    },
-    {
-      "round": 4,
-      "tslEventId": 262303,
-      "venue": "Brands Hatch Indy",
-      "startDate": "2026-05-09",
-      "endDate": "2026-05-10",
-      "qualifyingRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:23.856",
-        "speed": "96.72 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "1:24.052",
-        "speed": "95.57 mph",
-        "year": 2025
-      },
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:35"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:30"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:45"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "fullTimetable": [
-        {
-          "day": "SAT",
-          "time": "09:10",
-          "endTime": "09:30",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:45",
-          "endTime": "10:20",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "10:35",
-          "endTime": "11:15",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Free Practice",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "11:45",
-          "endTime": "12:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 1",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "12:20",
-          "endTime": "12:50",
-          "series": "MINI CHALLENGE",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "15:05",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying Race",
-          "laps": "18"
-        },
-        {
-          "day": "SAT",
-          "time": "15:35",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:10",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:45",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "17:15",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 2",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "09:00",
-          "endTime": "09:30",
-          "series": null,
-          "session": "Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "10:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "34"
-        },
-        {
-          "day": "SUN",
-          "time": "10:40",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "11:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "11:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        },
-        {
-          "day": "SUN",
-          "time": "12:10",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "12:40",
-          "endTime": "13:15",
-          "series": null,
-          "session": "Lunch Break",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:15",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "13:50",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "34"
-        },
-        {
-          "day": "SUN",
-          "time": "14:30",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "14:45",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        },
-        {
-          "day": "SUN",
-          "time": "15:25",
-          "series": "Caterham Seven 310R Championship",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:00",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:35",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "25 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "17:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "17:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "24"
-        }
-      ]
-    },
-    {
-      "round": 5,
-      "tslEventId": 263003,
-      "venue": "Snetterton",
-      "startDate": "2026-05-23",
-      "endDate": "2026-05-24",
-      "qualifyingRecord": {
-        "driver": "Dan Cammish",
-        "time": "1:15.201",
-        "speed": "112.79 mph",
-        "year": 2020
-      },
-      "raceRecord": {
-        "driver": "Ash Sutton",
-        "time": "1:15.254",
-        "speed": "112.71 mph",
-        "year": 2025
       },
       "sessions": [
         {
@@ -1338,11 +795,533 @@
       ]
     },
     {
+      "round": 4,
+      "tslEventId": 262303,
+      "venue": "Oulton Park",
+      "startDate": "2026-06-06",
+      "endDate": "2026-06-07",
+      "qualifyingRecord": {
+        "driver": "Tom Ingram",
+        "time": "1:23.856",
+        "speed": "96.72 mph",
+        "year": 2025
+      },
+      "raceRecord": {
+        "driver": "Tom Ingram",
+        "time": "1:24.052",
+        "speed": "95.57 mph",
+        "year": 2025
+      },
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:30"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "12:25"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:55"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
+      ],
+      "fullTimetable": [
+        {
+          "day": "SAT",
+          "time": "09:00",
+          "endTime": "09:10",
+          "series": "Scottish Legends Championship",
+          "session": "Free Practice",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "09:20",
+          "endTime": "09:40",
+          "series": "CTCRC Group 1 Touring Cars",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "09:50",
+          "endTime": "10:20",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "10:30",
+          "endTime": "11:10",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Free Practice",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "11:40",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "6"
+        },
+        {
+          "day": "SAT",
+          "time": "12:05",
+          "endTime": "12:25",
+          "series": "MINI CHALLENGE",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "13:25",
+          "series": "CTCRC Group 1 Touring Cars",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "14:00",
+          "endTime": "14:35",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "15:05",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying Race",
+          "laps": "10"
+        },
+        {
+          "day": "SAT",
+          "time": "15:35",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "6"
+        },
+        {
+          "day": "SAT",
+          "time": "16:00",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:35",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "17:10",
+          "series": "CTCRC Group 1 Touring Cars",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "17:50",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "8"
+        },
+        {
+          "day": "SUN",
+          "time": "10:30",
+          "endTime": "11:05",
+          "series": null,
+          "session": "Pit Lane Walkabout / Autograph Session",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "12:10",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "12:25",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "15"
+        },
+        {
+          "day": "SUN",
+          "time": "13:10",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "6"
+        },
+        {
+          "day": "SUN",
+          "time": "13:30",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "14:05",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "14:40",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:55",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "15"
+        },
+        {
+          "day": "SUN",
+          "time": "15:35",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "6"
+        },
+        {
+          "day": "SUN",
+          "time": "15:55",
+          "series": "CTCRC Group 1 Touring Cars",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:30",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "17:05",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "17:20",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "15"
+        },
+        {
+          "day": "SUN",
+          "time": "17:55",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "8"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "tslEventId": 263003,
+      "venue": "Thruxton",
+      "startDate": "2026-07-25",
+      "endDate": "2026-07-26",
+      "qualifyingRecord": {
+        "driver": "Dan Cammish",
+        "time": "1:15.201",
+        "speed": "112.79 mph",
+        "year": 2020
+      },
+      "raceRecord": {
+        "driver": "Ash Sutton",
+        "time": "1:15.254",
+        "speed": "112.71 mph",
+        "year": 2025
+      },
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:25"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:40"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ],
+      "fullTimetable": [
+        {
+          "day": "SAT",
+          "time": "09:00",
+          "endTime": "09:20",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "09:30",
+          "endTime": "09:45",
+          "series": "Porsche  Carwow Carrera Cup Great Britain",
+          "session": "Qualifying 1",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "09:55",
+          "endTime": "10:15",
+          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "10:25",
+          "endTime": "11:15",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Free Practice",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "11:25",
+          "endTime": "11:50",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "12:00",
+          "endTime": "12:20",
+          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "12:30",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "13:30",
+          "endTime": "13:45",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
+          "session": "Qualifying 2",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "14:00",
+          "endTime": "14:35",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "15:05",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying Race",
+          "laps": "12"
+        },
+        {
+          "day": "SAT",
+          "time": "15:35",
+          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:10",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:45",
+          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "17:20",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "10:00",
+          "endTime": "10:30",
+          "series": null,
+          "session": "BTCC Pit Lane Walkabout / Autograph Session",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "10:50",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "22"
+        },
+        {
+          "day": "SUN",
+          "time": "11:30",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "11:45",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "16"
+        },
+        {
+          "day": "SUN",
+          "time": "12:25",
+          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "13:00",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "13:35",
+          "endTime": "13:50",
+          "series": null,
+          "session": "Marshals' Break",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "13:50",
+          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "14:25",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:40",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "16"
+        },
+        {
+          "day": "SUN",
+          "time": "15:20",
+          "series": "Porsche Carwow Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "22"
+        },
+        {
+          "day": "SUN",
+          "time": "16:00",
+          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:35",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "25 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "17:15",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "17:30",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "16"
+        }
+      ]
+    },
+    {
       "round": 6,
       "tslEventId": 263203,
-      "venue": "Snetterton",
-      "startDate": "2026-05-23",
-      "endDate": "2026-05-24",
+      "venue": "Knockhill",
+      "startDate": "2026-08-08",
+      "endDate": "2026-08-09",
       "qualifyingRecord": {
         "driver": "Rory Butcher",
         "time": "50.451s",
@@ -1364,7 +1343,7 @@
         {
           "name": "Qualifying",
           "day": "SAT",
-          "time": "14:00"
+          "time": "14:05"
         },
         {
           "name": "Qualifying Race",
@@ -1374,261 +1353,12 @@
         {
           "name": "Race 1",
           "day": "SUN",
-          "time": "11:30"
+          "time": "11:15"
         },
         {
           "name": "Race 2",
           "day": "SUN",
-          "time": "14:30"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:20"
-        }
-      ],
-      "fullTimetable": [
-        {
-          "day": "SAT",
-          "time": "09:05",
-          "endTime": "09:35",
-          "series": "MINI CHALLENGE Trophy",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:50",
-          "endTime": "10:15",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "10:30",
-          "endTime": "11:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Free Practice",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "11:50",
-          "endTime": "12:05",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 1",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "12:20",
-          "endTime": "12:50",
-          "series": "MINI CHALLENGE",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "15:05",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying Race",
-          "laps": "8"
-        },
-        {
-          "day": "SAT",
-          "time": "15:35",
-          "series": "MINI CHALLENGE Trophy",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:15",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:50",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "17:25",
-          "endTime": "17:40",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Qualifying 2",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "09:25",
-          "series": "MINI CHALLENGE Trophy",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "10:00",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "14"
-        },
-        {
-          "day": "SUN",
-          "time": "10:40",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "11:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "11:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "12"
-        },
-        {
-          "day": "SUN",
-          "time": "12:10",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "12:45",
-          "endTime": "13:40",
-          "series": null,
-          "session": "Lunch Break",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "12:50",
-          "endTime": "13:20",
-          "series": null,
-          "session": "Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:40",
-          "series": "MINI CHALLENGE Trophy",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "14:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "14:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "12"
-        },
-        {
-          "day": "SUN",
-          "time": "15:10",
-          "series": "Porsche Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "14"
-        },
-        {
-          "day": "SUN",
-          "time": "15:50",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "25 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:30",
-          "series": "MINI CHALLENGE",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "17:05",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "17:20",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "12"
-        }
-      ]
-    },
-    {
-      "round": 7,
-      "tslEventId": 263403,
-      "venue": "Oulton Park",
-      "startDate": "2026-06-06",
-      "endDate": "2026-06-07",
-      "qualifyingRecord": {
-        "driver": "Adam MORGAN",
-        "time": "1:32.654",
-        "year": 2026
-      },
-      "raceRecord": {
-        "driver": "Adam MORGAN",
-        "time": "1:33.381",
-        "year": 2026
-      },
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:30"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "12:25"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:55"
+          "time": "14:15"
         },
         {
           "name": "Race 3",
@@ -1648,37 +1378,37 @@
         {
           "day": "SAT",
           "time": "09:20",
-          "endTime": "09:40",
-          "series": "CTCRC Group 1 Touring Cars",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:50",
-          "endTime": "10:20",
+          "endTime": "09:50",
           "series": "Porsche Sprint Challenge Great Britain",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
+          "time": "10:00",
+          "endTime": "10:20",
+          "series": "Caterham Seven Championship UK",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
           "time": "10:30",
-          "endTime": "11:10",
+          "endTime": "11:20",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:40",
+          "time": "11:30",
           "series": "Scottish Legends Championship",
           "session": "Race",
-          "laps": "6"
+          "laps": "8"
         },
         {
           "day": "SAT",
-          "time": "12:05",
+          "time": "11:55",
           "endTime": "12:25",
           "series": "MINI CHALLENGE",
           "session": "Qualifying",
@@ -1687,14 +1417,14 @@
         {
           "day": "SAT",
           "time": "13:25",
-          "series": "CTCRC Group 1 Touring Cars",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
+          "time": "14:05",
+          "endTime": "14:40",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying",
           "laps": null
@@ -1704,120 +1434,142 @@
           "time": "15:05",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying Race",
-          "laps": "10"
+          "laps": "17"
         },
         {
           "day": "SAT",
           "time": "15:35",
           "series": "Scottish Legends Championship",
           "session": "Race",
-          "laps": "6"
+          "laps": "8"
         },
         {
           "day": "SAT",
-          "time": "16:00",
-          "series": "Porsche Sprint Challenge Great Britain",
+          "time": "16:10",
+          "series": "Caterham Seven Championship UK",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "16:35",
+          "time": "16:45",
           "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "17:10",
-          "series": "CTCRC Group 1 Touring Cars",
+          "time": "17:25",
+          "series": "Scottish Legends Championship",
           "session": "Race",
-          "laps": "20 mins"
+          "laps": "10"
         },
         {
-          "day": "SAT",
-          "time": "17:50",
+          "day": "SUN",
+          "time": "09:15",
           "series": "Scottish Legends Championship",
           "session": "Race",
           "laps": "8"
         },
         {
           "day": "SUN",
-          "time": "10:30",
-          "endTime": "11:05",
-          "series": null,
-          "session": "Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "12:10",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "12:25",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "15"
-        },
-        {
-          "day": "SUN",
-          "time": "13:10",
-          "series": "Scottish Legends Championship",
-          "session": "Race",
-          "laps": "6"
-        },
-        {
-          "day": "SUN",
-          "time": "13:30",
+          "time": "09:45",
           "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "14:05",
+          "time": "10:20",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "11:00",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "11:15",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "24"
+        },
+        {
+          "day": "SUN",
+          "time": "11:55",
           "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "14:40",
+          "time": "12:30",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "8"
+        },
+        {
+          "day": "SUN",
+          "time": "13:00",
+          "endTime": "14:00",
+          "series": null,
+          "session": "Lunch Break",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "13:10",
+          "endTime": "13:40",
+          "series": null,
+          "session": "BTCC Paddock Autograph Session TBC",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:00",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "14:55",
+          "time": "14:15",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "15"
+          "laps": "24"
         },
         {
           "day": "SUN",
-          "time": "15:35",
-          "series": "Scottish Legends Championship",
-          "session": "Race",
-          "laps": "6"
-        },
-        {
-          "day": "SUN",
-          "time": "15:55",
-          "series": "CTCRC Group 1 Touring Cars",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:30",
+          "time": "14:55",
           "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "15:25",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:05",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:35",
+          "series": "Scottish Legends Championship",
+          "session": "Race",
+          "laps": "10"
         },
         {
           "day": "SUN",
@@ -1831,23 +1583,265 @@
           "time": "17:20",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "15"
+          "laps": "24"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "tslEventId": 263403,
+      "venue": "Donington Park GP",
+      "startDate": "2026-08-22",
+      "endDate": "2026-08-23",
+      "qualifyingRecord": {
+        "driver": "Adam MORGAN",
+        "time": "1:32.654",
+        "year": 2026
+      },
+      "raceRecord": {
+        "driver": "Adam MORGAN",
+        "time": "1:33.381",
+        "year": 2026
+      },
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "11:00"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:05"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:45"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:45"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:30"
+        }
+      ],
+      "fullTimetable": [
+        {
+          "day": "SAT",
+          "time": "09:35",
+          "endTime": "10:00",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "10:15",
+          "endTime": "10:45",
+          "series": "MINI CHALLENGE Trophy",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "11:00",
+          "endTime": "11:50",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Free Practice",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "12:00",
+          "endTime": "12:15",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying 1",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "12:30",
+          "endTime": "12:50",
+          "series": "Caterham Seven Championship UK",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "14:05",
+          "endTime": "14:40",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "15:05",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying Race",
+          "laps": "9"
+        },
+        {
+          "day": "SAT",
+          "time": "15:35",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:10",
+          "series": "MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:50",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "17:20",
+          "endTime": "17:35",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying 2",
+          "laps": null
         },
         {
           "day": "SUN",
-          "time": "17:55",
-          "series": "Scottish Legends Championship",
+          "time": "09:40",
+          "series": "Porsche Carrera Cup Great Britain",
           "session": "Race",
-          "laps": "8"
+          "laps": "19"
+        },
+        {
+          "day": "SUN",
+          "time": "10:20",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "10:55",
+          "series": "MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "11:30",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "11:45",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "14"
+        },
+        {
+          "day": "SUN",
+          "time": "12:25",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "12:55",
+          "endTime": "13:50",
+          "series": null,
+          "session": "Lunch break",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "13:05",
+          "endTime": "13:35",
+          "series": null,
+          "session": "BTCC Pit Lane Walkabout / Autograph Session",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "13:50",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "19"
+        },
+        {
+          "day": "SUN",
+          "time": "14:30",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:45",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "14"
+        },
+        {
+          "day": "SUN",
+          "time": "15:25",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "25 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:05",
+          "series": "MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:40",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "17:15",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "17:30",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "14"
         }
       ]
     },
     {
       "round": 8,
       "tslEventId": 263603,
-      "venue": "Oulton Park",
-      "startDate": "2026-06-06",
-      "endDate": "2026-06-07",
+      "venue": "Croft",
+      "startDate": "2026-09-05",
+      "endDate": "2026-09-06",
       "qualifyingRecord": {
         "driver": "Tom Ingram",
         "time": "1:20.522",
@@ -1864,7 +1858,7 @@
         {
           "name": "Free Practice",
           "day": "SAT",
-          "time": "10:30"
+          "time": "10:15"
         },
         {
           "name": "Qualifying",
@@ -1879,71 +1873,57 @@
         {
           "name": "Race 1",
           "day": "SUN",
-          "time": "12:25"
+          "time": "12:10"
         },
         {
           "name": "Race 2",
           "day": "SUN",
-          "time": "14:55"
+          "time": "14:30"
         },
         {
           "name": "Race 3",
           "day": "SUN",
-          "time": "17:20"
+          "time": "17:15"
         }
       ],
       "fullTimetable": [
         {
           "day": "SAT",
-          "time": "09:00",
-          "endTime": "09:10",
-          "series": "Scottish Legends Championship",
-          "session": "Free Practice",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:20",
-          "endTime": "09:40",
-          "series": "CTCRC Group 1 Touring Cars",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:50",
-          "endTime": "10:20",
+          "time": "09:30",
+          "endTime": "10:00",
           "series": "Porsche Sprint Challenge Great Britain",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "10:30",
-          "endTime": "11:10",
+          "time": "10:15",
+          "endTime": "10:55",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:40",
-          "series": "Scottish Legends Championship",
-          "session": "Race",
-          "laps": "6"
-        },
-        {
-          "day": "SAT",
-          "time": "12:05",
-          "endTime": "12:25",
-          "series": "MINI CHALLENGE",
+          "time": "11:25",
+          "endTime": "11:45",
+          "series": "MINI CHALLENGE Trophy",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "13:25",
-          "series": "CTCRC Group 1 Touring Cars",
+          "time": "11:55",
+          "endTime": "12:20",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "12:30",
+          "endTime": "12:50",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
         },
@@ -1960,42 +1940,36 @@
           "time": "15:05",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying Race",
-          "laps": "10"
+          "laps": "11"
         },
         {
           "day": "SAT",
           "time": "15:35",
-          "series": "Scottish Legends Championship",
-          "session": "Race",
-          "laps": "6"
+          "endTime": "16:05",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying",
+          "laps": null
         },
         {
           "day": "SAT",
-          "time": "16:00",
-          "series": "Porsche Sprint Challenge Great Britain",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:35",
-          "series": "MINI CHALLENGE",
+          "time": "16:25",
+          "series": "MINI CHALLENGE Trophy",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "17:10",
-          "series": "CTCRC Group 1 Touring Cars",
+          "time": "17:05",
+          "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
           "time": "17:50",
-          "series": "Scottish Legends Championship",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
-          "laps": "8"
+          "laps": "20 mins"
         },
         {
           "day": "SUN",
@@ -2007,64 +1981,307 @@
         },
         {
           "day": "SUN",
-          "time": "12:10",
+          "time": "11:55",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "12:25",
+          "time": "12:10",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
           "laps": "15"
         },
         {
           "day": "SUN",
-          "time": "13:10",
-          "series": "Scottish Legends Championship",
+          "time": "12:50",
+          "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
-          "laps": "6"
+          "laps": "20 mins"
         },
         {
           "day": "SUN",
           "time": "13:30",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "17"
+        },
+        {
+          "day": "SUN",
+          "time": "14:15",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:30",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "15"
+        },
+        {
+          "day": "SUN",
+          "time": "15:10",
+          "series": "MINI CHALLENGE Trophy",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "15:45",
           "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "14:05",
-          "series": "MINI CHALLENGE",
+          "time": "16:20",
+          "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
-          "laps": "20 mins"
+          "laps": "25 mins"
         },
         {
           "day": "SUN",
-          "time": "14:40",
+          "time": "17:00",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "14:55",
+          "time": "17:15",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
           "laps": "15"
         },
         {
           "day": "SUN",
-          "time": "15:35",
-          "series": "Scottish Legends Championship",
+          "time": "17:50",
+          "series": "Porsche Carrera Cup Great Britain",
           "session": "Race",
-          "laps": "6"
+          "laps": "17"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "tslEventId": 263903,
+      "venue": "Silverstone",
+      "startDate": "2026-09-26",
+      "endDate": "2026-09-27",
+      "qualifyingRecord": {
+        "driver": "Daryl DeLeon",
+        "time": "56.734s",
+        "speed": "105.43 mph",
+        "year": 2025
+      },
+      "raceRecord": {
+        "driver": "Tom Ingram",
+        "time": "56.875s",
+        "speed": "105.43 mph",
+        "year": 2025
+      },
+      "sessions": [
+        {
+          "name": "Free Practice",
+          "day": "SAT",
+          "time": "10:05"
+        },
+        {
+          "name": "Qualifying",
+          "day": "SAT",
+          "time": "14:00"
+        },
+        {
+          "name": "Qualifying Race",
+          "day": "SAT",
+          "time": "15:05"
+        },
+        {
+          "name": "Race 1",
+          "day": "SUN",
+          "time": "11:15"
+        },
+        {
+          "name": "Race 2",
+          "day": "SUN",
+          "time": "14:30"
+        },
+        {
+          "name": "Race 3",
+          "day": "SUN",
+          "time": "17:20"
+        }
+      ],
+      "fullTimetable": [
+        {
+          "day": "SAT",
+          "time": "09:15",
+          "endTime": "09:50",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "10:05",
+          "endTime": "10:45",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Free Practice",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "11:10",
+          "endTime": "11:40",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "11:50",
+          "endTime": "12:20",
+          "series": "MINI CHALLENGE",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "12:30",
+          "endTime": "13:00",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "14:00",
+          "endTime": "14:35",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
+          "time": "15:05",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Qualifying Race",
+          "laps": "15"
+        },
+        {
+          "day": "SAT",
+          "time": "15:35",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:10",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "16:50",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "09:10",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "30"
+        },
+        {
+          "day": "SUN",
+          "time": "09:50",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "10:25",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "11:00",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "11:15",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "22"
+        },
+        {
+          "day": "SUN",
+          "time": "11:55",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "12:30",
+          "endTime": "13:30",
+          "series": null,
+          "session": "Lunch break",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "12:40",
+          "endTime": "13:10",
+          "series": null,
+          "session": "Pit Lane Walkabout / Autograph Session",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "13:30",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "30"
+        },
+        {
+          "day": "SUN",
+          "time": "14:15",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:30",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "22"
+        },
+        {
+          "day": "SUN",
+          "time": "15:15",
+          "series": "Wera Tools F4 British Championship certified by FIA",
+          "session": "Race",
+          "laps": "25 mins"
         },
         {
           "day": "SUN",
           "time": "15:55",
-          "series": "CTCRC Group 1 Touring Cars",
+          "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
@@ -2087,289 +2304,16 @@
           "time": "17:20",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "15"
-        },
-        {
-          "day": "SUN",
-          "time": "17:55",
-          "series": "Scottish Legends Championship",
-          "session": "Race",
-          "laps": "8"
-        }
-      ]
-    },
-    {
-      "round": 9,
-      "tslEventId": 263903,
-      "venue": "Thruxton",
-      "startDate": "2026-07-25",
-      "endDate": "2026-07-26",
-      "qualifyingRecord": {
-        "driver": "Daryl DeLeon",
-        "time": "56.734s",
-        "speed": "105.43 mph",
-        "year": 2025
-      },
-      "raceRecord": {
-        "driver": "Tom Ingram",
-        "time": "56.875s",
-        "speed": "105.43 mph",
-        "year": 2025
-      },
-      "sessions": [
-        {
-          "name": "Free Practice",
-          "day": "SAT",
-          "time": "10:25"
-        },
-        {
-          "name": "Qualifying",
-          "day": "SAT",
-          "time": "14:00"
-        },
-        {
-          "name": "Qualifying Race",
-          "day": "SAT",
-          "time": "15:05"
-        },
-        {
-          "name": "Race 1",
-          "day": "SUN",
-          "time": "11:45"
-        },
-        {
-          "name": "Race 2",
-          "day": "SUN",
-          "time": "14:40"
-        },
-        {
-          "name": "Race 3",
-          "day": "SUN",
-          "time": "17:30"
-        }
-      ],
-      "fullTimetable": [
-        {
-          "day": "SAT",
-          "time": "09:00",
-          "endTime": "09:20",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:30",
-          "endTime": "09:45",
-          "series": "Porsche  Carwow Carrera Cup Great Britain",
-          "session": "Qualifying 1",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:55",
-          "endTime": "10:15",
-          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "10:25",
-          "endTime": "11:15",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Free Practice",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "11:25",
-          "endTime": "11:50",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "12:00",
-          "endTime": "12:20",
-          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "12:30",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "13:30",
-          "endTime": "13:45",
-          "series": "Porsche Carwow Carrera Cup Great Britain",
-          "session": "Qualifying 2",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "15:05",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Qualifying Race",
-          "laps": "12"
-        },
-        {
-          "day": "SAT",
-          "time": "15:35",
-          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:10",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "16:45",
-          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "17:20",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "10:00",
-          "endTime": "10:30",
-          "series": null,
-          "session": "BTCC Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "10:50",
-          "series": "Porsche Carwow Carrera Cup Great Britain",
-          "session": "Race",
           "laps": "22"
-        },
-        {
-          "day": "SUN",
-          "time": "11:30",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "11:45",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "16"
-        },
-        {
-          "day": "SUN",
-          "time": "12:25",
-          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "13:00",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "13:35",
-          "endTime": "13:50",
-          "series": null,
-          "session": "Marshals' Break",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:50",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "14:25",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "14:40",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "16"
-        },
-        {
-          "day": "SUN",
-          "time": "15:20",
-          "series": "Porsche Carwow Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "22"
-        },
-        {
-          "day": "SUN",
-          "time": "16:00",
-          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "16:35",
-          "series": "Wera Tools F4 British Championship certified by FIA",
-          "session": "Race",
-          "laps": "25 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "17:15",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "17:30",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "16"
         }
       ]
     },
     {
       "round": 10,
       "tslEventId": 264103,
-      "venue": "Thruxton",
-      "startDate": "2026-07-25",
-      "endDate": "2026-07-26",
+      "venue": "Brands Hatch GP",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-11",
       "qualifyingRecord": {
         "driver": "Charles Rainford",
         "time": "1:28.919",
@@ -2386,247 +2330,253 @@
         {
           "name": "Free Practice",
           "day": "SAT",
-          "time": "10:25"
+          "time": "10:10"
         },
         {
           "name": "Qualifying",
           "day": "SAT",
-          "time": "14:00"
+          "time": "13:45"
         },
         {
           "name": "Qualifying Race",
           "day": "SAT",
-          "time": "15:05"
+          "time": "14:50"
         },
         {
           "name": "Race 1",
           "day": "SUN",
-          "time": "11:45"
+          "time": "11:25"
         },
         {
           "name": "Race 2",
           "day": "SUN",
-          "time": "14:40"
+          "time": "14:35"
         },
         {
           "name": "Race 3",
           "day": "SUN",
-          "time": "17:30"
+          "time": "17:15"
         }
       ],
       "fullTimetable": [
         {
           "day": "SAT",
           "time": "09:00",
-          "endTime": "09:20",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "endTime": "09:30",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "09:30",
-          "endTime": "09:45",
-          "series": "Porsche  Carwow Carrera Cup Great Britain",
-          "session": "Qualifying 1",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:55",
-          "endTime": "10:15",
-          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
+          "time": "09:40",
+          "endTime": "10:00",
+          "series": "Caterham Seven Championship UK",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "10:25",
-          "endTime": "11:15",
+          "time": "10:10",
+          "endTime": "10:50",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:25",
-          "endTime": "11:50",
+          "time": "11:15",
+          "endTime": "11:40",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "12:00",
-          "endTime": "12:20",
-          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
+          "time": "11:50",
+          "endTime": "12:10",
+          "series": "MINI CHALLENGE",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "12:30",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "time": "12:20",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "13:30",
-          "endTime": "13:45",
-          "series": "Porsche Carwow Carrera Cup Great Britain",
-          "session": "Qualifying 2",
-          "laps": null
+          "time": "12:55",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
+          "time": "13:45",
+          "endTime": "14:20",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "15:05",
+          "time": "14:50",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying Race",
-          "laps": "12"
+          "laps": "10"
         },
         {
           "day": "SAT",
-          "time": "15:35",
-          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
-          "session": "Race",
-          "laps": "20 mins"
+          "time": "15:20",
+          "endTime": "15:50",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Qualifying",
+          "laps": null
         },
         {
           "day": "SAT",
-          "time": "16:10",
+          "time": "16:00",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "16:45",
-          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
+          "time": "16:35",
+          "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "17:20",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "time": "17:10",
+          "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "17:45",
+          "series": "Caterham Seven Championship UK",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "09:00",
+          "endTime": "09:30",
+          "series": null,
+          "session": "Pit Lane Walkabout / Autograph Session",
+          "laps": null
         },
         {
           "day": "SUN",
           "time": "10:00",
-          "endTime": "10:30",
-          "series": null,
-          "session": "BTCC Pit Lane Walkabout / Autograph Session",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "10:50",
-          "series": "Porsche Carwow Carrera Cup Great Britain",
-          "session": "Race",
-          "laps": "22"
-        },
-        {
-          "day": "SUN",
-          "time": "11:30",
-          "series": null,
-          "session": "BTCC Pit Lane Opens",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "11:45",
-          "series": "Kwik Fit British Touring Car Championship",
-          "session": "Race",
-          "laps": "16"
-        },
-        {
-          "day": "SUN",
-          "time": "12:25",
-          "series": "The Goodyear Mini Se7en Challenge supported by Mini Spares",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SUN",
-          "time": "13:00",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "13:35",
-          "endTime": "13:50",
-          "series": null,
-          "session": "Marshals' Break",
-          "laps": null
-        },
-        {
-          "day": "SUN",
-          "time": "13:50",
-          "series": "Mairon Motorsport MINI CHALLENGE Trophy",
+          "time": "10:30",
+          "series": "MINI CHALLENGE",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "14:25",
+          "time": "11:10",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "14:40",
+          "time": "11:25",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "16"
+          "laps": "15"
         },
         {
           "day": "SUN",
-          "time": "15:20",
-          "series": "Porsche Carwow Carrera Cup Great Britain",
+          "time": "12:05",
+          "series": "Porsche Carrera Cup Great Britain",
           "session": "Race",
-          "laps": "22"
+          "laps": "17"
         },
         {
           "day": "SUN",
-          "time": "16:00",
-          "series": "The Goodyear Mini Miglia Challenge supported by Mini Spares",
+          "time": "12:45",
+          "endTime": "13:15",
+          "series": null,
+          "session": "Lunch Break",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "13:15",
+          "series": "Caterham Seven Championship UK",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SUN",
-          "time": "16:35",
+          "time": "13:50",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "14:20",
+          "series": null,
+          "session": "BTCC Pit Lane Opens",
+          "laps": null
+        },
+        {
+          "day": "SUN",
+          "time": "14:35",
+          "series": "Kwik Fit British Touring Car Championship",
+          "session": "Race",
+          "laps": "15"
+        },
+        {
+          "day": "SUN",
+          "time": "15:15",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Race",
           "laps": "25 mins"
         },
         {
           "day": "SUN",
-          "time": "17:15",
+          "time": "15:50",
+          "series": "MINI CHALLENGE",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SUN",
+          "time": "16:20",
+          "series": "Porsche Carrera Cup Great Britain",
+          "session": "Race",
+          "laps": "17"
+        },
+        {
+          "day": "SUN",
+          "time": "17:00",
           "series": null,
           "session": "BTCC Pit Lane Opens",
           "laps": null
         },
         {
           "day": "SUN",
-          "time": "17:30",
+          "time": "17:15",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Race",
-          "laps": "16"
+          "laps": "15"
         }
       ]
     }

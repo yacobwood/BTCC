@@ -83,6 +83,26 @@ def scrape_calendar(fetcher: RenderedFetcher, year: int) -> list[dict] | None:
             if parsed:
                 events.append({"venue": venue, "startDate": parsed[0], "endDate": parsed[1]})
 
+    # btcc.net can render each event's card twice (confirmed live 2026-08-24 -
+    # a responsive layout puts the same card in two DOM sections, one hidden
+    # by CSS depending on viewport) - collapse duplicates by (venue,
+    # startDate, endDate) before assigning round numbers. Two genuinely
+    # different rounds never share both the same venue and the same date
+    # range, so this can't merge two real events. Without this, every round
+    # doubled and merge_into_calendar() (which writes by index into a
+    # fixed-length rounds list) silently overwrote rounds 2-10 with an
+    # earlier round's venue/dates and dropped every later real round as
+    # "no existing slot, skipped".
+    seen = set()
+    deduped = []
+    for e in events:
+        key = (e["venue"], e["startDate"], e["endDate"])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(e)
+    events = deduped
+
     events.sort(key=lambda e: e["startDate"])
     for i, e in enumerate(events, start=1):
         e["round"] = i
@@ -105,25 +125,37 @@ def merge_into_calendar(schedule: list[dict], dry_run: bool) -> None:
 
     rounds = data.get("rounds", [])
     if len(schedule) != len(rounds):
+        # Updating by index when the counts disagree silently misassigns
+        # every round from here on (confirmed live 2026-08-24: a duplicate-
+        # card page bug made this scrape 20 "rounds" for a 10-round season -
+        # this warning printed, the run still exited 0, and the by-index
+        # merge below wrote 5 real rounds' venue/dates into the wrong slots
+        # and dropped the other 5 real rounds entirely, straight to
+        # production, with nobody alerted). Fail loudly instead so
+        # reportScraperFailure actually fires (it's only wired to `if:
+        # failure()` in scrape-calendar.yml) and no partial data gets
+        # committed - a real round count change needs a human/AI look either
+        # way, not a silent by-index guess.
         print(
-            f"Warning: scraped {len(schedule)} rounds, calendar has {len(rounds)}. "
-            "Updating by index; extra rounds left unchanged.",
+            f"ERROR: scraped {len(schedule)} rounds, calendar has {len(rounds)} - "
+            "refusing to merge by index (mismatched counts silently misassign "
+            "every subsequent round). Investigate before re-running.",
             file=sys.stderr,
         )
+        sys.exit(1)
 
+    # Counts are guaranteed equal at this point (mismatch exits above), so
+    # every schedule entry has a real slot in rounds - no "skipped" case.
     for i, s in enumerate(schedule):
-        if i < len(rounds):
-            rounds[i]["startDate"] = s["startDate"]
-            rounds[i]["endDate"] = s["endDate"]
-            rounds[i]["venue"] = s["venue"]
-            if "fullTimetable" in s:
-                rounds[i]["fullTimetable"] = s["fullTimetable"]
-            if not dry_run:
-                ft_count = len(s.get("fullTimetable") or [])
-                ft_str = f"  ({ft_count} timetable entries)" if ft_count else ""
-                print(f"  Round {s['round']}: {s['venue']}  {s['startDate']} → {s['endDate']}{ft_str}")
-        else:
-            print(f"  Round {s['round']}: {s['venue']} (no existing slot, skipped)")
+        rounds[i]["startDate"] = s["startDate"]
+        rounds[i]["endDate"] = s["endDate"]
+        rounds[i]["venue"] = s["venue"]
+        if "fullTimetable" in s:
+            rounds[i]["fullTimetable"] = s["fullTimetable"]
+        if not dry_run:
+            ft_count = len(s.get("fullTimetable") or [])
+            ft_str = f"  ({ft_count} timetable entries)" if ft_count else ""
+            print(f"  Round {s['round']}: {s['venue']}  {s['startDate']} → {s['endDate']}{ft_str}")
 
     if dry_run:
         print("Dry run — no file written.")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for scrape_calendar.py's date parsing and round ordering.
+Tests for scrape_calendar.py's date parsing, round ordering, and merge.
 
 Regression coverage: btcc.net's calendar page abbreviates most months to
 3 letters ("18 APR") but September to 4 ("5 SEPT") - a real inconsistency
@@ -9,9 +9,13 @@ calendar scrape until caught by testing against the actual rendered page
 (2026-07-31 Vercel migration fix).
 """
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
-from scrape_calendar import parse_date_range, scrape_calendar
+import scrape_calendar as scrape_calendar_module
+from scrape_calendar import merge_into_calendar, parse_date_range, scrape_calendar
 
 
 class FakeFetcher:
@@ -99,6 +103,114 @@ class TestScrapeCalendarOrdering(unittest.TestCase):
                 raise RuntimeError("HTTP 429 fetching https://btcc.net/calendar/")
 
         self.assertIsNone(scrape_calendar(_RaisingFetcher(), 2026))
+
+
+class TestScrapeCalendarDeduplication(unittest.TestCase):
+    """Regression (2026-08-24): btcc.net rendered every event's card twice -
+    a responsive layout puts the same card in two DOM sections, one hidden
+    by CSS depending on viewport, both present in the raw HTML this regex
+    scans. That doubled every round (10 real rounds -> 20 parsed "events"),
+    and merge_into_calendar()'s by-index merge silently overwrote 5 real
+    rounds' venue/dates with an earlier round's and dropped the other 5
+    entirely - shipped straight to production undetected."""
+
+    DUPED_HTML = """
+    <div class="calendar-grid-mobile">
+      <a class="calendar-card" href="/circuit/donington-park/">
+        <div class="calendar-date"><span>18 APR</span><span>-</span><span>19 APR</span></div>
+        <h2>Donington Park</h2>
+      </a>
+      <a class="calendar-card" href="/circuit/thruxton/">
+        <div class="calendar-date"><span>25 JUL</span><span>-</span><span>26 JUL</span></div>
+        <h2>Thruxton</h2>
+      </a>
+    </div>
+    <div class="calendar-grid-desktop">
+      <a class="calendar-card" href="/circuit/donington-park/">
+        <div class="calendar-date"><span>18 APR</span><span>-</span><span>19 APR</span></div>
+        <h2>Donington Park</h2>
+      </a>
+      <a class="calendar-card" href="/circuit/thruxton/">
+        <div class="calendar-date"><span>25 JUL</span><span>-</span><span>26 JUL</span></div>
+        <h2>Thruxton</h2>
+      </a>
+    </div>
+    """
+
+    def test_duplicate_cards_collapsed_to_one_event_each(self):
+        events = scrape_calendar(FakeFetcher(self.DUPED_HTML), 2026)
+        self.assertEqual([e["venue"] for e in events], ["Donington Park", "Thruxton"])
+        self.assertEqual([e["round"] for e in events], [1, 2])
+
+    def test_same_venue_different_dates_not_treated_as_duplicate(self):
+        # Two genuinely different rounds can share a venue (e.g. Donington
+        # Park hosts both an early-season National round and a later GP
+        # round) - only an exact (venue, startDate, endDate) match is a
+        # duplicate card, not a same-venue coincidence.
+        html = """
+        <a href="/circuit/donington-park/">
+          <div class="calendar-date"><span>18 APR</span><span>-</span><span>19 APR</span></div>
+          <h2>Donington Park</h2>
+        </a>
+        <a href="/circuit/donington-park-gp/">
+          <div class="calendar-date"><span>22 AUG</span><span>-</span><span>23 AUG</span></div>
+          <h2>Donington Park GP</h2>
+        </a>
+        """
+        events = scrape_calendar(FakeFetcher(html), 2026)
+        self.assertEqual(len(events), 2)
+
+
+class TestMergeIntoCalendarCountMismatch(unittest.TestCase):
+    """Regression (2026-08-24): a count mismatch used to print a warning and
+    still merge by index (and still exit 0), which is exactly how the
+    duplicate-card bug above reached production without
+    reportScraperFailure ever firing - that alert only runs `if:
+    failure()` in scrape-calendar.yml. A mismatch must now hard-fail instead
+    of silently writing partial/misaligned data."""
+
+    def setUp(self):
+        self._orig_calendar_json = scrape_calendar_module.CALENDAR_JSON
+        self._tmpdir = tempfile.TemporaryDirectory()
+        calendar_path = Path(self._tmpdir.name) / "calendar.json"
+        calendar_path.write_text(json.dumps({
+            "rounds": [
+                {"round": 1, "venue": "Donington Park", "startDate": "2026-04-18", "endDate": "2026-04-19"},
+                {"round": 2, "venue": "Brands Hatch Indy", "startDate": "2026-05-09", "endDate": "2026-05-10"},
+            ]
+        }))
+        scrape_calendar_module.CALENDAR_JSON = calendar_path
+        self._calendar_path = calendar_path
+
+    def tearDown(self):
+        scrape_calendar_module.CALENDAR_JSON = self._orig_calendar_json
+        self._tmpdir.cleanup()
+
+    def test_exits_nonzero_on_count_mismatch(self):
+        schedule = [
+            {"round": 1, "venue": "Donington Park", "startDate": "2026-04-18", "endDate": "2026-04-19"},
+        ]  # only 1 scraped, calendar.json has 2 rounds
+        with self.assertRaises(SystemExit) as ctx:
+            merge_into_calendar(schedule, dry_run=False)
+        self.assertNotEqual(ctx.exception.code, 0)
+
+    def test_does_not_write_file_on_count_mismatch(self):
+        before = self._calendar_path.read_text()
+        schedule = [
+            {"round": 1, "venue": "Donington Park", "startDate": "2026-04-18", "endDate": "2026-04-19"},
+        ]
+        with self.assertRaises(SystemExit):
+            merge_into_calendar(schedule, dry_run=False)
+        self.assertEqual(self._calendar_path.read_text(), before)
+
+    def test_merges_cleanly_when_counts_match(self):
+        schedule = [
+            {"round": 1, "venue": "Donington Park", "startDate": "2026-04-18", "endDate": "2026-04-19"},
+            {"round": 2, "venue": "Brands Hatch Indy", "startDate": "2026-05-10", "endDate": "2026-05-11"},
+        ]
+        merge_into_calendar(schedule, dry_run=False)
+        written = json.loads(self._calendar_path.read_text())
+        self.assertEqual(written["rounds"][1]["endDate"], "2026-05-11")
 
 
 if __name__ == "__main__":
