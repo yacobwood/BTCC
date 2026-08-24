@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Morgan's moment to shine"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/9954275d-2e85-4419-8d94-de49ebd59a3b-Morgan-JSB_8909.jpg"
+        }
+      ]
+    }
   }
 ]
