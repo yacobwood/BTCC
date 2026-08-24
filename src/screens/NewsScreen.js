@@ -25,8 +25,10 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
 const logoImg = require('../assets/logo_long.png');
 
+// orderDate (parseArticle/mapHubPosts) is the feed-ordering key - falls back
+// to sortDate/pubDate for anything that predates it so nothing sorts as epoch 0.
 const byDateDesc = (a, b) =>
-  new Date(b.sortDate || b.pubDate || 0) - new Date(a.sortDate || a.pubDate || 0);
+  new Date(b.orderDate || b.sortDate || b.pubDate || 0) - new Date(a.orderDate || a.sortDate || a.pubDate || 0);
 
 export default function NewsScreen({navigation}) {
   const {hub_news_enabled} = useFeatureFlags();
@@ -200,13 +202,14 @@ export default function NewsScreen({navigation}) {
   // there's nothing to prematurely reveal.
   const visibleArticles = useMemo(() => {
     if (!hubPosts.length) return articles;
-    const oldestArticleDate = articles.length
-      ? new Date(articles[articles.length - 1].sortDate || articles[articles.length - 1].pubDate || 0)
+    const oldest = articles[articles.length - 1];
+    const oldestArticleDate = oldest
+      ? new Date(oldest.orderDate || oldest.sortDate || oldest.pubDate || 0)
       : null;
     const eligibleHub = hubPosts.filter(h => {
       if (h.category === 'Weekly Digest') return true;
       if (!oldestArticleDate) return false;
-      return new Date(h.sortDate) >= oldestArticleDate;
+      return new Date(h.orderDate || h.sortDate) >= oldestArticleDate;
     });
     return eligibleHub.length ? [...articles, ...eligibleHub].sort(byDateDesc) : articles;
   }, [articles, hubPosts]);

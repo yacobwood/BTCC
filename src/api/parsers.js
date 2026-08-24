@@ -38,10 +38,24 @@ export function parseArticle(post) {
   const content = post.content?.rendered || '';
   const sortDate = post.date || '';
   const pubDate = formatDate(sortDate);
+  // orderDate is for feed ordering only (NewsScreen's byDateDesc/hero gating) -
+  // sortDate itself stays the official btcc.net date because it's also used
+  // as the displayed article header date and the GA4 publish_date param
+  // (ArticleScreen.js), which must show/report the real publish date, not
+  // when our scraper happened to see it. btcc.net's `date` has no time-of-day
+  // (always T00:00:00), so every article published the same day compares
+  // equal on it; against hub posts' real pubDate timestamp (client.js
+  // mapHubPosts), that midnight value always loses, letting same-day hub
+  // posts jump the hero slot ahead of mirror articles seen hours later (seen
+  // 2026-08-24: a 16:47 hub post outranked a 20:16 mirror article). firstSeenAt
+  // carries the scraper's real detection time (see scrape_articles.py's
+  // sort_posts/resolve_first_seen) and is comparable precision to hub's
+  // pubDate, so use it for ordering specifically.
+  const orderDate = post.firstSeenAt || sortDate;
   const embedded = post._embedded;
   const imageUrl = extractFeaturedImage(embedded, content);
   const category = extractCategory(embedded);
-  return {id, title, link, description, pubDate, sortDate, imageUrl, category, content, source: 'btcc.net'};
+  return {id, title, link, description, pubDate, sortDate, orderDate, imageUrl, category, content, source: 'btcc.net'};
 }
 
 function extractFeaturedImage(embedded, content = '') {

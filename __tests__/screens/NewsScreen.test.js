@@ -367,6 +367,44 @@ describe('NewsScreen', () => {
       expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data))
         .not.toContain('A Day in the Paddock');
     });
+
+    it('does not let a same-day hub post outrank a mirror article seen later that day', async () => {
+      // Regression test for 2026-08-24: btcc.net's `date` field has no
+      // time-of-day, so two mirror articles published the same calendar day
+      // used to tie on sortDate. A hub post's pubDate DOES carry real
+      // time-of-day, so any hub post published that same day - no matter how
+      // early - always won the tie and jumped the hero slot ahead of mirror
+      // articles actually seen (orderDate/firstSeenAt) hours later.
+      const earlierMirror = {
+        id: 'p1-0', title: 'Morgan converts pole to emphatic win', imageUrl: null,
+        source: 'btcc.net', category: 'LATEST NEWS',
+        pubDate: '23 Aug 2026', sortDate: '2026-08-23', orderDate: '2026-08-23T13:33:07Z',
+      };
+      const laterMirror = {
+        id: 'p1-1', title: 'Cammish heads the chasing pack', imageUrl: null,
+        source: 'btcc.net', category: 'LATEST NEWS',
+        pubDate: '23 Aug 2026', sortDate: '2026-08-23', orderDate: '2026-08-23T20:16:22Z',
+      };
+      const hubPost = {
+        id: 'hub-1', title: 'Jason Plato issues first statement', imageUrl: null,
+        source: 'btcc hub', category: 'News',
+        pubDate: '23 Aug 2026', sortDate: '2026-08-23T16:47', orderDate: '2026-08-23T16:47',
+      };
+
+      fetchHubPosts.mockResolvedValue([hubPost]);
+      fetchArticles.mockResolvedValue([laterMirror, earlierMirror]);
+
+      const {getByTestId} = renderWithProviders(<NewsScreen navigation={nav} />);
+      await waitFor(() => {
+        expect(titlesInDisplayOrder(getByTestId('news-flatlist').props.data)).toHaveLength(3);
+      });
+      const titles = titlesInDisplayOrder(getByTestId('news-flatlist').props.data);
+      // Seen at 20:16 - genuinely the most recent of the three - must be hero.
+      expect(titles[0]).toBe('Cammish heads the chasing pack');
+      // Published 16:47, between the other two - must land second, not first.
+      expect(titles[1]).toBe('Jason Plato issues first statement');
+      expect(titles[2]).toBe('Morgan converts pole to emphatic win');
+    });
   });
 
   describe('search', () => {

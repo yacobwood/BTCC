@@ -240,7 +240,14 @@ function mapHubPosts(data, uid) {
       title: p.title || '',
       link: p.link || null,
       description: p.description || '',
+      // sortDate and orderDate are the same value here - unlike mirror
+      // articles (parsers.js's parseArticle), a hub post's own pubDate
+      // already carries real time-of-day precision, so there's no separate
+      // "official date" vs "detection time" to reconcile. orderDate exists
+      // so NewsScreen's feed-ordering code can read one consistent field
+      // name regardless of which source an article came from.
       sortDate: p.pubDate || new Date().toISOString(),
+      orderDate: p.pubDate || new Date().toISOString(),
       pubDate: formatDate(p.pubDate || ''),
       imageUrl: p.imageUrl || null,
       category: p.category || '',

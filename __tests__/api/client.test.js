@@ -338,8 +338,19 @@ describe('fetchHubPosts', () => {
     expect(p).toHaveProperty('id');
     expect(p).toHaveProperty('title');
     expect(p).toHaveProperty('sortDate');
+    expect(p).toHaveProperty('orderDate');
     expect(p).toHaveProperty('pubDate');
     expect(p).toHaveProperty('source');
+  });
+
+  // Unlike mirror articles (parsers.js's parseArticle, which has to fall back
+  // to a scraper-detection timestamp for ordering since btcc.net's own date
+  // has no time-of-day), a hub post's pubDate already carries real precision -
+  // so orderDate is just an alias of sortDate here, not a distinct value.
+  it('sets orderDate equal to sortDate, since pubDate is already precise', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchHubPosts();
+    expect(result[0].orderDate).toBe(result[0].sortDate);
   });
 
   it('uses current time as sortDate when pubDate is empty', async () => {

@@ -136,6 +136,26 @@ describe('parseArticle', () => {
     expect(article.category).toBe('News');
     expect(article.description).toBe('Excerpt text');
   });
+
+  // Regression coverage for 2026-08-24: btcc.net's `date` field has no
+  // time-of-day, so same-day articles used to tie in NewsScreen's feed sort -
+  // and always lost that tie to same-day hub posts (whose pubDate does carry
+  // real time-of-day). orderDate exists purely to fix that ordering; sortDate/
+  // pubDate must keep meaning "official publish date" since ArticleScreen's
+  // header date and GA4 publish_date param both read sortDate directly.
+  test('orderDate prefers firstSeenAt over the date-only field, for ordering only', () => {
+    const post = {id: 1, title: {rendered: 'T'}, date: '2026-08-23T00:00:00', firstSeenAt: '2026-08-23T20:16:22.795437+00:00'};
+    const article = parseArticle(post);
+    expect(article.orderDate).toBe('2026-08-23T20:16:22.795437+00:00');
+    expect(article.sortDate).toBe('2026-08-23T00:00:00'); // unaffected - still the official date
+    expect(article.pubDate).toBe(formatDate('2026-08-23T00:00:00')); // unaffected
+  });
+
+  test('orderDate falls back to sortDate when firstSeenAt is absent (older archived articles)', () => {
+    const post = {id: 2, title: {rendered: 'T'}, date: '2026-08-23T00:00:00'};
+    const article = parseArticle(post);
+    expect(article.orderDate).toBe('2026-08-23T00:00:00');
+  });
 });
 
 describe('parseCalendar', () => {
