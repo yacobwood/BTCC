@@ -34,6 +34,7 @@ const LEAF_TOPICS = {
   resultsRace1:      'results_race1',
   resultsRace2:      'results_race2',
   resultsRace3:      'results_race3',
+  resultsTeaser:     'results_teaser',
 };
 
 const PARENT_KEYS = [
@@ -408,6 +409,15 @@ describe('SettingsProvider', () => {
       await act(async () => { getHook().setSetting('spoilerFree', true); });
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'news_alerts');
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'digest_alerts');
+    });
+
+    it('spoilerFree=true does NOT unsubscribe results_teaser - its whole point is to work even with No Spoilers on', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      unsubscribeFromTopic.mockClear();
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(unsubscribeFromTopic).not.toHaveBeenCalledWith(expect.anything(), 'results_teaser');
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_teaser');
     });
 
     it('spoilerFreeExpiry is loaded as a string (not parsed as boolean)', async () => {

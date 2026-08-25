@@ -69,6 +69,11 @@ describe('SettingsScreen', () => {
       expect(getByText('NOTIFICATIONS')).toBeTruthy();
     });
 
+    it('renders the "Results are in" toggle', async () => {
+      const {getByLabelText} = await renderSettings();
+      expect(getByLabelText('Results are in')).toBeTruthy();
+    });
+
     it('renders the DISPLAY section', async () => {
       const {getByText} = await renderSettings();
       expect(getByText('DISPLAY')).toBeTruthy();

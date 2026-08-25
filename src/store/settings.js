@@ -24,6 +24,10 @@ const LEAF_TOPICS = {
   resultsRace1:      'results_race1',
   resultsRace2:      'results_race2',
   resultsRace3:      'results_race3',
+  // Deliberately NOT in RESULT_LEAF_KEYS below - its whole point is to pull a
+  // spoiler-free user back in without ever stating the actual result, so
+  // spoilerFree must never suppress it the way it suppresses resultsRace*.
+  resultsTeaser:     'results_teaser',
 };
 
 // For each leaf, which parent keys must also be true for the subscription to be active
@@ -45,6 +49,7 @@ const PARENT_CHAIN = {
   resultsRace1:      ['results', 'resultsRace'],
   resultsRace2:      ['results', 'resultsRace'],
   resultsRace3:      ['results', 'resultsRace'],
+  resultsTeaser:     [],
 };
 
 const STORAGE_KEYS = {
@@ -69,6 +74,7 @@ const STORAGE_KEYS = {
   resultsRace1:        'setting_results_race1',
   resultsRace2:        'setting_results_race2',
   resultsRace3:        'setting_results_race3',
+  resultsTeaser:       'setting_results_teaser',
   hubPreview:          'setting_hub_preview',
   spoilerFree:         'setting_spoiler_free',
   spoilerFreeExpiry:   'setting_spoiler_free_expiry',
@@ -99,6 +105,7 @@ const defaults = {
   resultsRace1:        true,
   resultsRace2:        true,
   resultsRace3:        true,
+  resultsTeaser:       true,
   hubPreview:          false,
   spoilerFree:         false,
   spoilerFreeExpiry:   null,
@@ -147,7 +154,7 @@ const SYNCED_KEYS = new Set([
   'preRace', 'preRaceFP', 'preRaceQualifying', 'preRaceQRace', 'preRaceRace',
   'preRaceRace1', 'preRaceRace2', 'preRaceRace3',
   'results', 'resultsFP', 'resultsQualifying', 'resultsQRace', 'resultsRace',
-  'resultsRace1', 'resultsRace2', 'resultsRace3',
+  'resultsRace1', 'resultsRace2', 'resultsRace3', 'resultsTeaser',
   'spoilerFree',
 ]);
 

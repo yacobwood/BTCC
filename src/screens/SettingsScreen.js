@@ -300,6 +300,12 @@ export default function SettingsScreen({navigation}) {
           value={settings.standingsUpdate}
           onToggle={toggle('standingsUpdate')}
         />
+        <SettingRow
+          label="Results are in"
+          description="A gentle nudge when a fresh result drops - never reveals it, works even with No Spoilers on"
+          value={settings.resultsTeaser}
+          onToggle={toggle('resultsTeaser')}
+        />
 
         {live_chat && (
           <>
