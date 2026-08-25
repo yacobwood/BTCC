@@ -149,7 +149,7 @@ export default function SettingsScreen({navigation}) {
         />
         <SettingRow
           label="Monday Roundup"
-          description="Get notified when a new BTCC Monday Roundup drops"
+          description="Get notified when a new weekly roundup is ready to read"
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
