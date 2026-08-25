@@ -141,7 +141,7 @@ const tabIcons = {
 
 const TAB_BAR_HEIGHT = 56;
 
-const linking = {
+export const linking = {
   prefixes: ['btccfanhub://', 'https://btcchub.vercel.app'],
   config: {
     screens: {

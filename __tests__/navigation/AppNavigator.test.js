@@ -197,3 +197,27 @@ describe('AppNavigator', () => {
   });
 });
 
+describe('linking config', () => {
+  // Real getStateFromPath (jest.setup.js's @react-navigation/native mock
+  // spreads the actual library first, only overriding specific exports) -
+  // this resolves an actual URL against the real linking.config, not just
+  // asserting the config object's shape.
+  const {getStateFromPath} = require('@react-navigation/native');
+  const {linking} = require('../../src/navigation/AppNavigator');
+
+  it('resolves a bare "results" path to the Results tab\'s list screen', () => {
+    const state = getStateFromPath('results', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    expect(resultsRoute).toBeTruthy();
+    expect(resultsRoute.state.routes[0].name).toBe('ResultsList');
+  });
+
+  it('still resolves "results/5" to RoundResults with the round param (regression check)', () => {
+    const state = getStateFromPath('results/5', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('RoundResults');
+    expect(leaf.params).toEqual({round: '5'});
+  });
+});
+
