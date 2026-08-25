@@ -145,11 +145,12 @@ export default function RoundResultsScreen({route, navigation}) {
     maybeShowShareNudge().then(should => {
       if (!should) return;
       markShareNudgeShown();
+      Analytics.shareNudgeShown();
       Alert.alert(
         'Enjoying BTCC Hub?',
         'Share it with a fellow fan.',
         [
-          {text: 'Not now', style: 'cancel'},
+          {text: 'Not now', style: 'cancel', onPress: () => Analytics.shareNudgeDismissed()},
           {text: 'Share', onPress: () => shareApp('share_nudge')},
         ],
       );

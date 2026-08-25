@@ -5,7 +5,14 @@ import MoreScreen from '../../src/screens/MoreScreen';
 import {renderWithProviders, makeNav} from './testUtils';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), moreItemClicked: jest.fn(), contentShared: jest.fn()},
+  Analytics: {
+    screen: jest.fn(),
+    moreItemClicked: jest.fn(),
+    contentShared: jest.fn(),
+    donorGateShown: jest.fn(),
+    donorGateNameSaveResult: jest.fn(),
+    donorGateSkipped: jest.fn(),
+  },
 }));
 
 jest.mock('../../src/utils/chatIdentity', () => ({
@@ -14,6 +21,7 @@ jest.mock('../../src/utils/chatIdentity', () => ({
 }));
 
 const {hasChatDisplayName, saveChatDisplayName} = require('../../src/utils/chatIdentity');
+const {Analytics} = require('../../src/utils/analytics');
 const mockAuthModule = require('@react-native-firebase/auth').default;
 
 const nav = makeNav();
@@ -199,6 +207,7 @@ describe('MoreScreen', () => {
       fireEvent.press(getByLabelText('Buy me a coffee'));
       await waitFor(() => expect(getByText('One quick thing')).toBeTruthy());
       expect(getByLabelText('Chat display name')).toBeTruthy();
+      expect(Analytics.donorGateShown).toHaveBeenCalled();
     });
 
     it('shows a "sign in to make this permanent" link for an anonymous user', async () => {
@@ -246,6 +255,7 @@ describe('MoreScreen', () => {
       ));
       await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
       expect(queryByText('One quick thing')).toBeNull();
+      expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('ok');
     });
 
     it('shows an error and keeps the gate open when the name cannot be saved', async () => {
@@ -260,6 +270,7 @@ describe('MoreScreen', () => {
       fireEvent.press(getByLabelText('Save name and continue'));
       await waitFor(() => expect(getByText('That name is already taken')).toBeTruthy());
       expect(openURL).not.toHaveBeenCalled();
+      expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('taken');
     });
 
     it('Skip opens the coffee link directly without saving a name', async () => {
@@ -273,6 +284,7 @@ describe('MoreScreen', () => {
       expect(saveChatDisplayName).not.toHaveBeenCalled();
       await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
       expect(queryByText('One quick thing')).toBeNull();
+      expect(Analytics.donorGateSkipped).toHaveBeenCalled();
     });
   });
 });

@@ -249,22 +249,37 @@ describe('NewsScreen', () => {
     }
 
     it('does not show the banner on a first-ever launch (no prior stamp)', async () => {
+      const {logEvent} = require('@react-native-firebase/analytics');
       const {getByText, queryByText} = renderNewsWithLastOpen(null);
       await waitFor(() => getByText('Ingram wins Race 1 at Donington'));
       expect(queryByText(/Welcome back/)).toBeNull();
+      expect(logEvent).not.toHaveBeenCalledWith(expect.anything(), 'inactivity_banner_shown');
     });
 
     it('shows a "welcome back" banner after 10+ days of inactivity', async () => {
+      const {logEvent} = require('@react-native-firebase/analytics');
       const {getByText} = renderNewsWithLastOpen(ELEVEN_DAYS_AGO);
       await waitFor(() => expect(getByText(/Welcome back/)).toBeTruthy());
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'inactivity_banner_shown');
     });
 
     it('dismissing the banner action navigates to Results and hides the banner', async () => {
+      const {logEvent} = require('@react-native-firebase/analytics');
       const {getByText, getByLabelText, queryByText} = renderNewsWithLastOpen(ELEVEN_DAYS_AGO);
       await waitFor(() => getByText(/Welcome back/));
       fireEvent.press(getByLabelText('Season'));
       expect(nav.navigate).toHaveBeenCalledWith('Results');
       expect(queryByText(/Welcome back/)).toBeNull();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'nav_item_clicked', {label: 'inactivity_banner_action'});
+    });
+
+    it('dismissing the banner without acting on it tracks the dismiss action', async () => {
+      const {logEvent} = require('@react-native-firebase/analytics');
+      const {getByText, getByLabelText, queryByText} = renderNewsWithLastOpen(ELEVEN_DAYS_AGO);
+      await waitFor(() => getByText(/Welcome back/));
+      fireEvent.press(getByLabelText('Dismiss'));
+      expect(queryByText(/Welcome back/)).toBeNull();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'nav_item_clicked', {label: 'inactivity_banner_dismiss'});
     });
   });
 

@@ -83,6 +83,7 @@ export default function MoreScreen({navigation}) {
       setDonorNameError('');
       setDonorNameInput('');
       setDonorGateVisible(true);
+      Analytics.donorGateShown();
     }
   };
 
@@ -91,6 +92,7 @@ export default function MoreScreen({navigation}) {
     const authorId = auth().currentUser?.uid || 'anonymous';
     const result = await saveChatDisplayName({authorId, user: auth().currentUser, name: donorNameInput});
     setSavingDonorName(false);
+    Analytics.donorGateNameSaveResult(result.status);
     if (result.status !== 'ok') {
       setDonorNameError(result.message);
       return;
@@ -100,6 +102,7 @@ export default function MoreScreen({navigation}) {
   };
 
   const onSkipDonorName = () => {
+    Analytics.donorGateSkipped();
     setDonorGateVisible(false);
     Linking.openURL(BMC_URL);
   };

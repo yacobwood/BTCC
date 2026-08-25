@@ -17,6 +17,7 @@ import {cacheEvictStale, cacheDelete} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
 import {handleNotificationOpen, navigateToNewToBtcc} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
+import {Analytics} from './src/utils/analytics';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
 import OnboardingDialog from './src/components/OnboardingDialog';
@@ -53,7 +54,10 @@ function AppDialogs() {
         AsyncStorage.getItem('setting_spoiler_free'),
         AsyncStorage.getItem('setting_spoiler_free_expiry'),
       ]);
-      if (!onboardingShown) setShowOnboarding(true);
+      if (!onboardingShown) {
+        setShowOnboarding(true);
+        Analytics.screen('onboarding');
+      }
 
       // Auto-disable spoiler-free on app open — read directly from storage to avoid context timing
       if (spoilerFreeVal === 'true') {
@@ -79,17 +83,20 @@ function AppDialogs() {
   }, [update_available, update_min_version, update_min_version_ios, update_min_version_android]);
 
   const handleOnboardingAllow = async () => {
+    Analytics.onboardingChoiceMade('allow');
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     setShowOnboarding(false);
     requestNotificationPermission();
   };
 
   const handleOnboardingSkip = async () => {
+    Analytics.onboardingChoiceMade('skip');
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     setShowOnboarding(false);
   };
 
   const handleOnboardingLearnBasics = async () => {
+    Analytics.onboardingChoiceMade('learn_basics');
     // Deliberately does NOT set ONBOARDING_KEY - "Learn the basics" is a
     // detour, not a decision about notifications. Leaving the flag unset
     // means the prompt asks again on the next cold start instead of the

@@ -133,7 +133,12 @@ export default function NewsScreen({navigation}) {
   useEffect(() => { Analytics.screen('news'); }, []);
   // News is the app's default/home tab, so its mount is a reasonable proxy
   // for "app opened" without threading a launch event through App.tsx.
-  useEffect(() => { checkAndStampLastOpen().then(setShowInactivityBanner); }, []);
+  useEffect(() => {
+    checkAndStampLastOpen().then(should => {
+      setShowInactivityBanner(should);
+      if (should) Analytics.inactivityBannerShown();
+    });
+  }, []);
   useFocusEffect(useCallback(() => { getReadIds().then(setDigestReadIds); }, []));
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -315,8 +320,8 @@ export default function NewsScreen({navigation}) {
         visible={showInactivityBanner}
         message="Welcome back! Catch up on results and standings."
         actionLabel="Season"
-        onAction={() => { setShowInactivityBanner(false); navigation.navigate('Results'); }}
-        onDismiss={() => setShowInactivityBanner(false)}
+        onAction={() => { Analytics.navItemClicked('inactivity_banner_action'); setShowInactivityBanner(false); navigation.navigate('Results'); }}
+        onDismiss={() => { Analytics.navItemClicked('inactivity_banner_dismiss'); setShowInactivityBanner(false); }}
       />
 
       {(!searchActive || searchQuery.length >= 2) && (

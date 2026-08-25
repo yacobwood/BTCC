@@ -13,6 +13,8 @@ export const Analytics = {
   // already established, instead of each screen improvising its own (which is
   // how driver/track sharing drifted - see 2026-08-25 growth report).
   contentShared: (contentType, itemId) => logEvent(fa(),'share', {content_type: contentType, item_id: (itemId ?? '').toString().substring(0, 100)}),
+  shareNudgeShown: () => logEvent(fa(),'share_nudge_shown'),
+  shareNudgeDismissed: () => logEvent(fa(),'share_nudge_dismissed'),
   articleScrollDepth: (title, depth) => logEvent(fa(),'article_scroll_depth', {item_name: title?.substring(0, 100), depth_percent: depth}),
   articleExternalLinkClicked: (title, url) => logEvent(fa(),'article_external_link_clicked', {item_name: title?.substring(0, 100), url: url?.substring(0, 100)}),
   // error_code is coarse by necessity: fetchArticleBySlug's own internal try/catch
@@ -60,6 +62,8 @@ export const Analytics = {
   moreItemClicked: (item) => logEvent(fa(),'more_item_clicked', {item}),
   merchStoreClicked: (teamName, storeName) => logEvent(fa(),'merch_store_clicked', {team_name: teamName, ...(storeName ? {store_name: storeName} : {})}),
 
+  // choice: 'allow' | 'skip' | 'learn_basics' - the first-launch onboarding dialog's outcome
+  onboardingChoiceMade: (choice) => logEvent(fa(),'onboarding_choice_made', {choice}),
   notificationTypeToggled: (type, enabled) => logEvent(fa(),'notification_type_toggled', {type, enabled: enabled ? 'true' : 'false'}),
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
   timeFormatChanged: (format) => logEvent(fa(),'time_format_changed', {format}),
@@ -81,6 +85,7 @@ export const Analytics = {
   retryClicked: (screen) => logEvent(fa(),'retry_clicked', {screen}),
   scrollToTop: (screen) => logEvent(fa(),'scroll_to_top', {screen}),
   navItemClicked: (label) => logEvent(fa(),'nav_item_clicked', {label}),
+  inactivityBannerShown: () => logEvent(fa(),'inactivity_banner_shown'),
 
   notificationDelivered: (type, venue) => logEvent(fa(),'notification_delivered', {type, ...(venue ? {venue} : {})}),
   notificationOpened: (type) => logEvent(fa(),'notification_opened', {type: type || 'unknown'}),
@@ -88,6 +93,11 @@ export const Analytics = {
   chatMessageSent: () => logEvent(fa(),'chat_message_sent'),
   chatMessageFlagged: () => logEvent(fa(),'chat_message_flagged'),
   chatMentionSuggestionSelected: () => logEvent(fa(),'chat_mention_suggestion_selected'),
+
+  donorGateShown: () => logEvent(fa(),'donor_gate_shown'),
+  // status: 'ok' | 'invalid' | 'taken' | 'error' - saveChatDisplayName's own result
+  donorGateNameSaveResult: (status) => logEvent(fa(),'donor_gate_name_save_result', {status}),
+  donorGateSkipped: () => logEvent(fa(),'donor_gate_skipped'),
 
   adImpression: (placement) => logEvent(fa(),'ad_impression', {placement}),
   adClicked: (placement) => logEvent(fa(),'ad_clicked', {placement}),

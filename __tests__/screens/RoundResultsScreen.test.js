@@ -17,6 +17,8 @@ jest.mock('../../src/utils/analytics', () => ({
     penaltyDocumentOpened: jest.fn(),
     penaltyDocumentOpenFailed: jest.fn(),
     contentShared: jest.fn(),
+    shareNudgeShown: jest.fn(),
+    shareNudgeDismissed: jest.fn(),
   },
 }));
 
@@ -79,13 +81,16 @@ describe('RoundResultsScreen', () => {
     });
 
     it('does not show the nudge on the first-ever view (just records the timestamp)', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
       const alertSpy = jest.spyOn(Alert, 'alert');
       renderRoundWithNudgeState(null);
       await waitFor(() => expect(AsyncStorage.setItem).toHaveBeenCalledWith('share_nudge_first_view_ts', String(NOW)));
       expect(alertSpy).not.toHaveBeenCalled();
+      expect(Analytics.shareNudgeShown).not.toHaveBeenCalled();
     });
 
     it('shows the share nudge once 10+ days have passed since the first view', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
       const alertSpy = jest.spyOn(Alert, 'alert');
       renderRoundWithNudgeState(ELEVEN_DAYS_AGO);
       await waitFor(() => expect(alertSpy).toHaveBeenCalledWith(
@@ -93,6 +98,7 @@ describe('RoundResultsScreen', () => {
         'Share it with a fellow fan.',
         expect.any(Array),
       ));
+      expect(Analytics.shareNudgeShown).toHaveBeenCalled();
     });
 
     it('pressing Share in the nudge shares the app, tagged with the share_nudge origin', async () => {
@@ -105,6 +111,15 @@ describe('RoundResultsScreen', () => {
       await waitFor(() => expect(shareSpy).toHaveBeenCalledWith({
         message: expect.stringContaining('https://btcchub.vercel.app?src=share_nudge'),
       }));
+    });
+
+    it('pressing Not now in the nudge tracks the dismissal', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      jest.spyOn(Alert, 'alert').mockImplementation((title, message, buttons) => {
+        buttons.find(b => b.text === 'Not now')?.onPress();
+      });
+      renderRoundWithNudgeState(ELEVEN_DAYS_AGO);
+      await waitFor(() => expect(Analytics.shareNudgeDismissed).toHaveBeenCalled());
     });
   });
 
