@@ -455,10 +455,7 @@ export default function SettingsScreen({navigation}) {
         </Modal>
 
         <View style={styles.divider} />
-        <Text style={styles.versionText}>Version {version}</Text>
-        {!!raceVersionLabel(version) && (
-          <Text style={styles.versionNickname}>{raceVersionLabel(version)}</Text>
-        )}
+        <Text style={styles.versionText}>{raceVersionLabel(version) || `Version ${version}`}</Text>
         {!!user?.uid && (
           <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy user ID">
             <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `User ID: ${user.uid.slice(0, 16)}…`}</Text>
@@ -650,7 +647,6 @@ const styles = StyleSheet.create({
   pillText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '700'},
   pillTextActive: {color: Colors.navy},
   versionText: {color: Colors.textSecondary, fontSize: 12, marginTop: 12},
-  versionNickname: {color: Colors.textSecondary, fontSize: 11, marginTop: 2, opacity: 0.75},
   deviceIdText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 4},
   debugBtn: {paddingVertical: 8, paddingHorizontal: 12, backgroundColor: Colors.surface, borderRadius: 8, marginBottom: 8, alignSelf: 'flex-start'},
   debugBtnText: {color: Colors.yellow, fontSize: 13, fontWeight: '600'},
