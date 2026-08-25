@@ -16,6 +16,7 @@ jest.mock('../../src/utils/analytics', () => ({
     penaltiesShown: jest.fn(),
     penaltyDocumentOpened: jest.fn(),
     penaltyDocumentOpenFailed: jest.fn(),
+    contentShared: jest.fn(),
   },
 }));
 
@@ -37,6 +38,20 @@ describe('RoundResultsScreen', () => {
     const {Analytics} = require('../../src/utils/analytics');
     renderRound();
     await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('round_results'));
+  });
+
+  it('shares a web link to this round\'s results and logs contentShared when the share button is pressed', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {Analytics} = require('../../src/utils/analytics');
+    const {getByLabelText} = renderRound();
+    await waitFor(() => getByLabelText('Share round result'));
+    fireEvent.press(getByLabelText('Share round result'));
+    expect(Analytics.contentShared).toHaveBeenCalledWith('round_result', MOCK_ROUND.round);
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining(`https://btcchub.vercel.app/results/${MOCK_ROUND.round}?src=round_result`),
+    });
+    shareSpy.mockRestore();
   });
 
   describe('tab bar', () => {

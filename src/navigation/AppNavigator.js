@@ -163,6 +163,7 @@ const linking = {
       },
       Results: {
         screens: {
+          ResultsList: 'results',
           RoundResults: 'results/:round',
         },
       },

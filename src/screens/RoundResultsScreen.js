@@ -9,6 +9,7 @@ import {
   Linking,
   AppState,
   Alert,
+  Share,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -117,6 +118,15 @@ export default function RoundResultsScreen({route, navigation}) {
   // snapshot so it works offline; refreshed opportunistically below.
   const [allRounds, setAllRounds] = useState(BUNDLED_RESULTS.rounds || []);
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
+
+  const onShareRound = async () => {
+    Analytics.contentShared('round_result', round.round);
+    try {
+      await Share.share({
+        message: `${round.venue} - Round ${round.round} results\n\nhttps://btcchub.vercel.app/results/${round.round}?src=round_result`,
+      });
+    } catch {}
+  };
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
   const races = round.races || [];
@@ -272,6 +282,9 @@ export default function RoundResultsScreen({route, navigation}) {
           <Text style={styles.headerTitle}>{round.venue}</Text>
           <Text style={styles.headerSub}>Rounds {rStart}–{rEnd} · {round.date}</Text>
         </View>
+        <TouchableOpacity onPress={onShareRound} style={{padding: 4}} accessibilityLabel="Share round result" accessibilityRole="button">
+          <Icon name="share" size={22} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <SwipeableTabs

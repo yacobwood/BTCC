@@ -10,6 +10,7 @@ import {
   InteractionManager,
   Modal,
   StyleSheet,
+  Share,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import {useFocusEffect} from '@react-navigation/native';
@@ -694,6 +695,18 @@ export default function ResultsScreen({navigation, route}) {
     }
   };
 
+  const onShareStandings = async () => {
+    const top3 = (standings?.drivers || []).slice(0, 3);
+    if (!top3.length) return;
+    const lines = top3.map((d, i) => `${i + 1}. ${d.name} - ${d.points}pts`).join('\n');
+    Analytics.contentShared('standings', standings.season);
+    try {
+      await Share.share({
+        message: `BTCC Championship - after Round ${standings.round}\n\n${lines}\n\nhttps://btcchub.vercel.app/results?src=standings`,
+      });
+    } catch {}
+  };
+
   return (
     <View style={styles.container}>
       <View style={[styles.header, {flexDirection: 'row', alignItems: 'center'}]}>
@@ -706,6 +719,15 @@ export default function ResultsScreen({navigation, route}) {
                 {formatAge(dataFreshnessMs)}
               </Text>
             </View>
+          )}
+          {!!standings?.drivers?.length && (
+            <TouchableOpacity
+              onPress={onShareStandings}
+              accessibilityLabel="Share standings"
+              accessibilityRole="button"
+              style={{width: 34, height: 34, borderRadius: 17, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.outline, justifyContent: 'center', alignItems: 'center'}}>
+              <Icon name="share" size={16} color={Colors.yellow} />
+            </TouchableOpacity>
           )}
           <TouchableOpacity
             onPress={() => navigation.navigate('Records')}

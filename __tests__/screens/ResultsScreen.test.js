@@ -6,7 +6,7 @@ import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), resultsYearChanged: jest.fn(), resultsTabChanged: jest.fn(), resultsChampionshipChanged: jest.fn(), pullToRefresh: jest.fn(), scrollToTop: jest.fn()},
+  Analytics: {screen: jest.fn(), resultsYearChanged: jest.fn(), resultsTabChanged: jest.fn(), resultsChampionshipChanged: jest.fn(), pullToRefresh: jest.fn(), scrollToTop: jest.fn(), contentShared: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({
@@ -168,6 +168,36 @@ describe('ResultsScreen', () => {
     await waitFor(() => getByLabelText('Select season'));
     fireEvent.press(getByLabelText('Select season'));
     await waitFor(() => expect(getByText('SELECT SEASON')).toBeTruthy());
+  });
+
+  // ── Sharing ──────────────────────────────────────────────────────────────────
+
+  it('hides the share button when there are no standings yet', async () => {
+    const {queryByLabelText} = renderResults();
+    await waitFor(() => expect(queryByLabelText('Share standings')).toBeNull());
+  });
+
+  it('shares a top-3 summary and logs contentShared when standings exist', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {Analytics} = require('../../src/utils/analytics');
+    parseStandings.mockReturnValue({
+      drivers: [
+        {position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, wins: 7},
+        {position: 2, name: 'Tom Ingram', team: 'Team VERTU', points: 279, wins: 2},
+        {position: 3, name: 'Dan Cammish', team: 'NAPA Racing UK', points: 274, wins: 2},
+      ],
+      teams: [], season: '2026', round: 21, venue: 'Donington Park GP',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText('Share standings'));
+    fireEvent.press(getByLabelText('Share standings'));
+    expect(Analytics.contentShared).toHaveBeenCalledWith('standings', '2026');
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining('https://btcchub.vercel.app/results?src=standings'),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('1. Ashley Sutton - 377pts');
+    shareSpy.mockRestore();
   });
 
   // ── Championship toggle ───────────────────────────────────────────────────────
