@@ -90,7 +90,12 @@ function AppDialogs() {
   };
 
   const handleOnboardingLearnBasics = async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    // Deliberately does NOT set ONBOARDING_KEY - "Learn the basics" is a
+    // detour, not a decision about notifications. Leaving the flag unset
+    // means the prompt asks again on the next cold start instead of the
+    // notification choice silently vanishing forever (bug: a curious new
+    // user who taps this never gets asked at all). Nothing re-shows it
+    // mid-session since the check only runs once, on mount.
     setShowOnboarding(false);
     navigateToNewToBtcc(navigationRef);
   };

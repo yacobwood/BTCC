@@ -37,7 +37,7 @@ test('renders correctly', async () => {
   });
 });
 
-test('pressing "New to BTCC? Learn the basics" in onboarding dismisses it and navigates', async () => {
+test('pressing "New to BTCC? Learn the basics" in onboarding dismisses it and navigates, without marking onboarding as shown', async () => {
   let root;
   await act(async () => {
     root = ReactTestRenderer.create(<App />);
@@ -48,6 +48,12 @@ test('pressing "New to BTCC? Learn the basics" in onboarding dismisses it and na
     link.props.onPress();
   });
 
-  expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_shown', 'true');
   expect(navigateToNewToBtcc).toHaveBeenCalled();
+  // Regression: this used to also set onboarding_shown, which meant a
+  // curious new user who tapped this link was never asked about
+  // notifications at all, on this or any later launch. Leaving the flag
+  // unset means the prompt asks again next cold start instead.
+  expect(AsyncStorage.setItem).not.toHaveBeenCalledWith('onboarding_shown', 'true');
+  // The dialog itself is still dismissed immediately (doesn't block navigation)
+  expect(root.root.findAllByProps({accessibilityLabel: 'New to BTCC? Learn the basics'}).length).toBe(0);
 });
