@@ -896,7 +896,8 @@ export default function TrackDetailScreen({route, navigation}) {
   };
 
   const onShare = async () => {
-    await Share.share({message: `Round ${track.round} - ${track.venue}\n\nbtccfanhub://round/${track.round}`});
+    Analytics.contentShared('track', track.venue);
+    await Share.share({message: `Round ${track.round} - ${track.venue}\n\nhttps://btcchub.vercel.app/round/${track.round}?src=track_detail`});
   };
 
   return (

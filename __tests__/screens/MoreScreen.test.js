@@ -1,11 +1,11 @@
 import React from 'react';
 import {fireEvent, waitFor} from '@testing-library/react-native';
-import {Platform, Linking} from 'react-native';
+import {Platform, Linking, Share} from 'react-native';
 import MoreScreen from '../../src/screens/MoreScreen';
 import {renderWithProviders, makeNav} from './testUtils';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), moreItemClicked: jest.fn()},
+  Analytics: {screen: jest.fn(), moreItemClicked: jest.fn(), contentShared: jest.fn()},
 }));
 
 const nav = makeNav();
@@ -42,6 +42,11 @@ describe('MoreScreen', () => {
   it('shows ROADMAP row', async () => {
     const {getByLabelText} = renderMore();
     await waitFor(() => expect(getByLabelText('Roadmap & Ideas')).toBeTruthy());
+  });
+
+  it('shows the Share BTCC Hub row', async () => {
+    const {getByLabelText} = renderMore();
+    await waitFor(() => expect(getByLabelText('Share BTCC Hub')).toBeTruthy());
   });
 
   it('shows FEEDBACK row', async () => {
@@ -84,6 +89,17 @@ describe('MoreScreen', () => {
     await waitFor(() => getByLabelText('Partners & Sponsors'));
     fireEvent.press(getByLabelText('Partners & Sponsors'));
     expect(nav.navigate).toHaveBeenCalledWith('Partners');
+  });
+
+  it('opens the native share sheet with an app link tagged more_menu when Share BTCC Hub is pressed', async () => {
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {getByLabelText} = renderMore();
+    await waitFor(() => getByLabelText('Share BTCC Hub'));
+    fireEvent.press(getByLabelText('Share BTCC Hub'));
+    await waitFor(() => expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining('https://btcchub.vercel.app?src=more_menu'),
+    }));
+    shareSpy.mockRestore();
   });
 
   // ── Support buttons (Android only) ────────────────────────────────────────────

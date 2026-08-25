@@ -7,7 +7,7 @@ import * as featureFlags from '../../src/store/featureFlags';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn()},
+  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn(), contentShared: jest.fn()},
 }));
 
 jest.mock('../../src/utils/weather', () => ({
@@ -101,6 +101,20 @@ describe('TrackDetailScreen', () => {
   it('renders venue name', async () => {
     const {getAllByText} = render();
     await waitFor(() => expect(getAllByText('Donington Park').length).toBeGreaterThan(0));
+  });
+
+  it('shares a web link (not the custom scheme) and logs contentShared("track", venue) when the share button is pressed', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {Analytics} = require('../../src/utils/analytics');
+    const {getByLabelText} = render();
+    await waitFor(() => getByLabelText('Share round'));
+    fireEvent.press(getByLabelText('Share round'));
+    expect(Analytics.contentShared).toHaveBeenCalledWith('track', 'Donington Park');
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining(`https://btcchub.vercel.app/round/${TRACK.round}?src=track_detail`),
+    });
+    shareSpy.mockRestore();
   });
 
   it('renders the About section', async () => {

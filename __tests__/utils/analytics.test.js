@@ -98,6 +98,32 @@ describe('Analytics', () => {
     });
   });
 
+  describe('contentShared', () => {
+    it('logs a share event with the given content_type and item_id', () => {
+      Analytics.contentShared('driver', 'Tom Ingram');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share', {
+        content_type: 'driver',
+        item_id: 'Tom Ingram',
+      });
+    });
+
+    it('stringifies a non-string itemId', () => {
+      Analytics.contentShared('standings', 2026);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share', {
+        content_type: 'standings',
+        item_id: '2026',
+      });
+    });
+
+    it('handles a missing itemId gracefully', () => {
+      expect(() => Analytics.contentShared('app', undefined)).not.toThrow();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share', {
+        content_type: 'app',
+        item_id: '',
+      });
+    });
+  });
+
   describe('calendar events', () => {
     it('trackDetailViewed logs with round and venue', () => {
       Analytics.trackDetailViewed(3, 'Snetterton');

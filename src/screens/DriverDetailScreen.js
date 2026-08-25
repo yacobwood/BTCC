@@ -22,39 +22,21 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import {fetchResults, fetchStandings, fetchDrivers} from '../api/client';
-import {attachTeamDisplayFields, parseDriverHistory} from '../api/parsers';
+import {attachTeamDisplayFields, parseDriverHistory, carThumbCropUrl, formatDate} from '../api/parsers';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
-// Rewrites a data/carImages/ URL to its pre-generated small thumbnail,
-// cropped tight to the visible car (<name>-thumb-crop.webp - see
-// scripts/generate_car_thumb.py). Deliberately NOT the same plain -thumb
-// file TeamDetailScreen.js's carImage uses - that file keeps its full
-// ~40%/16% top/bottom padding on purpose, since TeamDetailScreen's sponsor
-// logo overlays the top of the car cards and relies on that padding being
-// blank so it doesn't clash with the car artwork. This banner has no
-// overlay to protect, so it uses the cropped variant instead - carStrip's
-// aspectRatio below is tuned to that crop, not the padded original.
-// Android decodes an image to a bitmap sized off pixel dimensions, not file
-// size, so the full-size 1536x1024 original costs 6MB of decoded memory
-// even though this screen only ever shows one at a time. This screen never
-// hit the multi-driver decode-pool cap that originally motivated shrinking
-// these in the first place (DriversScreen's tile, back when it rendered one
-// per driver on a long grid), but there's no reason to decode 15x more
-// bitmap than this banner needs just because only one is on screen here.
-function carThumbUrl(url) {
-  if (!url) return url;
-  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb-crop$1');
-}
-
-function formatDob(dateStr) {
-  if (!dateStr) return null;
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
-  } catch { return null; }
-}
+// This banner uses api/parsers.js's carThumbCropUrl (the cropped variant),
+// deliberately NOT the same plain-thumb one TeamDetailScreen.js's carImage
+// uses - that screen keeps its full ~40%/16% top/bottom padding on purpose,
+// since its sponsor logo overlays the top of the car cards and relies on
+// that padding being blank so it doesn't clash with the car artwork. This
+// banner has no overlay to protect, so it uses the cropped variant instead -
+// carStrip's aspectRatio below is tuned to that crop, not the padded
+// original. Android decodes an image to a bitmap sized off pixel
+// dimensions, not file size, so the full-size 1536x1024 original costs 6MB
+// of decoded memory even though this screen only ever shows one at a time.
 
 function calcAge(dateStr) {
   if (!dateStr) return null;
@@ -160,7 +142,7 @@ export default function DriverDetailScreen({route, navigation}) {
   const bestPos = history.filter(h => h.pos > 0).reduce((best, h) => Math.min(best, h.pos), 999);
 
   const age = calcAge(driver.dateOfBirth);
-  const dobFormatted = formatDob(driver.dateOfBirth);
+  const dobFormatted = formatDate(driver.dateOfBirth);
 
   // Large variant, not the small one DriversScreen's tile/TeamDetailScreen's
   // roster card use - see driverImages.js's own comment for why these need
@@ -169,8 +151,8 @@ export default function DriverDetailScreen({route, navigation}) {
 
   const onShare = async () => {
     const slug = driver.name.toLowerCase().replace(/\s+/g, '-');
-    Analytics.screen('driver_detail_share:' + driver.name);
-    await Share.share({message: `${driver.name} - ${CURRENT_SEASON} BTCC\n\nbtccfanhub://drivers/${slug}`});
+    Analytics.contentShared('driver', driver.name);
+    await Share.share({message: `${driver.name} - ${CURRENT_SEASON} BTCC\n\nhttps://btcchub.vercel.app/drivers/${slug}?src=driver_detail`});
   };
 
   return (
@@ -214,7 +196,7 @@ export default function DriverDetailScreen({route, navigation}) {
         {driver.carImageUrl ? (
           <View style={styles.carStrip}>
             <CachedImage
-              uri={carThumbUrl(driver.carImageUrl)}
+              uri={carThumbCropUrl(driver.carImageUrl)}
               style={styles.carStripImg}
               resizeMode="contain"
               accessibilityLabel={`${driver.name}'s car`}

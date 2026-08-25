@@ -15,7 +15,7 @@ import {LiveUrlsProvider} from './src/store/liveUrls';
 import {runBackgroundPrefetch} from './src/utils/backgroundPrefetch';
 import {cacheEvictStale, cacheDelete} from './src/store/cache';
 import notifee, {EventType} from '@notifee/react-native';
-import {handleNotificationOpen} from './src/utils/notifNavigation';
+import {handleNotificationOpen, navigateToNewToBtcc} from './src/utils/notifNavigation';
 import {setupNotificationChannels, requestNotificationPermission, onForegroundMessage} from './src/utils/notifications';
 import {getCrashlytics, setCrashlyticsCollectionEnabled} from '@react-native-firebase/crashlytics';
 import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@react-native-firebase/messaging';
@@ -89,9 +89,20 @@ function AppDialogs() {
     setShowOnboarding(false);
   };
 
+  const handleOnboardingLearnBasics = async () => {
+    await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    setShowOnboarding(false);
+    navigateToNewToBtcc(navigationRef);
+  };
+
   return (
     <>
-      <OnboardingDialog visible={showOnboarding} onAllow={handleOnboardingAllow} onSkip={handleOnboardingSkip} />
+      <OnboardingDialog
+        visible={showOnboarding}
+        onAllow={handleOnboardingAllow}
+        onSkip={handleOnboardingSkip}
+        onLearnBasics={handleOnboardingLearnBasics}
+      />
       <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       <SpoilerClearedDialog visible={showSpoilerCleared} onDismiss={() => setShowSpoilerCleared(false)} />
     </>

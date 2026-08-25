@@ -20,7 +20,7 @@ jest.mock('../../src/utils/chatBridge', () => ({
   requestOpenChat: jest.fn(),
 }));
 
-import {navigateFromData, handleNotificationOpen} from '../../src/utils/notifNavigation';
+import {navigateFromData, handleNotificationOpen, navigateToNewToBtcc} from '../../src/utils/notifNavigation';
 import {getSeasonData} from '../../src/assets/seasonData';
 import {Analytics} from '../../src/utils/analytics';
 import {requestOpenChat} from '../../src/utils/chatBridge';
@@ -320,6 +320,48 @@ describe('navigateFromData', () => {
       jest.advanceTimersByTime(500);
 
       expect(ref.dispatch).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('navigateToNewToBtcc', () => {
+  it('dispatches More → MoreMenu → InfoPage with the new-to-btcc page when already ready', () => {
+    const ref = makeRef(true);
+    navigateToNewToBtcc(ref);
+
+    expect(ref.dispatch).toHaveBeenCalledTimes(1);
+    const dispatched = ref.dispatch.mock.calls[0][0];
+    expect(dispatched.routes[0].name).toBe('More');
+    expect(dispatched.routes[0].state.routes[0]).toEqual({name: 'MoreMenu'});
+    expect(dispatched.routes[0].state.routes[1].name).toBe('InfoPage');
+    expect(dispatched.routes[0].state.routes[1].params.page.id).toBe('new-to-btcc');
+  });
+
+  describe('cold-start polling (navigationRef not yet ready)', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('dispatches once navigationRef becomes ready', () => {
+      let readyCount = 0;
+      const ref = {
+        navigate: jest.fn(),
+        dispatch: jest.fn(),
+        isReady: jest.fn(() => { readyCount++; return readyCount >= 3; }),
+      };
+
+      navigateToNewToBtcc(ref);
+      expect(ref.dispatch).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(300);
+      expect(ref.dispatch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not navigate after the 10 second timeout if ref never becomes ready', () => {
+      const ref = makeRef(false);
+      navigateToNewToBtcc(ref);
+
+      jest.advanceTimersByTime(11000);
+      expect(ref.dispatch).not.toHaveBeenCalled();
     });
   });
 });

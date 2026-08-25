@@ -8,6 +8,11 @@ export const Analytics = {
 
   articleClicked: (title, position, source, trafficSource = 'organic', publishDate) => logEvent(fa(),'select_content', {content_type: 'article', item_id: title?.substring(0, 100) || '', position, ...(source ? {source} : {}), traffic_source: trafficSource, ...(publishDate ? {publish_date: publishDate} : {})}),
   articleShared: (title) => logEvent(fa(),'share', {content_type: 'article', item_id: title?.substring(0, 100) || ''}),
+  // Generic share event for any new share call site - keeps every future
+  // "share" firing under the same GA4 standard event name/shape articleShared
+  // already established, instead of each screen improvising its own (which is
+  // how driver/track sharing drifted - see 2026-08-25 growth report).
+  contentShared: (contentType, itemId) => logEvent(fa(),'share', {content_type: contentType, item_id: (itemId ?? '').toString().substring(0, 100)}),
   articleScrollDepth: (title, depth) => logEvent(fa(),'article_scroll_depth', {item_name: title?.substring(0, 100), depth_percent: depth}),
   articleExternalLinkClicked: (title, url) => logEvent(fa(),'article_external_link_clicked', {item_name: title?.substring(0, 100), url: url?.substring(0, 100)}),
   // error_code is coarse by necessity: fetchArticleBySlug's own internal try/catch

@@ -24,6 +24,8 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {checkAndStampLastOpen} from '../utils/inactivityBanner';
+import NudgeBanner from '../components/NudgeBanner';
 const logoImg = require('../assets/logo_long.png');
 
 // orderDate (parseArticle/mapHubPosts) is the feed-ordering key - falls back
@@ -44,6 +46,7 @@ export default function NewsScreen({navigation}) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showInactivityBanner, setShowInactivityBanner] = useState(false);
   const flatListRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
   const [searchResults, setSearchResults] = useState([]);
@@ -128,6 +131,9 @@ export default function NewsScreen({navigation}) {
 
 
   useEffect(() => { Analytics.screen('news'); }, []);
+  // News is the app's default/home tab, so its mount is a reasonable proxy
+  // for "app opened" without threading a launch event through App.tsx.
+  useEffect(() => { checkAndStampLastOpen().then(setShowInactivityBanner); }, []);
   useFocusEffect(useCallback(() => { getReadIds().then(setDigestReadIds); }, []));
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -304,6 +310,14 @@ export default function NewsScreen({navigation}) {
           </TouchableOpacity>
         </View>
       )}
+
+      <NudgeBanner
+        visible={showInactivityBanner}
+        message="Welcome back! Catch up on results and standings."
+        actionLabel="Season"
+        onAction={() => { setShowInactivityBanner(false); navigation.navigate('Results'); }}
+        onDismiss={() => setShowInactivityBanner(false)}
+      />
 
       {(!searchActive || searchQuery.length >= 2) && (
       <FlatList

@@ -400,4 +400,19 @@ describe('SettingsScreen', () => {
       Alert.alert.mockRestore();
     });
   });
+
+  describe('version display', () => {
+    it('renders the real semver version', async () => {
+      const {getByText} = await renderSettings();
+      expect(getByText(/^Version /)).toBeTruthy();
+    });
+
+    it('renders the Season/Round/Lap nickname mapped from the semver', async () => {
+      const {getByText} = await renderSettings();
+      // package.json version is "2.20.9" at the time this test was written -
+      // Season 2, Round 20, Lap 9. If the version bumps this assertion should
+      // be updated to match rather than loosened.
+      expect(getByText('Season 2 · Round 20 · Lap 9')).toBeTruthy();
+    });
+  });
 });

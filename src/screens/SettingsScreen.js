@@ -23,6 +23,16 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {useBroadcaster} from '../utils/broadcaster';
 import {Analytics} from '../utils/analytics';
 import {version} from '../../package.json';
+
+// Playful release nickname mapped onto the app's own Season → Round → Lap
+// hierarchy (major.minor.patch) - display only, the real semver above is
+// what App Store Connect/Play Console and Gradle actually use.
+function raceVersionLabel(v) {
+  const parts = String(v).split('.');
+  if (parts.length !== 3 || parts.some(p => !p)) return null;
+  const [season, round, lap] = parts;
+  return `Season ${season} · Round ${round} · Lap ${lap}`;
+}
 import {getFCMToken} from '../utils/notifications';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
@@ -440,6 +450,9 @@ export default function SettingsScreen({navigation}) {
 
         <View style={styles.divider} />
         <Text style={styles.versionText}>Version {version}</Text>
+        {!!raceVersionLabel(version) && (
+          <Text style={styles.versionNickname}>{raceVersionLabel(version)}</Text>
+        )}
         {!!user?.uid && (
           <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy user ID">
             <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `User ID: ${user.uid.slice(0, 16)}…`}</Text>
@@ -631,6 +644,7 @@ const styles = StyleSheet.create({
   pillText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '700'},
   pillTextActive: {color: Colors.navy},
   versionText: {color: Colors.textSecondary, fontSize: 12, marginTop: 12},
+  versionNickname: {color: Colors.textSecondary, fontSize: 11, marginTop: 2, opacity: 0.75},
   deviceIdText: {color: Colors.textSecondary, fontSize: 11, fontFamily: 'monospace', marginTop: 4},
   debugBtn: {paddingVertical: 8, paddingHorizontal: 12, backgroundColor: Colors.surface, borderRadius: 8, marginBottom: 8, alignSelf: 'flex-start'},
   debugBtnText: {color: Colors.yellow, fontSize: 13, fontWeight: '600'},

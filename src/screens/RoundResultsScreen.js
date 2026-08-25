@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Linking,
   AppState,
+  Alert,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -20,6 +21,8 @@ import {formatDriverName} from '../utils/driverName';
 import {fetchResults, fetchPenalties} from '../api/client';
 import {parseResults, parsePenalties} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
+import {maybeShowShareNudge, markShareNudgeShown} from '../utils/shareNudge';
+import {shareApp} from '../utils/appShare';
 import {detectBroadcaster} from '../utils/broadcaster';
 import {ttbPositionMapForRace, isTtbSeasonOpener, getTtbBadge} from '../utils/ttb';
 
@@ -127,6 +130,20 @@ export default function RoundResultsScreen({route, navigation}) {
     Analytics.screen('round_results');
     Analytics.roundResultsViewed(year, round.round);
     maybeRequestReviewAfterResults();
+    // Independently gated from the review prompt above (different keys, a
+    // later day-count) so the two don't compete for the same visit.
+    maybeShowShareNudge().then(should => {
+      if (!should) return;
+      markShareNudgeShown();
+      Alert.alert(
+        'Enjoying BTCC Hub?',
+        'Share it with a fellow fan.',
+        [
+          {text: 'Not now', style: 'cancel'},
+          {text: 'Share', onPress: () => shareApp('share_nudge')},
+        ],
+      );
+    });
   }, []);
 
   const refresh = useCallback(async () => {

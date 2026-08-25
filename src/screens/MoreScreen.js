@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
+import {shareApp} from '../utils/appShare';
 const pagesData = require('../assets/pages.json');
 
 const iconMap = {
@@ -49,6 +50,11 @@ export default function MoreScreen({navigation}) {
 
   const openPage = (page) => {
     navigation.navigate('InfoPage', {page});
+  };
+
+  const onShareApp = () => {
+    Analytics.moreItemClicked('share_app');
+    shareApp('more_menu');
   };
 
   return (
@@ -107,6 +113,7 @@ export default function MoreScreen({navigation}) {
         {/* Roadmap */}
         <Text style={styles.sectionTitle}>COMMUNITY</Text>
         <MoreRow label="Roadmap & Ideas" icon="rocket-launch" onPress={() => { Analytics.moreItemClicked('roadmap'); navigation.navigate('Roadmap'); }} />
+        <MoreRow label="Share BTCC Hub" icon="share" onPress={onShareApp} />
 
         <View style={styles.divider} />
 
