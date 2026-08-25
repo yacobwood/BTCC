@@ -1602,6 +1602,15 @@ select.input { cursor: pointer; }
     <div class="section-label">ACTIVE BANS</div>
   </div>
   <div id="chat-bans-list"><div class="section-note">Loading…</div></div>
+
+  <div style="margin-top:28px;margin-bottom:12px">
+    <div class="section-label">SUPPORTERS</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input id="donor-name-input" type="text" placeholder="Chat display name (matched against the BMC donation notice)" style="flex:1" />
+    <button class="btn-sm" onclick="markSupporter()">MARK AS SUPPORTER</button>
+  </div>
+  <div id="chat-donors-list"><div class="section-note">Loading…</div></div>
 </div>
 
 <script>
@@ -2832,6 +2841,7 @@ function saveAndPublishDigest() { saveDigestEdit(true); }
 
 const TRIGGER_DIGEST_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/triggerDigest';
 const DISMISS_ERROR_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/dismissError';
+const SET_CHAT_DONOR_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/setChatDonor';
 const TRIGGER_DIGEST_SECRET = 'btcchub-digest-trigger-2026';
 
 async function triggerDigestGenerate(type) {
@@ -4167,7 +4177,7 @@ async function dismissAllErrors() {
 let chatReportsRaw = {}; // reportId -> raw RTDB data (used to store in ban for unban restore)
 
 async function loadChat() {
-  await Promise.all([loadChatReports(), loadChatBans()]);
+  await Promise.all([loadChatReports(), loadChatBans(), loadChatDonors()]);
 }
 
 async function loadChatReports() {
@@ -4303,6 +4313,75 @@ async function unbanUser(authorId) {
     await loadChat();
   } catch (e) {
     alert(`Failed to unban: ${e.message}`);
+  }
+}
+
+async function loadChatDonors() {
+  const el = document.getElementById('chat-donors-list');
+  el.innerHTML = '<div class="section-note">Loading…</div>';
+  try {
+    const [donorsR, namesR] = await Promise.all([
+      fetch(`${RTDB_URL}/chat/donors.json`),
+      fetch(`${RTDB_URL}/chat/authorNames.json`),
+    ]);
+    const donors = (await donorsR.json()) || {};
+    const names  = (await namesR.json()) || {};
+    const ids = Object.keys(donors);
+    if (!ids.length) { el.innerHTML = '<div class="section-note">No supporters yet.</div>'; return; }
+    el.innerHTML = ids.map(authorId => {
+      const name = names[authorId] || `Fan #${authorId.slice(-4)}`;
+      return `<div class="card" style="margin-bottom:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <span style="color:var(--yellow);font-weight:700;font-size:13px">☕ ${htmlEsc(name)}</span>
+        <button class="btn-sm" style="color:var(--red)" onclick="removeSupporter('${htmlEsc(authorId)}')">REMOVE</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${htmlEsc(e.message)}</div>`;
+  }
+}
+
+// Admins only see a donor's chat display name in the Buy Me a Coffee
+// notification (that's the whole point of MoreScreen's name gate) - look up
+// which authorId currently holds that name in /chat/authorNames before
+// calling setChatDonor, since the Cloud Function itself is keyed by authorId
+// (safer than by name - see the 2026-08-25 growth report's anonymous-auth
+// correction for why name-keying was rejected).
+async function markSupporter() {
+  const nameInput = document.getElementById('donor-name-input');
+  const name = (nameInput.value || '').trim();
+  if (!name) { alert('Enter the chat display name to search for.'); return; }
+  try {
+    const r = await fetch(`${RTDB_URL}/chat/authorNames.json`);
+    const names = (await r.json()) || {};
+    const match = Object.entries(names).find(([, v]) => (v || '').toLowerCase() === name.toLowerCase());
+    if (!match) { alert(`No chat participant found with the name "${name}".`); return; }
+    const [authorId] = match;
+    if (!confirm(`Mark "${name}" as a supporter?`)) return;
+    const res = await fetch(SET_CHAT_DONOR_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({authorId, isDonor: true}),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    nameInput.value = '';
+    await loadChatDonors();
+  } catch (e) {
+    alert(`Failed: ${e.message}`);
+  }
+}
+
+async function removeSupporter(authorId) {
+  if (!confirm('Remove this supporter badge?')) return;
+  try {
+    const res = await fetch(SET_CHAT_DONOR_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({authorId, isDonor: false}),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await loadChatDonors();
+  } catch (e) {
+    alert(`Failed: ${e.message}`);
   }
 }
 
