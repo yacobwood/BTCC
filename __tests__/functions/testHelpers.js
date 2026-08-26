@@ -87,10 +87,19 @@ function makeMessagingMock() {
   return {send: jest.fn(() => Promise.resolve('projects/x/messages/1'))};
 }
 
+// A fake Admin Auth instance for getAuth().getUserByEmail(...) - defaults to
+// rejecting with the same 'auth/user-not-found' code the real SDK throws for
+// an unknown email, since that's the shape callers actually branch on.
+function makeAuthMock() {
+  const notFound = Object.assign(new Error('no user'), {code: 'auth/user-not-found'});
+  return {getUserByEmail: jest.fn(() => Promise.reject(notFound))};
+}
+
 module.exports = {
   makeReq,
   makeRes,
   makeFirestoreMock,
   makeDatabaseMock,
   makeMessagingMock,
+  makeAuthMock,
 };

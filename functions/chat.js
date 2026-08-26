@@ -2,6 +2,7 @@ const {onValueCreated} = require('firebase-functions/v2/database');
 const {onRequest} = require('firebase-functions/v2/https');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getDatabaseWithUrl} = require('firebase-admin/database');
+const {getAuth} = require('firebase-admin/auth');
 const {resolveMentionedAuthorIds} = require('./chatMentions');
 const {selectMessagesToTrim} = require('./chatTrim');
 const {ADMIN_SECRET} = require('./shared');
@@ -126,6 +127,51 @@ exports.setChatDonor = onRequest(
       res.status(200).json({ok: true});
     } catch (e) {
       console.error('setChatDonor failed:', e);
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
+);
+
+// Admin lookup: given an email, resolve the Firebase Auth account (if any)
+// and fold in everything else the admin panel already tracks by authorId -
+// chat display name, donor badge, active ban - in one call, so an admin
+// working from a support email or a Buy Me a Coffee receipt doesn't have to
+// separately guess a chat display name (the fragile path setChatDonor's own
+// UI otherwise relies on - see markSupporter()'s comment in the admin page).
+exports.lookupUserByEmail = onRequest(
+  {cors: ['https://yacobwood.github.io']},
+  async (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+
+    const email = (req.body?.email || '').trim().toLowerCase();
+    if (!email) { res.status(400).json({ok: false, error: 'email required'}); return; }
+
+    try {
+      const user = await getAuth().getUserByEmail(email);
+      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
+      const [nameSnap, donorSnap, banSnap] = await Promise.all([
+        db.ref(`/chat/authorNames/${user.uid}`).once('value'),
+        db.ref(`/chat/donors/${user.uid}`).once('value'),
+        db.ref(`/chat/bans/${user.uid}`).once('value'),
+      ]);
+      const ban = banSnap.val();
+      const activeBan = (ban && (!ban.expiresAt || ban.expiresAt > Date.now())) ? ban : null;
+      res.status(200).json({
+        ok: true,
+        uid: user.uid,
+        email: user.email || null,
+        emailVerified: user.emailVerified,
+        disabled: user.disabled,
+        creationTime: user.metadata.creationTime,
+        lastSignInTime: user.metadata.lastSignInTime,
+        chatDisplayName: nameSnap.val() || null,
+        isDonor: !!donorSnap.val(),
+        activeBan,
+      });
+    } catch (e) {
+      if (e.code === 'auth/user-not-found') { res.status(404).json({ok: false, error: 'No account found'}); return; }
+      console.error('lookupUserByEmail failed:', e);
       res.status(500).json({ok: false, error: e.message});
     }
   },

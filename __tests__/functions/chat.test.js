@@ -1,4 +1,4 @@
-const {makeReq, makeRes, makeFirestoreMock, makeDatabaseMock, makeMessagingMock} = require('./testHelpers');
+const {makeReq, makeRes, makeFirestoreMock, makeDatabaseMock, makeMessagingMock, makeAuthMock} = require('./testHelpers');
 
 const ADMIN_SECRET = 'test-admin-secret';
 
@@ -10,6 +10,11 @@ jest.mock('firebase-admin/database', () => ({
 const mockMessaging = makeMessagingMock();
 jest.mock('firebase-admin/messaging', () => ({
   getMessaging: jest.fn(() => mockMessaging),
+}), {virtual: true});
+
+const mockAuth = makeAuthMock();
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: jest.fn(() => mockAuth),
 }), {virtual: true});
 
 jest.mock('../../functions/shared', () => ({
@@ -24,7 +29,7 @@ jest.mock('../../functions/chatTrim', () => ({
   selectMessagesToTrim: jest.fn(),
 }));
 
-const {onChatBan, onChatMention, setChatDonor, trimChat} = require('../../functions/chat');
+const {onChatBan, onChatMention, setChatDonor, lookupUserByEmail, trimChat} = require('../../functions/chat');
 const {resolveMentionedAuthorIds} = require('../../functions/chatMentions');
 const {selectMessagesToTrim} = require('../../functions/chatTrim');
 
@@ -164,6 +169,82 @@ describe('setChatDonor', () => {
     const res = makeRes();
     await setChatDonor(req, res);
     expect(mockDatabaseRef.remove).toHaveBeenCalled();
+  });
+});
+
+describe('lookupUserByEmail', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('rejects a non-POST request', async () => {
+    const req = makeReq({method: 'GET'});
+    const res = makeRes();
+    await lookupUserByEmail(req, res);
+    expect(res.status).toHaveBeenCalledWith(405);
+  });
+
+  it('rejects a request without the correct admin secret', async () => {
+    const req = makeReq({headers: {'x-admin-secret': 'wrong'}, body: {email: 'a@b.com'}});
+    const res = makeRes();
+    await lookupUserByEmail(req, res);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('requires an email', async () => {
+    const req = makeReq({headers: {'x-admin-secret': ADMIN_SECRET}, body: {}});
+    const res = makeRes();
+    await lookupUserByEmail(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it('returns 404 when no Firebase Auth account exists for that email', async () => {
+    const req = makeReq({headers: {'x-admin-secret': ADMIN_SECRET}, body: {email: 'nobody@example.com'}});
+    const res = makeRes();
+    await lookupUserByEmail(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('resolves the account plus chat name/donor/ban state by uid when found', async () => {
+    mockAuth.getUserByEmail.mockResolvedValueOnce({
+      uid: 'uid-1',
+      email: 'fan@example.com',
+      emailVerified: true,
+      disabled: false,
+      metadata: {creationTime: '2026-01-01', lastSignInTime: '2026-08-01'},
+    });
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => 'Gordon'}) // authorNames
+      .mockResolvedValueOnce({val: () => true})     // donors
+      .mockResolvedValueOnce({val: () => null});    // bans
+
+    const req = makeReq({headers: {'x-admin-secret': ADMIN_SECRET}, body: {email: 'FAN@example.com'}});
+    const res = makeRes();
+    await lookupUserByEmail(req, res);
+
+    expect(mockAuth.getUserByEmail).toHaveBeenCalledWith('fan@example.com'); // lowercased
+    expect(mockDatabaseDb.ref).toHaveBeenCalledWith('/chat/authorNames/uid-1');
+    expect(mockDatabaseDb.ref).toHaveBeenCalledWith('/chat/donors/uid-1');
+    expect(mockDatabaseDb.ref).toHaveBeenCalledWith('/chat/bans/uid-1');
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      ok: true, uid: 'uid-1', chatDisplayName: 'Gordon', isDonor: true, activeBan: null,
+    }));
+  });
+
+  it('reports an active ban but not an expired one', async () => {
+    mockAuth.getUserByEmail.mockResolvedValueOnce({
+      uid: 'uid-2', email: 'x@y.com', emailVerified: false, disabled: false,
+      metadata: {creationTime: '2026-01-01', lastSignInTime: '2026-08-01'},
+    });
+    const activeBan = {bannedAt: 1, expiresAt: Date.now() + 100000, authorName: 'X'};
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => null})
+      .mockResolvedValueOnce({val: () => false})
+      .mockResolvedValueOnce({val: () => activeBan});
+
+    const req = makeReq({headers: {'x-admin-secret': ADMIN_SECRET}, body: {email: 'x@y.com'}});
+    const res = makeRes();
+    await lookupUserByEmail(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({activeBan}));
   });
 });
 
