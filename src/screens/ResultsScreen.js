@@ -333,24 +333,29 @@ export default function ResultsScreen({navigation, route}) {
 
   useEffect(() => { Analytics.screen('results'); }, []);
 
-  // Auto-open a specific round when navigated here with openRound param
+  // Auto-open a specific round (and optionally a specific session tab) when
+  // navigated here with openRound/openRace params - the getStateFromPath
+  // special-case for shared "results/:round/:race" links in AppNavigator.js
+  // lands here rather than directly on RoundResults, since this is where a
+  // bare round number actually gets resolved into the full round object.
   useFocusEffect(useCallback(() => {
     const openRound = route?.params?.openRound;
     const openYear = route?.params?.openYear;
+    const openRace = route?.params?.openRace;
     if (!openRound) return;
     // If the year doesn't match, switch it  -  the load useEffect will reload results
     if (openYear && openYear !== year) {
-      navigation.setParams({openRound: undefined, openYear: undefined});
+      navigation.setParams({openRound: undefined, openYear: undefined, openRace: undefined});
       setYear(openYear);
       return;
     }
     if (loading || results.length === 0) return;
     const found = results.find(r => r.round === openRound);
     if (found) {
-      navigation.setParams({openRound: undefined, openYear: undefined});
-      navigation.navigate('RoundResults', {round: found, year, initialRace: 0});
+      navigation.setParams({openRound: undefined, openYear: undefined, openRace: undefined});
+      navigation.navigate('RoundResults', {round: found, year, initialRace: openRace ?? 0});
     }
-  }, [route?.params?.openRound, route?.params?.openYear, loading, results, year]));
+  }, [route?.params?.openRound, route?.params?.openYear, route?.params?.openRace, loading, results, year]));
   useEffect(() => {
     if (year >= 2004 && year <= CURRENT_SEASON - 1) {
       load(year);

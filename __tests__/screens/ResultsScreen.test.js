@@ -244,6 +244,66 @@ describe('ResultsScreen', () => {
     shareSpy.mockRestore();
   });
 
+  // ── Auto-opening a round from route params (openRound/openYear/openRace) ───────
+  // The entry point for both TrackDetailScreen's "View results" link and the
+  // getStateFromPath special-case for shared "results/:round[/:race]" URLs in
+  // AppNavigator.js - neither had coverage before this fix, because this
+  // logic lives inside useFocusEffect, which jest.setup.js mocks as a global
+  // no-op (jest.fn()) for every test in the app. Run it for real, scoped to
+  // just this block and restored immediately after each test, so the many
+  // other tests in this file keep the no-op behavior they were written against.
+  describe('auto-opening a round via route params', () => {
+    const {useFocusEffect} = require('@react-navigation/native');
+
+    beforeEach(() => {
+      // ResultsScreen calls useFocusEffect twice per render: a scroll-to-top +
+      // reload effect first, then the openRound one this block is testing.
+      // Running the first for real too calls load() synchronously mid-render
+      // (its setState calls happen before its first await), which React
+      // rejects as a same-render update loop - so only invoke the 2nd call,
+      // in the fixed order the two hooks are declared in the component.
+      let callCount = 0;
+      useFocusEffect.mockImplementation((cb) => {
+        callCount += 1;
+        if (callCount % 2 === 0) cb();
+      });
+    });
+
+    afterEach(() => {
+      useFocusEffect.mockReset(); // back to the global no-op default
+    });
+
+    it('navigates to RoundResults with the resolved round object once results are loaded', async () => {
+      const foundRound = {round: 5, venue: 'Silverstone', races: []};
+      parseResults.mockReturnValue([foundRound]);
+      renderResults({openRound: 5});
+      await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith(
+        'RoundResults',
+        expect.objectContaining({round: foundRound, initialRace: 0}),
+      ));
+    });
+
+    it('passes openRace through as RoundResults\' initialRace param, so a shared tab link opens on the right session', async () => {
+      const foundRound = {round: 5, venue: 'Silverstone', races: []};
+      parseResults.mockReturnValue([foundRound]);
+      renderResults({openRound: 5, openRace: 4});
+      await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith(
+        'RoundResults',
+        expect.objectContaining({round: foundRound, initialRace: 4}),
+      ));
+    });
+
+    it('defaults to initialRace 0 when openRace is absent (existing TrackDetailScreen callers)', async () => {
+      const foundRound = {round: 5, venue: 'Silverstone', races: []};
+      parseResults.mockReturnValue([foundRound]);
+      renderResults({openRound: 5, openRace: undefined});
+      await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith(
+        'RoundResults',
+        expect.objectContaining({round: foundRound, initialRace: 0}),
+      ));
+    });
+  });
+
   // ── Championship toggle ───────────────────────────────────────────────────────
 
   it('shows BTCC Championship pill when there is another championship to switch to', async () => {

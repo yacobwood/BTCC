@@ -42,17 +42,34 @@ describe('RoundResultsScreen', () => {
     await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('round_results'));
   });
 
-  it('shares a web link to this round\'s results and logs contentShared when the share button is pressed', async () => {
+  it('shares a web link to the initial tab\'s results and logs contentShared when the share button is pressed', async () => {
     const {Share} = require('react-native');
     const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
     const {Analytics} = require('../../src/utils/analytics');
-    const {getByLabelText} = renderRound();
+    const {getByLabelText} = renderRound(); // defaults to initialRace: 0 -> Free Practice
     await waitFor(() => getByLabelText('Share round result'));
     fireEvent.press(getByLabelText('Share round result'));
     expect(Analytics.contentShared).toHaveBeenCalledWith('round_result', MOCK_ROUND.round);
     expect(shareSpy).toHaveBeenCalledWith({
-      message: expect.stringContaining(`https://btcchub.vercel.app/results/${MOCK_ROUND.round}?src=round_result`),
+      message: expect.stringContaining(`https://btcchub.vercel.app/results/${MOCK_ROUND.round}/1?src=round_result`),
     });
+    expect(shareSpy.mock.calls[0][0].message).toContain('Free Practice');
+    shareSpy.mockRestore();
+  });
+
+  it('shares a link to the currently active tab, not the tab the screen opened on - fixes the share button ignoring which session tab is open', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {getByText, getByLabelText} = renderRound({initialRace: 0}); // opens on FP
+    await act(async () => {
+      fireEvent.press(getByText('R2')); // then the user swipes/taps to R2
+    });
+    fireEvent.press(getByLabelText('Share round result'));
+    // R2 is races[4] in MOCK_ROUND (FP, Qualifying, Qualifying Race, Race 1, Race 2)
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining(`https://btcchub.vercel.app/results/${MOCK_ROUND.round}/5?src=round_result`),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('Race 2');
     shareSpy.mockRestore();
   });
 

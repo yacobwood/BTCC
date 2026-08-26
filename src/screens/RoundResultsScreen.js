@@ -112,6 +112,9 @@ const POLL_INTERVAL_MS = 60 * 1000;
 export default function RoundResultsScreen({route, navigation}) {
   const {round: initialRound, year, initialRace, origin} = route.params;
   const [round, setRound] = useState(initialRound);
+  // Mirrors SwipeableTabs' own index so a share fired from e.g. the R2 tab can
+  // link back to R2 specifically, not just the round overview.
+  const [activeRace, setActiveRace] = useState(initialRace ?? 0);
   // Full season's rounds, kept alongside `round` so Race 1's TTB allocation
   // (reg 1.11.1.a - Championship Order before this round) can be reconstructed
   // from cumulative points across earlier rounds. Seeded from the bundled
@@ -119,17 +122,24 @@ export default function RoundResultsScreen({route, navigation}) {
   const [allRounds, setAllRounds] = useState(BUNDLED_RESULTS.rounds || []);
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
 
-  const onShareRound = async () => {
-    Analytics.contentShared('round_result', round.round);
-    try {
-      await Share.share({
-        message: `${round.venue} - Round ${round.round} results\n\nhttps://btcchub.vercel.app/results/${round.round}?src=round_result`,
-      });
-    } catch {}
-  };
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
   const races = round.races || [];
+
+  // Shares whichever session tab is actually open (FP/QUAL/Q RACE/R1/R2/R3) -
+  // previously this always linked to the round overview, so a link shared
+  // from e.g. the R2 tab opened the recipient straight to FP instead.
+  const onShareRound = async () => {
+    const race = races[activeRace];
+    const sessionSuffix = race ? `/${activeRace + 1}` : '';
+    const sessionLabel = race ? `: ${race.label}` : '';
+    Analytics.contentShared('round_result', round.round);
+    try {
+      await Share.share({
+        message: `${round.venue} - Round ${round.round}${sessionLabel} results\n\nhttps://btcchub.vercel.app/results/${round.round}${sessionSuffix}?src=round_result`,
+      });
+    } catch {}
+  };
 
   // Sync state when navigated to a different round (screen is reused in the stack)
   useEffect(() => {
@@ -291,6 +301,7 @@ export default function RoundResultsScreen({route, navigation}) {
       <SwipeableTabs
         tabs={races.map(r => shortLabel(r.label))}
         initialPage={initialRace ?? 0}
+        onTabChange={setActiveRace}
         lazy={true}
         pages={races.map((race, i) => {
           const gridMap = buildGridMap(races, i);

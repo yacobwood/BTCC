@@ -187,6 +187,33 @@ export const linking = {
         }],
       };
     }
+    // "results/:round" alone (the static config entry below) would land
+    // directly on RoundResults with round as a raw string param - but
+    // RoundResultsScreen needs the full round object (races/venue/date,
+    // not just a number), so opening a shared results link always rendered
+    // a broken, empty screen. Route through ResultsList instead, which
+    // already resolves openRound/openYear into the real object once
+    // results are loaded (see ResultsScreen.js) - an optional second
+    // segment threads through which session tab to land on (1-indexed,
+    // matching how RoundResultsScreen's onShareRound builds the link).
+    const r = path.match(/^results\/(\d+)(?:\/(\d+))?/);
+    if (r) {
+      const [, round, race] = r;
+      return {
+        routes: [{
+          name: 'Results',
+          state: {
+            routes: [
+              {name: 'ResultsList', params: {
+                openRound: parseInt(round, 10),
+                ...(race ? {openRace: parseInt(race, 10) - 1} : {}),
+              }},
+            ],
+            index: 0,
+          },
+        }],
+      };
+    }
     return defaultGetStateFromPath(path, options);
   },
 };

@@ -212,12 +212,30 @@ describe('linking config', () => {
     expect(resultsRoute.state.routes[0].name).toBe('ResultsList');
   });
 
-  it('still resolves "results/5" to RoundResults with the round param (regression check)', () => {
-    const state = getStateFromPath('results/5', linking.config);
+  // Corrected 2026-08-26: this test used to call the generic library
+  // getStateFromPath against the static `config` object alone, which never
+  // exercises the custom getStateFromPath override below - the function
+  // NavigationContainer actually calls at runtime (linking={linking}). That
+  // gap is exactly why it asserted a broken production behavior as if it
+  // were correct: RoundResultsScreen needs the full round object (races,
+  // venue, date...), not a raw string, so landing directly on RoundResults
+  // with {round: '5'} rendered an empty, broken screen for anyone who
+  // actually opened a shared results link. Calling linking.getStateFromPath
+  // itself (as below) is what the old test should have done from the start.
+  it('resolves "results/5" through ResultsList\'s openRound param, not a raw string on RoundResults', () => {
+    const state = linking.getStateFromPath('results/5', linking.config);
     const resultsRoute = state.routes.find(r => r.name === 'Results');
     const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
-    expect(leaf.name).toBe('RoundResults');
-    expect(leaf.params).toEqual({round: '5'});
+    expect(leaf.name).toBe('ResultsList');
+    expect(leaf.params).toEqual({openRound: 5});
+  });
+
+  it('resolves "results/5/2" to ResultsList with a 0-indexed openRace param, so a shared tab link opens on the right session', () => {
+    const state = linking.getStateFromPath('results/5/2', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('ResultsList');
+    expect(leaf.params).toEqual({openRound: 5, openRace: 1});
   });
 });
 
