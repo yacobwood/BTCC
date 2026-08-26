@@ -176,6 +176,7 @@ export default function ResultsScreen({navigation, route}) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [dataFreshnessMs, setDataFreshnessMs] = useState(null);
+  const [activeTab, setActiveTab] = useState(0); // tracks SwipeableTabs' index so share respects the visible tab/filter
 
   const progressionCache = useRef({});
   const driversListRef = useRef(null);
@@ -695,14 +696,23 @@ export default function ResultsScreen({navigation, route}) {
     }
   };
 
+  // Mirrors whichever standings list + sub-filter is actually on screen (see
+  // driverStandings/teamStandings above) - previously this always shared the
+  // raw main BTCC drivers' top-3, ignoring both the active tab (Drivers vs
+  // Teams) and the active filter pill within it (Independents' Trophy, Jack
+  // Sears Trophy, Independents' Teams, Manufacturers).
   const onShareStandings = async () => {
-    const top3 = (standings?.drivers || []).slice(0, 3);
+    const isTeams = activeTab === 1;
+    const top3 = (isTeams ? teamStandings : driverStandings).slice(0, 3);
     if (!top3.length) return;
+    const heading = isTeams
+      ? {teams: 'Teams Championship', independentsTeams: "Independents' Teams", manufacturers: 'Manufacturers'}[teamsChampionship]
+      : {btcc: 'BTCC Championship', independents: "Independents' Trophy", jst: 'Jack Sears Trophy'}[championship];
     const lines = top3.map((d, i) => `${i + 1}. ${d.name} - ${d.points}pts`).join('\n');
     Analytics.contentShared('standings', standings.season);
     try {
       await Share.share({
-        message: `BTCC Championship - after Round ${standings.round}\n\n${lines}\n\nhttps://btcchub.vercel.app/results?src=standings`,
+        message: `${heading} - after Round ${standings.round}\n\n${lines}\n\nhttps://btcchub.vercel.app/results?src=standings`,
       });
     } catch {}
   };
@@ -720,7 +730,7 @@ export default function ResultsScreen({navigation, route}) {
               </Text>
             </View>
           )}
-          {!!standings?.drivers?.length && (
+          {!!(activeTab === 1 ? teamStandings : driverStandings).length && (
             <TouchableOpacity
               onPress={onShareStandings}
               accessibilityLabel="Share standings"
@@ -776,6 +786,7 @@ export default function ResultsScreen({navigation, route}) {
       <SwipeableTabs
         tabs={tabs}
         onTabChange={(i) => {
+          setActiveTab(i);
           setShowScrollTop(false);
           Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
         }}

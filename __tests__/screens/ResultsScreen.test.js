@@ -200,6 +200,50 @@ describe('ResultsScreen', () => {
     shareSpy.mockRestore();
   });
 
+  it("shares the Independents' Trophy top-3 (not the main table) when that pill is active", async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, wins: 7}],
+      teams: [], jst: [],
+      independents: [{position: 1, name: 'Mikey Doble', team: 'LKQ Euro Car Parts', points: 264, wins: 5}],
+      season: '2026', round: 21, venue: 'Donington Park GP',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText("Show Independents' Trophy"));
+    fireEvent.press(getByLabelText("Show Independents' Trophy"));
+    fireEvent.press(getByLabelText('Share standings'));
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining("Independents' Trophy - after Round 21"),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('1. Mikey Doble - 264pts');
+    expect(shareSpy.mock.calls[0][0].message).not.toContain('Ashley Sutton');
+    shareSpy.mockRestore();
+  });
+
+  it('shares the active Teams-tab filter (Manufacturers), not the main drivers table', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, wins: 7}],
+      teams: [{position: 1, name: 'NAPA Racing UK', points: 658}], jst: [], independentsTeams: [],
+      manufacturers: [{position: 1, name: 'Alliance Racing / Ford', points: 658}],
+      season: '2026', round: 7, venue: 'Snetterton',
+    });
+    const {getByText, getByLabelText} = renderResults();
+    await waitFor(() => getByText('TEAMS'));
+    fireEvent.press(getByText('TEAMS'));
+    await waitFor(() => getByLabelText('Show Manufacturers'));
+    fireEvent.press(getByLabelText('Show Manufacturers'));
+    fireEvent.press(getByLabelText('Share standings'));
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining('Manufacturers - after Round 7'),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('1. Alliance Racing / Ford - 658pts');
+    expect(shareSpy.mock.calls[0][0].message).not.toContain('Ashley Sutton');
+    shareSpy.mockRestore();
+  });
+
   // ── Championship toggle ───────────────────────────────────────────────────────
 
   it('shows BTCC Championship pill when there is another championship to switch to', async () => {
