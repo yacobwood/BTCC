@@ -316,14 +316,6 @@ export default function NewsScreen({navigation}) {
         </View>
       )}
 
-      <NudgeBanner
-        visible={showInactivityBanner}
-        message="Welcome back! Catch up on results and standings."
-        actionLabel="Season"
-        onAction={() => { Analytics.navItemClicked('inactivity_banner_action'); setShowInactivityBanner(false); navigation.navigate('Results'); }}
-        onDismiss={() => { Analytics.navItemClicked('inactivity_banner_dismiss'); setShowInactivityBanner(false); }}
-      />
-
       {(!searchActive || searchQuery.length >= 2) && (
       <FlatList
         ref={flatListRef}
@@ -356,6 +348,19 @@ export default function NewsScreen({navigation}) {
         scrollEventThrottle={100}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />
+        }
+        // Rendered as a scrollable list item (like DigestBanner further down)
+        // rather than a fixed sibling above the FlatList - a fixed sibling
+        // permanently ate space above the hero card for as long as it was
+        // visible, on every scroll position, not just the first frame.
+        ListHeaderComponent={
+          <NudgeBanner
+            visible={showInactivityBanner}
+            message="Welcome back! Catch up on results and standings."
+            actionLabel="Season"
+            onAction={() => { Analytics.navItemClicked('inactivity_banner_action'); setShowInactivityBanner(false); navigation.navigate('Results'); }}
+            onDismiss={() => { Analytics.navItemClicked('inactivity_banner_dismiss'); setShowInactivityBanner(false); }}
+          />
         }
         ListEmptyComponent={
           searchLoading ? (
