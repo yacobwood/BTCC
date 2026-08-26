@@ -273,6 +273,33 @@ describe('MoreScreen', () => {
       expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('taken');
     });
 
+    it('rejects an empty name instead of silently falling back to a generated "Fan #" name', async () => {
+      hasChatDisplayName.mockResolvedValue(false);
+      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+      const {getByLabelText, getByText} = renderMore();
+      await waitFor(() => getByLabelText('Buy me a coffee'));
+      fireEvent.press(getByLabelText('Buy me a coffee'));
+      await waitFor(() => getByText('One quick thing'));
+      // Leave the input blank - don't fireEvent.changeText at all
+      fireEvent.press(getByLabelText('Save name and continue'));
+      await waitFor(() => expect(getByText('Enter a display name, or tap Skip')).toBeTruthy());
+      expect(saveChatDisplayName).not.toHaveBeenCalled();
+      expect(openURL).not.toHaveBeenCalled();
+      expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('empty');
+    });
+
+    it('rejects a whitespace-only name the same way', async () => {
+      hasChatDisplayName.mockResolvedValue(false);
+      const {getByLabelText, getByText} = renderMore();
+      await waitFor(() => getByLabelText('Buy me a coffee'));
+      fireEvent.press(getByLabelText('Buy me a coffee'));
+      await waitFor(() => getByText('One quick thing'));
+      fireEvent.changeText(getByLabelText('Chat display name'), '   ');
+      fireEvent.press(getByLabelText('Save name and continue'));
+      await waitFor(() => expect(getByText('Enter a display name, or tap Skip')).toBeTruthy());
+      expect(saveChatDisplayName).not.toHaveBeenCalled();
+    });
+
     it('Skip opens the coffee link directly without saving a name', async () => {
       hasChatDisplayName.mockResolvedValue(false);
       const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);

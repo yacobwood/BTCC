@@ -88,6 +88,18 @@ export default function MoreScreen({navigation}) {
   };
 
   const onSaveDonorName = async () => {
+    // saveChatDisplayName() silently falls back to "Fan #1234" for an empty
+    // name - correct for ChatScreen's own casual name flow (it even has its
+    // own explicit saveName('') path), but wrong here: the donor gate's
+    // entire purpose is giving the admin something to match against a BMC
+    // donation, and a generated placeholder defeats that while also
+    // permanently satisfying hasChatDisplayName() so this person is never
+    // asked again. Reject before ever calling the shared function.
+    if (!donorNameInput.trim()) {
+      setDonorNameError('Enter a display name, or tap Skip');
+      Analytics.donorGateNameSaveResult('empty');
+      return;
+    }
     setSavingDonorName(true);
     const authorId = auth().currentUser?.uid || 'anonymous';
     const result = await saveChatDisplayName({authorId, user: auth().currentUser, name: donorNameInput});
