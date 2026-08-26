@@ -1592,6 +1592,15 @@ select.input { cursor: pointer; }
 
 <!-- ══════════════════════════════ CHAT ══════ -->
 <div id="panel-chat" class="tab-panel">
+  <div style="margin-bottom:12px">
+    <div class="section-label">FIND USER BY EMAIL</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input id="email-lookup-input" type="email" placeholder="user@example.com" style="flex:1" />
+    <button class="btn-sm" onclick="lookupUserByEmail()">SEARCH</button>
+  </div>
+  <div id="email-lookup-result" style="margin-bottom:28px"></div>
+
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="section-label">FLAGGED REPORTS</div>
     <button class="btn-sm" onclick="loadChat()">↻ REFRESH</button>
@@ -2842,6 +2851,7 @@ function saveAndPublishDigest() { saveDigestEdit(true); }
 const TRIGGER_DIGEST_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/triggerDigest';
 const DISMISS_ERROR_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/dismissError';
 const SET_CHAT_DONOR_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/setChatDonor';
+const LOOKUP_USER_URL       = 'https://us-central1-btcchub-af77a.cloudfunctions.net/lookupUserByEmail';
 const TRIGGER_DIGEST_SECRET = 'btcchub-digest-trigger-2026';
 
 async function triggerDigestGenerate(type) {
@@ -4383,6 +4393,87 @@ async function removeSupporter(authorId) {
   } catch (e) {
     alert(`Failed: ${e.message}`);
   }
+}
+
+// Reverse lookup for the case markSupporter() can't handle: an admin only has
+// an email address (a support message, a Buy Me a Coffee receipt) and needs
+// to find the account it belongs to, rather than already knowing the exact
+// chat display name. Resolves email -> Firebase Auth uid via the Admin SDK
+// (lookupUserByEmail), then folds in chat name/donor/ban state by that same
+// uid in one response, so the result card can offer direct actions.
+async function lookupUserByEmail() {
+  const input = document.getElementById('email-lookup-input');
+  const email = (input.value || '').trim();
+  const resultEl = document.getElementById('email-lookup-result');
+  if (!email) { alert('Enter an email address to search for.'); return; }
+  resultEl.innerHTML = '<div class="section-note">Searching…</div>';
+  try {
+    const res = await fetch(LOOKUP_USER_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({email}),
+    });
+    if (res.status === 404) {
+      resultEl.innerHTML = '<div class="section-note">No account found with that email.</div>';
+      return;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    renderUserLookupResult(await res.json());
+  } catch (e) {
+    resultEl.innerHTML = `<div class="section-note" style="color:var(--red)">Failed: ${htmlEsc(e.message)}</div>`;
+  }
+}
+
+function renderUserLookupResult(u) {
+  const resultEl = document.getElementById('email-lookup-result');
+  const created = u.creationTime ? new Date(u.creationTime).toLocaleDateString('en-GB') : '—';
+  const lastSignIn = u.lastSignInTime ? new Date(u.lastSignInTime).toLocaleDateString('en-GB') : '—';
+  const banNote = u.activeBan
+    ? `<div class="section-note" style="margin-top:10px;color:var(--red)">Currently banned${u.activeBan.expiresAt ? ' until ' + new Date(u.activeBan.expiresAt).toLocaleString('en-GB') : ' (permanent)'}</div>`
+    : '';
+  resultEl.innerHTML = `<div class="card" style="padding:16px">
+    <div style="display:grid;grid-template-columns:140px 1fr;gap:8px 12px;font-size:13px;margin-bottom:14px">
+      <span style="color:var(--text-sec)">UID</span><span style="font-family:monospace">${htmlEsc(u.uid)}</span>
+      <span style="color:var(--text-sec)">Email verified</span><span>${u.emailVerified ? 'Yes' : 'No'}</span>
+      <span style="color:var(--text-sec)">Account status</span><span style="${u.disabled ? 'color:var(--red)' : ''}">${u.disabled ? 'Disabled' : 'Active'}</span>
+      <span style="color:var(--text-sec)">Created</span><span>${created}</span>
+      <span style="color:var(--text-sec)">Last sign-in</span><span>${lastSignIn}</span>
+      <span style="color:var(--text-sec)">Chat display name</span><span>${u.chatDisplayName ? htmlEsc(u.chatDisplayName) : '—'}</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${u.isDonor
+        ? `<button class="btn-sm" style="color:var(--red)" onclick="removeSupporterFromLookup('${htmlEsc(u.uid)}')">REMOVE SUPPORTER BADGE</button>`
+        : `<button class="btn-sm" onclick="markSupporterById('${htmlEsc(u.uid)}')">MARK AS SUPPORTER</button>`}
+      ${u.activeBan ? `<button class="btn-sm" style="color:var(--red)" onclick="unbanFromLookup('${htmlEsc(u.uid)}')">UNBAN</button>` : ''}
+    </div>
+    ${banNote}
+  </div>`;
+}
+
+async function markSupporterById(authorId) {
+  if (!confirm('Mark this user as a supporter?')) return;
+  try {
+    const res = await fetch(SET_CHAT_DONOR_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({authorId, isDonor: true}),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await loadChatDonors();
+    await lookupUserByEmail();
+  } catch (e) {
+    alert(`Failed: ${e.message}`);
+  }
+}
+
+async function removeSupporterFromLookup(authorId) {
+  await removeSupporter(authorId);
+  await lookupUserByEmail();
+}
+
+async function unbanFromLookup(authorId) {
+  await unbanUser(authorId);
+  await lookupUserByEmail();
 }
 
 async function refreshErrorBadge() {
