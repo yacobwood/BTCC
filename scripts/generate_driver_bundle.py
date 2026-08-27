@@ -35,7 +35,7 @@ Requires cwebp (https://formulae.brew.sh/formula/webp).
 
 Usage:
     python3 scripts/generate_driver_bundle.py                    # regenerate every file in data/driverImages/
-    python3 scripts/generate_driver_bundle.py data/driverImages/55.webp   # just one file
+    python3 scripts/generate_driver_bundle.py data/driverImages/halstead.webp   # just one file
 
 Run this after adding or replacing ANY file in data/driverImages/ - nothing
 else does it automatically. src/assets/driver_images/ is what

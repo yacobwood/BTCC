@@ -1216,7 +1216,7 @@ select.input { cursor: pointer; }
 
   <div class="banner banner-green" id="digest-banner">
     <div class="banner-dot"></div>
-    <span id="digest-banner-text">Editor's Weekly Roundup</span>
+    <span id="digest-banner-text">Editor's Flying Lap</span>
   </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -3019,7 +3019,7 @@ async function dispatchArticleNotif(article) {
   try {
     const inputs = {
       channel: isDigest ? 'digest' : 'news',
-      title: article.title || (isDigest ? 'BTCC Monday Roundup' : 'New BTCC Hub Article'),
+      title: article.title || (isDigest ? 'The Flying Lap' : 'New BTCC Hub Article'),
       body: article.description || '',
       data: JSON.stringify(isDigest
         ? {type: 'digest', id: article.id, channel: 'news'}
@@ -3836,9 +3836,12 @@ async function loadWebsiteAnalytics() {
       .map(doc => fsFields(doc.fields || {}))
       .sort((a, b) => (a.weekStart || '').localeCompare(b.weekStart || ''));
 
-    // Merge the one-time backfill with each week's own dailyBreakdown -
-    // the weekly docs take priority on overlapping dates since they're the
-    // ongoing live source, the backfill only fills in everything earlier.
+    // Merge analytics_daily_history (backfill + syncAnalytics' daily upsert,
+    // trailing 30 days) with each week's own dailyBreakdown - the weekly
+    // docs take priority on overlapping dates since exportAnalyticsHistory
+    // is the permanent archive; analytics_daily_history is what keeps the
+    // chart's live tail fresh day to day and covers everything further back
+    // than 30 days via the one-time backfill.
     const dailyMap = {};
     dailyDocs.map(doc => fsFields(doc.fields || {})).forEach(day => { if (day.date) dailyMap[day.date] = day; });
     weeks.forEach(w => (w.dailyBreakdown || []).forEach(day => { if (day.date) dailyMap[day.date] = day; }));

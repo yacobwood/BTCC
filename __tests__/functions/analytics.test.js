@@ -49,7 +49,7 @@ describe('syncAnalytics', () => {
     mockFetchWithTimeout
       .mockResolvedValueOnce(ga4Response([metricRow([5, 50], ['1d'])])) // overview
       .mockResolvedValueOnce(ga4Response([metricRow([3, 10], ['google', 'organic'])])) // sources
-      .mockResolvedValueOnce(ga4Response([metricRow([2, 20], ['20260818'])])); // daily
+      .mockResolvedValueOnce(ga4Response([metricRow([2, 20, 7], ['20260818'])])); // daily
 
     await syncAnalytics.run();
 
@@ -60,6 +60,24 @@ describe('syncAnalytics', () => {
       topSources: [{source: 'google', medium: 'organic', newUsers: 3, sessions: 10}],
       dailyNewUsers: [{date: '20260818', newUsers: 2, activeUsers: 20}],
     }));
+  });
+
+  it('also upserts the daily breakdown into analytics_daily_history, reformatted to YYYY-MM-DD', async () => {
+    mockFetchWithTimeout
+      .mockResolvedValueOnce(ga4Response([])) // overview
+      .mockResolvedValueOnce(ga4Response([])) // sources
+      .mockResolvedValueOnce(ga4Response([ // daily
+        metricRow([2, 20, 7], ['20260818']),
+        metricRow([1, 15, 5], ['20260819']),
+      ]));
+
+    await syncAnalytics.run();
+
+    expect(mockFirestoreDb.collection).toHaveBeenCalledWith('analytics_daily_history');
+    expect(mockBatch.set).toHaveBeenCalledTimes(2);
+    expect(mockBatch.set).toHaveBeenCalledWith(mockDocRef, {date: '2026-08-18', newUsers: 2, activeUsers: 20, sessions: 7});
+    expect(mockBatch.set).toHaveBeenCalledWith(mockDocRef, {date: '2026-08-19', newUsers: 1, activeUsers: 15, sessions: 5});
+    expect(mockBatch.commit).toHaveBeenCalledTimes(1);
   });
 
   it('logs an alerting error rather than throwing if the GA4 call fails', async () => {

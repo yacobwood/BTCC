@@ -1,9 +1,9 @@
-import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parsePenalties, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl} from '../src/api/parsers';
+import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parsePenalties, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl} from '../../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
 // coincidence against real track data.
-jest.mock('../data/tracks.json', () => ({
+jest.mock('../../data/tracks.json', () => ({
   'Test Track': {
     location: 'Testville, England',
     country: 'England',

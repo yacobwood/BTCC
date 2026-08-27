@@ -50,7 +50,7 @@ BTCC Hub is a React Native mobile application for fans of the British Touring Ca
 
 The app is published on both the Apple App Store and Google Play Store.
 
-Current version: **2.20.8** (versionCode 86)
+Current version: **2.20.9** (versionCode 87)
 
 ---
 
@@ -272,7 +272,7 @@ Combines two feeds: official btcc.net articles (from the GitHub-mirrored `data/a
 WebView article reader for btcc.net articles. Adds Firestore comments (with commenter name input and optimistic posting), like/dislike reactions, a view counter, share button and external link option. Tracks scroll depth for Firebase Analytics. Accepts either a full article object or just a `slug` parameter (resolved via `data/articles/index.json` to find which page file actually holds it, if needed). If the slug isn't found (e.g. a just-published article the mirror hasn't picked up yet in its 5-minute refresh cycle) or the lookup fails, shows a "Couldn't load this article" retry state instead of spinning forever - but only after the very first automatic (mount-triggered) load has already gotten one immediate, cache-bypassing silent re-attempt, since a notification can fire before the slower article-mirror commit lands and the on-device cache can still be serving that pre-commit snapshot of the index for up to 5 minutes (same race the manual Retry button already accounted for below; root-caused live via device trace 2026-08-13 - an earlier version of this auto-retry re-read the same stale cache instead of bypassing it, so it reliably missed twice). Manual Retry-button presses don't get a second silent layer stacked on top. The initial load reads the index's normal 5-minute cache, but both the silent auto-retry and the manual Retry pass `forceRefresh=true` all the way through `fetchArticleBySlug` so neither can just replay the same cached miss. Signed-in users can edit and delete their own comments - edit uses Firestore REST PATCH with `updateMask.fieldPaths` to update only `text` and `editedAt` without touching reactions. Edited comments show an "edited" label. Delete uses Firestore REST DELETE and removes the item from local state optimistically. View count lives in `article_views/{slug}` (mirrors the `article_reactions` increment pattern: a Firestore `:commit` transform with `fieldTransforms: [{fieldPath: 'views', increment: 1}]`). Every WebView load records a view and re-fetches the total, shown next to the reaction buttons - no dedup, so the same person re-opening the article counts each time by design. A "Source: <link>" line renders at the bottom of the article body (`buildHtml()`, exported for direct unit testing) - hub posts show their own explicit `sourceUrl` verbatim (e.g. a credited Reddit thread), regular btcc.net-scraped articles fall back to a clean "btcc.net" label linking to `article.link`. Tapping it opens the system browser, not the in-app WebView (`onShouldStartLoad` only allows same-window navigation to the bare btcc.net root).
 
 **DigestsScreen** ([src/screens/DigestsScreen.js](src/screens/DigestsScreen.js))
-Lists AI-generated weekly digest articles from hub_news.json filtered to the Weekly Digest category.
+Lists AI-generated weekly digest articles from hub_news.json filtered to the Weekly Digest category. Branded "The Flying Lap" in the UI (header, banner, Settings toggle, push notification title) covering both the post-race weekly edition and the pre-race buildup edition - renamed 2026-08-26 from "BTCC Monday Roundup" since the admin can trigger a new edition on demand and the old name tied it to a fixed day/cadence that no longer held.
 
 ### Calendar Stack
 
@@ -608,7 +608,7 @@ All notification subscriptions are topic-based (not individual tokens), managed 
 | Topic | Trigger |
 |---|---|
 | `news_alerts` | New btcc.net article or hub post |
-| `digest_alerts` | New weekly/race weekend digest |
+| `digest_alerts` | New weekly/race weekend digest ("The Flying Lap") |
 | `podcast_alerts` | New podcast episode |
 | `weekend_preview` | Friday 9am before a race weekend |
 | `standings_update` | Tuesday 9am after a race weekend |

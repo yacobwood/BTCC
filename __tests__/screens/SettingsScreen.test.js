@@ -86,9 +86,9 @@ describe('SettingsScreen', () => {
       expect(getByText('Standings update')).toBeTruthy();
     });
 
-    it('renders the Monday Roundup toggle', async () => {
+    it('renders the Flying Lap toggle', async () => {
       const {getByLabelText} = await renderSettings();
-      expect(getByLabelText('Monday Roundup')).toBeTruthy();
+      expect(getByLabelText('The Flying Lap')).toBeTruthy();
     });
 
     it('renders Pre-race alerts group', async () => {
@@ -186,9 +186,9 @@ describe('SettingsScreen', () => {
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_news_alerts', 'false');
     });
 
-    it('toggling Monday Roundup off persists to AsyncStorage', async () => {
+    it('toggling The Flying Lap off persists to AsyncStorage', async () => {
       const {UNSAFE_getAllByType} = await renderSettings();
-      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Monday Roundup', false); });
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'The Flying Lap', false); });
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_digest_alerts', 'false');
     });
 

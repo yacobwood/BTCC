@@ -45,9 +45,9 @@ describe('DigestsScreen', () => {
     markUnread.mockResolvedValue(undefined);
   });
 
-  it('renders the BTCC MONDAY ROUNDUP header', async () => {
+  it('renders the Flying Lap header', async () => {
     const {getByText} = await renderDigests();
-    expect(getByText('BTCC MONDAY ROUNDUP')).toBeTruthy();
+    expect(getByText('THE FLYING LAP')).toBeTruthy();
   });
 
   it('shows a loading indicator while fetching', async () => {

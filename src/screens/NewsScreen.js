@@ -487,7 +487,7 @@ function DigestBanner({count, unread, onPress}) {
       style={[styles.digestBanner, hasUnread ? styles.digestBannerUnread : styles.digestBannerRead]}
       activeOpacity={0.8}
       onPress={onPress}
-      accessibilityLabel="View BTCC Monday Roundup"
+      accessibilityLabel="View The Flying Lap"
       accessibilityRole="button">
       <Icon
         name="library-books"
@@ -497,7 +497,7 @@ function DigestBanner({count, unread, onPress}) {
       />
       <View style={{flex: 1}}>
         <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: hasUnread ? '#000' : Colors.textSecondary}}>
-          BTCC MONDAY ROUNDUP
+          THE FLYING LAP
         </Text>
         <Text style={{fontSize: 12, marginTop: 2, color: hasUnread ? 'rgba(0,0,0,0.6)' : Colors.textSecondary}}>
           {subtitle}

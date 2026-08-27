@@ -151,7 +151,7 @@ export function navigateFromData(navigationRef, data) {
         })
         .catch(() => navigationRef.navigate('News'));
 
-    // ── Monday Roundup (digest) ────────────────────────────────────
+    // ── The Flying Lap (digest) ────────────────────────────────────
     } else if (type === 'digest' && id) {
       fetchHubPost(id)
         .then(article => {

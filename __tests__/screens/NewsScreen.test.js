@@ -205,21 +205,21 @@ describe('NewsScreen', () => {
 
     it('shows digest banner when digests are present', async () => {
       const {getByLabelText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST});
-      await waitFor(() => getByLabelText('View BTCC Monday Roundup'));
-      expect(getByLabelText('View BTCC Monday Roundup')).toBeTruthy();
+      await waitFor(() => getByLabelText('View The Flying Lap'));
+      expect(getByLabelText('View The Flying Lap')).toBeTruthy();
     });
 
     it('no digest banner when no digests in feed', async () => {
       const {getByText, queryByLabelText} = renderNews({articles: MOCK_ARTICLES});
       await waitFor(() => getByText('Ingram wins Race 1 at Donington'));
-      expect(queryByLabelText('View BTCC Monday Roundup')).toBeNull();
+      expect(queryByLabelText('View The Flying Lap')).toBeNull();
     });
 
     it('tapping digest banner navigates to Digests', async () => {
       const {getByLabelText} = renderNews({articles: MOCK_ARTICLES_WITH_DIGEST});
-      await waitFor(() => getByLabelText('View BTCC Monday Roundup'));
+      await waitFor(() => getByLabelText('View The Flying Lap'));
       await act(async () => {
-        fireEvent.press(getByLabelText('View BTCC Monday Roundup'));
+        fireEvent.press(getByLabelText('View The Flying Lap'));
       });
       expect(nav.navigate).toHaveBeenCalledWith('Digests');
     });

@@ -158,8 +158,8 @@ export default function SettingsScreen({navigation}) {
           onToggle={toggle('newsAlerts')}
         />
         <SettingRow
-          label="Monday Roundup"
-          description="Get notified when a new weekly roundup is ready to read"
+          label="The Flying Lap"
+          description="Get notified when a new edition of The Flying Lap is ready to read"
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
