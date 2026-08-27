@@ -326,23 +326,23 @@
     },
     {
       "pos": 3,
-      "team": "CPRL",
-      "points": 353
-    },
-    {
-      "pos": 4,
       "team": "WSR",
       "points": 334
     },
     {
-      "pos": 5,
+      "pos": 4,
       "team": "Laser Tools Racing with MB Motorsport",
       "points": 295
     },
     {
-      "pos": 6,
+      "pos": 5,
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
       "points": 289
+    },
+    {
+      "pos": 6,
+      "team": "Cataclean Plato Racing",
+      "points": 282
     },
     {
       "pos": 7,
@@ -358,6 +358,11 @@
       "pos": 9,
       "team": "Steel Seal with Power Maxed Racing",
       "points": 142
+    },
+    {
+      "pos": 10,
+      "team": "CPRL",
+      "points": 71
     }
   ],
   "manufacturers": [

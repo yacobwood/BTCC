@@ -678,6 +678,20 @@ describe('attachTeamDisplayFields', () => {
     expect(shaped.carImageUrl).toBe('https://example.com/wsr-car.png');
   });
 
+  // Root-caused live 2026-08-28: unlike cardBgUrl (a generic team-branded
+  // background, true of any driver on the team), team.carImageUrl is one
+  // specific active teammate's own numbered/liveried car - James Dorlin's
+  // profile (departed from Restart Racing, no carImageUrl of his own) showed
+  // Chris Smiley's own car, "22 Smiley" printed on the bodywork, mislabelled
+  // as Dorlin's. Fine as a placeholder for a driver awaiting their own
+  // cutout (currentlyRacing left at its true default); wrong for a driver
+  // who has left and will never get one.
+  test('does not fall back to the team carImageUrl for a departed driver (currentlyRacing: false)', () => {
+    const raw = {name: 'A Driver', team: 'WSR', carImageUrl: '', currentlyRacing: false};
+    const shaped = attachTeamDisplayFields(raw, rawTeams);
+    expect(shaped.carImageUrl).toBe('');
+  });
+
   test('is what closes the deep-link dual-shape bug: raw driver + raw teams produces the same display fields parseGrid() would', () => {
     const json = {
       drivers: [{number: 1, name: 'A Driver', team: 'WSR', car: 'Car', class: 'I'}],

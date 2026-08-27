@@ -13,6 +13,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 # Allow importing scrape_tsl without running main()
 sys.argv = ['scrape_tsl.py', '2026']
@@ -517,24 +518,32 @@ class TestApplyDrawOverride(unittest.TestCase):
 # the Teams tab with a phantom last-place duplicate.
 
 class TestNormalizeTeamEntries(unittest.TestCase):
+    # TEAM_NAME_ALIASES ships empty as of 2026-08-28 (see its own comment -
+    # the one alias it used to hold, Cataclean Plato Racing -> CPRL, is now a
+    # deliberate permanent split the app mirrors rather than merges). The
+    # merge mechanism itself is still real, reusable machinery for a genuinely
+    # transient future duplicate, so these tests configure a throwaway alias
+    # via mock.patch.dict rather than asserting on that one specific pair.
 
     def test_merges_aliased_name_into_canonical_name(self):
         entries = [
-            {'pos': 4, 'team': 'Cataclean Plato Racing', 'points': 282},
-            {'pos': 10, 'team': 'CPRL', 'points': 0},
+            {'pos': 4, 'team': 'Old Team Name', 'points': 282},
+            {'pos': 10, 'team': 'New Team Name', 'points': 0},
         ]
-        result = s._normalize_team_entries(entries)
-        self.assertEqual([e['team'] for e in result].count('CPRL'), 1)
-        self.assertEqual([e for e in result if e['team'] == 'CPRL'][0]['points'], 282)
+        with mock.patch.dict(s.TEAM_NAME_ALIASES, {'Old Team Name': 'New Team Name'}, clear=True):
+            result = s._normalize_team_entries(entries)
+        self.assertEqual([e['team'] for e in result].count('New Team Name'), 1)
+        self.assertEqual([e for e in result if e['team'] == 'New Team Name'][0]['points'], 282)
 
     def test_reranks_contiguously_by_points_after_merge(self):
         entries = [
             {'pos': 1, 'team': 'Team VERTU', 'points': 333},
-            {'pos': 4, 'team': 'Cataclean Plato Racing', 'points': 282},
+            {'pos': 4, 'team': 'Old Team Name', 'points': 282},
             {'pos': 5, 'team': 'Restart Racing', 'points': 187},
-            {'pos': 10, 'team': 'CPRL', 'points': 0},
+            {'pos': 10, 'team': 'New Team Name', 'points': 0},
         ]
-        result = s._normalize_team_entries(entries)
+        with mock.patch.dict(s.TEAM_NAME_ALIASES, {'Old Team Name': 'New Team Name'}, clear=True):
+            result = s._normalize_team_entries(entries)
         self.assertEqual([e['pos'] for e in result], [1, 2, 3])
         self.assertEqual([e['points'] for e in result], sorted([e['points'] for e in result], reverse=True))
 
@@ -550,12 +559,19 @@ class TestNormalizeTeamEntries(unittest.TestCase):
         # Guards against a future alias mapping many old names onto one
         # canonical name all appearing in the same table at once.
         entries = [
-            {'pos': 3, 'team': 'Cataclean Plato Racing', 'points': 200},
-            {'pos': 7, 'team': 'CPRL', 'points': 50},
+            {'pos': 3, 'team': 'Old Team Name', 'points': 200},
+            {'pos': 7, 'team': 'New Team Name', 'points': 50},
         ]
-        result = s._normalize_team_entries(entries)
+        with mock.patch.dict(s.TEAM_NAME_ALIASES, {'Old Team Name': 'New Team Name'}, clear=True):
+            result = s._normalize_team_entries(entries)
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], {'pos': 1, 'team': 'CPRL', 'points': 250})
+        self.assertEqual(result[0], {'pos': 1, 'team': 'New Team Name', 'points': 250})
+
+    def test_ships_with_no_aliases_configured(self):
+        # Cataclean Plato Racing / CPRL is a deliberate permanent split, not
+        # an alias to merge - guards against it (or any other pair) silently
+        # creeping back into the default config.
+        self.assertEqual(s.TEAM_NAME_ALIASES, {})
 
 
 if __name__ == '__main__':

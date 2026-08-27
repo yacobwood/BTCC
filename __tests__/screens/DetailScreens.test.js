@@ -345,6 +345,27 @@ describe('DriverDetailScreen', () => {
     await waitFor(() => expect(getByText('80')).toBeTruthy());
   });
 
+  // Root-caused live 2026-08-28: a driver with no bundled header photo yet
+  // falls through to a network CachedImage on their imageUrl - if that URL
+  // is dead (James Dorlin/Max Buxton's stale btcc.net hotlink, now
+  // permanently blocked by Vercel bot mitigation) CachedImage's own default
+  // fallback is a "broken image" icon glyph, which reads as a real bug on
+  // the profile's biggest, most prominent element. A driver photo slot
+  // deserves to just quietly disappear instead, same as a driver with no
+  // photo at all - see driverImages.js's own test for the bundled-photo half
+  // of this fix.
+  it('header photo has a graceful fallback so a dead imageUrl never shows a broken-image icon', async () => {
+    const route = makeRoute({driver: {...DRIVER, imageUrl: 'https://btcc.net/wp-content/uploads/driver.jpg'}});
+    const {getAllByTestId} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      const headerPhoto = getAllByTestId('cached-image').find(img => img.props.source.uri?.includes('driver.jpg'));
+      expect(headerPhoto).toBeTruthy();
+      expect(headerPhoto.props.fallback).toBeTruthy();
+    });
+  });
+
   // Full-width banner below the name row (see DriversScreen's history for
   // why the car renders per-driver rather than a shared team image at all).
   // Requests the -thumb-crop variant, not the plain -thumb TeamDetailScreen

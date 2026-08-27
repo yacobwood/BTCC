@@ -819,12 +819,19 @@ def _parse_driver_rows(elems):
 # alongside it with 0 points - not a parsing bug, this is what the source PDF
 # itself contains while officials transition a mid-season name change (seen
 # 2026-08-22, Donington Park GP round 7: "Cataclean Plato Racing" pos 4/282pts
-# and "CPRL" pos 10/0pts both present in the same table). Without this, the
-# same team shows up twice on the Teams tab. See scrape_team_stats.py's
-# TEAM_SLUGS comment for the same rename on the drivers.json side.
-TEAM_NAME_ALIASES = {
-    "Cataclean Plato Racing": "CPRL",
-}
+# and "CPRL" pos 10/0pts both present in the same table). This dict originally
+# aliased "Cataclean Plato Racing" -> "CPRL" so the app showed one continuous
+# row - reversed 2026-08-28 by explicit request: btcc.net's own site and the
+# TSL PDF still show this exact same split weeks later (282/pos 6 + 71/pos 10
+# as of that date, confirmed live), so it was never a transient rename-week
+# artifact to normalize away - the app now deliberately mirrors the official
+# split instead. See __tests__/data/liveDataConsistency.test.js's
+# TEAM_NAMES_WITH_NO_CURRENT_DRIVER for the corresponding app-side allowance.
+# Left in place (empty, not deleted) since the underlying merge mechanism
+# below still legitimately handles a genuinely transient duplicate - the same
+# name appearing twice in one table from a scrape glitch, as opposed to a
+# permanent split like this one - should that happen for some other team.
+TEAM_NAME_ALIASES = {}
 
 
 def _normalize_team_entries(entries):
