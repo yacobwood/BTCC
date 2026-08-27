@@ -144,11 +144,25 @@ describe('standings.json — structural integrity', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
+  // A team's registered name can change mid-season (see
+  // [[reference_cprl_full_name]]/[[project_cprl_team_rename_dedup_fix]]).
+  // btcc.net's own teams[] table permanently splits the pre-rename and
+  // post-rename points into two rows under two different names, even though
+  // every individual driver's own `team` field already uses only the
+  // current name - by design as of 2026-08-28 (see scrape_tsl.py's
+  // TEAM_NAME_ALIASES comment), the app now mirrors that official split
+  // rather than merging it away. A team name here with no matching driver
+  // is therefore expected for these specific known historical entries only -
+  // anything else still fails, so a genuine future mismatch isn't hidden.
+  const TEAM_NAMES_WITH_NO_CURRENT_DRIVER = new Set(['Cataclean Plato Racing']);
+
   it('teams[] entries match the unique teams found in driver standings', () => {
     const teamsInStandings  = new Set(STANDINGS.standings.map(s => s.team));
     const teamsInTeamsArray = new Set(STANDINGS.teams.map(t => t.team));
     const inDriversNotTeams = [...teamsInStandings].filter(t => !teamsInTeamsArray.has(t));
-    const inTeamsNotDrivers = [...teamsInTeamsArray].filter(t => !teamsInStandings.has(t));
+    const inTeamsNotDrivers = [...teamsInTeamsArray]
+      .filter(t => !teamsInStandings.has(t))
+      .filter(t => !TEAM_NAMES_WITH_NO_CURRENT_DRIVER.has(t));
     expect(inDriversNotTeams).toEqual([]);
     expect(inTeamsNotDrivers).toEqual([]);
   });

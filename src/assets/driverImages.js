@@ -36,11 +36,17 @@ const driverImages = {
   132: require('./driver_images/132.webp'),
 };
 
-// No 19/132 here (Max Buxton/James Dorlin) - both departed drivers with no
-// data/driverImages/ source to generate a large variant from (see the
-// generator script). getDriverImageLarge() returning null for them is
-// correct: DriverDetailScreen's existing imageUrl fallback covers it, same
-// as any driver with no bundled photo at all.
+// 19/132 (Max Buxton/James Dorlin) reuse the same source photo as their
+// small driverImages entry above rather than a scripts/generate_driver_bundle.py
+// output - both are departed drivers with no data/driverImages/ source left
+// to regenerate a proper large variant from. Root-caused live 2026-08-28:
+// leaving them out on the assumption DriverDetailScreen's imageUrl fallback
+// covered it was wrong - that fallback is a dead btcc.net wp-content hotlink
+// now permanently blocked by Vercel's bot mitigation (429/challenge on every
+// request, not a transient blip), so it rendered CachedImage's broken-image
+// icon instead. imageUrl has been cleared to null for both in drivers.json
+// accordingly (see DriverDetailScreen.js's own CachedImage fallback prop for
+// the general-case defence if this gap reopens for some other driver).
 const driverImagesLarge = {
   2: require('./driver_images_large/deleon.webp'),
   3: require('./driver_images_large/chilton.webp'),
@@ -65,6 +71,8 @@ const driverImagesLarge = {
   99: require('./driver_images_large/rainford.webp'),
   116: require('./driver_images_large/sutton.webp'),
   123: require('./driver_images_large/lloyd.webp'),
+  19: require('./driver_images_large/19.webp'),
+  132: require('./driver_images_large/132.webp'),
 };
 
 export function getDriverImage(number) {
@@ -73,4 +81,11 @@ export function getDriverImage(number) {
 
 export function getDriverImageLarge(number) {
   return driverImagesLarge[number] || null;
+}
+
+// Driver numbers with a bundled small photo - exported only so tests can
+// sweep "does every one of these also have a large variant" generically,
+// without a second hardcoded number list of its own to drift out of sync.
+export function getBundledSmallNumbers() {
+  return Object.keys(driverImages).map(Number);
 }

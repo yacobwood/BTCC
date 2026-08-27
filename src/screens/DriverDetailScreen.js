@@ -171,7 +171,14 @@ export default function DriverDetailScreen({route, navigation}) {
           {bundledImg ? (
             <Image source={bundledImg} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fadeDuration={150} />
           ) : driver.imageUrl ? (
-            <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} />
+            // fallback: a driver with no bundled photo yet (see the archived
+            // scrape_driver_images.py's own doc comment - imageUrl only ever
+            // covers the gap before one lands) still deserves the plain
+            // number/background/livery shown either side of this slot, not
+            // CachedImage's default broken-image icon, if this URL is dead -
+            // root-caused live 2026-08-28 via James Dorlin/Max Buxton's stale
+            // btcc.net hotlink, now permanently 429'd by Vercel bot mitigation.
+            <CachedImage uri={driver.imageUrl} targetWidth={300} style={styles.headerPhoto} resizeMode="contain" accessibilityLabel={`Photo of ${driver.name}`} fallback={<View style={styles.headerPhoto} />} />
           ) : null}
         </View>
         <View style={styles.headerFooter}>

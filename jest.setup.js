@@ -254,7 +254,10 @@ jest.mock('./App', () => ({
 jest.mock('./src/components/CachedImage', () => {
   const React = require('react');
   const {Image} = require('react-native');
-  const CachedImage = ({uri, style}) => React.createElement(Image, {source: {uri}, style, testID: 'cached-image'});
+  // Forward every other prop (fallback, resizeMode, accessibilityLabel, ...)
+  // so a test can assert on them - source/style/testID always win regardless
+  // of what's in rest, matching this stub's original narrower behaviour.
+  const CachedImage = ({uri, style, ...rest}) => React.createElement(Image, {...rest, source: {uri}, style, testID: 'cached-image'});
   return {
     __esModule: true,
     default: CachedImage,

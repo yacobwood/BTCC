@@ -225,14 +225,27 @@ export function parseDriverHistory(history) {
 // driver with no car cutout of their own yet - DriversScreen/MerchScreen's
 // team tiles dropped the car entirely (just the shared logo now), since a
 // single "representative" car can no longer describe a multi-livery team.
+//
+// That team.carImageUrl fallback is gated to currently-racing drivers only -
+// root-caused live 2026-08-28: unlike cardBgUrl (a generic team-branded
+// background, true of any driver on that team), team.carImageUrl is one
+// specific active teammate's own numbered/liveried car (Restart Racing's is
+// literally Chris Smiley's cutout, "22 Smiley" printed on the bodywork).
+// Fine as a placeholder for a driver awaiting their own cutout, since that's
+// temporary and their own will land eventually - wrong for a departed driver
+// (currentlyRacing: false) with no carImageUrl, since they'll never get one
+// and showing a teammate's own named car mislabelled as theirs is actively
+// misleading, not just an approximation. Found via James Dorlin's/Max
+// Buxton's profile pages showing Smiley's/Bensley's cars respectively.
 export function attachTeamDisplayFields(driver, rawTeams) {
   const team = (rawTeams || []).find(t => t.name === driver.team);
   const {class: rawClass, ...rest} = driver; // `class` is raw-shape only; output uses `cls`
+  const carFallbackEligible = driver.currentlyRacing !== false;
   return {
     ...rest,
     cls: driver.cls || rawClass || '',
     cardBgUrl: driver.cardBgUrl || team?.cardBgUrl || '',
-    carImageUrl: driver.carImageUrl || team?.carImageUrl || '',
+    carImageUrl: driver.carImageUrl || (carFallbackEligible && team?.carImageUrl) || '',
     lightCardBg: team?.lightCardBg || false,
   };
 }
