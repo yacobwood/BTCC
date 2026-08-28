@@ -1,0 +1,137 @@
+{
+  "season": 2013,
+  "albums": [
+    {
+      "slug": "pre-season",
+      "title": "Pre-season",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/1569d347-d35c-4ec7-948c-1dd333dd4f96/989fe499-0f4d-488d-90af-4f43441d279f/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 10,
+      "totalCount": 10,
+      "complete": true
+    },
+    {
+      "slug": "silverstone",
+      "title": "Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/0a69fe19-feee-40d9-b409-521a3a8e7d9e/e4bfc858-b758-4962-924a-9a852ca36d8c/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 16,
+      "totalCount": 16,
+      "complete": true
+    },
+    {
+      "slug": "rockingham",
+      "title": "Rockingham",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/61e79d45-e4c1-4c70-8afb-bdeb2d315ec2/72665aa4-fb8b-46d6-a682-ef15a83561cb/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Rockingham",
+      "isCanonical": true,
+      "capturedCount": 26,
+      "totalCount": 26,
+      "complete": true
+    },
+    {
+      "slug": "snetterton",
+      "title": "Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/f1307efa-1f32-4d3c-a12d-39ccb8ab2a80/37d5bca8-89a6-4f4e-9898-0d235276980e/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 39,
+      "totalCount": 39,
+      "complete": true
+    },
+    {
+      "slug": "croft",
+      "title": "Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/47afb11a-1349-44a4-b3a1-00b0d49cb9e6/4b43748d-be67-4e42-be6e-324ca82d6aad/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 41,
+      "totalCount": 41,
+      "complete": true
+    },
+    {
+      "slug": "oulton-park",
+      "title": "Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/14755fbe-7e4f-41bb-a87f-b6d2df7460db/d4bf2908-ad81-429d-9591-ba0d74a4df01/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 43,
+      "totalCount": 43,
+      "complete": true
+    },
+    {
+      "slug": "2013-season",
+      "title": "2013 season",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/4227aeee-c7f2-444d-af08-601747d21aa6/faceb62c-f2c2-4814-b998-07857763a721/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 25,
+      "totalCount": 25,
+      "complete": true
+    },
+    {
+      "slug": "brands-hatch-gp",
+      "title": "Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/1de1649b-4260-416e-8eed-1139458d30ec/d2caf670-5fe7-40dd-8bae-fd487aea8c47/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 64,
+      "totalCount": 64,
+      "complete": true
+    },
+    {
+      "slug": "knockhill",
+      "title": "Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/adf2ed5c-19dc-4458-9c94-40fe0307d9b8/8e8e4f5c-d52d-4921-a69e-2e7be7a955a6/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 61,
+      "totalCount": 61,
+      "complete": true
+    },
+    {
+      "slug": "thruxton",
+      "title": "Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/3c4a0226-06d0-4bdf-aec5-0da4db5e6d69/db1ee141-024a-4ded-b994-0ed2f2c293fc/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 59,
+      "totalCount": 59,
+      "complete": true
+    },
+    {
+      "slug": "donington-park",
+      "title": "Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/8246a5ec-69d6-4df8-81d6-a33602aa1764/338f26d2-6ad6-4699-b627-049042f1c476/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Donington",
+      "isCanonical": true,
+      "capturedCount": 54,
+      "totalCount": 54,
+      "complete": true
+    },
+    {
+      "slug": "brands-hatch-indy",
+      "title": "Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/febd636d-1a8d-4231-894e-72715d30accc/2d818a8c-44d4-4994-8345-c7e11cb0e078/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 63,
+      "totalCount": 63,
+      "complete": true
+    }
+  ]
+}
