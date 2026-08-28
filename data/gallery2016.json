@@ -1,0 +1,170 @@
+{
+  "season": 2016,
+  "albums": [
+    {
+      "slug": "toca-night-of-champions-2016",
+      "title": "TOCA Night of Champions 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/19d10685-d2a7-4a04-bcbe-f2abbc73f996/6ce12241-a93b-456a-8192-1b30eed9dab0/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 7,
+      "totalCount": 7,
+      "complete": true
+    },
+    {
+      "slug": "jack-goff-at-wsr",
+      "title": "Jack Goff at WSR",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/ea611521-851e-48ba-883c-c8f39971a192/021d2f4c-abf3-494e-ac7a-df6e3ae23a33/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 9,
+      "totalCount": 9,
+      "complete": true
+    },
+    {
+      "slug": "autosport-international-2016",
+      "title": "Autosport International 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/3a093e10-54cf-4749-8e2b-2d4f36a56f52/09037516-028f-45f7-8022-738bc4782432/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 43,
+      "totalCount": 43,
+      "complete": true
+    },
+    {
+      "slug": "team-jct600-with-gardx-bmw",
+      "title": "Team JCT600 with GardX BMW",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/ce611456-cd62-4fca-b674-26fbe009e860/08c00fe2-a1ca-44fd-889e-045c8304ca4f/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 24,
+      "totalCount": 24,
+      "complete": true
+    },
+    {
+      "slug": "2016-season-launch",
+      "title": "2016 Season Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/d31d20b8-8d2b-4508-88fc-1c6f96313a41/7495b9c2-ec8e-46fe-8add-d0fd6677e813/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 55,
+      "totalCount": 55,
+      "complete": true
+    },
+    {
+      "slug": "croft-circuit-1",
+      "title": "Croft Circuit",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/3daa4f7a-96e0-4d19-815f-df364bc63be0/1c3cf171-a961-4807-a361-e7ccacccf5c9/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 120,
+      "totalCount": 120,
+      "complete": true
+    },
+    {
+      "slug": "knockhill-2016-1",
+      "title": "Knockhill 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/7fff6386-d1be-47f0-bcab-eb1af22cd272/5b7c562c-f42e-4a2d-a11b-bc1eb723b0ed/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 120,
+      "totalCount": 120,
+      "complete": true
+    },
+    {
+      "slug": "silverstone-2016-1",
+      "title": "Silverstone 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/9cd7ae9f-7707-4846-8b10-4b58eab8d5ae/e46a13db-707c-4730-ada3-b31185482785/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 107,
+      "totalCount": 107,
+      "complete": true
+    },
+    {
+      "slug": "thruxton-2016",
+      "title": "Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/55a66e1c-5c5a-45a5-a42b-a786157d8f51/3d9d1bdc-ef03-420c-8823-594e5d97ce4c/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 152,
+      "totalCount": 152,
+      "complete": true
+    },
+    {
+      "slug": "snetterton-2016-1",
+      "title": "Snetterton 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/e1d18fa7-0bf6-4de4-832d-0e90b349a267/1e24cf76-f726-46ae-a366-ca080b3f41b0/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 157,
+      "totalCount": 157,
+      "complete": true
+    },
+    {
+      "slug": "rockingham-2016-1",
+      "title": "Rockingham 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/e1050a46-ff6c-4da1-8f8d-b43b8fc84708/b0b6e81d-2021-446b-a386-0b3f511733af/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Rockingham",
+      "isCanonical": true,
+      "capturedCount": 163,
+      "totalCount": 163,
+      "complete": true
+    },
+    {
+      "slug": "brands-hatch-gp-2016-1",
+      "title": "Brands Hatch GP 2016",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/eb02b522-fdc6-484c-acb2-88c1fbe68c3b/82b6f72a-c142-4c1c-81fd-cc30ac71638e/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 150,
+      "totalCount": 150,
+      "complete": true
+    },
+    {
+      "slug": "donington-1",
+      "title": "Donington",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/79fb13a4-f0cd-4445-9396-227d47b6054d/27200841-5f94-4716-9f3d-5abe9899e8cb/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 169,
+      "totalCount": 169,
+      "complete": true
+    },
+    {
+      "slug": "oulton-1",
+      "title": "Oulton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/01af7a8f-98e6-440b-95f9-c1f0e71752b5/a01f3a56-2743-4784-9773-8fd59bc043f2/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 169,
+      "totalCount": 169,
+      "complete": true
+    },
+    {
+      "slug": "brands-hatch-indy-2019",
+      "title": "Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2016/5f2cf6b8-9923-4351-879d-aa1a9daad27e/0b2da0cf-5267-4107-bac2-bad0ed4d03c8/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 224,
+      "totalCount": 224,
+      "complete": true
+    }
+  ]
+}
