@@ -1,0 +1,16 @@
+{
+  "season": 2011,
+  "albums": [
+    {
+      "slug": "2011-season",
+      "title": "2011 Season",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2011/8ece4af6-1d87-46e4-8cf0-4b42f0f30d27/8336f4f4-63b7-4035-8202-e6812efcfb2e/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 21,
+      "totalCount": 21,
+      "complete": true
+    }
+  ]
+}
