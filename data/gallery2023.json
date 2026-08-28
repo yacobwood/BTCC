@@ -1,0 +1,159 @@
+{
+  "season": 2023,
+  "albums": [
+    {
+      "slug": "season-launch-2023-day-1",
+      "title": "Season Launch 2023 Day 1",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/8dfd3aae-5424-4c8e-9b26-884dae509cf9/bd107c4a-5267-478d-9376-204ac30905cb/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 49,
+      "totalCount": 49,
+      "complete": true
+    },
+    {
+      "slug": "2023-silverstone",
+      "title": "2023 - Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/4b554be4-ce4a-430f-b61c-8cabe97ed64e/8a8f798f-7796-4751-8675-dbedaf2913d7/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 143,
+      "totalCount": 143,
+      "complete": true
+    },
+    {
+      "slug": "2023-goodyear-tyre-test",
+      "title": "2023 - Goodyear Tyre Test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/f48deb8a-4707-49c2-be6c-b1e7768f2038/e451749c-96bb-4854-9ed1-3e19825ea609/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 147,
+      "totalCount": 147,
+      "complete": true
+    },
+    {
+      "slug": "2023-croft",
+      "title": "2023 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/cb4b056d-84c5-427a-8633-9e2a0289ad77/0e3ab311-0dd6-4da2-ad30-1951bb0de7ac/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 200,
+      "totalCount": 200,
+      "complete": true
+    },
+    {
+      "slug": "2023-knockhill",
+      "title": "2023 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/51ea33cb-497b-4d10-80dc-95f1aec9f68a/a5b5e14e-9588-43a1-88f2-0ddbf386b9d4/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 221,
+      "totalCount": 221,
+      "complete": true
+    },
+    {
+      "slug": "2023-donington-park-national",
+      "title": "2023 - Donington Park National",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/8fca2d3f-5f5c-44b2-a782-36b167937e46/50f1a94e-0128-4073-9444-df7a55fb8840/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 237,
+      "totalCount": 237,
+      "complete": true
+    },
+    {
+      "slug": "2023-donington-gp",
+      "title": "2023 - Donington GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/ca06802d-32c4-4bab-acb4-8366744a83e1/b3ab3e71-dacb-4f97-aaff-7dc1a4942fb9/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Donington Park GP",
+      "isCanonical": true,
+      "capturedCount": 264,
+      "totalCount": 264,
+      "complete": true
+    },
+    {
+      "slug": "2023-snetterton",
+      "title": "2023 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/3d8d50fb-73f3-4a9a-95ea-b8209658d671/e807a9d1-bf3a-4263-a435-ad6892fbe909/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 241,
+      "totalCount": 241,
+      "complete": true
+    },
+    {
+      "slug": "season-launch-2023-day-2",
+      "title": "Season Launch 2023 Day 2",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/4e6d301f-2dec-43b2-b264-50d31cf26f74/d9963038-888e-459d-917c-adbc80bbbc15/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 241,
+      "totalCount": 241,
+      "complete": true
+    },
+    {
+      "slug": "2023-brands-hatch-gp",
+      "title": "2023 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/3806dfe2-03e1-48bd-9140-4d47ba1cc07a/1b1d1681-adc6-42bc-a046-a3f05fff12a3/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 278,
+      "totalCount": 278,
+      "complete": true
+    },
+    {
+      "slug": "2023-thruxton",
+      "title": "2023 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/b0d9f0ef-ec72-41b8-bd29-e2ebf68e4395/b0fbc01e-8d3e-4155-a34b-dca5678a2275/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 271,
+      "totalCount": 271,
+      "complete": true
+    },
+    {
+      "slug": "2023-oulton-park",
+      "title": "2023 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/2492e0fd-bf89-44dc-9b62-86556443273e/8b7759d8-525d-467d-b515-f37e01020b67/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 346,
+      "totalCount": 346,
+      "complete": true
+    },
+    {
+      "slug": "2023-brands-hatch-indy",
+      "title": "2023 - Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/ba29adab-25d1-45f5-b5a5-b377f1b06bec/6c467c5f-8ac3-413d-bc25-2bb6680a5fb7/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 395,
+      "totalCount": 395,
+      "complete": true
+    },
+    {
+      "slug": "2023-goodwood-fos",
+      "title": "2023 - Goodwood FoS",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2023/00fe941b-8691-4382-8c1f-9f47ee037ef8/8b82587b-3541-4ad5-9496-f8e6c369a77a/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 493,
+      "totalCount": 493,
+      "complete": true
+    }
+  ]
+}
