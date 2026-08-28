@@ -1,0 +1,181 @@
+{
+  "season": 2020,
+  "albums": [
+    {
+      "slug": "2020-contenders",
+      "title": "2020 - Contenders",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/4346be1d-e9a5-47b7-a362-fbdab8525ec5/7d4d80dc-2acc-4917-bf30-ffbb63089cbc/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 32,
+      "totalCount": 32,
+      "complete": true
+    },
+    {
+      "slug": "kwik-fit-thruxton-24-1",
+      "title": "Kwik Fit Thruxton 24",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/e211b788-853b-444d-8254-736daee302a4/c56660c3-c2f1-4f4c-b2e7-687796b3e18e/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 21,
+      "totalCount": 21,
+      "complete": true
+    },
+    {
+      "slug": "2020-snetterton-test",
+      "title": "2020 - Snetterton Test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/654a0e82-4dc2-41df-b226-5ac4b6a6bf6f/95a06f45-1030-4b4d-b996-d10385ce40b5/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 46,
+      "totalCount": 46,
+      "complete": true
+    },
+    {
+      "slug": "2020-toca-hybrid",
+      "title": "2020 - TOCA Hybrid",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/656bbdd6-c0a3-40a4-b591-93a52232b257/ea83b2cf-b30a-4b24-9ac3-5689995f4773/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 16,
+      "totalCount": 16,
+      "complete": true
+    },
+    {
+      "slug": "2020-team-bmw-is-back-in-black",
+      "title": "2020 - Team BMW is back \u2013 in black!",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/9dbec444-b021-4ca2-b1a7-bd13893a1475/06401b52-391e-4280-930a-305ed71b38dd/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 21,
+      "totalCount": 21,
+      "complete": true
+    },
+    {
+      "slug": "2020-autosport-international",
+      "title": "2020 - Autosport International",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/f31332e5-6238-46eb-abc1-d60b282ad342/b6771165-44ce-48b4-822b-5eacca2a376d/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 114,
+      "totalCount": 114,
+      "complete": true
+    },
+    {
+      "slug": "2020-snetterton",
+      "title": "2020 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/8c0b6af3-1f5b-421b-88a5-7296d685c474/a655a7ff-d1f1-4c11-97e9-691f533da758/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 131,
+      "totalCount": 131,
+      "complete": true
+    },
+    {
+      "slug": "2020-croft",
+      "title": "2020 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/83b1eb82-168f-4d80-8bd0-0bdf596e8a13/4caf9d65-ae96-4334-9549-16ca43bed245/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 142,
+      "totalCount": 142,
+      "complete": true
+    },
+    {
+      "slug": "2020-silverstone",
+      "title": "2020 - Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/9af839cb-48e1-4464-a4ae-78b3bd7a44e5/d7bf11d0-7074-4a86-8ed8-1fae4a2db2a1/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 124,
+      "totalCount": 124,
+      "complete": true
+    },
+    {
+      "slug": "2020-oulton-park",
+      "title": "2020 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/3a8a4a3c-7bf0-4ba5-b6e1-ff1fc50ce1a8/c05b9b26-227c-4e95-9615-34ac83af2426/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 125,
+      "totalCount": 125,
+      "complete": true
+    },
+    {
+      "slug": "2020-brands-hatch-gp",
+      "title": "2020 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/64170777-36b3-4c0f-8750-f8c4f1d67614/dbfeff11-bdb5-4eab-acc2-76ab5adcb2bd/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 123,
+      "totalCount": 123,
+      "complete": true
+    },
+    {
+      "slug": "2020-donington-park",
+      "title": "2020 - Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/ab964d02-b5b0-4c04-a7f7-afa686ebdca7/307d4abf-3b8e-4bad-b4ee-083b8c3beea8/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 131,
+      "totalCount": 131,
+      "complete": true
+    },
+    {
+      "slug": "2020-thruxton",
+      "title": "2020 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/0f467c8f-3ffe-49a5-89f3-502c8e4f5e0a/9fed0a00-d0d8-4f15-999e-a5743d31fa39/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 154,
+      "totalCount": 154,
+      "complete": true
+    },
+    {
+      "slug": "2020-knockhill",
+      "title": "2020 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/d520a5ef-59e5-4350-8d66-8eb66236e956/27f83fab-ba61-4208-84d0-b9b1c580fa03/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 149,
+      "totalCount": 149,
+      "complete": true
+    },
+    {
+      "slug": "2020-brands-hatch-indy-season-finale",
+      "title": "2020 - Brands Hatch Indy - Season Finale",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/67c14775-71f6-42f4-a1c8-e93505132a66/eedaabca-838d-43d6-8802-4fd1c4d0e440/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 220,
+      "totalCount": 220,
+      "complete": true
+    },
+    {
+      "slug": "2020-season-launch-official-pre-season-test",
+      "title": "2020 - Season Launch: Official Pre-season Test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2020/8be86ef1-8c08-4283-ab2c-098c6e94d7ec/3f87e17a-fda6-4932-8664-9c4149a8b567/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 556,
+      "totalCount": 556,
+      "complete": true
+    }
+  ]
+}
