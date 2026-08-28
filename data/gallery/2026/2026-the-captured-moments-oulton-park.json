@@ -4,12 +4,12 @@
   "year": 2026,
   "round": 4,
   "venue": "Oulton Park",
-  "lastPageScraped": 1,
-  "totalPages": null,
+  "lastPageScraped": 2,
+  "totalPages": 2,
   "_firstPagePhotoCount": 24,
   "capturedCount": 24,
   "totalCount": 24,
-  "complete": false,
+  "complete": true,
   "photos": [
     {
       "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/131c657d-6abf-469d-8235-189af3c0d8a9/07f60406-2fab-471a-8461-53a5306e712f/variants/thumb-gallery-import-v1.webp",

@@ -4,12 +4,12 @@
   "year": 2026,
   "round": 2,
   "venue": "Brands Hatch Indy",
-  "lastPageScraped": 1,
-  "totalPages": null,
+  "lastPageScraped": 2,
+  "totalPages": 2,
   "_firstPagePhotoCount": 21,
   "capturedCount": 21,
   "totalCount": 21,
-  "complete": false,
+  "complete": true,
   "photos": [
     {
       "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/f2aad18b-dafb-42d3-bb3a-d2d70fe8cea9/b3dc642f-a793-404c-a39f-ec3a4f52c684/variants/thumb-gallery-import-v1.webp",

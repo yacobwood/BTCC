@@ -4,12 +4,12 @@
   "year": 2026,
   "round": 6,
   "venue": "Knockhill",
-  "lastPageScraped": 1,
-  "totalPages": null,
+  "lastPageScraped": 2,
+  "totalPages": 2,
   "_firstPagePhotoCount": 23,
   "capturedCount": 23,
   "totalCount": 23,
-  "complete": false,
+  "complete": true,
   "photos": [
     {
       "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/83d4ec8e-9203-4673-b5f1-b90c2f59cea7/502ed682-bd41-48c4-8857-a2789a8cbd19/variants/thumb-gallery-editor-client-v1.webp",
