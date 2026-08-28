@@ -1,0 +1,170 @@
+{
+  "season": 2018,
+  "albums": [
+    {
+      "slug": "2018-brands-hatch-gp",
+      "title": "2018 \u2013 Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/697337c9-df4d-4fab-8e9b-b5d3eb7d53dc/37693be0-db6e-4f84-9eda-5f53a8b9c969/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 37,
+      "totalCount": 37,
+      "complete": true
+    },
+    {
+      "slug": "2018-goodwood-fos",
+      "title": "2018 \u2013 Goodwood FoS",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/7cf8063b-3229-4077-a282-8a318f4cbfdf/6cfa3109-a8a2-4c56-a366-2f1d5033c067/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 12,
+      "totalCount": 12,
+      "complete": true
+    },
+    {
+      "slug": "2018-autosport-international",
+      "title": "2018 \u2013 Autosport International",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/4f29aa38-ae16-4a69-b475-0962b9931e52/ee01c5a5-e67f-427c-9df0-3b9b1edf8c53/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 39,
+      "totalCount": 39,
+      "complete": true
+    },
+    {
+      "slug": "2018-snetterton-test",
+      "title": "2018 \u2013 Snetterton Test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/0856c0c2-4ba3-45f6-b488-9440a5961c7b/3964d0b9-eb70-45e8-8bd8-537d78eb10a9/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 60,
+      "totalCount": 60,
+      "complete": true
+    },
+    {
+      "slug": "2018-croft",
+      "title": "2018 \u2013 Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/8e161742-2259-4875-9165-662b0ae7b272/a1419b84-a75d-48bc-9e93-2e0d7bc2f661/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 70,
+      "totalCount": 70,
+      "complete": true
+    },
+    {
+      "slug": "2018-testing-spain",
+      "title": "2018 \u2013 Testing, Spain",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/e434cc66-b196-46c5-9df9-f8124c6708a6/f34858fd-d2c7-4720-a66c-c3211708cd20/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 59,
+      "totalCount": 59,
+      "complete": true
+    },
+    {
+      "slug": "2018-knockhill",
+      "title": "2018 \u2013 Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/37b50a05-3057-42ac-a2dd-4e28b82e0464/dbf4c5e3-ae9d-4cec-8c09-34b15f435cc9/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 90,
+      "totalCount": 90,
+      "complete": true
+    },
+    {
+      "slug": "2018-rockingham",
+      "title": "2018 \u2013 Rockingham",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/ee366fa0-1c99-43dd-a470-e4e9410bc426/2cf330f9-9cb6-4c4e-8bb6-6e89898b1e17/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Rockingham",
+      "isCanonical": true,
+      "capturedCount": 78,
+      "totalCount": 78,
+      "complete": true
+    },
+    {
+      "slug": "2018-oulton-park",
+      "title": "2018 \u2013 Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/74e3bfc7-093f-4249-a3ec-a6a11ca77e18/7b10b708-51d2-4217-8730-c4347eb25c94/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 120,
+      "totalCount": 120,
+      "complete": true
+    },
+    {
+      "slug": "2018-brands-hatch-indy",
+      "title": "2018 \u2013 Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/d43f1c70-2cd7-453d-8d2a-5073e491c122/081c6da9-8db6-4793-9ef0-ced91f579f75/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 144,
+      "totalCount": 144,
+      "complete": true
+    },
+    {
+      "slug": "2018-silverstone",
+      "title": "2018 \u2013 Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/1a165067-f378-4883-b510-a0b6d5b10b2d/cb899288-819f-485c-a992-b050b5c4b1c6/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 155,
+      "totalCount": 155,
+      "complete": true
+    },
+    {
+      "slug": "2018-snetterton",
+      "title": "2018 \u2013 Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/25fea74c-8114-4876-9b70-cd6b67ea8e8e/f6768bf8-27c4-4cfb-972c-0ca0f3d28a98/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 161,
+      "totalCount": 161,
+      "complete": true
+    },
+    {
+      "slug": "2018-donington-park",
+      "title": "2018 \u2013 Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/15a93c44-1a7c-4baa-b28f-ba8f40cf2e86/77db1039-f67b-48d0-9585-117b2700d972/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 216,
+      "totalCount": 216,
+      "complete": true
+    },
+    {
+      "slug": "2018-thruxton",
+      "title": "2018 \u2013 Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/34c2b5ee-a2dd-445c-931f-3748e555d581/b60c0e35-a2a9-485e-a71c-f1f044fd2014/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 236,
+      "totalCount": 236,
+      "complete": true
+    },
+    {
+      "slug": "2018-season-launch",
+      "title": "2018 \u2013 Season Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2018/c58eb454-e55a-4e3e-a62b-0b657fee7a22/0a9825d6-a56c-41ab-a360-cce9930ab915/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 280,
+      "totalCount": 280,
+      "complete": true
+    }
+  ]
+}
