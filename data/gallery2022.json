@@ -1,0 +1,203 @@
+{
+  "season": 2022,
+  "albums": [
+    {
+      "slug": "2023-motorsport-uk-night-of-champions",
+      "title": "2023 - Motorsport UK Night of Champions",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/63f9fd98-05be-4633-80f7-8d4e54dce667/c684d219-27fd-430d-8f65-da56b8aacd08/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 7,
+      "totalCount": 7,
+      "complete": true
+    },
+    {
+      "slug": "2022-toca-night-of-champions",
+      "title": "2022 - TOCA Night of Champions",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/30ae5886-61a6-401b-b7de-52635f533762/2a798cc3-fccb-4e87-8a15-60c8475d3e18/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 27,
+      "totalCount": 27,
+      "complete": true
+    },
+    {
+      "slug": "2022-contenders",
+      "title": "2022 - Contenders",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/eab3d26d-59b0-4651-bef4-bae0a6b751aa/aab5bc6d-077a-4fe5-8f3e-e903766524e4/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 27,
+      "totalCount": 27,
+      "complete": true
+    },
+    {
+      "slug": "2022-goodyear-tyre-test",
+      "title": "2022 - Goodyear Tyre Test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/324a1c2f-198d-451b-b6d6-a591da9a7a51/f0fd9e8a-2efb-49a4-a235-5ac0747652ad/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 33,
+      "totalCount": 33,
+      "complete": true
+    },
+    {
+      "slug": "2022-motorsport-uk-awards",
+      "title": "2022 - Motorsport UK awards",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/3f0c8ae2-ba62-4894-a9a0-77e43f66ff5e/1d5f922d-1293-48c7-8fdd-4ebe030549bd/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 8,
+      "totalCount": 8,
+      "complete": true
+    },
+    {
+      "slug": "2022-kwik-fit-24-mile",
+      "title": "2022 - Kwik Fit 24 Mile",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/7b3be524-65ef-4546-b2bb-a67b3d849aea/eef8339e-5b69-40a9-b877-5b8c12466cb5/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 57,
+      "totalCount": 57,
+      "complete": true
+    },
+    {
+      "slug": "2022-brands-hatch-indy",
+      "title": "2022 - Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/e378cc88-01de-4432-90c2-d04ec39714ab/3a6e09aa-c0de-4dd0-95c6-4ebdf5fbeac9/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 125,
+      "totalCount": 125,
+      "complete": true
+    },
+    {
+      "slug": "2022-brands-hatch-gp",
+      "title": "2022 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/ffd3577d-dd1d-4b78-a35b-f6ab0a594d5e/603962a7-102e-403c-a090-3587ff814b03/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 159,
+      "totalCount": 159,
+      "complete": true
+    },
+    {
+      "slug": "2022-thruxton-2-7",
+      "title": "2022 - Thruxton 2",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/44e2b75b-6a12-4753-8d54-a879770e9b99/8de445d0-4e63-4336-9010-f1a479a979fa/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Thruxton 2",
+      "isCanonical": true,
+      "capturedCount": 168,
+      "totalCount": 168,
+      "complete": true
+    },
+    {
+      "slug": "2022-oulton-park",
+      "title": "2022 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/5c0e43f2-2a73-4e27-b801-99f6f6ab6ed6/0e63c6f1-8ca9-44f9-a24f-84cc4f5eea61/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 163,
+      "totalCount": 163,
+      "complete": true
+    },
+    {
+      "slug": "croft-3",
+      "title": "Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2014/6df42c70-40dd-4bc8-b251-958e24823c8e/6bbd4b30-5fc2-4827-a11b-75362de6b8f5/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Croft",
+      "isCanonical": false,
+      "capturedCount": 186,
+      "totalCount": 186,
+      "complete": true
+    },
+    {
+      "slug": "2022-thruxton",
+      "title": "2022 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/f082b4f0-486a-431e-999b-9464f83d35eb/e6e37010-b0ec-446f-8d52-ccd9085c9995/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 197,
+      "totalCount": 197,
+      "complete": true
+    },
+    {
+      "slug": "2022-silverstone",
+      "title": "2022 - Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/1382c5b4-f21f-4bbb-87ce-e6821601f649/3c212f02-d187-459c-b3e9-2db015d6374f/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 227,
+      "totalCount": 227,
+      "complete": true
+    },
+    {
+      "slug": "2022-snetterton",
+      "title": "2022 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/aa43ca3b-815d-414f-bee8-2e56529756f6/db316e83-bd3e-493a-8d94-511c6634f7cb/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 218,
+      "totalCount": 218,
+      "complete": true
+    },
+    {
+      "slug": "2022-knockhill",
+      "title": "2022 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/73103e40-a4cf-439b-a4e7-b14bfd58d108/30ca62b3-7c21-4ac3-90cd-a66df2902216/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 244,
+      "totalCount": 244,
+      "complete": true
+    },
+    {
+      "slug": "2022-croft",
+      "title": "2022 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/076c7993-a7a5-43ee-8f19-c40903595bb8/82a3528f-53f8-45df-b53b-7f650586be06/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 259,
+      "totalCount": 259,
+      "complete": true
+    },
+    {
+      "slug": "2022-season-launch-2",
+      "title": "2022 - Season Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/1f9ba445-2d34-4f13-9bc9-c2f44a2938e8/e1655f1f-a366-4220-bbfb-2afa07e4c0b7/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 286,
+      "totalCount": 286,
+      "complete": true
+    },
+    {
+      "slug": "2022-donington-park",
+      "title": "2022 - Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2022/5e19ac09-6015-4e04-ae6b-31bc95963617/4249c0e9-122c-420f-ac52-45563c27d37d/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 290,
+      "totalCount": 290,
+      "complete": true
+    }
+  ]
+}
