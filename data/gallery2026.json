@@ -1,0 +1,25 @@
+{
+  "season": 2026,
+  "albums": [
+    {
+      "slug": "2026-season-launch",
+      "title": "2026 Season Launch",
+      "cover": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/gallery/2026/2026-season-launch/thumb/launch-01.jpg",
+      "round": null,
+      "venue": null,
+      "capturedCount": 3,
+      "totalCount": 3,
+      "complete": true
+    },
+    {
+      "slug": "donington-park-gallery",
+      "title": "Donington Park",
+      "cover": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/gallery/2026/donington-park-gallery/thumb/start-0h5a1735.jpg",
+      "round": 1,
+      "venue": "Donington Park",
+      "capturedCount": 3,
+      "totalCount": 3,
+      "complete": true
+    }
+  ]
+}
