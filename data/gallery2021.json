@@ -1,0 +1,170 @@
+{
+  "season": 2021,
+  "albums": [
+    {
+      "slug": "2021-toca-night-of-champions",
+      "title": "2021 - TOCA Night of Champions",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/81a4850a-4c56-44eb-987e-0404b5e7b98a/1aaf2f92-f629-423d-b119-3823ce554d06/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 28,
+      "totalCount": 28,
+      "complete": true
+    },
+    {
+      "slug": "2021-goodyear-tyre-test",
+      "title": "2021 - Goodyear Tyre Test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/2e787ada-1e44-41da-af4b-aedb77ca9929/086a5a7f-63e6-4f6b-a212-49b806cce4dd/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 36,
+      "totalCount": 36,
+      "complete": true
+    },
+    {
+      "slug": "2021-hybrid-testing",
+      "title": "2021 - Hybrid testing",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/e34ac1a2-29ed-4243-b3d9-c7d431e67aa1/36d4c518-28db-4144-9ef5-639af73b3c72/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 14,
+      "totalCount": 14,
+      "complete": true
+    },
+    {
+      "slug": "2021-kwik-fit-thruxton-24",
+      "title": "2021 - Kwik Fit Thruxton 24",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/abd11113-0c96-4eb0-be14-b91f4e6be731/f5853034-03ad-44c6-a1c8-daf7d7872bcc/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 85,
+      "totalCount": 85,
+      "complete": true
+    },
+    {
+      "slug": "2021-brands-hatch-indy",
+      "title": "2021 - Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/5d2892e9-04af-4560-8a94-e5665b2c82ac/9554a128-c119-49e9-ba9d-75e92ea74ee1/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 94,
+      "totalCount": 94,
+      "complete": true
+    },
+    {
+      "slug": "2021-season-launch",
+      "title": "2021 - Season Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/5899f6f5-6fc1-49ed-a78b-9bffcd573c3b/c8a6770f-2ff3-4455-be32-e8cb193ddbfe/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 96,
+      "totalCount": 96,
+      "complete": true
+    },
+    {
+      "slug": "2021-knockhill-5",
+      "title": "2021 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/1a2a676d-97c3-4f7a-98bd-225362236683/671ed8b1-1326-450d-bc00-a3d39fce60ea/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 140,
+      "totalCount": 140,
+      "complete": true
+    },
+    {
+      "slug": "2021-snetterton",
+      "title": "2021 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/720d2ac8-2d80-41eb-a445-189b52dbd4be/98f3a2ff-5f56-43cd-bda7-cf97bd9142f4/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 129,
+      "totalCount": 129,
+      "complete": true
+    },
+    {
+      "slug": "2021-silverstone-3",
+      "title": "2021 - Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/6dacb10c-3a4e-4b7d-a95f-3a7e1dc229aa/7e59985a-9b74-4bf3-90d9-301ec542ad0b/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 149,
+      "totalCount": 149,
+      "complete": true
+    },
+    {
+      "slug": "2021-thruxton-2",
+      "title": "2021 - Thruxton 2",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/8699748a-0185-4f42-bc78-323d6108f6f0/03203e2c-93fe-410d-b058-a0cf659ddb7c/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Thruxton 2",
+      "isCanonical": true,
+      "capturedCount": 148,
+      "totalCount": 148,
+      "complete": true
+    },
+    {
+      "slug": "2021-oulton-park",
+      "title": "2021 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/bd93195c-3039-4aba-b381-feb800f21985/161b0f2a-b55c-4938-94bb-7959606fb3d1/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 145,
+      "totalCount": 145,
+      "complete": true
+    },
+    {
+      "slug": "2021-thruxton",
+      "title": "2021 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/daa5c7d5-e1dc-4851-9f4e-d969c89c301e/045f09e2-17de-4dde-a0f3-82b755120cbf/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 150,
+      "totalCount": 150,
+      "complete": true
+    },
+    {
+      "slug": "2021-donington-park-3",
+      "title": "2021 - Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/c9787cdb-bfc4-4ce2-90f5-12f13887f84f/15a707aa-9778-4066-84c2-5026b7cfafe6/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 171,
+      "totalCount": 171,
+      "complete": true
+    },
+    {
+      "slug": "2021-croft-21",
+      "title": "2021 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/075babe9-db59-4859-9a84-1fd3b0c67205/d804aeeb-98db-4298-896e-cd0fa12dcca3/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 178,
+      "totalCount": 178,
+      "complete": true
+    },
+    {
+      "slug": "2021-brands-hatch-gp",
+      "title": "2021 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2021/ea891081-c30e-40b5-8a03-3ecb39cd8638/7fec6fcb-4cb5-4e93-9291-ed80db1f1e0b/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 279,
+      "totalCount": 279,
+      "complete": true
+    }
+  ]
+}
