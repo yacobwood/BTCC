@@ -1,0 +1,192 @@
+{
+  "season": 2019,
+  "albums": [
+    {
+      "slug": "2019-toca-night-of-champions",
+      "title": "2019 - TOCA Night of Champions",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/d518612d-17b7-41c7-9a71-63c1e54ff282/4703389e-a021-4e72-b5a2-0aadae685447/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 20,
+      "totalCount": 20,
+      "complete": true
+    },
+    {
+      "slug": "turkington-champion",
+      "title": "Turkington - Champion",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/30f52225-4e9c-4eb5-b09d-92df68179e28/968ace52-0789-49d4-81b8-59f5868e97be/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 19,
+      "totalCount": 19,
+      "complete": true
+    },
+    {
+      "slug": "2019-snetterton-dunlop-tyre-test",
+      "title": "2019 - Snetterton Dunlop Tyre test",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/73297197-4feb-4bac-94e3-9eee7b08c33b/d335ce00-e023-4a27-a427-18e1a3a13ea1/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 29,
+      "totalCount": 29,
+      "complete": true
+    },
+    {
+      "slug": "toyota-on-track-1",
+      "title": "Toyota On-Track",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/69fa1828-a0e8-4cb0-97f4-381f3beb58e1/37b521fe-2715-48a3-ad6c-c8845580a826/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 30,
+      "totalCount": 30,
+      "complete": true
+    },
+    {
+      "slug": "2019-hever-castle",
+      "title": "2019 \u2013 Hever Castle",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/4083ce36-192f-43a0-a61a-f4e6f4e780c0/66ca01d5-19f1-4ace-85bd-28dd4d381405/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 50,
+      "totalCount": 50,
+      "complete": true
+    },
+    {
+      "slug": "2019-autosport-international",
+      "title": "2019 \u2013&nbsp;Autosport International",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/1a8bdfeb-d157-4552-9fd0-e5d13d8303ce/6f05aad5-b07d-4712-a2c4-584f58f3bdab/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 63,
+      "totalCount": 63,
+      "complete": true
+    },
+    {
+      "slug": "2019-croft",
+      "title": "2019 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/54f9f886-0a7c-4a8c-ab65-784e50eed508/a0f3d8f7-245b-433a-97c0-c3ddba0478e7/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 116,
+      "totalCount": 116,
+      "complete": true
+    },
+    {
+      "slug": "2019-thruxton-2",
+      "title": "2019 - Thruxton 2",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/cf2b904f-bdc3-4308-86f7-534454f17787/6b1f4d9d-f2df-40bf-bedf-894863fc5850/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Thruxton 2",
+      "isCanonical": true,
+      "capturedCount": 132,
+      "totalCount": 132,
+      "complete": true
+    },
+    {
+      "slug": "2019-brands-hatch-indy",
+      "title": "2019 - Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/dbbfd3e7-88d0-4831-a379-cf437106ab7a/c7448e9c-9e64-49d1-9e17-444a38e43972/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 129,
+      "totalCount": 129,
+      "complete": true
+    },
+    {
+      "slug": "2019-snetterton",
+      "title": "2019 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/a1a9ff24-42cf-4b74-8082-9335aa994603/ea5d76b6-ec56-4a46-8bf0-2ae5ab8c0fec/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 145,
+      "totalCount": 145,
+      "complete": true
+    },
+    {
+      "slug": "2019-brands-hatch-gp",
+      "title": "2019 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/3e929221-85e3-422f-b937-e1cee9da034a/3d666263-62b6-45bc-a2f8-edbeb89a9ed4/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 172,
+      "totalCount": 172,
+      "complete": true
+    },
+    {
+      "slug": "2019-oulton-park",
+      "title": "2019 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/ab0cc28c-a6ea-4108-a0cc-0346648d57e7/aa404f9b-984f-4340-8e61-088446b21c24/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 170,
+      "totalCount": 170,
+      "complete": true
+    },
+    {
+      "slug": "2019-knockhill",
+      "title": "2019 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/1f4c6925-fcfb-4d78-b8c7-022e71770a51/21ec741c-540e-4dbb-b4e3-e35c6e393200/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 195,
+      "totalCount": 195,
+      "complete": true
+    },
+    {
+      "slug": "2019-silverstone",
+      "title": "2019 - Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/d10f73a3-1afa-4604-8478-b6f8b44a1eb4/3692a1ce-a474-43c4-97ed-34fee9b92ca3/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 230,
+      "totalCount": 230,
+      "complete": true
+    },
+    {
+      "slug": "2019-thruxton",
+      "title": "2019 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/29a340d8-ea70-4a30-9d7d-54535889b260/89189d1b-69ed-448d-ae08-701064038a5b/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 239,
+      "totalCount": 239,
+      "complete": true
+    },
+    {
+      "slug": "2019-donington-park",
+      "title": "2019 - Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/bca7e068-d017-452a-b5c7-aaeed08ae10e/3e1ed2b2-58e6-4edb-a4ab-3ee1637550a8/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 257,
+      "totalCount": 257,
+      "complete": true
+    },
+    {
+      "slug": "2019-season-launch-test-day",
+      "title": "2019 \u2013 Season Launch Test Day",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2019/81304d34-56a2-4c28-a232-e5a9974d0c6b/2958abc8-95b7-4304-b820-ead12a39b602/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 382,
+      "totalCount": 382,
+      "complete": true
+    }
+  ]
+}
