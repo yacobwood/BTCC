@@ -1,0 +1,16 @@
+{
+  "season": 2010,
+  "albums": [
+    {
+      "slug": "2010-season",
+      "title": "2010 Season",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2010/fc46673f-fad7-4d0b-8bd5-ca5450fb8d40/08f446a3-6f08-4569-be02-63d61dae056d/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 15,
+      "totalCount": 15,
+      "complete": true
+    }
+  ]
+}
