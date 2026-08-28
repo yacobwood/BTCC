@@ -2,24 +2,134 @@
   "season": 2026,
   "albums": [
     {
-      "slug": "2026-season-launch",
-      "title": "2026 Season Launch",
-      "cover": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/gallery/2026/2026-season-launch/thumb/launch-01.jpg",
-      "round": null,
-      "venue": null,
-      "capturedCount": 3,
-      "totalCount": 3,
+      "slug": "2026-the-captured-moments-donington-park-gp",
+      "title": "2026: The Captured Moments - Donington Park GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/94c5fe5e-2388-4d30-85d0-a17e4abef0fa/c06ed4ae-6b5f-4535-8c77-2ec5d2f53ba1/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 7,
+      "venue": "Donington Park GP",
+      "capturedCount": 12,
+      "totalCount": 12,
       "complete": true
     },
     {
-      "slug": "donington-park-gallery",
-      "title": "Donington Park",
-      "cover": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/gallery/2026/donington-park-gallery/thumb/start-0h5a1735.jpg",
+      "slug": "2026-donington-park-gp",
+      "title": "2026 - Donington Park GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/2f078323-d3c6-43af-84f0-32a30da39700/d1ca8fa1-1eee-4033-9cc2-2369f0627c66/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 7,
+      "venue": "Donington Park GP",
+      "capturedCount": 24,
+      "totalCount": 216,
+      "complete": false
+    },
+    {
+      "slug": "the-captured-moments-knockhill-2026",
+      "title": "The Captured Moments: Knockhill 2026",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/83d4ec8e-9203-4673-b5f1-b90c2f59cea7/502ed682-bd41-48c4-8857-a2789a8cbd19/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 6,
+      "venue": "Knockhill",
+      "capturedCount": 23,
+      "totalCount": 23,
+      "complete": false
+    },
+    {
+      "slug": "2026-knockhill",
+      "title": "2026 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/c1a0ab25-399d-4602-beae-39bbcae28958/d548284a-1293-449c-b005-0435e1985497/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 6,
+      "venue": "Knockhill",
+      "capturedCount": 24,
+      "totalCount": 216,
+      "complete": false
+    },
+    {
+      "slug": "2026-thruxton",
+      "title": "2026 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/27ed96f8-e370-4dda-9617-4a9f914f040c/fcb18254-b19b-448d-8ac7-d1a3e8ce1fc2/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 5,
+      "venue": "Thruxton",
+      "capturedCount": 24,
+      "totalCount": 120,
+      "complete": false
+    },
+    {
+      "slug": "2026-the-captured-moments-oulton-park",
+      "title": "2026 - The Captured Moments: Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/131c657d-6abf-469d-8235-189af3c0d8a9/07f60406-2fab-471a-8461-53a5306e712f/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "capturedCount": 24,
+      "totalCount": 24,
+      "complete": false
+    },
+    {
+      "slug": "2026-oulton-park",
+      "title": "2026 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/19bb75fd-041f-4960-ab81-d1de15691ba6/aa527f28-6c5a-4c51-8f27-1465f1b4923c/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Oulton Park",
+      "capturedCount": 24,
+      "totalCount": 216,
+      "complete": false
+    },
+    {
+      "slug": "2026-snetterton",
+      "title": "2026 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/5243d999-d807-4cd9-a5d8-c6d8d5e98f35/d2cfde84-53c7-4417-814e-f4c493f8d46b/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Snetterton",
+      "capturedCount": 24,
+      "totalCount": 216,
+      "complete": false
+    },
+    {
+      "slug": "2026-driven-by-sport-brands-hatch",
+      "title": "2026 - Driven By Sport - Brands Hatch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/8d8ad740-fef9-4253-b27a-35380c87b0ed/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "capturedCount": 24,
+      "totalCount": 24,
+      "complete": true
+    },
+    {
+      "slug": "the-captured-moments-brands-hatch-indy",
+      "title": "The Captured Moments: Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/f2aad18b-dafb-42d3-bb3a-d2d70fe8cea9/b3dc642f-a793-404c-a39f-ec3a4f52c684/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "capturedCount": 21,
+      "totalCount": 21,
+      "complete": false
+    },
+    {
+      "slug": "2026-brands-hatch-indy",
+      "title": "2026 - Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/36a6633f-eeba-4669-9c9b-c233885afc9f/19b56c2d-3b65-412a-8376-f7c9548a5cae/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "capturedCount": 24,
+      "totalCount": 216,
+      "complete": false
+    },
+    {
+      "slug": "2026-donington-park",
+      "title": "2026 - Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/2cce65c0-c212-4128-9a82-a5880a712bb5/79ca5020-ad04-4e54-9f05-3242c0a7fddc/variants/thumb-gallery-import-v1.webp",
       "round": 1,
       "venue": "Donington Park",
-      "capturedCount": 3,
-      "totalCount": 3,
-      "complete": true
+      "capturedCount": 24,
+      "totalCount": 192,
+      "complete": false
+    },
+    {
+      "slug": "2026-croft-testing",
+      "title": "2026 - Croft Testing",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/99926b59-a4a1-45f4-a01b-9f85a99d62fb/22f4206a-bd03-452c-af9f-575ea4a59fee/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Croft",
+      "capturedCount": 24,
+      "totalCount": 120,
+      "complete": false
     }
   ]
 }
