@@ -71,12 +71,12 @@
       "slug": "2026-croft-testing",
       "title": "2026 - Croft Testing",
       "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/99926b59-a4a1-45f4-a01b-9f85a99d62fb/22f4206a-bd03-452c-af9f-575ea4a59fee/variants/thumb-gallery-import-v1.webp",
-      "round": 8,
-      "venue": "Croft",
+      "round": null,
+      "venue": null,
       "capturedCount": 102,
       "totalCount": 102,
       "complete": true,
-      "isCanonical": true
+      "isCanonical": false
     },
     {
       "slug": "2026-season-launch",
