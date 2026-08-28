@@ -7,8 +7,8 @@
   "lastPageScraped": 2,
   "totalPages": 2,
   "_firstPagePhotoCount": 24,
-  "capturedCount": 24,
-  "totalCount": 24,
+  "capturedCount": 28,
+  "totalCount": 28,
   "complete": true,
   "photos": [
     {
@@ -106,6 +106,22 @@
     {
       "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/388e2762-9ff0-429f-bf1d-8c48987c0edd/variants/thumb-gallery-import-v1.webp",
       "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/388e2762-9ff0-429f-bf1d-8c48987c0edd/variants/display-gallery-import-v1.webp"
+    },
+    {
+      "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/004a055e-7b25-4f78-897e-55be0e1893fe/variants/thumb-gallery-import-v1.webp",
+      "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/004a055e-7b25-4f78-897e-55be0e1893fe/variants/display-gallery-import-v1.webp"
+    },
+    {
+      "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/a6c7ca02-cd5a-498d-be47-1b53263499ec/variants/thumb-gallery-import-v1.webp",
+      "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/a6c7ca02-cd5a-498d-be47-1b53263499ec/variants/display-gallery-import-v1.webp"
+    },
+    {
+      "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/8c67f9f6-400f-4ea8-b802-05195a015fb7/variants/thumb-gallery-import-v1.webp",
+      "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/8c67f9f6-400f-4ea8-b802-05195a015fb7/variants/display-gallery-import-v1.webp"
+    },
+    {
+      "thumbUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/970299ee-a123-4121-9c27-d919f776ec25/variants/thumb-gallery-import-v1.webp",
+      "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2026/927e61c3-fa20-4002-a7d8-fee65bf8ae9c/970299ee-a123-4121-9c27-d919f776ec25/variants/display-gallery-import-v1.webp"
     }
   ]
 }
