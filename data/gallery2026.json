@@ -9,7 +9,8 @@
       "venue": "Donington Park GP",
       "capturedCount": 17,
       "totalCount": 17,
-      "complete": true
+      "complete": true,
+      "isCanonical": false
     },
     {
       "slug": "2026-driven-by-sport-brands-hatch",
@@ -19,7 +20,8 @@
       "venue": null,
       "capturedCount": 28,
       "totalCount": 28,
-      "complete": true
+      "complete": true,
+      "isCanonical": false
     },
     {
       "slug": "the-captured-moments-knockhill-2026",
@@ -29,7 +31,8 @@
       "venue": "Knockhill",
       "capturedCount": 23,
       "totalCount": 23,
-      "complete": true
+      "complete": true,
+      "isCanonical": false
     },
     {
       "slug": "2026-the-captured-moments-oulton-park",
@@ -39,7 +42,8 @@
       "venue": "Oulton Park",
       "capturedCount": 24,
       "totalCount": 24,
-      "complete": true
+      "complete": true,
+      "isCanonical": false
     },
     {
       "slug": "the-captured-moments-brands-hatch-indy",
@@ -49,7 +53,8 @@
       "venue": "Brands Hatch Indy",
       "capturedCount": 21,
       "totalCount": 21,
-      "complete": true
+      "complete": true,
+      "isCanonical": false
     },
     {
       "slug": "2026-thruxton",
@@ -59,7 +64,8 @@
       "venue": "Thruxton",
       "capturedCount": 117,
       "totalCount": 117,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-croft-testing",
@@ -69,7 +75,8 @@
       "venue": "Croft",
       "capturedCount": 102,
       "totalCount": 102,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-season-launch",
@@ -79,7 +86,8 @@
       "venue": null,
       "capturedCount": 137,
       "totalCount": 137,
-      "complete": true
+      "complete": true,
+      "isCanonical": false
     },
     {
       "slug": "2026-donington-park",
@@ -89,7 +97,8 @@
       "venue": "Donington Park",
       "capturedCount": 170,
       "totalCount": 170,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-donington-park-gp",
@@ -99,7 +108,8 @@
       "venue": "Donington Park GP",
       "capturedCount": 210,
       "totalCount": 210,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-knockhill",
@@ -109,7 +119,8 @@
       "venue": "Knockhill",
       "capturedCount": 216,
       "totalCount": 216,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-oulton-park",
@@ -119,7 +130,8 @@
       "venue": "Oulton Park",
       "capturedCount": 203,
       "totalCount": 203,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-snetterton",
@@ -129,7 +141,8 @@
       "venue": "Snetterton",
       "capturedCount": 201,
       "totalCount": 201,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     },
     {
       "slug": "2026-brands-hatch-indy",
@@ -139,7 +152,8 @@
       "venue": "Brands Hatch Indy",
       "capturedCount": 193,
       "totalCount": 193,
-      "complete": true
+      "complete": true,
+      "isCanonical": true
     }
   ]
 }
