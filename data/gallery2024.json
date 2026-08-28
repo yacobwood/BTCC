@@ -1,0 +1,181 @@
+{
+  "season": 2024,
+  "albums": [
+    {
+      "slug": "2024-toca-awards",
+      "title": "2024 - TOCA Awards",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/9ab766ee-c4cb-45b4-b135-56efd0245910/1bb64c5e-30d1-4675-9521-8c2b77f847a0/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 38,
+      "totalCount": 38,
+      "complete": true
+    },
+    {
+      "slug": "autosport-international-2019",
+      "title": "Autosport International",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/188fbc2d-2887-4839-9f22-f1a20bb3a480/b9e85cb4-5232-463e-9eec-8a46b69d6e51/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 42,
+      "totalCount": 42,
+      "complete": true
+    },
+    {
+      "slug": "kids-in-motorsport",
+      "title": "Kids in Motorsport",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/6df6738a-c1f0-4b93-9e7c-9550084c0f37/d7f6e0aa-d2a1-4ae4-a6a1-9ddeda04d57f/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 54,
+      "totalCount": 54,
+      "complete": true
+    },
+    {
+      "slug": "season-launch-2040",
+      "title": "Season Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/13b5ef06-b337-4fea-b01e-307087c1191a/e602ffb1-b7ee-4de1-b5b7-d78a7c23a1be/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 68,
+      "totalCount": 68,
+      "complete": true
+    },
+    {
+      "slug": "2024-croft",
+      "title": "2024 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/b65860b8-0575-46ee-b6f7-42ded899fd71/43bf2ab8-edef-4c07-a1fd-b781f58dc7f0/variants/thumb-gallery-import-v1.webp",
+      "round": 4,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 92,
+      "totalCount": 92,
+      "complete": true
+    },
+    {
+      "slug": "2024-snetterton",
+      "title": "2024 - Snetterton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/0ec05356-a9c8-48cf-a117-2e1a93ba2ccc/ee12efef-fabf-4134-aebf-dc5a155e34da/variants/thumb-gallery-import-v1.webp",
+      "round": 6,
+      "venue": "Snetterton",
+      "isCanonical": true,
+      "capturedCount": 90,
+      "totalCount": 90,
+      "complete": true
+    },
+    {
+      "slug": "napa-racing-uk-launch",
+      "title": "NAPA Racing UK Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/28f24f30-593e-49aa-a36d-121154c2fcd4/e17dcb3e-7c99-46b3-a789-44d21b704b7e/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 73,
+      "totalCount": 73,
+      "complete": true
+    },
+    {
+      "slug": "2024-donington-park-gp",
+      "title": "2024 - Donington Park GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/c870aa41-a5bb-49fe-a5b1-67615f239165/ec4147e5-15b2-4854-993a-3ae841df07dc/variants/thumb-gallery-import-v1.webp",
+      "round": 9,
+      "venue": "Donington Park GP",
+      "isCanonical": true,
+      "capturedCount": 119,
+      "totalCount": 119,
+      "complete": true
+    },
+    {
+      "slug": "2024-thruxton",
+      "title": "2024 - Thruxton",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/99ec63ef-db4e-40bc-b98c-de04413d2eec/90ef1095-cba6-4a41-bf59-7dcd4a52386a/variants/thumb-gallery-import-v1.webp",
+      "round": 7,
+      "venue": "Thruxton",
+      "isCanonical": true,
+      "capturedCount": 114,
+      "totalCount": 114,
+      "complete": true
+    },
+    {
+      "slug": "2024-donington-park",
+      "title": "2024 - Donington Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/ec568688-5f82-45ce-9fe4-4191d18fa2d2/4a34d91c-0b62-4c99-971a-577f06647a2b/variants/thumb-gallery-import-v1.webp",
+      "round": 1,
+      "venue": "Donington Park",
+      "isCanonical": true,
+      "capturedCount": 120,
+      "totalCount": 120,
+      "complete": true
+    },
+    {
+      "slug": "2024-knockhill",
+      "title": "2024 - Knockhill",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/01b2416a-06d4-420c-ab4e-8429f2c2481c/1ded4979-1fa4-4660-9f0c-4ab4fa3fe40a/variants/thumb-gallery-import-v1.webp",
+      "round": 5,
+      "venue": "Knockhill",
+      "isCanonical": true,
+      "capturedCount": 134,
+      "totalCount": 134,
+      "complete": true
+    },
+    {
+      "slug": "2024-oulton-park",
+      "title": "2024 - Oulton Park",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/d9b49933-801c-4596-a3d1-8b7e3d024f66/f7389110-1a1c-43ea-bb24-3b6012219ac1/variants/thumb-gallery-import-v1.webp",
+      "round": 3,
+      "venue": "Oulton Park",
+      "isCanonical": true,
+      "capturedCount": 123,
+      "totalCount": 123,
+      "complete": true
+    },
+    {
+      "slug": "bristol-street-motors-excelr8-launch",
+      "title": "Bristol Street Motors EXCELR8 Launch",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/5e0aabf5-a2b9-4a68-a1de-2b31c08906a5/47d05441-9e6d-44b5-b370-7548e984135f/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 136,
+      "totalCount": 136,
+      "complete": true
+    },
+    {
+      "slug": "2024-brands-hatch-gp",
+      "title": "2024 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/59cfe4b8-a6ac-44a8-a4ce-f6d99f135ee7/8faf72e3-c9a1-42ff-a6a5-69a283816452/variants/thumb-gallery-import-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 156,
+      "totalCount": 156,
+      "complete": true
+    },
+    {
+      "slug": "2024-silverstone",
+      "title": "2024 \u2013 Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/8ee90bf9-0191-4482-a6d8-b7b83fdac2a0/97ab141a-7a8e-4476-b91c-1dc5b51c5f7d/variants/thumb-gallery-import-v1.webp",
+      "round": 8,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 168,
+      "totalCount": 168,
+      "complete": true
+    },
+    {
+      "slug": "2024-brands-hatch-indy",
+      "title": "2024 - Brands Hatch Indy",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2024/c911dff1-2b4c-42e2-82f5-2957b5caadc1/35ab1b88-f5b3-432f-96d1-411ae9f06494/variants/thumb-gallery-import-v1.webp",
+      "round": 2,
+      "venue": "Brands Hatch Indy",
+      "isCanonical": true,
+      "capturedCount": 167,
+      "totalCount": 167,
+      "complete": true
+    }
+  ]
+}
