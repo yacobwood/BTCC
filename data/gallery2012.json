@@ -1,0 +1,16 @@
+{
+  "season": 2012,
+  "albums": [
+    {
+      "slug": "2012-season",
+      "title": "2012 Season",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2012/85e8168a-73fd-48fe-94fc-789274bc84b8/1d00f059-98d8-46ce-8a6d-d0be29a694b7/variants/thumb-gallery-import-v1.webp",
+      "round": null,
+      "venue": null,
+      "isCanonical": false,
+      "capturedCount": 16,
+      "totalCount": 16,
+      "complete": true
+    }
+  ]
+}
