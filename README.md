@@ -1121,10 +1121,10 @@ Fastlane is configured in [fastlane/](fastlane/) for automated builds and metada
 
 ### Version Bump Process
 
-1. Update `version` and `versionCode` in [package.json](package.json)
-2. Update `ios/BTCCFanHub/Info.plist` and `android/app/build.gradle`
-3. Update Fastlane metadata
-4. Rebuild native bundles and commit
+1. Update `version` and `versionCode` in [package.json](package.json) - Android's own `versionCode`/`versionName` in `android/app/build.gradle` read directly from these two fields at build time (`packageJson.versionCode`/`packageJson.version`), so nothing there needs a manual edit. iOS is separate and currently dormant (pulled from the App Store, see below) - its equivalents (`MARKETING_VERSION`/`CURRENT_PROJECT_VERSION`) live in `ios/BTCCFanHub.xcodeproj/project.pbxproj`, not `Info.plist` (which only references those build settings by variable, `$(MARKETING_VERSION)`/`$(CURRENT_PROJECT_VERSION)`), and haven't been bumped since it was pulled.
+2. Update `SettingsScreen.test.js`'s `raceVersionLabel()` assertion (`Season {major} · Round {minor} · Lap {patch}`) to match the new version - the test's own comment flags this explicitly rather than silently going stale.
+3. Update Fastlane metadata - `fastlane/metadata/android/en-GB/changelogs/{versionCode}.txt`. **Keep it under 500 characters** - Google Play's actual current limit for release notes per language (confirmed live, not assumed). Found live 2026-08-29: 4 of the last 8 changelogs committed here (84/85/87/88) already exceed it, apparently never caught because none had been through an actual Play Console upload yet at commit time.
+4. Rebuild native bundles (`cd android && ./gradlew bundleRelease`) and commit
 
 **Release nickname (added 2026-08-25):** SettingsScreen shows a display-only "Season {major} · Round {minor} · Lap {patch}" subtitle under the real version number (`raceVersionLabel()`), mapped onto the app's own Season → Round → Lap hierarchy. Purely cosmetic - the real semver above it is still what App Store Connect/Play Console/Gradle actually use, and still gets bumped exactly as described above.
 
