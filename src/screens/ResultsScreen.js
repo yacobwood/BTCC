@@ -22,7 +22,9 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getSeasonData} from '../assets/seasonData';
 import ProgressionChart from '../components/ProgressionChart';
 import SeasonTable from '../components/SeasonTable';
+import GalleryTab from '../components/GalleryTab';
 import {Analytics} from '../utils/analytics';
+import {shareContent} from '../utils/appShare';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite, cacheReadTimestamp} from '../store/cache';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -175,6 +177,7 @@ export default function ResultsScreen({navigation, route}) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [dataFreshnessMs, setDataFreshnessMs] = useState(null);
+  const [activeTab, setActiveTab] = useState(0); // tracks SwipeableTabs' index so share respects the visible tab/filter
 
   const progressionCache = useRef({});
   const driversListRef = useRef(null);
@@ -331,24 +334,29 @@ export default function ResultsScreen({navigation, route}) {
 
   useEffect(() => { Analytics.screen('results'); }, []);
 
-  // Auto-open a specific round when navigated here with openRound param
+  // Auto-open a specific round (and optionally a specific session tab) when
+  // navigated here with openRound/openRace params - the getStateFromPath
+  // special-case for shared "results/:round/:race" links in AppNavigator.js
+  // lands here rather than directly on RoundResults, since this is where a
+  // bare round number actually gets resolved into the full round object.
   useFocusEffect(useCallback(() => {
     const openRound = route?.params?.openRound;
     const openYear = route?.params?.openYear;
+    const openRace = route?.params?.openRace;
     if (!openRound) return;
     // If the year doesn't match, switch it  -  the load useEffect will reload results
     if (openYear && openYear !== year) {
-      navigation.setParams({openRound: undefined, openYear: undefined});
+      navigation.setParams({openRound: undefined, openYear: undefined, openRace: undefined});
       setYear(openYear);
       return;
     }
     if (loading || results.length === 0) return;
     const found = results.find(r => r.round === openRound);
     if (found) {
-      navigation.setParams({openRound: undefined, openYear: undefined});
-      navigation.navigate('RoundResults', {round: found, year, initialRace: 0});
+      navigation.setParams({openRound: undefined, openYear: undefined, openRace: undefined});
+      navigation.navigate('RoundResults', {round: found, year, initialRace: openRace ?? 0});
     }
-  }, [route?.params?.openRound, route?.params?.openYear, loading, results, year]));
+  }, [route?.params?.openRound, route?.params?.openYear, route?.params?.openRace, loading, results, year]));
   useEffect(() => {
     if (year >= 2004 && year <= CURRENT_SEASON - 1) {
       load(year);
@@ -524,11 +532,14 @@ export default function ResultsScreen({navigation, route}) {
     </View>
   );
 
-  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'TABLE', 'CHART'];
+  const tabs = ['DRIVERS', 'TEAMS', 'RESULTS', 'STATS', 'TABLE', 'CHART', 'GALLERY'];
   const hasData = results.some(r => r.races.some(race => race.results.length > 0));
 
   const renderTabContent = (t) => {
-    // Show season not started OR no live data for the current season
+    // Show season not started OR no live data for the current season - t===2
+    // (RESULTS) and t===6 (GALLERY) are deliberately excluded from this gate:
+    // a fixture list or a season-launch photo album can both exist before
+    // racing starts, unlike standings/stats/table/chart which need results.
     if (year === CURRENT_SEASON && (t === 0 || t === 1 || t === 3 || t === 4 || t === 5)) {
       if (!seasonStarted) {
         return (
@@ -689,9 +700,27 @@ export default function ResultsScreen({navigation, route}) {
             />
           </ScrollView>
         );
+      case 6:
+        return <GalleryTab year={year} navigation={navigation} />;
       default:
         return null;
     }
+  };
+
+  // Mirrors whichever standings list + sub-filter is actually on screen (see
+  // driverStandings/teamStandings above) - previously this always shared the
+  // raw main BTCC drivers' top-3, ignoring both the active tab (Drivers vs
+  // Teams) and the active filter pill within it (Independents' Trophy, Jack
+  // Sears Trophy, Independents' Teams, Manufacturers).
+  const onShareStandings = async () => {
+    const isTeams = activeTab === 1;
+    const top3 = (isTeams ? teamStandings : driverStandings).slice(0, 3);
+    if (!top3.length) return;
+    const heading = isTeams
+      ? {teams: 'Teams Championship', independentsTeams: "Independents' Teams", manufacturers: 'Manufacturers'}[teamsChampionship]
+      : {btcc: 'BTCC Championship', independents: "Independents' Trophy", jst: 'Jack Sears Trophy'}[championship];
+    const lines = top3.map((d, i) => `${i + 1}. ${d.name} - ${d.points}pts`).join('\n');
+    await shareContent('standings', standings.season, `${heading} - after Round ${standings.round}\n\n${lines}\n\nhttps://btcchub.vercel.app/results?src=standings`);
   };
 
   return (
@@ -706,6 +735,15 @@ export default function ResultsScreen({navigation, route}) {
                 {formatAge(dataFreshnessMs)}
               </Text>
             </View>
+          )}
+          {!!(activeTab === 1 ? teamStandings : driverStandings).length && (
+            <TouchableOpacity
+              onPress={onShareStandings}
+              accessibilityLabel="Share standings"
+              accessibilityRole="button"
+              style={{width: 34, height: 34, borderRadius: 17, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.outline, justifyContent: 'center', alignItems: 'center'}}>
+              <Icon name="share" size={16} color={Colors.yellow} />
+            </TouchableOpacity>
           )}
           <TouchableOpacity
             onPress={() => navigation.navigate('Records')}
@@ -754,6 +792,7 @@ export default function ResultsScreen({navigation, route}) {
       <SwipeableTabs
         tabs={tabs}
         onTabChange={(i) => {
+          setActiveTab(i);
           setShowScrollTop(false);
           Analytics.resultsTabChanged(year, tabs[i].toLowerCase());
         }}

@@ -23,6 +23,16 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {useBroadcaster} from '../utils/broadcaster';
 import {Analytics} from '../utils/analytics';
 import {version} from '../../package.json';
+
+// Playful release nickname mapped onto the app's own Season → Round → Lap
+// hierarchy (major.minor.patch) - display only, the real semver above is
+// what App Store Connect/Play Console and Gradle actually use.
+function raceVersionLabel(v) {
+  const parts = String(v).split('.');
+  if (parts.length !== 3 || parts.some(p => !p)) return null;
+  const [season, round, lap] = parts;
+  return `Season ${season} · Round ${round} · Lap ${lap}`;
+}
 import {getFCMToken} from '../utils/notifications';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
@@ -148,8 +158,8 @@ export default function SettingsScreen({navigation}) {
           onToggle={toggle('newsAlerts')}
         />
         <SettingRow
-          label="Monday Roundup"
-          description="Get notified when a new BTCC Monday Roundup drops"
+          label="The Flying Lap"
+          description="Get notified when a new edition of The Flying Lap is ready to read"
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
@@ -289,6 +299,12 @@ export default function SettingsScreen({navigation}) {
           description="Tuesday reminder to check standings after each round"
           value={settings.standingsUpdate}
           onToggle={toggle('standingsUpdate')}
+        />
+        <SettingRow
+          label="Results are in"
+          description="A gentle nudge when a fresh result drops - never reveals it, works even with No Spoilers on"
+          value={settings.resultsTeaser}
+          onToggle={toggle('resultsTeaser')}
         />
 
         {live_chat && (
@@ -439,7 +455,7 @@ export default function SettingsScreen({navigation}) {
         </Modal>
 
         <View style={styles.divider} />
-        <Text style={styles.versionText}>Version {version}</Text>
+        <Text style={styles.versionText}>{raceVersionLabel(version) || `Version ${version}`}</Text>
         {!!user?.uid && (
           <TouchableOpacity onPress={copyStableId} accessibilityRole="button" accessibilityLabel="Copy user ID">
             <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `User ID: ${user.uid.slice(0, 16)}…`}</Text>

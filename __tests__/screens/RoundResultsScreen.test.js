@@ -1,5 +1,5 @@
 import React from 'react';
-import {Linking} from 'react-native';
+import {Linking, Alert} from 'react-native';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RoundResultsScreen from '../../src/screens/RoundResultsScreen';
@@ -16,6 +16,9 @@ jest.mock('../../src/utils/analytics', () => ({
     penaltiesShown: jest.fn(),
     penaltyDocumentOpened: jest.fn(),
     penaltyDocumentOpenFailed: jest.fn(),
+    contentShared: jest.fn(),
+    shareNudgeShown: jest.fn(),
+    shareNudgeDismissed: jest.fn(),
   },
 }));
 
@@ -37,6 +40,104 @@ describe('RoundResultsScreen', () => {
     const {Analytics} = require('../../src/utils/analytics');
     renderRound();
     await waitFor(() => expect(Analytics.screen).toHaveBeenCalledWith('round_results'));
+  });
+
+  it('shares a web link to the initial tab\'s results and logs contentShared when the share button is pressed', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {Analytics} = require('../../src/utils/analytics');
+    const {getByLabelText} = renderRound(); // defaults to initialRace: 0 -> Free Practice
+    await waitFor(() => getByLabelText('Share round result'));
+    fireEvent.press(getByLabelText('Share round result'));
+    expect(Analytics.contentShared).toHaveBeenCalledWith('round_result', MOCK_ROUND.round);
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining(`https://btcchub.vercel.app/results/${MOCK_ROUND.round}/1?src=round_result`),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('Free Practice');
+    shareSpy.mockRestore();
+  });
+
+  it('shares a link to the currently active tab, not the tab the screen opened on - fixes the share button ignoring which session tab is open', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {getByText, getByLabelText} = renderRound({initialRace: 0}); // opens on FP
+    await act(async () => {
+      fireEvent.press(getByText('R2')); // then the user swipes/taps to R2
+    });
+    fireEvent.press(getByLabelText('Share round result'));
+    // R2 is races[4] in MOCK_ROUND (FP, Qualifying, Qualifying Race, Race 1, Race 2)
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining(`https://btcchub.vercel.app/results/${MOCK_ROUND.round}/5?src=round_result`),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('Race 2');
+    shareSpy.mockRestore();
+  });
+
+  describe('share nudge', () => {
+    const NOW = 1_700_000_000_000;
+    const ELEVEN_DAYS_AGO = NOW - 11 * 24 * 60 * 60 * 1000;
+
+    function renderRoundWithNudgeState(firstViewTs) {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'favourite_drivers') return Promise.resolve(JSON.stringify([]));
+        if (key === 'share_nudge_first_view_ts') {
+          return Promise.resolve(firstViewTs == null ? null : String(firstViewTs));
+        }
+        return Promise.resolve(null);
+      });
+      const route = makeRoute({round: MOCK_ROUND, year: 2026, initialRace: 0, origin: 'results'});
+      return renderWithProviders(<RoundResultsScreen navigation={nav} route={route} />);
+    }
+
+    beforeEach(() => {
+      jest.spyOn(Date, 'now').mockReturnValue(NOW);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('does not show the nudge on the first-ever view (just records the timestamp)', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const alertSpy = jest.spyOn(Alert, 'alert');
+      renderRoundWithNudgeState(null);
+      await waitFor(() => expect(AsyncStorage.setItem).toHaveBeenCalledWith('share_nudge_first_view_ts', String(NOW)));
+      expect(alertSpy).not.toHaveBeenCalled();
+      expect(Analytics.shareNudgeShown).not.toHaveBeenCalled();
+    });
+
+    it('shows the share nudge once 10+ days have passed since the first view', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const alertSpy = jest.spyOn(Alert, 'alert');
+      renderRoundWithNudgeState(ELEVEN_DAYS_AGO);
+      await waitFor(() => expect(alertSpy).toHaveBeenCalledWith(
+        'Enjoying BTCC Hub?',
+        'Share it with a fellow fan.',
+        expect.any(Array),
+      ));
+      expect(Analytics.shareNudgeShown).toHaveBeenCalled();
+    });
+
+    it('pressing Share in the nudge shares the app, tagged with the share_nudge origin', async () => {
+      const {Share} = require('react-native');
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+      jest.spyOn(Alert, 'alert').mockImplementation((title, message, buttons) => {
+        buttons.find(b => b.text === 'Share')?.onPress();
+      });
+      renderRoundWithNudgeState(ELEVEN_DAYS_AGO);
+      await waitFor(() => expect(shareSpy).toHaveBeenCalledWith({
+        message: expect.stringContaining('https://btcchub.vercel.app?src=share_nudge'),
+      }));
+    });
+
+    it('pressing Not now in the nudge tracks the dismissal', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      jest.spyOn(Alert, 'alert').mockImplementation((title, message, buttons) => {
+        buttons.find(b => b.text === 'Not now')?.onPress();
+      });
+      renderRoundWithNudgeState(ELEVEN_DAYS_AGO);
+      await waitFor(() => expect(Analytics.shareNudgeDismissed).toHaveBeenCalled());
+    });
   });
 
   describe('tab bar', () => {

@@ -197,3 +197,71 @@ describe('AppNavigator', () => {
   });
 });
 
+describe('linking config', () => {
+  // Real getStateFromPath (jest.setup.js's @react-navigation/native mock
+  // spreads the actual library first, only overriding specific exports) -
+  // this resolves an actual URL against the real linking.config, not just
+  // asserting the config object's shape.
+  const {getStateFromPath} = require('@react-navigation/native');
+  const {linking} = require('../../src/navigation/AppNavigator');
+
+  it('resolves a bare "results" path to the Results tab\'s list screen', () => {
+    const state = getStateFromPath('results', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    expect(resultsRoute).toBeTruthy();
+    expect(resultsRoute.state.routes[0].name).toBe('ResultsList');
+  });
+
+  // Corrected 2026-08-26: this test used to call the generic library
+  // getStateFromPath against the static `config` object alone, which never
+  // exercises the custom getStateFromPath override below - the function
+  // NavigationContainer actually calls at runtime (linking={linking}). That
+  // gap is exactly why it asserted a broken production behavior as if it
+  // were correct: RoundResultsScreen needs the full round object (races,
+  // venue, date...), not a raw string, so landing directly on RoundResults
+  // with {round: '5'} rendered an empty, broken screen for anyone who
+  // actually opened a shared results link. Calling linking.getStateFromPath
+  // itself (as below) is what the old test should have done from the start.
+  it('resolves "results/5" through ResultsList\'s openRound param, not a raw string on RoundResults', () => {
+    const state = linking.getStateFromPath('results/5', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('ResultsList');
+    expect(leaf.params).toEqual({openRound: 5});
+  });
+
+  it('resolves "results/5/2" to ResultsList with a 0-indexed openRace param, so a shared tab link opens on the right session', () => {
+    const state = linking.getStateFromPath('results/5/2', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('ResultsList');
+    expect(leaf.params).toEqual({openRound: 5, openRace: 1});
+  });
+
+  // GalleryAlbum needs no custom getStateFromPath branch, unlike results/:round
+  // above - GalleryAlbumScreen fetches its own data straight from
+  // season/albumSlug (fetchGalleryAlbum), so the static config entry alone
+  // (falling through to the library's own defaultGetStateFromPath) resolves
+  // it correctly, same as the plain "results" case at the top of this
+  // describe block.
+  it('resolves a "gallery/:season/:albumSlug/:photoIndex" path straight to GalleryAlbum with all three params', () => {
+    const state = linking.getStateFromPath('gallery/2026/donington-park-gallery/3', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('GalleryAlbum');
+    expect(leaf.params.season).toBe('2026');
+    expect(leaf.params.albumSlug).toBe('donington-park-gallery');
+    expect(leaf.params.photoIndex).toBe('3');
+  });
+
+  it('resolves a "gallery/:season/:albumSlug" path (no photo index) to GalleryAlbum with photoIndex unset', () => {
+    const state = linking.getStateFromPath('gallery/2026/donington-park-gallery', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('GalleryAlbum');
+    expect(leaf.params.season).toBe('2026');
+    expect(leaf.params.albumSlug).toBe('donington-park-gallery');
+    expect(leaf.params.photoIndex).toBeUndefined();
+  });
+});
+

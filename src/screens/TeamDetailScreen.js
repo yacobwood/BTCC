@@ -20,6 +20,7 @@ import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import CachedImage from '../components/CachedImage';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {carThumbUrl} from '../api/parsers';
 
 // Sponsor tier -> section label, in display order. A team's `sponsors` array
 // (see parseGrid in api/parsers.js) tags each entry with one of these tiers;
@@ -33,20 +34,17 @@ const SPONSOR_TIERS = [
   {key: 'decal', label: 'ALSO ON THE CAR'},
 ];
 
-// Rewrites a data/carImages/ URL to its pre-generated small thumbnail
-// (<name>-thumb.webp - see scripts/generate_car_thumb.py). A car cutout here
-// only ever renders at a couple hundred px, well under the full-size
-// 1536x1024 original's decoded-bitmap cost (6MB regardless of how well the
-// file itself compresses) - see DriversScreen.js's carThumbUrl for the full
-// story (root-caused live: that cost is what exhausted Android's image
-// decode pool on a 23-driver grid). This screen only ever shows 2-4 cars at
-// once so it was never actually hitting that cap, but there's no reason to
-// decode 15x more bitmap than the card needs just because the number here
-// happens to be small.
-function carThumbUrl(url) {
-  if (!url) return url;
-  return url.replace(/(\.[a-z0-9]+)$/i, '-thumb$1');
-}
+// This screen uses api/parsers.js's carThumbUrl (the plain-thumb variant,
+// not the cropped one DriverDetailScreen.js uses) - see that file's comment
+// for why the two screens need different crops. A car cutout here only ever
+// renders at a couple hundred px, well under the full-size 1536x1024
+// original's decoded-bitmap cost (6MB regardless of how well the file
+// itself compresses) - see DriversScreen.js's carThumbUrl for the full story
+// (root-caused live: that cost is what exhausted Android's image decode
+// pool on a 23-driver grid). This screen only ever shows 2-4 cars at once so
+// it was never actually hitting that cap, but there's no reason to decode
+// 15x more bitmap than the card needs just because the number here happens
+// to be small.
 
 // Press feedback is a dark scrim painted OVER the whole card, not a whole-tile
 // opacity fade - same fix, same reason as DriverCardInner in

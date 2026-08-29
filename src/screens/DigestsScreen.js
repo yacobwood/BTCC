@@ -128,7 +128,7 @@ accessibilityLabel={article.title}
         )}
         <View style={styles.cardContent}>
           <View style={styles.cardCategoryRow}>
-            <Text style={[styles.cardCategory, isRead && styles.cardCategoryRead]}>BTCC MONDAY ROUNDUP · EP. {episode}</Text>
+            <Text style={[styles.cardCategory, isRead && styles.cardCategoryRead]}>THE FLYING LAP · EP. {episode}</Text>
             {isRead && <Text style={styles.readBadge}>READ</Text>}
           </View>
           <Text style={[styles.cardTitle, isRead && styles.cardTitleRead]} numberOfLines={3}>{article.title}</Text>
@@ -148,7 +148,7 @@ accessibilityLabel={article.title}
           accessibilityRole="button">
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>BTCC MONDAY ROUNDUP</Text>
+        <Text style={styles.headerTitle}>THE FLYING LAP</Text>
         {digests.length > 0 && (
           <TouchableOpacity
             onPress={allRead ? handleMarkAllUnread : handleMarkAllRead}

@@ -56,6 +56,26 @@ describe('RadioScreen', () => {
     });
   });
 
+  it('still fetches live stations when AbortSignal.timeout is unsupported on the runtime', async () => {
+    // Root-caused live 2026-08-28 via the Gallery tab, see
+    // src/api/client.js's fetchJson() comment: AbortSignal.timeout throws
+    // synchronously when unsupported (Android/Hermes), before fetch() is
+    // even called - this screen's own Phase 2 used to do exactly that,
+    // silently caught by its own try/catch, meaning the live fetch never
+    // actually ran on an affected device and it fell straight to Phase 3's
+    // bundled fallback every time. Simulates the broken runtime directly
+    // (Node/Jest has real support, so this was invisible to every other
+    // test here too).
+    const original = global.AbortSignal.timeout;
+    delete global.AbortSignal.timeout;
+    try {
+      const {getByText} = renderWithProviders(<RadioScreen navigation={nav} />);
+      await waitFor(() => expect(getByText('BTCC Radio')).toBeTruthy());
+    } finally {
+      global.AbortSignal.timeout = original;
+    }
+  });
+
   it('renders station taglines', async () => {
     const {getByText} = renderWithProviders(<RadioScreen navigation={nav} />);
     await waitFor(() => {

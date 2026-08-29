@@ -6,7 +6,7 @@ import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), resultsYearChanged: jest.fn(), resultsTabChanged: jest.fn(), resultsChampionshipChanged: jest.fn(), pullToRefresh: jest.fn(), scrollToTop: jest.fn()},
+  Analytics: {screen: jest.fn(), resultsYearChanged: jest.fn(), resultsTabChanged: jest.fn(), resultsChampionshipChanged: jest.fn(), pullToRefresh: jest.fn(), scrollToTop: jest.fn(), contentShared: jest.fn()},
 }));
 
 jest.mock('../../src/api/client', () => ({
@@ -22,6 +22,9 @@ jest.mock('../../src/api/parsers', () => ({
 // SeasonTable and ProgressionChart are expensive native/canvas components — stub them
 jest.mock('../../src/components/SeasonTable',      () => ({__esModule: true, default: () => null}));
 jest.mock('../../src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
+// GalleryTab does its own fetchGallery() call - stubbed here so this file's tests
+// stay focused on ResultsScreen's own tab-wiring; GalleryTab gets its own test file.
+jest.mock('../../src/components/GalleryTab', () => ({__esModule: true, default: () => null}));
 
 // SwipeableTabs — render all pages simultaneously (no PagerView needed)
 jest.mock('../../src/components/SwipeableTabs', () => {
@@ -123,6 +126,11 @@ describe('ResultsScreen', () => {
     await waitFor(() => expect(getByText('RESULTS')).toBeTruthy());
   });
 
+  it('renders GALLERY tab', async () => {
+    const {getByText} = renderResults();
+    await waitFor(() => expect(getByText('GALLERY')).toBeTruthy());
+  });
+
   // ── Bundled year data ────────────────────────────────────────────────────────
   // Navigate to 2025 explicitly via the Previous season button so applyBundledYear
   // is called regardless of which year the component defaults to on startup.
@@ -168,6 +176,140 @@ describe('ResultsScreen', () => {
     await waitFor(() => getByLabelText('Select season'));
     fireEvent.press(getByLabelText('Select season'));
     await waitFor(() => expect(getByText('SELECT SEASON')).toBeTruthy());
+  });
+
+  // ── Sharing ──────────────────────────────────────────────────────────────────
+
+  it('hides the share button when there are no standings yet', async () => {
+    const {queryByLabelText} = renderResults();
+    await waitFor(() => expect(queryByLabelText('Share standings')).toBeNull());
+  });
+
+  it('shares a top-3 summary and logs contentShared when standings exist', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    const {Analytics} = require('../../src/utils/analytics');
+    parseStandings.mockReturnValue({
+      drivers: [
+        {position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, wins: 7},
+        {position: 2, name: 'Tom Ingram', team: 'Team VERTU', points: 279, wins: 2},
+        {position: 3, name: 'Dan Cammish', team: 'NAPA Racing UK', points: 274, wins: 2},
+      ],
+      teams: [], season: '2026', round: 21, venue: 'Donington Park GP',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText('Share standings'));
+    fireEvent.press(getByLabelText('Share standings'));
+    expect(Analytics.contentShared).toHaveBeenCalledWith('standings', '2026');
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining('https://btcchub.vercel.app/results?src=standings'),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('1. Ashley Sutton - 377pts');
+    shareSpy.mockRestore();
+  });
+
+  it("shares the Independents' Trophy top-3 (not the main table) when that pill is active", async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, wins: 7}],
+      teams: [], jst: [],
+      independents: [{position: 1, name: 'Mikey Doble', team: 'LKQ Euro Car Parts', points: 264, wins: 5}],
+      season: '2026', round: 21, venue: 'Donington Park GP',
+    });
+    const {getByLabelText} = renderResults();
+    await waitFor(() => getByLabelText("Show Independents' Trophy"));
+    fireEvent.press(getByLabelText("Show Independents' Trophy"));
+    fireEvent.press(getByLabelText('Share standings'));
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining("Independents' Trophy - after Round 21"),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('1. Mikey Doble - 264pts');
+    expect(shareSpy.mock.calls[0][0].message).not.toContain('Ashley Sutton');
+    shareSpy.mockRestore();
+  });
+
+  it('shares the active Teams-tab filter (Manufacturers), not the main drivers table', async () => {
+    const {Share} = require('react-native');
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, wins: 7}],
+      teams: [{position: 1, name: 'NAPA Racing UK', points: 658}], jst: [], independentsTeams: [],
+      manufacturers: [{position: 1, name: 'Alliance Racing / Ford', points: 658}],
+      season: '2026', round: 7, venue: 'Snetterton',
+    });
+    const {getByText, getByLabelText} = renderResults();
+    await waitFor(() => getByText('TEAMS'));
+    fireEvent.press(getByText('TEAMS'));
+    await waitFor(() => getByLabelText('Show Manufacturers'));
+    fireEvent.press(getByLabelText('Show Manufacturers'));
+    fireEvent.press(getByLabelText('Share standings'));
+    expect(shareSpy).toHaveBeenCalledWith({
+      message: expect.stringContaining('Manufacturers - after Round 7'),
+    });
+    expect(shareSpy.mock.calls[0][0].message).toContain('1. Alliance Racing / Ford - 658pts');
+    expect(shareSpy.mock.calls[0][0].message).not.toContain('Ashley Sutton');
+    shareSpy.mockRestore();
+  });
+
+  // ── Auto-opening a round from route params (openRound/openYear/openRace) ───────
+  // The entry point for both TrackDetailScreen's "View results" link and the
+  // getStateFromPath special-case for shared "results/:round[/:race]" URLs in
+  // AppNavigator.js - neither had coverage before this fix, because this
+  // logic lives inside useFocusEffect, which jest.setup.js mocks as a global
+  // no-op (jest.fn()) for every test in the app. Run it for real, scoped to
+  // just this block and restored immediately after each test, so the many
+  // other tests in this file keep the no-op behavior they were written against.
+  describe('auto-opening a round via route params', () => {
+    const {useFocusEffect} = require('@react-navigation/native');
+
+    beforeEach(() => {
+      // ResultsScreen calls useFocusEffect twice per render: a scroll-to-top +
+      // reload effect first, then the openRound one this block is testing.
+      // Running the first for real too calls load() synchronously mid-render
+      // (its setState calls happen before its first await), which React
+      // rejects as a same-render update loop - so only invoke the 2nd call,
+      // in the fixed order the two hooks are declared in the component.
+      let callCount = 0;
+      useFocusEffect.mockImplementation((cb) => {
+        callCount += 1;
+        if (callCount % 2 === 0) cb();
+      });
+    });
+
+    afterEach(() => {
+      useFocusEffect.mockReset(); // back to the global no-op default
+    });
+
+    it('navigates to RoundResults with the resolved round object once results are loaded', async () => {
+      const foundRound = {round: 5, venue: 'Silverstone', races: []};
+      parseResults.mockReturnValue([foundRound]);
+      renderResults({openRound: 5});
+      await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith(
+        'RoundResults',
+        expect.objectContaining({round: foundRound, initialRace: 0}),
+      ));
+    });
+
+    it('passes openRace through as RoundResults\' initialRace param, so a shared tab link opens on the right session', async () => {
+      const foundRound = {round: 5, venue: 'Silverstone', races: []};
+      parseResults.mockReturnValue([foundRound]);
+      renderResults({openRound: 5, openRace: 4});
+      await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith(
+        'RoundResults',
+        expect.objectContaining({round: foundRound, initialRace: 4}),
+      ));
+    });
+
+    it('defaults to initialRace 0 when openRace is absent (existing TrackDetailScreen callers)', async () => {
+      const foundRound = {round: 5, venue: 'Silverstone', races: []};
+      parseResults.mockReturnValue([foundRound]);
+      renderResults({openRound: 5, openRace: undefined});
+      await waitFor(() => expect(nav.navigate).toHaveBeenCalledWith(
+        'RoundResults',
+        expect.objectContaining({round: foundRound, initialRace: 0}),
+      ));
+    });
   });
 
   // ── Championship toggle ───────────────────────────────────────────────────────

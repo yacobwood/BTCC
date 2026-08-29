@@ -7,12 +7,20 @@ import {
   StyleSheet,
   Linking,
   Platform,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {useFocusEffect} from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
 import {Analytics} from '../utils/analytics';
+import {shareApp} from '../utils/appShare';
+import {hasChatDisplayName, saveChatDisplayName} from '../utils/chatIdentity';
 const pagesData = require('../assets/pages.json');
+
+const BMC_URL = 'https://www.buymeacoffee.com/btcchub';
 
 const iconMap = {
   info: 'info',
@@ -26,6 +34,10 @@ const iconMap = {
 export default function MoreScreen({navigation}) {
   const [pages, setPages] = useState([]);
   const scrollRef = useRef(null);
+  const [donorGateVisible, setDonorGateVisible] = useState(false);
+  const [donorNameInput, setDonorNameInput] = useState('');
+  const [donorNameError, setDonorNameError] = useState('');
+  const [savingDonorName, setSavingDonorName] = useState(false);
 
   useFocusEffect(useCallback(() => {
     scrollRef.current?.scrollTo({y: 0, animated: false});
@@ -51,6 +63,62 @@ export default function MoreScreen({navigation}) {
     navigation.navigate('InfoPage', {page});
   };
 
+  const onShareApp = () => {
+    Analytics.moreItemClicked('share_app');
+    shareApp('more_menu');
+  };
+
+  // A supporter badge in Live Chat only means something if we can recognise
+  // who donated - gate the coffee link on having a chat display name first
+  // (skip the prompt entirely if one's already set, so this never interrupts
+  // a returning supporter), so whatever name they use matches what they type
+  // into Buy Me a Coffee's own checkout.
+  const onPressCoffee = async () => {
+    Analytics.moreItemClicked('buy_me_a_coffee');
+    const authorId = auth().currentUser?.uid || 'anonymous';
+    const named = await hasChatDisplayName(authorId);
+    if (named) {
+      Linking.openURL(BMC_URL);
+    } else {
+      setDonorNameError('');
+      setDonorNameInput('');
+      setDonorGateVisible(true);
+      Analytics.donorGateShown();
+    }
+  };
+
+  const onSaveDonorName = async () => {
+    // saveChatDisplayName() silently falls back to "Fan #1234" for an empty
+    // name - correct for ChatScreen's own casual name flow (it even has its
+    // own explicit saveName('') path), but wrong here: the donor gate's
+    // entire purpose is giving the admin something to match against a BMC
+    // donation, and a generated placeholder defeats that while also
+    // permanently satisfying hasChatDisplayName() so this person is never
+    // asked again. Reject before ever calling the shared function.
+    if (!donorNameInput.trim()) {
+      setDonorNameError('Enter a display name, or tap Skip');
+      Analytics.donorGateNameSaveResult('empty');
+      return;
+    }
+    setSavingDonorName(true);
+    const authorId = auth().currentUser?.uid || 'anonymous';
+    const result = await saveChatDisplayName({authorId, user: auth().currentUser, name: donorNameInput});
+    setSavingDonorName(false);
+    Analytics.donorGateNameSaveResult(result.status);
+    if (result.status !== 'ok') {
+      setDonorNameError(result.message);
+      return;
+    }
+    setDonorGateVisible(false);
+    Linking.openURL(BMC_URL);
+  };
+
+  const onSkipDonorName = () => {
+    Analytics.donorGateSkipped();
+    setDonorGateVisible(false);
+    Linking.openURL(BMC_URL);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -63,7 +131,7 @@ export default function MoreScreen({navigation}) {
             <TouchableOpacity
               style={styles.coffeeCard}
               activeOpacity={0.8}
-              onPress={() => { Analytics.moreItemClicked('buy_me_a_coffee'); Linking.openURL('https://www.buymeacoffee.com/btcchub'); }}
+              onPress={onPressCoffee}
               accessibilityLabel="Buy me a coffee"
               accessibilityRole="button">
               <View style={styles.coffeeIconWrap}>
@@ -107,6 +175,7 @@ export default function MoreScreen({navigation}) {
         {/* Roadmap */}
         <Text style={styles.sectionTitle}>COMMUNITY</Text>
         <MoreRow label="Roadmap & Ideas" icon="rocket-launch" onPress={() => { Analytics.moreItemClicked('roadmap'); navigation.navigate('Roadmap'); }} />
+        <MoreRow label="Share BTCC Hub" icon="share" onPress={onShareApp} />
 
         <View style={styles.divider} />
 
@@ -114,6 +183,49 @@ export default function MoreScreen({navigation}) {
         <Text style={styles.sectionTitle}>SUPPORT</Text>
         <MoreRow label="Feedback & Bugs" icon="bug-report" onPress={() => { Analytics.moreItemClicked('bug_report'); navigation.navigate('BugReport'); }} />
       </ScrollView>
+
+      <Modal visible={donorGateVisible} transparent animationType="fade" onRequestClose={() => setDonorGateVisible(false)}>
+        <KeyboardAvoidingView
+          style={styles.gateOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.gateCard}>
+            <Text style={styles.gateTitle}>One quick thing</Text>
+            <Text style={styles.gateBody}>
+              Set your chat name so we can recognise you as a supporter - use this same name when you donate!
+            </Text>
+            <TextInput
+              style={styles.gateInput}
+              value={donorNameInput}
+              onChangeText={setDonorNameInput}
+              placeholder="Your chat display name"
+              placeholderTextColor={Colors.textSecondary}
+              autoFocus
+              maxLength={24}
+              accessibilityLabel="Chat display name"
+            />
+            {!!donorNameError && <Text style={styles.gateError}>{donorNameError}</Text>}
+            {auth().currentUser?.isAnonymous && (
+              <TouchableOpacity
+                onPress={() => { setDonorGateVisible(false); navigation.navigate('Settings'); }}
+                accessibilityRole="button"
+                accessibilityLabel="Sign in to make this permanent">
+                <Text style={styles.gateSignInLink}>Sign in to make this permanent →</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.gateSaveBtn}
+              onPress={onSaveDonorName}
+              disabled={savingDonorName}
+              accessibilityRole="button"
+              accessibilityLabel="Save name and continue">
+              <Text style={styles.gateSaveText}>{savingDonorName ? 'SAVING…' : 'SAVE & CONTINUE'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onSkipDonorName} accessibilityRole="button" accessibilityLabel="Skip">
+              <Text style={styles.gateSkipText}>SKIP</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -161,4 +273,24 @@ const styles = StyleSheet.create({
   },
   coffeeTitle: {color: '#fff', fontSize: 15, fontWeight: '700'},
   coffeeSubtitle: {color: Colors.textSecondary, fontSize: 12, marginTop: 2},
+  gateOverlay: {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24},
+  gateCard: {backgroundColor: Colors.card, borderRadius: 20, padding: 24, width: '100%', maxWidth: 340},
+  gateTitle: {color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 8},
+  gateBody: {color: Colors.textSecondary, fontSize: 13, lineHeight: 20, marginBottom: 16},
+  gateInput: {
+    backgroundColor: Colors.background,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#fff',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  gateError: {color: '#ff6b6b', fontSize: 12, marginBottom: 8},
+  gateSignInLink: {color: Colors.yellow, fontSize: 12, fontWeight: '700', marginBottom: 16},
+  gateSaveBtn: {backgroundColor: Colors.yellow, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 4},
+  gateSaveText: {color: Colors.navy, fontSize: 13, fontWeight: '900', letterSpacing: 1},
+  gateSkipText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700', letterSpacing: 1, textAlign: 'center', paddingVertical: 12},
 });

@@ -3,7 +3,7 @@ import {View, Text, TouchableOpacity, StyleSheet, Modal} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 
-export default function OnboardingDialog({visible, onAllow, onSkip}) {
+export default function OnboardingDialog({visible, onAllow, onSkip, onLearnBasics}) {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
@@ -26,6 +26,11 @@ export default function OnboardingDialog({visible, onAllow, onSkip}) {
           <TouchableOpacity style={styles.skipBtn} onPress={onSkip} accessibilityLabel="Skip for now" accessibilityRole="button">
             <Text style={styles.skipText}>MAYBE LATER</Text>
           </TouchableOpacity>
+          {onLearnBasics && (
+            <TouchableOpacity style={styles.learnBtn} onPress={onLearnBasics} accessibilityLabel="New to BTCC? Learn the basics" accessibilityRole="button">
+              <Text style={styles.learnText}>New to BTCC? Learn the basics →</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -42,4 +47,6 @@ const styles = StyleSheet.create({
   allowText: {color: Colors.navy, fontSize: 13, fontWeight: '900', letterSpacing: 1},
   skipBtn: {paddingVertical: 12, width: '100%', alignItems: 'center'},
   skipText: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700', letterSpacing: 1},
+  learnBtn: {paddingVertical: 8, width: '100%', alignItems: 'center'},
+  learnText: {color: Colors.yellow, fontSize: 12, fontWeight: '700'},
 });

@@ -27,6 +27,7 @@ jest.mock('../../src/utils/timeAgo', () => ({
 var mockDbOn, mockDbOff, mockDbPush, mockDbUpdate, mockDbRemove, mockDbTransaction, mockDbRef;
 var mockBanOn, mockBanOff, mockBanRef;
 var mockNamesOn, mockNamesOff, mockNamesSet, mockNamesRef;
+var mockDonorsOn, mockDonorsOff, mockDonorsRef;
 
 jest.mock('@react-native-firebase/database', () => {
   mockDbOn          = jest.fn();
@@ -56,10 +57,14 @@ jest.mock('@react-native-firebase/database', () => {
   mockNamesOff = jest.fn();
   mockNamesSet = jest.fn(() => Promise.resolve());
   mockNamesRef = {on: mockNamesOn, off: mockNamesOff, set: mockNamesSet};
+  mockDonorsOn  = jest.fn();
+  mockDonorsOff = jest.fn();
+  mockDonorsRef = {on: mockDonorsOn, off: mockDonorsOff};
   const db = jest.fn(() => ({
     ref: jest.fn(path => {
       if (path && path.startsWith('/chat/bans/')) return mockBanRef;
       if (path && path.startsWith('/chat/authorNames')) return mockNamesRef;
+      if (path && path.startsWith('/chat/donors')) return mockDonorsRef;
       return mockDbRef;
     }),
   }));
@@ -85,6 +90,12 @@ function triggerBan(banData) {
 function triggerAuthorNames(namesMap) {
   const snap = {val: () => namesMap};
   const onCall = mockNamesOn.mock.calls[0];
+  if (onCall) onCall[1](snap);
+}
+
+function triggerDonors(donorsMap) {
+  const snap = {val: () => donorsMap};
+  const onCall = mockDonorsOn.mock.calls[0];
   if (onCall) onCall[1](snap);
 }
 
@@ -317,6 +328,30 @@ describe('ChatScreen', () => {
       triggerAuthorNames({someoneElse: 'Whatever'});
     });
     await waitFor(() => expect(getByText(/Gordon/)).toBeTruthy());
+  });
+
+  describe('supporter badge', () => {
+    it('shows the supporter badge for a message author flagged in /chat/donors', async () => {
+      const {getByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+        triggerDonors({xyz: true});
+      });
+      await waitFor(() => expect(getByLabelText('Supporter')).toBeTruthy());
+    });
+
+    it('does not show a badge for a non-donor', async () => {
+      const {queryByLabelText} = renderChat();
+      await act(async () => {
+        triggerMessages([
+          {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
+        ]);
+        triggerDonors({someoneElse: true});
+      });
+      await waitFor(() => expect(queryByLabelText('Supporter')).toBeNull());
+    });
   });
 
   it('reply mention uses the resolved current name, not the stale message snapshot', async () => {

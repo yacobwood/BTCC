@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Linking,
   AppState,
+  Alert,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -20,6 +21,8 @@ import {formatDriverName} from '../utils/driverName';
 import {fetchResults, fetchPenalties} from '../api/client';
 import {parseResults, parsePenalties} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
+import {maybeShowShareNudge, markShareNudgeShown} from '../utils/shareNudge';
+import {shareApp, shareContent} from '../utils/appShare';
 import {detectBroadcaster} from '../utils/broadcaster';
 import {ttbPositionMapForRace, isTtbSeasonOpener, getTtbBadge} from '../utils/ttb';
 
@@ -108,15 +111,29 @@ const POLL_INTERVAL_MS = 60 * 1000;
 export default function RoundResultsScreen({route, navigation}) {
   const {round: initialRound, year, initialRace, origin} = route.params;
   const [round, setRound] = useState(initialRound);
+  // Mirrors SwipeableTabs' own index so a share fired from e.g. the R2 tab can
+  // link back to R2 specifically, not just the round overview.
+  const [activeRace, setActiveRace] = useState(initialRace ?? 0);
   // Full season's rounds, kept alongside `round` so Race 1's TTB allocation
   // (reg 1.11.1.a - Championship Order before this round) can be reconstructed
   // from cumulative points across earlier rounds. Seeded from the bundled
   // snapshot so it works offline; refreshed opportunistically below.
   const [allRounds, setAllRounds] = useState(BUNDLED_RESULTS.rounds || []);
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
+
   const {isFavourite} = useFavouriteDriver();
   const {useKm} = useUnits();
   const races = round.races || [];
+
+  // Shares whichever session tab is actually open (FP/QUAL/Q RACE/R1/R2/R3) -
+  // previously this always linked to the round overview, so a link shared
+  // from e.g. the R2 tab opened the recipient straight to FP instead.
+  const onShareRound = async () => {
+    const race = races[activeRace];
+    const sessionSuffix = race ? `/${activeRace + 1}` : '';
+    const sessionLabel = race ? `: ${race.label}` : '';
+    await shareContent('round_result', round.round, `${round.venue} - Round ${round.round}${sessionLabel} results\n\nhttps://btcchub.vercel.app/results/${round.round}${sessionSuffix}?src=round_result`);
+  };
 
   // Sync state when navigated to a different round (screen is reused in the stack)
   useEffect(() => {
@@ -127,6 +144,21 @@ export default function RoundResultsScreen({route, navigation}) {
     Analytics.screen('round_results');
     Analytics.roundResultsViewed(year, round.round);
     maybeRequestReviewAfterResults();
+    // Independently gated from the review prompt above (different keys, a
+    // later day-count) so the two don't compete for the same visit.
+    maybeShowShareNudge().then(should => {
+      if (!should) return;
+      markShareNudgeShown();
+      Analytics.shareNudgeShown();
+      Alert.alert(
+        'Enjoying BTCC Hub?',
+        'Share it with a fellow fan.',
+        [
+          {text: 'Not now', style: 'cancel', onPress: () => Analytics.shareNudgeDismissed()},
+          {text: 'Share', onPress: () => shareApp('share_nudge')},
+        ],
+      );
+    });
   }, []);
 
   const refresh = useCallback(async () => {
@@ -255,11 +287,15 @@ export default function RoundResultsScreen({route, navigation}) {
           <Text style={styles.headerTitle}>{round.venue}</Text>
           <Text style={styles.headerSub}>Rounds {rStart}–{rEnd} · {round.date}</Text>
         </View>
+        <TouchableOpacity onPress={onShareRound} style={{padding: 4}} accessibilityLabel="Share round result" accessibilityRole="button">
+          <Icon name="share" size={22} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <SwipeableTabs
         tabs={races.map(r => shortLabel(r.label))}
         initialPage={initialRace ?? 0}
+        onTabChange={setActiveRace}
         lazy={true}
         pages={races.map((race, i) => {
           const gridMap = buildGridMap(races, i);

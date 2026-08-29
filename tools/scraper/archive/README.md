@@ -53,3 +53,15 @@ TestScrapeDriverCutouts, TestScrapeDriverImages, plus the driver-card-bg/
 driver-profile-cutout cases of TestDualShapeMediaRegexes) is still in git
 history in `tools/scraper/test_driver_media_scrapers.py` as of the commit
 before this archive.
+
+## build_team_map.py, backfill_team_names.py
+
+Archived 2026-08-25. Both were one-off migration scripts, already run,
+with no remaining caller (no workflow, no other script imports either
+one - confirmed by grep). `build_team_map.py` generated
+`team_name_map.json` once from `data/drivers.json`'s team-history
+entries; `backfill_team_names.py` then consumed that map to rewrite the
+`team` field across `data/results2014.json`-`results2023.json` for teams
+that had since been renamed. `team_name_map.json` moved here with them,
+since it only ever had these two scripts as producer/consumer. No test
+files existed for either (neither had one before archiving).

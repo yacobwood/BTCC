@@ -98,6 +98,32 @@ describe('Analytics', () => {
     });
   });
 
+  describe('contentShared', () => {
+    it('logs a share event with the given content_type and item_id', () => {
+      Analytics.contentShared('driver', 'Tom Ingram');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share', {
+        content_type: 'driver',
+        item_id: 'Tom Ingram',
+      });
+    });
+
+    it('stringifies a non-string itemId', () => {
+      Analytics.contentShared('standings', 2026);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share', {
+        content_type: 'standings',
+        item_id: '2026',
+      });
+    });
+
+    it('handles a missing itemId gracefully', () => {
+      expect(() => Analytics.contentShared('app', undefined)).not.toThrow();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share', {
+        content_type: 'app',
+        item_id: '',
+      });
+    });
+  });
+
   describe('calendar events', () => {
     it('trackDetailViewed logs with round and venue', () => {
       Analytics.trackDetailViewed(3, 'Snetterton');
@@ -282,6 +308,37 @@ describe('Analytics', () => {
     it('sets auth_provider to anonymous for anonymous users', () => {
       Analytics.setAuthUser('uid-anon', 'anonymous');
       expect(setUserProperty).toHaveBeenCalledWith(expect.anything(), 'auth_provider', 'anonymous');
+    });
+  });
+
+  describe('growth/re-engagement events (2026-08-25)', () => {
+    it('onboardingChoiceMade logs the choice', () => {
+      Analytics.onboardingChoiceMade('learn_basics');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'onboarding_choice_made', {choice: 'learn_basics'});
+    });
+
+    it('shareNudgeShown/shareNudgeDismissed log with no params', () => {
+      Analytics.shareNudgeShown();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share_nudge_shown');
+      Analytics.shareNudgeDismissed();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share_nudge_dismissed');
+    });
+
+    it('inactivityBannerShown logs with no params', () => {
+      Analytics.inactivityBannerShown();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'inactivity_banner_shown');
+    });
+
+    it('donorGateShown/donorGateSkipped log with no params', () => {
+      Analytics.donorGateShown();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'donor_gate_shown');
+      Analytics.donorGateSkipped();
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'donor_gate_skipped');
+    });
+
+    it('donorGateNameSaveResult logs the save status', () => {
+      Analytics.donorGateNameSaveResult('taken');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'donor_gate_name_save_result', {status: 'taken'});
     });
   });
 });

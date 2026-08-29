@@ -69,6 +69,11 @@ describe('SettingsScreen', () => {
       expect(getByText('NOTIFICATIONS')).toBeTruthy();
     });
 
+    it('renders the "Results are in" toggle', async () => {
+      const {getByLabelText} = await renderSettings();
+      expect(getByLabelText('Results are in')).toBeTruthy();
+    });
+
     it('renders the DISPLAY section', async () => {
       const {getByText} = await renderSettings();
       expect(getByText('DISPLAY')).toBeTruthy();
@@ -81,9 +86,9 @@ describe('SettingsScreen', () => {
       expect(getByText('Standings update')).toBeTruthy();
     });
 
-    it('renders the Monday Roundup toggle', async () => {
+    it('renders the Flying Lap toggle', async () => {
       const {getByLabelText} = await renderSettings();
-      expect(getByLabelText('Monday Roundup')).toBeTruthy();
+      expect(getByLabelText('The Flying Lap')).toBeTruthy();
     });
 
     it('renders Pre-race alerts group', async () => {
@@ -181,9 +186,9 @@ describe('SettingsScreen', () => {
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_news_alerts', 'false');
     });
 
-    it('toggling Monday Roundup off persists to AsyncStorage', async () => {
+    it('toggling The Flying Lap off persists to AsyncStorage', async () => {
       const {UNSAFE_getAllByType} = await renderSettings();
-      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Monday Roundup', false); });
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'The Flying Lap', false); });
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_digest_alerts', 'false');
     });
 
@@ -398,6 +403,17 @@ describe('SettingsScreen', () => {
       });
       expect(mockSignOut).toHaveBeenCalled();
       Alert.alert.mockRestore();
+    });
+  });
+
+  describe('version display', () => {
+    it('shows only the Season/Round/Lap nickname, not the plain semver line', async () => {
+      const {getByText, queryByText} = await renderSettings();
+      // package.json version is "2.20.10" at the time this test was written -
+      // Season 2, Round 20, Lap 10. If the version bumps this assertion should
+      // be updated to match rather than loosened.
+      expect(getByText('Season 2 · Round 20 · Lap 10')).toBeTruthy();
+      expect(queryByText(/^Version /)).toBeNull();
     });
   });
 });

@@ -4,6 +4,8 @@ import {markRead} from './digestRead';
 import {Analytics} from './analytics';
 import {requestOpenChat} from './chatBridge';
 
+const pagesData = require('../assets/pages.json');
+
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
 const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest']);
@@ -149,7 +151,7 @@ export function navigateFromData(navigationRef, data) {
         })
         .catch(() => navigationRef.navigate('News'));
 
-    // ── Monday Roundup (digest) ────────────────────────────────────
+    // ── The Flying Lap (digest) ────────────────────────────────────
     } else if (type === 'digest' && id) {
       fetchHubPost(id)
         .then(article => {
@@ -272,6 +274,41 @@ export function navigateFromData(navigationRef, data) {
     } else if (type === 'hub' || type === 'news') {
       navigationRef.navigate('News');
     }
+  };
+
+  if (navigationRef.isReady()) {
+    go();
+  } else {
+    const iv = setInterval(() => {
+      if (navigationRef.isReady()) {
+        clearInterval(iv);
+        go();
+      }
+    }, 100);
+    setTimeout(() => clearInterval(iv), 10000);
+  }
+}
+
+/**
+ * Onboarding's "New to BTCC?" link needs to navigate from outside the
+ * navigator - same problem a notification tap has - before the user has
+ * necessarily opened the More tab even once. Reuses the same cold-start-safe
+ * reset pattern as the rest of this file rather than inventing a second one.
+ */
+export function navigateToNewToBtcc(navigationRef) {
+  const page = (pagesData.pages || []).find(p => p.id === 'new-to-btcc');
+  if (!page) return;
+
+  const go = () => {
+    navigationRef.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{
+          name: 'More',
+          state: {routes: [{name: 'MoreMenu'}, {name: 'InfoPage', params: {page}}], index: 1},
+        }],
+      }),
+    );
   };
 
   if (navigationRef.isReady()) {

@@ -33,9 +33,20 @@ export default function RadioScreen({navigation}) {
         }
       } catch {}
 
-      // Phase 2: fetch fresh data with timeout
+      // Phase 2: fetch fresh data with timeout - manual AbortController, not
+      // AbortSignal.timeout (unreliable on Android/Hermes - see
+      // src/store/featureFlags.js's identical workaround and src/api/
+      // client.js's fetchJson()). On an affected device the old code threw
+      // synchronously building the fetch options, silently caught by this
+      // same try/catch - meaning this phase never actually ran, falling
+      // straight to Phase 3's bundled fallback every time with no visible
+      // symptom.
       try {
-        const res = await fetch(RADIO_URL, {signal: AbortSignal.timeout(8000)});
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        if (timeoutId?.unref) timeoutId.unref();
+        const res = await fetch(RADIO_URL, {signal: controller.signal});
+        clearTimeout(timeoutId);
         const data = await res.json();
         const mapped = mapStations(data);
         if (mapped.length) {

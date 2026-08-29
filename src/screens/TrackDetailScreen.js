@@ -11,7 +11,6 @@ import {
   Dimensions,
   Animated,
   Linking,
-  Share,
   AppState,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -21,6 +20,7 @@ import {fetchWeather, weatherDescription, weatherIcon, weatherIconColor, windDir
 import CachedImage from '../components/CachedImage';
 import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
+import {shareContent} from '../utils/appShare';
 import {useUnits} from '../store/units';
 import {useSettings} from '../store/settings';
 import {useFeatureFlags} from '../store/featureFlags';
@@ -896,7 +896,7 @@ export default function TrackDetailScreen({route, navigation}) {
   };
 
   const onShare = async () => {
-    await Share.share({message: `Round ${track.round} - ${track.venue}\n\nbtccfanhub://round/${track.round}`});
+    await shareContent('track', track.venue, `Round ${track.round} - ${track.venue}\n\nhttps://btcchub.vercel.app/round/${track.round}?src=track_detail`);
   };
 
   return (

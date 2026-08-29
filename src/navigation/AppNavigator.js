@@ -38,6 +38,7 @@ import DriverDetailScreen from '../screens/DriverDetailScreen';
 import TeamDetailScreen from '../screens/TeamDetailScreen';
 import ResultsScreen from '../screens/ResultsScreen';
 import RoundResultsScreen from '../screens/RoundResultsScreen';
+import GalleryAlbumScreen from '../screens/GalleryAlbumScreen';
 import MoreScreen from '../screens/MoreScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InfoPageScreen from '../screens/InfoPageScreen';
@@ -105,6 +106,7 @@ function ResultsStack() {
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="ResultsList" component={ResultsScreen} />
       <Stack.Screen name="RoundResults" component={RoundResultsScreen} />
+      <Stack.Screen name="GalleryAlbum" component={GalleryAlbumScreen} />
       <Stack.Screen name="Records" component={RecordsScreen} />
     </Stack.Navigator>
   );
@@ -141,7 +143,7 @@ const tabIcons = {
 
 const TAB_BAR_HEIGHT = 56;
 
-const linking = {
+export const linking = {
   prefixes: ['btccfanhub://', 'https://btcchub.vercel.app'],
   config: {
     screens: {
@@ -163,7 +165,17 @@ const linking = {
       },
       Results: {
         screens: {
+          ResultsList: 'results',
           RoundResults: 'results/:round',
+          // No custom getStateFromPath needed here, unlike results/:round
+          // below - GalleryAlbumScreen fetches its own data straight from
+          // season/albumSlug (fetchGalleryAlbum), it doesn't need a
+          // pre-resolved object handed to it by a parent screen's already-
+          // loaded state the way RoundResultsScreen does. photoIndex is
+          // optional (`?` suffix) - a shared album-only link (no index)
+          // still lands correctly, it just opens the grid instead of a
+          // specific photo.
+          GalleryAlbum: 'gallery/:season/:albumSlug/:photoIndex?',
         },
       },
     },
@@ -182,6 +194,33 @@ const linking = {
               {name: 'LiveTiming', params: {eventId: m[1]}},
             ],
             index: 1,
+          },
+        }],
+      };
+    }
+    // "results/:round" alone (the static config entry below) would land
+    // directly on RoundResults with round as a raw string param - but
+    // RoundResultsScreen needs the full round object (races/venue/date,
+    // not just a number), so opening a shared results link always rendered
+    // a broken, empty screen. Route through ResultsList instead, which
+    // already resolves openRound/openYear into the real object once
+    // results are loaded (see ResultsScreen.js) - an optional second
+    // segment threads through which session tab to land on (1-indexed,
+    // matching how RoundResultsScreen's onShareRound builds the link).
+    const r = path.match(/^results\/(\d+)(?:\/(\d+))?/);
+    if (r) {
+      const [, round, race] = r;
+      return {
+        routes: [{
+          name: 'Results',
+          state: {
+            routes: [
+              {name: 'ResultsList', params: {
+                openRound: parseInt(round, 10),
+                ...(race ? {openRace: parseInt(race, 10) - 1} : {}),
+              }},
+            ],
+            index: 0,
           },
         }],
       };

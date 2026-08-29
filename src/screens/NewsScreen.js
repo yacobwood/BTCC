@@ -24,6 +24,8 @@ import {useFeatureFlags} from '../store/featureFlags';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {checkAndStampLastOpen} from '../utils/inactivityBanner';
+import NudgeBanner from '../components/NudgeBanner';
 const logoImg = require('../assets/logo_long.png');
 
 // orderDate (parseArticle/mapHubPosts) is the feed-ordering key - falls back
@@ -44,6 +46,7 @@ export default function NewsScreen({navigation}) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showInactivityBanner, setShowInactivityBanner] = useState(false);
   const flatListRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
   const [searchResults, setSearchResults] = useState([]);
@@ -128,6 +131,14 @@ export default function NewsScreen({navigation}) {
 
 
   useEffect(() => { Analytics.screen('news'); }, []);
+  // News is the app's default/home tab, so its mount is a reasonable proxy
+  // for "app opened" without threading a launch event through App.tsx.
+  useEffect(() => {
+    checkAndStampLastOpen().then(should => {
+      setShowInactivityBanner(should);
+      if (should) Analytics.inactivityBannerShown();
+    });
+  }, []);
   useFocusEffect(useCallback(() => { getReadIds().then(setDigestReadIds); }, []));
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -338,6 +349,19 @@ export default function NewsScreen({navigation}) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />
         }
+        // Rendered as a scrollable list item (like DigestBanner further down)
+        // rather than a fixed sibling above the FlatList - a fixed sibling
+        // permanently ate space above the hero card for as long as it was
+        // visible, on every scroll position, not just the first frame.
+        ListHeaderComponent={
+          <NudgeBanner
+            visible={showInactivityBanner}
+            message="Welcome back! Catch up on results and standings."
+            actionLabel="Season"
+            onAction={() => { Analytics.navItemClicked('inactivity_banner_action'); setShowInactivityBanner(false); navigation.navigate('Results'); }}
+            onDismiss={() => { Analytics.navItemClicked('inactivity_banner_dismiss'); setShowInactivityBanner(false); }}
+          />
+        }
         ListEmptyComponent={
           searchLoading ? (
             <ActivityIndicator color={Colors.yellow} style={{marginTop: 40}} />
@@ -463,7 +487,7 @@ function DigestBanner({count, unread, onPress}) {
       style={[styles.digestBanner, hasUnread ? styles.digestBannerUnread : styles.digestBannerRead]}
       activeOpacity={0.8}
       onPress={onPress}
-      accessibilityLabel="View BTCC Monday Roundup"
+      accessibilityLabel="View The Flying Lap"
       accessibilityRole="button">
       <Icon
         name="library-books"
@@ -473,7 +497,7 @@ function DigestBanner({count, unread, onPress}) {
       />
       <View style={{flex: 1}}>
         <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: hasUnread ? '#000' : Colors.textSecondary}}>
-          BTCC MONDAY ROUNDUP
+          THE FLYING LAP
         </Text>
         <Text style={{fontSize: 12, marginTop: 2, color: hasUnread ? 'rgba(0,0,0,0.6)' : Colors.textSecondary}}>
           {subtitle}

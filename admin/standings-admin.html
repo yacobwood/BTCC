@@ -1216,7 +1216,7 @@ select.input { cursor: pointer; }
 
   <div class="banner banner-green" id="digest-banner">
     <div class="banner-dot"></div>
-    <span id="digest-banner-text">Editor's Weekly Roundup</span>
+    <span id="digest-banner-text">Editor's Flying Lap</span>
   </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -2852,7 +2852,16 @@ const TRIGGER_DIGEST_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.
 const DISMISS_ERROR_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/dismissError';
 const SET_CHAT_DONOR_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/setChatDonor';
 const LOOKUP_USER_URL       = 'https://us-central1-btcchub-af77a.cloudfunctions.net/lookupUserByEmail';
-const TRIGGER_DIGEST_SECRET = 'btcchub-digest-trigger-2026';
+// KNOWN WEAKNESS, not a real fix: this page is served publicly via GitHub
+// Pages with no server-side gate, so this value is readable by anyone who
+// views source - the SHA-256 login above only hides the UI, it never
+// touches the 7 endpoints this secret gates. Rotated 2026-08-28 after the
+// prior value was found exposed here; must match whatever ADMIN_SECRET is
+// currently set to in Firebase Secret Manager (functions/shared.js). A real
+// fix means replacing this shared-secret model with per-admin auth (e.g.
+// Firebase Auth ID token + an allowlist checked server-side) so this page
+// never has to hold a value that unlocks the backend on its own.
+const TRIGGER_DIGEST_SECRET = 'hOZlJPo8ZdzS2nZ8-vKr2q2w9h2CgQlUPhJLJxT7OhQ';
 
 async function triggerDigestGenerate(type) {
   const btnId = type === 'race' ? 'gen-race-btn' : 'gen-weekly-btn';
@@ -3019,7 +3028,7 @@ async function dispatchArticleNotif(article) {
   try {
     const inputs = {
       channel: isDigest ? 'digest' : 'news',
-      title: article.title || (isDigest ? 'BTCC Monday Roundup' : 'New BTCC Hub Article'),
+      title: article.title || (isDigest ? 'The Flying Lap' : 'New BTCC Hub Article'),
       body: article.description || '',
       data: JSON.stringify(isDigest
         ? {type: 'digest', id: article.id, channel: 'news'}
@@ -3836,9 +3845,12 @@ async function loadWebsiteAnalytics() {
       .map(doc => fsFields(doc.fields || {}))
       .sort((a, b) => (a.weekStart || '').localeCompare(b.weekStart || ''));
 
-    // Merge the one-time backfill with each week's own dailyBreakdown -
-    // the weekly docs take priority on overlapping dates since they're the
-    // ongoing live source, the backfill only fills in everything earlier.
+    // Merge analytics_daily_history (backfill + syncAnalytics' daily upsert,
+    // trailing 30 days) with each week's own dailyBreakdown - the weekly
+    // docs take priority on overlapping dates since exportAnalyticsHistory
+    // is the permanent archive; analytics_daily_history is what keeps the
+    // chart's live tail fresh day to day and covers everything further back
+    // than 30 days via the one-time backfill.
     const dailyMap = {};
     dailyDocs.map(doc => fsFields(doc.fields || {})).forEach(day => { if (day.date) dailyMap[day.date] = day; });
     weeks.forEach(w => (w.dailyBreakdown || []).forEach(day => { if (day.date) dailyMap[day.date] = day; }));

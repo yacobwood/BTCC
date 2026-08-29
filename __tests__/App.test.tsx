@@ -8,7 +8,7 @@ jest.unmock('../App');
 
 // Stub out side-effect-heavy utils so this smoke test stays fast
 jest.mock('../src/utils/backgroundPrefetch', () => ({runBackgroundPrefetch: jest.fn()}));
-jest.mock('../src/utils/notifNavigation',    () => ({navigateFromData: jest.fn(), handleNotificationOpen: jest.fn()}));
+jest.mock('../src/utils/notifNavigation',    () => ({navigateFromData: jest.fn(), handleNotificationOpen: jest.fn(), navigateToNewToBtcc: jest.fn()}));
 jest.mock('@react-native-firebase/database', () => {
   const ref = {
     orderByChild: jest.fn().mockReturnThis(),
@@ -26,11 +26,74 @@ jest.mock('@react-native-firebase/database', () => {
 });
 
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
+import ReactTestRenderer, {act} from 'react-test-renderer';
 import App from '../App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {navigateToNewToBtcc} from '../src/utils/notifNavigation';
+import {logEvent} from '@react-native-firebase/analytics';
 
 test('renders correctly', async () => {
   await ReactTestRenderer.act(() => {
     ReactTestRenderer.create(<App />);
   });
+});
+
+test('mounting with onboarding not yet shown logs an onboarding screen view', async () => {
+  await act(async () => {
+    ReactTestRenderer.create(<App />);
+  });
+
+  expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'screen_view', expect.objectContaining({screen_name: 'onboarding'}));
+});
+
+test('pressing "New to BTCC? Learn the basics" in onboarding dismisses it and navigates, without marking onboarding as shown', async () => {
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  const link = root.root.findByProps({accessibilityLabel: 'New to BTCC? Learn the basics'});
+  await act(async () => {
+    link.props.onPress();
+  });
+
+  expect(navigateToNewToBtcc).toHaveBeenCalled();
+  // Regression: this used to also set onboarding_shown, which meant a
+  // curious new user who tapped this link was never asked about
+  // notifications at all, on this or any later launch. Leaving the flag
+  // unset means the prompt asks again next cold start instead.
+  expect(AsyncStorage.setItem).not.toHaveBeenCalledWith('onboarding_shown', 'true');
+  // The dialog itself is still dismissed immediately (doesn't block navigation)
+  expect(root.root.findAllByProps({accessibilityLabel: 'New to BTCC? Learn the basics'}).length).toBe(0);
+  expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'onboarding_choice_made', {choice: 'learn_basics'});
+});
+
+test('pressing "Allow notifications" in onboarding logs the allow choice', async () => {
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  const allowBtn = root.root.findByProps({accessibilityLabel: 'Allow notifications'});
+  await act(async () => {
+    allowBtn.props.onPress();
+  });
+
+  expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'onboarding_choice_made', {choice: 'allow'});
+  expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_shown', 'true');
+});
+
+test('pressing "Skip for now" in onboarding logs the skip choice', async () => {
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  const skipBtn = root.root.findByProps({accessibilityLabel: 'Skip for now'});
+  await act(async () => {
+    skipBtn.props.onPress();
+  });
+
+  expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'onboarding_choice_made', {choice: 'skip'});
+  expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_shown', 'true');
 });

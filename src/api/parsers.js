@@ -435,6 +435,55 @@ export function parseResults(json) {
   }));
 }
 
+// Parse the gallery season index (tools/scraper/scrape_gallery.py's
+// data/gallery{year}.json) - album metadata only, no photo lists. round/venue
+// stay null for an album match_round() couldn't resolve to a race weekend
+// (a season-launch shoot, TOCA Awards, a test day) rather than guessed.
+export function parseGalleryIndex(json) {
+  return {
+    season: json.season || 0,
+    albums: (json.albums || []).map(a => ({
+      slug: a.slug || '',
+      title: a.title || '',
+      cover: a.cover || '',
+      round: a.round ?? null,
+      venue: a.venue || null,
+      // True for exactly one album per round (scrape_gallery.py's
+      // assign_canonical_albums()) - a round can have more than one
+      // published album (e.g. a main one plus a separate "Captured
+      // Moments" one), both correctly resolved to the same round, but only
+      // the canonical one should render as that round's "Race Weekends"
+      // tile; every other album for the round goes to "Other" instead of
+      // showing a duplicate round chip.
+      isCanonical: a.isCanonical || false,
+      capturedCount: a.capturedCount || 0,
+      totalCount: a.totalCount || 0,
+      complete: a.complete || false,
+    })),
+  };
+}
+
+// Parse a single gallery album's photo list (data/gallery/{year}/{slug}.json).
+// capturedCount/totalCount/complete let the UI show an honest "38 of 42
+// photos so far" rather than implying a still-capturing album is finished.
+export function parseGalleryAlbum(json) {
+  if (!json) return null;
+  return {
+    slug: json.slug || '',
+    title: json.title || '',
+    year: json.year || 0,
+    round: json.round ?? null,
+    venue: json.venue || null,
+    capturedCount: json.capturedCount || 0,
+    totalCount: json.totalCount || 0,
+    complete: json.complete || false,
+    photos: (json.photos || []).map(p => ({
+      thumbUrl: p.thumbUrl || '',
+      viewUrl: p.viewUrl || '',
+    })),
+  };
+}
+
 // tools/scraper/scrape_penalties.py's "confidence" field ("full"/"partial"/
 // "minimal") isn't surfaced in the UI - a penalty is shown either way, just
 // with a less detailed oneLiner when the source PDF didn't match a known

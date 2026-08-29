@@ -18,7 +18,8 @@ const DB = database();
 import {Colors} from '../theme/colors';
 import auth from '@react-native-firebase/auth';
 import {useAuth} from '../store/auth';
-import {saveProfile, claimUsername, validateUsername} from '../utils/userProfile';
+import {saveProfile, claimUsername} from '../utils/userProfile';
+import {saveChatDisplayName} from '../utils/chatIdentity';
 import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
 import {timeAgo} from '../utils/timeAgo';
@@ -49,6 +50,7 @@ export default function ChatScreen({onClose} = {}) {
   // as a fallback for authors who've never (re)named themselves since this
   // map existed.
   const [authorNames, setAuthorNames] = useState({});
+  const [donors, setDonors] = useState({});
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
   const [commenterName, setCommenterName] = useState(null);
@@ -122,7 +124,11 @@ export default function ChatScreen({onClose} = {}) {
     const namesRef = DB.ref('/chat/authorNames');
     namesRef.on('value', snap => { setAuthorNames(snap.val() || {}); });
 
-    return () => { ref.off('value'); namesRef.off('value'); };
+    // Live authorId -> donor flag map, for the supporter badge in renderMessage
+    const donorsRef = DB.ref('/chat/donors');
+    donorsRef.on('value', snap => { setDonors(snap.val() || {}); });
+
+    return () => { ref.off('value'); namesRef.off('value'); donorsRef.off('value'); };
   }, []);
 
   // Current display name for a given message, resolved live by authorId -
@@ -246,35 +252,19 @@ export default function ChatScreen({onClose} = {}) {
   }, [myAuthorId]);
 
   const saveName = async (name) => {
-    const trimmed = name.trim() || `Fan #${myAuthorIdRef.current.slice(-4)}`;
-
-    // Validate and enforce uniqueness for non-empty names on non-anonymous accounts
-    if (name.trim() && user && !user.isAnonymous) {
-      const validationError = validateUsername(trimmed);
-      if (validationError) {
-        setNameError(validationError);
-        return null;
-      }
-      const result = await claimUsername(user.uid, trimmed, commenterName || null);
-      if (result === 'taken') {
-        setNameError('That name is already taken');
-        return null;
-      }
-      if (result === 'error') {
-        setNameError('Could not save name. Please try again.');
-        return null;
-      }
-    } else {
-      await AsyncStorage.setItem(COMMENTER_NAME_KEY, trimmed);
+    const result = await saveChatDisplayName({
+      authorId: myAuthorIdRef.current,
+      user,
+      name,
+      previousName: commenterName || null,
+    });
+    if (result.status !== 'ok') {
+      setNameError(result.message);
+      return null;
     }
-
     setNameError('');
-    setCommenterName(trimmed);
-    // Best-effort - if this write fails (offline, rules hiccup), the new name
-    // still applies to future messages via commenterName; only the retroactive
-    // relabelling of past messages is missed.
-    DB.ref(`/chat/authorNames/${myAuthorIdRef.current}`).set(trimmed).catch(() => {});
-    return trimmed;
+    setCommenterName(result.name);
+    return result.name;
   };
 
   const handleSend = useCallback(async () => {
@@ -417,6 +407,9 @@ export default function ChatScreen({onClose} = {}) {
       <View style={styles.msgRow}>
         <View style={styles.msgMeta}>
           <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{authorName}</Text>
+          {!!donors[item.authorId] && (
+            <Icon name="local-cafe" size={12} color={Colors.yellow} accessibilityLabel="Supporter" />
+          )}
           <Text style={styles.msgTime}>{timeAgo(item.timestamp)}</Text>
         </View>
         <Text style={styles.msgText}>{item.text}</Text>

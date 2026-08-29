@@ -56,6 +56,12 @@
           ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30"
         }
       },
+      "donors": {
+        ".read": true,
+        "$authorId": {
+          ".write": false
+        }
+      },
       "deviceTokens": {
         ".read": false,
         "$authorId": {

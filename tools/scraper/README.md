@@ -113,6 +113,9 @@ across runs instead of reinstalling every time.
 | `scrape_tsl.py` | tsl-timing.com PDFs (not btcc.net) | `data/results{year}.json`, `data/standings.json`, `data/calendar.json` (records) | Every 2 min on race weekends - `scrape-results.yml` (GitHub-hosted) |
 | `scrape_youtube.py` | youtube.com (ITV Sport Extra, not btcc.net) | `data/results2026.json`, `data/calendar.json` | Mon+Tue 10:00 UTC - `scrape-youtube.yml` (GitHub-hosted) |
 | `scrape_circuit_images.py` | btcc.net/circuit/\<slug\>/ per track | `data/tracks.json` (`imageUrl`) + `data/media/tracks/` | Manual only |
+| `scrape_gallery.py` | btcc.net/gallery/\<year\>/ + per-album pages (both paginated) | `data/gallery{year}.json` + `data/gallery/{year}/*.json` (no image bytes - photos are hotlinked directly, see below) | Weekly, Wed 09:00 UTC - `scrape-gallery.yml` |
+
+**`scrape_gallery.py` is the one exception to "every btcc.net image must be mirrored"** - confirmed live 2026-08-28 (direct `curl`, no browser/auth/special headers): gallery photos are served as direct, PUBLIC (non-signed, non-expiring) Supabase Storage URLs on a completely different host than btcc.net. Vercel's bot-challenge protects btcc.net's own Vercel deployment specifically - it has no reach over a different origin, unlike article/driver/circuit images which route through btcc.net's own `/api/media/<uuid>` redirector (same origin as the challenge, confirmed blocked - see `scrape_articles.py`'s own docstring). So this scraper stores the real photo URLs directly (`{thumbUrl, viewUrl}` per photo, the large "display" variant derived from the small "thumb" one via a simple URL-suffix swap - same idea as this codebase's own `wpThumb()`/`carThumbUrl()`, just a different naming convention) and never downloads/mirrors any image bytes at all - no `data/media/gallery/`. Both the year-listing page and each album's own photo grid paginate independently (`?page=N` - a single album can span many pages, e.g. Donington Park's 2026 album alone is 9), so the scraper tracks `lastPageScraped`/`totalPages`/`complete` per album and resumes any incomplete album's next unscraped page before starting a new one - a routine run's cost is bounded by page loads, not photo downloads. A round can have more than one published album (e.g. a main "2026 - Donington Park GP" album and a separately-published "The Captured Moments: Donington Park GP" one) - `match_round()` resolves each independently, preferring the longest/most-specific venue-name match when one venue name is a literal prefix of another (e.g. "Donington Park" vs "Donington Park GP") rather than treating that as ambiguous.
 
 Driver headshots, per-driver car cutouts, number graphics and driver/team card
 backgrounds used to be live-scraped too (`scrape_driver_images.py`,
@@ -124,9 +127,11 @@ images" below and `tools/scraper/archive/README.md`.
 ## Hardcoded driver/team images (not scraped)
 
 `data/driverImages/`, `data/carImages/`, `data/numberImages/` and
-`data/backgroundImages/` hold official team/driver graphics, named
-`<car number>.png` (or `<team-slug>.png`/`.jpg` for team-level backgrounds),
-referenced by `raw.githubusercontent.com` URL from `data/drivers.json` -
+`data/backgroundImages/` hold official team/driver graphics (naming
+convention varies by folder and has changed over time - see the root
+`README.md`'s "Hardcoded driver/team images" entry for the current state
+of each one), referenced by `raw.githubusercontent.com` URL from
+`data/drivers.json` -
 `imageUrl`, `carImageUrl`, `numberImageUrl` (driver-level) and
 `cardBgUrl`/`carImageUrl` (team-level). No scraper writes these; replacing an
 image means dropping in a new file under the same name (or updating
@@ -142,11 +147,12 @@ and what each field replaced.
 | `merge_schedule.py` | Merges `schedule.json` sessions into `data/calendar.json` | `data/calendar.json` |
 | `compute_records.py` | Computes all-time driver records from bundled `season_*.json` + `results{year}.json` | `data/records.json` |
 | `career_stats.py` | Computes per-driver per-year career stats from the same local archives; has a `--verify-champions` self-check mode | stdout only |
-| `backfill_team_names.py` | One-off: rewrites `team` fields in `results2014.json`-`results2023.json` from `team_name_map.json` | `data/results{year}.json` (2014-2023) |
-| `build_team_map.py` | One-off: generates `team_name_map.json` from `data/drivers.json` histories | `tools/scraper/team_name_map.json` |
 
 `scrape_schedule.py`/`merge_schedule.py` run as later steps in `scrape-calendar.yml`, right
 after `scrape_calendar.py` in the same job, so they see the freshly-written `fullTimetable`.
+
+`backfill_team_names.py` and `build_team_map.py` already did their one-off job and have been
+moved to `archive/` - see `archive/README.md` for what they did.
 The rest are manual/ad-hoc maintenance scripts, not wired into any workflow.
 
 ## Testing
