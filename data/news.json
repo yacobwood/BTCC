@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Mikey Doble shows fighting spirit at Donington Park"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/a72568fe-9044-4283-bf3a-e5c5a6bc9c0e-Doble-KY2A4957.jpg"
+        }
+      ]
+    }
   }
 ]
