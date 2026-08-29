@@ -9,7 +9,6 @@ import {
   Linking,
   AppState,
   Alert,
-  Share,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -23,7 +22,7 @@ import {fetchResults, fetchPenalties} from '../api/client';
 import {parseResults, parsePenalties} from '../api/parsers';
 import {maybeRequestReviewAfterResults} from '../utils/reviewPrompt';
 import {maybeShowShareNudge, markShareNudgeShown} from '../utils/shareNudge';
-import {shareApp} from '../utils/appShare';
+import {shareApp, shareContent} from '../utils/appShare';
 import {detectBroadcaster} from '../utils/broadcaster';
 import {ttbPositionMapForRace, isTtbSeasonOpener, getTtbBadge} from '../utils/ttb';
 
@@ -133,12 +132,7 @@ export default function RoundResultsScreen({route, navigation}) {
     const race = races[activeRace];
     const sessionSuffix = race ? `/${activeRace + 1}` : '';
     const sessionLabel = race ? `: ${race.label}` : '';
-    Analytics.contentShared('round_result', round.round);
-    try {
-      await Share.share({
-        message: `${round.venue} - Round ${round.round}${sessionLabel} results\n\nhttps://btcchub.vercel.app/results/${round.round}${sessionSuffix}?src=round_result`,
-      });
-    } catch {}
+    await shareContent('round_result', round.round, `${round.venue} - Round ${round.round}${sessionLabel} results\n\nhttps://btcchub.vercel.app/results/${round.round}${sessionSuffix}?src=round_result`);
   };
 
   // Sync state when navigated to a different round (screen is reused in the stack)

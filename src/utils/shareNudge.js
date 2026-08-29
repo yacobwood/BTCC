@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {daysSince} from './daysSince';
 
 const KEY_SHOWN = 'share_nudge_shown';
 const KEY_FIRST_VIEW = 'share_nudge_first_view_ts';
@@ -23,8 +24,7 @@ export async function maybeShowShareNudge() {
       return false;
     }
 
-    const daysSince = (now - parseInt(firstViewStr, 10)) / (1000 * 60 * 60 * 24);
-    return daysSince >= DAYS_BEFORE_PROMPT;
+    return daysSince(parseInt(firstViewStr, 10), now) >= DAYS_BEFORE_PROMPT;
   } catch {
     return false;
   }

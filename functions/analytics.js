@@ -2,7 +2,7 @@ const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {GoogleAuth} = require('google-auth-library');
-const {logError, fetchWithTimeout, getUKDateString, ADMIN_SECRET} = require('./shared');
+const {logError, fetchWithTimeout, getUKDateString, requireAdminPost} = require('./shared');
 
 // ── Analytics sync — daily at 8am ─────────────────────────────
 // Fetches key metrics from GA4 and writes to Firestore analytics/summary
@@ -299,10 +299,9 @@ exports.exportAnalyticsHistory = onSchedule(
 // just overwritten - so it also works to extend the backfill further back
 // later if needed.
 exports.backfillAnalyticsDaily = onRequest(
-  {secrets: ['GMAIL_APP_PASSWORD']},
+  {secrets: ['GMAIL_APP_PASSWORD'], cors: ['https://yacobwood.github.io']},
   async (req, res) => {
-    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
-    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+    if (requireAdminPost(req, res)) return;
 
     try {
       const db = getFirestore();

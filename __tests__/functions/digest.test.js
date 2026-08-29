@@ -14,7 +14,11 @@ jest.mock('../../functions/shared', () => ({
   CALENDAR_URL: 'https://example.com/calendar.json',
   ARTICLES_URL: 'https://example.com/articles.json',
   getUKDateString: jest.fn((date, offset) => (offset === 2 ? '2026-08-22' : '2026-08-18')),
-  ADMIN_SECRET: 'test-admin-secret',
+  requireAdminPost: (req, res) => {
+    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
+    if (req.headers['x-admin-secret'] !== 'test-admin-secret') { res.status(401).send('Unauthorized'); return true; }
+    return false;
+  },
 }));
 
 const mockCreate = jest.fn();

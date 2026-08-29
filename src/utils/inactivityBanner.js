@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {daysSince} from './daysSince';
 
 const KEY_LAST_OPEN = 'last_open_ts';
 const DAYS_INACTIVE_THRESHOLD = 10;
@@ -15,8 +16,7 @@ export async function checkAndStampLastOpen() {
     const lastStr = await AsyncStorage.getItem(KEY_LAST_OPEN);
     await AsyncStorage.setItem(KEY_LAST_OPEN, String(now));
     if (!lastStr) return false;
-    const daysSince = (now - parseInt(lastStr, 10)) / (1000 * 60 * 60 * 24);
-    return daysSince >= DAYS_INACTIVE_THRESHOLD;
+    return daysSince(parseInt(lastStr, 10), now) >= DAYS_INACTIVE_THRESHOLD;
   } catch {
     return false;
   }

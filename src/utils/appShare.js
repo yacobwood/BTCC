@@ -12,3 +12,18 @@ export async function shareApp(origin) {
     await Share.share({message: `${APP_MESSAGE}\n\nhttps://btcchub.vercel.app?src=${origin}`});
   } catch {}
 }
+
+// Fires the same content_shared analytics event then opens the OS share
+// sheet, wrapped in try/catch so a user cancelling the share sheet (or the
+// share sheet itself failing) never surfaces as an unhandled rejection.
+// Each caller (DriverDetailScreen, TrackDetailScreen, RoundResultsScreen,
+// ResultsScreen) still builds its own bespoke message - that part is
+// genuinely different per content type - only this wrapping shape was
+// identical across all four, and two of them were missing the try/catch
+// before this was factored out.
+export async function shareContent(type, id, message) {
+  Analytics.contentShared(type, id);
+  try {
+    await Share.share({message});
+  } catch {}
+}

@@ -5,7 +5,10 @@ const {getDatabaseWithUrl} = require('firebase-admin/database');
 const {getAuth} = require('firebase-admin/auth');
 const {resolveMentionedAuthorIds} = require('./chatMentions');
 const {selectMessagesToTrim} = require('./chatTrim');
-const {ADMIN_SECRET} = require('./shared');
+const {requireAdminPost} = require('./shared');
+
+const CHAT_DB_URL = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
+const getChatDb = () => getDatabaseWithUrl(CHAT_DB_URL);
 
 // Apply ban: hide all existing messages from the banned author and write a system notice
 exports.onChatBan = onValueCreated(
@@ -14,8 +17,7 @@ exports.onChatBan = onValueCreated(
     try {
       const authorId = event.params.authorId;
       const ban = event.data.val();
-      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
-      const messagesRef = db.ref('/chat/messages');
+      const messagesRef = getChatDb().ref('/chat/messages');
 
       const snap = await messagesRef.orderByChild('authorId').equalTo(authorId).once('value');
       const updates = {};
@@ -54,7 +56,7 @@ exports.onChatMention = onValueCreated(
       const msg = event.data.val();
       if (!msg || msg.type === 'ban_notice' || !msg.text || !msg.text.includes('@')) return;
 
-      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
+      const db = getChatDb();
       const namesSnap = await db.ref('/chat/authorNames').once('value');
       const mentionedIds = resolveMentionedAuthorIds(msg.text, namesSnap.val(), msg.authorId);
       if (mentionedIds.length === 0) return;
@@ -110,15 +112,13 @@ exports.onChatMention = onValueCreated(
 exports.setChatDonor = onRequest(
   {cors: ['https://yacobwood.github.io']},
   async (req, res) => {
-    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
-    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+    if (requireAdminPost(req, res)) return;
 
     const {authorId, isDonor} = req.body || {};
     if (!authorId) { res.status(400).json({ok: false, error: 'authorId required'}); return; }
 
     try {
-      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
-      const ref = db.ref(`/chat/donors/${authorId}`);
+      const ref = getChatDb().ref(`/chat/donors/${authorId}`);
       if (isDonor) {
         await ref.set(true);
       } else {
@@ -141,15 +141,14 @@ exports.setChatDonor = onRequest(
 exports.lookupUserByEmail = onRequest(
   {cors: ['https://yacobwood.github.io']},
   async (req, res) => {
-    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
-    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+    if (requireAdminPost(req, res)) return;
 
     const email = (req.body?.email || '').trim().toLowerCase();
     if (!email) { res.status(400).json({ok: false, error: 'email required'}); return; }
 
     try {
       const user = await getAuth().getUserByEmail(email);
-      const db = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app');
+      const db = getChatDb();
       const [nameSnap, donorSnap, banSnap] = await Promise.all([
         db.ref(`/chat/authorNames/${user.uid}`).once('value'),
         db.ref(`/chat/donors/${user.uid}`).once('value'),
@@ -187,7 +186,7 @@ exports.trimChat = onValueCreated(
   {ref: '/chat/messages/{msgId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
   async () => {
     try {
-      const ref = getDatabaseWithUrl('https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app').ref('/chat/messages');
+      const ref = getChatDb().ref('/chat/messages');
       const snap = await ref.orderByChild('timestamp').once('value');
       const entries = [];
       snap.forEach(c => entries.push({key: c.key, timestamp: c.val()?.timestamp || 0}));

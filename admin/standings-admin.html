@@ -2852,7 +2852,16 @@ const TRIGGER_DIGEST_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.
 const DISMISS_ERROR_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/dismissError';
 const SET_CHAT_DONOR_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/setChatDonor';
 const LOOKUP_USER_URL       = 'https://us-central1-btcchub-af77a.cloudfunctions.net/lookupUserByEmail';
-const TRIGGER_DIGEST_SECRET = 'btcchub-digest-trigger-2026';
+// KNOWN WEAKNESS, not a real fix: this page is served publicly via GitHub
+// Pages with no server-side gate, so this value is readable by anyone who
+// views source - the SHA-256 login above only hides the UI, it never
+// touches the 7 endpoints this secret gates. Rotated 2026-08-28 after the
+// prior value was found exposed here; must match whatever ADMIN_SECRET is
+// currently set to in Firebase Secret Manager (functions/shared.js). A real
+// fix means replacing this shared-secret model with per-admin auth (e.g.
+// Firebase Auth ID token + an allowlist checked server-side) so this page
+// never has to hold a value that unlocks the backend on its own.
+const TRIGGER_DIGEST_SECRET = 'REPLACE_ME_WITH_NEW_SECRET_BEFORE_DEPLOY';
 
 async function triggerDigestGenerate(type) {
   const btnId = type === 'race' ? 'gen-race-btn' : 'gen-weekly-btn';

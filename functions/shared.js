@@ -152,9 +152,34 @@ function getUKDateString(date, offsetDays = 0) {
   }).format(d);
 }
 
-// Shared by triggerDigest, backfillAnalyticsDaily and dismissError (all
-// admin-page-triggered onRequest functions) to authenticate the caller.
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'btcchub-digest-trigger-2026';
+// Shared by every admin-page-triggered onRequest function (triggerDigest,
+// dismissError, backfillAnalyticsDaily, setChatDonor, lookupUserByEmail) to
+// authenticate the caller. No hardcoded fallback, deliberately - the old
+// 'btcchub-digest-trigger-2026' default was also hardcoded into
+// admin/standings-admin.html's TRIGGER_DIGEST_SECRET, a publicly-served
+// static file with no server-side gate, which meant the real secret was
+// readable by anyone who viewed the page's source (its SHA-256 login gate
+// only hides the UI, it never touches these endpoints). The current value
+// lives only in Firebase Secret Manager (`firebase functions:secrets:set
+// ADMIN_SECRET`) - never commit it to this repo in any form, including a
+// README or comment. For local/emulator use, set it in functions/.env.local
+// (already gitignored, never committed).
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+
+// Standard guard for admin-page-triggered onRequest functions (triggerDigest,
+// dismissError, backfillAnalyticsDaily, setChatDonor, lookupUserByEmail) -
+// rejects non-POST requests and requests missing/wrong x-admin-secret,
+// writing the response itself in either case. Callers do:
+//   if (requireAdminPost(req, res)) return;
+// as their very first line, before touching req.body. Not used by
+// notifyResultsUpdate/reportScraperFailure, which authenticate against
+// SCRAPER_SECRET instead - a different caller (GitHub Actions), not the
+// admin page.
+function requireAdminPost(req, res) {
+  if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return true; }
+  return false;
+}
 
 module.exports = {
   logError,
@@ -171,4 +196,5 @@ module.exports = {
   getUKTimeParts,
   getUKDateString,
   ADMIN_SECRET,
+  requireAdminPost,
 };

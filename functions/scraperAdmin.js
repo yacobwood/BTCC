@@ -1,14 +1,13 @@
 const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getMessaging} = require('firebase-admin/messaging');
-const {logError, ADMIN_SECRET} = require('./shared');
+const {logError, requireAdminPost} = require('./shared');
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
 exports.dismissError = onRequest(
   {cors: ['https://yacobwood.github.io']},
   async (req, res) => {
-    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
-    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+    if (requireAdminPost(req, res)) return;
 
     const {id, all} = req.body || {};
     const db = getFirestore();

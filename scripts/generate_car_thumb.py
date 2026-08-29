@@ -40,10 +40,9 @@ clearance. So:
                         carStrip uses this one, since it has nothing an
                         overlay needs to clear.
 
-Requires Pillow (`pip install Pillow>=10.0.0` - already a dependency for
-tools/scripts/download_driver_images.py, see tools/scripts/requirements.txt)
-for the crop step; cwebp (https://formulae.brew.sh/formula/webp) still does
-the actual resize + WebP re-encode for both variants, unchanged from before.
+Requires Pillow (`pip install Pillow>=10.0.0`) for the crop step; cwebp
+(https://formulae.brew.sh/formula/webp) still does the actual resize + WebP
+re-encode for both variants, unchanged from before.
 
 Usage:
     python3 scripts/generate_car_thumb.py                  # regenerate every file in data/carImages/

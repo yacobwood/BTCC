@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Share,
 } from 'react-native';
 
 const BUNDLED_DRIVERS = require('../../data/drivers.json');
@@ -24,6 +23,7 @@ import {formatDriverName} from '../utils/driverName';
 import {fetchResults, fetchStandings, fetchDrivers} from '../api/client';
 import {attachTeamDisplayFields, parseDriverHistory, carThumbCropUrl, formatDate} from '../api/parsers';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {shareContent} from '../utils/appShare';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -151,8 +151,7 @@ export default function DriverDetailScreen({route, navigation}) {
 
   const onShare = async () => {
     const slug = driver.name.toLowerCase().replace(/\s+/g, '-');
-    Analytics.contentShared('driver', driver.name);
-    await Share.share({message: `${driver.name} - ${CURRENT_SEASON} BTCC\n\nhttps://btcchub.vercel.app/drivers/${slug}?src=driver_detail`});
+    await shareContent('driver', driver.name, `${driver.name} - ${CURRENT_SEASON} BTCC\n\nhttps://btcchub.vercel.app/drivers/${slug}?src=driver_detail`);
   };
 
   return (

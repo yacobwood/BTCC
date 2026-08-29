@@ -6,7 +6,7 @@ const {
   CALENDAR_URL,
   ARTICLES_URL,
   getUKDateString,
-  ADMIN_SECRET,
+  requireAdminPost,
 } = require('./shared');
 
 // ── Shared digest prompt intros ───────────────────────────────
@@ -332,8 +332,7 @@ exports.triggerDigest = onRequest(
     cors: ['https://yacobwood.github.io'],
   },
   async (req, res) => {
-    if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
-    if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return; }
+    if (requireAdminPost(req, res)) return;
 
     const type = req.body?.type || 'weekly';
     try {

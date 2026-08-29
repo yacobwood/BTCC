@@ -1,5 +1,5 @@
 {
-  "_note": "Driver-name to sponsor team name, per year. Used by scripts/results_to_standings_kt.py. Names must match normalised driver names in results JSON files.",
+  "_note": "Driver-name to sponsor team name, per year. Was used by tools/scripts/results_to_standings_kt.py, deleted 2026-08-28 as dead code (targeted a Kotlin app directory removed 2026-04-09) - no current consumer of this file is known; kept as reference data pending a real one turning up. Names must match normalised driver names in results JSON files.",
   "2015": {
     "Gordon Shedden":      "Honda Yuasa Racing",
     "Matt Neal":           "Honda Yuasa Racing",

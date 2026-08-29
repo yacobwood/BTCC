@@ -409,10 +409,10 @@ describe('SettingsScreen', () => {
   describe('version display', () => {
     it('shows only the Season/Round/Lap nickname, not the plain semver line', async () => {
       const {getByText, queryByText} = await renderSettings();
-      // package.json version is "2.20.9" at the time this test was written -
-      // Season 2, Round 20, Lap 9. If the version bumps this assertion should
+      // package.json version is "2.20.10" at the time this test was written -
+      // Season 2, Round 20, Lap 10. If the version bumps this assertion should
       // be updated to match rather than loosened.
-      expect(getByText('Season 2 · Round 20 · Lap 9')).toBeTruthy();
+      expect(getByText('Season 2 · Round 20 · Lap 10')).toBeTruthy();
       expect(queryByText(/^Version /)).toBeNull();
     });
   });
