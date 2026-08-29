@@ -2,8 +2,8 @@
   "slug": "brands-hatch-indy",
   "title": "Brands Hatch Indy",
   "year": 2013,
-  "round": null,
-  "venue": null,
+  "round": 1,
+  "venue": "Brands Hatch",
   "lastPageScraped": 3,
   "totalPages": 3,
   "_firstPagePhotoCount": 24,
@@ -264,5 +264,5 @@
       "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/febd636d-1a8d-4231-894e-72715d30accc/f9d99bf3-8466-4a04-98fb-d3c8e02499d3/variants/display-gallery-import-v1.webp"
     }
   ],
-  "isCanonical": false
+  "isCanonical": true
 }

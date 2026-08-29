@@ -2,8 +2,8 @@
   "slug": "brands-hatch-gp",
   "title": "Brands Hatch GP",
   "year": 2013,
-  "round": null,
-  "venue": null,
+  "round": 10,
+  "venue": "Brands Hatch",
   "lastPageScraped": 3,
   "totalPages": 3,
   "_firstPagePhotoCount": 24,
@@ -268,5 +268,5 @@
       "viewUrl": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/imports/2013/1de1649b-4260-416e-8eed-1139458d30ec/61efa2bd-51ad-4026-9805-105d9d4e8fe6/variants/display-gallery-import-v1.webp"
     }
   ],
-  "isCanonical": false
+  "isCanonical": true
 }
