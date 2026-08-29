@@ -1,0 +1,84 @@
+# Runs the gallery scraper on a schedule. Self-hosted runner for the same
+# reason every btcc.net-facing workflow is (Vercel bot-challenge blocks
+# GitHub-hosted runner IPs - see scrape-calendar.yml's own comment).
+#
+# Weekly, on Wednesday rather than Monday - deliberately spread off the
+# scrape-btcc-stats (06:00) -> scrape-team-stats (06:30) -> scrape-calendar
+# (09:00) chain that's already Monday morning's busiest window on the one
+# shared btcc-mac runner. This scraper hotlinks photos directly (no image
+# bytes captured/resized - see scrape_gallery.py's own module docstring)
+# but can still visit many paginated pages in one run (a single album can
+# span 8+ pages), so it's worth its own slot rather than competing with
+# that chain for runner time.
+#
+# scrape_gallery.py is deliberately incremental/resumable by PAGE, not by
+# photo (see its own module docstring): a routine run only visits whatever
+# pages are new or still unscraped since the last run, so a normal week's
+# run is cheap even though the very first run for a season backfills
+# everything that already exists. Historical seasons (2010-2025) are NOT
+# backfilled by this schedule at all - run workflow_dispatch manually with
+# an older `season` input whenever there's spare capacity, so this weekly
+# job stays focused on the current season.
+name: Scrape BTCC Gallery
+
+on:
+  schedule:
+    # Weekly, Wednesday 09:00 UTC.
+    - cron: "0 9 * * 3"
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "Season year (e.g. 2026) - use an older year for a manual historical backfill"
+        type: number
+        default: 2026
+
+concurrency:
+  group: scrape-gallery
+  # false: a manual workflow_dispatch (e.g. right after a race weekend, or a
+  # historical backfill) should queue behind an in-flight run rather than
+  # cancel it outright - matches scrape-calendar.yml/scrape-team-stats.yml's
+  # own setting, for the same reason (this runs at most weekly, not on
+  # scrape-news.yml's 5-minute cadence where a stale run should always lose).
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: [self-hosted, btcc-mac]
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Scrape gallery
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          SEASON="${{ github.event.inputs.season }}"
+          [ -z "$SEASON" ] && SEASON=2026
+          ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_gallery.py --season "$SEASON"
+
+      - name: Commit updated data
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update gallery from btcc.net [skip ci]"
+          # No data/media/gallery/ - this scraper hotlinks photos directly
+          # (confirmed live: gallery images are public Supabase Storage
+          # URLs on a different host than btcc.net, unaffected by its
+          # Vercel bot-challenge) rather than mirroring image bytes.
+          file_pattern: "data/gallery*.json data/gallery/"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+      - name: Report failure
+        if: failure()
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"scrape-gallery\",\"message\":\"Gallery scrape failed\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
