@@ -30,6 +30,8 @@ import {
   fetchBlacklist,
   fetchMerchStores,
   fetchPartners,
+  fetchGallery,
+  fetchGalleryAlbum,
 } from '../../src/api/client';
 
 describe('fetchCalendar', () => {
@@ -141,6 +143,37 @@ describe('fetchResults', () => {
 
     expect(cacheWrite).toHaveBeenCalledWith('results_2024', data);
   });
+
+  it('resolves with the cached value immediately even when AbortSignal.timeout is unsupported on the runtime', async () => {
+    // Root-caused live 2026-08-28 via the Gallery tab: fetchJson's cached-hit
+    // branch built its background-refresh fetch options with
+    // `{signal: AbortSignal.timeout(10000)}` - Node (and this Jest env) has
+    // real support for it, so this bug was invisible to every existing test
+    // here, but it's documented elsewhere in this codebase as unreliable on
+    // Android/Hermes (see src/utils/weather.js's own AbortController
+    // workaround). When unsupported, calling it throws synchronously,
+    // *before* fetch() is even invoked - and since that whole branch sits
+    // outside fetchJson's own try/catch, the throw rejected the entire
+    // fetchJson() call instead of resolving with the cached value it
+    // already had in hand. Simulates that broken runtime directly by
+    // deleting the method, rather than trusting Node's own working version
+    // to prove anything about Hermes.
+    const original = global.AbortSignal.timeout;
+    delete global.AbortSignal.timeout;
+    try {
+      const cachedData = {rounds: [{round: 1}]};
+      cacheRead.mockResolvedValueOnce(cachedData);
+      // The background refresh itself may still be attempted/fail silently -
+      // this mock only needs to exist so nothing else throws if it's reached.
+      global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(cachedData)});
+
+      const result = await fetchResults(2026);
+
+      expect(result).toEqual(cachedData);
+    } finally {
+      global.AbortSignal.timeout = original;
+    }
+  });
 });
 
 describe('fetchPenalties', () => {
@@ -185,6 +218,72 @@ describe('fetchPenalties', () => {
     const result = await fetchPenalties(2026);
 
     expect(result.rounds[0].penalties[0].driver).toBe('Bundled Driver');
+  });
+});
+
+describe('fetchGallery', () => {
+  it('fetches the correct year\'s season index', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({season: 2026, albums: []})});
+
+    await fetchGallery(2026);
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('gallery2026.json'));
+  });
+
+  it('uses a year-specific cache key', async () => {
+    const data = {season: 2025, albums: []};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(data)});
+
+    await fetchGallery(2025);
+
+    expect(cacheWrite).toHaveBeenCalledWith('gallery_2025', data);
+  });
+
+  it('returns an empty-but-valid shape on a 404 (no gallery scraped for this year yet)', async () => {
+    global.fetch.mockResolvedValueOnce({ok: false, status: 404});
+    cacheRead.mockResolvedValueOnce(null);
+
+    const result = await fetchGallery(2010);
+
+    expect(result).toEqual({season: 2010, albums: []});
+  });
+
+  it('propagates a genuine network error rather than swallowing it into an empty result', async () => {
+    // Root-caused live 2026-08-28: swallowing every failure (not just a
+    // 404) into {albums: []} made GalleryTab's own retry-capable error UI
+    // permanently unreachable - a real fetch failure looked identical to
+    // "this season genuinely has no albums." Only a 404 should degrade
+    // quietly; anything else must reject so the caller's catch block runs.
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    cacheRead.mockResolvedValueOnce(null);
+
+    await expect(fetchGallery(2026)).rejects.toThrow('network error');
+  });
+});
+
+describe('fetchGalleryAlbum', () => {
+  it('fetches the correct year/slug album file', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({photos: []})});
+
+    await fetchGalleryAlbum(2026, 'donington-park-gallery');
+
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('gallery/2026/donington-park-gallery.json'));
+  });
+
+  it('returns null on a 404 (album not found)', async () => {
+    global.fetch.mockResolvedValueOnce({ok: false, status: 404});
+    cacheRead.mockResolvedValueOnce(null);
+
+    const result = await fetchGalleryAlbum(2026, 'missing-album');
+
+    expect(result).toBeNull();
+  });
+
+  it('propagates a genuine network error rather than returning null', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    cacheRead.mockResolvedValueOnce(null);
+
+    await expect(fetchGalleryAlbum(2026, 'donington-park-gallery')).rejects.toThrow('network error');
   });
 });
 

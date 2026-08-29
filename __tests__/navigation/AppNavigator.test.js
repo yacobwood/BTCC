@@ -237,5 +237,31 @@ describe('linking config', () => {
     expect(leaf.name).toBe('ResultsList');
     expect(leaf.params).toEqual({openRound: 5, openRace: 1});
   });
+
+  // GalleryAlbum needs no custom getStateFromPath branch, unlike results/:round
+  // above - GalleryAlbumScreen fetches its own data straight from
+  // season/albumSlug (fetchGalleryAlbum), so the static config entry alone
+  // (falling through to the library's own defaultGetStateFromPath) resolves
+  // it correctly, same as the plain "results" case at the top of this
+  // describe block.
+  it('resolves a "gallery/:season/:albumSlug/:photoIndex" path straight to GalleryAlbum with all three params', () => {
+    const state = linking.getStateFromPath('gallery/2026/donington-park-gallery/3', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('GalleryAlbum');
+    expect(leaf.params.season).toBe('2026');
+    expect(leaf.params.albumSlug).toBe('donington-park-gallery');
+    expect(leaf.params.photoIndex).toBe('3');
+  });
+
+  it('resolves a "gallery/:season/:albumSlug" path (no photo index) to GalleryAlbum with photoIndex unset', () => {
+    const state = linking.getStateFromPath('gallery/2026/donington-park-gallery', linking.config);
+    const resultsRoute = state.routes.find(r => r.name === 'Results');
+    const leaf = resultsRoute.state.routes[resultsRoute.state.routes.length - 1];
+    expect(leaf.name).toBe('GalleryAlbum');
+    expect(leaf.params.season).toBe('2026');
+    expect(leaf.params.albumSlug).toBe('donington-park-gallery');
+    expect(leaf.params.photoIndex).toBeUndefined();
+  });
 });
 

@@ -41,6 +41,13 @@ export const Analytics = {
   resultsChampionshipChanged: (year, championship) => logEvent(fa(), 'results_championship_changed', {year, championship}),
   roundResultsViewed: (year, round) => logEvent(fa(),'round_results_viewed', {year, round}),
 
+  galleryAlbumOpen: (year, albumSlug) => logEvent(fa(),'gallery_album_open', {year, album_slug: albumSlug}),
+  galleryAlbumViewed: (year, albumSlug) => logEvent(fa(),'gallery_album_viewed', {year, album_slug: albumSlug}),
+  galleryIndexLoadFailed: (year, errorCode) => logEvent(fa(),'gallery_index_load_failed', {year, error_code: errorCode || 'unknown'}),
+  galleryAlbumLoadFailed: (year, albumSlug, errorCode) => logEvent(fa(),'gallery_album_load_failed', {year, album_slug: albumSlug, error_code: errorCode || 'unknown'}),
+  galleryPhotoView: (year, albumSlug, photoIndex) => logEvent(fa(),'gallery_photo_view', {year, album_slug: albumSlug, photo_index: photoIndex}),
+  galleryLightboxClosed: (year, albumSlug, photoIndex) => logEvent(fa(),'gallery_lightbox_closed', {year, album_slug: albumSlug, photo_index: photoIndex}),
+
   driverClicked: (name) => logEvent(fa(),'driver_clicked', {driver_name: name}),
   teamClicked: (name) => logEvent(fa(),'team_clicked', {team_name: name}),
   favouriteToggled: (name, added) => logEvent(fa(),'favourite_toggled', {driver_name: name, action: added ? 'added' : 'removed'}),

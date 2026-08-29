@@ -22,6 +22,9 @@ jest.mock('../../src/api/parsers', () => ({
 // SeasonTable and ProgressionChart are expensive native/canvas components — stub them
 jest.mock('../../src/components/SeasonTable',      () => ({__esModule: true, default: () => null}));
 jest.mock('../../src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
+// GalleryTab does its own fetchGallery() call - stubbed here so this file's tests
+// stay focused on ResultsScreen's own tab-wiring; GalleryTab gets its own test file.
+jest.mock('../../src/components/GalleryTab', () => ({__esModule: true, default: () => null}));
 
 // SwipeableTabs — render all pages simultaneously (no PagerView needed)
 jest.mock('../../src/components/SwipeableTabs', () => {
@@ -121,6 +124,11 @@ describe('ResultsScreen', () => {
   it('renders RESULTS tab', async () => {
     const {getByText} = renderResults();
     await waitFor(() => expect(getByText('RESULTS')).toBeTruthy());
+  });
+
+  it('renders GALLERY tab', async () => {
+    const {getByText} = renderResults();
+    await waitFor(() => expect(getByText('GALLERY')).toBeTruthy());
   });
 
   // ── Bundled year data ────────────────────────────────────────────────────────

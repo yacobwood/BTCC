@@ -38,6 +38,7 @@ import DriverDetailScreen from '../screens/DriverDetailScreen';
 import TeamDetailScreen from '../screens/TeamDetailScreen';
 import ResultsScreen from '../screens/ResultsScreen';
 import RoundResultsScreen from '../screens/RoundResultsScreen';
+import GalleryAlbumScreen from '../screens/GalleryAlbumScreen';
 import MoreScreen from '../screens/MoreScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import InfoPageScreen from '../screens/InfoPageScreen';
@@ -105,6 +106,7 @@ function ResultsStack() {
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="ResultsList" component={ResultsScreen} />
       <Stack.Screen name="RoundResults" component={RoundResultsScreen} />
+      <Stack.Screen name="GalleryAlbum" component={GalleryAlbumScreen} />
       <Stack.Screen name="Records" component={RecordsScreen} />
     </Stack.Navigator>
   );
@@ -165,6 +167,15 @@ export const linking = {
         screens: {
           ResultsList: 'results',
           RoundResults: 'results/:round',
+          // No custom getStateFromPath needed here, unlike results/:round
+          // below - GalleryAlbumScreen fetches its own data straight from
+          // season/albumSlug (fetchGalleryAlbum), it doesn't need a
+          // pre-resolved object handed to it by a parent screen's already-
+          // loaded state the way RoundResultsScreen does. photoIndex is
+          // optional (`?` suffix) - a shared album-only link (no index)
+          // still lands correctly, it just opens the grid instead of a
+          // specific photo.
+          GalleryAlbum: 'gallery/:season/:albumSlug/:photoIndex?',
         },
       },
     },

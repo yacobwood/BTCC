@@ -61,7 +61,8 @@ def resolve_media_url(src: str) -> str:
 
 
 def save_mirrored_image(
-    media: dict[str, tuple[bytes, str]], media_url: str | None, out_dir: Path
+    media: dict[str, tuple[bytes, str]], media_url: str | None, out_dir: Path,
+    max_dimension: int = _MAX_DIMENSION,
 ) -> str | None:
     """Save a captured btcc.net media image (from get_with_media's result) into
     out_dir, named by its identifying path segment. Returns the saved filename,
@@ -75,7 +76,15 @@ def save_mirrored_image(
     query string. Strip any query string and any extension already present
     before appending the one derived from content-type, so the /api/media/
     case (unaffected) and the Supabase case (would otherwise double up, e.g.
-    "name.jpg.jpg") both end up with exactly one correct extension."""
+    "name.jpg.jpg") both end up with exactly one correct extension.
+
+    max_dimension: defaults to _MAX_DIMENSION (matches every existing
+    caller's prior behavior unchanged). A caller that needs a second, smaller
+    variant of the same captured bytes (e.g. scrape_gallery.py's grid
+    thumbnail alongside its lightbox-view size) can call this twice with a
+    different out_dir and max_dimension per size, instead of duplicating this
+    function's extension/filename logic - the media dict already holds the
+    bytes in memory, so a second call costs a resize, not a re-fetch."""
     if not media_url:
         return None
     entry = media.get(media_url)
@@ -87,20 +96,20 @@ def save_mirrored_image(
     stem = last_segment.rsplit(".", 1)[0] if "." in last_segment else last_segment
     filename = f"{stem}.{ext}"
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / filename).write_bytes(_downscale(body, ext))
+    (out_dir / filename).write_bytes(_downscale(body, ext, max_dimension))
     return filename
 
 
-def _downscale(body: bytes, ext: str) -> bytes:
-    """Shrink an image to _MAX_DIMENSION on its long edge, preserving aspect
+def _downscale(body: bytes, ext: str, max_dimension: int = _MAX_DIMENSION) -> bytes:
+    """Shrink an image to max_dimension on its long edge, preserving aspect
     ratio and format. Returns the original bytes unchanged if it's already
     smaller, or if PIL can't decode it (never block a mirror on a decode
     quirk - malformed bytes just get written verbatim, same as before)."""
     try:
         img = Image.open(io.BytesIO(body))
-        if max(img.size) <= _MAX_DIMENSION:
+        if max(img.size) <= max_dimension:
             return body
-        img.thumbnail((_MAX_DIMENSION, _MAX_DIMENSION), Image.LANCZOS)
+        img.thumbnail((max_dimension, max_dimension), Image.LANCZOS)
         out = io.BytesIO()
         if ext in ("jpg", "jpeg"):
             img.convert("RGB").save(out, format="JPEG", quality=85)

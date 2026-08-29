@@ -34,11 +34,31 @@ async function fetchJson(url, cacheKey, forceRefresh = false, staleFallback = fa
     const ageLimit = staleFirst ? undefined : maxAgeMs;
     const cached = await cacheRead(cacheKey, ageLimit);
     if (cached) {
-      // Refresh cache in background without blocking
-      fetch(url, {signal: AbortSignal.timeout(10000)})
+      // Refresh cache in background without blocking - manual AbortController,
+      // not AbortSignal.timeout (unreliable on Android/Hermes - see
+      // src/utils/weather.js's own identical workaround). Root-caused live
+      // 2026-08-28, via the Gallery tab: AbortSignal.timeout(10000) throws
+      // synchronously ("AbortSignal.timeout is not a function") when it's
+      // unsupported on the runtime - and since this whole `if (cached)`
+      // block sits outside this function's own try/catch below, that throw
+      // rejected fetchJson()'s entire returned promise instead of resolving
+      // it with the cached value already sitting right here. Every cached
+      // endpoint's "instant from cache, refresh quietly after" promise
+      // silently never held on an affected device for as long as this line
+      // existed - invisible until now because every other caller either
+      // already displays its own separately-read cached data first (masking
+      // a background-refresh rejection) or wraps the call in a bare
+      // try{}catch{}. `timeoutId?.unref?.()` mirrors weather.js's own call -
+      // a no-op in React Native, but avoids leaving an open timer handle in
+      // Jest's Node environment.
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      timeoutId?.unref?.();
+      fetch(url, {signal: controller.signal})
         .then(r => r.ok ? r.json() : null)
         .then(data => { if (data) cacheWrite(cacheKey, data); })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => clearTimeout(timeoutId));
       return cached;
     }
   }
@@ -157,6 +177,53 @@ export async function fetchPartners() {
 
 export async function fetchRecords() {
   return fetchJson(`${BASE_GITHUB}/records.json`, 'records', /* forceRefresh */ true, /* staleFallback */ true);
+}
+
+// Gallery season index (tools/scraper/scrape_gallery.py) - album metadata
+// only (slug/title/cover/round/venue/capture progress), never the full photo
+// list, so opening the Gallery tab doesn't download every album's photos up
+// front. No bundled-JSON fallback (matches fetchArticles' precedent for a
+// non-critical browsing feature) - an offline cold start just shows an
+// empty state on this one tab rather than carrying a static snapshot that
+// would grow stale the same way a bundled results/calendar file doesn't
+// (those get a fresh app release each season; this doesn't).
+const GALLERY_MAX_AGE_MS = 60 * 60 * 1000; // matches the scraper's weekly-ish cadence
+
+// Only a 404 degrades to an empty result - that genuinely means "no gallery
+// data scraped for this year yet" (same reasoning as fetchPenalties' own
+// 404 fallback above). Any other failure (network error, timeout, DNS) must
+// propagate rather than be swallowed here: unlike fetchPenalties (which has
+// no reachable error UI downstream - RoundResultsScreen just polls again a
+// minute later), GalleryTab has its own dedicated error/retry state that
+// this function silently swallowing every failure into "empty" would make
+// permanently unreachable, indistinguishable from a season that genuinely
+// has no albums yet. Found live 2026-08-28: a real device's first-ever
+// Gallery fetch (no cache to fall back on) hit a transient failure and
+// showed "no gallery albums" instead of a retryable error.
+function isNotFound(e) {
+  return e?.message?.includes('404');
+}
+
+export async function fetchGallery(year = 2026, forceRefresh = false) {
+  try {
+    return await fetchJson(`${BASE_GITHUB}/gallery${year}.json`, `gallery_${year}`, forceRefresh, /* staleFallback */ true, false, GALLERY_MAX_AGE_MS);
+  } catch (e) {
+    if (isNotFound(e)) return {season: year, albums: []};
+    throw e;
+  }
+}
+
+// Per-album photo list, fetched only when a user actually opens that album -
+// same "index is small, detail is on-demand" split fetchArticles already
+// uses for the same reason (an album can be large; most of them are never
+// opened in a given session).
+export async function fetchGalleryAlbum(year, slug, forceRefresh = false) {
+  try {
+    return await fetchJson(`${BASE_GITHUB}/gallery/${year}/${slug}.json`, `gallery_album_${year}_${slug}`, forceRefresh, /* staleFallback */ true, false, GALLERY_MAX_AGE_MS);
+  } catch (e) {
+    if (isNotFound(e)) return null;
+    throw e;
+  }
 }
 
 
