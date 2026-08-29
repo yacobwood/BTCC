@@ -254,7 +254,8 @@ body {
 }
 .card-header .section-label { flex: 1; }
 
-#analytics-stat-cards, #ga-stat-cards { grid-template-columns: 1fr 1fr; }
+#analytics-stat-cards, #ga-stat-cards, #ga-engagement-cards { grid-template-columns: 1fr 1fr; }
+#ga-funnel-cards { grid-template-columns: 1fr; }
 
 /* ── Stat grid (dashboard) ── */
 .stat-grid {
@@ -705,7 +706,8 @@ select.input { cursor: pointer; }
      form-like tabs (roadmap editor, push composer) that .tab-panel's
      760px cap is really sized for. */
   #panel-analytics { max-width: 1200px; }
-  #analytics-stat-cards, #ga-stat-cards { grid-template-columns: repeat(4, 1fr); }
+  #analytics-stat-cards, #ga-stat-cards, #ga-engagement-cards { grid-template-columns: repeat(4, 1fr); }
+  #ga-funnel-cards { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -1572,9 +1574,80 @@ select.input { cursor: pointer; }
     <div id="ga-platform-list"><div class="section-note">Loading…</div></div>
   </div>
 
-  <div class="card">
+  <div class="card" style="margin-bottom:12px">
     <div class="card-header"><div class="section-label">WHERE IN THE UK (7D)</div></div>
     <div id="ga-uk-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- Engagement quality — these 4 fields have been fetched from GA4 and
+       stored on every analytics_history doc since 2026-08-03, but never
+       actually rendered anywhere until now. -->
+  <div style="display:grid;gap:10px;margin:16px 0" id="ga-engagement-cards">
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">AVG SESSION (7D)</div><div id="stat-ga-avgsession" style="font-size:28px;font-weight:900;color:var(--yellow)">—</div></div>
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">ENGAGEMENT RATE (7D)</div><div id="stat-ga-engagement" style="font-size:28px;font-weight:900;color:var(--green)">—</div></div>
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">BOUNCE RATE (7D)</div><div id="stat-ga-bounce" style="font-size:28px;font-weight:900;color:var(--red)">—</div></div>
+    <div class="card" style="text-align:center;margin-bottom:0"><div class="section-note" style="margin-bottom:4px">PAGE/SCREEN VIEWS (7D)</div><div id="stat-ga-pageviews" style="font-size:28px;font-weight:900;color:#60A5FA">—</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header">
+      <div class="section-label">APP VERSION ADOPTION (7D)</div>
+      <button class="btn-sm" onclick="refreshAnalyticsNow()" id="refresh-analytics-now-btn">⟳ Refresh now</button>
+    </div>
+    <div class="section-note" style="margin-bottom:8px">Which build active users are actually on - the direct read on whether a just-shipped release is reaching people. Re-running pulls this week's numbers immediately instead of waiting for the Monday 08:05 schedule.</div>
+    <div id="ga-appversion-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">TOP EVENTS THIS WEEK</div></div>
+    <div class="section-note" style="margin-bottom:8px">Every distinct event name GA4 recorded, ranked by volume - a full activity leaderboard in one place (shares, taps, chat messages, favourites, notification toggles...).</div>
+    <div id="ga-events-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">SCREEN POPULARITY (7D)</div></div>
+    <div id="ga-screens-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <!-- The 5 cards below need their event parameter registered as a GA4
+       custom dimension before they'll show anything - see the comment atop
+       exportAnalyticsHistory (functions/analytics.js) for the exact GA4
+       Admin → Custom definitions steps. Each falls back to a note explaining
+       this rather than an empty "no data" that looks like a bug. -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">SHARE BREAKDOWN BY CONTENT TYPE (7D)</div></div>
+    <div id="ga-share-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">ONBOARDING CHOICE (7D)</div></div>
+    <div id="ga-onboarding-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">NOTIFICATION OPT-IN / OUT BY TYPE (7D)</div></div>
+    <div id="ga-notif-optins-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div style="display:grid;gap:10px;margin-bottom:16px" id="ga-funnel-cards">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><div class="section-label">DONOR GATE FUNNEL (7D)</div></div>
+      <div id="ga-donorgate-funnel"><div class="section-note">Loading…</div></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><div class="section-label">WIDGET ADOPTION (7D)</div></div>
+      <div id="ga-widget-adoption"><div class="section-note">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="section-label">MOST FAVOURITED DRIVERS (7D)</div></div>
+    <div id="ga-favdrivers-list"><div class="section-note">Loading…</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="section-label">TOP SEARCH TERMS (7D)</div></div>
+    <div id="ga-search-list"><div class="section-note">Loading…</div></div>
   </div>
 </div>
 
@@ -2855,7 +2928,10 @@ const LOOKUP_USER_URL       = 'https://us-central1-btcchub-af77a.cloudfunctions.
 // KNOWN WEAKNESS, not a real fix: this page is served publicly via GitHub
 // Pages with no server-side gate, so this value is readable by anyone who
 // views source - the SHA-256 login above only hides the UI, it never
-// touches the 7 endpoints this secret gates. Rotated 2026-08-28 after the
+// touches the 6 endpoints this secret gates (triggerDigest, dismissError,
+// backfillAnalyticsDaily, setChatDonor, lookupUserByEmail,
+// refreshAnalyticsHistory - grep requireAdminPost across functions/*.js to
+// recheck this count if it drifts again). Rotated 2026-08-28 after the
 // prior value was found exposed here; must match whatever ADMIN_SECRET is
 // currently set to in Firebase Secret Manager (functions/shared.js). A real
 // fix means replacing this shared-secret model with per-admin auth (e.g.
@@ -3826,11 +3902,71 @@ function buildDailyLineChart(days, rounds) {
     </div>`;
 }
 
+// Custom-dimension-backed cards (shareBreakdown/onboardingFunnel/
+// notificationOptIns/favouriteDrivers/searchTerms) stay empty until their
+// event parameter is registered in GA4 Admin - see the comment atop
+// exportAnalyticsHistory in functions/analytics.js for the exact steps.
+// Worded distinctly from the plain "no data" cards so it doesn't read as a bug.
+const GA_CUSTOM_DIM_PENDING = '<div class="section-note">No data yet - needs a one-time custom dimension registered in GA4 Admin first (see functions/analytics.js).</div>';
+
+function formatDuration(totalSeconds) {
+  const s = Math.round(totalSeconds || 0);
+  const m = Math.floor(s / 60);
+  return `${m}m ${s % 60}s`;
+}
+function formatPct(rate) {
+  return `${((rate || 0) * 100).toFixed(1)}%`;
+}
+
+// A 2-step funnel row: the raw count plus what % of `base` it represents -
+// same bar styling as gaBar(), just with a percentage-of-base label instead
+// of a percentage-of-max-in-list one.
+function gaFunnelBar(label, value, base, color) {
+  const pct = base > 0 ? Math.round((value / base) * 100) : 0;
+  return `<div style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <span style="color:var(--text);font-size:13px">${escHtml(label)}</span>
+      <span style="color:${color};font-size:13px;font-weight:700">${value}${label !== 'Shown' ? ` (${pct}%)` : ''}</span>
+    </div>
+    <div style="background:var(--outline);border-radius:4px;height:6px">
+      <div style="background:${color};height:6px;border-radius:4px;width:${Math.min(pct, 100)}%;transition:width .3s"></div>
+    </div>
+  </div>`;
+}
+
+const REFRESH_ANALYTICS_URL = 'https://us-central1-btcchub-af77a.cloudfunctions.net/refreshAnalyticsHistory';
+
+async function refreshAnalyticsNow() {
+  const btn = document.getElementById('refresh-analytics-now-btn');
+  if (!confirm("Re-run this week's GA4 export now? This overwrites the current week's stored figures with fresh ones.")) return;
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = '⏳ Refreshing…';
+  try {
+    const res = await fetch(REFRESH_ANALYTICS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+    btn.textContent = '✓ Done — reloading…';
+    await loadWebsiteAnalytics();
+  } catch (e) {
+    alert(`Refresh failed: ${e.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
 async function loadWebsiteAnalytics() {
-  ['stat-ga-total', 'stat-ga-new', 'stat-ga-active', 'stat-ga-sessions'].forEach(id => {
+  ['stat-ga-total', 'stat-ga-new', 'stat-ga-active', 'stat-ga-sessions', 'stat-ga-avgsession', 'stat-ga-engagement', 'stat-ga-bounce', 'stat-ga-pageviews'].forEach(id => {
     document.getElementById(id).textContent = '…';
   });
-  ['ga-daily-chart', 'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list', 'ga-uk-list'].forEach(id => {
+  [
+    'ga-daily-chart', 'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list', 'ga-uk-list',
+    'ga-appversion-list', 'ga-events-list', 'ga-screens-list', 'ga-share-list', 'ga-onboarding-list',
+    'ga-notif-optins-list', 'ga-donorgate-funnel', 'ga-widget-adoption', 'ga-favdrivers-list', 'ga-search-list',
+  ].forEach(id => {
     document.getElementById(id).innerHTML = '<div class="section-note">Loading…</div>';
   });
 
@@ -3861,10 +3997,11 @@ async function loadWebsiteAnalytics() {
 
     if (!weeks.length) {
       const empty = '<div class="section-note">No data yet - the first weekly export runs Monday.</div>';
-      document.getElementById('ga-weekly-trend').innerHTML = empty;
-      document.getElementById('ga-sources-list').innerHTML = empty;
-      document.getElementById('ga-platform-list').innerHTML = empty;
-      document.getElementById('ga-uk-list').innerHTML = empty;
+      [
+        'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list', 'ga-uk-list', 'ga-appversion-list',
+        'ga-events-list', 'ga-screens-list', 'ga-share-list', 'ga-onboarding-list', 'ga-notif-optins-list',
+        'ga-donorgate-funnel', 'ga-widget-adoption', 'ga-favdrivers-list', 'ga-search-list',
+      ].forEach(id => { document.getElementById(id).innerHTML = empty; });
       return;
     }
 
@@ -3873,6 +4010,10 @@ async function loadWebsiteAnalytics() {
     document.getElementById('stat-ga-new').textContent = latest.newUsers || 0;
     document.getElementById('stat-ga-active').textContent = latest.activeUsers || 0;
     document.getElementById('stat-ga-sessions').textContent = latest.sessions || 0;
+    document.getElementById('stat-ga-avgsession').textContent = formatDuration(latest.averageSessionDuration);
+    document.getElementById('stat-ga-engagement').textContent = formatPct(latest.engagementRate);
+    document.getElementById('stat-ga-bounce').textContent = formatPct(latest.bounceRate);
+    document.getElementById('stat-ga-pageviews').textContent = (latest.screenPageViews || 0).toLocaleString();
 
     // ── Weekly trend, most recent first ──
     const recentWeeks = weeks.slice().reverse().slice(0, 12);
@@ -3916,13 +4057,124 @@ async function loadWebsiteAnalytics() {
     } else {
       document.getElementById('ga-uk-list').innerHTML = '<div class="section-note">No UK location data for this week.</div>';
     }
+
+    // ── App version adoption, latest week ──
+    const appVersions = (latest.appVersionBreakdown || []).slice(0, 8);
+    if (appVersions.length) {
+      const maxVer = Math.max(...appVersions.map(v => v.activeUsers || 0), 1);
+      document.getElementById('ga-appversion-list').innerHTML = appVersions
+        .map(v => gaBar(v.appVersion || 'Unknown', v.activeUsers || 0, maxVer, 'var(--yellow)'))
+        .join('');
+    } else {
+      document.getElementById('ga-appversion-list').innerHTML = '<div class="section-note">No app version data for this week.</div>';
+    }
+
+    // ── Top events, latest week ──
+    const topEvents = (latest.topEvents || []).slice(0, 20);
+    if (topEvents.length) {
+      const maxEvt = Math.max(...topEvents.map(ev => ev.eventCount || 0), 1);
+      document.getElementById('ga-events-list').innerHTML = topEvents
+        .map(ev => gaBar(ev.eventName || 'unknown_event', ev.eventCount || 0, maxEvt, '#60A5FA'))
+        .join('');
+    } else {
+      document.getElementById('ga-events-list').innerHTML = '<div class="section-note">No event data for this week.</div>';
+    }
+
+    // ── Screen popularity, latest week ──
+    const screens = (latest.screenPopularity || []).slice(0, 12);
+    if (screens.length) {
+      const maxScreen = Math.max(...screens.map(s => s.views || 0), 1);
+      document.getElementById('ga-screens-list').innerHTML = screens
+        .map(s => gaBar(s.screenName || 'unknown', s.views || 0, maxScreen, 'var(--green)'))
+        .join('');
+    } else {
+      document.getElementById('ga-screens-list').innerHTML = '<div class="section-note">No screen data for this week.</div>';
+    }
+
+    // ── Share breakdown by content_type ──
+    const shares = (latest.shareBreakdown || []).slice(0, 8);
+    if (shares.length) {
+      const maxShare = Math.max(...shares.map(s => s.eventCount || 0), 1);
+      document.getElementById('ga-share-list').innerHTML = shares
+        .map(s => gaBar(s.contentType || 'unknown', s.eventCount || 0, maxShare, '#A78BFA'))
+        .join('');
+    } else {
+      document.getElementById('ga-share-list').innerHTML = GA_CUSTOM_DIM_PENDING;
+    }
+
+    // ── Onboarding choice funnel ──
+    const onboarding = (latest.onboardingFunnel || []).slice(0, 5);
+    if (onboarding.length) {
+      const maxChoice = Math.max(...onboarding.map(o => o.eventCount || 0), 1);
+      document.getElementById('ga-onboarding-list').innerHTML = onboarding
+        .map(o => gaBar(o.choice || 'unknown', o.eventCount || 0, maxChoice, 'var(--yellow)'))
+        .join('');
+    } else {
+      document.getElementById('ga-onboarding-list').innerHTML = GA_CUSTOM_DIM_PENDING;
+    }
+
+    // ── Notification opt-in / out, by type ──
+    const notifOptIns = (latest.notificationOptIns || []).slice(0, 12);
+    if (notifOptIns.length) {
+      const maxOptIn = Math.max(...notifOptIns.map(n => n.eventCount || 0), 1);
+      document.getElementById('ga-notif-optins-list').innerHTML = notifOptIns
+        .map(n => gaBar(`${n.type || 'unknown'} → ${n.enabled === 'true' ? 'ON' : 'OFF'}`, n.eventCount || 0, maxOptIn, n.enabled === 'true' ? 'var(--green)' : 'var(--red)'))
+        .join('');
+    } else {
+      document.getElementById('ga-notif-optins-list').innerHTML = GA_CUSTOM_DIM_PENDING;
+    }
+
+    // ── Donor gate funnel (shown → saved/skipped) - derived server-side
+    // from topEvents, so it's only ever empty when topEvents itself is. ──
+    const donorGate = latest.donorGateFunnel;
+    if (donorGate && donorGate.shown) {
+      document.getElementById('ga-donorgate-funnel').innerHTML =
+        gaFunnelBar('Shown', donorGate.shown, donorGate.shown, 'var(--yellow)') +
+        gaFunnelBar('Name saved', donorGate.nameSaved || 0, donorGate.shown, 'var(--green)') +
+        gaFunnelBar('Skipped', donorGate.skipped || 0, donorGate.shown, 'var(--red)');
+    } else {
+      document.getElementById('ga-donorgate-funnel').innerHTML = '<div class="section-note">Not shown to anyone this week.</div>';
+    }
+
+    // ── Widget adoption ──
+    const widget = latest.widgetAdoption;
+    if (widget && (widget.configured || widget.sizeUsed)) {
+      const maxWidget = Math.max(widget.configured || 0, widget.sizeUsed || 0, 1);
+      document.getElementById('ga-widget-adoption').innerHTML =
+        gaBar('Widget configured', widget.configured || 0, maxWidget, '#60A5FA') +
+        gaBar('Widget size changed', widget.sizeUsed || 0, maxWidget, '#A78BFA');
+    } else {
+      document.getElementById('ga-widget-adoption').innerHTML = '<div class="section-note">No widget activity this week.</div>';
+    }
+
+    // ── Most favourited drivers ──
+    const favDrivers = (latest.favouriteDrivers || []).slice(0, 10);
+    if (favDrivers.length) {
+      const maxFav = Math.max(...favDrivers.map(d => d.eventCount || 0), 1);
+      document.getElementById('ga-favdrivers-list').innerHTML = favDrivers
+        .map(d => gaBar(d.driverName || 'Unknown', d.eventCount || 0, maxFav, 'var(--yellow)'))
+        .join('');
+    } else {
+      document.getElementById('ga-favdrivers-list').innerHTML = GA_CUSTOM_DIM_PENDING;
+    }
+
+    // ── Top search terms ──
+    const searchTerms = (latest.searchTerms || []).slice(0, 10);
+    if (searchTerms.length) {
+      const maxSearch = Math.max(...searchTerms.map(s => s.eventCount || 0), 1);
+      document.getElementById('ga-search-list').innerHTML = searchTerms
+        .map(s => gaBar(s.searchTerm || '(empty)', s.eventCount || 0, maxSearch, '#60A5FA'))
+        .join('');
+    } else {
+      document.getElementById('ga-search-list').innerHTML = GA_CUSTOM_DIM_PENDING;
+    }
   } catch (e) {
     const failMsg = `<div class="section-note" style="color:var(--red)">Failed: ${e.message}</div>`;
-    document.getElementById('ga-daily-chart').innerHTML = failMsg;
-    document.getElementById('ga-weekly-trend').innerHTML = failMsg;
-    document.getElementById('ga-sources-list').innerHTML = failMsg;
-    document.getElementById('ga-platform-list').innerHTML = failMsg;
-    document.getElementById('ga-uk-list').innerHTML = failMsg;
+    [
+      'ga-daily-chart', 'ga-weekly-trend', 'ga-sources-list', 'ga-platform-list', 'ga-uk-list',
+      'ga-appversion-list', 'ga-events-list', 'ga-screens-list', 'ga-share-list', 'ga-onboarding-list',
+      'ga-notif-optins-list', 'ga-donorgate-funnel', 'ga-widget-adoption', 'ga-favdrivers-list', 'ga-search-list',
+    ].forEach(id => { document.getElementById(id).innerHTML = failMsg; });
   }
 }
 
