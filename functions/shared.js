@@ -175,6 +175,22 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET;
 // notifyResultsUpdate/reportScraperFailure, which authenticate against
 // SCRAPER_SECRET instead - a different caller (GitHub Actions), not the
 // admin page.
+//
+// EVERY caller of this function MUST also declare `secrets: ['ADMIN_SECRET']`
+// in its own onRequest options object (alongside any other secrets it
+// needs) - found live 2026-08-29: referencing process.env.ADMIN_SECRET in
+// code is not enough on its own. Firebase Functions v2 only injects a
+// Secret Manager value into a given function's runtime if that function
+// explicitly lists it in `secrets: [...]`; without that, the module-level
+// const above silently reads whatever plain (non-Secret-Manager)
+// environment variable of the same name already happens to be configured
+// on that Cloud Run service - in this case, a stale value set independently
+// of this repo at some point in the past, which kept authenticating
+// successfully even after this file's own fallback was removed and a new
+// value was set in Secret Manager. Confirmed live via curl: the real new
+// secret was rejected with 401, while the old hardcoded value kept working,
+// until `secrets: ['ADMIN_SECRET']` was added to every one of these 5
+// functions and redeployed.
 function requireAdminPost(req, res) {
   if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
   if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return true; }

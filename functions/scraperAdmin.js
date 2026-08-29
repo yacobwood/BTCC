@@ -5,7 +5,7 @@ const {logError, requireAdminPost} = require('./shared');
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
 exports.dismissError = onRequest(
-  {cors: ['https://yacobwood.github.io']},
+  {secrets: ['ADMIN_SECRET'], cors: ['https://yacobwood.github.io']},
   async (req, res) => {
     if (requireAdminPost(req, res)) return;
 

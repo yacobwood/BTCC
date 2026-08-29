@@ -328,7 +328,7 @@ exports.raceWeekendDigest = onSchedule(
 // ── Manual digest trigger — called from admin page ────────────
 exports.triggerDigest = onRequest(
   {
-    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN', 'GMAIL_APP_PASSWORD'],
+    secrets: ['ANTHROPIC_API_KEY', 'GITHUB_TOKEN', 'GMAIL_APP_PASSWORD', 'ADMIN_SECRET'],
     cors: ['https://yacobwood.github.io'],
   },
   async (req, res) => {

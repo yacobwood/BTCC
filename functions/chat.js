@@ -110,7 +110,7 @@ exports.onChatMention = onValueCreated(
 // that open-write pattern is a known, separate issue and donors
 // deliberately does not repeat it.
 exports.setChatDonor = onRequest(
-  {cors: ['https://yacobwood.github.io']},
+  {secrets: ['ADMIN_SECRET'], cors: ['https://yacobwood.github.io']},
   async (req, res) => {
     if (requireAdminPost(req, res)) return;
 
@@ -139,7 +139,7 @@ exports.setChatDonor = onRequest(
 // separately guess a chat display name (the fragile path setChatDonor's own
 // UI otherwise relies on - see markSupporter()'s comment in the admin page).
 exports.lookupUserByEmail = onRequest(
-  {cors: ['https://yacobwood.github.io']},
+  {secrets: ['ADMIN_SECRET'], cors: ['https://yacobwood.github.io']},
   async (req, res) => {
     if (requireAdminPost(req, res)) return;
 

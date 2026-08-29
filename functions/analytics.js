@@ -299,7 +299,7 @@ exports.exportAnalyticsHistory = onSchedule(
 // just overwritten - so it also works to extend the backfill further back
 // later if needed.
 exports.backfillAnalyticsDaily = onRequest(
-  {secrets: ['GMAIL_APP_PASSWORD'], cors: ['https://yacobwood.github.io']},
+  {secrets: ['GMAIL_APP_PASSWORD', 'ADMIN_SECRET'], cors: ['https://yacobwood.github.io']},
   async (req, res) => {
     if (requireAdminPost(req, res)) return;
 
