@@ -1863,7 +1863,7 @@
         {
           "name": "Qualifying",
           "day": "SAT",
-          "time": "14:00"
+          "time": "14:05"
         },
         {
           "name": "Qualifying Race",
@@ -1898,39 +1898,39 @@
         {
           "day": "SAT",
           "time": "10:15",
-          "endTime": "10:55",
+          "endTime": "11:05",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:25",
-          "endTime": "11:45",
+          "time": "11:20",
+          "endTime": "11:50",
           "series": "MINI CHALLENGE Trophy",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "11:55",
-          "endTime": "12:20",
+          "time": "12:00",
+          "endTime": "12:25",
           "series": "Wera Tools F4 British Championship certified by FIA",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
-          "time": "12:30",
-          "endTime": "12:50",
+          "time": "12:35",
+          "endTime": "12:55",
           "series": "Porsche Sprint Challenge Great Britain",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "14:00",
-          "endTime": "14:35",
+          "time": "14:05",
+          "endTime": "14:40",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying",
           "laps": null
