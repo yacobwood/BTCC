@@ -72,6 +72,42 @@ class TestScrapeNews(unittest.TestCase):
         scrape_news(force=True)
         mock_image.assert_called_once()
 
+    @patch("scrape_news._current_slug", return_value="race-1-report")
+    @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML)
+    @patch("scrape_news.fetch_image_smart", return_value=None)
+    def test_force_falls_back_to_existing_image_when_refetch_fails(self, mock_image, mock_fetch, mock_slug):
+        """Regression coverage: confirmed live 2026-09-02 - a --force run
+        that hits a transient Scrapfly failure used to silently wipe out an
+        already-good image back to none, since the old code only ever set
+        image_url from a fresh fetch attempt and defaulted to None
+        everywhere else. A failed re-fetch of the SAME article must fall
+        back to whatever was already committed, not lose it."""
+        with patch("pathlib.Path.read_text", return_value=json.dumps([
+            {"slug": "race-1-report", "_embedded": {"wp:featuredmedia": [{"source_url": "https://example.com/existing.jpg"}]}}
+        ])):
+            posts = scrape_news(force=True)
+        mock_image.assert_called_once()  # the retry was genuinely attempted...
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://example.com/existing.jpg",  # ...but the existing image survives its failure
+        )
+
+    @patch("scrape_news._current_slug", return_value="some-older-article")
+    @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML)
+    @patch("scrape_news.fetch_image_smart", return_value=None)
+    def test_new_headline_with_failed_fetch_never_reuses_a_different_articles_image(self, mock_image, mock_fetch, mock_slug):
+        """The fallback-to-existing-image behavior above is scoped to the
+        SAME article only - a genuinely new headline whose image fetch
+        fails must show no image, never the previous (different) article's
+        one, even though data/news.json still has that old entry sitting
+        there when this runs."""
+        with patch("pathlib.Path.read_text", return_value=json.dumps([
+            {"slug": "some-older-article", "_embedded": {"wp:featuredmedia": [{"source_url": "https://example.com/old-article.jpg"}]}}
+        ])):
+            posts = scrape_news()
+        self.assertEqual(posts[0]["slug"], "race-1-report")
+        self.assertEqual(posts[0]["_embedded"], {})
+
     @patch("scrape_news._current_slug", return_value="some-older-article")
     @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML_NO_IMAGE)
     @patch("scrape_news.fetch_image_smart")

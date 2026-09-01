@@ -105,28 +105,38 @@ def scrape_news(force: bool = False) -> list | None:
         print("ERROR: could not extract title/slug from article card", file=sys.stderr)
         return None
 
+    current_slug = _current_slug()
     image_url = None
-    if not force and slug == _current_slug():
-        # Already the current post - reuse whatever image (if any) is
-        # already committed rather than re-fetching. Avoids paying the
-        # ~225-credit image fetch on every single run for a headline that
-        # hasn't changed (confirmed this was a real, unbounded cost bug in
-        # the pre-Scrapfly version of this function - harmless there since
-        # RenderedFetcher captured images for free as a side effect of
-        # rendering the page anyway).
+    if slug == current_slug:
+        # Same article as what's already committed - default to reusing
+        # whatever image (if any) is already there, whether or not we're
+        # about to attempt a fresh fetch below. Only meaningful when the
+        # slug matches: an existing image belongs to THIS article, so it's
+        # a safe fallback; it would be actively wrong to reuse it as a
+        # placeholder for a genuinely different (new) headline below.
         try:
             existing = json.loads(NEWS_JSON.read_text())
             image_url = existing[0].get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
         except (OSError, json.JSONDecodeError, IndexError, AttributeError):
             pass
-    else:
+
+    if force or slug != current_slug:
+        # Either a genuinely new headline (always worth trying once), or a
+        # forced re-check of an unchanged one. Confirmed live 2026-09-02: a
+        # failed fetch here must fall through to whatever image_url was
+        # already set to above, NOT reset to None - an earlier version of
+        # this function defaulted to None unconditionally whenever a fetch
+        # was attempted, so a single transient Scrapfly failure during a
+        # --force run silently wiped out an image that had been working
+        # fine moments before.
         image_m = IMAGE_RE.search(block)
         if image_m:
             media_url = resolve_media_url(image_m.group(1))
             fetched = fetch_image_smart(media_url, label=slug)
             if fetched:
                 filename = save_mirrored_image({media_url: fetched}, media_url, MEDIA_DIR)
-                image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
+                if filename:
+                    image_url = f"{MEDIA_RAW_BASE}/{filename}"
 
     post = {
         "id": slug,
