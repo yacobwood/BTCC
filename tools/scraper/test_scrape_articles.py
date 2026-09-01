@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for scrape_articles.py's display-date parsing."""
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,7 @@ from scrape_articles import (
     parse_display_date,
     resolve_first_seen,
     scrape_card_list,
+    scrape_pages,
     sort_posts,
 )
 
@@ -179,143 +181,156 @@ class TestSortPosts(unittest.TestCase):
         self.assertEqual([p["slug"] for p in result], ["current", "legacy"])
 
 
-# ── scrape_card_list ─────────────────────────────────────────────────────────
-#
-# Regression coverage: the /news/ listing's card images use loading="lazy" -
-# without scrolling, only the hero card (already in the initial viewport)
-# actually gets its image requested and captured; every card lower down
-# silently got media_url=None, permanently, since a missing image is never
-# retried once a slug is otherwise fully scraped. Confirmed live: two Race 1
-# reports both missing images the same day they were first scraped.
-
-class FakeFetcher:
-    """Minimal stand-in for RenderedFetcher - scrape_card_list only ever calls
-    .get_with_media(url, **kwargs) on whatever fetcher it's given, so a real
-    Playwright browser isn't needed to test the call itself. get()/
-    over_budget()/__enter__/__exit__ extend this same fake for
-    fetch_article_body/build_articles coverage below - harmless additions,
-    since scrape_card_list's own test above never calls them."""
-    def __init__(self, html='<html><body></body></html>', media=None, get_error=None, over_budget=False):
-        self.html = html
-        self.media = media or {}
-        self.calls = []
-        self.get_error = get_error
-        self._over_budget = over_budget
-
-    def get_with_media(self, url, **kwargs):
-        self.calls.append({'url': url, **kwargs})
-        return self.html, self.media
-
-    def get(self, url, **kwargs):
-        self.calls.append({'url': url, **kwargs})
-        if self.get_error:
-            raise self.get_error
-        return '<div class="article-body">Full content.</div>'
-
-    def over_budget(self):
-        return self._over_budget
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
+# ── scrape_card_list / scrape_pages ──────────────────────────────────────────
 
 class TestScrapeCardList(unittest.TestCase):
 
-    def test_requests_scroll_through_to_capture_lazy_loaded_images(self):
-        fetcher = FakeFetcher()
-        scrape_card_list(fetcher)
-        self.assertEqual(len(fetcher.calls), 1)
-        self.assertTrue(fetcher.calls[0].get('scroll_through'))
+    @patch("scrape_articles.fetch_via_scrapfly", return_value=None)
+    def test_returns_empty_list_when_fetch_fails(self, mock_fetch):
+        self.assertEqual(scrape_card_list(), [])
 
-    def test_strips_a_nested_tag_wrapped_around_the_title(self):
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_strips_a_nested_tag_wrapped_around_the_title(self, mock_fetch):
         # 2026-08-18/19 overnight incident: see the matching comment on
         # TITLE_RE - a title briefly wrapped in an inline tag (e.g. a
         # "breaking" badge span) used to make the whole card silently
         # unparseable instead of just losing the badge markup.
-        html = (
+        mock_fetch.return_value = (
             '<article class="news-card">'
             '<h3><a href="/a-statement/"><span class="badge">Breaking</span> A Statement</a></h3>'
             '</article>'
         )
-        cards, _ = scrape_card_list(FakeFetcher(html=html))
+        cards = scrape_card_list()
         self.assertEqual(len(cards), 1)
         self.assertEqual(cards[0]['title'], 'Breaking A Statement')
 
-    def test_skips_a_card_whose_title_is_tags_only(self):
-        html = (
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_skips_a_card_whose_title_is_tags_only(self, mock_fetch):
+        mock_fetch.return_value = (
             '<article class="news-card">'
             '<h3><a href="/a-statement/"><span></span></a></h3>'
             '</article>'
         )
-        cards, _ = scrape_card_list(FakeFetcher(html=html))
-        self.assertEqual(cards, [])
+        self.assertEqual(scrape_card_list(), [])
+
+
+class TestScrapePages(unittest.TestCase):
+    """Regression coverage for the 2026-09-01 fix: the real pagination URL
+    is /page/<n>/, not /news/page/<n>/ (which 404s) - confirmed live via the
+    listing's own <nav class="pagination"> markup. These confirm the correct
+    URLs are requested and that a stop condition (fetch failure, empty page,
+    or no new slugs) ends the backfill early rather than looping forever."""
+
+    def _card_html(self, slug):
+        return f'<article class="news-card"><h3><a href="/{slug}/">{slug}</a></h3></article>'
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_requests_the_correct_page_urls(self, mock_fetch):
+        mock_fetch.side_effect = [self._card_html(f"article-{p}") for p in range(1, 4)]
+        scrape_pages(3)
+        requested_urls = [c.args[0] for c in mock_fetch.call_args_list]
+        self.assertEqual(requested_urls, [NEWS_URL, "https://btcc.net/page/2/", "https://btcc.net/page/3/"])
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_dedupes_slugs_across_pages(self, mock_fetch):
+        mock_fetch.side_effect = [self._card_html("dup"), self._card_html("dup")]
+        cards = scrape_pages(2)
+        self.assertEqual(len(cards), 1)
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_stops_early_when_a_page_fetch_fails(self, mock_fetch):
+        mock_fetch.side_effect = [self._card_html("article-1"), None, self._card_html("article-3")]
+        cards = scrape_pages(3)
+        self.assertEqual([c["slug"] for c in cards], ["article-1"])
+        self.assertEqual(mock_fetch.call_count, 2)  # never attempted page 3
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_stops_early_when_a_page_has_no_new_cards(self, mock_fetch):
+        # btcc.net has fewer real distinct pages than num_pages asked for -
+        # every card on page 2 is identical to page 1's.
+        mock_fetch.side_effect = [self._card_html("article-1"), self._card_html("article-1")]
+        cards = scrape_pages(5)
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(mock_fetch.call_count, 2)
 
 
 # ── fetch_article_body / build_articles ──────────────────────────────────────
-#
-# Regression coverage for the 2026-08-17 refactor onto btcc_playwright.py's
-# now-shared retry/budget logic (see test_btcc_playwright.py for the retry
-# mechanics themselves) - these confirm fetch_article_body/build_articles
-# still behave the same from the outside: None on total failure, referer
-# still passed, and a budget that's already exhausted still skips fetching a
-# brand-new (nothing cached) slug entirely rather than fetching regardless.
 
 class TestFetchArticleBody(unittest.TestCase):
-    """The Scrapfly fallback (scrapfly_fallback.fetch_via_scrapfly) is
-    mocked directly at its scrape_articles-side import in every test here -
-    its own no-op/success/failure behavior is covered independently in
-    test_scrapfly_fallback.py; what matters here is *when* it's called."""
 
     @patch("scrape_articles.fetch_via_scrapfly", return_value=None)
-    def test_returns_none_rather_than_raising_when_every_attempt_fails(self, mock_scrapfly):
-        fetcher = FakeFetcher(get_error=RuntimeError("HTTP 429 fetching article"))
-        self.assertIsNone(fetch_article_body(fetcher, "some-slug"))
+    def test_returns_none_rather_than_raising_when_fetch_fails(self, mock_fetch):
+        self.assertIsNone(fetch_article_body("some-slug"))
 
     @patch("scrape_articles.fetch_via_scrapfly")
-    def test_passes_referer_to_the_listing_page(self, mock_scrapfly):
-        fetcher = FakeFetcher()
-        fetch_article_body(fetcher, "some-slug")
-        self.assertEqual(fetcher.calls[0]["referer"], NEWS_URL)
-        # RenderedFetcher succeeded outright - the fallback must never fire.
-        mock_scrapfly.assert_not_called()
-
-    @patch("scrape_articles.fetch_via_scrapfly")
-    def test_scrapfly_fallback_only_fires_after_rendered_fetcher_is_exhausted(self, mock_scrapfly):
-        mock_scrapfly.return_value = '<div class="article-body">Fallback content.</div></article>'
-        fetcher = FakeFetcher(get_error=RuntimeError("HTTP 429 fetching article"))
-        result = fetch_article_body(fetcher, "some-slug")
-        mock_scrapfly.assert_called_once()
-        self.assertEqual(mock_scrapfly.call_args.kwargs.get("referer"), NEWS_URL)
-        self.assertEqual(mock_scrapfly.call_args.kwargs.get("label"), "some-slug")
-        self.assertEqual(result, "Fallback content.")
+    def test_passes_referer_and_extracts_body(self, mock_fetch):
+        mock_fetch.return_value = '<div class="article-body">Full content.</div></article>'
+        result = fetch_article_body("some-slug")
+        self.assertEqual(mock_fetch.call_args.kwargs.get("referer"), NEWS_URL)
+        self.assertEqual(result, "Full content.")
 
 
-class TestBuildArticlesBudget(unittest.TestCase):
+class TestBuildArticlesImageFetch(unittest.TestCase):
+    """The cost-critical property, same shape as scrape_news.py's own
+    coverage: an article that already has a mirrored image must never
+    re-pay the ~225-credit image fetch, since build_articles runs on
+    every 5-minute tick and re-processes every already-mirrored article
+    each time."""
 
     NEWS_CARD_HTML = (
         '<article class="news-card">'
+        '<img src="/api/media/abc123">'
         '<h3><a href="/race-1-report/">Race 1 Report</a></h3>'
         '<time class="date">1st August 2026</time>'
         '</article>'
     )
 
-    def test_skips_fetching_a_brand_new_slug_when_budget_already_exhausted(self):
-        fetcher = FakeFetcher(html=self.NEWS_CARD_HTML, over_budget=True)
+    def test_skips_image_fetch_when_already_mirrored(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with patch.object(scrape_articles, "RenderedFetcher", lambda **kw: fetcher), \
-                 patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
-                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"):
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            existing_post = {
+                "id": "race-1-report", "slug": "race-1-report", "date": "2026-08-01T00:00:00",
+                "firstSeenAt": "2026-08-01T00:00:00", "title": {"rendered": "Race 1 Report"},
+                "excerpt": {"rendered": ""}, "content": {"rendered": "Full report."},
+                "_embedded": {"wp:featuredmedia": [{
+                    "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/abc123.jpg",
+                }]},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "race-1-report", "title": "Race 1 Report",
+                     "media_url": "https://btcc.net/api/media/abc123",
+                     "excerpt": "", "date": "2026-08-01T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_image_smart") as mock_image:
                 posts = build_articles(refresh_all=False)
-        # Nothing was ever cached for this slug and the budget was already
-        # exhausted, so it's skipped entirely this run (see build_articles'
-        # own "if prior_content: ... else: continue" fallback) - the article
-        # body fetch (wait_selector="div.article-body") must never happen.
-        self.assertEqual(posts, [])
-        body_fetch_calls = [c for c in fetcher.calls if c.get("wait_selector") == "div.article-body"]
-        self.assertEqual(body_fetch_calls, [])
+        mock_image.assert_not_called()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/abc123.jpg",
+        )
+
+    def test_fetches_image_for_a_genuinely_new_article(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "race-1-report", "title": "Race 1 Report",
+                     "media_url": "https://btcc.net/api/media/abc123",
+                     "excerpt": "", "date": "2026-08-01T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body", return_value="Full report."), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
+                 patch("scrape_articles.save_mirrored_image", return_value="abc123.jpg"):
+                posts = build_articles(refresh_all=False)
+        mock_image.assert_called_once()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/abc123.jpg",
+        )
 
 
 if __name__ == "__main__":

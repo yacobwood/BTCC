@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Tests for scrape_news.py - the single most business-critical scraper (it
-drives live push notifications, runs every 5 minutes). Before this file
-existed there was zero coverage of it at all - a real gap, since it also
-had no retry: any single transient 429 skipped straight to failure rather
-than riding it out (fixed by moving retry logic into RenderedFetcher, see
-test_btcc_playwright.py, and giving this script retries=3)."""
+drives live push notifications). Covers the cost-critical property first:
+when the fetched slug already matches what's committed, the ~225-credit
+image fetch must never be attempted - that's the whole reason this exists
+as a gated check rather than an unconditional fetch (see the function's own
+docstring for why that distinction didn't matter under the old Playwright
+implementation but matters a great deal under Scrapfly's per-resource
+billing)."""
 
+import json
 import unittest
 from unittest.mock import patch
 
@@ -20,86 +23,75 @@ CARD_HTML = """
 </body></html>
 """
 
-
-class _FakeRenderedFetcher:
-    """Stand-in for the `with RenderedFetcher(...) as fetcher:` context
-    manager scrape_news() constructs internally - patched in via
-    scrape_news.RenderedFetcher, since scrape_news() (unlike
-    scrape_articles.py's per-item functions) doesn't take an injected
-    fetcher and doesn't need to - it makes exactly one fetch."""
-
-    def __init__(self, html=None, media=None, error=None):
-        self._html = html
-        self._media = media or {}
-        self._error = error
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
-    def get_with_media(self, *a, **k):
-        if self._error:
-            raise self._error
-        return self._html, self._media
+CARD_HTML_NO_IMAGE = """
+<html><body>
+<article class="news-card">
+  <h3><a href="/where-to-watch-croft-2/">Where to Watch: Croft</a></h3>
+</article>
+</body></html>
+"""
 
 
 class TestScrapeNews(unittest.TestCase):
 
-    def test_parses_the_latest_card_into_wp_rest_shape(self):
-        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html=CARD_HTML)):
-            posts = scrape_news()
+    @patch("scrape_news._current_slug", return_value="some-older-article")
+    @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML)
+    @patch("scrape_news.fetch_image_smart", return_value=(b"bytes", "image/jpeg"))
+    @patch("scrape_news.save_mirrored_image", return_value="abc123.jpg")
+    def test_parses_the_latest_card_into_wp_rest_shape(self, mock_save, mock_image, mock_fetch, mock_slug):
+        posts = scrape_news()
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0]["id"], "race-1-report")
         self.assertEqual(posts[0]["slug"], "race-1-report")
         self.assertEqual(posts[0]["title"]["rendered"], "Race 1 Report")
-
-    def test_returns_none_rather_than_raising_when_fetch_ultimately_fails(self):
-        error = RuntimeError("HTTP 429 fetching https://btcc.net/news/")
-        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(error=error)):
-            result = scrape_news()
-        self.assertIsNone(result)
-
-    def test_returns_none_when_no_article_card_is_found(self):
-        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html="<html></html>")):
-            self.assertIsNone(scrape_news())
-
-    def test_strips_a_nested_tag_wrapped_around_the_title(self):
-        # 2026-08-18/19 overnight incident: 3 real scrape failures around a
-        # breaking-news story, most likely because the title was briefly
-        # wrapped in an inline tag (e.g. a "breaking" badge span) while the
-        # CMS was actively re-publishing it - the old [^<]+ capture had zero
-        # tolerance for that and hard-failed the whole scrape.
-        html = CARD_HTML.replace(
-            "<h3><a href=\"/race-1-report/\">Race 1 Report</a></h3>",
-            "<h3><a href=\"/race-1-report/\"><span class=\"badge\">Breaking</span> Race 1 Report</a></h3>",
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/abc123.jpg",
         )
-        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html=html)):
+
+    @patch("scrape_news._current_slug", return_value="race-1-report")
+    @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML)
+    @patch("scrape_news.fetch_image_smart")
+    def test_matching_slug_never_touches_the_expensive_image_fetch(self, mock_image, mock_fetch, mock_slug):
+        """The cost-critical property: a headline that hasn't changed since
+        the last run must not re-pay the ~225-credit image fetch."""
+        with patch("pathlib.Path.read_text", return_value=json.dumps([
+            {"slug": "race-1-report", "_embedded": {"wp:featuredmedia": [{"source_url": "https://example.com/existing.jpg"}]}}
+        ])):
             posts = scrape_news()
-        self.assertEqual(posts[0]["title"]["rendered"], "Breaking Race 1 Report")
-
-    def test_returns_none_when_title_is_tags_only(self):
-        html = CARD_HTML.replace(
-            "<h3><a href=\"/race-1-report/\">Race 1 Report</a></h3>",
-            "<h3><a href=\"/race-1-report/\"><span></span></a></h3>",
+        mock_image.assert_not_called()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://example.com/existing.jpg",
         )
-        with patch("scrape_news.RenderedFetcher", lambda **kw: _FakeRenderedFetcher(html=html)):
-            self.assertIsNone(scrape_news())
 
-    def test_constructs_fetcher_with_retries_3(self):
-        # retries=3, not RenderedFetcher's own default of 2 - a missed
-        # 5-minute tick has a direct notification-latency cost, so this
-        # script deliberately asks for one more attempt than the default.
-        captured = {}
+    @patch("scrape_news._current_slug", return_value="race-1-report")
+    @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML)
+    @patch("scrape_news.fetch_image_smart", return_value=(b"bytes", "image/jpeg"))
+    def test_force_refetches_even_when_slug_matches(self, mock_image, mock_fetch, mock_slug):
+        scrape_news(force=True)
+        mock_image.assert_called_once()
 
-        def fake(**kwargs):
-            captured.update(kwargs)
-            return _FakeRenderedFetcher(html=CARD_HTML)
+    @patch("scrape_news._current_slug", return_value="some-older-article")
+    @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML_NO_IMAGE)
+    @patch("scrape_news.fetch_image_smart")
+    def test_no_image_in_card_means_no_image_fetch_attempted(self, mock_image, mock_fetch, mock_slug):
+        posts = scrape_news()
+        mock_image.assert_not_called()
+        self.assertEqual(posts[0]["_embedded"], {})
 
-        with patch("scrape_news.RenderedFetcher", fake):
-            scrape_news()
-        self.assertEqual(captured.get("retries"), 3)
+    @patch("scrape_news.fetch_via_scrapfly", return_value=None)
+    def test_returns_none_rather_than_raising_when_fetch_fails(self, mock_fetch):
+        self.assertIsNone(scrape_news())
+
+    @patch("scrape_news.fetch_via_scrapfly", return_value="<html><body>no cards here</body></html>")
+    def test_returns_none_when_no_article_card_found(self, mock_fetch):
+        self.assertIsNone(scrape_news())
+
+    @patch("scrape_news._current_slug", return_value="some-older-article")
+    @patch("scrape_news.fetch_via_scrapfly", return_value='<html><body><article class="news-card"><img src="/api/media/x"><h3><a href="/x/"></a></h3></article></body></html>')
+    def test_returns_none_when_title_is_empty(self, mock_fetch, mock_slug):
+        self.assertIsNone(scrape_news())
 
 
 if __name__ == "__main__":

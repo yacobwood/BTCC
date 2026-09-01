@@ -1,7 +1,7 @@
-# Runs on a self-hosted runner (see scrape-news.yml comment /
-# project_vercel_migration memory) since btcc.net's Vercel bot-challenge
-# blocks GitHub-hosted runner IPs even with headless Chromium - interim
-# fix until btcc.net's dev allowlists us.
+# Fetches via Scrapfly (see scrape-news.yml's own comment /
+# project_scrapfly_full_migration memory) as of 2026-09-01 rather than a
+# self-hosted runner's local Playwright - runs on GitHub-hosted
+# ubuntu-latest, no residential IP needed.
 #
 # Weekly, not daily: all-time wins/titles only meaningfully change right
 # after a race weekend (roughly biweekly), and btcc.net's own dev confirmed
@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: [self-hosted, btcc-mac]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
@@ -45,13 +45,14 @@ jobs:
 
       - name: Run scraper
         env:
-          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
         run: |
           ARGS=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="--dry-run"
           fi
-          ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_btcc_stats.py $ARGS
+          python3 scrape_btcc_stats.py $ARGS
 
       - name: Commit updated records
         if: github.event.inputs.dry_run != 'true'
@@ -63,22 +64,18 @@ jobs:
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
 
-      # Covers a genuine script failure() as well as cancelled() (e.g.
-      # timeout-killed while queued behind another job on the shared
-      # btcc-mac runner - see project_scraper_reliability_audit memory).
-      # This only runs weekly, so a failure here would otherwise wait a full
-      # week for its next natural attempt - the sleep gives runner
-      # contention a real chance to clear before retrying. Carries dry_run
-      # through so a manual dry-run retry doesn't accidentally write.
-      # is_retry guards against looping: a run dispatched BY this step
-      # carries is_retry=true, so a second failure falls through to "Report
-      # failure" instead of dispatching again.
+      # Covers a genuine script failure() as well as cancelled(). This only
+      # runs weekly, so a failure here would otherwise wait a full week for
+      # its next natural attempt. Carries dry_run through so a manual
+      # dry-run retry doesn't accidentally write. is_retry guards against
+      # looping: a run dispatched BY this step carries is_retry=true, so a
+      # second failure falls through to "Report failure" instead of
+      # dispatching again.
       - name: Retry once on failure
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sleep 120
           curl -sf -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \

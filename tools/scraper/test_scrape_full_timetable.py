@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """Tests for scrape_full_timetable.py - previously had zero coverage at all.
 
-scrape_circuit_timetable() used to fetch via fetch_rendered() (a one-off
-helper that opens a brand-new browser, plus its own 0-45s startup jitter,
-every single call) - called once per round from scrape_calendar.py's loop,
-so a routine 10-round run opened up to 10 separate browser sessions just for
-this step. Fixed by taking a shared RenderedFetcher instance instead - these
-tests confirm the call shape (fetcher.get with the right selector/referer),
-not the real network behavior.
-"""
+scrape_circuit_timetable() fetches via Scrapfly (see scrapfly_fallback.py)
+as of 2026-09-01 rather than local Playwright - the old wait_state=
+"attached"/"visible" distinction (needed because #timetable sits in an
+inactive tab, confirmed live 2026-08-17) doesn't apply here, since Scrapfly
+returns the fully post-JS-render DOM regardless of what's currently
+CSS-visible."""
 
 import unittest
+from unittest.mock import patch
 
 from scrape_full_timetable import looks_like_series, parse_laps, parse_time, scrape_circuit_timetable
 
@@ -24,54 +23,30 @@ TIMETABLE_HTML = """
 """
 
 
-class FakeFetcher:
-    """Minimal stand-in for RenderedFetcher - scrape_circuit_timetable only
-    ever calls .get(url, **kwargs), matching the FakeFetcher convention used
-    elsewhere in this test suite (see test_scrape_calendar.py)."""
-    def __init__(self, html):
-        self.html = html
-        self.calls = []
-
-    def get(self, url, **kwargs):
-        self.calls.append({"url": url, **kwargs})
-        return self.html
-
-
 class TestScrapeCircuitTimetable(unittest.TestCase):
 
-    def test_parses_a_saturday_row(self):
-        entries = scrape_circuit_timetable(FakeFetcher(TIMETABLE_HTML), "donington-park")
+    @patch("scrape_full_timetable.fetch_via_scrapfly", return_value=TIMETABLE_HTML)
+    def test_parses_a_saturday_row(self, mock_fetch):
+        entries = scrape_circuit_timetable("donington-park")
         self.assertEqual(len(entries), 1)
         self.assertEqual(entries[0]["day"], "SAT")
         self.assertEqual(entries[0]["time"], "09:00")
         self.assertEqual(entries[0]["endTime"], "09:10")
         self.assertEqual(entries[0]["session"], "Qualifying")
 
-    def test_passes_wait_selector_and_referer_to_the_fetcher(self):
-        fetcher = FakeFetcher(TIMETABLE_HTML)
-        scrape_circuit_timetable(fetcher, "donington-park", referer="https://btcc.net/calendar/")
-        self.assertEqual(fetcher.calls[0]["wait_selector"], "#timetable")
-        self.assertEqual(fetcher.calls[0]["referer"], "https://btcc.net/calendar/")
+    @patch("scrape_full_timetable.fetch_via_scrapfly", return_value=TIMETABLE_HTML)
+    def test_passes_referer_to_the_fetcher(self, mock_fetch):
+        scrape_circuit_timetable("donington-park", referer="https://btcc.net/calendar/")
+        self.assertEqual(mock_fetch.call_args.kwargs.get("referer"), "https://btcc.net/calendar/")
 
-    def test_waits_for_attached_not_visible(self):
-        # Root-caused live 2026-08-17: #timetable sits in an inactive tab and
-        # never becomes CSS-visible without a click, even though the content
-        # is already present in the DOM this parser reads from.
-        fetcher = FakeFetcher(TIMETABLE_HTML)
-        scrape_circuit_timetable(fetcher, "donington-park")
-        self.assertEqual(fetcher.calls[0]["wait_state"], "attached")
+    @patch("scrape_full_timetable.fetch_via_scrapfly", return_value=TIMETABLE_HTML)
+    def test_referer_defaults_to_none(self, mock_fetch):
+        scrape_circuit_timetable("donington-park")
+        self.assertIsNone(mock_fetch.call_args.kwargs.get("referer"))
 
-    def test_referer_defaults_to_none(self):
-        fetcher = FakeFetcher(TIMETABLE_HTML)
-        scrape_circuit_timetable(fetcher, "donington-park")
-        self.assertIsNone(fetcher.calls[0]["referer"])
-
-    def test_returns_empty_list_rather_than_raising_on_fetch_failure(self):
-        class _RaisingFetcher:
-            def get(self, url, **kwargs):
-                raise RuntimeError("HTTP 429 fetching https://btcc.net/circuit/donington-park/")
-
-        self.assertEqual(scrape_circuit_timetable(_RaisingFetcher(), "donington-park"), [])
+    @patch("scrape_full_timetable.fetch_via_scrapfly", return_value=None)
+    def test_returns_empty_list_rather_than_raising_on_fetch_failure(self, mock_fetch):
+        self.assertEqual(scrape_circuit_timetable("donington-park"), [])
 
 
 class TestParseTime(unittest.TestCase):

@@ -2,54 +2,76 @@
 """
 scrapfly_fallback.py
 
-Bounded, measured trial of Scrapfly's paid Scrape API (https://scrapfly.io)
-as a fallback for the one confirmed-residually-flaky fetch path:
-scrape_articles.py's individual article-body fetch, and only after
-RenderedFetcher's own built-in retries (free, see btcc_playwright.py) are
-already exhausted. Not wired into any other scraper - no other scraper has
-scrape_articles.py's confirmed history of still 429ing occasionally even
-with a persisted session, correct hostname, and referer all in place
-(2026-08-14 incident notes).
+Wraps Scrapfly's paid Scrape API (https://scrapfly.io) for two roles:
 
-Deliberately a no-op - returns None immediately, no network call at all -
-unless the SCRAPFLY_API_KEY environment variable is set, so the trial can
-be disabled at any time by removing that one GitHub Actions secret, with no
-code change needed. Every real attempt prints a SCRAPFLY_FALLBACK: log line
-(success or fail) - the trial's data source is meant to be grepping these
-out of accumulated workflow run logs over the trial period, not a new
-metrics file, since this is meant to be a bounded trial, not a permanent
-feature. See the project's own off-repo notes for the review point.
+1. A per-fetch fallback for scrape_articles.py's individual article-body
+   fetch, after RenderedFetcher's own built-in retries (free, see
+   btcc_playwright.py) are already exhausted - the original, narrow use
+   this module started as (2026-08-14 incident notes: that one fetch path
+   has a confirmed history of still 429ing occasionally even with a
+   persisted session, correct hostname, and referer all in place).
 
-Uses urllib (stdlib) rather than adding a `requests` dependency for what
-may turn out to be a short-lived trial - matches scrape_tsl.py's own choice
-of urllib over requests for its plain (non-Playwright) HTTP fetches.
+2. The fetch layer for scrape_news_scrapfly_fallback.py's emergency
+   watchdog (2026-09-01) - runs on GitHub-hosted ubuntu-latest, no
+   residential IP required, used only when the self-hosted-runner primary
+   path is down or has fallen behind. See that script's own docstring and
+   project_scrapfly_fallback_watchdog memory for the cost reasoning
+   (images cost ~7.5x a plain page fetch here - confirmed live, asp=true
+   is required even for a raw image URL or it 429s - which is why that
+   watchdog only pays for one when the primary path has genuinely fallen
+   behind, not on every check).
+
+Deliberately a no-op in both roles - returns None immediately, no network
+call at all - unless the SCRAPFLY_API_KEY environment variable is set, so
+either can be disabled at any time by removing that one GitHub Actions
+secret, with no code change needed. Every real attempt prints a
+SCRAPFLY_FALLBACK: log line (success or fail).
+
+Uses urllib (stdlib) rather than adding a `requests` dependency - matches
+scrape_tsl.py's own choice of urllib over requests for its plain
+(non-Playwright) HTTP fetches.
 """
 
 from __future__ import annotations
 
+import base64
 import json
 import os
+import re
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 
 SCRAPFLY_ENDPOINT = "https://api.scrapfly.io/scrape"
+_SUPABASE_RE = re.compile(r"supabase\.co/storage/")
 
 
-def fetch_via_scrapfly(url: str, referer: str | None = None, label: str = "", timeout: int = 30) -> str | None:
-    """Fetch url through Scrapfly's Scrape API and return the rendered HTML,
-    or None if the trial is off (no API key configured) or the request
-    failed for any reason - this is a fallback path, never something a
-    caller should let crash a run.
+def fetch_via_scrapfly(
+    url: str, referer: str | None = None, label: str = "", timeout: int = 30, render_js: bool = True,
+) -> str | None:
+    """Fetch url through Scrapfly's Scrape API and return the rendered HTML
+    (or, with render_js=False, whatever text content the origin returned
+    directly), or None if this is off (no API key configured) or the
+    request failed for any reason - this is always a fallback path, never
+    something a caller should let crash a run.
 
     asp=true + render_js=true is Scrapfly's own documented combination for
     anti-bot-protected, JS-challenge targets (Kasada-class, which is what
     Vercel BotID is powered by) - verified against Scrapfly's own API docs
-    (scrapfly.io/docs/scrape-api), not assumed. referer, if given, is passed
-    as a real request header (headers[Referer]=...), not just cosmetic -
-    also per their docs, since Scrapfly's ASP mode can otherwise auto-
-    generate its own referer, which we'd rather not leave to chance given
-    referer is the one lever confirmed (2026-08-14) to matter here."""
+    (scrapfly.io/docs/scrape-api), not assumed, and this is the right
+    combination for an HTML page. render_js=False is for
+    fetch_image_via_scrapfly below, not this function's normal callers -
+    confirmed live (2026-09-01) that render_js=True against a raw image URL
+    returns an empty 302 instead of the image, while render_js=False +
+    asp=true correctly returns it (asp=False alone still 429s - the
+    challenge applies to image URLs too, not just pages).
+
+    referer, if given, is passed as a real request header
+    (headers[Referer]=...), not just cosmetic - also per their docs, since
+    Scrapfly's ASP mode can otherwise auto-generate its own referer, which
+    we'd rather not leave to chance given referer is the one lever
+    confirmed (2026-08-14) to matter here."""
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
@@ -58,7 +80,7 @@ def fetch_via_scrapfly(url: str, referer: str | None = None, label: str = "", ti
         "key": api_key,
         "url": url,
         "asp": "true",
-        "render_js": "true",
+        "render_js": "true" if render_js else "false",
     }
     if referer:
         params["headers[Referer]"] = referer
@@ -74,3 +96,60 @@ def fetch_via_scrapfly(url: str, referer: str | None = None, label: str = "", ti
 
     print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
     return content
+
+
+def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 30) -> tuple[bytes, str] | None:
+    """Fetch a raw image URL (btcc.net's /api/media/<uuid> shape - the one
+    still behind the Vercel challenge; a Supabase Storage URL needs no
+    fallback at all, see btcc_playwright.MEDIA_SRC_RE_FRAGMENT) through
+    Scrapfly and return (bytes, content_type), shaped to drop straight into
+    btcc_playwright.save_mirrored_image's `media` dict - or None if this is
+    off (no API key) or the request failed.
+
+    Confirmed live (2026-09-01) this costs ~225 credits vs. ~30 for a plain
+    HTML page fetch - Scrapfly bills each resource independently, unlike
+    RenderedFetcher which captures every image a page loads for free as a
+    side effect of rendering it once. Callers should gate this behind an
+    actual "does this article still need an image" check, not call it
+    unconditionally on every run - see scrape_news_scrapfly_fallback.py."""
+    api_key = os.environ.get("SCRAPFLY_API_KEY")
+    if not api_key:
+        return None
+
+    params = {"key": api_key, "url": url, "asp": "true", "render_js": "false"}
+    request_url = f"{SCRAPFLY_ENDPOINT}?{urllib.parse.urlencode(params)}"
+    try:
+        with urllib.request.urlopen(request_url, timeout=timeout) as resp:
+            body = json.loads(resp.read())
+        result = body["result"]
+        # Confirmed live (2026-09-01) Scrapfly reports this one of two ways
+        # depending on target - check both rather than trust one and risk
+        # silently mislabelling a non-JPEG image's extension.
+        content_type = result.get("content_type") or result.get("response_headers", {}).get("content-type", "image/jpeg")
+        content_type = content_type.split(";")[0].strip()
+        image_bytes = base64.b64decode(result["content"])
+    except Exception as e:  # noqa: BLE001 - fallback path, any failure just means "no"
+        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({e})")
+        return None
+
+    print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
+    return image_bytes, content_type
+
+
+def fetch_image_smart(media_url: str, label: str = "") -> tuple[bytes, str] | None:
+    """Shared by scrape_news.py and scrape_articles.py: a Supabase Storage
+    URL isn't behind btcc.net's Vercel challenge at all (confirmed live -
+    see scrape-gallery.yml's own comment on this) so a plain, free request
+    works; only btcc.net's own /api/media/<uuid> redirector needs
+    fetch_image_via_scrapfly's paid path above. Returns None on any
+    failure - image mirroring should never crash the whole scrape."""
+    if _SUPABASE_RE.search(media_url):
+        try:
+            req = urllib.request.Request(media_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+                return resp.read(), content_type
+        except Exception as e:  # noqa: BLE001 - image mirroring must never crash the whole scrape
+            print(f"  WARNING: plain fetch of Supabase image failed ({e})", file=sys.stderr)
+            return None
+    return fetch_image_via_scrapfly(media_url, label=label)

@@ -1,22 +1,44 @@
 # Runs the news scrapers on a schedule so both the sendSessionNotifications
 # Cloud Function and the app itself can read btcc.net content from GitHub
-# instead of hitting btcc.net directly at runtime. btcc.net moved off
-# WordPress to a Vercel-hosted React app (2026-07-31) and now issues a JS
-# proof-of-work challenge (HTTP 429) to any request that can't execute
-# JavaScript - AND the challenge also factors in network/IP reputation, so
-# even headless Chromium still gets blocked from GitHub-hosted runners.
-# This runs on a self-hosted runner (the user's own Mac, label "btcc-mac")
-# instead, whose residential/office IP clears the challenge. Interim fix
-# until btcc.net's dev allowlists our traffic - see project_vercel_migration
-# memory. Uses a persistent venv at ~/.btcc-scraper-venv (with Playwright's
-# Chromium already downloaded) instead of reinstalling every 5 minutes.
+# instead of hitting btcc.net directly at runtime.
+#
+# Migrated off the self-hosted btcc-mac runner to GitHub-hosted ubuntu-latest
+# on 2026-09-01 (see project_scrapfly_full_migration memory) - btcc.net's
+# Vercel BotID JS challenge used to require a residential-IP headless
+# browser (Playwright, via btcc_playwright.py) to clear, which meant every
+# btcc.net-facing workflow had to share one single self-hosted runner. That
+# runner became a real reliability problem: this cron was landing successful
+# runs every 4-5 hours instead of every 5 minutes, root-caused to runner
+# contention from other scheduled workflows (see git history / README §20's
+# "Shared self-hosted runner contention"). Scrapfly's paid Scrape API
+# (asp=true, see scrapfly_fallback.py) clears the same challenge from any
+# IP, confirmed live, so this now runs on elastic GitHub-hosted infrastructure
+# with no shared-runner bottleneck at all.
+#
+# Schedule is deliberately NOT flat 5-minute-forever: Scrapfly bills per
+# request, and full-time 5-minute polling was estimated at 190k-268k
+# credits/month depending on article volume - past the $30/mo Discovery
+# tier's 200k ceiling. 07:00-20:00 UTC covers UK working hours (BST or GMT)
+# at full 5-minute responsiveness - real article-publish activity is
+# essentially always in this window - and steps down to hourly the rest of
+# the day, since an article published at say 04:01 UTC is still caught
+# within the hour (by 05:00), not held until 07:00. Sized against the real
+# worst month on record (June 2026, 53 articles) at ~83-88% of the 200k
+# ceiling - comfortable margin, not razor's-edge.
+#
+# The self-hosted Playwright path (btcc_playwright.py, RenderedFetcher) is
+# deliberately left completely intact and untouched in the repo - dormant,
+# not deleted, in case Scrapfly ever needs to be swapped back out.
 name: Scrape BTCC News
 
 on:
   schedule:
-    # Every 5 minutes - keeps notification lag close to the previous
-    # live-check behaviour.
-    - cron: "*/5 * * * *"
+    # Every 5 minutes, 07:00-20:00 UTC (covers UK working hours across both
+    # BST and GMT with margin either side).
+    - cron: "*/5 7-19 * * *"
+    # Hourly the rest of the day (20:00-06:00 UTC) - bounds worst-case
+    # overnight lag to under an hour rather than going dark until 07:00.
+    - cron: "0 0-6,20-23 * * *"
   workflow_dispatch:
     inputs:
       is_retry:
@@ -26,16 +48,14 @@ on:
 
 concurrency:
   group: scrape-news
-  # true, not false: this runs every 5 minutes on a single self-hosted
-  # runner shared with every other btcc.net-facing scraper, so a slow or
-  # stuck run must not let queued-up ticks pile up behind it - cancel the
-  # stale one and let the freshest tick through instead.
+  # true, not false: a stale run should always lose to a fresher one at this
+  # cadence, same reasoning as before the migration.
   cancel-in-progress: true
 
 jobs:
   scrape:
-    runs-on: [self-hosted, btcc-mac]
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
       actions: write
@@ -49,46 +69,29 @@ jobs:
 
       - name: Scrape news
         env:
-          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
-        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_news.py
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
+        run: python3 scrape_news.py
 
-      # Committed immediately, before the much slower article-mirror step
-      # below - sendSessionNotifications (every 1 min) can only react to
-      # whatever data/news.json currently says, so this fast,
-      # notification-critical update must never be held hostage by (or
-      # discarded along with) the per-article Playwright fetches that
-      # follow. Root cause of a real incident (2026-08-09, see
-      # project_notification_delay_fix memory): on a race weekend several
-      # articles publish in quick succession, so "Scrape full article
-      # mirror" can need multiple never-before-cached Playwright fetches
-      # and run past 5 minutes - cancel-in-progress then killed the whole
-      # job before it ever reached the old single end-of-job commit,
-      # discarding this step's already-successful output right along with
-      # it. Repeated every 5 minutes for ~5 hours with nothing landing at
-      # all, so notifications for genuinely new articles sat hours-stale.
+      # Committed immediately, before the slower article-mirror step below -
+      # sendSessionNotifications can only react to whatever data/news.json
+      # currently says, so this fast, notification-critical update must
+      # never be held hostage by the full article mirror that follows.
       - name: Commit news update
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update news.json from btcc.net [skip ci]"
-          file_pattern: "data/news.json"
+          file_pattern: "data/news.json data/media/news/"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
 
       - name: Scrape full article mirror
         env:
-          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
-        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_articles.py
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
+        run: python3 scrape_articles.py
 
-      # Re-sync first - real time may have passed inside the article-mirror
-      # step above (it's the slow one), and other workflows (e.g. live
-      # results, every 2 minutes on a race weekend) push to main constantly.
-      # --autostash is required here (unlike the earlier "Pull latest" step):
-      # scrape_articles.py has already written local, uncommitted changes by
-      # this point, and a plain rebase refuses to run against a dirty working
-      # tree ("cannot pull with rebase: you have unstaged changes" - broke
-      # run #486 the first time this shipped without it). Autostash shelves
-      # those changes for the rebase and restores them straight after.
       - name: Pull latest before article commit
         run: git pull --rebase --autostash origin main
 
@@ -101,16 +104,10 @@ jobs:
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
 
-      # Covers both a genuine script failure() and a cancelled() run (e.g.
-      # timeout-killed while queued behind another self-hosted job on the
-      # shared btcc-mac runner - see project_scraper_reliability_audit
-      # memory). is_retry guards against looping forever: a run dispatched
-      # BY this step carries is_retry=true, so if that retry also fails it
-      # falls through to "Report failure" below instead of dispatching a
-      # second retry. Deliberately no sleep before dispatching (unlike the
-      # weekly scrapers below) - scrape-news already gets a free retry every
-      # 5 minutes from cron regardless, so an instant re-dispatch just gives
-      # it a second, earlier shot at the runner without adding latency.
+      # Covers both a genuine script failure() and a cancelled() run. A
+      # single blip self-heals on the next scheduled tick regardless, so
+      # only alert once a retry has ALSO failed - see README §20's "Failure
+      # handling convention".
       - name: Retry once on failure
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
@@ -122,9 +119,6 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-news.yml/dispatches" \
             -d '{"ref":"main","inputs":{"is_retry":"true"}}' || echo "Retry dispatch failed (non-fatal)"
 
-      # Only reached once the automated retry above has ALSO failed/been
-      # cancelled - a single transient blip (the common case, self-heals via
-      # the retry or the next 5-minute tick) no longer emails anyone.
       - name: Report failure
         if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
         env:

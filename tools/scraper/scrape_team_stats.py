@@ -29,7 +29,7 @@ import json
 import re
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher
+from scrapfly_fallback import fetch_via_scrapfly
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DRIVERS_PATH = REPO_ROOT / "data" / "drivers.json"
@@ -55,9 +55,11 @@ STAT_RE = re.compile(r'<strong>(\d+)</strong>\s*<h3>([^<]+)</h3>')
 BASE_URL = "https://btcc.net/team/"
 
 
-def _fetch_team_stats(fetcher: RenderedFetcher, slug: str) -> dict[str, int]:
+def _fetch_team_stats(slug: str) -> dict[str, int]:
     url = BASE_URL + slug + "/"
-    html = fetcher.get(url, wait_selector=".team-summary-stats", referer=TEAMS_LISTING_URL)
+    html = fetch_via_scrapfly(url, referer=TEAMS_LISTING_URL, render_js=True, label=slug)
+    if html is None:
+        raise RuntimeError(f"Scrapfly fetch failed for {url}")
     return {
         m.group(2).strip().split()[0].lower(): int(m.group(1))
         for m in STAT_RE.finditer(html)
@@ -68,24 +70,20 @@ def main() -> None:
     data = json.loads(DRIVERS_PATH.read_text(encoding="utf-8"))
     updated = 0
 
-    with RenderedFetcher() as fetcher:
-        for team in data["teams"]:
-            name = team["name"]
-            slug = TEAM_SLUGS.get(name)
-            if not slug:
-                continue
-            if fetcher.over_budget():
-                print("  WARNING: fetch time budget exhausted - skipping remaining teams this run")
-                break
-            try:
-                stats = _fetch_team_stats(fetcher, slug)
-                team["totalRaces"] = stats.get("races", team.get("totalRaces", 0))
-                team["totalWins"]  = stats.get("wins",  team.get("totalWins",  0))
+    for team in data["teams"]:
+        name = team["name"]
+        slug = TEAM_SLUGS.get(name)
+        if not slug:
+            continue
+        try:
+            stats = _fetch_team_stats(slug)
+            team["totalRaces"] = stats.get("races", team.get("totalRaces", 0))
+            team["totalWins"]  = stats.get("wins",  team.get("totalWins",  0))
 
-                print(f"  {name}: {team['totalRaces']} races, {team['totalWins']} wins")
-                updated += 1
-            except Exception as e:
-                print(f"  WARNING: could not fetch stats for {name}: {e}")
+            print(f"  {name}: {team['totalRaces']} races, {team['totalWins']} wins")
+            updated += 1
+        except Exception as e:
+            print(f"  WARNING: could not fetch stats for {name}: {e}")
 
     DRIVERS_PATH.write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"

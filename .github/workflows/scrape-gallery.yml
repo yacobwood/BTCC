@@ -1,15 +1,16 @@
-# Runs the gallery scraper on a schedule. Self-hosted runner for the same
-# reason every btcc.net-facing workflow is (Vercel bot-challenge blocks
-# GitHub-hosted runner IPs - see scrape-calendar.yml's own comment).
+# Runs the gallery scraper on a schedule. Fetches via Scrapfly (see
+# scrape-news.yml's own comment / project_scrapfly_full_migration memory)
+# as of 2026-09-01 rather than a self-hosted runner's local Playwright -
+# runs on GitHub-hosted ubuntu-latest, no residential IP needed and no
+# runner-time contention with the other scrapers to worry about any more.
 #
-# Weekly, on Wednesday rather than Monday - deliberately spread off the
-# scrape-btcc-stats (06:00) -> scrape-team-stats (06:30) -> scrape-calendar
-# (09:00) chain that's already Monday morning's busiest window on the one
-# shared btcc-mac runner. This scraper hotlinks photos directly (no image
-# bytes captured/resized - see scrape_gallery.py's own module docstring)
-# but can still visit many paginated pages in one run (a single album can
-# span 8+ pages), so it's worth its own slot rather than competing with
-# that chain for runner time.
+# Weekly, on Wednesday rather than Monday - still deliberately spread off
+# the scrape-btcc-stats/scrape-team-stats/scrape-calendar chain, mostly to
+# keep commit conflicts on data/calendar.json's own consumers apart rather
+# than for runner-contention reasons now. This scraper hotlinks photos
+# directly (no image bytes captured/resized - see scrape_gallery.py's own
+# module docstring) but can still visit many paginated pages in one run (a
+# single album can span 8+ pages).
 #
 # scrape_gallery.py is deliberately incremental/resumable by PAGE, not by
 # photo (see its own module docstring): a routine run only visits whatever
@@ -47,7 +48,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: [self-hosted, btcc-mac]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: write
@@ -59,11 +60,12 @@ jobs:
 
       - name: Scrape gallery
         env:
-          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
         run: |
           SEASON="${{ github.event.inputs.season }}"
           [ -z "$SEASON" ] && SEASON=2026
-          ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_gallery.py --season "$SEASON"
+          python3 scrape_gallery.py --season "$SEASON"
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
@@ -77,25 +79,20 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
-      # Covers a genuine script failure() as well as cancelled() (e.g.
-      # timeout-killed while queued behind another job on the shared
-      # btcc-mac runner - see project_scraper_reliability_audit memory).
-      # This only runs weekly, so a failure here would otherwise wait a full
-      # week for its next natural attempt - the sleep gives runner
-      # contention a real chance to clear before retrying. Carries season
-      # through so a manual historical-backfill retry targets the same
-      # year; scrape_gallery.py is resumable by page (see its own module
-      # docstring) so a retry cheaply picks up from whatever already
-      # committed rather than re-scraping from scratch. is_retry guards
-      # against looping: a run dispatched BY this step carries
-      # is_retry=true, so a second failure falls through to "Report
-      # failure" instead of dispatching again.
+      # Covers a genuine script failure() as well as cancelled(). This only
+      # runs weekly, so a failure here would otherwise wait a full week for
+      # its next natural attempt. Carries season through so a manual
+      # historical-backfill retry targets the same year; scrape_gallery.py
+      # is resumable by page (see its own module docstring) so a retry
+      # cheaply picks up from whatever already committed rather than
+      # re-scraping from scratch. is_retry guards against looping: a run
+      # dispatched BY this step carries is_retry=true, so a second failure
+      # falls through to "Report failure" instead of dispatching again.
       - name: Retry once on failure
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sleep 120
           curl -sf -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \

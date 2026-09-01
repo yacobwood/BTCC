@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher
+from scrapfly_fallback import fetch_via_scrapfly
 
 CALENDAR_URL = "https://btcc.net/calendar/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -49,15 +49,12 @@ def parse_date_range(text: str, year: int) -> tuple[str, str] | None:
     )
 
 
-def scrape_calendar(fetcher: RenderedFetcher, year: int) -> list[dict] | None:
-    """Fetch btcc.net/calendar/ and return list of {round, venue, startDate, endDate}, or None on fetch failure.
-    fetcher is shared with the per-round timetable fetches main() makes
-    afterwards, rather than each opening its own browser."""
+def scrape_calendar(year: int) -> list[dict] | None:
+    """Fetch btcc.net/calendar/ and return list of {round, venue, startDate, endDate}, or None on fetch failure."""
     print(f"Fetching {CALENDAR_URL} …")
-    try:
-        html = fetcher.get(CALENDAR_URL, wait_selector='a[href^="/circuit/"]')
-    except Exception as e:
-        print(f"ERROR: could not fetch calendar ({e})", file=sys.stderr)
+    html = fetch_via_scrapfly(CALENDAR_URL, render_js=True, label="calendar")
+    if html is None:
+        print("ERROR: could not fetch calendar (Scrapfly fetch failed)", file=sys.stderr)
         return None
 
     events = []
@@ -179,38 +176,25 @@ def main():
     _ft = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_ft)
 
-    # One shared browser for the whole run (calendar fetch + every round's
-    # timetable fetch) instead of one per fetch - a routine run used to open
-    # up to 11 separate browser sessions this way (1 calendar + ~10 rounds),
-    # each paying its own startup jitter, which is itself the same "looks
-    # like a fresh bot every time" signal already root-caused and fixed
-    # elsewhere (2026-08-13/14).
-    with RenderedFetcher() as fetcher:
-        schedule = scrape_calendar(fetcher, args.season)
-        if schedule is None:
-            sys.exit(1)
-        if not schedule:
-            print("ERROR: no calendar events parsed - page structure may have changed", file=sys.stderr)
-            sys.exit(1)
+    schedule = scrape_calendar(args.season)
+    if schedule is None:
+        sys.exit(1)
+    if not schedule:
+        print("ERROR: no calendar events parsed - page structure may have changed", file=sys.stderr)
+        sys.exit(1)
 
-        print(f"\nScraped {len(schedule)} rounds for {args.season}")
-        for s in schedule:
-            print(f"  {s['round']}. {s['venue']}  {s['startDate']} – {s['endDate']}")
+    print(f"\nScraped {len(schedule)} rounds for {args.season}")
+    for s in schedule:
+        print(f"  {s['round']}. {s['venue']}  {s['startDate']} – {s['endDate']}")
 
-        print("\nScraping full weekend timetables …")
-        for s in schedule:
-            slug = _ft.VENUE_SLUG.get(s["venue"])
-            if not slug:
-                continue
-            if fetcher.over_budget():
-                print(
-                    "  WARNING: fetch time budget exhausted - skipping remaining timetable fetches this run",
-                    file=sys.stderr,
-                )
-                break
-            entries = _ft.scrape_circuit_timetable(fetcher, slug, referer=CALENDAR_URL)
-            if entries:
-                s["fullTimetable"] = entries
+    print("\nScraping full weekend timetables …")
+    for s in schedule:
+        slug = _ft.VENUE_SLUG.get(s["venue"])
+        if not slug:
+            continue
+        entries = _ft.scrape_circuit_timetable(slug, referer=CALENDAR_URL)
+        if entries:
+            s["fullTimetable"] = entries
 
     merge_into_calendar(schedule, args.dry_run)
 

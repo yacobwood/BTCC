@@ -15,7 +15,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Optional
 
-from btcc_playwright import RenderedFetcher
+from scrapfly_fallback import fetch_via_scrapfly
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CALENDAR_JSON = DATA_DIR / "calendar.json"
@@ -119,27 +119,21 @@ class _TimetableParser(HTMLParser):
             self._current_cell += data
 
 
-def scrape_circuit_timetable(fetcher: RenderedFetcher, slug: str, referer: Optional[str] = None) -> list[dict]:
-    """fetcher is shared across every round in a run rather than opened
-    fresh per call - previously each call went through fetch_rendered(),
-    which opens a brand-new browser (plus its own 0-45s startup jitter)
-    every time, so a routine 10-round run opened up to 10 separate browser
-    sessions just for this step alone. referer: pass the calendar page's
-    URL a real visitor would have clicked a circuit card from.
+def scrape_circuit_timetable(slug: str, referer: Optional[str] = None) -> list[dict]:
+    """referer: pass the calendar page's URL a real visitor would have
+    clicked a circuit card from.
 
-    wait_state="attached" (not the default "visible"): confirmed live
-    2026-08-17 that #timetable sits inside a "Timetable" tab that isn't the
-    page's default active tab ("Details" is) - the content is genuinely
-    already there in the DOM/page.content() this parser reads, it just
-    never becomes CSS-visible without clicking the tab, which was causing
-    every single circuit fetch to time out waiting for a visibility state
-    that would never arrive."""
+    Fetches via Scrapfly (see scrapfly_fallback.py) as of 2026-09-01 rather
+    than local Playwright - the old wait_state="attached"/"visible"
+    distinction (needed because #timetable sits inside a non-default-active
+    "Timetable" tab, confirmed live 2026-08-17) doesn't apply here: Scrapfly
+    returns the fully post-JS-render DOM regardless of what's currently
+    CSS-visible, so the content this parser reads is present either way."""
     url = f"https://btcc.net/circuit/{slug}/"
     print(f"    Fetching {url} …")
-    try:
-        html = fetcher.get(url, wait_selector="#timetable", referer=referer, wait_state="attached")
-    except Exception as e:
-        print(f"    Failed to load {url}: {e}", file=sys.stderr)
+    html = fetch_via_scrapfly(url, referer=referer, render_js=True, label=slug)
+    if html is None:
+        print(f"    Failed to load {url}", file=sys.stderr)
         return []
 
     parser = _TimetableParser()
@@ -206,39 +200,34 @@ def main():
     rounds = data.get("rounds", [])
     updated = 0
 
-    with RenderedFetcher() as fetcher:
-        for r in rounds:
-            if args.round and r["round"] != args.round:
-                continue
+    for r in rounds:
+        if args.round and r["round"] != args.round:
+            continue
 
-            venue = r.get("venue", "")
-            slug = VENUE_SLUG.get(venue)
-            if not slug:
-                print(f"Round {r['round']} ({venue}): no slug mapping — skipping")
-                continue
+        venue = r.get("venue", "")
+        slug = VENUE_SLUG.get(venue)
+        if not slug:
+            print(f"Round {r['round']} ({venue}): no slug mapping — skipping")
+            continue
 
-            if fetcher.over_budget():
-                print("  WARNING: fetch time budget exhausted - skipping remaining rounds this run", file=sys.stderr)
-                break
+        print(f"Round {r['round']} — {venue}")
+        entries = scrape_circuit_timetable(slug, referer=_STANDALONE_REFERER)
 
-            print(f"Round {r['round']} — {venue}")
-            entries = scrape_circuit_timetable(fetcher, slug, referer=_STANDALONE_REFERER)
+        if not entries:
+            print(f"    No timetable found — leaving existing data unchanged")
+            continue
 
-            if not entries:
-                print(f"    No timetable found — leaving existing data unchanged")
-                continue
+        sat = sum(1 for e in entries if e["day"] == "SAT")
+        sun = sum(1 for e in entries if e["day"] == "SUN")
+        print(f"    {len(entries)} entries  (Sat: {sat}  Sun: {sun})")
+        for e in entries:
+            laps_str = f"  [{e['laps']}]" if e["laps"] else ""
+            end_str = f" – {e['endTime']}" if e.get("endTime") else ""
+            series_str = e["series"] or "(event)"
+            print(f"      {e['day']}  {e['time']}{end_str}  {series_str} — {e['session']}{laps_str}")
 
-            sat = sum(1 for e in entries if e["day"] == "SAT")
-            sun = sum(1 for e in entries if e["day"] == "SUN")
-            print(f"    {len(entries)} entries  (Sat: {sat}  Sun: {sun})")
-            for e in entries:
-                laps_str = f"  [{e['laps']}]" if e["laps"] else ""
-                end_str = f" – {e['endTime']}" if e.get("endTime") else ""
-                series_str = e["series"] or "(event)"
-                print(f"      {e['day']}  {e['time']}{end_str}  {series_str} — {e['session']}{laps_str}")
-
-            r["fullTimetable"] = entries
-            updated += 1
+        r["fullTimetable"] = entries
+        updated += 1
 
     if args.dry_run:
         print(f"\nDry run — {updated} round(s) would be updated.")

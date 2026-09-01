@@ -28,28 +28,16 @@ from scrape_gallery import (
 )
 
 
-class FakeFetcher:
-    """Minimal stand-in for RenderedFetcher (same convention as every other
-    scraper's test file - see test_scrape_calendar.py's own FakeFetcher).
-    pages maps a URL (exact match) -> html string, so a test can hand back
-    different content per page/URL including query-string variants."""
-    def __init__(self, pages=None, over_budget=False):
-        self.pages = pages or {}
-        self.calls = []
-        self._over_budget = over_budget
-
-    def get(self, url, **kwargs):
-        self.calls.append({'url': url, **kwargs})
-        return self.pages.get(url, '<html></html>')
-
-    def over_budget(self):
-        return self._over_budget
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
+def stub_fetch(pages):
+    """side_effect for patching scrape_gallery.fetch_via_scrapfly - pages
+    maps a URL (exact match) -> html string, so a test can hand back
+    different content per page/URL including query-string variants.
+    Defaults to an empty (but successfully "fetched") page for any
+    unmapped URL, matching the old FakeFetcher's default - a genuine fetch
+    failure (None) is opted into explicitly by a test, not the default."""
+    def _fetch(url, **kwargs):
+        return pages.get(url, '<html></html>')
+    return _fetch
 
 
 # Fixtures modeled directly on the real, live-confirmed markup (see module
@@ -407,12 +395,14 @@ class TestAssignCanonicalAlbums(unittest.TestCase):
 
 
 class TestScrapeGalleryListing(unittest.TestCase):
-    def test_parses_album_cards_across_paginated_listing_pages(self):
-        fetcher = FakeFetcher(pages={
+
+    @patch("scrape_gallery.fetch_via_scrapfly")
+    def test_parses_album_cards_across_paginated_listing_pages(self, mock_fetch):
+        mock_fetch.side_effect = stub_fetch({
             'https://btcc.net/gallery/2026/': LISTING_PAGE_1,
             'https://btcc.net/gallery/2026/?page=2': LISTING_PAGE_2,
         })
-        albums = scrape_gallery_listing(fetcher, 2026)
+        albums = scrape_gallery_listing(2026)
         self.assertEqual(
             [a['slug'] for a in albums],
             ['2026-donington-park', '2026-season-launch', '2026-knockhill'],
@@ -420,7 +410,8 @@ class TestScrapeGalleryListing(unittest.TestCase):
         self.assertEqual(albums[0]['title'], 'Donington Park')
         self.assertTrue(albums[0]['cover_src'].startswith('https://'))
 
-    def test_extracts_cover_regardless_of_attribute_order_within_the_img_tag(self):
+    @patch("scrape_gallery.fetch_via_scrapfly")
+    def test_extracts_cover_regardless_of_attribute_order_within_the_img_tag(self, mock_fetch):
         """Same real "editor-client"-pipeline shape as
         test_captures_photos_regardless_of_attribute_order_within_the_img_tag
         below, but for a listing card's cover image."""
@@ -432,21 +423,23 @@ class TestScrapeGalleryListing(unittest.TestCase):
             'galleries/set-uuid/cover-uuid/variants/thumb-gallery-editor-client-v1.webp"></span>'
             '<h2>2026 - Donington Park GP</h2></a></div>' + page_info(1, 1)
         )
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/': card_html})
-        albums = scrape_gallery_listing(fetcher, 2026)
+        mock_fetch.side_effect = stub_fetch({'https://btcc.net/gallery/2026/': card_html})
+        albums = scrape_gallery_listing(2026)
         self.assertEqual(len(albums), 1)
         self.assertTrue(albums[0]['cover_src'].startswith('https://'))
 
-    def test_stops_after_the_real_last_page(self):
-        fetcher = FakeFetcher(pages={
+    @patch("scrape_gallery.fetch_via_scrapfly")
+    def test_stops_after_the_real_last_page(self, mock_fetch):
+        mock_fetch.side_effect = stub_fetch({
             'https://btcc.net/gallery/2026/': LISTING_PAGE_1,
             'https://btcc.net/gallery/2026/?page=2': LISTING_PAGE_2,
         })
-        scrape_gallery_listing(fetcher, 2026)
+        scrape_gallery_listing(2026)
         # Only 2 fetches (page 1 + page 2) - never a phantom page 3.
-        self.assertEqual(len(fetcher.calls), 2)
+        self.assertEqual(mock_fetch.call_count, 2)
 
-    def test_2020_uses_its_own_slug_override_not_the_plain_year(self):
+    @patch("scrape_gallery.fetch_via_scrapfly")
+    def test_2020_uses_its_own_slug_override_not_the_plain_year(self, mock_fetch):
         """Real live case, 2020 backfill on 2026-08-29: a bare
         https://btcc.net/gallery/2020/ 404s through to the generic gallery
         landing page instead (its own <h1>Gallery</h1>, not "2020") - the
@@ -457,32 +450,34 @@ class TestScrapeGalleryListing(unittest.TestCase):
         self.assertEqual(gallery_year_slug(2020), '2020-1')
         self.assertEqual(gallery_year_slug(2021), '2021')
         card = album_card('2020-1', '2020-croft', '2020 - Croft') + page_info(1, 1)
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2020-1/': card})
-        albums = scrape_gallery_listing(fetcher, 2020)
-        self.assertEqual(fetcher.calls[0]['url'], 'https://btcc.net/gallery/2020-1/')
+        mock_fetch.side_effect = stub_fetch({'https://btcc.net/gallery/2020-1/': card})
+        albums = scrape_gallery_listing(2020)
+        self.assertEqual(mock_fetch.call_args_list[0].args[0], 'https://btcc.net/gallery/2020-1/')
         self.assertEqual([a['slug'] for a in albums], ['2020-croft'])
 
-    def test_returns_empty_list_when_nothing_matches(self):
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/': '<html>no albums here</html>'})
-        self.assertEqual(scrape_gallery_listing(fetcher, 2026), [])
+    @patch("scrape_gallery.fetch_via_scrapfly")
+    def test_returns_empty_list_when_nothing_matches(self, mock_fetch):
+        mock_fetch.side_effect = stub_fetch({'https://btcc.net/gallery/2026/': '<html>no albums here</html>'})
+        self.assertEqual(scrape_gallery_listing(2026), [])
 
 
 class TestProcessAlbum(unittest.TestCase):
-    def _run(self, fetcher, existing_album=None, slug='2026-donington-park'):
+    def _run(self, pages, existing_album=None, slug='2026-donington-park'):
         with tempfile.TemporaryDirectory() as tmp:
             gallery_dir = Path(tmp) / "gallery"
             if existing_album:
                 year_dir = gallery_dir / "2026"
                 year_dir.mkdir(parents=True)
                 (year_dir / f"{slug}.json").write_text(json.dumps(existing_album))
-            with patch.object(scrape_gallery, "GALLERY_DIR", gallery_dir):
-                return process_album(fetcher, 2026, slug, 'Donington Park', 'https://example.com/cover.jpg',
-                                      'https://btcc.net/gallery/2026/', CALENDAR_ROUNDS)
+            with patch.object(scrape_gallery, "GALLERY_DIR", gallery_dir), \
+                 patch("scrape_gallery.fetch_via_scrapfly", side_effect=stub_fetch(pages)) as mock_fetch:
+                album = process_album(2026, slug, 'Donington Park', 'https://example.com/cover.jpg',
+                                       'https://btcc.net/gallery/2026/', CALENDAR_ROUNDS)
+                return album, mock_fetch
 
     def test_single_page_album_captures_every_photo_and_marks_complete(self):
         html = '<div>' + ''.join(photo_img(f'p{i}') for i in range(3)) + '</div>' + page_info(1, 1)
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/2026-donington-park/': html})
-        album = self._run(fetcher)
+        album, _ = self._run({'https://btcc.net/gallery/2026/2026-donington-park/': html})
         self.assertEqual(album['capturedCount'], 3)
         self.assertEqual(album['totalCount'], 3)
         self.assertTrue(album['complete'])
@@ -502,19 +497,17 @@ class TestProcessAlbum(unittest.TestCase):
         html = (
             '<div>' + ''.join(photo_img(f'p{i}', src_last=True) for i in range(3)) + '</div>' + page_info(1, 1)
         )
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/2026-donington-park/': html})
-        album = self._run(fetcher)
+        album, _ = self._run({'https://btcc.net/gallery/2026/2026-donington-park/': html})
         self.assertEqual(album['capturedCount'], 3)
         self.assertTrue(album['complete'])
 
     def test_multi_page_album_walks_every_page_via_the_real_pagination_links(self):
         page1 = '<div>' + ''.join(photo_img(f'p{i}') for i in range(2)) + '</div>' + page_info(1, 2)
         page2 = '<div>' + ''.join(photo_img(f'q{i}') for i in range(2)) + '</div>' + page_info(2, 2)
-        fetcher = FakeFetcher(pages={
+        album, _ = self._run({
             'https://btcc.net/gallery/2026/2026-donington-park/': page1,
             'https://btcc.net/gallery/2026/2026-donington-park/?page=2': page2,
         })
-        album = self._run(fetcher)
         self.assertEqual(album['capturedCount'], 4)
         self.assertTrue(album['complete'])
         self.assertEqual(album['lastPageScraped'], 2)
@@ -533,22 +526,22 @@ class TestProcessAlbum(unittest.TestCase):
             ],
         }
         page2 = '<div>' + ''.join(photo_img(f'q{i}') for i in range(2)) + '</div>' + page_info(2, 2)
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/2026-donington-park/?page=2': page2})
-        album = self._run(fetcher, existing_album=existing)
+        album, mock_fetch = self._run(
+            {'https://btcc.net/gallery/2026/2026-donington-park/?page=2': page2}, existing_album=existing,
+        )
         # Page 1 must never be re-fetched - only page 2 (the next unscraped one).
-        self.assertEqual(fetcher.calls, [{'url': 'https://btcc.net/gallery/2026/2026-donington-park/?page=2', 'referer': 'https://btcc.net/gallery/2026/'}])
+        self.assertEqual(
+            [c.args[0] for c in mock_fetch.call_args_list],
+            ['https://btcc.net/gallery/2026/2026-donington-park/?page=2'],
+        )
         self.assertEqual(album['capturedCount'], 4)
         self.assertTrue(album['complete'])
 
-    def test_budget_exhausted_leaves_album_incomplete_for_next_run(self):
-        html = '<div>' + ''.join(photo_img(f'p{i}') for i in range(3)) + '</div>' + page_info(1, 2)
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/2026-donington-park/': html}, over_budget=True)
-        album = self._run(fetcher)
-        # over_budget() is checked before every page fetch - already over
-        # budget means zero pages fetched this run, not a crash.
+    def test_fetch_failure_leaves_album_incomplete_for_next_run(self):
+        album, mock_fetch = self._run({'https://btcc.net/gallery/2026/2026-donington-park/': None})
         self.assertEqual(album['capturedCount'], 0)
         self.assertFalse(album['complete'])
-        self.assertEqual(fetcher.calls, [])
+        self.assertEqual(mock_fetch.call_count, 1)
 
     def test_single_page_album_with_no_pagination_nav_is_marked_complete(self):
         """Real live case, 2026-08-28: "The Captured Moments: Knockhill
@@ -561,8 +554,7 @@ class TestProcessAlbum(unittest.TestCase):
         would show "more being added" for an album that already has
         everything."""
         html = '<div>' + ''.join(photo_img(f'p{i}') for i in range(23)) + '</div>'  # no page_info() at all
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/2026-donington-park/': html})
-        album = self._run(fetcher)
+        album, _ = self._run({'https://btcc.net/gallery/2026/2026-donington-park/': html})
         self.assertEqual(album['capturedCount'], 23)
         self.assertTrue(album['complete'])
         self.assertEqual(album['totalPages'], 1)
@@ -604,35 +596,36 @@ class TestLoadCalendarRounds(unittest.TestCase):
 
 
 class TestBuildGallery(unittest.TestCase):
+
     def test_returns_none_and_writes_nothing_when_listing_is_empty(self):
-        fetcher = FakeFetcher(pages={'https://btcc.net/gallery/2026/': '<html>no albums</html>'})
         with tempfile.TemporaryDirectory() as tmp:
             calendar_path = Path(tmp) / "calendar.json"
             calendar_path.write_text(json.dumps({'season': 2026, 'rounds': CALENDAR_ROUNDS}))
-            with patch.object(scrape_gallery, "RenderedFetcher", lambda **kw: fetcher), \
-                 patch.object(scrape_gallery, "DATA_DIR", Path(tmp)), \
+            with patch.object(scrape_gallery, "DATA_DIR", Path(tmp)), \
                  patch.object(scrape_gallery, "CALENDAR_JSON", calendar_path), \
-                 patch.object(scrape_gallery, "GALLERY_DIR", Path(tmp) / "gallery"):
+                 patch.object(scrape_gallery, "GALLERY_DIR", Path(tmp) / "gallery"), \
+                 patch("scrape_gallery.fetch_via_scrapfly",
+                       side_effect=stub_fetch({'https://btcc.net/gallery/2026/': '<html>no albums</html>'})):
                 result = build_gallery(2026, dry_run=False)
         self.assertIsNone(result)
 
     def test_writes_index_and_per_album_files_with_no_media_directory_at_all(self):
         donington_html = '<div>' + ''.join(photo_img(f'p{i}') for i in range(2)) + '</div>' + page_info(1, 1)
         launch_html = '<div>' + photo_img('l0') + '</div>' + page_info(1, 1)
-        fetcher = FakeFetcher(pages={
+        pages = {
             'https://btcc.net/gallery/2026/': LISTING_PAGE_1,
             'https://btcc.net/gallery/2026/2026-donington-park/': donington_html,
             'https://btcc.net/gallery/2026/2026-season-launch/': launch_html,
-        })
+        }
         with tempfile.TemporaryDirectory() as tmp:
             calendar_path = Path(tmp) / "calendar.json"
             calendar_path.write_text(json.dumps({'season': 2026, 'rounds': CALENDAR_ROUNDS}))
             data_dir = Path(tmp)
             gallery_dir = data_dir / "gallery"
-            with patch.object(scrape_gallery, "RenderedFetcher", lambda **kw: fetcher), \
-                 patch.object(scrape_gallery, "DATA_DIR", data_dir), \
+            with patch.object(scrape_gallery, "DATA_DIR", data_dir), \
                  patch.object(scrape_gallery, "CALENDAR_JSON", calendar_path), \
-                 patch.object(scrape_gallery, "GALLERY_DIR", gallery_dir):
+                 patch.object(scrape_gallery, "GALLERY_DIR", gallery_dir), \
+                 patch("scrape_gallery.fetch_via_scrapfly", side_effect=stub_fetch(pages)):
                 results = build_gallery(2026, dry_run=False)
 
             self.assertEqual(len(results), 2)
@@ -649,19 +642,19 @@ class TestBuildGallery(unittest.TestCase):
     def test_dry_run_does_not_write_any_files(self):
         donington_html = '<div>' + photo_img('p0') + '</div>' + page_info(1, 1)
         launch_html = '<div>' + photo_img('l0') + '</div>' + page_info(1, 1)
-        fetcher = FakeFetcher(pages={
+        pages = {
             'https://btcc.net/gallery/2026/': LISTING_PAGE_1,
             'https://btcc.net/gallery/2026/2026-donington-park/': donington_html,
             'https://btcc.net/gallery/2026/2026-season-launch/': launch_html,
-        })
+        }
         with tempfile.TemporaryDirectory() as tmp:
             calendar_path = Path(tmp) / "calendar.json"
             calendar_path.write_text(json.dumps({'season': 2026, 'rounds': CALENDAR_ROUNDS}))
             data_dir = Path(tmp)
-            with patch.object(scrape_gallery, "RenderedFetcher", lambda **kw: fetcher), \
-                 patch.object(scrape_gallery, "DATA_DIR", data_dir), \
+            with patch.object(scrape_gallery, "DATA_DIR", data_dir), \
                  patch.object(scrape_gallery, "CALENDAR_JSON", calendar_path), \
-                 patch.object(scrape_gallery, "GALLERY_DIR", data_dir / "gallery"):
+                 patch.object(scrape_gallery, "GALLERY_DIR", data_dir / "gallery"), \
+                 patch("scrape_gallery.fetch_via_scrapfly", side_effect=stub_fetch(pages)):
                 results = build_gallery(2026, dry_run=True)
             self.assertEqual(len(results), 2)
             self.assertFalse((data_dir / "gallery2026.json").exists())

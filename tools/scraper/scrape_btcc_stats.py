@@ -21,7 +21,7 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher
+from scrapfly_fallback import fetch_via_scrapfly
 
 WINS_URL   = "https://btcc.net/history/statistics/drivers/"
 TITLES_URL = "https://btcc.net/history/champions/btcc-titles/"
@@ -200,27 +200,22 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Print changes without writing")
     args = ap.parse_args()
 
-    # One shared browser for both fetches, each isolated in its own
-    # try/except - previously a wins-fetch failure sys.exit(1)'d before even
-    # attempting titles, so one side being briefly 429'd threw away an
-    # otherwise-successful update to the other.
-    wins_html = titles_html = None
-    with RenderedFetcher() as fetcher:
-        print("Fetching wins from btcc.net...")
-        try:
-            wins_html = fetcher.get(WINS_URL, wait_selector=".history-editorial")
-        except Exception as e:
-            print(f"ERROR: could not fetch wins ({e})", file=sys.stderr)
+    # Each fetch isolated in its own check - previously a wins-fetch failure
+    # sys.exit(1)'d before even attempting titles, so one side being briefly
+    # blocked threw away an otherwise-successful update to the other.
+    print("Fetching wins from btcc.net...")
+    wins_html = fetch_via_scrapfly(WINS_URL, render_js=True, label="wins")
+    if wins_html is None:
+        print("ERROR: could not fetch wins (Scrapfly fetch failed)", file=sys.stderr)
 
-        print("Fetching titles from btcc.net...")
-        try:
-            # referer=WINS_URL: less proven than scrape_articles.py's
-            # listing->article referer fix (these are sibling /history/...
-            # pages, not a card-click relationship) - included because it's
-            # cheap and plausible, not because it's been confirmed to matter.
-            titles_html = fetcher.get(TITLES_URL, wait_selector=".history-editorial", referer=WINS_URL)
-        except Exception as e:
-            print(f"ERROR: could not fetch titles ({e})", file=sys.stderr)
+    print("Fetching titles from btcc.net...")
+    # referer=WINS_URL: less proven than scrape_articles.py's listing->article
+    # referer fix (these are sibling /history/... pages, not a card-click
+    # relationship) - included because it's cheap and plausible, not because
+    # it's been confirmed to matter.
+    titles_html = fetch_via_scrapfly(TITLES_URL, referer=WINS_URL, render_js=True, label="titles")
+    if titles_html is None:
+        print("ERROR: could not fetch titles (Scrapfly fetch failed)", file=sys.stderr)
 
     if wins_html is None and titles_html is None:
         sys.exit(1)  # both fetches failed outright - nothing to do

@@ -7,23 +7,33 @@ hitting btcc.net directly at runtime.
 
 btcc.net moved off WordPress entirely to a Vercel-hosted React app
 (2026-07-31). It now issues a Vercel BotID JS challenge (HTTP 429) to any
-request that can't execute JavaScript, so this fetches through headless
-Chromium (see btcc_playwright.py) rather than a direct/relayed HTTP
-request. The /news/ page's card markup is also entirely new - no more
-WordPress post IDs, so `id` is now the article slug (safe: every consumer
-of article.id already treats it as an opaque string - see
-project_wp_rest_api_lockdown / project_vercel_migration memory).
+request that can't execute JavaScript. Fetches through Scrapfly's paid
+Scrape API (see scrapfly_fallback.py) rather than local Playwright as of
+2026-09-01 - `asp=true` clears the challenge from any IP (confirmed live),
+so this runs on GitHub-hosted ubuntu-latest instead of needing the
+self-hosted runner's residential IP reputation. See
+project_scrapfly_full_migration memory for the cost reasoning behind the
+07:00-20:00 UTC / hourly-overnight cadence this now runs on (see
+scrape-news.yml), and why the image fetch below is gated on "does this
+article already have one mirrored" rather than attempted every run - that
+gate used to be free with Playwright (an image capture was a side effect of
+rendering the page anyway) but costs ~225 credits a time here, ~7.5x a
+plain page fetch, so re-fetching an already-mirrored image on every 5-
+minute tick would be enormously wasteful.
 
 Article images (btcc.net/api/media/<uuid>) are behind the exact same
 Vercel challenge as the page itself, so the app's own Image component
 (a plain HTTPS GET from the user's phone, no JS engine) can't load them
 directly either - confirmed as the cause of a live "no article images"
-report. Images are mirrored into data/media/news/ during the scrape (see
-btcc_playwright.get_with_media/save_mirrored_image) and served from
-GitHub raw instead, same as every other piece of scraped data.
+report. Images are mirrored into data/media/news/ during the scrape and
+served from GitHub raw instead, same as every other piece of scraped data.
+A Supabase Storage-hosted image (a shape some pages now use directly - see
+MEDIA_SRC_RE_FRAGMENT) needs no Scrapfly at all - confirmed via
+scrape-gallery.yml's own comment that host isn't behind btcc.net's Vercel
+challenge, so a plain, free request works.
 
 Usage:
-    python scrape_news.py [--dry-run]
+    python scrape_news.py [--dry-run] [--force]
 """
 
 from __future__ import annotations
@@ -34,7 +44,8 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
+from scrapfly_fallback import fetch_image_smart, fetch_via_scrapfly
 
 NEWS_URL = "https://btcc.net/news/"
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
@@ -58,19 +69,25 @@ TAG_RE = re.compile(r"<[^>]+>")
 IMAGE_RE = re.compile(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 
 
-def scrape_news() -> list | None:
-    """Fetch btcc.net/news/ and return the latest article in WP-REST-API shape, or None on failure."""
-    print(f"Fetching {NEWS_URL} …")
+def _current_slug() -> str | None:
+    """Whatever slug data/news.json currently holds, or None if it's
+    missing/empty/unreadable - treated the same as "definitely new"."""
     try:
-        # retries=3 (one more than RenderedFetcher's own default of 2): this
-        # is the single most business-critical scrape - it drives live push
-        # notifications and runs every 5 minutes - so a missed tick has a
-        # direct notification-latency cost, and the extra attempt costs
-        # well under a minute against this workflow's 10-minute timeout.
-        with RenderedFetcher(retries=3) as fetcher:
-            html, media = fetcher.get_with_media(NEWS_URL, wait_selector="article.news-card")
-    except Exception as e:
-        print(f"ERROR: could not fetch news ({e})", file=sys.stderr)
+        posts = json.loads(NEWS_JSON.read_text())
+        return posts[0].get("slug") if posts else None
+    except (OSError, json.JSONDecodeError, IndexError, AttributeError):
+        return None
+
+
+def scrape_news(force: bool = False) -> list | None:
+    """Fetch btcc.net/news/ and return the latest article in WP-REST-API
+    shape, or None on failure. force=True always (re-)fetches the image
+    even if the slug already matches what's committed - for testing, not
+    routine use (costs the ~225-credit image fetch every time)."""
+    print(f"Fetching {NEWS_URL} …")
+    html = fetch_via_scrapfly(NEWS_URL, render_js=True, label="news-listing")
+    if html is None:
+        print("ERROR: could not fetch news (Scrapfly fetch failed)", file=sys.stderr)
         return None
 
     article_m = ARTICLE_RE.search(html)
@@ -88,10 +105,28 @@ def scrape_news() -> list | None:
         print("ERROR: could not extract title/slug from article card", file=sys.stderr)
         return None
 
-    image_m = IMAGE_RE.search(block)
-    media_url = resolve_media_url(image_m.group(1)) if image_m else None
-    filename = save_mirrored_image(media, media_url, MEDIA_DIR)
-    image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
+    image_url = None
+    if not force and slug == _current_slug():
+        # Already the current post - reuse whatever image (if any) is
+        # already committed rather than re-fetching. Avoids paying the
+        # ~225-credit image fetch on every single run for a headline that
+        # hasn't changed (confirmed this was a real, unbounded cost bug in
+        # the pre-Scrapfly version of this function - harmless there since
+        # RenderedFetcher captured images for free as a side effect of
+        # rendering the page anyway).
+        try:
+            existing = json.loads(NEWS_JSON.read_text())
+            image_url = existing[0].get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
+        except (OSError, json.JSONDecodeError, IndexError, AttributeError):
+            pass
+    else:
+        image_m = IMAGE_RE.search(block)
+        if image_m:
+            media_url = resolve_media_url(image_m.group(1))
+            fetched = fetch_image_smart(media_url, label=slug)
+            if fetched:
+                filename = save_mirrored_image({media_url: fetched}, media_url, MEDIA_DIR)
+                image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
 
     post = {
         "id": slug,
@@ -105,9 +140,10 @@ def scrape_news() -> list | None:
 def main():
     ap = argparse.ArgumentParser(description="Scrape latest BTCC news post into data/news.json")
     ap.add_argument("--dry-run", action="store_true", help="Print result only, do not write")
+    ap.add_argument("--force", action="store_true", help="Re-fetch the image even if the slug already matches (for testing - costs the image fetch every time)")
     args = ap.parse_args()
 
-    posts = scrape_news()
+    posts = scrape_news(force=args.force)
     if posts is None:
         sys.exit(1)
 

@@ -12,10 +12,10 @@
 # favour of a hand-curated image set (see tools/scraper/archive/README.md).
 # Only the team stats scrape remains.
 #
-# Runs on a self-hosted runner (see scrape-news.yml comment /
-# project_vercel_migration memory) since btcc.net's Vercel bot-challenge
-# blocks GitHub-hosted runner IPs even with headless Chromium - interim
-# fix until btcc.net's dev allowlists us.
+# Fetches via Scrapfly (see scrape-news.yml's own comment /
+# project_scrapfly_full_migration memory) as of 2026-09-01 rather than a
+# self-hosted runner's local Playwright - runs on GitHub-hosted
+# ubuntu-latest, no residential IP needed.
 name: Scrape BTCC Team Stats
 
 on:
@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: [self-hosted, btcc-mac]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
@@ -49,7 +49,10 @@ jobs:
         run: git pull --rebase origin main
 
       - name: Run team stats scraper
-        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_team_stats.py
+        env:
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
+        run: python3 scrape_team_stats.py
 
       - name: Commit team stats update
         uses: stefanzweifel/git-auto-commit-action@v7
@@ -60,22 +63,18 @@ jobs:
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
 
-      # Covers a genuine script failure() as well as cancelled() (e.g.
-      # timeout-killed while queued behind another job on the shared
-      # btcc-mac runner - see project_scraper_reliability_audit memory).
-      # This only runs weekly, so unlike scrape-news.yml (which gets a free
-      # retry from cron every 5 minutes anyway) a failure here would
-      # otherwise wait a full week for its next natural attempt - the sleep
-      # gives runner contention a real chance to clear before retrying.
-      # is_retry guards against looping: a run dispatched BY this step
-      # carries is_retry=true, so a second failure falls through to "Report
+      # Covers a genuine script failure() as well as cancelled(). This only
+      # runs weekly, so unlike scrape-news.yml (which gets a free retry
+      # from cron every 5 minutes anyway) a failure here would otherwise
+      # wait a full week for its next natural attempt. is_retry guards
+      # against looping: a run dispatched BY this step carries
+      # is_retry=true, so a second failure falls through to "Report
       # failure" instead of dispatching again.
       - name: Retry once on failure
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sleep 120
           curl -sf -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \

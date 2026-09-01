@@ -69,7 +69,7 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import RenderedFetcher
+from scrapfly_fallback import fetch_via_scrapfly
 
 GALLERY_YEAR_URL_TMPL = "https://btcc.net/gallery/{year}/"
 GALLERY_ALBUM_URL_TMPL = "https://btcc.net/gallery/{year}/{slug}/"
@@ -390,19 +390,19 @@ def assign_canonical_albums(albums: list[dict], year: int, calendar_rounds: list
         winner['isCanonical'] = True
 
 
-def _fetch_paginated(fetcher: RenderedFetcher, base_url: str, referer: str, start_page: int = 1):
+def _fetch_paginated(base_url: str, referer: str, start_page: int = 1):
     """Yields (page_number, html) for base_url and each subsequent page
     (base_url?page=2, ?page=3, ...) as found via PAGE_INFO_RE, starting
     from start_page (so a resumed album can skip pages it already scraped),
-    stopping at the real last page, on over_budget(), or if a page fails to
-    parse a page-info span at all (treated as a single, unpaginated page)."""
+    stopping at the real last page, on a fetch failure, or if a page fails
+    to parse a page-info span at all (treated as a single, unpaginated
+    page)."""
     page = start_page
-    total_pages = None
     while True:
-        if fetcher.over_budget():
-            return
         url = base_url if page == 1 else f"{base_url}?page={page}"
-        html = fetcher.get(url, referer=referer)
+        html = fetch_via_scrapfly(url, referer=referer, render_js=True, label=base_url)
+        if html is None:
+            return
         yield page, html
         page_info = PAGE_INFO_RE.search(html)
         if not page_info:
@@ -413,7 +413,7 @@ def _fetch_paginated(fetcher: RenderedFetcher, base_url: str, referer: str, star
         page += 1
 
 
-def scrape_gallery_listing(fetcher: RenderedFetcher, year: int) -> list[dict]:
+def scrape_gallery_listing(year: int) -> list[dict]:
     """Fetch every page of the year-scoped gallery listing and return
     [{slug, title, cover_src}, ...] for every album card found, across
     however many listing pages exist (small in practice - 2 for 2026 at
@@ -422,7 +422,7 @@ def scrape_gallery_listing(fetcher: RenderedFetcher, year: int) -> list[dict]:
     listing_url = GALLERY_YEAR_URL_TMPL.format(year=gallery_year_slug(year))
     albums = []
     seen_slugs = set()
-    for _page_num, html in _fetch_paginated(fetcher, listing_url, referer="https://btcc.net/gallery/"):
+    for _page_num, html in _fetch_paginated(listing_url, referer="https://btcc.net/gallery/"):
         for m in ALBUM_CARD_RE.finditer(html):
             card_year, slug, content = m.group(1), m.group(2), m.group(3)
             if card_year != gallery_year_slug(year) or slug in seen_slugs:
@@ -467,7 +467,7 @@ def load_existing_album(year: int, slug: str) -> dict | None:
 
 
 def process_album(
-    fetcher: RenderedFetcher, year: int, slug: str, title: str, cover_src: str | None,
+    year: int, slug: str, title: str, cover_src: str | None,
     listing_url: str, calendar_rounds: list[dict],
 ) -> dict:
     """Fetches whichever of an album's paginated pages haven't been scraped
@@ -485,7 +485,7 @@ def process_album(
     print(f"  Scraping album: {slug} (page {last_page_scraped + 1} onward, {len(photos)} photo(s) already known)")
 
     page_before_this_run = last_page_scraped
-    for page_num, html in _fetch_paginated(fetcher, album_url, referer=listing_url, start_page=last_page_scraped + 1):
+    for page_num, html in _fetch_paginated(album_url, referer=listing_url, start_page=last_page_scraped + 1):
         page_new = 0
         for m in PHOTO_IMG_RE.finditer(html):
             thumb = m.group(1)
@@ -583,38 +583,34 @@ def load_calendar_rounds(year: int) -> list[dict]:
 
 
 def build_gallery(year: int, dry_run: bool) -> list[dict] | None:
-    with RenderedFetcher() as fetcher:
-        listing_url = GALLERY_YEAR_URL_TMPL.format(year=gallery_year_slug(year))
-        cards = scrape_gallery_listing(fetcher, year)
-        if not cards:
-            print(f"ERROR: no gallery albums found for {year} - page structure may have changed", file=sys.stderr)
-            return None
+    listing_url = GALLERY_YEAR_URL_TMPL.format(year=gallery_year_slug(year))
+    cards = scrape_gallery_listing(year)
+    if not cards:
+        print(f"ERROR: no gallery albums found for {year} - page structure may have changed", file=sys.stderr)
+        return None
 
-        calendar_rounds = load_calendar_rounds(year)
+    calendar_rounds = load_calendar_rounds(year)
 
-        existing_index = load_existing_index(year)
-        # Resumable-first: any album already known but not yet complete gets
-        # processed before a brand-new one, so a deep album's own pagination
-        # backlog doesn't get starved every run by an ever-growing set of
-        # brand-new albums.
-        cards_by_slug = {c['slug']: c for c in cards}
-        incomplete_slugs = [s for s, a in existing_index.items() if not a.get('complete') and s in cards_by_slug]
-        new_slugs = [c['slug'] for c in cards if c['slug'] not in existing_index]
-        order = incomplete_slugs + new_slugs
+    existing_index = load_existing_index(year)
+    # Resumable-first: any album already known but not yet complete gets
+    # processed before a brand-new one, so a deep album's own pagination
+    # backlog doesn't get starved every run by an ever-growing set of
+    # brand-new albums.
+    cards_by_slug = {c['slug']: c for c in cards}
+    incomplete_slugs = [s for s, a in existing_index.items() if not a.get('complete') and s in cards_by_slug]
+    new_slugs = [c['slug'] for c in cards if c['slug'] not in existing_index]
+    order = incomplete_slugs + new_slugs
 
-        results = []
-        for slug in order:
-            if fetcher.over_budget():
-                print("WARNING: fetch time budget exhausted - skipping remaining albums this run", file=sys.stderr)
-                break
-            card = cards_by_slug[slug]
-            album = process_album(fetcher, year, slug, card['title'], card['cover_src'], listing_url, calendar_rounds)
-            results.append(album)
+    results = []
+    for slug in order:
+        card = cards_by_slug[slug]
+        album = process_album(year, slug, card['title'], card['cover_src'], listing_url, calendar_rounds)
+        results.append(album)
 
-        # Albums untouched this run (already complete, or budget ran out
-        # before reaching them) keep whatever's already on disk/in the index
-        # unchanged - never dropped for not being re-visited this run.
-        untouched = {s: a for s, a in existing_index.items() if s not in {r['slug'] for r in results}}
+    # Albums untouched this run (nothing left to do) keep whatever's already
+    # on disk/in the index unchanged - never dropped for not being
+    # re-visited this run.
+    untouched = {s: a for s, a in existing_index.items() if s not in {r['slug'] for r in results}}
 
     # Runs across every album for the season (both freshly-scraped and
     # untouched-this-run), not just this run's own results - picking a

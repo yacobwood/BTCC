@@ -56,78 +56,46 @@ class TestApplyUpdates(unittest.TestCase):
         self.assertEqual(changes, [])
 
 
-class _FakeRenderedFetcher:
-    """Stand-in for `with RenderedFetcher() as fetcher:` - routes by URL so
-    one fetch can be scripted to fail while the other succeeds."""
-
-    def __init__(self, wins_html=None, titles_html=None, wins_error=None, titles_error=None):
-        self._wins_html = wins_html
-        self._titles_html = titles_html
-        self._wins_error = wins_error
-        self._titles_error = titles_error
-        self.calls = []
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
-    def get(self, url, **kwargs):
-        self.calls.append({"url": url, **kwargs})
-        if url == s.WINS_URL:
-            if self._wins_error:
-                raise self._wins_error
-            return self._wins_html
-        if url == s.TITLES_URL:
-            if self._titles_error:
-                raise self._titles_error
-            return self._titles_html
-        raise AssertionError(f"unexpected url {url}")
-
-
 class TestMainIsolation(unittest.TestCase):
     """Regression coverage for the isolation fix itself - previously a
     wins-fetch failure prevented titles from ever being attempted at all."""
 
-    def _run_main_with(self, fetcher, initial_drivers):
+    def _run_main_with(self, initial_drivers, wins_return=None, titles_return=None):
         with tempfile.TemporaryDirectory() as tmp:
             records_path = Path(tmp) / "records.json"
             records_path.write_text(json.dumps({"drivers": initial_drivers}))
-            with patch.object(s, "RenderedFetcher", lambda **kw: fetcher), \
-                 patch.object(s, "RECORDS", records_path), \
-                 patch.object(sys, "argv", ["scrape_btcc_stats.py"]):
+
+            def fake_fetch(url, **kwargs):
+                return wins_return if url == s.WINS_URL else titles_return
+
+            with patch.object(s, "RECORDS", records_path), \
+                 patch.object(sys, "argv", ["scrape_btcc_stats.py"]), \
+                 patch("scrape_btcc_stats.fetch_via_scrapfly", side_effect=fake_fetch) as mock_fetch:
                 s.main()
-            return json.loads(records_path.read_text())
+            return json.loads(records_path.read_text()), mock_fetch
 
     def test_titles_still_applied_when_wins_fetch_fails(self):
-        fetcher = _FakeRenderedFetcher(
-            wins_error=RuntimeError("HTTP 429 fetching wins"),
-            titles_html=TITLES_HTML,
+        result, _ = self._run_main_with(
+            [{"driver": "Jason Plato", "wins": 90, "starts": 300, "championships": 2}],
+            wins_return=None, titles_return=TITLES_HTML,
         )
-        result = self._run_main_with(fetcher, [{"driver": "Jason Plato", "wins": 90, "starts": 300, "championships": 2}])
         self.assertEqual(result["drivers"][0]["championships"], 3)   # titles update landed
         self.assertEqual(result["drivers"][0]["wins"], 90)           # wins untouched, not zeroed
 
     def test_both_fetches_attempted_even_if_first_fails(self):
         # Confirms titles is still fetched (not skipped) after a wins failure.
-        fetcher = _FakeRenderedFetcher(wins_error=RuntimeError("HTTP 429"), titles_html=TITLES_HTML)
-        self._run_main_with(fetcher, [])
-        self.assertEqual([c["url"] for c in fetcher.calls], [s.WINS_URL, s.TITLES_URL])
+        _, mock_fetch = self._run_main_with([], wins_return=None, titles_return=TITLES_HTML)
+        self.assertEqual([c.args[0] for c in mock_fetch.call_args_list], [s.WINS_URL, s.TITLES_URL])
 
     def test_exits_nonzero_when_both_fetches_fail(self):
-        fetcher = _FakeRenderedFetcher(
-            wins_error=RuntimeError("HTTP 429"), titles_error=RuntimeError("HTTP 429"),
-        )
         with self.assertRaises(SystemExit) as ctx:
-            self._run_main_with(fetcher, [])
+            self._run_main_with([], wins_return=None, titles_return=None)
         self.assertNotEqual(ctx.exception.code, 0)
 
     def test_titles_referer_is_the_wins_url(self):
-        fetcher = _FakeRenderedFetcher(wins_html=WINS_HTML, titles_html=TITLES_HTML)
-        self._run_main_with(fetcher, [])
-        titles_call = next(c for c in fetcher.calls if c["url"] == s.TITLES_URL)
-        self.assertEqual(titles_call["referer"], s.WINS_URL)
+        _, mock_fetch = self._run_main_with([], wins_return=WINS_HTML, titles_return=TITLES_HTML)
+        titles_call = next(c for c in mock_fetch.call_args_list if c.args[0] == s.TITLES_URL)
+        self.assertEqual(titles_call.kwargs.get("referer"), s.WINS_URL)
 
 
 if __name__ == "__main__":

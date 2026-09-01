@@ -1,9 +1,8 @@
 # Runs the calendar + session-schedule scrapers on a schedule. Picks up new
-# calendar data automatically when btcc.net publishes it. Runs on a
-# self-hosted runner (see scrape-news.yml comment / project_vercel_migration
-# memory) since btcc.net's Vercel bot-challenge blocks GitHub-hosted runner
-# IPs even with headless Chromium - interim fix until btcc.net's dev
-# allowlists us.
+# calendar data automatically when btcc.net publishes it. Fetches via
+# Scrapfly (see scrape-news.yml's own comment / project_scrapfly_full_migration
+# memory) as of 2026-09-01 rather than a self-hosted runner's local Playwright -
+# runs on GitHub-hosted ubuntu-latest, no residential IP needed.
 #
 # Weekly, not daily: per btcc.net's own dev, "calendar doesn't get updated
 # often, once set at season launch kinda stays that way most of the time" -
@@ -41,7 +40,7 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: [self-hosted, btcc-mac]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: write
@@ -53,17 +52,20 @@ jobs:
 
       - name: Scrape calendar
         env:
-          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
         run: |
           SEASON="${{ github.event.inputs.season }}"
           [ -z "$SEASON" ] && SEASON=2026
-          ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_calendar.py --season "$SEASON"
+          python3 scrape_calendar.py --season "$SEASON"
 
       - name: Derive session schedule (no network - reuses calendar.json's fullTimetable)
-        run: ~/.btcc-scraper-venv/bin/python tools/scraper/scrape_schedule.py
+        working-directory: tools/scraper
+        run: python3 scrape_schedule.py
 
       - name: Merge sessions into app calendar
-        run: ~/.btcc-scraper-venv/bin/python tools/scraper/merge_schedule.py
+        working-directory: tools/scraper
+        run: python3 merge_schedule.py
 
       - name: Commit updated data
         uses: stefanzweifel/git-auto-commit-action@v7
@@ -73,22 +75,18 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
-      # Covers a genuine script failure() as well as cancelled() (e.g.
-      # timeout-killed while queued behind another job on the shared
-      # btcc-mac runner - see project_scraper_reliability_audit memory).
-      # This only runs weekly, so a failure here would otherwise wait a full
-      # week for its next natural attempt - the sleep gives runner
-      # contention a real chance to clear before retrying. Carries season
-      # through so a manual historical-backfill retry targets the same
-      # year. is_retry guards against looping: a run dispatched BY this
-      # step carries is_retry=true, so a second failure falls through to
-      # "Report failure" instead of dispatching again.
+      # Covers a genuine script failure() as well as cancelled(). This only
+      # runs weekly, so a failure here would otherwise wait a full week for
+      # its next natural attempt. Carries season through so a manual
+      # historical-backfill retry targets the same year. is_retry guards
+      # against looping: a run dispatched BY this step carries
+      # is_retry=true, so a second failure falls through to "Report
+      # failure" instead of dispatching again.
       - name: Retry once on failure
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sleep 120
           curl -sf -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \

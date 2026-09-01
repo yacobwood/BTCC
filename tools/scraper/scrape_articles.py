@@ -9,13 +9,26 @@ btcc.net moved off WordPress entirely to a Vercel-hosted React app
 (2026-07-31): the old /wp-json/ REST API, and the /feed/ RSS feed this
 scraper used for full article content, are both gone. It also now issues
 a Vercel BotID JS challenge (HTTP 429) to any request that can't execute
-JavaScript, so every fetch here goes through headless Chromium (see
-btcc_playwright.py) rather than a direct HTTP request.
+JavaScript. Fetches through Scrapfly's paid Scrape API (see
+scrapfly_fallback.py) as of 2026-09-01 rather than local headless Chromium -
+`asp=true` clears the challenge from any IP (confirmed live), so this now
+runs on GitHub-hosted ubuntu-latest instead of needing the self-hosted
+runner's residential IP reputation. btcc_playwright.py's RenderedFetcher is
+deliberately left completely intact and unused in the repo - dormant, not
+deleted, in case Scrapfly ever needs to be swapped back out.
 
 Two btcc.net pages are used:
-  - /news/, /news/page/<n>/   rendered listing pages - slug, title,
-                       excerpt, date and featured image for each card
-                       (~25 per load).
+  - /news/, /page/<n>/   rendered listing pages - slug, title, excerpt,
+                       date and featured image for each card (~25 per
+                       load). NOTE: the pagination URL is /page/<n>/, NOT
+                       /news/page/<n>/ - confirmed live 2026-09-01 via the
+                       listing's own <nav class="pagination"> markup, after
+                       an earlier version of this scraper spent months
+                       thinking direct-URL pagination didn't work at all
+                       (it was just testing the wrong URL) and worked
+                       around it with a click-based approach that hit a
+                       real site bug after 2 clicks. Confirmed real content
+                       all the way to page 201 (~November 2013).
   - /<slug>/           each article's own page - full body HTML, fetched
                        only for slugs not already mirrored, UNLESS the
                        cached content is itself a "More to follow..."
@@ -60,10 +73,12 @@ Article images (btcc.net/api/media/<uuid>) are behind the exact same
 Vercel challenge as the page itself, so the app's own Image component
 (a plain HTTPS GET from the user's phone, no JS engine) can't load them
 directly either - confirmed as the cause of a live "no article images"
-report. Images are mirrored into data/media/news/ during the scrape (see
-btcc_playwright.get_with_media/save_mirrored_image) and served from
-GitHub raw instead - only for articles without an already-mirrored image,
-same bounded-cost pattern as the full-content fetch below.
+report. Images are mirrored into data/media/news/ during the scrape and
+served from GitHub raw instead - only for articles without an
+already-mirrored image, fetched on demand via scrapfly_fallback.
+fetch_image_smart (Scrapfly for btcc.net's own /api/media/ shape, ~225
+credits, confirmed live 2026-09-01 - a plain free request for a
+Supabase-hosted image, which isn't behind the Vercel challenge at all).
 
 Usage:
     python scrape_articles.py [--dry-run] [--refresh-all] [--backfill-pages N]
@@ -78,8 +93,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, RenderedFetcher, resolve_media_url, save_mirrored_image
-from scrapfly_fallback import fetch_via_scrapfly
+from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
+from scrapfly_fallback import fetch_image_smart, fetch_via_scrapfly
 
 NEWS_URL = "https://btcc.net/news/"
 PAGE_SIZE = 20  # must match src/api/client.js's fetchArticles() perPage
@@ -129,63 +144,10 @@ def parse_display_date(text: str) -> str:
     return f"{year}-{month:02d}-{int(day):02d}T00:00:00"
 
 
-def scrape_card_list(fetcher: RenderedFetcher, url: str = NEWS_URL) -> tuple[list[dict], dict]:
-    """Fetch a /news/ listing page (page 1 or /news/page/<n>/) and return card
-    metadata for every article found, plus the captured media dict (see
-    btcc_playwright.get_with_media) for mirroring.
-
-    scroll_through=True: the listing's card images use loading="lazy" - without
-    scrolling, only the hero card (already in the initial viewport) actually
-    gets its image requested/captured; every card lower down silently gets
-    media_url=None. Since a successfully-captured image is what gets carried
-    forward on later runs (not a missing one), any article whose *first* scrape
-    happens to land it below the fold - e.g. two other articles already
-    published ahead of it that day - is missing an image permanently, with
-    nothing to ever retrigger a re-capture. Confirmed live: two Race 1 reports
-    both missing images the same day they were first scraped."""
-    html, media = fetcher.get_with_media(url, wait_selector="article.news-card", scroll_through=True)
-    cards = []
-    for m in ARTICLE_RE.finditer(html):
-        block = m.group(0)
-        title_m = TITLE_RE.search(block)
-        if not title_m:
-            continue
-        slug, title = title_m.group(1), TAG_RE.sub("", title_m.group(2)).strip()
-        if not title:
-            continue
-        image_m = IMAGE_RE.search(block)
-        excerpt_m = EXCERPT_RE.search(block)
-        date_m = DATE_RE.search(block)
-        cards.append({
-            "slug": slug,
-            "title": title,
-            "media_url": resolve_media_url(image_m.group(1)) if image_m else None,
-            "excerpt": excerpt_m.group(1).strip() if excerpt_m else "",
-            "date": parse_display_date(date_m.group(1)) if date_m else "",
-        })
-    return cards, media
-
-
-def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], dict]:
-    """Load /news/ and click its in-page "Next" link up to num_pages-1 times,
-    each click appending another ~25-card batch to the same DOM (confirmed:
-    a direct page.goto("/news/page/<n>/") does NOT work - it silently
-    re-renders page 1's content instead of page n's; only clicking the
-    listing's own pagination link actually advances it). Used only for a
-    one-off deep backfill - the routine 5-minute run only ever needs page 1.
-
-    In practice this listing's own infinite-scroll component hits an
-    unrecoverable client-side bug after 2 successful clicks (confirmed: a
-    real "Minified React error #419" hydration mismatch, not anything on
-    our end) and every click after that succeeds with no further effect -
-    get_with_media_paginated stops early once a click stops growing the
-    card count, so num_pages beyond what btcc.net can actually deliver is
-    harmless to ask for, just capped at whatever it actually yields (as of
-    2026-08 that's ~75 cards / 3 pages worth, not num_pages*25)."""
-    html, media = fetcher.get_with_media_paginated(
-        NEWS_URL, next_selector='nav.pagination a:has-text("Next")',
-        max_clicks=num_pages - 1, wait_selector="article.news-card",
-    )
+def _parse_cards(html: str) -> list[dict]:
+    """Shared parsing core for scrape_card_list/scrape_pages - extracts card
+    metadata (slug/title/media_url/excerpt/date) from a listing page's raw
+    HTML, deduped by slug within this one page's cards."""
     cards = []
     seen_slugs = set()
     for m in ARTICLE_RE.finditer(html):
@@ -207,38 +169,80 @@ def scrape_pages(fetcher: RenderedFetcher, num_pages: int) -> tuple[list[dict], 
             "excerpt": excerpt_m.group(1).strip() if excerpt_m else "",
             "date": parse_display_date(date_m.group(1)) if date_m else "",
         })
-    return cards, media
+    return cards
 
 
-def fetch_article_body(fetcher: RenderedFetcher, slug: str, retries: int | None = None) -> str | None:
-    """Fetch a single article page and return its body's inner HTML, or None
-    if every attempt failed.
+def scrape_card_list(url: str = NEWS_URL) -> list[dict]:
+    """Fetch btcc.net/news/ (page 1) via Scrapfly and return card metadata
+    for every article found. Unlike the pre-Scrapfly version, this does NOT
+    also capture image bytes - that's now a separate, on-demand fetch (see
+    build_articles' prior_image check) only for cards that actually need a
+    fresh image, since Scrapfly bills each image independently (~225
+    credits, confirmed live 2026-09-01) rather than capturing every image on
+    a page for free as a side effect of rendering it once, the way
+    Playwright did."""
+    html = fetch_via_scrapfly(url, render_js=True, label="news-listing")
+    if html is None:
+        return []
+    return _parse_cards(html)
 
-    Retrying with backoff before giving up is now RenderedFetcher's own
-    built-in default behavior (see btcc_playwright.py), not local logic -
-    confirmed 2026-08-14 that an individual article fetch can still
-    intermittently hit Vercel's BotID challenge even with a persisted
-    session, the correct (bare, not www.) hostname, and referer=NEWS_URL set
-    (a real visitor reaches this page by clicking a card link on the listing
-    page, not by teleporting to it) - none of those individually or combined
-    made it fully reliable, so every btcc.net-facing scraper retries by
-    default now, not just this one.
 
-    Once RenderedFetcher's own retries are exhausted, falls back to
-    fetch_via_scrapfly (a bounded, measured trial - see scrapfly_fallback.py
-    - scoped to exactly this fetch path, since it's the one with a confirmed
-    history of residual flakiness even with every free-tier fix already
-    applied). A no-op if that trial isn't configured. Callers should treat
-    None as "try again next run", not something that should crash the whole
-    batch."""
-    url = f"https://btcc.net/{slug}/"
-    try:
-        html = fetcher.get(url, wait_selector="div.article-body", referer=NEWS_URL, retries=retries)
-    except Exception as e:
-        print(f"  WARNING: RenderedFetcher gave up on {slug} ({e}) - trying Scrapfly fallback", file=sys.stderr)
-        html = fetch_via_scrapfly(url, referer=NEWS_URL, label=slug)
+def scrape_pages(num_pages: int) -> list[dict]:
+    """Fetch num_pages of btcc.net's /news/ listing (page 1, then
+    https://btcc.net/page/2/, /page/3/, ... - NOT /news/page/<n>/, which
+    404s) and return deduped card metadata across all of them, for a one-off
+    deep backfill.
+
+    The real pagination URL was only discovered live 2026-09-01, while
+    investigating a completely different question (Scrapfly cost planning):
+    the previous version of this function assumed page.goto("/news/page/
+    <n>/") silently re-rendered page 1 (based on a real observation) and
+    worked around it with in-page "Next"-link clicking instead, which then
+    hit a genuine site bug after 2 clicks (a "Minified React error #419"
+    hydration mismatch) and could never reach past ~75 cards / 3 pages.
+    Confirmed live via the listing's own <nav class="pagination"> markup
+    that its real links are /page/<n>/, not /news/page/<n>/ - the old
+    function was quietly testing the wrong URL the whole time. Direct
+    fetches of the correct URL work cleanly with no click-based workaround
+    needed at all, and were confirmed to return genuinely distinct,
+    chronologically-ordered content all the way to page 201 (~November
+    2013) - the full backfill depth was never actually blocked by btcc.net,
+    only by this bug."""
+    all_cards: list[dict] = []
+    seen_slugs = set()
+    for page in range(1, num_pages + 1):
+        url = NEWS_URL if page == 1 else f"https://btcc.net/page/{page}/"
+        html = fetch_via_scrapfly(url, render_js=True, label=f"news-listing-page-{page}")
         if html is None:
-            return None
+            print(f"  WARNING: could not fetch page {page} - stopping backfill here", file=sys.stderr)
+            break
+        page_cards = _parse_cards(html)
+        if not page_cards:
+            print(f"  page {page} had no cards - stopping backfill here")
+            break
+        new_count = 0
+        for card in page_cards:
+            if card["slug"] in seen_slugs:
+                continue
+            seen_slugs.add(card["slug"])
+            all_cards.append(card)
+            new_count += 1
+        if new_count == 0:
+            # Every card on this page was already seen - btcc.net has fewer
+            # real pages of distinct content than num_pages asked for.
+            print(f"  page {page} had no new cards - stopping backfill here")
+            break
+    return all_cards
+
+
+def fetch_article_body(slug: str) -> str | None:
+    """Fetch a single article page via Scrapfly and return its body's inner
+    HTML, or None if the fetch failed. Callers should treat None as "try
+    again next run", not something that should crash the whole batch."""
+    url = f"https://btcc.net/{slug}/"
+    html = fetch_via_scrapfly(url, referer=NEWS_URL, render_js=True, label=slug)
+    if html is None:
+        return None
     m = BODY_RE.search(html)
     return m.group(1).strip() if m else ""
 
@@ -340,100 +344,84 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
-    # RenderedFetcher's own budget_seconds (default 150s, see
-    # btcc_playwright.py) now covers this loop, not local bookkeeping here.
-    # Root-caused 2026-08-17: this was the only scraper on the shared
-    # self-hosted runner (btcc-mac - just one registered, so exactly one job
-    # runs at a time across every scraper workflow) with any ceiling at all
-    # on how many articles' worth of retries a single bad-block-day run could
-    # burn through - every other scraper had no such ceiling either, which
-    # is why the budget moved into the shared helper instead of staying
-    # local to this one script. Once it's spent, remaining articles skip
-    # straight to the existing cached-content/skip fallback with no further
-    # fetch attempts, so a bad block day degrades to "finishes quickly with
-    # partial data" instead of "occupies the only runner for however long
-    # the block lasts" (confirmed: a scrape-team-stats run once sat queued
-    # for 20+ minutes behind exactly this kind of unbounded run).
-    with RenderedFetcher() as fetcher:
-        if backfill_pages > 1:
-            cards, media = scrape_pages(fetcher, backfill_pages)
+    if backfill_pages > 1:
+        cards = scrape_pages(backfill_pages)
+    else:
+        cards = scrape_card_list()
+    if not cards:
+        return []
+
+    merged = dict(existing)
+    for i, card in enumerate(cards):
+        if backfill_pages > 1 and i % 25 == 0:
+            print(f"  Processing article {i + 1}/{len(cards)}...")
+        slug = card["slug"]
+        prior = existing.get(slug)
+        prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
+        has_content = bool(prior_content) and not needs_full_refetch(prior_content, refresh_all)
+
+        if has_content:
+            content_html = prior["content"]["rendered"]
+            date_iso = prior.get("date") or card["date"]
+            category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
         else:
-            cards, media = scrape_card_list(fetcher)
-        if not cards:
-            return []
+            print(f"  Fetching full content: {slug}")
+            content_html = fetch_article_body(slug)
 
-        merged = dict(existing)
-        budget_warned = False
-        for i, card in enumerate(cards):
-            if backfill_pages > 1 and i % 25 == 0:
-                print(f"  Processing article {i + 1}/{len(cards)}...")
-            slug = card["slug"]
-            prior = existing.get(slug)
-            prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
-            has_content = bool(prior_content) and not needs_full_refetch(prior_content, refresh_all)
-
-            if has_content:
-                content_html = prior["content"]["rendered"]
-                date_iso = prior.get("date") or card["date"]
-                category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
-            else:
-                # Loop keeps running past budget exhaustion (never breaks) -
-                # remaining cards still need visiting to preserve whatever
-                # cached content they already have below; only new *fetch
-                # attempts* stop.
-                if fetcher.over_budget():
-                    if not budget_warned:
-                        print("  WARNING: fetch time budget exhausted - skipping remaining fetches for this run")
-                        budget_warned = True
-                    content_html = None
+            if content_html is None:
+                # Fetch failed - don't let it sink every other card in this
+                # batch. Keep serving whatever was cached before (a stale
+                # stub is still better than nothing, and this slug gets
+                # retried fresh next run); if there's nothing cached at all,
+                # skip it entirely this run rather than writing a broken/
+                # empty entry - the card is still in `cards` so the next run
+                # tries it again from scratch.
+                if prior_content:
+                    content_html = prior_content
+                    date_iso = prior.get("date") or card["date"]
+                    category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
                 else:
-                    print(f"  Fetching full content: {slug}")
-                    content_html = fetch_article_body(fetcher, slug)
-
-                if content_html is None:
-                    # Every attempt failed (see fetch_article_body's retry), or
-                    # the time budget above ran out before this slug even got
-                    # an attempt - either way, don't let it sink every other
-                    # card in this batch. Keep serving whatever was cached
-                    # before (a stale stub is still better than nothing, and
-                    # this slug gets retried fresh next run); if there's
-                    # nothing cached at all, skip it entirely this run rather
-                    # than writing a broken/empty entry - the card is still in
-                    # `cards` so the next run tries it again from scratch.
-                    if prior_content:
-                        content_html = prior_content
-                        date_iso = prior.get("date") or card["date"]
-                        category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
-                    else:
-                        continue
-                else:
-                    date_iso = card["date"]
-                    category = ""
-
-            prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
-            if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
-                image_url = prior_image
+                    continue
             else:
-                filename = save_mirrored_image(media, card["media_url"], MEDIA_DIR)
+                date_iso = card["date"]
+                category = ""
+
+        prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
+        if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
+            image_url = prior_image
+        elif card["media_url"]:
+            # On-demand, not eagerly-captured: Scrapfly bills each image
+            # independently (~225 credits for btcc.net's own /api/media/
+            # shape, confirmed live 2026-09-01) rather than capturing every
+            # image on a page for free during render the way Playwright did,
+            # so this only ever runs for a card that genuinely lacks an
+            # already-mirrored image.
+            fetched = fetch_image_smart(card["media_url"], label=slug)
+            if fetched:
+                filename = save_mirrored_image({card["media_url"]: fetched}, card["media_url"], MEDIA_DIR)
                 image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
+            else:
+                image_url = None
+        else:
+            image_url = None
 
-            embedded = {}
-            if image_url:
-                embedded["wp:featuredmedia"] = [{"source_url": image_url}]
-            if category:
-                embedded["wp:term"] = [[{"name": category}]]
+        embedded = {}
+        if image_url:
+            embedded["wp:featuredmedia"] = [{"source_url": image_url}]
+        if category:
+            embedded["wp:term"] = [[{"name": category}]]
 
-            merged[slug] = {
-                "id": slug,
-                "slug": slug,
-                "link": f"https://btcc.net/{slug}/",
-                "date": date_iso,
-                "firstSeenAt": resolve_first_seen(prior, now_iso, date_iso),
-                "title": {"rendered": card["title"]},
-                "excerpt": {"rendered": card["excerpt"]},
-                "content": {"rendered": content_html},
-                "_embedded": embedded,
-            }
+        merged[slug] = {
+            "id": slug,
+            "slug": slug,
+            "link": f"https://btcc.net/{slug}/",
+            "date": date_iso,
+            "firstSeenAt": resolve_first_seen(prior, now_iso, date_iso),
+            "title": {"rendered": card["title"]},
+            "excerpt": {"rendered": card["excerpt"]},
+            "content": {"rendered": content_html},
+            "_embedded": embedded,
+        }
 
     # firstSeenAt (not date) is the primary sort key - see resolve_first_seen
     # and sort_posts (date tie-break).

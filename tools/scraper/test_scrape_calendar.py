@@ -13,21 +13,10 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import scrape_calendar as scrape_calendar_module
 from scrape_calendar import merge_into_calendar, parse_date_range, scrape_calendar
-
-
-class FakeFetcher:
-    """Minimal stand-in for RenderedFetcher - scrape_calendar() only ever
-    calls .get(url, **kwargs) on whatever fetcher it's given, so a real
-    Playwright browser isn't needed to test the call itself (same
-    convention as test_scrape_articles.py's own FakeFetcher)."""
-    def __init__(self, html):
-        self.html = html
-
-    def get(self, url, **kwargs):
-        return self.html
 
 
 class TestParseDateRange(unittest.TestCase):
@@ -87,22 +76,23 @@ class TestScrapeCalendarOrdering(unittest.TestCase):
     </div>
     """
 
-    def test_rounds_sorted_chronologically_not_by_dom_order(self):
-        events = scrape_calendar(FakeFetcher(self.CALENDAR_HTML), 2026)
+    @patch("scrape_calendar.fetch_via_scrapfly")
+    def test_rounds_sorted_chronologically_not_by_dom_order(self, mock_fetch):
+        mock_fetch.return_value = self.CALENDAR_HTML
+        events = scrape_calendar(2026)
         self.assertEqual([e["venue"] for e in events], ["Donington Park", "Thruxton", "Croft"])
         self.assertEqual([e["round"] for e in events], [1, 2, 3])
 
-    def test_september_round_not_dropped(self):
-        events = scrape_calendar(FakeFetcher(self.CALENDAR_HTML), 2026)
+    @patch("scrape_calendar.fetch_via_scrapfly")
+    def test_september_round_not_dropped(self, mock_fetch):
+        mock_fetch.return_value = self.CALENDAR_HTML
+        events = scrape_calendar(2026)
         venues = [e["venue"] for e in events]
         self.assertIn("Croft", venues)
 
-    def test_returns_none_rather_than_raising_on_fetch_failure(self):
-        class _RaisingFetcher:
-            def get(self, url, **kwargs):
-                raise RuntimeError("HTTP 429 fetching https://btcc.net/calendar/")
-
-        self.assertIsNone(scrape_calendar(_RaisingFetcher(), 2026))
+    @patch("scrape_calendar.fetch_via_scrapfly", return_value=None)
+    def test_returns_none_rather_than_raising_on_fetch_failure(self, mock_fetch):
+        self.assertIsNone(scrape_calendar(2026))
 
 
 class TestScrapeCalendarDeduplication(unittest.TestCase):
@@ -137,17 +127,20 @@ class TestScrapeCalendarDeduplication(unittest.TestCase):
     </div>
     """
 
-    def test_duplicate_cards_collapsed_to_one_event_each(self):
-        events = scrape_calendar(FakeFetcher(self.DUPED_HTML), 2026)
+    @patch("scrape_calendar.fetch_via_scrapfly")
+    def test_duplicate_cards_collapsed_to_one_event_each(self, mock_fetch):
+        mock_fetch.return_value = self.DUPED_HTML
+        events = scrape_calendar(2026)
         self.assertEqual([e["venue"] for e in events], ["Donington Park", "Thruxton"])
         self.assertEqual([e["round"] for e in events], [1, 2])
 
-    def test_same_venue_different_dates_not_treated_as_duplicate(self):
+    @patch("scrape_calendar.fetch_via_scrapfly")
+    def test_same_venue_different_dates_not_treated_as_duplicate(self, mock_fetch):
         # Two genuinely different rounds can share a venue (e.g. Donington
         # Park hosts both an early-season National round and a later GP
         # round) - only an exact (venue, startDate, endDate) match is a
         # duplicate card, not a same-venue coincidence.
-        html = """
+        mock_fetch.return_value = """
         <a href="/circuit/donington-park/">
           <div class="calendar-date"><span>18 APR</span><span>-</span><span>19 APR</span></div>
           <h2>Donington Park</h2>
@@ -157,7 +150,7 @@ class TestScrapeCalendarDeduplication(unittest.TestCase):
           <h2>Donington Park GP</h2>
         </a>
         """
-        events = scrape_calendar(FakeFetcher(html), 2026)
+        events = scrape_calendar(2026)
         self.assertEqual(len(events), 2)
 
 
