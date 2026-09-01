@@ -44,7 +44,7 @@ import re
 import sys
 from pathlib import Path
 
-from btcc_playwright import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
+from media_utils import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
 from scrapfly_fallback import fetch_image_smart, fetch_via_scrapfly
 
 NEWS_URL = "https://btcc.net/news/"

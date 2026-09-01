@@ -67,6 +67,15 @@ jobs:
       - name: Pull latest
         run: git pull --rebase origin main
 
+      # Only real dependency of the active (Scrapfly) fetch path -
+      # scrape_news.py/scrape_articles.py import media_utils.py for image
+      # downscaling, which needs Pillow but deliberately not Playwright
+      # (see media_utils.py's own module docstring - importing
+      # btcc_playwright.py directly for these same helpers used to pull in
+      # Playwright too, which isn't installed here and doesn't need to be).
+      - name: Install dependencies
+        run: pip install --quiet Pillow
+
       - name: Scrape news
         env:
           SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
