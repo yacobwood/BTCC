@@ -23,6 +23,11 @@ on:
     # Weekly, Monday 06:30 UTC - same window as scrape-btcc-stats.yml.
     - cron: "30 6 * * 1"
   workflow_dispatch:
+    inputs:
+      is_retry:
+        description: "internal - marks this run as an automated retry (do not set manually)"
+        type: boolean
+        default: false
 
 concurrency:
   group: scrape-team-stats
@@ -34,6 +39,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+      actions: write
 
     steps:
       - name: Checkout repo
@@ -54,13 +60,37 @@ jobs:
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
 
+      # Covers a genuine script failure() as well as cancelled() (e.g.
+      # timeout-killed while queued behind another job on the shared
+      # btcc-mac runner - see project_scraper_reliability_audit memory).
+      # This only runs weekly, so unlike scrape-news.yml (which gets a free
+      # retry from cron every 5 minutes anyway) a failure here would
+      # otherwise wait a full week for its next natural attempt - the sleep
+      # gives runner contention a real chance to clear before retrying.
+      # is_retry guards against looping: a run dispatched BY this step
+      # carries is_retry=true, so a second failure falls through to "Report
+      # failure" instead of dispatching again.
+      - name: Retry once on failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sleep 120
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-team-stats.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || echo "Retry dispatch failed (non-fatal)"
+
+      # Only reached once the automated retry above has ALSO failed/been
+      # cancelled - a single transient blip no longer emails anyone.
       - name: Report failure
-        if: failure()
+        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
           curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Content-Type: application/json" \
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
-            -d "{\"workflow\":\"scrape-team-stats\",\"message\":\"Team stats scrape failed\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            -d "{\"workflow\":\"scrape-team-stats\",\"message\":\"Team stats scrape failed (auto-retry also failed)\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
             "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
