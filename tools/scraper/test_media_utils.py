@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from media_utils import resolve_media_url, save_mirrored_image
+from media_utils import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
 
 # A 2x2 red PNG, small enough to embed as a literal.
 _TINY_PNG = bytes.fromhex(
@@ -29,6 +29,52 @@ class TestResolveMediaUrl(unittest.TestCase):
     def test_leaves_an_already_absolute_url_unchanged(self):
         url = "https://x.supabase.co/storage/v1/object/sign/photo.jpg?token=abc"
         self.assertEqual(resolve_media_url(url), url)
+
+    def test_unwraps_next_js_image_optimization_proxy(self):
+        """Regression coverage: confirmed live 2026-09-02, btcc.net's
+        news-card markup switched to Next.js's own <Image> component, which
+        wraps the real /api/media/<uuid> URL as a url= query param on
+        /_next/image/? instead of linking it directly - this was silently
+        producing zero images for every card (IMAGE_RE simply didn't match
+        the new shape at all) until both the regex and this unwrap were
+        added. Uses the exact real captured markup, HTML-entity-escaped
+        &amp;s and all - not a simplified fixture."""
+        proxy_url = (
+            "https://btcc.net/_next/image/?url=%2Fapi%2Fmedia%2F87f9a9c2-1e0e-496a-8c98-95ccbb686bee"
+            "%3Fimage-optimizer%3D1&amp;w=1920&amp;q=75&amp;dpl=dpl_5Y8w8WJXhB4gZeZAKpLAsoKwLtg2"
+        )
+        self.assertEqual(
+            resolve_media_url(proxy_url),
+            "https://btcc.net/api/media/87f9a9c2-1e0e-496a-8c98-95ccbb686bee?image-optimizer=1",
+        )
+
+
+class TestMediaSrcReFragment(unittest.TestCase):
+    """The regex needs to actually match the new proxy shape in a real <img>
+    tag - a passing resolve_media_url test alone doesn't prove IMAGE_RE
+    (which wraps this fragment) ever captures it in the first place."""
+
+    def _search(self, html):
+        import re
+        return re.search(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"', html)
+
+    def test_matches_the_next_js_proxy_shape(self):
+        html = (
+            '<img src="https://btcc.net/_next/image/?url=%2Fapi%2Fmedia%2Fabc123'
+            '&amp;w=1920&amp;q=75&amp;dpl=dpl_xyz">'
+        )
+        m = self._search(html)
+        self.assertIsNotNone(m)
+        self.assertTrue(m.group(1).startswith("https://btcc.net/_next/image/?url="))
+
+    def test_still_matches_the_old_direct_shape(self):
+        m = self._search('<img src="/api/media/abc123">')
+        self.assertEqual(m.group(1), "/api/media/abc123")
+
+    def test_still_matches_supabase_shape(self):
+        url = "https://x.supabase.co/storage/v1/object/sign/photo.jpg?token=abc"
+        m = self._search(f'<img src="{url}">')
+        self.assertEqual(m.group(1), url)
 
 
 class TestSaveMirroredImage(unittest.TestCase):

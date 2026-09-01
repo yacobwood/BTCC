@@ -25,6 +25,7 @@ etc. - it's the dormant, still-fully-intact self-hosted path, not deleted.
 from __future__ import annotations
 
 import io
+import urllib.parse
 from pathlib import Path
 
 from PIL import Image
@@ -47,17 +48,35 @@ _EXT_BY_CONTENT_TYPE = {
 # matches WP_SIZES's own largest tier in CachedImage.js.
 _MAX_DIMENSION = 1024
 
-# Matches an <img src="..."> value in either shape a btcc.net page might use:
-# btcc.net's own stable /api/media/<uuid> redirector (relative path), or a
-# Supabase Storage signed URL embedded directly (already absolute). Capture
-# the whole match so callers can tell which shape they got.
-MEDIA_SRC_RE_FRAGMENT = r'(?:/api/media/[^"]+|https://[a-z0-9-]+\.supabase\.co/storage/[^"]+)'
+# Matches an <img src="..."> value in any shape a btcc.net page might use:
+# btcc.net's own stable /api/media/<uuid> redirector (relative path), a
+# Supabase Storage signed URL embedded directly (already absolute), or -
+# confirmed live 2026-09-02, a site-markup change - that same /api/media/
+# URL wrapped in Next.js's own Image Optimization proxy
+# (https://btcc.net/_next/image/?url=<url-encoded original>&w=...&q=...).
+# resolve_media_url() below unwraps the third shape back to one of the
+# first two; capture the whole match here so it has something to unwrap.
+MEDIA_SRC_RE_FRAGMENT = (
+    r'(?:/api/media/[^"]+'
+    r'|https://[a-z0-9-]+\.supabase\.co/storage/[^"]+'
+    r'|https://btcc\.net/_next/image/\?url=[^"]+)'
+)
 
 
 def resolve_media_url(src: str) -> str:
     """Turn a matched <img src> value into an absolute URL - prefixes
-    btcc.net's own domain onto a relative /api/media/<uuid> path, or returns
-    an already-absolute Supabase Storage URL unchanged."""
+    btcc.net's own domain onto a relative /api/media/<uuid> path, returns an
+    already-absolute Supabase Storage URL unchanged, or unwraps Next.js's
+    Image Optimization proxy (confirmed live 2026-09-02: btcc.net's news-card
+    markup switched from a direct <img src="/api/media/<uuid>"> to
+    <img src="https://btcc.net/_next/image/?url=%2Fapi%2Fmedia%2F<uuid>...">
+    - same underlying media endpoint, just no longer linked directly. The
+    `url` query param is itself a URL-encoded relative path, so this
+    recurses once to apply the same "prefix btcc.net" resolution to it."""
+    if "/_next/image/?url=" in src:
+        inner = urllib.parse.parse_qs(urllib.parse.urlparse(src).query).get("url", [None])[0]
+        if inner:
+            return resolve_media_url(inner)
     return f"https://btcc.net{src}" if src.startswith("/") else src
 
 
