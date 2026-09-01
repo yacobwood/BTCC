@@ -98,20 +98,30 @@ def fetch_via_scrapfly(
     return content
 
 
-def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 30) -> tuple[bytes, str] | None:
+def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tuple[bytes, str] | None:
     """Fetch a raw image URL (btcc.net's /api/media/<uuid> shape - the one
     still behind the Vercel challenge; a Supabase Storage URL needs no
-    fallback at all, see btcc_playwright.MEDIA_SRC_RE_FRAGMENT) through
-    Scrapfly and return (bytes, content_type), shaped to drop straight into
-    btcc_playwright.save_mirrored_image's `media` dict - or None if this is
-    off (no API key) or the request failed.
+    fallback at all, see media_utils.MEDIA_SRC_RE_FRAGMENT) through Scrapfly
+    and return (bytes, content_type), shaped to drop straight into
+    media_utils.save_mirrored_image's `media` dict - or None if this is off
+    (no API key) or the request failed.
 
     Confirmed live (2026-09-01) this costs ~225 credits vs. ~30 for a plain
     HTML page fetch - Scrapfly bills each resource independently, unlike
     RenderedFetcher which captures every image a page loads for free as a
     side effect of rendering it once. Callers should gate this behind an
     actual "does this article still need an image" check, not call it
-    unconditionally on every run - see scrape_news_scrapfly_fallback.py."""
+    unconditionally on every run - see scrape_news.py/scrape_articles.py's
+    own prior-image checks.
+
+    timeout defaults to 60s, not the 30s a plain page fetch gets - confirmed
+    live 2026-09-02 that a real image fetch (challenge-solve + downloading a
+    multi-megabyte file) can occasionally take longer than a lightweight
+    HTML fetch does; one genuinely timed out at 30s that then succeeded in
+    under 7s moments later on retry. Failed requests cost no credits
+    (confirmed via Scrapfly's own billing docs), so there's no downside to
+    the extra headroom, only a cost to timing out too eagerly and missing an
+    image that was never actually unavailable."""
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
