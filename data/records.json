@@ -3,14 +3,14 @@
     {
       "driver": "Jason Plato",
       "starts": 539,
-      "wins": 83,
+      "wins": 97,
       "podiums": 183,
       "poles": 36,
       "fastestLaps": 70,
       "dnfs": 60,
       "points": 4358,
       "seasons": 18,
-      "championships": 1,
+      "championships": 2,
       "bestSeasonWins": 8,
       "bestSeasonPodiums": 17,
       "bestSeasonPoles": 5,
@@ -21,7 +21,7 @@
       "consecutivePoints": 40,
       "racesLed": 23,
       "hatTricks": 13,
-      "winPct": 0.15398886827458255,
+      "winPct": 0.17996289424860853,
       "podiumPct": 0.3395176252319109,
       "pointsPerStart": 8.08534322820037,
       "dnfPct": 0.11131725417439703
@@ -29,7 +29,7 @@
     {
       "driver": "Colin Turkington",
       "starts": 536,
-      "wins": 71,
+      "wins": 72,
       "podiums": 186,
       "poles": 31,
       "fastestLaps": 72,
@@ -47,7 +47,7 @@
       "consecutivePoints": 38,
       "racesLed": 65,
       "hatTricks": 16,
-      "winPct": 0.13246268656716417,
+      "winPct": 0.13432835820895522,
       "podiumPct": 0.34701492537313433,
       "pointsPerStart": 9.798507462686567,
       "dnfPct": 0.07835820895522388
@@ -55,7 +55,7 @@
     {
       "driver": "Tom Chilton",
       "starts": 529,
-      "wins": 19,
+      "wins": 18,
       "podiums": 69,
       "poles": 12,
       "fastestLaps": 18,
@@ -73,7 +73,7 @@
       "consecutivePoints": 23,
       "racesLed": 13,
       "hatTricks": 2,
-      "winPct": 0.035916824196597356,
+      "winPct": 0.034026465028355386,
       "podiumPct": 0.13043478260869565,
       "pointsPerStart": 4.9073724007561434,
       "dnfPct": 0.13988657844990549
@@ -81,7 +81,7 @@
     {
       "driver": "Matt Neal",
       "starts": 505,
-      "wins": 52,
+      "wins": 63,
       "podiums": 169,
       "poles": 11,
       "fastestLaps": 39,
@@ -99,7 +99,7 @@
       "consecutivePoints": 37,
       "racesLed": 17,
       "hatTricks": 3,
-      "winPct": 0.10297029702970296,
+      "winPct": 0.12475247524752475,
       "podiumPct": 0.3346534653465347,
       "pointsPerStart": 8.354455445544554,
       "dnfPct": 0.12673267326732673
@@ -211,7 +211,7 @@
     {
       "driver": "Tom Ingram",
       "starts": 385,
-      "wins": 42,
+      "wins": 41,
       "podiums": 124,
       "poles": 15,
       "fastestLaps": 52,
@@ -229,7 +229,7 @@
       "consecutivePoints": 36,
       "racesLed": 66,
       "hatTricks": 4,
-      "winPct": 0.10909090909090909,
+      "winPct": 0.10649350649350649,
       "podiumPct": 0.3220779220779221,
       "pointsPerStart": 10.192207792207792,
       "dnfPct": 0.0987012987012987
@@ -263,7 +263,7 @@
     {
       "driver": "Josh Cook",
       "starts": 355,
-      "wins": 23,
+      "wins": 21,
       "podiums": 63,
       "poles": 5,
       "fastestLaps": 28,
@@ -281,7 +281,7 @@
       "consecutivePoints": 24,
       "racesLed": 30,
       "hatTricks": 2,
-      "winPct": 0.0647887323943662,
+      "winPct": 0.059154929577464786,
       "podiumPct": 0.17746478873239438,
       "pointsPerStart": 7.405633802816902,
       "dnfPct": 0.1352112676056338
@@ -289,7 +289,7 @@
     {
       "driver": "Ashley Sutton",
       "starts": 325,
-      "wins": 55,
+      "wins": 52,
       "podiums": 131,
       "poles": 13,
       "fastestLaps": 62,
@@ -307,7 +307,7 @@
       "consecutivePoints": 29,
       "racesLed": 66,
       "hatTricks": 4,
-      "winPct": 0.16923076923076924,
+      "winPct": 0.16,
       "podiumPct": 0.40307692307692305,
       "pointsPerStart": 11.47076923076923,
       "dnfPct": 0.06153846153846154
@@ -521,7 +521,7 @@
       "dnfPct": 0.32945736434108525
     },
     {
-      "driver": "\u00c1r\u00f3n Taylor-Smith",
+      "driver": "Árón Taylor-Smith",
       "starts": 241,
       "wins": 1,
       "podiums": 10,
@@ -1613,7 +1613,7 @@
       "dnfPct": 0.4
     },
     {
-      "driver": "\u00c1r\u00f3n Smith",
+      "driver": "Árón Smith",
       "starts": 90,
       "wins": 3,
       "podiums": 12,
@@ -3589,7 +3589,7 @@
       "dnfPct": 0.9
     },
     {
-      "driver": "\u00c1r\u00f3n Taylor-smith",
+      "driver": "Árón Taylor-smith",
       "starts": 28,
       "wins": 1,
       "podiums": 1,
@@ -4085,7 +4085,7 @@
     {
       "driver": "Alan Morrison",
       "starts": 12,
-      "wins": 0,
+      "wins": 1,
       "podiums": 0,
       "poles": 0,
       "fastestLaps": 0,
@@ -4103,7 +4103,7 @@
       "consecutivePoints": 5,
       "racesLed": 0,
       "hatTricks": 0,
-      "winPct": 0.0,
+      "winPct": 0.08333333333333333,
       "podiumPct": 0.0,
       "pointsPerStart": 1.3333333333333333,
       "dnfPct": 0.25
@@ -6486,7 +6486,7 @@
       "historical": true
     },
     {
-      "driver": "Paul O\u2019Neill",
+      "driver": "Paul O’Neill",
       "starts": 0,
       "wins": 2,
       "podiums": 0,
@@ -7188,7 +7188,7 @@
       "historical": true
     },
     {
-      "driver": "Mike O\u2019Brien",
+      "driver": "Mike O’Brien",
       "starts": 0,
       "wins": 1,
       "podiums": 0,
