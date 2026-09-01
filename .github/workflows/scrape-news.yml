@@ -41,6 +41,10 @@ on:
     - cron: "0 0-6,20-23 * * *"
   workflow_dispatch:
     inputs:
+      force:
+        description: "Re-fetch the headline's image even if the slug already matches what's committed (for a manual retry after btcc.net adds/changes an image for the current headline - the routine run only checks the image on a slug change)"
+        type: boolean
+        default: false
       is_retry:
         description: "internal - marks this run as an automated retry (do not set manually)"
         type: boolean
@@ -80,7 +84,12 @@ jobs:
         env:
           SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
         working-directory: tools/scraper
-        run: python3 scrape_news.py
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            ARGS="--force"
+          fi
+          python3 scrape_news.py $ARGS
 
       # Committed immediately, before the slower article-mirror step below -
       # sendSessionNotifications can only react to whatever data/news.json
