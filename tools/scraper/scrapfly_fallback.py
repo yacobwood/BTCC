@@ -132,6 +132,14 @@ def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tu
         with urllib.request.urlopen(request_url, timeout=timeout) as resp:
             body = json.loads(resp.read())
         result = body["result"]
+        # Scrapfly can return HTTP 200 with success=False and a non-image
+        # error payload in `content` (confirmed live 2026-09-02: this
+        # previously fell through to base64.b64decode() below and failed
+        # with an opaque "Incorrect padding" instead of a real reason) -
+        # check this explicitly so a genuine target-side failure reports
+        # as what it actually is.
+        if not result.get("success", True):
+            raise RuntimeError(result.get("error", {}).get("message") or "Scrapfly reported success=false")
         # Confirmed live (2026-09-01) Scrapfly reports this one of two ways
         # depending on target - check both rather than trust one and risk
         # silently mislabelling a non-JPEG image's extension.
