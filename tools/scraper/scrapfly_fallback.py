@@ -44,6 +44,10 @@ import urllib.parse
 import urllib.request
 
 SCRAPFLY_ENDPOINT = "https://api.scrapfly.io/scrape"
+# Confirmed live 2026-09-02: Scrapfly returns this instead of inline base64
+# content once a response's size crosses some threshold (~4MB, confirmed on
+# a genuine 4.1MB image) - see fetch_image_via_scrapfly's own docstring.
+_LARGE_OBJECT_URL_PREFIX = "https://api.scrapfly.io/scrape/large_object/"
 _SUPABASE_RE = re.compile(r"supabase\.co/storage/")
 
 
@@ -121,7 +125,17 @@ def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tu
     under 7s moments later on retry. Failed requests cost no credits
     (confirmed via Scrapfly's own billing docs), so there's no downside to
     the extra headroom, only a cost to timing out too eagerly and missing an
-    image that was never actually unavailable."""
+    image that was never actually unavailable.
+
+    Large images (confirmed live 2026-09-02 on a genuine 4.1MB file) don't
+    come back as inline base64 in `content` at all - Scrapfly instead
+    returns a `https://api.scrapfly.io/scrape/large_object/<id>` reference
+    URL there once a response crosses some size threshold, needing a
+    second, separately-authenticated request to actually fetch the bytes.
+    This was the real, 100%-reproducible cause of a run of "Incorrect
+    padding" base64-decode failures that looked like flakiness at first -
+    every attempt was trying to decode that reference URL string as if it
+    were the image data itself."""
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
@@ -145,7 +159,12 @@ def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tu
         # silently mislabelling a non-JPEG image's extension.
         content_type = result.get("content_type") or result.get("response_headers", {}).get("content-type", "image/jpeg")
         content_type = content_type.split(";")[0].strip()
-        image_bytes = base64.b64decode(result["content"])
+        raw_content = result["content"]
+        if raw_content.startswith(_LARGE_OBJECT_URL_PREFIX):
+            with urllib.request.urlopen(f"{raw_content}?key={api_key}", timeout=timeout) as lo_resp:
+                image_bytes = lo_resp.read()
+        else:
+            image_bytes = base64.b64decode(raw_content)
     except Exception as e:  # noqa: BLE001 - fallback path, any failure just means "no"
         print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({e})")
         return None

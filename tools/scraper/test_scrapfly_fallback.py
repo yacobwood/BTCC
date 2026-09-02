@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Tests for scrapfly_fallback.py - the Scrapfly-backed fetch helpers used
-by scrape_articles.py's per-article fallback and by
-scrape_news_scrapfly_fallback.py's emergency watchdog. Confirms the most
-important property first: with no SCRAPFLY_API_KEY configured (the default
-state on most CI environments), both functions are true no-ops that never
-even attempt a network call."""
+"""Tests for scrapfly_fallback.py - the Scrapfly-backed fetch functions
+every btcc.net-facing scraper uses as of the 2026-09-01 migration (see
+project_scrapfly_full_migration memory). Confirms the most important
+property first: with no SCRAPFLY_API_KEY configured (the default state on
+most CI environments), every fetch function is a true no-op that never
+even attempts a network call."""
 
 import base64
 import json
@@ -121,6 +121,44 @@ class TestFetchImageViaScrapfly(unittest.TestCase):
     def test_returns_none_rather_than_raising_on_any_failure(self, mock_urlopen):
         mock_urlopen.side_effect = RuntimeError("connection reset")
         self.assertIsNone(fetch_image_via_scrapfly("https://btcc.net/api/media/abc123"))
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_fetches_large_object_reference_instead_of_decoding_it_as_base64(self, mock_urlopen):
+        """Regression coverage: confirmed live 2026-09-02 on a genuine
+        4.1MB image - Scrapfly returns a large_object reference URL in
+        `content` instead of inline base64 once a response crosses some
+        size threshold. The old code tried to base64-decode that URL
+        string itself and failed with an opaque "Incorrect padding" that
+        looked like intermittent flakiness across many retries before the
+        real, 100%-reproducible cause was found."""
+        large_object_url = "https://api.scrapfly.io/scrape/large_object/01M1GFGJTN2YQJMXCC60N1PEKE"
+        real_image_bytes = b"\xff\xd8\xff\xe0fake-large-jpeg-bytes"
+
+        api_response = BytesIO(json.dumps({
+            "result": {"content": large_object_url, "content_type": "image/jpeg", "success": True},
+        }).encode())
+        large_object_response = BytesIO(real_image_bytes)
+        # urlopen used as a context manager both times - .read() must work
+        # on whichever BytesIO __enter__ returns for that call.
+        mock_urlopen.return_value.__enter__.side_effect = [api_response, large_object_response]
+
+        result = fetch_image_via_scrapfly("https://btcc.net/api/media/2f0991ab-...")
+        self.assertEqual(result, (real_image_bytes, "image/jpeg"))
+        # The second request must be authenticated - a bare fetch of the
+        # large_object URL returns 401 (confirmed live).
+        second_call_url = mock_urlopen.call_args_list[1].args[0]
+        self.assertIn("key=test-key", second_call_url)
+        self.assertTrue(second_call_url.startswith(large_object_url))
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_success_false_response_reports_the_real_error_not_a_decode_failure(self, mock_urlopen):
+        mock_urlopen.return_value.__enter__.return_value = BytesIO(json.dumps({
+            "result": {"success": False, "error": {"message": "target site blocked the request"}},
+        }).encode())
+        result = fetch_image_via_scrapfly("https://btcc.net/api/media/abc123")
+        self.assertIsNone(result)
 
 
 class TestFetchImageSmart(unittest.TestCase):
