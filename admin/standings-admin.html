@@ -1417,10 +1417,6 @@ select.input { cursor: pointer; }
       <input type="text" id="explainer-edit-title" placeholder="Headline">
     </div>
     <div class="field-group">
-      <div class="field-label">DESCRIPTION <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(shown in feed)</span></div>
-      <textarea id="explainer-edit-desc" rows="4" placeholder="One sentence summary…"></textarea>
-    </div>
-    <div class="field-group">
       <div class="field-label">BODY</div>
       <div id="explainer-content-editor"></div>
     </div>
@@ -3283,7 +3279,6 @@ function newExplainerArticle() {
   document.getElementById('explainer-edit-id').value = '';
   document.getElementById('explainer-edit-is-new').value = 'true';
   document.getElementById('explainer-edit-title').value = '';
-  document.getElementById('explainer-edit-desc').value = '';
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3297,7 +3292,6 @@ function openExplainerEdit(id) {
   document.getElementById('explainer-edit-id').value = p.id;
   document.getElementById('explainer-edit-is-new').value = '';
   document.getElementById('explainer-edit-title').value = p.title || '';
-  document.getElementById('explainer-edit-desc').value = p.description || '';
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3325,7 +3319,6 @@ async function saveExplainerEdit(andPublish = false) {
     article = {
       id: newId,
       title,
-      description: document.getElementById('explainer-edit-desc').value.trim(),
       content,
       status: andPublish ? 'published' : 'staged',
       order: maxOrder + 1,
@@ -3338,7 +3331,6 @@ async function saveExplainerEdit(andPublish = false) {
     explainerPosts[idx] = {
       ...explainerPosts[idx],
       title,
-      description: document.getElementById('explainer-edit-desc').value.trim(),
       content,
       ...(andPublish ? {status: 'published', pubDate: explainerPosts[idx].pubDate || nowIso()} : {}),
     };
