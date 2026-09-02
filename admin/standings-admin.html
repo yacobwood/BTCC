@@ -10,8 +10,6 @@
 /* Quill theme overrides */
 .ql-toolbar { background: var(--surface) !important; border: 1px solid var(--outline) !important; border-bottom: none !important; border-radius: 10px 10px 0 0 !important; }
 .ql-container { background: var(--surface) !important; border: 1px solid var(--outline) !important; border-top: none !important; border-radius: 0 0 10px 10px !important; min-height: 180px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: var(--text); }
-.ql-editor { color: var(--text) !important; min-height: 180px; line-height: 1.6; }
-.ql-editor.ql-blank::before { color: var(--text-sec) !important; opacity: 0.5; font-style: normal; }
 .ql-stroke { stroke: var(--text-sec) !important; }
 .ql-fill  { fill:   var(--text-sec) !important; }
 .ql-picker-label { color: var(--text-sec) !important; }
@@ -21,11 +19,32 @@
 .ql-toolbar button.ql-active .ql-fill  { fill:   var(--yellow) !important; }
 .ql-toolbar .ql-picker-label:hover,
 .ql-toolbar .ql-picker-item:hover { color: var(--yellow) !important; }
-.ql-editor img { max-width: 100%; border-radius: 8px; margin: 8px 0; display: block; }
-.ql-editor p { margin-bottom: 8px; }
 .ql-snow .ql-tooltip { background: var(--card) !important; border: 1px solid var(--outline) !important; color: var(--text) !important; box-shadow: none !important; border-radius: 8px; }
 .ql-snow .ql-tooltip input[type=text] { background: var(--surface) !important; border: 1px solid var(--outline) !important; color: var(--text) !important; border-radius: 6px; padding: 4px 8px; }
 .ql-snow .ql-tooltip a { color: var(--yellow) !important; }
+
+/* Content area only - matches ArticleScreen.js's buildHtml() CSS as closely
+   as reasonably possible (same background/text colours, font size, line
+   height, heading sizes/spacing, paragraph spacing, link colour, and the
+   yellow-bordered list box treatment) so what you see while editing is
+   close to what actually ships in the app, not Quill's generic default
+   look. Added 2026-09-02 after "a lot of extra spaces" made a real draft
+   hard to visualise here. Only .ql-editor itself (the actual toolbar stays
+   admin-themed) - keep this in sync with buildHtml()'s <style> block if
+   that ever changes; it's a second, deliberate copy of those values for a
+   different rendering context (a live-editable surface vs. a WebView), not
+   something that can just import the same CSS. */
+.ql-editor { background: #0B0C0F !important; color: #fff !important; min-height: 180px; font-size: 16px; line-height: 1.7; }
+.ql-editor.ql-blank::before { color: var(--text-sec) !important; opacity: 0.5; font-style: normal; }
+.ql-editor p { margin-bottom: 14px; }
+.ql-editor h1 { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+.ql-editor h2 { font-size: 18px; font-weight: 700; margin-top: 14px; margin-bottom: 0; }
+.ql-editor h3 { font-size: 16px; font-weight: 700; margin-top: 14px; margin-bottom: 0; }
+.ql-editor a { color: var(--yellow) !important; text-decoration: none; }
+.ql-editor blockquote { border-left: 3px solid var(--yellow); padding-left: 14px; margin: 16px 0; color: #8B949E; font-style: italic; }
+.ql-editor ul, .ql-editor ol { background: rgba(255,255,255,0.05); border-left: 3px solid var(--yellow); border-radius: 6px; padding: 14px 14px 14px 28px; margin: 16px 0; }
+.ql-editor li { margin-bottom: 8px; color: #ccc; }
+.ql-editor img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: block; }
 </style>
 <script>
 (async function() {
