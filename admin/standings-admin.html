@@ -3758,6 +3758,27 @@ function loadImagesIntoGrid(imageUrl, imagesArr) {
 let quill = null;
 let digestQuill = null;
 
+// Cleans up stray blank lines the moment focus leaves the editor (clicking
+// the Title field, a toolbar button elsewhere on the page, or Save) rather
+// than only at load/save time - added 2026-09-02 after that gap between
+// load/save caused real, repeated confusion mid-draft (a blank line from
+// pressing Enter twice looks huge with the real-app-matching CSS, and
+// nothing before this cleaned it up until an actual save). Deliberately
+// NOT continuous/on every keystroke - Quill's own selection-change event
+// with a null range means focus genuinely left the editor, so this only
+// ever touches lines the admin has already moved past, never the one
+// their cursor is still sitting on. Only stripEmptyParagraphs, never
+// restoreTables - putting real table HTML into Quill's live DOM here
+// would just trigger the exact deletion bug tables were rescued from.
+function autoCleanEmptyLinesOnBlur(quillInstance) {
+  quillInstance.on('selection-change', range => {
+    if (range !== null) return;
+    const current = quillInstance.root.innerHTML;
+    const cleaned = stripEmptyParagraphs(current);
+    if (cleaned !== current) quillInstance.root.innerHTML = cleaned;
+  });
+}
+
 function initDigestQuill() {
   if (digestQuill) return;
   digestQuill = new Quill('#digest-content-editor', {
@@ -3773,6 +3794,7 @@ function initDigestQuill() {
       ],
     },
   });
+  autoCleanEmptyLinesOnBlur(digestQuill);
 }
 
 let explainerQuill = null;
@@ -3792,6 +3814,7 @@ function initExplainerQuill() {
       ],
     },
   });
+  autoCleanEmptyLinesOnBlur(explainerQuill);
 }
 
 function initQuill() {
@@ -3840,6 +3863,7 @@ function initQuill() {
       },
     },
   });
+  autoCleanEmptyLinesOnBlur(quill);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
