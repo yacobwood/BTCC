@@ -2,10 +2,20 @@ name: Race Day Start
 
 # Runs every morning to check if today is a BTCC race day.
 # If it is, automatically dispatches the session-watcher workflow.
+#
+# Cron deliberately fires at :27, not the round :30 mark - GitHub's own
+# docs (confirmed live 2026-09-02, see scrape-news.yml's own comment/
+# project_overnight_cron_gap_fix memory) warn that scheduled triggers can
+# be delayed or dropped under load, worst at round minute marks. This is a
+# once-per-weekend-morning trigger feeding session-watcher.yml, which
+# needs to be connected before the earliest session of the day (as little
+# as 45 min later on some rounds) - a delay here is more consequential
+# than on scrape-news.yml's own frequent polling, where a missed tick is
+# just briefly stale data.
 
 on:
   schedule:
-    - cron: "30 8 * * 6,0"   # 08:30 UTC, Saturdays and Sundays only
+    - cron: "27 8 * * 6,0"   # 08:27 UTC, Saturdays and Sundays only
   workflow_dispatch:           # allow manual trigger for testing
 
 jobs:
