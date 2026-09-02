@@ -981,6 +981,13 @@ export function buildHtml(article, topPad) {
       .content { padding:0 16px 0; }
       img { width:100%!important; height:auto!important; border-radius:8px; margin:12px 0; display:block; }
       p { margin-bottom:14px; }
+      /* A genuinely empty paragraph (a stray blank line left in the source
+         content, e.g. from a markdown double-newline that survived
+         conversion) otherwise renders as a full text line's height on top
+         of the margins already collapsing around it - collapses to a thin
+         spacer instead. Kept in sync with the equivalent rule in
+         admin/standings-admin.html's .ql-editor CSS. */
+      p:has(> br:only-child) { min-height:0; line-height:0.3; margin:0; }
       a { color:#FEBD02; text-decoration:none; }
       blockquote { border-left:3px solid #FEBD02; padding-left:14px; margin:16px 0; color:#8B949E; font-style:italic; }
       ul,ol { padding-left:1.5em; background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:6px; padding:14px 14px 14px 28px; margin:16px 0; }

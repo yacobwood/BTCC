@@ -45,6 +45,17 @@
 .ql-editor ul, .ql-editor ol { background: rgba(255,255,255,0.05); border-left: 3px solid var(--yellow); border-radius: 6px; padding: 14px 14px 14px 28px; margin: 16px 0; }
 .ql-editor li { margin-bottom: 8px; color: #ccc; }
 .ql-editor img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: block; }
+/* A blank line Quill represents as <p><br></p> - a genuinely empty
+   paragraph, not extra intentional whitespace - otherwise renders as a
+   full text line's height (~27px at this font-size/line-height) on top
+   of the 14px margins already collapsing around it, making a single
+   blank line between paragraphs/before a heading look enormous. Collapse
+   it to a thin spacer instead. Also applied in ArticleScreen.js's
+   buildHtml() - keep both in sync, same reasoning as the rest of this
+   block: this is real content behaviour, not just an editor-preview
+   nicety, so a stray blank paragraph in *any* published article gets the
+   same fix, not just what's visible while drafting. */
+.ql-editor p:has(> br:only-child) { min-height: 0; line-height: 0.3; margin: 0; }
 </style>
 <script>
 (async function() {
