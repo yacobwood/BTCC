@@ -1822,6 +1822,39 @@ function stripEmptyParagraphs(html) {
   return (html || '').replace(/<p>(\s|<br\s*\/?>|&nbsp;|<\/?(?:strong|em|u|b|i|span)\b[^>]*>)*<\/p>/gi, '');
 }
 
+// Quill Core (no table module) has no concept of a <table> at all and
+// silently DELETES one the moment content containing it loads into the
+// editor - confirmed live 2026-09-02 via an isolated headless-Chrome test:
+// setting quill.root.innerHTML to content with a real
+// <div class="table-wrap"><table>...</table></div> left only a bare empty
+// paragraph in its place within one Quill init cycle, before any user
+// interaction. Saving after that would permanently strip the table from
+// the real published content, not a preview-only loss. Rather than let
+// Quill ever see a table, extractTables() swaps each one for a plain-text
+// placeholder paragraph before loading (Quill handles ordinary text fine)
+// and restoreTables() splices the real table HTML back in at save time,
+// matched by the placeholder's position/number. If the placeholder text
+// itself gets deleted while editing, its table is correctly dropped too -
+// same as deleting any other paragraph - so this only actively protects a
+// table the admin never touched, not one they deliberately removed.
+function extractTables(html) {
+  const tables = [];
+  const stripped = (html || '').replace(/<div class="table-wrap">[\s\S]*?<\/table>\s*<\/div>/gi, match => {
+    tables.push(match);
+    return `<p>[Table ${tables.length} - not editable here, kept as-is on save]</p>`;
+  });
+  return {stripped, tables};
+}
+
+function restoreTables(html, tables) {
+  let result = html;
+  (tables || []).forEach((table, i) => {
+    const marker = new RegExp('<p>\\s*\\[Table ' + (i + 1) + '[^\\]]*\\]\\s*</p>', 'i');
+    result = result.replace(marker, table);
+  });
+  return result;
+}
+
 // ── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -3004,6 +3037,8 @@ function renderDigestList() {
   }).join('');
 }
 
+let digestEditTables = [];
+
 function openDigestEdit(id) {
   const p = hubNewsPosts.find(x => x.id === id);
   if (!p) return;
@@ -3013,7 +3048,9 @@ function openDigestEdit(id) {
   document.getElementById('digest-edit-status').textContent = '';
   document.getElementById('digest-edit-card').style.display = 'block';
   initDigestQuill();
-  digestQuill.root.innerHTML = stripEmptyParagraphs(p.content);
+  const {stripped, tables} = extractTables(p.content);
+  digestEditTables = tables;
+  digestQuill.root.innerHTML = stripEmptyParagraphs(stripped);
   document.getElementById('digest-edit-card').scrollIntoView({behavior: 'smooth'});
 }
 
@@ -3026,7 +3063,7 @@ async function saveDigestEdit(andPublish = false) {
   const idx = hubNewsPosts.findIndex(p => p.id === id);
   if (idx < 0) return;
   const rawContent = digestQuill ? digestQuill.root.innerHTML : '';
-  const content = rawContent === '<p><br></p>' ? '' : stripEmptyParagraphs(rawContent);
+  const content = rawContent === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(rawContent), digestEditTables);
   hubNewsPosts[idx] = {
     ...hubNewsPosts[idx],
     title: document.getElementById('digest-edit-title').value.trim(),
@@ -3100,13 +3137,19 @@ async function regenerateDigest(articleId) {
   await triggerDigestGenerate(type);
 }
 
+let hubNewsEditTables = [];
+
 function editArticle(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
   if (!p) return;
   document.getElementById('hn-edit-id').value = p.id;
   document.getElementById('hn-title').value = p.title || '';
   document.getElementById('hn-desc').value = p.description || '';
-  if (quill) { quill.root.innerHTML = stripEmptyParagraphs(p.content); }
+  if (quill) {
+    const {stripped, tables} = extractTables(p.content);
+    hubNewsEditTables = tables;
+    quill.root.innerHTML = stripEmptyParagraphs(stripped);
+  }
   loadImagesIntoGrid(p.imageUrl || '', p.images || []);
   renderCategorySelect(p.category || '');
   document.getElementById('hn-source').value = p.source || '';
@@ -3125,6 +3168,7 @@ function cancelEdit() {
   document.getElementById('hn-edit-id').value = '';
   document.getElementById('hn-title').value = '';
   document.getElementById('hn-desc').value = '';
+  hubNewsEditTables = [];
   if (quill) { quill.root.innerHTML = ''; }
   sessionImages = [];
   renderImgGrid();
@@ -3175,7 +3219,7 @@ async function publishArticle() {
   const imagesRaw = document.getElementById('hn-images').value.trim();
   const images = imagesRaw ? imagesRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
   const rawContent = quill ? quill.root.innerHTML : '';
-  const content = rawContent === '<p><br></p>' ? '' : stripEmptyParagraphs(rawContent);
+  const content = rawContent === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(rawContent), hubNewsEditTables);
   if (currentArticleStatus === 'draft' && !previewDeviceIds.length) {
     if (!confirm('No preview devices added — this draft will be invisible to everyone. Continue?')) return;
   }
@@ -3344,6 +3388,8 @@ function slugifyExplainerTitle(title) {
     .slice(0, 60);
 }
 
+let explainerEditTables = [];
+
 function newExplainerArticle() {
   document.getElementById('explainer-edit-id').value = '';
   document.getElementById('explainer-edit-is-new').value = 'true';
@@ -3351,6 +3397,7 @@ function newExplainerArticle() {
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
+  explainerEditTables = [];
   explainerQuill.root.innerHTML = '';
   document.getElementById('explainer-edit-card').scrollIntoView({behavior: 'smooth'});
 }
@@ -3364,7 +3411,9 @@ function openExplainerEdit(id) {
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
-  explainerQuill.root.innerHTML = stripEmptyParagraphs(p.content);
+  const {stripped, tables} = extractTables(p.content);
+  explainerEditTables = tables;
+  explainerQuill.root.innerHTML = stripEmptyParagraphs(stripped);
   document.getElementById('explainer-edit-card').scrollIntoView({behavior: 'smooth'});
 }
 
@@ -3378,7 +3427,7 @@ async function saveExplainerEdit(andPublish = false) {
   const title = document.getElementById('explainer-edit-title').value.trim();
   if (!title) { alert('Title is required.'); return; }
   const rawContent = explainerQuill ? explainerQuill.root.innerHTML : '';
-  const content = rawContent === '<p><br></p>' ? '' : stripEmptyParagraphs(rawContent);
+  const content = rawContent === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(rawContent), explainerEditTables);
 
   let article;
   if (isNew) {
