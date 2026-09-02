@@ -45,6 +45,21 @@
 .ql-editor ul, .ql-editor ol { background: rgba(255,255,255,0.05); border-left: 3px solid var(--yellow); border-radius: 6px; padding: 14px 14px 14px 28px; margin: 16px 0; }
 .ql-editor li { margin-bottom: 8px; color: #ccc; }
 .ql-editor img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: block; }
+/* A saved article's content can already contain a real <table> (wrapped in
+   <div class="table-wrap">, matching ArticleScreen.js's own wrapping) even
+   though Quill's toolbar here has no table button of its own - editing an
+   article that already has one just needs it to render correctly, not to
+   be creatable from scratch. Without this, table/th/td fell back to the
+   browser's own default styling - black text on this editor's near-black
+   background, rendering as what looked like blank space rather than a
+   missing table. Confirmed live 2026-09-02 via a real draft's table.
+   Values copied from ArticleScreen.js's buildHtml() - keep in sync. */
+.ql-editor .table-wrap { overflow-x: auto; margin: 16px 0; }
+.ql-editor table { width: auto; min-width: 100%; border-collapse: collapse; font-size: 14px; }
+.ql-editor th, .ql-editor td { border: 1px solid #333; padding: 8px 10px; text-align: left; white-space: nowrap; }
+.ql-editor th { background: rgba(255,255,255,0.08); font-weight: 700; color: #fff; }
+.ql-editor tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+.ql-editor td { color: #ccc; }
 /* A blank line Quill represents as <p><br></p> - a genuinely empty
    paragraph, not extra intentional whitespace - otherwise renders as a
    full text line's height (~27px at this font-size/line-height) on top
