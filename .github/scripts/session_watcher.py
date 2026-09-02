@@ -2,11 +2,23 @@
 """
 BTCC Session Watcher
 ====================
-Connects to TSL SignalR live timing for a race weekend, then:
+Connects to TSL SignalR live timing for a race weekend, then, when TSL
+fires `sessioncomplete`, scrapes the results PDF, commits the data, and
+sends that session's spoiler-specific results notification
+(results_race1/results_qualifying/etc.) - the one notification nothing
+else in the pipeline sends. See functions/scraperAdmin.js's
+notifyResultsUpdate for the separate, deliberately spoiler-safe generic
+"a result just dropped" push that already goes out reliably regardless of
+whether this script runs.
 
-  - Sends a push notification 15 minutes before each session starts
-  - When TSL fires `sessioncomplete`, scrapes the results PDF, commits
-    the data, and (for the appropriate sessions) sends a results notification
+Does NOT send pre-session "starting in 15 minutes" alerts any more (fixed
+2026-09-02, removed the same day the race-day-start.yml dispatch bug that
+had kept this script from ever running was found) - functions/
+sessionNotifications.js's sendSessionNotifications already sends those
+reliably on a completely separate, always-running Firebase schedule, using
+the exact same topic names (pre_fp, pre_race1, etc.) this script used to
+also send to. Keeping both would have meant every pre-session alert
+arriving twice the first weekend this script's dispatch actually worked.
 
 Usage (from repo root, typically run via GitHub Actions):
   python .github/scripts/session_watcher.py --round 1 --day saturday
@@ -20,7 +32,8 @@ Required env vars:
 
 import argparse, json, logging, os, subprocess, sys, threading, time
 import urllib.request, urllib.parse, http.cookiejar
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import websocket
 
@@ -33,13 +46,22 @@ log = logging.getLogger("watcher")
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-PRE_TOPICS = {
-    "Free Practice":   "pre_fp",
-    "Qualifying":      "pre_qualifying",
-    "Qualifying Race": "pre_qrace",
-    "Race 1":          "pre_race1",
-    "Race 2":          "pre_race2",
-    "Race 3":          "pre_race3",
+# Deliberately duplicated from tools/scraper/scrape_tsl.py's own
+# SESSION_SUFFIXES, not imported - that script parses sys.argv directly at
+# module level (YEAR = int(sys.argv[1]) ...) by design, since it's always
+# invoked as a subprocess (see run_scraper() below), never imported
+# elsewhere in this codebase. Importing it here would read *this* script's
+# own argv ("--round", "8", ...) instead and crash on `int("--round")` -
+# confirmed live. Keep this dict in sync with scrape_tsl.py's if either
+# changes - both are small and rarely touched (session names are stable
+# across a season; TOCA/TSL don't rename their own PDF suffixes mid-year).
+SESSION_SUFFIXES = {
+    "Free Practice":   "fp1",
+    "Qualifying":      "qu1",
+    "Qualifying Race": "qra",
+    "Race 1":          "rc1",
+    "Race 2":          "rc2",
+    "Race 3":          "rc3",
 }
 
 RESULTS_TOPICS = {
@@ -62,17 +84,53 @@ def parse_args():
     return p.parse_args()
 
 
+# ── Time conversion ───────────────────────────────────────────────────────────
+
+def session_to_utc(date_str, time_str):
+    """Mirrors functions/shared.js's sessionToUTC(): session times in
+    calendar.json/schedule.json are local UK clock time. Uses zoneinfo
+    rather than a hardcoded BST offset so a round landing right on a
+    DST boundary is never silently wrong, even though BTCC's April-October
+    season is in practice always BST."""
+    year, month, day = map(int, date_str.split("-"))
+    hour, minute = map(int, time_str.split(":"))
+    local = datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Europe/London"))
+    return local.astimezone(timezone.utc)
+
+
 # ── Schedule loading ──────────────────────────────────────────────────────────
 
 def load_sessions(year, round_num, day):
-    schedule_path = os.path.join(REPO_ROOT, "data", "schedule.json")
-    with open(schedule_path) as f:
-        sched = json.load(f)
-    rnd = next((r for r in sched["rounds"] if r["round"] == round_num), None)
+    """Reads data/calendar.json - NOT schedule.json. Fixed 2026-09-02:
+    this used to read schedule.json expecting rnd["tsl"], rnd["venue"], and
+    rnd["sessions"] as a dict keyed by "saturday"/"sunday" with each
+    session carrying its own suffix/start_utc/notify flags - none of which
+    schedule.json actually has (confirmed live: rnd["tsl"] raised KeyError
+    immediately). calendar.json has the real tslEventId/venue per round and
+    a flat sessions list of {name, day, time} - the suffix and UTC start
+    time are derived here instead of expected pre-computed."""
+    calendar_path = os.path.join(REPO_ROOT, "data", "calendar.json")
+    with open(calendar_path) as f:
+        cal = json.load(f)
+    rnd = next((r for r in cal["rounds"] if r["round"] == round_num), None)
     if not rnd:
-        log.error(f"Round {round_num} not found in schedule.json")
+        log.error(f"Round {round_num} not found in calendar.json")
         sys.exit(1)
-    return rnd["tsl"], rnd["venue"], rnd["sessions"][day]
+
+    date_str = rnd["startDate"] if day == "saturday" else rnd["endDate"]
+    day_code = "SAT" if day == "saturday" else "SUN"
+    day_sessions = [s for s in rnd.get("sessions", []) if s.get("day") == day_code and s.get("time")]
+
+    sessions = []
+    for s in day_sessions:
+        label = s["name"]
+        sessions.append({
+            "label":     label,
+            "suffix":    SESSION_SUFFIXES.get(label),
+            "start_utc": session_to_utc(date_str, s["time"]),
+        })
+
+    return rnd["tslEventId"], rnd["venue"], sessions
 
 
 # ── FCM notification ──────────────────────────────────────────────────────────
@@ -193,12 +251,17 @@ def get_top_finisher(year, round_num, label):
 # ── Session-complete handler ──────────────────────────────────────────────────
 
 def handle_session_complete(session, year, round_num, venue):
-    label     = session["label"]
-    suffix    = session.get("suffix")
-    topic     = RESULTS_TOPICS.get(label)
-    channel   = label.lower().replace(" ", "_")
-    is_q1     = session.get("is_q1", False)
-    do_notify = session.get("notify_results", True) and not is_q1
+    label   = session["label"]
+    suffix  = session.get("suffix")
+    topic   = RESULTS_TOPICS.get(label)
+    channel = label.lower().replace(" ", "_")
+    # Every session in the current 6-session format (Free Practice,
+    # Qualifying, Qualifying Race, Race 1-3) gets its own full results
+    # notification - confirmed against the 2026 regs (no Q1/Q2 partial-
+    # qualifying split anywhere in them) that the old is_q1/notify_results
+    # exception this used to check was dead logic from an earlier format,
+    # not something the current season can actually hit. Removed rather
+    # than carried forward silently.
 
     log.info(f"▶ session complete: {label}")
 
@@ -215,10 +278,6 @@ def handle_session_complete(session, year, round_num, venue):
         return
 
     commit_and_push(round_num)
-
-    if not do_notify:
-        log.info(f"  No results notification for {label} (Q1 partial or disabled)")
-        return
 
     top = get_top_finisher(year, round_num, label)
     race_num = label.split()[-1] if label.startswith("Race") else None
@@ -240,48 +299,6 @@ def handle_session_complete(session, year, round_num, venue):
         topic, title, body, channel,
         extra_data={"type": "results", "round": str(round_num), "year": str(year)},
     )
-
-
-# ── Pre-session notification thread ──────────────────────────────────────────
-
-def pre_session_notifier(sessions, round_num, venue):
-    """Fires 15 min before each session with a notify_pre start time."""
-    for sess in sessions:
-        start_str = sess.get("start_utc")
-        if not start_str or not sess.get("notify_pre"):
-            continue
-
-        start_utc = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-        notify_at = start_utc - timedelta(minutes=15)
-        now = datetime.now(timezone.utc)
-
-        if notify_at <= now:
-            log.info(f"Pre-session: {sess['label']} window already passed")
-            continue
-
-        wait_secs = (notify_at - now).total_seconds()
-        log.info(f"Pre-session: will notify for {sess['label']} in {wait_secs/60:.0f} min")
-        time.sleep(wait_secs)
-
-        label     = sess.get("pre_label", sess["label"])  # Q1 uses "Qualifying" as pre_label
-        topic     = PRE_TOPICS.get(label, "pre_race1")
-        start_bst = (start_utc + timedelta(hours=1)).strftime("%H:%M")  # rough BST display
-
-        if label == "Free Practice":
-            title = f"Free Practice — Round {round_num}"
-            body  = f"{venue} · Free Practice starts at {start_bst} BST"
-        elif "Qualifying Race" in label:
-            title = f"Qualifying Race — Round {round_num}"
-            body  = f"{venue} · Qualifying Race starts at {start_bst} BST"
-        elif "Qualifying" in label:
-            title = f"Qualifying — Round {round_num}"
-            body  = f"{venue} · Qualifying starts at {start_bst} BST"
-        else:
-            race_num = label.split()[-1]
-            title = f"Race {race_num} — Round {round_num}"
-            body  = f"{venue} · Race {race_num} starts at {start_bst} BST"
-
-        send_fcm(topic, title, body, label.lower().replace(" ", "_"))
 
 
 # ── TSL SignalR connection ────────────────────────────────────────────────────
@@ -371,12 +388,11 @@ def main():
     log.info(f"Session watcher: Round {args.round} ({args.day}) — {venue} — TSL event {event_id}")
     log.info(f"Sessions: {[s['label'] for s in sessions]}")
 
-    # Start pre-session notification thread
-    threading.Thread(
-        target=pre_session_notifier,
-        args=(sessions, args.round, venue),
-        daemon=True,
-    ).start()
+    # No pre-session notification thread any more - sendSessionNotifications
+    # (functions/sessionNotifications.js, a separate always-running Firebase
+    # schedule) already sends those reliably. See this file's own module
+    # docstring for why running both would double-send every pre-session
+    # alert.
 
     # Connect to TSL and watch for sessioncomplete events
     connect_and_watch(event_id, sessions, args.year, args.round, venue)
