@@ -21,6 +21,15 @@ rendering the page anyway) but costs ~225 credits a time here, ~7.5x a
 plain page fetch, so re-fetching an already-mirrored image on every 5-
 minute tick would be enormously wasteful.
 
+Before attempting that fetch at all, _archive_mirrored_image() checks
+whether scrape_articles.py's own full mirror (data/articles/, run right
+after this script in the same job) already has this exact slug's image
+mirrored from an earlier run - a free, reliable second source that can't
+time out. Added 2026-09-02 after a run where this script's own fetch of an
+already-known headline's image kept hitting ordinary transient timeouts
+while the identical image sat already-mirrored in the archive the whole
+time.
+
 Article images (btcc.net/api/media/<uuid>) are behind the exact same
 Vercel challenge as the page itself, so the app's own Image component
 (a plain HTTPS GET from the user's phone, no JS engine) can't load them
@@ -52,6 +61,8 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 NEWS_JSON = DATA_DIR / "news.json"
 MEDIA_DIR = DATA_DIR / "media" / "news"
 MEDIA_RAW_BASE = "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news"
+ARTICLES_DIR = DATA_DIR / "articles"
+ARTICLES_INDEX = ARTICLES_DIR / "index.json"
 
 ARTICLE_RE = re.compile(r'<article class="news-card[^"]*"[^>]*>.*?</article>', re.DOTALL)
 # Title capture is deliberately permissive ([\s\S]*?, not [^<]+) and stripped
@@ -77,6 +88,40 @@ def _current_slug() -> str | None:
         return posts[0].get("slug") if posts else None
     except (OSError, json.JSONDecodeError, IndexError, AttributeError):
         return None
+
+
+def _archive_mirrored_image(slug: str) -> str | None:
+    """The full article mirror (scrape_articles.py, run right after this
+    script within the same job - see scrape-news.yml) tracks every known
+    slug's own mirrored image independently in data/articles/, and once a
+    fetch has succeeded there it stays cached indefinitely (gated on "does
+    this article already have one mirrored", same idea as this script's own
+    gate). That makes it a free, reliable second source worth checking
+    before paying for (or retrying) this script's own separate Scrapfly
+    fetch of the exact same file.
+
+    Confirmed live 2026-09-02: croft-takes-centre-stage-as-btcc-season-
+    enters-final-stretch's hero image kept hitting ordinary transient
+    Scrapfly timeouts here on repeated retries, while the identical
+    /api/media/<uuid> image had already succeeded and sat mirrored in the
+    article archive the whole time from an earlier run - this script just
+    never looked. Returns None if the slug isn't in the archive at all
+    (most likely a genuinely brand-new headline that scrape_articles.py
+    hasn't reached yet this run - it runs after this script, so a headline
+    appearing for the very first time won't be there yet) or has no image
+    of its own there either."""
+    try:
+        index = json.loads(ARTICLES_INDEX.read_text())
+        page_num = index.get(slug)
+        if page_num is None:
+            return None
+        page = json.loads((ARTICLES_DIR / f"page_{page_num}.json").read_text())
+        for article in page:
+            if article.get("slug") == slug:
+                return article.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
+    except (OSError, json.JSONDecodeError, AttributeError, TypeError):
+        pass
+    return None
 
 
 def scrape_news(force: bool = False) -> list | None:
@@ -119,6 +164,12 @@ def scrape_news(force: bool = False) -> list | None:
             image_url = existing[0].get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
         except (OSError, json.JSONDecodeError, IndexError, AttributeError):
             pass
+
+    if not image_url:
+        # Free, reliable second source before paying for (or retrying) our
+        # own fetch of the same file - see _archive_mirrored_image's own
+        # docstring for the incident this closes.
+        image_url = _archive_mirrored_image(slug)
 
     if force or slug != current_slug:
         # Either a genuinely new headline (always worth trying once), or a
