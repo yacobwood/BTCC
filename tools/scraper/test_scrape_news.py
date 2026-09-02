@@ -68,7 +68,12 @@ class TestScrapeNews(unittest.TestCase):
     @patch("scrape_news._current_slug", return_value="race-1-report")
     @patch("scrape_news.fetch_via_scrapfly", return_value=CARD_HTML)
     @patch("scrape_news.fetch_image_smart", return_value=(b"bytes", "image/jpeg"))
-    def test_force_refetches_even_when_slug_matches(self, mock_image, mock_fetch, mock_slug):
+    @patch("scrape_news.save_mirrored_image", return_value="abc123.jpg")
+    def test_force_refetches_even_when_slug_matches(self, mock_save, mock_image, mock_fetch, mock_slug):
+        # save_mirrored_image mocked (not just fetch_image_smart) - left
+        # unmocked here once, this called the real function against the
+        # real repo path and left a stray data/media/news/abc123.jpg
+        # committed nowhere but sitting on disk on every test run.
         scrape_news(force=True)
         mock_image.assert_called_once()
 
