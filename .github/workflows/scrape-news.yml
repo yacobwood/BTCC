@@ -29,16 +29,29 @@
 # The self-hosted Playwright path (btcc_playwright.py, RenderedFetcher) is
 # deliberately left completely intact and untouched in the repo - dormant,
 # not deleted, in case Scrapfly ever needs to be swapped back out.
+#
+# Both cron entries below deliberately fire at :03/:08/:13... rather than
+# :00/:05/:10 - confirmed live 2026-09-02 (GitHub's own docs:
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+# - "the schedule event can be delayed during periods of high loads... high
+# load times include the start of every hour... schedule your workflow to
+# run at a different time of the hour") that landing on the exact minute
+# mark is the single most contended moment on GitHub's shared scheduler.
+# Real overnight run history showed only 2 of ~7 expected hourly ticks
+# actually landing, arriving 1-4.5 hours late (cross-checked independently
+# via runner-heartbeat.yml's own now-removed "age_min" logging - see
+# below). Cadence/cost is unchanged, only the offset - see
+# project_scrape_schedule memory if this ever needs revisiting.
 name: Scrape BTCC News
 
 on:
   schedule:
     # Every 5 minutes, 07:00-20:00 UTC (covers UK working hours across both
     # BST and GMT with margin either side).
-    - cron: "*/5 7-19 * * *"
+    - cron: "3-59/5 7-19 * * *"
     # Hourly the rest of the day (20:00-06:00 UTC) - bounds worst-case
     # overnight lag to under an hour rather than going dark until 07:00.
-    - cron: "0 0-6,20-23 * * *"
+    - cron: "3 0-6,20-23 * * *"
   workflow_dispatch:
     inputs:
       force:

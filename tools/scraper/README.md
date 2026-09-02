@@ -12,12 +12,24 @@ suite, which predates that rewrite by a fair margin (btcc.net's move to Vercel, 
 
 ## btcc.net access model - read this before adding a new scraper
 
+**Superseded 2026-09-01 - this section describes the dormant Playwright/self-hosted-runner
+path, kept intact in case Scrapfly ever needs to be swapped back out, not what actually runs
+today.** Every btcc.net-facing scraper now fetches via Scrapfly's paid Scrape API
+(`scrapfly_fallback.py`) on GitHub-hosted `ubuntu-latest` - see the main
+[README §20](../../README.md#20-python-scrapers) for the current, accurate writeup (cost
+model, cadence, what's still dormant vs. active). `runner-heartbeat.yml`, referenced several
+times below as the thing watching `btcc-mac`, was retired 2026-09-02 - no scheduled workflow
+has used that runner since the migration, so there was nothing left for it to watch, and its
+cadence-mismatched threshold had been firing false "btcc-mac may be offline" alerts every
+overnight run since the migration (see main README's "Overnight cron gaps" note in §20).
+
 btcc.net is a Vercel-hosted React app protected by Vercel BotID (Kasada-powered): every
 request that can't execute JavaScript gets a proof-of-work challenge and a 429, and the
 challenge also factors in network/IP reputation on top of the JS check - confirmed by testing
 identical Playwright code from both a residential IP (clean) and a GitHub-hosted Actions
 runner (still 429'd). No TLS-impersonation trick or IP-relay approach can pass this, since the
-block isn't about network identity, it's about being unable to execute JavaScript. So:
+block isn't about network identity, it's about being unable to execute JavaScript. So, **when
+this dormant path was last active:**
 
 - **Every btcc.net-facing scraper renders pages with headless Chromium via `btcc_playwright.py`**
   (`RenderedFetcher`, or `fetch_rendered()` for a genuine one-off single fetch) instead of a
@@ -27,9 +39,8 @@ block isn't about network identity, it's about being unable to execute JavaScrip
   `ubuntu-latest` - an interim fix until btcc.net's dev allowlists this project's traffic.
   `scrape_tsl.py` (TSL Timing PDFs) and `scrape_youtube.py` (YouTube) never touch btcc.net and
   stay on `ubuntu-latest`.
-- **`runner-heartbeat.yml`** (GitHub-hosted, hourly) is the only thing that can notice
-  `btcc-mac` itself going unreachable - every other workflow's `if: failure()` alert needs a job
-  to have actually started to fire at all. See "Self-hosted runner reliability" below.
+- ~~**`runner-heartbeat.yml`** (GitHub-hosted, hourly) is the only thing that can notice
+  `btcc-mac` itself going unreachable~~ - retired 2026-09-02, see note above.
 - **`cf-worker/`'s Cloudflare Worker relay is dead code, do not reuse it here.** It solved a
   *different*, now-obsolete problem: the old WordPress origin's IP-reputation WAF block
   (pre-dates the Vercel migration). A Worker can't execute a JS challenge either, so it can't
@@ -66,6 +77,10 @@ on top of it. If your script loops over more than one URL, open `with RenderedFe
 fetcher:` once, outside the loop, and pass `fetcher` down.
 
 ## Self-hosted runner reliability
+
+**Dormant-path history - `btcc-mac` hasn't run any scheduled workflow since the 2026-09-01
+Scrapfly migration, and `runner-heartbeat.yml` (the workflow this section is about) was
+retired 2026-09-02.** Kept below in case the Playwright path is ever reactivated.
 
 **2026-08-19 incident:** `btcc-mac` (a laptop, not a server) dropped onto battery power
 overnight and macOS suspended it into idle/maintenance sleep repeatedly for ~5 hours;
