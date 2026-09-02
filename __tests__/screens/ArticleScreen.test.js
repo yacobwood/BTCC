@@ -652,6 +652,51 @@ describe('buildHtml source attribution', () => {
   });
 });
 
+// ─── buildHtml: empty paragraph stripping ──────────────────────────────────
+//
+// A genuinely empty paragraph (a stray blank line - e.g. a markdown
+// double-newline that survived conversion, or one left over from the admin
+// editor) rendered as a full text line's height on top of the margins
+// already collapsing around it - confirmed live 2026-09-02 to look
+// enormous for just a single blank line between paragraphs or before a
+// heading. sanitise() strips it entirely rather than relying on a CSS-only
+// fix - a CSS :has() selector targeting Quill's bare <p><br></p> shape
+// didn't catch the formatting-tag-wrapped variant a real draft actually
+// had (<p><strong><br></strong></p>, left behind when bold/italic/
+// underline was toggled on when the blank line was created).
+
+describe('buildHtml empty paragraph stripping', () => {
+  const BASE = {title: 'Test', content: '', sortDate: '2026-08-09'};
+
+  it('strips a bare Quill blank line (<p><br></p>)', () => {
+    const html = buildHtml({...BASE, content: '<p>First.</p><p><br></p><p>Second.</p>'}, 0);
+    expect(html).toContain('<p>First.</p>');
+    expect(html).toContain('<p>Second.</p>');
+    expect(html).not.toContain('<p><br></p>');
+  });
+
+  it('strips a blank line with the <br> wrapped in a formatting tag', () => {
+    const html = buildHtml({...BASE, content: '<p>First.</p><p><strong><br></strong></p><p>Second.</p>'}, 0);
+    expect(html).not.toContain('<strong><br>');
+  });
+
+  it('strips a blank line containing only a non-breaking space', () => {
+    const html = buildHtml({...BASE, content: '<p>First.</p><p>&nbsp;</p><p>Second.</p>'}, 0);
+    expect(html).not.toContain('<p>&nbsp;</p>');
+  });
+
+  it('leaves a paragraph with real text content untouched', () => {
+    const html = buildHtml({...BASE, content: '<p>A real sentence.</p>'}, 0);
+    expect(html).toContain('<p>A real sentence.</p>');
+  });
+
+  it('leaves a paragraph containing only an image untouched', () => {
+    const html = buildHtml({...BASE, content: '<p><img src="https://example.com/x.jpg"></p>'}, 0);
+    expect(html).toContain('img src="https://example.com/x.jpg"');
+  });
+});
+
+
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 
 describe('CommentsSheet', () => {

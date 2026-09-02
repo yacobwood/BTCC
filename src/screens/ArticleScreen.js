@@ -933,7 +933,23 @@ function sanitise(html) {
     .replace(/<style[^>]*>.*?<\/style>/gis, '')
     .replace(/\s+style="[^"]*"/g, '')
     .replace(/\s+style='[^']*'/g, '')
-    .replace(/\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*"/g, '');
+    .replace(/\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*"/g, '')
+    // A genuinely empty paragraph (a stray blank line left in the source
+    // content - e.g. a markdown double-newline that survived conversion,
+    // or one left over from admin/standings-admin.html's Quill editor
+    // before its own equivalent strip was added there) renders as a full
+    // text line's height on top of the CSS margins already collapsing
+    // around it - confirmed live 2026-09-02 to look enormous for just one
+    // blank line. Matches Quill's own <p><br></p> shape and its
+    // formatting-tag-wrapped variant (<p><strong><br></strong></p> etc,
+    // left behind if bold/italic/underline was toggled on when the blank
+    // line was created) - keep in sync with admin's stripEmptyParagraphs().
+    // The \b after the tag-name group is load-bearing, not decorative -
+    // without it "i" (for <i>) matches as a bare prefix of "img", since
+    // [^>]* doesn't care what follows; a real <p><img ...></p> got
+    // silently stripped as if it were an empty italic paragraph until a
+    // test caught it.
+    .replace(/<p>(?:\s|<br\s*\/?>|&nbsp;|<\/?(?:strong|em|u|b|i|span)\b[^>]*>)*<\/p>/gi, '');
 }
 
 // Exported (in addition to the default component) so its source-attribution

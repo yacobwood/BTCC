@@ -1783,6 +1783,30 @@ const GIST_ID   = '7a2af0a9690d24cab8eb608dd4c5ba42';
 const FILE      = 'btcc-standings.json';
 const RTDB_URL  = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
 
+// A blank line Quill leaves behind (pressing Enter twice, or a paste that
+// carried one over) is a genuinely empty paragraph - still <p><br></p> in
+// the simple case (confirmed - saveDigestEdit's own existing "whole
+// content is just this" check below already relied on that exact shape),
+// but can also come out with the <br> nested inside a formatting tag
+// (<p><strong><br></strong></p>) if bold/italic/underline happened to be
+// toggled on when the blank line was created - confirmed 2026-09-02, a
+// CSS-only fix (:has(> br:only-child), only matches the bare case) still
+// left real drafts showing an oversized gap. This strips the paragraph
+// entirely rather than just visually shrinking it, permissively matching
+// through any of those wrapper tags rather than assuming one exact shape.
+// Used both on load (into Quill) and on save, so it fixes what's on
+// screen immediately for existing content and keeps freshly-saved content
+// clean going forward. ArticleScreen.js's sanitise() has the same
+// pattern for already-published content - keep both in sync.
+function stripEmptyParagraphs(html) {
+  // The \b after the tag-name group is load-bearing, not decorative -
+  // without it "i" (for <i>) matches as a bare prefix of "img", since
+  // [^>]* doesn't care what follows; a <p><img ...></p> got silently
+  // stripped as if it were an empty italic paragraph until a test caught
+  // it. Keep in sync with ArticleScreen.js's sanitise().
+  return (html || '').replace(/<p>(\s|<br\s*\/?>|&nbsp;|<\/?(?:strong|em|u|b|i|span)\b[^>]*>)*<\/p>/gi, '');
+}
+
 // ── Tab switching ────────────────────────────────────────────────────────────
 function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -2974,7 +2998,7 @@ function openDigestEdit(id) {
   document.getElementById('digest-edit-status').textContent = '';
   document.getElementById('digest-edit-card').style.display = 'block';
   initDigestQuill();
-  digestQuill.root.innerHTML = p.content || '';
+  digestQuill.root.innerHTML = stripEmptyParagraphs(p.content);
   document.getElementById('digest-edit-card').scrollIntoView({behavior: 'smooth'});
 }
 
@@ -2987,7 +3011,7 @@ async function saveDigestEdit(andPublish = false) {
   const idx = hubNewsPosts.findIndex(p => p.id === id);
   if (idx < 0) return;
   const rawContent = digestQuill ? digestQuill.root.innerHTML : '';
-  const content = rawContent === '<p><br></p>' ? '' : rawContent;
+  const content = rawContent === '<p><br></p>' ? '' : stripEmptyParagraphs(rawContent);
   hubNewsPosts[idx] = {
     ...hubNewsPosts[idx],
     title: document.getElementById('digest-edit-title').value.trim(),
@@ -3067,7 +3091,7 @@ function editArticle(articleId) {
   document.getElementById('hn-edit-id').value = p.id;
   document.getElementById('hn-title').value = p.title || '';
   document.getElementById('hn-desc').value = p.description || '';
-  if (quill) { quill.root.innerHTML = p.content || ''; }
+  if (quill) { quill.root.innerHTML = stripEmptyParagraphs(p.content); }
   loadImagesIntoGrid(p.imageUrl || '', p.images || []);
   renderCategorySelect(p.category || '');
   document.getElementById('hn-source').value = p.source || '';
@@ -3136,7 +3160,7 @@ async function publishArticle() {
   const imagesRaw = document.getElementById('hn-images').value.trim();
   const images = imagesRaw ? imagesRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
   const rawContent = quill ? quill.root.innerHTML : '';
-  const content = rawContent === '<p><br></p>' ? '' : rawContent;
+  const content = rawContent === '<p><br></p>' ? '' : stripEmptyParagraphs(rawContent);
   if (currentArticleStatus === 'draft' && !previewDeviceIds.length) {
     if (!confirm('No preview devices added — this draft will be invisible to everyone. Continue?')) return;
   }
@@ -3325,7 +3349,7 @@ function openExplainerEdit(id) {
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
-  explainerQuill.root.innerHTML = p.content || '';
+  explainerQuill.root.innerHTML = stripEmptyParagraphs(p.content);
   document.getElementById('explainer-edit-card').scrollIntoView({behavior: 'smooth'});
 }
 
@@ -3339,7 +3363,7 @@ async function saveExplainerEdit(andPublish = false) {
   const title = document.getElementById('explainer-edit-title').value.trim();
   if (!title) { alert('Title is required.'); return; }
   const rawContent = explainerQuill ? explainerQuill.root.innerHTML : '';
-  const content = rawContent === '<p><br></p>' ? '' : rawContent;
+  const content = rawContent === '<p><br></p>' ? '' : stripEmptyParagraphs(rawContent);
 
   let article;
   if (isNew) {
