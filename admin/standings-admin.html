@@ -751,6 +751,10 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
     DIGEST
   </button>
+  <button class="tab" onclick="switchTab('explainers',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+    ACADEMY
+  </button>
   <button class="tab" onclick="switchTab('scrapers',this)">
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
     SCRAPERS
@@ -1382,6 +1386,57 @@ select.input { cursor: pointer; }
 
 </div>
 
+<!-- ══════════════════════════════ EXPLAINED ══════ -->
+<!-- Regulation-explainer articles (BTCC Hub's own written pieces, not
+     btcc.net journalism - see data/explainer_articles.json). Deliberately no
+     in-panel authoring UI, unlike Hub News/Digest above - these 48 are
+     pre-written and committed already; this tab is purely the manual review
+     gate: publish one, and it both goes live in the app and fires an
+     explainer_alerts notification (its own toggle in Settings, not the
+     unconditional 'broadcast' topic Hub News/Digest use). -->
+<div id="panel-explainers" class="tab-panel">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div class="section-note" style="margin:0">Regulation-explainer reference articles for the app's Academy section. Review, edit and publish when ready.</div>
+    <button class="btn-sm" onclick="window._explainersLoaded=false;loadExplainers()" style="flex-shrink:0;margin-left:12px">↻ Refresh</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="btn-sm" onclick="newExplainerArticle()" style="border-color:var(--yellow);color:var(--yellow)">+ New Article</button>
+  </div>
+
+  <!-- Inline edit form -->
+  <div class="card" id="explainer-edit-card" style="display:none;margin-bottom:16px">
+    <div class="card-header">
+      <div class="section-label">EDIT ARTICLE</div>
+      <button class="btn-sm" onclick="cancelExplainerEdit()">Cancel</button>
+    </div>
+    <input type="hidden" id="explainer-edit-id">
+    <input type="hidden" id="explainer-edit-is-new">
+    <div class="field-group">
+      <div class="field-label">TITLE</div>
+      <input type="text" id="explainer-edit-title" placeholder="Headline">
+    </div>
+    <div class="field-group">
+      <div class="field-label">DESCRIPTION <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(shown in feed)</span></div>
+      <textarea id="explainer-edit-desc" rows="2" placeholder="One sentence summary…"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">BODY</div>
+      <div id="explainer-content-editor"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn-primary" style="flex:1" onclick="saveExplainerEdit()">SAVE CHANGES</button>
+      <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAndPublishExplainer()">SAVE &amp; PUBLISH</button>
+    </div>
+    <div id="explainer-edit-status" class="status-line"></div>
+  </div>
+
+  <div class="section-label" style="margin:20px 0 12px">STAGED (NOT YET LIVE)</div>
+  <div id="explainers-staged-list"><div class="section-note">Loading…</div></div>
+  <div class="section-label" style="margin:28px 0 12px">PUBLISHED</div>
+  <div id="explainers-published-list"><div class="section-note">Loading…</div></div>
+</div>
+
 <!-- ══════════════════════════════ SCRAPERS ══════ -->
 <div id="panel-scrapers" class="tab-panel">
 
@@ -1725,6 +1780,10 @@ function switchTab(name, el) {
     } else {
       renderDigestList();
     }
+  }
+  if (name === 'explainers' && !window._explainersLoaded) {
+    window._explainersLoaded = true;
+    loadExplainers();
   }
   if (name === 'dashboard') refreshDashboard();
   if (name === 'live' && !window._liveLoaded) {
@@ -3155,6 +3214,217 @@ async function saveHubNews(commitMessage, notifArticle = null) {
   btn.disabled = false; btn.textContent = document.getElementById('hn-edit-id').value ? 'SAVE CHANGES' : 'PUBLISH ARTICLE';
 }
 
+// ── Explained (regulation-explainer articles) ─────────────────────────────────
+const EXPLAINER_PATH = 'data/explainer_articles.json';
+let explainerPosts = [], explainerFileSha = null;
+
+async function loadExplainers() {
+  try {
+    // Repo is public — no auth needed to read, same as loadHubNews.
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${EXPLAINER_PATH}`);
+    if (!r.ok) throw new Error(`GitHub ${r.status}`);
+    const meta = await r.json();
+    explainerFileSha = meta.sha;
+    const bytes = Uint8Array.from(atob(meta.content.replace(/\s/g, '')), c => c.charCodeAt(0));
+    const text = new TextDecoder('utf-8').decode(bytes);
+    const data = JSON.parse(text);
+    explainerPosts = data.posts || [];
+  } catch(e) { console.error('loadExplainers failed:', e); }
+  renderExplainersList();
+}
+
+function renderExplainersList() {
+  const stagedEl = document.getElementById('explainers-staged-list');
+  const publishedEl = document.getElementById('explainers-published-list');
+  const staged = explainerPosts.filter(p => p.status !== 'published').sort((a, b) => (a.order || 0) - (b.order || 0));
+  const published = explainerPosts.filter(p => p.status === 'published').sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
+
+  stagedEl.innerHTML = staged.length ? staged.map(p => `
+    <div class="hub-article-card">
+      <div class="hub-article-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
+          <span class="status-badge badge-dft">◎ STAGED</span>
+        </div>
+        <div class="hub-article-meta">Scheduled ${p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'unscheduled'}${p.description ? ' · ' + htmlEsc(p.description) : ''}</div>
+        <div class="hub-article-actions">
+          <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublishExplainer('${htmlEsc(p.id)}')">Publish Now</button>
+          <button class="btn-sm" onclick="openExplainerEdit('${htmlEsc(p.id)}')">Edit</button>
+          <button class="btn-danger" onclick="deleteExplainer('${htmlEsc(p.id)}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join('') : '<div class="section-note">Nothing staged right now.</div>';
+
+  publishedEl.innerHTML = published.length ? published.map(p => `
+    <div class="hub-article-card">
+      <div class="hub-article-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
+          <span class="status-badge badge-pub">● LIVE</span>
+        </div>
+        <div class="hub-article-meta">${p.pubDate ? new Date(p.pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : ''}</div>
+        <div class="hub-article-actions">
+          <button class="btn-sm" onclick="quickUnpublishExplainer('${htmlEsc(p.id)}')">Unpublish</button>
+          <button class="btn-sm" onclick="openExplainerEdit('${htmlEsc(p.id)}')">Edit</button>
+          <button class="btn-danger" onclick="deleteExplainer('${htmlEsc(p.id)}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join('') : '<div class="section-note">None published yet.</div>';
+}
+
+function slugifyExplainerTitle(title) {
+  return title.toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
+
+function newExplainerArticle() {
+  document.getElementById('explainer-edit-id').value = '';
+  document.getElementById('explainer-edit-is-new').value = 'true';
+  document.getElementById('explainer-edit-title').value = '';
+  document.getElementById('explainer-edit-desc').value = '';
+  document.getElementById('explainer-edit-status').textContent = '';
+  document.getElementById('explainer-edit-card').style.display = 'block';
+  initExplainerQuill();
+  explainerQuill.root.innerHTML = '';
+  document.getElementById('explainer-edit-card').scrollIntoView({behavior: 'smooth'});
+}
+
+function openExplainerEdit(id) {
+  const p = explainerPosts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('explainer-edit-id').value = p.id;
+  document.getElementById('explainer-edit-is-new').value = '';
+  document.getElementById('explainer-edit-title').value = p.title || '';
+  document.getElementById('explainer-edit-desc').value = p.description || '';
+  document.getElementById('explainer-edit-status').textContent = '';
+  document.getElementById('explainer-edit-card').style.display = 'block';
+  initExplainerQuill();
+  explainerQuill.root.innerHTML = p.content || '';
+  document.getElementById('explainer-edit-card').scrollIntoView({behavior: 'smooth'});
+}
+
+function cancelExplainerEdit() {
+  document.getElementById('explainer-edit-card').style.display = 'none';
+}
+
+async function saveExplainerEdit(andPublish = false) {
+  const id = document.getElementById('explainer-edit-id').value;
+  const isNew = document.getElementById('explainer-edit-is-new').value === 'true';
+  const title = document.getElementById('explainer-edit-title').value.trim();
+  if (!title) { alert('Title is required.'); return; }
+  const rawContent = explainerQuill ? explainerQuill.root.innerHTML : '';
+  const content = rawContent === '<p><br></p>' ? '' : rawContent;
+
+  let article;
+  if (isNew) {
+    let newId = 'explainer-' + slugifyExplainerTitle(title);
+    if (explainerPosts.some(p => p.id === newId)) newId += '-' + Date.now().toString(36);
+    const maxOrder = explainerPosts.reduce((m, p) => Math.max(m, p.order || 0), 0);
+    article = {
+      id: newId,
+      title,
+      description: document.getElementById('explainer-edit-desc').value.trim(),
+      content,
+      status: andPublish ? 'published' : 'staged',
+      order: maxOrder + 1,
+      ...(andPublish ? {pubDate: nowIso()} : {}),
+    };
+    explainerPosts.push(article);
+  } else {
+    const idx = explainerPosts.findIndex(p => p.id === id);
+    if (idx < 0) return;
+    explainerPosts[idx] = {
+      ...explainerPosts[idx],
+      title,
+      description: document.getElementById('explainer-edit-desc').value.trim(),
+      content,
+      ...(andPublish ? {status: 'published', pubDate: explainerPosts[idx].pubDate || nowIso()} : {}),
+    };
+    article = explainerPosts[idx];
+  }
+
+  document.getElementById('explainer-edit-status').textContent = 'Saving…';
+  await saveExplainers(
+    andPublish ? 'Publish explainer article: ' + article.title : (isNew ? 'Add explainer article: ' : 'Edit explainer article: ') + article.title,
+    andPublish ? article : null
+  );
+  document.getElementById('explainer-edit-card').style.display = 'none';
+}
+
+function saveAndPublishExplainer() { saveExplainerEdit(true); }
+
+async function quickPublishExplainer(articleId) {
+  const p = explainerPosts.find(x => x.id === articleId);
+  if (!p) return;
+  if (!confirm(`Publish "${p.title}"? This sends a push notification immediately.`)) return;
+  p.status = 'published';
+  p.pubDate = p.pubDate || nowIso();
+  await saveExplainers('Publish explainer article: ' + p.title, p);
+}
+
+async function quickUnpublishExplainer(articleId) {
+  const p = explainerPosts.find(x => x.id === articleId);
+  if (!p || !confirm('Unpublish this article? It will go back to staged.')) return;
+  p.status = 'staged';
+  await saveExplainers('Unpublish explainer article: ' + p.title);
+}
+
+async function deleteExplainer(articleId) {
+  if (!confirm('Delete this article? This cannot be undone.')) return;
+  explainerPosts = explainerPosts.filter(p => p.id !== articleId);
+  await saveExplainers('Delete explainer article ' + articleId);
+}
+
+async function saveExplainers(commitMessage, notifArticle = null) {
+  const tok = getToken();
+  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return; }
+  const content = JSON.stringify({posts: explainerPosts}, null, 2) + '\n';
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  try {
+    // Always fetch the latest SHA first, same reasoning as saveHubNews - avoids
+    // clobbering a concurrent edit made since this page loaded its own copy.
+    const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${EXPLAINER_PATH}`, {headers:{Authorization:'token '+tok}});
+    if (meta.ok) explainerFileSha = (await meta.json()).sha;
+
+    const body = {message: commitMessage, content: encoded};
+    if (explainerFileSha) body.sha = explainerFileSha;
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${EXPLAINER_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (r.ok) {
+      const d = await r.json(); explainerFileSha = d.content?.sha || null;
+      renderExplainersList();
+      if (notifArticle) dispatchExplainerNotif(notifArticle);
+    } else {
+      const e = await r.json();
+      alert(`GitHub error: ${e.message}`);
+    }
+  } catch(e) { alert(`Network error: ${e.message}`); }
+}
+
+async function dispatchExplainerNotif(article) {
+  const tok = getToken();
+  if (!tok) return;
+  try {
+    const inputs = {
+      channel: 'explainer',
+      title: article.title || 'New Academy article',
+      body: article.description || '',
+      data: JSON.stringify({type: 'explainer', id: article.id}),
+      image_url: article.imageUrl || '',
+      // Its own topic, not 'broadcast' - this is the one thing that makes the
+      // Settings "Explained articles" toggle actually do something. See the
+      // topic input added to send-broadcast-notif.yml.
+      topic: 'explainer_alerts',
+    };
+    await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {
+      method: 'POST',
+      headers: {Authorization: 'token ' + tok, 'Content-Type': 'application/json'},
+      body: JSON.stringify({ref: 'main', inputs}),
+    });
+  } catch(e) { console.error('dispatchExplainerNotif failed:', e); }
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function updateDashHealth() {
   const el = document.getElementById('dash-health');
@@ -3381,6 +3651,25 @@ let digestQuill = null;
 function initDigestQuill() {
   if (digestQuill) return;
   digestQuill = new Quill('#digest-content-editor', {
+    theme: 'snow',
+    placeholder: 'Edit article body…',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{'header': 2}, {'header': 3}],
+        [{'list': 'ordered'}, {'list': 'bullet'}],
+        ['link'],
+        ['clean'],
+      ],
+    },
+  });
+}
+
+let explainerQuill = null;
+
+function initExplainerQuill() {
+  if (explainerQuill) return;
+  explainerQuill = new Quill('#explainer-content-editor', {
     theme: 'snow',
     placeholder: 'Edit article body…',
     modules: {

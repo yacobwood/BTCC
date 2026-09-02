@@ -166,6 +166,39 @@ describe('userProfile', () => {
         arrayValue: {values: [{stringValue: '101'}, {stringValue: '102'}]},
       });
     });
+
+    // Mirrors the digestReadIds case above - explainerReadIds (Academy)
+    // added 2026-09-02 alongside digestReadIds (Flying Lap) in
+    // PROFILE_ASYNC_KEYS; without this a first sign-in would silently never
+    // upload the user's Academy read history at all.
+    it('parses explainer_read_ids as an array before uploading', async () => {
+      AsyncStorage.multiGet.mockResolvedValueOnce([
+        ['explainer_read_ids', '["explainer-a","explainer-b"]'],
+      ]);
+
+      await uploadLocalProfile(UID);
+
+      const [, options] = global.fetch.mock.calls[0];
+      const body = JSON.parse(options.body);
+      expect(body.fields.explainerReadIds).toEqual({
+        arrayValue: {values: [{stringValue: 'explainer-a'}, {stringValue: 'explainer-b'}]},
+      });
+    });
+
+    // Regression coverage: use12HourTime (STORAGE_KEYS.setting_12hr_time in
+    // settings.js) was missing from PROFILE_ASYNC_KEYS entirely, so a first
+    // sign-in never uploaded the user's 12hr choice to Firestore at all.
+    it('uploads use12HourTime as a boolean, not the raw AsyncStorage string', async () => {
+      AsyncStorage.multiGet.mockResolvedValueOnce([
+        ['setting_12hr_time', 'true'],
+      ]);
+
+      await uploadLocalProfile(UID);
+
+      const [, options] = global.fetch.mock.calls[0];
+      const body = JSON.parse(options.body);
+      expect(body.fields.use12HourTime).toEqual({booleanValue: true});
+    });
   });
 
   describe('applyProfileToStorage', () => {
@@ -189,8 +222,33 @@ describe('userProfile', () => {
       );
     });
 
+    // Mirrors the digestReadIds case above - without this, a fresh
+    // install/new device could never restore a signed-in user's Academy
+    // read history from Firestore, even after it had synced there from
+    // another device.
+    it('writes explainerReadIds back to AsyncStorage as a JSON array', async () => {
+      await applyProfileToStorage({explainerReadIds: ['explainer-a', 'explainer-b']});
+      expect(AsyncStorage.multiSet).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          ['explainer_read_ids', '["explainer-a","explainer-b"]'],
+        ]),
+      );
+    });
+
     it('does not throw on empty profile', async () => {
       await expect(applyProfileToStorage({})).resolves.toBeUndefined();
+    });
+
+    // Regression coverage: without use12HourTime in PROFILE_ASYNC_KEYS, a
+    // fresh install/new device could never restore the setting from the
+    // user's Firestore profile - it always fell back to the 24hr default.
+    it('writes use12HourTime back to setting_12hr_time', async () => {
+      await applyProfileToStorage({use12HourTime: true});
+      expect(AsyncStorage.multiSet).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          ['setting_12hr_time', 'true'],
+        ]),
+      );
     });
   });
 

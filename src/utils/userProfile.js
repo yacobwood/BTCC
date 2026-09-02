@@ -11,8 +11,10 @@ const COLLECTION = 'users';
 const PROFILE_ASYNC_KEYS = {
   favouriteDrivers:   'favourite_drivers',
   digestReadIds:      'digest_read_ids',
+  explainerReadIds:   'explainer_read_ids',
   unitKm:             'use_km',
   spoilerFree:        'setting_spoiler_free',
+  use12HourTime:      'setting_12hr_time',
   commenterName:      'commenter_name',
   // notification settings
   preRace:            'setting_pre_race',
@@ -223,9 +225,9 @@ export async function uploadLocalProfile(uid) {
         k => PROFILE_ASYNC_KEYS[k] === storageKey,
       );
       if (!profileKey || raw === null) continue;
-      if (profileKey === 'favouriteDrivers' || profileKey === 'digestReadIds') {
+      if (profileKey === 'favouriteDrivers' || profileKey === 'digestReadIds' || profileKey === 'explainerReadIds') {
         try { profile[profileKey] = JSON.parse(raw); } catch {}
-      } else if (profileKey === 'unitKm' || profileKey === 'spoilerFree' || profileKey.startsWith('pre') || profileKey.startsWith('results') || profileKey === 'newsAlerts' || profileKey === 'digestAlerts' || profileKey === 'weekendPreview' || profileKey === 'standingsUpdate' || profileKey === 'podcastAlerts') {
+      } else if (profileKey === 'unitKm' || profileKey === 'spoilerFree' || profileKey === 'use12HourTime' || profileKey.startsWith('pre') || profileKey.startsWith('results') || profileKey === 'newsAlerts' || profileKey === 'digestAlerts' || profileKey === 'weekendPreview' || profileKey === 'standingsUpdate' || profileKey === 'podcastAlerts') {
         profile[profileKey] = raw === 'true';
       } else {
         profile[profileKey] = raw;
@@ -242,7 +244,7 @@ export async function applyProfileToStorage(profile) {
     for (const [profileKey, storageKey] of Object.entries(PROFILE_ASYNC_KEYS)) {
       const val = profile[profileKey];
       if (val === undefined) continue;
-      if (profileKey === 'favouriteDrivers' || profileKey === 'digestReadIds') {
+      if (profileKey === 'favouriteDrivers' || profileKey === 'digestReadIds' || profileKey === 'explainerReadIds') {
         pairs.push([storageKey, JSON.stringify(val)]);
       } else {
         pairs.push([storageKey, String(val)]);

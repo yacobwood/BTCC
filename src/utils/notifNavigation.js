@@ -1,14 +1,16 @@
 import {CommonActions} from '@react-navigation/native';
 import {getSeasonData} from '../assets/seasonData';
 import {markRead} from './digestRead';
+import {markRead as markExplainerRead} from './explainerRead';
 import {Analytics} from './analytics';
 import {requestOpenChat} from './chatBridge';
+import {fetchExplainerArticleById} from '../api/client';
 
 const pagesData = require('../assets/pages.json');
 
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
-const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest']);
+const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest', 'explainer']);
 
 function fetchHubPost(id) {
   return fetch(HUB_NEWS_URL + '?t=' + Date.now())
@@ -176,6 +178,42 @@ export function navigateFromData(navigationRef, data) {
                 routes: [{
                   name: 'News',
                   state: {routes: [{name: 'NewsFeed'}, {name: 'Digests'}], index: 1},
+                }],
+              }),
+            );
+          }
+        })
+        .catch(() => navigationRef.navigate('News'));
+
+    // ── Explainer article ──────────────────────────────────────────
+    // Same shape as the 'digest' branch above (article lives behind its own
+    // list screen in the back stack, ExplainerList here instead of Digests) -
+    // not the 'hub' branch, since these articles are never merged into the
+    // real News feed and shouldn't land the user there on a back-press.
+    } else if (type === 'explainer' && id) {
+      fetchExplainerArticleById(id)
+        .then(article => {
+          if (article) {
+            markExplainerRead(id);
+            navigationRef.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{
+                  name: 'News',
+                  state: {
+                    routes: [{name: 'NewsFeed'}, {name: 'ExplainerList'}, {name: 'Article', params: {article, trafficSource: 'notification'}}],
+                    index: 2,
+                  },
+                }],
+              }),
+            );
+          } else {
+            navigationRef.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{
+                  name: 'News',
+                  state: {routes: [{name: 'NewsFeed'}, {name: 'ExplainerList'}], index: 1},
                 }],
               }),
             );
