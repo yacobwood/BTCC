@@ -969,7 +969,7 @@ Each prefetched URL is built to match **exactly** what its real render site requ
 
 **notifNavigation.js** - Maps notification `data` payloads to navigation actions. Uses `CommonActions.reset()` for all nested screen navigations.
 
-**notifications.js** - Sets up Android notification channels. Requests OS permission. Registers foreground FCM message handler.
+**notifications.js** - Sets up Android notification channels. Requests OS permission. Registers foreground FCM message handler. `setupNotificationChannels()`'s channel `id`s must exactly match every real `data.channel` value a Cloud Function/admin dispatch ever sends (`index.js`'s background handler and this file's own `onForegroundMessage` both pass `data.channel` straight through as the Notifee Android `channelId` with zero validation) - posting to an unregistered channel is a silent, unthrown OS-level no-op (Android's `NotificationChannel` API requirement, API 26+), with nothing in Firebase's own send response to indicate anything went wrong. Confirmed live 2026-09-02/03: `explainer` (Academy articles' channel, set in `admin/standings-admin.html`'s `dispatchExplainerNotif`) was missing from this list entirely - every real Academy notification sent to an Android device had been silently failing to display since the feature launched, discovered only via a manual test notification that Firebase confirmed sending but that never appeared on-device. Fixed by adding the missing channel; worth checking this list stays in sync any time a new `channel`/topic pairing is introduced elsewhere.
 
 **profanityFilter.js** - Checks input text against the `blacklist.json` word list. Used in ChatScreen and BugReportScreen.
 

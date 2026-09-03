@@ -14,6 +14,24 @@ export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'weekend_preview', name: 'Weekend Preview', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'standings', name: 'Standings Update', importance: AndroidImportance.HIGH});
   await notifee.createChannel({id: 'chat_mentions', name: 'Chat Mentions', importance: AndroidImportance.HIGH});
+  // 'explainer' - Academy articles' data.channel value (admin's
+  // dispatchExplainerNotif/send-test-notif.yml), user-facing name kept
+  // as "Academy" to match the 2026-09-02 rename even though the internal
+  // id stayed 'explainer'. Missing entirely until 2026-09-03, found while
+  // debugging a test notification that Firebase confirmed sending
+  // successfully but never appeared on an Android device - both index.js's
+  // background handler and notifications.js's own onForegroundMessage pass
+  // data.channel straight through as the Notifee Android channelId with no
+  // validation, and posting to an unregistered channel is a silent,
+  // unthrown OS-level no-op (Android's NotificationChannel API requirement,
+  // API 26+) - no crash, no rejected promise, nothing in Firebase's own
+  // send response to indicate anything went wrong. This means every real
+  // Academy article notification sent to an Android device (via the live
+  // explainer_alerts topic, not just this test path) has been silently
+  // failing to display since the feature launched, not just the test-send
+  // button - a client-app fix, so it only takes effect for a device
+  // running a build made after this change, not retroactively.
+  await notifee.createChannel({id: 'explainer', name: 'Academy Articles', importance: AndroidImportance.HIGH});
   // Delete and recreate to force importance upgrade on existing installs
   await notifee.deleteChannel('podcasts');
   await notifee.createChannel({id: 'podcasts', name: 'Podcast Alerts', importance: AndroidImportance.HIGH});

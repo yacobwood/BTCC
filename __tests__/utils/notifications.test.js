@@ -31,9 +31,24 @@ jest.mock('@react-native-firebase/database', () => {
 
 // ── setupNotificationChannels ──────────────────────────────────────────────────
 describe('setupNotificationChannels', () => {
-  it('creates all 10 notification channels', async () => {
+  it('creates all 11 notification channels', async () => {
     await setupNotificationChannels();
-    expect(notifee.createChannel).toHaveBeenCalledTimes(10);
+    expect(notifee.createChannel).toHaveBeenCalledTimes(11);
+  });
+
+  // Regression coverage: found missing entirely 2026-09-03 while debugging
+  // a test notification Firebase confirmed sending but that never appeared
+  // on Android - index.js's background handler passes data.channel
+  // straight through as the Notifee channelId with no validation, and
+  // posting to an unregistered channel is a silent OS-level no-op (no
+  // crash, no rejected promise) - so every real Academy article
+  // notification had been failing to display the same way, not just this
+  // test path.
+  it('creates channel with id "explainer" (Academy articles) at HIGH importance', async () => {
+    await setupNotificationChannels();
+    expect(notifee.createChannel).toHaveBeenCalledWith(
+      expect.objectContaining({id: 'explainer', importance: AndroidImportance.HIGH}),
+    );
   });
 
   it('creates channel with id "chat_mentions" at HIGH importance', async () => {
@@ -57,7 +72,7 @@ describe('setupNotificationChannels', () => {
     );
   });
 
-  const HIGH_CHANNELS = ['news', 'race', 'qualifying', 'free_practice', 'results', 'weekend_preview', 'standings'];
+  const HIGH_CHANNELS = ['news', 'race', 'qualifying', 'free_practice', 'results', 'weekend_preview', 'standings', 'explainer'];
   HIGH_CHANNELS.forEach(id => {
     it(`channel "${id}" has HIGH importance`, async () => {
       await setupNotificationChannels();
