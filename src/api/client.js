@@ -424,9 +424,24 @@ const EXPLAINER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes, matches fetchHubPos
 // running tests. Never ship this as true; it is not read by any test.
 const PREVIEW_ALL_EXPLAINERS_LOCALLY = false;
 
-function mapExplainerPosts(data, includeAllStatuses = false) {
+// uid mirrors mapHubPosts' own draft-preview gate exactly (same shape,
+// same Firebase Auth uid check) - added 2026-09-03 so an admin can publish
+// an Academy article visible only on their own device (status: 'draft' +
+// previewDeviceIds: [uid]) before a real Save & Publish, the same way hub
+// posts already could. includeAllStatuses (the local-preview debug switch
+// below) bypasses this entirely, same as it already bypassed the plain
+// published-only filter.
+function mapExplainerPosts(data, uid, includeAllStatuses = false) {
   return (data.posts || [])
-    .filter(p => includeAllStatuses || p.status === 'published')
+    .filter(p => {
+      if (includeAllStatuses) return true;
+      if (p.status === 'published') return true;
+      if (p.status === 'draft') {
+        const ids = Array.isArray(p.previewDeviceIds) ? p.previewDeviceIds : [];
+        return uid && ids.includes(uid);
+      }
+      return false;
+    })
     .map(p => ({
       id: p.id,
       title: p.title || '',
@@ -449,8 +464,9 @@ function mapExplainerPosts(data, includeAllStatuses = false) {
 }
 
 export async function fetchExplainerArticles() {
+  const uid = auth().currentUser?.uid ?? null;
   if (PREVIEW_ALL_EXPLAINERS_LOCALLY) {
-    return mapExplainerPosts(require('../../data/explainer_articles.json'), true);
+    return mapExplainerPosts(require('../../data/explainer_articles.json'), uid, true);
   }
   try {
     const cached = await cacheRead(EXPLAINER_CACHE_KEY, EXPLAINER_CACHE_MAX_AGE);
@@ -467,10 +483,10 @@ export async function fetchExplainerArticles() {
       data = await res.json();
       cacheWrite(EXPLAINER_CACHE_KEY, data).catch(() => {});
     }
-    return mapExplainerPosts(data);
+    return mapExplainerPosts(data, uid);
   } catch {
     const stale = await cacheRead(EXPLAINER_CACHE_KEY);
-    if (stale) return mapExplainerPosts(stale);
+    if (stale) return mapExplainerPosts(stale, uid);
     return [];
   }
 }

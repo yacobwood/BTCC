@@ -649,6 +649,33 @@ describe('fetchExplainerArticles', () => {
     const url = global.fetch.mock.calls[0][0];
     expect(url).toMatch(/[?&]t=\d+/);
   });
+
+  // Mirrors mapHubPosts' own draft-preview gate exactly - added 2026-09-03
+  // so an admin can publish an Academy article visible only on their own
+  // device before a real Save & Publish. jest.setup.js's Firebase Auth mock
+  // resolves to uid 'test-uid-123', the same one fetchHubPosts' own draft
+  // tests already use.
+  it('returns a draft article whose previewDeviceIds includes the current uid', async () => {
+    const draft = {id: 'explainer-brakes', title: 'Brakes (preview)', status: 'draft', previewDeviceIds: ['test-uid-123'], source: 'btcc hub'};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [draft]})});
+    const result = await fetchExplainerArticles();
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('explainer-brakes');
+  });
+
+  it('does not return a draft article previewed to a different device', async () => {
+    const draftOther = {id: 'explainer-brakes', title: 'Brakes (preview)', status: 'draft', previewDeviceIds: ['someone-elses-uid'], source: 'btcc hub'};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [draftOther]})});
+    const result = await fetchExplainerArticles();
+    expect(result).toEqual([]);
+  });
+
+  it('does not return a draft article with no previewDeviceIds at all', async () => {
+    const draftNoIds = {id: 'explainer-brakes', title: 'Brakes (preview)', status: 'draft', source: 'btcc hub'};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [draftNoIds]})});
+    const result = await fetchExplainerArticles();
+    expect(result).toEqual([]);
+  });
 });
 
 describe('fetchExplainerArticleById', () => {

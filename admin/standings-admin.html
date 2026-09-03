@@ -1483,6 +1483,7 @@ select.input { cursor: pointer; }
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn-primary" style="flex:1" onclick="saveExplainerEdit()">SAVE CHANGES</button>
+      <button class="btn-sm" style="border-color:var(--blue);color:var(--blue)" onclick="previewExplainerOnMyDevice()" title="Visible only on your own device (Settings → User ID) - never the real News tab for anyone else">PREVIEW ON MY DEVICE</button>
       <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAndPublishExplainer()">SAVE &amp; PUBLISH</button>
     </div>
     <div id="explainer-edit-status" class="status-line"></div>
@@ -3364,21 +3365,29 @@ function renderExplainersList() {
   const staged = explainerPosts.filter(p => p.status !== 'published').sort((a, b) => (a.order || 0) - (b.order || 0));
   const published = explainerPosts.filter(p => p.status === 'published').sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
 
-  stagedEl.innerHTML = staged.length ? staged.map(p => `
+  stagedEl.innerHTML = staged.length ? staged.map(p => {
+    // status:'draft' + previewDeviceIds is the "Preview on my device" state
+    // (mirrors mapHubPosts' own gate) - distinct badge/meta text from a
+    // plain never-touched staged article, so it's obvious from this list
+    // alone that it's already live on someone's device, just not the real
+    // News tab for everyone.
+    const isPreview = p.status === 'draft' && p.previewDeviceIds?.length;
+    return `
     <div class="hub-article-card">
       <div class="hub-article-body">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
           <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
-          <span class="status-badge badge-dft">◎ STAGED</span>
+          <span class="status-badge badge-dft">${isPreview ? '◎ PREVIEW (DEVICE)' : '◎ STAGED'}</span>
         </div>
-        <div class="hub-article-meta">Scheduled ${p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'unscheduled'}${p.description ? ' · ' + htmlEsc(p.description) : ''}</div>
+        <div class="hub-article-meta">${isPreview ? `Visible only on ${p.previewDeviceIds.length} device${p.previewDeviceIds.length > 1 ? 's' : ''} - not the real News tab` : 'Scheduled ' + (p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'unscheduled')}${p.description ? ' · ' + htmlEsc(p.description) : ''}</div>
         <div class="hub-article-actions">
           <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublishExplainer('${htmlEsc(p.id)}')">Publish Now</button>
           <button class="btn-sm" onclick="openExplainerEdit('${htmlEsc(p.id)}')">Edit</button>
           <button class="btn-danger" onclick="deleteExplainer('${htmlEsc(p.id)}')">Delete</button>
         </div>
       </div>
-    </div>`).join('') : '<div class="section-note">Nothing staged right now.</div>';
+    </div>`;
+  }).join('') : '<div class="section-note">Nothing staged right now.</div>';
 
   publishedEl.innerHTML = published.length ? published.map(p => `
     <div class="hub-article-card">
@@ -3447,15 +3456,38 @@ function cancelExplainerEdit() {
   document.getElementById('explainer-edit-card').style.display = 'none';
 }
 
-async function saveExplainerEdit(andPublish = false) {
+// mode: 'save' (plain draft/edit, default), 'publish' (real Save & Publish,
+// fires the broadcast notification), or 'preview' (visible only on this
+// admin's own device - status:'draft' + previewDeviceIds:[uid], the same
+// gate mapHubPosts already has for hub posts, mirrored into
+// mapExplainerPosts 2026-09-03). Kept as one function with a mode rather
+// than three separate near-duplicates so the shared form-reading/article-
+// building logic can't drift between them the way other things already
+// have this session.
+async function saveExplainerEdit(mode = 'save') {
   const id = document.getElementById('explainer-edit-id').value;
   const isNew = document.getElementById('explainer-edit-is-new').value === 'true';
   const title = document.getElementById('explainer-edit-title').value.trim();
   if (!title) { alert('Title is required.'); return; }
+
+  let previewUid = null;
+  if (mode === 'preview') {
+    previewUid = getMyUid();
+    if (!previewUid) return;
+    // A preview-on-my-device save flips status to 'draft', which would
+    // silently pull an already-live article off the real News tab for
+    // everyone else - confirm rather than let one misclick do that.
+    const existing = !isNew && explainerPosts.find(p => p.id === id);
+    if (existing?.status === 'published' && !confirm('This article is already published. "Preview on my device" will take it off the real News tab for everyone else and make it visible only on your device. Continue?')) return;
+  }
+
   const rawContent = explainerQuill ? explainerQuill.root.innerHTML : '';
   const content = rawContent === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(rawContent), explainerEditTables);
   const notifTitleOverride = document.getElementById('explainer-notif-title').value.trim();
   const notifBodyOverride = document.getElementById('explainer-notif-body').value.trim();
+  const statusFields = mode === 'publish' ? {status: 'published'}
+    : mode === 'preview' ? {status: 'draft', previewDeviceIds: [previewUid]}
+    : {};
 
   let article;
   if (isNew) {
@@ -3466,9 +3498,10 @@ async function saveExplainerEdit(andPublish = false) {
       id: newId,
       title,
       content,
-      status: andPublish ? 'published' : 'staged',
+      status: 'staged',
       order: maxOrder + 1,
-      ...(andPublish ? {pubDate: nowIso()} : {}),
+      ...statusFields,
+      ...(mode === 'publish' ? {pubDate: nowIso()} : {}),
       ...(notifTitleOverride ? {notifTitleOverride} : {}),
       ...(notifBodyOverride ? {notifBodyOverride} : {}),
     };
@@ -3480,8 +3513,17 @@ async function saveExplainerEdit(andPublish = false) {
       ...explainerPosts[idx],
       title,
       content,
-      ...(andPublish ? {status: 'published', pubDate: explainerPosts[idx].pubDate || nowIso()} : {}),
+      ...statusFields,
+      ...(mode === 'publish' ? {pubDate: explainerPosts[idx].pubDate || nowIso()} : {}),
     };
+    // Only an actual Save & Publish clears a stale previewDeviceIds - a
+    // plain Save Changes on an already-previewing article must leave its
+    // preview state alone (still visible on that device), not silently
+    // un-preview it just because the admin tweaked the title. Publishing
+    // for real is the one case where leaving the array behind would be
+    // actively wrong: status becomes 'published', so previewDeviceIds
+    // would otherwise just sit there stale and meaningless.
+    if (mode === 'publish') delete explainerPosts[idx].previewDeviceIds;
     // Set/clear independently of the spread above - a blank field means
     // "remove the override", not "leave whatever was saved before", which
     // a conditional spread alone can't express (it can only add a key, not
@@ -3503,21 +3545,25 @@ async function saveExplainerEdit(andPublish = false) {
   // being drafted-and-saved-for-later, but doesn't linger indefinitely and
   // get silently reused on some unrelated future re-save/republish.
   let notifArticle = null;
-  if (andPublish) {
+  if (mode === 'publish') {
     notifArticle = {...article, title: article.notifTitleOverride || article.title, description: article.notifBodyOverride || ''};
     delete article.notifTitleOverride;
     delete article.notifBodyOverride;
     document.getElementById('explainer-notif-title').value = '';
     document.getElementById('explainer-notif-body').value = '';
   }
-  await saveExplainers(
-    andPublish ? 'Publish explainer article: ' + article.title : (isNew ? 'Add explainer article: ' : 'Edit explainer article: ') + article.title,
-    notifArticle
-  );
+  const commitMessage = mode === 'publish' ? 'Publish explainer article: ' + article.title
+    : mode === 'preview' ? 'Preview explainer article on device: ' + article.title
+    : (isNew ? 'Add explainer article: ' : 'Edit explainer article: ') + article.title;
+  // 'preview' never dispatches a real notification - the existing "Send
+  // test notification to my device" button already covers verifying that
+  // separately, safely, as many times as needed.
+  await saveExplainers(commitMessage, notifArticle);
   document.getElementById('explainer-edit-card').style.display = 'none';
 }
 
-function saveAndPublishExplainer() { saveExplainerEdit(true); }
+function saveAndPublishExplainer() { saveExplainerEdit('publish'); }
+function previewExplainerOnMyDevice() { saveExplainerEdit('preview'); }
 
 async function quickPublishExplainer(articleId) {
   const p = explainerPosts.find(x => x.id === articleId);
@@ -3613,6 +3659,29 @@ function changeMyDeviceToken() {
   if (!entered) return localStorage.getItem(MY_DEVICE_TOKEN_KEY);
   const trimmed = entered.trim();
   localStorage.setItem(MY_DEVICE_TOKEN_KEY, trimmed);
+  return trimmed;
+}
+
+// Firebase Auth UID, not the FCM device token above - a completely
+// different identifier used for a completely different purpose (matching
+// previewDeviceIds on a 'draft' article, mapExplainerPosts in client.js -
+// same gate mapHubPosts already had for hub posts). Both are copyable from
+// the same app screen (Settings → "Device Token" row vs "User ID" row), so
+// this deliberately mirrors getMyDeviceToken/changeMyDeviceToken's own
+// cached-prompt-once pattern rather than inventing a new one.
+const MY_UID_KEY = 'btcc_my_uid';
+
+function getMyUid() {
+  let saved = localStorage.getItem(MY_UID_KEY);
+  if (!saved) saved = changeMyUid();
+  return saved;
+}
+
+function changeMyUid() {
+  const entered = prompt('Paste your User ID (open the app → Settings → tap "User ID" to copy it):');
+  if (!entered) return localStorage.getItem(MY_UID_KEY);
+  const trimmed = entered.trim();
+  localStorage.setItem(MY_UID_KEY, trimmed);
   return trimmed;
 }
 
