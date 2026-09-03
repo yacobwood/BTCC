@@ -14,7 +14,9 @@
       "status": "staged",
       "scheduledDate": "2026-10-13",
       "pubDate": null,
-      "order": 1
+      "order": 1,
+      "notifTitleOverride": "Introducing BTCC Academy",
+      "notifBodyOverride": "Your guide to the rules behind the racing - new explainer articles added regularly"
     },
     {
       "id": "explainer-how-points-are-scored",
