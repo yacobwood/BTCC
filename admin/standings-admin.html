@@ -1478,12 +1478,12 @@ select.input { cursor: pointer; }
         <a href="#" onclick="changeMyDeviceToken();return false" style="font-size:11px;color:var(--text-sec);margin-left:auto">change device</a>
       </div>
       <div class="section-note" style="margin-top:4px">
-        Sends the title/body above (with your override, if filled in) to just your own phone via send-test-notif.yml - never the real explainer_alerts topic, so this is safe to use as many times as you like before an actual Save &amp; Publish. Needs your device token once (Settings → tap "Device Token" in the app to copy it).
+        Sends the title/body above (with your override, if filled in) to just your own phone via send-test-notif.yml - never the real explainer_alerts topic, so this is safe to use as many times as you like before an actual Save &amp; Publish. Needs your device token once (Settings → tap "Device Token" in the app to copy it). "Preview on my device" below sends this same test notification automatically, on top of making the article itself visible on your device - use this button on its own only when you want just the notification, with no change to what's saved.
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn-primary" style="flex:1" onclick="saveExplainerEdit()">SAVE CHANGES</button>
-      <button class="btn-sm" style="border-color:var(--blue);color:var(--blue)" onclick="previewExplainerOnMyDevice()" title="Visible only on your own device (Settings → User ID) - never the real News tab for anyone else">PREVIEW ON MY DEVICE</button>
+      <button class="btn-sm" style="border-color:var(--blue);color:var(--blue)" onclick="previewExplainerOnMyDevice()" title="Visible only on your own device (Settings → User ID) - never the real News tab for anyone else. Also sends you a test notification, same as a real Save &amp; Publish would.">PREVIEW ON MY DEVICE</button>
       <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAndPublishExplainer()">SAVE &amp; PUBLISH</button>
     </div>
     <div id="explainer-edit-status" class="status-line"></div>
@@ -3555,10 +3555,21 @@ async function saveExplainerEdit(mode = 'save') {
   const commitMessage = mode === 'publish' ? 'Publish explainer article: ' + article.title
     : mode === 'preview' ? 'Preview explainer article on device: ' + article.title
     : (isNew ? 'Add explainer article: ' : 'Edit explainer article: ') + article.title;
-  // 'preview' never dispatches a real notification - the existing "Send
-  // test notification to my device" button already covers verifying that
-  // separately, safely, as many times as needed.
   await saveExplainers(commitMessage, notifArticle);
+  // 'preview' fires the same test notification the standalone "Send test
+  // notification" button does - to your own device token only, via
+  // send-test-notif.yml, never the real explainer_alerts topic - so
+  // clicking Preview gives the same experience a real Save & Publish gives
+  // everyone else: the article shows up AND a notification arrives, not
+  // just the former. Fires on every preview save, same as a real publish
+  // fires on every publish.
+  if (mode === 'preview') {
+    await dispatchTestExplainerNotif(
+      article.notifTitleOverride || article.title,
+      article.notifBodyOverride || '',
+      article.id
+    );
+  }
   document.getElementById('explainer-edit-card').style.display = 'none';
 }
 
@@ -3685,12 +3696,38 @@ function changeMyUid() {
   return trimmed;
 }
 
-async function sendTestExplainerNotif() {
+// Shared by sendTestExplainerNotif (explicit button) and saveExplainerEdit's
+// 'preview' mode (added 2026-09-03 - a user testing "Preview on my device"
+// expects the same experience a real Save & Publish gives everyone else:
+// the article shows up AND a notification arrives, not just the former).
+// Both send via send-test-notif.yml to one cached device token, never the
+// real explainer_alerts topic - safe to fire on every preview save, exactly
+// like a real publish fires on every publish.
+async function dispatchTestExplainerNotif(title, body, articleId) {
   const tok = getToken();
-  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return; }
+  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return false; }
   const deviceToken = getMyDeviceToken();
-  if (!deviceToken) return;
+  if (!deviceToken) return false;
+  try {
+    const inputs = {
+      channel: 'explainer',
+      title,
+      body,
+      device_token: deviceToken,
+      data: JSON.stringify({type: 'explainer', id: articleId}),
+    };
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
+      method: 'POST',
+      headers: {Authorization: 'token ' + tok, 'Content-Type': 'application/json'},
+      body: JSON.stringify({ref: 'main', inputs}),
+    });
+    return r.status === 204;
+  } catch {
+    return false;
+  }
+}
 
+async function sendTestExplainerNotif() {
   const title = document.getElementById('explainer-edit-title').value.trim();
   if (!title) { alert('Title is required.'); return; }
   const notifTitleOverride = document.getElementById('explainer-notif-title').value.trim();
@@ -3699,23 +3736,8 @@ async function sendTestExplainerNotif() {
 
   const statusEl = document.getElementById('explainer-test-notif-status');
   statusEl.textContent = 'Sending…';
-  try {
-    const inputs = {
-      channel: 'explainer',
-      title: notifTitleOverride || title,
-      body: notifBodyOverride,
-      device_token: deviceToken,
-      data: JSON.stringify({type: 'explainer', id: testId}),
-    };
-    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
-      method: 'POST',
-      headers: {Authorization: 'token ' + tok, 'Content-Type': 'application/json'},
-      body: JSON.stringify({ref: 'main', inputs}),
-    });
-    statusEl.textContent = r.status === 204 ? '✓ Sent - check your phone' : 'Failed to dispatch (' + r.status + ')';
-  } catch(e) {
-    statusEl.textContent = 'Error: ' + e.message;
-  }
+  const ok = await dispatchTestExplainerNotif(notifTitleOverride || title, notifBodyOverride, testId);
+  statusEl.textContent = ok ? '✓ Sent - check your phone' : 'Failed to dispatch';
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
