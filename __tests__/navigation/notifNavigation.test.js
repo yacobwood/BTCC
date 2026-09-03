@@ -20,10 +20,24 @@ jest.mock('../../src/utils/chatBridge', () => ({
   requestOpenChat: jest.fn(),
 }));
 
+jest.mock('../../src/api/client', () => ({
+  fetchExplainerArticleById: jest.fn(),
+}));
+
 import {navigateFromData, handleNotificationOpen, navigateToNewToBtcc} from '../../src/utils/notifNavigation';
 import {getSeasonData} from '../../src/assets/seasonData';
 import {Analytics} from '../../src/utils/analytics';
 import {requestOpenChat} from '../../src/utils/chatBridge';
+import {fetchExplainerArticleById} from '../../src/api/client';
+
+// Default resolution so every pre-existing synchronous-only test (checking
+// state before the fetch settles, never awaiting it) still gets a real
+// Promise to call .then/.catch on, not undefined - only tests that actually
+// care about the resolved value override this with mockResolvedValueOnce.
+beforeEach(() => {
+  fetchExplainerArticleById.mockReset();
+  fetchExplainerArticleById.mockResolvedValue(null);
+});
 
 // A sample round object matching the shape stored in season data
 const MOCK_ROUND = {
@@ -246,6 +260,25 @@ describe('navigateFromData', () => {
 
       expect(ref.navigate).not.toHaveBeenCalled();
       expect(ref.dispatch).not.toHaveBeenCalled();
+    });
+
+    // Regression coverage: found live 2026-09-04 - a notification tapped
+    // before raw.githubusercontent.com finished propagating resolved to
+    // null here (correctly - there was genuinely nothing to find yet) and
+    // fell back to the plain list with no way to ever pick the article up
+    // automatically once it did appear. pendingArticleId on the fallback
+    // route is what ExplainerListScreen.js uses to keep quietly checking in
+    // the background instead of leaving that entirely to a manual refresh.
+    it('falls back to the list WITH pendingArticleId when the article is not found yet', async () => {
+      fetchExplainerArticleById.mockResolvedValueOnce(null);
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'explainer', id: 'explainer-engine-rules'});
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(ref.dispatch).toHaveBeenCalledWith(
+        resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'ExplainerList', params: {pendingArticleId: 'explainer-engine-rules'}}])),
+      );
     });
   });
 

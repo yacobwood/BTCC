@@ -208,12 +208,23 @@ export function navigateFromData(navigationRef, data) {
               }),
             );
           } else {
+            // pendingArticleId (not just landing on the plain list) - added
+            // 2026-09-04. fetchExplainerArticleById already retries a few
+            // times over a few seconds (see api/client.js) to absorb small
+            // CDN-edge inconsistency, but a live run the same day showed
+            // raw.githubusercontent.com's actual propagation tail can run
+            // well past 2 minutes on occasion - far more than any bounded
+            // retry here should block navigation for. ExplainerListScreen
+            // picks this param up and keeps quietly checking in the
+            // background for up to 2 more minutes, auto-opening the article
+            // the moment it's actually there instead of leaving the user to
+            // discover it only via a manual pull-to-refresh.
             navigationRef.dispatch(
               CommonActions.reset({
                 index: 0,
                 routes: [{
                   name: 'News',
-                  state: {routes: [{name: 'NewsFeed'}, {name: 'ExplainerList'}], index: 1},
+                  state: {routes: [{name: 'NewsFeed'}, {name: 'ExplainerList', params: {pendingArticleId: id}}], index: 1},
                 }],
               }),
             );

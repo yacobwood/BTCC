@@ -5,6 +5,7 @@ import {renderWithProviders, makeNav} from './testUtils';
 
 jest.mock('../../src/api/client', () => ({
   fetchExplainerArticles: jest.fn(),
+  fetchExplainerArticleById: jest.fn(),
 }));
 
 jest.mock('../../src/utils/explainerRead', () => ({
@@ -13,7 +14,7 @@ jest.mock('../../src/utils/explainerRead', () => ({
   markAllRead: jest.fn(() => Promise.resolve()),
 }));
 
-const {fetchExplainerArticles} = require('../../src/api/client');
+const {fetchExplainerArticles, fetchExplainerArticleById} = require('../../src/api/client');
 const {getReadIds, markRead, markAllRead} = require('../../src/utils/explainerRead');
 const nav = makeNav();
 
@@ -31,13 +32,14 @@ const ARTICLE = {
 beforeEach(() => {
   jest.clearAllMocks();
   fetchExplainerArticles.mockResolvedValue([ARTICLE]);
+  fetchExplainerArticleById.mockResolvedValue(null);
   getReadIds.mockResolvedValue(new Set());
   markRead.mockResolvedValue(undefined);
   markAllRead.mockResolvedValue(undefined);
 });
 
-function renderScreen() {
-  return renderWithProviders(<ExplainerListScreen navigation={nav} />);
+function renderScreen(route) {
+  return renderWithProviders(<ExplainerListScreen navigation={nav} route={route} />);
 }
 
 describe('ExplainerListScreen', () => {
@@ -183,5 +185,67 @@ describe('ExplainerListScreen', () => {
     getReadIds.mockClear();
     await act(async () => { focusHandler(); });
     expect(getReadIds).toHaveBeenCalled();
+  });
+});
+
+// Regression coverage: found live 2026-09-04 - a notification tapped before
+// raw.githubusercontent.com finished propagating (fetchExplainerArticleById's
+// own short built-in retry, see api/client.test.js, wasn't enough on a run
+// that took over 4 minutes) landed the user here via notifNavigation.js's
+// fallback with nothing further ever checking again - a manual pull-to-
+// refresh always found the article, proving the data layer was fine and
+// this screen just never rechecked on its own after the one initial miss.
+describe('ExplainerListScreen pendingArticleId polling', () => {
+  const PENDING = {id: 'explainer-engine-rules', title: 'The two-engine season'};
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it('does nothing extra when there is no pendingArticleId', async () => {
+    renderScreen({params: {}});
+    await act(async () => {});
+    fetchExplainerArticleById.mockClear();
+    await act(async () => { jest.advanceTimersByTime(60000); });
+    expect(fetchExplainerArticleById).not.toHaveBeenCalled();
+  });
+
+  it('polls in the background and auto-opens the article once it appears', async () => {
+    fetchExplainerArticleById
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(PENDING);
+    renderScreen({params: {pendingArticleId: PENDING.id}});
+    await act(async () => {});
+
+    await act(async () => { jest.advanceTimersByTime(15000); }); // attempt 1: null
+    await act(async () => { jest.advanceTimersByTime(15000); }); // attempt 2: null
+    expect(nav.navigate).not.toHaveBeenCalledWith('Article', expect.anything());
+
+    await act(async () => { jest.advanceTimersByTime(15000); }); // attempt 3: found
+    expect(fetchExplainerArticleById).toHaveBeenCalledWith(PENDING.id, true, {retries: 0});
+    expect(nav.navigate).toHaveBeenCalledWith('Article', {article: PENDING, trafficSource: 'notification'});
+    expect(markRead).toHaveBeenCalledWith(PENDING.id);
+  });
+
+  it('stops polling after the bounded window if the article never appears', async () => {
+    renderScreen({params: {pendingArticleId: PENDING.id}}); // fetchExplainerArticleById resolves null every time (default mock)
+    await act(async () => {});
+
+    await act(async () => { jest.advanceTimersByTime(8 * 15000); }); // exhausts all 8 attempts
+    expect(fetchExplainerArticleById).toHaveBeenCalledTimes(8);
+    expect(nav.navigate).not.toHaveBeenCalledWith('Article', expect.anything());
+
+    fetchExplainerArticleById.mockClear();
+    await act(async () => { jest.advanceTimersByTime(60000); }); // well past the window
+    expect(fetchExplainerArticleById).not.toHaveBeenCalled(); // genuinely stopped, not still ticking
+  });
+
+  it('does not start a second poll loop on a re-render with the same pendingArticleId', async () => {
+    const {rerender} = renderScreen({params: {pendingArticleId: PENDING.id}});
+    await act(async () => {});
+    fetchExplainerArticleById.mockClear();
+    rerender(<ExplainerListScreen navigation={nav} route={{params: {pendingArticleId: PENDING.id}}} />);
+    await act(async () => { jest.advanceTimersByTime(15000); });
+    expect(fetchExplainerArticleById).toHaveBeenCalledTimes(1); // one loop's tick, not two overlapping loops
   });
 });

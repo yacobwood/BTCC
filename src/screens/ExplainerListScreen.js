@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchExplainerArticles} from '../api/client';
+import {fetchExplainerArticles, fetchExplainerArticleById} from '../api/client';
 import CachedImage from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -40,12 +40,22 @@ import {getReadIds, markRead, markAllRead} from '../utils/explainerRead';
 // meta-commentary inside an unrelated regulation topic. Styled to match
 // PartnersScreen.js's own identical `intro` convention - the only other
 // screen with this exact pattern.
-export default function ExplainerListScreen({navigation}) {
+
+// How long/often to keep quietly re-checking for a notification's article
+// after it wasn't found on the first try (see the pendingArticleId effect
+// below) - module-level so tests can reach in without threading new props
+// through the component just for this.
+const PENDING_POLL_INTERVAL_MS = 15000;
+const PENDING_POLL_MAX_ATTEMPTS = 8; // 8 * 15s = 2 minutes
+
+export default function ExplainerListScreen({navigation, route}) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [readIds, setReadIds] = useState(new Set());
+  const pendingArticleId = route?.params?.pendingArticleId;
+  const pendingHandledRef = useRef(false);
 
   const load = useCallback(async (forceRefresh = false) => {
     setError(null);
@@ -81,6 +91,44 @@ export default function ExplainerListScreen({navigation}) {
     });
     return unsub;
   }, [navigation, load]);
+
+  // pendingArticleId (set by notifNavigation.js when a tapped notification's
+  // article wasn't fetchable yet) - added 2026-09-04. fetchExplainerArticleById
+  // already retries a few times over a few seconds to absorb small CDN-edge
+  // inconsistency between raw.githubusercontent.com's own Fastly edges, but
+  // a live run the same day showed the actual propagation tail can run well
+  // past 2 minutes on occasion (one commit took 4m13s) - far too long to
+  // block navigation for, but also too long to just give up on. A manual
+  // pull-to-refresh always found the article the moment it was actually
+  // there, proving the data layer was never the problem - nothing was
+  // automatically checking again after the one initial miss. This keeps
+  // quietly polling in the background for up to PENDING_POLL_MAX_ATTEMPTS *
+  // PENDING_POLL_INTERVAL_MS and auto-opens the article the instant it
+  // appears, same as if the original tap had resolved immediately. Silently
+  // stops after that window - the article still shows up normally on the
+  // next manual refresh or re-focus, exactly as before this existed.
+  useEffect(() => {
+    if (!pendingArticleId || pendingHandledRef.current) return undefined;
+    pendingHandledRef.current = true;
+    let cancelled = false;
+    let attempts = 0;
+    const intervalId = setInterval(async () => {
+      attempts += 1;
+      // retries: 0 - each poll tick here already IS a retry, spaced far
+      // further apart than fetchExplainerArticleById's own built-in ones;
+      // stacking both would just slow down every single tick for no benefit.
+      const article = await fetchExplainerArticleById(pendingArticleId, true, {retries: 0});
+      if (cancelled) return;
+      if (article) {
+        clearInterval(intervalId);
+        markRead(article.id).then(() => setReadIds(prev => new Set([...prev, String(article.id)])));
+        navigation.navigate('Article', {article, trafficSource: 'notification'});
+      } else if (attempts >= PENDING_POLL_MAX_ATTEMPTS) {
+        clearInterval(intervalId);
+      }
+    }, PENDING_POLL_INTERVAL_MS);
+    return () => { cancelled = true; clearInterval(intervalId); };
+  }, [pendingArticleId, navigation]);
 
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('explainers');
