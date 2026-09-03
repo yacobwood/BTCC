@@ -166,6 +166,29 @@ describe('NewsScreen', () => {
         expect(getByText('Retry')).toBeTruthy();
       });
     });
+
+    // Regression coverage: found live 2026-09-03 debugging a user report of
+    // a broken-looking News tab on slow wifi. fetchArticlesPage used to
+    // silently swallow a genuine network failure into an empty array
+    // (client.test.js covers that half of the fix) - the consequence here
+    // was that a real articles failure, while fetchHubPosts (a separate,
+    // independently-cached call) succeeded, left the screen rendering only
+    // the Flying Lap banner above a permanently blank feed: no error, no
+    // Retry button, nothing to explain it. Confirms the fix's other half -
+    // NewsScreen must still show the error screen even when hub posts (and
+    // therefore the digest banner) loaded fine.
+    it('shows Retry button, not a bannerRow-only broken screen, when articles fail but hub posts succeed', async () => {
+      fetchArticles.mockRejectedValue(new Error('Network request failed'));
+      fetchHubPosts.mockResolvedValue([
+        {id: 'digest-1', title: 'Donington Park Race Weekend Digest', category: 'Weekly Digest', pubDate: '20 Apr 2026', sortDate: '2026-04-20', orderDate: '2026-04-20'},
+      ]);
+      const {getByText, queryByLabelText} = renderWithProviders(<NewsScreen navigation={nav} />);
+      await waitFor(() => {
+        expect(getByText('Retry')).toBeTruthy();
+      });
+      // The digest banner must not stand in for the missing feed
+      expect(queryByLabelText('View The Flying Lap')).toBeNull();
+    });
   });
 
   describe('favourite driver highlighting', () => {

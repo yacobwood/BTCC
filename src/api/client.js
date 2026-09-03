@@ -241,11 +241,27 @@ export async function fetchGalleryAlbum(year, slug, forceRefresh = false) {
 const ARTICLES_BASE = `${BASE_GITHUB}/articles`;
 const ARTICLES_MAX_AGE_MS = 5 * 60 * 1000; // matches the scraper's own refresh cadence
 
-async function fetchArticlesPage(page, forceRefresh = false) {
+// propagateError=false (search's multi-page fan-out, and any other caller
+// that doesn't pass it) treats one page's genuine failure as "no matches
+// from that page" rather than aborting the whole call - reasonable when
+// several pages are being combined and one going missing shouldn't sink
+// the rest. The primary list fetch (fetchArticles's non-search branch,
+// what NewsScreen's Phase 2 calls) passes propagateError=true instead:
+// confirmed live 2026-09-03 that silently swallowing here left a genuine
+// "Network request failed" indistinguishable from "nothing's published
+// yet" - NewsScreen.js already has real staleFallback/error/retry handling
+// built for exactly this (fetchJson's own catch already tries a
+// bounded-age cached fallback before this ever throws), but it never got
+// the chance to run: no error, no retry button, just a permanently blank
+// feed under whatever independently-cached widgets (the Flying Lap/Academy
+// banners, fed by their own separate fetchHubPosts call) happened to have
+// already loaded.
+async function fetchArticlesPage(page, forceRefresh = false, propagateError = false) {
   try {
     const posts = await fetchJson(`${ARTICLES_BASE}/page_${page}.json`, `news_p${page}`, forceRefresh, /* staleFallback */ true, /* staleFirst */ false, ARTICLES_MAX_AGE_MS);
     return Array.isArray(posts) ? posts : [];
-  } catch {
+  } catch (e) {
+    if (propagateError) throw e;
     return [];
   }
 }
@@ -265,7 +281,7 @@ async function fetchArticlesIndex(forceRefresh = false) {
 // count. Search ignores page/perPage entirely and returns every match.
 export async function fetchArticles(page = 1, perPage = 20, search = '', forceRefresh = false) {
   const q = search.trim().toLowerCase();
-  if (!q) return fetchArticlesPage(page, forceRefresh);
+  if (!q) return fetchArticlesPage(page, forceRefresh, /* propagateError */ true);
 
   // Search has no server to hit anymore (see above), so it fetches every
   // mirrored page and filters client-side - a heavier, deliberate one-off

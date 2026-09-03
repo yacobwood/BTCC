@@ -369,6 +369,42 @@ describe('fetchArticles', () => {
     // cacheRead must not have been called — forceRefresh skips the cache check entirely
     expect(cacheRead).not.toHaveBeenCalled();
   });
+
+  // Regression coverage: found live 2026-09-03 while investigating a user
+  // report of a broken-looking News tab on slow wifi. A genuine network
+  // failure with no usable stale cache used to be silently swallowed into
+  // an empty array here, indistinguishable from "nothing's published yet" -
+  // NewsScreen.js's own staleFallback/error/retry handling never got the
+  // chance to run, and the screen ended up showing only the independently-
+  // cached Flying Lap/Academy banners above a permanently blank, unexplained
+  // feed. The non-search list fetch must now propagate a genuine failure
+  // once fetchJson's own bounded staleFallback has already come up empty,
+  // so the caller can show a real error and a retry button.
+  it('propagates a genuine network error when no usable stale cache exists (non-search)', async () => {
+    cacheRead.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+    global.fetch.mockRejectedValueOnce(new Error('Network request failed'));
+
+    await expect(fetchArticles(1)).rejects.toThrow('Network request failed');
+  });
+
+  // Search fans out across every mirrored page (see fetchArticlesIndex above) -
+  // one page failing shouldn't sink the whole search the way it should for
+  // the primary single-page list fetch, so this deliberately keeps the old
+  // swallow-and-continue behaviour rather than also propagating.
+  it('search still treats one page\'s failure as no matches from that page, not a thrown error', async () => {
+    const index = {a: 1, b: 2};
+    global.fetch
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve(index)})
+      .mockRejectedValueOnce(new Error('Network request failed'))
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve([
+        {id: 'b', slug: 'b', title: {rendered: 'Ingram wins'}, content: {rendered: ''}},
+      ])});
+    cacheRead.mockResolvedValue(null);
+
+    const result = await fetchArticles(1, 20, 'Ingram');
+
+    expect(result.map(p => p.id)).toEqual(['b']);
+  });
 });
 
 describe('peekArticlesCache', () => {
