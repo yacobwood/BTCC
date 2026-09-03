@@ -709,6 +709,21 @@ describe('fetchExplainerArticleById', () => {
     const result = await fetchExplainerArticleById('explainer-does-not-exist');
     expect(result).toBeNull();
   });
+
+  // Regression coverage: found live 2026-09-03 - a fourth call site of the
+  // same root cause fetchExplainerArticles' own forceRefresh fix already
+  // covered. notifNavigation.js calls this to resolve a tapped notification
+  // into a full article - if it silently used a stale on-device cache
+  // (predating whatever article the notification is actually about), the
+  // lookup would come back null and notifNavigation.js's own fallback for
+  // that case drops the user on the plain Academy list with no article and
+  // no explanation. A notification is always about content that just
+  // changed, so this must never serve a stale cache by default.
+  it('forces a fresh fetch by default, bypassing the on-device cache', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    await fetchExplainerArticleById('explainer-ttb-toca-turbo-boost');
+    expect(cacheRead).not.toHaveBeenCalled();
+  });
 });
 
 describe('fetchArticleBySlug', () => {

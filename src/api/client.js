@@ -502,7 +502,17 @@ export async function fetchExplainerArticles(forceRefresh = false) {
 
 // Used by notifNavigation.js to resolve a notification's article id into the
 // full article object, same role fetchHubPost plays for type:'hub'/'digest'.
-export async function fetchExplainerArticleById(id) {
-  const all = await fetchExplainerArticles();
+// forceRefresh defaults true here (unlike fetchExplainerArticles itself) -
+// found live 2026-09-03 as a fourth call site of the same root cause the
+// ExplainerListScreen/NewsScreen fix already covered: a notification is
+// always about content that JUST changed, so serving a stale on-device
+// cache here isn't a reasonable trade-off the way it can be for ordinary
+// list browsing. Without it, tapping a notification for an article that
+// isn't in the stale cache yet resolves to null, and notifNavigation.js's
+// own fallback for that case silently drops the user on the plain
+// ExplainerList with no article and no explanation - exactly the bug this
+// closes.
+export async function fetchExplainerArticleById(id, forceRefresh = true) {
+  const all = await fetchExplainerArticles(forceRefresh);
   return all.find(a => String(a.id) === String(id)) ?? null;
 }

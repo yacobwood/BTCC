@@ -3471,14 +3471,24 @@ async function saveExplainerEdit(mode = 'save') {
   if (!title) { alert('Title is required.'); return; }
 
   let previewUid = null;
+  let previewDeviceIds = null;
+  const existing = !isNew && explainerPosts.find(p => p.id === id);
   if (mode === 'preview') {
     previewUid = getMyUid();
     if (!previewUid) return;
     // A preview-on-my-device save flips status to 'draft', which would
     // silently pull an already-live article off the real News tab for
     // everyone else - confirm rather than let one misclick do that.
-    const existing = !isNew && explainerPosts.find(p => p.id === id);
     if (existing?.status === 'published' && !confirm('This article is already published. "Preview on my device" will take it off the real News tab for everyone else and make it visible only on your device. Continue?')) return;
+    // Append to any existing previewDeviceIds rather than replace it - found
+    // live 2026-09-03 that overwriting with [previewUid] silently erased a
+    // second device someone had added to this same array (e.g. a QA
+    // emulator added directly via the GitHub API), the moment anyone next
+    // re-clicked Preview on that article. A dedup, not a fresh array, is
+    // the correct save for "also preview on my device", not "only mine".
+    const ids = new Set(Array.isArray(existing?.previewDeviceIds) ? existing.previewDeviceIds : []);
+    ids.add(previewUid);
+    previewDeviceIds = [...ids];
   }
 
   const rawContent = explainerQuill ? explainerQuill.root.innerHTML : '';
@@ -3486,7 +3496,7 @@ async function saveExplainerEdit(mode = 'save') {
   const notifTitleOverride = document.getElementById('explainer-notif-title').value.trim();
   const notifBodyOverride = document.getElementById('explainer-notif-body').value.trim();
   const statusFields = mode === 'publish' ? {status: 'published'}
-    : mode === 'preview' ? {status: 'draft', previewDeviceIds: [previewUid]}
+    : mode === 'preview' ? {status: 'draft', previewDeviceIds}
     : {};
 
   let article;
