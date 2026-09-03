@@ -650,6 +650,23 @@ describe('fetchExplainerArticles', () => {
     expect(url).toMatch(/[?&]t=\d+/);
   });
 
+  // Regression coverage: found live 2026-09-03 - unlike every other cached
+  // fetch in this file, this one never had a forceRefresh option at all,
+  // so an admin previewing a second article had no way to see it within
+  // the 5-minute on-device cache window - not even pull-to-refresh on
+  // ExplainerListScreen could break through it, since load() called the
+  // same un-forced fetch either way.
+  it('forceRefresh bypasses the on-device cache and always hits the network', async () => {
+    const fresh = {posts: [{id: 'explainer-fresh', title: 'Fresh', status: 'published', pubDate: '2026-10-01'}]};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(fresh)});
+
+    const result = await fetchExplainerArticles(/* forceRefresh */ true);
+
+    expect(result[0].id).toBe('explainer-fresh');
+    // cacheRead must not have been called for the primary read - forceRefresh skips it entirely
+    expect(cacheRead).not.toHaveBeenCalled();
+  });
+
   // Mirrors mapHubPosts' own draft-preview gate exactly - added 2026-09-03
   // so an admin can publish an Academy article visible only on their own
   // device before a real Save & Publish. jest.setup.js's Firebase Auth mock

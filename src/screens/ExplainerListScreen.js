@@ -47,10 +47,10 @@ export default function ExplainerListScreen({navigation}) {
   const [error, setError] = useState(null);
   const [readIds, setReadIds] = useState(new Set());
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (forceRefresh = false) => {
     setError(null);
     try {
-      const list = await fetchExplainerArticles();
+      const list = await fetchExplainerArticles(forceRefresh);
       setArticles(list);
     } catch (e) {
       setError(e.message);
@@ -66,17 +66,26 @@ export default function ExplainerListScreen({navigation}) {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  // forceRefresh on focus (not just readIds) - added 2026-09-03 after an
+  // admin previewing a second article reported it "not published": the
+  // mount-only fetch above never re-runs on its own, and fetchExplainerArticles
+  // has its own 5-minute on-device cache, so navigating back to this screen
+  // after publishing something new used to keep re-serving whatever was
+  // cached from before that change, with no way to force a fresh look
+  // (not even pull-to-refresh could break through it, since load() called
+  // the same un-forced fetch either way).
   useEffect(() => {
     const unsub = navigation.addListener('focus', () => {
       getReadIds().then(setReadIds);
+      load(true);
     });
     return unsub;
-  }, [navigation]);
+  }, [navigation, load]);
 
   const onRefresh = useCallback(() => {
     Analytics.pullToRefresh('explainers');
     setRefreshing(true);
-    load();
+    load(true);
   }, [load]);
 
   const allRead = articles.length > 0 && articles.every(a => readIds.has(String(a.id)));

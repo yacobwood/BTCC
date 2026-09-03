@@ -463,13 +463,22 @@ function mapExplainerPosts(data, uid, includeAllStatuses = false) {
     .sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate));
 }
 
-export async function fetchExplainerArticles() {
+// forceRefresh, unlike every other cached fetch in this file, wasn't
+// something this function ever had - found live 2026-09-03 while chasing a
+// "second preview article isn't showing up" report: an admin previewing
+// content wants their own just-published change to show immediately, but
+// with no way to bypass the 5-minute on-device cache, not even pull-to-
+// refresh on ExplainerListScreen could break through it - the exact same
+// load() call just kept re-serving whatever was cached from before the
+// preview was published, for up to 5 minutes with nothing the user could
+// do about it.
+export async function fetchExplainerArticles(forceRefresh = false) {
   const uid = auth().currentUser?.uid ?? null;
   if (PREVIEW_ALL_EXPLAINERS_LOCALLY) {
     return mapExplainerPosts(require('../../data/explainer_articles.json'), uid, true);
   }
   try {
-    const cached = await cacheRead(EXPLAINER_CACHE_KEY, EXPLAINER_CACHE_MAX_AGE);
+    const cached = forceRefresh ? null : await cacheRead(EXPLAINER_CACHE_KEY, EXPLAINER_CACHE_MAX_AGE);
     let data;
     if (cached) {
       fetch(`${BASE_GITHUB}/explainer_articles.json?t=${Date.now()}`)

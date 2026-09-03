@@ -59,9 +59,8 @@ export default function NewsScreen({navigation}) {
   // The full list, not just a count - needed to compute an unread count for
   // the teaser tile the same way digests do (below), not just gate whether
   // the teaser row (and the section it links to) shows at all. Fetched once
-  // on mount, not tied to the News pull-to-refresh cycle - explainers
-  // publish roughly twice a week, not the many-times-a-day cadence real
-  // news does, so it doesn't need one.
+  // on mount, not tied to the News pull-to-refresh cycle, and again
+  // (forced) on every focus below - see that useFocusEffect for why.
   const [explainerArticles, setExplainerArticles] = useState([]);
   useEffect(() => { fetchExplainerArticles().then(setExplainerArticles).catch(() => {}); }, []);
   const [explainerReadIds, setExplainerReadIds] = useState(new Set());
@@ -152,6 +151,13 @@ export default function NewsScreen({navigation}) {
   useFocusEffect(useCallback(() => {
     getReadIds().then(setDigestReadIds);
     getExplainerReadIds().then(setExplainerReadIds);
+    // forceRefresh - added 2026-09-03 after an admin previewing an article
+    // found the Academy tile's count didn't reflect what they'd just
+    // published: fetchExplainerArticles has its own 5-minute on-device
+    // cache, and the mount-only fetch below never re-runs, so returning to
+    // News after publishing something new used to keep showing whatever
+    // was cached from before that change.
+    fetchExplainerArticles(true).then(setExplainerArticles).catch(() => {});
   }, []));
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';

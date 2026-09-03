@@ -101,6 +101,28 @@ describe('ExplainerListScreen', () => {
     await waitFor(() => expect(getByText(ARTICLE.title)).toBeTruthy());
   });
 
+  // Regression coverage: found live 2026-09-03 - an admin previewing a
+  // second article found it didn't show up, because fetchExplainerArticles
+  // has its own 5-minute on-device cache and this screen only ever fetched
+  // once, on mount. Returning to this screen (a real tab press or back
+  // navigation, both fire 'focus') must force a fresh look, bypassing that
+  // cache, not just re-ask for whatever's already cached.
+  it('force-refreshes the article list on focus, not just on mount', async () => {
+    let focusCb;
+    nav.addListener.mockImplementationOnce((event, cb) => {
+      if (event === 'focus') focusCb = cb;
+      return jest.fn();
+    });
+    renderScreen();
+    await waitFor(() => expect(fetchExplainerArticles).toHaveBeenCalledTimes(1));
+    expect(fetchExplainerArticles).toHaveBeenNthCalledWith(1, false);
+
+    await act(async () => { focusCb(); });
+
+    expect(fetchExplainerArticles).toHaveBeenCalledTimes(2);
+    expect(fetchExplainerArticles).toHaveBeenNthCalledWith(2, true);
+  });
+
   // ── Read/unread - mirrors DigestsScreen's own behaviour exactly, added
   // 2026-09-02 so Academy articles work the same way as The Flying Lap. ──
 
