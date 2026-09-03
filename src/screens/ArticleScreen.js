@@ -31,6 +31,8 @@ import {useAuth} from '../store/auth';
 import {claimUsername, validateUsername, loadProfile, saveProfile} from '../utils/userProfile';
 import {timeAgo} from '../utils/timeAgo';
 import {containsProfanity} from '../utils/profanityFilter';
+import {htmlToSpeechText} from '../utils/htmlToSpeechText';
+import {useArticleReader} from '../utils/useArticleReader';
 
 import {FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIRESTORE_BASE, COMMENT_REACT_URL} from '../config/firebase';
 const API_KEY = FIREBASE_API_KEY;
@@ -839,6 +841,55 @@ export default function ArticleScreen({route, navigation}) {
     [article],
   );
 
+  // Memoised so the native onFinish/onError listeners inside useArticleReader
+  // only get torn down and resubscribed when the article itself actually
+  // changes, not on every unrelated re-render (comments loading, reactions
+  // updating, etc.) while a read-aloud session may be mid-playback.
+  const onReaderFinish = useCallback(() => Analytics.articleListenCompleted(article?.title), [article?.title]);
+  const onReaderError = useCallback(() => Analytics.articleListenFailed(article?.title), [article?.title]);
+  const {status: readerStatus, isBuffering: readerBuffering, start: startReading, togglePause: toggleReading, stop: stopReading} =
+    useArticleReader({onFinish: onReaderFinish, onError: onReaderError});
+
+  // Leaving the article (back, a deep link, switching tabs) stops playback
+  // rather than letting it keep talking over whatever screen comes next -
+  // this app has no background-audio session for read-aloud the way
+  // RadioScreen's track-player does, so "still speaking off-screen" would
+  // just be a stuck, unstoppable voice rather than a deliberate feature.
+  // Only fires the "stopped" event if something was actually playing/paused -
+  // navigating away from an article nobody ever tapped Listen on isn't a
+  // real exit worth counting. Read through refs rather than closing over
+  // readerStatus/stopReading directly - both change on every play/pause/
+  // resume and re-registering the blur listener on every one of those
+  // (rather than once, read fresh at blur time) would leave React
+  // Navigation holding whichever closure was current when it last fired,
+  // silently under-reporting "stopped" if a later blur reuses an older one.
+  const latestReaderStatusRef = useRef(readerStatus);
+  latestReaderStatusRef.current = readerStatus;
+  const latestStopReadingRef = useRef(stopReading);
+  latestStopReadingRef.current = stopReading;
+  useEffect(() => navigation.addListener('blur', () => {
+    if (latestReaderStatusRef.current !== 'idle') Analytics.articleListenStopped(article?.title);
+    latestStopReadingRef.current();
+  }), [navigation, article?.title]);
+
+  const onListenPress = () => {
+    if (readerStatus === 'idle') {
+      Analytics.articleListenStarted(article.title);
+      startReading(htmlToSpeechText(article.content));
+    } else if (readerStatus === 'playing') {
+      Analytics.articleListenPaused(article.title);
+      toggleReading();
+    } else {
+      Analytics.articleListenResumed(article.title);
+      toggleReading();
+    }
+  };
+
+  const onStopPress = () => {
+    Analytics.articleListenStopped(article.title);
+    stopReading();
+  };
+
   const onShare = async () => {
     const s = article.link.replace(/\/$/, '').split('/').pop();
     const appLink = `https://btcchub.vercel.app/news/${s}`;
@@ -907,9 +958,39 @@ export default function ArticleScreen({route, navigation}) {
           accessibilityRole="button">
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn} onPress={onShare} accessibilityLabel="Share article" accessibilityRole="button">
-          <Icon name="share" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.topBarRightGroup}>
+          <TouchableOpacity
+            style={styles.iconBtn}
+            onPress={onListenPress}
+            accessibilityLabel={
+              readerBuffering ? 'Starting article read-aloud' :
+              readerStatus === 'playing' ? 'Pause reading article aloud' :
+              readerStatus === 'paused' ? 'Resume reading article aloud' : 'Listen to article'
+            }
+            accessibilityRole="button">
+            {/* readerBuffering covers the gap between tapping Listen and audio
+                actually starting - can be a couple of seconds if the OS's
+                preferred voice needs to fail over to a fallback first (see
+                useArticleReader.js). Without this the button just sits on a
+                static pause icon with no sound, which reads as broken rather
+                than as "starting up". */}
+            {readerBuffering ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Icon name={readerStatus === 'playing' ? 'pause' : readerStatus === 'paused' ? 'play-arrow' : 'headset'} size={24} color="#fff" />
+            )}
+          </TouchableOpacity>
+          {/* Only shown once a session exists to stop - idle has nothing to
+              break out from a single Listen button yet. */}
+          {readerStatus !== 'idle' && (
+            <TouchableOpacity style={styles.iconBtn} onPress={onStopPress} accessibilityLabel="Stop reading article aloud" accessibilityRole="button">
+              <Icon name="stop" size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.iconBtn} onPress={onShare} accessibilityLabel="Share article" accessibilityRole="button">
+            <Icon name="share" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <CommentsSheet
@@ -968,6 +1049,14 @@ export function buildHtml(article, topPad) {
   const sourceUrl = article.sourceUrl || (article.source === 'btcc.net' ? article.link : null);
   const sourceLabel = article.sourceUrl || 'btcc.net';
   const headerDate = formatFullDate(article.sortDate || article.pubDate);
+  // CC-licensed images (currently just the Jack Sears Trophy hero) carry a
+  // real attribution requirement, not an optional nicety - see IMAGES in
+  // build_explainer_articles.py for the license each one was checked
+  // against. Renders nothing when a hero has no credit (every btcc.net/hub
+  // image so far), so this is a no-op for every other article.
+  const imageCredit = article.imageCredit
+    ? `<p class="image-credit">Photo: <a href="${article.imageCreditUrl}">${article.imageCredit}</a>${article.imageLicense ? ` (${article.imageLicense})` : ''}</p>`
+    : '';
   const heroSection = article.imageUrl
     ? `<div class="hero" style="background-image:url('${article.imageUrl}');">
          <div class="hero-gradient"></div>
@@ -975,7 +1064,8 @@ export function buildHtml(article, topPad) {
            <h1>${article.title}</h1>
            <p class="date">${headerDate}</p>
          </div>
-       </div>`
+       </div>
+       ${imageCredit}`
     : `<div style="padding:${topPad + 50}px 16px 0;">
          <h1>${article.title}</h1>
          <p class="date">${headerDate}</p>
@@ -989,6 +1079,8 @@ export function buildHtml(article, topPad) {
       .hero { position:relative; width:100%; min-height:${topPad + 300}px; padding-top:${topPad}px; background-size:cover; background-position:center; display:flex; flex-direction:column; justify-content:flex-end; }
       .hero-gradient { position:absolute; top:0;left:0;right:0;bottom:0; background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,transparent 30%,transparent 50%,rgba(11,12,15,0.95) 100%); }
       .hero-text { position:relative; z-index:1; padding:0 16px 20px; }
+      .image-credit { margin:6px 16px 0; font-size:11px; color:#8B949E; }
+      .image-credit a { color:#8B949E; text-decoration:underline; }
       h1 { font-size:22px; font-weight:700; margin-bottom:6px; line-height:1.3; }
       h2 { font-size:18px; font-weight:700; margin-top:14px; margin-bottom:0; }
       h3 { font-size:16px; font-weight:700; margin-top:14px; margin-bottom:0; }
@@ -1008,6 +1100,9 @@ export function buildHtml(article, topPad) {
       blockquote { border-left:3px solid #FEBD02; padding-left:14px; margin:16px 0; color:#8B949E; font-style:italic; }
       ul,ol { padding-left:1.5em; background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:6px; padding:14px 14px 14px 28px; margin:16px 0; }
       li { margin-bottom:8px; color:#ccc; }
+      ol.steps { list-style:none; counter-reset:step; }
+      ol.steps li { position:relative; padding-left:26px; counter-increment:step; }
+      ol.steps li::before { content:counter(step); position:absolute; left:-4px; top:-1px; width:20px; height:20px; border-radius:10px; background:#FEBD02; color:#020255; font-size:11px; font-weight:800; text-align:center; line-height:20px; }
       iframe { width:100%!important; max-width:100%!important; border:none; }
       video { width:100%!important; height:auto!important; border-radius:8px; margin:12px 0; }
       .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:16px 0; }
@@ -1142,6 +1237,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 12,
+  },
+  topBarRightGroup: {
+    flexDirection: 'row',
+    gap: 8,
   },
   statusBarBg: {
     position: 'absolute',

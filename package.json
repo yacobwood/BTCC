@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@invertase/react-native-apple-authentication": "^2.5.1",
+    "@mhpdev/react-native-speech": "^1.4.2",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-firebase/analytics": "^24.0.0",

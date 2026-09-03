@@ -56,8 +56,52 @@ jest.mock('../../src/utils/notifications', () => ({
   syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));
 
+// Overrides the package's own bundled jest mock (applied globally via
+// __mocks__/@mhpdev/react-native-speech.js) - that default only wraps the
+// event methods (onFinish/onError/etc.) as real jest.fn() spies, not
+// speak/pause/resume/stop themselves, so toHaveBeenCalledWith would fail
+// against them. useArticleReader's own test suite covers the chunking/event
+// state machine in full; these tests only need to confirm ArticleScreen
+// wires the button through to the hook correctly.
+// onStart's handler is captured (not just stubbed) so tests can simulate
+// the moment audio genuinely begins - useArticleReader's isBuffering stays
+// true, and the header button stays a spinner rather than the pause icon,
+// until that event fires. speak() always resolves the same fixed
+// 'utterance-id' here (unlike useArticleReader's own suite, which needs
+// distinct incrementing ids to test its stale-event guard), so every test
+// below fires onStart with that same id.
+let onStartHandler = null;
+jest.mock('@mhpdev/react-native-speech', () => ({
+  __esModule: true,
+  default: {
+    maxInputLength: 4000,
+    speak: jest.fn(() => Promise.resolve('utterance-id')),
+    pause: jest.fn(() => Promise.resolve(false)),
+    resume: jest.fn(() => Promise.resolve(false)),
+    stop: jest.fn(() => Promise.resolve()),
+    configure: jest.fn(),
+    getAvailableVoices: jest.fn(() => Promise.resolve([
+      {identifier: 'en-gb-x-network', language: 'en-GB'},
+      {identifier: 'en-gb-x-local', language: 'en-GB'},
+    ])),
+    onStart: jest.fn((handler) => { onStartHandler = handler; return {remove: jest.fn()}; }),
+    onFinish: jest.fn(() => ({remove: jest.fn()})),
+    onError: jest.fn(() => ({remove: jest.fn()})),
+  },
+}));
+
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), articleShared: jest.fn(), articleLoadFailed: jest.fn()},
+  Analytics: {
+    screen: jest.fn(),
+    articleShared: jest.fn(),
+    articleLoadFailed: jest.fn(),
+    articleListenStarted: jest.fn(),
+    articleListenPaused: jest.fn(),
+    articleListenResumed: jest.fn(),
+    articleListenCompleted: jest.fn(),
+    articleListenStopped: jest.fn(),
+    articleListenFailed: jest.fn(),
+  },
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -205,6 +249,153 @@ describe('ArticleScreen', () => {
     it('screen_view omits publish_date when article has no sortDate', () => {
       renderArticle();
       expect(Analytics.screen).toHaveBeenCalledWith('article:Ingram wins at Donington', {});
+    });
+  });
+
+  // ── Read aloud ───────────────────────────────────────────────────────────────
+
+  describe('read aloud', () => {
+    const Speech = require('@mhpdev/react-native-speech').default;
+
+    // Simulates the native engine genuinely producing audio for the current
+    // utterance - without this, useArticleReader's isBuffering stays true
+    // and the header button stays a spinner ("Starting article read-aloud")
+    // rather than flipping to the pause icon these tests look for.
+    const fireStarted = () => act(async () => { onStartHandler?.({id: 'utterance-id'}); });
+
+    it('shows a "Listen to article" button before playback starts', () => {
+      const {getByLabelText} = renderArticle();
+      expect(getByLabelText('Listen to article')).toBeTruthy();
+    });
+
+    it('shows a starting spinner immediately after tapping Listen, before audio actually begins', async () => {
+      const {getByLabelText, queryByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+
+      expect(getByLabelText('Starting article read-aloud')).toBeTruthy();
+      expect(queryByLabelText('Pause reading article aloud')).toBeNull();
+    });
+
+    it('tapping it speaks the article text, fires the started event and switches to a pause control once audio begins', async () => {
+      const {getByLabelText} = renderArticle();
+      // start() now awaits resolveVoices() (Speech.getAvailableVoices) before
+      // configuring a voice and calling speak() - a plain fireEvent.press
+      // wouldn't let that microtask settle before the assertions below run.
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+
+      expect(Speech.speak).toHaveBeenCalledWith('Tom Ingram took a comfortable win...');
+      expect(Analytics.articleListenStarted).toHaveBeenCalledWith('Ingram wins at Donington');
+      expect(getByLabelText('Pause reading article aloud')).toBeTruthy();
+    });
+
+    it('tapping while playing pauses and fires the paused event', async () => {
+      Speech.pause.mockResolvedValueOnce(true);
+      const {getByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+      await act(async () => { fireEvent.press(getByLabelText('Pause reading article aloud')); });
+
+      expect(Speech.pause).toHaveBeenCalled();
+      expect(Analytics.articleListenPaused).toHaveBeenCalledWith('Ingram wins at Donington');
+      expect(getByLabelText('Resume reading article aloud')).toBeTruthy();
+    });
+
+    it('tapping while paused resumes and fires the resumed event', async () => {
+      Speech.pause.mockResolvedValueOnce(true);
+      Speech.resume.mockResolvedValueOnce(true);
+      const {getByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+      await act(async () => { fireEvent.press(getByLabelText('Pause reading article aloud')); });
+      await act(async () => { fireEvent.press(getByLabelText('Resume reading article aloud')); });
+
+      expect(Speech.resume).toHaveBeenCalled();
+      expect(Analytics.articleListenResumed).toHaveBeenCalledWith('Ingram wins at Donington');
+      expect(getByLabelText('Pause reading article aloud')).toBeTruthy();
+    });
+
+    it('stops an active playback session when the screen loses focus and fires the stopped event', async () => {
+      const {getByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); }); // now actively playing
+      // Grab the LAST registered blur listener, not the first - the effect
+      // re-registers on every play/pause/resume (see the ref comment in
+      // ArticleScreen.js), so nav.addListener.mock.calls accumulates one
+      // entry per status change and only the latest one reflects reality.
+      const blurCalls = nav.addListener.mock.calls.filter(call => call[0] === 'blur');
+      const blurCallback = blurCalls[blurCalls.length - 1]?.[1];
+      expect(blurCallback).toBeInstanceOf(Function);
+      blurCallback();
+      expect(Speech.stop).toHaveBeenCalled();
+      expect(Analytics.articleListenStopped).toHaveBeenCalledWith('Ingram wins at Donington');
+    });
+
+    it('losing focus with nothing playing is a no-op, not a crash and never fires the stopped event', () => {
+      renderArticle();
+      const blurCalls = nav.addListener.mock.calls.filter(call => call[0] === 'blur');
+      const blurCallback = blurCalls[blurCalls.length - 1]?.[1];
+      expect(() => blurCallback()).not.toThrow();
+      expect(Speech.stop).not.toHaveBeenCalled();
+      expect(Analytics.articleListenStopped).not.toHaveBeenCalled();
+    });
+
+    it('shows a separate stop control once playback starts, alongside the pause control', async () => {
+      const {getByLabelText, queryByLabelText} = renderArticle();
+      expect(queryByLabelText('Stop reading article aloud')).toBeNull();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+      expect(getByLabelText('Pause reading article aloud')).toBeTruthy();
+      expect(getByLabelText('Stop reading article aloud')).toBeTruthy();
+    });
+
+    it('also shows the stop control during the starting spinner, not just once playing', async () => {
+      const {getByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      expect(getByLabelText('Starting article read-aloud')).toBeTruthy();
+      expect(getByLabelText('Stop reading article aloud')).toBeTruthy();
+    });
+
+    it('keeps showing the stop control while paused, not just while playing', async () => {
+      Speech.pause.mockResolvedValueOnce(true);
+      const {getByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+      await act(async () => { fireEvent.press(getByLabelText('Pause reading article aloud')); });
+      expect(getByLabelText('Stop reading article aloud')).toBeTruthy();
+    });
+
+    it('tapping stop ends playback, fires the stopped event and returns to a single Listen button', async () => {
+      const {getByLabelText, queryByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+      await act(async () => { fireEvent.press(getByLabelText('Stop reading article aloud')); });
+
+      expect(Speech.stop).toHaveBeenCalled();
+      expect(Analytics.articleListenStopped).toHaveBeenCalledWith('Ingram wins at Donington');
+      expect(getByLabelText('Listen to article')).toBeTruthy();
+      expect(queryByLabelText('Stop reading article aloud')).toBeNull();
+      expect(queryByLabelText('Pause reading article aloud')).toBeNull();
+    });
+
+    it('tapping stop while still starting (before audio begins) also returns cleanly to a single Listen button', async () => {
+      const {getByLabelText, queryByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await act(async () => { fireEvent.press(getByLabelText('Stop reading article aloud')); });
+
+      expect(Speech.stop).toHaveBeenCalled();
+      expect(getByLabelText('Listen to article')).toBeTruthy();
+      expect(queryByLabelText('Starting article read-aloud')).toBeNull();
+    });
+
+    it('starting again after a stop shows the starting spinner again, not a stuck pause icon', async () => {
+      const {getByLabelText, queryByLabelText} = renderArticle();
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+      await fireStarted();
+      await act(async () => { fireEvent.press(getByLabelText('Stop reading article aloud')); });
+      await act(async () => { fireEvent.press(getByLabelText('Listen to article')); });
+
+      expect(getByLabelText('Starting article read-aloud')).toBeTruthy();
+      expect(queryByLabelText('Pause reading article aloud')).toBeNull();
     });
   });
 
@@ -696,6 +887,41 @@ describe('buildHtml empty paragraph stripping', () => {
   });
 });
 
+// ─── buildHtml: hero image attribution ─────────────────────────────────────
+//
+// CC-licensed hero images (currently just the Jack Sears Trophy explainer,
+// see IMAGES in build_explainer_articles.py) carry a real attribution
+// requirement, not an optional nicety - this must render whenever
+// imageCredit is set, and never render for the (overwhelming majority of)
+// articles that don't set it, including btcc.net-sourced photos that were
+// never license-checked.
+
+describe('buildHtml image attribution', () => {
+  const BASE = {title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09', source: 'btcc hub'};
+
+  it('renders credit, link and license when a hero image has them', () => {
+    const html = buildHtml({
+      ...BASE,
+      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/1958_Jack_Sears.JPG',
+      imageCredit: 'Aylesburyape',
+      imageCreditUrl: 'https://commons.wikimedia.org/wiki/File:1958_Jack_Sears.JPG',
+      imageLicense: 'CC BY 3.0',
+    }, 0);
+    expect(html).toContain('class="image-credit"');
+    expect(html).toContain('<a href="https://commons.wikimedia.org/wiki/File:1958_Jack_Sears.JPG">Aylesburyape</a>');
+    expect(html).toContain('(CC BY 3.0)');
+  });
+
+  it('shows no image-credit line when the hero image has no credit set', () => {
+    const html = buildHtml({...BASE, imageUrl: 'https://example.com/photo.jpg'}, 0);
+    expect(html).not.toContain('class="image-credit"');
+  });
+
+  it('shows no image-credit line when there is no hero image at all', () => {
+    const html = buildHtml({...BASE}, 0);
+    expect(html).not.toContain('class="image-credit"');
+  });
+});
 
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 

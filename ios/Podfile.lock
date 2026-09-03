@@ -1577,7 +1577,7 @@ PODS:
     - ReactNativeDependencies
   - react-native-in-app-review (4.4.2):
     - React-Core
-  - react-native-pager-view (8.0.0):
+  - react-native-pager-view (8.0.4):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1600,7 +1600,7 @@ PODS:
     - ReactNativeDependencies
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
-  - react-native-safe-area-context (5.7.0):
+  - react-native-safe-area-context (5.8.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1612,8 +1612,8 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.7.0)
-    - react-native-safe-area-context/fabric (= 5.7.0)
+    - react-native-safe-area-context/common (= 5.8.0)
+    - react-native-safe-area-context/fabric (= 5.8.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1624,7 +1624,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context/common (5.7.0):
+  - react-native-safe-area-context/common (5.8.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1646,7 +1646,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context/fabric (5.7.0):
+  - react-native-safe-area-context/fabric (5.8.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1672,7 +1672,7 @@ PODS:
   - react-native-track-player (4.1.2):
     - React-Core
     - SwiftAudioEx (= 1.1.0)
-  - react-native-webview (13.16.1):
+  - react-native-webview (14.0.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2082,7 +2082,7 @@ PODS:
   - RecaptchaInterop (101.0.0)
   - RNAppleAuthentication (2.5.1):
     - React-Core
-  - RNBootSplash (7.3.1):
+  - RNBootSplash (7.3.2):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2128,7 +2128,7 @@ PODS:
     - Yoga
   - RNDeviceInfo (15.0.2):
     - React-Core
-  - RNFBAnalytics (24.0.0):
+  - RNFBAnalytics (24.1.1):
     - FirebaseAnalytics/Core (= 12.10.0)
     - FirebaseAnalytics/IdentitySupport (= 12.10.0)
     - hermes-engine
@@ -2153,7 +2153,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBApp (24.0.0):
+  - RNFBApp (24.1.1):
     - Firebase/CoreOnly (= 12.10.0)
     - hermes-engine
     - RCTRequired
@@ -2176,7 +2176,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNFBAuth (24.0.0):
+  - RNFBAuth (24.1.1):
     - Firebase/Auth (= 12.10.0)
     - hermes-engine
     - RCTRequired
@@ -2200,7 +2200,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBCrashlytics (24.0.0):
+  - RNFBCrashlytics (24.1.1):
     - Firebase/Crashlytics (= 12.10.0)
     - FirebaseCoreExtension
     - hermes-engine
@@ -2225,7 +2225,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBDatabase (24.0.0):
+  - RNFBDatabase (24.1.1):
     - Firebase/Database (= 12.10.0)
     - hermes-engine
     - RCTRequired
@@ -2249,7 +2249,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNFBMessaging (24.0.0):
+  - RNFBMessaging (24.1.1):
     - Firebase/Messaging (= 12.10.0)
     - FirebaseCoreExtension
     - hermes-engine
@@ -2274,7 +2274,7 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
-  - RNGoogleSignin (16.1.2):
+  - RNGoogleSignin (16.1.4):
     - GoogleSignIn (~> 9.0)
     - hermes-engine
     - RCTRequired
@@ -2302,7 +2302,7 @@ PODS:
     - RNNotifee/NotifeeCore (= 9.1.8)
   - RNNotifee/NotifeeCore (9.1.8):
     - React-Core
-  - RNScreens (4.24.0):
+  - RNScreens (4.26.2):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2324,9 +2324,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNScreens/common (= 4.24.0)
+    - RNScreens/common (= 4.26.2)
     - Yoga
-  - RNScreens/common (4.24.0):
+  - RNScreens/common (4.26.2):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2349,7 +2349,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNSVG (15.15.4):
+  - RNSVG (15.15.5):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2370,9 +2370,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNSVG/common (= 15.15.4)
+    - RNSVG/common (= 15.15.5)
     - Yoga
-  - RNSVG/common (15.15.4):
+  - RNSVG/common (15.15.5):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2812,10 +2812,10 @@ SPEC CHECKSUMS:
   React-Mapbuffer: f4ee8c62e0ef8359d139124f35a471518a172cd3
   React-microtasksnativemodule: d1956f0eec54c619b63a379520fb4c618a55ccb9
   react-native-in-app-review: 1516ba69d60d58053b7eb3aaaf8d2a5a74af8b57
-  react-native-pager-view: adc7d78123fb395e03a70d19e8d75805b49838b5
-  react-native-safe-area-context: ae7587b95fb580d1800c5b0b2a7bd48c2868e67a
+  react-native-pager-view: 36c2e034aeef30f786dfd80718384fa3bb43f702
+  react-native-safe-area-context: 5727bd761ca52fa393b40989a6483bf859622136
   react-native-track-player: dd56f9948e03756a217c75e0a61aa04aab65b5a1
-  react-native-webview: 0ed52ddb2eafc64a502871218440b8b4d37961c3
+  react-native-webview: f953554d82b6ea5cc3a02622ff8d8b5101bd3a71
   React-NativeModulesApple: 5ba0903927f6b8d335a091700e9fda143980f819
   React-networking: 3a4b7f9ed2b2d1c0441beacb79674323a24bcca6
   React-oscompat: ff26abf0ae3e3fdbe47b44224571e3fc7226a573
@@ -2852,19 +2852,19 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: 224783076827c8fb330a1223f12ee41b107c7582
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RNAppleAuthentication: a89c9804592b38ed4ab11f0aee68d05ba12ad432
-  RNBootSplash: c0d86dded541a26441dd35d927fae3f0855af499
+  RNBootSplash: b0cb090dda213532b2670ca591aa1d5b955866d0
   RNCAsyncStorage: 7a5a6094f9f6b9158e72f1855cd86e769413d851
   RNDeviceInfo: 4c852998208b60dc192ae3529e5867817719ad1e
-  RNFBAnalytics: 492b859bdd5790478927815e3d94a7be186c51f1
-  RNFBApp: fdc22fcdb61b16877dfcee623a29cd1107dde01a
-  RNFBAuth: 29e09b71493ad5f4f017ee2b564de91c6d01d72e
-  RNFBCrashlytics: 080348feb2f6221efa8d1598dafdc9deeb759eca
-  RNFBDatabase: 5c01f3f6b892581d90f79d89b123e3802d541034
-  RNFBMessaging: 1b0ed6e3963b9b32b340286130542097e01f5a33
-  RNGoogleSignin: 104dd7238c56fe354e4b0a8fd267f866039ffdf3
+  RNFBAnalytics: 484170182a3663e070ec39f413ff727344bd1d69
+  RNFBApp: a81613bd497265b378688094f69b160cfe8f6cbd
+  RNFBAuth: 7a54418b382a9cd61b074e1361e189571531294c
+  RNFBCrashlytics: e52598fe586bfebcf8f2a7bc95a3f0076d2c12b1
+  RNFBDatabase: aaaaebc83760077c8e1b42cd820804909ee75442
+  RNFBMessaging: 72d55597d76b224308016e1348c34bf17f283ff0
+  RNGoogleSignin: e4caaa71be97fed950d445f55e5181f6c5e9e065
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
-  RNScreens: 6cb648bdad8fe9bee9259fe144df95b6d1d5b707
-  RNSVG: c69f7709226108f5eb89b5aa8833c17a36345468
+  RNScreens: 856e896bc2e08807313c9a4d4f7b98d6b1f484d9
+  RNSVG: 77d8775159dbdc228febb75b67bc1d5733c0d2d8
   RNVectorIcons: 4351544f100d4f12cac156a7c13399e60bab3e26
   SwiftAudioEx: f6aa653770f3a0d3851edaf8d834a30aee4a7646
   SwiftUIIntrospect: fee9aa07293ee280373a591e1824e8ddc869ba5d

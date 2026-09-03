@@ -26,6 +26,17 @@ export const Analytics = {
   // chain to stop swallowing its underlying error first.
   articleLoadFailed: (slug, errorCode) => logEvent(fa(),'article_load_failed', {item_id: slug?.substring(0, 100) || '', error_code: errorCode || 'unknown'}),
 
+  // Read-aloud (entry/action/success/failure/exit): Started on first tap,
+  // Paused/Resumed for the toggle mid-playback, Completed when every chunk
+  // finishes naturally, Stopped for a manual stop or leaving the screen
+  // before it finished, Failed if the native TTS engine itself errors.
+  articleListenStarted: (title) => logEvent(fa(),'article_listen_started', {item_name: title?.substring(0, 100)}),
+  articleListenPaused: (title) => logEvent(fa(),'article_listen_paused', {item_name: title?.substring(0, 100)}),
+  articleListenResumed: (title) => logEvent(fa(),'article_listen_resumed', {item_name: title?.substring(0, 100)}),
+  articleListenCompleted: (title) => logEvent(fa(),'article_listen_completed', {item_name: title?.substring(0, 100)}),
+  articleListenStopped: (title) => logEvent(fa(),'article_listen_stopped', {item_name: title?.substring(0, 100)}),
+  articleListenFailed: (title) => logEvent(fa(),'article_listen_failed', {item_name: title?.substring(0, 100)}),
+
   trackDetailViewed: (round, venue) => logEvent(fa(),'track_detail_viewed', {round, venue}),
   raceClicked: (round, venue) => logEvent(fa(),'race_clicked', {round, venue}),
   liveTimingOpened: (venue) => logEvent(fa(),'live_timing_opened', {venue}),
