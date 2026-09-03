@@ -1472,6 +1472,14 @@ select.input { cursor: pointer; }
       </div>
       <input type="text" id="explainer-notif-title" placeholder="e.g. Introducing BTCC Academy">
       <textarea id="explainer-notif-body" rows="2" placeholder="e.g. Your guide to the rules behind the racing - new explainer articles added regularly." style="margin-top:8px"></textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <button class="btn-sm" onclick="sendTestExplainerNotif()">Send test notification to my device</button>
+        <span id="explainer-test-notif-status" class="status-line" style="margin:0"></span>
+        <a href="#" onclick="changeMyDeviceToken();return false" style="font-size:11px;color:var(--text-sec);margin-left:auto">change device</a>
+      </div>
+      <div class="section-note" style="margin-top:4px">
+        Sends the title/body above (with your override, if filled in) to just your own phone via send-test-notif.yml - never the real explainer_alerts topic, so this is safe to use as many times as you like before an actual Save &amp; Publish. Needs your device token once (Settings → tap "Device Token" in the app to copy it).
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn-primary" style="flex:1" onclick="saveExplainerEdit()">SAVE CHANGES</button>
@@ -3579,6 +3587,66 @@ async function dispatchExplainerNotif(article) {
       body: JSON.stringify({ref: 'main', inputs}),
     });
   } catch(e) { console.error('dispatchExplainerNotif failed:', e); }
+}
+
+// send-broadcast-notif.yml only ever sends to a topic (admin.messaging()
+// .send({topic, ...}) - no single-device mode at all), so a real Save &
+// Publish always reaches every real explainer_alerts subscriber - there's
+// no way to redirect that specific pipeline to just one device for
+// testing. Added 2026-09-03 so a notification can be verified safely as
+// many times as needed before ever actually publishing: reads the same
+// live title/override fields a real publish would use, but dispatches
+// via send-test-notif.yml (a genuinely separate workflow that sends to
+// one FCM token via admin.messaging().send({token, ...}), never a topic)
+// instead - zero risk of reaching a real subscriber regardless of how
+// many times it's used or what the article's actual publish status is.
+const MY_DEVICE_TOKEN_KEY = 'btcc_my_device_token';
+
+function getMyDeviceToken() {
+  let saved = localStorage.getItem(MY_DEVICE_TOKEN_KEY);
+  if (!saved) saved = changeMyDeviceToken();
+  return saved;
+}
+
+function changeMyDeviceToken() {
+  const entered = prompt('Paste your device token (open the app → Settings → tap "Device Token" to copy it):');
+  if (!entered) return localStorage.getItem(MY_DEVICE_TOKEN_KEY);
+  const trimmed = entered.trim();
+  localStorage.setItem(MY_DEVICE_TOKEN_KEY, trimmed);
+  return trimmed;
+}
+
+async function sendTestExplainerNotif() {
+  const tok = getToken();
+  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return; }
+  const deviceToken = getMyDeviceToken();
+  if (!deviceToken) return;
+
+  const title = document.getElementById('explainer-edit-title').value.trim();
+  if (!title) { alert('Title is required.'); return; }
+  const notifTitleOverride = document.getElementById('explainer-notif-title').value.trim();
+  const notifBodyOverride = document.getElementById('explainer-notif-body').value.trim();
+  const testId = document.getElementById('explainer-edit-id').value || 'test';
+
+  const statusEl = document.getElementById('explainer-test-notif-status');
+  statusEl.textContent = 'Sending…';
+  try {
+    const inputs = {
+      channel: 'explainer',
+      title: notifTitleOverride || title,
+      body: notifBodyOverride,
+      device_token: deviceToken,
+      data: JSON.stringify({type: 'explainer', id: testId}),
+    };
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-test-notif.yml/dispatches`, {
+      method: 'POST',
+      headers: {Authorization: 'token ' + tok, 'Content-Type': 'application/json'},
+      body: JSON.stringify({ref: 'main', inputs}),
+    });
+    statusEl.textContent = r.status === 204 ? '✓ Sent - check your phone' : 'Failed to dispatch (' + r.status + ')';
+  } catch(e) {
+    statusEl.textContent = 'Error: ' + e.message;
+  }
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
