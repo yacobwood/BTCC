@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchArticles, fetchHubPosts, peekArticlesCache} from '../api/client';
+import {fetchArticles, fetchHubPosts, fetchExplainerArticles, peekArticlesCache} from '../api/client';
 import {parseArticle} from '../api/parsers';
 import styles from './NewsScreen.styles';
 import CachedImage, {prefetchImages} from '../components/CachedImage';
@@ -55,6 +55,14 @@ export default function NewsScreen({navigation}) {
   const [searchKeyboardShown, setSearchKeyboardShown] = useState(false);
   const [error, setError] = useState(null);
   const [digestReadIds, setDigestReadIds] = useState(new Set());
+  // Count only, not the full list - the teaser row (and the section it links
+  // to) must stay invisible until an admin has actually published at least
+  // one explainer article. A plain count is all this screen needs; the full
+  // list lives in ExplainerListScreen. Fetched once on mount, not tied to the
+  // News pull-to-refresh cycle - explainers publish roughly twice a week, not
+  // the many-times-a-day cadence real news does, so it doesn't need one.
+  const [explainerCount, setExplainerCount] = useState(0);
+  useEffect(() => { fetchExplainerArticles().then(list => setExplainerCount(list.length)).catch(() => {}); }, []);
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
@@ -118,7 +126,7 @@ export default function NewsScreen({navigation}) {
       setHasMore(parsed.length >= 20);
       setPage(p);
     } catch (e) {
-      // If Phase 1 already showed stale articles, silently absorb the network error  - 
+      // If Phase 1 already showed stale articles, silently absorb the network error  -
       // the user has something to read. Only surface the error on a true cold start.
       if (!append && !shownStale) setError(e.message);
       if (append) setHasMore(false);
@@ -239,16 +247,27 @@ export default function NewsScreen({navigation}) {
     const data = [];
     if (hero) data.push({type: 'hero', article: hero});
     if (gridArticles.length > 0) data.push({type: 'grid', articles: gridArticles});
-    if (digests.length > 0) {
-      const unread = digests.filter(a => !digestReadIds.has(String(a.id))).length;
-      data.push({type: 'digestBanner', count: digests.length, unread});
+    // Digest banner and the Explainers teaser share one row, half-width each,
+    // once both exist - see ExplainerTeaser below for why this pairs with
+    // Flying Lap specifically rather than getting its own separate row.
+    // Either can also appear alone (full width) if the other has nothing to
+    // show yet, matching DigestBanner's own pre-existing solo behaviour.
+    const hasDigests = digests.length > 0;
+    const hasExplainers = explainerCount > 0;
+    if (hasDigests || hasExplainers) {
+      const unread = hasDigests ? digests.filter(a => !digestReadIds.has(String(a.id))).length : 0;
+      data.push({
+        type: 'bannerRow',
+        digest: hasDigests ? {count: digests.length, unread} : null,
+        explainerCount: hasExplainers ? explainerCount : null,
+      });
     }
     if (remaining.length > 0) {
       data.push({type: 'moreHeader'});
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds]);
+  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds, explainerCount]);
 
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
@@ -260,16 +279,31 @@ export default function NewsScreen({navigation}) {
         return <Text style={styles.moreHeader}>MORE STORIES</Text>;
       case 'compact':
         return <CompactCard article={item.article} favourite={favourites} onPress={() => { Analytics.articleClicked(item.article.title, 'list', item.article.source, undefined, item.article.sortDate); openArticle(item.article); }} />;
-      case 'digestBanner':
+      case 'bannerRow':
         return (
-          <DigestBanner
-            count={item.count}
-            unread={item.unread}
-            onPress={() => {
-              Analytics.navItemClicked('digest_banner');
-              navigation.navigate('Digests');
-            }}
-          />
+          <View style={styles.bannerRow}>
+            {item.digest && (
+              <DigestBanner
+                style={styles.bannerItem}
+                count={item.digest.count}
+                unread={item.digest.unread}
+                onPress={() => {
+                  Analytics.navItemClicked('digest_banner');
+                  navigation.navigate('Digests');
+                }}
+              />
+            )}
+            {item.explainerCount && (
+              <ExplainerTeaser
+                style={styles.bannerItem}
+                count={item.explainerCount}
+                onPress={() => {
+                  Analytics.navItemClicked('explainer_teaser');
+                  navigation.navigate('ExplainerList');
+                }}
+              />
+            )}
+          </View>
         );
       default:
         return null;
@@ -477,14 +511,14 @@ function GridRow({articles, favourite, onPress}) {
 }
 
 // ── Digest Banner ─────────────────────────────────────────────────
-function DigestBanner({count, unread, onPress}) {
+function DigestBanner({count, unread, onPress, style}) {
   const hasUnread = unread > 0;
   const subtitle = hasUnread
-    ? `${unread} unread edition${unread !== 1 ? 's' : ''}`
+    ? `${unread} unread`
     : 'All caught up';
   return (
     <TouchableOpacity
-      style={[styles.digestBanner, hasUnread ? styles.digestBannerUnread : styles.digestBannerRead]}
+      style={[styles.digestBanner, hasUnread ? styles.digestBannerUnread : styles.digestBannerRead, style]}
       activeOpacity={0.8}
       onPress={onPress}
       accessibilityLabel="View The Flying Lap"
@@ -496,10 +530,17 @@ function DigestBanner({count, unread, onPress}) {
         style={styles.digestBannerIcon}
       />
       <View style={{flex: 1}}>
-        <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: hasUnread ? '#000' : Colors.textSecondary}}>
+        {/* "THE FLYING LAP" doesn't fit on one line in this half-width tile
+            the way "ACADEMY" does - allowed to wrap onto a second line
+            instead of truncating. bannerRow has no explicit alignItems, so
+            it defaults to stretch: the row grows to match this tile's
+            taller two-line content and the Academy tile (still one line)
+            stretches to the same height alongside it, keeping the row
+            visually even rather than one tile taller than the other. */}
+        <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: hasUnread ? '#000' : Colors.textSecondary}} numberOfLines={2}>
           THE FLYING LAP
         </Text>
-        <Text style={{fontSize: 12, marginTop: 2, color: hasUnread ? 'rgba(0,0,0,0.6)' : Colors.textSecondary}}>
+        <Text style={{fontSize: 12, marginTop: 2, color: hasUnread ? 'rgba(0,0,0,0.6)' : Colors.textSecondary}} numberOfLines={1}>
           {subtitle}
         </Text>
       </View>
@@ -509,6 +550,41 @@ function DigestBanner({count, unread, onPress}) {
         color={hasUnread ? '#000' : Colors.textSecondary}
         style={hasUnread && styles.digestBannerChevronUnread}
       />
+    </TouchableOpacity>
+  );
+}
+
+// ── Explainer Teaser ──────────────────────────────────────────────
+// Entry point into the separate "Academy" section (regulation-explainer
+// articles BTCC Hub writes itself, not btcc.net journalism), renamed from
+// "Explained" (09-02) - the original name fit this tile fine on its own,
+// but the request that prompted the rename was really about the OTHER
+// tile's truncation, discovered via a clarifying question turning up that
+// "the new article section" meant this one, not the digest banner beside
+// it. Deliberately
+// paired with DigestBanner in the same row rather than given its own, per
+// the placement this was built to: half the width of the existing Flying
+// Lap banner, sitting alongside it, not a new row of its own. Gated on
+// explainerCount > 0 by the caller (see listData above) - this component
+// itself is never rendered until at least one explainer article is published.
+function ExplainerTeaser({count, onPress, style}) {
+  return (
+    <TouchableOpacity
+      style={[styles.digestBanner, styles.digestBannerRead, style]}
+      activeOpacity={0.8}
+      onPress={onPress}
+      accessibilityLabel="View Academy articles"
+      accessibilityRole="button">
+      <Icon name="menu-book" size={22} color={Colors.textSecondary} style={styles.digestBannerIcon} />
+      <View style={{flex: 1}}>
+        <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: Colors.textSecondary}} numberOfLines={1}>
+          ACADEMY
+        </Text>
+        <Text style={{fontSize: 12, marginTop: 2, color: Colors.textSecondary}} numberOfLines={1}>
+          {count} article{count !== 1 ? 's' : ''}
+        </Text>
+      </View>
+      <Icon name="chevron-right" size={22} color={Colors.textSecondary} />
     </TouchableOpacity>
   );
 }

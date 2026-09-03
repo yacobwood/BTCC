@@ -165,13 +165,21 @@ export default StyleSheet.create({
     elevation: 6,
   },
 
-  // Digest banner (between hero and grid)
-  digestBanner: {
+  // Digest banner / Explainer teaser (between hero and grid) - margins moved
+  // to bannerRow below, since both banners now always render inside that
+  // wrapper (even when only one of the two exists) rather than owning their
+  // own outer spacing directly.
+  bannerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: 8,
     marginHorizontal: 16,
     marginTop: 10,
     marginBottom: -10,
+  },
+  bannerItem: {flex: 1},
+  digestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,

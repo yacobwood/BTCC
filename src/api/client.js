@@ -404,3 +404,80 @@ export async function fetchArticleBySlug(slug, forceRefresh = false) {
     return null;
   }
 }
+
+// ── Explainer articles ────────────────────────────────────────────
+// Regulation-explainer pieces (Independents' Trophy, TTB, how points are
+// scored, etc.) - deliberately a separate file and a separate fetch path
+// from hub_news.json/fetchHubPosts, not merged into the News feed the way
+// hub posts are. Each entry stays 'staged' (invisible to fetchExplainerArticles)
+// until an admin publishes it via the admin panel, which flips status to
+// 'published' and commits the change - the same manual-review gate the
+// digest/hub pipeline already uses for AI-assisted drafts, see
+// project_article_topic_list_drafts memory for why these 48 pieces
+// specifically need that review step before reaching real users.
+const EXPLAINER_CACHE_KEY = 'explainer_articles';
+const EXPLAINER_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes, matches fetchHubPosts
+
+// Local preview switch only - flip to true to see every draft article in a
+// dev build (ignoring status and reading the file straight off disk instead
+// of the live GitHub copy), then flip back to false before committing or
+// running tests. Never ship this as true; it is not read by any test.
+const PREVIEW_ALL_EXPLAINERS_LOCALLY = false;
+
+function mapExplainerPosts(data, includeAllStatuses = false) {
+  return (data.posts || [])
+    .filter(p => includeAllStatuses || p.status === 'published')
+    .map(p => ({
+      id: p.id,
+      title: p.title || '',
+      link: null,
+      description: p.description || '',
+      sortDate: p.pubDate || p.scheduledDate || new Date().toISOString(),
+      orderDate: p.pubDate || p.scheduledDate || new Date().toISOString(),
+      pubDate: formatDate(p.pubDate || p.scheduledDate || ''),
+      imageUrl: p.imageUrl || null,
+      imageCredit: p.imageCredit || null,
+      imageCreditUrl: p.imageCreditUrl || null,
+      imageLicense: p.imageLicense || null,
+      category: p.category || 'Regs Explained',
+      content: p.content || '',
+      source: p.source || 'btcc hub',
+      sourceUrl: null,
+      order: typeof p.order === 'number' ? p.order : null,
+    }))
+    .sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate));
+}
+
+export async function fetchExplainerArticles() {
+  if (PREVIEW_ALL_EXPLAINERS_LOCALLY) {
+    return mapExplainerPosts(require('../../data/explainer_articles.json'), true);
+  }
+  try {
+    const cached = await cacheRead(EXPLAINER_CACHE_KEY, EXPLAINER_CACHE_MAX_AGE);
+    let data;
+    if (cached) {
+      fetch(`${BASE_GITHUB}/explainer_articles.json?t=${Date.now()}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) cacheWrite(EXPLAINER_CACHE_KEY, d); })
+        .catch(() => {});
+      data = cached;
+    } else {
+      const res = await fetch(`${BASE_GITHUB}/explainer_articles.json?t=${Date.now()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      cacheWrite(EXPLAINER_CACHE_KEY, data).catch(() => {});
+    }
+    return mapExplainerPosts(data);
+  } catch {
+    const stale = await cacheRead(EXPLAINER_CACHE_KEY);
+    if (stale) return mapExplainerPosts(stale);
+    return [];
+  }
+}
+
+// Used by notifNavigation.js to resolve a notification's article id into the
+// full article object, same role fetchHubPost plays for type:'hub'/'digest'.
+export async function fetchExplainerArticleById(id) {
+  const all = await fetchExplainerArticles();
+  return all.find(a => String(a.id) === String(id)) ?? null;
+}

@@ -28,6 +28,16 @@ on:
         description: 'Image URL (optional)'
         required: false
         default: ''
+      topic:
+        description: |
+          FCM topic to send to (optional). Defaults to 'broadcast', which every
+          install is force-subscribed to regardless of any Settings toggle -
+          existing News/Digest triggers deliberately keep relying on that
+          default. Pass a specific topic (e.g. 'explainer_alerts') only for a
+          notification type that has its own opt-out toggle in settings.js,
+          since that's the only way the toggle actually has any effect.
+        required: false
+        default: 'broadcast'
 
 jobs:
   send:
@@ -55,10 +65,14 @@ jobs:
 
           const db = admin.firestore();
 
-          // All app installs subscribe to the 'broadcast' topic unconditionally (settings.js).
-          // Single send — no duplicates possible.
+          // Defaults to the 'broadcast' topic, which every app install is
+          // force-subscribed to unconditionally (settings.js) - existing
+          // News/Digest triggers rely on that default and are unaffected by
+          // this change. A caller wanting an actually-toggleable notification
+          // (one with its own Settings switch) passes a specific topic instead.
+          const topic = process.env.TOPIC || 'broadcast';
           admin.messaging().send({
-            topic: 'broadcast',
+            topic,
             android: { priority: 'high' },
             apns: { payload: { aps: { alert: { title: process.env.TITLE, body }, sound: 'default' } } },
             data,
@@ -68,7 +82,7 @@ jobs:
               title: process.env.TITLE,
               body,
               channel: process.env.CHANNEL,
-              type: 'broadcast',
+              type: topic === 'broadcast' ? 'broadcast' : 'topic:' + topic,
               sentAt: new Date().toISOString(),
             });
             process.exit(0);
@@ -81,3 +95,4 @@ jobs:
           BODY: ${{ inputs.body }}
           EXTRA_DATA: ${{ inputs.data }}
           IMAGE_URL: ${{ inputs.image_url }}
+          TOPIC: ${{ inputs.topic }}

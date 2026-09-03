@@ -226,6 +226,29 @@ describe('navigateFromData', () => {
     });
   });
 
+  describe('explainer article deeplinks', () => {
+    // Same async-fetch shape as the 'hub' case above (fetchExplainerArticleById
+    // resolves the id into a full article before navigating), just through
+    // ExplainerList in the back stack rather than Digests/NewsFeed directly -
+    // see notifNavigation.js for why this gets its own branch rather than
+    // reusing 'hub'.
+    it('type="explainer" with id triggers async fetch (navigate not called synchronously)', () => {
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'explainer', id: 'explainer-ttb-toca-turbo-boost'});
+
+      expect(ref.navigate).not.toHaveBeenCalled();
+      expect(ref.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('does nothing synchronously for type="explainer" with no id', () => {
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'explainer'});
+
+      expect(ref.navigate).not.toHaveBeenCalled();
+      expect(ref.dispatch).not.toHaveBeenCalled();
+    });
+  });
+
   describe('no-op cases', () => {
     it('does nothing for undefined data', () => {
       const ref = makeRef();
@@ -472,6 +495,13 @@ describe('handleNotificationOpen', () => {
     expect(ref.dispatch).toHaveBeenCalledWith(
       resetTo('News', nestedState([{name: 'NewsFeed'}, {name: 'Article', params: {slug: 'btcc-2026-season-preview', trafficSource: 'notification'}}])),
     );
+  });
+
+  it('also tracks articleClicked for type="explainer" - it is an article notif type too, just not real News', () => {
+    const ref = makeRef();
+    handleNotificationOpen(ref, {type: 'explainer', id: 'explainer-ttb-toca-turbo-boost'});
+
+    expect(Analytics.articleClicked).toHaveBeenCalledWith('explainer-ttb-toca-turbo-boost', 'notification', undefined, 'notification');
   });
 
   it('falls back to id, then type, as the tracked article id when slug is absent', () => {

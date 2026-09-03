@@ -12,6 +12,7 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('../../src/api/client', () => ({
   fetchArticles: jest.fn(),
   fetchHubPosts: jest.fn(),
+  fetchExplainerArticles: jest.fn(),
   peekArticlesCache: jest.fn(),
 }));
 jest.mock('../../src/api/parsers', () => ({
@@ -21,7 +22,7 @@ jest.mock('../../src/utils/digestRead', () => ({
   getReadIds: jest.fn().mockResolvedValue(new Set()),
 }));
 
-const {fetchArticles, fetchHubPosts, peekArticlesCache} = require('../../src/api/client');
+const {fetchArticles, fetchHubPosts, fetchExplainerArticles, peekArticlesCache} = require('../../src/api/client');
 const nav = makeNav();
 
 beforeEach(() => {
@@ -29,16 +30,18 @@ beforeEach(() => {
   jest.clearAllMocks();
   fetchArticles.mockResolvedValue(MOCK_ARTICLES);
   fetchHubPosts.mockResolvedValue([]);
+  fetchExplainerArticles.mockResolvedValue([]);
   peekArticlesCache.mockResolvedValue(null); // cold start by default
 });
 
-function renderNews({articles = MOCK_ARTICLES, favourites = []} = {}) {
+function renderNews({articles = MOCK_ARTICLES, favourites = [], explainerArticles = []} = {}) {
   AsyncStorage.getItem.mockImplementation((key) => {
     if (key === 'favourite_drivers') return Promise.resolve(JSON.stringify(favourites));
     return Promise.resolve(null);
   });
   fetchArticles.mockResolvedValue(articles);
   fetchHubPosts.mockResolvedValue([]);
+  fetchExplainerArticles.mockResolvedValue(explainerArticles);
   return renderWithProviders(<NewsScreen navigation={nav} />);
 }
 
@@ -245,6 +248,50 @@ describe('NewsScreen', () => {
         fireEvent.press(getByLabelText('View The Flying Lap'));
       });
       expect(nav.navigate).toHaveBeenCalledWith('Digests');
+    });
+  });
+
+  describe('explainer teaser', () => {
+    // Gated on fetchExplainerArticles() actually returning something - the
+    // teaser (and the section it links to) must stay invisible until an
+    // admin has published at least one explainer article, per the
+    // "half the width of the Flying Lap, but only once the first one exists"
+    // requirement this was built to.
+    it('no explainer teaser when there are no published explainer articles yet', async () => {
+      const {getByText, queryByLabelText} = renderNews({articles: MOCK_ARTICLES, explainerArticles: []});
+      await waitFor(() => getByText('Ingram wins Race 1 at Donington'));
+      expect(queryByLabelText('View Academy articles')).toBeNull();
+    });
+
+    it('shows the explainer teaser once at least one explainer article exists', async () => {
+      const {getByLabelText} = renderNews({
+        articles: MOCK_ARTICLES,
+        explainerArticles: [{id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained'}],
+      });
+      await waitFor(() => getByLabelText('View Academy articles'));
+      expect(getByLabelText('View Academy articles')).toBeTruthy();
+    });
+
+    it('tapping the explainer teaser navigates to ExplainerList, not the real News feed', async () => {
+      const {getByLabelText} = renderNews({
+        articles: MOCK_ARTICLES,
+        explainerArticles: [{id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained'}],
+      });
+      await waitFor(() => getByLabelText('View Academy articles'));
+      await act(async () => {
+        fireEvent.press(getByLabelText('View Academy articles'));
+      });
+      expect(nav.navigate).toHaveBeenCalledWith('ExplainerList');
+    });
+
+    it('shows both Flying Lap and Academy teasers together when both have content', async () => {
+      const {getByLabelText} = renderNews({
+        articles: MOCK_ARTICLES_WITH_DIGEST,
+        explainerArticles: [{id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained'}],
+      });
+      await waitFor(() => getByLabelText('View The Flying Lap'));
+      expect(getByLabelText('View The Flying Lap')).toBeTruthy();
+      expect(getByLabelText('View Academy articles')).toBeTruthy();
     });
   });
 

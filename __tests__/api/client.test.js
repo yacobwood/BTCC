@@ -25,6 +25,8 @@ import {
   fetchArticles,
   fetchArticleBySlug,
   fetchHubPosts,
+  fetchExplainerArticles,
+  fetchExplainerArticleById,
   peekArticlesCache,
   fetchLiveStatus,
   fetchBlacklist,
@@ -572,6 +574,96 @@ describe('fetchHubPosts', () => {
     expect(result).toHaveLength(500);
     expect(result[0].id).toBe('500'); // newest kept
     expect(result.map(p => p.id)).not.toContain('0'); // oldest dropped
+  });
+});
+
+describe('fetchExplainerArticles', () => {
+  const staged = {id: 'explainer-brakes', title: 'Brakes', status: 'staged', scheduledDate: '2026-11-17', source: 'btcc hub', order: 12};
+  const published = {id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained', status: 'published', pubDate: '2026-10-23T09:00:00', source: 'btcc hub', order: 5};
+
+  it('returns only published articles, not staged ones', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [staged, published]})});
+    const result = await fetchExplainerArticles();
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('explainer-ttb-toca-turbo-boost');
+  });
+
+  it('returns an empty array when nothing has been published yet - the section-gating case', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [staged]})});
+    const result = await fetchExplainerArticles();
+    expect(result).toEqual([]);
+  });
+
+  it('maps posts to the shape ArticleScreen/ExplainerListScreen expect', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchExplainerArticles();
+    const p = result[0];
+    expect(p).toHaveProperty('id');
+    expect(p).toHaveProperty('title');
+    expect(p).toHaveProperty('content');
+    expect(p).toHaveProperty('sortDate');
+    expect(p).toHaveProperty('orderDate');
+    expect(p).toHaveProperty('category');
+    expect(p.order).toBe(5);
+  });
+
+  it('sets order to null when the source data has no numeric order', async () => {
+    const noOrder = {...published, order: undefined};
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [noOrder]})});
+    const result = await fetchExplainerArticles();
+    expect(result[0].order).toBeNull();
+  });
+
+  it('passes through image credit fields when a post has them', async () => {
+    const credited = {
+      ...published,
+      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/1958_Jack_Sears.JPG',
+      imageCredit: 'Aylesburyape',
+      imageCreditUrl: 'https://commons.wikimedia.org/wiki/File:1958_Jack_Sears.JPG',
+      imageLicense: 'CC BY 3.0',
+    };
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [credited]})});
+    const result = await fetchExplainerArticles();
+    expect(result[0].imageCredit).toBe('Aylesburyape');
+    expect(result[0].imageCreditUrl).toBe('https://commons.wikimedia.org/wiki/File:1958_Jack_Sears.JPG');
+    expect(result[0].imageLicense).toBe('CC BY 3.0');
+  });
+
+  it('sets image credit fields to null when a post has no image credit', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchExplainerArticles();
+    expect(result[0].imageCredit).toBeNull();
+    expect(result[0].imageCreditUrl).toBeNull();
+    expect(result[0].imageLicense).toBeNull();
+  });
+
+  it('returns empty array on fetch error', async () => {
+    global.fetch.mockRejectedValueOnce(new Error('network error'));
+    const result = await fetchExplainerArticles();
+    expect(result).toEqual([]);
+  });
+
+  it('adds cache-busting timestamp to URL', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: []})});
+    await fetchExplainerArticles();
+    const url = global.fetch.mock.calls[0][0];
+    expect(url).toMatch(/[?&]t=\d+/);
+  });
+});
+
+describe('fetchExplainerArticleById', () => {
+  const published = {id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained', status: 'published', pubDate: '2026-10-23T09:00:00', source: 'btcc hub'};
+
+  it('finds the matching published article by id', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchExplainerArticleById('explainer-ttb-toca-turbo-boost');
+    expect(result?.title).toBe('TTB explained');
+  });
+
+  it('returns null when no article matches the id (e.g. still staged, not yet published)', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchExplainerArticleById('explainer-does-not-exist');
+    expect(result).toBeNull();
   });
 });
 
