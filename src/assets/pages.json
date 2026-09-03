@@ -64,7 +64,7 @@
         },
         {
           "type": "text",
-          "body": "Official Qualifying runs in two groups of roughly equal size. Group 1 consists of drivers who finished in odd-numbered positions in free practice; Group 2 the even-numbered finishers. Each group gets 15 minutes on track. Both groups' lap times are then combined and ranked, with the fastest overall time winning pole for the Qualifying Race."
+          "body": "Official Qualifying runs in two groups of roughly equal size. Group 1 consists of drivers who finished in odd-numbered positions in free practice; Group 2 the even-numbered finishers. Each group gets 15 minutes on track. The faster of the two groups then takes the pole position side of the grid for the Qualifying Race, with each group's drivers ranked among themselves by their own group's times."
         },
         {
           "type": "text",
@@ -72,11 +72,11 @@
         },
         {
           "type": "text",
-          "body": "Parc Fermé begins at the start of qualifying and runs through to the end of the Qualifying Race. Teams cannot make setup changes during this window. Only tyre swaps if wet weather forces a compound change are permitted."
+          "body": "Parc Fermé begins at the start of qualifying and runs through to the end of the Qualifying Race. Teams cannot make setup changes during this window. Only tyre swaps and ride-height adjustments made through the wishbone or spring platform are permitted. This is allowed only if wet weather forces a compound change."
         },
         {
           "type": "callout",
-          "body": "If it rains between the two qualifying groups, one group may run in dry conditions and the other in wet. Because lap times are combined, drivers in the wet group face a significant natural disadvantage through no fault of their own. This quirk means qualifying luck and the group you happen to be placed in can have an outsized impact on the Race 1 grid."
+          "body": "If it rains between the two qualifying groups, one group may run in dry conditions and the other in wet. Because each group is judged as a whole against the other for grid position, drivers in the wet group face a significant natural disadvantage through no fault of their own. This quirk means qualifying luck and the group you happen to be placed in can have an outsized impact on the Race 1 grid."
         },
         {
           "type": "heading",
@@ -136,7 +136,7 @@
         },
         {
           "type": "text",
-          "body": "If a race is stopped by red flags, the outcome depends on how far it had progressed. If less than 50% of the race distance had been completed, the BTCC Clerk may declare the race null and void, with no points awarded. Between 50% and 75% complete, half points are awarded. If more than 75% complete when stopped, full points are awarded and the race is not usually restarted. Between 2 laps and 75%, the race can be restarted from the current running order with the remaining distance adjusted."
+          "body": "If a race is stopped by red flags, the outcome depends on how far it had progressed. If the leader has completed less than two laps, the race is declared no contest and simply restarts in full from the original grid. Beyond two laps and up to 75% complete, the race can instead be restarted from the current running order with the remaining distance adjusted, though if the leader had completed less than 50% the BTCC Clerk may choose not to restart at all and declare the race null and void with no points awarded. If more than 75% complete when stopped, full points are awarded and the race is not usually restarted, while a stoppage between 50% and 75% complete that is not restarted earns half points."
         },
         {
           "type": "heading",
@@ -176,15 +176,15 @@
         },
         {
           "type": "text",
-          "body": "When the Safety Car pulls into the pit lane at the end of a Safety Car period, the lead driver does not have to wait until a fixed point to resume racing. Two 'Go' boards are positioned 20 metres apart on the pit straight. The lead car can begin racing at any point between the first and second board. This gives the leader a small strategic choice - attack early from the first board to maximise the gap, or hold back and pick the exact moment to pounce. Cars behind must react instantly, as racing resumes the moment the leader accelerates."
+          "body": "When the Safety Car pulls into the pit lane at the end of a Safety Car period, the lead driver does not have to wait until a fixed point to resume racing. Two 'Go' boards are positioned between the final corner and the finish line. The lead car can begin racing at any point between the first and second board. This gives the leader a small strategic choice - attack early from the first board to maximise the gap, or hold back and pick the exact moment to pounce. Cars behind must react instantly, as racing resumes the moment the leader accelerates."
         },
         {
           "type": "text",
-          "body": "To compensate for time lost running behind the Safety Car, laps are added to the race distance. The number of laps added matches the number of laps completed under Safety Car conditions, so the total racing time stays as close to the intended distance as possible."
+          "body": "To compensate for time lost running behind the Safety Car, the race distance can be extended. The first three laps behind the Safety Car cost the race nothing at all and only laps beyond that first three each add one extra lap to the race, so a brief caution period barely dents the intended distance while a long one stretches it out lap for lap."
         },
         {
           "type": "callout",
-          "body": "The 20-metre window between the Go boards is one of the most overlooked details of a BTCC restart. A lead driver who hesitates, or whose rivals anticipate the acceleration perfectly, can lose ground in the blink of an eye - even before the first corner after the Safety Car comes in."
+          "body": "The window between the Go boards is one of the most overlooked details of a BTCC restart. A lead driver who hesitates or whose rivals anticipate the acceleration perfectly can lose ground in the blink of an eye - even before the first corner after the Safety Car comes in."
         },
         {
           "type": "heading",
@@ -251,7 +251,7 @@
         },
         {
           "type": "text",
-          "body": "All three of these championships use the same 20–17–15... base scale. No fastest lap or race leader bonus points. The Qualifying Race does not count. For Manufacturers' and Teams', each organisation nominates a maximum of two cars per race (declared at least 30 minutes before the Qualifying Session). Only those nominated cars score: the best two finishers from the same team or marque. For the Independents Teams' Championship, only the highest-placed car from each independent team scores per race."
+          "body": "All three of these championships use the same 20–17–15... base scale. No fastest lap or race leader bonus points. The Qualifying Race does not count. For Manufacturers' and Teams', each organisation nominates a maximum of two cars per race. Manufacturers must declare their two cars at least 30 minutes before the Qualifying Race, while Teams must declare theirs at least 30 minutes before the Qualifying Session. Only those nominated cars score: the best two finishers from the same team or marque. For the Independents Teams' Championship, only the highest-placed car from each independent team scores per race."
         },
         {
           "type": "heading",
@@ -267,7 +267,7 @@
         },
         {
           "type": "text",
-          "body": "If two or more drivers (or teams or manufacturers) finish the season level on points, the tiebreaker is: most first-place finishes. If still tied, most second-place finishes, then thirds, and so on until a winner emerges."
+          "body": "If two or more drivers (or teams or manufacturers) finish the season level on points, the tiebreaker is: most first-place finishes in the three Sunday Championship Rounds. If still tied, most second-place finishes, then thirds and so on until a winner emerges."
         },
         {
           "type": "heading",
@@ -275,7 +275,7 @@
         },
         {
           "type": "text",
-          "body": "If a race is stopped between 50% and 75% of its full distance, half points are awarded across all championships. If the leader has completed less than 50% of the race distance when it is stopped, the BTCC Clerk may declare the race null and void, with no points awarded to anyone. Reduced-length races that run to a shorter distance at the Clerk's discretion but complete fully still attract full points."
+          "body": "If a race is stopped between 2 laps and 75% of its full distance and not restarted, half points are awarded across all championships when the leader had completed at least 50%. If the leader had completed less than 50% at the time of stoppage, the BTCC Clerk may instead declare the race null and void, with no points awarded to anyone. If less than two laps had been completed, the race is simply declared no contest and restarts in full, with no points implications either way. Reduced-length races that run to a shorter distance at the Clerk's discretion but complete fully still attract full points."
         },
         {
           "type": "heading",
@@ -330,7 +330,7 @@
         },
         {
           "type": "text",
-          "body": "Teams supply their own engine, but it must be a 2.0-litre turbocharged direct-injection four-cylinder unit. Output typically exceeds 350 bhp. Engines are sealed at the start of the season by the BTCC Chief Scrutineer and may only be opened under official supervision. Each registered driver is allocated a maximum of two engines for the entire season. Exceeding that allocation triggers championship points deductions: 5 points for the first extra engine, scaling up for each subsequent one. If a sump is damaged in a race incident, it may be replaced and resealed without counting as a new engine."
+          "body": "Teams supply their own engine, but it must be a 2.0-litre turbocharged direct-injection four-cylinder unit. Output typically exceeds 350 bhp. Engines are sealed at the start of the season by the BTCC Chief Scrutineer and may only be opened under official supervision. Each registered driver is allocated a maximum of two engines for the entire season. Exceeding that allocation triggers championship points deductions: 5 points for the first extra engine, scaling up for each subsequent one. If a sump is damaged in a race incident, it may be replaced and resealed without counting as a new engine, though the car must then start its next race from the back of the grid."
         },
         {
           "type": "heading",
@@ -354,7 +354,7 @@
         },
         {
           "type": "text",
-          "body": "Front-wheel-drive cars must weigh a minimum of 1270 kg including the driver and all fluids. Rear-wheel-drive cars must weigh a minimum of 1300 kg. These weights are checked at the official weighbridge at every qualifying session and after every race. Teams running the TOCA-spec engine may have their minimum weight adjusted by bulletin during the season."
+          "body": "Front-wheel-drive cars must weigh a minimum of 1270 kg including the driver and all fluids. Rear-wheel-drive cars must weigh a minimum of 1300 kg. These weights are checked at the official weighbridge at every qualifying session and after every race. Any car's minimum weight may be adjusted by bulletin during the season at the Administrator's discretion."
         },
         {
           "type": "heading",
@@ -370,7 +370,7 @@
         },
         {
           "type": "text",
-          "body": "All cars must carry an FIA-approved Impact Data Recorder, a performance monitoring device (which also serves as the official judicial camera), and a pit lane speed limiter built into the ECU. The pit lane speed limiter is activated by a button on the steering wheel and automatically illuminates the rear fog lights to signal to marshals that it is active. GPS devices and mobile cellular communications are prohibited, other than TOCA-mandated systems."
+          "body": "All cars must carry an FIA-approved Impact Data Recorder, a performance monitoring device (which also serves as the official judicial camera), and a pit lane speed limiter built into the ECU. The pit lane speed limiter is activated by a button on the steering wheel and automatically flashes the rear fog lights to signal to marshals that it is active. GPS devices and mobile cellular communications are prohibited, other than TOCA-mandated systems."
         },
         {
           "type": "heading",
@@ -386,7 +386,7 @@
         },
         {
           "type": "text",
-          "body": "Front-wheel-drive cars are limited to 30 sets of brake discs for the season. Rear-wheel-drive cars are limited to 22 sets. All discs must be registered with the BTCC scrutineers before the first championship meeting. Only one set of discs may be used in the qualifying session."
+          "body": "Front-wheel-drive cars are limited to 30 sets of brake discs for the season. Rear-wheel-drive cars are limited to 22 sets. All discs must be declared to the BTCC scrutineers before use at each championship meeting. Only one set of discs may be used in the qualifying session."
         }
       ]
     },
@@ -417,7 +417,7 @@
         },
         {
           "type": "text",
-          "body": "Each driver's tyre allocation for a meeting varies by circuit. Some venues are allocated Soft and Hard, others Medium and Hard. The allocation is set by TOCA in advance and published per-event. All tyres must be officially marked by scrutineers at least 60 minutes before the first official session of the meeting. At the first championship meeting only, previously-used unmarked discs may be run in free practice as a one-off allowance."
+          "body": "Each driver's tyre allocation for a meeting varies by circuit. Each venue is allocated one of three possible compound pairings: Soft with Medium, Soft with Hard or Medium with Hard. The allocation is set by TOCA in advance and published per-event. All tyres must be officially marked by scrutineers at least 60 minutes before the first official session of the meeting, with no exception for the first meeting of the season."
         },
         {
           "type": "heading",
@@ -477,7 +477,7 @@
         },
         {
           "type": "text",
-          "body": "Thruxton is the only circuit where just the Hard compound is allocated for all three Sunday races. The track's high-speed, abrasive surface means softer compounds would degrade too quickly to be safe or competitive. Because there is only one dry compound available, there is no Option tyre rule at Thruxton. Substitute drivers at Thruxton may use up to 20 new Hard tyres."
+          "body": "Thruxton is the only circuit where just the Hard compound is used for all three Sunday races, with a small allowance of Medium tyres set aside for qualifying use only. The track's high-speed, abrasive surface means softer compounds would degrade too quickly to be safe or competitive across a full race distance. Because Hard is the only compound raced on, there is no Option tyre rule for the Sunday races at Thruxton, though the Medium tyre can still be used to attack a qualifying lap. Substitute drivers at Thruxton may use up to 20 new Hard tyres."
         },
         {
           "type": "heading",
@@ -485,7 +485,7 @@
         },
         {
           "type": "text",
-          "body": "At most circuits, only standard compound tyres are used in the qualifying sessions. However, at Donington Park (GP) and Brands Hatch (GP), the Option tyre is also permitted in the Official Qualifying sessions. This means teams can choose to run their softer compound to set a faster qualifying time, at the cost of using their only Option set in qualifying rather than saving it for a Sunday race."
+          "body": "At most circuits, only standard compound tyres are used in the qualifying sessions. However, at Thruxton, Donington Park (GP) and Brands Hatch (GP), the Option tyre is also permitted in the Official Qualifying sessions. This means teams can choose to run their softer compound to set a faster qualifying time, at the cost of using their only Option set in qualifying rather than saving it for a Sunday race."
         },
         {
           "type": "heading",
@@ -650,10 +650,6 @@
           "body": "There is an important nuance: drivers who received a podium position via post-race judicial proceedings (where they were not physically on the podium at the circuit at the time) remain eligible. The rule applies to actual podium presentations, not retroactively awarded positions."
         },
         {
-          "type": "text",
-          "body": "Final eligibility decisions rest with the BTCC Administrator, whose judgement is final. The Administrator can also review classifications during the season if new information comes to light."
-        },
-        {
           "type": "heading",
           "body": "How Points Are Scored"
         },
@@ -770,10 +766,6 @@
         {
           "type": "text",
           "body": "There is an important nuance: drivers who received a podium position via post-race judicial proceedings (where they were not physically on the podium at the circuit at the time) remain eligible. The rule applies to actual podium presentations, not retroactively awarded positions."
-        },
-        {
-          "type": "text",
-          "body": "Final eligibility decisions rest with the BTCC Administrator, whose judgement is final. The Administrator can also review classifications during the season if new information comes to light."
         },
         {
           "type": "subheading",
