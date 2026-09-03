@@ -23,6 +23,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
+import {getReadIds as getExplainerReadIds} from '../utils/explainerRead';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {checkAndStampLastOpen} from '../utils/inactivityBanner';
 import NudgeBanner from '../components/NudgeBanner';
@@ -55,14 +56,15 @@ export default function NewsScreen({navigation}) {
   const [searchKeyboardShown, setSearchKeyboardShown] = useState(false);
   const [error, setError] = useState(null);
   const [digestReadIds, setDigestReadIds] = useState(new Set());
-  // Count only, not the full list - the teaser row (and the section it links
-  // to) must stay invisible until an admin has actually published at least
-  // one explainer article. A plain count is all this screen needs; the full
-  // list lives in ExplainerListScreen. Fetched once on mount, not tied to the
-  // News pull-to-refresh cycle - explainers publish roughly twice a week, not
-  // the many-times-a-day cadence real news does, so it doesn't need one.
-  const [explainerCount, setExplainerCount] = useState(0);
-  useEffect(() => { fetchExplainerArticles().then(list => setExplainerCount(list.length)).catch(() => {}); }, []);
+  // The full list, not just a count - needed to compute an unread count for
+  // the teaser tile the same way digests do (below), not just gate whether
+  // the teaser row (and the section it links to) shows at all. Fetched once
+  // on mount, not tied to the News pull-to-refresh cycle - explainers
+  // publish roughly twice a week, not the many-times-a-day cadence real
+  // news does, so it doesn't need one.
+  const [explainerArticles, setExplainerArticles] = useState([]);
+  useEffect(() => { fetchExplainerArticles().then(setExplainerArticles).catch(() => {}); }, []);
+  const [explainerReadIds, setExplainerReadIds] = useState(new Set());
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
@@ -147,7 +149,10 @@ export default function NewsScreen({navigation}) {
       if (should) Analytics.inactivityBannerShown();
     });
   }, []);
-  useFocusEffect(useCallback(() => { getReadIds().then(setDigestReadIds); }, []));
+  useFocusEffect(useCallback(() => {
+    getReadIds().then(setDigestReadIds);
+    getExplainerReadIds().then(setExplainerReadIds);
+  }, []));
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
@@ -253,13 +258,14 @@ export default function NewsScreen({navigation}) {
     // Either can also appear alone (full width) if the other has nothing to
     // show yet, matching DigestBanner's own pre-existing solo behaviour.
     const hasDigests = digests.length > 0;
-    const hasExplainers = explainerCount > 0;
+    const hasExplainers = explainerArticles.length > 0;
     if (hasDigests || hasExplainers) {
       const unread = hasDigests ? digests.filter(a => !digestReadIds.has(String(a.id))).length : 0;
+      const explainerUnread = hasExplainers ? explainerArticles.filter(a => !explainerReadIds.has(String(a.id))).length : 0;
       data.push({
         type: 'bannerRow',
         digest: hasDigests ? {count: digests.length, unread} : null,
-        explainerCount: hasExplainers ? explainerCount : null,
+        explainer: hasExplainers ? {count: explainerArticles.length, unread: explainerUnread} : null,
       });
     }
     if (remaining.length > 0) {
@@ -267,7 +273,7 @@ export default function NewsScreen({navigation}) {
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds, explainerCount]);
+  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds, explainerArticles, explainerReadIds]);
 
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
@@ -293,10 +299,11 @@ export default function NewsScreen({navigation}) {
                 }}
               />
             )}
-            {item.explainerCount && (
+            {item.explainer && (
               <ExplainerTeaser
                 style={styles.bannerItem}
-                count={item.explainerCount}
+                count={item.explainer.count}
+                unread={item.explainer.unread}
                 onPress={() => {
                   Analytics.navItemClicked('explainer_teaser');
                   navigation.navigate('ExplainerList');
@@ -565,26 +572,42 @@ function DigestBanner({count, unread, onPress, style}) {
 // paired with DigestBanner in the same row rather than given its own, per
 // the placement this was built to: half the width of the existing Flying
 // Lap banner, sitting alongside it, not a new row of its own. Gated on
-// explainerCount > 0 by the caller (see listData above) - this component
-// itself is never rendered until at least one explainer article is published.
-function ExplainerTeaser({count, onPress, style}) {
+// explainerArticles.length > 0 by the caller (see listData above) - this
+// component itself is never rendered until at least one explainer article
+// is published.
+//
+// unread/highlighting mirrors DigestBanner exactly (added 2026-09-03,
+// after the tile shipped always-grey despite Academy already having its
+// own read/unread tracking - explainerRead.js, ported from digestRead.js
+// the same day as ExplainerListScreen's own read/unread UI - the teaser
+// tile itself just never got wired up to it).
+function ExplainerTeaser({count, unread, onPress, style}) {
+  const hasUnread = unread > 0;
+  const subtitle = hasUnread
+    ? `${unread} unread`
+    : `${count} article${count !== 1 ? 's' : ''}`;
   return (
     <TouchableOpacity
-      style={[styles.digestBanner, styles.digestBannerRead, style]}
+      style={[styles.digestBanner, hasUnread ? styles.digestBannerUnread : styles.digestBannerRead, style]}
       activeOpacity={0.8}
       onPress={onPress}
       accessibilityLabel="View Academy articles"
       accessibilityRole="button">
-      <Icon name="menu-book" size={22} color={Colors.textSecondary} style={styles.digestBannerIcon} />
+      <Icon name="menu-book" size={22} color={hasUnread ? '#000' : Colors.textSecondary} style={styles.digestBannerIcon} />
       <View style={{flex: 1}}>
-        <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: Colors.textSecondary}} numberOfLines={1}>
+        <Text style={{fontSize: 14, fontWeight: '900', letterSpacing: 0.5, color: hasUnread ? '#000' : Colors.textSecondary}} numberOfLines={1}>
           ACADEMY
         </Text>
-        <Text style={{fontSize: 12, marginTop: 2, color: Colors.textSecondary}} numberOfLines={1}>
-          {count} article{count !== 1 ? 's' : ''}
+        <Text style={{fontSize: 12, marginTop: 2, color: hasUnread ? 'rgba(0,0,0,0.6)' : Colors.textSecondary}} numberOfLines={1}>
+          {subtitle}
         </Text>
       </View>
-      <Icon name="chevron-right" size={22} color={Colors.textSecondary} />
+      <Icon
+        name="chevron-right"
+        size={22}
+        color={hasUnread ? '#000' : Colors.textSecondary}
+        style={hasUnread && styles.digestBannerChevronUnread}
+      />
     </TouchableOpacity>
   );
 }

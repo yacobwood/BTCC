@@ -21,8 +21,13 @@ jest.mock('../../src/api/parsers', () => ({
 jest.mock('../../src/utils/digestRead', () => ({
   getReadIds: jest.fn().mockResolvedValue(new Set()),
 }));
+jest.mock('../../src/utils/explainerRead', () => ({
+  getReadIds: jest.fn().mockResolvedValue(new Set()),
+}));
 
 const {fetchArticles, fetchHubPosts, fetchExplainerArticles, peekArticlesCache} = require('../../src/api/client');
+const {getReadIds: getExplainerReadIds} = require('../../src/utils/explainerRead');
+const {useFocusEffect} = require('@react-navigation/native');
 const nav = makeNav();
 
 beforeEach(() => {
@@ -292,6 +297,37 @@ describe('NewsScreen', () => {
       await waitFor(() => getByLabelText('View The Flying Lap'));
       expect(getByLabelText('View The Flying Lap')).toBeTruthy();
       expect(getByLabelText('View Academy articles')).toBeTruthy();
+    });
+
+    // Regression coverage: found 2026-09-03 - the teaser had its own
+    // read/unread infrastructure available (explainerRead.js, ported from
+    // digestRead.js the same day ExplainerListScreen got its read/unread
+    // UI) but the tile itself was never wired up to it, so it always
+    // rendered in the plain "read" grey style regardless of unread count -
+    // unlike DigestBanner, which turns yellow. useFocusEffect is a bare
+    // no-op mock at the top of this file, so these two tests locally
+    // override it to actually invoke its callback (the only way to
+    // exercise explainerReadIds/digestReadIds at all in this file).
+    it('turns yellow and shows an unread count when explainer articles are unread', async () => {
+      useFocusEffect.mockImplementationOnce(cb => cb());
+      getExplainerReadIds.mockResolvedValueOnce(new Set());
+      const {getByLabelText, getByText} = renderNews({
+        articles: MOCK_ARTICLES,
+        explainerArticles: [{id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained'}],
+      });
+      await waitFor(() => getByText('1 unread'));
+      expect(getByLabelText('View Academy articles')).toHaveStyle({backgroundColor: '#FEBD02'});
+    });
+
+    it('stays grey and shows the article count once all explainer articles are read', async () => {
+      useFocusEffect.mockImplementationOnce(cb => cb());
+      getExplainerReadIds.mockResolvedValueOnce(new Set(['explainer-ttb-toca-turbo-boost']));
+      const {getByLabelText, getByText} = renderNews({
+        articles: MOCK_ARTICLES,
+        explainerArticles: [{id: 'explainer-ttb-toca-turbo-boost', title: 'TTB explained'}],
+      });
+      await waitFor(() => getByText('1 article'));
+      expect(getByLabelText('View Academy articles')).not.toHaveStyle({backgroundColor: '#FEBD02'});
     });
   });
 
