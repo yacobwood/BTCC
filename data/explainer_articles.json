@@ -11,12 +11,15 @@
       "imageLicense": null,
       "category": "Regs Explained",
       "source": "btcc hub",
-      "status": "staged",
+      "status": "draft",
       "scheduledDate": "2026-10-13",
       "pubDate": null,
       "order": 1,
       "notifTitleOverride": "Introducing BTCC Academy",
-      "notifBodyOverride": "Your guide to the rules behind the racing - new explainer articles added regularly"
+      "notifBodyOverride": "Your guide to the rules behind the racing - new explainer articles added regularly",
+      "previewDeviceIds": [
+        "ZzVw630F1tSeMg912pBHAnMdi132"
+      ]
     },
     {
       "id": "explainer-how-points-are-scored",
