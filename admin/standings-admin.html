@@ -1489,6 +1489,9 @@ select.input { cursor: pointer; }
     <div style="text-align:right;margin-top:4px">
       <a href="#" onclick="changeMyUid();return false" style="font-size:11px;color:var(--text-sec)">change my device's User ID</a>
     </div>
+    <div class="section-note" style="margin-top:8px">
+      The notification for "Preview on my device" / "Save &amp; Publish" can arrive before the article itself is actually fetchable - raw.githubusercontent.com can take up to a couple of minutes to serve a just-committed file, regardless of the app's own cache-busting. If tapping the notification lands on the article list with nothing there, wait a minute or two and try again (or just reopen the Academy section) rather than assume something's broken.
+    </div>
     <div id="explainer-edit-status" class="status-line"></div>
   </div>
 
