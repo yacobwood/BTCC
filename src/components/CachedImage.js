@@ -61,7 +61,14 @@ export default function CachedImage({uri, style, resizeMode = 'cover', targetWid
   }, []);
 
   const source = useMemo(() => ({uri: src}), [src]);
-  const handleError = useCallback(() => {
+  const handleError = useCallback((e) => {
+    // handleError previously had no visibility into *why* a load failed -
+    // every failure looked identical (network blip, dead URL, CDN block,
+    // decode error) all the way to the broken-image fallback. Logging the
+    // native error string here so a genuinely reproducible failure (survives
+    // retries + a rebuild) is diagnosable from Metro/logcat instead of
+    // guessed at.
+    console.warn(`CachedImage load failed for ${src}:`, e?.nativeEvent?.error);
     if (src !== uri) {
       setSrc(uri);
       return;
