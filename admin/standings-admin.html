@@ -1481,10 +1481,13 @@ select.input { cursor: pointer; }
         Sends the title/body above (with your override, if filled in) to just your own phone via send-test-notif.yml - never the real explainer_alerts topic, so this is safe to use as many times as you like before an actual Save &amp; Publish. Needs your device token once (Settings → tap "Device Token" in the app to copy it). "Preview on my device" below sends this same test notification automatically, on top of making the article itself visible on your device - use this button on its own only when you want just the notification, with no change to what's saved.
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
       <button class="btn-primary" style="flex:1" onclick="saveExplainerEdit()">SAVE CHANGES</button>
       <button class="btn-sm" style="border-color:var(--blue);color:var(--blue)" onclick="previewExplainerOnMyDevice()" title="Visible only on your own device (Settings → User ID) - never the real News tab for anyone else. Also sends you a test notification, same as a real Save &amp; Publish would.">PREVIEW ON MY DEVICE</button>
       <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAndPublishExplainer()">SAVE &amp; PUBLISH</button>
+    </div>
+    <div style="text-align:right;margin-top:4px">
+      <a href="#" onclick="changeMyUid();return false" style="font-size:11px;color:var(--text-sec)">change my device's User ID</a>
     </div>
     <div id="explainer-edit-status" class="status-line"></div>
   </div>
