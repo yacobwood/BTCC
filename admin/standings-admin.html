@@ -1490,7 +1490,7 @@ select.input { cursor: pointer; }
       <a href="#" onclick="changeMyUid();return false" style="font-size:11px;color:var(--text-sec)">change my device's User ID</a>
     </div>
     <div class="section-note" style="margin-top:8px">
-      "Preview on my device" and "Save &amp; Publish" now wait for raw.githubusercontent.com to actually be serving the new content before sending the notification (shown as a countdown above - can take up to ~2 minutes, since that's a backend propagation delay on GitHub's side, not something this app's own cache-busting can shortcut). If a wait ever times out and the notification arrives anyway with nothing at the other end, wait another minute and reopen the Academy section rather than assume something's broken.
+      "Preview on my device" and "Save &amp; Publish" now wait for raw.githubusercontent.com to actually be serving the new content before sending the notification (shown as a countdown above - can take a few minutes, up to a 6-minute ceiling, since that's a backend propagation delay on GitHub's side, not something this app's own cache-busting can shortcut). The notification only fires once the content is confirmed live, so tapping it should always open the article straight away. If a wait ever hits that 6-minute ceiling and the notification arrives anyway with nothing at the other end yet, the app will keep quietly checking in the background for another 2 minutes and open the article as soon as it appears - no need to do anything, but if you check the Academy list yourself in that window it may briefly not be there yet.
     </div>
     <div id="explainer-edit-status" class="status-line"></div>
   </div>
@@ -3602,7 +3602,7 @@ async function saveExplainerEdit(mode = 'save') {
     );
     statusEl.textContent = live
       ? '✓ Live - notification sent, check your phone'
-      : '⚠ Still unconfirmed after 2 min - sent anyway, may need a retry';
+      : '⚠ Still unconfirmed after 6 min - sent anyway, may need a retry';
   }
   if (mode === 'publish' || mode === 'preview') {
     // Leave the final status line up briefly instead of yanking the card
@@ -3622,9 +3622,9 @@ async function quickPublishExplainer(articleId) {
   if (!p) return;
   // Not "immediately" any more (2026-09-04) - saveExplainers now waits for
   // raw.githubusercontent.com to actually serve the published state before
-  // notifying, which can take up to ~2 minutes. Wording it as "shortly after"
-  // rather than reintroducing a promise the wait-before-notify fix exists
-  // specifically to no longer make.
+  // notifying, which can take a few minutes (up to a 6-minute ceiling).
+  // Wording it as "shortly after" rather than reintroducing a promise the
+  // wait-before-notify fix exists specifically to no longer make.
   if (!confirm(`Publish "${p.title}"? This sends a push notification shortly after.`)) return;
   p.status = 'published';
   p.pubDate = p.pubDate || nowIso();
@@ -3646,18 +3646,31 @@ async function deleteExplainer(articleId) {
 
 // Polls raw.githubusercontent.com for the just-committed explainer_articles.json
 // until `predicate` matches the article by id, or timeoutMs elapses. Exists
-// because raw.githubusercontent.com has its own backend propagation delay of
-// up to roughly two minutes after a commit lands - separate from, and not
-// fixed by, this app's own ?t= cache-busting (that only defeats caching of an
-// *existing* response, not a backend that hasn't finished replicating a
-// brand-new commit yet). Traced live 2026-09-03/04: firing the push the
-// instant the GitHub Contents API PUT returned 200 could notify a device
-// before there was anything there for it to fetch. Waiting here until the
-// predicate is genuinely true removes that race instead of just warning
-// about it - see [[project_raw_githubusercontent_propagation_delay]] and the
-// note still left under the buttons below as a fallback for the rare case
-// this still times out.
-async function waitForExplainerLive(articleId, predicate, {timeoutMs = 130000, intervalMs = 4000, onTick} = {}) {
+// because raw.githubusercontent.com has its own backend propagation delay
+// after a commit lands - separate from, and not fixed by, this app's own ?t=
+// cache-busting (that only defeats caching of an *existing* response, not a
+// backend that hasn't finished replicating a brand-new commit yet). Firing
+// the push the instant the GitHub Contents API PUT returned 200 could notify
+// a device before there was anything there for it to fetch. Waiting here
+// until the predicate is genuinely true removes that race instead of just
+// warning about it - see [[project_raw_githubusercontent_propagation_delay]].
+//
+// timeoutMs raised 130000 -> 360000 (2026-09-04): the original ~2-minute
+// figure was an early estimate, not measured - every single real test the
+// day this shipped had its notification arrive 2m25s-2m40s after commit,
+// suspiciously exactly matching 130s + a few seconds of GitHub Actions
+// dispatch latency, meaning the predicate had NEVER ONCE actually matched
+// before timing out; every notification sent that day was the "gave up,
+// sent anyway" fallback, not the intended "confirmed live" path - directly
+// causing every "tapped immediately, article not there" report that day,
+// since a tap is only ever truly instant when the notification doesn't go
+// out until the content already is live everywhere. Directly observed
+// propagation taking up to 4m13s the same day. 6 minutes gives real margin
+// above that without being open-ended - the note under the buttons and
+// ExplainerListScreen's own background poll (see api/client.js /
+// ExplainerListScreen.js) stay as defense-in-depth for whatever residual
+// tail this still doesn't cover, not the primary mitigation any more.
+async function waitForExplainerLive(articleId, predicate, {timeoutMs = 360000, intervalMs = 4000, onTick} = {}) {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     try {
