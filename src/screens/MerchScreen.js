@@ -17,7 +17,6 @@ import {Colors} from '../theme/colors';
 import {fetchDrivers, fetchMerchStores} from '../api/client';
 import {parseGrid} from '../api/parsers';
 import {Analytics} from '../utils/analytics';
-import {useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CachedImage from '../components/CachedImage';
 
@@ -86,10 +85,6 @@ export default function MerchScreen({navigation}) {
   const [pickerTeam, setPickerTeam] = useState(null);
   const {bottom: bottomInset} = useSafeAreaInsets();
   const scrollRef = useRef(null);
-
-  useFocusEffect(useCallback(() => {
-    scrollRef.current?.scrollTo({y: 0, animated: false});
-  }, []));
 
   useEffect(() => { Analytics.screen('merch'); }, []);
 

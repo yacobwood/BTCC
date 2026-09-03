@@ -32,8 +32,17 @@ export function renderWithProviders(ui, options = {}) {
   return render(ui, {wrapper: AllProviders, ...options});
 }
 
-// A minimal navigation prop accepted by most screens
+// A minimal navigation prop accepted by most screens.
+//
+// getParent().addListener('tabPress', cb) actually stores cb here (unlike a
+// plain no-op jest.fn()), so tests can call nav.__fireTabPress() to simulate
+// a real tab bar press - this is what useTabPressReset (src/navigation/
+// useTabPressReset.js) subscribes to. getState() defaults to a single-route
+// stack (index 0, one route) so the default mock exercises the "already at
+// root, no stack to pop" path; pass stateOverride to simulate a deeper stack.
 export function makeNav(overrides = {}) {
+  const tabPressListeners = [];
+  const {stateOverride, ...rest} = overrides;
   return {
     navigate: jest.fn(),
     goBack: jest.fn(),
@@ -41,8 +50,25 @@ export function makeNav(overrides = {}) {
     dispatch: jest.fn(),
     setParams: jest.fn(),
     addListener: jest.fn(() => jest.fn()),
-    getParent: jest.fn(() => ({addListener: jest.fn(() => jest.fn())})),
-    ...overrides,
+    getState: jest.fn(() => stateOverride ?? {routes: [{name: 'Screen'}], index: 0}),
+    getParent: jest.fn(() => ({
+      addListener: jest.fn((event, cb) => {
+        if (event !== 'tabPress') return jest.fn();
+        tabPressListeners.push(cb);
+        // A real unsubscribe, not a no-op - since `nav` is typically shared
+        // (module-level `const nav = makeNav()`) across every test in a
+        // file, a listener a previous test's unmount didn't actually remove
+        // would still fire (harmlessly, against stale refs) on every
+        // subsequent test's __fireTabPress() call, and the array would grow
+        // unbounded across the whole file.
+        return () => {
+          const idx = tabPressListeners.indexOf(cb);
+          if (idx !== -1) tabPressListeners.splice(idx, 1);
+        };
+      }),
+    })),
+    __fireTabPress: () => tabPressListeners.forEach(cb => cb()),
+    ...rest,
   };
 }
 

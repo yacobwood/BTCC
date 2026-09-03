@@ -1,32 +1,16 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {NavigationContainer, useNavigation, getStateFromPath as defaultGetStateFromPath} from '@react-navigation/native';
+import {NavigationContainer, getStateFromPath as defaultGetStateFromPath} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {CommonActions} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 
-// Hook to reset stack to root when its parent tab is pressed
-function useResetStackOnTabPress(navigation, tabName) {
-  useEffect(() => {
-    const parent = navigation.getParent();
-    if (!parent) return;
-    const unsubscribe = parent.addListener('tabPress', (e) => {
-      const state = navigation.getState();
-      if (state && state.routes && state.routes.length > 1) {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{name: state.routes[0].name}],
-          })
-        );
-      }
-    });
-    return unsubscribe;
-  }, [navigation, tabName]);
-}
+// useTabPressReset lives in its own file (./useTabPressReset.js), not here -
+// screens that need it (DriversScreen, CalendarScreen, MoreScreen,
+// ResultsScreen) import it from there directly, so they don't pull in this
+// file's own imports of every other screen in the app.
 
 import NewsScreen from '../screens/NewsScreen';
 import ArticleScreen from '../screens/ArticleScreen';
@@ -48,6 +32,7 @@ import TocaRadioScreen from '../screens/TocaRadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
 import ListenScreen from '../screens/ListenScreen';
 import DigestsScreen from '../screens/DigestsScreen';
+import ExplainerListScreen from '../screens/ExplainerListScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import PartnersScreen from '../screens/PartnersScreen';
 import MerchScreen from '../screens/MerchScreen';
@@ -64,20 +49,17 @@ const screenOptions = {
 };
 
 function NewsStack() {
-  const navigation = useNavigation();
-  useResetStackOnTabPress(navigation, 'News');
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="NewsFeed" component={NewsScreen} />
       <Stack.Screen name="Article" component={ArticleScreen} />
       <Stack.Screen name="Digests" component={DigestsScreen} />
+      <Stack.Screen name="ExplainerList" component={ExplainerListScreen} />
     </Stack.Navigator>
   );
 }
 
 function CalendarStack() {
-  const navigation = useNavigation();
-  useResetStackOnTabPress(navigation, 'Calendar');
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="CalendarList" component={CalendarScreen} />
@@ -88,8 +70,6 @@ function CalendarStack() {
 }
 
 function DriversStack() {
-  const navigation = useNavigation();
-  useResetStackOnTabPress(navigation, 'Grid');
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="DriversList" component={DriversScreen} />
@@ -100,8 +80,6 @@ function DriversStack() {
 }
 
 function ResultsStack() {
-  const navigation = useNavigation();
-  useResetStackOnTabPress(navigation, 'Results');
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="ResultsList" component={ResultsScreen} />
@@ -113,8 +91,6 @@ function ResultsStack() {
 }
 
 function MoreStack() {
-  const navigation = useNavigation();
-  useResetStackOnTabPress(navigation, 'More');
   return (
     <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="MoreMenu" component={MoreScreen} />

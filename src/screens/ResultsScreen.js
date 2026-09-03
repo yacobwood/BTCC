@@ -28,6 +28,7 @@ import {shareContent} from '../utils/appShare';
 import {formatDriverName} from '../utils/driverName';
 import {cacheRead, cacheWrite, cacheReadTimestamp} from '../store/cache';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {useTabPressReset} from '../navigation/useTabPressReset';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const CURRENT_SEASON = BUNDLED_CALENDAR.season;
@@ -301,13 +302,20 @@ export default function ResultsScreen({navigation, route}) {
   }, [year, seasonStarted]);
 
   useFocusEffect(useCallback(() => {
+    if (year === CURRENT_SEASON) load(CURRENT_SEASON, true);
+  }, [year]));
+
+  // Scroll to top only when the Results tab bar icon is pressed (see
+  // useTabPressReset in AppNavigator.js) - never on back navigation from
+  // RoundResults/GalleryAlbum/Records, which should preserve scroll
+  // position.
+  useTabPressReset(navigation, useCallback(() => {
     driversListRef.current?.scrollToOffset({offset: 0, animated: false});
     teamsListRef.current?.scrollToOffset({offset: 0, animated: false});
     resultsListRef.current?.scrollToOffset({offset: 0, animated: false});
     statsListRef.current?.scrollToOffset({offset: 0, animated: false});
     chartScrollRef.current?.scrollTo({y: 0, animated: false});
-    if (year === CURRENT_SEASON) load(CURRENT_SEASON, true);
-  }, [year]));
+  }, []));
 
   const changeYear = useCallback((newYear) => {
     Analytics.resultsYearChanged(newYear);

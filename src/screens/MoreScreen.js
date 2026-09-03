@@ -13,11 +13,11 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {useFocusEffect} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import {Analytics} from '../utils/analytics';
 import {shareApp} from '../utils/appShare';
 import {hasChatDisplayName, saveChatDisplayName} from '../utils/chatIdentity';
+import {useTabPressReset} from '../navigation/useTabPressReset';
 const pagesData = require('../assets/pages.json');
 
 const BMC_URL = 'https://www.buymeacoffee.com/btcchub';
@@ -39,7 +39,13 @@ export default function MoreScreen({navigation}) {
   const [donorNameError, setDonorNameError] = useState('');
   const [savingDonorName, setSavingDonorName] = useState(false);
 
-  useFocusEffect(useCallback(() => {
+  // Scroll to top only when the More tab bar icon is pressed (see
+  // useTabPressReset in AppNavigator.js) - never on back navigation from
+  // Settings/InfoPage/Merch/etc, which should preserve scroll position. This
+  // also correctly handles returning from Merch (pushed deep in this stack)
+  // since the reset pops the whole stack back to MoreMenu regardless of how
+  // deep it was.
+  useTabPressReset(navigation, useCallback(() => {
     scrollRef.current?.scrollTo({y: 0, animated: false});
   }, []));
 

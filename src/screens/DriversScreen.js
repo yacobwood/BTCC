@@ -17,10 +17,10 @@ import {Colors} from '../theme/colors';
 import {fetchDrivers} from '../api/client';
 import {parseGrid} from '../api/parsers';
 import {getDriverImage} from '../assets/driverImages';
-import {useFocusEffect} from '@react-navigation/native';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
+import {useTabPressReset} from '../navigation/useTabPressReset';
 import SwipeableTabs from '../components/SwipeableTabs';
 import CachedImage from '../components/CachedImage';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
@@ -206,12 +206,12 @@ export default function DriversScreen({navigation}) {
   const driversListRef = useRef(null);
   const teamsListRef = useRef(null);
 
-  useFocusEffect(useCallback(() => {
-    const t = setTimeout(() => {
-      driversListRef.current?.scrollTo({y: 0, animated: false});
-      teamsListRef.current?.scrollTo({y: 0, animated: false});
-    }, 50);
-    return () => clearTimeout(t);
+  // Scroll to top only when the Grid tab bar icon is pressed (see
+  // useTabPressReset in AppNavigator.js) - never on back navigation from
+  // DriverDetail/TeamDetail, which should preserve scroll position.
+  useTabPressReset(navigation, useCallback(() => {
+    driversListRef.current?.scrollTo({y: 0, animated: false});
+    teamsListRef.current?.scrollTo({y: 0, animated: false});
   }, []));
 
   const load = useCallback(async () => {

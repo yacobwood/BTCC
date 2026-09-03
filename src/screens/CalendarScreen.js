@@ -13,12 +13,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {fetchCalendar} from '../api/client';
 import {parseCalendar} from '../api/parsers';
-import {useFocusEffect} from '@react-navigation/native';
 import {Analytics} from '../utils/analytics';
 import {useBroadcaster} from '../utils/broadcaster';
 import {useLiveUrls, ensureHttps} from '../store/liveUrls';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {useFeatureFlags} from '../store/featureFlags';
+import {useTabPressReset} from '../navigation/useTabPressReset';
 
 const BUNDLED_CALENDAR = require('../../data/calendar.json');
 const CURRENT_SEASON = BUNDLED_CALENDAR.season;
@@ -58,7 +58,10 @@ export default function CalendarScreen({navigation}) {
   const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef(null);
 
-  useFocusEffect(useCallback(() => {
+  // Scroll to top only when the Calendar tab bar icon is pressed (see
+  // useTabPressReset in AppNavigator.js) - never on back navigation from
+  // TrackDetail/LiveTiming, which should preserve scroll position.
+  useTabPressReset(navigation, useCallback(() => {
     flatListRef.current?.scrollToOffset({offset: 0, animated: false});
   }, []));
 
@@ -181,7 +184,7 @@ export default function CalendarScreen({navigation}) {
     navigation.navigate('TrackDetail', {track: item, year: selectedYear});
   };
 
-  const renderItem = ({item}) => {
+  const renderItem = ({item, index}) => {
     if (item.type === 'divider') {
       return (
         <View style={styles.divider}>
@@ -198,6 +201,9 @@ export default function CalendarScreen({navigation}) {
     const isPast = round.endDate < today;
     const isActive = round.startDate <= today && today <= round.endDate;
     const isNext = !activeRound && round === nextRound;
+    // The UPCOMING divider already draws its own separation - the last past
+    // row's own bottom border sitting directly above it just doubled up.
+    const isLastPastRow = isPast && listData[index + 1]?.type === 'divider';
 
     // Race weekend in progress
     if (isActive) {
@@ -278,7 +284,7 @@ export default function CalendarScreen({navigation}) {
     if (isPast) {
       return (
         <TouchableOpacity
-          style={styles.pastRow}
+          style={[styles.pastRow, isLastPastRow && styles.pastRowNoBorder]}
           activeOpacity={0.6}
           onPress={() => navigate(round)}
           accessibilityLabel={`${round.venue}  -  completed`}
@@ -546,6 +552,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginBottom: 8,
+    overflow: 'hidden',
   },
   nextCardInner: {flexDirection: 'row', alignItems: 'center'},
   nextLeft: {flex: 1},
@@ -592,6 +599,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.outline,
     opacity: 0.45,
   },
+  pastRowNoBorder: {borderBottomWidth: 0},
   pastIcon: {marginRight: 10},
   pastContent: {flex: 1},
   pastVenue: {color: '#fff', fontSize: 13, fontWeight: '600'},
