@@ -3418,11 +3418,14 @@ function openExplainerEdit(id) {
   document.getElementById('explainer-edit-id').value = p.id;
   document.getElementById('explainer-edit-is-new').value = '';
   document.getElementById('explainer-edit-title').value = p.title || '';
-  // Notification override is transient, never persisted to the article
-  // itself (see saveExplainerEdit) - always starts blank on open, never
-  // pre-filled from a previous publish's override.
-  document.getElementById('explainer-notif-title').value = '';
-  document.getElementById('explainer-notif-body').value = '';
+  // Persisted on the article itself (notifTitleOverride/notifBodyOverride)
+  // across a plain SAVE CHANGES, unlike the article's own title/content -
+  // fixed 2026-09-03 after the original always-blank-on-reopen version
+  // lost a drafted-but-not-yet-published override on reload. Only
+  // actually cleared once a real SAVE & PUBLISH has consumed it - see
+  // saveExplainerEdit.
+  document.getElementById('explainer-notif-title').value = p.notifTitleOverride || '';
+  document.getElementById('explainer-notif-body').value = p.notifBodyOverride || '';
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3458,6 +3461,8 @@ async function saveExplainerEdit(andPublish = false) {
       status: andPublish ? 'published' : 'staged',
       order: maxOrder + 1,
       ...(andPublish ? {pubDate: nowIso()} : {}),
+      ...(notifTitleOverride ? {notifTitleOverride} : {}),
+      ...(notifBodyOverride ? {notifBodyOverride} : {}),
     };
     explainerPosts.push(article);
   } else {
@@ -3469,18 +3474,34 @@ async function saveExplainerEdit(andPublish = false) {
       content,
       ...(andPublish ? {status: 'published', pubDate: explainerPosts[idx].pubDate || nowIso()} : {}),
     };
+    // Set/clear independently of the spread above - a blank field means
+    // "remove the override", not "leave whatever was saved before", which
+    // a conditional spread alone can't express (it can only add a key, not
+    // delete one).
+    if (notifTitleOverride) explainerPosts[idx].notifTitleOverride = notifTitleOverride;
+    else delete explainerPosts[idx].notifTitleOverride;
+    if (notifBodyOverride) explainerPosts[idx].notifBodyOverride = notifBodyOverride;
+    else delete explainerPosts[idx].notifBodyOverride;
     article = explainerPosts[idx];
   }
 
   document.getElementById('explainer-edit-status').textContent = 'Saving…';
-  // Override title/body are for the notification only, never written back
-  // into the persisted article - built as a separate throwaway object
-  // rather than mutating `article` itself, so explainer_articles.json
-  // never carries launch-announcement copy as if it were the article's
-  // own title or a real description field.
-  const notifArticle = andPublish
-    ? {...article, title: notifTitleOverride || article.title, description: notifBodyOverride}
-    : null;
+  // Fixed 2026-09-03: the override used to be read straight from the form
+  // and never actually saved anywhere, so a "Save Changes" (drafting the
+  // notification ahead of a later publish) followed by a reload lost it
+  // silently - confirmed live, not just a hypothetical. It's now persisted
+  // on the article itself (above) across any plain save, and only cleared
+  // once an actual publish has consumed it (right here) - so it survives
+  // being drafted-and-saved-for-later, but doesn't linger indefinitely and
+  // get silently reused on some unrelated future re-save/republish.
+  let notifArticle = null;
+  if (andPublish) {
+    notifArticle = {...article, title: article.notifTitleOverride || article.title, description: article.notifBodyOverride || ''};
+    delete article.notifTitleOverride;
+    delete article.notifBodyOverride;
+    document.getElementById('explainer-notif-title').value = '';
+    document.getElementById('explainer-notif-body').value = '';
+  }
   await saveExplainers(
     andPublish ? 'Publish explainer article: ' + article.title : (isNew ? 'Add explainer article: ' : 'Edit explainer article: ') + article.title,
     notifArticle
