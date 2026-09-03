@@ -1,6 +1,6 @@
 import React from 'react';
-import {fireEvent, waitFor} from '@testing-library/react-native';
-import {Platform, Linking, Share} from 'react-native';
+import {act, fireEvent, waitFor} from '@testing-library/react-native';
+import {Platform, Linking, Share, ScrollView} from 'react-native';
 import MoreScreen from '../../src/screens/MoreScreen';
 import {renderWithProviders, makeNav} from './testUtils';
 
@@ -312,6 +312,27 @@ describe('MoreScreen', () => {
       await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
       expect(queryByText('One quick thing')).toBeNull();
       expect(Analytics.donorGateSkipped).toHaveBeenCalled();
+    });
+  });
+
+  // Regression guard (2026-08-30): scroll-to-top used to fire on every focus,
+  // including a plain back-pop from Settings/InfoPage/etc - fixed to fire
+  // only when route.params.scrollToTopToken changes, which AppNavigator.js's
+  // useResetStackOnTabPress sets solely on an actual More tab bar press.
+  describe('scroll to top on tab press', () => {
+    it('does not scroll on initial mount', () => {
+      const spy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+      renderMore();
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('scrolls to top when the More tab bar icon is pressed', async () => {
+      const spy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+      renderMore();
+      await act(async () => { nav.__fireTabPress(); });
+      expect(spy).toHaveBeenCalledWith({y: 0, animated: false});
+      spy.mockRestore();
     });
   });
 });

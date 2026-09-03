@@ -142,4 +142,13 @@ describe('MerchScreen', () => {
       expect(logoImages.length).toBe(1);
     });
   });
+
+  // Merch itself no longer implements scroll-to-top-on-tab-press (2026-08-30):
+  // it's a screen pushed inside MoreStack, not that stack's root - MoreScreen
+  // (the root) already handles both popping the whole stack back to MoreMenu
+  // and scrolling itself, whenever the More tab is pressed from anywhere in
+  // its stack, Merch included. See MoreScreen.test.js's own
+  // "scroll to top on tab press" block and useTabPressReset's doc comment
+  // (src/navigation/useTabPressReset.js) for why a per-screen listener like
+  // this file used to have isn't needed (or wanted) for non-root screens.
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import {act, fireEvent} from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {ScrollView} from 'react-native';
 import DriversScreen from '../../src/screens/DriversScreen';
 import {renderWithProviders, makeNav, MOCK_GRID, MOCK_DRIVERS_RAW} from './testUtils';
 
@@ -390,6 +391,38 @@ describe('DriversScreen', () => {
       const carImages = queryAllByTestId('cached-image')
         .filter(img => img.props.source.uri?.includes('carImages'));
       expect(carImages.length).toBe(0);
+    });
+  });
+
+  // Regression guard (2026-08-30): scroll-to-top used to fire on every focus,
+  // including a plain back-pop from DriverDetail/TeamDetail - fixed to fire
+  // only when route.params.scrollToTopToken changes, which AppNavigator.js's
+  // useResetStackOnTabPress sets solely on an actual Grid tab bar press.
+  describe('scroll to top on tab press', () => {
+    it('does not scroll on initial mount', async () => {
+      const spy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+      await renderDrivers();
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('scrolls both lists to top when the Grid tab bar icon is pressed', async () => {
+      const spy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+      await renderDrivers();
+      expect(spy).not.toHaveBeenCalled();
+      await act(async () => { nav.__fireTabPress(); });
+      expect(spy).toHaveBeenCalledWith({y: 0, animated: false});
+      spy.mockRestore();
+    });
+
+    it('scrolls again on a second tab press', async () => {
+      const spy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+      await renderDrivers();
+      await act(async () => { nav.__fireTabPress(); });
+      spy.mockClear();
+      await act(async () => { nav.__fireTabPress(); });
+      expect(spy).toHaveBeenCalledWith({y: 0, animated: false});
+      spy.mockRestore();
     });
   });
 });

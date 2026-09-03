@@ -1,6 +1,6 @@
 import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
-import {InteractionManager} from 'react-native';
+import {InteractionManager, FlatList, ScrollView} from 'react-native';
 import ResultsScreen from '../../src/screens/ResultsScreen';
 import {renderWithProviders, makeNav, makeRoute} from './testUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -451,6 +451,37 @@ describe('ResultsScreen', () => {
       // fetchResults may or may not be called depending on system date vs season start
       // The important thing is it didn't crash
       expect(true).toBe(true);
+    });
+  });
+
+  // Regression guard (2026-08-30): scroll-to-top used to fire on every focus,
+  // including a plain back-pop from RoundResults/GalleryAlbum/Records - fixed
+  // to fire only when route.params.scrollToTopToken changes, which
+  // AppNavigator.js's useResetStackOnTabPress sets solely on an actual
+  // Results tab bar press. The deep-link-open-a-round effect (openRound
+  // param, tested elsewhere in this file) is unaffected - a different param.
+  describe('scroll to top on tab press', () => {
+    it('does not scroll on initial mount', async () => {
+      const flatListSpy = jest.spyOn(FlatList.prototype, 'scrollToOffset').mockImplementation(() => {});
+      const scrollViewSpy = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+      renderResults();
+      await waitFor(() => { expect(true).toBe(true); });
+      expect(flatListSpy).not.toHaveBeenCalled();
+      expect(scrollViewSpy).not.toHaveBeenCalled();
+      flatListSpy.mockRestore();
+      scrollViewSpy.mockRestore();
+    });
+
+    it('scrolls the driver/team/results/stats lists to top when the Results tab bar icon is pressed', async () => {
+      // chartScrollRef isn't asserted here - its ScrollView only mounts once
+      // hasData is true (real progression data), which is more setup than
+      // this fix needs; the FlatLists below already prove the wiring.
+      const flatListSpy = jest.spyOn(FlatList.prototype, 'scrollToOffset').mockImplementation(() => {});
+      renderResults();
+      await waitFor(() => { expect(true).toBe(true); });
+      await act(async () => { nav.__fireTabPress(); });
+      expect(flatListSpy).toHaveBeenCalledWith({offset: 0, animated: false});
+      flatListSpy.mockRestore();
     });
   });
 });

@@ -1,4 +1,5 @@
 import React from 'react';
+import {FlatList} from 'react-native';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import CalendarScreen from '../../src/screens/CalendarScreen';
 import {renderWithProviders, makeNav} from './testUtils';
@@ -375,6 +376,29 @@ describe('CalendarScreen', () => {
         expect(getByText('DAY')).toBeTruthy();
         expect(queryByText('DAYS')).toBeNull();
       });
+    });
+  });
+
+  // Regression guard (2026-08-30): scroll-to-top used to fire on every focus,
+  // including a plain back-pop from TrackDetail/LiveTiming - fixed to fire
+  // only when route.params.scrollToTopToken changes, which AppNavigator.js's
+  // useResetStackOnTabPress sets solely on an actual Calendar tab bar press.
+  describe('scroll to top on tab press', () => {
+    it('does not scroll on initial mount', async () => {
+      const spy = jest.spyOn(FlatList.prototype, 'scrollToOffset').mockImplementation(() => {});
+      renderWithProviders(<CalendarScreen navigation={nav} />);
+      await act(async () => { await Promise.resolve(); });
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('scrolls to top when the Calendar tab bar icon is pressed', async () => {
+      const spy = jest.spyOn(FlatList.prototype, 'scrollToOffset').mockImplementation(() => {});
+      renderWithProviders(<CalendarScreen navigation={nav} />);
+      await act(async () => { await Promise.resolve(); });
+      await act(async () => { nav.__fireTabPress(); });
+      expect(spy).toHaveBeenCalledWith({offset: 0, animated: false});
+      spy.mockRestore();
     });
   });
 });
