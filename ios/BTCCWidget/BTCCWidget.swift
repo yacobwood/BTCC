@@ -34,7 +34,12 @@ struct FullTimetableRow: Identifiable {
     let laps: String?
 
     var isBtcc: Bool { series?.contains("British Touring Car Championship") == true }
-    var displayTime: String { endTime != nil ? "\(time) - \(endTime!)" : time }
+    var displayTime: String {
+        let use12Hour = defaults.bool(forKey: "use12HourTime")
+        let start = formatWidgetTime(time, use12Hour: use12Hour)
+        guard let end = endTime else { return start }
+        return "\(start) - \(formatWidgetTime(end, use12Hour: use12Hour))"
+    }
 }
 
 struct RoundInfo {
@@ -114,6 +119,21 @@ private let dayFmt: DateFormatter = {
 private let monthYearFmt: DateFormatter = {
     let f = DateFormatter(); f.dateFormat = "MMM yyyy"; f.locale = Locale(identifier: "en_GB"); return f
 }()
+
+// Mirrors the 12-hour formatting used in TrackDetailScreen.js (to12h/formatSessionTime)
+// and the Android widget's formatWidgetTime, so a session time reads identically
+// everywhere. Falls back to the raw string for anything that isn't a plain
+// "HH:mm" time (e.g. "TBA"), same as the other two do.
+private func formatWidgetTime(_ time: String, use12Hour: Bool) -> String {
+    guard use12Hour else { return time }
+    let parts = time.split(separator: ":")
+    guard parts.count == 2,
+          let hour = Int(parts[0]),
+          parts[1].count == 2, parts[1].allSatisfy({ $0.isNumber }) else { return time }
+    let hour12 = hour % 12 == 0 ? 12 : hour % 12
+    let period = hour >= 12 ? "pm" : "am"
+    return "\(hour12):\(parts[1])\(period)"
+}
 
 private func parseCalendar(_ data: Data) -> RoundInfo? {
     guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -535,7 +555,8 @@ struct ScheduleCol: View {
                 HStack {
                     Text(s.name).font(.system(size: 12, weight: .medium)).foregroundColor(.white).lineLimit(1)
                     Spacer()
-                    Text(s.time).font(.system(size: 11)).foregroundColor(.white.opacity(0.6))
+                    Text(formatWidgetTime(s.time, use12Hour: defaults.bool(forKey: "use12HourTime")))
+                        .font(.system(size: 11)).foregroundColor(.white.opacity(0.6))
                 }
                 .padding(.vertical, 4)
             }

@@ -3,6 +3,7 @@ import {act, create} from 'react-test-renderer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
 import {syncChatMentionToken} from '../../src/utils/notifications';
+import {syncWidgetTimeFormat} from '../../src/utils/widgetSettings';
 import {SettingsProvider, useSettings} from '../../src/store/settings';
 
 jest.mock('../../src/store/auth', () => ({
@@ -14,11 +15,15 @@ jest.mock('../../src/utils/userProfile', () => ({
 jest.mock('../../src/utils/notifications', () => ({
   syncChatMentionToken: jest.fn(() => Promise.resolve()),
 }));
+jest.mock('../../src/utils/widgetSettings', () => ({
+  syncWidgetTimeFormat: jest.fn(),
+}));
 
 // All leaf keys that map to FCM topics
 const LEAF_TOPICS = {
   newsAlerts:        'news_alerts',
   digestAlerts:      'digest_alerts',
+  explainerAlerts:   'explainer_alerts',
   weekendPreview:    'weekend_preview',
   standingsUpdate:   'standings_update',
   podcastAlerts:     'podcast_alerts',
@@ -344,6 +349,44 @@ describe('SettingsProvider', () => {
     });
   });
 
+  describe('explainerAlerts', () => {
+    it('defaults to true', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.explainerAlerts).toBe(true);
+    });
+
+    it('subscribes to explainer_alerts topic by default', async () => {
+      AsyncStorage.getItem.mockResolvedValue(null);
+      await act(async () => { renderProvider(); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'explainer_alerts');
+    });
+
+    it('disabling explainerAlerts unsubscribes from explainer_alerts topic', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('explainerAlerts', false); });
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'explainer_alerts');
+    });
+
+    it('persists explainerAlerts to AsyncStorage', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('explainerAlerts', false); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_explainer_alerts', 'false');
+    });
+
+    it('loads explainerAlerts=false from storage', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_explainer_alerts') return Promise.resolve('false');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      expect(getHook().settings.explainerAlerts).toBe(false);
+    });
+  });
+
   describe('spoilerFree', () => {
     it('defaults to false', () => {
       let getHook;
@@ -508,6 +551,63 @@ describe('SettingsProvider', () => {
     });
   });
 
+  describe('use12HourTime', () => {
+    beforeEach(() => {
+      syncWidgetTimeFormat.mockClear();
+    });
+
+    it('defaults to false', () => {
+      let getHook;
+      act(() => { getHook = renderProvider(); });
+      expect(getHook().settings.use12HourTime).toBe(false);
+    });
+
+    it('loads use12HourTime=true from storage', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_12hr_time') return Promise.resolve('true');
+        return Promise.resolve(null);
+      });
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      expect(getHook().settings.use12HourTime).toBe(true);
+    });
+
+    it('persists the new value to AsyncStorage', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      await act(async () => { getHook().setSetting('use12HourTime', true); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_12hr_time', 'true');
+    });
+
+    // Regression coverage: the widget runs as a separate native process and
+    // can't read AsyncStorage, so this handoff is the only way it ever learns
+    // the setting changed (see project fix: widget still showed 24hr time).
+    it('hands the new value to the native widget bridge on toggle', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      syncWidgetTimeFormat.mockClear();
+      await act(async () => { getHook().setSetting('use12HourTime', true); });
+      expect(syncWidgetTimeFormat).toHaveBeenCalledWith(true);
+    });
+
+    it('re-syncs the widget bridge with the loaded value on every provider load, not just on toggle', async () => {
+      AsyncStorage.getItem.mockImplementation((key) => {
+        if (key === 'setting_12hr_time') return Promise.resolve('true');
+        return Promise.resolve(null);
+      });
+      await act(async () => { renderProvider(); });
+      expect(syncWidgetTimeFormat).toHaveBeenCalledWith(true);
+    });
+
+    it('does not call syncWidgetTimeFormat for an unrelated setting change', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      syncWidgetTimeFormat.mockClear();
+      await act(async () => { getHook().setSetting('newsAlerts', false); });
+      expect(syncWidgetTimeFormat).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Firestore live sync', () => {
     beforeEach(() => {
       const {saveProfile} = require('../../src/utils/userProfile');
@@ -546,6 +646,26 @@ describe('SettingsProvider', () => {
       });
 
       expect(saveProfile).toHaveBeenCalledWith('test-uid', {preRace: false});
+    });
+
+    // Regression coverage: use12HourTime was added to STORAGE_KEYS/defaults but
+    // left out of SYNCED_KEYS, so a signed-in user's 12hr choice never reached
+    // Firestore and silently reverted to 24hr on a fresh install/new device.
+    it('calls saveProfile for use12HourTime (it is synced)', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('use12HourTime', true);
+      });
+
+      expect(saveProfile).toHaveBeenCalledWith('test-uid', {use12HourTime: true});
     });
 
     it('does not call saveProfile for hubPreview (not synced)', async () => {

@@ -172,12 +172,13 @@ class LargeWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_sat_weather, if (showSatWeather) weatherText(cal.startDate) else "")
             views.setTextViewText(R.id.widget_sun_header, if (sun.isNotEmpty()) "SUNDAY" else "")
             views.setTextViewText(R.id.widget_sun_weather, if (sun.isNotEmpty()) weatherText(cal.endDate) else "")
-            bindRow(views, sat, 0, R.id.widget_sat_name1, R.id.widget_sat_time1)
-            bindRow(views, sat, 1, R.id.widget_sat_name2, R.id.widget_sat_time2)
-            bindRow(views, sat, 2, R.id.widget_sat_name3, R.id.widget_sat_time3)
-            bindRow(views, sun, 0, R.id.widget_sun_name1, R.id.widget_sun_time1)
-            bindRow(views, sun, 1, R.id.widget_sun_name2, R.id.widget_sun_time2)
-            bindRow(views, sun, 2, R.id.widget_sun_name3, R.id.widget_sun_time3)
+            val use12h = WidgetPrefs.getUse12HourTime(context)
+            bindRow(views, sat, 0, R.id.widget_sat_name1, R.id.widget_sat_time1, use12h)
+            bindRow(views, sat, 1, R.id.widget_sat_name2, R.id.widget_sat_time2, use12h)
+            bindRow(views, sat, 2, R.id.widget_sat_name3, R.id.widget_sat_time3, use12h)
+            bindRow(views, sun, 0, R.id.widget_sun_name1, R.id.widget_sun_time1, use12h)
+            bindRow(views, sun, 1, R.id.widget_sun_name2, R.id.widget_sun_time2, use12h)
+            bindRow(views, sun, 2, R.id.widget_sun_name3, R.id.widget_sun_time3, use12h)
         } else {
             clearSchedule(views)
         }
@@ -185,11 +186,11 @@ class LargeWidget : AppWidgetProvider() {
         return views
     }
 
-    private fun bindRow(views: RemoteViews, sessions: List<Sess>, idx: Int, nameId: Int, timeId: Int) {
+    private fun bindRow(views: RemoteViews, sessions: List<Sess>, idx: Int, nameId: Int, timeId: Int, use12Hour: Boolean) {
         if (idx < sessions.size) {
             val s = sessions[idx]
             views.setTextViewText(nameId, s.name)
-            views.setTextViewText(timeId, s.time)
+            views.setTextViewText(timeId, formatWidgetTime(s.time, use12Hour))
         } else {
             views.setTextViewText(nameId, "")
             views.setTextViewText(timeId, "")

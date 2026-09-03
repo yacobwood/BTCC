@@ -163,6 +163,12 @@ export default function SettingsScreen({navigation}) {
           value={settings.digestAlerts}
           onToggle={toggle('digestAlerts')}
         />
+        <SettingRow
+          label="Academy articles"
+          description="Get notified when a new regulations-explained article is published"
+          value={settings.explainerAlerts}
+          onToggle={toggle('explainerAlerts')}
+        />
         {podcasts_enabled && (
           <SettingRow
             label="Podcast alerts"

@@ -89,7 +89,12 @@ class TimetableWidgetFactory(private val context: Context) : RemoteViewsService.
                     rv.setViewVisibility(R.id.row_session_type, View.GONE)
                     rv.setViewVisibility(R.id.row_event, View.VISIBLE)
                 }
-                val timeStr = if (item.endTime != null) "${item.time} - ${item.endTime}" else item.time
+                val use12h = WidgetPrefs.getUse12HourTime(context)
+                val timeStr = if (item.endTime != null) {
+                    "${formatWidgetTime(item.time, use12h)} - ${formatWidgetTime(item.endTime, use12h)}"
+                } else {
+                    formatWidgetTime(item.time, use12h)
+                }
                 rv.setTextViewText(R.id.row_time, timeStr)
                 if (item.laps != null) {
                     val lapsDisplay = if (item.laps.matches(Regex("\\d+"))) "${item.laps} laps" else item.laps

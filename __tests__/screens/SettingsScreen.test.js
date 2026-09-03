@@ -91,6 +91,11 @@ describe('SettingsScreen', () => {
       expect(getByLabelText('The Flying Lap')).toBeTruthy();
     });
 
+    it('renders the Academy articles toggle', async () => {
+      const {getByLabelText} = await renderSettings();
+      expect(getByLabelText('Academy articles')).toBeTruthy();
+    });
+
     it('renders Pre-race alerts group', async () => {
       const {getByText} = await renderSettings();
       expect(getByText('Pre-race alerts')).toBeTruthy();
@@ -190,6 +195,12 @@ describe('SettingsScreen', () => {
       const {UNSAFE_getAllByType} = await renderSettings();
       await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'The Flying Lap', false); });
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_digest_alerts', 'false');
+    });
+
+    it('toggling Academy articles off persists to AsyncStorage', async () => {
+      const {UNSAFE_getAllByType} = await renderSettings();
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Academy articles', false); });
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_explainer_alerts', 'false');
     });
 
     it('toggling No Spoilers on persists to AsyncStorage', async () => {

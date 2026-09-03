@@ -4,11 +4,13 @@ import {getMessaging, subscribeToTopic, unsubscribeFromTopic} from '@react-nativ
 import {useAuth} from './auth';
 import {saveProfile} from '../utils/userProfile';
 import {syncChatMentionToken} from '../utils/notifications';
+import {syncWidgetTimeFormat} from '../utils/widgetSettings';
 
 // Leaf settings that map 1:1 to an FCM topic
 const LEAF_TOPICS = {
   newsAlerts:        'news_alerts',
   digestAlerts:      'digest_alerts',
+  explainerAlerts:   'explainer_alerts',
   weekendPreview:    'weekend_preview',
   standingsUpdate:   'standings_update',
   podcastAlerts:     'podcast_alerts',
@@ -34,6 +36,7 @@ const LEAF_TOPICS = {
 const PARENT_CHAIN = {
   newsAlerts:        [],
   digestAlerts:      [],
+  explainerAlerts:   [],
   weekendPreview:    [],
   standingsUpdate:   [],
   podcastAlerts:     [],
@@ -55,6 +58,7 @@ const PARENT_CHAIN = {
 const STORAGE_KEYS = {
   newsAlerts:          'setting_news_alerts',
   digestAlerts:        'setting_digest_alerts',
+  explainerAlerts:     'setting_explainer_alerts',
   weekendPreview:      'setting_weekend_preview',
   standingsUpdate:     'setting_standings_update',
   podcastAlerts:       'setting_podcast_alerts',
@@ -86,6 +90,7 @@ const STORAGE_KEYS = {
 const defaults = {
   newsAlerts:          true,
   digestAlerts:        true,
+  explainerAlerts:     true,
   weekendPreview:      true,
   standingsUpdate:     true,
   podcastAlerts:       true,
@@ -150,12 +155,12 @@ function nextMondayNight() {
 }
 
 const SYNCED_KEYS = new Set([
-  'newsAlerts', 'digestAlerts', 'weekendPreview', 'standingsUpdate', 'podcastAlerts',
+  'newsAlerts', 'digestAlerts', 'explainerAlerts', 'weekendPreview', 'standingsUpdate', 'podcastAlerts',
   'preRace', 'preRaceFP', 'preRaceQualifying', 'preRaceQRace', 'preRaceRace',
   'preRaceRace1', 'preRaceRace2', 'preRaceRace3',
   'results', 'resultsFP', 'resultsQualifying', 'resultsQRace', 'resultsRace',
   'resultsRace1', 'resultsRace2', 'resultsRace3', 'resultsTeaser',
-  'spoilerFree',
+  'spoilerFree', 'use12HourTime',
 ]);
 
 const SettingsContext = createContext({settings: defaults, setSetting: (_key, _value) => {}});
@@ -192,6 +197,10 @@ export function SettingsProvider({children}) {
       setSettings(loaded);
       syncAllTopics(loaded);
       syncChatMentionToken(user?.uid, loaded.chatMentions);
+      // Push to native widget storage on every load - covers a fresh install/new
+      // device pulling the value back from the Firestore profile, not just a
+      // same-device toggle (see setSetting below).
+      syncWidgetTimeFormat(loaded.use12HourTime);
     })();
   }, [user]);
 
@@ -216,6 +225,9 @@ export function SettingsProvider({children}) {
       syncAllTopics(next);
       // Not a topic - registers/removes this device's own token directly (see notifications.js)
       if (key === 'chatMentions') syncChatMentionToken(user?.uid, next.chatMentions);
+      // Not a topic - hands the value to the native widget (AsyncStorage isn't
+      // readable from the widget process on either platform, see widgetSettings.js)
+      if (key === 'use12HourTime') syncWidgetTimeFormat(next.use12HourTime);
       return next;
     });
   }, [user]);

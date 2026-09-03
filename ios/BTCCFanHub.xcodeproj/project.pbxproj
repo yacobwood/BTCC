@@ -8,16 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		2A2D7B624AB9D0BC9210B2EF /* WidgetSettingsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6E6DA55756EC0DAA04A91AD /* WidgetSettingsModule.swift */; };
 		53F51B589C2E41118B295644 /* Cookie-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC9BCAE9C25C49E3BADCE051 /* Cookie-Regular.ttf */; };
 		6027BE5A5D0F055A42353152 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		999CD48A42FDB84E5A4DAAB8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C52CE8172F96B86A00319CF2 /* WidgetKit.framework */; };
 		9EBBCADA67464B21A48186FC /* Cookie-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC9BCAE9C25C49E3BADCE051 /* Cookie-Regular.ttf */; };
 		A597D273058802381945DAFA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4B34AD4900DA114A0DB0511F /* GoogleService-Info.plist */; };
 		C52CE8182F96B86A00319CF2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C52CE8172F96B86A00319CF2 /* WidgetKit.framework */; };
 		C52CE81A2F96B86A00319CF2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C52CE8192F96B86A00319CF2 /* SwiftUI.framework */; };
 		C52CE8272F96B86C00319CF2 /* BTCCWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C52CE8162F96B86A00319CF2 /* BTCCWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CC00F6DFBB12EF4B72B8E2CA /* libPods-BTCCFanHub.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8513C4C806FFF3C3E2DA9798 /* libPods-BTCCFanHub.a */; };
+		ECB25B9DEB571348EB1D7D40 /* WidgetSettingsModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 41034E594531241966666D20 /* WidgetSettingsModule.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +53,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = BTCCFanHub/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = BTCCFanHub/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-BTCCFanHub.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BTCCFanHub.debug.xcconfig"; path = "Target Support Files/Pods-BTCCFanHub/Pods-BTCCFanHub.debug.xcconfig"; sourceTree = "<group>"; };
+		41034E594531241966666D20 /* WidgetSettingsModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = WidgetSettingsModule.m; path = BTCCFanHub/WidgetSettingsModule.m; sourceTree = "<group>"; };
 		4B34AD4900DA114A0DB0511F /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "BTCCFanHub/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-BTCCFanHub.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BTCCFanHub.release.xcconfig"; path = "Target Support Files/Pods-BTCCFanHub/Pods-BTCCFanHub.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = BTCCFanHub/AppDelegate.swift; sourceTree = "<group>"; };
@@ -61,6 +65,7 @@
 		C52CE8172F96B86A00319CF2 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		C52CE8192F96B86A00319CF2 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		DC9BCAE9C25C49E3BADCE051 /* Cookie-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Cookie-Regular.ttf"; path = "../src/assets/fonts/Cookie-Regular.ttf"; sourceTree = "<group>"; };
+		E6E6DA55756EC0DAA04A91AD /* WidgetSettingsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetSettingsModule.swift; path = BTCCFanHub/WidgetSettingsModule.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -95,6 +100,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC00F6DFBB12EF4B72B8E2CA /* libPods-BTCCFanHub.a in Frameworks */,
+				999CD48A42FDB84E5A4DAAB8 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +122,8 @@
 				C52CE8112F964D1E00319CF2 /* BTCCFanHub.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				E6E6DA55756EC0DAA04A91AD /* WidgetSettingsModule.swift */,
+				41034E594531241966666D20 /* WidgetSettingsModule.m */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -400,6 +408,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				2A2D7B624AB9D0BC9210B2EF /* WidgetSettingsModule.swift in Sources */,
+				ECB25B9DEB571348EB1D7D40 /* WidgetSettingsModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

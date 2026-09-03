@@ -3,6 +3,7 @@ package com.btccfanhub
 import android.app.Application
 import androidx.work.WorkManager
 import com.btccfanhub.service.RadioPackage
+import com.btccfanhub.widget.WidgetSettingsPackage
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -17,6 +18,7 @@ class MainApplication : Application(), ReactApplication {
       packageList =
         PackageList(this).packages.apply {
           add(RadioPackage())
+          add(WidgetSettingsPackage())
         },
     )
   }
