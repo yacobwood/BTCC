@@ -78,13 +78,55 @@ export async function syncChatMentionToken(uid, enabled) {
   } catch {}
 }
 
+// Resolves and displays an Android notification for a data-only FCM message -
+// shared by index.js's background handler (app backgrounded/killed) and the
+// foreground path below (app open). FCM data-only messages route through two
+// structurally separate native delivery paths depending on app state: confirmed
+// directly on-device 2026-09-03 (paired with the setupNotificationChannels fix
+// above) that the background/headless task never fires while the app is
+// foregrounded and vice versa - they're mutually exclusive, not overlapping.
+// Before this fix, onForegroundMessage returned early on Android on the
+// mistaken assumption that the background handler covered both states, which
+// meant every FCM notification on every channel - not just Academy - was
+// silently dropped whenever the app was open. Kept as one function so the
+// title/body/channel resolution logic can't drift between the two call sites
+// the way the channel list itself already did once.
+export async function displayAndroidDataNotification(remoteMessage) {
+  const {data} = remoteMessage;
+  // Silent cache-invalidation from scraper - no notification, just bust the cache.
+  if (data?.type === 'results_refresh') {
+    const year = data.year || '2026';
+    await AsyncStorage.removeItem(`cache_results_${year}`).catch(() => {});
+    return;
+  }
+  if (!data?.title) return;
+  const channelId = data.channel || 'news';
+  const imageUrl = data.imageUrl || null;
+  const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
+  const notifBody = data.body || data.title;
+  await notifee.displayNotification({
+    title: notifTitle,
+    body: notifBody,
+    data,
+    android: {
+      channelId,
+      smallIcon: 'ic_notification',
+      largeIcon: 'ic_notification_large',
+      circularLargeIcon: true,
+      pressAction: {id: 'default'},
+      ...(imageUrl ? {style: {type: AndroidStyle.BIGPICTURE, picture: imageUrl}} : {}),
+    },
+  });
+}
+
 export function onForegroundMessage(callback) {
   const messaging = getMessaging();
   return onMessage(messaging, async remoteMessage => {
     callback(remoteMessage);
-    // Android: setBackgroundMessageHandler in index.js handles display for both
-    // foreground and background  -  don't also display here or it shows twice
-    if (Platform.OS === 'android') return;
+    if (Platform.OS === 'android') {
+      await displayAndroidDataNotification(remoteMessage);
+      return;
+    }
     const {data, notification} = remoteMessage;
     // iOS: if a notification payload is present, the system already shows it  -  skip notifee
     if (notification) return;

@@ -16,6 +16,7 @@ import {
   requestNotificationPermission,
   getFCMToken,
   onForegroundMessage,
+  displayAndroidDataNotification,
   checkForNewPodcast,
   showLocalNotification,
   syncChatMentionToken,
@@ -213,7 +214,14 @@ describe('onForegroundMessage', () => {
     );
   });
 
-  it('skips notifee.displayNotification on Android (background handler takes over)', async () => {
+  // Regression coverage: found 2026-09-03 while debugging a test notification
+  // Firebase confirmed sending but that never appeared while the app was open
+  // on Android - the background handler in index.js only fires while the app
+  // is backgrounded/killed (confirmed directly on-device with a controlled
+  // foreground-vs-background A/B test), so this early return meant every FCM
+  // notification on every channel was silently dropped whenever the app was
+  // in the foreground, not just Academy's.
+  it('calls notifee.displayNotification on Android too (app is in the foreground)', async () => {
     Object.defineProperty(Platform, 'OS', {get: () => 'android', configurable: true});
     let capturedHandler;
     onMessage.mockImplementationOnce((_, handler) => {
@@ -222,9 +230,15 @@ describe('onForegroundMessage', () => {
     });
 
     onForegroundMessage(jest.fn());
-    await capturedHandler({data: {title: 'News headline'}});
+    await capturedHandler({data: {channel: 'race', title: 'Race name', body: 'Race starting!'}});
 
-    expect(notifee.displayNotification).not.toHaveBeenCalled();
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Race name',
+        body: 'Race starting!',
+        android: expect.objectContaining({channelId: 'race'}),
+      }),
+    );
 
     // Restore for subsequent tests
     Object.defineProperty(Platform, 'OS', {get: () => 'ios', configurable: true});
@@ -244,6 +258,66 @@ describe('onForegroundMessage', () => {
     await capturedHandler(msg);
 
     expect(userCallback).toHaveBeenCalledWith(msg);
+  });
+});
+
+// ── displayAndroidDataNotification ───────────────────────────────────────────
+// Shared by index.js's background handler and onForegroundMessage's Android
+// path above - tested directly here so both call sites stay covered by one
+// source of truth instead of drifting apart again.
+describe('displayAndroidDataNotification', () => {
+  it('does nothing and just clears the cache for a results_refresh message', async () => {
+    await displayAndroidDataNotification({data: {type: 'results_refresh', year: '2026'}});
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith('cache_results_2026');
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when data.title is missing', async () => {
+    await displayAndroidDataNotification({data: {channel: 'news'}});
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it('defaults to the "news" channel when data.channel is absent', async () => {
+    await displayAndroidDataNotification({data: {title: 'Some headline'}});
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({android: expect.objectContaining({channelId: 'news'})}),
+    );
+  });
+
+  it('uses data.channel as the Notifee channelId', async () => {
+    await displayAndroidDataNotification({data: {channel: 'explainer', title: 'Introducing BTCC Academy', body: 'Your guide to the rules.'}});
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Introducing BTCC Academy',
+        body: 'Your guide to the rules.',
+        android: expect.objectContaining({channelId: 'explainer'}),
+      }),
+    );
+  });
+
+  it('uses data.title as the body and a generic title when data.body is absent (scraper-style)', async () => {
+    await displayAndroidDataNotification({data: {channel: 'news', title: 'Article headline'}});
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({title: 'New Article', body: 'Article headline'}),
+    );
+  });
+
+  it('uses "New Podcast" as the generic title on the podcasts channel', async () => {
+    await displayAndroidDataNotification({data: {channel: 'podcasts', title: 'Episode 42'}});
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({title: 'New Podcast', body: 'Episode 42'}),
+    );
+  });
+
+  it('attaches a BIGPICTURE style when data.imageUrl is present', async () => {
+    await displayAndroidDataNotification({data: {channel: 'news', title: 'T', imageUrl: 'https://example.com/a.jpg'}});
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        android: expect.objectContaining({
+          style: expect.objectContaining({picture: 'https://example.com/a.jpg'}),
+        }),
+      }),
+    );
   });
 });
 

@@ -110,6 +110,7 @@ jest.mock('@notifee/react-native', () => ({
     cancelAllNotifications: jest.fn(() => Promise.resolve()),
   },
   AndroidImportance: {HIGH: 4, DEFAULT: 3, LOW: 2, MIN: 1, NONE: 0},
+  AndroidStyle: {NONE: 0, BIGTEXT: 1, BIGPICTURE: 2, INBOX: 3, MESSAGING: 4},
   EventType: {UNKNOWN: 0, DISMISSED: 1, PRESS: 2, ACTION_PRESS: 3, DELIVERED: 4},
 }));
 
