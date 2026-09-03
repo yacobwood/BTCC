@@ -70,6 +70,21 @@ describe('ExplainerListScreen', () => {
     await waitFor(() => expect(getByText(/No explainer articles yet/)).toBeTruthy());
   });
 
+  // Regression coverage for where this explanation lives: it's the list's
+  // own header, not baked into whichever article happens to sort first
+  // (see the file's own module docstring for why) - so it must appear
+  // regardless of which/how many articles are actually loaded.
+  it('shows the "what is Academy" intro above the article list', async () => {
+    const {getByText} = renderScreen();
+    await waitFor(() => expect(getByText(/BTCC Hub's own guide to the rules/)).toBeTruthy());
+  });
+
+  it('still shows the intro even when there are no articles', async () => {
+    fetchExplainerArticles.mockResolvedValue([]);
+    const {getByText} = renderScreen();
+    await waitFor(() => expect(getByText(/BTCC Hub's own guide to the rules/)).toBeTruthy());
+  });
+
   it('tapping an article navigates to Article with the full article object', async () => {
     const {getByText} = renderScreen();
     await waitFor(() => getByText(ARTICLE.title));

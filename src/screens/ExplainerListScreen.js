@@ -30,6 +30,16 @@ import {getReadIds, markRead, markAllRead} from '../utils/explainerRead';
 // separate parallel util/state rather than sharing digestRead.js's, so
 // reading every Flying Lap edition doesn't also mark every Academy article
 // read and vice versa.
+//
+// The one-line "what is this section" intro (ListHeaderComponent, added
+// 2026-09-03) lives here rather than inside whichever article happens to
+// sort first - the list is every visitor's actual entry point regardless
+// of which headline they tap, and "first article" shifts with `order`
+// over time, so baking an about-Academy blurb into one specific article's
+// own content would both miss most visitors and permanently misplace
+// meta-commentary inside an unrelated regulation topic. Styled to match
+// PartnersScreen.js's own identical `intro` convention - the only other
+// screen with this exact pattern.
 export default function ExplainerListScreen({navigation}) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,6 +143,9 @@ export default function ExplainerListScreen({navigation}) {
           )}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />}
           contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
+          ListHeaderComponent={
+            <Text style={styles.intro}>BTCC Hub's own guide to the rules and procedures behind the championship, written in plain English.</Text>
+          }
           ListEmptyComponent={
             <Text style={styles.emptyText}>No explainer articles yet - check back soon.</Text>
           }
@@ -214,6 +227,11 @@ const styles = StyleSheet.create({
   rowTitle: {color: '#fff', fontSize: 15, fontWeight: '700', lineHeight: 20},
   rowTitleRead: {color: Colors.textSecondary},
   rowDate: {color: Colors.textSecondary, fontSize: 12, marginTop: 6},
+  // Matches PartnersScreen.js's own `intro` style exactly - the one other
+  // place in the app that puts a one-line "what is this section" blurb
+  // above a FlatList via ListHeaderComponent, reused here for visual
+  // consistency rather than inventing a second convention.
+  intro: {color: Colors.textSecondary, fontSize: 14, lineHeight: 22, marginBottom: 20, marginTop: 16},
   errorText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', paddingHorizontal: 24},
   retryBtn: {marginTop: 16, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, backgroundColor: Colors.yellow},
   retryText: {color: Colors.background, fontWeight: '700'},
