@@ -1465,6 +1465,14 @@ select.input { cursor: pointer; }
       <div class="field-label">BODY</div>
       <div id="explainer-content-editor"></div>
     </div>
+    <div class="field-group">
+      <div class="field-label">NOTIFICATION OVERRIDE <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional - leave blank to just use the article title)</span></div>
+      <div class="section-note" style="margin:0 0 8px">
+        The push notification normally just uses the article's own title, with no body text. Fill these in when the title alone doesn't say enough on its own - e.g. the very first Academy article ever published, where the actual headline reads like an ordinary news story and gives no signal there's a whole new section to explore.
+      </div>
+      <input type="text" id="explainer-notif-title" placeholder="e.g. Introducing BTCC Academy">
+      <textarea id="explainer-notif-body" rows="2" placeholder="e.g. Your guide to the rules behind the racing - new explainer articles added regularly." style="margin-top:8px"></textarea>
+    </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn-primary" style="flex:1" onclick="saveExplainerEdit()">SAVE CHANGES</button>
       <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="saveAndPublishExplainer()">SAVE &amp; PUBLISH</button>
@@ -3394,6 +3402,8 @@ function newExplainerArticle() {
   document.getElementById('explainer-edit-id').value = '';
   document.getElementById('explainer-edit-is-new').value = 'true';
   document.getElementById('explainer-edit-title').value = '';
+  document.getElementById('explainer-notif-title').value = '';
+  document.getElementById('explainer-notif-body').value = '';
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3408,6 +3418,11 @@ function openExplainerEdit(id) {
   document.getElementById('explainer-edit-id').value = p.id;
   document.getElementById('explainer-edit-is-new').value = '';
   document.getElementById('explainer-edit-title').value = p.title || '';
+  // Notification override is transient, never persisted to the article
+  // itself (see saveExplainerEdit) - always starts blank on open, never
+  // pre-filled from a previous publish's override.
+  document.getElementById('explainer-notif-title').value = '';
+  document.getElementById('explainer-notif-body').value = '';
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3428,6 +3443,8 @@ async function saveExplainerEdit(andPublish = false) {
   if (!title) { alert('Title is required.'); return; }
   const rawContent = explainerQuill ? explainerQuill.root.innerHTML : '';
   const content = rawContent === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(rawContent), explainerEditTables);
+  const notifTitleOverride = document.getElementById('explainer-notif-title').value.trim();
+  const notifBodyOverride = document.getElementById('explainer-notif-body').value.trim();
 
   let article;
   if (isNew) {
@@ -3456,9 +3473,17 @@ async function saveExplainerEdit(andPublish = false) {
   }
 
   document.getElementById('explainer-edit-status').textContent = 'Saving…';
+  // Override title/body are for the notification only, never written back
+  // into the persisted article - built as a separate throwaway object
+  // rather than mutating `article` itself, so explainer_articles.json
+  // never carries launch-announcement copy as if it were the article's
+  // own title or a real description field.
+  const notifArticle = andPublish
+    ? {...article, title: notifTitleOverride || article.title, description: notifBodyOverride}
+    : null;
   await saveExplainers(
     andPublish ? 'Publish explainer article: ' + article.title : (isNew ? 'Add explainer article: ' : 'Edit explainer article: ') + article.title,
-    andPublish ? article : null
+    notifArticle
   );
   document.getElementById('explainer-edit-card').style.display = 'none';
 }
