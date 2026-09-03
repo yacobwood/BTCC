@@ -705,8 +705,10 @@ describe('fetchExplainerArticleById', () => {
   });
 
   it('returns null when no article matches the id (e.g. still staged, not yet published)', async () => {
-    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
-    const result = await fetchExplainerArticleById('explainer-does-not-exist');
+    // retries: 0 opts out of the retry loop below - this test is about the
+    // plain "genuinely doesn't exist" case, not the "not there yet" case.
+    global.fetch.mockResolvedValue({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchExplainerArticleById('explainer-does-not-exist', true, {retries: 0});
     expect(result).toBeNull();
   });
 
@@ -721,8 +723,35 @@ describe('fetchExplainerArticleById', () => {
   // changed, so this must never serve a stale cache by default.
   it('forces a fresh fetch by default, bypassing the on-device cache', async () => {
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
-    await fetchExplainerArticleById('explainer-ttb-toca-turbo-boost');
+    await fetchExplainerArticleById('explainer-ttb-toca-turbo-boost', true, {retries: 0});
     expect(cacheRead).not.toHaveBeenCalled();
+  });
+
+  // Regression coverage: found live 2026-09-04 - a report of "waited out
+  // admin's own ~2 min wait-for-live check, tapped the notification, article
+  // still not there" recurred even after admin.html started delaying the
+  // notification until its own check confirmed the content live. Root cause:
+  // raw.githubusercontent.com is served off Fastly's edge network, not one
+  // origin - admin's check succeeding from admin's own network path doesn't
+  // guarantee every edge has replicated yet, so a phone hitting a different,
+  // still-stale edge moments later is a real, distinct possibility no single
+  // check from one location can rule out. A short bounded retry here (not a
+  // bigger timeout on admin's side) is what actually closes that gap.
+  it('retries a bounded number of times before giving up when the article is not found yet', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: []})})
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: []})})
+      .mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchExplainerArticleById('explainer-ttb-toca-turbo-boost', true, {retries: 2, retryDelayMs: 0});
+    expect(result?.title).toBe('TTB explained');
+    expect(global.fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives up and returns null once retries are exhausted, never retrying forever', async () => {
+    global.fetch.mockResolvedValue({ok: true, json: () => Promise.resolve({posts: []})});
+    const result = await fetchExplainerArticleById('explainer-ttb-toca-turbo-boost', true, {retries: 2, retryDelayMs: 0});
+    expect(result).toBeNull();
+    expect(global.fetch).toHaveBeenCalledTimes(3); // 1 initial attempt + 2 retries
   });
 });
 

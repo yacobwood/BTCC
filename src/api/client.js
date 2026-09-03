@@ -512,7 +512,29 @@ export async function fetchExplainerArticles(forceRefresh = false) {
 // own fallback for that case silently drops the user on the plain
 // ExplainerList with no article and no explanation - exactly the bug this
 // closes.
-export async function fetchExplainerArticleById(id, forceRefresh = true) {
-  const all = await fetchExplainerArticles(forceRefresh);
-  return all.find(a => String(a.id) === String(id)) ?? null;
+//
+// Short bounded retry added 2026-09-04: admin.html's own save flow now waits
+// for raw.githubusercontent.com to serve the new content before sending the
+// notification at all (waitForExplainerLive) - but confirmed live, a report
+// of "waited ~2 minutes for the notification, tapped it, article still not
+// there" recurred even after that fix shipped. raw.githubusercontent.com is
+// served off Fastly's edge network, not one single origin - admin's own
+// check (from admin's network path) finding the new content live doesn't
+// guarantee every edge node has replicated it yet, and a phone on a
+// different network can land on a different, still-stale edge moments
+// later. Retrying here rather than stretching admin's wait further treats
+// the actual cause (edge propagation isn't atomic across the CDN, so no
+// single check from one location can ever fully guarantee it for another)
+// instead of chasing a bigger timeout number that would still eventually be
+// too small. Only adds latency on the failure path - an article found on
+// the first try (the overwhelming majority of taps, especially now that
+// admin's own wait already covers most of the delay) resolves exactly as
+// fast as before.
+export async function fetchExplainerArticleById(id, forceRefresh = true, {retries = 2, retryDelayMs = 3000} = {}) {
+  for (let attempt = 0; ; attempt++) {
+    const all = await fetchExplainerArticles(forceRefresh);
+    const found = all.find(a => String(a.id) === String(id)) ?? null;
+    if (found || attempt >= retries) return found;
+    await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+  }
 }
