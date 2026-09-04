@@ -1515,7 +1515,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">RESULTS</div>
       <div class="scraper-status-chip" id="ss-results">—</div>
     </div>
-    <div class="scraper-desc">Race results → <strong>results{year}.json</strong> + <strong>standings.json</strong>. Auto: Sat 15–18 UTC, Sun 10–18 UTC.</div>
+    <div class="scraper-desc">Race results → <strong>results{year}.json</strong> + <strong>standings.json</strong>. Auto: every 2 min, Sat/Sun 09:00–19:00 UTC (race-weekend gated).</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group"><div class="field-label">YEAR</div><input type="number" id="si-year" value="2026" min="2014" max="2030"></div>
@@ -1530,7 +1530,7 @@ select.input { cursor: pointer; }
       <div class="scraper-title">CALENDAR</div>
       <div class="scraper-status-chip" id="ss-calendar">—</div>
     </div>
-    <div class="scraper-desc">Round dates &amp; venues → <strong>calendar.json</strong>. Auto: daily 09:00 UTC.</div>
+    <div class="scraper-desc">Round dates &amp; venues → <strong>calendar.json</strong>. Auto: weekly, Monday 09:00 UTC.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <div class="field-group"><div class="field-label">SEASON</div><input type="number" id="si-season" value="2026" min="2020" max="2030"></div>
@@ -1539,23 +1539,12 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
-  <div class="scraper-card" id="sc-schedule">
-    <div class="scraper-head">
-      <div class="scraper-title">SCHEDULE</div>
-      <div class="scraper-status-chip" id="ss-schedule">—</div>
-    </div>
-    <div class="scraper-desc">Session times (FP, Qual, Race) → <strong>schedule.json</strong>. Auto: nightly 07:00 UTC.</div>
-    <div class="scraper-footer">
-      <button class="btn-run" onclick="runScraper('scrape-schedule.yml','schedule')">RUN ▶</button>
-    </div>
-  </div>
-
   <div class="scraper-card" id="sc-btcc-stats">
     <div class="scraper-head">
       <div class="scraper-title">ALL-TIME STATS</div>
       <div class="scraper-status-chip" id="ss-btcc-stats">—</div>
     </div>
-    <div class="scraper-desc">All-time records from btcc.net → <strong>records.json</strong>. Auto: daily 06:00 UTC.</div>
+    <div class="scraper-desc">All-time records from btcc.net → <strong>records.json</strong>. Auto: weekly, Monday 06:00 UTC.</div>
     <div class="scraper-footer">
       <div class="scraper-inputs">
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);cursor:pointer">
@@ -2262,7 +2251,6 @@ const runningTimestamps = {}, dispatchedAt = {};
 const SCRAPER_WORKFLOWS = [
   {file:'scrape-results.yml',          key:'results'},
   {file:'scrape-calendar.yml',         key:'calendar'},
-  {file:'scrape-schedule.yml',         key:'schedule'},
   {file:'scrape-btcc-stats.yml',       key:'btcc-stats'},
 ];
 
