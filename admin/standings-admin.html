@@ -826,7 +826,7 @@ select.input { cursor: pointer; }
   </button>
   <button class="tab" id="tab-errors" onclick="switchTab('errors',this);loadErrors()">
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-    FIRESTORE<span id="errors-badge" style="display:none;background:#E3000B;color:#fff;font-size:9px;font-weight:900;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle"></span>
+    ERRORS<span id="errors-badge" style="display:none;background:#E3000B;color:#fff;font-size:9px;font-weight:900;border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle"></span>
   </button>
   <button class="tab" onclick="switchTab('chat',this);loadChat()">
     <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -956,7 +956,7 @@ select.input { cursor: pointer; }
 <!-- ══════════════════════════════ FLAGS ══════ -->
 <div id="panel-flags" class="tab-panel">
 
-  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/flags.json</strong>. The app fetches on launch and every 60s.</div>
+  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/flags.json</strong>. The app fetches once on launch only (no polling) - a flag change needs a fresh app launch to take effect for an already-running session.</div>
 
   <div class="banner banner-green" id="flags-banner">
     <div class="banner-dot"></div>
@@ -1762,7 +1762,7 @@ select.input { cursor: pointer; }
 <!-- ══════════════════════════════ ERRORS ══════════════════ -->
 <div id="panel-errors" class="tab-panel">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div class="section-label">FIRESTORE ERRORS</div>
+    <div class="section-label">ERRORS</div>
     <div style="display:flex;gap:8px">
       <button class="btn-sm" onclick="loadErrors()">↻ REFRESH</button>
       <button class="btn-sm" onclick="dismissAllErrors()" style="color:#E3000B">DISMISS ALL</button>
@@ -2563,7 +2563,7 @@ async function doSaveFlags() {
     const r = await fetch(`${GH_API}/repos/${REPO}/contents/${FLAGS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
     if (r.ok) {
       const d = await r.json(); flagFileSha = d.content?.sha || null;
-      document.getElementById('flags-status').innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>';
+      document.getElementById('flags-status').innerHTML = '<span class="ok">Saved ✓ — takes effect on next app launch.</span>';
       document.getElementById('flags-banner-text').textContent = 'Saved to GitHub · just now';
       document.getElementById('flags-banner').classList.add('visible');
     } else { const e = await r.json(); document.getElementById('flags-status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
@@ -3289,6 +3289,12 @@ async function dispatchArticleNotif(article) {
         ? {type: 'digest', id: article.id, channel: 'news'}
         : {type: 'hub', id: article.id}),
       image_url: article.imageUrl || '',
+      // Its own topic for a digest, not 'broadcast' - same fix as
+      // dispatchExplainerNotif's explainer_alerts below. Without this the
+      // Settings "The Flying Lap" toggle had zero effect, since every
+      // digest publish notification went out on the always-on 'broadcast'
+      // topic regardless of whether the user had switched it off.
+      ...(isDigest ? {topic: 'digest_alerts'} : {}),
     };
     const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/send-broadcast-notif.yml/dispatches`, {
       method: 'POST',
@@ -5023,9 +5029,15 @@ async function loadPushHistory() {
     if (!docs.length) { el.innerHTML = '<div class="section-note">No notifications sent yet.</div>'; return; }
     el.innerHTML = docs.map(n => {
       const date = n.sentAt ? new Date(n.sentAt).toLocaleString() : '—';
-      const typeBadge = n.type === 'broadcast'
-        ? `<span style="font-size:10px;font-weight:800;color:var(--yellow);letter-spacing:1px">BROADCAST</span>`
-        : `<span style="font-size:10px;font-weight:800;color:#60A5FA;letter-spacing:1px">TEST</span>`;
+      // Was a plain broadcast-vs-else binary, which mislabeled every non-broadcast
+      // real send as "TEST" - the type field gained 'auto' (routine automated
+      // pushes, functions/shared.js's logPushHistory) and 'topic:<name>' (a
+      // send-broadcast-notif.yml dispatch to a specific FCM topic, e.g. this
+      // admin's own digest/explainer notifications) since this was last touched,
+      // and neither is a test send.
+      const badgeColor = {broadcast: 'var(--yellow)', auto: 'var(--green)', test: 'var(--blue)'}[n.type] || 'var(--purple)';
+      const badgeLabel = n.type.startsWith('topic:') ? n.type.slice(6).toUpperCase() : n.type.toUpperCase();
+      const typeBadge = `<span style="font-size:10px;font-weight:800;color:${badgeColor};letter-spacing:1px">${escHtml(badgeLabel)}</span>`;
       return `<div style="background:var(--surface);border:1px solid var(--outline);border-radius:10px;padding:14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
           ${typeBadge}
