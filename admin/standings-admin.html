@@ -1490,7 +1490,7 @@ select.input { cursor: pointer; }
       <a href="#" onclick="changeMyUid();return false" style="font-size:11px;color:var(--text-sec)">change my device's User ID</a>
     </div>
     <div class="section-note" style="margin-top:8px">
-      "Preview on my device" and "Save &amp; Publish" now wait for raw.githubusercontent.com to actually be serving the new content before sending the notification (shown as a countdown above - can take a few minutes, up to a 6-minute ceiling, since that's a backend propagation delay on GitHub's side, not something this app's own cache-busting can shortcut). The notification only fires once the content is confirmed live, so tapping it should always open the article straight away. If a wait ever hits that 6-minute ceiling and the notification arrives anyway with nothing at the other end yet, the app will keep quietly checking in the background for another 2 minutes and open the article as soon as it appears - no need to do anything, but if you check the Academy list yourself in that window it may briefly not be there yet.
+      "Preview on my device" and "Save &amp; Publish" wait for raw.githubusercontent.com to actually be serving the new content before sending the notification (shown as a countdown above - can take a few minutes, up to a 6-minute ceiling, since that's a backend propagation delay on GitHub's side, not something this app's own cache-busting can shortcut). The article itself is always saved straight away either way - only the notification waits. If that 6-minute wait ever times out, the notification is simply NOT sent at all (never sent for content that isn't confirmed live yet) - the status line above will say so plainly. Just click Preview/Save &amp; Publish again once you've confirmed the article is actually live (e.g. reopen the Academy section yourself) - the wait resolves almost immediately on a second attempt, and the notification will send then.
     </div>
     <div id="explainer-edit-status" class="status-line"></div>
   </div>
@@ -3576,9 +3576,21 @@ async function saveExplainerEdit(mode = 'save') {
   // to actually serve the published state before notifying (waitForExplainerLive)
   // - keep the card open and show that countdown here rather than closing it
   // the instant the commit lands, so the admin can see why it isn't done yet.
-  await saveExplainers(commitMessage, notifArticle, {
+  const {notifSent: publishNotifSent} = await saveExplainers(commitMessage, notifArticle, {
     onWaitTick: mode === 'publish' ? secs => { statusEl.textContent = `Saved - confirming it's live before notifying… (${secs}s)`; } : undefined,
   });
+  if (mode === 'publish' && notifArticle) {
+    // notifSent === false means the 6-minute wait never confirmed the
+    // article live - does NOT notify anyway (changed 2026-09-04, at the
+    // user's explicit request: a notification for content that still
+    // doesn't exist anywhere is worse than none). The article itself is
+    // safely published either way; clicking Save & Publish again once it's
+    // actually confirmed live is the retry path - the wait will resolve
+    // almost immediately on that second attempt.
+    statusEl.textContent = publishNotifSent
+      ? '✓ Live - notification sent'
+      : "⚠ Published, but NOT confirmed live after 6 min - notification not sent. Click Save & Publish again once it's actually live to send it.";
+  }
   // 'preview' fires the same test notification the standalone "Send test
   // notification" button does - to your own device token only, via
   // send-test-notif.yml, never the real explainer_alerts topic - so
@@ -3588,6 +3600,7 @@ async function saveExplainerEdit(mode = 'save') {
   // fires on every publish. Same wait-before-notify treatment as a real
   // publish (see saveExplainers) - previewDeviceIds is the field that has to
   // actually be live this time, not status.
+  let previewNotifSent = null;
   if (mode === 'preview') {
     statusEl.textContent = 'Saved - confirming the preview is live before notifying…';
     const live = await waitForExplainerLive(
@@ -3595,16 +3608,29 @@ async function saveExplainerEdit(mode = 'save') {
       post => Array.isArray(post.previewDeviceIds) && post.previewDeviceIds.includes(previewUid),
       {onTick: secs => { statusEl.textContent = `Saved - confirming the preview is live before notifying… (${secs}s)`; }}
     );
-    await dispatchTestExplainerNotif(
-      article.notifTitleOverride || article.title,
-      article.notifBodyOverride || '',
-      article.id
-    );
+    // Does NOT notify anyway on a timeout any more, same reasoning as the
+    // publish path above - re-clicking Preview once it's actually live is
+    // the retry path.
+    if (live) {
+      await dispatchTestExplainerNotif(
+        article.notifTitleOverride || article.title,
+        article.notifBodyOverride || '',
+        article.id
+      );
+    }
+    previewNotifSent = live;
     statusEl.textContent = live
       ? '✓ Live - notification sent, check your phone'
-      : '⚠ Still unconfirmed after 6 min - sent anyway, may need a retry';
+      : "⚠ Saved, but NOT confirmed live after 6 min - notification not sent. Click Preview again once it's actually live to send it.";
   }
-  if (mode === 'publish' || mode === 'preview') {
+  // A failed notification is left on screen for the admin to actually read
+  // and act on (re-click later) rather than auto-dismissed like a normal
+  // success - only close automatically when there was nothing to fail, or
+  // it genuinely succeeded.
+  const notifFailed = (mode === 'publish' && notifArticle && publishNotifSent === false) || (mode === 'preview' && previewNotifSent === false);
+  if (notifFailed) {
+    // Leave the card open - Cancel closes it once the admin has read the message.
+  } else if (mode === 'publish' || mode === 'preview') {
     // Leave the final status line up briefly instead of yanking the card
     // away the instant dispatch fires - the whole point of the countdown
     // above is for the admin to actually see it resolve.
@@ -3622,13 +3648,18 @@ async function quickPublishExplainer(articleId) {
   if (!p) return;
   // Not "immediately" any more (2026-09-04) - saveExplainers now waits for
   // raw.githubusercontent.com to actually serve the published state before
-  // notifying, which can take a few minutes (up to a 6-minute ceiling).
-  // Wording it as "shortly after" rather than reintroducing a promise the
-  // wait-before-notify fix exists specifically to no longer make.
-  if (!confirm(`Publish "${p.title}"? This sends a push notification shortly after.`)) return;
+  // notifying, which can take a few minutes (up to a 6-minute ceiling), and
+  // as of the same day does NOT notify at all if that wait times out (a
+  // notification for content that still doesn't exist anywhere is worse
+  // than none, at the user's explicit request) - re-clicking Publish again
+  // once the article is confirmed live is the retry path.
+  if (!confirm(`Publish "${p.title}"? This sends a push notification once it's confirmed live (usually within a few minutes).`)) return;
   p.status = 'published';
   p.pubDate = p.pubDate || nowIso();
-  await saveExplainers('Publish explainer article: ' + p.title, p);
+  const {notifSent} = await saveExplainers('Publish explainer article: ' + p.title, p);
+  if (notifSent === false) {
+    alert(`"${p.title}" is published, but the notification was NOT sent - raw.githubusercontent.com never confirmed it live within 6 minutes. Click Publish again once you've confirmed it's actually live (e.g. reopen the Academy section) to send the notification then.`);
+  }
 }
 
 async function quickUnpublishExplainer(articleId) {
@@ -3691,9 +3722,13 @@ async function waitForExplainerLive(articleId, predicate, {timeoutMs = 360000, i
   }
 }
 
+// Return shape: {ok, notifSent} - notifSent is null when no notifArticle was
+// passed (nothing to notify about), true once actually dispatched, false if
+// a notifArticle was passed but the live-check never confirmed in time.
+// Callers use this to show an accurate status rather than assuming success.
 async function saveExplainers(commitMessage, notifArticle = null, {onWaitTick} = {}) {
   const tok = getToken();
-  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return; }
+  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return {ok: false, notifSent: null}; }
   const content = JSON.stringify({posts: explainerPosts}, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
@@ -3708,19 +3743,29 @@ async function saveExplainers(commitMessage, notifArticle = null, {onWaitTick} =
     if (r.ok) {
       const d = await r.json(); explainerFileSha = d.content?.sha || null;
       renderExplainersList();
-      if (notifArticle) {
-        // Wait for raw.githubusercontent.com to actually be serving the
-        // published state before notifying - see waitForExplainerLive above.
-        // A timeout still notifies anyway (better than never notifying a
-        // real publish) rather than silently swallowing it.
-        await waitForExplainerLive(notifArticle.id, post => post.status === 'published', {onTick: onWaitTick});
-        dispatchExplainerNotif(notifArticle);
-      }
+      if (!notifArticle) return {ok: true, notifSent: null};
+      // Wait for raw.githubusercontent.com to actually be serving the
+      // published state before notifying - see waitForExplainerLive above.
+      // A timeout does NOT notify anyway any more (changed 2026-09-04, at
+      // the user's explicit request) - a notification for content that
+      // still doesn't exist anywhere is worse than no notification at all,
+      // not a lesser evil. The article itself is always safely saved either
+      // way; only the notification is held back. Re-clicking Publish later
+      // (once the content is confirmed live by then) is the retry path -
+      // no separate "resend" button needed, since the wait will resolve
+      // almost immediately on that second attempt.
+      const live = await waitForExplainerLive(notifArticle.id, post => post.status === 'published', {onTick: onWaitTick});
+      if (live) dispatchExplainerNotif(notifArticle);
+      return {ok: true, notifSent: live};
     } else {
       const e = await r.json();
       alert(`GitHub error: ${e.message}`);
+      return {ok: false, notifSent: null};
     }
-  } catch(e) { alert(`Network error: ${e.message}`); }
+  } catch(e) {
+    alert(`Network error: ${e.message}`);
+    return {ok: false, notifSent: null};
+  }
 }
 
 async function dispatchExplainerNotif(article) {
