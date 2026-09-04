@@ -4,6 +4,7 @@
 import json
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,6 +12,7 @@ import scrape_articles
 from scrape_articles import (
     NEWS_URL,
     build_articles,
+    extract_og_image,
     fetch_article_body,
     needs_full_refetch,
     parse_display_date,
@@ -256,18 +258,36 @@ class TestScrapePages(unittest.TestCase):
 
 # ── fetch_article_body / build_articles ──────────────────────────────────────
 
+class TestExtractOgImage(unittest.TestCase):
+
+    def test_finds_property_before_content(self):
+        html = '<meta property="og:image" content="https://btcc.net/api/media/abc123">'
+        self.assertEqual(extract_og_image(html), "https://btcc.net/api/media/abc123")
+
+    def test_finds_content_before_property(self):
+        html = '<meta content="https://btcc.net/api/media/abc123" property="og:image">'
+        self.assertEqual(extract_og_image(html), "https://btcc.net/api/media/abc123")
+
+    def test_none_when_no_og_image_tag(self):
+        self.assertIsNone(extract_og_image('<meta property="og:title" content="A title">'))
+
+
 class TestFetchArticleBody(unittest.TestCase):
 
     @patch("scrape_articles.fetch_via_scrapfly", return_value=None)
     def test_returns_none_rather_than_raising_when_fetch_fails(self, mock_fetch):
-        self.assertIsNone(fetch_article_body("some-slug"))
+        self.assertEqual(fetch_article_body("some-slug"), (None, None))
 
     @patch("scrape_articles.fetch_via_scrapfly")
-    def test_passes_referer_and_extracts_body(self, mock_fetch):
-        mock_fetch.return_value = '<div class="article-body">Full content.</div></article>'
-        result = fetch_article_body("some-slug")
+    def test_passes_referer_and_extracts_body_and_og_image(self, mock_fetch):
+        mock_fetch.return_value = (
+            '<meta property="og:image" content="https://btcc.net/api/media/abc123">'
+            '<div class="article-body">Full content.</div></article>'
+        )
+        content_html, og_image = fetch_article_body("some-slug")
         self.assertEqual(mock_fetch.call_args.kwargs.get("referer"), NEWS_URL)
-        self.assertEqual(result, "Full content.")
+        self.assertEqual(content_html, "Full content.")
+        self.assertEqual(og_image, "https://btcc.net/api/media/abc123")
 
 
 class TestBuildArticlesImageFetch(unittest.TestCase):
@@ -322,7 +342,7 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                      "media_url": "https://btcc.net/api/media/abc123",
                      "excerpt": "", "date": "2026-08-01T00:00:00",
                  }]), \
-                 patch("scrape_articles.fetch_article_body", return_value="Full report."), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
                  patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
                  patch("scrape_articles.save_mirrored_image", return_value="abc123.jpg"):
                 posts = build_articles(refresh_all=False)
@@ -331,6 +351,111 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
             posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
             "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/abc123.jpg",
         )
+
+    def test_falls_back_to_og_image_when_listing_card_has_no_thumbnail(self):
+        """Confirmed live 2026-09-04: "Darlington UK meets Darlington USA"
+        (a Goodyear press-release repost) had no <img> anywhere in its
+        /news/ listing card, so card["media_url"] was None and it never
+        got a mirrored image at all - despite its own article page
+        carrying a normal og:image. This is the fix's actual reason to
+        exist, not just the tuple-return plumbing above."""
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "darlington-uk-meets-darlington-usa", "title": "Darlington UK meets Darlington USA",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-04T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body",
+                       return_value=("Full report.", "https://btcc.net/api/media/def456")), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
+                 patch("scrape_articles.save_mirrored_image", return_value="def456.jpg"):
+                posts = build_articles(refresh_all=False)
+        mock_image.assert_called_once_with("https://btcc.net/api/media/def456", label="darlington-uk-meets-darlington-usa")
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/def456.jpg",
+        )
+
+    def test_no_image_anywhere_leaves_embedded_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "wire-story", "title": "Wire Story",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-04T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
+                 patch("scrape_articles.fetch_image_smart") as mock_image:
+                posts = build_articles(refresh_all=False)
+        mock_image.assert_not_called()
+        self.assertNotIn("wp:featuredmedia", posts[0]["_embedded"])
+
+    def test_retries_a_recent_mirrored_article_still_missing_an_image(self):
+        """The self-terminating retry: a mirrored article whose card and prior
+        entry both still lack an image gets a fresh fetch_article_body call
+        (a second chance at og_image) as long as it's within
+        IMAGE_RETRY_WINDOW of its firstSeenAt - mirrors needs_full_refetch's
+        stub-marker check just above it."""
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            existing_post = {
+                "id": "darlington-uk-meets-darlington-usa", "slug": "darlington-uk-meets-darlington-usa",
+                "date": "2026-09-04T00:00:00", "firstSeenAt": recent,
+                "title": {"rendered": "Darlington UK meets Darlington USA"},
+                "excerpt": {"rendered": ""}, "content": {"rendered": "Full report."},
+                "_embedded": {},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "darlington-uk-meets-darlington-usa", "title": "Darlington UK meets Darlington USA",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-04T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body",
+                       return_value=("Full report.", "https://btcc.net/api/media/def456")) as mock_body, \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", return_value="def456.jpg"):
+                posts = build_articles(refresh_all=False)
+        mock_body.assert_called_once()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/def456.jpg",
+        )
+
+    def test_stops_retrying_an_old_image_less_article(self):
+        """Past IMAGE_RETRY_WINDOW, an image-less mirrored article stops
+        paying for a fresh full-page fetch every run - the cost-control half
+        of the fix, same reasoning as IMAGE_RETRY_WINDOW's own comment."""
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+            existing_post = {
+                "id": "old-wire-story", "slug": "old-wire-story",
+                "date": "2026-08-05T00:00:00", "firstSeenAt": old,
+                "title": {"rendered": "Old Wire Story"},
+                "excerpt": {"rendered": ""}, "content": {"rendered": "Full report."},
+                "_embedded": {},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "old-wire-story", "title": "Old Wire Story",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-08-05T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body") as mock_body:
+                posts = build_articles(refresh_all=False)
+        mock_body.assert_not_called()
+        self.assertNotIn("wp:featuredmedia", posts[0]["_embedded"])
 
 
 if __name__ == "__main__":

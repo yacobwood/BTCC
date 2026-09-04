@@ -90,7 +90,7 @@ import argparse
 import json
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from media_utils import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
@@ -99,6 +99,15 @@ from scrapfly_fallback import fetch_image_smart, fetch_via_scrapfly
 NEWS_URL = "https://btcc.net/news/"
 PAGE_SIZE = 20  # must match src/api/client.js's fetchArticles() perPage
 MAX_ARTICLES = 500
+# How long a mirrored article with no image keeps getting a fresh full-page
+# refetch (see build_articles' needs_image_retry) purely to give
+# extract_og_image another chance at it - bounded rather than forever, since
+# an article that genuinely has no image on btcc.net at all would otherwise
+# re-pay a full Scrapfly page fetch every single scheduled run (every 5
+# minutes in-hours) with nothing to ever find. Self-terminating once an
+# image is found (prior_image then short-circuits it), same shape as
+# needs_full_refetch's stub-marker check just below.
+IMAGE_RETRY_WINDOW = timedelta(days=3)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ARTICLES_DIR = DATA_DIR / "articles"
 INDEX_JSON = ARTICLES_DIR / "index.json"
@@ -124,6 +133,29 @@ IMAGE_RE = re.compile(r'<img[^>]*src="(' + MEDIA_SRC_RE_FRAGMENT + r')"')
 EXCERPT_RE = re.compile(r'<div class="news-card-footer"><p>([^<]*)</p>')
 DATE_RE = re.compile(r'<time class="date">([^<]+)</time>')
 BODY_RE = re.compile(r'<div class="article-body">(.*?)</div>\s*</article>', re.DOTALL)
+# Fallback source of a featured image for an article whose /news/ listing
+# card has no <img> matching IMAGE_RE at all (confirmed live 2026-09-04:
+# "Darlington UK meets Darlington USA", a Goodyear press-release repost,
+# has no image anywhere in its news-card markup and so never got a
+# mirrored image - the app's HeroCard/GridRow just render blank when
+# imageUrl is falsy). An article's own page nearly always carries a
+# normal <meta property="og:image"> tag even when its listing-card
+# thumbnail is missing/differently-shaped, so this is checked against the
+# full page fetched for fetch_article_body's content extraction - no
+# extra Scrapfly request. Two attribute orders since HTML doesn't
+# guarantee property= comes before content=.
+OG_IMAGE_RE = re.compile(
+    r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"'
+    r'|<meta[^>]+content="([^"]+)"[^>]+property="og:image"'
+)
+
+
+def extract_og_image(html: str) -> str | None:
+    m = OG_IMAGE_RE.search(html)
+    if not m:
+        return None
+    return m.group(1) or m.group(2)
+
 
 _DISPLAY_DATE_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)\s+([A-Za-z]+)\s+(\d{4})")
 _MONTHS = {
@@ -235,16 +267,20 @@ def scrape_pages(num_pages: int) -> list[dict]:
     return all_cards
 
 
-def fetch_article_body(slug: str) -> str | None:
-    """Fetch a single article page via Scrapfly and return its body's inner
-    HTML, or None if the fetch failed. Callers should treat None as "try
-    again next run", not something that should crash the whole batch."""
+def fetch_article_body(slug: str) -> tuple[str | None, str | None]:
+    """Fetch a single article page via Scrapfly and return
+    (content_html, og_image_url). content_html is None if the fetch failed -
+    callers should treat that as "try again next run", not something that
+    should crash the whole batch. og_image_url (see OG_IMAGE_RE above) is
+    the featured-image fallback for a card whose listing-page thumbnail was
+    missing/unmatched; it's None whenever content_html is None too, and may
+    also be None if the page genuinely has no og:image tag."""
     url = f"https://btcc.net/{slug}/"
     html = fetch_via_scrapfly(url, referer=NEWS_URL, render_js=True, label=slug)
     if html is None:
-        return None
+        return None, None
     m = BODY_RE.search(html)
-    return m.group(1).strip() if m else ""
+    return (m.group(1).strip() if m else ""), extract_og_image(html)
 
 
 def load_existing() -> dict:
@@ -358,15 +394,38 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
         slug = card["slug"]
         prior = existing.get(slug)
         prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
-        has_content = bool(prior_content) and not needs_full_refetch(prior_content, refresh_all)
+        prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
+
+        # A mirrored article with no image at all (neither a prior mirrored
+        # one nor anything on the current listing card) gets treated like a
+        # content stub - worth one more full-page fetch so extract_og_image
+        # gets a shot at it, bounded to IMAGE_RETRY_WINDOW of its first
+        # sighting so a genuinely image-less article doesn't re-pay that
+        # fetch forever (see IMAGE_RETRY_WINDOW above).
+        needs_image_retry = False
+        if prior is not None and not prior_image and not card["media_url"]:
+            first_seen = prior.get("firstSeenAt")
+            try:
+                needs_image_retry = first_seen and (
+                    datetime.now(timezone.utc) - datetime.fromisoformat(first_seen) < IMAGE_RETRY_WINDOW
+                )
+            except ValueError:
+                needs_image_retry = False
+
+        has_content = (
+            bool(prior_content)
+            and not needs_full_refetch(prior_content, refresh_all)
+            and not needs_image_retry
+        )
 
         if has_content:
             content_html = prior["content"]["rendered"]
             date_iso = prior.get("date") or card["date"]
             category = prior.get("_embedded", {}).get("wp:term", [[{}]])[0][0].get("name", "")
+            og_image = None
         else:
             print(f"  Fetching full content: {slug}")
-            content_html = fetch_article_body(slug)
+            content_html, og_image = fetch_article_body(slug)
 
             if content_html is None:
                 # Fetch failed - don't let it sink every other card in this
@@ -386,24 +445,26 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
                 date_iso = card["date"]
                 category = ""
 
-        prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
         if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
             image_url = prior_image
-        elif card["media_url"]:
+        else:
             # On-demand, not eagerly-captured: Scrapfly bills each image
             # independently (~225 credits for btcc.net's own /api/media/
             # shape, confirmed live 2026-09-01) rather than capturing every
             # image on a page for free during render the way Playwright did,
             # so this only ever runs for a card that genuinely lacks an
-            # already-mirrored image.
-            fetched = fetch_image_smart(card["media_url"], label=slug)
+            # already-mirrored image. card["media_url"] (the listing-card
+            # thumbnail) is preferred when present; og_image (the article's
+            # own og:image meta tag, only populated when content_html was
+            # just freshly fetched above) is the fallback for a card whose
+            # listing thumbnail is missing/unmatched entirely.
+            source_url = card["media_url"] or (resolve_media_url(og_image) if og_image else None)
+            fetched = fetch_image_smart(source_url, label=slug) if source_url else None
             if fetched:
-                filename = save_mirrored_image({card["media_url"]: fetched}, card["media_url"], MEDIA_DIR)
+                filename = save_mirrored_image({source_url: fetched}, source_url, MEDIA_DIR)
                 image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
             else:
                 image_url = None
-        else:
-            image_url = None
 
         embedded = {}
         if image_url:
