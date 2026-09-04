@@ -1,5 +1,22 @@
 [
   {
+    "id": "darlington-uk-meets-darlington-usa",
+    "slug": "darlington-uk-meets-darlington-usa",
+    "link": "https://btcc.net/darlington-uk-meets-darlington-usa/",
+    "date": "2026-09-04T00:00:00",
+    "firstSeenAt": "2026-09-04T21:19:53.167982+00:00",
+    "title": {
+      "rendered": "Darlington UK meets Darlington USA"
+    },
+    "excerpt": {
+      "rendered": "Unique weekend of action for Goodyear Racing Eagles This weekend,..."
+    },
+    "content": {
+      "rendered": "<p data-text-alignment=\"center\"><strong>Unique weekend of action for Goodyear Racing Eagles</strong></p><p>This weekend, Goodyear Racing Eagles will be at the heart of the action at Croft Circuit in North Yorkshire for the British Touring Car Championship, one of the world's most competitive and thrilling motorsport spectacles. Simultaneously, Goodyear Racing is competing across three additional major championships globally, showcasing the technological prowess and capabilities of the Goodyear Racing Team and its Eagle tire family.</p><p>Incredibly, the BTCC race weekend takes place near to Darlington, England, which coincides with NASCAR's \u201cChase to the Championship\u201d playoff opener at Darlington Raceway in South Carolina!</p><p>With the FIA World Endurance Championship's Lone Star Le Mans endurance event in Austin, Texas and the NHRA U.S. Nationals in Indianapolis taking place across the same weekend, the races will see Goodyear technology pushed to its limits.</p><p><em>Xavier Fraipont, Vice President, Goodyear Racing said:</em> \u201cGoodyear Racing is at its best when we can demonstrate just how different the demands of racing can be, and this weekend brings together four very different racing environments and demonstrates the challenges for Goodyear Racing Eagle tires across four distinct championships.</p><p>\u201cThe varied environments and challenges allow our technical teams to create tires that perform, and those lessons translate to the tires that customers can buy today. \u2018Fast is in us\u2019 isn\u2019t just our mantra, but our fuel that allows us to create what we consider the best tires in the world, anywhere.\u201d</p>"
+    },
+    "_embedded": {}
+  },
+  {
     "id": "laser-tools-racing-with-mb-motorsport-head-to-croft",
     "slug": "laser-tools-racing-with-mb-motorsport-head-to-croft",
     "link": "https://btcc.net/laser-tools-racing-with-mb-motorsport-head-to-croft/",
@@ -432,29 +449,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/59dfda1b-4a79-4839-ae41-1182f2edfb56-Sutton--RL1_3854-2-.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "a-statement",
-    "slug": "a-statement",
-    "link": "https://btcc.net/a-statement/",
-    "date": "2026-08-18T00:00:00",
-    "firstSeenAt": "2026-08-18T17:58:12.340280+00:00",
-    "title": {
-      "rendered": "A Statement"
-    },
-    "excerpt": {
-      "rendered": "Following today\u2019s (18 August) statement from Cataclean, TOCA confirms the..."
-    },
-    "content": {
-      "rendered": "<p>Following today\u2019s (18 August) statement from Cataclean, TOCA confirms the team will continue competing in the 2026 Kwik Fit British Touring Car Championship under a new name and management structure, in order that it can move positively forward.</p><p>The matters concerned are internal to the organisation and relate solely to its directors, shareholders and relevant parties. TOCA is not privy to those matters.</p><p>However, TOCA has been provided with assurances of the team\u2019s participation in the BTCC going forward. Those assurances reflect Cataclean\u2019s continuing commitment and confidence in both the team and the Championship.</p><p>We understand that the programme will operate through a new entity, without the further involvement of Jason Plato in its management or ownership.</p><p>In the interim, the team will be entered as CPRL.</p><p>Jason is unquestionably one of the BTCC\u2019s greatest stars, and his exceptional record speaks for itself. He has long been \u2013 and will remain \u2013 a valued part of the BTCC family. Although his involvement with this particular venture appears to have reached its conclusion, we look forward to seeing Jason in the BTCC paddock in the future.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/8ac4f976-19d1-42c8-9574-b03fd3402371-Snetterton-094A9589.jpg"
         }
       ]
     }

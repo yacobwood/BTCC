@@ -1,5 +1,27 @@
 [
   {
+    "id": "7-eleven-tom-chilton",
+    "slug": "7-eleven-tom-chilton",
+    "link": "https://btcc.net/7-eleven-tom-chilton/",
+    "date": "2026-07-22T00:00:00",
+    "title": {
+      "rendered": "7-Eleven: Tom Chilton"
+    },
+    "excerpt": {
+      "rendered": "Continuing the 7-Eleven series, we turn to one of the..."
+    },
+    "content": {
+      "rendered": "<p>Continuing the 7-Eleven series, we turn to one of the 11 different drivers to reach the podium so far in 2026: Team VERTU's Tom Chilton. Now in his 20th BTCC season and with well over 500 race starts to his name, the #3 Hyundai i30 Fastback N picked up his solitary podium of the campaign so far at Snetterton.</p><p><strong>Snetterton 300</strong></p><p>Chilton kept himself firmly in the podium picture throughout Sunday's Race 2, running strongly in the leading pack and always within touching distance of the rostrum. With teammate Ricky Collard (Team VERTU) already through to second after a move around the outside of Dan Cammish (NAPA Racing UK) into Brundle on lap eight, Chilton pounced at the same spot a lap later, this time up the inside, showing the pace and racecraft to make the move stick and complete a Team VERTU two-three, his first top-three finish of the 2026 season.</p><figure class=\"wp-block-embed wp-block-embed-youtube\" data-url=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\"><iframe src=\"https://www.youtube-nocookie.com/embed/EDHNG1hfHZI?rel=0&amp;start=935\" title=\"YouTube video\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share\"></iframe></figure><p>Chilton sits just outside the top ten in the Drivers' Championship as the mid-season break comes to a close, with the grid back in action at Thruxton (25/26 July) this weekend.</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112621-112622-chilton-0H5A7184-1-scaled-e1784728852898.jpg"
+        }
+      ]
+    }
+  },
+  {
     "id": "expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton",
     "slug": "expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton",
     "link": "https://btcc.net/expanded-line-up-for-wsr-as-btcc-resumes-at-thruxton/",
@@ -413,28 +435,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/e57684e5-589f-41b9-8060-1e5ad430b448-banner-version-1-1-e1783005749716.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "introducing-the-7-eleven",
-    "slug": "introducing-the-7-eleven",
-    "link": "https://btcc.net/introducing-the-7-eleven/",
-    "date": "2026-07-03T00:00:00",
-    "title": {
-      "rendered": "Introducing the 7-Eleven"
-    },
-    "excerpt": {
-      "rendered": "The 2026 Kwik Fit British Touring Car Championship is deep..."
-    },
-    "content": {
-      "rendered": "<p>The 2026 Kwik Fit British Touring Car Championship is deep into its mid-season break, and with Thruxton still weeks away, we're taking the chance to look back at a first half unlike any other. Last year's midseason campaign, The Perfect Ten, charted the ten different race winners across the opening five events of the season. This year, the break lands an event earlier, and the numbers tell a different story entirely... Welcome to 7-Eleven.</p>\n\n\n\n<p>Across the first 12 races of the season, seven different drivers have taken victory. Even more strikingly, 11 drivers, over half the current grid, have already stood on the podium in just four events. Over the coming weeks, we'll be taking a closer look at each and every one, starting all the way back at the season opener at Donington Park.</p>\n\n\n\n<p>The seven race winners so far this season: Mikey Doble, Ash Sutton, \u00c1r\u00f3n Taylor Smith, Tom Ingram, Charles Rainford, Gordon Shedden and Dan Cammish.</p>\n\n\n\n<p>Joining them on the podium in 2026: Ricky Collard, Josh Cook, Daryl De Leon and Tom Chilton.</p>\n\n\n\n<p>11 drivers. Seven winners. 12 races. This is 7-Eleven.</p>\n\n\n\n<p></p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/3545d490-66b4-426c-9469-31ee5e3a35c2-sutton-0H5A5807-scaled-e1783092788538.jpg"
         }
       ]
     }
