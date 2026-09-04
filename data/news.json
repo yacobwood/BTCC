@@ -1,16 +1,10 @@
 [
   {
-    "id": "laser-tools-racing-with-mb-motorsport-head-to-croft",
-    "slug": "laser-tools-racing-with-mb-motorsport-head-to-croft",
+    "id": "darlington-uk-meets-darlington-usa",
+    "slug": "darlington-uk-meets-darlington-usa",
     "title": {
-      "rendered": "Laser Tools Racing with MB Motorsport ready for Croft challenge"
+      "rendered": "Darlington UK meets Darlington USA"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/5a74d573-0237-47ff-9cf6-c40f137d5259.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
