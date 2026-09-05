@@ -1,16 +1,10 @@
 [
   {
-    "id": "darlington-uk-meets-darlington-usa",
-    "slug": "darlington-uk-meets-darlington-usa",
+    "id": "cook-claims-second-pole-position-of-2026-season",
+    "slug": "cook-claims-second-pole-position-of-2026-season",
     "title": {
-      "rendered": "Darlington UK meets Darlington USA"
+      "rendered": "Cook claims second pole position of 2026 season"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/424cb587-5553-4d71-825b-e50c2cbeb91b.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
