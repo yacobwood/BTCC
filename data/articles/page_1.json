@@ -14,7 +14,13 @@
     "content": {
       "rendered": "<p data-text-alignment=\"center\"><strong>Unique weekend of action for Goodyear Racing Eagles</strong></p><p>This weekend, Goodyear Racing Eagles will be at the heart of the action at Croft Circuit in North Yorkshire for the British Touring Car Championship, one of the world's most competitive and thrilling motorsport spectacles. Simultaneously, Goodyear Racing is competing across three additional major championships globally, showcasing the technological prowess and capabilities of the Goodyear Racing Team and its Eagle tire family.</p><p>Incredibly, the BTCC race weekend takes place near to Darlington, England, which coincides with NASCAR's \u201cChase to the Championship\u201d playoff opener at Darlington Raceway in South Carolina!</p><p>With the FIA World Endurance Championship's Lone Star Le Mans endurance event in Austin, Texas and the NHRA U.S. Nationals in Indianapolis taking place across the same weekend, the races will see Goodyear technology pushed to its limits.</p><p><em>Xavier Fraipont, Vice President, Goodyear Racing said:</em> \u201cGoodyear Racing is at its best when we can demonstrate just how different the demands of racing can be, and this weekend brings together four very different racing environments and demonstrates the challenges for Goodyear Racing Eagle tires across four distinct championships.</p><p>\u201cThe varied environments and challenges allow our technical teams to create tires that perform, and those lessons translate to the tires that customers can buy today. \u2018Fast is in us\u2019 isn\u2019t just our mantra, but our fuel that allows us to create what we consider the best tires in the world, anywhere.\u201d</p>"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/424cb587-5553-4d71-825b-e50c2cbeb91b.jpg"
+        }
+      ]
+    }
   },
   {
     "id": "laser-tools-racing-with-mb-motorsport-head-to-croft",
