@@ -1,7 +1,8 @@
 const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getMessaging} = require('firebase-admin/messaging');
-const {logError, requireAdminPost} = require('./shared');
+const {logError, logPushHistory, requireAdminPost} = require('./shared');
+const {computeResultsHash} = require('./resultsHash');
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
 exports.dismissError = onRequest(
@@ -61,17 +62,37 @@ exports.notifyResultsUpdate = onRequest(
       // way it suppresses resultsRace*. Reuses the existing type:"results"
       // (no round) fallback in notifNavigation.js, which already just opens
       // the Results tab - no new navigation case needed.
+      //
+      // Deduped via computeResultsHash (./resultsHash.js) - this endpoint
+      // gets called on every scrape-results.yml tick (every 2 min on a
+      // raceday), and had no dedup of its own at all before 2026-09-05,
+      // unconditionally firing a visible push on every call. Confirmed live:
+      // users getting repeat "A fresh result just dropped" pushes during the
+      // Croft (round 8) race weekend with nothing actually new to show.
       try {
-        await getMessaging().send({
-          topic: 'results_teaser',
-          notification: {
-            title: 'A fresh result just dropped',
-            body: 'Open BTCC Hub to see how it went.',
-          },
-          data: {type: 'results'},
-          android: {notification: {channelId: 'results'}},
-        });
+        const hash = await computeResultsHash(year);
+        const stateRef = getFirestore().collection('state').doc('results_teaser');
+        const snap = await stateRef.get();
+        const lastHash = snap.exists ? snap.data().lastHash : null;
+        if (hash !== lastHash) {
+          await stateRef.set({lastHash: hash, sentAt: new Date().toISOString()});
+          const title = 'A fresh result just dropped';
+          const body = 'Open BTCC Hub to see how it went.';
+          await getMessaging().send({
+            topic: 'results_teaser',
+            notification: {title, body},
+            data: {type: 'results'},
+            android: {notification: {channelId: 'results'}},
+          });
+          await logPushHistory(title, body, 'results');
+        } else {
+          console.log('notifyResultsUpdate: results/standings content unchanged (hash match) - skipping teaser push');
+        }
       } catch (e) {
+        // Fails safe toward "don't spam": the silent results_live refresh
+        // above already went out unconditionally, so app clients still get
+        // fresh data regardless - they just don't get an extra nudge push
+        // if this dedup check itself errors.
         console.error('notifyResultsUpdate: results_teaser send failed:', e);
       }
 

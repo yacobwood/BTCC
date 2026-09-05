@@ -7,7 +7,7 @@ process.env.SCRAPER_SECRET = 'test-scraper-secret';
 // their own package.json/install, separate from the app's root one), so it
 // isn't resolvable from a root-level __tests__/ file - {virtual: true} tells
 // Jest to register the mock by name without trying to resolve a real module.
-const {db: mockFirestoreDb} = makeFirestoreMock();
+const {db: mockFirestoreDb, docRef: mockDocRef} = makeFirestoreMock();
 jest.mock('firebase-admin/firestore', () => ({
   getFirestore: jest.fn(() => mockFirestoreDb),
 }), {virtual: true});
@@ -18,8 +18,20 @@ jest.mock('firebase-admin/messaging', () => ({
 }), {virtual: true});
 
 const mockLogError = jest.fn(() => Promise.resolve());
+const mockLogPushHistory = jest.fn(() => Promise.resolve());
+// Default: both raw-GitHub fetches (results{year}.json, standings.json)
+// resolve to distinct, stable, parseable content - computeResultsHash needs
+// something real to hash even when a test doesn't care what the hash is.
+const mockFetchWithTimeout = jest.fn(url => Promise.resolve({
+  ok: true,
+  json: () => Promise.resolve(
+    url.includes('/results') ? {season: '2026', rounds: [{round: 8}]} : {standings: [{driver: 'A'}], updated: '2026-09-05T09:00:00Z'},
+  ),
+}));
 jest.mock('../../functions/shared', () => ({
   logError: mockLogError,
+  logPushHistory: mockLogPushHistory,
+  fetchWithTimeout: mockFetchWithTimeout,
   ADMIN_SECRET: 'test-admin-secret',
   requireAdminPost: (req, res) => {
     if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
@@ -29,6 +41,7 @@ jest.mock('../../functions/shared', () => ({
 }));
 
 const {dismissError, notifyResultsUpdate, reportScraperFailure} = require('../../functions/scraperAdmin');
+const {computeResultsHash} = require('../../functions/resultsHash');
 
 describe('dismissError', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -82,7 +95,7 @@ describe('notifyResultsUpdate', () => {
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
-  it('sends both the silent results_live signal and the visible results_teaser push', async () => {
+  it('sends both the silent results_live signal and the visible results_teaser push on first-ever content', async () => {
     const req = makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}});
     const res = makeRes();
     await notifyResultsUpdate(req, res);
@@ -95,7 +108,67 @@ describe('notifyResultsUpdate', () => {
       topic: 'results_teaser',
       notification: expect.objectContaining({title: 'A fresh result just dropped'}),
     }));
+    // Stores the new hash so a later identical-content call can dedupe against it.
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({lastHash: expect.any(String)}));
+    expect(mockLogPushHistory).toHaveBeenCalledWith('A fresh result just dropped', expect.any(String), 'results');
     expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  // The actual bug being fixed: scrape_tsl.py re-stamps standings.json's
+  // `updated` field with the current time on essentially every raceday tick
+  // regardless of whether anything real changed, and this endpoint used to
+  // have no dedup at all - firing a visible push on every one of those
+  // spurious calls (confirmed live, Croft round 8 weekend, 2026-09-05).
+  it('does not resend the teaser when only standings.json\'s updated timestamp changed', async () => {
+    // First call establishes a stored hash for this content.
+    await notifyResultsUpdate(
+      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
+      makeRes(),
+    );
+    const storedHash = mockDocRef.set.mock.calls[0][0].lastHash;
+    jest.clearAllMocks(); // isolate the assertions below to the second call only
+
+    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({lastHash: storedHash})});
+    // Same results/standings content as the default mock, but a bumped `updated`
+    // timestamp only - exactly what a spurious, content-unchanged scrape produces.
+    mockFetchWithTimeout
+      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({season: '2026', rounds: [{round: 8}]})}))
+      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({standings: [{driver: 'A'}], updated: '2026-09-05T09:59:59Z'})}));
+
+    const res = makeRes();
+    await notifyResultsUpdate(
+      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
+      res,
+    );
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_live'}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockDocRef.set).not.toHaveBeenCalled();
+    expect(mockLogPushHistory).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('sends the teaser again when the standings content genuinely changes', async () => {
+    await notifyResultsUpdate(
+      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
+      makeRes(),
+    );
+    const storedHash = mockDocRef.set.mock.calls[0][0].lastHash;
+    jest.clearAllMocks();
+
+    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({lastHash: storedHash})});
+    // A genuinely new driver row - real content change, not just the timestamp.
+    mockFetchWithTimeout
+      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({season: '2026', rounds: [{round: 8}]})}))
+      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({standings: [{driver: 'A'}, {driver: 'B'}], updated: '2026-09-05T09:59:59Z'})}));
+
+    await notifyResultsUpdate(
+      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
+      makeRes(),
+    );
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({lastHash: expect.any(String)}));
   });
 
   it('still succeeds if the results_teaser send fails (non-fatal, caught separately)', async () => {
