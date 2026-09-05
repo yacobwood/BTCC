@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Cook claims second pole position of 2026 season"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/2ea4fd2f-13f6-482d-a498-509cab2cdb7e.jpg"
+        }
+      ]
+    }
   }
 ]
