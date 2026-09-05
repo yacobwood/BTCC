@@ -454,13 +454,18 @@ describe('SettingsProvider', () => {
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'digest_alerts');
     });
 
-    it('spoilerFree=true does NOT unsubscribe results_teaser - its whole point is to work even with No Spoilers on', async () => {
+    // Changed 2026-09-05: results_teaser now deep-links straight to the
+    // actual result (functions/scraperAdmin.js's notifyResultsUpdate), so it
+    // moved into RESULT_LEAF_KEYS like every other result-revealing topic -
+    // previously it deliberately stayed subscribed through spoilerFree since
+    // its copy never revealed anything, which stopped being true once it
+    // started deep-linking.
+    it('spoilerFree=true unsubscribes results_teaser, same as the other result topics', async () => {
       let getHook;
       await act(async () => { getHook = renderProvider(); });
       unsubscribeFromTopic.mockClear();
       await act(async () => { getHook().setSetting('spoilerFree', true); });
-      expect(unsubscribeFromTopic).not.toHaveBeenCalledWith(expect.anything(), 'results_teaser');
-      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_teaser');
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'results_teaser');
     });
 
     it('spoilerFreeExpiry is loaded as a string (not parsed as boolean)', async () => {

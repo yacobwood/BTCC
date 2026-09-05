@@ -19,15 +19,25 @@ jest.mock('firebase-admin/messaging', () => ({
 
 const mockLogError = jest.fn(() => Promise.resolve());
 const mockLogPushHistory = jest.fn(() => Promise.resolve());
-// Default: both raw-GitHub fetches (results{year}.json, standings.json)
-// resolve to distinct, stable, parseable content - computeResultsHash needs
-// something real to hash even when a test doesn't care what the hash is.
-const mockFetchWithTimeout = jest.fn(url => Promise.resolve({
-  ok: true,
-  json: () => Promise.resolve(
-    url.includes('/results') ? {season: '2026', rounds: [{round: 8}]} : {standings: [{driver: 'A'}], updated: '2026-09-05T09:00:00Z'},
-  ),
-}));
+
+// Default results{year}.json content: round 8 with one already-scored
+// session (Qualifying) and one still-empty one (Race 1) - a realistic
+// mid-raceday shape. standings.json's `updated` timestamp is deliberately
+// irrelevant to every test here, since computeSessionFingerprints only ever
+// looks at results{year}.json - proving that by construction, not just by
+// assertion.
+const DEFAULT_ROUNDS = [{
+  round: 8,
+  races: [
+    {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+    {label: 'Race 1', results: [], grid: null},
+  ],
+}];
+const mockFetchWithTimeout = jest.fn(url => Promise.resolve(
+  url.includes('/results')
+    ? {ok: true, json: () => Promise.resolve({season: '2026', rounds: DEFAULT_ROUNDS})}
+    : {ok: true, json: () => Promise.resolve({standings: [{driver: 'A'}], updated: '2026-09-05T09:00:00Z'})},
+));
 jest.mock('../../functions/shared', () => ({
   logError: mockLogError,
   logPushHistory: mockLogPushHistory,
@@ -41,7 +51,16 @@ jest.mock('../../functions/shared', () => ({
 }));
 
 const {dismissError, notifyResultsUpdate, reportScraperFailure} = require('../../functions/scraperAdmin');
-const {computeResultsHash} = require('../../functions/resultsHash');
+const {computeSessionFingerprints} = require('../../functions/resultsHash');
+
+// fetchResultsAndStandings issues both fetches via Promise.all in this exact
+// order (results first, standings second) - queue exactly two "once" mocks
+// to override just the next notifyResultsUpdate call's content.
+function mockResultsOnce(rounds) {
+  mockFetchWithTimeout
+    .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({season: '2026', rounds})}))
+    .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({standings: [], updated: new Date().toISOString()})}));
+}
 
 describe('dismissError', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -88,6 +107,25 @@ describe('dismissError', () => {
 describe('notifyResultsUpdate', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  async function call() {
+    const req = makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}});
+    const res = makeRes();
+    await notifyResultsUpdate(req, res);
+    return res;
+  }
+
+  // Runs one bootstrap call (seeding whatever DEFAULT_ROUNDS/overridden
+  // content is currently mocked), captures the fingerprints it stored, then
+  // wires mockDocRef.get to return them for the next call - simulating
+  // "reading back what was just written" across two independent test-mock
+  // invocations, since these are plain jest.fn()s, not a real Firestore.
+  async function seedBaseline() {
+    await call();
+    const fingerprints = mockDocRef.set.mock.calls[0][0].fingerprints;
+    jest.clearAllMocks();
+    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({fingerprints})});
+  }
+
   it('rejects a request without the correct scraper secret', async () => {
     const req = makeReq({headers: {'x-scraper-secret': 'wrong'}, body: {year: '2026'}});
     const res = makeRes();
@@ -95,23 +133,47 @@ describe('notifyResultsUpdate', () => {
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
-  it('sends both the silent results_live signal and the visible results_teaser push on first-ever content', async () => {
-    const req = makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}});
-    const res = makeRes();
-    await notifyResultsUpdate(req, res);
-
+  it('always sends the silent results_live cache-invalidation signal', async () => {
+    const res = await call();
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
       topic: 'results_live',
       data: {type: 'results_refresh', year: '2026'},
     }));
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  // Same "don't notify on the very first sighting" idiom as newsCheck.js's
+  // state/news.lastId - without a prior fingerprint map, every session with
+  // real results would look "new" purely because nothing was stored yet,
+  // not because anything actually just changed.
+  it('seeds fingerprints without sending a visible teaser on the very first call', async () => {
+    await call();
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockLogPushHistory).not.toHaveBeenCalled();
+  });
+
+  it('deep-links the teaser to the round/session that changed, once a baseline exists', async () => {
+    await seedBaseline();
+    // Qualifying (index 0) was already scored at baseline; Race 1 (index 1)
+    // now has a result for the first time - that's the one that should win.
+    mockResultsOnce([{
+      round: 8,
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
+      ],
+    }]);
+
+    await call();
+
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
       topic: 'results_teaser',
       notification: expect.objectContaining({title: 'A fresh result just dropped'}),
+      data: {type: 'results', year: '2026', round: '8', race: '2'}, // race is 1-indexed for notifNavigation.js
     }));
-    // Stores the new hash so a later identical-content call can dedupe against it.
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({lastHash: expect.any(String)}));
     expect(mockLogPushHistory).toHaveBeenCalledWith('A fresh result just dropped', expect.any(String), 'results');
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
   });
 
   // The actual bug being fixed: scrape_tsl.py re-stamps standings.json's
@@ -119,27 +181,13 @@ describe('notifyResultsUpdate', () => {
   // regardless of whether anything real changed, and this endpoint used to
   // have no dedup at all - firing a visible push on every one of those
   // spurious calls (confirmed live, Croft round 8 weekend, 2026-09-05).
+  // computeSessionFingerprints never even looks at standings.json at all now,
+  // so this is airtight by construction, not just by assertion.
   it('does not resend the teaser when only standings.json\'s updated timestamp changed', async () => {
-    // First call establishes a stored hash for this content.
-    await notifyResultsUpdate(
-      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
-      makeRes(),
-    );
-    const storedHash = mockDocRef.set.mock.calls[0][0].lastHash;
-    jest.clearAllMocks(); // isolate the assertions below to the second call only
+    await seedBaseline();
+    mockResultsOnce(DEFAULT_ROUNDS); // identical results content, standings.json's `updated` differs (see mockResultsOnce)
 
-    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({lastHash: storedHash})});
-    // Same results/standings content as the default mock, but a bumped `updated`
-    // timestamp only - exactly what a spurious, content-unchanged scrape produces.
-    mockFetchWithTimeout
-      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({season: '2026', rounds: [{round: 8}]})}))
-      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({standings: [{driver: 'A'}], updated: '2026-09-05T09:59:59Z'})}));
-
-    const res = makeRes();
-    await notifyResultsUpdate(
-      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
-      res,
-    );
+    const res = await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_live'}));
     expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
@@ -148,44 +196,20 @@ describe('notifyResultsUpdate', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('sends the teaser again when the standings content genuinely changes', async () => {
-    await notifyResultsUpdate(
-      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
-      makeRes(),
-    );
-    const storedHash = mockDocRef.set.mock.calls[0][0].lastHash;
-    jest.clearAllMocks();
-
-    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({lastHash: storedHash})});
-    // A genuinely new driver row - real content change, not just the timestamp.
-    mockFetchWithTimeout
-      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({season: '2026', rounds: [{round: 8}]})}))
-      .mockImplementationOnce(() => Promise.resolve({ok: true, json: () => Promise.resolve({standings: [{driver: 'A'}, {driver: 'B'}], updated: '2026-09-05T09:59:59Z'})}));
-
-    await notifyResultsUpdate(
-      makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}}),
-      makeRes(),
-    );
-
-    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({lastHash: expect.any(String)}));
-  });
-
   it('still succeeds if the results_teaser send fails (non-fatal, caught separately)', async () => {
+    await seedBaseline();
+    mockResultsOnce([{round: 8, races: [{label: 'Qualifying', results: [{pos: 1, driver: 'B'}], grid: null}]}]);
     mockMessaging.send
       .mockResolvedValueOnce('ok') // results_live
       .mockRejectedValueOnce(new Error('teaser send failed')); // results_teaser
-    const req = makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}});
-    const res = makeRes();
-    await notifyResultsUpdate(req, res);
+
+    const res = await call();
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('logs and returns 500 if the primary results_live send fails', async () => {
     mockMessaging.send.mockRejectedValueOnce(new Error('fcm down'));
-    const req = makeReq({headers: {'x-scraper-secret': 'test-scraper-secret'}, body: {year: '2026'}});
-    const res = makeRes();
-    await notifyResultsUpdate(req, res);
+    const res = await call();
     expect(mockLogError).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
   });

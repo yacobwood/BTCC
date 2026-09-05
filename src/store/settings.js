@@ -26,9 +26,10 @@ const LEAF_TOPICS = {
   resultsRace1:      'results_race1',
   resultsRace2:      'results_race2',
   resultsRace3:      'results_race3',
-  // Deliberately NOT in RESULT_LEAF_KEYS below - its whole point is to pull a
-  // spoiler-free user back in without ever stating the actual result, so
-  // spoilerFree must never suppress it the way it suppresses resultsRace*.
+  // Now deep-links straight to the actual result (functions/scraperAdmin.js's
+  // notifyResultsUpdate, changed 2026-09-05) rather than sending a sanitized,
+  // non-deep-linking copy - so it belongs in RESULT_LEAF_KEYS below like any
+  // other result-revealing topic, unlike before when it deliberately wasn't.
   resultsTeaser:     'results_teaser',
 };
 
@@ -127,6 +128,7 @@ function isEffective(settings, key) {
 const RESULT_LEAF_KEYS = new Set([
   'resultsFP', 'resultsQualifying', 'resultsQRace',
   'resultsRace1', 'resultsRace2', 'resultsRace3',
+  'resultsTeaser',
 ]);
 
 function syncAllTopics(settings) {

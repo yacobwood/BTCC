@@ -308,7 +308,7 @@ export default function SettingsScreen({navigation}) {
         />
         <SettingRow
           label="Results are in"
-          description="A gentle nudge when a fresh result drops - never reveals it, works even with No Spoilers on"
+          description="A nudge straight to the latest result when one drops - suppressed by No Spoilers, same as the session alerts above"
           value={settings.resultsTeaser}
           onToggle={toggle('resultsTeaser')}
         />

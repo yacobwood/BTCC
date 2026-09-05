@@ -2,7 +2,7 @@ const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getMessaging} = require('firebase-admin/messaging');
 const {logError, logPushHistory, requireAdminPost} = require('./shared');
-const {computeResultsHash} = require('./resultsHash');
+const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession} = require('./resultsHash');
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
 exports.dismissError = onRequest(
@@ -55,38 +55,59 @@ exports.notifyResultsUpdate = onRequest(
       });
       console.log(`notifyResultsUpdate: sent results_refresh for year=${year}`);
 
-      // Spoiler-safe re-engagement push - deliberately generic copy (no round/
-      // venue/session context available from this request body, and the
-      // whole point is to never state the result), on its own topic so
-      // src/store/settings.js's spoilerFree gate can never suppress it the
-      // way it suppresses resultsRace*. Reuses the existing type:"results"
-      // (no round) fallback in notifNavigation.js, which already just opens
-      // the Results tab - no new navigation case needed.
+      // Re-engagement push for whichever session's result most recently
+      // changed - deep-links straight to that round/session (RoundResults,
+      // via notifNavigation.js's existing type:"results"+round(+race)
+      // handler, no new navigation case needed), on its own topic so
+      // src/store/settings.js's spoilerFree gate can fully unsubscribe
+      // devices from it (RESULT_LEAF_KEYS) instead of the old behaviour of
+      // sending a sanitized, non-deep-linking copy to everyone regardless -
+      // changed 2026-09-05 by explicit request: spoiler-free users should
+      // get no notification at all, not a deep-link-free one; everyone else
+      // should land on the actual result, not just the generic Results tab.
       //
-      // Deduped via computeResultsHash (./resultsHash.js) - this endpoint
-      // gets called on every scrape-results.yml tick (every 2 min on a
-      // raceday), and had no dedup of its own at all before 2026-09-05,
-      // unconditionally firing a visible push on every call. Confirmed live:
-      // users getting repeat "A fresh result just dropped" pushes during the
-      // Croft (round 8) race weekend with nothing actually new to show.
+      // Deduped via computeSessionFingerprints/findChangedSession
+      // (./resultsHash.js) - this endpoint gets called on every
+      // scrape-results.yml tick (every 2 min on a raceday), and had no
+      // dedup of its own at all before 2026-09-05, unconditionally firing a
+      // visible push on every call. Confirmed live: users getting repeat "A
+      // fresh result just dropped" pushes during the Croft (round 8) race
+      // weekend with nothing actually new to show - standings.json's own
+      // `updated` timestamp (tools/scraper/scrape_tsl.py:1332) gets
+      // re-stamped on nearly every raceday run regardless of real content
+      // change, which is why fingerprinting only ever hashes each session's
+      // own results/grid arrays, never that field.
       try {
-        const hash = await computeResultsHash(year);
+        const {results} = await fetchResultsAndStandings(year);
+        const currentFp = computeSessionFingerprints(results);
         const stateRef = getFirestore().collection('state').doc('results_teaser');
         const snap = await stateRef.get();
-        const lastHash = snap.exists ? snap.data().lastHash : null;
-        if (hash !== lastHash) {
-          await stateRef.set({lastHash: hash, sentAt: new Date().toISOString()});
-          const title = 'A fresh result just dropped';
-          const body = 'Open BTCC Hub to see how it went.';
-          await getMessaging().send({
-            topic: 'results_teaser',
-            notification: {title, body},
-            data: {type: 'results'},
-            android: {notification: {channelId: 'results'}},
-          });
-          await logPushHistory(title, body, 'results');
+        if (!snap.exists) {
+          // First run ever (no prior fingerprints to diff against) - every
+          // session with existing results would otherwise look "new" purely
+          // because nothing was stored yet, not because anything actually
+          // just changed. Same "don't notify on the very first sighting"
+          // idiom as newsCheck.js's state/news.lastId bootstrap - just seed
+          // the baseline silently.
+          await stateRef.set({fingerprints: currentFp, sentAt: new Date().toISOString()});
+          console.log('notifyResultsUpdate: first-ever run, seeding fingerprints without sending');
         } else {
-          console.log('notifyResultsUpdate: results/standings content unchanged (hash match) - skipping teaser push');
+          const storedFp = snap.data().fingerprints || {};
+          const changed = findChangedSession(results, currentFp, storedFp);
+          if (changed) {
+            await stateRef.set({fingerprints: currentFp, sentAt: new Date().toISOString()});
+            const title = 'A fresh result just dropped';
+            const body = 'Open BTCC Hub to see how it went.';
+            await getMessaging().send({
+              topic: 'results_teaser',
+              notification: {title, body},
+              data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
+              android: {notification: {channelId: 'results'}},
+            });
+            await logPushHistory(title, body, 'results');
+          } else {
+            console.log('notifyResultsUpdate: no session content changed - skipping teaser push');
+          }
         }
       } catch (e) {
         // Fails safe toward "don't spam": the silent results_live refresh
