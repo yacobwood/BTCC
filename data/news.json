@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Darlington UK meets Darlington USA"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/424cb587-5553-4d71-825b-e50c2cbeb91b.jpg"
+        }
+      ]
+    }
   }
 ]
