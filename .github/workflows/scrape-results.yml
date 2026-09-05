@@ -20,6 +20,10 @@ on:
       override_reverse_grid_draw:
         description: "Manually set Race 3 reverse-grid draw number (6-12) for the specified round. Use when TSL amended the grid PDF after the scrape window closed."
         type: number
+      is_retry:
+        description: "internal - marks this run as an automated retry (do not set manually)"
+        type: boolean
+        default: false
 
 concurrency:
   group: scrape-results
@@ -30,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
 
     steps:
       - name: Checkout repo
@@ -122,20 +127,45 @@ jobs:
 
       # scrape_tsl.py already writes results/standings before compute_records or
       # team-stats can fail, so the commit step above still runs and saves the
-      # good data even when the scrape step below reports failure. These two
-      # steps only make sure that failure is still reported and the job/run
-      # itself shows red, instead of the whole thing silently looking green.
-      - name: Report failure
+      # good data even when the scrape step below reports failure. This step
+      # makes sure that failure is still reported and the job/run itself
+      # shows red, instead of the whole thing silently looking green.
+      - name: Fail job if scrape step failed
         if: steps.scrape.outcome == 'failure'
+        run: exit 1
+
+      # Added 2026-09-05: the commit step above can fail on a genuine, ordinary
+      # race - triggerResultsScrape (functions/resultsDispatch.js) now dispatches
+      # this workflow reliably every 2 minutes on a raceday, and stefanzweifel/
+      # git-auto-commit-action's push_options: --force-with-lease rejects with
+      # "stale info" if any other push (this workflow's own next tick, a
+      # different scraper, a hub-news/digest publish, ...) lands on main in the
+      # few seconds between this run's rebase and its push - confirmed live,
+      # the first real failure this surfaced. Not a real problem: a fresh
+      # `git pull --rebase` on the very next attempt resolves it cleanly. Same
+      # auto-retry-before-alerting pattern the 5 btcc.net-facing workflows
+      # already use (scrape-news.yml etc.) - re-dispatches this same workflow
+      # once, carrying forward whatever manual inputs this run had, before ever
+      # alerting. Whole-job `failure()`, not scoped to one step, so it also
+      # catches the commit step's own failure alongside the scrape step's.
+      - name: Retry once on failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-results.yml/dispatches" \
+            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"year\":\"${{ github.event.inputs.year || '2026' }}\",\"round\":\"${{ github.event.inputs.round }}\",\"override_reverse_grid_draw\":\"${{ github.event.inputs.override_reverse_grid_draw }}\"}}" || echo "Retry dispatch failed (non-fatal)"
+
+      - name: Report failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
           curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Content-Type: application/json" \
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
-            -d "{\"workflow\":\"scrape-results\",\"message\":\"Results scrape failed (results/standings were still committed if produced) - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            -d "{\"workflow\":\"scrape-results\",\"message\":\"Results scrape failed (auto-retry also failed) - results/standings were still committed if produced - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
             "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
-
-      - name: Fail job if scrape step failed
-        if: steps.scrape.outcome == 'failure'
-        run: exit 1
