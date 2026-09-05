@@ -768,10 +768,6 @@ select.input { cursor: pointer; }
     <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
     DASH
   </button>
-  <button class="tab" onclick="switchTab('standings',this)">
-    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/></svg>
-    STANDINGS
-  </button>
   <button class="tab" onclick="switchTab('flags',this)">
     <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
     FLAGS
@@ -837,6 +833,21 @@ select.input { cursor: pointer; }
 <!-- ══════════════════════════════ DASHBOARD ══════ -->
 <div id="panel-dashboard" class="tab-panel active">
 
+  <div class="token-card" id="token-card" onclick="expandToken()">
+    <div class="token-collapsed-row">
+      <div class="token-ok">Token loaded</div>
+      <div class="token-edit-hint">Tap to change</div>
+    </div>
+    <div class="token-body">
+      <div class="section-label">GITHUB TOKEN</div>
+      <div class="input-row" style="margin-top:8px">
+        <input type="password" id="tok" placeholder="ghp_…" autocomplete="off" onclick="event.stopPropagation()">
+        <button class="btn-run" onclick="event.stopPropagation();saveToken()" style="padding:0 18px">SAVE</button>
+      </div>
+      <div class="token-note">Stored in this browser only — never sent anywhere except GitHub.</div>
+    </div>
+  </div>
+
   <!-- ── Season at a glance ── -->
   <div id="dash-standing-summary" style="margin-bottom:12px">
     <div class="stat-grid stat-grid-3">
@@ -863,7 +874,7 @@ select.input { cursor: pointer; }
 
   <!-- ── Top 5 drivers ── -->
   <div class="card">
-    <div class="card-header"><div class="section-label">DRIVER STANDINGS — TOP 5</div><button class="btn-sm" onclick="switchTabByName('standings')">Edit</button></div>
+    <div class="card-header"><div class="section-label">DRIVER STANDINGS — TOP 5</div></div>
     <div id="dash-top5-drivers"><div class="section-note">Loading…</div></div>
   </div>
 
@@ -904,52 +915,6 @@ select.input { cursor: pointer; }
     <div class="card-header"><div class="section-label">HUB NEWS</div><button class="btn-sm" onclick="switchTabByName('hubnews')">Manage</button></div>
     <div id="dash-news"><div class="section-note">Loading…</div></div>
   </div>
-
-</div>
-
-<!-- ══════════════════════════════ STANDINGS ══════ -->
-<div id="panel-standings" class="tab-panel">
-
-  <div class="token-card" id="token-card" onclick="expandToken()">
-    <div class="token-collapsed-row">
-      <div class="token-ok">Token loaded</div>
-      <div class="token-edit-hint">Tap to change</div>
-    </div>
-    <div class="token-body">
-      <div class="section-label">GITHUB TOKEN</div>
-      <div class="input-row" style="margin-top:8px">
-        <input type="password" id="tok" placeholder="ghp_…" autocomplete="off" onclick="event.stopPropagation()">
-        <button class="btn-run" onclick="event.stopPropagation();saveToken()" style="padding:0 18px">SAVE</button>
-      </div>
-      <div class="token-note">Stored in this browser only — never sent anywhere except GitHub.</div>
-    </div>
-  </div>
-
-  <div class="banner banner-green" id="data-banner">
-    <div class="banner-dot"></div>
-    <span id="data-banner-text">Loaded from GitHub</span>
-  </div>
-
-  <div style="display:flex;gap:10px;margin-bottom:4px">
-    <div style="flex:1"><div class="field-label">ROUND</div><input type="number" id="round-num" min="0" max="30" placeholder="0" style="text-align:center"></div>
-    <div style="flex:2"><div class="field-label">VENUE</div><input type="text" id="round-venue" placeholder="e.g. Donington Park"></div>
-  </div>
-
-  <div class="list-section-header" style="margin-top:20px">
-    <div class="section-label">DRIVERS</div>
-    <div class="section-note" style="font-size:11px">0 pts hidden · auto-sorts</div>
-  </div>
-  <div id="drv-list"></div>
-
-  <div class="list-section-header">
-    <div class="section-label">TEAMS</div>
-    <div class="section-note" style="font-size:11px">0 pts hidden</div>
-  </div>
-  <div id="team-list"></div>
-
-  <button class="btn-primary" id="savebtn" onclick="doSave()">SAVE TO APP</button>
-  <button class="btn-ghost" id="resetbtn" onclick="doReset()">RESET — CLEAR ALL 2026 DATA</button>
-  <div id="status" class="status-line"></div>
 
 </div>
 
@@ -1176,7 +1141,6 @@ select.input { cursor: pointer; }
           <option value="more">More</option>
         </optgroup>
         <optgroup label="More menu">
-          <option value="standings">Standings</option>
           <option value="records">Records</option>
           <option value="roadmap">Roadmap / Vote</option>
           <option value="podcasts">Podcasts</option>
@@ -1240,7 +1204,6 @@ select.input { cursor: pointer; }
           <option value="more">More</option>
         </optgroup>
         <optgroup label="More menu">
-          <option value="standings">Standings</option>
           <option value="records">Records</option>
           <option value="roadmap">Roadmap / Vote</option>
           <option value="podcasts">Podcasts</option>
@@ -1806,8 +1769,6 @@ select.input { cursor: pointer; }
 <script>
 const REPO   = 'yacobwood/BTCC';
 const GH_API    = 'https://api.github.com';
-const GIST_ID   = '7a2af0a9690d24cab8eb608dd4c5ba42';
-const FILE      = 'btcc-standings.json';
 const RTDB_URL  = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
 
 // A blank line Quill leaves behind (pressing Enter twice, or a paste that
@@ -1911,7 +1872,6 @@ function switchTabByName(name) {
 function htmlEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-function id(name) { return name.replace(/[^a-zA-Z0-9]/g,'_'); }
 function timeAgo(iso) {
   const secs = Math.floor((Date.now() - new Date(iso)) / 1000);
   if (secs < 60) return secs + 's ago';
@@ -1947,77 +1907,6 @@ function saveFcmTok() {
   collapseFcmTok();
 }
 
-// ── Standings data ───────────────────────────────────────────────────────────
-const DRIVERS = [
-  {name:'Jake Hill',          team:'West Surrey Racing'},
-  {name:'Daryl DeLeon',       team:'West Surrey Racing'},
-  {name:'Charles Rainford',   team:'West Surrey Racing'},
-  {name:'Tom Chilton',        team:'EXCELR8 Motorsport'},
-  {name:'Aiden Moffat',       team:'EXCELR8 Motorsport'},
-  {name:'Mikey Doble',        team:'EXCELR8 Motorsport'},
-  {name:'Tom Ingram',         team:'Team VERTU'},
-  {name:'Senna Proctor',      team:'Team VERTU'},
-  {name:'Ashley Sutton',      team:'NAPA Racing UK'},
-  {name:'Dan Cammish',        team:'NAPA Racing UK'},
-  {name:'Sam Osborne',        team:'NAPA Racing UK'},
-  {name:'Gordon Shedden',     team:'Laser Tools Racing'},
-  {name:'Árón Taylor-Smith',  team:'Laser Tools Racing'},
-  {name:'Daniel Rowbottom',   team:'Plato Racing'},
-  {name:'Adam Morgan',        team:'Ciceley Motorsport'},
-  {name:'Josh Cook',          team:'One Motorsport'},
-  {name:'Nic Hamilton',       team:'Un-limited Motorsport'},
-  {name:'Dexter Patterson',   team:'Power Maxed Racing'},
-  {name:'Nick Halstead',      team:'Power Maxed Racing'},
-  {name:'Daniel Lloyd',       team:'Restart Racing'},
-];
-const TEAMS = [
-  'NAPA Racing UK','Team VERTU','West Surrey Racing',
-  'Restart Racing','Laser Tools Racing','Toyota Gazoo Racing UK',
-  'WSR','Power Maxed Racing','One Motorsport',
-  'Un-limited Motorsport','Ciceley Motorsport',
-];
-
-let drvPts = {}, drvWins = {}, teamPts = {};
-
-function renderDrivers() {
-  const sorted = [...DRIVERS].sort((a,b) => (drvPts[b.name]||0) - (drvPts[a.name]||0));
-  document.getElementById('drv-list').innerHTML = sorted.map((d,i) => `
-    <div class="entry-card" id="card_${id(d.name)}">
-      <span class="entry-pos" id="pos_${id(d.name)}">${i+1}</span>
-      <div class="entry-info"><div class="entry-name">${d.name}</div><div class="entry-sub">${d.team}</div></div>
-      <div class="stat-inputs">
-        <div class="stat-col">
-          <div class="stat-col-label">W</div>
-          <div class="stat-input"><input type="number" min="0" max="99" placeholder="0" value="${drvWins[d.name]||''}" oninput="onDrvWinsChange('${d.name}',this.value)" id="dw_${id(d.name)}"></div>
-        </div>
-        <div class="stat-col">
-          <div class="stat-col-label">PTS</div>
-          <div class="pts-input"><input type="number" min="0" max="9999" placeholder="0" value="${drvPts[d.name]||''}" oninput="onDrvChange('${d.name}',this.value)" id="di_${id(d.name)}"></div>
-        </div>
-      </div>
-    </div>`).join('');
-}
-function renderTeams() {
-  const sorted = [...TEAMS].sort((a,b) => (teamPts[b]||0) - (teamPts[a]||0));
-  document.getElementById('team-list').innerHTML = sorted.map((t,i) => `
-    <div class="entry-card">
-      <span class="entry-pos" id="tpos_${id(t)}">${i+1}</span>
-      <div class="entry-info"><div class="entry-name">${t}</div></div>
-      <div class="pts-input"><input type="number" min="0" max="99999" placeholder="0" value="${teamPts[t]||''}" oninput="onTeamChange('${t}',this.value)" id="ti_${id(t)}"></div>
-    </div>`).join('');
-}
-function onDrvChange(name, val) {
-  drvPts[name] = parseInt(val)||0;
-  const sorted = [...DRIVERS].sort((a,b) => (drvPts[b.name]||0) - (drvPts[a.name]||0));
-  sorted.forEach((d,i) => { const el = document.getElementById('pos_'+id(d.name)); if(el) el.textContent = i+1; });
-}
-function onDrvWinsChange(name, val) { drvWins[name] = parseInt(val)||0; }
-function onTeamChange(name, val) {
-  teamPts[name] = parseInt(val)||0;
-  const sorted = [...TEAMS].sort((a,b) => (teamPts[b]||0) - (teamPts[a]||0));
-  sorted.forEach((t,i) => { const el = document.getElementById('tpos_'+id(t)); if(el) el.textContent = i+1; });
-}
-
 const STANDINGS_RAW = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/standings.json';
 const RESULTS_RAW_BASE = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/';
 
@@ -2025,13 +1914,6 @@ async function loadExisting() {
   try {
     const r = await fetch(STANDINGS_RAW + '?t=' + Date.now());
     const data = await r.json();
-    (data.standings||[]).forEach(d => { drvPts[d.driver||d.name] = d.points||0; drvWins[d.driver||d.name] = d.wins||0; });
-    (data.teams||[]).forEach(t => { teamPts[t.team||t.name] = t.points||0; });
-    if (data.round) document.getElementById('round-num').value = data.round;
-    if (data.venue) document.getElementById('round-venue').value = data.venue;
-    const updated = data.updated ? timeAgo(data.updated) : 'unknown';
-    document.getElementById('data-banner-text').textContent = `Loaded from GitHub · updated ${updated}`;
-    document.getElementById('data-banner').classList.add('visible');
     // dashboard — basic stats
     document.getElementById('ds-round').textContent = data.round || '—';
     document.getElementById('ds-drivers').textContent = (data.standings||[]).length || '—';
@@ -2054,7 +1936,6 @@ async function loadExisting() {
     // load results for last round & race count
     loadResultsDashboard(data.season || new Date().getFullYear());
   } catch(e) { console.error('loadExisting', e); }
-  renderDrivers(); renderTeams();
 }
 
 function renderLeaderCard(data) {
@@ -2210,40 +2091,6 @@ function renderLastRound(rnd) {
   document.getElementById('dash-last-round').innerHTML = header + raceRows;
 }
 
-async function doSave() {
-  const tok = getToken();
-  if (!tok) { document.getElementById('status').innerHTML = '<span class="err">Save your GitHub token first.</span>'; return; }
-  const btn = document.getElementById('savebtn');
-  btn.disabled = true; btn.textContent = 'SAVING…';
-  document.getElementById('status').textContent = '';
-  const round = parseInt(document.getElementById('round-num').value)||0;
-  const venue = document.getElementById('round-venue').value.trim();
-  const drivers = [...DRIVERS].map(d => ({name:d.name,team:d.team,points:parseInt(document.getElementById('di_'+id(d.name))?.value)||0,wins:parseInt(document.getElementById('dw_'+id(d.name))?.value)||0})).filter(d => d.points > 0).sort((a,b) => b.points - a.points).map((d,i) => ({pos:i+1,...d}));
-  const teams = [...TEAMS].map(name => ({name,points:parseInt(document.getElementById('ti_'+id(name))?.value)||0})).filter(t => t.points > 0).sort((a,b) => b.points - a.points).map((t,i) => ({pos:i+1,...t}));
-  const payload = {season:'2026',round,venue,updated:new Date().toISOString(),standings:drivers.map(d=>({pos:d.pos,driver:d.name,team:d.team,points:d.points,wins:d.wins})),teams:teams.map(t=>({pos:t.pos,team:t.name,points:t.points}))};
-  try {
-    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {method:'PATCH',headers:{Authorization:'token '+tok,'Content-Type':'application/json'},body:JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}})});
-    if (r.ok) { document.getElementById('status').innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>'; }
-    else { const e = await r.json(); document.getElementById('status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
-  } catch(e) { document.getElementById('status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
-  btn.disabled = false; btn.textContent = 'SAVE TO APP';
-}
-
-async function doReset() {
-  const tok = getToken();
-  if (!tok) { document.getElementById('status').innerHTML = '<span class="err">Save your GitHub token first.</span>'; return; }
-  if (!confirm('Clear all 2026 standings from the app?')) return;
-  const btn = document.getElementById('resetbtn');
-  btn.disabled = true; btn.textContent = 'RESETTING…';
-  const payload = {season:'2026',round:0,venue:'',updated:new Date().toISOString(),standings:[],teams:[]};
-  try {
-    const r = await fetch(`https://api.github.com/gists/${GIST_ID}`, {method:'PATCH',headers:{Authorization:'token '+tok,'Content-Type':'application/json'},body:JSON.stringify({files:{[FILE]:{content:JSON.stringify(payload,null,2)}}})});
-    if (r.ok) { drvPts={}; drvWins={}; teamPts={}; document.getElementById('round-num').value=''; document.getElementById('round-venue').value=''; renderDrivers(); renderTeams(); document.getElementById('status').innerHTML='<span class="ok">Reset ✓</span>'; }
-    else { const e = await r.json(); document.getElementById('status').innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
-  } catch(e) { document.getElementById('status').innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
-  btn.disabled = false; btn.textContent = 'RESET — CLEAR ALL 2026 DATA';
-}
-
 // ── Scrapers ─────────────────────────────────────────────────────────────────
 let pollTimer = null, liveTickTimer = null;
 const runningTimestamps = {}, dispatchedAt = {};
@@ -2388,7 +2235,7 @@ function renderLapPreviews() {
 
 async function doSaveLapPreviews() {
   const tok = getToken();
-  if (!tok) { document.getElementById('lappreview-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
+  if (!tok) { document.getElementById('lappreview-status').innerHTML = '<span class="err">Save your GitHub token first (Dash tab).</span>'; return; }
   if (!lapPreviewCalendar) { document.getElementById('lappreview-status').innerHTML = '<span class="err">Calendar not loaded.</span>'; return; }
   const btn = document.getElementById('lappreview-savebtn');
   const statusEl = document.getElementById('lappreview-status');
@@ -2515,7 +2362,7 @@ async function doSaveLiveUrls() {
     });
   });
   const tok = getToken();
-  if (!tok) { document.getElementById('live-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
+  if (!tok) { document.getElementById('live-status').innerHTML = '<span class="err">Save your GitHub token first (Dash tab).</span>'; return; }
   const btn = document.getElementById('live-savebtn');
   const statusEl = document.getElementById('live-status');
   btn.disabled = true; btn.textContent = 'SAVING…'; statusEl.textContent = '';
@@ -2540,7 +2387,7 @@ async function doSaveLiveUrls() {
 
 async function doSaveFlags() {
   const tok = getToken();
-  if (!tok) { document.getElementById('flags-status').innerHTML = '<span class="err">Save your GitHub token first (Standings tab).</span>'; return; }
+  if (!tok) { document.getElementById('flags-status').innerHTML = '<span class="err">Save your GitHub token first (Dash tab).</span>'; return; }
   const btn = document.getElementById('flags-savebtn');
   btn.disabled = true; btn.textContent = 'SAVING…';
   document.getElementById('flags-status').textContent = '';
@@ -2697,9 +2544,14 @@ function onDeeplinkPreset(val) {
 }
 
 const DEEPLINK_MAP = {
+  // No 'standings' entry - btccfanhub://standings has never had a route
+  // handler in notifNavigation.js (no dedicated Standings screen exists;
+  // standings live inside ResultsScreen's Season tab), so the preset that
+  // used to build this URL was a silent no-op since it was added - removed
+  // from both deeplink-preset dropdowns above along with this entry.
   news:'btccfanhub://news', calendar:'btccfanhub://calendar', drivers:'btccfanhub://drivers',
   chat:'btccfanhub://chat', results:'btccfanhub://results', more:'btccfanhub://more',
-  standings:'btccfanhub://standings', records:'btccfanhub://records', roadmap:'btccfanhub://roadmap',
+  records:'btccfanhub://records', roadmap:'btccfanhub://roadmap',
   podcasts:'btccfanhub://podcasts', radio:'btccfanhub://radio', partners:'btccfanhub://partners',
   settings:'btccfanhub://settings',
 };
@@ -3314,7 +3166,7 @@ async function dispatchArticleNotif(article) {
 
 async function saveHubNews(commitMessage, notifArticle = null) {
   const tok = getToken();
-  if (!tok) { showHubNewsError('Save your GitHub token first (Standings tab).'); return; }
+  if (!tok) { showHubNewsError('Save your GitHub token first (Dash tab).'); return; }
   const btn = document.getElementById('hn-publish-btn');
   btn.disabled = true; btn.textContent = 'SAVING…';
   document.getElementById('hubnews-status').textContent = '';
@@ -3722,7 +3574,7 @@ async function waitForExplainerLive(articleId, predicate, {timeoutMs = 360000, i
 // Callers use this to show an accurate status rather than assuming success.
 async function saveExplainers(commitMessage, notifArticle = null, {onWaitTick} = {}) {
   const tok = getToken();
-  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return {ok: false, notifSent: null}; }
+  if (!tok) { alert('Save your GitHub token first (Dash tab).'); return {ok: false, notifSent: null}; }
   const content = JSON.stringify({posts: explainerPosts}, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
@@ -3844,7 +3696,7 @@ function changeMyUid() {
 // like a real publish fires on every publish.
 async function dispatchTestExplainerNotif(title, body, articleId) {
   const tok = getToken();
-  if (!tok) { alert('Save your GitHub token first (Standings tab).'); return false; }
+  if (!tok) { alert('Save your GitHub token first (Dash tab).'); return false; }
   const deviceToken = getMyDeviceToken();
   if (!deviceToken) return false;
   try {
