@@ -1059,7 +1059,7 @@ select.input { cursor: pointer; }
 <!-- ══════════════════════════════ LAP PREVIEWS ══════ -->
 <div id="panel-lappreview" class="tab-panel">
 
-  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/calendar.json</strong>. Lap Preview URL shown on each track card. Race 1/2/3 links are added automatically by the Monday scraper.</div>
+  <div class="section-note" style="margin-bottom:14px">Writes to <strong style="color:var(--text)">data/tracks.json</strong>'s <strong style="color:var(--text)">lapPreviewUrl</strong> - one URL per circuit, shown on each track's Lap Preview button. <strong style="color:var(--red)">This file is bundled into the app at build time, not fetched live - changes here only reach users in the next app release, not immediately.</strong> (Race 1/2/3 video links are a separate, fully-automated pipeline into results{year}.json - nothing to edit here.)</div>
 
   <div class="banner banner-green" id="lappreview-banner">
     <div class="banner-dot"></div>
@@ -2195,17 +2195,29 @@ async function refreshAllStatus() {
 }
 
 // ── Lap Preview URLs ──────────────────────────────────────────────────────────
-const CALENDAR_PATH = 'data/calendar.json';
-let lapPreviewCalendar = null;
-let lapPreviewFileSha = null;
+// Repointed 2026-09-05 from calendar.json's youtubeUrl(s) (removed from the
+// app's own read path by commit 3255da65, 2026-05-25 - results2026.json is
+// now the single source of truth for race YouTube links, via a separate,
+// fully-automated scrape_youtube.py) to tracks.json's lapPreviewUrl, the
+// field TrackDetailScreen.js actually reads for its Lap Preview button - one
+// static URL per circuit, not per round/season. IMPORTANT: unlike every
+// other file this admin edits, tracks.json is require()'d directly in
+// src/api/parsers.js (BUNDLED_TRACKS) - it's compiled into the JS bundle at
+// build time, not fetched over the network. A save here has ZERO effect on
+// the live app until a new app build/release ships - there is no "within a
+// minute" or "next launch" for this one.
+const TRACKS_PATH = 'data/tracks.json';
+const TRACKS_RAW  = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/tracks.json';
+let tracksData = null;
+let tracksFileSha = null;
 
 async function loadLapPreviews() {
   if (window._lapPreviewLoaded) return;
   window._lapPreviewLoaded = true;
   try {
-    const r = await fetch(CALENDAR_URL + '?t=' + Date.now());
+    const r = await fetch(TRACKS_RAW + '?t=' + Date.now());
     if (r.ok) {
-      lapPreviewCalendar = await r.json();
+      tracksData = await r.json();
       document.getElementById('lappreview-banner-text').textContent = 'Loaded from GitHub';
       document.getElementById('lappreview-banner').classList.add('visible');
     }
@@ -2215,17 +2227,16 @@ async function loadLapPreviews() {
 
 function renderLapPreviews() {
   const list = document.getElementById('lappreview-list');
-  if (!lapPreviewCalendar) { list.innerHTML = '<div style="color:var(--text-sec);font-size:13px">Failed to load calendar.</div>'; return; }
-  list.innerHTML = lapPreviewCalendar.rounds.map(r => {
-    const url = (r.youtubeUrls && r.youtubeUrls[0]) || r.youtubeUrl || '';
+  if (!tracksData) { list.innerHTML = '<div style="color:var(--text-sec);font-size:13px">Failed to load tracks.</div>'; return; }
+  list.innerHTML = Object.keys(tracksData).sort().map(name => {
+    const url = tracksData[name].lapPreviewUrl || '';
     return `<div class="card" style="margin-bottom:12px">
       <div class="flag-row">
         <div class="flag-info">
-          <div class="flag-name">Round ${r.round} — ${r.venue}</div>
-          <div class="flag-desc">${r.startDate || ''}</div>
+          <div class="flag-name">${htmlEsc(name)}</div>
         </div>
         <div style="flex:1;margin-left:16px">
-          <input type="url" id="lappreview_r${r.round}" value="${url}" placeholder="https://youtube.com/watch?v=…"
+          <input type="url" id="lappreview_${trackFieldId(name)}" value="${htmlEsc(url)}" placeholder="https://youtube.com/watch?v=…"
             style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid var(--outline-lo);background:var(--surface);color:var(--text);font-size:12px;font-family:monospace;box-sizing:border-box">
         </div>
       </div>
@@ -2233,33 +2244,35 @@ function renderLapPreviews() {
   }).join('');
 }
 
+function trackFieldId(name) { return name.replace(/[^a-zA-Z0-9]/g,'_'); }
+
 async function doSaveLapPreviews() {
   const tok = getToken();
   if (!tok) { document.getElementById('lappreview-status').innerHTML = '<span class="err">Save your GitHub token first (Dash tab).</span>'; return; }
-  if (!lapPreviewCalendar) { document.getElementById('lappreview-status').innerHTML = '<span class="err">Calendar not loaded.</span>'; return; }
+  if (!tracksData) { document.getElementById('lappreview-status').innerHTML = '<span class="err">Tracks not loaded.</span>'; return; }
   const btn = document.getElementById('lappreview-savebtn');
   const statusEl = document.getElementById('lappreview-status');
   btn.disabled = true; btn.textContent = 'SAVING…'; statusEl.textContent = '';
-  lapPreviewCalendar.rounds.forEach(r => {
-    const el = document.getElementById(`lappreview_r${r.round}`);
+  Object.keys(tracksData).forEach(name => {
+    const el = document.getElementById(`lappreview_${trackFieldId(name)}`);
     if (!el) return;
     const val = el.value.trim();
-    r.youtubeUrl = val || undefined;
-    if (Array.isArray(r.youtubeUrls) && r.youtubeUrls.length > 0) r.youtubeUrls[0] = val;
+    if (val) tracksData[name].lapPreviewUrl = val;
+    else delete tracksData[name].lapPreviewUrl;
   });
-  const content = JSON.stringify(lapPreviewCalendar, null, 2) + '\n';
+  const content = JSON.stringify(tracksData, null, 2) + '\n';
   const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
-    if (!lapPreviewFileSha) {
-      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${CALENDAR_PATH}`, {headers:{Authorization:'token '+tok}});
-      if (meta.ok) lapPreviewFileSha = (await meta.json()).sha;
+    if (!tracksFileSha) {
+      const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${TRACKS_PATH}`, {headers:{Authorization:'token '+tok}});
+      if (meta.ok) tracksFileSha = (await meta.json()).sha;
     }
     const body = {message:'Update lap preview URLs via admin', content: encoded};
-    if (lapPreviewFileSha) body.sha = lapPreviewFileSha;
-    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${CALENDAR_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (tracksFileSha) body.sha = tracksFileSha;
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${TRACKS_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
     if (r.ok) {
-      const d = await r.json(); lapPreviewFileSha = d.content?.sha || null;
-      statusEl.innerHTML = '<span class="ok">Saved ✓ — app updates within a minute.</span>';
+      const d = await r.json(); tracksFileSha = d.content?.sha || null;
+      statusEl.innerHTML = '<span class="ok">Saved ✓ — bundled into the <u>next app release</u>, not live now.</span>';
       document.getElementById('lappreview-banner-text').textContent = 'Saved to GitHub · just now';
     } else { const e = await r.json(); statusEl.innerHTML = `<span class="err">GitHub error: ${e.message}</span>`; }
   } catch(e) { statusEl.innerHTML = `<span class="err">Network error: ${e.message}</span>`; }
