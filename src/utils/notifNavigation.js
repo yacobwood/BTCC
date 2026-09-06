@@ -7,6 +7,13 @@ import {requestOpenChat} from './chatBridge';
 import {fetchExplainerArticleById} from '../api/client';
 
 const pagesData = require('../assets/pages.json');
+// getSeasonData() only ever covers archived past seasons (2004-2025 as of
+// writing - see seasonData.js's own comment), so it's always null for the
+// live current season. Same current-season source RoundResultsScreen.js
+// itself already trusts (BUNDLED_RESULTS there) - see src/assets/data/
+// README.md for why this is a different pipeline's file, not a smaller/
+// stale copy of the season_*.json archive format.
+const BUNDLED_CURRENT_RESULTS = require('../../data/results2026.json');
 
 const HUB_NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/hub_news.json';
 
@@ -89,7 +96,16 @@ export function navigateFromData(navigationRef, data) {
     } else if (type === 'results' && round) {
       const y = parseInt(year, 10) || new Date().getFullYear();
       const season = getSeasonData(y);
-      const roundObj = season?.rounds?.find(r => r.round === parseInt(round, 10));
+      let roundObj = season?.rounds?.find(r => r.round === parseInt(round, 10));
+      // getSeasonData(y) is null for the live current season (it only covers
+      // the finalized archive) - without this, every "results" deep link for
+      // whatever season is actually happening right now silently no-op'd.
+      // Confirmed live 2026-09-06 (round 8, Croft): a Race 3 results
+      // notification landed on the default News tab instead of the Race 3
+      // results screen, for exactly this reason.
+      if (!roundObj && Number(BUNDLED_CURRENT_RESULTS.season) === y) {
+        roundObj = BUNDLED_CURRENT_RESULTS.rounds?.find(r => r.round === parseInt(round, 10));
+      }
       if (roundObj) {
         const initialRace = race ? parseInt(race, 10) - 1 : 0;
         navigationRef.dispatch(
