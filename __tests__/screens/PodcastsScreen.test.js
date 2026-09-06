@@ -1,5 +1,5 @@
 import React from 'react';
-import {fireEvent, waitFor} from '@testing-library/react-native';
+import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import {InteractionManager} from 'react-native';
 import PodcastsScreen from '../../src/screens/PodcastsScreen';
 import {renderWithProviders, makeNav} from './testUtils';
@@ -124,5 +124,56 @@ describe('PodcastsScreen', () => {
     mockRadio({currentStation: 'Brands Hatch Race Review', isPlaying: true});
     const {getByLabelText} = renderWithProviders(<PodcastsScreen navigation={nav} />);
     await waitFor(() => expect(getByLabelText('Stop Brands Hatch Race Review')).toBeTruthy());
+  });
+
+  // ── Cache hit must not skip the network re-fetch ─────────────────────────────
+  // Regression test: the data-loading effect used to list `loading`/`refreshing`
+  // in its dependency array, but its own body called setLoading(false) on a
+  // cache hit before awaiting InteractionManager. On a real device, React
+  // commits that state update - and runs this effect's cleanup - well before
+  // InteractionManager's callback fires (a render commits within a frame;
+  // InteractionManager can take far longer). The new effect instance's
+  // `!loading && !refreshing` guard then exited immediately (both now false),
+  // and the in-flight run's cleanup had already cancelled it, so the network
+  // re-fetch was silently skipped, leaving stale cached data on screen
+  // indefinitely. This test forces that exact interleaving deliberately -
+  // flushing the cache-hit state update to completion via `act()` BEFORE
+  // InteractionManager's callback is allowed to fire - rather than relying on
+  // incidental timing, which a synchronous-callback mock papers over.
+  it('still performs the network re-fetch after a cache hit, even when React flushes the resulting setLoading(false) before InteractionManager resolves', async () => {
+    let resolveGetItem;
+    AsyncStorage.getItem.mockReturnValueOnce(new Promise(r => { resolveGetItem = r; }));
+
+    let capturedInteractionCb = null;
+    InteractionManager.runAfterInteractions.mockImplementation(cb => {
+      capturedInteractionCb = cb;
+      return {cancel: jest.fn()};
+    });
+
+    const {getByText, queryByText} = renderWithProviders(<PodcastsScreen navigation={nav} />);
+
+    // Resolve the cache read, then give React several microtask turns to
+    // fully commit setLoading(false) - and this effect's cleanup - before
+    // InteractionManager ever resolves.
+    await act(async () => {
+      resolveGetItem(JSON.stringify([
+        {title: 'Cached Episode From Storage', url: 'https://example.com/cached.mp3', pubDate: '', duration: ''},
+      ]));
+      await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    });
+    expect(getByText('Cached Episode From Storage')).toBeTruthy();
+
+    // Now let InteractionManager's callback fire, as it would once the
+    // screen transition actually finishes.
+    await act(async () => {
+      capturedInteractionCb();
+      await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    });
+
+    // The network re-fetch must still have fired and replaced the stale
+    // cached episode - not been silently skipped.
+    await waitFor(() => expect(getByText('Brands Hatch Race Review')).toBeTruthy());
+    expect(global.fetch).toHaveBeenCalled();
+    expect(queryByText('Cached Episode From Storage')).toBeNull();
   });
 });
