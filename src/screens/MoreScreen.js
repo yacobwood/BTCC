@@ -18,6 +18,7 @@ import {Analytics} from '../utils/analytics';
 import {shareApp} from '../utils/appShare';
 import {hasChatDisplayName, saveChatDisplayName} from '../utils/chatIdentity';
 import {useTabPressReset} from '../navigation/useTabPressReset';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 const pagesData = require('../assets/pages.json');
 
 const BMC_URL = 'https://www.buymeacoffee.com/btcchub';
@@ -130,7 +131,7 @@ export default function MoreScreen({navigation}) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>MORE</Text>
       </View>
-      <ScrollView ref={scrollRef} contentContainerStyle={{padding: 16}}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
         {/* Support - kept at the very top of the screen for visibility */}
         {Platform.OS !== 'ios' && (
           <>
