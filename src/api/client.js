@@ -391,7 +391,7 @@ export async function fetchHubPosts() {
 // used by ArticleScreen's Retry button, since a slug that just 404'd may have
 // been looked up against a stale, pre-commit copy of the index (the article
 // mirror commits well after the notification that links to it goes out; see
-// newsCheck.js's isSlugMirrored). A plain re-render would otherwise keep
+// newsCheck.js's mirroredImageUrl). A plain re-render would otherwise keep
 // serving that same cached miss for up to 5 more minutes.
 export async function fetchArticleBySlug(slug, forceRefresh = false) {
   try {

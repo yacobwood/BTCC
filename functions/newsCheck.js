@@ -6,25 +6,55 @@ const NEWS_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/new
 // scrape-news.yml) than news.json above. A slug can sit in news.json - and
 // so be ready to notify about - for several minutes before it lands here.
 // ArticleScreen looks slugs up in this file, so notifying before it's here
-// sends users straight to a "couldn't load this article" screen.
+// sends users straight to a "couldn't load this article" screen. Since
+// 2026-09-06, scrape_articles.py also deliberately withholds a genuinely
+// brand-new, still image-less article from this index for up to
+// PUBLISH_HOLD_WINDOW (see that script) while it retries the image fetch -
+// so "not yet in the index" now also covers "known about, but held back
+// pending its image", which is exactly the gate this notification needs too.
 const ARTICLES_INDEX_URL = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/articles/index.json';
+const ARTICLES_PAGE_BASE = 'https://raw.githubusercontent.com/yacobwood/BTCC/main/data/articles/page_';
 
 function decodeHtmlEntities(str) {
   return str.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)));
 }
 
-// Fails closed (treats as "not mirrored yet") on any error, including a bad
-// response or a network hiccup - safe, since pendingSend just retries on the
-// next 1-minute tick rather than the notification being lost outright.
-async function isSlugMirrored(fetchFn, slug) {
-  if (!slug) return false;
+// Returns the article mirror's own current image for slug (a URL string -
+// or null if the mirrored article genuinely has none) once the slug is
+// confirmed present in the index - or `undefined` if it isn't mirrored yet
+// at all - callers must not send while this is undefined. Deliberately not
+// notifyPayload.imageUrl (data/news.json's own, independent image-fetch
+// attempt, captured once back when the headline first changed and never
+// refreshed on later retries) - the two scrapers' image fetches are
+// separate and can resolve at different times (see scrape_news.py's
+// _archive_mirrored_image comment); by the time this resolves true the
+// article mirror is the more authoritative, more likely-correct source,
+// especially now that scrape_articles.py can hold a brand-new article back
+// from the index specifically to give its own image fetch more tries.
+//
+// Fails closed (undefined, i.e. "not mirrored yet") on any error, including
+// a bad response or a network hiccup - safe, since pendingSend just retries
+// on the next 1-minute tick rather than the notification being lost
+// outright. The index fetch checks `.ok` explicitly (mirrors the old
+// isSlugMirrored this replaces); the page fetch doesn't, matching this
+// file's own top-level NEWS_URL handling - either way a malformed response
+// fails via the surrounding try/catch or the final "no matching article"
+// check, not a missed `.ok`.
+async function mirroredImageUrl(fetchFn, slug) {
+  if (!slug) return undefined;
   try {
-    const res = await fetchFn(ARTICLES_INDEX_URL, 10000);
-    if (!res.ok) return false;
-    const index = await res.json();
-    return !!(index && typeof index === 'object' && !Array.isArray(index) && index[slug]);
+    const indexRes = await fetchFn(ARTICLES_INDEX_URL, 10000);
+    if (!indexRes.ok) return undefined;
+    const index = await indexRes.json();
+    const pageNum = index && typeof index === 'object' && !Array.isArray(index) ? index[slug] : undefined;
+    if (!pageNum) return undefined;
+    const pageRes = await fetchFn(`${ARTICLES_PAGE_BASE}${pageNum}.json`, 10000);
+    const page = await pageRes.json();
+    const article = Array.isArray(page) ? page.find((a) => a?.slug === slug) : null;
+    if (!article) return undefined;
+    return article._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
   } catch {
-    return false;
+    return undefined;
   }
 }
 
@@ -64,10 +94,16 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
 
   if (!notifyPayload) return;
 
-  // Don't send a slug the article mirror hasn't picked up yet. pendingSend is
-  // already persisted above, so the next 1-minute tick just retries once the
-  // mirror catches up, instead of sending users to a broken article link now.
-  if (!(await isSlugMirrored(fetchFn, notifyPayload.slug))) {
+  // Don't send a slug the article mirror hasn't picked up yet - which now
+  // also covers a brand-new article scrape_articles.py is deliberately
+  // holding back pending its image (see PUBLISH_HOLD_WINDOW there). Once it
+  // resolves, use ITS image, not notifyPayload.imageUrl's stale snapshot -
+  // see mirroredImageUrl's own comment. pendingSend is already persisted
+  // above, so the next 1-minute tick just retries either way, instead of
+  // sending users to a broken article link (or a permanently stale image)
+  // now.
+  const mirrorImage = await mirroredImageUrl(fetchFn, notifyPayload.slug);
+  if (mirrorImage === undefined) {
     console.log(`News notification deferred: "${notifyPayload.title}" (${notifyPayload.slug}) not yet in article mirror`);
     return;
   }
@@ -77,7 +113,7 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
     topic: 'news_alerts',
     android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000},
     apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
-    data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
+    data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(mirrorImage ? {imageUrl: mirrorImage} : {})},
   });
   console.log(`News notification sent OK: "${notifyPayload.title}"`);
   await stateRef.update({pendingSend: null});
