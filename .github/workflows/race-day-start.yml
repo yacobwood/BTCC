@@ -17,6 +17,11 @@ on:
   schedule:
     - cron: "27 8 * * 6,0"   # 08:27 UTC, Saturdays and Sundays only
   workflow_dispatch:           # allow manual trigger for testing
+    inputs:
+      is_retry:
+        description: "internal - marks this run as an automated retry (do not set manually)"
+        type: boolean
+        default: false
 
 jobs:
   check-and-start:
@@ -41,3 +46,33 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+
+      # This fires once a day - a failure here can mean session-watcher.yml
+      # never gets connected before the earliest session, worse than any
+      # scrape-*.yml sibling's missed tick (see this file's own top-of-file
+      # comment). is_retry guards against looping: a run dispatched BY this
+      # step carries is_retry=true, so a second failure falls through to
+      # "Report failure" instead of dispatching again.
+      - name: Retry once on failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/race-day-start.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || echo "Retry dispatch failed (non-fatal)"
+
+      # Only reached once the automated retry above has ALSO failed/been
+      # cancelled - a single transient blip no longer emails anyone.
+      - name: Report failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"race-day-start\",\"message\":\"Race day start check failed (auto-retry also failed) - session-watcher.yml may not be connected\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
