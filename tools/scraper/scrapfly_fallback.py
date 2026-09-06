@@ -51,6 +51,27 @@ _LARGE_OBJECT_URL_PREFIX = "https://api.scrapfly.io/scrape/large_object/"
 _SUPABASE_RE = re.compile(r"supabase\.co/storage/")
 
 
+def _error_detail(e: Exception) -> str:
+    """str(e) alone for an HTTPError is just the generic reason phrase
+    ("HTTP Error 422: Unprocessable Entity") - not Scrapfly's own response
+    body, which is where its actual explanation of what it rejected about
+    the request lives. Needed specifically because this fallback runs
+    unattended in CI with no interactive access to Scrapfly's dashboard -
+    confirmed live 2026-09-06: the same image URL 422'd three separate
+    times that day and every log line said only the generic phrase, giving
+    no way to tell "genuinely broken request" from "Scrapfly-side blip"
+    without this. Falls back to str(e) for anything that isn't an
+    HTTPError - or if reading the body itself fails."""
+    if isinstance(e, urllib.error.HTTPError):
+        try:
+            body = e.read().decode("utf-8", errors="replace")[:500]
+            if body:
+                return f"{e} - {body}"
+        except Exception:  # noqa: BLE001 - the body read is itself best-effort
+            pass
+    return str(e)
+
+
 def fetch_via_scrapfly(
     url: str, referer: str | None = None, label: str = "", timeout: int = 30, render_js: bool = True,
 ) -> str | None:
@@ -95,7 +116,7 @@ def fetch_via_scrapfly(
             body = json.loads(resp.read())
         content = body["result"]["content"]
     except Exception as e:  # noqa: BLE001 - this is a last-resort fallback, any failure just means "no"
-        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({e})")
+        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
         return None
 
     print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
@@ -166,7 +187,7 @@ def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tu
         else:
             image_bytes = base64.b64decode(raw_content)
     except Exception as e:  # noqa: BLE001 - fallback path, any failure just means "no"
-        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({e})")
+        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
         return None
 
     print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
