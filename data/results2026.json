@@ -18099,19 +18099,6 @@
             },
             {
               "pos": 6,
-              "no": 2,
-              "cl": "I",
-              "driver": "Daryl DE LEON",
-              "team": "WSR",
-              "car": "BMW 330i M Sport",
-              "laps": 15,
-              "time": "23:22.558",
-              "gap": "16.705",
-              "bestLap": "1:31.885",
-              "points": 10
-            },
-            {
-              "pos": 7,
               "no": 16,
               "cl": "I",
               "driver": "Aiden MOFFAT",
@@ -18121,10 +18108,10 @@
               "time": "23:32.411",
               "gap": "26.558",
               "bestLap": "1:32.729",
-              "points": 9
+              "points": 10
             },
             {
-              "pos": 8,
+              "pos": 7,
               "no": 99,
               "cl": "I",
               "driver": "Charles RAINFORD",
@@ -18134,10 +18121,10 @@
               "time": "23:24.362",
               "gap": "",
               "bestLap": "1:32.430",
-              "points": 8
+              "points": 9
             },
             {
-              "pos": 9,
+              "pos": 8,
               "no": 32,
               "cl": "M",
               "driver": "Daniel ROWBOTTOM",
@@ -18147,10 +18134,10 @@
               "time": "23:35.055",
               "gap": "29.202",
               "bestLap": "1:31.753",
-              "points": 7
+              "points": 8
             },
             {
-              "pos": 10,
+              "pos": 9,
               "no": 88,
               "cl": "I",
               "driver": "Mikey DOBLE",
@@ -18160,10 +18147,10 @@
               "time": "23:35.314",
               "gap": "29.461",
               "bestLap": "1:31.904",
-              "points": 6
+              "points": 7
             },
             {
-              "pos": 11,
+              "pos": 10,
               "no": 29,
               "cl": "I",
               "driver": "Lewis GILBERT",
@@ -18173,10 +18160,10 @@
               "time": "23:35.668",
               "gap": "29.815",
               "bestLap": "1:32.302",
-              "points": 5
+              "points": 6
             },
             {
-              "pos": 12,
+              "pos": 11,
               "no": 3,
               "cl": "M",
               "driver": "Tom CHILTON",
@@ -18186,10 +18173,10 @@
               "time": "23:36.359",
               "gap": "30.506",
               "bestLap": "1:31.885",
-              "points": 4
+              "points": 5
             },
             {
-              "pos": 13,
+              "pos": 12,
               "no": 123,
               "cl": "I",
               "driver": "Daniel LLOYD",
@@ -18199,10 +18186,10 @@
               "time": "23:38.772",
               "gap": "32.919",
               "bestLap": "1:32.772",
-              "points": 3
+              "points": 4
             },
             {
-              "pos": 14,
+              "pos": 13,
               "no": 52,
               "cl": "I",
               "driver": "Gordon SHEDDEN",
@@ -18212,10 +18199,10 @@
               "time": "23:44.469",
               "gap": "38.616",
               "bestLap": "1:31.575",
-              "points": 2
+              "points": 3
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 77,
               "cl": "M",
               "driver": "Sam OSBORNE",
@@ -18225,10 +18212,10 @@
               "time": "23:45.585",
               "gap": "39.732",
               "bestLap": "1:31.805",
-              "points": 1
+              "points": 2
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 33,
               "cl": "M",
               "driver": "Adam MORGAN",
@@ -18238,10 +18225,10 @@
               "time": "23:45.691",
               "gap": "39.838",
               "bestLap": "1:32.117",
-              "points": 0
+              "points": 1
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 50,
               "cl": "I",
               "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
@@ -18254,7 +18241,7 @@
               "points": 0
             },
             {
-              "pos": 18,
+              "pos": 17,
               "no": 15,
               "cl": "M",
               "driver": "Lewis SELBY",
@@ -18267,7 +18254,7 @@
               "points": 0
             },
             {
-              "pos": 19,
+              "pos": 18,
               "no": 17,
               "cl": "I",
               "driver": "Dexter PATTERSON",
@@ -18280,7 +18267,7 @@
               "points": 0
             },
             {
-              "pos": 20,
+              "pos": 19,
               "no": 7,
               "cl": "M",
               "driver": "Ryan BENSLEY",
@@ -18290,6 +18277,19 @@
               "time": "24:08.253",
               "gap": "",
               "bestLap": "1:33.134",
+              "points": 0
+            },
+            {
+              "pos": 20,
+              "no": 2,
+              "cl": "I",
+              "driver": "Daryl DE LEON",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 15,
+              "time": "24:22.558",
+              "gap": "",
+              "bestLap": "1:31.885",
               "points": 0
             },
             {
