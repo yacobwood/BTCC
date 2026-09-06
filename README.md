@@ -435,6 +435,8 @@ Firebase Realtime Database community chat. Retention enforced by `trimChat` Clou
 
 **Find user by email (added 2026-08-26):** a FIND USER BY EMAIL search at the top of the admin Chat tab, for when an admin only has an email (a support message, a BMC receipt) rather than a known chat display name - the gap the SUPPORTERS flow above can't cover, since it only searches by name. Resolves the email to a Firebase Auth account via `getAuth().getUserByEmail()` in a new `lookupUserByEmail` Cloud Function (`functions/chat.js`, same admin-secret gating as `setChatDonor`), then folds in that `uid`'s chat display name, donor status and active ban in one response, with MARK AS SUPPORTER / REMOVE SUPPORTER BADGE / UNBAN actions directly on the result card.
 
+**Send-failure handling consolidated (2026-09-06):** `handleNameSet` and `handleNameSkip` (the two paths a first-time chatter's message goes through, after the name prompt) each re-implemented the RTDB push in their own bare `try{}catch{}`, with the input already cleared and no error state or analytics event on failure - a rejected push on someone's very first message (offline blip, RTDB rules rejection) silently vanished with no indication anything went wrong. Extracted a shared `sendMessage(text, authorName)`, used by `handleSend` and both name-prompt paths, so a failure always shows "Failed to send" and restores the input text on every path, not just the normal one.
+
 **ListenScreen** ([src/screens/ListenScreen.js](src/screens/ListenScreen.js))
 Entry point routing to Radio and Podcasts sections.
 
