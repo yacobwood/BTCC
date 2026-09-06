@@ -250,3 +250,72 @@ test('treats a non-ok index response as not-yet-mirrored and defers', async () =
 
   expect(messaging.send).not.toHaveBeenCalled();
 });
+
+test('treats a page-file fetch failure as not-yet-mirrored and defers', async () => {
+  const db = makeDb({lastId: 7});
+  const messaging = makeMessaging();
+  const fetchFn = jest.fn((url) => {
+    if (url === ARTICLES_INDEX_URL) {
+      return Promise.resolve({ok: true, json: jest.fn().mockResolvedValue({[ARTICLE.slug]: 1})});
+    }
+    if (url === NEWS_URL) return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([ARTICLE])});
+    return Promise.reject(new Error('network error')); // the page_1.json fetch
+  });
+
+  await checkBtccNews({fetchFn, db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).not.toHaveBeenCalled();
+});
+
+// ── Mirror image at send time, not a stale pendingSend snapshot ────────────
+//
+// Regression coverage for 2026-09-06: scrape_news.py's own image fetch (which
+// is what pendingSend.imageUrl is captured from, once, at detection time) and
+// scrape_articles.py's are independent and can resolve at different times -
+// notably, scrape_articles.py can now hold a brand-new article out of the
+// index entirely until its own image fetch succeeds (see
+// scrape_articles.py's PUBLISH_HOLD_WINDOW), so by the time the mirror gate
+// passes, the mirror is the more authoritative source and must be what's
+// actually sent, not whatever data/news.json said back when the headline
+// first changed.
+
+test("uses the article mirror's own image at send time, not a stale pendingSend snapshot", async () => {
+  const pending = {title: ARTICLE.title.rendered, imageUrl: null, slug: ARTICLE.slug};
+  const db = makeDb({lastId: ARTICLE.id, pendingSend: pending});
+  const messaging = makeMessaging();
+  const mirroredArticle = {...ARTICLE, _embedded: {'wp:featuredmedia': [{source_url: 'https://example.com/mirror-image.jpg'}]}};
+
+  const fetchFn = jest.fn((url) => {
+    if (url === ARTICLES_INDEX_URL) {
+      return Promise.resolve({ok: true, json: jest.fn().mockResolvedValue({[ARTICLE.slug]: 1})});
+    }
+    if (url === NEWS_URL) return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([ARTICLE])});
+    return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([mirroredArticle])}); // page_1.json
+  });
+
+  await checkBtccNews({fetchFn, db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).toHaveBeenCalledWith(
+    expect.objectContaining({data: expect.objectContaining({imageUrl: 'https://example.com/mirror-image.jpg'})}),
+  );
+});
+
+test('omits imageUrl when the mirror has none, even if pendingSend had one cached', async () => {
+  const pending = {title: ARTICLE.title.rendered, imageUrl: 'https://example.com/stale.jpg', slug: ARTICLE.slug};
+  const db = makeDb({lastId: ARTICLE.id, pendingSend: pending});
+  const messaging = makeMessaging();
+  const mirroredArticleNoImage = {...ARTICLE, _embedded: {}};
+
+  const fetchFn = jest.fn((url) => {
+    if (url === ARTICLES_INDEX_URL) {
+      return Promise.resolve({ok: true, json: jest.fn().mockResolvedValue({[ARTICLE.slug]: 1})});
+    }
+    if (url === NEWS_URL) return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([ARTICLE])});
+    return Promise.resolve({status: 200, json: jest.fn().mockResolvedValue([mirroredArticleNoImage])});
+  });
+
+  await checkBtccNews({fetchFn, db, messaging, logHistory: jest.fn()});
+
+  const sentData = messaging.send.mock.calls[0][0].data;
+  expect(sentData).not.toHaveProperty('imageUrl');
+});

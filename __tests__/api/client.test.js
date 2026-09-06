@@ -801,7 +801,7 @@ describe('fetchArticleBySlug', () => {
 
   // Regression: ArticleScreen's Retry button needs a real network hit, not a
   // replay of the same cached miss that got the user to the retry screen -
-  // see newsCheck.js's isSlugMirrored for why a plain-cached index can be
+  // see newsCheck.js's mirroredImageUrl for why a plain-cached index can be
   // stale relative to a just-published article.
   it('forceRefresh=true skips the index cache entirely', async () => {
     const article = {id: 3, slug: 'just-published'};

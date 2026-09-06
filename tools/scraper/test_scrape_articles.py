@@ -15,7 +15,9 @@ from scrape_articles import (
     extract_og_image,
     fetch_article_body,
     needs_full_refetch,
+    needs_image_retry,
     parse_display_date,
+    publish_hold_expired,
     resolve_first_seen,
     scrape_card_list,
     scrape_pages,
@@ -84,6 +86,47 @@ class TestNeedsFullRefetch(unittest.TestCase):
 # could only break same-day ties by whatever order that run's listing
 # happened to present them in. firstSeenAt (this run's own clock, stamped
 # once and never moved) is what actually fixes same-day ordering.
+
+class TestNeedsImageRetry(unittest.TestCase):
+    """needs_image_retry(first_seen) - broadened from `except ValueError` to
+    `except (ValueError, TypeError)`: some legacy articles' firstSeenAt
+    values (via resolve_first_seen's legacy fallback to parse_display_date)
+    are naive "YYYY-MM-DDT00:00:00" strings with no UTC offset, and
+    subtracting an aware datetime.now(timezone.utc) from a naive datetime
+    raises TypeError, not ValueError - a dormant landmine the old except
+    clause did not catch."""
+
+    def test_naive_legacy_format_does_not_raise_and_falls_back_to_false(self):
+        # A naive datetime (no UTC offset) can't be safely compared against
+        # the aware datetime.now(timezone.utc) at all - subtracting them
+        # raises TypeError, which is the actual regression this test
+        # guards: it must be caught (not propagate) and fall back to the
+        # same safe "no retry" default a ValueError already produced,
+        # regardless of how recent the naive timestamp actually is.
+        naive_recent = (datetime.now() - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
+        self.assertFalse(needs_image_retry(naive_recent))
+
+    def test_naive_legacy_format_outside_window_does_not_raise(self):
+        naive_old = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S")
+        self.assertFalse(needs_image_retry(naive_old))
+
+    def test_aware_recent_timestamp_is_true(self):
+        recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        self.assertTrue(needs_image_retry(recent))
+
+    def test_aware_old_timestamp_is_false(self):
+        old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        self.assertFalse(needs_image_retry(old))
+
+    def test_none_is_false(self):
+        self.assertFalse(needs_image_retry(None))
+
+    def test_empty_string_is_false(self):
+        self.assertFalse(needs_image_retry(""))
+
+    def test_genuinely_unparseable_string_is_false(self):
+        self.assertFalse(needs_image_retry("not-a-date"))
+
 
 class TestResolveFirstSeen(unittest.TestCase):
 
@@ -326,7 +369,7 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                      "excerpt": "", "date": "2026-08-01T00:00:00",
                  }]), \
                  patch("scrape_articles.fetch_image_smart") as mock_image:
-                posts = build_articles(refresh_all=False)
+                posts, pending = build_articles(refresh_all=False)
         mock_image.assert_not_called()
         self.assertEqual(
             posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
@@ -345,7 +388,7 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                  patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
                  patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
                  patch("scrape_articles.save_mirrored_image", return_value="abc123.jpg"):
-                posts = build_articles(refresh_all=False)
+                posts, pending = build_articles(refresh_all=False)
         mock_image.assert_called_once()
         self.assertEqual(
             posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
@@ -371,16 +414,30 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                        return_value=("Full report.", "https://btcc.net/api/media/def456")), \
                  patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
                  patch("scrape_articles.save_mirrored_image", return_value="def456.jpg"):
-                posts = build_articles(refresh_all=False)
+                posts, pending = build_articles(refresh_all=False)
         mock_image.assert_called_once_with("https://btcc.net/api/media/def456", label="darlington-uk-meets-darlington-usa")
         self.assertEqual(
             posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
             "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/def456.jpg",
         )
 
-    def test_no_image_anywhere_leaves_embedded_empty(self):
+    def test_no_image_anywhere_on_an_already_mirrored_article_leaves_embedded_empty(self):
+        """Distinct from a genuinely brand-new article (see TestPublishHold
+        below) - this one already has a prior entry, so PUBLISH_HOLD_WINDOW
+        (which only ever applies to slugs with no prior entry at all) never
+        applies; needs_image_retry's own IMAGE_RETRY_WINDOW governs it
+        instead, publishing text-only immediately either way."""
         with tempfile.TemporaryDirectory() as tmp:
-            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            existing_post = {
+                "id": "wire-story", "slug": "wire-story", "date": "2026-09-04T00:00:00",
+                "firstSeenAt": (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),
+                "title": {"rendered": "Wire Story"}, "excerpt": {"rendered": ""},
+                "content": {"rendered": "Full report."}, "_embedded": {},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
                  patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
                  patch("scrape_articles.scrape_card_list", return_value=[{
                      "slug": "wire-story", "title": "Wire Story",
@@ -389,7 +446,7 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                  }]), \
                  patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
                  patch("scrape_articles.fetch_image_smart") as mock_image:
-                posts = build_articles(refresh_all=False)
+                posts, pending = build_articles(refresh_all=False)
         mock_image.assert_not_called()
         self.assertNotIn("wp:featuredmedia", posts[0]["_embedded"])
 
@@ -422,7 +479,7 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                        return_value=("Full report.", "https://btcc.net/api/media/def456")) as mock_body, \
                  patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
                  patch("scrape_articles.save_mirrored_image", return_value="def456.jpg"):
-                posts = build_articles(refresh_all=False)
+                posts, pending = build_articles(refresh_all=False)
         mock_body.assert_called_once()
         self.assertEqual(
             posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
@@ -453,9 +510,120 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
                      "excerpt": "", "date": "2026-08-05T00:00:00",
                  }]), \
                  patch("scrape_articles.fetch_article_body") as mock_body:
-                posts = build_articles(refresh_all=False)
+                posts, pending = build_articles(refresh_all=False)
         mock_body.assert_not_called()
         self.assertNotIn("wp:featuredmedia", posts[0]["_embedded"])
+
+
+# ── publish_hold_expired ─────────────────────────────────────────────────────
+
+class TestPublishHoldExpired(unittest.TestCase):
+
+    def test_recent_timestamp_is_not_expired(self):
+        recent = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+        self.assertFalse(publish_hold_expired(recent))
+
+    def test_timestamp_past_the_window_is_expired(self):
+        old = (datetime.now(timezone.utc) - timedelta(minutes=25)).isoformat()
+        self.assertTrue(publish_hold_expired(old))
+
+    def test_unparseable_timestamp_fails_open_as_expired(self):
+        # Corrupt pending.json state must never hold a slug back forever.
+        self.assertTrue(publish_hold_expired("not-a-date"))
+
+
+# ── build_articles: publish-hold for a brand-new, still image-less article ──
+#
+# Requested 2026-09-06 after "Qualifying in Quotes: Croft" published (and
+# notified) with no image while its own image fetch kept hitting Scrapfly
+# 422s - the app/website and push notification should not go out ahead of
+# the image for a genuinely brand-new article, but must still publish
+# eventually rather than hold a truly image-less one forever (see
+# PUBLISH_HOLD_WINDOW). This is a distinct, new-article-only behaviour from
+# needs_image_retry/IMAGE_RETRY_WINDOW above, which only ever applies once a
+# slug already has a prior published entry.
+
+class TestPublishHold(unittest.TestCase):
+
+    def _card(self, slug="new-article", media_url=None, date="2026-09-06T00:00:00"):
+        return {"slug": slug, "title": "New Article", "media_url": media_url, "excerpt": "", "date": date}
+
+    def test_brand_new_article_with_no_image_is_held_back_not_published(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[self._card()]), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
+                 patch("scrape_articles.fetch_image_smart") as mock_image:
+                posts, pending = build_articles(refresh_all=False)
+        mock_image.assert_not_called()
+        self.assertEqual(posts, [])
+        self.assertIn("new-article", pending)
+        self.assertIn("firstSeenAt", pending["new-article"])
+
+    def test_held_article_keeps_retrying_content_every_cycle_while_pending(self):
+        # Unlike an already-published stub (has_content can cache the prior
+        # content and skip straight to just re-trying the image), a pending
+        # article has no prior entry to cache from at all - every cycle it's
+        # held re-runs fetch_article_body, giving extract_og_image another
+        # real shot, not just card["media_url"].
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            recent = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+            (articles_dir / "pending.json").write_text(json.dumps({"new-article": {"firstSeenAt": recent}}))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[self._card()]), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)) as mock_body:
+                posts, pending = build_articles(refresh_all=False)
+        mock_body.assert_called_once()
+        self.assertEqual(posts, [])
+        self.assertEqual(pending["new-article"]["firstSeenAt"], recent)
+
+    def test_held_article_releases_with_image_once_found_on_a_later_cycle(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            original_first_seen = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+            (articles_dir / "pending.json").write_text(json.dumps({"new-article": {"firstSeenAt": original_first_seen}}))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[self._card()]), \
+                 patch("scrape_articles.fetch_article_body",
+                       return_value=("Full report.", "https://btcc.net/api/media/def456")), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", return_value="def456.jpg"):
+                posts, pending = build_articles(refresh_all=False)
+        self.assertNotIn("new-article", pending)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/def456.jpg",
+        )
+        # Must keep the TRUE first-detection time, not this run's now_iso -
+        # otherwise a held article would look freshly-discovered at release
+        # time instead of when it actually first appeared (see sort_posts'
+        # own comment on why firstSeenAt accuracy matters for ordering).
+        self.assertEqual(posts[0]["firstSeenAt"], original_first_seen)
+
+    def test_held_article_publishes_text_only_once_hold_window_expires(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            expired_first_seen = (datetime.now(timezone.utc) - timedelta(minutes=25)).isoformat()
+            (articles_dir / "pending.json").write_text(json.dumps({"new-article": {"firstSeenAt": expired_first_seen}}))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[self._card()]), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
+                 patch("scrape_articles.fetch_image_smart") as mock_image:
+                posts, pending = build_articles(refresh_all=False)
+        mock_image.assert_not_called()
+        self.assertNotIn("new-article", pending)
+        self.assertEqual(len(posts), 1)
+        self.assertNotIn("wp:featuredmedia", posts[0]["_embedded"])
+        self.assertEqual(posts[0]["firstSeenAt"], expired_first_seen)
 
 
 if __name__ == "__main__":

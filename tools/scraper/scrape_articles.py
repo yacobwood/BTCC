@@ -51,6 +51,18 @@ page load paying for the whole thing:
                                    links, notifications) only has to fetch
                                    this small index plus the one page file
                                    that actually contains it.
+  - data/articles/pending.json    scraper-internal only, never read by the
+                                   app or website - brand-new articles held
+                                   back from the two files above while an
+                                   image is retried (see PUBLISH_HOLD_WINDOW).
+                                   A slug absent from index.json reads as
+                                   "not mirrored yet" to everything
+                                   downstream (functions/newsCheck.js's
+                                   mirroredImageUrl included), so holding a
+                                   slug out of index.json is what actually
+                                   suppresses both its News tab/website
+                                   appearance and its push notification
+                                   until the hold releases.
 A prior version of this scraper wrote a single data/articles.json capped
 at MAX_ARTICLES - that made every list fetch, search, and slug lookup
 download the *entire* archive's full HTML content regardless of which
@@ -108,6 +120,20 @@ MAX_ARTICLES = 500
 # image is found (prior_image then short-circuits it), same shape as
 # needs_full_refetch's stub-marker check just below.
 IMAGE_RETRY_WINDOW = timedelta(days=3)
+# How long a genuinely brand-new article (no prior entry at all) is held
+# back from publication - not written to any page_<n>.json/index.json, so it
+# appears in neither the News tab/website nor a push notification (see
+# functions/newsCheck.js's mirroredImageUrl, which only fires once the slug
+# is actually present in index.json) - while its image fetch is retried.
+# Bounded, not indefinite, for the same reason IMAGE_RETRY_WINDOW is: an
+# article that genuinely has no image at all (e.g. "Darlington UK meets
+# Darlington USA") must still publish eventually, just without one, rather
+# than sit invisible forever. ~3-4 scrape cycles at the in-hours 5-minute
+# cadence (see scrape-news.yml) - long enough to absorb an ordinary
+# transient Scrapfly failure (confirmed self-resolving within a run or two
+# for other articles the same day this was added), short enough that a live
+# race-weekend report is never held back for more than ~20 minutes.
+PUBLISH_HOLD_WINDOW = timedelta(minutes=20)
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ARTICLES_DIR = DATA_DIR / "articles"
 INDEX_JSON = ARTICLES_DIR / "index.json"
@@ -283,6 +309,49 @@ def fetch_article_body(slug: str) -> tuple[str | None, str | None]:
     return (m.group(1).strip() if m else ""), extract_og_image(html)
 
 
+def load_pending() -> dict:
+    """Read data/articles/pending.json - {slug: {"firstSeenAt": iso}} for
+    brand-new articles currently being held back from publication (see
+    PUBLISH_HOLD_WINDOW) while their image fetch is retried. Scraper-internal
+    state only - unlike everything else in data/articles/, this is never
+    read by the app or website, so it's fine for it to hold nothing more
+    than the one timestamp needed to bound the hold."""
+    try:
+        return json.loads((ARTICLES_DIR / "pending.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_pending(pending: dict) -> None:
+    ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
+    with open(ARTICLES_DIR / "pending.json", "w") as f:
+        json.dump(pending, f, indent=2)
+
+
+def publish_hold_expired(first_seen: str) -> bool:
+    """True once PUBLISH_HOLD_WINDOW has elapsed since a held-back article's
+    first sighting, at which point it publishes regardless of whether an
+    image was ever found - mirrors needs_image_retry's aware/naive
+    TypeError guard, though pending.json's timestamps are always aware
+    (stamped by this same script, never legacy data) so this is defensive,
+    not a known live case. An unparseable timestamp fails open (True, i.e.
+    publish now) rather than holding forever on corrupt state.
+
+    One accepted gap: a pending slug is only ever released (published or
+    dropped) by build_articles' main loop, which only visits slugs still
+    present in this run's freshly-scraped `cards` - if a held-back article
+    somehow fell off btcc.net's /news/ listing entirely within the ~20-
+    minute hold window (meaning 20+ newer articles published faster than
+    this site has ever been observed to), it would sit in pending.json
+    unreleased indefinitely rather than ever hitting this check. Not worth
+    guarding against given how implausible that is at this site's real
+    publish cadence."""
+    try:
+        return datetime.now(timezone.utc) - datetime.fromisoformat(first_seen) >= PUBLISH_HOLD_WINDOW
+    except (ValueError, TypeError):
+        return True
+
+
 def load_existing() -> dict:
     """Read every data/articles/page_<n>.json and return {slug: post} across
     all of them - the full previously-mirrored archive, regardless of how
@@ -339,6 +408,27 @@ def sort_posts(posts: list[dict]) -> list[dict]:
     return sorted(posts, key=lambda p: (p.get("firstSeenAt") or p["date"], p.get("date") or ""), reverse=True)
 
 
+def needs_image_retry(first_seen: str | None) -> bool:
+    """Whether a mirrored, still-image-less article is still within
+    IMAGE_RETRY_WINDOW of its first sighting and so should get one more
+    full-page fetch for extract_og_image to have a shot at it.
+
+    first_seen is normally an aware ISO string, but some legacy articles'
+    firstSeenAt values (via resolve_first_seen's legacy fallback to
+    parse_display_date, which produces a naive "YYYY-MM-DDT00:00:00" with no
+    UTC offset) are naive - subtracting an aware datetime.now(timezone.utc)
+    from a naive datetime raises TypeError, not ValueError, so both must be
+    caught here rather than just the one (confirmed: TypeError was NOT
+    caught by the old `except ValueError` alone, a dormant landmine for any
+    legacy first_seen value)."""
+    if not first_seen:
+        return False
+    try:
+        return datetime.now(timezone.utc) - datetime.fromisoformat(first_seen) < IMAGE_RETRY_WINDOW
+    except (ValueError, TypeError):
+        return False
+
+
 def resolve_first_seen(prior: dict | None, now_iso: str, date_iso: str = "") -> str:
     """Returns the timestamp a post should sort by: an already-mirrored
     article keeps whatever it was first stamped with (so re-scraping it on a
@@ -372,11 +462,14 @@ def resolve_first_seen(prior: dict | None, now_iso: str, date_iso: str = "") -> 
     return now_iso
 
 
-def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
+def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dict], dict]:
     # Always load the full accumulated archive - refresh_all forces today's
     # listing cards to refetch their content below, but must never wipe out
     # everything older than today's ~25 cards that's already been accumulated.
     existing = load_existing()
+    # Brand-new articles currently being held back from publication pending
+    # an image - see PUBLISH_HOLD_WINDOW/load_pending.
+    pending = load_pending()
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -385,7 +478,7 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
     else:
         cards = scrape_card_list()
     if not cards:
-        return []
+        return [], pending
 
     merged = dict(existing)
     for i, card in enumerate(cards):
@@ -395,6 +488,12 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
         prior = existing.get(slug)
         prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
         prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
+        # A held-back article's first-ever detection time (see
+        # PUBLISH_HOLD_WINDOW) - None for both a normal already-mirrored
+        # article (prior is not None, resolve_first_seen handles it below)
+        # and a genuinely first-sighting-ever new one (pending has nothing
+        # for it yet either, so it gets now_iso like any other new article).
+        pending_first_seen = pending.get(slug, {}).get("firstSeenAt") if prior is None else None
 
         # A mirrored article with no image at all (neither a prior mirrored
         # one nor anything on the current listing card) gets treated like a
@@ -402,20 +501,14 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
         # gets a shot at it, bounded to IMAGE_RETRY_WINDOW of its first
         # sighting so a genuinely image-less article doesn't re-pay that
         # fetch forever (see IMAGE_RETRY_WINDOW above).
-        needs_image_retry = False
+        image_retry_needed = False
         if prior is not None and not prior_image and not card["media_url"]:
-            first_seen = prior.get("firstSeenAt")
-            try:
-                needs_image_retry = first_seen and (
-                    datetime.now(timezone.utc) - datetime.fromisoformat(first_seen) < IMAGE_RETRY_WINDOW
-                )
-            except ValueError:
-                needs_image_retry = False
+            image_retry_needed = needs_image_retry(prior.get("firstSeenAt"))
 
         has_content = (
             bool(prior_content)
             and not needs_full_refetch(prior_content, refresh_all)
-            and not needs_image_retry
+            and not image_retry_needed
         )
 
         if has_content:
@@ -466,6 +559,25 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
             else:
                 image_url = None
 
+        if prior is None and not image_url:
+            # Genuinely new (never published) and still no image this cycle -
+            # hold it back rather than publish text-only immediately, unless
+            # PUBLISH_HOLD_WINDOW has already run out. first_seen is the
+            # TRUE first-detection time even when this is a repeat cycle of
+            # an already-held slug - never now_iso in that case, since
+            # releasing it would then misreport how new the article
+            # actually is (see sort_posts' own comment on why firstSeenAt
+            # accuracy matters for same-day ordering).
+            first_seen = pending_first_seen or now_iso
+            if not publish_hold_expired(first_seen):
+                pending[slug] = {"firstSeenAt": first_seen}
+                continue
+            # Hold window expired - publish anyway, text-only; falls through.
+
+        # Either published normally or a hold that just expired - either way
+        # this slug is no longer pending.
+        pending.pop(slug, None)
+
         embedded = {}
         if image_url:
             embedded["wp:featuredmedia"] = [{"source_url": image_url}]
@@ -477,7 +589,11 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
             "slug": slug,
             "link": f"https://btcc.net/{slug}/",
             "date": date_iso,
-            "firstSeenAt": resolve_first_seen(prior, now_iso, date_iso),
+            # resolve_first_seen only ever sees prior, not pending - a slug
+            # released from a publish hold must keep the timestamp of its
+            # TRUE first sighting (pending_first_seen) - not this run's
+            # now_iso, which would misreport how new it actually is.
+            "firstSeenAt": resolve_first_seen(prior, now_iso, date_iso) if prior is not None else (pending_first_seen or now_iso),
             "title": {"rendered": card["title"]},
             "excerpt": {"rendered": card["excerpt"]},
             "content": {"rendered": content_html},
@@ -487,7 +603,7 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> list[dict]:
     # firstSeenAt (not date) is the primary sort key - see resolve_first_seen
     # and sort_posts (date tie-break).
     posts = sort_posts(list(merged.values()))
-    return posts[:MAX_ARTICLES]
+    return posts[:MAX_ARTICLES], pending
 
 
 def prune_orphaned_images(posts: list[dict]) -> int:
@@ -551,7 +667,25 @@ def main():
     ap.add_argument("--backfill-pages", type=int, default=1, help="Crawl this many /news/ listing pages (~25 articles each) instead of just page 1 - one-off deep backfill, not for routine runs")
     args = ap.parse_args()
 
-    posts = build_articles(args.refresh_all, args.backfill_pages)
+    posts, pending = build_articles(args.refresh_all, args.backfill_pages)
+
+    if pending:
+        # Held back this run pending an image - see PUBLISH_HOLD_WINDOW.
+        # Not an error: neither the app/website nor a push notification can
+        # see these slugs yet (functions/newsCheck.js's mirroredImageUrl only
+        # fires once a slug is actually in index.json), which is the point.
+        # Saved even if the zero-posts guard below exits right after - a
+        # from-scratch/empty-archive bootstrap where every freshly-scraped
+        # card is genuinely brand-new could otherwise legitimately hit that
+        # guard while still needing this run's holds persisted - skip this
+        # and their firstSeenAt timers would silently reset next run for no
+        # reason.
+        print(f"Holding {len(pending)} new article(s) pending an image (publishes anyway once PUBLISH_HOLD_WINDOW elapses):")
+        for slug in pending:
+            print(f"  {slug}")
+        if not args.dry_run:
+            save_pending(pending)
+
     if not posts:
         print("ERROR: scraped zero articles - refusing to overwrite data/articles/", file=sys.stderr)
         sys.exit(1)
