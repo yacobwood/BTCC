@@ -12,6 +12,15 @@ jest.mock('../../src/assets/seasonData', () => ({
   getSeasonData: jest.fn(),
 }));
 
+// notifNavigation.js requires this directly (not through getSeasonData) as
+// its live-current-season fallback - mocked so these tests don't depend on
+// the real data/results2026.json's content, which changes constantly via
+// the scraper pipeline's own commits.
+jest.mock('../../data/results2026.json', () => ({
+  season: '2026',
+  rounds: [{round: 8, venue: 'Croft'}],
+}));
+
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {notificationOpened: jest.fn(), articleClicked: jest.fn()},
 }));
@@ -180,10 +189,44 @@ describe('navigateFromData', () => {
       expect(ref.dispatch).not.toHaveBeenCalled();
     });
 
-    it('does NOT dispatch when getSeasonData returns null', () => {
+    it('does NOT dispatch when getSeasonData returns null and the year does not match the live season either', () => {
+      // getSeasonData is null here for the same reason it always is for a
+      // season not in its archive (see the 2026 fallback test below), but
+      // year '2025' also doesn't match the mocked results2026.json's
+      // season - so there is genuinely nowhere to resolve this round from.
       getSeasonData.mockReturnValue(null);
       const ref = makeRef();
       navigateFromData(ref, {type: 'results', round: '1', year: '2025'});
+
+      expect(ref.dispatch).not.toHaveBeenCalled();
+    });
+
+    // Regression: found live 2026-09-06 (round 8, Croft) - getSeasonData()
+    // only covers the archived 2004-2025 seasons, so it's always null for
+    // whatever season is actually happening right now. A real Race 3
+    // results notification landed on the app's default News tab instead of
+    // the Race 3 results screen because of exactly this gap.
+    it('falls back to the bundled current-season results file when getSeasonData returns null for the live season', () => {
+      getSeasonData.mockReturnValue(null);
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'results', round: '8', year: '2026', race: '6'});
+
+      expect(ref.dispatch).toHaveBeenCalledWith(
+        resetTo('Results', nestedState([
+          {name: 'ResultsList'},
+          {name: 'RoundResults', params: {
+            round: expect.objectContaining({round: 8, venue: 'Croft'}),
+            year: 2026,
+            initialRace: 5,
+          }},
+        ])),
+      );
+    });
+
+    it('does NOT fall back to the bundled file for a round it does not contain', () => {
+      getSeasonData.mockReturnValue(null);
+      const ref = makeRef();
+      navigateFromData(ref, {type: 'results', round: '999', year: '2026'});
 
       expect(ref.dispatch).not.toHaveBeenCalled();
     });
