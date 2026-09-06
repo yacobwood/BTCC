@@ -2,7 +2,7 @@
  * Unit tests for the pure compute functions exported from ResultsScreen.
  * These functions are never exercised by the component tests (parseResults is mocked there).
  */
-import {computeSeasonStats, computeProgression} from '../../src/screens/ResultsScreen';
+import {computeSeasonStats, computeProgression, reconcileStatsOrder} from '../../src/screens/ResultsScreen';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -170,5 +170,91 @@ describe('computeProgression', () => {
     expect(alice.points).toHaveLength(2); // present for both races
     expect(bob.points).toHaveLength(1);   // only from Race 2 onwards
     expect(bob.points[0]).toBe(20);
+  });
+
+  // ── Official standings reconciliation ─────────────────────────────────────
+  // A standalone championship-points penalty (docked outright, not tied to
+  // any one race's classification) only ever shows up in the TSL PDF's own
+  // running total. Re-summing per-race points can never see it, so without
+  // this override the chart silently overstates a penalised driver's points
+  // forever. See project memory: table vs chart points mismatch (Sutton/
+  // Ingram/Morgan, 2026-09-06).
+
+  it('overrides the final point with the official standings total when they differ', () => {
+    const rounds = [makeRound(1, [
+      makeRace('Race 1', [makeResult('Morgan', 1, {points: 20})]),
+      makeRace('Race 2', [makeResult('Morgan', 1, {points: 20})]),
+    ])];
+    const standings = {drivers: [{name: 'Morgan', points: 35}]}; // 5pt penalty vs raw 40
+    const {series} = computeProgression(rounds, standings);
+    const morgan = series.find(s => s.name === 'Morgan');
+    expect(morgan.points[morgan.points.length - 1]).toBe(35);
+  });
+
+  it('leaves earlier rounds untouched when reconciling the final point', () => {
+    const rounds = [makeRound(1, [
+      makeRace('Race 1', [makeResult('Morgan', 1, {points: 20})]),
+      makeRace('Race 2', [makeResult('Morgan', 1, {points: 20})]),
+    ])];
+    const standings = {drivers: [{name: 'Morgan', points: 35}]};
+    const {series} = computeProgression(rounds, standings);
+    const morgan = series.find(s => s.name === 'Morgan');
+    expect(morgan.points[0]).toBe(20); // Race 1 snapshot unchanged
+    expect(morgan.points[1]).toBe(35); // only the latest snapshot is corrected
+  });
+
+  it('does not touch a driver absent from the official standings', () => {
+    const rounds = [makeRound(1, [makeRace('Race 1', [makeResult('Alice', 1, {points: 20})])])];
+    const standings = {drivers: [{name: 'Morgan', points: 35}]};
+    const {series} = computeProgression(rounds, standings);
+    const alice = series.find(s => s.name === 'Alice');
+    expect(alice.points[alice.points.length - 1]).toBe(20);
+  });
+
+  it('is a no-op when no standings are supplied (backward compatible)', () => {
+    const rounds = [makeRound(1, [makeRace('Race 1', [makeResult('Alice', 1, {points: 20})])])];
+    const {series} = computeProgression(rounds);
+    const alice = series.find(s => s.name === 'Alice');
+    expect(alice.points[alice.points.length - 1]).toBe(20);
+  });
+});
+
+// ── reconcileStatsOrder ────────────────────────────────────────────────────
+// A penalised driver's raw per-race point sum can undercut a nearby rival's,
+// flipping the STATS tab's displayed rank order relative to the real TSL
+// standings (e.g. 2026-09-06: Morgan's raw sum of 226 vs Rowbottom's 231,
+// though the official standings place Morgan above Rowbottom, 232 to 231).
+
+describe('reconcileStatsOrder', () => {
+  it('re-sorts by the official standings total, not the raw computed points', () => {
+    const stats = [
+      {name: 'Rowbottom', points: 231},
+      {name: 'Morgan', points: 226}, // raw sum undercounts Morgan's penalised total
+    ];
+    const standings = {drivers: [
+      {name: 'Morgan', points: 232},
+      {name: 'Rowbottom', points: 231},
+    ]};
+    const result = reconcileStatsOrder(stats, standings);
+    expect(result.map(s => s.name)).toEqual(['Morgan', 'Rowbottom']);
+  });
+
+  it('falls back to the raw computed points for a driver absent from standings', () => {
+    const stats = [{name: 'Alice', points: 20}, {name: 'Bob', points: 17}];
+    const standings = {drivers: [{name: 'Alice', points: 20}]}; // Bob not in the official list
+    const result = reconcileStatsOrder(stats, standings);
+    expect(result.map(s => s.name)).toEqual(['Alice', 'Bob']);
+  });
+
+  it('is a no-op when no standings are supplied', () => {
+    const stats = [{name: 'Alice', points: 20}, {name: 'Bob', points: 17}];
+    expect(reconcileStatsOrder(stats, null)).toBe(stats); // same array, untouched
+  });
+
+  it('does not mutate the input array', () => {
+    const stats = [{name: 'Rowbottom', points: 231}, {name: 'Morgan', points: 226}];
+    const standings = {drivers: [{name: 'Morgan', points: 232}, {name: 'Rowbottom', points: 231}]};
+    reconcileStatsOrder(stats, standings);
+    expect(stats.map(s => s.name)).toEqual(['Rowbottom', 'Morgan']); // original order preserved
   });
 });
