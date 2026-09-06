@@ -28,6 +28,7 @@ const mockLogPushHistory = jest.fn(() => Promise.resolve());
 // assertion.
 const DEFAULT_ROUNDS = [{
   round: 8,
+  venue: 'Croft',
   races: [
     {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
     {label: 'Race 1', results: [], grid: null},
@@ -159,6 +160,34 @@ describe('notifyResultsUpdate', () => {
     // now has a result for the first time - that's the one that should win.
     mockResultsOnce([{
       round: 8,
+      venue: 'Croft',
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
+      ],
+    }]);
+
+    await call();
+
+    // Title names the specific session + venue that changed, not a generic
+    // "a fresh result dropped somewhere" line - the whole point of surfacing
+    // findChangedSession's pick to the user, not just the dedup itself.
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      topic: 'results_teaser',
+      notification: expect.objectContaining({title: 'Results for Race 1 at Croft is now available'}),
+      data: {type: 'results', year: '2026', round: '8', race: '2'}, // race is 1-indexed for notifNavigation.js
+    }));
+    expect(mockLogPushHistory).toHaveBeenCalledWith('Results for Race 1 at Croft is now available', expect.any(String), 'results');
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
+  });
+
+  // Defensive fallback - real results{year}.json rounds always carry a
+  // venue (see data/results2026.json), but if one's ever missing this
+  // still produces a sensible title instead of "... at undefined".
+  it('falls back to the session label alone when the round has no venue field', async () => {
+    await seedBaseline();
+    mockResultsOnce([{
+      round: 8,
       races: [
         {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
         {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
@@ -169,11 +198,8 @@ describe('notifyResultsUpdate', () => {
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
       topic: 'results_teaser',
-      notification: expect.objectContaining({title: 'A fresh result just dropped'}),
-      data: {type: 'results', year: '2026', round: '8', race: '2'}, // race is 1-indexed for notifNavigation.js
+      notification: expect.objectContaining({title: 'Results for Race 1 is now available'}),
     }));
-    expect(mockLogPushHistory).toHaveBeenCalledWith('A fresh result just dropped', expect.any(String), 'results');
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
   });
 
   // The actual bug being fixed: scrape_tsl.py re-stamps standings.json's

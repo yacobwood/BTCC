@@ -95,7 +95,9 @@ exports.notifyResultsUpdate = onRequest(
           const storedFp = snap.data().fingerprints || {};
           const changed = findChangedSession(results, currentFp, storedFp);
           if (changed) {
-            const title = 'A fresh result just dropped';
+            const roundObj = results.rounds.find(r => r.round === changed.round);
+            const raceName = roundObj?.venue ? `${changed.label} at ${roundObj.venue}` : changed.label;
+            const title = `Results for ${raceName} is now available`;
             const body = 'Open BTCC Hub to see how it went.';
             await getMessaging().send({
               topic: 'results_teaser',
