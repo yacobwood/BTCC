@@ -55,6 +55,19 @@ class TestFetchViaScrapfly(unittest.TestCase):
 
     @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
     @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_success_false_response_reports_the_real_error_not_bogus_content(self, mock_urlopen):
+        # Confirmed live 2026-09-02: Scrapfly can return HTTP 200 with
+        # success=False and a non-page error payload in `content` when the
+        # actual target request failed server-side - this must not be
+        # returned to callers as if it were real page HTML.
+        mock_urlopen.return_value.__enter__.return_value = BytesIO(json.dumps({
+            "result": {"success": False, "error": {"message": "target site blocked the request"}},
+        }).encode())
+        result = fetch_via_scrapfly("https://btcc.net/some-article/")
+        self.assertIsNone(result)
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
     def test_render_js_false_is_passed_through(self, mock_urlopen):
         # scrape_news_scrapfly_fallback.py's HTML check always wants
         # render_js=True (the default); this confirms the override actually
