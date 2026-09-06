@@ -66,7 +66,7 @@
       "driver": "Daniel ROWBOTTOM",
       "nat": "GBR",
       "class": "M",
-      "points": 231,
+      "points": 232,
       "wins": 0,
       "seconds": 3,
       "thirds": 1,
@@ -162,7 +162,7 @@
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 154,
+      "points": 155,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -186,7 +186,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 117,
+      "points": 113,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -246,7 +246,7 @@
       "driver": "Daniel LLOYD",
       "nat": "GBR",
       "class": "I",
-      "points": 16,
+      "points": 17,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -282,7 +282,7 @@
       "driver": "Ryan BENSLEY",
       "nat": "GBR",
       "class": "M",
-      "points": 8,
+      "points": 9,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -347,22 +347,22 @@
     {
       "pos": 7,
       "team": "Restart Racing",
-      "points": 234
+      "points": 231
     },
     {
       "pos": 8,
       "team": "Speedworks Corolla Racing",
-      "points": 215
+      "points": 216
     },
     {
       "pos": 9,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 159
+      "points": 160
     },
     {
       "pos": 10,
       "team": "CPRL",
-      "points": 111
+      "points": 112
     }
   ],
   "manufacturers": [
@@ -481,7 +481,7 @@
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 275,
+      "points": 276,
       "wins": 2,
       "seconds": 1,
       "thirds": 4,
@@ -505,7 +505,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 238,
+      "points": 235,
       "wins": 0,
       "seconds": 2,
       "thirds": 2,
@@ -553,7 +553,7 @@
       "driver": "Daniel LLOYD",
       "nat": "GBR",
       "class": "I",
-      "points": 36,
+      "points": 38,
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
@@ -673,5 +673,5 @@
   "season": "2026",
   "round": 8,
   "venue": "Croft",
-  "updated": "2026-09-06T19:21:05Z"
+  "updated": "2026-09-06T19:23:23Z"
 }

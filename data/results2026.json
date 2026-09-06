@@ -19080,20 +19080,6 @@
             },
             {
               "pos": 7,
-              "no": 22,
-              "cl": "I",
-              "driver": "Chris SMILEY",
-              "team": "Restart Racing",
-              "car": "Hyundai i30N",
-              "laps": 18,
-              "time": "28:18.600",
-              "gap": "25.563",
-              "bestLap": "1:23.153",
-              "points": 9,
-              "leadLap": false
-            },
-            {
-              "pos": 8,
               "no": 123,
               "cl": "I",
               "driver": "Daniel LLOYD",
@@ -19103,11 +19089,11 @@
               "time": "28:19.445",
               "gap": "26.408",
               "bestLap": "1:23.328",
-              "points": 8,
+              "points": 9,
               "leadLap": false
             },
             {
-              "pos": 9,
+              "pos": 8,
               "no": 17,
               "cl": "I",
               "driver": "Dexter PATTERSON",
@@ -19117,11 +19103,11 @@
               "time": "28:20.740",
               "gap": "27.703",
               "bestLap": "1:23.624",
-              "points": 7,
+              "points": 8,
               "leadLap": false
             },
             {
-              "pos": 10,
+              "pos": 9,
               "no": 32,
               "cl": "M",
               "driver": "Daniel ROWBOTTOM",
@@ -19131,11 +19117,11 @@
               "time": "28:21.520",
               "gap": "28.483",
               "bestLap": "1:22.332",
-              "points": 6,
+              "points": 7,
               "leadLap": false
             },
             {
-              "pos": 11,
+              "pos": 10,
               "no": 7,
               "cl": "M",
               "driver": "Ryan BENSLEY",
@@ -19145,6 +19131,20 @@
               "time": "28:22.228",
               "gap": "29.191",
               "bestLap": "1:23.964",
+              "points": 6,
+              "leadLap": false
+            },
+            {
+              "pos": 11,
+              "no": 22,
+              "cl": "I",
+              "driver": "Chris SMILEY",
+              "team": "Restart Racing",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "28:23.600",
+              "gap": "30.563",
+              "bestLap": "1:23.153",
               "points": 5,
               "leadLap": false
             },
