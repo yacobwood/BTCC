@@ -1106,6 +1106,20 @@ select.input { cursor: pointer; }
         <button onclick="sendResultsTest()" style="background:#F87171;color:#000;font-size:11px;font-weight:800;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;min-width:70px;">Results</button>
         <input id="test-results-round" type="number" placeholder="round" min="1" max="30" value="1" style="width:70px;padding:9px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--text);">
         <input id="test-results-year" type="number" placeholder="year" value="2026" style="width:80px;padding:9px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--text);">
+        <!-- Value = 1-indexed slot into round.races[] (FP/Qualifying/Qualifying
+             Race/Race1/2/3), same convention notifyResultsUpdate's own
+             `race: String(changed.raceIndex + 1)` uses - lets this test button
+             actually land on a specific race tab like production does, not just
+             the round overview (tab 0) every time. -->
+        <select id="test-results-race" style="padding:9px 10px;font-size:12px;border-radius:8px;border:1px solid var(--outline);background:var(--surface);color:var(--text);">
+          <option value="">Auto (round overview)</option>
+          <option value="1">Free Practice</option>
+          <option value="2">Qualifying</option>
+          <option value="3">Qualifying Race</option>
+          <option value="4">Race 1</option>
+          <option value="5">Race 2</option>
+          <option value="6">Race 3</option>
+        </select>
       </div>
       <div>
         <button onclick="sendPodcastTest()" style="background:#C084FC;color:#000;font-size:11px;font-weight:800;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;min-width:70px;">Podcast</button>
@@ -1870,7 +1884,16 @@ function switchTabByName(name) {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function htmlEsc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Note: escaping ' here is defense-in-depth only, NOT sufficient on its own
+  // to make a string safe inside an inline onclick="fn('${...}')" JS-string
+  // context - the browser HTML-decodes attribute values before the inline
+  // script text is parsed, so &#39; becomes a literal ' again right before
+  // execution and an untrusted value can still break out of the JS string.
+  // Anywhere untrusted (chat authorName especially) needs to reach an inline
+  // handler, pass it via a data-* attribute and read it back from
+  // this.dataset at click time instead (see loadChatReports/loadChatBans) -
+  // that value is only ever treated as a string, never re-parsed as JS.
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;');
 }
 function timeAgo(iso) {
   const secs = Math.floor((Date.now() - new Date(iso)) / 1000);
@@ -2289,13 +2312,13 @@ let liveUrlValues = {saturday: {uk: null, international: null, us: null}, sunday
 let liveUrlsFileSha = null;
 
 const FLAG_DEFS = [
-  {key:'radio_tab',               label:'Radio Tab',              desc:'Show the Radio tab in the bottom nav'},
+  {key:'radio_tab',               label:'Radio Tab',              desc:'Show the Radio row on the Listen screen (More → Listen) - not a bottom nav tab, despite the name'},
   {key:'podcasts_enabled',        label:'Podcasts',               desc:'Show Podcasts & Interviews in the More tab'},
-  {key:'live_updates',            label:'Live Updates',           desc:'Live Timing tab is visible'},
+  {key:'live_updates',            label:'Live Updates',           desc:'Shows the Live Timing button on a round detail screen during that round\'s race weekend - there is no separate Live Timing tab'},
   {key:'track_weather',           label:'Track Weather',          desc:'Weather card on round detail screens'},
   {key:'hub_news_enabled',        label:'Hub News',               desc:'Show custom hub posts in the news feed'},
   {key:'live_timing_in_app',      label:'Live Timing In-App',     desc:'Show TSL live timing in a WebView (off = opens in browser)'},
-  {key:'live_chat',               label:'Live Chat',              desc:'Show the Live Chat tab in the bottom nav'},
+  {key:'live_chat',               label:'Live Chat',              desc:'Shows the floating chat button (FAB) app-wide and the Live Chat toggle in Settings - not a bottom nav tab'},
   {key:'debug_mode',              label:'Debug Mode',             desc:'Show the Debug section in Settings'},
   {key:'update_available',        label:'Update Available',       desc:'Force update modal'},
   {key:'update_min_version_ios',  label:'Update Min Version — iOS',     desc:'iOS only: min versionCode to require update (0 = never)', type:'number'},
@@ -2544,10 +2567,34 @@ async function sendPodcastTest() {
   sendTestNotif('podcasts', title, '', {type:'podcast'}, imageUrl);
 }
 
-function sendResultsTest() {
+// Mirrors functions/scraperAdmin.js's notifyResultsUpdate title formula
+// (`Results for ${label} at ${venue} is now available`) instead of the old
+// always-generic copy, and now includes `race` in the data payload - both
+// changed 2026-09-06 so a test push actually looks and deep-links like what
+// users get in production, rather than drifting from it the way the news/
+// results test buttons independently have before (see README's admin section).
+async function sendResultsTest() {
   const round = document.getElementById('test-results-round').value;
   const year  = document.getElementById('test-results-year').value;
-  sendTestNotif('results', 'Race Results Published', 'The results from the latest round are now available', {type:'results', round, year});
+  const race  = document.getElementById('test-results-race').value; // '' = round overview, same fallback notifNavigation.js's initialRace=0 already uses
+  const data = {type: 'results', round, year};
+  if (race) data.race = race;
+
+  let raceName = null;
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/yacobwood/BTCC/main/data/results${year}.json?t=${Date.now()}`);
+    if (r.ok) {
+      const d = await r.json();
+      const roundObj = (d.rounds || []).find(rd => String(rd.round) === String(round));
+      const label = race ? roundObj?.races?.[parseInt(race, 10) - 1]?.label : null;
+      if (roundObj?.venue) raceName = label ? `${label} at ${roundObj.venue}` : roundObj.venue;
+      else if (label) raceName = label;
+    }
+  } catch (e) { /* falls back to the generic copy below, same as a missing venue does in production */ }
+
+  const title = raceName ? `Results for ${raceName} is now available` : 'Race Results Published';
+  const body  = raceName ? 'Open BTCC Hub to see how it went.' : 'The results from the latest round are now available';
+  sendTestNotif('results', title, body, data);
 }
 
 function onDeeplinkPreset(val) {
@@ -5125,8 +5172,8 @@ async function loadChatReports() {
             <option value="7d">7 days</option>
             <option value="permanent">Permanent</option>
           </select>
-          <button class="btn-sm" onclick="banUser('${htmlEsc(msg.authorId||'')}','${htmlEsc(msg.authorName||'')}','${htmlEsc(rep.id)}')">BAN USER</button>
-          <button class="btn-sm" style="color:var(--text-sec)" onclick="dismissReport('${htmlEsc(rep.id)}')">DISMISS</button>
+          <button class="btn-sm" data-author-id="${htmlEsc(msg.authorId||'')}" data-author-name="${htmlEsc(msg.authorName||'')}" data-report-id="${htmlEsc(rep.id)}" onclick="banUser(this.dataset.authorId,this.dataset.authorName,this.dataset.reportId)">BAN USER</button>
+          <button class="btn-sm" style="color:var(--text-sec)" data-report-id="${htmlEsc(rep.id)}" onclick="dismissReport(this.dataset.reportId)">DISMISS</button>
         </div>
       </div>`;
     }).join('');
@@ -5159,7 +5206,7 @@ async function loadChatBans() {
             Banned: ${htmlEsc(bannedAt)} &middot; Expires: ${htmlEsc(expiresAt)} &middot; Duration: ${htmlEsc({'1h':'1 hour','24h':'24 hours','7d':'7 days','permanent':'Permanent'}[ban.duration] || ban.duration || '—')}
           </div>
         </div>
-        <button class="btn-sm" style="color:var(--red)" onclick="unbanUser('${htmlEsc(ban.authorId)}')">UNBAN</button>
+        <button class="btn-sm" style="color:var(--red)" data-author-id="${htmlEsc(ban.authorId)}" onclick="unbanUser(this.dataset.authorId)">UNBAN</button>
       </div>`;
     }).join('');
   } catch (e) {

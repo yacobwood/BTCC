@@ -28,6 +28,7 @@ const mockLogPushHistory = jest.fn(() => Promise.resolve());
 // assertion.
 const DEFAULT_ROUNDS = [{
   round: 8,
+  venue: 'Croft',
   races: [
     {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
     {label: 'Race 1', results: [], grid: null},
@@ -159,6 +160,34 @@ describe('notifyResultsUpdate', () => {
     // now has a result for the first time - that's the one that should win.
     mockResultsOnce([{
       round: 8,
+      venue: 'Croft',
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
+      ],
+    }]);
+
+    await call();
+
+    // Title names the specific session + venue that changed, not a generic
+    // "a fresh result dropped somewhere" line - the whole point of surfacing
+    // findChangedSession's pick to the user, not just the dedup itself.
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      topic: 'results_teaser',
+      notification: expect.objectContaining({title: 'Results for Race 1 at Croft is now available'}),
+      data: {type: 'results', year: '2026', round: '8', race: '2'}, // race is 1-indexed for notifNavigation.js
+    }));
+    expect(mockLogPushHistory).toHaveBeenCalledWith('Results for Race 1 at Croft is now available', expect.any(String), 'results');
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
+  });
+
+  // Defensive fallback - real results{year}.json rounds always carry a
+  // venue (see data/results2026.json), but if one's ever missing this
+  // still produces a sensible title instead of "... at undefined".
+  it('falls back to the session label alone when the round has no venue field', async () => {
+    await seedBaseline();
+    mockResultsOnce([{
+      round: 8,
       races: [
         {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
         {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
@@ -169,11 +198,39 @@ describe('notifyResultsUpdate', () => {
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
       topic: 'results_teaser',
-      notification: expect.objectContaining({title: 'A fresh result just dropped'}),
-      data: {type: 'results', year: '2026', round: '8', race: '2'}, // race is 1-indexed for notifNavigation.js
+      notification: expect.objectContaining({title: 'Results for Race 1 is now available'}),
     }));
-    expect(mockLogPushHistory).toHaveBeenCalledWith('A fresh result just dropped', expect.any(String), 'results');
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
+  });
+
+  // The actual bug this guards against, confirmed live 2026-09-06 (round 8,
+  // Croft): Race 3's reversed grid is published right after Race 2 finishes,
+  // well before Race 3 is actually run - hashSession() fingerprints grid
+  // alongside results, so that grid arriving looked identical to an actual
+  // result posting to findChangedSession, and users got "Results for Race 3
+  // at Croft is now available" while Race 3 hadn't happened yet. Grid
+  // announcements are already sessionAlerts.js's job (a correctly-worded,
+  // well-timed pre-race push) - this endpoint should only announce results.
+  it('does not send a visible push when a session gains a grid but has no results yet', async () => {
+    await seedBaseline(); // baseline: round 8 Qualifying scored, Race 1 empty, no Race 3 entry at all yet
+    mockResultsOnce([{
+      round: 8,
+      venue: 'Croft',
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Race 1', results: [], grid: null},
+        {label: 'Race 3', results: [], grid: [{pos: 1, driver: 'A'}]}, // grid set, race not run yet
+      ],
+    }]);
+
+    await call();
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_live'}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockLogPushHistory).not.toHaveBeenCalled();
+    // Still advances the fingerprint baseline for that session, so this same
+    // grid-only change doesn't get flagged as "changed" again next tick.
+    const persisted = mockDocRef.set.mock.calls.find(c => c[0].fingerprints)[0].fingerprints;
+    expect(persisted[8]['Race 3']).toEqual(expect.any(String));
   });
 
   // The actual bug being fixed: scrape_tsl.py re-stamps standings.json's
@@ -196,7 +253,7 @@ describe('notifyResultsUpdate', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('still succeeds if the results_teaser send fails (non-fatal, caught separately)', async () => {
+  it('still succeeds if the results_teaser send fails, and does NOT advance the fingerprint baseline (so the next tick retries instead of losing the push)', async () => {
     await seedBaseline();
     mockResultsOnce([{round: 8, races: [{label: 'Qualifying', results: [{pos: 1, driver: 'B'}], grid: null}]}]);
     mockMessaging.send
@@ -205,6 +262,49 @@ describe('notifyResultsUpdate', () => {
 
     const res = await call();
     expect(res.status).toHaveBeenCalledWith(200);
+    // The bug this guards against: persisting the new fingerprint BEFORE
+    // confirming the send succeeded meant a failed send still marked the
+    // change as "already reported" - silently losing that push forever
+    // instead of retrying on the next tick.
+    expect(mockDocRef.set).not.toHaveBeenCalled();
+  });
+
+  // findChangedSession only ever surfaces the single most-recent changed
+  // (round, session) pair per tick (by its own design, see resultsHash.js).
+  // A backfill/manual re-scrape can still change several sessions in one
+  // tick - this asserts the OTHER changed session (round 7, not picked
+  // since round 8 comes later in the rounds array) is left alone in the
+  // persisted baseline rather than being marked "seen" alongside the one
+  // that actually got notified, so it's still detected as changed next tick.
+  it('does not silently mark an unnotified session as seen when two sessions change in the same tick', async () => {
+    await seedBaseline(); // baseline: only round 8 (Qualifying scored, Race 1 empty)
+    mockResultsOnce([
+      // Round 7 is brand new this tick (wasn't in the baseline at all) -
+      // appears earlier in the array, so it's the "swallowed" one.
+      {round: 7, races: [{label: 'Qualifying', results: [{pos: 1, driver: 'C'}], grid: null}]},
+      // Round 8 Race 1 changes too, and being later in the array is the
+      // one findChangedSession actually picks and notifies.
+      {
+        round: 8,
+        races: [
+          {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+          {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
+        ],
+      },
+    ]);
+
+    await call();
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      topic: 'results_teaser',
+      data: expect.objectContaining({round: '8', race: '2'}),
+    }));
+    const persisted = mockDocRef.set.mock.calls.find(c => c[0].fingerprints)[0].fingerprints;
+    // Round 7's genuinely-new session must NOT be recorded as already-seen -
+    // it was never notified, so it needs to remain "changed" on the next tick.
+    expect(persisted[7]).toBeUndefined();
+    // Round 8's notified session correctly advances.
+    expect(persisted[8]['Race 1']).toEqual(expect.any(String));
   });
 
   it('logs and returns 500 if the primary results_live send fails', async () => {
