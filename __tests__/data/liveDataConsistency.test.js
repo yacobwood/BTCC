@@ -960,9 +960,36 @@ describe('drivers.json history champion identification', () => {
 // ── 11. results2026.json <-> standings.json — points totals ───────────────────
 
 describe('11. results2026.json <-> standings.json — points totals', () => {
+  // This check previously read STANDINGS.drivers, but the raw JSON's driver
+  // array is STANDINGS.standings (only parseStandings() in src/api/parsers.js
+  // renames it to `.drivers`, for the app's own consumption - this test loads
+  // the raw file directly, same as everywhere else in this file). That typo
+  // meant the loop below always iterated an empty array and this test has
+  // silently passed vacuously since it was added (commit d2942548) - it never
+  // once actually compared the two files. Fixed 2026-09-06, caught while
+  // investigating a live table-vs-chart points mismatch (Sutton/Ingram/Morgan)
+  // reported the same day - see computeProgression's own reconciliation fix
+  // in src/screens/ResultsScreen.js and README's ResultsScreen section.
+  //
+  // A standalone championship-points penalty (Sporting Regs judicial
+  // decision docking points outright, not tied to any one race's own
+  // classification) can never be reconstructed by summing race results - it
+  // only ever exists in the TSL PDF's own running total. Confirmed for two
+  // drivers via the official standings table's own "Penalties" column
+  // (asterisked entries) plus a stable +5 raw-sum-over-official gap that
+  // held across two different points in the season (pre- and post-round 8),
+  // so this is a real, permanent gap, not scrape-timing noise. The exact
+  // regs citation/date for each isn't verified here — flag to a human before
+  // trusting the number itself, this only documents that a deduction exists.
+  const KNOWN_STANDALONE_POINTS_PENALTIES = {
+    'Adam MORGAN': 5,
+    'James DORLIN': 5,
+  };
+
   it('sum of r.points in results2026 matches standings.json total for every driver', () => {
     // Points come directly from the TSL championship PDF (baked by scraper).
-    // A mismatch means the two files disagree — likely a hand-edit or scraper bug.
+    // A mismatch means the two files disagree — likely a hand-edit, scraper
+    // bug, or an unrecorded standalone points penalty (see allowance above).
     const pointsFromResults = {};
     for (const rnd of RESULTS.rounds || []) {
       for (const race of rnd.races || []) {
@@ -975,13 +1002,15 @@ describe('11. results2026.json <-> standings.json — points totals', () => {
     }
 
     const mismatches = [];
-    for (const entry of STANDINGS.drivers || []) {
-      if (!entry.name) continue;
-      const key = formatDriverName(entry.name);
+    for (const entry of STANDINGS.standings || []) {
+      if (!entry.driver) continue;
+      const key = formatDriverName(entry.driver);
       const fromResults = pointsFromResults[key] || 0;
-      if (fromResults !== entry.points) {
+      const diff = fromResults - entry.points;
+      const allowance = KNOWN_STANDALONE_POINTS_PENALTIES[entry.driver] || 0;
+      if (diff !== allowance) {
         mismatches.push(
-          `${entry.name}: standings=${entry.points} sum_of_results=${fromResults} (diff=${fromResults - entry.points})`
+          `${entry.driver}: standings=${entry.points} sum_of_results=${fromResults} (diff=${diff}, allowed=${allowance})`
         );
       }
     }
