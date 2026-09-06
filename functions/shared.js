@@ -193,7 +193,13 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET;
 // functions and redeployed.
 function requireAdminPost(req, res) {
   if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
-  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return true; }
+  // !ADMIN_SECRET must short-circuit first - without it, a caller's env
+  // reading undefined (the exact `secrets: ['ADMIN_SECRET']` omission this
+  // comment already warns about above) makes `undefined !== undefined`
+  // false, so a request with NO x-admin-secret header at all would pass.
+  // scraperAdmin.js's SCRAPER_SECRET guard already gets this right - this
+  // one just hadn't matched it.
+  if (!ADMIN_SECRET || req.headers['x-admin-secret'] !== ADMIN_SECRET) { res.status(401).send('Unauthorized'); return true; }
   return false;
 }
 
