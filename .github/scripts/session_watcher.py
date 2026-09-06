@@ -73,6 +73,22 @@ RESULTS_TOPICS = {
     "Race 3":          "results_race3",
 }
 
+# 1-indexed position within a round's races[] array in results{year}.json
+# (Free Practice, Qualifying, Qualifying Race, Race 1, Race 2, Race 3 - a
+# fixed 6-slot order every round has from the start of the season, same
+# order resultsHash.js/computeSessionFingerprints relies on). notifNavigation.js
+# does `parseInt(race, 10) - 1` on this to pick RoundResultsScreen's tab -
+# NOT the same number as the "Race 1/2/3" label itself, which is why this
+# needs its own mapping rather than reusing race_num below.
+SESSION_RACE_INDEX = {
+    "Free Practice":   "1",
+    "Qualifying":      "2",
+    "Qualifying Race": "3",
+    "Race 1":          "4",
+    "Race 2":          "5",
+    "Race 3":          "6",
+}
+
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
 
@@ -319,7 +335,13 @@ def handle_session_complete(session, year, round_num, venue):
 
     send_fcm(
         topic, title, body, channel,
-        extra_data={"type": "results", "round": str(round_num), "year": str(year)},
+        extra_data={
+            "type": "results", "round": str(round_num), "year": str(year),
+            # Missing before 2026-09-06 - notifNavigation.js's results
+            # handler always fell back to tab 0 (Free Practice) without
+            # this, regardless of which session actually just completed.
+            "race": SESSION_RACE_INDEX.get(label, ""),
+        },
     )
 
 
