@@ -400,6 +400,8 @@ WebView embedding the Cre8Media TOCA Radio player. JavaScript injection intercep
 **PodcastsScreen** ([src/screens/PodcastsScreen.js](src/screens/PodcastsScreen.js))
 Buzzsprout RSS feed with filter chips (All/Race/Qualifying/Podcast). Pagination. AsyncStorage caching. Playback via RadioProvider.
 
+**Cache-hit re-fetch race fixed (2026-09-06):** the data-loading effect keyed its own re-run on `[loading, refreshing]`, but called `setLoading(false)` on a cache hit before awaiting `InteractionManager`. React could commit that state update, and run the effect's cleanup, well before `InteractionManager`'s callback fired - the new effect instance's `!loading && !refreshing` guard then exited immediately and the in-flight run had already been cancelled, so the real network re-fetch never ran and stale cached episodes stayed on screen indefinitely. Replaced the `loading`/`refreshing` dependency with a `hasFetchedRef` ref the effect only ever sets, never depends on, so the state update it triggers can't retrigger the same effect.
+
 **RecordsScreen** ([src/screens/RecordsScreen.js](src/screens/RecordsScreen.js))
 All-time driver statistics. Two tab groups:
 - Rates: Win%, Podium%, Pts/Start, DNF% (min. 30 starts · 2004 onwards)

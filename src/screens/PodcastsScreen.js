@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager, RefreshControl} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -65,16 +65,28 @@ export default function PodcastsScreen({navigation}) {
   const [filter, setFilter] = useState('All');
   const [page, setPage] = useState(1);
   const {currentStation, isPlaying, play, stop} = useRadio();
+  // Tracks whether the initial fetch has already been kicked off - NOT
+  // `loading` itself, because the effect below calls setLoading(false) on a
+  // cache hit before it awaits InteractionManager. Driving the effect's
+  // dependency array off `loading` used to re-trigger this same effect right
+  // then: the in-flight run's cleanup set `cancelled` and cancelled its
+  // InteractionManager task, and the brand-new instance's own
+  // `!loading && !refreshing` guard exited immediately (both now false),
+  // silently skipping the network re-fetch entirely. A ref that this effect
+  // only ever sets (never a dependency) can't cause that re-trigger.
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!loading && !refreshing) return;
-    if (loading) Analytics.screen('podcasts');
+    const isInitialLoad = !hasFetchedRef.current;
+    if (!isInitialLoad && !refreshing) return;
+    hasFetchedRef.current = true;
+    if (isInitialLoad) Analytics.screen('podcasts');
     let cancelled = false;
     let task;
 
     const run = async () => {
       // 1. Show cached episodes immediately on first load (skip on pull-to-refresh)
-      if (loading) {
+      if (isInitialLoad) {
         try {
           const raw = await AsyncStorage.getItem(CACHE_KEY);
           if (raw && !cancelled) {
@@ -122,7 +134,7 @@ export default function PodcastsScreen({navigation}) {
       cancelled = true;
       task?.cancel();
     };
-  }, [loading, refreshing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = useMemo(() =>
     episodes.filter(e => matchesSession(e.title, filter)),
