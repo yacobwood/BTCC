@@ -9,10 +9,11 @@ even attempts a network call."""
 import base64
 import json
 import unittest
+import urllib.error
 from io import BytesIO
 from unittest.mock import patch
 
-from scrapfly_fallback import fetch_image_smart, fetch_image_via_scrapfly, fetch_via_scrapfly
+from scrapfly_fallback import _error_detail, fetch_image_smart, fetch_image_via_scrapfly, fetch_via_scrapfly
 
 
 class TestFetchViaScrapfly(unittest.TestCase):
@@ -191,6 +192,43 @@ class TestFetchImageSmart(unittest.TestCase):
             label="race-1-report",
         )
         self.assertIsNone(result)
+
+
+# ── _error_detail ─────────────────────────────────────────────────────────────
+#
+# Regression coverage for 2026-09-06: the same image URL 422'd three separate
+# times in one day and every SCRAPFLY_FALLBACK log line said only the generic
+# "HTTP Error 422: Unprocessable Entity" - Scrapfly's own explanation of what
+# it rejected lives in the response body, which str(e) alone never surfaces.
+
+class TestErrorDetail(unittest.TestCase):
+
+    def test_appends_the_http_error_response_body(self):
+        err = urllib.error.HTTPError(
+            url="https://api.scrapfly.io/scrape", code=422, msg="Unprocessable Entity",
+            hdrs=None, fp=BytesIO(b'{"error": "invalid asp parameter combination"}'),
+        )
+        detail = _error_detail(err)
+        self.assertIn("422", detail)
+        self.assertIn("invalid asp parameter combination", detail)
+
+    def test_falls_back_to_str_for_a_non_http_error(self):
+        self.assertEqual(_error_detail(RuntimeError("connection reset")), "connection reset")
+
+    def test_falls_back_to_str_if_the_body_itself_cant_be_read(self):
+        # fp=None simulates a response body that's already been consumed/
+        # closed - reading it must not itself raise and crash this fallback
+        # path (already the last line of defense against a scrape failure).
+        err = urllib.error.HTTPError(
+            url="https://api.scrapfly.io/scrape", code=422, msg="Unprocessable Entity", hdrs=None, fp=None,
+        )
+        self.assertEqual(_error_detail(err), str(err))
+
+    def test_falls_back_to_str_when_the_body_is_empty(self):
+        err = urllib.error.HTTPError(
+            url="https://api.scrapfly.io/scrape", code=422, msg="Unprocessable Entity", hdrs=None, fp=BytesIO(b""),
+        )
+        self.assertEqual(_error_detail(err), str(err))
 
 
 if __name__ == "__main__":
