@@ -222,11 +222,33 @@ def commit_and_push(round_num):
         log.info("No data changes — nothing to commit")
         return False
 
+    # Pathspec-scoped rather than a bare `git commit`: a bare commit sweeps
+    # in the WHOLE index, not just what was just `git add`-ed above, if
+    # anything else happens to be staged (known project gotcha).
     subprocess.run(
-        ["git", "commit", "-m", f"chore: update Round {round_num} results [skip ci]"],
+        ["git", "commit", "-m", f"chore: update Round {round_num} results [skip ci]",
+         "--", "data/results2026.json", "data/standings.json"],
         cwd=REPO_ROOT, capture_output=True,
     )
-    subprocess.run(["git", "push"], cwd=REPO_ROOT, capture_output=True)
+
+    # This script can genuinely race against scrape-results.yml writing the
+    # same two files during a live session - they're in different
+    # concurrency groups and not serialized against each other. Rebase onto
+    # whatever landed on main since checkout before pushing, same safety net
+    # most scrape-*.yml workflows already have (e.g. scrape-news.yml's own
+    # "Pull latest before article commit" step).
+    pull = subprocess.run(
+        ["git", "pull", "--rebase", "--autostash", "origin", "main"],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    if pull.returncode != 0:
+        log.error(f"git pull --rebase failed before push: {pull.stderr.strip()}")
+
+    push = subprocess.run(["git", "push"], cwd=REPO_ROOT, capture_output=True, text=True)
+    if push.returncode != 0:
+        log.error(f"git push failed (results/standings committed locally but NOT pushed): {push.stderr.strip()}")
+        return False
+
     log.info("Committed and pushed results")
     return True
 
