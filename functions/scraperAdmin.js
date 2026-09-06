@@ -37,6 +37,22 @@ exports.dismissError = onRequest(
 // No visible notification is shown to users.
 const SCRAPER_SECRET = process.env.SCRAPER_SECRET;
 
+// Deliberately duplicated from .github/scripts/session_watcher.py's own
+// RESULTS_TOPICS - same "small, rarely touched, keep in sync by hand"
+// justification that file already gives for its SESSION_SUFFIXES dict.
+// Needed below so notifyResultsUpdate's teaser push can tell whether a
+// device is already getting that specific session's spoiler push from
+// session_watcher.py, and skip the teaser if so - see the 2026-09-06
+// comment further down for why.
+const RESULTS_TOPIC_BY_LABEL = {
+  'Free Practice':   'results_fp',
+  'Qualifying':      'results_qualifying',
+  'Qualifying Race': 'results_qrace',
+  'Race 1':          'results_race1',
+  'Race 2':          'results_race2',
+  'Race 3':          'results_race3',
+};
+
 exports.notifyResultsUpdate = onRequest(
   {secrets: ['SCRAPER_SECRET', 'GMAIL_APP_PASSWORD']},
   async (req, res) => {
@@ -135,8 +151,27 @@ exports.notifyResultsUpdate = onRequest(
               const raceName = roundObj?.venue ? `${changed.label} at ${roundObj.venue}` : changed.label;
               const title = `Results for ${raceName} is now available`;
               const body = 'Open BTCC Hub to see how it went.';
+              // Skip devices already getting this session's spoiler-specific
+              // push (session_watcher.py's results_fp/qualifying/qrace/
+              // race1/2/3, e.g. "Race 2 Result — Round 8: X wins Race 2 at
+              // Croft") - both that topic and this one default to enabled,
+              // so without this a typical user got BOTH the vague teaser
+              // above AND the explicit spoiler for the same session.
+              // Confirmed live 2026-09-06 (Croft, round 8): the two
+              // pipelines had never both actually been live in the same
+              // raceday before now (session_watcher.py's dispatch was only
+              // just fixed, and this push's title only started naming the
+              // specific session yesterday), so nobody had noticed the
+              // overlap until a user reported getting both. FCM's condition
+              // syntax is the only way to express "subscribed to A but not
+              // B" server-side in one send - there's no per-device filter
+              // on a plain topic send.
+              const sessionTopic = RESULTS_TOPIC_BY_LABEL[changed.label];
+              const target = sessionTopic
+                ? {condition: `'results_teaser' in topics && !('${sessionTopic}' in topics)`}
+                : {topic: 'results_teaser'}; // defensive: label should always be one of the 6 known session names
               await getMessaging().send({
-                topic: 'results_teaser',
+                ...target,
                 notification: {title, body},
                 data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
                 android: {notification: {channelId: 'results'}},
