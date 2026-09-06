@@ -22,6 +22,7 @@ import {useSettings} from '../store/settings';
 import {useFeatureFlags} from '../store/featureFlags';
 import {useBroadcaster} from '../utils/broadcaster';
 import {Analytics} from '../utils/analytics';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {version} from '../../package.json';
 
 // Playful release nickname mapped onto the app's own Season → Round → Lap
@@ -140,7 +141,7 @@ export default function SettingsScreen({navigation}) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>SETTINGS</Text>
       </View>
-      <ScrollView contentContainerStyle={{padding: 16}}>
+      <ScrollView contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
         <Text style={styles.sectionTitle}>SPOILER-FREE MODE</Text>
         <SettingRow
           label="No Spoilers"
@@ -298,6 +299,14 @@ export default function SettingsScreen({navigation}) {
           onToggle={toggle('resultsRace3')}
           parentEnabled={settings.results && settings.resultsRace}
         />
+        <SubRow
+          label="Results are in"
+          description="A nudge straight to the latest result when one drops - suppressed by No Spoilers, same as the session alerts above"
+          accessibilityLabel="Results are in"
+          value={settings.resultsTeaser}
+          onToggle={toggle('resultsTeaser')}
+          parentEnabled={settings.results}
+        />
 
         <View style={styles.divider} />
         <SettingRow
@@ -305,12 +314,6 @@ export default function SettingsScreen({navigation}) {
           description="Tuesday reminder to check standings after each round"
           value={settings.standingsUpdate}
           onToggle={toggle('standingsUpdate')}
-        />
-        <SettingRow
-          label="Results are in"
-          description="A nudge straight to the latest result when one drops - suppressed by No Spoilers, same as the session alerts above"
-          value={settings.resultsTeaser}
-          onToggle={toggle('resultsTeaser')}
         />
 
         {live_chat && (
@@ -541,13 +544,17 @@ function GroupRow({label, description, value, onToggle}) {
   );
 }
 
-// First-level child (indented once)
-function SubRow({label, accessibilityLabel, value, onToggle, parentEnabled}) {
+// First-level child (indented once). description is optional - most callers
+// (Free Practice, Qualifying, ...) are self-explanatory from the label alone.
+function SubRow({label, description, accessibilityLabel, value, onToggle, parentEnabled}) {
   const dimmed = !parentEnabled;
   return (
     <View style={[styles.settingRow, styles.subRow]}>
       <View style={styles.subIndent} />
-      <Text style={[styles.subLabel, dimmed && styles.dimmed]}>{label}</Text>
+      <View style={{flex: 1}}>
+        <Text style={[styles.subLabel, dimmed && styles.dimmed]}>{label}</Text>
+        {description ? <Text style={[styles.settingDesc, dimmed && styles.dimmed]}>{description}</Text> : null}
+      </View>
       <Switch
         value={parentEnabled && value}
         onValueChange={onToggle}
