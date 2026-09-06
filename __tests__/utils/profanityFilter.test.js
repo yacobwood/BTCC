@@ -102,4 +102,64 @@ describe('containsProfanity', () => {
   it('returns false for text with no match against app default blacklist', () => {
     expect(containsProfanity('What an exciting race weekend!', ['fuck', 'shit', 'damn'])).toBe(false);
   });
+
+  // ── Obfuscation hardening ─────────────────────────────────────────────────────
+  // A single inserted space, a punctuation mark, or a leetspeak substitution used
+  // to defeat a plain substring check must now be caught.
+
+  it('catches a spaced-out blacklisted word ("f u c k")', () => {
+    expect(containsProfanity('f u c k off', ['fuck'])).toBe(true);
+  });
+
+  it('catches a dot-punctuated blacklisted word ("f.u.c.k")', () => {
+    expect(containsProfanity('f.u.c.k', ['fuck'])).toBe(true);
+  });
+
+  it('catches a hyphen-punctuated blacklisted word ("f-u-c-k")', () => {
+    expect(containsProfanity('f-u-c-k', ['fuck'])).toBe(true);
+  });
+
+  it('catches an underscore-punctuated blacklisted word ("f_u_c_k")', () => {
+    expect(containsProfanity('f_u_c_k', ['fuck'])).toBe(true);
+  });
+
+  it('catches an asterisk-punctuated blacklisted word ("f*u*c*k")', () => {
+    expect(containsProfanity('f*u*c*k', ['fuck'])).toBe(true);
+  });
+
+  it('catches a leetspeak substitution ("5hit" for "shit")', () => {
+    expect(containsProfanity('what 5hit is this', ['shit'])).toBe(true);
+  });
+
+  it('catches a leetspeak substitution ("a55" for "ass")', () => {
+    expect(containsProfanity('you a55', ['ass'])).toBe(true);
+  });
+
+  it('catches combined spacing + leetspeak ("5 h 1 t")', () => {
+    // Exercises both hardenings on the same token: the merge step
+    // reconstructs "5h1t" from the spaced-out single-character run, then
+    // normalizeToken's leet substitution turns it into "shit".
+    expect(containsProfanity('what 5 h 1 t is this', ['shit'])).toBe(true);
+  });
+
+  // ── No over-aggressive false positives ───────────────────────────────────────
+  // Ordinary chat text that happens to contain digits/punctuation as part of
+  // normal words must still pass through clean - the obfuscation handling above
+  // must never merge separate, unrelated words together.
+
+  it('does not flag ordinary text with incidental digits ("at 3pm")', () => {
+    expect(containsProfanity("let's meet at 3pm for practice", ['fuck', 'shit', 'damn', 'ass'])).toBe(false);
+  });
+
+  it('merging a benign run of single-letter tokens does not false-positive against an unrelated blacklist', () => {
+    // "a b c" genuinely does get concatenated into "abc" by the run-merge
+    // step (that's the intended mechanism, not a bug) - this just confirms
+    // that concatenation alone isn't enough to flag anything unless the
+    // result actually matches a blacklisted word.
+    expect(containsProfanity('learning my a b c already', ['fuck', 'shit', 'damn', 'ass'])).toBe(false);
+  });
+
+  it('does not merge unrelated words across a number into a false match ("at 5, hit me up")', () => {
+    expect(containsProfanity('call me at 5, hit me up after', ['shit'])).toBe(false);
+  });
 });
