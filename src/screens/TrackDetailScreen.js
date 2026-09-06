@@ -163,16 +163,21 @@ export default function TrackDetailScreen({route, navigation}) {
     }).catch(() => {});
   }, []);
 
-  if (!track) return null;
+  // NOTE: `track` can still be null here (deep link with only a round number,
+  // not yet resolved by the effect above) - every hook below this point must
+  // run unconditionally regardless, so any `track.xxx` access between here
+  // and the end of the hook calls is guarded with optional chaining. The
+  // actual "not found yet" guard has moved to after the last hook call
+  // (the useMemo below) so hook count/order never differs between renders.
   const {useKm} = useUnits();
   const {settings} = useSettings();
   const {track_weather, live_updates, broadcaster_override} = useFeatureFlags();
   const liveUrls = useLiveUrls();
   const insets = useSafeAreaInsets();
   const statusBarHeight = insets.top || StatusBar.currentHeight || 0;
-  const rStart = firstRaceNumber(track.round);
+  const rStart = firstRaceNumber(track?.round);
   const rEnd = rStart + 2;
-  const dateRange = formatDateRange(track.startDate, track.endDate);
+  const dateRange = formatDateRange(track?.startDate, track?.endDate);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -181,14 +186,14 @@ export default function TrackDetailScreen({route, navigation}) {
     const [y, m, d] = str.split('-').map(Number);
     return new Date(y, m - 1, d);
   };
-  const trackStart = parseLocalDate(track.startDate);
-  const trackEnd = parseLocalDate(track.endDate);
-  const isRaceWeekend = !!track.tslEventId && trackStart && trackEnd
+  const trackStart = parseLocalDate(track?.startDate);
+  const trackEnd = parseLocalDate(track?.endDate);
+  const isRaceWeekend = !!track?.tslEventId && trackStart && trackEnd
     && today >= trackStart && today <= trackEnd;
-  const isPastRaceWeekend = !!track.tslEventId && trackEnd && today > trackEnd;
+  const isPastRaceWeekend = !!track?.tslEventId && trackEnd && today > trackEnd;
 
-  const sessions = track.sessions || [];
-  const fullTimetable = track.fullTimetable || [];
+  const sessions = track?.sessions || [];
+  const fullTimetable = track?.fullTimetable || [];
   const [showFullTimetable, setShowFullTimetable] = useState(false);
   const [weather, setWeather] = useState(null);
   const [showHourlyWeather, setShowHourlyWeather] = useState(false);
@@ -200,11 +205,11 @@ export default function TrackDetailScreen({route, navigation}) {
   const [liveRaceRecord, setLiveRaceRecord] = useState(null);
   const [liveQualRecord, setLiveQualRecord] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const HERO_H = track.imageUrl ? 220 : 0;
+  const HERO_H = track?.imageUrl ? 220 : 0;
   const titlePaddingTop = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [12, statusBarHeight + 12], extrapolate: 'clamp'});
   const titlePaddingLeft = scrollAnim.interpolate({inputRange: [HERO_H - 120, HERO_H], outputRange: [0, 46], extrapolate: 'clamp'});
 
-  useEffect(() => { Analytics.screen('track_detail'); Analytics.trackDetailViewed(track.round, track.venue); }, []);
+  useEffect(() => { Analytics.screen('track_detail'); Analytics.trackDetailViewed(track?.round, track?.venue); }, []);
 
 
   // Refetch periodically (not just once on mount) so the forecast keeps up to
@@ -215,7 +220,7 @@ export default function TrackDetailScreen({route, navigation}) {
   // results-polling elsewhere in the app.
   useEffect(() => {
     if (!track_weather || isPastRaceWeekend) return;
-    if (!(track.lat && track.lng && track.startDate && track.endDate)) return;
+    if (!(track?.lat && track?.lng && track?.startDate && track?.endDate)) return;
     const refresh = () => {
       fetchWeather(track.lat, track.lng, track.startDate, track.endDate).then(w => {
         if (w) setWeather(w);
@@ -227,7 +232,7 @@ export default function TrackDetailScreen({route, navigation}) {
       if (state === 'active') refresh();
     });
     return () => { clearInterval(interval); appSub.remove(); };
-  }, [track.lat, track.lng, track.startDate, track.endDate, track_weather, isPastRaceWeekend]);
+  }, [track?.lat, track?.lng, track?.startDate, track?.endDate, track_weather, isPastRaceWeekend]);
 
   // Show Results button and load round data once this specific round has results.
   // For past weekends the date alone is sufficient; for live weekends we check the
@@ -287,14 +292,14 @@ export default function TrackDetailScreen({route, navigation}) {
 
     cacheRead(`results_${year}`).then(cached => { if (cached) checkAndApply(cached); });
     fetchResults(year).then(raw => checkAndApply(raw)).catch(() => {});
-  }, [isRaceWeekend, isPastRaceWeekend, track.round]);
+  }, [isRaceWeekend, isPastRaceWeekend, track?.round]);
 
   // Build flat list sections: hero, sticky title, then all content blocks
   const {data, stickyIndex} = useMemo(() => {
     const items = [];
 
     // 0: Hero image
-    if (track.imageUrl) {
+    if (track?.imageUrl) {
       items.push({type: 'hero'});
     }
 
@@ -306,19 +311,19 @@ export default function TrackDetailScreen({route, navigation}) {
     items.push({type: 'stats'});
 
     // YouTube links  -  lap preview is on track object (merged from tracks.json at parse time)
-    if (broadcaster === 'uk' && (track.lapPreviewUrl || raceUrls.some(Boolean))) items.push({type: 'youtube'});
+    if (broadcaster === 'uk' && (track?.lapPreviewUrl || raceUrls.some(Boolean))) items.push({type: 'youtube'});
 
     // Watch Live + Live Timing rendered side-by-side in one item
     if (isRaceWeekend || racesFinished || isPastRaceWeekend) items.push({type: 'liveTiming'});
 
     // About
-    if (track.about) items.push({type: 'about'});
+    if (track?.about) items.push({type: 'about'});
 
     // BTCC Fact
-    if (track.btccFact) items.push({type: 'fact'});
+    if (track?.btccFact) items.push({type: 'fact'});
 
     // Lap records
-    if (track.qualifyingRecord || track.raceRecord) {
+    if (track?.qualifyingRecord || track?.raceRecord) {
       items.push({type: 'recordsHeader'});
       items.push({type: 'records'});
     }
@@ -336,13 +341,13 @@ export default function TrackDetailScreen({route, navigation}) {
     }
 
     // Circuit layout (before guide)
-    if (track.layoutImageUrl || BUNDLED_TRACK_LAYOUTS[track.venue]) {
+    if (track?.layoutImageUrl || BUNDLED_TRACK_LAYOUTS[track?.venue]) {
       items.push({type: 'layoutHeader'});
       items.push({type: 'layout'});
     }
 
     // Circuit guide
-    if (track.trackGuide?.length > 0) {
+    if (track?.trackGuide?.length > 0) {
       items.push({type: 'guideHeader'});
       track.trackGuide.forEach((sector, si) => {
         items.push({type: 'sector', sector, key: `sector-${si}`});
@@ -351,6 +356,14 @@ export default function TrackDetailScreen({route, navigation}) {
 
     return {data: items, stickyIndex: titleIdx};
   }, [track, raceUrls, sessions, weather, isRaceWeekend, isPastRaceWeekend, track_weather, live_updates, racesFinished]);
+
+  // Every hook in the component has now run unconditionally, in the same
+  // order, on every render - it is only safe to conditionally bail out below
+  // this point. `track` starts null on a deep link / notification that only
+  // carries a round number for a round not yet in the bundled current-season
+  // calendar; the mount effect above resolves it via the live calendar/
+  // results fetch and re-renders with the same hook count/order.
+  if (!track) return null;
 
   const renderItem = ({item}) => {
     switch (item.type) {
