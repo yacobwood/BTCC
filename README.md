@@ -470,8 +470,8 @@ Per-device overrides are keyed by FCM token inside the `overrides` object in `fl
 | `update_available` | true | Enable update prompt |
 | `update_min_version_ios` | 0 | iOS minimum build number |
 | `update_min_version_android` | 66 | Android minimum build number |
-| `track_weather` | - | Enable Open-Meteo weather widget |
-| `live_updates` | - | Enable live scoring updates |
+| `track_weather` | true | Enable Open-Meteo weather widget |
+| `live_updates` | true | Enable live scoring updates |
 
 ### SettingsContext ([src/store/settings.js](src/store/settings.js))
 
