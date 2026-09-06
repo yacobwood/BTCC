@@ -27,6 +27,7 @@ Run manually or call main() from scrape_tsl.py after each scrape.
 
 import json
 import re
+import sys
 from pathlib import Path
 
 from scrapfly_fallback import fetch_via_scrapfly
@@ -69,6 +70,8 @@ def _fetch_team_stats(slug: str) -> dict[str, int]:
 def main() -> None:
     data = json.loads(DRIVERS_PATH.read_text(encoding="utf-8"))
     updated = 0
+    fetched_ok = 0          # teams whose page fetch itself succeeded (no raise)
+    parsed_real_stats = 0   # of those, how many yielded a non-empty stats dict
 
     for team in data["teams"]:
         name = team["name"]
@@ -77,6 +80,9 @@ def main() -> None:
             continue
         try:
             stats = _fetch_team_stats(slug)
+            fetched_ok += 1
+            if stats:
+                parsed_real_stats += 1
             team["totalRaces"] = stats.get("races", team.get("totalRaces", 0))
             team["totalWins"]  = stats.get("wins",  team.get("totalWins",  0))
 
@@ -84,6 +90,22 @@ def main() -> None:
             updated += 1
         except Exception as e:
             print(f"  WARNING: could not fetch stats for {name}: {e}")
+
+    # _fetch_team_stats returns {} (not an exception) when STAT_RE matches
+    # zero times on a page that otherwise fetched fine (e.g. btcc.net changes
+    # its markup) - left unguarded, that silently re-writes each team's
+    # existing totalRaces/totalWins while still counting as "updated" above,
+    # with no failure signal anywhere. Mirrors scrape_btcc_stats.py's own
+    # "fetched a page but parsed no rows" guard: if every page that actually
+    # fetched OK produced zero real stats, that's a structure change worth
+    # failing the run over - distinct from a team whose fetch itself failed
+    # (already isolated/warned above, not new here).
+    if fetched_ok > 0 and parsed_real_stats == 0:
+        print(
+            "ERROR: fetched team page(s) but parsed no stats for any team - structure may have changed",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     DRIVERS_PATH.write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
