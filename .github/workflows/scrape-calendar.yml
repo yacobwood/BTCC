@@ -56,7 +56,7 @@ jobs:
         working-directory: tools/scraper
         run: |
           SEASON="${{ github.event.inputs.season }}"
-          [ -z "$SEASON" ] && SEASON=2026
+          [ -z "$SEASON" ] && SEASON=$(date +%Y)
           python3 scrape_calendar.py --season "$SEASON"
 
       - name: Derive session schedule (no network - reuses calendar.json's fullTimetable)
@@ -87,11 +87,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -sf -X POST \
+          SEASON="${{ github.event.inputs.season }}"
+          [ -z "$SEASON" ] && SEASON=$(date +%Y)
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-calendar.yml/dispatches" \
-            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"season\":\"${{ github.event.inputs.season || '2026' }}\"}}" || echo "Retry dispatch failed (non-fatal)"
+            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"season\":\"$SEASON\"}}" || echo "Retry dispatch failed (non-fatal)"
 
       # Only reached once the automated retry above has ALSO failed/been
       # cancelled - a single transient blip no longer emails anyone.
