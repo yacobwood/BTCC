@@ -1,16 +1,10 @@
 [
   {
-    "id": "doble-takes-third-career-victory-at-croft",
-    "slug": "doble-takes-third-career-victory-at-croft",
+    "id": "trio-of-winners-deliver-at-croft",
+    "slug": "trio-of-winners-deliver-at-croft",
     "title": {
-      "rendered": "Doble takes third career victory at Croft"
+      "rendered": "Trio of winners deliver at Croft"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/00285469-35cf-4f78-a5b7-a2926ce4e5de.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
