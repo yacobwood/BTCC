@@ -188,6 +188,45 @@ describe('TrackDetailScreen', () => {
     expect(toJSON()).toBeNull();
   });
 
+  // Regression: `track` starts null on this exact path (round-only deep link,
+  // round not in the bundled current-season calendar) and roughly 15 hooks
+  // (useUnits, useSettings, useFeatureFlags, useLiveUrls, useSafeAreaInsets,
+  // several useState, useRef, useBroadcaster, multiple useEffect, the useMemo
+  // building the FlatList data) used to run AFTER an `if (!track) return null`
+  // early return - so the very next render, once the live calendar fetch
+  // resolved and called setTrack(), suddenly executed hooks that never ran on
+  // the first render, and React threw a Rules-of-Hooks violation. Neither of
+  // the two tests above exercises this: round '1' resolves synchronously from
+  // the bundled calendar (track is never actually null), and round '999'
+  // never resolves (track stays null forever). This one starts null and gets
+  // resolved by the mocked fetchCalendar, exercising the null-to-resolved
+  // transition directly.
+  it('does not crash when a round starts null and is then resolved via the live calendar fetch', async () => {
+    const {fetchCalendar} = require('../../src/api/client');
+    fetchCalendar.mockResolvedValueOnce({
+      rounds: [
+        {
+          round: 999,
+          venue: 'Donington Park',
+          startDate: '2026-04-19',
+          endDate: '2026-04-20',
+          tslEventId: 0,
+          sessions: [{name: 'Free Practice', time: '09:00', day: 'SAT'}],
+        },
+      ],
+    });
+    const {toJSON, findAllByText} = renderWithProviders(
+      <TrackDetailScreen route={makeRoute({round: '999'})} navigation={nav} />,
+    );
+    // round 999 is not in the bundled calendar, so track is genuinely null on
+    // the very first (synchronous) render - this must not throw.
+    expect(toJSON()).toBeNull();
+    // Once the mocked fetchCalendar resolves and finds round 999, setTrack()
+    // fires and the component re-renders with the same hook count/order,
+    // eventually showing content that only exists once track is set.
+    expect((await findAllByText('Donington Park')).length).toBeGreaterThan(0);
+  });
+
   // ── Live timing / results buttons ─────────────────────────────────────────────
 
   it('does not show live timing button when tslEventId is null', async () => {
