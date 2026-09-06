@@ -252,6 +252,40 @@ describe('ArticleScreen', () => {
     });
   });
 
+  // ── Sharing ──────────────────────────────────────────────────────────────────
+
+  describe('sharing', () => {
+    it('shares a link built from article.link when one exists', () => {
+      const {Share} = require('react-native');
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+
+      const {getByLabelText} = renderArticle();
+      fireEvent.press(getByLabelText('Share article'));
+
+      expect(shareSpy).toHaveBeenCalledWith({
+        message: 'Ingram wins at Donington\n\nhttps://btcchub.vercel.app/news/ingram-wins-donington',
+      });
+      expect(Analytics.articleShared).toHaveBeenCalledWith('Ingram wins at Donington');
+    });
+
+    // The actual bug: Academy/explainer articles (api/client.js's
+    // mapExplainerPosts) always have link: null, since they're in-app-only
+    // content with no matching website page - the Share button used to call
+    // `.replace()` on that null and crash every time on any such article.
+    it('falls back to the generic app link instead of crashing when article.link is null', () => {
+      const {Share} = require('react-native');
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+
+      const {getByLabelText} = renderArticle({article: {...FULL_ARTICLE, link: null}});
+      expect(() => fireEvent.press(getByLabelText('Share article'))).not.toThrow();
+
+      expect(shareSpy).toHaveBeenCalledWith({
+        message: 'Ingram wins at Donington\n\nhttps://btcchub.vercel.app?src=article_share',
+      });
+      expect(Analytics.articleShared).toHaveBeenCalledWith('Ingram wins at Donington');
+    });
+  });
+
   // ── Read aloud ───────────────────────────────────────────────────────────────
 
   describe('read aloud', () => {

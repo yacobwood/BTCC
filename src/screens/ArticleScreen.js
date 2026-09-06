@@ -891,8 +891,14 @@ export default function ArticleScreen({route, navigation}) {
   };
 
   const onShare = async () => {
-    const s = article.link.replace(/\/$/, '').split('/').pop();
-    const appLink = `https://btcchub.vercel.app/news/${s}`;
+    // Academy/explainer articles (and some hub posts) have no source `link`
+    // at all - api/client.js's mapExplainerPosts always sets it null, since
+    // they're in-app-only content with no matching btcc.net/website page.
+    // Fall back to the generic app link (same pattern as utils/appShare.js)
+    // instead of crashing on `.replace()` of a null link.
+    const appLink = article.link
+      ? `https://btcchub.vercel.app/news/${article.link.replace(/\/$/, '').split('/').pop()}`
+      : 'https://btcchub.vercel.app?src=article_share';
     Analytics.articleShared(article.title);
     await Share.share({message: `${article.title}\n\n${appLink}`});
   };
