@@ -714,6 +714,38 @@ describe('ChatScreen', () => {
     );
   });
 
+  // A first-ever message previously vanished silently here: handleNameSet/
+  // handleNameSkip re-pushed the pending message via their own bare
+  // try{}catch{} with no error state, and the input had already been
+  // cleared before that push ran. These assert the pending-message resend
+  // now goes through the same failure handling as handleSend.
+  it('shows "Failed to send" and restores input when the pending-message push fails after setting a name', async () => {
+    mockDbPush.mockRejectedValueOnce(new Error('network error'));
+    const {getByLabelText, getByPlaceholderText, getByText} = renderChat();
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => getByPlaceholderText(/say something/i));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'First message!');
+    fireEvent.press(getByLabelText('Send message'));
+    await waitFor(() => getByText(/Choose a display name/i));
+    fireEvent.changeText(getByPlaceholderText(/Fan #/i), 'Speedster');
+    fireEvent.press(getByLabelText('Set name'));
+    await waitFor(() => expect(getByText(/Failed to send/i)).toBeTruthy());
+    expect(getByPlaceholderText(/say something/i).props.value).toBe('First message!');
+  });
+
+  it('shows "Failed to send" and restores input when the pending-message push fails after skipping the name prompt', async () => {
+    mockDbPush.mockRejectedValueOnce(new Error('network error'));
+    const {getByLabelText, getByPlaceholderText, getByText} = renderChat();
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => getByPlaceholderText(/say something/i));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'First message!');
+    fireEvent.press(getByLabelText('Send message'));
+    await waitFor(() => getByText(/Choose a display name/i));
+    fireEvent.press(getByText('Skip'));
+    await waitFor(() => expect(getByText(/Failed to send/i)).toBeTruthy());
+    expect(getByPlaceholderText(/say something/i).props.value).toBe('First message!');
+  });
+
   // ── Name editing (header) ─────────────────────────────────────────────────────
 
   it('shows stored commenter name in the header when AsyncStorage has one', async () => {

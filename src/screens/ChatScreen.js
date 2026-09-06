@@ -267,20 +267,16 @@ export default function ChatScreen({onClose} = {}) {
     return result.name;
   };
 
-  const handleSend = useCallback(async () => {
-    const text = input.trim();
-    if (!text) return;
-    if (text.length > 500) { setInputError('Message too long (max 500 characters)'); return; }
-    if (containsProfanity(text, blacklist)) { setInputError('Message contains disallowed content'); return; }
-    setInputError('');
-
-    let authorName = commenterName;
-    if (!authorName) {
-      setShowNamePrompt(true);
-      return;
-    }
-
-    setInput('');
+  // Shared push-to-RTDB + success/failure handling, used by both the primary
+  // send path (handleSend) and the pending-message resend that follows the
+  // first-time name prompt (handleNameSet/handleNameSkip) - previously that
+  // second path re-implemented its own push wrapped in a bare try{}catch{}
+  // with no error state and no analytics failure event, so a rejected push
+  // there (offline blip, RTDB rules rejection) silently dropped the user's
+  // first-ever message with the input already cleared and zero indication
+  // anything went wrong. Routing both paths through here means a failure
+  // always surfaces the same "Failed to send" state and restores the text.
+  const sendMessage = useCallback(async (text, authorName) => {
     try {
       await DB.ref('/chat/messages').push({
         text,
@@ -295,7 +291,24 @@ export default function ChatScreen({onClose} = {}) {
       setInputError('Failed to send. Please try again.');
       setInput(text);
     }
-  }, [input, commenterName]);
+  }, []);
+
+  const handleSend = useCallback(async () => {
+    const text = input.trim();
+    if (!text) return;
+    if (text.length > 500) { setInputError('Message too long (max 500 characters)'); return; }
+    if (containsProfanity(text, blacklist)) { setInputError('Message contains disallowed content'); return; }
+    setInputError('');
+
+    let authorName = commenterName;
+    if (!authorName) {
+      setShowNamePrompt(true);
+      return;
+    }
+
+    setInput('');
+    await sendMessage(text, authorName);
+  }, [input, commenterName, sendMessage]);
 
   const handleNameSet = async () => {
     const name = await saveName(nameInput);
@@ -307,16 +320,7 @@ export default function ChatScreen({onClose} = {}) {
     if (input.trim()) {
       const text = input.trim();
       setInput('');
-      try {
-        await DB.ref('/chat/messages').push({
-          text,
-          authorId: myAuthorIdRef.current,
-          authorName: name,
-          timestamp: database.ServerValue.TIMESTAMP,
-          flagCount: 0,
-          hidden: false,
-        });
-      } catch {}
+      await sendMessage(text, name);
     }
   };
 
@@ -328,16 +332,7 @@ export default function ChatScreen({onClose} = {}) {
     if (input.trim()) {
       const text = input.trim();
       setInput('');
-      try {
-        await DB.ref('/chat/messages').push({
-          text,
-          authorId: myAuthorIdRef.current,
-          authorName: name,
-          timestamp: database.ServerValue.TIMESTAMP,
-          flagCount: 0,
-          hidden: false,
-        });
-      } catch {}
+      await sendMessage(text, name);
     }
   };
 
