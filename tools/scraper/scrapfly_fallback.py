@@ -114,7 +114,15 @@ def fetch_via_scrapfly(
     try:
         with urllib.request.urlopen(request_url, timeout=timeout) as resp:
             body = json.loads(resp.read())
-        content = body["result"]["content"]
+        result = body["result"]
+        # Scrapfly can return HTTP 200 with success=False and a non-page
+        # error payload in `content` (same failure mode confirmed live
+        # 2026-09-02 for fetch_image_via_scrapfly below - a target-side
+        # failure must not be treated as real page content) - check this
+        # explicitly rather than let it silently masquerade as a fetch.
+        if not result.get("success", True):
+            raise RuntimeError(result.get("error", {}).get("message") or "Scrapfly reported success=false")
+        content = result["content"]
     except Exception as e:  # noqa: BLE001 - this is a last-resort fallback, any failure just means "no"
         print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
         return None
