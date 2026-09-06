@@ -95,7 +95,6 @@ exports.notifyResultsUpdate = onRequest(
           const storedFp = snap.data().fingerprints || {};
           const changed = findChangedSession(results, currentFp, storedFp);
           if (changed) {
-            await stateRef.set({fingerprints: currentFp, sentAt: new Date().toISOString()});
             const title = 'A fresh result just dropped';
             const body = 'Open BTCC Hub to see how it went.';
             await getMessaging().send({
@@ -104,6 +103,28 @@ exports.notifyResultsUpdate = onRequest(
               data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
               android: {notification: {channelId: 'results'}},
             });
+            // Only advance the notified session's own fingerprint, not the
+            // whole map, and only after a successful send:
+            //  - findChangedSession deliberately surfaces just the single
+            //    most-recent changed (round, session) pair per tick (see its
+            //    own comment) - persisting every session's fresh hash here
+            //    would silently mark any OTHER session that also changed
+            //    this same tick (a backfill/manual re-scrape touching
+            //    several at once) as "already reported" forever, even
+            //    though nobody was ever actually told about it.
+            //  - doing this before the send (the original order) meant a
+            //    failed send (transient FCM outage) still advanced the
+            //    baseline, so that result's teaser was lost for good
+            //    instead of retried next tick - re-fixing the exact bug
+            //    class this dedup exists to prevent, in this same function.
+            const nextFp = {
+              ...storedFp,
+              [changed.round]: {
+                ...(storedFp[changed.round] || {}),
+                [changed.label]: currentFp[changed.round][changed.label],
+              },
+            };
+            await stateRef.set({fingerprints: nextFp, sentAt: new Date().toISOString()});
             await logPushHistory(title, body, 'results');
           } else {
             console.log('notifyResultsUpdate: no session content changed - skipping teaser push');
