@@ -96,17 +96,21 @@ exports.notifyResultsUpdate = onRequest(
           const changed = findChangedSession(results, currentFp, storedFp);
           if (changed) {
             const roundObj = results.rounds.find(r => r.round === changed.round);
-            const raceName = roundObj?.venue ? `${changed.label} at ${roundObj.venue}` : changed.label;
-            const title = `Results for ${raceName} is now available`;
-            const body = 'Open BTCC Hub to see how it went.';
-            await getMessaging().send({
-              topic: 'results_teaser',
-              notification: {title, body},
-              data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
-              android: {notification: {channelId: 'results'}},
-            });
+            const changedRace = roundObj?.races?.[changed.raceIndex];
+            // hashSession() (resultsHash.js) fingerprints grid alongside
+            // results, so a session's *grid* changing (e.g. Race 3's
+            // reversed grid, published right after Race 2 finishes, well
+            // before Race 3 is actually run) counts as "changed" exactly
+            // like an actual result posting does. Confirmed live 2026-09-06
+            // (round 8, Croft): a user got "Results for Race 3 at Croft is
+            // now available" the moment its grid was set, while Race 3
+            // itself hadn't been run yet - flatly wrong. Grid announcements
+            // are already sessionAlerts.js's job (a correctly-worded,
+            // well-timed pre-race push) - only send this "results" push
+            // when the session actually has results.
+            const hasResults = (changedRace?.results?.length || 0) > 0;
             // Only advance the notified session's own fingerprint, not the
-            // whole map, and only after a successful send:
+            // whole map:
             //  - findChangedSession deliberately surfaces just the single
             //    most-recent changed (round, session) pair per tick (see its
             //    own comment) - persisting every session's fresh hash here
@@ -114,11 +118,6 @@ exports.notifyResultsUpdate = onRequest(
             //    this same tick (a backfill/manual re-scrape touching
             //    several at once) as "already reported" forever, even
             //    though nobody was ever actually told about it.
-            //  - doing this before the send (the original order) meant a
-            //    failed send (transient FCM outage) still advanced the
-            //    baseline, so that result's teaser was lost for good
-            //    instead of retried next tick - re-fixing the exact bug
-            //    class this dedup exists to prevent, in this same function.
             const nextFp = {
               ...storedFp,
               [changed.round]: {
@@ -126,8 +125,31 @@ exports.notifyResultsUpdate = onRequest(
                 [changed.label]: currentFp[changed.round][changed.label],
               },
             };
-            await stateRef.set({fingerprints: nextFp, sentAt: new Date().toISOString()});
-            await logPushHistory(title, body, 'results');
+            if (!hasResults) {
+              // No send to guard here, so it's safe to persist immediately -
+              // still stops this same grid-only change from re-triggering
+              // every subsequent tick.
+              await stateRef.set({fingerprints: nextFp, sentAt: new Date().toISOString()});
+              console.log(`notifyResultsUpdate: round ${changed.round} ${changed.label} grid-only change (no results yet) - skipping teaser push`);
+            } else {
+              const raceName = roundObj?.venue ? `${changed.label} at ${roundObj.venue}` : changed.label;
+              const title = `Results for ${raceName} is now available`;
+              const body = 'Open BTCC Hub to see how it went.';
+              await getMessaging().send({
+                topic: 'results_teaser',
+                notification: {title, body},
+                data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
+                android: {notification: {channelId: 'results'}},
+              });
+              // Persisted only after a successful send - doing this before
+              // the send (the original order) meant a failed send (transient
+              // FCM outage) still advanced the baseline, so that result's
+              // teaser was lost for good instead of retried next tick -
+              // re-fixing the exact bug class this dedup exists to prevent,
+              // in this same function.
+              await stateRef.set({fingerprints: nextFp, sentAt: new Date().toISOString()});
+              await logPushHistory(title, body, 'results');
+            }
           } else {
             console.log('notifyResultsUpdate: no session content changed - skipping teaser push');
           }

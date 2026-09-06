@@ -202,6 +202,37 @@ describe('notifyResultsUpdate', () => {
     }));
   });
 
+  // The actual bug this guards against, confirmed live 2026-09-06 (round 8,
+  // Croft): Race 3's reversed grid is published right after Race 2 finishes,
+  // well before Race 3 is actually run - hashSession() fingerprints grid
+  // alongside results, so that grid arriving looked identical to an actual
+  // result posting to findChangedSession, and users got "Results for Race 3
+  // at Croft is now available" while Race 3 hadn't happened yet. Grid
+  // announcements are already sessionAlerts.js's job (a correctly-worded,
+  // well-timed pre-race push) - this endpoint should only announce results.
+  it('does not send a visible push when a session gains a grid but has no results yet', async () => {
+    await seedBaseline(); // baseline: round 8 Qualifying scored, Race 1 empty, no Race 3 entry at all yet
+    mockResultsOnce([{
+      round: 8,
+      venue: 'Croft',
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Race 1', results: [], grid: null},
+        {label: 'Race 3', results: [], grid: [{pos: 1, driver: 'A'}]}, // grid set, race not run yet
+      ],
+    }]);
+
+    await call();
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_live'}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockLogPushHistory).not.toHaveBeenCalled();
+    // Still advances the fingerprint baseline for that session, so this same
+    // grid-only change doesn't get flagged as "changed" again next tick.
+    const persisted = mockDocRef.set.mock.calls.find(c => c[0].fingerprints)[0].fingerprints;
+    expect(persisted[8]['Race 3']).toEqual(expect.any(String));
+  });
+
   // The actual bug being fixed: scrape_tsl.py re-stamps standings.json's
   // `updated` field with the current time on essentially every raceday tick
   // regardless of whether anything real changed, and this endpoint used to
