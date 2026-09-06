@@ -18112,19 +18112,6 @@
             },
             {
               "pos": 7,
-              "no": 99,
-              "cl": "I",
-              "driver": "Charles RAINFORD",
-              "team": "WSR",
-              "car": "BMW 330i M Sport",
-              "laps": 15,
-              "time": "23:24.362",
-              "gap": "18.509",
-              "bestLap": "1:32.430",
-              "points": 9
-            },
-            {
-              "pos": 8,
               "no": 16,
               "cl": "I",
               "driver": "Aiden MOFFAT",
@@ -18134,6 +18121,19 @@
               "time": "23:32.411",
               "gap": "26.558",
               "bestLap": "1:32.729",
+              "points": 9
+            },
+            {
+              "pos": 8,
+              "no": 99,
+              "cl": "I",
+              "driver": "Charles RAINFORD",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 15,
+              "time": "23:24.362",
+              "gap": "",
+              "bestLap": "1:32.430",
               "points": 8
             },
             {
@@ -18545,16 +18545,16 @@
             },
             {
               "pos": 7,
-              "no": 99,
+              "no": 16,
               "cl": "",
-              "driver": "Charles RAINFORD",
+              "driver": "Aiden MOFFAT",
               "team": ""
             },
             {
               "pos": 8,
-              "no": 16,
+              "no": 99,
               "cl": "",
-              "driver": "Aiden MOFFAT",
+              "driver": "Charles RAINFORD",
               "team": ""
             },
             {
