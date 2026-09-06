@@ -19,6 +19,10 @@ on:
       round:
         description: "Specific round to scrape (leave blank to auto-detect the round that just finished)"
         type: number
+      is_retry:
+        description: "internal - marks this run as an automated retry (do not set manually)"
+        type: boolean
+        default: false
 
 concurrency:
   group: scrape-penalties
@@ -29,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
 
     steps:
       - name: Checkout repo
@@ -93,17 +98,42 @@ jobs:
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
 
-      - name: Report failure
+      # scrape_penalties.py already writes whatever it found before a later
+      # step of its own could fail, so the commit step above still runs and
+      # saves any good data even when the scrape step reports failure. This
+      # step makes sure that failure is still reported and the job/run itself
+      # shows red, instead of the whole thing silently looking green.
+      - name: Fail job if scrape step failed
         if: steps.scrape.outcome == 'failure'
+        run: exit 1
+
+      # Covers a genuine script failure() as well as cancelled(). This only
+      # runs weekly, so a failure here would otherwise wait a full week for
+      # its next natural attempt. Carries year/round through so the retry
+      # targets the same round rather than re-running is_day_after_race.py's
+      # own auto-detection. is_retry guards against looping: a run dispatched
+      # BY this step carries is_retry=true, so a second failure falls through
+      # to "Report failure" instead of dispatching again.
+      - name: Retry once on failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-penalties.yml/dispatches" \
+            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"year\":\"${{ github.event.inputs.year || '2026' }}\",\"round\":\"${{ github.event.inputs.round || steps.gate.outputs.round }}\"}}" || echo "Retry dispatch failed (non-fatal)"
+
+      # Only reached once the automated retry above has ALSO failed/been
+      # cancelled - a single transient blip no longer emails anyone.
+      - name: Report failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
           curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Content-Type: application/json" \
             -H "x-scraper-secret: ${SCRAPER_SECRET}" \
-            -d "{\"workflow\":\"scrape-penalties\",\"message\":\"Penalties scrape failed - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            -d "{\"workflow\":\"scrape-penalties\",\"message\":\"Penalties scrape failed (auto-retry also failed) - see run log\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
             "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
-
-      - name: Fail job if scrape step failed
-        if: steps.scrape.outcome == 'failure'
-        run: exit 1
