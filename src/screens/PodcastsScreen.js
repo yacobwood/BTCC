@@ -6,6 +6,7 @@ import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {decodeEntities} from '../api/parsers';
 
 const CACHE_KEY = 'podcasts_episodes';
 
@@ -30,7 +31,8 @@ function parseRSS(xml) {
   let match;
   while ((match = itemRegex.exec(xml)) !== null) {
     const block = match[1];
-    const title = (/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title>([\s\S]*?)<\/title>/.exec(block) || [])[1]?.trim() || '';
+    const rawTitle = (/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title>([\s\S]*?)<\/title>/.exec(block) || [])[1]?.trim() || '';
+    const title = rawTitle ? decodeEntities(rawTitle) : '';
     const url = /enclosure[^>]+url="([^"]+)"/.exec(block)?.[1] || '';
     const pubDate = /<pubDate>([\s\S]*?)<\/pubDate>/.exec(block)?.[1]?.trim() || '';
     const duration = /<itunes:duration>([\s\S]*?)<\/itunes:duration>/.exec(block)?.[1]?.trim() || '';

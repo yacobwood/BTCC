@@ -63,3 +63,25 @@ describe('requireAdminPost', () => {
     expect(res.status).toHaveBeenCalledWith(401);
   });
 });
+
+// Added 2026-09-07: a raw regex-extracted RSS <title> (Buzzsprout doesn't
+// wrap it in CDATA) came through with a literal "&amp;" instead of "&" in
+// the podcast push and the Podcasts screen - decodeEntities existed on the
+// client (src/api/parsers.js) but functions/ had no equivalent, and nothing
+// called it either way. Mirrors src/api/parsers.js's own decodeEntities tests.
+describe('decodeEntities', () => {
+  const {decodeEntities} = require('../../functions/shared');
+
+  it('decodes a bare ampersand, the entity actually seen in the live Buzzsprout feed', () => {
+    expect(decodeEntities('Tom Ingram &amp; Mikey Doble Join the BTCC Podcast'))
+      .toBe('Tom Ingram & Mikey Doble Join the BTCC Podcast');
+  });
+
+  it('decodes the other common named/numeric entities', () => {
+    expect(decodeEntities('&lt;tag&gt; &quot;quoted&quot; &#039;apos&#039; &nbsp;end')).toBe('<tag> "quoted" \'apos\'  end');
+  });
+
+  it('leaves plain text with no entities untouched', () => {
+    expect(decodeEntities('Brands Hatch Race Review')).toBe('Brands Hatch Race Review');
+  });
+});

@@ -22,6 +22,9 @@ const mockLogError = jest.fn(() => Promise.resolve());
 const mockLogPushHistory = jest.fn(() => Promise.resolve());
 const mockFetchWithTimeout = jest.fn();
 jest.mock('../../functions/shared', () => ({
+  // Real implementation, not a mock - it's pure text transform, and the
+  // podcast-title tests below need it to actually decode entities.
+  decodeEntities: jest.requireActual('../../functions/shared').decodeEntities,
   logError: mockLogError,
   logPushHistory: mockLogPushHistory,
   fetchWithTimeout: (...args) => mockFetchWithTimeout(...args),
@@ -122,6 +125,24 @@ describe('sendSessionNotifications', () => {
     await sendSessionNotifications.run();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'podcast_alerts'}));
+  });
+
+  it('decodes HTML entities in a plain (non-CDATA) podcast title before sending', async () => {
+    const rss = `<rss><channel><item><title>Tom Ingram &amp; Mikey Doble Join the BTCC Podcast</title><guid>guid-2</guid></item></channel></rss>`;
+    mockFetchWithTimeout.mockImplementation((url) => {
+      if (url.includes('podcast.rss')) return Promise.resolve({text: () => Promise.resolve(rss)});
+      if (url.includes('calendar.json')) return emptyJsonResponse({rounds: []});
+      if (url.includes('hub_news.json')) return emptyJsonResponse({posts: []});
+      return emptyJsonResponse({});
+    });
+    mockTx.get.mockResolvedValueOnce({exists: true, data: () => ({lastGuid: 'guid-1', pendingSend: null})});
+
+    await sendSessionNotifications.run();
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      topic: 'podcast_alerts',
+      data: expect.objectContaining({title: 'Tom Ingram & Mikey Doble Join the BTCC Podcast'}),
+    }));
   });
 
   it('isolates a calendar-check failure - logs it and still runs the other sections', async () => {

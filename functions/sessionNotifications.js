@@ -4,6 +4,7 @@ const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getFirestore} = require('firebase-admin/firestore');
 const {
+  decodeEntities,
   logError,
   logPushHistory,
   fetchWithTimeout,
@@ -200,7 +201,7 @@ exports.sendSessionNotifications = onSchedule(
                          rssText.match(/<item>[\s\S]*?<title>(.*?)<\/title>/);
       const imageMatch = rssText.match(/<itunes:image[^>]+href="([^"]+)"/);
       const latestGuid = guidMatch?.[1]?.trim();
-      const latestTitle = titleMatch?.[1]?.trim();
+      const latestTitle = titleMatch?.[1]?.trim() ? decodeEntities(titleMatch[1].trim()) : undefined;
       const artworkUrl = imageMatch?.[1] || null;
 
       if (latestGuid) {

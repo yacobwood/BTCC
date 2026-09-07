@@ -98,6 +98,23 @@ describe('PodcastsScreen', () => {
     await waitFor(() => expect(getByLabelText('Play Brands Hatch Race Review')).toBeTruthy());
   });
 
+  it('decodes HTML entities in a plain (non-CDATA) RSS title, e.g. Buzzsprout\'s "&amp;"', async () => {
+    const rssWithEntity = [
+      '<rss><channel>',
+      '<item>',
+      '<title>Tom Ingram &amp; Mikey Doble Join the BTCC Podcast</title>',
+      '<enclosure url="https://example.com/ep3.mp3" type="audio/mpeg" length="1000" />',
+      '<pubDate>Mon, 01 Jan 2024 12:00:00 +0000</pubDate>',
+      '<itunes:duration>30:00</itunes:duration>',
+      '</item>',
+      '</channel></rss>',
+    ].join('\n');
+    global.fetch.mockResolvedValue({ok: true, text: jest.fn().mockResolvedValue(rssWithEntity)});
+    const {getByText, queryByText} = renderWithProviders(<PodcastsScreen navigation={nav} />);
+    await waitFor(() => expect(getByText('Tom Ingram & Mikey Doble Join the BTCC Podcast')).toBeTruthy());
+    expect(queryByText(/&amp;/)).toBeNull();
+  });
+
   // ── Error state ───────────────────────────────────────────────────────────────
 
   it('shows error state when all fetch attempts fail and no cache', async () => {
