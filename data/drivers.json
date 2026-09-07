@@ -284,10 +284,23 @@
       "car": "Hyundai i30N",
       "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/collard.webp",
       "nationality": "British",
+      "currentlyRacing": false,
       "dateOfBirth": "1996-07-30",
       "birthplace": "Frimley, Surrey",
       "bio": "Ricky Collard started his full-time motorsport journey in the British Formula Ford Championship in 2014, taking five podiums in his debut season. In 2015, the then 18-year-old would improve, taking a total of 13 podiums, of which six were race victories.\n\nAfter his second-place finish in the MSA Formula Championship, Collard would achieve the same feat in 2016, racing in the BRDC British Formula 3 Championship. Taking four pole positions, five race victories and a total of nine podiums, the Frimley-born racer impressed in his stint racing in the single-seater junior categories.\n\nFrom 2017-2021, the now Team VERTU racer would compete in multiple GT championships. ADAC GT Masters, British GT Championship, GT World Challenge Europe (Sprint & Endurance), Intercontinental GT Challenge and the 24H Series were all championships competed in around a debut in the BTCC in 2018.\n\nCollard would finish the 2018 season for Team BMW, making his championship debut at Rockingham. Straight up to speed, the 11 races competed in would see the then 23-year-old take his first podium in Race 1 at Silverstone.\n\nIt would be four more years before Collard returned to the championship, this time for Toyota Gazoo Racing UK. The two-year stint would see the #11 half his finishing position, coming home eighth in the 2023 standings. A year in which he would take his second podium, this time coming at Knockhill.\n\n2024 would see Collard reunite with his father and 15-time BTCC race winner Rob Collard in the British GT Championship. The duo would go on to win the championship, taking victories at Donington Park and Oulton Park.\n\n2026 sees the return of Collard to the BTCC, racing the #11 for Team VERTU alongside Tom Ingram, Tom Chilton and Nicolas Hamilton.",
       "history": [
+        {
+          "year": 2026,
+          "team": "Team VERTU",
+          "car": "Hyundai i30N",
+          "pos": 4,
+          "points": 234,
+          "wins": 0,
+          "podiums": 7,
+          "poles": 0,
+          "fastestLaps": 1,
+          "dnfs": 4
+        },
         {
           "year": 2023,
           "team": "Toyota GAZOO Racing UK with Speedworks",
@@ -329,6 +342,20 @@
       "cardBgUrl": "",
       "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/collard.webp",
       "numberImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/11.png"
+    },
+    {
+      "number": "TBC",
+      "name": "Osamu Kawashima",
+      "team": "Team VERTU",
+      "car": "Hyundai i30N",
+      "imageUrl": null,
+      "nationality": "Japanese",
+      "bio": "57-year-old Osamu Kawashima steps into Team VERTU's Hyundai i30N for the final two rounds of the 2026 season, Silverstone and Brands Hatch, taking over the seat vacated by Ricky Collard. Kawashima had been announced earlier in the year as the team's reserve driver, having tested a Speedworks Toyota Avensis back in 2016.\n\nHis Silverstone debut makes him the first Japanese driver to compete in the BTCC since Kunimitsu Takahashi raced a Mitsubishi Starion at the same circuit in 1985.\n\nHis car number for the two rounds is still to be confirmed.",
+      "history": [],
+      "class": "M",
+      "cardBgUrl": "",
+      "carImageUrl": "",
+      "numberImageUrl": ""
     },
     {
       "number": 15,

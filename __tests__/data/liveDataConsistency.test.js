@@ -234,7 +234,11 @@ describe('drivers.json <-> standings.json consistency', () => {
   });
 
   it('car number in drivers.json is a unique integer for every driver', () => {
-    const numbers = DRIVERS.map(d => d.number);
+    // A driver whose number hasn't been allocated yet (e.g. a late-season signing
+    // announced before their car number is confirmed - Osamu Kawashima, 2026) is
+    // stored as the literal string "TBC" rather than a fabricated integer; exclude
+    // those from the uniqueness/positivity check rather than guess a placeholder.
+    const numbers = DRIVERS.map(d => d.number).filter(n => n !== 'TBC');
     expect(numbers.every(n => Number.isInteger(n) && n > 0)).toBe(true);
     expect(new Set(numbers).size).toBe(numbers.length);
   });
