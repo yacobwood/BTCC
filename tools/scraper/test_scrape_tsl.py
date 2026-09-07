@@ -574,6 +574,47 @@ class TestNormalizeTeamEntries(unittest.TestCase):
         self.assertEqual(s.TEAM_NAME_ALIASES, {})
 
 
+class TestMergeStandingsTimestamp(unittest.TestCase):
+    """Regression coverage for the 2026-09-06 fix: standings.json's `updated`
+    field used to get re-stamped on every scrape tick regardless of whether
+    anything else actually changed, so git-auto-commit-action committed this
+    file on essentially every 2-minute tick during a raceday (confirmed live:
+    round 7/Donington GP weekend logged 193 commits to this file, all but ~8
+    of them differing from their predecessor only in this one field)."""
+
+    def test_reverts_to_existing_timestamp_when_nothing_else_changed(self):
+        existing = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:00:00Z'}
+        new = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, existing)
+        self.assertEqual(result['updated'], '2026-09-06T09:00:00Z')
+
+    def test_keeps_fresh_timestamp_when_standings_data_genuinely_changed(self):
+        existing = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:00:00Z'}
+        new = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 40}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, existing)
+        self.assertEqual(result['updated'], '2026-09-06T09:02:00Z')
+
+    def test_keeps_fresh_timestamp_on_first_ever_run(self):
+        new = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, None)
+        self.assertEqual(result['updated'], '2026-09-06T09:02:00Z')
+
+    def test_keeps_fresh_timestamp_when_round_or_venue_changed(self):
+        # Same standings values, but a new round has started - a real change
+        # even though `standings` itself is unchanged.
+        existing = {'season': '2026', 'round': 7, 'venue': 'Donington Park GP', 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:00:00Z'}
+        new = {'season': '2026', 'round': 8, 'venue': 'Croft', 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, existing)
+        self.assertEqual(result['updated'], '2026-09-06T09:02:00Z')
+
+    def test_does_not_mutate_the_existing_dict(self):
+        existing = {'season': '2026', 'standings': [], 'updated': '2026-09-06T09:00:00Z'}
+        existing_copy = dict(existing)
+        new = {'season': '2026', 'standings': [], 'updated': '2026-09-06T09:02:00Z'}
+        s.merge_standings_timestamp(new, existing)
+        self.assertEqual(existing, existing_copy)
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

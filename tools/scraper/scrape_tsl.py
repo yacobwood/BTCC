@@ -1093,6 +1093,29 @@ def compute_standings_fallback(rounds):
         ],
     }
 
+def merge_standings_timestamp(new_standings, existing_standings):
+    """Reverts new_standings["updated"] back to existing_standings's value
+    when nothing else in new_standings actually differs from what's already
+    on disk - keeps a genuine no-change scrape tick byte-identical to the
+    already-committed file, instead of always re-stamping `updated` with
+    the current time and so making git-auto-commit-action commit this file
+    on essentially every 2-minute scrape tick during a raceday regardless
+    of real content change (confirmed live: round 7/Donington GP weekend
+    logged 193 commits to this file, all but ~8 of them differing from
+    their predecessor only in this one field).
+
+    existing_standings may be None (first run ever, or the existing file
+    was missing/unreadable) - new_standings is returned unchanged in that
+    case, same as a genuine first-ever write.
+    """
+    if existing_standings is None:
+        return new_standings
+    new_comparable = {k: v for k, v in new_standings.items() if k != "updated"}
+    existing_comparable = {k: v for k, v in existing_standings.items() if k != "updated"}
+    if new_comparable == existing_comparable and "updated" in existing_standings:
+        new_standings["updated"] = existing_standings["updated"]
+    return new_standings
+
 
 # ── Calendar track record updater ────────────────────────────────────────────
 
@@ -1351,6 +1374,14 @@ def main():
     # Strip internal working fields that aren't JSON-serializable (tuple keys/sets)
     standings.pop("per_race_points", None)
     standings.pop("scored_sessions", None)
+
+    existing_standings = None
+    if standings_path.exists():
+        try:
+            existing_standings = json.loads(standings_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            existing_standings = None
+    standings = merge_standings_timestamp(standings, existing_standings)
 
     standings_path.write_text(json.dumps(standings, indent=2))
     print(f"Wrote {standings_path}")
