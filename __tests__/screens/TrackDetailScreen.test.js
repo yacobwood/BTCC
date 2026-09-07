@@ -719,6 +719,22 @@ describe('TrackDetailScreen', () => {
       expect(await findByText('18°')).toBeTruthy();
     });
 
+    it('still shows Saturday\'s daily forecast card when viewed on the Sunday of the race weekend', async () => {
+      // Regression test: a past-day filter (weather.daily.filter(day => new
+      // Date(day.date) >= today)) was added to the Daily view only, hiding
+      // Saturday's card once the device's real clock reached Sunday - while
+      // the By-session view (which has no such filter) kept showing it,
+      // exactly the inconsistency reported live.
+      jest.setSystemTime(new Date('2026-04-26T10:00:00Z')); // Sunday of the race weekend
+      const {fetchWeather} = require('../../src/utils/weather');
+      fetchWeather.mockResolvedValue(DAILY_ONLY);
+      const {findByText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
+      );
+      expect(await findByText('14°')).toBeTruthy(); // Sunday's high
+      expect(await findByText('18°')).toBeTruthy(); // Saturday's high - must still be visible
+    });
+
     it('does not show the Daily/By session toggle when there is no hourly data', async () => {
       const {fetchWeather} = require('../../src/utils/weather');
       fetchWeather.mockResolvedValue(DAILY_ONLY);

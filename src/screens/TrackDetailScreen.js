@@ -789,7 +789,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
             {!showHourlyWeather && (
               <View style={styles.weatherRow}>
-                {weather.daily.filter(day => new Date(day.date) >= today).map((day, i) => {
+                {weather.daily.map((day, i) => {
                   const d = new Date(day.date);
                   const dayName = d.toLocaleDateString('en-GB', {weekday: 'short'});
                   return (
