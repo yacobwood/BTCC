@@ -54,14 +54,15 @@ jobs:
 
       # continue-on-error: true - matches scrape-results.yml's own pattern
       # for compute_records.py. scrape_driver_media.py can genuinely update
-      # ONE of the two images and still exit non-zero for the other (found
-      # its URL but the fetch itself failed - confirmed live 2026-09-08,
-      # Scrapfly 422'd Daniel Lloyd's headshot fetch while his car-image
-      # fetch, moments earlier via the identical function, succeeded fine).
-      # The commit step below must still run and save whatever DID succeed,
-      # while "Fail job if scrape step failed" further down still makes sure
-      # the run shows red and the retry-once mechanism actually fires,
-      # instead of a half-done run silently reporting green.
+      # one or two of the three images and still exit non-zero for another
+      # (found its URL but the fetch itself failed - confirmed live
+      # 2026-09-08, Scrapfly 422'd Daniel Lloyd's headshot fetch while his
+      # car-image fetch, moments earlier via the identical function,
+      # succeeded fine). The commit step below must still run and save
+      # whatever DID succeed, while "Fail job if scrape step failed" further
+      # down still makes sure the run shows red and the retry-once
+      # mechanism actually fires, instead of a half-done run silently
+      # reporting green.
       - name: Scrape driver media
         id: scrape
         continue-on-error: true
@@ -76,8 +77,8 @@ jobs:
       - name: Commit updated media
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: update driver photo/car image from btcc.net [skip ci]"
-          file_pattern: "data/driverImages/ data/carImages/ data/drivers.json src/assets/driver_images/ src/assets/driver_images_large/"
+          commit_message: "chore: update driver photo/car/number image from btcc.net [skip ci]"
+          file_pattern: "data/driverImages/ data/carImages/ data/numberImages/ data/drivers.json src/assets/driver_images/ src/assets/driver_images_large/"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
