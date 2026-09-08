@@ -127,6 +127,7 @@ across runs instead of reinstalling every time.
 | `scrape_team_stats.py` | btcc.net/teams/ + each team page | `data/drivers.json` (`teams[].totalRaces`/`totalWins`) | Weekly, Mon 06:30 UTC - `scrape-team-stats.yml` |
 | `scrape_tsl.py` | tsl-timing.com PDFs (not btcc.net) | `data/results{year}.json`, `data/standings.json`, `data/calendar.json` (records) | Every 2 min on race weekends - `scrape-results.yml` (GitHub-hosted) |
 | `scrape_youtube.py` | youtube.com (ITV Sport Extra, not btcc.net) | `data/results2026.json`, `data/calendar.json` | Mon+Tue 10:00 UTC - `scrape-youtube.yml` (GitHub-hosted) |
+| `scrape_driver_media.py` | btcc.net/driver/\<slug\>/ (one driver at a time) | `data/driverImages/`, `data/carImages/` (+ bundled `src/assets/driver_images*/`) | On-demand only, no schedule - `scrape-driver-media.yml`, triggered from the admin panel's DRIVER MEDIA card |
 | `scrape_circuit_images.py` | btcc.net/circuit/\<slug\>/ per track | `data/tracks.json` (`imageUrl`) + `data/media/tracks/` | Manual only |
 | `scrape_gallery.py` | btcc.net/gallery/\<year\>/ + per-album pages (both paginated) | `data/gallery{year}.json` + `data/gallery/{year}/*.json` (no image bytes - photos are hotlinked directly, see below) | Weekly, Wed 09:00 UTC - `scrape-gallery.yml` |
 
@@ -136,8 +137,13 @@ Driver headshots, per-driver car cutouts, number graphics and driver/team card
 backgrounds used to be live-scraped too (`scrape_driver_images.py`,
 `scrape_driver_cutouts.py`, `scrape_driver_backgrounds.py`, plus an image-mirroring
 step inside `scrape_team_stats.py`) - archived 2026-08-18 in favour of a
-hand-curated set committed straight into the repo. See "Hardcoded driver/team
-images" below and `tools/scraper/archive/README.md`.
+hand-curated set committed straight into the repo. `scrape_driver_media.py`
+(added 2026-09-08) is a narrower, on-demand-only replacement for the headshot
+and car-image half of that: it refreshes ONE named driver's photo when
+someone notices btcc.net has published an updated one, rather than
+live-scraping the whole roster on a schedule - the hand-curated set is still
+the source of truth day-to-day. See "Hardcoded driver/team images" below and
+`tools/scraper/archive/README.md`.
 
 ## Hardcoded driver/team images (not scraped)
 
@@ -148,11 +154,16 @@ convention varies by folder and has changed over time - see the root
 of each one), referenced by `raw.githubusercontent.com` URL from
 `data/drivers.json` -
 `imageUrl`, `carImageUrl`, `numberImageUrl` (driver-level) and
-`cardBgUrl`/`carImageUrl` (team-level). No scraper writes these; replacing an
-image means dropping in a new file under the same name (or updating
-`drivers.json`'s URL if the name changes) and committing - no code change,
-no app release. See `tools/scraper/archive/README.md` for the full mapping
-and what each field replaced.
+`cardBgUrl`/`carImageUrl` (team-level). Replacing one by hand means dropping
+in a new file under the same name (or updating `drivers.json`'s URL if the
+name changes) and committing - no code change, no app release.
+`scrape_driver_media.py` (see above) can now do the driver `imageUrl`/
+`carImageUrl` half of this on demand instead, for one driver at a time - it
+still overwrites the same existing filename in place, it just fetches the
+replacement from btcc.net instead of a human downloading it. `numberImageUrl`
+and both `cardBgUrl` fields remain hand-curated only, no scraper for either.
+See `tools/scraper/archive/README.md` for the full mapping and what each
+field replaced.
 
 ## Local-only utilities (no network fetch)
 

@@ -1532,6 +1532,33 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
+  <div class="scraper-card" id="sc-youtube">
+    <div class="scraper-head">
+      <div class="scraper-title">YOUTUBE LINKS</div>
+      <div class="scraper-status-chip" id="ss-youtube">—</div>
+    </div>
+    <div class="scraper-desc">ITV YouTube race links → <strong>results{year}.json</strong> + <strong>calendar.json</strong>. Auto: Monday &amp; Tuesday 10:00 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs"></div>
+      <button class="btn-run" onclick="runScraper('scrape-youtube.yml','youtube')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-driver-media">
+    <div class="scraper-head">
+      <div class="scraper-title">DRIVER MEDIA</div>
+      <div class="scraper-status-chip" id="ss-driver-media">—</div>
+    </div>
+    <div class="scraper-desc">One driver's headshot + car livery from their own btcc.net page → <strong>driverImages/</strong> + <strong>carImages/</strong> (+ bundled app assets). On-demand only, no schedule.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group"><div class="field-label">DRIVER NAME</div><input type="text" id="si-driver-name" placeholder="Daniel Lloyd"></div>
+        <div class="field-group"><div class="field-label">BTCC.NET SLUG</div><input type="text" id="si-driver-slug" placeholder="daniel-lloyd"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-driver-media.yml','driver-media')">RUN ▶</button>
+    </div>
+  </div>
+
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
@@ -2122,6 +2149,8 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-results.yml',          key:'results'},
   {file:'scrape-calendar.yml',         key:'calendar'},
   {file:'scrape-btcc-stats.yml',       key:'btcc-stats'},
+  {file:'scrape-youtube.yml',          key:'youtube'},
+  {file:'scrape-driver-media.yml',     key:'driver-media'},
 ];
 
 function startLiveTick() {
@@ -2149,6 +2178,10 @@ function scraperInputs(workflow) {
   }
   if (workflow === 'scrape-calendar.yml') return {season: String(document.getElementById('si-season').value || 2026)};
   if (workflow === 'scrape-btcc-stats.yml') return {dry_run: String(!!document.getElementById('si-stats-dry-run')?.checked)};
+  if (workflow === 'scrape-driver-media.yml') return {
+    driver_name: document.getElementById('si-driver-name').value.trim(),
+    driver_slug: document.getElementById('si-driver-slug').value.trim(),
+  };
   return {};
 }
 
