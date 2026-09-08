@@ -352,14 +352,6 @@ export default function TrackDetailScreen({route, navigation}) {
       track.trackGuide.forEach((sector, si) => {
         items.push({type: 'sector', sector, key: `sector-${si}`});
       });
-      // Closing cap so the guide (the last section on the page) doesn't just
-      // stop mid-screen with bare background below it - a short final
-      // corner description (e.g. Silverstone's one-sentence Woodcote) can
-      // otherwise leave a large empty gap before the floating chat button,
-      // since the FlatList's content only takes the height its items need
-      // while the scroll viewport still fills the screen (RN's default
-      // ScrollView behaviour) - see project memory on the ChatFab gap fix.
-      items.push({type: 'guideFooter'});
     }
 
     return {data: items, stickyIndex: titleIdx};
@@ -746,14 +738,6 @@ export default function TrackDetailScreen({route, navigation}) {
                 </View>
               </View>
             ))}
-          </View>
-        );
-
-      case 'guideFooter':
-        return (
-          <View style={styles.guideFooter}>
-            <View style={styles.guideFooterDivider} />
-            <Text style={styles.guideFooterText}>END OF CIRCUIT GUIDE</Text>
           </View>
         );
 
@@ -1184,9 +1168,6 @@ const styles = StyleSheet.create({
   },
   overtakingText: {color: Colors.yellow, fontSize: 9, fontWeight: '800'},
   cornerDesc: {color: Colors.textSecondary, fontSize: 13, marginTop: 2, lineHeight: 18},
-  guideFooter: {alignItems: 'center', marginTop: 32, marginBottom: 8},
-  guideFooterDivider: {width: 40, height: 2, borderRadius: 1, backgroundColor: Colors.outline, marginBottom: 12},
-  guideFooterText: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 1.5},
 
   // Layout & photos
   layoutImg: {width: '100%', height: 200, borderRadius: 10},

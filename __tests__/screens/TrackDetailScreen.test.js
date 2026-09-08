@@ -137,31 +137,6 @@ describe('TrackDetailScreen', () => {
     await waitFor(() => expect(getByText(/1:22.000/)).toBeTruthy());
   });
 
-  // Regression coverage for the ChatFab-gap fix (2026-09-08): a short final
-  // corner description left a large empty area between the guide and the
-  // floating chat button, since the FlatList's content only takes the
-  // height its items need while the scroll viewport still fills the screen.
-  // A closing cap after the last sector fills that space with something
-  // visible rather than bare background.
-  it('renders a closing cap after the circuit guide', async () => {
-    // Deliberately a lean fixture, not {...TRACK, trackGuide: [...]} - FlatList
-    // only renders its default initialNumToRender window without a real
-    // scroll, and TRACK's records/schedule sections alone push the guide (and
-    // this cap) far enough down the item list to fall outside that window,
-    // which looks exactly like a rendering failure but isn't one.
-    const {getByText} = render({
-      round: 99, venue: 'Donington Park', startDate: '2026-04-19', endDate: '2026-04-20',
-      raceRecord: null, qualifyingRecord: null, sessions: [], youtubeUrls: [], photos: [],
-      trackGuide: [{name: 'Sector 1', corners: [{number: 1, name: 'Turn 1', description: 'A tight hairpin.'}]}],
-    });
-    await waitFor(() => expect(getByText('END OF CIRCUIT GUIDE')).toBeTruthy());
-  });
-
-  it('does not render a circuit guide closing cap when the track has no guide data', async () => {
-    const {queryByText} = render(); // TRACK has no trackGuide field
-    await waitFor(() => expect(queryByText('END OF CIRCUIT GUIDE')).toBeNull());
-  });
-
   // Regression: lapTimeSecs() used to require a "M:SS.mmm" colon format and
   // returned null for anything else, so short circuits like Knockhill (whose
   // records are bare seconds, e.g. "50.876") silently lost their computed
