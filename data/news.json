@@ -1,16 +1,10 @@
 [
   {
-    "id": "trio-of-winners-deliver-at-croft",
-    "slug": "trio-of-winners-deliver-at-croft",
+    "id": "doble-charges-to-third-btcc-career-victory-at-croft",
+    "slug": "doble-charges-to-third-btcc-career-victory-at-croft",
     "title": {
-      "rendered": "Trio of winners deliver at Croft"
+      "rendered": "Doble charges to third BTCC career victory at Croft"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/e1d4582c-9565-4716-a711-db470546da81.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
