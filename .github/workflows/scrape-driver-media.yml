@@ -52,7 +52,19 @@ jobs:
           pip install Pillow
           sudo apt-get update -qq && sudo apt-get install -y -qq webp
 
+      # continue-on-error: true - matches scrape-results.yml's own pattern
+      # for compute_records.py. scrape_driver_media.py can genuinely update
+      # ONE of the two images and still exit non-zero for the other (found
+      # its URL but the fetch itself failed - confirmed live 2026-09-08,
+      # Scrapfly 422'd Daniel Lloyd's headshot fetch while his car-image
+      # fetch, moments earlier via the identical function, succeeded fine).
+      # The commit step below must still run and save whatever DID succeed,
+      # while "Fail job if scrape step failed" further down still makes sure
+      # the run shows red and the retry-once mechanism actually fires,
+      # instead of a half-done run silently reporting green.
       - name: Scrape driver media
+        id: scrape
+        continue-on-error: true
         env:
           SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
         working-directory: tools/scraper
@@ -69,6 +81,10 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
+
+      - name: Fail job if scrape step failed
+        if: steps.scrape.outcome == 'failure'
+        run: exit 1
 
       # Covers a genuine script failure() as well as cancelled(). Carries the
       # same driver_name/driver_slug through so a retry targets the same

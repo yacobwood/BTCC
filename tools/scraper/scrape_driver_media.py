@@ -150,6 +150,19 @@ def main() -> None:
     media = extract_media_urls(html)
     drivers_changed = False
     updated: list[tuple[str, Path]] = []  # (script to regenerate its bundle, saved master path)
+    # Distinct from "selector not on the page at all" (media["cutout"]/["car"]
+    # is None - legitimately nothing there, e.g. a driver with no car photo
+    # published yet) - this is "found the URL but downloading it failed",
+    # which is a real, usually-transient failure (confirmed live 2026-09-08:
+    # Scrapfly 422'd Daniel Lloyd's headshot fetch while his car-image fetch,
+    # moments earlier, via the identical function, succeeded fine). Matches
+    # this repo's own stated convention (see tools/scraper/README.md's
+    # "Failure handling convention") that a scraper exits non-zero on a real
+    # failure and 0 only when there was legitimately nothing new to do -
+    # "one of two images updated" is NOT "nothing new to do" for the one that
+    # failed, and must still exit non-zero so the workflow's retry-once step
+    # actually fires instead of silently reporting a half-done run as green.
+    any_fetch_failed = False
 
     if media["cutout"]:
         fetched = fetch_image_smart(media["cutout"], label=f"{args.driver_slug}-headshot")
@@ -164,6 +177,7 @@ def main() -> None:
             print(f"  headshot: saved {dest}")
         else:
             print(f"  WARNING: found headshot image URL but fetch failed for {args.driver_name}", file=sys.stderr)
+            any_fetch_failed = True
     else:
         print(f"  WARNING: no cutout image found for {args.driver_name}", file=sys.stderr)
 
@@ -180,6 +194,7 @@ def main() -> None:
             print(f"  car image: saved {dest}")
         else:
             print(f"  WARNING: found car image URL but fetch failed for {args.driver_name}", file=sys.stderr)
+            any_fetch_failed = True
     else:
         print(f"  WARNING: no car image found for {args.driver_name}", file=sys.stderr)
 
@@ -195,6 +210,15 @@ def main() -> None:
         _regenerate_bundle(script_name, dest)
 
     print(f"Done: {len(updated)}/2 image(s) updated for {args.driver_name}")
+
+    if any_fetch_failed:
+        # Whatever DID succeed above is already saved (and, in the calling
+        # workflow, continue-on-error: true lets the commit step still run) -
+        # this just makes sure the run itself still shows red so the
+        # retry-once/alert pipeline actually engages, rather than a real,
+        # usually-transient fetch failure silently passing as success because
+        # the other image happened to work.
+        sys.exit(1)
 
 
 if __name__ == "__main__":

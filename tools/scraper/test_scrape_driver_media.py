@@ -188,6 +188,45 @@ class TestMain(unittest.TestCase):
                 main()
         self.assertEqual(cm.exception.code, 1)
 
+    @patch("scrape_driver_media._regenerate_bundle")
+    @patch("scrape_driver_media._save_master_webp")
+    @patch("scrape_driver_media.fetch_via_scrapfly", return_value=DRIVER_PAGE_HTML)
+    def test_exits_nonzero_when_one_image_updates_but_the_other_found_url_fails_to_fetch(
+        self, mock_fetch, mock_save, mock_regen,
+    ):
+        """Regression coverage for the 2026-09-08 incident: Daniel Lloyd's
+        real first run updated his car image fine but Scrapfly 422'd the
+        headshot fetch - and the run still reported success (exit 0), so the
+        workflow's retry-once step never fired. One image genuinely updating
+        must not mask the other one's real fetch failure - this has to exit
+        non-zero so the run shows red and the retry actually happens, even
+        though the car image below DOES get saved."""
+        def fetch_image_smart_side_effect(url, label=""):
+            if "headshot" in label:
+                return None  # found the URL, but the fetch itself failed
+            return (b"bytes", "image/webp")
+
+        drivers = [{
+            "name": "Daniel Lloyd",
+            "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/lloyd.webp",
+            "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/lloyd.webp",
+        }]
+        path, tmp_dir = self._drivers_json(drivers)
+        with patch.multiple(
+            "scrape_driver_media",
+            DRIVERS_PATH=path,
+            DRIVER_IMAGES_DIR=tmp_dir / "driverImages",
+            CAR_IMAGES_DIR=tmp_dir / "carImages",
+        ), patch("scrape_driver_media.fetch_image_smart", side_effect=fetch_image_smart_side_effect), \
+           patch("sys.argv", self._argv()):
+            with self.assertRaises(SystemExit) as cm:
+                main()
+        self.assertEqual(cm.exception.code, 1)
+        # The car image that DID succeed must still have been saved - a
+        # partial failure shouldn't throw away the half that worked.
+        mock_save.assert_called_once()
+        mock_regen.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
