@@ -227,6 +227,66 @@ class TestMain(unittest.TestCase):
         mock_save.assert_called_once()
         mock_regen.assert_called_once()
 
+    @patch("scrape_driver_media._regenerate_bundle")
+    @patch("scrape_driver_media._save_master_webp")
+    @patch("scrape_driver_media.fetch_image_smart", return_value=(b"not actually an image", "image/webp"))
+    @patch("scrape_driver_media.fetch_via_scrapfly", return_value=DRIVER_PAGE_HTML)
+    def test_exits_nonzero_and_still_keeps_the_other_images_bundle_regen_when_one_cant_be_decoded(
+        self, mock_fetch, mock_image, mock_save, mock_regen,
+    ):
+        """Regression coverage for the 2026-09-08 incident: Daryl De Leon's
+        real run had his headshot fetch AND save succeed, but his car
+        image's fetch reported Scrapfly success while returning bytes PIL
+        couldn't decode (PIL.UnidentifiedImageError) - uncaught, that
+        crashed the whole script before the headshot's own bundle-regenerate
+        step (at the time, deferred to a shared loop after both images) ever
+        ran. A decode failure on one image must degrade to that one image's
+        own "failed" outcome, not crash the process and leave the other
+        image's already-saved master with a stale, un-regenerated bundle."""
+        mock_save.side_effect = [None, Exception("cannot identify image file")]  # headshot ok, car raises
+        drivers = [{
+            "name": "Daniel Lloyd",
+            "imageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/lloyd.webp",
+            "carImageUrl": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/lloyd.webp",
+        }]
+        path, tmp_dir = self._drivers_json(drivers)
+        with patch.multiple(
+            "scrape_driver_media",
+            DRIVERS_PATH=path,
+            DRIVER_IMAGES_DIR=tmp_dir / "driverImages",
+            CAR_IMAGES_DIR=tmp_dir / "carImages",
+        ), patch("sys.argv", self._argv()):
+            with self.assertRaises(SystemExit) as cm:
+                main()
+        self.assertEqual(cm.exception.code, 1)
+        # The headshot succeeded before the car image's decode failure - its
+        # bundle-regenerate call must still have happened, not been skipped
+        # because a later, unrelated image type blew up.
+        mock_regen.assert_called_once()
+
+    @patch("scrape_driver_media._regenerate_bundle")
+    @patch("scrape_driver_media._save_master_webp")
+    @patch("scrape_driver_media.fetch_image_smart", return_value=(b"bytes", "image/webp"))
+    @patch("scrape_driver_media.fetch_via_scrapfly", return_value='<html><body><img class="driver-profile-cutout" src="/api/media/abc"></body></html>')
+    def test_a_legitimately_missing_image_selector_does_not_fail_the_run_when_the_other_succeeds(
+        self, mock_fetch, mock_image, mock_save, mock_regen,
+    ):
+        """A page genuinely missing one selector (no car photo published yet
+        for this driver, e.g. a brand-new signing with only a headshot so
+        far) is NOT the same failure category as "found the URL but the
+        fetch/decode broke" - it must not fail the run just because the
+        headshot succeeded and the car image was never there to begin with."""
+        path, tmp_dir = self._drivers_json([{"name": "Senna Proctor", "imageUrl": None, "carImageUrl": None}])
+        with patch.multiple(
+            "scrape_driver_media",
+            DRIVERS_PATH=path,
+            DRIVER_IMAGES_DIR=tmp_dir / "driverImages",
+            CAR_IMAGES_DIR=tmp_dir / "carImages",
+        ), patch("sys.argv", self._argv(name="Senna Proctor", slug="senna-proctor")):
+            main()  # must NOT raise SystemExit
+        mock_save.assert_called_once()
+        mock_regen.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

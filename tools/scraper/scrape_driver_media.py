@@ -110,7 +110,14 @@ def _save_master_webp(image_bytes: bytes, dest_path: Path) -> None:
     media_utils.save_mirrored_image's downscale-on-save): both bundle
     scripts do their own resizing for their own target sizes from whatever
     the master is, and downscaling twice would just compound quality loss
-    for no benefit."""
+    for no benefit.
+
+    Raises PIL.UnidentifiedImageError (or any other decode error) rather
+    than catching it here - the caller (_process_one_image) is what needs to
+    turn that into a per-image "this one failed" outcome rather than letting
+    it propagate, since a single undecodable response must never take down
+    processing of the OTHER image slot too (see that function's own
+    docstring)."""
     from PIL import Image
     import io
 
@@ -126,6 +133,62 @@ def _regenerate_bundle(script_name: str, target_file: Path) -> None:
         [sys.executable, str(REPO_ROOT / "scripts" / script_name), str(target_file)],
         check=True,
     )
+
+
+def _process_one_image(
+    *, kind: str, media_url: str | None, existing_url: str | None, driver_name: str,
+    fetch_label: str, images_dir: Path, url_field_prefix: str, bundle_script: str,
+) -> tuple[bool, str | None]:
+    """Handles one image type (headshot or car) fully and independently:
+    fetch -> decode/save -> regenerate its own bundle, right here, rather
+    than deferring the regenerate step to a shared loop after both image
+    types have been attempted.
+
+    Confirmed live 2026-09-08 why this has to be fully self-contained per
+    image, not two steps sharing later state: Daryl De Leon's real run had
+    his headshot fetch AND save succeed, but his car image's fetch reported
+    Scrapfly success while returning bytes PIL couldn't decode
+    (UnidentifiedImageError) - an uncaught exception there crashed the whole
+    script before a shared "regenerate every saved image's bundle" loop
+    ever ran, silently leaving his already-saved headshot's bundled
+    src/assets/ copies stale. Catching decode failures here (in addition to
+    the already-handled "fetch returned None" case) and returning a plain
+    per-image outcome means the OTHER image type's own call to this function
+    is entirely unaffected either way.
+
+    Returns (status, new_url_or_None). status is one of:
+      "ok"        - fetched, decoded, saved and bundle-regenerated fine.
+      "not_found" - the selector simply wasn't on the page at all (e.g. a
+                    driver with no car photo published yet) - legitimate,
+                    not an error, and on its own must never fail the run.
+      "failed"    - the selector WAS found but something after that broke
+                    (fetch failed, or fetched bytes wouldn't decode) - a
+                    real failure the caller must still fail the run for,
+                    even if the other image type came back "ok".
+    new_url_or_None is only set on "ok" when this driver had no existing URL
+    for this field yet (a brand-new signing), so the caller knows to write
+    it into drivers.json."""
+    if not media_url:
+        print(f"  WARNING: no {kind} image found for {driver_name}", file=sys.stderr)
+        return "not_found", None
+
+    fetched = fetch_image_smart(media_url, label=fetch_label)
+    if not fetched:
+        print(f"  WARNING: found {kind} image URL but fetch failed for {driver_name}", file=sys.stderr)
+        return "failed", None
+
+    stem = _filename_stem(existing_url, driver_name)
+    dest = images_dir / f"{stem}.webp"
+    try:
+        _save_master_webp(fetched[0], dest)
+    except Exception as e:  # noqa: BLE001 - any decode/save failure here must degrade to "this image failed", never crash the whole run and take the other image type down with it
+        print(f"  WARNING: found {kind} image but could not decode/save it for {driver_name} ({e})", file=sys.stderr)
+        return "failed", None
+
+    _regenerate_bundle(bundle_script, dest)
+    print(f"  {kind}: saved {dest}")
+    new_url = f"{RAW_BASE}/{url_field_prefix}/{stem}.webp" if not existing_url else None
+    return "ok", new_url
 
 
 def main() -> None:
@@ -148,76 +211,51 @@ def main() -> None:
         sys.exit(1)
 
     media = extract_media_urls(html)
-    drivers_changed = False
-    updated: list[tuple[str, Path]] = []  # (script to regenerate its bundle, saved master path)
-    # Distinct from "selector not on the page at all" (media["cutout"]/["car"]
-    # is None - legitimately nothing there, e.g. a driver with no car photo
-    # published yet) - this is "found the URL but downloading it failed",
-    # which is a real, usually-transient failure (confirmed live 2026-09-08:
-    # Scrapfly 422'd Daniel Lloyd's headshot fetch while his car-image fetch,
-    # moments earlier, via the identical function, succeeded fine). Matches
-    # this repo's own stated convention (see tools/scraper/README.md's
-    # "Failure handling convention") that a scraper exits non-zero on a real
-    # failure and 0 only when there was legitimately nothing new to do -
-    # "one of two images updated" is NOT "nothing new to do" for the one that
-    # failed, and must still exit non-zero so the workflow's retry-once step
-    # actually fires instead of silently reporting a half-done run as green.
-    any_fetch_failed = False
 
-    if media["cutout"]:
-        fetched = fetch_image_smart(media["cutout"], label=f"{args.driver_slug}-headshot")
-        if fetched:
-            stem = _filename_stem(drv.get("imageUrl"), args.driver_name)
-            dest = DRIVER_IMAGES_DIR / f"{stem}.webp"
-            _save_master_webp(fetched[0], dest)
-            if not drv.get("imageUrl"):
-                drv["imageUrl"] = f"{RAW_BASE}/driverImages/{stem}.webp"
-                drivers_changed = True
-            updated.append(("generate_driver_bundle.py", dest))
-            print(f"  headshot: saved {dest}")
-        else:
-            print(f"  WARNING: found headshot image URL but fetch failed for {args.driver_name}", file=sys.stderr)
-            any_fetch_failed = True
-    else:
-        print(f"  WARNING: no cutout image found for {args.driver_name}", file=sys.stderr)
+    headshot_status, new_image_url = _process_one_image(
+        kind="headshot", media_url=media["cutout"], existing_url=drv.get("imageUrl"),
+        driver_name=args.driver_name, fetch_label=f"{args.driver_slug}-headshot",
+        images_dir=DRIVER_IMAGES_DIR, url_field_prefix="driverImages",
+        bundle_script="generate_driver_bundle.py",
+    )
+    car_status, new_car_url = _process_one_image(
+        kind="car", media_url=media["car"], existing_url=drv.get("carImageUrl"),
+        driver_name=args.driver_name, fetch_label=f"{args.driver_slug}-car",
+        images_dir=CAR_IMAGES_DIR, url_field_prefix="carImages",
+        bundle_script="generate_car_thumb.py",
+    )
+    statuses = (headshot_status, car_status)
 
-    if media["car"]:
-        fetched = fetch_image_smart(media["car"], label=f"{args.driver_slug}-car")
-        if fetched:
-            stem = _filename_stem(drv.get("carImageUrl"), args.driver_name)
-            dest = CAR_IMAGES_DIR / f"{stem}.webp"
-            _save_master_webp(fetched[0], dest)
-            if not drv.get("carImageUrl"):
-                drv["carImageUrl"] = f"{RAW_BASE}/carImages/{stem}.webp"
-                drivers_changed = True
-            updated.append(("generate_car_thumb.py", dest))
-            print(f"  car image: saved {dest}")
-        else:
-            print(f"  WARNING: found car image URL but fetch failed for {args.driver_name}", file=sys.stderr)
-            any_fetch_failed = True
-    else:
-        print(f"  WARNING: no car image found for {args.driver_name}", file=sys.stderr)
-
-    if not updated:
+    if "ok" not in statuses:
         print(f"ERROR: neither image updated for {args.driver_name} - check the slug is correct", file=sys.stderr)
         sys.exit(1)
 
+    drivers_changed = False
+    if new_image_url:
+        drv["imageUrl"] = new_image_url
+        drivers_changed = True
+    if new_car_url:
+        drv["carImageUrl"] = new_car_url
+        drivers_changed = True
     if drivers_changed:
         DRIVERS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Updated {DRIVERS_PATH}")
 
-    for script_name, dest in updated:
-        _regenerate_bundle(script_name, dest)
+    updated_count = statuses.count("ok")
+    print(f"Done: {updated_count}/2 image(s) updated for {args.driver_name}")
 
-    print(f"Done: {len(updated)}/2 image(s) updated for {args.driver_name}")
-
-    if any_fetch_failed:
-        # Whatever DID succeed above is already saved (and, in the calling
-        # workflow, continue-on-error: true lets the commit step still run) -
-        # this just makes sure the run itself still shows red so the
-        # retry-once/alert pipeline actually engages, rather than a real,
-        # usually-transient fetch failure silently passing as success because
-        # the other image happened to work.
+    if "failed" in statuses:
+        # Distinct from "not_found" (a selector legitimately absent from the
+        # page, e.g. no car photo published yet for a brand-new signing) -
+        # "failed" means the selector WAS there but the fetch or decode step
+        # broke (confirmed live 2026-09-08 in two different ways: a fetch
+        # returning None, and a fetch reporting success but returning
+        # undecodable bytes - see _process_one_image's own docstring). That's
+        # a real failure, not "nothing new to do", and must still exit
+        # non-zero so the workflow's retry-once step actually fires - whatever
+        # DID succeed above is already saved and bundle-regenerated regardless
+        # (and the calling workflow's continue-on-error: true lets its commit
+        # step still run), so nothing good is lost by still failing the run.
         sys.exit(1)
 
 
