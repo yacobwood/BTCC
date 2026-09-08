@@ -511,6 +511,58 @@ class TestApplyDrawOverride(unittest.TestCase):
         self.assertIsNone(r2_r3.get('reverseGridDraw'))
 
 
+# ── _build_results_output ────────────────────────────────────────────────────
+# Regression coverage for a season-long bug fixed 2026-09-09: main() used to
+# serialize+write results{year}.json immediately after output_rounds was
+# assembled, then apply the championship-PDF per-race override to
+# output_rounds afterward once the PDF had been fetched - so the override
+# was always computed correctly but never reached the file. Every per-race
+# point value on disk stayed the locally-reconstructed one (this file's own
+# fastestLap/leadLap-bonus detection), letting results{year}.json's summed
+# points drift from standings.json's official total for several drivers
+# despite the override itself being correct. _build_results_output exists
+# specifically so the override is applied to whatever gets returned, before
+# any caller can serialize it - not something a caller can get wrong by
+# sequencing two separate steps in the wrong order.
+class TestBuildResultsOutput(unittest.TestCase):
+
+    def _rounds_with_one_result(self, points):
+        return [{
+            'round': 1, 'venue': 'Test', 'date': '01 Jan', 'youtubeUrls': [],
+            'races': [{'label': 'Race 1', 'results': [
+                {'driver': 'Tom INGRAM', 'pos': 2, 'points': points},
+            ], 'grid': []}],
+        }]
+
+    def test_the_returned_dict_already_reflects_the_championship_pdf_override(self):
+        rounds = self._rounds_with_one_result(points=17)  # locally-computed (wrong) value
+        per_race = {'Tom INGRAM': {(1, 'Race 1'): 18}}     # authoritative PDF value
+        out = s._build_results_output(2026, rounds, per_race, {(1, 'Race 1')})
+        result = out['rounds'][0]['races'][0]['results'][0]
+        self.assertEqual(result['points'], 18)
+
+    def test_mutates_and_returns_the_same_rounds_object_the_caller_passed_in(self):
+        # Confirms there's no second, un-overridden copy anywhere a future
+        # caller could accidentally serialize instead of this one.
+        rounds = self._rounds_with_one_result(points=17)
+        per_race = {'Tom INGRAM': {(1, 'Race 1'): 18}}
+        out = s._build_results_output(2026, rounds, per_race, {(1, 'Race 1')})
+        self.assertIs(out['rounds'], rounds)
+        self.assertEqual(rounds[0]['races'][0]['results'][0]['points'], 18)
+
+    def test_is_a_safe_no_op_when_no_championship_pdf_was_available(self):
+        # Matches main()'s own per_race={}, scored_sessions=set() default when
+        # every championship-PDF fetch attempt failed - must leave the
+        # locally-computed points untouched, not wipe them to 0.
+        rounds = self._rounds_with_one_result(points=17)
+        out = s._build_results_output(2026, rounds, {}, set())
+        self.assertEqual(out['rounds'][0]['races'][0]['results'][0]['points'], 17)
+
+    def test_includes_the_season_key(self):
+        out = s._build_results_output(2026, self._rounds_with_one_result(points=17), {}, set())
+        self.assertEqual(out['season'], '2026')
+
+
 # ── _normalize_team_entries ──────────────────────────────────────────────────
 # Regression: 2026-08-22, Donington Park GP round 7 - the official TSL teams
 # championship PDF listed "Cataclean Plato Racing" (282pts) and its renamed
