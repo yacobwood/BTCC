@@ -1,5 +1,6 @@
 import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
+import {Linking} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NewsScreen from '../../src/screens/NewsScreen';
 import {renderWithProviders, makeNav, MOCK_ARTICLES, MOCK_ARTICLES_WITH_DIGEST} from './testUtils';
@@ -13,10 +14,12 @@ jest.mock('../../src/api/client', () => ({
   fetchArticles: jest.fn(),
   fetchHubPosts: jest.fn(),
   fetchExplainerArticles: jest.fn(),
+  fetchShorts: jest.fn(),
   peekArticlesCache: jest.fn(),
 }));
 jest.mock('../../src/api/parsers', () => ({
   parseArticle: jest.fn(a => a),
+  parseShorts: jest.fn(json => json),
 }));
 jest.mock('../../src/utils/digestRead', () => ({
   getReadIds: jest.fn().mockResolvedValue(new Set()),
@@ -25,7 +28,7 @@ jest.mock('../../src/utils/explainerRead', () => ({
   getReadIds: jest.fn().mockResolvedValue(new Set()),
 }));
 
-const {fetchArticles, fetchHubPosts, fetchExplainerArticles, peekArticlesCache} = require('../../src/api/client');
+const {fetchArticles, fetchHubPosts, fetchExplainerArticles, fetchShorts, peekArticlesCache} = require('../../src/api/client');
 const {getReadIds: getExplainerReadIds} = require('../../src/utils/explainerRead');
 const {useFocusEffect} = require('@react-navigation/native');
 const nav = makeNav();
@@ -36,10 +39,11 @@ beforeEach(() => {
   fetchArticles.mockResolvedValue(MOCK_ARTICLES);
   fetchHubPosts.mockResolvedValue([]);
   fetchExplainerArticles.mockResolvedValue([]);
+  fetchShorts.mockResolvedValue({updatedAt: '', shorts: []});
   peekArticlesCache.mockResolvedValue(null); // cold start by default
 });
 
-function renderNews({articles = MOCK_ARTICLES, favourites = [], explainerArticles = []} = {}) {
+function renderNews({articles = MOCK_ARTICLES, favourites = [], explainerArticles = [], shorts = []} = {}) {
   AsyncStorage.getItem.mockImplementation((key) => {
     if (key === 'favourite_drivers') return Promise.resolve(JSON.stringify(favourites));
     return Promise.resolve(null);
@@ -47,6 +51,7 @@ function renderNews({articles = MOCK_ARTICLES, favourites = [], explainerArticle
   fetchArticles.mockResolvedValue(articles);
   fetchHubPosts.mockResolvedValue([]);
   fetchExplainerArticles.mockResolvedValue(explainerArticles);
+  fetchShorts.mockResolvedValue({updatedAt: '2026-09-08T00:00:00Z', shorts});
   return renderWithProviders(<NewsScreen navigation={nav} />);
 }
 
@@ -592,6 +597,41 @@ describe('NewsScreen', () => {
         fireEvent.press(getByLabelText('Close search'));
       });
       expect(queryByPlaceholderText('Search news…')).toBeNull();
+    });
+  });
+
+  describe('shorts rail', () => {
+    const SHORTS = [
+      {videoId: 'Fv8Rk1ei3TE', url: 'https://www.youtube.com/shorts/Fv8Rk1ei3TE', thumbnailUrl: 'https://i.ytimg.com/vi/Fv8Rk1ei3TE/hqdefault.jpg'},
+      {videoId: 'D7gG1Cd1AZ8', url: 'https://www.youtube.com/shorts/D7gG1Cd1AZ8', thumbnailUrl: 'https://i.ytimg.com/vi/D7gG1Cd1AZ8/hqdefault.jpg'},
+    ];
+
+    it('does not render the rail when there are no shorts', async () => {
+      const {getByLabelText, queryByText} = renderNews({shorts: []});
+      await waitFor(() => getByLabelText('Search news'));
+      expect(queryByText('LATEST BTCC SHORTS')).toBeNull();
+    });
+
+    it('renders a thumbnail per short once shorts.json has data', async () => {
+      const {getByText, getAllByLabelText} = renderNews({shorts: SHORTS});
+      await waitFor(() => getByText('LATEST BTCC SHORTS'));
+      expect(getAllByLabelText('Watch BTCC short on YouTube')).toHaveLength(2);
+    });
+
+    it('tapping a short opens its own YouTube Shorts URL', async () => {
+      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+      const {getByText, getAllByLabelText} = renderNews({shorts: SHORTS});
+      await waitFor(() => getByText('LATEST BTCC SHORTS'));
+      await act(async () => { fireEvent.press(getAllByLabelText('Watch BTCC short on YouTube')[1]); });
+      expect(openURL).toHaveBeenCalledWith('https://www.youtube.com/shorts/D7gG1Cd1AZ8');
+    });
+
+    it('the "View Channel" link opens the official BTCC Shorts channel, not any one short', async () => {
+      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+      const {getByLabelText} = renderNews({shorts: SHORTS});
+      await waitFor(() => getByLabelText('View Channel Shorts'));
+      await act(async () => { fireEvent.press(getByLabelText('View Channel Shorts')); });
+      expect(openURL).toHaveBeenCalledWith('https://www.youtube.com/@OfficialBTCC/shorts');
     });
   });
 });

@@ -1559,6 +1559,18 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
+  <div class="scraper-card" id="sc-shorts">
+    <div class="scraper-head">
+      <div class="scraper-title">SHORTS</div>
+      <div class="scraper-status-chip" id="ss-shorts">—</div>
+    </div>
+    <div class="scraper-desc">"Latest BTCC Shorts" carousel from btcc.net's homepage → <strong>shorts.json</strong>. Auto: weekly, Wednesday 09:33 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs"></div>
+      <button class="btn-run" onclick="runScraper('scrape-shorts.yml','shorts')">RUN ▶</button>
+    </div>
+  </div>
+
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
@@ -2151,6 +2163,7 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-btcc-stats.yml',       key:'btcc-stats'},
   {file:'scrape-youtube.yml',          key:'youtube'},
   {file:'scrape-driver-media.yml',     key:'driver-media'},
+  {file:'scrape-shorts.yml',           key:'shorts'},
 ];
 
 function startLiveTick() {
