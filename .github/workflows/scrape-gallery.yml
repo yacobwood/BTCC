@@ -20,12 +20,26 @@
 # backfilled by this schedule at all - run workflow_dispatch manually with
 # an older `season` input whenever there's spare capacity, so this weekly
 # job stays focused on the current season.
+#
+# Cron moved off the exact :00 mark to :05 on 2026-09-09, after this
+# workflow's own real run history showed it: fired fine on its first-ever
+# Wednesday (2026-09-02), then silently didn't fire at all on its second
+# (2026-09-09) - confirmed live, not assumed (gh run list showed zero
+# "schedule" event for that date, while scrape-news.yml's own 5-minute
+# schedule kept ticking fine the same morning, ruling out a repo-wide
+# GitHub Actions outage). Same root cause already found and fixed for
+# scrape-news.yml's overnight gaps (see root README.md's "overnight cron
+# gap" entry / project_overnight_cron_gap_fix memory) and for
+# scrape-shorts.yml's own :33 choice - GitHub's own docs warn scheduled
+# triggers can be delayed or dropped under load, worst right on the hour
+# mark, the single most contested tick across every repo on GitHub, not
+# just this one.
 name: Scrape BTCC Gallery
 
 on:
   schedule:
-    # Weekly, Wednesday 09:00 UTC.
-    - cron: "0 9 * * 3"
+    # Weekly, Wednesday 09:05 UTC (moved off :00, see comment above).
+    - cron: "5 9 * * 3"
   workflow_dispatch:
     inputs:
       season:
