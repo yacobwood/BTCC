@@ -1,7 +1,9 @@
-# On-demand only, unlike scrape-results/calendar/btcc-stats/youtube - there's
-# no sensible schedule for "a specific driver's photo changed on btcc.net",
-# only a human noticing it and triggering this from the admin panel's DRIVER
-# MEDIA card (or `gh workflow run` directly). Fetches via Scrapfly (see
+# On-demand only, triggered from the admin panel's DRIVER MEDIA card (or
+# `gh workflow run` directly) for a specific driver you already know changed.
+# scrape-driver-roster.yml (added 2026-09-09) is the weekly, unattended
+# companion that sweeps every driver AND discovers new signings - this one
+# stays targeted and manual for "I know exactly who changed, refresh just
+# them now" (e.g. right after triggering that one). Fetches via Scrapfly (see
 # scrapfly_fallback.py / tools/scraper/README.md's access model section),
 # same as every other btcc.net-facing scraper since the 2026-09-01 migration -
 # runs on GitHub-hosted ubuntu-latest, no residential IP needed.

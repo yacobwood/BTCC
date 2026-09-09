@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scrape_driver_media import _filename_stem, extract_media_urls, main
+from scrape_driver_media import _filename_stem, extract_media_urls, main, refresh_driver_media
 
 DRIVER_PAGE_HTML = """
 <html><body>
@@ -91,6 +91,55 @@ class TestFilenameStem(unittest.TestCase):
         # _filename_stem is genuinely convention-agnostic, just slugifying
         # whatever fallback_stem it's given.
         self.assertEqual(_filename_stem(None, "123"), "123")
+
+
+class TestRefreshDriverMedia(unittest.TestCase):
+    """refresh_driver_media() itself - the function extracted 2026-09-09 so
+    scrape_driver_roster.py's weekly sweep can call the same per-driver
+    logic main() below already relies on. main()'s own tests above already
+    cover every per-image status combination via the full CLI - these focus
+    on refresh_driver_media's own direct contract (in-place mutation, return
+    shape) since it now has a second, non-CLI caller."""
+
+    @patch("scrape_driver_media._regenerate_bundle")
+    @patch("scrape_driver_media._save_master_image")
+    @patch("scrape_driver_media.fetch_image_smart", return_value=(b"bytes", "image/webp"))
+    @patch("scrape_driver_media.fetch_via_scrapfly", return_value=DRIVER_PAGE_HTML)
+    def test_returns_the_three_statuses_and_mutates_drv_in_place(
+        self, mock_fetch, mock_image, mock_save, mock_regen,
+    ):
+        drv = {"name": "Senna Proctor", "number": 55, "imageUrl": None, "carImageUrl": None, "numberImageUrl": None}
+        with patch.multiple(
+            "scrape_driver_media",
+            DRIVER_IMAGES_DIR=Path("/tmp/driverImages"),
+            CAR_IMAGES_DIR=Path("/tmp/carImages"),
+            NUMBER_IMAGES_DIR=Path("/tmp/numberImages"),
+        ):
+            statuses = refresh_driver_media(drv, "senna-proctor")
+        self.assertEqual(statuses, ("ok", "ok", "ok"))
+        # The caller (main(), or scrape_driver_roster.py) owns writing
+        # drivers.json back to disk - refresh_driver_media only needs to
+        # mutate the dict it was given.
+        self.assertEqual(drv["imageUrl"], "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/driverImages/proctor.webp")
+        self.assertEqual(drv["carImageUrl"], "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/carImages/proctor.webp")
+        self.assertEqual(drv["numberImageUrl"], "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/numberImages/55.png")
+
+    @patch("scrape_driver_media.fetch_via_scrapfly", return_value=None)
+    def test_returns_none_without_raising_when_the_page_fetch_fails(self, mock_fetch):
+        # A caller sweeping many drivers (scrape_driver_roster.py) needs to
+        # tell "this driver's page failed to load this week, skip them" apart
+        # from "the page loaded but every image on it failed" - only the
+        # former is a plain None, not a fabricated ("failed","failed","failed").
+        drv = dict(_LLOYD)
+        result = refresh_driver_media(drv, "daniel-lloyd")
+        self.assertIsNone(result)
+        # Nothing should have been touched - drv is exactly as given.
+        self.assertEqual(drv, _LLOYD)
+
+    def test_strips_a_leading_or_trailing_slash_from_the_slug(self):
+        with patch("scrape_driver_media.fetch_via_scrapfly", return_value=None) as mock_fetch:
+            refresh_driver_media(dict(_LLOYD), "/daniel-lloyd/")
+        self.assertEqual(mock_fetch.call_args.args[0], "https://btcc.net/driver/daniel-lloyd/")
 
 
 class TestMain(unittest.TestCase):

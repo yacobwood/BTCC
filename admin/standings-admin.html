@@ -1559,6 +1559,18 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
+  <div class="scraper-card" id="sc-driver-roster">
+    <div class="scraper-head">
+      <div class="scraper-title">DRIVER ROSTER SWEEP</div>
+      <div class="scraper-status-chip" id="ss-driver-roster">—</div>
+    </div>
+    <div class="scraper-desc">Sweeps every driver's images for changes and auto-adds any new signing found on btcc.net's /drivers/ listing (as a stub - team/car/class/bio still need manual completion). Auto: weekly, Thursday 09:15 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs"></div>
+      <button class="btn-run" onclick="runScraper('scrape-driver-roster.yml','driver-roster')">RUN ▶</button>
+    </div>
+  </div>
+
   <div class="scraper-card" id="sc-shorts">
     <div class="scraper-head">
       <div class="scraper-title">SHORTS</div>
@@ -2163,6 +2175,7 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-btcc-stats.yml',       key:'btcc-stats'},
   {file:'scrape-youtube.yml',          key:'youtube'},
   {file:'scrape-driver-media.yml',     key:'driver-media'},
+  {file:'scrape-driver-roster.yml',    key:'driver-roster'},
   {file:'scrape-shorts.yml',           key:'shorts'},
 ];
 
