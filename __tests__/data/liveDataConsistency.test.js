@@ -985,9 +985,20 @@ describe('11. results2026.json <-> standings.json — points totals', () => {
   // so this is a real, permanent gap, not scrape-timing noise. The exact
   // regs citation/date for each isn't verified here — flag to a human before
   // trusting the number itself, this only documents that a deduction exists.
+  //
+  // Daniel LLOYD added 2026-09-09: also asterisked in the official standings
+  // table (confirmed via the actual TSL championship PDF, re-parsed directly
+  // rather than assumed) - his own per-race breakdown columns in that same
+  // PDF sum to exactly 27 (matching results2026.json's own per-race total,
+  // confirmed correct), while the PDF's own printed Total for him is 17 - an
+  // inconsistency *within one single document*, not a scrape-timing artifact
+  // across two snapshots, so no second time-separated check was needed to
+  // trust this one the way the +5 gap above was cross-checked. Exact regs
+  // citation still not independently verified - same caveat as above.
   const KNOWN_STANDALONE_POINTS_PENALTIES = {
     'Adam MORGAN': 5,
     'James DORLIN': 5,
+    'Daniel LLOYD': 10,
   };
 
   it('sum of r.points in results2026 matches standings.json total for every driver', () => {
