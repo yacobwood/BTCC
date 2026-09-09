@@ -128,6 +128,7 @@ across runs instead of reinstalling every time.
 | `scrape_tsl.py` | tsl-timing.com PDFs (not btcc.net) | `data/results{year}.json`, `data/standings.json`, `data/calendar.json` (records) | Every 2 min on race weekends - `scrape-results.yml` (GitHub-hosted) |
 | `scrape_youtube.py` | youtube.com (ITV Sport Extra, not btcc.net) | `data/results2026.json`, `data/calendar.json` | Mon+Tue 10:00 UTC - `scrape-youtube.yml` (GitHub-hosted) |
 | `scrape_driver_media.py` | btcc.net/driver/\<slug\>/ (one driver at a time) | `data/driverImages/`, `data/carImages/`, `data/numberImages/` (+ bundled `src/assets/driver_images*/` for the first two) | On-demand only, no schedule - `scrape-driver-media.yml`, triggered from the admin panel's DRIVER MEDIA card |
+| `scrape_driver_roster.py` | btcc.net/drivers/ (listing) + btcc.net/driver/\<slug\>/ for every driver | Same as `scrape_driver_media.py` above, plus new-driver stub entries in `data/drivers.json` and change-detection state in `data/driver_media_state.json` | Weekly, Thu 09:15 UTC - `scrape-driver-roster.yml`, triggered from the admin panel's DRIVER ROSTER SWEEP card |
 | `scrape_circuit_images.py` | btcc.net/circuit/\<slug\>/ per track | `data/tracks.json` (`imageUrl`) + `data/media/tracks/` | Manual only |
 | `scrape_gallery.py` | btcc.net/gallery/\<year\>/ + per-album pages (both paginated) | `data/gallery{year}.json` + `data/gallery/{year}/*.json` (no image bytes - photos are hotlinked directly, see below) | Weekly, Wed 09:00 UTC - `scrape-gallery.yml` |
 | `scrape_shorts.py` | btcc.net/ (bare homepage - the first scraper to fetch it; every other one targets a specific subpath) | `data/shorts.json` (video IDs + `i.ytimg.com` thumbnail URLs, no image bytes mirrored - same "it's already a public, non-expiring URL" reasoning as `scrape_gallery.py`'s own hotlinked photos) | Weekly, Wed 09:33 UTC - `scrape-shorts.yml`, triggered from the admin panel's SHORTS card |
@@ -149,6 +150,40 @@ assumed nothing consumed that field, having misread a different field's "no
 UI consumer yet" note; `numberImageUrl` is genuinely rendered in
 `DriversScreen`/`DriverDetailScreen`/`TeamDetailScreen`). See "Hardcoded
 driver/team images" below and `tools/scraper/archive/README.md`.
+
+**`scrape_driver_roster.py`** (added 2026-09-09) is the weekly, unattended
+counterpart: it calls `scrape_driver_media.py`'s own `refresh_driver_media()`
+(extracted so both share the exact same per-image fetch/decode/bundle-regen
+logic) for every driver already in `drivers.json`, and separately discovers
+any driver on the `/drivers/` listing who isn't in `drivers.json` yet (a
+mid-season signing) and adds them automatically.
+
+Deliberately NOT a blind weekly resweep of all three images for all ~27
+drivers - that would cost real, if small, Scrapfly credits (an image fetch
+is ~225 credits vs. ~30 for a page) and touch ~81 image files in the commit
+diff regardless of whether anything actually changed. Instead it fetches
+each driver's profile page (cheap, needed anyway) and compares the three
+images' current btcc.net-side `/api/media/<uuid>` source URLs against
+`data/driver_media_state.json` - a new cache distinct from `drivers.json`'s
+own `imageUrl`/`carImageUrl`/`numberImageUrl` fields (which deliberately
+keep a STABLE `raw.githubusercontent.com` URL forever) - only paying for the
+expensive per-image fetch on a slot whose source URL genuinely changed since
+the last run.
+
+A newly-discovered driver only gets `name`, `number` (read from the car
+number graphic's own `alt` attribute - the one place this repo has confirmed
+the number as text, not just an image) and their three images auto-added.
+`team`/`car`/`class`/`nationality`/`bio`/`dateOfBirth`/`birthplace`/`livesIn`/
+`cardBgUrl` are left blank rather than guessed - none of these have ever been
+confirmed scrapable from btcc.net's markup by any script in this repo
+(archived or current), and `project_new_driver_workflow`'s own established
+process needs WebSearch cross-referencing for bio/DOB facts, not mechanical
+extraction. The new entry is marked `"needsReview": true` so it's easy to
+find and finish by hand (see that same 3-file checklist for what's still
+needed) - it still renders correctly in the app immediately with a real
+photo via the live-`imageUrl` fallback (see "Hardcoded driver/team images"
+below), just without a bio, until it's completed and a future release adds
+its `src/assets/driverImages.js` bundle entry.
 
 ## Hardcoded driver/team images (not scraped)
 

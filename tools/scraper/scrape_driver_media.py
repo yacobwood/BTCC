@@ -4,7 +4,10 @@ scrape_driver_media.py
 On-demand refresh of ONE driver's headshot, car livery photo and/or car
 number graphic from their own btcc.net profile page, triggered manually
 from the admin panel's Scrapers tab (DRIVER MEDIA card) - not run on a
-schedule.
+schedule itself. The actual per-driver fetch/refresh logic lives in
+refresh_driver_media() below, which scrape_driver_roster.py's weekly,
+full-roster sweep (added 2026-09-09) also calls, one driver at a time -
+this file's own main()/CLI is unchanged, just a thin wrapper around it now.
 
 Not a revival of the old archived scrape_driver_images.py/
 scrape_driver_cutouts.py (both still sit in tools/scraper/archive/,
@@ -218,19 +221,33 @@ def _process_one_image(
     return "ok", new_url
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser(description="Refresh one driver's headshot + car photo + car number graphic from btcc.net")
-    ap.add_argument("--driver-name", required=True, help='Exact name as it appears in drivers.json (e.g. "Daniel Lloyd")')
-    ap.add_argument("--driver-slug", required=True, help="btcc.net URL slug (e.g. daniel-lloyd)")
-    args = ap.parse_args()
+def refresh_driver_media(drv: dict, slug: str) -> tuple[str, str, str] | None:
+    """Fetches slug's btcc.net profile page once and refreshes drv's
+    headshot, car livery and car number graphic - the actual work of this
+    script, extracted 2026-09-09 out of main() below so
+    scrape_driver_roster.py's weekly full-sweep can call the exact same
+    tested per-image fetch/decode/bundle-regenerate logic
+    (_process_one_image) that this script's own single-driver CLI already
+    uses, instead of a second, drifting copy of it.
 
-    data = json.loads(DRIVERS_PATH.read_text(encoding="utf-8"))
-    drv = next((d for d in data["drivers"] if d.get("name") == args.driver_name), None)
-    if drv is None:
-        print(f"ERROR: no driver named '{args.driver_name}' found in {DRIVERS_PATH}", file=sys.stderr)
-        sys.exit(1)
+    Mutates drv's imageUrl/carImageUrl/numberImageUrl fields in place
+    (only ever setting a field that was previously empty - see
+    _filename_stem's own docstring for why an existing field's value, and
+    therefore its file, never changes) - the caller is responsible for
+    deciding whether/when to write drv's containing drivers.json back to
+    disk, since a caller sweeping many drivers wants to write once at the
+    end, not once per driver.
 
-    url = BASE_URL + args.driver_slug.strip("/") + "/"
+    Returns (headshot_status, car_status, number_status), each one of
+    _process_one_image's "ok"/"not_found"/"failed" - or None if the page
+    fetch itself failed outright (a distinct case from any per-image
+    status: nothing about this driver could be checked at all this run).
+    Deliberately returns None rather than raising, so a caller sweeping
+    many drivers can skip this one and keep going without a try/except
+    around every call - see scrape_driver_roster.py's own per-driver
+    isolation."""
+    slug = slug.strip("/")
+    url = BASE_URL + slug + "/"
     print(f"Fetching {url} …")
     # wait_for_selector added 2026-09-09: real runs hit several intermittent
     # failures (a headshot 422, a car image that "fetched successfully" but
@@ -248,51 +265,68 @@ def main() -> None:
     # or number graphic into a hard timeout instead of this script's own,
     # already-graceful "not_found" handling for that.
     html = fetch_via_scrapfly(
-        url, referer=_DRIVERS_LISTING_REFERER, render_js=True, label=args.driver_slug,
+        url, referer=_DRIVERS_LISTING_REFERER, render_js=True, label=slug,
         wait_for_selector=".driver-profile-cutout",
     )
     if html is None:
-        print(f"ERROR: could not fetch {url} (Scrapfly fetch failed)", file=sys.stderr)
-        sys.exit(1)
+        print(f"  ERROR: could not fetch {url} (Scrapfly fetch failed)", file=sys.stderr)
+        return None
 
     media = extract_media_urls(html)
-    surname = args.driver_name.strip().split()[-1]
+    surname = drv["name"].strip().split()[-1]
 
     headshot_status, new_image_url = _process_one_image(
         kind="headshot", media_url=media["cutout"], existing_url=drv.get("imageUrl"),
-        driver_name=args.driver_name, fallback_stem=surname, fetch_label=f"{args.driver_slug}-headshot",
+        driver_name=drv["name"], fallback_stem=surname, fetch_label=f"{slug}-headshot",
         images_dir=DRIVER_IMAGES_DIR, ext="webp", url_field_prefix="driverImages",
         bundle_script="generate_driver_bundle.py",
     )
     car_status, new_car_url = _process_one_image(
         kind="car", media_url=media["car"], existing_url=drv.get("carImageUrl"),
-        driver_name=args.driver_name, fallback_stem=surname, fetch_label=f"{args.driver_slug}-car",
+        driver_name=drv["name"], fallback_stem=surname, fetch_label=f"{slug}-car",
         images_dir=CAR_IMAGES_DIR, ext="webp", url_field_prefix="carImages",
         bundle_script="generate_car_thumb.py",
     )
     number_status, new_number_url = _process_one_image(
         kind="number", media_url=media["number"], existing_url=drv.get("numberImageUrl"),
-        driver_name=args.driver_name, fallback_stem=str(drv.get("number", surname)),
-        fetch_label=f"{args.driver_slug}-number", images_dir=NUMBER_IMAGES_DIR, ext="png",
+        driver_name=drv["name"], fallback_stem=str(drv.get("number", surname)),
+        fetch_label=f"{slug}-number", images_dir=NUMBER_IMAGES_DIR, ext="png",
         url_field_prefix="numberImages", bundle_script=None,  # no bundled RN asset for number graphics - always network-fetched
     )
-    statuses = (headshot_status, car_status, number_status)
+
+    if new_image_url:
+        drv["imageUrl"] = new_image_url
+    if new_car_url:
+        drv["carImageUrl"] = new_car_url
+    if new_number_url:
+        drv["numberImageUrl"] = new_number_url
+
+    return headshot_status, car_status, number_status
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Refresh one driver's headshot + car photo + car number graphic from btcc.net")
+    ap.add_argument("--driver-name", required=True, help='Exact name as it appears in drivers.json (e.g. "Daniel Lloyd")')
+    ap.add_argument("--driver-slug", required=True, help="btcc.net URL slug (e.g. daniel-lloyd)")
+    args = ap.parse_args()
+
+    data = json.loads(DRIVERS_PATH.read_text(encoding="utf-8"))
+    drv = next((d for d in data["drivers"] if d.get("name") == args.driver_name), None)
+    if drv is None:
+        print(f"ERROR: no driver named '{args.driver_name}' found in {DRIVERS_PATH}", file=sys.stderr)
+        sys.exit(1)
+
+    before = (drv.get("imageUrl"), drv.get("carImageUrl"), drv.get("numberImageUrl"))
+    statuses = refresh_driver_media(drv, args.driver_slug)
+    if statuses is None:
+        sys.exit(1)  # error already printed by refresh_driver_media
 
     if "ok" not in statuses:
         print(f"ERROR: no image updated for {args.driver_name} - check the slug is correct", file=sys.stderr)
         sys.exit(1)
 
-    drivers_changed = False
-    if new_image_url:
-        drv["imageUrl"] = new_image_url
-        drivers_changed = True
-    if new_car_url:
-        drv["carImageUrl"] = new_car_url
-        drivers_changed = True
-    if new_number_url:
-        drv["numberImageUrl"] = new_number_url
-        drivers_changed = True
-    if drivers_changed:
+    after = (drv.get("imageUrl"), drv.get("carImageUrl"), drv.get("numberImageUrl"))
+    if after != before:
         DRIVERS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Updated {DRIVERS_PATH}")
 
