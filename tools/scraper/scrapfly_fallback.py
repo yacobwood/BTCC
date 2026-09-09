@@ -74,6 +74,7 @@ def _error_detail(e: Exception) -> str:
 
 def fetch_via_scrapfly(
     url: str, referer: str | None = None, label: str = "", timeout: int = 30, render_js: bool = True,
+    wait_for_selector: str | None = None,
 ) -> str | None:
     """Fetch url through Scrapfly's Scrape API and return the rendered HTML
     (or, with render_js=False, whatever text content the origin returned
@@ -96,7 +97,24 @@ def fetch_via_scrapfly(
     (headers[Referer]=...), not just cosmetic - also per their docs, since
     Scrapfly's ASP mode can otherwise auto-generate its own referer, which
     we'd rather not leave to chance given referer is the one lever
-    confirmed (2026-08-14) to matter here."""
+    confirmed (2026-08-14) to matter here.
+
+    wait_for_selector, if given, is Scrapfly's own documented
+    render-completion signal (a CSS/XPath selector, or an `xhr:` prefixed
+    pattern) - hold the response until that element is actually present in
+    the DOM, rather than trusting Scrapfly's own generic "page looks done"
+    heuristic (the default when this is left unset). Added 2026-09-09:
+    scrape_driver_media.py's real runs hit several intermittent failures
+    that all had the same shape - a headshot 422, a car image that "fetched
+    successfully" but decoded to garbage bytes, and a recurring 404 on a
+    malformed-looking redirect target - every one consistent with the page
+    not having genuinely finished rendering the image element the caller
+    then went on to extract a src from. Only worth setting for a page whose
+    target element is expected to reliably exist (an established driver
+    always has a headshot, say) - for anything the caller's own downstream
+    parsing already treats as legitimately-optional (see e.g.
+    extract_media_urls's "not_found" vs "failed" distinction), waiting on
+    it here risks turning a genuine absence into a hard timeout instead."""
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
@@ -109,6 +127,8 @@ def fetch_via_scrapfly(
     }
     if referer:
         params["headers[Referer]"] = referer
+    if wait_for_selector:
+        params["wait_for_selector"] = wait_for_selector
 
     request_url = f"{SCRAPFLY_ENDPOINT}?{urllib.parse.urlencode(params)}"
     try:

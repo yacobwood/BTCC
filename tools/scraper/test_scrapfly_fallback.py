@@ -79,6 +79,28 @@ class TestFetchViaScrapfly(unittest.TestCase):
         requested_url = mock_urlopen.call_args[0][0]
         self.assertIn("render_js=false", requested_url)
 
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_wait_for_selector_is_passed_through_when_given(self, mock_urlopen):
+        mock_urlopen.return_value.__enter__.return_value = BytesIO(
+            json.dumps({"result": {"content": "ok"}}).encode()
+        )
+        fetch_via_scrapfly("https://btcc.net/driver/daniel-lloyd/", wait_for_selector=".driver-profile-cutout")
+        requested_url = mock_urlopen.call_args[0][0]
+        self.assertIn("wait_for_selector=.driver-profile-cutout", requested_url)
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_wait_for_selector_is_omitted_when_not_given(self, mock_urlopen):
+        # Every existing caller before 2026-09-09 didn't set this - confirms
+        # adding the parameter didn't change their request shape at all.
+        mock_urlopen.return_value.__enter__.return_value = BytesIO(
+            json.dumps({"result": {"content": "ok"}}).encode()
+        )
+        fetch_via_scrapfly("https://btcc.net/some-article/")
+        requested_url = mock_urlopen.call_args[0][0]
+        self.assertNotIn("wait_for_selector", requested_url)
+
 
 class TestFetchImageViaScrapfly(unittest.TestCase):
 

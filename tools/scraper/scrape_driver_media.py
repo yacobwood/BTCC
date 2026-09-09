@@ -232,7 +232,19 @@ def main() -> None:
 
     url = BASE_URL + args.driver_slug.strip("/") + "/"
     print(f"Fetching {url} …")
-    html = fetch_via_scrapfly(url, referer=_DRIVERS_LISTING_REFERER, render_js=True, label=args.driver_slug)
+    # wait_for_selector added 2026-09-09: real runs hit several intermittent
+    # failures (a headshot 422, a car image that "fetched successfully" but
+    # decoded to garbage bytes, a recurring 404 on a malformed-looking
+    # redirect target) all consistent with the page not having genuinely
+    # finished rendering yet. .driver-profile-cutout specifically (not car/
+    # number) since every established driver has a headshot - the one
+    # element safe to require without risking turning a driver's genuinely
+    # missing car photo or number graphic into a hard timeout instead of
+    # this script's own, already-graceful "not_found" handling for that.
+    html = fetch_via_scrapfly(
+        url, referer=_DRIVERS_LISTING_REFERER, render_js=True, label=args.driver_slug,
+        wait_for_selector=".driver-profile-cutout",
+    )
     if html is None:
         print(f"ERROR: could not fetch {url} (Scrapfly fetch failed)", file=sys.stderr)
         sys.exit(1)

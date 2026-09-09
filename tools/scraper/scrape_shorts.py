@@ -75,7 +75,11 @@ def build_short(video_id: str) -> dict:
 
 def main() -> None:
     print(f"Fetching {HOMEPAGE_URL} …")
-    html = fetch_via_scrapfly(HOMEPAGE_URL, render_js=True, label="shorts")
+    # wait_for_selector added 2026-09-09, same reasoning as
+    # scrape_driver_media.py's own call - waits for the actual carousel
+    # content to be rendered rather than trusting Scrapfly's generic
+    # render-complete heuristic.
+    html = fetch_via_scrapfly(HOMEPAGE_URL, render_js=True, label="shorts", wait_for_selector=".short-card")
     if html is None:
         print(f"ERROR: could not fetch {HOMEPAGE_URL} (Scrapfly fetch failed)", file=sys.stderr)
         sys.exit(1)
