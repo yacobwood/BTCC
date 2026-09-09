@@ -597,6 +597,18 @@ select.input { cursor: pointer; }
 .scraper-inputs input[type=number] { width: 72px; padding: 7px 8px; font-size: 12px; }
 .scraper-inputs input[type=text]   { width: 130px; padding: 7px 8px; font-size: 12px; }
 .scraper-inputs select.input       { width: 120px; padding: 7px 8px; font-size: 12px; }
+
+/* ── Scraper "recent runs" (added 2026-09-09, built entirely from
+   SCRAPER_WORKFLOWS by initRecentRunsUI() - never hand-added per card) ── */
+.scraper-runs-toggle { font-size: 11px; color: var(--text-sec); cursor: pointer; letter-spacing: 0.5px; }
+.scraper-runs-toggle:hover { color: var(--yellow); }
+.scraper-runs-panel { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; margin-top: 2px; border-top: 1px solid var(--outline-lo); }
+.scraper-run-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-sec); }
+.scraper-run-row .run-icon { font-weight: 700; width: 12px; text-align: center; flex-shrink: 0; }
+.scraper-run-row .run-label { flex: 1; }
+.scraper-run-row .run-trigger { opacity: 0.7; }
+.scraper-runs-refresh { font-size: 10px; color: var(--text-sec); cursor: pointer; text-align: right; margin-bottom: 2px; }
+.scraper-runs-refresh:hover { color: var(--yellow); }
 .scraper-info-note {
   background: var(--surface);
   border: 1px solid var(--outline);
@@ -1583,6 +1595,75 @@ select.input { cursor: pointer; }
     </div>
   </div>
 
+  <div class="scraper-card" id="sc-news">
+    <div class="scraper-head">
+      <div class="scraper-title">NEWS</div>
+      <div class="scraper-status-chip" id="ss-news">—</div>
+    </div>
+    <div class="scraper-desc">Latest headline card from btcc.net/news/ → <strong>news.json</strong> + article mirror. Auto: every 5 min, 07:00-19:59 UTC; hourly overnight.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);cursor:pointer">
+          <input type="checkbox" id="si-news-force"> FORCE IMAGE
+        </label>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-news.yml','news')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-penalties">
+    <div class="scraper-head">
+      <div class="scraper-title">PENALTIES</div>
+      <div class="scraper-status-chip" id="ss-penalties">—</div>
+    </div>
+    <div class="scraper-desc">BARC judicial decision PDFs for the round that just finished → penalty data. Auto: weekly, Monday 07:05 UTC (morning after a race weekend).</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group"><div class="field-label">YEAR</div><input type="number" id="si-penalties-year" value="2026" min="2014" max="2030"></div>
+        <div class="field-group"><div class="field-label">ROUND</div><input type="number" id="si-penalties-round" placeholder="auto" min="1" max="30"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-penalties.yml','penalties')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-gallery">
+    <div class="scraper-head">
+      <div class="scraper-title">GALLERY</div>
+      <div class="scraper-status-chip" id="ss-gallery">—</div>
+    </div>
+    <div class="scraper-desc">Race-weekend photo albums from btcc.net/gallery/ → <strong>gallery{year}.json</strong> (hotlinked, no image bytes mirrored). Auto: weekly, Wednesday 09:05 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs">
+        <div class="field-group"><div class="field-label">SEASON</div><input type="number" id="si-gallery-season" value="2026" min="2010" max="2030"></div>
+      </div>
+      <button class="btn-run" onclick="runScraper('scrape-gallery.yml','gallery')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-team-stats">
+    <div class="scraper-head">
+      <div class="scraper-title">TEAM STATS</div>
+      <div class="scraper-status-chip" id="ss-team-stats">—</div>
+    </div>
+    <div class="scraper-desc">Race/win totals per team from btcc.net/team/&lt;slug&gt;/ → <strong>drivers.json</strong> (teams[].totalRaces/totalWins). Auto: weekly, Monday 06:34 UTC.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs"></div>
+      <button class="btn-run" onclick="runScraper('scrape-team-stats.yml','team-stats')">RUN ▶</button>
+    </div>
+  </div>
+
+  <div class="scraper-card" id="sc-circuit-images">
+    <div class="scraper-head">
+      <div class="scraper-title">CIRCUIT IMAGES</div>
+      <div class="scraper-status-chip" id="ss-circuit-images">—</div>
+    </div>
+    <div class="scraper-desc">Every circuit's hero photo from its own btcc.net page → <strong>tracks.json</strong> (imageUrl) + <strong>media/tracks/</strong>. On-demand only, no schedule.</div>
+    <div class="scraper-footer">
+      <div class="scraper-inputs"></div>
+      <button class="btn-run" onclick="runScraper('scrape-circuit-images.yml','circuit-images')">RUN ▶</button>
+    </div>
+  </div>
+
   </div><!-- /scrapers-grid -->
 
   <button class="btn-ghost" onclick="refreshAllStatus()" style="margin-top:4px;letter-spacing:1.5px">↻  REFRESH STATUS</button>
@@ -2177,6 +2258,11 @@ const SCRAPER_WORKFLOWS = [
   {file:'scrape-driver-media.yml',     key:'driver-media'},
   {file:'scrape-driver-roster.yml',    key:'driver-roster'},
   {file:'scrape-shorts.yml',           key:'shorts'},
+  {file:'scrape-news.yml',             key:'news'},
+  {file:'scrape-penalties.yml',        key:'penalties'},
+  {file:'scrape-gallery.yml',          key:'gallery'},
+  {file:'scrape-team-stats.yml',       key:'team-stats'},
+  {file:'scrape-circuit-images.yml',   key:'circuit-images'},
 ];
 
 function startLiveTick() {
@@ -2208,6 +2294,14 @@ function scraperInputs(workflow) {
     driver_name: document.getElementById('si-driver-name').value.trim(),
     driver_slug: document.getElementById('si-driver-slug').value.trim(),
   };
+  if (workflow === 'scrape-news.yml') return {force: String(!!document.getElementById('si-news-force')?.checked)};
+  if (workflow === 'scrape-penalties.yml') {
+    const inputs = {year: String(document.getElementById('si-penalties-year').value || 2026)};
+    const round = document.getElementById('si-penalties-round').value;
+    if (round) inputs.round = String(round);
+    return inputs;
+  }
+  if (workflow === 'scrape-gallery.yml') return {season: String(document.getElementById('si-gallery-season').value || 2026)};
   return {};
 }
 
@@ -2274,6 +2368,78 @@ async function refreshAllStatus() {
   clearInterval(pollTimer);
   pollTimer = setInterval(refreshAllStatus, 15000);
   updateDashHealth();
+}
+
+// ── Recent runs (added 2026-09-09) ────────────────────────────────────────
+// A small "▾ recent runs" row + collapsed panel, built entirely from
+// SCRAPER_WORKFLOWS and appended to every card at page load - so a new
+// scraper still only ever needs the same 2-3 touch points it already
+// needed (grid card + SCRAPER_WORKFLOWS entry), this attaches to whatever
+// #sc-<key> already exists rather than being hand-added per card.
+// Deliberately NOT part of refreshAllStatus()'s own 15s poll loop - that
+// one lightweight per_page=1 check per workflow already adds up across N
+// cards; a per_page=5 history list is only worth fetching for a card
+// someone's actually looking at, so it's lazy (first expand) and manually
+// refreshable instead of constantly re-polled.
+const recentRunsCache = {}; // key -> array of run objects, or undefined if never fetched
+
+function initRecentRunsUI() {
+  for (const w of SCRAPER_WORKFLOWS) {
+    const card = document.getElementById('sc-' + w.key);
+    if (!card) continue;
+    card.insertAdjacentHTML('beforeend',
+      '<div class="scraper-runs-toggle" onclick="toggleRecentRuns(\'' + w.key + '\')">▾ recent runs</div>' +
+      '<div class="scraper-runs-panel" id="sr-' + w.key + '" hidden><div class="section-note">—</div></div>');
+  }
+}
+
+async function toggleRecentRuns(key) {
+  const panel = document.getElementById('sr-' + key);
+  if (!panel) return;
+  const wasHidden = panel.hidden;
+  panel.hidden = !wasHidden;
+  if (wasHidden && !recentRunsCache[key]) await loadRecentRuns(key);
+}
+
+async function loadRecentRuns(key) {
+  const panel = document.getElementById('sr-' + key);
+  const w = SCRAPER_WORKFLOWS.find(x => x.key === key);
+  if (!panel || !w) return;
+  if (!getToken()) { panel.innerHTML = '<div class="section-note">Save token first</div>'; return; }
+  panel.innerHTML = '<div class="section-note">Loading…</div>';
+  recentRunsCache[key] = await fetchRecentRuns(w.file, 5);
+  renderRecentRuns(key);
+}
+
+async function fetchRecentRuns(workflow, count) {
+  const tok = getToken(); if (!tok) return [];
+  try {
+    const r = await fetch(`${GH_API}/repos/${REPO}/actions/workflows/${workflow}/runs?per_page=${count}`, {headers:{Authorization:'token '+tok}});
+    if (!r.ok) return [];
+    const d = await r.json();
+    return d.workflow_runs || [];
+  } catch { return []; }
+}
+
+function renderRecentRuns(key) {
+  const panel = document.getElementById('sr-' + key);
+  const runs = recentRunsCache[key] || [];
+  if (!panel) return;
+  const refreshRow = '<div class="scraper-runs-refresh" onclick="loadRecentRuns(\'' + key + '\')">↻ refresh</div>';
+  if (!runs.length) { panel.innerHTML = refreshRow + '<div class="section-note">No runs yet</div>'; return; }
+  const rows = runs.map(run => {
+    const inProgress = run.status !== 'completed';
+    const cls = inProgress ? 'st-running' : (run.conclusion === 'success' ? 'st-ok' : 'st-fail');
+    const icon = inProgress ? '●' : (run.conclusion === 'success' ? '✓' : '✗');
+    const label = inProgress ? (run.status === 'queued' ? 'Queued' : 'Running') : (run.conclusion || run.status);
+    const trigger = run.event === 'schedule' ? 'auto' : run.event === 'workflow_dispatch' ? 'manual' : run.event;
+    const ago = timeAgo(run.updated_at || run.created_at);
+    return '<div class="scraper-run-row"><span class="run-icon ' + cls + '">' + icon + '</span>'
+      + '<span class="run-label">' + label + '</span>'
+      + '<span class="run-trigger">' + trigger + '</span>'
+      + '<span class="run-ago">' + ago + '</span></div>';
+  }).join('');
+  panel.innerHTML = refreshRow + rows;
 }
 
 // ── Lap Preview URLs ──────────────────────────────────────────────────────────
@@ -4195,6 +4361,7 @@ loadFlags();
 loadNotifSchedule();
 window._notifLoaded = true;
 if (getToken()) refreshAllStatus();
+initRecentRunsUI();
 refreshErrorBadge();
 
 // ══════════════════════════════ ROADMAP ══════════════════════════════
