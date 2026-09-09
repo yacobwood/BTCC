@@ -11,8 +11,13 @@ name: Scrape BTCC Official Stats
 
 on:
   schedule:
-    # Weekly, Monday 06:00 UTC — well outside race windows to avoid commit conflicts
-    - cron: "0 6 * * 1"
+    # Weekly, Monday 06:04 UTC — well outside race windows to avoid commit
+    # conflicts. Moved off the exact :00 mark 2026-09-09, after
+    # scrape-gallery.yml was confirmed live to silently skip a scheduled
+    # tick while sitting on it (see project_gallery_croft_missed_schedule_fix
+    # memory) - unrelated to this workflow's own separate real failure on
+    # 2026-09-07 (that run DID fire correctly, then genuinely errored).
+    - cron: "4 6 * * 1"
   workflow_dispatch:
     inputs:
       dry_run:

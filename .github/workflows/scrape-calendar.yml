@@ -16,8 +16,11 @@ name: Scrape BTCC Calendar
 
 on:
   schedule:
-    # Weekly, Monday 09:00 UTC.
-    - cron: "0 9 * * 1"
+    # Weekly, Monday 09:06 UTC - moved off the exact :00 mark 2026-09-09,
+    # after scrape-gallery.yml was confirmed live to silently skip a
+    # scheduled tick while sitting on it (see root README.md's "overnight
+    # cron gap" entry / project_gallery_croft_missed_schedule_fix memory).
+    - cron: "6 9 * * 1"
   workflow_dispatch:
     inputs:
       season:

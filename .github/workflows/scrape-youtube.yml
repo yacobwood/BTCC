@@ -2,8 +2,10 @@ name: Scrape ITV YouTube Race Links
 
 on:
   schedule:
-    - cron: "0 10 * * 1"   # Monday 10:00 UTC
-    - cron: "0 10 * * 2"   # Tuesday 10:00 UTC (catches late uploads)
+    # Moved off the exact :00 mark 2026-09-09 - see
+    # project_gallery_croft_missed_schedule_fix memory.
+    - cron: "7 10 * * 1"   # Monday 10:07 UTC
+    - cron: "7 10 * * 2"   # Tuesday 10:07 UTC (catches late uploads)
   workflow_dispatch:
     inputs:
       is_retry:

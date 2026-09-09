@@ -2,14 +2,15 @@ name: Scrape BTCC Penalties
 
 on:
   schedule:
-    # 07:00 UTC every Monday (08:00 BST) - "the morning after race day".
+    # 07:05 UTC every Monday (08:05 BST) - "the morning after race day".
     # BARC posts judicial decision PDFs live during each session (confirmed
     # by their own timestamps), so by Monday morning every decision from
     # that weekend's round is already up - no need to poll during the race
     # itself the way scrape-results.yml does. is_day_after_race.py still
     # gates on the calendar so a Monday with no round ending the day before
-    # (e.g. between rounds) is a no-op.
-    - cron: "0 7 * * 1"
+    # (e.g. between rounds) is a no-op. Moved off the exact :00 mark
+    # 2026-09-09 - see project_gallery_croft_missed_schedule_fix memory.
+    - cron: "5 7 * * 1"
   workflow_dispatch:
     inputs:
       year:
