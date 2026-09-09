@@ -747,7 +747,14 @@ export default function TrackDetailScreen({route, navigation}) {
       case 'weather': {
         const hasHourly = weather?.hourly?.length > 0;
         const weatherDayLabel = {SAT: 'Saturday', SUN: 'Sunday'};
-        const weatherDays = ['SAT', 'SUN'].filter(day => sessions.some(s => s.day === day));
+        // Same past-day rule as the Daily view just above (both must agree,
+        // not just Daily) - a day's forecast disappears from both views once
+        // it's over, not just Daily's. SAT maps to track.startDate/SUN to
+        // track.endDate, matching this file's own existing convention (see
+        // nearestHourlyEntry and the "weather" session-chip date lookup below).
+        const weatherDays = ['SAT', 'SUN']
+          .filter(day => sessions.some(s => s.day === day))
+          .filter(day => (day === 'SAT' ? trackStart : trackEnd) >= today);
         return (
           <View>
             {hasHourly && (
@@ -789,7 +796,7 @@ export default function TrackDetailScreen({route, navigation}) {
 
             {!showHourlyWeather && (
               <View style={styles.weatherRow}>
-                {weather.daily.map((day, i) => {
+                {weather.daily.filter(day => new Date(day.date) >= today).map((day, i) => {
                   const d = new Date(day.date);
                   const dayName = d.toLocaleDateString('en-GB', {weekday: 'short'});
                   return (

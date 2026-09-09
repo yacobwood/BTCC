@@ -2,7 +2,7 @@
 • Listen to any article with in-app text-to-speech
 • "Latest BTCC Shorts" video carousel added to the News tab
 • 12/24-hour time format now reaches your home screen widgets
-• Fixed: Saturday's weather forecast no longer vanishes on Sunday
+• Fixed: weekend weather could show different days per view
 • Fixed: some notifications were silently dropped while the app was open
 • Fixed: standings chart could disagree with the official points table
 • Bug fixes and performance improvements
