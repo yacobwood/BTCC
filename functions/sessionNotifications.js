@@ -71,20 +71,29 @@ exports.sendSessionNotifications = onSchedule(
             if (!topic) continue;
 
             const {body, data} = buildSessionAlertPayload(session, round, now);
+            const title = `${session.name} — Starting in 15 mins`;
+            const channel = SESSION_CHANNELS[session.name] || 'race';
 
             sends.push(
               messaging.send({
                 topic,
-                notification: {
-                  title: `${session.name} — Starting in 15 mins`,
-                  body,
-                },
-                android: {notification: {channelId: SESSION_CHANNELS[session.name] || 'race'}},
+                notification: {title, body},
+                android: {notification: {channelId: channel}},
                 apns: {payload: {aps: {sound: 'default'}}},
-                ...(data ? {data} : {}),
+                // title/body/channel always mirrored into data (merged with
+                // whatever buildSessionAlertPayload already supplies for
+                // deep-linking, e.g. type/round/eventId) - data itself can
+                // be null there (a non-Race-3 session with no live-timing
+                // event ID), which used to mean NO data object was sent at
+                // all, not even a fallback. The foreground JS display path
+                // only reads from data and drops anything missing
+                // data.title - see project_chat_mention_foreground_android_notification_gap
+                // memory for the full root cause (found via chat, applied
+                // here too rather than fixed in isolation).
+                data: {...(data || {}), title, body, channel},
               }),
             );
-            logPushHistory(`${session.name} — Starting in 15 mins`, body, topic);
+            logPushHistory(title, body, topic);
           }
         }
 
@@ -93,19 +102,20 @@ exports.sendSessionNotifications = onSchedule(
           const round = calendar.rounds.find(r => r.startDate === tomorrowStr);
           if (round) {
             const rStart = (round.round - 1) * 3 + 1;
+            const wpTitle = 'Race Weekend Tomorrow';
+            const wpBody = `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`;
             sends.push(
               messaging.send({
                 topic: 'weekend_preview',
-                notification: {
-                  title: 'Race Weekend Tomorrow',
-                  body: `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`,
-                },
+                notification: {title: wpTitle, body: wpBody},
                 android: {notification: {channelId: 'weekend_preview'}},
                 apns: {payload: {aps: {sound: 'default'}}},
-                data: {type: 'round', round: String(round.round)},
+                // title/body/channel mirrored into data - see the session-alert
+                // fix just above for why (foreground Android drop otherwise).
+                data: {type: 'round', round: String(round.round), title: wpTitle, body: wpBody, channel: 'weekend_preview'},
               }),
             );
-            logPushHistory('Race Weekend Tomorrow', `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`, 'weekend_preview');
+            logPushHistory(wpTitle, wpBody, 'weekend_preview');
           }
         }
 
@@ -114,19 +124,20 @@ exports.sendSessionNotifications = onSchedule(
           const round = calendar.rounds.find(r => r.endDate === sundayStr);
           if (round) {
             const rStart = (round.round - 1) * 3 + 1;
+            const suTitle = 'Standings Updated';
+            const suBody = `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`;
             sends.push(
               messaging.send({
                 topic: 'standings_update',
-                notification: {
-                  title: 'Standings Updated',
-                  body: `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`,
-                },
+                notification: {title: suTitle, body: suBody},
                 android: {notification: {channelId: 'standings'}},
                 apns: {payload: {aps: {sound: 'default'}}},
-                data: {type: 'history'},
+                // title/body/channel mirrored into data - see the session-alert
+                // fix above for why (foreground Android drop otherwise).
+                data: {type: 'history', title: suTitle, body: suBody, channel: 'standings'},
               }),
             );
-            logPushHistory('Standings Updated', `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`, 'standings_update');
+            logPushHistory(suTitle, suBody, 'standings_update');
           }
         }
       }

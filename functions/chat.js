@@ -71,13 +71,25 @@ exports.onChatMention = onValueCreated(
         const token = tokens[authorId];
         if (!token) return;
         try {
+          const title = 'You were mentioned in Live Chat';
+          const notifBody = `${msg.authorName}: ${body}`;
           await messaging.send({
             token,
-            notification: {
-              title: 'You were mentioned in Live Chat',
-              body: `${msg.authorName}: ${body}`,
-            },
-            data: {type: 'chat'},
+            notification: {title, body: notifBody},
+            // title/body/channel mirrored into data - the OS auto-displays
+            // the notification block above when the recipient's app is
+            // backgrounded/killed, but the foreground JS path
+            // (displayAndroidDataNotification, src/utils/notifications.js)
+            // only ever reads from data and silently drops anything missing
+            // data.title. Root-caused live 2026-09-07/09-09 after a user
+            // reported being @mentioned with no push received while
+            // presumably in the app (the state most likely to hit this,
+            // since being tagged in chat requires being active in it) - see
+            // project_chat_mention_foreground_android_notification_gap
+            // memory. Same gap existed on weekend_preview/standings_update/
+            // session alerts/results_teaser - fixed alongside this, not in
+            // isolation.
+            data: {type: 'chat', title, body: notifBody, channel: 'chat_mentions'},
             android: {notification: {channelId: 'chat_mentions'}},
           });
         } catch (e) {

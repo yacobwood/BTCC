@@ -138,7 +138,14 @@ exports.notifyResultsUpdate = onRequest(
               await getMessaging().send({
                 topic: 'results_teaser',
                 notification: {title, body},
-                data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
+                // title/body/channel mirrored into data - without this the
+                // foreground-Android JS display path (only reads data,
+                // drops anything missing data.title) silently ate this
+                // exact notification whenever a recipient had the app open -
+                // see project_chat_mention_foreground_android_notification_gap
+                // memory (found via chat, applied to every other affected
+                // sender at the same time, not fixed in isolation).
+                data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1), title, body, channel: 'results'},
                 android: {notification: {channelId: 'results'}},
               });
               // Persisted only after a successful send - doing this before

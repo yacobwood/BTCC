@@ -175,7 +175,17 @@ describe('notifyResultsUpdate', () => {
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
       topic: 'results_teaser',
       notification: expect.objectContaining({title: 'Results for Race 1 at Croft is now available'}),
-      data: {type: 'results', year: '2026', round: '8', race: '2'}, // race is 1-indexed for notifNavigation.js
+      // title/body/channel mirrored into data too (added alongside the
+      // 2026-09-09 foreground-Android-drop fix - see
+      // project_chat_mention_foreground_android_notification_gap memory) -
+      // without them the notification silently never displays at all if
+      // the recipient's app is foregrounded when it arrives.
+      data: {
+        type: 'results', year: '2026', round: '8', race: '2', // race is 1-indexed for notifNavigation.js
+        title: 'Results for Race 1 at Croft is now available',
+        body: 'Open BTCC Hub to see how it went.',
+        channel: 'results',
+      },
     }));
     expect(mockLogPushHistory).toHaveBeenCalledWith('Results for Race 1 at Croft is now available', expect.any(String), 'results');
     expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
