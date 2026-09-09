@@ -236,11 +236,17 @@ def main() -> None:
     # failures (a headshot 422, a car image that "fetched successfully" but
     # decoded to garbage bytes, a recurring 404 on a malformed-looking
     # redirect target) all consistent with the page not having genuinely
-    # finished rendering yet. .driver-profile-cutout specifically (not car/
-    # number) since every established driver has a headshot - the one
-    # element safe to require without risking turning a driver's genuinely
-    # missing car photo or number graphic into a hard timeout instead of
-    # this script's own, already-graceful "not_found" handling for that.
+    # finished rendering yet. Only .driver-profile-cutout is named here, but
+    # this covers all three images, not just the headshot - confirmed live
+    # 2026-09-08 that cutout/car/number are one single static hero block on
+    # the page (all three present together in the same markup dump), not
+    # three independently-loaded pieces, so waiting on any one of them means
+    # the whole block - car and number graphic included - has rendered too.
+    # .driver-profile-cutout specifically (not car/number) purely because
+    # every established driver has a headshot - the one element safe to
+    # require without risking turning a driver's genuinely missing car photo
+    # or number graphic into a hard timeout instead of this script's own,
+    # already-graceful "not_found" handling for that.
     html = fetch_via_scrapfly(
         url, referer=_DRIVERS_LISTING_REFERER, render_js=True, label=args.driver_slug,
         wait_for_selector=".driver-profile-cutout",
