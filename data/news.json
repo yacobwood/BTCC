@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Gilbert stars as WSR scores strong points at Croft"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/75b1fcd7-4213-43a3-b2eb-dfe872d1dd0c.jpg"
+        }
+      ]
+    }
   }
 ]
