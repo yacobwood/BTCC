@@ -236,6 +236,26 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(getByText('Saved User')).toBeTruthy());
   });
 
+  it('re-syncs the saved name to /chat/authorNames/{authorId} on mount, not just on save', async () => {
+    // Guards against a bug where a name saved once, then a single dropped
+    // write to /chat/authorNames (offline, rules hiccup - both silently
+    // swallowed in saveChatDisplayName), left an account permanently
+    // un-mentionable with no visible symptom - see syncChatAuthorName.
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'commenter_name' ? Promise.resolve('Saved User') : Promise.resolve(null),
+    );
+    renderWithProviders(<ChatScreen />);
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => expect(mockNamesSet).toHaveBeenCalledWith('Saved User'));
+  });
+
+  it('does not touch /chat/authorNames on mount when no name has been saved yet', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    renderWithProviders(<ChatScreen />);
+    await act(async () => { triggerMessages([]); });
+    expect(mockNamesSet).not.toHaveBeenCalled();
+  });
+
   it('derives authorId from Firebase Auth UID', async () => {
     AsyncStorage.getItem.mockImplementation(key =>
       key === 'commenter_name' ? Promise.resolve('Tom') : Promise.resolve(null),

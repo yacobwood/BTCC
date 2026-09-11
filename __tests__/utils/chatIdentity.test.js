@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {claimUsername, validateUsername} from '../../src/utils/userProfile';
-import {hasChatDisplayName, saveChatDisplayName} from '../../src/utils/chatIdentity';
+import {hasChatDisplayName, saveChatDisplayName, syncChatAuthorName} from '../../src/utils/chatIdentity';
 
 jest.mock('../../src/utils/userProfile', () => ({
   claimUsername: jest.fn(),
@@ -84,5 +84,29 @@ describe('saveChatDisplayName', () => {
     claimUsername.mockResolvedValue('error');
     const result = await saveChatDisplayName({authorId: 'uid1', user: {isAnonymous: false, uid: 'uid1'}, name: 'Gordon'});
     expect(result).toEqual({status: 'error', message: 'Could not save name. Please try again.'});
+  });
+});
+
+describe('syncChatAuthorName', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it('re-writes /chat/authorNames/{authorId} with the given name', () => {
+    syncChatAuthorName('uid1', 'Gordon');
+    expect(mockSet).toHaveBeenCalledWith('Gordon');
+  });
+
+  it('does nothing when authorId is missing', () => {
+    syncChatAuthorName(null, 'Gordon');
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when name is missing', () => {
+    syncChatAuthorName('uid1', null);
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it('does not throw if the write fails (offline, rules hiccup)', () => {
+    mockSet.mockReturnValueOnce(Promise.reject(new Error('offline')));
+    expect(() => syncChatAuthorName('uid1', 'Gordon')).not.toThrow();
   });
 });

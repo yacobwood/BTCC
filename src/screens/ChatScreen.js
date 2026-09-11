@@ -19,7 +19,7 @@ import {Colors} from '../theme/colors';
 import auth from '@react-native-firebase/auth';
 import {useAuth} from '../store/auth';
 import {saveProfile, claimUsername} from '../utils/userProfile';
-import {saveChatDisplayName} from '../utils/chatIdentity';
+import {saveChatDisplayName, syncChatAuthorName} from '../utils/chatIdentity';
 import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
 import {timeAgo} from '../utils/timeAgo';
@@ -94,7 +94,14 @@ export default function ChatScreen({onClose} = {}) {
         }
       }
 
-      if (savedName) setCommenterName(savedName);
+      if (savedName) {
+        setCommenterName(savedName);
+        // Self-heal: re-assert this authorId's entry in /chat/authorNames on
+        // every chat open, not just at the moment the name was first saved -
+        // see syncChatAuthorName in chatIdentity.js for why the one-shot
+        // write alone isn't enough.
+        syncChatAuthorName(myId, savedName);
+      }
     };
     init();
 
