@@ -748,6 +748,10 @@ class TestBuildArticlesGalleryImages(unittest.TestCase):
             posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
             f"{MEDIA_RAW_BASE}/a.jpg",
         )
+        # A guess, not confirmed - see TestHeroSourceRetry below for why
+        # this marker has to survive so a later run can keep trying for
+        # the real card/og image instead of treating this as final.
+        self.assertEqual(posts[0]["_embedded"]["heroSource"], "gallery")
 
     def test_stops_retrying_gallery_images_on_an_old_already_mirrored_article(self):
         """The cost-control half at the build_articles integration level -
@@ -778,6 +782,143 @@ class TestBuildArticlesGalleryImages(unittest.TestCase):
                 posts, pending = build_articles(refresh_all=False)
         mock_image.assert_not_called()
         self.assertIn("/site-assets/", posts[0]["content"]["rendered"])
+
+
+# ── heroSource: a gallery-fallback hero must stay retryable ─────────────────
+#
+# Confirmed live 2026-09-11, same day as the gallery-mirroring fix shipped:
+# the user compared "BTCC visit Darlington Memorial Hospital..." against the
+# real btcc.net page directly and it showed a different, correct hero photo -
+# meaning a real og:image DID exist, this run's fetch of it had just failed
+# transiently (the same live per-request Scrapfly flakiness already hit twice
+# the same day - see project_gallery_image_mirroring_fix memory), and the
+# tier-3 gallery fallback then permanently blocked ever trying again, since a
+# gallery-derived MEDIA_RAW_BASE URL looked identical to a confirmed one.
+
+class TestHeroSourceRetry(unittest.TestCase):
+
+    def _existing_gallery_hero(self, first_seen):
+        # content.rendered already has its gallery src mirrored (realistic
+        # persisted state - mirror_gallery_images already ran successfully
+        # on some earlier cycle), matching what real committed data looks
+        # like after a successful mirror.
+        return {
+            "id": "hospital-visit", "slug": "hospital-visit",
+            "date": "2026-09-11T00:00:00", "firstSeenAt": first_seen,
+            "title": {"rendered": "Hospital Visit"}, "excerpt": {"rendered": ""},
+            "content": {"rendered": f'<img src="{MEDIA_RAW_BASE}/a.jpg">'},
+            "_embedded": {
+                "wp:featuredmedia": [{"source_url": f"{MEDIA_RAW_BASE}/a.jpg"}],
+                "heroSource": "gallery",
+            },
+        }
+
+    def test_a_recent_gallery_sourced_hero_gets_retried_and_upgrades_to_the_real_og_image(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            (articles_dir / "page_1.json").write_text(json.dumps([self._existing_gallery_hero(recent)]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "hospital-visit", "title": "Hospital Visit",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-11T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body",
+                       return_value=('<img src="/site-assets/2026/09/a.jpg">', "https://btcc.net/api/media/real789")) as mock_body, \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", return_value="real789.jpg"):
+                posts, pending = build_articles(refresh_all=False)
+        mock_body.assert_called_once()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            f"{MEDIA_RAW_BASE}/real789.jpg",
+        )
+        self.assertNotIn("heroSource", posts[0]["_embedded"])
+
+    def test_a_recent_gallery_sourced_hero_stays_gallery_when_the_retry_still_finds_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            (articles_dir / "page_1.json").write_text(json.dumps([self._existing_gallery_hero(recent)]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "hospital-visit", "title": "Hospital Visit",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-11T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body",
+                       return_value=('<img src="/site-assets/2026/09/a.jpg">', None)) as mock_body, \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", return_value="a.jpg"):
+                posts, pending = build_articles(refresh_all=False)
+        mock_body.assert_called_once()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            f"{MEDIA_RAW_BASE}/a.jpg",
+        )
+        self.assertEqual(posts[0]["_embedded"]["heroSource"], "gallery")
+
+    def test_stops_retrying_a_gallery_sourced_hero_past_the_retry_window(self):
+        """Same cost-control shape as test_stops_retrying_an_old_image_less_article -
+        a gallery guess this old stops paying for a fresh full-page fetch on
+        every run, same as a fully image-less article would."""
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+            (articles_dir / "page_1.json").write_text(json.dumps([self._existing_gallery_hero(old)]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "hospital-visit", "title": "Hospital Visit",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-11T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body") as mock_body:
+                posts, pending = build_articles(refresh_all=False)
+        mock_body.assert_not_called()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            f"{MEDIA_RAW_BASE}/a.jpg",
+        )
+        self.assertEqual(posts[0]["_embedded"]["heroSource"], "gallery")
+
+    def test_a_confirmed_hero_image_is_never_reattempted(self):
+        """The pre-existing, unchanged behaviour for every article mirrored
+        before heroSource existed (or any real card/og image) - absent
+        heroSource must keep short-circuiting exactly as it always did."""
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            existing_post = {
+                "id": "race-report", "slug": "race-report",
+                "date": "2026-09-11T00:00:00", "firstSeenAt": recent,
+                "title": {"rendered": "Race Report"}, "excerpt": {"rendered": ""},
+                "content": {"rendered": "Full report."},
+                "_embedded": {"wp:featuredmedia": [{"source_url": f"{MEDIA_RAW_BASE}/real.jpg"}]},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "race-report", "title": "Race Report",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-11T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body") as mock_body:
+                posts, pending = build_articles(refresh_all=False)
+        mock_body.assert_not_called()
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            f"{MEDIA_RAW_BASE}/real.jpg",
+        )
+        self.assertNotIn("heroSource", posts[0]["_embedded"])
 
 
 class TestPruneOrphanedImages(unittest.TestCase):
