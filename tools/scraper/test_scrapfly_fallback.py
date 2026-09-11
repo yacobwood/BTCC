@@ -11,9 +11,36 @@ import json
 import unittest
 import urllib.error
 from io import BytesIO
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from scrapfly_fallback import _error_detail, fetch_image_smart, fetch_image_via_scrapfly, fetch_via_scrapfly
+
+# Every failure path below now retries once (see scrapfly_fallback.py's
+# _MAX_ATTEMPTS) before actually giving up - patched module-wide, not
+# per-test, so every existing failure-path test keeps its original
+# signature; without this each one would burn a real _RETRY_DELAY_SECONDS
+# (currently 3s) of wall-clock time for no reason.
+_sleep_patcher = None
+
+
+def setUpModule():
+    global _sleep_patcher
+    _sleep_patcher = patch("scrapfly_fallback.time.sleep")
+    _sleep_patcher.start()
+
+
+def tearDownModule():
+    _sleep_patcher.stop()
+
+
+def _json_response(data: dict) -> BytesIO:
+    """A urllib.request.urlopen(...) context-manager stand-in for a
+    successful call, for use as one item in a mock's side_effect list
+    alongside a raised exception (io.BytesIO supports the context-manager
+    protocol itself - __enter__ just returns self - so this can be returned
+    directly from urlopen() without also needing __enter__ configured, the
+    way this file's single-response tests do via return_value.__enter__)."""
+    return BytesIO(json.dumps(data).encode())
 
 
 class TestFetchViaScrapfly(unittest.TestCase):
@@ -52,6 +79,24 @@ class TestFetchViaScrapfly(unittest.TestCase):
     def test_returns_none_rather_than_raising_on_any_failure(self, mock_urlopen):
         mock_urlopen.side_effect = RuntimeError("connection reset")
         self.assertIsNone(fetch_via_scrapfly("https://btcc.net/some-article/"))
+        # One bare retry (see _MAX_ATTEMPTS), not zero and not unbounded.
+        self.assertEqual(mock_urlopen.call_count, 2)
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_succeeds_on_the_retry_after_one_failure(self, mock_urlopen):
+        """Confirmed live 2026-09-11: chasing one article through three
+        separate flaky Scrapfly failures took multiple manual re-dispatches
+        across ~10 minutes, when each would very likely have resolved within
+        seconds on a plain in-run retry - this is that retry actually
+        working, not just "eventually gives up correctly"."""
+        mock_urlopen.side_effect = [
+            RuntimeError("connection reset"),
+            _json_response({"result": {"content": "<div>Full content.</div>"}}),
+        ]
+        result = fetch_via_scrapfly("https://btcc.net/some-article/")
+        self.assertEqual(result, "<div>Full content.</div>")
+        self.assertEqual(mock_urlopen.call_count, 2)
 
     @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
     @patch("scrapfly_fallback.urllib.request.urlopen")
@@ -157,6 +202,35 @@ class TestFetchImageViaScrapfly(unittest.TestCase):
     def test_returns_none_rather_than_raising_on_any_failure(self, mock_urlopen):
         mock_urlopen.side_effect = RuntimeError("connection reset")
         self.assertIsNone(fetch_image_via_scrapfly("https://btcc.net/api/media/abc123"))
+        self.assertEqual(mock_urlopen.call_count, 2)  # one bare retry, not zero, not unbounded
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_succeeds_on_the_retry_after_one_failure(self, mock_urlopen):
+        raw_bytes = b"\xff\xd8\xff\xe0fake-jpeg-bytes"
+        mock_urlopen.side_effect = [
+            RuntimeError("connection reset"),
+            _json_response({"result": {"content": base64.b64encode(raw_bytes).decode(), "content_type": "image/jpeg"}}),
+        ]
+        result = fetch_image_via_scrapfly("https://btcc.net/api/media/abc123")
+        self.assertEqual(result, (raw_bytes, "image/jpeg"))
+
+    @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_an_empty_body_reported_as_success_is_treated_as_a_failure_worth_retrying(self, mock_urlopen):
+        """Confirmed live 2026-09-11: one of 3 gallery images for a real
+        article mirrored as a 0-byte file - Scrapfly reported result=success
+        with a genuinely empty content body. media_utils.save_mirrored_image
+        now also rejects this (belt and braces for any caller that skips
+        this function), but catching it here means an actual retry chance
+        within the same run instead of only rejection downstream."""
+        raw_bytes = b"\xff\xd8\xff\xe0real-jpeg-bytes"
+        mock_urlopen.side_effect = [
+            _json_response({"result": {"content": base64.b64encode(b"").decode(), "content_type": "image/jpeg"}}),
+            _json_response({"result": {"content": base64.b64encode(raw_bytes).decode(), "content_type": "image/jpeg"}}),
+        ]
+        result = fetch_image_via_scrapfly("https://btcc.net/api/media/abc123")
+        self.assertEqual(result, (raw_bytes, "image/jpeg"))
 
     @patch.dict("os.environ", {"SCRAPFLY_API_KEY": "test-key"}, clear=True)
     @patch("scrapfly_fallback.urllib.request.urlopen")
@@ -227,6 +301,33 @@ class TestFetchImageSmart(unittest.TestCase):
             label="race-1-report",
         )
         self.assertIsNone(result)
+        self.assertEqual(mock_urlopen.call_count, 2)  # one bare retry, not zero, not unbounded
+
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_supabase_fetch_succeeds_on_the_retry_after_one_failure(self, mock_urlopen):
+        real_resp = MagicMock()
+        real_resp.__enter__.return_value.read.return_value = b"raw-bytes"
+        real_resp.__enter__.return_value.headers.get.return_value = "image/jpeg"
+        mock_urlopen.side_effect = [RuntimeError("connection reset"), real_resp]
+        result = fetch_image_smart(
+            "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/sign/uploads/photo.jpg?token=abc",
+            label="race-1-report",
+        )
+        self.assertEqual(result, (b"raw-bytes", "image/jpeg"))
+
+    @patch("scrapfly_fallback.urllib.request.urlopen")
+    def test_supabase_empty_body_is_treated_as_a_failure_worth_retrying(self, mock_urlopen):
+        empty_resp, real_resp = MagicMock(), MagicMock()
+        empty_resp.__enter__.return_value.read.return_value = b""
+        empty_resp.__enter__.return_value.headers.get.return_value = "image/jpeg"
+        real_resp.__enter__.return_value.read.return_value = b"raw-bytes"
+        real_resp.__enter__.return_value.headers.get.return_value = "image/jpeg"
+        mock_urlopen.side_effect = [empty_resp, real_resp]
+        result = fetch_image_smart(
+            "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/sign/uploads/photo.jpg?token=abc",
+            label="race-1-report",
+        )
+        self.assertEqual(result, (b"raw-bytes", "image/jpeg"))
 
 
 # ── _error_detail ─────────────────────────────────────────────────────────────
