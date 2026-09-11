@@ -10,13 +10,17 @@ from unittest.mock import patch
 
 import scrape_articles
 from scrape_articles import (
+    MEDIA_RAW_BASE,
     NEWS_URL,
     build_articles,
     extract_og_image,
     fetch_article_body,
+    mirror_gallery_images,
     needs_full_refetch,
+    needs_gallery_mirror,
     needs_image_retry,
     parse_display_date,
+    prune_orphaned_images,
     publish_hold_expired,
     resolve_first_seen,
     scrape_card_list,
@@ -624,6 +628,179 @@ class TestPublishHold(unittest.TestCase):
         self.assertEqual(len(posts), 1)
         self.assertNotIn("wp:featuredmedia", posts[0]["_embedded"])
         self.assertEqual(posts[0]["firstSeenAt"], expired_first_seen)
+
+
+# ── btcc-gallery body images: mirroring + the retry-window cost bound ───────
+#
+# Confirmed live 2026-09-11 (on-device, two articles seven weeks apart) that
+# the app's ArticleScreen WebView renders every btcc-gallery image as a
+# broken icon - unlike the article's own featured/hero image, these were
+# never mirrored at all, just hotlinked live from btcc.net's own
+# /site-assets/<path>. See scrape_articles.py's GALLERY_IMG_RE/
+# mirror_gallery_images and media_utils.py's MEDIA_SRC_RE_FRAGMENT.
+
+class TestNeedsGalleryMirror(unittest.TestCase):
+
+    def test_no_gallery_images_in_content_never_needs_mirroring(self):
+        self.assertFalse(needs_gallery_mirror("<p>No images here.</p>", None, just_fetched=True))
+
+    def test_just_fetched_always_gets_one_attempt_regardless_of_age(self):
+        html = '<img src="/site-assets/2026/07/pic.jpg">'
+        old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        self.assertTrue(needs_gallery_mirror(html, old, just_fetched=True))
+
+    def test_cached_content_within_retry_window_still_tries(self):
+        html = '<img src="/site-assets/2026/09/pic.jpg">'
+        recent = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        self.assertTrue(needs_gallery_mirror(html, recent, just_fetched=False))
+
+    def test_cached_content_past_retry_window_stops_trying(self):
+        # The cost-control half: a genuinely-dead gallery image must not
+        # re-bill Scrapfly every 5-minute cycle forever, same reasoning as
+        # IMAGE_RETRY_WINDOW's own for the hero image.
+        html = '<img src="/site-assets/2026/07/pic.jpg">'
+        old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        self.assertFalse(needs_gallery_mirror(html, old, just_fetched=False))
+
+
+class TestMirrorGalleryImages(unittest.TestCase):
+
+    def test_mirrors_a_gallery_image_and_rewrites_its_src(self):
+        html = '<figure><img src="/site-assets/2026/09/a.jpg" alt="A"></figure>'
+        with patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
+             patch("scrape_articles.save_mirrored_image", return_value="a.jpg"):
+            result = mirror_gallery_images(html, "some-article")
+        mock_image.assert_called_once_with("https://btcc.net/site-assets/2026/09/a.jpg", label="some-article-gallery")
+        self.assertEqual(result, f'<figure><img src="{MEDIA_RAW_BASE}/a.jpg" alt="A"></figure>')
+
+    def test_dedupes_a_src_repeated_more_than_once(self):
+        html = (
+            '<img src="/site-assets/2026/09/a.jpg">'
+            '<img src="/site-assets/2026/09/a.jpg">'
+        )
+        with patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
+             patch("scrape_articles.save_mirrored_image", return_value="a.jpg"):
+            result = mirror_gallery_images(html, "some-article")
+        mock_image.assert_called_once()
+        self.assertEqual(result.count(f'"{MEDIA_RAW_BASE}/a.jpg"'), 2)
+
+    def test_a_failed_fetch_leaves_the_raw_src_untouched(self):
+        html = '<img src="/site-assets/2026/09/dead.jpg">'
+        with patch("scrape_articles.fetch_image_smart", return_value=None):
+            result = mirror_gallery_images(html, "some-article")
+        self.assertEqual(result, html)
+
+    def test_a_non_gallery_img_shape_is_left_alone(self):
+        # Only the confirmed-broken /site-assets/ shape gets this treatment -
+        # a Supabase URL embedded directly in body content already loads
+        # live in the WebView without issue.
+        html = '<img src="https://xyz.supabase.co/storage/v1/object/public/a.jpg">'
+        with patch("scrape_articles.fetch_image_smart") as mock_image:
+            result = mirror_gallery_images(html, "some-article")
+        mock_image.assert_not_called()
+        self.assertEqual(result, html)
+
+
+class TestBuildArticlesGalleryImages(unittest.TestCase):
+
+    def test_mirrors_gallery_images_in_a_freshly_fetched_article(self):
+        content = '<p>Report.</p><img src="/site-assets/2026/09/a.jpg">'
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "gallery-story", "title": "Gallery Story",
+                     "media_url": "https://btcc.net/api/media/hero123",
+                     "excerpt": "", "date": "2026-09-11T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body", return_value=(content, None)), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", side_effect=["a.jpg", "hero123.jpg"]):
+                # save_mirrored_image is called once for the gallery image
+                # (mirror_gallery_images runs first) and once for the card's
+                # own hero image (resolved after) - side_effect order above
+                # matches that call order.
+                posts, pending = build_articles(refresh_all=False)
+        self.assertIn(f'{MEDIA_RAW_BASE}/a.jpg', posts[0]["content"]["rendered"])
+        self.assertNotIn("/site-assets/", posts[0]["content"]["rendered"])
+
+    def test_falls_back_to_first_gallery_image_when_no_hero_or_og_image(self):
+        """Confirmed live 2026-09-11: "BTCC visit Darlington Memorial
+        Hospital..." had no listing-card thumbnail and no og:image at all -
+        only its own inline btcc-gallery - so its hero rendered as a blank
+        black background in the app. Tier 3 of the fallback chain (tiers 1-2
+        are card thumbnail / og:image, see
+        project_article_missing_image_ogimage_fallback memory)."""
+        content = '<p>Report.</p><img src="/site-assets/2026/09/a.jpg" alt="A">'
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "hospital-visit", "title": "Hospital Visit",
+                     "media_url": None,
+                     "excerpt": "", "date": "2026-09-11T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_article_body", return_value=(content, None)), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", return_value="a.jpg"):
+                posts, pending = build_articles(refresh_all=False)
+        self.assertEqual(
+            posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+            f"{MEDIA_RAW_BASE}/a.jpg",
+        )
+
+    def test_stops_retrying_gallery_images_on_an_old_already_mirrored_article(self):
+        """The cost-control half at the build_articles integration level -
+        mirrors test_stops_retrying_an_old_image_less_article above, but for
+        gallery images: past IMAGE_RETRY_WINDOW, a cached article's own
+        still-broken gallery src stops paying for a fresh image fetch every
+        run."""
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            old = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+            existing_post = {
+                "id": "old-gallery-story", "slug": "old-gallery-story",
+                "date": "2026-08-05T00:00:00", "firstSeenAt": old,
+                "title": {"rendered": "Old Gallery Story"}, "excerpt": {"rendered": ""},
+                "content": {"rendered": '<img src="/site-assets/2026/08/a.jpg">'},
+                "_embedded": {"wp:featuredmedia": [{"source_url": f"{MEDIA_RAW_BASE}/hero.jpg"}]},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[{
+                     "slug": "old-gallery-story", "title": "Old Gallery Story",
+                     "media_url": "https://btcc.net/api/media/hero.jpg",
+                     "excerpt": "", "date": "2026-08-05T00:00:00",
+                 }]), \
+                 patch("scrape_articles.fetch_image_smart") as mock_image:
+                posts, pending = build_articles(refresh_all=False)
+        mock_image.assert_not_called()
+        self.assertIn("/site-assets/", posts[0]["content"]["rendered"])
+
+
+class TestPruneOrphanedImages(unittest.TestCase):
+
+    def test_a_gallery_referenced_image_survives_pruning(self):
+        # Without accounting for content.rendered, this looks orphaned to
+        # prune_orphaned_images (it's not in any post's _embedded) and would
+        # get deleted on the very same run that just mirrored it.
+        with tempfile.TemporaryDirectory() as tmp:
+            media_dir = Path(tmp) / "media"
+            media_dir.mkdir()
+            (media_dir / "a.jpg").write_bytes(b"fake")
+            (media_dir / "orphan.jpg").write_bytes(b"fake")
+            posts = [{
+                "slug": "gallery-story",
+                "content": {"rendered": f'<img src="{MEDIA_RAW_BASE}/a.jpg">'},
+                "_embedded": {},
+            }]
+            with patch.object(scrape_articles, "MEDIA_DIR", media_dir):
+                removed = prune_orphaned_images(posts)
+            self.assertEqual(removed, 1)
+            self.assertTrue((media_dir / "a.jpg").exists())
+            self.assertFalse((media_dir / "orphan.jpg").exists())
 
 
 if __name__ == "__main__":

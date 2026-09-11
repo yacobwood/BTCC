@@ -50,14 +50,18 @@ _MAX_DIMENSION = 1024
 
 # Matches an <img src="..."> value in any shape a btcc.net page might use:
 # btcc.net's own stable /api/media/<uuid> redirector (relative path), a
-# Supabase Storage signed URL embedded directly (already absolute), or -
+# Supabase Storage signed URL embedded directly (already absolute), - or
 # confirmed live 2026-09-02, a site-markup change - that same /api/media/
 # URL wrapped in Next.js's own Image Optimization proxy
-# (https://btcc.net/_next/image/?url=<url-encoded original>&w=...&q=...).
-# resolve_media_url() below unwraps the third shape back to one of the
-# first two; capture the whole match here so it has something to unwrap.
+# (https://btcc.net/_next/image/?url=<url-encoded original>&w=...&q=...) -
+# or (confirmed live 2026-09-11, see scrape_articles.py's GALLERY_IMG_RE)
+# the custom "btcc-gallery" block's own /site-assets/<path> shape.
+# resolve_media_url() below unwraps the Next.js-proxy shape back to one of
+# the other three; capture the whole match here so it has something to
+# unwrap.
 MEDIA_SRC_RE_FRAGMENT = (
     r'(?:/api/media/[^"]+'
+    r'|/site-assets/[^"]+'
     r'|https://[a-z0-9-]+\.supabase\.co/storage/[^"]+'
     r'|https://btcc\.net/_next/image/\?url=[^"]+)'
 )
