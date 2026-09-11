@@ -92,6 +92,13 @@ fetch_image_smart (Scrapfly for btcc.net's own /api/media/ shape, ~225
 credits, confirmed live 2026-09-01 - a plain free request for a
 Supabase-hosted image, which isn't behind the Vercel challenge at all).
 
+The same applies to any photo in a "btcc-gallery" block inside an
+article's own body content, not just its one featured/hero image -
+confirmed live 2026-09-11 that the app's ArticleScreen WebView renders
+these as broken-image icons, since (unlike the hero image) they were never
+mirrored at all, just hotlinked from btcc.net's own /site-assets/<path>.
+See GALLERY_IMG_RE/mirror_gallery_images.
+
 Usage:
     python scrape_articles.py [--dry-run] [--refresh-all] [--backfill-pages N]
 """
@@ -174,6 +181,17 @@ OG_IMAGE_RE = re.compile(
     r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"'
     r'|<meta[^>]+content="([^"]+)"[^>]+property="og:image"'
 )
+# btcc.net's custom "btcc-gallery" block (a grid of photos embedded inline
+# in an article's own body, distinct from its one featured/hero image)
+# emits each photo as a root-relative /site-assets/<path> src - a shape
+# none of MEDIA_SRC_RE_FRAGMENT's other three cases covered before
+# 2026-09-11, so these were never mirrored: the app's ArticleScreen WebView
+# just hotlinks them live from btcc.net at render time. Confirmed live
+# on-device (two articles, seven weeks apart - "PM1 Junior prototype car
+# unveiled" 25 Jul and "BTCC visit Darlington Memorial Hospital..." 11 Sep)
+# that this renders as a broken-image icon next to the alt text every time,
+# not an occasional flake - see mirror_gallery_images below.
+GALLERY_IMG_RE = re.compile(r'<img[^>]*src="(/site-assets/[^"]+)"')
 
 
 def extract_og_image(html: str) -> str | None:
@@ -429,6 +447,58 @@ def needs_image_retry(first_seen: str | None) -> bool:
         return False
 
 
+def needs_gallery_mirror(content_html: str, first_seen: str | None, just_fetched: bool) -> bool:
+    """Whether content_html still has at least one un-mirrored btcc-gallery
+    image (a raw /site-assets/ src - see GALLERY_IMG_RE) worth attempting
+    this run. A successfully-mirrored src is rewritten to its MEDIA_RAW_BASE
+    URL in place (see mirror_gallery_images), so this naturally goes False
+    on its own the moment every image in an article is mirrored - no
+    separate "stop trying" flag needed for the success case.
+
+    The cost concern is the failure case: each still-broken src costs one
+    Scrapfly image fetch, same as the hero-image fetch, so a genuinely-dead
+    gallery photo must not re-bill every 5-minute cycle forever. Bounded the
+    same way needs_image_retry bounds the hero-image retry - except when
+    content_html was JUST freshly fetched this run (a brand-new article, or
+    an existing one needs_full_refetch/image_retry_needed already forced a
+    fresh page fetch for), which always gets one attempt regardless of age,
+    since that's a rare event already gated elsewhere, not a steady
+    per-cycle cost."""
+    if GALLERY_IMG_RE.search(content_html) is None:
+        return False
+    return just_fetched or needs_image_retry(first_seen)
+
+
+def mirror_gallery_images(content_html: str, slug: str) -> str:
+    """Mirrors every btcc-gallery block image in content_html (see
+    GALLERY_IMG_RE) into MEDIA_DIR exactly the way the article's own
+    featured/hero image is already mirrored, rewriting each successfully-
+    mirrored src from its raw btcc.net path to its MEDIA_RAW_BASE one in
+    place. A src that fails to fetch is left as-is - not an error, just a
+    still-broken image for the next eligible run (see needs_gallery_mirror)
+    to retry.
+
+    Deliberately does NOT touch any other <img> shape already covered by
+    MEDIA_SRC_RE_FRAGMENT (a Supabase URL embedded directly in body content,
+    say) - those already load live in the WebView without issue, and this
+    repo has never mirrored in-body content images before now; only the
+    specific shape confirmed broken gets this treatment."""
+    mirrored = {}
+    for raw_src in GALLERY_IMG_RE.findall(content_html):
+        if raw_src in mirrored:
+            continue
+        source_url = resolve_media_url(raw_src)
+        fetched = fetch_image_smart(source_url, label=f"{slug}-gallery")
+        if not fetched:
+            continue
+        filename = save_mirrored_image({source_url: fetched}, source_url, MEDIA_DIR)
+        if filename:
+            mirrored[raw_src] = f"{MEDIA_RAW_BASE}/{filename}"
+    for raw_src, mirrored_url in mirrored.items():
+        content_html = content_html.replace(f'"{raw_src}"', f'"{mirrored_url}"')
+    return content_html
+
+
 def resolve_first_seen(prior: dict | None, now_iso: str, date_iso: str = "") -> str:
     """Returns the timestamp a post should sort by: an already-mirrored
     article keeps whatever it was first stamped with (so re-scraping it on a
@@ -538,6 +608,14 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
                 date_iso = card["date"]
                 category = ""
 
+        # Runs against whatever content_html ended up being above (freshly
+        # fetched or reused from cache) - a page fetch isn't needed to mirror
+        # a gallery image, only the image fetch itself, so this doesn't wait
+        # on has_content/needs_full_refetch the way the hero image's og:image
+        # extraction does.
+        if needs_gallery_mirror(content_html, prior.get("firstSeenAt") if prior else None, not has_content):
+            content_html = mirror_gallery_images(content_html, slug)
+
         if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
             image_url = prior_image
         else:
@@ -558,6 +636,16 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
                 image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
             else:
                 image_url = None
+            if not image_url:
+                # Tier 3: no listing-card thumbnail and no og:image either -
+                # confirmed live 2026-09-11 ("BTCC visit Darlington Memorial
+                # Hospital..."), a "community visit" style article can carry
+                # neither, only its own inline btcc-gallery. Falls back to
+                # that gallery's own first image, already mirrored above if
+                # mirror_gallery_images found one - no extra Scrapfly image
+                # fetch, since it's already sitting in content_html.
+                gallery_m = re.search(re.escape(MEDIA_RAW_BASE) + r'/[^"]+', content_html)
+                image_url = gallery_m.group(0) if gallery_m else None
 
         if prior is None and not image_url:
             # Genuinely new (never published) and still no image this cycle -
@@ -617,6 +705,12 @@ def prune_orphaned_images(posts: list[dict]) -> int:
         url = p.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
         if url and url.startswith(MEDIA_RAW_BASE):
             referenced.add(url.rsplit("/", 1)[-1])
+        # A btcc-gallery image (see mirror_gallery_images) is referenced from
+        # inside content.rendered, not _embedded - without this, every
+        # gallery image mirrored above would look orphaned to this function
+        # and get deleted again on this same run's own prune pass.
+        for gallery_url in re.findall(re.escape(MEDIA_RAW_BASE) + r'/[^"]+', p.get("content", {}).get("rendered", "")):
+            referenced.add(gallery_url.rsplit("/", 1)[-1])
     removed = 0
     for f in MEDIA_DIR.iterdir():
         if f.is_file() and f.name not in referenced:

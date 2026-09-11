@@ -30,6 +30,16 @@ class TestResolveMediaUrl(unittest.TestCase):
         url = "https://x.supabase.co/storage/v1/object/sign/photo.jpg?token=abc"
         self.assertEqual(resolve_media_url(url), url)
 
+    def test_prefixes_btcc_net_onto_a_site_assets_gallery_path(self):
+        # btcc.net's custom "btcc-gallery" block - confirmed live 2026-09-11
+        # rendering as a broken image in the app's ArticleScreen WebView
+        # since these were never mirrored at all (see scrape_articles.py's
+        # GALLERY_IMG_RE/mirror_gallery_images).
+        self.assertEqual(
+            resolve_media_url("/site-assets/2026/09/a1b2-DSC01.jpg"),
+            "https://btcc.net/site-assets/2026/09/a1b2-DSC01.jpg",
+        )
+
     def test_unwraps_next_js_image_optimization_proxy(self):
         """Regression coverage: confirmed live 2026-09-02, btcc.net's
         news-card markup switched to Next.js's own <Image> component, which
@@ -75,6 +85,10 @@ class TestMediaSrcReFragment(unittest.TestCase):
         url = "https://x.supabase.co/storage/v1/object/sign/photo.jpg?token=abc"
         m = self._search(f'<img src="{url}">')
         self.assertEqual(m.group(1), url)
+
+    def test_matches_the_site_assets_gallery_shape(self):
+        m = self._search('<img src="/site-assets/2026/09/a1b2-DSC01.jpg">')
+        self.assertEqual(m.group(1), "/site-assets/2026/09/a1b2-DSC01.jpg")
 
 
 class TestSaveMirroredImage(unittest.TestCase):

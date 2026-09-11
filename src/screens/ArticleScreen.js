@@ -1103,6 +1103,26 @@ export function buildHtml(article, topPad) {
       .divider { height:2px; background:#FEBD02; margin:0 16px 20px; border-radius:2px; }
       .content { padding:0 16px 0; }
       img { width:100%!important; height:auto!important; border-radius:8px; margin:12px 0; display:block; }
+      /* btcc.net's custom "btcc-gallery" block (a grid of photos inline in
+         an article's own body, e.g. "BTCC visit Darlington Memorial
+         Hospital..." 2026-09-11) had zero rules here at all - its images
+         are now mirrored (see scrape_articles.py's mirror_gallery_images)
+         so they load, but without this they'd still just stack full-width
+         one per row rather than as the grid btcc.net intends. Two
+         fixed-tag selectors, not one shared class name, because btcc.net's
+         own markup reuses the class "btcc-gallery-grid" on BOTH the outer
+         wrapping <figure> and the inner <div> that's the real grid - one
+         shared display:grid rule for both would make the outer figure's
+         own single grid item (that inner div) sit in only the first
+         column instead of spanning full width. Only 2/3/4-column variants
+         are handled explicitly (every gallery seen live so far); anything
+         else falls back to the 3-column default. */
+      .btcc-gallery { margin:16px 0; }
+      div.btcc-gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+      figure.btcc-gallery-columns-2 > .btcc-gallery-grid { grid-template-columns:repeat(2,1fr); }
+      figure.btcc-gallery-columns-4 > .btcc-gallery-grid { grid-template-columns:repeat(4,1fr); }
+      .btcc-gallery-item { margin:0; }
+      .btcc-gallery-item img { margin:0; }
       p { margin-bottom:14px; }
       /* A genuinely empty paragraph (a stray blank line left in the source
          content, e.g. from a markdown double-newline that survived

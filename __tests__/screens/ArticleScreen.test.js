@@ -974,6 +974,31 @@ describe('buildHtml WebView font-boosting', () => {
   });
 });
 
+// ─── buildHtml: btcc-gallery block layout ──────────────────────────────────
+//
+// Confirmed live 2026-09-11 ("BTCC visit Darlington Memorial Hospital...")
+// that this block had zero CSS at all - once its images are mirrored (see
+// scrape_articles.py's mirror_gallery_images) they'd still just stack
+// full-width one per row rather than as the grid btcc.net intends.
+
+describe('buildHtml btcc-gallery layout', () => {
+  it('always includes the gallery grid rules, regardless of article content', () => {
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('div.btcc-gallery-grid { display:grid;');
+  });
+
+  it('scopes the base grid rule to the div tag, not a bare class shared with the outer figure', () => {
+    // btcc.net's own markup reuses the class "btcc-gallery-grid" on both
+    // the outer wrapping <figure> and the inner <div> that's the real
+    // grid - a bare shared `.btcc-gallery-grid { display:grid }` rule
+    // would also apply to the outer figure, whose only grid item (that
+    // inner div) would then sit in just the first column instead of
+    // spanning full width.
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).not.toContain('\n      .btcc-gallery-grid {');
+  });
+});
+
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 
 describe('CommentsSheet', () => {
