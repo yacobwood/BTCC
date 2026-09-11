@@ -1081,6 +1081,15 @@ export function buildHtml(article, topPad) {
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <style>
       * { box-sizing:border-box; margin:0; padding:0; max-width:100%!important; }
+      /* Without this, Android WebView's font-boosting heuristic (separate
+         from the OS accessibility text-size setting) rescales individual
+         text blocks unpredictably on narrow columns - at large system font
+         sizes this has produced paragraphs rendering hugely oversized and
+         superimposed on top of the following paragraph. Locking to the
+         authored sizes keeps the article legible; it just means this
+         content doesn't grow with the OS font-size setting like the rest
+         of the app's native text does. */
+      html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       body { background:#0B0C0F; color:#fff; font-family:-apple-system,sans-serif; font-size:16px; line-height:1.7; padding-top:0; }
       .hero { position:relative; width:100%; min-height:${topPad + 300}px; padding-top:${topPad}px; background-size:cover; background-position:center; display:flex; flex-direction:column; justify-content:flex-end; }
       .hero-gradient { position:absolute; top:0;left:0;right:0;bottom:0; background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,transparent 30%,transparent 50%,rgba(11,12,15,0.95) 100%); }

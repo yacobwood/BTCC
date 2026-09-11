@@ -457,7 +457,9 @@ function CareerTimeline({history}) {
 function StatBox({label, value, flexGrow = 1}) {
   return (
     <View style={[styles.statBox, {flex: flexGrow}]}>
-      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>
+        {value}
+      </Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
@@ -585,7 +587,7 @@ const styles = StyleSheet.create({
   historyTeam: {color: '#fff', fontSize: 13, fontWeight: '600'},
   historyCar: {color: Colors.textSecondary, fontSize: 11, marginTop: 1},
   historyPos: {color: Colors.textSecondary, fontSize: 15, fontWeight: '900'},
-  historyBadges: {flexDirection: 'row', gap: 6, marginTop: 6, alignItems: 'center'},
+  historyBadges: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6, alignItems: 'center'},
   badgePts: {backgroundColor: 'rgba(0,200,83,0.12)', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3},
   badgePtsText: {color: '#00C853', fontSize: 11, fontWeight: '600'},
   badgeWin: {backgroundColor: 'rgba(254,189,2,0.15)', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3},

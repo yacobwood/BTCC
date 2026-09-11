@@ -957,6 +957,23 @@ describe('buildHtml image attribution', () => {
   });
 });
 
+// ─── buildHtml: WebView font-boosting disabled ─────────────────────────────
+//
+// Without `text-size-adjust: 100%`, Android WebView's own font-boosting
+// heuristic (separate from the OS accessibility text-size setting) rescales
+// individual text blocks unpredictably on this narrow single-column layout -
+// confirmed live on a Pixel 10a with system font size increased, where a
+// mid-article paragraph rendered hugely oversized and superimposed directly
+// on top of the next paragraph, both illegible. Locking the adjustment to
+// 100% keeps the article legible at every system font size.
+
+describe('buildHtml WebView font-boosting', () => {
+  it('disables WebView text-size-adjust so large system font sizes cannot rescale paragraphs unpredictably', () => {
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('text-size-adjust:100%');
+  });
+});
+
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 
 describe('CommentsSheet', () => {

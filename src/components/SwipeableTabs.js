@@ -77,7 +77,11 @@ export default function SwipeableTabs({
             accessibilityRole="tab"
             accessibilityLabel={`${label} tab`}
             accessibilityState={{selected: currentPage === i}}>
-            <Text style={[styles.tabText, currentPage === i && styles.tabTextActive]}>
+            <Text
+              style={[styles.tabText, currentPage === i && styles.tabTextActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}>
               {label}
             </Text>
           </TouchableOpacity>
