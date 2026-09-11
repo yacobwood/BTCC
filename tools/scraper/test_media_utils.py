@@ -100,6 +100,23 @@ class TestSaveMirroredImage(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIsNone(save_mirrored_image({}, "https://btcc.net/api/media/abc123", Path(tmp)))
 
+    def test_returns_none_and_writes_nothing_for_a_captured_but_empty_body(self):
+        """Confirmed live 2026-09-11: a gallery-image Scrapfly fetch reported
+        result=success (see fetch_image_via_scrapfly) with a genuinely empty
+        content - the same live per-request flakiness already seen on
+        driver-media fetches, just landing as empty bytes this time instead
+        of a crash. Without this check the caller gets back a filename and
+        treats it as a real success - see
+        scrape_articles.py's mirror_gallery_images, which would then rewrite
+        content to permanently point at a 0-byte file no future run would
+        ever know to retry."""
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = Path(tmp)
+            url = "https://btcc.net/site-assets/2026/09/a.jpg"
+            media = {url: (b"", "image/jpeg")}
+            self.assertIsNone(save_mirrored_image(media, url, out_dir))
+            self.assertEqual(list(out_dir.iterdir()), [])
+
     def test_saves_bytes_and_derives_extension_from_content_type(self):
         with tempfile.TemporaryDirectory() as tmp:
             out_dir = Path(tmp)

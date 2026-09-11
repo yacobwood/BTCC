@@ -92,7 +92,18 @@ def save_mirrored_image(
     a single {media_url: (bytes, content_type)} dict from an on-demand
     Scrapfly fetch) into out_dir, named by its identifying path segment.
     Returns the saved filename, or None if media_url is falsy or wasn't
-    captured (e.g. the image failed to load).
+    captured (e.g. the image failed to load) - or captured as an empty
+    body: confirmed live 2026-09-11, a gallery-image mirror via Scrapfly
+    reported `result=success` (see fetch_image_via_scrapfly) with a
+    genuinely empty `content` - the exact same live per-request Scrapfly
+    flakiness already documented for driver-media fetches, just landing as
+    empty bytes instead of a crash/timeout this time. Writing that
+    silently as a 0-byte file would be worse than not mirroring at all: a
+    caller like scrape_articles.py's mirror_gallery_images rewrites its
+    content to point at this filename once save_mirrored_image returns
+    one, so a 0-byte "success" would look permanently mirrored forever -
+    never retried, since nothing downstream can tell it apart from a
+    genuine image afterward.
 
     media_url is one of two shapes depending on the page: btcc.net's own
     stable /api/media/<uuid> redirector (no extension in the URL), or - some
@@ -116,6 +127,8 @@ def save_mirrored_image(
     if not entry:
         return None
     body, content_type = entry
+    if not body:
+        return None
     ext = _EXT_BY_CONTENT_TYPE.get(content_type.split(";")[0].strip(), "jpg")
     last_segment = media_url.split("?", 1)[0].rstrip("/").rsplit("/", 1)[-1]
     stem = last_segment.rsplit(".", 1)[0] if "." in last_segment else last_segment
