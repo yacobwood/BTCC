@@ -97,3 +97,60 @@ test('pressing "Skip for now" in onboarding logs the skip choice', async () => {
   expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'onboarding_choice_made', {choice: 'skip'});
   expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_shown', 'true');
 });
+
+// ─── Spoiler-free auto-clear ────────────────────────────────────────────────
+// Regression coverage for a real end-to-end mount, not just SettingsProvider
+// or SpoilerClearedDialog in isolation - previously untested at this level,
+// which is exactly why the auto-clear used to live in its own separate
+// App.tsx effect that could race SettingsProvider's load (see project
+// memory: spoiler_mode_audit_2026_09_13). These are last in the file: they
+// set a custom AsyncStorage.getItem implementation that (unlike the rest of
+// this file) isn't reset afterwards, matching jest.setup.js's clearAllMocks
+// (not resetAllMocks) between tests.
+
+test('spoiler-free mode still active (not yet expired) auto-clears on open and shows "No Spoilers Disabled"', async () => {
+  const future = new Date(Date.now() + 86400000).toISOString();
+  AsyncStorage.getItem.mockImplementation((key) => {
+    if (key === 'onboarding_shown') return Promise.resolve('true');
+    if (key === 'setting_spoiler_free') return Promise.resolve('true');
+    if (key === 'setting_spoiler_free_expiry') return Promise.resolve(future);
+    return Promise.resolve(null);
+  });
+
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  // Text-based presence check, not accessibilityLabel prop-matching:
+  // TouchableOpacity forwards accessibilityLabel down through several
+  // internal Animated.View/View layers, so findAllByProps over-counts a
+  // single logical button (react-test-renderer has no built-in "not
+  // found" query) - text content doesn't have that problem.
+  expect(JSON.stringify(root.toJSON())).toContain('No Spoilers Disabled');
+  expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_spoiler_free', 'false');
+
+  const gotIt = root.root.findByProps({accessibilityLabel: 'Got it'});
+  await act(async () => {
+    gotIt.props.onPress();
+  });
+  expect(JSON.stringify(root.toJSON())).not.toContain('No Spoilers Disabled');
+});
+
+test('spoiler-free mode already past its own expiry auto-clears silently, without the dialog', async () => {
+  const past = new Date(Date.now() - 86400000).toISOString();
+  AsyncStorage.getItem.mockImplementation((key) => {
+    if (key === 'onboarding_shown') return Promise.resolve('true');
+    if (key === 'setting_spoiler_free') return Promise.resolve('true');
+    if (key === 'setting_spoiler_free_expiry') return Promise.resolve(past);
+    return Promise.resolve(null);
+  });
+
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  expect(JSON.stringify(root.toJSON())).not.toContain('No Spoilers Disabled');
+  expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_spoiler_free', 'false');
+});

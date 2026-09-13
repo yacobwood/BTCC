@@ -171,11 +171,17 @@ const SYNCED_KEYS = new Set([
   'spoilerFree', 'use12HourTime',
 ]);
 
-const SettingsContext = createContext({settings: defaults, setSetting: (_key, _value) => {}});
+const SettingsContext = createContext({settings: defaults, setSetting: (_key, _value) => {}, spoilerJustCleared: false});
 
 export function SettingsProvider({children}) {
   const {user} = useAuth();
   const [settings, setSettings] = useState(defaults);
+  // Set (once, never reset) the one time a load finds spoilerFree left on from
+  // a previous session and auto-clears it before its own Monday-night expiry -
+  // App.tsx's AppDialogs watches this to show "No Spoilers Disabled". Deliberately
+  // NOT the same thing as settings.spoilerFree itself (which is always false right
+  // after this fires) - a plain boolean transition an effect elsewhere can key off.
+  const [spoilerJustCleared, setSpoilerJustCleared] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -202,6 +208,31 @@ export function SettingsProvider({children}) {
           loaded[key] = key === 'spoilerFreeExpiry' ? val : val === 'true';
         }
       }
+      // Auto-disable spoiler-free on every load (covers cold app-open, not just
+      // a same-device toggle) - folded into this same pass, before setSettings/
+      // syncAllTopics ever run, rather than a second independent effect (as
+      // App.tsx's AppDialogs used to do) calling setSetting('spoilerFree', false)
+      // afterwards. That second-effect version raced this one: this effect
+      // re-runs whenever `user` changes identity (useAuth's onAuthStateChanged
+      // resolves async, after mount), so a separate later syncAllTopics call
+      // could re-read AsyncStorage before the other effect's fire-and-forget
+      // write had landed and momentarily resubscribe a topic the user had
+      // actually turned off. Computing the clear as part of `loaded` itself
+      // means the very first sync this session already reflects it correctly -
+      // no second pass to race against.
+      if (loaded.spoilerFree) {
+        const expired = !loaded.spoilerFreeExpiry || new Date() >= new Date(loaded.spoilerFreeExpiry);
+        loaded.spoilerFree = false;
+        loaded.spoilerFreeExpiry = null;
+        AsyncStorage.setItem(STORAGE_KEYS.spoilerFree, 'false').catch(() => {});
+        AsyncStorage.removeItem(STORAGE_KEYS.spoilerFreeExpiry).catch(() => {});
+        if (user && !user.isAnonymous) saveProfile(user.uid, {spoilerFree: false}).catch(() => {});
+        // Only worth telling the user notifications are back if they were
+        // actually still being suppressed (not yet Monday night) - an
+        // already-expired spoilerFree that just never got cleared until now
+        // shouldn't claim anything was "disabled" for them just now.
+        if (!expired) setSpoilerJustCleared(true);
+      }
       setSettings(loaded);
       syncAllTopics(loaded);
       syncChatMentionToken(user?.uid, loaded.chatMentions);
@@ -225,6 +256,12 @@ export function SettingsProvider({children}) {
         next.spoilerFreeExpiry = expiry;
         if (expiry) {
           AsyncStorage.setItem(STORAGE_KEYS.spoilerFreeExpiry, expiry).catch(() => {});
+          // Only pushed on the enabling side - saveProfile/toFirestore can't
+          // write a null (see toFirestore's null/undefined skip), so a clear
+          // (expiry=null) has nothing to push; the boolean spoilerFree:false
+          // above already tells another device to stop suppressing regardless
+          // of whatever stale expiry date it may still see synced.
+          if (user && !user.isAnonymous) saveProfile(user.uid, {spoilerFreeExpiry: expiry}).catch(() => {});
         } else {
           AsyncStorage.removeItem(STORAGE_KEYS.spoilerFreeExpiry).catch(() => {});
         }
@@ -241,7 +278,7 @@ export function SettingsProvider({children}) {
   }, [user]);
 
   return (
-    <SettingsContext.Provider value={{settings, setSetting}}>
+    <SettingsContext.Provider value={{settings, setSetting, spoilerJustCleared}}>
       {children}
     </SettingsContext.Provider>
   );
