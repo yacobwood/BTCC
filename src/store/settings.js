@@ -53,7 +53,13 @@ const PARENT_CHAIN = {
   resultsRace1:      ['results', 'resultsRace'],
   resultsRace2:      ['results', 'resultsRace'],
   resultsRace3:      ['results', 'resultsRace'],
-  resultsTeaser:     [],
+  // Nested under 'results' 2026-09-06 (was []) - a user disabling the
+  // master "Results" toggle expecting to silence everything results-related
+  // was still getting this teaser, since it sat outside the hierarchy
+  // entirely. See functions/scraperAdmin.js's notifyResultsUpdate for the
+  // matching server-side fix (excludes devices already on a session's own
+  // spoiler topic) - a separate, unrelated bug this doesn't touch.
+  resultsTeaser:     ['results'],
 };
 
 const STORAGE_KEYS = {

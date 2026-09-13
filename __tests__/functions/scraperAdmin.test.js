@@ -150,7 +150,7 @@ describe('notifyResultsUpdate', () => {
   it('seeds fingerprints without sending a visible teaser on the very first call', async () => {
     await call();
     expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
-    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({condition: expect.stringContaining('results_teaser')}));
     expect(mockLogPushHistory).not.toHaveBeenCalled();
   });
 
@@ -172,8 +172,11 @@ describe('notifyResultsUpdate', () => {
     // Title names the specific session + venue that changed, not a generic
     // "a fresh result dropped somewhere" line - the whole point of surfacing
     // findChangedSession's pick to the user, not just the dedup itself.
+    // Sent as a condition (not a flat topic) so a device already getting
+    // Race 1's own spoiler push (results_race1) doesn't also get this one -
+    // see the 2026-09-06 comment above the send in scraperAdmin.js.
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      topic: 'results_teaser',
+      condition: "'results_teaser' in topics && !('results_race1' in topics)",
       notification: expect.objectContaining({title: 'Results for Race 1 at Croft is now available'}),
       // title/body/channel mirrored into data too (added alongside the
       // 2026-09-09 foreground-Android-drop fix - see
@@ -207,8 +210,57 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      topic: 'results_teaser',
+      condition: "'results_teaser' in topics && !('results_race1' in topics)",
       notification: expect.objectContaining({title: 'Results for Race 1 is now available'}),
+    }));
+  });
+
+  // The actual bug a user reported live 2026-09-06 (Croft, round 8): both
+  // this teaser ("Results for Race 2 at Croft is now available") and
+  // session_watcher.py's spoiler-specific push for the same session ("Race
+  // 2 Result — Round 8: X wins Race 2 at Croft") default to enabled, so
+  // without the exclusion below every user got both for every session.
+  it('excludes devices already subscribed to the changed session\'s own spoiler topic', async () => {
+    await seedBaseline();
+    mockResultsOnce([{
+      round: 8,
+      venue: 'Croft',
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Race 1', results: [], grid: null},
+        {label: 'Race 2', results: [{pos: 1, driver: 'B'}], grid: null},
+      ],
+    }]);
+
+    await call();
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      condition: "'results_teaser' in topics && !('results_race2' in topics)",
+      notification: expect.objectContaining({title: 'Results for Race 2 at Croft is now available'}),
+    }));
+  });
+
+  // Defensive fallback - every real session label in results{year}.json is
+  // one of the 6 keys RESULTS_TOPIC_BY_LABEL knows about, but if an unknown
+  // one ever showed up this still delivers the teaser (as a flat topic
+  // send, same as before this exclusion existed) rather than silently
+  // dropping it.
+  it('falls back to a flat topic send if the changed session label has no known spoiler topic', async () => {
+    await seedBaseline();
+    mockResultsOnce([{
+      round: 8,
+      venue: 'Croft',
+      races: [
+        {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+        {label: 'Warm-up Session', results: [{pos: 1, driver: 'A'}], grid: null},
+      ],
+    }]);
+
+    await call();
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      topic: 'results_teaser',
+      notification: expect.objectContaining({title: 'Results for Warm-up Session at Croft is now available'}),
     }));
   });
 
@@ -235,7 +287,7 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_live'}));
-    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({condition: expect.stringContaining('results_teaser')}));
     expect(mockLogPushHistory).not.toHaveBeenCalled();
     // Still advances the fingerprint baseline for that session, so this same
     // grid-only change doesn't get flagged as "changed" again next tick.
@@ -257,7 +309,7 @@ describe('notifyResultsUpdate', () => {
     const res = await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'results_live'}));
-    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({topic: 'results_teaser'}));
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({condition: expect.stringContaining('results_teaser')}));
     expect(mockDocRef.set).not.toHaveBeenCalled();
     expect(mockLogPushHistory).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
@@ -306,7 +358,7 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      topic: 'results_teaser',
+      condition: "'results_teaser' in topics && !('results_race1' in topics)",
       data: expect.objectContaining({round: '8', race: '2'}),
     }));
     const persisted = mockDocRef.set.mock.calls.find(c => c[0].fingerprints)[0].fingerprints;

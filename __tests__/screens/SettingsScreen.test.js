@@ -182,6 +182,23 @@ describe('SettingsScreen', () => {
       expect(getByLabelText('Results Race 2')).toHaveProp('disabled', true);
       expect(getByLabelText('Results Race 3')).toHaveProp('disabled', true);
     });
+
+    // 2026-09-06: "Results are in" (resultsTeaser) used to sit outside the
+    // Results hierarchy entirely (empty PARENT_CHAIN) - a user disabling the
+    // master Results toggle expecting to silence everything results-related
+    // was still getting this one. Now nested like every other child.
+    it('disabling Results alerts also disables "Results are in"', async () => {
+      const {getByLabelText, UNSAFE_getAllByType} = await renderSettings();
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Results alerts', false); });
+      expect(getByLabelText('Results are in')).toHaveProp('disabled', true);
+    });
+
+    it('re-enabling Results alerts re-enables "Results are in"', async () => {
+      const {getByLabelText, UNSAFE_getAllByType} = await renderSettings();
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Results alerts', false); });
+      await act(async () => { toggleSwitch(UNSAFE_getAllByType, 'Results alerts', true); });
+      expect(getByLabelText('Results are in')).toHaveProp('disabled', false);
+    });
   });
 
   describe('individual toggles', () => {

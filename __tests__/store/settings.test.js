@@ -290,6 +290,7 @@ describe('SettingsProvider', () => {
 
       expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'results_fp');
       expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'results_race1');
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'results_teaser');
     });
 
     it('re-enabling parent re-subscribes individually enabled children', async () => {
@@ -308,6 +309,19 @@ describe('SettingsProvider', () => {
 
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_fp');
       expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_race1');
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_teaser');
+    });
+
+    // 2026-09-06: resultsTeaser used to have an empty PARENT_CHAIN, so it
+    // stayed subscribed even with the master Results toggle off - the only
+    // result-revealing topic that ever behaved that way. Now nested under
+    // 'results' like every other results leaf.
+    it('disabling Results alerts unsubscribes resultsTeaser even though it defaults to enabled on its own', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      unsubscribeFromTopic.mockClear();
+      await act(async () => { getHook().setSetting('results', false); });
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'results_teaser');
     });
   });
 
