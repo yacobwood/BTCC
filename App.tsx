@@ -45,30 +45,27 @@ function AppDialogs() {
   const [showUpdate, setShowUpdate] = useState(false);
   const [showSpoilerCleared, setShowSpoilerCleared] = useState(false);
   const {update_available, update_min_version, update_min_version_ios, update_min_version_android} = useFeatureFlags();
-  const {setSetting} = useSettings();
+  const {spoilerJustCleared} = useSettings();
 
   useEffect(() => {
     (async () => {
-      const [onboardingShown, spoilerFreeVal, expiryVal] = await Promise.all([
-        AsyncStorage.getItem(ONBOARDING_KEY),
-        AsyncStorage.getItem('setting_spoiler_free'),
-        AsyncStorage.getItem('setting_spoiler_free_expiry'),
-      ]);
+      const onboardingShown = await AsyncStorage.getItem(ONBOARDING_KEY);
       if (!onboardingShown) {
         setShowOnboarding(true);
         Analytics.screen('onboarding');
       }
-
-      // Auto-disable spoiler-free on app open — read directly from storage to avoid context timing
-      if (spoilerFreeVal === 'true') {
-        const expired = !expiryVal || new Date() >= new Date(expiryVal);
-        setSetting('spoilerFree', false);
-        if (!expired) setShowSpoilerCleared(true);
-      }
-
       RNBootSplash.hide({fade: true});
     })();
   }, []);
+
+  // Auto-disabling spoiler-free itself (and deciding whether it's worth
+  // telling the user) now happens inside SettingsProvider's own load, as
+  // part of the same pass that computes every other setting - see its
+  // spoilerJustCleared comment for why this used to live here as an
+  // independent effect and raced it.
+  useEffect(() => {
+    if (spoilerJustCleared) setShowSpoilerCleared(true);
+  }, [spoilerJustCleared]);
 
   // Flag-based override for testing via admin page device overrides
   useEffect(() => {

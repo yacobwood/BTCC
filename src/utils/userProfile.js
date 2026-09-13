@@ -14,6 +14,7 @@ const PROFILE_ASYNC_KEYS = {
   explainerReadIds:   'explainer_read_ids',
   unitKm:             'use_km',
   spoilerFree:        'setting_spoiler_free',
+  spoilerFreeExpiry:  'setting_spoiler_free_expiry',
   use12HourTime:      'setting_12hr_time',
   commenterName:      'commenter_name',
   // notification settings

@@ -199,6 +199,24 @@ describe('userProfile', () => {
       const body = JSON.parse(options.body);
       expect(body.fields.use12HourTime).toEqual({booleanValue: true});
     });
+
+    // Regression coverage: spoilerFreeExpiry (STORAGE_KEYS.setting_spoiler_
+    // free_expiry in settings.js) was missing from PROFILE_ASYNC_KEYS
+    // entirely - only the spoilerFree boolean itself was ever uploaded, so a
+    // signed-in user's actual expiry date never reached Firestore. See
+    // project memory: spoiler_mode_audit_2026_09_13.
+    it('uploads spoilerFreeExpiry as a string, not coerced to a boolean', async () => {
+      const isoDate = '2026-09-14T23:00:00.000Z';
+      AsyncStorage.multiGet.mockResolvedValueOnce([
+        ['setting_spoiler_free_expiry', isoDate],
+      ]);
+
+      await uploadLocalProfile(UID);
+
+      const [, options] = global.fetch.mock.calls[0];
+      const body = JSON.parse(options.body);
+      expect(body.fields.spoilerFreeExpiry).toEqual({stringValue: isoDate});
+    });
   });
 
   describe('applyProfileToStorage', () => {
@@ -242,6 +260,19 @@ describe('userProfile', () => {
     // Regression coverage: without use12HourTime in PROFILE_ASYNC_KEYS, a
     // fresh install/new device could never restore the setting from the
     // user's Firestore profile - it always fell back to the 24hr default.
+    // Regression coverage: without spoilerFreeExpiry in PROFILE_ASYNC_KEYS, a
+    // second device signing into the same account would inherit
+    // spoilerFree:true from the profile but no expiry to auto-clear against.
+    it('writes spoilerFreeExpiry back to setting_spoiler_free_expiry', async () => {
+      const isoDate = '2026-09-14T23:00:00.000Z';
+      await applyProfileToStorage({spoilerFreeExpiry: isoDate});
+      expect(AsyncStorage.multiSet).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          ['setting_spoiler_free_expiry', isoDate],
+        ]),
+      );
+    });
+
     it('writes use12HourTime back to setting_12hr_time', async () => {
       await applyProfileToStorage({use12HourTime: true});
       expect(AsyncStorage.multiSet).toHaveBeenCalledWith(

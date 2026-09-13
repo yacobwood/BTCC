@@ -492,6 +492,93 @@ describe('SettingsProvider', () => {
       await act(async () => { getHook = renderProvider(); });
       expect(getHook().settings.spoilerFreeExpiry).toBe(isoDate);
     });
+
+    // Auto-clear on load: was previously a second, independent effect in
+    // App.tsx (setSetting('spoilerFree', false) after its own AsyncStorage
+    // reads) that raced this provider's own load - folded into the same load
+    // pass instead so the very first render/sync already reflects it. See
+    // project memory: spoiler_mode_audit_2026_09_13.
+    describe('auto-clear on load', () => {
+      it('clears a still-active (not yet expired) spoilerFree and marks spoilerJustCleared', async () => {
+        const future = new Date(Date.now() + 86400000).toISOString();
+        AsyncStorage.getItem.mockImplementation((key) => {
+          if (key === 'setting_spoiler_free') return Promise.resolve('true');
+          if (key === 'setting_spoiler_free_expiry') return Promise.resolve(future);
+          return Promise.resolve(null);
+        });
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        expect(getHook().settings.spoilerFree).toBe(false);
+        expect(getHook().settings.spoilerFreeExpiry).toBeNull();
+        expect(getHook().spoilerJustCleared).toBe(true);
+        expect(AsyncStorage.setItem).toHaveBeenCalledWith('setting_spoiler_free', 'false');
+        expect(AsyncStorage.removeItem).toHaveBeenCalledWith('setting_spoiler_free_expiry');
+      });
+
+      it('clears an already-expired spoilerFree silently, without marking spoilerJustCleared', async () => {
+        const past = new Date(Date.now() - 86400000).toISOString();
+        AsyncStorage.getItem.mockImplementation((key) => {
+          if (key === 'setting_spoiler_free') return Promise.resolve('true');
+          if (key === 'setting_spoiler_free_expiry') return Promise.resolve(past);
+          return Promise.resolve(null);
+        });
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        expect(getHook().settings.spoilerFree).toBe(false);
+        expect(getHook().spoilerJustCleared).toBe(false);
+      });
+
+      it('treats a missing expiry as already-expired (no dialog, still clears)', async () => {
+        AsyncStorage.getItem.mockImplementation((key) => {
+          if (key === 'setting_spoiler_free') return Promise.resolve('true');
+          return Promise.resolve(null);
+        });
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        expect(getHook().settings.spoilerFree).toBe(false);
+        expect(getHook().spoilerJustCleared).toBe(false);
+      });
+
+      it('does not touch spoilerFree, and does not mark spoilerJustCleared, when it was already off', async () => {
+        AsyncStorage.getItem.mockResolvedValue(null);
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        expect(getHook().settings.spoilerFree).toBe(false);
+        expect(getHook().spoilerJustCleared).toBe(false);
+        expect(AsyncStorage.setItem).not.toHaveBeenCalledWith('setting_spoiler_free', 'false');
+      });
+
+      it('the first sync already reflects the clear - never resubscribes a topic the user had individually disabled', async () => {
+        const future = new Date(Date.now() + 86400000).toISOString();
+        AsyncStorage.getItem.mockImplementation((key) => {
+          if (key === 'setting_spoiler_free') return Promise.resolve('true');
+          if (key === 'setting_spoiler_free_expiry') return Promise.resolve(future);
+          if (key === 'setting_results_race1') return Promise.resolve('false');
+          if (key === 'setting_results') return Promise.resolve('true');
+          if (key === 'setting_results_race') return Promise.resolve('true');
+          return Promise.resolve(null);
+        });
+        await act(async () => { renderProvider(); });
+        // Only ever unsubscribed, never (even transiently) subscribed
+        expect(subscribeToTopic).not.toHaveBeenCalledWith(expect.anything(), 'results_race1');
+        expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'results_race1');
+      });
+
+      it('pushes the auto-clear to the Firestore profile when signed in', async () => {
+        const {useAuth} = require('../../src/store/auth');
+        useAuth.mockReturnValue({user: {uid: 'u1', isAnonymous: false}});
+        const future = new Date(Date.now() + 86400000).toISOString();
+        AsyncStorage.getItem.mockImplementation((key) => {
+          if (key === 'setting_spoiler_free') return Promise.resolve('true');
+          if (key === 'setting_spoiler_free_expiry') return Promise.resolve(future);
+          return Promise.resolve(null);
+        });
+        await act(async () => { renderProvider(); });
+        const {saveProfile} = require('../../src/utils/userProfile');
+        expect(saveProfile).toHaveBeenCalledWith('u1', {spoilerFree: false});
+        useAuth.mockReturnValue({user: null, isAnonymous: true});
+      });
+    });
   });
 
   describe('chatMentions', () => {
@@ -685,6 +772,30 @@ describe('SettingsProvider', () => {
       });
 
       expect(saveProfile).toHaveBeenCalledWith('test-uid', {use12HourTime: true});
+    });
+
+    // Regression coverage: spoilerFreeExpiry was never pushed to Firestore at
+    // all (only the spoilerFree boolean was) - a signed-in user enabling
+    // spoiler-free on one device, then opening the app on a second device
+    // before the first's own expiry naturally passed, would inherit
+    // spoilerFree:true there with no expiry to auto-clear against. See
+    // project memory: spoiler_mode_audit_2026_09_13.
+    it('calls saveProfile with spoilerFreeExpiry alongside spoilerFree when enabling', async () => {
+      const {useAuth} = require('../../src/store/auth');
+      const {saveProfile} = require('../../src/utils/userProfile');
+      useAuth.mockReturnValue({user: {uid: 'test-uid', isAnonymous: false}, isAnonymous: false});
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      await act(async () => {
+        getHook().setSetting('spoilerFree', true);
+      });
+
+      expect(saveProfile).toHaveBeenCalledWith('test-uid', {spoilerFree: true});
+      expect(saveProfile).toHaveBeenCalledWith('test-uid', {spoilerFreeExpiry: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/)});
     });
 
     it('does not call saveProfile for hubPreview (not synced)', async () => {
