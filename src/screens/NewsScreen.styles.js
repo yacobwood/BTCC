@@ -200,4 +200,41 @@ export default StyleSheet.create({
   digestBannerSubUnread: {color: '#000', opacity: 0.6},
   digestBannerSubRead: {color: Colors.textSecondary},
   digestBannerChevronUnread: {opacity: 0.5},
+
+  // Shorts rail
+  shortsSection: {marginTop: 20, marginBottom: 4},
+  shortsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+  sectionTitleInline: {
+    color: Colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
+  shortsChannelLink: {color: Colors.yellow, fontSize: 12, fontWeight: '700'},
+  shortsListContent: {paddingHorizontal: 16, gap: 10},
+  shortCard: {
+    width: 120,
+    height: 200,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: Colors.card,
+  },
+  shortThumbnail: {width: '100%', height: '100%'},
+  shortPlayBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

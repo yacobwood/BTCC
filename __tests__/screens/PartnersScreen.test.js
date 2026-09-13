@@ -71,4 +71,28 @@ describe('PartnersScreen', () => {
     const {getByLabelText} = renderWithProviders(<PartnersScreen navigation={nav} />);
     expect(() => fireEvent.press(getByLabelText('Visit Kwik Fit website'))).not.toThrow();
   });
+
+  // ── Logo URLs ─────────────────────────────────────────────────────────────────
+  //
+  // Confirmed live 2026-09-12: every logo in this file hotlinked
+  // btcc.net's old WordPress /wp-content/uploads/ path, dead since the
+  // 2026-07-31 Vercel migration - the whole Partners screen rendered blank
+  // white boxes. Fixed by mirroring each logo into data/media/partners/
+  // (same pattern as every other image this app displays); this guards
+  // against a future partner being added with a raw btcc.net hotlink again,
+  // since partners.json has no scraper of its own to catch a stale URL.
+
+  it('never hotlinks a partner logo directly to btcc.net', () => {
+    const partners = require('../../data/partners.json');
+    for (const p of partners) {
+      expect(p.logo).not.toMatch(/^https:\/\/(www\.)?btcc\.net\//);
+    }
+  });
+
+  it('mirrors every partner logo via raw.githubusercontent.com', () => {
+    const partners = require('../../data/partners.json');
+    for (const p of partners) {
+      expect(p.logo).toMatch(/^https:\/\/raw\.githubusercontent\.com\/yacobwood\/BTCC\/main\/data\/media\/partners\//);
+    }
+  });
 });

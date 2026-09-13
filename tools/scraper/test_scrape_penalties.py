@@ -18,7 +18,9 @@ Run with:
     python tools/scraper/test_scrape_penalties.py
 """
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -402,6 +404,81 @@ class TestBuildOneLiner(unittest.TestCase):
         result = sp.build_one_liner("Driver", 1, "Reprimand", long_desc)
         self.assertLessEqual(len(result), 200)
         self.assertTrue(result.endswith("…"))
+
+
+class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
+    """main() must not let a round that scrapes to zero penalties silently
+    overwrite real, non-empty data already on file for that round - the
+    noticeboard page fetching fine but _ROW_RE/BARC_SERIES_MARKER matching
+    nothing (e.g. BARC changes its markup) looks identical to a genuinely
+    penalty-free weekend from the empty list alone, so an empty result can
+    only be trusted when there was nothing already on file to lose."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.data_dir = Path(self.tmp.name)
+        self.calendar_path = self.data_dir / "calendar.json"
+        self.penalties_path = self.data_dir / "penalties2026.json"
+
+        calendar = {"rounds": [
+            {"round": 99, "venue": "Testville", "startDate": "2026-09-26", "endDate": "2026-09-27"},
+        ]}
+        self.calendar_path.write_text(json.dumps(calendar))
+
+        self._orig_calendar_path = sp.CALENDAR_PATH
+        self._orig_data_dir = sp.DATA_DIR
+        self._orig_scrape_round_penalties = sp.scrape_round_penalties
+        sp.CALENDAR_PATH = self.calendar_path
+        sp.DATA_DIR = self.data_dir
+
+    def tearDown(self):
+        sp.CALENDAR_PATH = self._orig_calendar_path
+        sp.DATA_DIR = self._orig_data_dir
+        sp.scrape_round_penalties = self._orig_scrape_round_penalties
+
+    def _write_existing_penalties(self, round_num, penalties):
+        self.penalties_path.write_text(json.dumps(
+            {"season": "2026", "rounds": [{"round": round_num, "penalties": penalties}]}
+        ))
+
+    def test_existing_data_preserved_and_run_fails_when_new_scrape_is_empty(self):
+        existing_penalty = {"driver": "Chris Smiley", "summary": "5s time penalty"}
+        self._write_existing_penalties(99, [existing_penalty])
+        sp.scrape_round_penalties = lambda round_info: []
+
+        with self.assertRaises(SystemExit) as ctx:
+            sp.main()
+        self.assertNotEqual(ctx.exception.code, 0)
+
+        # Fatal, and crucially the existing on-file data for round 99 must
+        # not have been overwritten with the empty result.
+        on_disk = json.loads(self.penalties_path.read_text())
+        round_99 = next(r for r in on_disk["rounds"] if r["round"] == 99)
+        self.assertEqual(round_99["penalties"], [existing_penalty])
+
+    def test_confirmed_zero_is_accepted_when_nothing_was_on_file_before(self):
+        # No prior penalties.json at all for this round - an empty result is
+        # the only information we have, so it's accepted as legitimate
+        # rather than treated as a suspected failure.
+        sp.scrape_round_penalties = lambda round_info: []
+
+        sp.main()  # must not raise
+
+        on_disk = json.loads(self.penalties_path.read_text())
+        round_99 = next(r for r in on_disk["rounds"] if r["round"] == 99)
+        self.assertEqual(round_99["penalties"], [])
+
+    def test_non_empty_new_result_still_overwrites_normally(self):
+        self._write_existing_penalties(99, [{"driver": "Old Driver", "summary": "Old penalty"}])
+        new_penalty = {"driver": "New Driver", "summary": "New penalty"}
+        sp.scrape_round_penalties = lambda round_info: [new_penalty]
+
+        sp.main()  # must not raise - a real, non-empty new result is a normal update
+
+        on_disk = json.loads(self.penalties_path.read_text())
+        round_99 = next(r for r in on_disk["rounds"] if r["round"] == 99)
+        self.assertEqual(round_99["penalties"], [new_penalty])
 
 
 if __name__ == "__main__":

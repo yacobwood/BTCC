@@ -511,6 +511,58 @@ class TestApplyDrawOverride(unittest.TestCase):
         self.assertIsNone(r2_r3.get('reverseGridDraw'))
 
 
+# ── _build_results_output ────────────────────────────────────────────────────
+# Regression coverage for a season-long bug fixed 2026-09-09: main() used to
+# serialize+write results{year}.json immediately after output_rounds was
+# assembled, then apply the championship-PDF per-race override to
+# output_rounds afterward once the PDF had been fetched - so the override
+# was always computed correctly but never reached the file. Every per-race
+# point value on disk stayed the locally-reconstructed one (this file's own
+# fastestLap/leadLap-bonus detection), letting results{year}.json's summed
+# points drift from standings.json's official total for several drivers
+# despite the override itself being correct. _build_results_output exists
+# specifically so the override is applied to whatever gets returned, before
+# any caller can serialize it - not something a caller can get wrong by
+# sequencing two separate steps in the wrong order.
+class TestBuildResultsOutput(unittest.TestCase):
+
+    def _rounds_with_one_result(self, points):
+        return [{
+            'round': 1, 'venue': 'Test', 'date': '01 Jan', 'youtubeUrls': [],
+            'races': [{'label': 'Race 1', 'results': [
+                {'driver': 'Tom INGRAM', 'pos': 2, 'points': points},
+            ], 'grid': []}],
+        }]
+
+    def test_the_returned_dict_already_reflects_the_championship_pdf_override(self):
+        rounds = self._rounds_with_one_result(points=17)  # locally-computed (wrong) value
+        per_race = {'Tom INGRAM': {(1, 'Race 1'): 18}}     # authoritative PDF value
+        out = s._build_results_output(2026, rounds, per_race, {(1, 'Race 1')})
+        result = out['rounds'][0]['races'][0]['results'][0]
+        self.assertEqual(result['points'], 18)
+
+    def test_mutates_and_returns_the_same_rounds_object_the_caller_passed_in(self):
+        # Confirms there's no second, un-overridden copy anywhere a future
+        # caller could accidentally serialize instead of this one.
+        rounds = self._rounds_with_one_result(points=17)
+        per_race = {'Tom INGRAM': {(1, 'Race 1'): 18}}
+        out = s._build_results_output(2026, rounds, per_race, {(1, 'Race 1')})
+        self.assertIs(out['rounds'], rounds)
+        self.assertEqual(rounds[0]['races'][0]['results'][0]['points'], 18)
+
+    def test_is_a_safe_no_op_when_no_championship_pdf_was_available(self):
+        # Matches main()'s own per_race={}, scored_sessions=set() default when
+        # every championship-PDF fetch attempt failed - must leave the
+        # locally-computed points untouched, not wipe them to 0.
+        rounds = self._rounds_with_one_result(points=17)
+        out = s._build_results_output(2026, rounds, {}, set())
+        self.assertEqual(out['rounds'][0]['races'][0]['results'][0]['points'], 17)
+
+    def test_includes_the_season_key(self):
+        out = s._build_results_output(2026, self._rounds_with_one_result(points=17), {}, set())
+        self.assertEqual(out['season'], '2026')
+
+
 # ── _normalize_team_entries ──────────────────────────────────────────────────
 # Regression: 2026-08-22, Donington Park GP round 7 - the official TSL teams
 # championship PDF listed "Cataclean Plato Racing" (282pts) and its renamed
@@ -572,6 +624,47 @@ class TestNormalizeTeamEntries(unittest.TestCase):
         # an alias to merge - guards against it (or any other pair) silently
         # creeping back into the default config.
         self.assertEqual(s.TEAM_NAME_ALIASES, {})
+
+
+class TestMergeStandingsTimestamp(unittest.TestCase):
+    """Regression coverage for the 2026-09-06 fix: standings.json's `updated`
+    field used to get re-stamped on every scrape tick regardless of whether
+    anything else actually changed, so git-auto-commit-action committed this
+    file on essentially every 2-minute tick during a raceday (confirmed live:
+    round 7/Donington GP weekend logged 193 commits to this file, all but ~8
+    of them differing from their predecessor only in this one field)."""
+
+    def test_reverts_to_existing_timestamp_when_nothing_else_changed(self):
+        existing = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:00:00Z'}
+        new = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, existing)
+        self.assertEqual(result['updated'], '2026-09-06T09:00:00Z')
+
+    def test_keeps_fresh_timestamp_when_standings_data_genuinely_changed(self):
+        existing = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:00:00Z'}
+        new = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 40}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, existing)
+        self.assertEqual(result['updated'], '2026-09-06T09:02:00Z')
+
+    def test_keeps_fresh_timestamp_on_first_ever_run(self):
+        new = {'season': '2026', 'round': 8, 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, None)
+        self.assertEqual(result['updated'], '2026-09-06T09:02:00Z')
+
+    def test_keeps_fresh_timestamp_when_round_or_venue_changed(self):
+        # Same standings values, but a new round has started - a real change
+        # even though `standings` itself is unchanged.
+        existing = {'season': '2026', 'round': 7, 'venue': 'Donington Park GP', 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:00:00Z'}
+        new = {'season': '2026', 'round': 8, 'venue': 'Croft', 'standings': [{'driver': 'A', 'points': 20}], 'updated': '2026-09-06T09:02:00Z'}
+        result = s.merge_standings_timestamp(new, existing)
+        self.assertEqual(result['updated'], '2026-09-06T09:02:00Z')
+
+    def test_does_not_mutate_the_existing_dict(self):
+        existing = {'season': '2026', 'standings': [], 'updated': '2026-09-06T09:00:00Z'}
+        existing_copy = dict(existing)
+        new = {'season': '2026', 'standings': [], 'updated': '2026-09-06T09:02:00Z'}
+        s.merge_standings_timestamp(new, existing)
+        self.assertEqual(existing, existing_copy)
 
 
 if __name__ == '__main__':

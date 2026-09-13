@@ -891,8 +891,14 @@ export default function ArticleScreen({route, navigation}) {
   };
 
   const onShare = async () => {
-    const s = article.link.replace(/\/$/, '').split('/').pop();
-    const appLink = `https://btcchub.vercel.app/news/${s}`;
+    // Academy/explainer articles (and some hub posts) have no source `link`
+    // at all - api/client.js's mapExplainerPosts always sets it null, since
+    // they're in-app-only content with no matching btcc.net/website page.
+    // Fall back to the generic app link (same pattern as utils/appShare.js)
+    // instead of crashing on `.replace()` of a null link.
+    const appLink = article.link
+      ? `https://btcchub.vercel.app/news/${article.link.replace(/\/$/, '').split('/').pop()}`
+      : 'https://btcchub.vercel.app?src=article_share';
     Analytics.articleShared(article.title);
     await Share.share({message: `${article.title}\n\n${appLink}`});
   };
@@ -1075,6 +1081,15 @@ export function buildHtml(article, topPad) {
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <style>
       * { box-sizing:border-box; margin:0; padding:0; max-width:100%!important; }
+      /* Without this, Android WebView's font-boosting heuristic (separate
+         from the OS accessibility text-size setting) rescales individual
+         text blocks unpredictably on narrow columns - at large system font
+         sizes this has produced paragraphs rendering hugely oversized and
+         superimposed on top of the following paragraph. Locking to the
+         authored sizes keeps the article legible; it just means this
+         content doesn't grow with the OS font-size setting like the rest
+         of the app's native text does. */
+      html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       body { background:#0B0C0F; color:#fff; font-family:-apple-system,sans-serif; font-size:16px; line-height:1.7; padding-top:0; }
       .hero { position:relative; width:100%; min-height:${topPad + 300}px; padding-top:${topPad}px; background-size:cover; background-position:center; display:flex; flex-direction:column; justify-content:flex-end; }
       .hero-gradient { position:absolute; top:0;left:0;right:0;bottom:0; background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,transparent 30%,transparent 50%,rgba(11,12,15,0.95) 100%); }
@@ -1088,6 +1103,26 @@ export function buildHtml(article, topPad) {
       .divider { height:2px; background:#FEBD02; margin:0 16px 20px; border-radius:2px; }
       .content { padding:0 16px 0; }
       img { width:100%!important; height:auto!important; border-radius:8px; margin:12px 0; display:block; }
+      /* btcc.net's custom "btcc-gallery" block (a grid of photos inline in
+         an article's own body, e.g. "BTCC visit Darlington Memorial
+         Hospital..." 2026-09-11) had zero rules here at all - its images
+         are now mirrored (see scrape_articles.py's mirror_gallery_images)
+         so they load, but without this they'd still just stack full-width
+         one per row rather than as the grid btcc.net intends. Two
+         fixed-tag selectors, not one shared class name, because btcc.net's
+         own markup reuses the class "btcc-gallery-grid" on BOTH the outer
+         wrapping <figure> and the inner <div> that's the real grid - one
+         shared display:grid rule for both would make the outer figure's
+         own single grid item (that inner div) sit in only the first
+         column instead of spanning full width. Only 2/3/4-column variants
+         are handled explicitly (every gallery seen live so far); anything
+         else falls back to the 3-column default. */
+      .btcc-gallery { margin:16px 0; }
+      div.btcc-gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+      figure.btcc-gallery-columns-2 > .btcc-gallery-grid { grid-template-columns:repeat(2,1fr); }
+      figure.btcc-gallery-columns-4 > .btcc-gallery-grid { grid-template-columns:repeat(4,1fr); }
+      .btcc-gallery-item { margin:0; }
+      .btcc-gallery-item img { margin:0; }
       p { margin-bottom:14px; }
       /* A genuinely empty paragraph (a stray blank line left in the source
          content, e.g. from a markdown double-newline that survived

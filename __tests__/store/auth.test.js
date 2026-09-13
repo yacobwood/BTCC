@@ -134,6 +134,9 @@ describe('AuthProvider', () => {
         cb(anonUser);
         return jest.fn();
       });
+      // In the real SDK, auth().currentUser is the same object onAuthStateChanged
+      // just fired with - keep the mock consistent with that.
+      mockAuthInstance.currentUser = anonUser;
 
       let getHook;
       await act(async () => {
@@ -146,6 +149,80 @@ describe('AuthProvider', () => {
 
       expect(GoogleSignin.signIn).toHaveBeenCalled();
       expect(linkFn).toHaveBeenCalled();
+    });
+
+    it('links via auth().currentUser (not the stale null user state) when called before onAuthStateChanged resolves', async () => {
+      const mockAuthInstance = auth();
+      const {loadProfile} = require('../../src/utils/userProfile');
+
+      // Keep onAuthStateChanged's callback suspended on its first await so
+      // setUser(u) never runs - the provider's `user` state stays null even
+      // though auth().currentUser already holds a real anonymous user.
+      let resolveLoadProfile;
+      loadProfile.mockImplementationOnce(() => new Promise(resolve => { resolveLoadProfile = resolve; }));
+
+      const linkFn = jest.fn(() => Promise.resolve());
+      const anonUser = {uid: 'anon-uid', isAnonymous: true, linkWithCredential: linkFn, providerData: []};
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
+        cb(anonUser);
+        return jest.fn();
+      });
+      mockAuthInstance.currentUser = anonUser;
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      // Confirm the race window is real: state hasn't caught up yet.
+      expect(getHook().user).toBeNull();
+
+      await act(async () => {
+        await getHook().signInWithGoogle();
+      });
+
+      expect(linkFn).toHaveBeenCalled();
+      expect(mockAuthInstance.signInWithCredential).not.toHaveBeenCalled();
+
+      // Let the suspended onAuthStateChanged callback finish so it doesn't leak into other tests.
+      await act(async () => { resolveLoadProfile(null); });
+    });
+  });
+
+  describe('signInWithApple', () => {
+    // Same race as signInWithGoogle above (both read the identical stale
+    // `user` state before this fix) - kept as its own test since the two
+    // functions are independent call sites, not a shared helper.
+    it('links via auth().currentUser (not the stale null user state) when called before onAuthStateChanged resolves', async () => {
+      const mockAuthInstance = auth();
+      const {loadProfile} = require('../../src/utils/userProfile');
+
+      let resolveLoadProfile;
+      loadProfile.mockImplementationOnce(() => new Promise(resolve => { resolveLoadProfile = resolve; }));
+
+      const linkFn = jest.fn(() => Promise.resolve());
+      const anonUser = {uid: 'anon-uid', isAnonymous: true, linkWithCredential: linkFn, providerData: []};
+      mockAuthInstance.onAuthStateChanged.mockImplementationOnce(cb => {
+        cb(anonUser);
+        return jest.fn();
+      });
+      mockAuthInstance.currentUser = anonUser;
+
+      let getHook;
+      await act(async () => {
+        getHook = renderProvider();
+      });
+
+      expect(getHook().user).toBeNull();
+
+      await act(async () => {
+        await getHook().signInWithApple();
+      });
+
+      expect(linkFn).toHaveBeenCalled();
+      expect(mockAuthInstance.signInWithCredential).not.toHaveBeenCalled();
+
+      await act(async () => { resolveLoadProfile(null); });
     });
   });
 

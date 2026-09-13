@@ -10,6 +10,17 @@ Archived 2026-08-18. These three lived-scraped a driver's headshot
 (`imageUrl`), their bundled `src/assets/driver_images/<number>.webp`
 cutout, and their card-background graphic (`cardBgUrl`) from btcc.net.
 
+**Not fully superseded by anything below - see `../scrape_driver_media.py`
+(added 2026-09-08, extended the same day to cover `numberImageUrl` too) for
+the headshot/car-image/car-number half.** That script is a narrower
+replacement, not a revival of this one: on-demand only (triggered manually
+from the admin panel, one named driver at a time), fetches via Scrapfly
+rather than these three's Playwright/`RenderedFetcher` approach, and
+additionally covers the car-livery photo (`carImageUrl`) and car-number
+graphic (`numberImageUrl`), which these three never did. The card-background
+graphics (`cardBgUrl`, both driver- and team-level) remain hand-curated
+only - nothing scrapes those.
+
 Replaced by a hand-curated set of official team/driver graphics dropped
 directly into the repo:
 

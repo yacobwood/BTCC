@@ -120,8 +120,9 @@ export function AuthProvider({children}) {
       await GoogleSignin.hasPlayServices();
       const {data} = await GoogleSignin.signIn();
       const credential = auth.GoogleAuthProvider.credential(data.idToken);
-      if (user?.isAnonymous) {
-        await user.linkWithCredential(credential);
+      const currentUser = auth().currentUser;
+      if (currentUser?.isAnonymous) {
+        await currentUser.linkWithCredential(credential);
       } else {
         await auth().signInWithCredential(credential);
       }
@@ -142,8 +143,9 @@ export function AuthProvider({children}) {
         appleReq.identityToken,
         appleReq.nonce,
       );
-      if (user?.isAnonymous) {
-        await user.linkWithCredential(credential);
+      const currentUser = auth().currentUser;
+      if (currentUser?.isAnonymous) {
+        await currentUser.linkWithCredential(credential);
       } else {
         await auth().signInWithCredential(credential);
       }

@@ -43,3 +43,19 @@ export async function saveChatDisplayName({authorId, user, name, previousName}) 
   DB.ref(`/chat/authorNames/${authorId}`).set(trimmed).catch(() => {});
   return {status: 'ok', name: trimmed};
 }
+
+// Re-assert the authorId -> name mapping every time chat identity resolves
+// (ChatScreen init), not just at the moment the name is first saved. Without
+// this, the one-shot write above failing silently just once (offline, a
+// rules hiccup - the exact case its own comment calls out) leaves that
+// account permanently un-mentionable: their own messages keep showing the
+// right name (set from local state, not read back from this map), so
+// nothing looks broken to them, but functions/chatMentions.js's
+// resolveMentionedAuthorIds only ever matches against this map - a missing
+// entry means every @mention of that name silently resolves to zero
+// recipients, with no error anywhere to find. Mirrors syncChatMentionToken's
+// same "re-sync on every identity resolve" pattern (src/store/settings.js).
+export function syncChatAuthorName(authorId, name) {
+  if (!authorId || !name) return;
+  DB.ref(`/chat/authorNames/${authorId}`).set(name).catch(() => {});
+}

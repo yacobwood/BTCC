@@ -226,6 +226,23 @@ export async function fetchGalleryAlbum(year, slug, forceRefresh = false) {
   }
 }
 
+// btcc.net's homepage "Latest BTCC Shorts" carousel, mirrored into
+// shorts.json by scrape_shorts.py on a weekly schedule - a longer max age
+// than gallery's (which shares a similar weekly-ish scraper cadence) isn't
+// warranted here since there's no reason to expect this to refresh any less
+// often; kept as its own constant rather than reusing GALLERY_MAX_AGE_MS so
+// the two can diverge later without one silently affecting the other.
+const SHORTS_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+export async function fetchShorts(forceRefresh = false) {
+  try {
+    return await fetchJson(`${BASE_GITHUB}/shorts.json`, 'shorts', forceRefresh, /* staleFallback */ true, false, SHORTS_MAX_AGE_MS);
+  } catch (e) {
+    if (isNotFound(e)) return {updatedAt: '', shorts: []};
+    throw e;
+  }
+}
+
 
 // btcc.net's own wp-json REST API now returns 401 for every client, so the
 // news list/search/article-by-slug all read this GitHub-mirrored snapshot

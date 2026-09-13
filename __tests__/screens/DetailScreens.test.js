@@ -99,6 +99,24 @@ describe('DriverDetailScreen', () => {
     });
   });
 
+  // Regression: StatBox's value Text had no numberOfLines/adjustsFontSizeToFit,
+  // so a long single-token value like 'Filipino-British' or 'Main Championship'
+  // forced a mid-character line break ('Britis'/'h') at large accessibility
+  // font sizes instead of shrinking to fit (confirmed live on a Pixel 10a with
+  // system font size increased).
+  it('shrinks a long key-fact value to fit instead of letting it wrap mid-word', async () => {
+    const driver = {...DRIVER, nationality: 'Filipino-British'};
+    const route = makeRoute({driver});
+    const {getByText} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      const value = getByText('Filipino-British');
+      expect(value.props.numberOfLines).toBe(2);
+      expect(value.props.adjustsFontSizeToFit).toBe(true);
+    });
+  });
+
   it('hides the Car/Class tile row entirely when the driver has neither', async () => {
     // DRIVER has no car/cls set - the second key-facts row must not render
     // (previously the chip row simply omitted whichever chips were absent;
@@ -161,6 +179,30 @@ describe('DriverDetailScreen', () => {
       <DriverDetailScreen route={route} navigation={nav} />,
     );
     await waitFor(() => expect(getByText('P30')).toBeTruthy());
+  });
+
+  // Regression: the season-history badge row (pts/W/P/PL/FL/DNF) had no
+  // flexWrap, so at large accessibility font sizes the combined badge width
+  // exceeded the card and the trailing badges overran its right edge instead
+  // of wrapping to a second line (confirmed live on a Pixel 10a with system
+  // font size increased).
+  it('wraps the season-history badge row instead of letting it overrun the card', async () => {
+    const {View} = require('react-native');
+    const driver = {
+      ...DRIVER,
+      history: [{year: 2024, team: 'Team Ingram', wins: 3, podiums: 8, poles: 2, fastestLaps: 4, dnfs: 1, points: 250}],
+    };
+    const route = makeRoute({driver});
+    const {getByText, UNSAFE_root} = renderWithProviders(
+      <DriverDetailScreen route={route} navigation={nav} />,
+    );
+    await waitFor(() => {
+      expect(getByText('3 W')).toBeTruthy(); // badge row has actually rendered
+      const badgeRows = UNSAFE_root.findAll(
+        node => node.type === View && node.props.style?.flexWrap === 'wrap',
+      );
+      expect(badgeRows.length).toBeGreaterThan(0);
+    });
   });
 
   it('toggles favourite when star button is pressed', async () => {

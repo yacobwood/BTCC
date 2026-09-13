@@ -11,11 +11,12 @@ import {
   TextInput,
   Keyboard,
   Platform,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
-import {fetchArticles, fetchHubPosts, fetchExplainerArticles, peekArticlesCache} from '../api/client';
-import {parseArticle} from '../api/parsers';
+import {fetchArticles, fetchHubPosts, fetchExplainerArticles, fetchShorts, peekArticlesCache} from '../api/client';
+import {parseArticle, parseShorts} from '../api/parsers';
 import styles from './NewsScreen.styles';
 import CachedImage, {prefetchImages} from '../components/CachedImage';
 import {Analytics} from '../utils/analytics';
@@ -64,6 +65,18 @@ export default function NewsScreen({navigation}) {
   const [explainerArticles, setExplainerArticles] = useState([]);
   useEffect(() => { fetchExplainerArticles().then(setExplainerArticles).catch(() => {}); }, []);
   const [explainerReadIds, setExplainerReadIds] = useState(new Set());
+  // Same "fetch once on mount, independent of the main News pagination/pull-
+  // to-refresh cycle" precedent as explainerArticles above - this is
+  // homepage-native content mirrored weekly, not something that needs to
+  // feel live on every refresh.
+  const [shorts, setShorts] = useState([]);
+  useEffect(() => {
+    fetchShorts().then(raw => {
+      const parsed = parseShorts(raw).shorts;
+      setShorts(parsed);
+      if (parsed.length > 0) Analytics.shortsViewed(parsed.length);
+    }).catch(e => Analytics.shortsLoadFailed(e?.message));
+  }, []);
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
@@ -274,12 +287,13 @@ export default function NewsScreen({navigation}) {
         explainer: hasExplainers ? {count: explainerArticles.length, unread: explainerUnread} : null,
       });
     }
+    if (shorts.length > 0) data.push({type: 'shortsRail', shorts});
     if (remaining.length > 0) {
       data.push({type: 'moreHeader'});
       remaining.forEach(a => data.push({type: 'compact', article: a}));
     }
     return data;
-  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds, explainerArticles, explainerReadIds]);
+  }, [visibleArticles, searchActive, searchQuery, searchResults, digestReadIds, explainerArticles, explainerReadIds, shorts]);
 
   const renderItem = useCallback(({item}) => {
     switch (item.type) {
@@ -317,6 +331,20 @@ export default function NewsScreen({navigation}) {
               />
             )}
           </View>
+        );
+      case 'shortsRail':
+        return (
+          <ShortsRail
+            shorts={item.shorts}
+            onOpenShort={(short) => {
+              Analytics.shortOpened(short.videoId);
+              Linking.openURL(short.url);
+            }}
+            onOpenChannel={() => {
+              Analytics.navItemClicked('shorts_channel_link');
+              Linking.openURL('https://www.youtube.com/@OfficialBTCC/shorts');
+            }}
+          />
         );
       default:
         return null;
@@ -615,6 +643,45 @@ function ExplainerTeaser({count, unread, onPress, style}) {
         style={hasUnread && styles.digestBannerChevronUnread}
       />
     </TouchableOpacity>
+  );
+}
+
+// ── Shorts rail (btcc.net homepage's own "Latest BTCC Shorts" carousel,
+// mirrored) - a freely-scrolling thumbnail strip, deliberately NOT the
+// paged/full-bleed treatment TrackDetailScreen's PhotoCarousel uses for its
+// own photo gallery: every short is equally-weighted and tapping any of
+// them exits to YouTube either way, so there's no "one at a time" viewing
+// mode worth a page-snap here, just a quick horizontal browse. ─────────────
+function ShortsRail({shorts, onOpenShort, onOpenChannel}) {
+  return (
+    <View style={styles.shortsSection}>
+      <View style={styles.shortsHeader}>
+        <Text style={styles.sectionTitleInline}>LATEST BTCC SHORTS</Text>
+        <TouchableOpacity onPress={onOpenChannel} accessibilityLabel="View Channel Shorts" accessibilityRole="button">
+          <Text style={styles.shortsChannelLink}>View Channel</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={shorts}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={s => s.videoId}
+        contentContainerStyle={styles.shortsListContent}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            style={styles.shortCard}
+            activeOpacity={0.8}
+            onPress={() => onOpenShort(item)}
+            accessibilityLabel="Watch BTCC short on YouTube"
+            accessibilityRole="button">
+            <Image source={{uri: item.thumbnailUrl}} style={styles.shortThumbnail} resizeMode="cover" />
+            <View style={styles.shortPlayBadge}>
+              <Icon name="play-arrow" size={16} color="#fff" />
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 }
 

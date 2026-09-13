@@ -82,6 +82,27 @@ describe('SwipeableTabs', () => {
     expect(lastPagerViewProps.offscreenPageLimit).toBe(PAGES.length - 1);
   });
 
+  // Regression: at large accessibility font sizes, a label like 'RESULTS' or
+  // 'GALLERY' wrapped to a second line inside the tab bar's fixed height:44
+  // row, spilling the wrapped line out over the screen content below it
+  // (confirmed live on a Pixel 10a with system font size increased). Forcing
+  // a single line and letting the font shrink to fit keeps every label
+  // readable without ever wrapping.
+  it('keeps tab labels on a single line, shrinking to fit rather than wrapping', () => {
+    const {getByText} = render(
+      <SwipeableTabs
+        tabs={['RESULTS', 'GALLERY']}
+        pages={[<Text key="1">Page 1</Text>, <Text key="2">Page 2</Text>]}
+        onTabChange={jest.fn()}
+      />,
+    );
+    ['RESULTS', 'GALLERY'].forEach(label => {
+      const text = getByText(label);
+      expect(text.props.numberOfLines).toBe(1);
+      expect(text.props.adjustsFontSizeToFit).toBe(true);
+    });
+  });
+
   it('lazy mode: only renders content for the initial active page', () => {
     const {getByText, queryByText} = render(
       <SwipeableTabs

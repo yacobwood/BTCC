@@ -59,6 +59,10 @@ export const Analytics = {
   galleryPhotoView: (year, albumSlug, photoIndex) => logEvent(fa(),'gallery_photo_view', {year, album_slug: albumSlug, photo_index: photoIndex}),
   galleryLightboxClosed: (year, albumSlug, photoIndex) => logEvent(fa(),'gallery_lightbox_closed', {year, album_slug: albumSlug, photo_index: photoIndex}),
 
+  shortsViewed: (count) => logEvent(fa(),'shorts_viewed', {count}),
+  shortOpened: (videoId) => logEvent(fa(),'short_opened', {video_id: videoId}),
+  shortsLoadFailed: (errorCode) => logEvent(fa(),'shorts_load_failed', {error_code: errorCode || 'unknown'}),
+
   driverClicked: (name) => logEvent(fa(),'driver_clicked', {driver_name: name}),
   teamClicked: (name) => logEvent(fa(),'team_clicked', {team_name: name}),
   favouriteToggled: (name, added) => logEvent(fa(),'favourite_toggled', {driver_name: name, action: added ? 'added' : 'removed'}),

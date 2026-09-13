@@ -154,6 +154,17 @@
       "totalCount": 193,
       "complete": true,
       "isCanonical": true
+    },
+    {
+      "slug": "2026-croft",
+      "title": "2026 - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/6e70dc65-bb4d-4611-92e0-af4431d53fcf/461f5776-ebed-491d-8169-e516d25d46f4/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 8,
+      "venue": "Croft",
+      "isCanonical": true,
+      "capturedCount": 142,
+      "totalCount": 142,
+      "complete": true
     }
   ]
 }

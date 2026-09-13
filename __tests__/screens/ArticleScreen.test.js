@@ -252,6 +252,40 @@ describe('ArticleScreen', () => {
     });
   });
 
+  // ── Sharing ──────────────────────────────────────────────────────────────────
+
+  describe('sharing', () => {
+    it('shares a link built from article.link when one exists', () => {
+      const {Share} = require('react-native');
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+
+      const {getByLabelText} = renderArticle();
+      fireEvent.press(getByLabelText('Share article'));
+
+      expect(shareSpy).toHaveBeenCalledWith({
+        message: 'Ingram wins at Donington\n\nhttps://btcchub.vercel.app/news/ingram-wins-donington',
+      });
+      expect(Analytics.articleShared).toHaveBeenCalledWith('Ingram wins at Donington');
+    });
+
+    // The actual bug: Academy/explainer articles (api/client.js's
+    // mapExplainerPosts) always have link: null, since they're in-app-only
+    // content with no matching website page - the Share button used to call
+    // `.replace()` on that null and crash every time on any such article.
+    it('falls back to the generic app link instead of crashing when article.link is null', () => {
+      const {Share} = require('react-native');
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({action: 'sharedAction'});
+
+      const {getByLabelText} = renderArticle({article: {...FULL_ARTICLE, link: null}});
+      expect(() => fireEvent.press(getByLabelText('Share article'))).not.toThrow();
+
+      expect(shareSpy).toHaveBeenCalledWith({
+        message: 'Ingram wins at Donington\n\nhttps://btcchub.vercel.app?src=article_share',
+      });
+      expect(Analytics.articleShared).toHaveBeenCalledWith('Ingram wins at Donington');
+    });
+  });
+
   // ── Read aloud ───────────────────────────────────────────────────────────────
 
   describe('read aloud', () => {
@@ -920,6 +954,48 @@ describe('buildHtml image attribution', () => {
   it('shows no image-credit line when there is no hero image at all', () => {
     const html = buildHtml({...BASE}, 0);
     expect(html).not.toContain('class="image-credit"');
+  });
+});
+
+// ─── buildHtml: WebView font-boosting disabled ─────────────────────────────
+//
+// Without `text-size-adjust: 100%`, Android WebView's own font-boosting
+// heuristic (separate from the OS accessibility text-size setting) rescales
+// individual text blocks unpredictably on this narrow single-column layout -
+// confirmed live on a Pixel 10a with system font size increased, where a
+// mid-article paragraph rendered hugely oversized and superimposed directly
+// on top of the next paragraph, both illegible. Locking the adjustment to
+// 100% keeps the article legible at every system font size.
+
+describe('buildHtml WebView font-boosting', () => {
+  it('disables WebView text-size-adjust so large system font sizes cannot rescale paragraphs unpredictably', () => {
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('text-size-adjust:100%');
+  });
+});
+
+// ─── buildHtml: btcc-gallery block layout ──────────────────────────────────
+//
+// Confirmed live 2026-09-11 ("BTCC visit Darlington Memorial Hospital...")
+// that this block had zero CSS at all - once its images are mirrored (see
+// scrape_articles.py's mirror_gallery_images) they'd still just stack
+// full-width one per row rather than as the grid btcc.net intends.
+
+describe('buildHtml btcc-gallery layout', () => {
+  it('always includes the gallery grid rules, regardless of article content', () => {
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('div.btcc-gallery-grid { display:grid;');
+  });
+
+  it('scopes the base grid rule to the div tag, not a bare class shared with the outer figure', () => {
+    // btcc.net's own markup reuses the class "btcc-gallery-grid" on both
+    // the outer wrapping <figure> and the inner <div> that's the real
+    // grid - a bare shared `.btcc-gallery-grid { display:grid }` rule
+    // would also apply to the outer figure, whose only grid item (that
+    // inner div) would then sit in just the first column instead of
+    // spanning full width.
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).not.toContain('\n      .btcc-gallery-grid {');
   });
 });
 

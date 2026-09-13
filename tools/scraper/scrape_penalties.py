@@ -621,23 +621,51 @@ def main():
     output_rounds = {r["round"]: r for r in existing.get("rounds", [])}
 
     any_scraped = False
+    suspected_failures = []
     for round_info in rounds:
         penalties = scrape_round_penalties(round_info)
-        if penalties is not None:
-            output_rounds[round_info["round"]] = {"round": round_info["round"], "penalties": penalties}
-            any_scraped = True
+        if penalties is None:
+            continue  # non-fatal: round is skipped, existing data (if any) is preserved
+        existing_round = output_rounds.get(round_info["round"])
+        existing_penalties = existing_round.get("penalties") if existing_round else None
+        if not penalties and existing_penalties:
+            # scrape_round_penalties returns [] both when a round genuinely
+            # had zero BTCC judicial notices this weekend AND when the
+            # noticeboard page's markup changed and _ROW_RE/BARC_SERIES_MARKER
+            # silently matched nothing - an empty list alone can't tell those
+            # apart. We already have real, non-empty data on file for this
+            # round, so treat the new empty result as a suspected parse
+            # failure rather than a confirmed legitimate zero: don't
+            # overwrite known-good data with it.
+            print(
+                f"WARNING: round {round_info['round']} scraped 0 penalties but "
+                f"{len(existing_penalties)} existing penalty entr"
+                f"{'y' if len(existing_penalties) == 1 else 'ies'} already on file - "
+                "suspected parse failure, not overwriting",
+                file=sys.stderr,
+            )
+            suspected_failures.append(round_info["round"])
+            continue
+        output_rounds[round_info["round"]] = {"round": round_info["round"], "penalties": penalties}
+        any_scraped = True
 
     result = {"season": str(YEAR), "rounds": [output_rounds[k] for k in sorted(output_rounds)]}
 
     if DRY_RUN:
         print(json.dumps(result, indent=2))
-        return
-
-    if any_scraped:
+    elif any_scraped:
         penalties_path.write_text(json.dumps(result, indent=2))
         print(f"\nWrote {penalties_path}")
     else:
         print("\nNo rounds scraped successfully - leaving existing data untouched")
+
+    if suspected_failures:
+        print(
+            f"\nERROR: suspected parse failure(s) for round(s) {suspected_failures} - "
+            "preserved existing data on file but failing the run so the retry/alert path fires",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":

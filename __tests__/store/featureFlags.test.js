@@ -22,6 +22,8 @@ describe('FeatureFlagsProvider', () => {
     update_available: false,
     update_min_version_ios: 0,
     update_min_version_android: 0,
+    live_updates: true,
+    track_weather: true,
   };
 
   it('provides default flags immediately (before fetch resolves)', () => {
@@ -30,6 +32,15 @@ describe('FeatureFlagsProvider', () => {
       getHook = renderProvider();
     });
     expect(getHook()).toMatchObject(defaults);
+  });
+
+  it('defaults live_updates and track_weather to true so a cold install with a failed fetch does not silently disable them', () => {
+    let getHook;
+    act(() => {
+      getHook = renderProvider();
+    });
+    expect(getHook().live_updates).toBe(true);
+    expect(getHook().track_weather).toBe(true);
   });
 
   it('merges fetched flags with defaults', async () => {

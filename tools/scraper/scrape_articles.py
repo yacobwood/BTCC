@@ -92,6 +92,13 @@ fetch_image_smart (Scrapfly for btcc.net's own /api/media/ shape, ~225
 credits, confirmed live 2026-09-01 - a plain free request for a
 Supabase-hosted image, which isn't behind the Vercel challenge at all).
 
+The same applies to any photo in a "btcc-gallery" block inside an
+article's own body content, not just its one featured/hero image -
+confirmed live 2026-09-11 that the app's ArticleScreen WebView renders
+these as broken-image icons, since (unlike the hero image) they were never
+mirrored at all, just hotlinked from btcc.net's own /site-assets/<path>.
+See GALLERY_IMG_RE/mirror_gallery_images.
+
 Usage:
     python scrape_articles.py [--dry-run] [--refresh-all] [--backfill-pages N]
 """
@@ -174,6 +181,17 @@ OG_IMAGE_RE = re.compile(
     r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"'
     r'|<meta[^>]+content="([^"]+)"[^>]+property="og:image"'
 )
+# btcc.net's custom "btcc-gallery" block (a grid of photos embedded inline
+# in an article's own body, distinct from its one featured/hero image)
+# emits each photo as a root-relative /site-assets/<path> src - a shape
+# none of MEDIA_SRC_RE_FRAGMENT's other three cases covered before
+# 2026-09-11, so these were never mirrored: the app's ArticleScreen WebView
+# just hotlinks them live from btcc.net at render time. Confirmed live
+# on-device (two articles, seven weeks apart - "PM1 Junior prototype car
+# unveiled" 25 Jul and "BTCC visit Darlington Memorial Hospital..." 11 Sep)
+# that this renders as a broken-image icon next to the alt text every time,
+# not an occasional flake - see mirror_gallery_images below.
+GALLERY_IMG_RE = re.compile(r'<img[^>]*src="(/site-assets/[^"]+)"')
 
 
 def extract_og_image(html: str) -> str | None:
@@ -429,6 +447,58 @@ def needs_image_retry(first_seen: str | None) -> bool:
         return False
 
 
+def needs_gallery_mirror(content_html: str, first_seen: str | None, just_fetched: bool) -> bool:
+    """Whether content_html still has at least one un-mirrored btcc-gallery
+    image (a raw /site-assets/ src - see GALLERY_IMG_RE) worth attempting
+    this run. A successfully-mirrored src is rewritten to its MEDIA_RAW_BASE
+    URL in place (see mirror_gallery_images), so this naturally goes False
+    on its own the moment every image in an article is mirrored - no
+    separate "stop trying" flag needed for the success case.
+
+    The cost concern is the failure case: each still-broken src costs one
+    Scrapfly image fetch, same as the hero-image fetch, so a genuinely-dead
+    gallery photo must not re-bill every 5-minute cycle forever. Bounded the
+    same way needs_image_retry bounds the hero-image retry - except when
+    content_html was JUST freshly fetched this run (a brand-new article, or
+    an existing one needs_full_refetch/image_retry_needed already forced a
+    fresh page fetch for), which always gets one attempt regardless of age,
+    since that's a rare event already gated elsewhere, not a steady
+    per-cycle cost."""
+    if GALLERY_IMG_RE.search(content_html) is None:
+        return False
+    return just_fetched or needs_image_retry(first_seen)
+
+
+def mirror_gallery_images(content_html: str, slug: str) -> str:
+    """Mirrors every btcc-gallery block image in content_html (see
+    GALLERY_IMG_RE) into MEDIA_DIR exactly the way the article's own
+    featured/hero image is already mirrored, rewriting each successfully-
+    mirrored src from its raw btcc.net path to its MEDIA_RAW_BASE one in
+    place. A src that fails to fetch is left as-is - not an error, just a
+    still-broken image for the next eligible run (see needs_gallery_mirror)
+    to retry.
+
+    Deliberately does NOT touch any other <img> shape already covered by
+    MEDIA_SRC_RE_FRAGMENT (a Supabase URL embedded directly in body content,
+    say) - those already load live in the WebView without issue, and this
+    repo has never mirrored in-body content images before now; only the
+    specific shape confirmed broken gets this treatment."""
+    mirrored = {}
+    for raw_src in GALLERY_IMG_RE.findall(content_html):
+        if raw_src in mirrored:
+            continue
+        source_url = resolve_media_url(raw_src)
+        fetched = fetch_image_smart(source_url, label=f"{slug}-gallery")
+        if not fetched:
+            continue
+        filename = save_mirrored_image({source_url: fetched}, source_url, MEDIA_DIR)
+        if filename:
+            mirrored[raw_src] = f"{MEDIA_RAW_BASE}/{filename}"
+    for raw_src, mirrored_url in mirrored.items():
+        content_html = content_html.replace(f'"{raw_src}"', f'"{mirrored_url}"')
+    return content_html
+
+
 def resolve_first_seen(prior: dict | None, now_iso: str, date_iso: str = "") -> str:
     """Returns the timestamp a post should sort by: an already-mirrored
     article keeps whatever it was first stamped with (so re-scraping it on a
@@ -488,6 +558,17 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
         prior = existing.get(slug)
         prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
         prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
+        # Confirmed live 2026-09-11: a real og:image for this exact article
+        # DOES exist on btcc.net (user compared against the live site
+        # directly and it showed a different, correct photo) - the tier-3
+        # gallery fallback below had filled in a plausible-looking but
+        # objectively wrong substitute, then permanently blocked ever
+        # trying again for the real one, since prior_image was now truthy
+        # and MEDIA_RAW_BASE-prefixed same as a confirmed real image would
+        # be. heroSource distinguishes "confirmed from card/og" (absent/None)
+        # from "gallery fallback, keep looking" (see image_retry_needed and
+        # the prior_image short-circuit below, both gated on this).
+        prior_hero_source = prior.get("_embedded", {}).get("heroSource") if prior else None
         # A held-back article's first-ever detection time (see
         # PUBLISH_HOLD_WINDOW) - None for both a normal already-mirrored
         # article (prior is not None, resolve_first_seen handles it below)
@@ -496,13 +577,15 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
         pending_first_seen = pending.get(slug, {}).get("firstSeenAt") if prior is None else None
 
         # A mirrored article with no image at all (neither a prior mirrored
-        # one nor anything on the current listing card) gets treated like a
-        # content stub - worth one more full-page fetch so extract_og_image
-        # gets a shot at it, bounded to IMAGE_RETRY_WINDOW of its first
-        # sighting so a genuinely image-less article doesn't re-pay that
-        # fetch forever (see IMAGE_RETRY_WINDOW above).
+        # one nor anything on the current listing card) - or one whose only
+        # image so far is the tier-3 gallery fallback, not a confirmed
+        # card/og image - gets treated like a content stub - worth one more
+        # full-page fetch so extract_og_image gets a shot at it, bounded to
+        # IMAGE_RETRY_WINDOW of its first sighting so a genuinely image-less
+        # article doesn't re-pay that fetch forever (see IMAGE_RETRY_WINDOW
+        # above).
         image_retry_needed = False
-        if prior is not None and not prior_image and not card["media_url"]:
+        if prior is not None and not card["media_url"] and (not prior_image or prior_hero_source == "gallery"):
             image_retry_needed = needs_image_retry(prior.get("firstSeenAt"))
 
         has_content = (
@@ -538,15 +621,26 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
                 date_iso = card["date"]
                 category = ""
 
-        if prior_image and prior_image.startswith(MEDIA_RAW_BASE):
+        # Runs against whatever content_html ended up being above (freshly
+        # fetched or reused from cache) - a page fetch isn't needed to mirror
+        # a gallery image, only the image fetch itself, so this doesn't wait
+        # on has_content/needs_full_refetch the way the hero image's og:image
+        # extraction does.
+        if needs_gallery_mirror(content_html, prior.get("firstSeenAt") if prior else None, not has_content):
+            content_html = mirror_gallery_images(content_html, slug)
+
+        if prior_image and prior_image.startswith(MEDIA_RAW_BASE) and prior_hero_source != "gallery":
             image_url = prior_image
+            hero_source = prior_hero_source
         else:
             # On-demand, not eagerly-captured: Scrapfly bills each image
             # independently (~225 credits for btcc.net's own /api/media/
             # shape, confirmed live 2026-09-01) rather than capturing every
             # image on a page for free during render the way Playwright did,
             # so this only ever runs for a card that genuinely lacks an
-            # already-mirrored image. card["media_url"] (the listing-card
+            # already-mirrored image (or one whose only image so far is a
+            # tier-3 gallery fallback still worth upgrading - see
+            # prior_hero_source above). card["media_url"] (the listing-card
             # thumbnail) is preferred when present; og_image (the article's
             # own og:image meta tag, only populated when content_html was
             # just freshly fetched above) is the fallback for a card whose
@@ -558,6 +652,30 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
                 image_url = f"{MEDIA_RAW_BASE}/{filename}" if filename else None
             else:
                 image_url = None
+            hero_source = None  # a card/og image just confirmed above is never a guess
+            if not image_url:
+                # Tier 3: no listing-card thumbnail and no og:image either -
+                # confirmed live 2026-09-11 ("BTCC visit Darlington Memorial
+                # Hospital..."), a "community visit" style article can carry
+                # neither, only its own inline btcc-gallery. Falls back to
+                # that gallery's own first image, already mirrored above if
+                # mirror_gallery_images found one - no extra Scrapfly image
+                # fetch, since it's already sitting in content_html.
+                #
+                # Marked heroSource="gallery" rather than treated as final:
+                # confirmed live the same day that this can be flat wrong -
+                # the real og:image existed on btcc.net's own page the whole
+                # time, this run's og:image fetch had just failed
+                # transiently (the same live per-request Scrapfly flakiness
+                # already hit twice elsewhere the same day - see
+                # project_gallery_image_mirroring_fix memory). Without this
+                # marker, a wrong gallery-derived guess would look identical
+                # to a confirmed real image on every future run (both are
+                # just a MEDIA_RAW_BASE URL) and never get replaced even
+                # once the real one becomes fetchable again.
+                gallery_m = re.search(re.escape(MEDIA_RAW_BASE) + r'/[^"]+', content_html)
+                image_url = gallery_m.group(0) if gallery_m else None
+                hero_source = "gallery" if image_url else None
 
         if prior is None and not image_url:
             # Genuinely new (never published) and still no image this cycle -
@@ -581,6 +699,13 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
         embedded = {}
         if image_url:
             embedded["wp:featuredmedia"] = [{"source_url": image_url}]
+        if hero_source:
+            # "gallery" - a guess, not confirmed; see prior_hero_source
+            # above for why this needs to survive to next run. Never
+            # written at all for a confirmed card/og image, so an older
+            # already-mirrored article predating this field simply reads
+            # as confirmed (correct - every one of those really was).
+            embedded["heroSource"] = hero_source
         if category:
             embedded["wp:term"] = [[{"name": category}]]
 
@@ -617,6 +742,12 @@ def prune_orphaned_images(posts: list[dict]) -> int:
         url = p.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url")
         if url and url.startswith(MEDIA_RAW_BASE):
             referenced.add(url.rsplit("/", 1)[-1])
+        # A btcc-gallery image (see mirror_gallery_images) is referenced from
+        # inside content.rendered, not _embedded - without this, every
+        # gallery image mirrored above would look orphaned to this function
+        # and get deleted again on this same run's own prune pass.
+        for gallery_url in re.findall(re.escape(MEDIA_RAW_BASE) + r'/[^"]+', p.get("content", {}).get("rendered", "")):
+            referenced.add(gallery_url.rsplit("/", 1)[-1])
     removed = 0
     for f in MEDIA_DIR.iterdir():
         if f.is_file() and f.name not in referenced:

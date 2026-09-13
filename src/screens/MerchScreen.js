@@ -19,6 +19,7 @@ import {parseGrid} from '../api/parsers';
 import {Analytics} from '../utils/analytics';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import CachedImage from '../components/CachedImage';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_WIDTH = (SCREEN_WIDTH - 32 - 10) / 2;
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {color: '#fff', fontSize: 16, fontWeight: '900', letterSpacing: 1.5, flex: 1},
   yellowDivider: {height: 3, backgroundColor: Colors.yellow, marginHorizontal: 16, borderRadius: 2},
-  scrollContent: {padding: 16, paddingBottom: 30},
+  scrollContent: {padding: 16, paddingBottom: 30 + CHAT_FAB_CLEARANCE},
   intro: {color: Colors.textSecondary, fontSize: 14, lineHeight: 22, marginBottom: 20, marginTop: 4},
   emptyWrap: {alignItems: 'center', marginTop: 60, gap: 12},
   emptyText: {color: Colors.textSecondary, fontSize: 14},

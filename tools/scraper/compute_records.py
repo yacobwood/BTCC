@@ -53,8 +53,18 @@ CHAMPIONS = {
 
 
 def title_case(name):
-    """Convert TSL all-caps surname format 'Tom INGRAM' → 'Tom Ingram'."""
-    return " ".join(w.capitalize() for w in name.split()) if name else name
+    """Convert TSL all-caps surname format 'Tom INGRAM' → 'Tom Ingram'.
+
+    Must use str.title(), not str.capitalize(), on each word: capitalize()
+    only lowercases everything after the first character of the whole token,
+    so a hyphenated surname like 'TAYLOR-SMITH' becomes 'Taylor-smith'
+    instead of 'Taylor-Smith' - str.title() correctly treats '-' as a word
+    boundary. This exact bug silently split Árón Taylor-Smith's career stats
+    across two rows in records.json (his pre-2026 total under the correct
+    spelling, his 2026 season under 'Taylor-smith') until fixed here -
+    see the accompanying one-off merge in data/records.json.
+    """
+    return " ".join(w.title() for w in name.split()) if name else name
 
 
 def get_flag(result, short_key, long_key):
@@ -286,6 +296,33 @@ def compute_records(timeline):
     return drivers
 
 
+def load_historical_entries(out_path: Path) -> list[dict]:
+    """Preserve historical=True entries (pre-2004 era drivers, which this
+    script has no season data of its own to recompute) from a previous run's
+    records.json.
+
+    If out_path exists but fails to parse (e.g. transiently corrupt or
+    partially written), this is FATAL - main() would otherwise proceed to
+    write only the freshly-computed 2004+ drivers over the file, silently
+    dropping every pre-2004 historical entry with no error surfaced
+    anywhere. A script that can't safely confirm how many historical
+    entries it already has to carry forward must not proceed to blow them
+    away."""
+    if not out_path.exists():
+        return []
+    try:
+        prev = json.loads(out_path.read_text())
+        return [d for d in prev.get("drivers", []) if d.get("historical")]
+    except Exception as e:
+        print(
+            f"FATAL: {out_path} exists but could not be parsed ({e}) - refusing to "
+            "proceed, since doing so would silently drop every historical "
+            "(pre-2004) entry it currently holds",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def main():
     print("Loading season data...")
     seasons = load_all_seasons()
@@ -310,13 +347,7 @@ def main():
                   f"streak={d['winStreak']} consecutive={d['consecutive']} starts={d['starts']}")
 
     # Preserve historical=True entries from previous records.json (pre-2004 era drivers)
-    historical_entries = []
-    if OUT_PATH.exists():
-        try:
-            prev = json.loads(OUT_PATH.read_text())
-            historical_entries = [d for d in prev.get("drivers", []) if d.get("historical")]
-        except Exception:
-            pass
+    historical_entries = load_historical_entries(OUT_PATH)
 
     all_drivers = list(by_name.values()) + historical_entries
     OUT_PATH.write_text(json.dumps({"drivers": all_drivers}, indent=2))

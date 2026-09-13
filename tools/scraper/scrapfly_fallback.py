@@ -39,6 +39,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -49,6 +50,26 @@ SCRAPFLY_ENDPOINT = "https://api.scrapfly.io/scrape"
 # a genuine 4.1MB image) - see fetch_image_via_scrapfly's own docstring.
 _LARGE_OBJECT_URL_PREFIX = "https://api.scrapfly.io/scrape/large_object/"
 _SUPABASE_RE = re.compile(r"supabase\.co/storage/")
+
+# Every fetch function below gets one bare retry (not an unbounded loop) on
+# any failure before actually giving up for this cycle - confirmed live on
+# three separate occasions (2026-08-14, 2026-09-02, 2026-09-11) that a
+# Scrapfly call failing once is very often a pure blip that succeeds within
+# seconds on a plain retry (see fetch_image_via_scrapfly's own long-standing
+# "one genuinely timed out at 30s that then succeeded in under 7s moments
+# later" note). Before this, the ONLY retry mechanism was waiting for the
+# next scheduled 5-minute cron tick - confirmed live 2026-09-11: chasing one
+# article's image through three separate flaky failures (a page-fetch 422, a
+# malformed-redirect 404, an empty-body "success") took multiple manual
+# `gh workflow run` dispatches across ~10 minutes, when each one would have
+# self-resolved in seconds with a retry inside the same run. Scrapfly bills
+# failed requests nothing (confirmed via their own billing docs), so this
+# costs nothing when everything's fine and saves exactly that kind of
+# multi-dispatch chase when it isn't - still bounded to one retry, not
+# unbounded, so a genuinely-down target fails in ~2x the time instead of
+# hanging the whole run.
+_MAX_ATTEMPTS = 2
+_RETRY_DELAY_SECONDS = 3
 
 
 def _error_detail(e: Exception) -> str:
@@ -74,6 +95,7 @@ def _error_detail(e: Exception) -> str:
 
 def fetch_via_scrapfly(
     url: str, referer: str | None = None, label: str = "", timeout: int = 30, render_js: bool = True,
+    wait_for_selector: str | None = None,
 ) -> str | None:
     """Fetch url through Scrapfly's Scrape API and return the rendered HTML
     (or, with render_js=False, whatever text content the origin returned
@@ -96,7 +118,24 @@ def fetch_via_scrapfly(
     (headers[Referer]=...), not just cosmetic - also per their docs, since
     Scrapfly's ASP mode can otherwise auto-generate its own referer, which
     we'd rather not leave to chance given referer is the one lever
-    confirmed (2026-08-14) to matter here."""
+    confirmed (2026-08-14) to matter here.
+
+    wait_for_selector, if given, is Scrapfly's own documented
+    render-completion signal (a CSS/XPath selector, or an `xhr:` prefixed
+    pattern) - hold the response until that element is actually present in
+    the DOM, rather than trusting Scrapfly's own generic "page looks done"
+    heuristic (the default when this is left unset). Added 2026-09-09:
+    scrape_driver_media.py's real runs hit several intermittent failures
+    that all had the same shape - a headshot 422, a car image that "fetched
+    successfully" but decoded to garbage bytes, and a recurring 404 on a
+    malformed-looking redirect target - every one consistent with the page
+    not having genuinely finished rendering the image element the caller
+    then went on to extract a src from. Only worth setting for a page whose
+    target element is expected to reliably exist (an established driver
+    always has a headshot, say) - for anything the caller's own downstream
+    parsing already treats as legitimately-optional (see e.g.
+    extract_media_urls's "not_found" vs "failed" distinction), waiting on
+    it here risks turning a genuine absence into a hard timeout instead."""
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
@@ -109,18 +148,33 @@ def fetch_via_scrapfly(
     }
     if referer:
         params["headers[Referer]"] = referer
+    if wait_for_selector:
+        params["wait_for_selector"] = wait_for_selector
 
     request_url = f"{SCRAPFLY_ENDPOINT}?{urllib.parse.urlencode(params)}"
-    try:
-        with urllib.request.urlopen(request_url, timeout=timeout) as resp:
-            body = json.loads(resp.read())
-        content = body["result"]["content"]
-    except Exception as e:  # noqa: BLE001 - this is a last-resort fallback, any failure just means "no"
-        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
-        return None
+    for attempt in range(1, _MAX_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(request_url, timeout=timeout) as resp:
+                body = json.loads(resp.read())
+            result = body["result"]
+            # Scrapfly can return HTTP 200 with success=False and a non-page
+            # error payload in `content` (same failure mode confirmed live
+            # 2026-09-02 for fetch_image_via_scrapfly below - a target-side
+            # failure must not be treated as real page content) - check this
+            # explicitly rather than let it silently masquerade as a fetch.
+            if not result.get("success", True):
+                raise RuntimeError(result.get("error", {}).get("message") or "Scrapfly reported success=false")
+            content = result["content"]
+        except Exception as e:  # noqa: BLE001 - this is a last-resort fallback, any failure just means "no"
+            if attempt < _MAX_ATTEMPTS:
+                print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail, retrying ({_error_detail(e)})")
+                time.sleep(_RETRY_DELAY_SECONDS)
+                continue
+            print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
+            return None
 
-    print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
-    return content
+        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
+        return content
 
 
 def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tuple[bytes, str] | None:
@@ -163,35 +217,48 @@ def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tu
 
     params = {"key": api_key, "url": url, "asp": "true", "render_js": "false"}
     request_url = f"{SCRAPFLY_ENDPOINT}?{urllib.parse.urlencode(params)}"
-    try:
-        with urllib.request.urlopen(request_url, timeout=timeout) as resp:
-            body = json.loads(resp.read())
-        result = body["result"]
-        # Scrapfly can return HTTP 200 with success=False and a non-image
-        # error payload in `content` (confirmed live 2026-09-02: this
-        # previously fell through to base64.b64decode() below and failed
-        # with an opaque "Incorrect padding" instead of a real reason) -
-        # check this explicitly so a genuine target-side failure reports
-        # as what it actually is.
-        if not result.get("success", True):
-            raise RuntimeError(result.get("error", {}).get("message") or "Scrapfly reported success=false")
-        # Confirmed live (2026-09-01) Scrapfly reports this one of two ways
-        # depending on target - check both rather than trust one and risk
-        # silently mislabelling a non-JPEG image's extension.
-        content_type = result.get("content_type") or result.get("response_headers", {}).get("content-type", "image/jpeg")
-        content_type = content_type.split(";")[0].strip()
-        raw_content = result["content"]
-        if raw_content.startswith(_LARGE_OBJECT_URL_PREFIX):
-            with urllib.request.urlopen(f"{raw_content}?key={api_key}", timeout=timeout) as lo_resp:
-                image_bytes = lo_resp.read()
-        else:
-            image_bytes = base64.b64decode(raw_content)
-    except Exception as e:  # noqa: BLE001 - fallback path, any failure just means "no"
-        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
-        return None
+    for attempt in range(1, _MAX_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(request_url, timeout=timeout) as resp:
+                body = json.loads(resp.read())
+            result = body["result"]
+            # Scrapfly can return HTTP 200 with success=False and a non-image
+            # error payload in `content` (confirmed live 2026-09-02: this
+            # previously fell through to base64.b64decode() below and failed
+            # with an opaque "Incorrect padding" instead of a real reason) -
+            # check this explicitly so a genuine target-side failure reports
+            # as what it actually is.
+            if not result.get("success", True):
+                raise RuntimeError(result.get("error", {}).get("message") or "Scrapfly reported success=false")
+            # Confirmed live (2026-09-01) Scrapfly reports this one of two
+            # ways depending on target - check both rather than trust one and
+            # risk silently mislabelling a non-JPEG image's extension.
+            content_type = result.get("content_type") or result.get("response_headers", {}).get("content-type", "image/jpeg")
+            content_type = content_type.split(";")[0].strip()
+            raw_content = result["content"]
+            if raw_content.startswith(_LARGE_OBJECT_URL_PREFIX):
+                with urllib.request.urlopen(f"{raw_content}?key={api_key}", timeout=timeout) as lo_resp:
+                    image_bytes = lo_resp.read()
+            else:
+                image_bytes = base64.b64decode(raw_content)
+            if not image_bytes:
+                # Confirmed live 2026-09-11: Scrapfly can report
+                # result=success with a genuinely empty content body - same
+                # media_utils.save_mirrored_image now also guards against
+                # (belt and braces: that guard covers every OTHER caller of
+                # this data too, e.g. a cached capture dict; this one gets an
+                # actual retry chance instead of just rejection downstream).
+                raise RuntimeError("empty response body")
+        except Exception as e:  # noqa: BLE001 - fallback path, any failure just means "no"
+            if attempt < _MAX_ATTEMPTS:
+                print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail, retrying ({_error_detail(e)})")
+                time.sleep(_RETRY_DELAY_SECONDS)
+                continue
+            print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=fail ({_error_detail(e)})")
+            return None
 
-    print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
-    return image_bytes, content_type
+        print(f"  SCRAPFLY_FALLBACK: slug={label or url} result=success")
+        return image_bytes, content_type
 
 
 def fetch_image_smart(media_url: str, label: str = "") -> tuple[bytes, str] | None:
@@ -202,12 +269,20 @@ def fetch_image_smart(media_url: str, label: str = "") -> tuple[bytes, str] | No
     fetch_image_via_scrapfly's paid path above. Returns None on any
     failure - image mirroring should never crash the whole scrape."""
     if _SUPABASE_RE.search(media_url):
-        try:
-            req = urllib.request.Request(media_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0].strip()
-                return resp.read(), content_type
-        except Exception as e:  # noqa: BLE001 - image mirroring must never crash the whole scrape
-            print(f"  WARNING: plain fetch of Supabase image failed ({e})", file=sys.stderr)
-            return None
+        for attempt in range(1, _MAX_ATTEMPTS + 1):
+            try:
+                req = urllib.request.Request(media_url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+                    body = resp.read()
+                if not body:
+                    raise RuntimeError("empty response body")
+            except Exception as e:  # noqa: BLE001 - image mirroring must never crash the whole scrape
+                if attempt < _MAX_ATTEMPTS:
+                    print(f"  WARNING: plain fetch of Supabase image failed, retrying ({e})", file=sys.stderr)
+                    time.sleep(_RETRY_DELAY_SECONDS)
+                    continue
+                print(f"  WARNING: plain fetch of Supabase image failed ({e})", file=sys.stderr)
+                return None
+            return body, content_type
     return fetch_image_via_scrapfly(media_url, label=label)

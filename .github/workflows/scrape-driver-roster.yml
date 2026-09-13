@@ -1,0 +1,108 @@
+# Weekly companion to scrape-driver-media.yml (which stays on-demand,
+# triggered per-driver from the admin panel). This sweeps EVERY driver in
+# drivers.json for a changed image, and auto-adds any brand-new driver found
+# on btcc.net's /drivers/ listing - see tools/scraper/scrape_driver_roster.py's
+# own module docstring for the change-detection design (why this doesn't just
+# blindly refetch all three images for all ~27 drivers every week) and the
+# new-driver "needsReview" stub convention.
+#
+# Thursday 09:15 UTC - the one weekday with no existing scraper on it yet,
+# off the :00/:30 marks per the documented "overnight cron gap" fix (root
+# README.md) - GitHub's own scheduler is most contended right on the
+# hour/half-hour.
+name: Scrape Driver Roster
+
+on:
+  schedule:
+    - cron: "15 9 * * 4"   # Thursday 09:15 UTC
+  workflow_dispatch:
+    inputs:
+      is_retry:
+        description: "internal - marks this run as an automated retry (do not set manually)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: scrape-driver-roster
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Pull latest
+        run: git pull --rebase origin main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install Pillow
+          sudo apt-get update -qq && sudo apt-get install -y -qq webp
+
+      # continue-on-error: true - same reasoning as scrape-driver-media.yml's
+      # own scrape step: this can genuinely update some drivers/add a new
+      # signing and still exit non-zero overall (e.g. one other driver's
+      # page failed to fetch this run) - the commit step below must still
+      # run and save whatever DID succeed, while "Fail job if scrape step
+      # failed" further down still makes the run show red and fires the
+      # retry-once mechanism, instead of a partly-broken run reporting green.
+      - name: Scrape driver roster
+        id: scrape
+        continue-on-error: true
+        env:
+          SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+        working-directory: tools/scraper
+        run: python3 scrape_driver_roster.py
+
+      - name: Commit updated media
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: weekly driver roster sweep from btcc.net [skip ci]"
+          file_pattern: "data/driverImages/ data/carImages/ data/numberImages/ data/drivers.json data/driver_media_state.json src/assets/driver_images/ src/assets/driver_images_large/"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          push_options: "--force-with-lease"
+
+      - name: Fail job if scrape step failed
+        if: steps.scrape.outcome == 'failure'
+        run: exit 1
+
+      # Covers a genuine script failure() as well as cancelled(). is_retry
+      # guards against looping: a run dispatched BY this step carries
+      # is_retry=true, so a second failure falls through to "Report failure"
+      # instead of dispatching again.
+      - name: Retry once on failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-driver-roster.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || echo "Retry dispatch failed (non-fatal)"
+
+      # Only reached once the automated retry above has ALSO failed/been
+      # cancelled - a single transient blip no longer emails anyone.
+      - name: Report failure
+        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"scrape-driver-roster\",\"message\":\"Driver roster sweep failed (auto-retry also failed)\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"

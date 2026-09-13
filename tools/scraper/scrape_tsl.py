@@ -996,6 +996,36 @@ def _apply_per_race_points(rounds, per_race, scored_sessions):
                 # Drivers not in per_race (wildcards not in championship) are unchanged
 
 
+def _build_results_output(year, output_rounds, per_race, scored_sessions):
+    """Applies the championship-PDF per-race point override (if any) to
+    output_rounds and returns the exact dict main() should write to
+    results{year}.json - the override and the file build happen in one
+    place, together, on purpose.
+
+    Confirmed live 2026-09-09: this used to be two separate steps in main()
+    itself, in the wrong order - results{year}.json was serialized and
+    written immediately after output_rounds was assembled, then
+    _apply_per_race_points() ran afterward (once the championship PDF had
+    been fetched) and correctly overrode output_rounds' per-race points in
+    memory, but nothing ever wrote that corrected state back to disk. Every
+    per-race point value in results{year}.json was therefore always the
+    locally-reconstructed one (subject to this file's own fastestLap/
+    leadLap-bonus detection - real, but a fundamentally different, less
+    authoritative computation than the officially-published PDF), never the
+    override - the override wasn't buggy, it just never reached the file it
+    was meant to correct. That's what let points summed from
+    results{year}.json drift from standings.json's official total for
+    several drivers despite both the override logic and the PDF parsing
+    themselves being correct. Extracted into its own function specifically
+    so the override-then-build ordering is enforced by construction (the
+    caller literally cannot get the dict without the override already
+    having been applied to it), not left to hope every future call site in
+    a 400+ line main() sequences its own two steps correctly."""
+    if per_race and scored_sessions:
+        _apply_per_race_points(output_rounds, per_race, scored_sessions)
+    return {"season": str(year), "rounds": output_rounds}
+
+
 
 # Wins/podiums are tracked only for the three main races of a round — the
 # Qualifying Race is a scored sprint (see POINTS_QUALIFYING) but its results
@@ -1092,6 +1122,29 @@ def compute_standings_fallback(rounds):
             for i, (name, pts) in enumerate(teams, 1)
         ],
     }
+
+def merge_standings_timestamp(new_standings, existing_standings):
+    """Reverts new_standings["updated"] back to existing_standings's value
+    when nothing else in new_standings actually differs from what's already
+    on disk - keeps a genuine no-change scrape tick byte-identical to the
+    already-committed file, instead of always re-stamping `updated` with
+    the current time and so making git-auto-commit-action commit this file
+    on essentially every 2-minute scrape tick during a raceday regardless
+    of real content change (confirmed live: round 7/Donington GP weekend
+    logged 193 commits to this file, all but ~8 of them differing from
+    their predecessor only in this one field).
+
+    existing_standings may be None (first run ever, or the existing file
+    was missing/unreadable) - new_standings is returned unchanged in that
+    case, same as a genuine first-ever write.
+    """
+    if existing_standings is None:
+        return new_standings
+    new_comparable = {k: v for k, v in new_standings.items() if k != "updated"}
+    existing_comparable = {k: v for k, v in existing_standings.items() if k != "updated"}
+    if new_comparable == existing_comparable and "updated" in existing_standings:
+        new_standings["updated"] = existing_standings["updated"]
+    return new_standings
 
 
 # ── Calendar track record updater ────────────────────────────────────────────
@@ -1273,10 +1326,6 @@ def main():
     if SET_DRAW is not None and ROUND_FILTER is not None:
         apply_draw_override(output_rounds, ROUND_FILTER, SET_DRAW)
 
-    results_out = {"season": str(YEAR), "rounds": output_rounds}
-    results_path.write_text(json.dumps(results_out, indent=2))
-    print(f"\nWrote {results_path}")
-
     # Find the latest round that has any results
     completed = [r for r in output_rounds
                  if any(race.get("results") for race in r.get("races", []))]
@@ -1286,6 +1335,7 @@ def main():
     # TSL only publishes ptstrg after Race 3, so mid-round we fall back to the
     # previous round's official PDF rather than the computed standings.
     standings = None
+    per_race, scored_sessions = {}, set()  # populated below if a championship PDF parses; passed to _build_results_output regardless, so an empty/failed parse is a safe no-op override there
     if latest:
         tsl_map = {info["round"]: info["tsl"] for info in ROUNDS[YEAR]}
         completed_rounds = sorted(
@@ -1310,11 +1360,12 @@ def main():
                     _backfill_teams(standings["standings"],    output_rounds)
                     _backfill_teams(standings["independents"], output_rounds)
                     _backfill_teams(standings["jst"],          output_rounds)
-                    # Override computed per-race points with championship PDF values
+                    # Stashed for _build_results_output below, which is what
+                    # actually applies this override - not done here, so it
+                    # can't be applied before output_rounds gets serialized
+                    # to results{year}.json (see that function's docstring).
                     per_race       = standings.get("per_race_points", {})
                     scored_sessions = standings.get("scored_sessions", set())
-                    if per_race and scored_sessions:
-                        _apply_per_race_points(output_rounds, per_race, scored_sessions)
                     break
                 else:
                     print("  parse failed — trying previous round")
@@ -1325,6 +1376,14 @@ def main():
 
     if not standings:
         standings = compute_standings_fallback(output_rounds)
+
+    # See _build_results_output's own docstring for why the override and the
+    # write happen together here, rather than writing output_rounds straight
+    # after it was assembled above (which is what this code used to do, and
+    # the root cause of a season-long points drift - fixed 2026-09-09).
+    results_out = _build_results_output(YEAR, output_rounds, per_race, scored_sessions)
+    results_path.write_text(json.dumps(results_out, indent=2))
+    print(f"\nWrote {results_path}")
 
     standings["season"]  = str(YEAR)
     standings["round"]   = latest["round"] if latest else 0
@@ -1351,6 +1410,14 @@ def main():
     # Strip internal working fields that aren't JSON-serializable (tuple keys/sets)
     standings.pop("per_race_points", None)
     standings.pop("scored_sessions", None)
+
+    existing_standings = None
+    if standings_path.exists():
+        try:
+            existing_standings = json.loads(standings_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            existing_standings = None
+    standings = merge_standings_timestamp(standings, existing_standings)
 
     standings_path.write_text(json.dumps(standings, indent=2))
     print(f"Wrote {standings_path}")

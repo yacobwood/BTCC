@@ -30,6 +30,16 @@ class TestResolveMediaUrl(unittest.TestCase):
         url = "https://x.supabase.co/storage/v1/object/sign/photo.jpg?token=abc"
         self.assertEqual(resolve_media_url(url), url)
 
+    def test_prefixes_btcc_net_onto_a_site_assets_gallery_path(self):
+        # btcc.net's custom "btcc-gallery" block - confirmed live 2026-09-11
+        # rendering as a broken image in the app's ArticleScreen WebView
+        # since these were never mirrored at all (see scrape_articles.py's
+        # GALLERY_IMG_RE/mirror_gallery_images).
+        self.assertEqual(
+            resolve_media_url("/site-assets/2026/09/a1b2-DSC01.jpg"),
+            "https://btcc.net/site-assets/2026/09/a1b2-DSC01.jpg",
+        )
+
     def test_unwraps_next_js_image_optimization_proxy(self):
         """Regression coverage: confirmed live 2026-09-02, btcc.net's
         news-card markup switched to Next.js's own <Image> component, which
@@ -76,6 +86,10 @@ class TestMediaSrcReFragment(unittest.TestCase):
         m = self._search(f'<img src="{url}">')
         self.assertEqual(m.group(1), url)
 
+    def test_matches_the_site_assets_gallery_shape(self):
+        m = self._search('<img src="/site-assets/2026/09/a1b2-DSC01.jpg">')
+        self.assertEqual(m.group(1), "/site-assets/2026/09/a1b2-DSC01.jpg")
+
 
 class TestSaveMirroredImage(unittest.TestCase):
     def test_returns_none_when_media_url_is_falsy(self):
@@ -85,6 +99,23 @@ class TestSaveMirroredImage(unittest.TestCase):
     def test_returns_none_when_url_was_not_captured(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIsNone(save_mirrored_image({}, "https://btcc.net/api/media/abc123", Path(tmp)))
+
+    def test_returns_none_and_writes_nothing_for_a_captured_but_empty_body(self):
+        """Confirmed live 2026-09-11: a gallery-image Scrapfly fetch reported
+        result=success (see fetch_image_via_scrapfly) with a genuinely empty
+        content - the same live per-request flakiness already seen on
+        driver-media fetches, just landing as empty bytes this time instead
+        of a crash. Without this check the caller gets back a filename and
+        treats it as a real success - see
+        scrape_articles.py's mirror_gallery_images, which would then rewrite
+        content to permanently point at a 0-byte file no future run would
+        ever know to retry."""
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = Path(tmp)
+            url = "https://btcc.net/site-assets/2026/09/a.jpg"
+            media = {url: (b"", "image/jpeg")}
+            self.assertIsNone(save_mirrored_image(media, url, out_dir))
+            self.assertEqual(list(out_dir.iterdir()), [])
 
     def test_saves_bytes_and_derives_extension_from_content_type(self):
         with tempfile.TemporaryDirectory() as tmp:

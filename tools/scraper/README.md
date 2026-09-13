@@ -122,13 +122,16 @@ across runs instead of reinstalling every time.
 |---|---|---|---|
 | `scrape_news.py` | btcc.net/news/ (latest card only) | `data/news.json` + `data/media/news/` | Every 5 min - `scrape-news.yml` |
 | `scrape_articles.py` | btcc.net/news/ + each article page | `data/articles/*.json` + `data/media/news/` | Every 5 min, same run as above - `scrape-news.yml` |
-| `scrape_calendar.py` (+ `scrape_full_timetable.py`) | btcc.net/calendar/ + each circuit page | `data/calendar.json` | Weekly, Mon 09:00 UTC - `scrape-calendar.yml` |
-| `scrape_btcc_stats.py` | btcc.net/history/statistics/drivers/ + /history/champions/btcc-titles/ | `data/records.json` | Weekly, Mon 06:00 UTC - `scrape-btcc-stats.yml` |
-| `scrape_team_stats.py` | btcc.net/teams/ + each team page | `data/drivers.json` (`teams[].totalRaces`/`totalWins`) | Weekly, Mon 06:30 UTC - `scrape-team-stats.yml` |
+| `scrape_calendar.py` (+ `scrape_full_timetable.py`) | btcc.net/calendar/ + each circuit page | `data/calendar.json` | Weekly, Mon 09:06 UTC - `scrape-calendar.yml` |
+| `scrape_btcc_stats.py` | btcc.net/history/statistics/drivers/ + /history/champions/btcc-titles/ | `data/records.json` | Weekly, Mon 06:04 UTC - `scrape-btcc-stats.yml` |
+| `scrape_team_stats.py` | btcc.net/teams/ + each team page | `data/drivers.json` (`teams[].totalRaces`/`totalWins`) | Weekly, Mon 06:34 UTC - `scrape-team-stats.yml` |
 | `scrape_tsl.py` | tsl-timing.com PDFs (not btcc.net) | `data/results{year}.json`, `data/standings.json`, `data/calendar.json` (records) | Every 2 min on race weekends - `scrape-results.yml` (GitHub-hosted) |
-| `scrape_youtube.py` | youtube.com (ITV Sport Extra, not btcc.net) | `data/results2026.json`, `data/calendar.json` | Mon+Tue 10:00 UTC - `scrape-youtube.yml` (GitHub-hosted) |
-| `scrape_circuit_images.py` | btcc.net/circuit/\<slug\>/ per track | `data/tracks.json` (`imageUrl`) + `data/media/tracks/` | Manual only |
-| `scrape_gallery.py` | btcc.net/gallery/\<year\>/ + per-album pages (both paginated) | `data/gallery{year}.json` + `data/gallery/{year}/*.json` (no image bytes - photos are hotlinked directly, see below) | Weekly, Wed 09:00 UTC - `scrape-gallery.yml` |
+| `scrape_youtube.py` | youtube.com (ITV Sport Extra, not btcc.net) | `data/results2026.json`, `data/calendar.json` | Mon+Tue 10:07 UTC - `scrape-youtube.yml` (GitHub-hosted) |
+| `scrape_driver_media.py` | btcc.net/driver/\<slug\>/ (one driver at a time) | `data/driverImages/`, `data/carImages/`, `data/numberImages/` (+ bundled `src/assets/driver_images*/` for the first two) | On-demand only, no schedule - `scrape-driver-media.yml`, triggered from the admin panel's DRIVER MEDIA card |
+| `scrape_driver_roster.py` | btcc.net/drivers/ (listing) + btcc.net/driver/\<slug\>/ for every driver | Same as `scrape_driver_media.py` above, plus new-driver stub entries in `data/drivers.json` and change-detection state in `data/driver_media_state.json` | Weekly, Thu 09:15 UTC - `scrape-driver-roster.yml`, triggered from the admin panel's DRIVER ROSTER SWEEP card |
+| `scrape_circuit_images.py` | btcc.net/circuit/\<slug\>/ per track | `data/tracks.json` (`imageUrl`) + `data/media/tracks/` | On-demand only, no schedule - `scrape-circuit-images.yml`, triggered from the admin panel's CIRCUIT IMAGES card |
+| `scrape_gallery.py` | btcc.net/gallery/\<year\>/ + per-album pages (both paginated) | `data/gallery{year}.json` + `data/gallery/{year}/*.json` (no image bytes - photos are hotlinked directly, see below) | Weekly, Wed 09:05 UTC - `scrape-gallery.yml` |
+| `scrape_shorts.py` | btcc.net/ (bare homepage - the first scraper to fetch it; every other one targets a specific subpath) | `data/shorts.json` (video IDs + `i.ytimg.com` thumbnail URLs, no image bytes mirrored - same "it's already a public, non-expiring URL" reasoning as `scrape_gallery.py`'s own hotlinked photos) | Weekly, Wed 09:33 UTC - `scrape-shorts.yml`, triggered from the admin panel's SHORTS card |
 
 **`scrape_gallery.py` is the one exception to "every btcc.net image must be mirrored"** - confirmed live 2026-08-28 (direct `curl`, no browser/auth/special headers): gallery photos are served as direct, PUBLIC (non-signed, non-expiring) Supabase Storage URLs on a completely different host than btcc.net. Vercel's bot-challenge protects btcc.net's own Vercel deployment specifically - it has no reach over a different origin, unlike article/driver/circuit images which route through btcc.net's own `/api/media/<uuid>` redirector (same origin as the challenge, confirmed blocked - see `scrape_articles.py`'s own docstring). So this scraper stores the real photo URLs directly (`{thumbUrl, viewUrl}` per photo, the large "display" variant derived from the small "thumb" one via a simple URL-suffix swap - same idea as this codebase's own `wpThumb()`/`carThumbUrl()`, just a different naming convention) and never downloads/mirrors any image bytes at all - no `data/media/gallery/`. Both the year-listing page and each album's own photo grid paginate independently (`?page=N` - a single album can span many pages, e.g. Donington Park's 2026 album alone is 9), so the scraper tracks `lastPageScraped`/`totalPages`/`complete` per album and resumes any incomplete album's next unscraped page before starting a new one - a routine run's cost is bounded by page loads, not photo downloads. A round can have more than one published album (e.g. a main "2026 - Donington Park GP" album and a separately-published "The Captured Moments: Donington Park GP" one) - `match_round()` resolves each independently, preferring the longest/most-specific venue-name match when one venue name is a literal prefix of another (e.g. "Donington Park" vs "Donington Park GP") rather than treating that as ambiguous.
 
@@ -136,8 +139,51 @@ Driver headshots, per-driver car cutouts, number graphics and driver/team card
 backgrounds used to be live-scraped too (`scrape_driver_images.py`,
 `scrape_driver_cutouts.py`, `scrape_driver_backgrounds.py`, plus an image-mirroring
 step inside `scrape_team_stats.py`) - archived 2026-08-18 in favour of a
-hand-curated set committed straight into the repo. See "Hardcoded driver/team
-images" below and `tools/scraper/archive/README.md`.
+hand-curated set committed straight into the repo. `scrape_driver_media.py`
+(added 2026-09-08) is a narrower, on-demand-only replacement for the headshot
+car-image and car-number-graphic half of that: it refreshes ONE named
+driver's photo when someone notices btcc.net has published an updated one,
+rather than live-scraping the whole roster on a schedule - the hand-curated
+set is still the source of truth day-to-day. Extended 2026-09-08 to also
+cover `numberImageUrl` (a real gap - an earlier version of this note wrongly
+assumed nothing consumed that field, having misread a different field's "no
+UI consumer yet" note; `numberImageUrl` is genuinely rendered in
+`DriversScreen`/`DriverDetailScreen`/`TeamDetailScreen`). See "Hardcoded
+driver/team images" below and `tools/scraper/archive/README.md`.
+
+**`scrape_driver_roster.py`** (added 2026-09-09) is the weekly, unattended
+counterpart: it calls `scrape_driver_media.py`'s own `refresh_driver_media()`
+(extracted so both share the exact same per-image fetch/decode/bundle-regen
+logic) for every driver already in `drivers.json`, and separately discovers
+any driver on the `/drivers/` listing who isn't in `drivers.json` yet (a
+mid-season signing) and adds them automatically.
+
+Deliberately NOT a blind weekly resweep of all three images for all ~27
+drivers - that would cost real, if small, Scrapfly credits (an image fetch
+is ~225 credits vs. ~30 for a page) and touch ~81 image files in the commit
+diff regardless of whether anything actually changed. Instead it fetches
+each driver's profile page (cheap, needed anyway) and compares the three
+images' current btcc.net-side `/api/media/<uuid>` source URLs against
+`data/driver_media_state.json` - a new cache distinct from `drivers.json`'s
+own `imageUrl`/`carImageUrl`/`numberImageUrl` fields (which deliberately
+keep a STABLE `raw.githubusercontent.com` URL forever) - only paying for the
+expensive per-image fetch on a slot whose source URL genuinely changed since
+the last run.
+
+A newly-discovered driver only gets `name`, `number` (read from the car
+number graphic's own `alt` attribute - the one place this repo has confirmed
+the number as text, not just an image) and their three images auto-added.
+`team`/`car`/`class`/`nationality`/`bio`/`dateOfBirth`/`birthplace`/`livesIn`/
+`cardBgUrl` are left blank rather than guessed - none of these have ever been
+confirmed scrapable from btcc.net's markup by any script in this repo
+(archived or current), and `project_new_driver_workflow`'s own established
+process needs WebSearch cross-referencing for bio/DOB facts, not mechanical
+extraction. The new entry is marked `"needsReview": true` so it's easy to
+find and finish by hand (see that same 3-file checklist for what's still
+needed) - it still renders correctly in the app immediately with a real
+photo via the live-`imageUrl` fallback (see "Hardcoded driver/team images"
+below), just without a bio, until it's completed and a future release adds
+its `src/assets/driverImages.js` bundle entry.
 
 ## Hardcoded driver/team images (not scraped)
 
@@ -148,11 +194,16 @@ convention varies by folder and has changed over time - see the root
 of each one), referenced by `raw.githubusercontent.com` URL from
 `data/drivers.json` -
 `imageUrl`, `carImageUrl`, `numberImageUrl` (driver-level) and
-`cardBgUrl`/`carImageUrl` (team-level). No scraper writes these; replacing an
-image means dropping in a new file under the same name (or updating
-`drivers.json`'s URL if the name changes) and committing - no code change,
-no app release. See `tools/scraper/archive/README.md` for the full mapping
-and what each field replaced.
+`cardBgUrl`/`carImageUrl` (team-level). Replacing one by hand means dropping
+in a new file under the same name (or updating `drivers.json`'s URL if the
+name changes) and committing - no code change, no app release.
+`scrape_driver_media.py` (see above) can now do the driver `imageUrl`/
+`carImageUrl`/`numberImageUrl` trio of this on demand instead, for one driver
+at a time - it still overwrites the same existing filename in place, it
+just fetches the replacement from btcc.net instead of a human downloading
+it. Both `cardBgUrl` fields remain hand-curated only, no scraper for either.
+See `tools/scraper/archive/README.md` for the full mapping and what each
+field replaced.
 
 ## Local-only utilities (no network fetch)
 

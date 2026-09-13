@@ -1,13 +1,14 @@
 name: Scrape BTCC Results
 
 on:
-  schedule:
-    # Every 2 min Sat/Sun 09:00–19:00 UTC — is_race_weekend.py gates execution
-    # to per-session windows (session BST+15min → session BST+90min), skipping
-    # sessions whose results are already committed. Stops as soon as each
-    # session's data lands. Latest possible close: 19:00 UTC (R3 17:30 BST+90min).
-    - cron: "*/2 9-19 * * 6"
-    - cron: "*/2 9-19 * * 0"
+  # Native `schedule:` trigger removed 2026-09-05: functions/resultsDispatch.js's
+  # Cloud-Scheduler-backed triggerResultsScrape is a reliable replacement for
+  # the 2-minute cadence this used to ask GitHub for - GitHub Actions' own
+  # schedule trigger has a documented 5-minute floor and, checked against this
+  # workflow's entire real run history, never once landed a tick within 3
+  # minutes of the previous one (median real gap 21.6 minutes, worst 230).
+  # triggerResultsScrape calls this same workflow_dispatch endpoint on Cloud
+  # Scheduler's reliable cadence instead. See resultsDispatch.js's own comment.
   workflow_dispatch:
     inputs:
       year:
@@ -32,6 +33,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
       actions: write
@@ -153,7 +155,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -sf -X POST \
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-results.yml/dispatches" \

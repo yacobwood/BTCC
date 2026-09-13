@@ -3,7 +3,7 @@
     "id": "kwik-fit",
     "name": "Kwik Fit",
     "role": "Title Sponsor",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/Kwikfit.jpg",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/kwik-fit.jpg",
     "description": "Kwik Fit has been the Title Sponsor of the BTCC since 2019. One of the UK's leading automotive retailers, with over 600 centres offering tyres, MOTs, and car servicing.",
     "url": "https://www.kwik-fit.com/"
   },
@@ -11,7 +11,7 @@
     "id": "goodyear",
     "name": "Goodyear",
     "role": "Tyre Supplier",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/Goodyear.jpg",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/goodyear.png",
     "description": "Founded in 1898, Goodyear has been the exclusive tyre supplier to the BTCC since 2020. Their Dunlop brand supplied the championship from 2003–2019.",
     "url": "https://www.goodyear.eu/"
   },
@@ -19,7 +19,7 @@
     "id": "liqui-moly",
     "name": "Liqui Moly",
     "role": "Oil & Lubricants Partner",
-    "logo": "https://btcc.net/wp-content/uploads/2024/07/Liqui-Moly-Logo-RGB.png",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/liqui-moly.png",
     "description": "German manufacturer specialising in motor oils, additives, and car care products. Official oil and lubricants partner of the BTCC since mid-2024.",
     "url": "https://www.liqui-moly.com/en/gb/"
   },
@@ -27,7 +27,7 @@
     "id": "barc",
     "name": "BARC",
     "role": "British Automobile Racing Club",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/BARC.jpg",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/barc.jpg",
     "description": "The BARC is one of the UK's leading motorsport organisations, overseeing a wide range of racing events and providing official support to the championship.",
     "url": "http://barc.net/"
   },
@@ -35,7 +35,7 @@
     "id": "motorsport-uk",
     "name": "Motorsport UK",
     "role": "Governing Body",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/Motorsport-UK-logo.png",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/motorsport-uk.png",
     "description": "The governing body for four-wheel motorsport in the UK, promoting the development, safety, and sustainability of the sport at all levels.",
     "url": "https://www.motorsportuk.org/"
   },
@@ -43,7 +43,7 @@
     "id": "autocar",
     "name": "Autocar",
     "role": "Media Partner",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/Autocar_logo.png",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/autocar.png",
     "description": "The world's oldest car magazine, established in 1895. Autocar has been the BTCC's official media partner for over a decade.",
     "url": "http://autocar.co.uk/"
   },
@@ -51,7 +51,7 @@
     "id": "dread",
     "name": "Dread",
     "role": "Official Merchandise",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/Dread-1.jpg",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/dread.jpg",
     "description": "UK-based supplier of premium race team clothing and motorsport merchandise, known for quality and durability.",
     "url": "https://shop.dread.cc/"
   },
@@ -59,7 +59,7 @@
     "id": "alcosense",
     "name": "AlcoSense",
     "role": "Alcohol Testing Partner",
-    "logo": "https://btcc.net/wp-content/uploads/2024/03/Alcosense-Logo-scaled.jpeg",
+    "logo": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/partners/alcosense.jpeg",
     "description": "Official alcohol testing partner since 2014, making the BTCC the first major racing series to introduce mandatory driver breathalyser testing.",
     "url": "http://alcosense.co.uk/"
   }

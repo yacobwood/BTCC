@@ -386,6 +386,7 @@ def main():
     chapters = get_chapters(video_id)
     timestamps = chapters_to_timestamps(chapters) if chapters else None
 
+    detection_failed = False
     if timestamps:
         t1, t2, t3 = timestamps
         print(f"Chapters found - Race 1: {t1}s, Race 2: {t2}s, Race 3: {t3}s")
@@ -393,8 +394,9 @@ def main():
         print("No chapters found - falling back to green-screen detection.")
         t2, t3 = detect_race_timestamps(video_id)
         if t2 is None:
-            print("WARNING: Could not detect race timestamps (geo-restricted?) - storing base URL for all races.")
-            t1, t2, t3 = 0, 0, 0
+            print("WARNING: Could not detect race timestamps (geo-restricted, or a genuine detection miss).")
+            detection_failed = True
+            t1, t2, t3 = 0, 0, 0  # placeholder only, for the preview below - never written, see detection_failed check
         else:
             t1 = 0
             print(f"Detected - Race 1: 0s (start), Race 2: {t2}s, Race 3: {t3}s")
@@ -417,6 +419,18 @@ def main():
     print(f"  results  [3] Race 1      : {results_urls[3]}")
     print(f"  results  [4] Race 2      : {results_urls[4]}")
     print(f"  results  [5] Race 3      : {results_urls[5]}")
+
+    if detection_failed:
+        # t1,t2,t3 = 0,0,0 above means detection genuinely failed (geo-block
+        # or a real miss), not a confirmed "these races start at t=0" - but
+        # build_urls() always returns non-empty strings even for t=0, so
+        # writing results_urls here would make find_target_round's
+        # `len(urls) >= 6 and all(urls[3:6])` check see this round as fully
+        # complete and never retry it, permanently locking in wrong deep
+        # links for Race 2/3. Leave this round's existing youtubeUrls
+        # untouched instead so a future run retries it.
+        print("\nDetection failed - not writing; round left incomplete so a future run retries it.")
+        sys.exit(0)
 
     if args.dry_run:
         print("\n--dry-run: no files were modified.")

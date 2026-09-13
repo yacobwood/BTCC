@@ -236,6 +236,26 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(getByText('Saved User')).toBeTruthy());
   });
 
+  it('re-syncs the saved name to /chat/authorNames/{authorId} on mount, not just on save', async () => {
+    // Guards against a bug where a name saved once, then a single dropped
+    // write to /chat/authorNames (offline, rules hiccup - both silently
+    // swallowed in saveChatDisplayName), left an account permanently
+    // un-mentionable with no visible symptom - see syncChatAuthorName.
+    AsyncStorage.getItem.mockImplementation(key =>
+      key === 'commenter_name' ? Promise.resolve('Saved User') : Promise.resolve(null),
+    );
+    renderWithProviders(<ChatScreen />);
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => expect(mockNamesSet).toHaveBeenCalledWith('Saved User'));
+  });
+
+  it('does not touch /chat/authorNames on mount when no name has been saved yet', async () => {
+    AsyncStorage.getItem.mockResolvedValue(null);
+    renderWithProviders(<ChatScreen />);
+    await act(async () => { triggerMessages([]); });
+    expect(mockNamesSet).not.toHaveBeenCalled();
+  });
+
   it('derives authorId from Firebase Auth UID', async () => {
     AsyncStorage.getItem.mockImplementation(key =>
       key === 'commenter_name' ? Promise.resolve('Tom') : Promise.resolve(null),
@@ -712,6 +732,38 @@ describe('ChatScreen', () => {
         expect.stringMatching(/^Fan #/),
       ),
     );
+  });
+
+  // A first-ever message previously vanished silently here: handleNameSet/
+  // handleNameSkip re-pushed the pending message via their own bare
+  // try{}catch{} with no error state, and the input had already been
+  // cleared before that push ran. These assert the pending-message resend
+  // now goes through the same failure handling as handleSend.
+  it('shows "Failed to send" and restores input when the pending-message push fails after setting a name', async () => {
+    mockDbPush.mockRejectedValueOnce(new Error('network error'));
+    const {getByLabelText, getByPlaceholderText, getByText} = renderChat();
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => getByPlaceholderText(/say something/i));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'First message!');
+    fireEvent.press(getByLabelText('Send message'));
+    await waitFor(() => getByText(/Choose a display name/i));
+    fireEvent.changeText(getByPlaceholderText(/Fan #/i), 'Speedster');
+    fireEvent.press(getByLabelText('Set name'));
+    await waitFor(() => expect(getByText(/Failed to send/i)).toBeTruthy());
+    expect(getByPlaceholderText(/say something/i).props.value).toBe('First message!');
+  });
+
+  it('shows "Failed to send" and restores input when the pending-message push fails after skipping the name prompt', async () => {
+    mockDbPush.mockRejectedValueOnce(new Error('network error'));
+    const {getByLabelText, getByPlaceholderText, getByText} = renderChat();
+    await act(async () => { triggerMessages([]); });
+    await waitFor(() => getByPlaceholderText(/say something/i));
+    fireEvent.changeText(getByPlaceholderText(/say something/i), 'First message!');
+    fireEvent.press(getByLabelText('Send message'));
+    await waitFor(() => getByText(/Choose a display name/i));
+    fireEvent.press(getByText('Skip'));
+    await waitFor(() => expect(getByText(/Failed to send/i)).toBeTruthy());
+    expect(getByPlaceholderText(/say something/i).props.value).toBe('First message!');
   });
 
   // ── Name editing (header) ─────────────────────────────────────────────────────

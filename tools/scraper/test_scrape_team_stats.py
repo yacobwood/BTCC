@@ -65,6 +65,48 @@ class TestMainIsolation(unittest.TestCase):
         result = self._run_main_with([{"name": "Some Unmapped Team", "totalRaces": 0}])
         self.assertEqual(result["teams"][0]["totalRaces"], 0)
 
+    def test_exits_nonzero_when_every_fetched_page_parses_to_zero_stats(self):
+        # A page that fetches fine but whose markup no longer matches
+        # STAT_RE (e.g. btcc.net redesign) makes _fetch_team_stats return {}
+        # without raising - previously this silently re-wrote the existing
+        # totalRaces/totalWins while still printing a normal-looking
+        # "updated" line, with no sys.exit anywhere in the file.
+        with tempfile.TemporaryDirectory() as tmp:
+            drivers_path = Path(tmp) / "drivers.json"
+            drivers_path.write_text(json.dumps({"teams": [
+                {"name": "NAPA Racing UK", "totalRaces": 150, "totalWins": 12},
+            ]}))
+            with patch.object(s, "DRIVERS_PATH", drivers_path), \
+                 patch("scrape_team_stats.fetch_via_scrapfly", return_value="<div>no stats here</div>"):
+                with self.assertRaises(SystemExit) as ctx:
+                    s.main()
+                self.assertNotEqual(ctx.exception.code, 0)
+            # Fatal before the write - existing good data must survive on disk.
+            unchanged = json.loads(drivers_path.read_text())
+            self.assertEqual(unchanged["teams"][0]["totalRaces"], 150)
+
+    def test_does_not_exit_when_only_some_teams_fail_but_others_parse_real_stats(self):
+        # One team's page failing to fetch entirely is the existing,
+        # already-isolated case (test_one_teams_fetch_failure_does_not_abort_the_rest)
+        # - this confirms the new all-zero guard doesn't get tripped by that
+        # case as long as at least one *other* team's page parsed real stats.
+        with tempfile.TemporaryDirectory() as tmp:
+            drivers_path = Path(tmp) / "drivers.json"
+            drivers_path.write_text(json.dumps({"teams": [
+                {"name": "NAPA Racing UK", "totalRaces": 5, "totalWins": 1},
+                {"name": "Team VERTU", "totalRaces": 0, "totalWins": 0},
+            ]}))
+
+            def fake_fetch(url, referer=None, label="", timeout=30, render_js=True):
+                return None if label == "napa-racing-uk" else TEAM_STATS_HTML
+
+            with patch.object(s, "DRIVERS_PATH", drivers_path), \
+                 patch("scrape_team_stats.fetch_via_scrapfly", side_effect=fake_fetch):
+                s.main()  # must not raise
+            result = json.loads(drivers_path.read_text())
+            self.assertEqual(result["teams"][0]["totalRaces"], 5)     # unchanged - fetch failed
+            self.assertEqual(result["teams"][1]["totalRaces"], 150)   # updated from real stats
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -484,6 +484,17 @@ export function parseGalleryAlbum(json) {
   };
 }
 
+export function parseShorts(json) {
+  return {
+    updatedAt: json?.updatedAt || '',
+    shorts: (json?.shorts || []).map(s => ({
+      videoId: s.videoId || '',
+      url: s.url || '',
+      thumbnailUrl: s.thumbnailUrl || '',
+    })),
+  };
+}
+
 // tools/scraper/scrape_penalties.py's "confidence" field ("full"/"partial"/
 // "minimal") isn't surfaced in the UI - a penalty is shown either way, just
 // with a less detailed oneLiner when the source PDF didn't match a known

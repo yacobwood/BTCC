@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import auth from '@react-native-firebase/auth';
+import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 
 const FS_BASE = 'https://firestore.googleapis.com/v1/projects/btcchub-af77a/databases/(default)/documents';
 const FS_API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
@@ -74,7 +75,7 @@ export default function BugReportScreen({navigation}) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>FEEDBACK & BUGS</Text>
       </View>
-      <ScrollView contentContainerStyle={{padding: 16}}>
+      <ScrollView contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
         <Text style={styles.label}>CATEGORY</Text>
         <View style={styles.chipRow}>
           {categories.map(c => (

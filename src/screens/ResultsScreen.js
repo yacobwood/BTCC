@@ -58,7 +58,7 @@ export function computeSeasonStats(rounds) {
 
 const SCORING_RACES = ['Qualifying Race', 'Race 1', 'Race 2', 'Race 3'];
 
-export function computeProgression(rounds) {
+export function computeProgression(rounds, standings) {
   const driverPoints = {};
   const firstPoint = {}; // point index when driver first appeared
   const series = {};
@@ -84,10 +84,42 @@ export function computeProgression(rounds) {
       }
     });
   });
+  // Reconcile the latest point with the official TSL-sourced standings total,
+  // same override SeasonTable.js already applies to the table. Re-summing
+  // per-race points can never see a standalone championship-points penalty
+  // (e.g. a driver docked points outright rather than in any single race's
+  // classification) - that deduction only ever appears in the TSL PDF's own
+  // running total, so without this the chart silently drifts above the real
+  // total for a penalised driver, forever. Only the final point is corrected;
+  // earlier rounds are left alone since the PDF doesn't say which round a
+  // standalone deduction applies against.
+  if (standings?.drivers?.length) {
+    const officialPts = {};
+    standings.drivers.forEach(d => { officialPts[d.name] = d.points; });
+    for (const name of Object.keys(series)) {
+      if (officialPts[name] === undefined) continue;
+      const pts = series[name].points;
+      const lastIdx = pts.length - 1;
+      if (lastIdx >= 0 && pts[lastIdx] !== null) pts[lastIdx] = officialPts[name];
+    }
+  }
   return {
     series: Object.values(series).sort((a, b) => (b.points[b.points.length - 1] || 0) - (a.points[a.points.length - 1] || 0)),
     pointLabels,
   };
+}
+
+// Re-rank driver stats by the official TSL standings when available. A raw
+// per-race points sum can't see a standalone championship-points penalty
+// (see computeProgression's own override, above) - so a penalised driver can
+// end up outranking someone the official standings place below them. This
+// only reorders the list; it doesn't touch any of the displayed W/POD/POL/
+// FL/DNF counts, which come straight from race results and aren't affected.
+export function reconcileStatsOrder(stats, standings) {
+  if (!standings?.drivers?.length) return stats;
+  const officialPts = {};
+  standings.drivers.forEach(d => { officialPts[d.name] = d.points; });
+  return [...stats].sort((a, b) => (officialPts[b.name] ?? b.points) - (officialPts[a.name] ?? a.points));
 }
 
 // Build a driver-name → team map from race results to fill gaps in standings
@@ -413,17 +445,17 @@ export default function ResultsScreen({navigation, route}) {
         points: 0, // not in driverStats, but we don't show points on stats tab
       }));
     }
-    return computeSeasonStats(results);
-  }, [results, bundledStats]);
+    return reconcileStatsOrder(computeSeasonStats(results), standings);
+  }, [results, bundledStats, standings]);
 
   const {progression, pointLabels} = useMemo(() => {
     // Cache by year  -  historical years never change so no need to recompute
     if (progressionCache.current[year]) return progressionCache.current[year];
-    const {series, pointLabels: labels} = computeProgression(results);
+    const {series, pointLabels: labels} = computeProgression(results, standings);
     const computed = {progression: series, pointLabels: labels};
     if (year !== CURRENT_SEASON) progressionCache.current[year] = computed; // don't cache live year
     return computed;
-  }, [year, results]);
+  }, [year, results, standings]);
 
   const renderDriverStanding = useCallback(({item}) => {
     const fav = isFavourite(item.name);

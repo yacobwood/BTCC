@@ -220,7 +220,11 @@ export default function RoundResultsScreen({route, navigation}) {
 
     return (
       <View style={[styles.resultRow, isDNF && styles.resultRowDNF, fav && styles.resultRowFav]} accessibilityLabel={`Position ${posLabel}, ${item.driver}, ${item.points} points`}>
-        <Text style={[styles.pos, {color: isDNF ? Colors.textSecondary : posColor}]}>
+        <Text
+          style={[styles.pos, {color: isDNF ? Colors.textSecondary : posColor}]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}>
           {posLabel}
         </Text>
         <View style={{flex: 1, minWidth: 0}}>

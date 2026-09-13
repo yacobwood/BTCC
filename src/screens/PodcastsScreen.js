@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager, RefreshControl} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,6 +6,7 @@ import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import {useRadio} from '../store/radio';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {decodeEntities} from '../api/parsers';
 
 const CACHE_KEY = 'podcasts_episodes';
 
@@ -30,7 +31,8 @@ function parseRSS(xml) {
   let match;
   while ((match = itemRegex.exec(xml)) !== null) {
     const block = match[1];
-    const title = (/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title>([\s\S]*?)<\/title>/.exec(block) || [])[1]?.trim() || '';
+    const rawTitle = (/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/.exec(block) || /<title>([\s\S]*?)<\/title>/.exec(block) || [])[1]?.trim() || '';
+    const title = rawTitle ? decodeEntities(rawTitle) : '';
     const url = /enclosure[^>]+url="([^"]+)"/.exec(block)?.[1] || '';
     const pubDate = /<pubDate>([\s\S]*?)<\/pubDate>/.exec(block)?.[1]?.trim() || '';
     const duration = /<itunes:duration>([\s\S]*?)<\/itunes:duration>/.exec(block)?.[1]?.trim() || '';
@@ -65,16 +67,28 @@ export default function PodcastsScreen({navigation}) {
   const [filter, setFilter] = useState('All');
   const [page, setPage] = useState(1);
   const {currentStation, isPlaying, play, stop} = useRadio();
+  // Tracks whether the initial fetch has already been kicked off - NOT
+  // `loading` itself, because the effect below calls setLoading(false) on a
+  // cache hit before it awaits InteractionManager. Driving the effect's
+  // dependency array off `loading` used to re-trigger this same effect right
+  // then: the in-flight run's cleanup set `cancelled` and cancelled its
+  // InteractionManager task, and the brand-new instance's own
+  // `!loading && !refreshing` guard exited immediately (both now false),
+  // silently skipping the network re-fetch entirely. A ref that this effect
+  // only ever sets (never a dependency) can't cause that re-trigger.
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!loading && !refreshing) return;
-    if (loading) Analytics.screen('podcasts');
+    const isInitialLoad = !hasFetchedRef.current;
+    if (!isInitialLoad && !refreshing) return;
+    hasFetchedRef.current = true;
+    if (isInitialLoad) Analytics.screen('podcasts');
     let cancelled = false;
     let task;
 
     const run = async () => {
       // 1. Show cached episodes immediately on first load (skip on pull-to-refresh)
-      if (loading) {
+      if (isInitialLoad) {
         try {
           const raw = await AsyncStorage.getItem(CACHE_KEY);
           if (raw && !cancelled) {
@@ -122,7 +136,7 @@ export default function PodcastsScreen({navigation}) {
       cancelled = true;
       task?.cancel();
     };
-  }, [loading, refreshing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refreshing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = useMemo(() =>
     episodes.filter(e => matchesSession(e.title, filter)),

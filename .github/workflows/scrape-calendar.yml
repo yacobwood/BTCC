@@ -16,8 +16,11 @@ name: Scrape BTCC Calendar
 
 on:
   schedule:
-    # Weekly, Monday 09:00 UTC.
-    - cron: "0 9 * * 1"
+    # Weekly, Monday 09:06 UTC - moved off the exact :00 mark 2026-09-09,
+    # after scrape-gallery.yml was confirmed live to silently skip a
+    # scheduled tick while sitting on it (see root README.md's "overnight
+    # cron gap" entry / project_gallery_croft_missed_schedule_fix memory).
+    - cron: "6 9 * * 1"
   workflow_dispatch:
     inputs:
       season:
@@ -56,7 +59,7 @@ jobs:
         working-directory: tools/scraper
         run: |
           SEASON="${{ github.event.inputs.season }}"
-          [ -z "$SEASON" ] && SEASON=2026
+          [ -z "$SEASON" ] && SEASON=$(date +%Y)
           python3 scrape_calendar.py --season "$SEASON"
 
       - name: Derive session schedule (no network - reuses calendar.json's fullTimetable)
@@ -87,11 +90,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -sf -X POST \
+          SEASON="${{ github.event.inputs.season }}"
+          [ -z "$SEASON" ] && SEASON=$(date +%Y)
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-calendar.yml/dispatches" \
-            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"season\":\"${{ github.event.inputs.season || '2026' }}\"}}" || echo "Retry dispatch failed (non-fatal)"
+            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"season\":\"$SEASON\"}}" || echo "Retry dispatch failed (non-fatal)"
 
       # Only reached once the automated retry above has ALSO failed/been
       # cancelled - a single transient blip no longer emails anyone.

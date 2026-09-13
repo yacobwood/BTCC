@@ -115,6 +115,36 @@ describe('onChatMention', () => {
     }));
   });
 
+  it('mirrors title/body/channel into data too, not just the notification block', async () => {
+    // Regression test for a real, live-reported bug (2026-09-09): the
+    // notification block alone auto-displays fine when the recipient's app
+    // is backgrounded/killed, but the foreground-Android JS display path
+    // (displayAndroidDataNotification, src/utils/notifications.js) only
+    // ever reads from `data` and silently drops anything missing
+    // data.title - so a mention sent while the recipient had the app open
+    // (the most likely state, since being tagged in chat basically requires
+    // being active in it) never showed at all, with zero error on either
+    // side. See project_chat_mention_foreground_android_notification_gap
+    // memory - the exact bug the test just above would NOT have caught,
+    // since it never asserted anything about `data`.
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})});
+
+    const event = {data: {val: () => ({text: '@Gordon check this out', authorId: 'sender-1', authorName: 'Sender'})}};
+    await onChatMention.run(event);
+
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
+      data: {
+        type: 'chat',
+        title: 'You were mentioned in Live Chat',
+        body: 'Sender: @Gordon check this out',
+        channel: 'chat_mentions',
+      },
+    }));
+  });
+
   it('drops a stale device token on messaging/registration-token-not-registered', async () => {
     resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
     mockDatabaseRef.once

@@ -202,6 +202,28 @@ describe('RoundResultsScreen', () => {
       expect(getByText('DQ')).toBeTruthy();
     });
 
+    // Regression: the position cell has a fixed width:36 - at large
+    // accessibility font sizes 'DNF' wrapped mid-word into 'DN'/'F' instead
+    // of shrinking to fit (confirmed live on a Pixel 10a with system font
+    // size increased). numberOfLines keeps it a single line; the caller
+    // (not covered here) shrinks the font to fit that line via
+    // adjustsFontSizeToFit.
+    it('keeps the DNF/DQ position label on a single line rather than letting it wrap', () => {
+      // Colin Turkington's own time cell would otherwise also read literally
+      // 'DNF' (see rightCol's item.time fallback below) and match the same
+      // query - null it out so only the position badge itself renders 'DNF'.
+      const qRaceRound = {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r =>
+          r.label === 'Qualifying Race'
+            ? {...r, results: r.results.map(res => res.driver === 'Colin Turkington' ? {...res, time: null} : res)}
+            : r,
+        ),
+      };
+      const {getByText} = renderRound({round: qRaceRound, initialRace: 2}); // Q Race
+      expect(getByText('DNF').props.numberOfLines).toBe(1);
+    });
+
     it('shows points for a race session', async () => {
       const {getByText} = renderRound({initialRace: 3}); // Race 1
       await waitFor(() => {

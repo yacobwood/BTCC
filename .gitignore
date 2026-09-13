@@ -119,3 +119,7 @@ ios/assets/
 
 # Claude Code local config
 .claude/
+
+# Private draft - not for the public repo, never commit
+BTCC-offseason-proposal.md
+BTCC-offseason-proposal.pdf
