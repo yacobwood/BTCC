@@ -41,6 +41,8 @@ jest.mock('react-native-webview', () => {
         <Text testID="webview-message-likes"    onPress={() => fire('likes')}>like</Text>
         <Text testID="webview-message-dislikes" onPress={() => fire('dislikes')}>dislike</Text>
         <Text testID="webview-open-comments"    onPress={() => fire('open_comments')}>comments</Text>
+        <Text testID="webview-add-comment"      onPress={() => fire('add_comment')}>add-comment</Text>
+        <Text testID="webview-add-comment-empty" onPress={() => onMessage && onMessage({nativeEvent: {data: JSON.stringify({type: 'add_comment', source: 'preview_empty'})}})}>add-comment-empty</Text>
         {/* prev-carrying messages for toggle/switch tests */}
         <Text testID="webview-toggle-likes"     onPress={() => fire(null, 'likes')}>toggle-like</Text>
         <Text testID="webview-switch-to-dislike" onPress={() => fire('dislikes', 'likes')}>switch-dislike</Text>
@@ -101,6 +103,7 @@ jest.mock('../../src/utils/analytics', () => ({
     articleListenCompleted: jest.fn(),
     articleListenStopped: jest.fn(),
     articleListenFailed: jest.fn(),
+    articleCommentsOpened: jest.fn(),
   },
 }));
 
@@ -999,6 +1002,30 @@ describe('buildHtml btcc-gallery layout', () => {
   });
 });
 
+describe('buildHtml comments preview', () => {
+  it('renders the inline preview skeleton instead of the old comments button', () => {
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('id="comments-preview-body"');
+    expect(html).toContain('Add a comment');
+    expect(html).not.toContain('class="comments-btn"');
+  });
+
+  it('starts in the empty state so there is no blank box before comments load', () => {
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('No comments yet. Be the first!');
+  });
+
+  it('builds preview rows via textContent, not innerHTML, so comment text cannot inject markup', () => {
+    // A stored XSS vector here would be far worse than in the native
+    // CommentsSheet - this WebView runs alongside a postMessage bridge back
+    // into the app, unlike RN's own auto-escaping <Text>.
+    const html = buildHtml({title: 'Test', content: '<p>Body</p>', sortDate: '2026-08-09'}, 0);
+    expect(html).toContain('.textContent = c.authorName');
+    expect(html).toContain('.textContent = c.text');
+    expect(html).not.toContain('.innerHTML');
+  });
+});
+
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 
 describe('CommentsSheet', () => {
@@ -1044,6 +1071,45 @@ describe('CommentsSheet', () => {
     await waitFor(() => {
       expect(getByPlaceholderText('Add a comment...')).toBeTruthy();
     });
+  });
+
+  it('opens when WebView sends add_comment message (inline preview "Add a comment" button)', async () => {
+    const {getByTestId, getByPlaceholderText} = renderArticle();
+
+    await act(async () => { getByTestId('webview-load').props.onPress(); });
+    await act(async () => { getByTestId('webview-add-comment').props.onPress(); });
+
+    await waitFor(() => {
+      expect(getByPlaceholderText('Add a comment...')).toBeTruthy();
+    });
+  });
+
+  // ── Inline preview entry-point analytics ────────────────────────────────────
+  // The vote-buttons preview (buildHtml's .comments-preview) has three ways in:
+  // tap the preview itself, tap "Add a comment", or tap the empty state. Each
+  // should be distinguishable in GA4, not just lumped into one "opened" event.
+
+  it('tags analytics with source "preview_view" when the preview body itself is tapped', async () => {
+    const {getByTestId} = renderArticle();
+    await openComments(getByTestId);
+
+    expect(Analytics.articleCommentsOpened).toHaveBeenCalledWith('Ingram wins at Donington', 'preview_view');
+  });
+
+  it('tags analytics with source "preview_add" when the header Add-a-comment button is tapped', async () => {
+    const {getByTestId} = renderArticle();
+    await act(async () => { getByTestId('webview-load').props.onPress(); });
+    await act(async () => { getByTestId('webview-add-comment').props.onPress(); });
+
+    expect(Analytics.articleCommentsOpened).toHaveBeenCalledWith('Ingram wins at Donington', 'preview_add');
+  });
+
+  it('tags analytics with source "preview_empty" when the empty state itself is tapped', async () => {
+    const {getByTestId} = renderArticle();
+    await act(async () => { getByTestId('webview-load').props.onPress(); });
+    await act(async () => { getByTestId('webview-add-comment-empty').props.onPress(); });
+
+    expect(Analytics.articleCommentsOpened).toHaveBeenCalledWith('Ingram wins at Donington', 'preview_empty');
   });
 
   // ── Loading / empty states ──────────────────────────────────────────────────

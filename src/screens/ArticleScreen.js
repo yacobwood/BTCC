@@ -204,9 +204,23 @@ async function editComment(docId, newText) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// Picks the comments shown inline under the vote buttons (buildHtml's
+// .comments-preview, populated via updateCommentPreview - see onWebViewLoad).
+// Replies are excluded so the preview reads as "who's talking about this",
+// not a nested thread - and newest-first, unlike the sheet's own oldest-first
+// order, since a preview's job is to show that the discussion is alive.
+function buildCommentPreviewItems(comments, limit = 2) {
+  return (comments || [])
+    .filter(c => !c.parentId)
+    .slice()
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    .slice(0, limit)
+    .map(c => ({authorName: c.authorName, text: c.text}));
+}
+
 // ─── CommentsSheet ────────────────────────────────────────────────────────────
 
-function CommentsSheet({visible, onClose, comments, setComments, articleSlug, myAuthorId, commenterName, setCommenterName}) {
+function CommentsSheet({visible, onClose, comments, setComments, articleSlug, myAuthorId, commenterName, setCommenterName, focusInputOnOpen}) {
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
   const [input, setInput] = useState('');
@@ -268,6 +282,14 @@ function CommentsSheet({visible, onClose, comments, setComments, articleSlug, my
   useEffect(() => {
     if (visible) translateY.setValue(0);
   }, [visible]);
+
+  // "Add a comment" in the inline preview opens straight to composing rather
+  // than just opening the sheet - same as tapping "Reply" on an existing
+  // comment already does further down, just fired on open instead of on
+  // press.
+  useEffect(() => {
+    if (visible && focusInputOnOpen) inputRef.current?.focus();
+  }, [visible, focusInputOnOpen]);
 
   const topLevel = (comments || []).filter(c => !c.parentId);
   const replies = (comments || []).filter(c => c.parentId);
@@ -691,6 +713,7 @@ export default function ArticleScreen({route, navigation}) {
   const articleSlug = slug || (articleParam?.link ? articleParam.link.replace(/\/$/, '').split('/').pop() : null) || articleParam?.id || null;
 
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsAutoFocus, setCommentsAutoFocus] = useState(false);
   const [comments, setComments] = useState(null);
   const [commenterName, setCommenterName] = useState(null);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -749,10 +772,17 @@ export default function ArticleScreen({route, navigation}) {
   }, [article]);
 
   useEffect(() => {
+    // Watches the whole array, not just its length - editing a comment's text
+    // (or a like/dislike on one) doesn't change the count but can change what
+    // the inline preview should be showing.
     if (comments && webviewRef.current) {
-      webviewRef.current.injectJavaScript(`updateCommentCount(${comments.length}); true;`);
+      webviewRef.current.injectJavaScript(`
+        updateCommentCount(${comments.length});
+        updateCommentPreview(${JSON.stringify(buildCommentPreviewItems(comments))}, ${comments.length});
+        true;
+      `);
     }
-  }, [comments?.length]);
+  }, [comments]);
 
   const onWebViewLoad = async () => {
     if (!articleSlug || !webviewRef.current) return;
@@ -796,6 +826,7 @@ export default function ArticleScreen({route, navigation}) {
     webviewRef.current.injectJavaScript(`
       updateReactions(${reactionsData.likes}, ${reactionsData.dislikes}, ${JSON.stringify(mine)});
       updateCommentCount(${commentsData.length});
+      updateCommentPreview(${JSON.stringify(buildCommentPreviewItems(commentsData))}, ${commentsData.length});
       updateViews(${viewsData + 1});
       true;
     `);
@@ -808,8 +839,13 @@ export default function ArticleScreen({route, navigation}) {
     try {
       const msg = JSON.parse(event.nativeEvent.data);
 
-      if (msg.type === 'open_comments') {
+      if (msg.type === 'open_comments' || msg.type === 'add_comment') {
+        setCommentsAutoFocus(msg.type === 'add_comment');
         setCommentsOpen(true);
+        // source distinguishes the "Add a comment" button from the empty-state
+        // tap (both post add_comment) and the ordinary preview tap - see
+        // buildHtml's .comments-preview script.
+        Analytics.articleCommentsOpened(article?.title, msg.source || (msg.type === 'add_comment' ? 'preview_add' : 'preview_view'));
         return;
       }
 
@@ -831,7 +867,7 @@ export default function ArticleScreen({route, navigation}) {
         }
       }
     } catch {}
-  }, [articleSlug]);
+  }, [articleSlug, article]);
 
   const topPadRef = useRef(topPad);
   if (!article) topPadRef.current = topPad;
@@ -1008,6 +1044,7 @@ export default function ArticleScreen({route, navigation}) {
         myAuthorId={myAuthorIdRef.current}
         commenterName={commenterName}
         setCommenterName={setCommenterName}
+        focusInputOnOpen={commentsAutoFocus}
       />
     </View>
   );
@@ -1155,7 +1192,21 @@ export function buildHtml(article, topPad) {
       .reaction-btn { display:flex; align-items:center; justify-content:center; gap:8px; flex:1; padding:12px 0; border-radius:32px; background:rgba(255,255,255,0.08); border:none; color:#fff; font-size:15px; font-weight:700; cursor:pointer; transition:background 0.15s,color 0.15s; -webkit-tap-highlight-color:transparent; }
       .reaction-btn.active { background:#FEBD02; color:#020255; }
       .reaction-btn svg { width:20px; height:20px; fill:currentColor; flex-shrink:0; }
-      .comments-btn { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:10px; padding:11px 0; border-radius:32px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#8B949E; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:0.3px; -webkit-tap-highlight-color:transparent; }
+      /* Inline comments preview - shown under the vote buttons instead of a
+         "N Comments" button that hides the discussion behind a tap. Two tap
+         targets only: the "Add a comment" pill (straight into composing),
+         and the preview body itself (opens the full thread) - see
+         updateCommentPreview() below and CommentsSheet's focusInputOnOpen. */
+      .comments-preview { margin:16px 16px 0; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1); }
+      .comments-preview-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+      .comments-preview-title { font-size:12px; font-weight:700; color:#8B949E; letter-spacing:0.5px; text-transform:uppercase; }
+      .comments-preview-add { flex-shrink:0; font:inherit; font-size:13px; font-weight:700; color:#FEBD02; background:none; border:none; padding:4px 0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+      .comments-preview-body { display:block; width:100%; text-align:left; font:inherit; color:inherit; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:12px 14px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+      .comments-preview-item { font-size:13px; line-height:1.4; color:#C9D1D9; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+      .comments-preview-item + .comments-preview-item { margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); }
+      .comments-preview-author { font-weight:700; color:#fff; margin-right:4px; }
+      .comments-preview-more { margin-top:8px; font-size:12px; font-weight:700; color:#8B949E; }
+      .comments-preview-empty { font-size:13px; color:#8B949E; }
     </style>
   </head><body>
     ${heroSection}
@@ -1177,9 +1228,19 @@ export function buildHtml(article, topPad) {
           <span id="count-likes">0</span>
         </button>
       </div>
-      <button class="comments-btn" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({type:'open_comments'}))">
-        💬 <span id="comment-count">0</span> Comments
-      </button>
+      <div class="comments-preview">
+        <div class="comments-preview-header">
+          <span class="comments-preview-title">💬 <span id="comment-count">0</span> Comments</span>
+          <button class="comments-preview-add" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({type:'add_comment'}))">Add a comment</button>
+        </div>
+        <!-- Content + final onclick come from updateCommentPreview() below,
+             once comments have loaded - it differs by state (view the thread
+             vs jump into composing when there's nothing to view yet). This
+             starting state is the empty one, matching most articles today. -->
+        <button class="comments-preview-body" id="comments-preview-body" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({type:'add_comment', source:'preview_empty'}))">
+          <div class="comments-preview-empty">No comments yet. Be the first!</div>
+        </button>
+      </div>
     </div>
     <div style="height:24px;"></div>
     <script>
@@ -1201,6 +1262,50 @@ export function buildHtml(article, topPad) {
 
       function updateCommentCount(n) {
         document.getElementById('comment-count').textContent = n;
+      }
+
+      // items: [{authorName, text}, ...] (already the newest top-level
+      // comments only - see buildCommentPreviewItems). Built with
+      // createElement/textContent rather than innerHTML since comment text
+      // is user-submitted and only passes through a profanity filter, not
+      // HTML sanitisation - textContent can't be interpreted as markup so
+      // there's nothing here for a malicious comment to exploit.
+      function updateCommentPreview(items, total) {
+        var body = document.getElementById('comments-preview-body');
+        while (body.firstChild) body.removeChild(body.firstChild);
+
+        if (!items || items.length === 0) {
+          var empty = document.createElement('div');
+          empty.className = 'comments-preview-empty';
+          empty.textContent = 'No comments yet. Be the first!';
+          body.appendChild(empty);
+          body.onclick = function() {
+            window.ReactNativeWebView.postMessage(JSON.stringify({type: 'add_comment', source: 'preview_empty'}));
+          };
+          return;
+        }
+
+        items.forEach(function(c) {
+          var row = document.createElement('div');
+          row.className = 'comments-preview-item';
+          var author = document.createElement('span');
+          author.className = 'comments-preview-author';
+          author.textContent = c.authorName;
+          var text = document.createElement('span');
+          text.textContent = c.text;
+          row.appendChild(author);
+          row.appendChild(text);
+          body.appendChild(row);
+        });
+
+        var more = document.createElement('div');
+        more.className = 'comments-preview-more';
+        more.textContent = 'View all ' + total + (total === 1 ? ' comment' : ' comments');
+        body.appendChild(more);
+
+        body.onclick = function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({type: 'open_comments'}));
+        };
       }
 
       function updateViews(n) {

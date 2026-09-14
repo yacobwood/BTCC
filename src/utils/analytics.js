@@ -25,6 +25,13 @@ export const Analytics = {
   // an adb logcat session to even notice; a real error_code would need that whole
   // chain to stop swallowing its underlying error first.
   articleLoadFailed: (slug, errorCode) => logEvent(fa(),'article_load_failed', {item_id: slug?.substring(0, 100) || '', error_code: errorCode || 'unknown'}),
+  // Entry point into the comments sheet - the inline preview under the vote
+  // buttons has two distinct taps that both open it (view the thread, or jump
+  // straight into composing), plus the empty state nudging a first comment.
+  // Posting/reacting/deleting a comment still has no analytics of its own
+  // (pre-existing gap, unrelated to the preview) - this only covers the new
+  // surface's own entry points.
+  articleCommentsOpened: (title, source) => logEvent(fa(),'article_comments_opened', {item_name: title?.substring(0, 100), source}),
 
   // Read-aloud (entry/action/success/failure/exit): Started on first tap,
   // Paused/Resumed for the toggle mid-playback, Completed when every chunk

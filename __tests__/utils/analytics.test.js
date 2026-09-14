@@ -96,6 +96,21 @@ describe('Analytics', () => {
       expect(call.item_id).toBe('');
       expect(call.traffic_source).toBe('organic');
     });
+
+    it('articleCommentsOpened logs item_name and source', () => {
+      Analytics.articleCommentsOpened('Title', 'preview_add');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'article_comments_opened', {
+        item_name: 'Title',
+        source: 'preview_add',
+      });
+    });
+
+    it('articleCommentsOpened truncates title to 100 chars', () => {
+      const longTitle = 'A'.repeat(150);
+      Analytics.articleCommentsOpened(longTitle, 'preview_view');
+      const call = logEvent.mock.calls[0][2];
+      expect(call.item_name.length).toBeLessThanOrEqual(100);
+    });
   });
 
   describe('contentShared', () => {
