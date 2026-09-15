@@ -60,7 +60,7 @@
           "points": 187,
           "wins": 1,
           "podiums": 3,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 5
         },
@@ -84,7 +84,7 @@
           "points": 83,
           "wins": 0,
           "podiums": 0,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 4
         },
@@ -120,7 +120,7 @@
           "points": 200,
           "wins": 1,
           "podiums": 5,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 3
         },
@@ -391,7 +391,7 @@
           "points": 165,
           "wins": 0,
           "podiums": 0,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 1
         },
@@ -439,7 +439,7 @@
           "points": 230,
           "wins": 1,
           "podiums": 4,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
           "dnfs": 1
         },
@@ -451,7 +451,7 @@
           "points": 105,
           "wins": 0,
           "podiums": 0,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 2
         },
@@ -487,7 +487,7 @@
           "points": 117,
           "wins": 1,
           "podiums": 3,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 4
         },
@@ -499,7 +499,7 @@
           "points": 121,
           "wins": 2,
           "podiums": 2,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 5
         },
@@ -697,7 +697,7 @@
           "points": 70,
           "wins": 0,
           "podiums": 0,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 4
         },
@@ -721,7 +721,7 @@
           "points": 106,
           "wins": 0,
           "podiums": 1,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 1
         },
@@ -733,7 +733,7 @@
           "points": 132,
           "wins": 0,
           "podiums": 3,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 7
         },
@@ -1019,7 +1019,7 @@
           "points": 276,
           "wins": 3,
           "podiums": 8,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 1,
           "dnfs": 2
         },
@@ -1067,7 +1067,7 @@
           "points": 222,
           "wins": 1,
           "podiums": 4,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 1,
           "dnfs": 2
         },
@@ -1121,7 +1121,7 @@
           "points": 201,
           "wins": 0,
           "podiums": 1,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 3
         },
@@ -1133,7 +1133,7 @@
           "points": 199,
           "wins": 0,
           "podiums": 4,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 3
         },
@@ -1157,7 +1157,7 @@
           "points": 161,
           "wins": 2,
           "podiums": 4,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 4
         },
@@ -1193,7 +1193,7 @@
           "points": 232,
           "wins": 3,
           "podiums": 6,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 2,
           "dnfs": 4
         },
@@ -1217,7 +1217,7 @@
           "points": 241,
           "wins": 2,
           "podiums": 5,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 4,
           "dnfs": 3
         },
@@ -1229,7 +1229,7 @@
           "points": 267,
           "wins": 1,
           "podiums": 7,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 3,
           "dnfs": 0
         },
@@ -1457,7 +1457,7 @@
           "points": 177,
           "wins": 1,
           "podiums": 3,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 2
         },
@@ -1469,7 +1469,7 @@
           "points": 249,
           "wins": 2,
           "podiums": 6,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 3,
           "dnfs": 4
         },
@@ -1505,7 +1505,7 @@
           "points": 308,
           "wins": 4,
           "podiums": 10,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 3,
           "champion": true,
           "dnfs": 3
@@ -1518,7 +1518,7 @@
           "points": 347,
           "wins": 4,
           "podiums": 11,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 5,
           "champion": true,
           "dnfs": 2
@@ -1555,7 +1555,7 @@
           "points": 408,
           "wins": 8,
           "podiums": 16,
-          "poles": 3,
+          "poles": 0,
           "fastestLaps": 9,
           "champion": true,
           "dnfs": 4
@@ -1568,7 +1568,7 @@
           "points": 249,
           "wins": 6,
           "podiums": 13,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 2,
           "dnfs": 2
         },
@@ -1580,7 +1580,7 @@
           "points": 218,
           "wins": 5,
           "podiums": 12,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 4,
           "dnfs": 4
         },
@@ -1621,7 +1621,7 @@
           "points": 144,
           "wins": 2,
           "podiums": 4,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 0,
           "dnfs": 3
         },
@@ -1645,7 +1645,7 @@
           "points": 204,
           "wins": 4,
           "podiums": 10,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 8,
           "dnfs": 5
         },
@@ -1818,7 +1818,7 @@
           "points": 327,
           "wins": 2,
           "podiums": 9,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 2,
           "dnfs": 2
         },
@@ -1842,7 +1842,7 @@
           "points": 296,
           "wins": 5,
           "podiums": 9,
-          "poles": 4,
+          "poles": 1,
           "fastestLaps": 3,
           "dnfs": 0
         },
@@ -1854,7 +1854,7 @@
           "points": 303,
           "wins": 5,
           "podiums": 8,
-          "poles": 2,
+          "poles": 0,
           "fastestLaps": 7,
           "dnfs": 3
         },
@@ -1866,7 +1866,7 @@
           "points": 196,
           "wins": 3,
           "podiums": 4,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 4,
           "dnfs": 4
         },
@@ -1878,7 +1878,7 @@
           "points": 278,
           "wins": 3,
           "podiums": 7,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 3,
           "dnfs": 2
         },
@@ -1890,7 +1890,7 @@
           "points": 235,
           "wins": 2,
           "podiums": 6,
-          "poles": 3,
+          "poles": 1,
           "fastestLaps": 2,
           "dnfs": 4
         },
@@ -1902,7 +1902,7 @@
           "points": 84,
           "wins": 0,
           "podiums": 0,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "teams": [
             {
@@ -2070,7 +2070,7 @@
           "points": 462,
           "wins": 7,
           "podiums": 18,
-          "poles": 3,
+          "poles": 2,
           "fastestLaps": 9,
           "champion": true,
           "dnfs": 1
@@ -2107,7 +2107,7 @@
           "points": 394,
           "wins": 6,
           "podiums": 12,
-          "poles": 4,
+          "poles": 2,
           "fastestLaps": 8,
           "champion": true,
           "dnfs": 0
@@ -2144,7 +2144,7 @@
           "points": 245,
           "wins": 4,
           "podiums": 4,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 1,
           "dnfs": 1
         },
@@ -2168,7 +2168,7 @@
           "points": 311,
           "wins": 4,
           "podiums": 9,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 2,
           "dnfs": 4
         },
@@ -2192,7 +2192,7 @@
           "points": 176,
           "wins": 0,
           "podiums": 2,
-          "poles": 1,
+          "poles": 0,
           "fastestLaps": 0,
           "dnfs": 4
         },
@@ -2441,7 +2441,7 @@
           "points": 161,
           "wins": 1,
           "podiums": 2,
-          "poles": 2,
+          "poles": 1,
           "fastestLaps": 2,
           "dnfs": 6
         }
