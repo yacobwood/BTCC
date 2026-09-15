@@ -86,7 +86,32 @@ export default function RecordsScreen({navigation}) {
   const sortedData = useMemo(
     () => [totalsData, ratesData].map((sectionData, secIdx) =>
       SECTION_DEFS[secIdx].sorts.map(s => {
-        let base = HISTORICAL_TABS.has(s.key) ? sectionData : sectionData.filter(d => !d.historical);
+        let base;
+        if (HISTORICAL_TABS.has(s.key)) {
+          // A driver spanning both eras has TWO rows here: a real 2004+-only
+          // entry and a `historical: true` override entry carrying the
+          // authoritative full-career wins/championships total (see
+          // compute_records.py's OFFICIAL_WINS/OFFICIAL_CHAMPS_OVERRIDE).
+          // Left unmerged, that driver was listed twice at two different,
+          // both-wrong-alone win counts - confirmed live for James Thompson
+          // (10 vs 36), Yvan Muller (11 vs 36) and Anthony Reid (3 vs 15),
+          // 2026-09-15. Merge by driver name into one row, taking wins and
+          // championships from the historical entry when both exist.
+          const groups = new Map();
+          for (const d of sectionData) {
+            if (!groups.has(d.driver)) groups.set(d.driver, []);
+            groups.get(d.driver).push(d);
+          }
+          base = Array.from(groups.values()).map(group => {
+            if (group.length === 1) return group[0];
+            const hist = group.find(d => d.historical);
+            const real = group.find(d => !d.historical);
+            if (!hist || !real) return group[0];
+            return {...real, wins: hist.wins, championships: hist.championships};
+          });
+        } else {
+          base = sectionData.filter(d => !d.historical);
+        }
         const filtered = s.hideZero ? base.filter(d => d[s.key] > 0) : base;
         return [...filtered].sort((a, b) => b[s.key] - a[s.key]);
       })

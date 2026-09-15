@@ -23,7 +23,19 @@ SEASON_DIR = REPO_ROOT / "src" / "assets" / "data"
 DATA_DIR   = REPO_ROOT / "data"
 OUT_PATH   = DATA_DIR / "records.json"
 
-POINTS_SESSIONS = {"Race 1", "Race 2", "Race 3", "Qualifying Race"}
+# "Championship Rounds" only - matches career_stats.py's PODIUM_SESSIONS
+# exactly (same name, same regulation-verified scope - see that module's
+# docstring for the reg 1.6.2.a / 1.6.9-1.6.10 citations). "Qualifying Race"
+# (which sets the Race 1 grid) is a real, points-paying session, so its
+# points DO count toward a driver's total - but starts/wins/podiums/poles/
+# fastestLaps/dnfs are all scoped to Championship Rounds only, so Qualifying
+# Race is deliberately excluded from this set even though it stays in the
+# timeline. Cross-checked 2026-09-15 against insidebtcc.com/drivers/: with
+# Qualifying Race included in every stat (the bug this fixes), every current
+# driver's `starts` (and several drivers' wins/podiums/poles/fastestLaps)
+# came out higher than that reference by roughly how many Qualifying Races
+# they'd started - points already matched closely and is untouched here.
+PODIUM_SESSIONS = {"Race 1", "Race 2", "Race 3"}
 
 # BTCC Drivers' Champions — verified against season points totals
 CHAMPIONS = {
@@ -191,9 +203,17 @@ def compute_records(timeline):
             ll  = r["lapsLed"]
             s   = stats[d]
 
-            s["starts"]  += 1
+            # Points count for every session (Qualifying Race included), but
+            # every other per-result stat below - including the streak
+            # trackers - is scoped to Championship Rounds only, so a
+            # Qualifying Race entry is skipped entirely past this point: it
+            # neither adds a start/win/podium/etc nor breaks a streak.
             s["points"]  += pts
             s["season_set"].add(year)
+            if label not in PODIUM_SESSIONS:
+                continue
+
+            s["starts"]  += 1
 
             is_finish = pos > 0
             is_win    = pos == 1
