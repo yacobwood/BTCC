@@ -18,6 +18,13 @@ const DRIVERS = [
   {driver: 'Colin Turkington', starts: 60,  wins: 10, podiums: 25, poles:  8, fastestLaps:  6, dnfs: 3,  racesLed: 20, hatTricks: 0, winStreak: 2, bestSeasonWins: 4,  podiumStreak: 0,  bestSeasonPodiums: 10, poleStreak: 0, bestSeasonPoles: 3, consecutive: 30, consecutivePoints: 50, points: 600,  seasons:  6, championships: 0, winPct: 0.1667, podiumPct: 0.4167, pointsPerStart: 10.0, dnfPct: 0.05},
   // historical=true, starts=0 — appears in Wins and Titles tabs only
   {driver: 'Andy Rouse',       starts: 0,   wins: 60, podiums: 0,  poles: 0,  fastestLaps:  0, dnfs: 0,  racesLed: 0,  hatTricks: 0, winStreak: 0, bestSeasonWins: 0,  podiumStreak: 0,  bestSeasonPodiums: 0,  poleStreak: 0, bestSeasonPoles: 0, consecutive: 0,  consecutivePoints: 0,  points: 0,    seasons:  0, championships: 4, winPct: 0.0,    podiumPct: 0.0,    pointsPerStart: 0.0,  dnfPct: 0.0,  historical: true},
+  // A driver spanning both eras: a real 2004+-only row AND a historical
+  // override row carrying the authoritative full-career total (mirrors
+  // James Thompson/Yvan Muller/Anthony Reid in the live data, 2026-09-15) -
+  // without merging, this driver would list twice on Wins/Titles at two
+  // different, both-wrong-alone values.
+  {driver: 'Dual Era Driver',  starts: 90,  wins: 12, podiums: 30, poles:  5, fastestLaps:  4, dnfs: 6,  racesLed: 15, hatTricks: 1, winStreak: 2, bestSeasonWins: 4,  podiumStreak: 5,  bestSeasonPodiums: 12, poleStreak: 1, bestSeasonPoles: 2, consecutive: 20, consecutivePoints: 40, points: 700,  seasons:  7, championships: 1, winPct: 0.1333, podiumPct: 0.3333, pointsPerStart: 7.78, dnfPct: 0.0667},
+  {driver: 'Dual Era Driver',  starts: 0,   wins: 45, podiums: 0,  poles: 0,  fastestLaps:  0, dnfs: 0,  racesLed: 0,  hatTricks: 0, winStreak: 0, bestSeasonWins: 0,  podiumStreak: 0,  bestSeasonPodiums: 0,  poleStreak: 0, bestSeasonPoles: 0, consecutive: 0,  consecutivePoints: 0,  points: 0,    seasons:  0, championships: 3, winPct: 0.0,    podiumPct: 0.0,    pointsPerStart: 0.0,  dnfPct: 0.0,  historical: true},
 ];
 
 jest.mock('../../src/api/client', () => ({
@@ -137,6 +144,49 @@ describe('RecordsScreen', () => {
     await waitFor(() => expect(getAllByText('🥇').length).toBeGreaterThan(0));
     // The gold medal row should contain Andy Rouse
     expect(getByText('Andy Rouse')).toBeTruthy();
+  });
+
+  // ── Dual-era (real + historical) merge ────────────────────────────────────────
+  // Regression coverage for the Wins/Titles double-listing bug fixed 2026-09-15.
+
+  it('Wins tab lists a dual-era driver once, not twice', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => getByLabelText('Wins tab'));
+    fireEvent.press(getByLabelText('Wins tab'));
+    // getByText throws if more than one match is found - this alone proves
+    // there's exactly one "Dual Era Driver" row, not one per source entry.
+    await waitFor(() => expect(getByText('Dual Era Driver')).toBeTruthy());
+  });
+
+  it('Wins tab shows the historical (career-total) win count, not the real-entry-only count', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => getByLabelText('Wins tab'));
+    fireEvent.press(getByLabelText('Wins tab'));
+    // 45 (historical) is correct; 12 (real, 2004+-only) would be the bug.
+    await waitFor(() => expect(getByText('45')).toBeTruthy());
+  });
+
+  it('Titles tab lists a dual-era driver once, not twice', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => getByLabelText('Titles tab'));
+    fireEvent.press(getByLabelText('Titles tab'));
+    await waitFor(() => expect(getByText('Dual Era Driver')).toBeTruthy());
+  });
+
+  it('Titles tab shows the historical (career-total) championship count, not the real-entry-only count', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => getByLabelText('Titles tab'));
+    fireEvent.press(getByLabelText('Titles tab'));
+    // 3 (historical) is correct; 1 (real, 2004+-only) would be the bug.
+    await waitFor(() => expect(getByText('3')).toBeTruthy());
+  });
+
+  it('Rates section still shows the dual-era driver\'s real-entry stats (unaffected by the Wins/Titles merge)', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await goToSection(getByLabelText, 'Rates');
+    // 12 wins / 90 starts = 13.3%, from the real entry - the historical
+    // stub (starts=0) must not leak into or replace this.
+    await waitFor(() => expect(getByText('13.3%')).toBeTruthy());
   });
 
   // ── Historical driver filtering ───────────────────────────────────────────────
