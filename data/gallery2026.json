@@ -165,6 +165,17 @@
       "capturedCount": 142,
       "totalCount": 142,
       "complete": true
+    },
+    {
+      "slug": "2026-the-captured-moments-croft",
+      "title": "2026: The Captured Moments - Croft",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/cf10d9d6-4933-4fe7-9367-ecbd4e480dbe/31aeb89b-998b-4550-b990-883b3376ce7a/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 8,
+      "venue": "Croft",
+      "isCanonical": false,
+      "capturedCount": 36,
+      "totalCount": 36,
+      "complete": true
     }
   ]
 }
