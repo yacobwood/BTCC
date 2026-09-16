@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Restart Racing bounce back with strong results at Croft"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/f6596ed5-8c4a-46b7-86d0-5134abc3af94.jpg"
+        }
+      ]
+    }
   }
 ]
