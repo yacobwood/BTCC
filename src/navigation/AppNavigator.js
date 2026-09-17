@@ -31,6 +31,7 @@ import RadioScreen from '../screens/RadioScreen';
 import TocaRadioScreen from '../screens/TocaRadioScreen';
 import PodcastsScreen from '../screens/PodcastsScreen';
 import ListenScreen from '../screens/ListenScreen';
+import OnTheLimitScreen from '../screens/OnTheLimitScreen';
 import DigestsScreen from '../screens/DigestsScreen';
 import ExplainerListScreen from '../screens/ExplainerListScreen';
 import RecordsScreen from '../screens/RecordsScreen';
@@ -98,6 +99,7 @@ function MoreStack() {
       <Stack.Screen name="InfoPage" component={InfoPageScreen} />
       <Stack.Screen name="BugReport" component={BugReportScreen} />
       <Stack.Screen name="Listen" component={ListenScreen} />
+      <Stack.Screen name="OnTheLimit" component={OnTheLimitScreen} />
       <Stack.Screen name="Radio" component={RadioScreen} />
       <Stack.Screen name="Podcasts" component={PodcastsScreen} />
       <Stack.Screen name="Records" component={RecordsScreen} />

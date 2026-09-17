@@ -52,6 +52,11 @@ describe('MoreScreen', () => {
     await waitFor(() => expect(getByLabelText('Listen')).toBeTruthy());
   });
 
+  it('shows the On The Limit row', async () => {
+    const {getByLabelText} = renderMore();
+    await waitFor(() => expect(getByLabelText('On The Limit')).toBeTruthy());
+  });
+
   it('shows the SETTINGS row', async () => {
     const {getByLabelText} = renderMore();
     await waitFor(() => expect(getByLabelText('Settings')).toBeTruthy());
@@ -84,6 +89,13 @@ describe('MoreScreen', () => {
     await waitFor(() => getByLabelText('Listen'));
     fireEvent.press(getByLabelText('Listen'));
     expect(nav.navigate).toHaveBeenCalledWith('Listen');
+  });
+
+  it('navigates to OnTheLimit screen when On The Limit is pressed', async () => {
+    const {getByLabelText} = renderMore();
+    await waitFor(() => getByLabelText('On The Limit'));
+    fireEvent.press(getByLabelText('On The Limit'));
+    expect(nav.navigate).toHaveBeenCalledWith('OnTheLimit');
   });
 
   it('navigates to Settings screen when Settings is pressed', async () => {
