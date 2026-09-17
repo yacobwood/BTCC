@@ -458,6 +458,10 @@ Firebase Realtime Database community chat. Retention enforced by `trimChat` Clou
 **ListenScreen** ([src/screens/ListenScreen.js](src/screens/ListenScreen.js))
 Entry point routing to Radio and Podcasts sections.
 
+**OnTheLimitScreen** ([src/screens/OnTheLimitScreen.js](src/screens/OnTheLimitScreen.js)) - added 2026-09-17
+
+Reached via MoreScreen's "On The Limit" row. Lists the 6 On The Limit season-review documentary episodes (2020-2025), each a card with a YouTube thumbnail and year; tapping opens the video via `Linking.openURL`. A fixed, hand-curated `EPISODES` array in the screen itself (one new episode a year at most) rather than a data file/scraper - the same reasoning `partners.json`'s own writeup above argues against for a dataset this small and this rarely touched. Thumbnails are fetched directly from YouTube's own public `i.ytimg.com/vi/<id>/hqdefault.jpg` CDN rather than mirrored, since that URL is stable and needs no auth. Video URLs are stored as plain `https://youtu.be/<id>` links, with the `?si=...` share-tracking parameter from however each link was originally copied deliberately stripped before being hardcoded here.
+
 **MerchScreen** ([src/screens/MerchScreen.js](src/screens/MerchScreen.js))
 Reached via MoreScreen's "Team Merch" row. Reuses `parseGrid()`'s teams list - the same `cardBgUrl`/`logoUrl` fields DriversScreen's Grid -> Teams tab renders - filtered down to teams with at least one store in `fetchMerchStores()`'s `merch.json` map. A single-store team opens that store's URL directly via `Linking.openURL` (wrapped by `withTracking()`, which appends `utm_source=btcchub&utm_medium=app&utm_campaign=merch`); a multi-store team opens a `StorePickerModal` bottom sheet instead, listing every store by name.
 
