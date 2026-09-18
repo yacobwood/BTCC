@@ -1,2 +1,7 @@
-• Fixed an issue that could prevent the News tab and articles from loading
+• Fixed some race weekends sending two notifications for the same result instead of one
+• Fixed a few screens where large text sizes could overlap or get cut off
+• Fixed chat @mentions sometimes not working for other users
+• Fixed dead sponsor/partner logos in the More menu
+• Fixed a Spoiler-Free Mode timing issue that could turn it off early
+• Fixed some gallery photos not loading
 • Bug fixes and performance improvements
