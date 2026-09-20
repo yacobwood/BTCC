@@ -98,6 +98,84 @@ test('pressing "Skip for now" in onboarding logs the skip choice', async () => {
   expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_shown', 'true');
 });
 
+// ─── Cross-promo (TicketStack) ──────────────────────────────────────────────
+// Deliberately gated behind onboarding already being done (see App.tsx) -
+// these tests mock onboarding_shown: 'true' so the mount effect's else
+// branch (the one that checks the cross-promo flag) actually runs, unlike
+// the plain onboarding tests above which rely on the default null mock.
+
+test('onboarding already done, cross-promo not yet shown: shows the TicketStack cross-promo dialog', async () => {
+  AsyncStorage.getItem.mockImplementation((key) => {
+    if (key === 'onboarding_shown') return Promise.resolve('true');
+    return Promise.resolve(null);
+  });
+
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  expect(JSON.stringify(root.toJSON())).toContain('TicketStack');
+});
+
+test('cross-promo already shown before: does not show it again', async () => {
+  AsyncStorage.getItem.mockImplementation((key) => {
+    if (key === 'onboarding_shown') return Promise.resolve('true');
+    if (key === 'cross_promo_ticketstack_shown') return Promise.resolve('true');
+    return Promise.resolve(null);
+  });
+
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  expect(JSON.stringify(root.toJSON())).not.toContain('TicketStack');
+});
+
+test('dismissing the cross-promo dialog with "MAYBE LATER" marks it shown and logs the choice', async () => {
+  AsyncStorage.getItem.mockImplementation((key) => {
+    if (key === 'onboarding_shown') return Promise.resolve('true');
+    return Promise.resolve(null);
+  });
+
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  const maybeLater = root.root.findByProps({accessibilityLabel: 'Dismiss'});
+  await act(async () => {
+    maybeLater.props.onPress();
+  });
+
+  expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'cross_promo_choice_made', {app: 'ticketstack', choice: 'dismiss'});
+  expect(AsyncStorage.setItem).toHaveBeenCalledWith('cross_promo_ticketstack_shown', 'true');
+  expect(JSON.stringify(root.toJSON())).not.toContain('TicketStack');
+});
+
+test('pressing "CHECK IT OUT" logs the choice and also marks the dialog shown', async () => {
+  const {Linking} = require('react-native');
+  jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+  AsyncStorage.getItem.mockImplementation((key) => {
+    if (key === 'onboarding_shown') return Promise.resolve('true');
+    return Promise.resolve(null);
+  });
+
+  let root;
+  await act(async () => {
+    root = ReactTestRenderer.create(<App />);
+  });
+
+  const checkItOut = root.root.findByProps({accessibilityLabel: 'Check out TicketStack on the Play Store'});
+  await act(async () => {
+    checkItOut.props.onPress();
+  });
+
+  expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'cross_promo_choice_made', {app: 'ticketstack', choice: 'check_it_out'});
+  expect(AsyncStorage.setItem).toHaveBeenCalledWith('cross_promo_ticketstack_shown', 'true');
+});
+
 // ─── Spoiler-free auto-clear ────────────────────────────────────────────────
 // Regression coverage for a real end-to-end mount, not just SettingsProvider
 // or SpoilerClearedDialog in isolation - previously untested at this level,
@@ -112,6 +190,11 @@ test('spoiler-free mode still active (not yet expired) auto-clears on open and s
   const future = new Date(Date.now() + 86400000).toISOString();
   AsyncStorage.getItem.mockImplementation((key) => {
     if (key === 'onboarding_shown') return Promise.resolve('true');
+    // Marked as already shown so this test stays focused on spoiler-clear
+    // behaviour - see the dedicated 'cross-promo' tests below for its own
+    // coverage, including the case where these two dialogs would otherwise
+    // both want to show on the same launch.
+    if (key === 'cross_promo_ticketstack_shown') return Promise.resolve('true');
     if (key === 'setting_spoiler_free') return Promise.resolve('true');
     if (key === 'setting_spoiler_free_expiry') return Promise.resolve(future);
     return Promise.resolve(null);
@@ -141,6 +224,7 @@ test('spoiler-free mode already past its own expiry auto-clears silently, withou
   const past = new Date(Date.now() - 86400000).toISOString();
   AsyncStorage.getItem.mockImplementation((key) => {
     if (key === 'onboarding_shown') return Promise.resolve('true');
+    if (key === 'cross_promo_ticketstack_shown') return Promise.resolve('true');
     if (key === 'setting_spoiler_free') return Promise.resolve('true');
     if (key === 'setting_spoiler_free_expiry') return Promise.resolve(past);
     return Promise.resolve(null);
