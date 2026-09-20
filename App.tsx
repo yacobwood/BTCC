@@ -23,6 +23,7 @@ import {getMessaging, onNotificationOpenedApp, getInitialNotification} from '@re
 import OnboardingDialog from './src/components/OnboardingDialog';
 import UpdateDialog from './src/components/UpdateDialog';
 import SpoilerClearedDialog from './src/components/SpoilerClearedDialog';
+import CrossPromoDialog from './src/components/CrossPromoDialog';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import {AuthProvider} from './src/store/auth';
 
@@ -39,11 +40,13 @@ export function navigateToRound(round: string) {
 
 
 const ONBOARDING_KEY = 'onboarding_shown';
+const CROSS_PROMO_TICKETSTACK_KEY = 'cross_promo_ticketstack_shown';
 
 function AppDialogs() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showUpdate, setShowUpdate] = useState(false);
   const [showSpoilerCleared, setShowSpoilerCleared] = useState(false);
+  const [showCrossPromo, setShowCrossPromo] = useState(false);
   const {update_available, update_min_version, update_min_version_ios, update_min_version_android} = useFeatureFlags();
   const {spoilerJustCleared} = useSettings();
 
@@ -53,10 +56,25 @@ function AppDialogs() {
       if (!onboardingShown) {
         setShowOnboarding(true);
         Analytics.screen('onboarding');
+      } else {
+        // Deliberately gated behind onboarding already being done, so this
+        // never stacks onto a brand-new user's very first launch - a
+        // returning/existing user sees it once, on their next open after
+        // this ships. See CrossPromoDialog.js for why the wording avoids
+        // any claim of a formal sponsorship.
+        const crossPromoShown = await AsyncStorage.getItem(CROSS_PROMO_TICKETSTACK_KEY);
+        if (!crossPromoShown) {
+          setShowCrossPromo(true);
+        }
       }
       RNBootSplash.hide({fade: true});
     })();
   }, []);
+
+  const handleCrossPromoDismiss = async () => {
+    await AsyncStorage.setItem(CROSS_PROMO_TICKETSTACK_KEY, 'true');
+    setShowCrossPromo(false);
+  };
 
   // Auto-disabling spoiler-free itself (and deciding whether it's worth
   // telling the user) now happens inside SettingsProvider's own load, as
@@ -114,6 +132,7 @@ function AppDialogs() {
       />
       <UpdateDialog visible={showUpdate} onDismiss={() => setShowUpdate(false)} />
       <SpoilerClearedDialog visible={showSpoilerCleared} onDismiss={() => setShowSpoilerCleared(false)} />
+      <CrossPromoDialog visible={showCrossPromo} onDismiss={handleCrossPromoDismiss} />
     </>
   );
 }

@@ -103,6 +103,7 @@ BTCC/
 │   ├── components/
 │   │   ├── AdBanner.js        Google AdMob banner
 │   │   ├── CachedImage.js     Image with thumbnail URL rewriting + fallback
+│   │   ├── CrossPromoDialog.js Same-developer app promo, shown once
 │   │   ├── ErrorBoundary.js   Top-level React error boundary
 │   │   ├── OnboardingDialog.js First-run notification permission prompt
 │   │   ├── ProgressionChart.js Points-over-rounds SVG line chart
@@ -179,11 +180,14 @@ ErrorBoundary
 
 ### 4.2 AppDialogs Component
 
-Rendered alongside the navigator (not inside it) so dialogs appear above all screens. Manages three modals:
+Rendered alongside the navigator (not inside it) so dialogs appear above all screens. Manages four modals:
 
 - **OnboardingDialog** - shown once on first launch; prompts for notification permission
 - **UpdateDialog** - shown when `update_available` flag is set and the installed build number is below `update_min_version_android` or `update_min_version_ios`
 - **SpoilerClearedDialog** - shown when spoiler-free mode auto-expires (next Monday 23:00 local time)
+- **CrossPromoDialog** - shown once ever, on the next launch after onboarding is already complete (never stacks onto a brand-new user's first launch)
+
+None of these four coordinate with each other beyond CrossPromoDialog's own onboarding check - it's possible, if rare, for two to want to show on the same launch (e.g. spoiler-free auto-clearing on the exact same open where cross-promo also first qualifies). Not solved with a priority queue since it would be speculative engineering for a collision that's rare in practice; worth revisiting if it's ever actually seen live.
 
 ### 4.3 Startup Side Effects (useEffect in App)
 
@@ -976,6 +980,8 @@ The colour palette is dark navy/black with a BTCC yellow accent. All screens use
 **ChatFab** ([src/components/ChatFab.js](src/components/ChatFab.js)) - Floating live-chat button, mounted once globally in `AppContent` (not per-screen), gated on the `live_chat` feature flag and the user's own "Chat button" setting. Positioned a fixed `12px` above the tab bar's own top edge (`bottom: bottomOffset + FAB_BOTTOM_OFFSET`, where `bottomOffset` is the exact same `TAB_BAR_HEIGHT + safeAreaBottom` value the tab bar's own height uses) - so its footprint relative to any screen's natural bottom edge is a fixed 12-64px zone regardless of device/safe-area, and it overlays every screen identically. Since it's an absolute-positioned overlay, a screen's own scrollable content can still scroll its last item underneath it - every screen with a bottom-of-content `paddingBottom` adds `CHAT_FAB_CLEARANCE` (exported from `src/utils/chatFabLayout.js`, a plain-constants file with zero imports) on top of its own value, so the true last item always clears the FAB (fixed 2026-08-24, reported live: a `RoundResultsScreen` judicial-decision card's "View decision" link was sitting half-behind the FAB). `chatFabLayout.js` is deliberately its own dependency-free module rather than exporting the constant straight from `ChatFab.js` itself - that file pulls in Firebase Realtime Database, AsyncStorage and keyboard listeners, and a first attempt at this fix that imported the constant directly from `ChatFab.js` broke 17 unrelated test suites (plain util-level tests with no Firebase mock configured) purely by being on the import chain.
 
 **CachedImage** ([src/components/CachedImage.js](src/components/CachedImage.js)) - Image component that rewrites btcc.net WordPress URLs to thumbnails (`-150x150` or `-768x768` suffix depending on display size). Provides a fallback placeholder on load error or null URI. `handleError` logs the native error string (`e.nativeEvent.error`) via `console.warn` - every failure used to look identical (network blip, dead URL, CDN block, decode error) all the way to the broken-image fallback, with nothing to distinguish them after the fact. A genuinely reproducible failure (one that survives the retry and a rebuild) is now diagnosable straight from Metro/logcat instead of guessed at.
+
+**CrossPromoDialog** ([src/components/CrossPromoDialog.js](src/components/CrossPromoDialog.js)) - Same-developer app promo for TicketStack (a separate ticket-collecting app by the same developer), styled to match UpdateDialog's bottom-sheet pattern. **Wording is deliberate**: "sponsored by" or "in association with" would claim a formal relationship between two companies that doesn't exist - both apps are made by the same person, so the dialog says "ALSO BY THE SAME DEVELOPER" instead, which is both accurate and avoids the deceptive-claims territory of Play Store policy around false endorsement/partnership claims. Shown once ever, gated behind `onboarding_shown` already being true (see `App.tsx`) so it never stacks onto a brand-new user's very first launch - an existing user sees it once, on their next open after this ships; a brand-new user sees it on their second launch (once onboarding is done). AsyncStorage key `cross_promo_ticketstack_shown` is set on either button (CHECK IT OUT or MAYBE LATER), so it never reappears regardless of which the user picks. `TICKETSTACK_PLAY_URL` points at `com.ticketstackapp`'s Play Store listing - as of 2026-09-20 that app is still at version 0.0.1 in its own repo and not yet published on either store, so this link will 404 until it goes live; update the constant once it has a real listing (and add an iOS URL/Platform.OS branch once TicketStack has an App Store presence - none exists yet, unlike UpdateDialog's own iOS/Android split).
 
 **ErrorBoundary** ([src/components/ErrorBoundary.js](src/components/ErrorBoundary.js)) - React class component catching JS errors anywhere in the tree. Shows a "Try Again" button that resets its state.
 

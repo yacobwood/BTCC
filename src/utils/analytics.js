@@ -86,6 +86,8 @@ export const Analytics = {
 
   // choice: 'allow' | 'skip' | 'learn_basics' - the first-launch onboarding dialog's outcome
   onboardingChoiceMade: (choice) => logEvent(fa(),'onboarding_choice_made', {choice}),
+  // app: the promoted app's slug e.g. 'ticketstack'. choice: 'check_it_out' | 'dismiss'
+  crossPromoChoiceMade: (app, choice) => logEvent(fa(),'cross_promo_choice_made', {app, choice}),
   notificationTypeToggled: (type, enabled) => logEvent(fa(),'notification_type_toggled', {type, enabled: enabled ? 'true' : 'false'}),
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
   timeFormatChanged: (format) => logEvent(fa(),'time_format_changed', {format}),
