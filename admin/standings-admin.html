@@ -3339,7 +3339,10 @@ function cancelEdit() {
 async function quickPublish(articleId) {
   const p = hubNewsPosts.find(x => x.id === articleId);
   if (!p) return;
-  const wasPublished = p.status === 'published';
+  // Missing status counts as already-published too (same convention as
+  // everywhere else this three-state field is read) - a pre-status-field
+  // legacy article shouldn't look "newly published" here either.
+  const wasPublished = p.status === 'published' || !p.status;
   p.status = 'published';
   p.pubDate = p.pubDate || nowIso();
   delete p.scheduledAt; delete p.previewDeviceIds;
@@ -3395,6 +3398,17 @@ async function publishArticle() {
     sourceUrl: document.getElementById('hn-source-url').value.trim() || null,
   };
 
+  // Only a transition into published should notify - an edit to an
+  // already-published article (e.g. swapping the image, fixing a typo)
+  // must be silent. Missing status counts as already-published too, same
+  // as everywhere else this three-state field is read - otherwise editing
+  // a pre-status-field legacy article would wrongly look "newly published"
+  // and notify. Captured before any mutation below, since editId's lookup
+  // would otherwise just find the new article we're about to write in.
+  const priorArticle = editId ? hubNewsPosts.find(p => p.id === editId) : null;
+  const wasAlreadyPublished = !!priorArticle && (priorArticle.status === 'published' || !priorArticle.status);
+  const isNewlyPublished = currentArticleStatus === 'published' && !wasAlreadyPublished;
+
   if (editId) {
     const idx = hubNewsPosts.findIndex(p => p.id === editId);
     if (idx >= 0) hubNewsPosts[idx] = article; else hubNewsPosts.unshift(article);
@@ -3403,7 +3417,7 @@ async function publishArticle() {
   }
   await saveHubNews(
     editId ? 'Update hub article' : 'Add hub article: ' + title,
-    currentArticleStatus === 'published' ? article : null
+    isNewlyPublished ? article : null
   );
 }
 
