@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Sutton chases BTCC history at Silverstone"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/8a5289c7-546d-4b9d-8bf4-a6303a9db652.jpg"
+        }
+      ]
+    }
   }
 ]
