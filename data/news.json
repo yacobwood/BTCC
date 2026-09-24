@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Silverstone next for WSR as De Leon prepares for 100th start"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/aba3df48-3494-4ec8-8622-29e692e7955b.jpg"
+        }
+      ]
+    }
   }
 ]
