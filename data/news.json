@@ -1,16 +1,10 @@
 [
   {
-    "id": "silverstone-where-to-watch",
-    "slug": "silverstone-where-to-watch",
+    "id": "silverstone-next-for-wsr-as-de-leon-prepares-for-100th-start",
+    "slug": "silverstone-next-for-wsr-as-de-leon-prepares-for-100th-start",
     "title": {
-      "rendered": "Silverstone: Where to Watch"
+      "rendered": "Silverstone next for WSR as De Leon prepares for 100th start"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/51f512fc-6f3f-4cd8-a14a-a792fbae5e9b.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
