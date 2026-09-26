@@ -1,16 +1,10 @@
 [
   {
-    "id": "team-vertu-seeks-to-add-to-silverstone-success",
-    "slug": "team-vertu-seeks-to-add-to-silverstone-success",
+    "id": "rowbottom-tops-close-fight-on-the-timesheets",
+    "slug": "rowbottom-tops-close-fight-on-the-timesheets",
     "title": {
-      "rendered": "Team VERTU seeks to add to Silverstone success"
+      "rendered": "Rowbottom leads close fight at the top of the timesheets"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/7cda3db0-c08d-425c-bf18-6b9692ee1691.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
