@@ -1,16 +1,10 @@
 [
   {
-    "id": "rowbottom-tops-close-fight-on-the-timesheets",
-    "slug": "rowbottom-tops-close-fight-on-the-timesheets",
+    "id": "doble-takes-maiden-race-to-pole-victory-at-silverstone",
+    "slug": "doble-takes-maiden-race-to-pole-victory-at-silverstone",
     "title": {
-      "rendered": "Rowbottom leads close fight at the top of the timesheets"
+      "rendered": "Doble takes maiden Race to Pole victory at Silverstone"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/2b59105a-0dfd-4098-b394-a66e730fbbd3.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
