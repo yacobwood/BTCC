@@ -30,28 +30,31 @@
 # deliberately left completely intact and untouched in the repo - dormant,
 # not deleted, in case Scrapfly ever needs to be swapped back out.
 #
-# Both cron entries below deliberately fire at :03/:08/:13... rather than
-# :00/:05/:10 - confirmed live 2026-09-02 (GitHub's own docs:
-# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-# - "the schedule event can be delayed during periods of high loads... high
-# load times include the start of every hour... schedule your workflow to
-# run at a different time of the hour") that landing on the exact minute
-# mark is the single most contended moment on GitHub's shared scheduler.
-# Real overnight run history showed only 2 of ~7 expected hourly ticks
-# actually landing, arriving 1-4.5 hours late (cross-checked independently
-# via runner-heartbeat.yml's own now-removed "age_min" logging - see
-# below). Cadence/cost is unchanged, only the offset - see
-# project_scrape_schedule memory if this ever needs revisiting.
+# Native `schedule:` trigger removed 2026-09-26: this workflow's own real run
+# history (checked via the Actions API) showed the schedule trigger simply
+# doesn't deliver its own cadence, at all - even on an ordinary day with no
+# other Actions load (2026-09-25), only 5 of the ~155 ticks its own two cron
+# lines used to produce actually landed. On a live race day
+# (2026-09-26, Silverstone), with functions/resultsDispatch.js's Cloud
+# Scheduler-driven triggerResultsScrape dispatching scrape-results.yml every
+# ~2 minutes for live coverage, only 3 landed all day - the user had to
+# manually re-dispatch this workflow repeatedly just to get a published
+# btcc.net article showing up in the app. Same root cause, same fix already
+# applied to scrape-results.yml on 2026-09-05: GitHub's own `schedule:`
+# trigger is best-effort and gets silently dropped under load rather than
+# queued or retried, and this repo's own Actions traffic is enough to
+# trigger it even without a live race day. functions/newsDispatch.js's
+# triggerNewsScrapeBusy/triggerNewsScrapeOvernight now drive this exact same
+# cadence via Cloud Scheduler instead (no 5-minute floor, immune to GitHub's
+# own queue contention), calling this same workflow_dispatch endpoint - the
+# two cron lines that used to live here are reproduced as the two Cloud
+# Scheduler jobs' own `schedule` options instead, so cadence/cost is
+# unchanged, only the trigger mechanism. See project_scrape_schedule /
+# project_scrape_news_schedule_starved_race_day memory for the fuller
+# writeup, and README §12/§20 if this ever needs revisiting.
 name: Scrape BTCC News
 
 on:
-  schedule:
-    # Every 5 minutes, 07:00-20:00 UTC (covers UK working hours across both
-    # BST and GMT with margin either side).
-    - cron: "3-59/5 7-19 * * *"
-    # Hourly the rest of the day (20:00-06:00 UTC) - bounds worst-case
-    # overnight lag to under an hour rather than going dark until 07:00.
-    - cron: "3 0-6,20-23 * * *"
   workflow_dispatch:
     inputs:
       force:

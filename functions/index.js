@@ -14,4 +14,5 @@ Object.assign(exports, require('./chat'));
 Object.assign(exports, require('./analytics'));
 Object.assign(exports, require('./scraperAdmin'));
 Object.assign(exports, require('./resultsDispatch'));
+Object.assign(exports, require('./newsDispatch'));
 Object.assign(exports, require('./appEndpoints'));
