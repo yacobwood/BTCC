@@ -21090,7 +21090,8 @@
               "gap": "",
               "bestLap": "57.196",
               "points": 22,
-              "fastestLap": true
+              "fastestLap": true,
+              "leadLap": true
             },
             {
               "pos": 2,
@@ -21103,7 +21104,8 @@
               "time": "21:21.511",
               "gap": "5.449",
               "bestLap": "57.555",
-              "points": 17
+              "points": 17,
+              "leadLap": false
             },
             {
               "pos": 3,
@@ -21116,7 +21118,8 @@
               "time": "21:24.529",
               "gap": "8.467",
               "bestLap": "57.634",
-              "points": 15
+              "points": 15,
+              "leadLap": false
             },
             {
               "pos": 4,
@@ -21129,7 +21132,8 @@
               "time": "21:25.923",
               "gap": "9.861",
               "bestLap": "57.320",
-              "points": 14
+              "points": 14,
+              "leadLap": true
             },
             {
               "pos": 5,
@@ -21142,7 +21146,8 @@
               "time": "21:26.370",
               "gap": "10.308",
               "bestLap": "57.532",
-              "points": 11
+              "points": 11,
+              "leadLap": false
             },
             {
               "pos": 6,
@@ -21155,7 +21160,8 @@
               "time": "21:28.668",
               "gap": "12.606",
               "bestLap": "57.811",
-              "points": 10
+              "points": 10,
+              "leadLap": false
             },
             {
               "pos": 7,
@@ -21168,7 +21174,8 @@
               "time": "21:29.141",
               "gap": "13.079",
               "bestLap": "57.799",
-              "points": 9
+              "points": 9,
+              "leadLap": false
             },
             {
               "pos": 8,
@@ -21181,7 +21188,8 @@
               "time": "21:29.746",
               "gap": "13.684",
               "bestLap": "57.828",
-              "points": 8
+              "points": 8,
+              "leadLap": false
             },
             {
               "pos": 9,
@@ -21194,7 +21202,8 @@
               "time": "21:31.376",
               "gap": "15.314",
               "bestLap": "57.818",
-              "points": 8
+              "points": 8,
+              "leadLap": true
             },
             {
               "pos": 10,
@@ -21207,7 +21216,8 @@
               "time": "21:35.463",
               "gap": "19.401",
               "bestLap": "58.011",
-              "points": 6
+              "points": 6,
+              "leadLap": false
             },
             {
               "pos": 11,
@@ -21220,7 +21230,8 @@
               "time": "21:36.353",
               "gap": "20.291",
               "bestLap": "57.543",
-              "points": 5
+              "points": 5,
+              "leadLap": false
             },
             {
               "pos": 12,
@@ -21233,7 +21244,8 @@
               "time": "21:36.738",
               "gap": "20.676",
               "bestLap": "57.561",
-              "points": 4
+              "points": 4,
+              "leadLap": false
             },
             {
               "pos": 13,
@@ -21246,7 +21258,8 @@
               "time": "21:36.903",
               "gap": "20.841",
               "bestLap": "57.978",
-              "points": 3
+              "points": 3,
+              "leadLap": false
             },
             {
               "pos": 14,
@@ -21259,7 +21272,8 @@
               "time": "21:37.418",
               "gap": "21.356",
               "bestLap": "57.900",
-              "points": 2
+              "points": 2,
+              "leadLap": false
             },
             {
               "pos": 15,
@@ -21272,7 +21286,8 @@
               "time": "21:37.589",
               "gap": "21.527",
               "bestLap": "57.822",
-              "points": 1
+              "points": 1,
+              "leadLap": false
             },
             {
               "pos": 16,
@@ -21285,7 +21300,8 @@
               "time": "21:37.965",
               "gap": "21.903",
               "bestLap": "57.836",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 17,
@@ -21298,7 +21314,8 @@
               "time": "21:38.426",
               "gap": "22.364",
               "bestLap": "58.051",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 18,
@@ -21311,7 +21328,8 @@
               "time": "21:38.501",
               "gap": "22.439",
               "bestLap": "57.929",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 19,
@@ -21324,7 +21342,8 @@
               "time": "21:38.508",
               "gap": "22.446",
               "bestLap": "57.971",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 20,
@@ -21337,7 +21356,8 @@
               "time": "21:40.171",
               "gap": "24.109",
               "bestLap": "57.985",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 21,
@@ -21350,7 +21370,8 @@
               "time": "21:51.144",
               "gap": "35.082",
               "bestLap": "58.118",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             },
             {
               "pos": 22,
@@ -21363,7 +21384,8 @@
               "time": "22:17.038",
               "gap": "",
               "bestLap": "1:01.473",
-              "points": 0
+              "points": 0,
+              "leadLap": false
             }
           ],
           "grid": [
