@@ -42,10 +42,10 @@
       "driver": "Josh COOK",
       "nat": "GBR",
       "class": "M",
-      "points": 248,
+      "points": 246,
       "wins": 2,
       "seconds": 1,
-      "thirds": 2,
+      "thirds": 1,
       "team": "Speedworks Corolla Racing"
     },
     {
@@ -66,9 +66,9 @@
       "driver": "Mikey DOBLE",
       "nat": "GBR",
       "class": "I",
-      "points": 243,
-      "wins": 3,
-      "seconds": 0,
+      "points": 240,
+      "wins": 2,
+      "seconds": 1,
       "thirds": 1,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
@@ -138,8 +138,8 @@
       "driver": "Aiden MOFFAT",
       "nat": "GBR",
       "class": "I",
-      "points": 178,
-      "wins": 0,
+      "points": 185,
+      "wins": 1,
       "seconds": 1,
       "thirds": 0,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
@@ -150,10 +150,10 @@
       "driver": "Tom CHILTON",
       "nat": "GBR",
       "class": "M",
-      "points": 175,
+      "points": 173,
       "wins": 1,
-      "seconds": 2,
-      "thirds": 1,
+      "seconds": 1,
+      "thirds": 2,
       "team": "Team VERTU"
     },
     {
@@ -334,17 +334,17 @@
     {
       "pos": 2,
       "team": "Team VERTU",
-      "points": 449
+      "points": 447
     },
     {
       "pos": 3,
-      "team": "WSR",
-      "points": 389
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "points": 390
     },
     {
       "pos": 4,
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 386
+      "team": "WSR",
+      "points": 389
     },
     {
       "pos": 5,
@@ -364,7 +364,7 @@
     {
       "pos": 8,
       "team": "Speedworks Corolla Racing",
-      "points": 232
+      "points": 230
     },
     {
       "pos": 9,
@@ -433,9 +433,9 @@
       "driver": "Mikey DOBLE",
       "nat": "GBR",
       "class": "I",
-      "points": 360,
-      "wins": 7,
-      "seconds": 2,
+      "points": 357,
+      "wins": 6,
+      "seconds": 3,
       "thirds": 4,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
@@ -481,9 +481,9 @@
       "driver": "Aiden MOFFAT",
       "nat": "GBR",
       "class": "I",
-      "points": 294,
-      "wins": 3,
-      "seconds": 4,
+      "points": 297,
+      "wins": 4,
+      "seconds": 3,
       "thirds": 2,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
@@ -697,5 +697,5 @@
   "season": "2026",
   "round": 9,
   "venue": "Silverstone",
-  "updated": "2026-09-27T11:00:53Z"
+  "updated": "2026-09-27T11:46:50Z"
 }

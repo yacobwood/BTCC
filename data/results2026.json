@@ -20588,6 +20588,20 @@
           "results": [
             {
               "pos": 1,
+              "no": 16,
+              "cl": "I",
+              "driver": "Aiden MOFFAT",
+              "team": "LKQ Euro Car Parts with Power Maxed Racing",
+              "car": "Audi A3 Saloon",
+              "laps": 22,
+              "time": "21:18.420",
+              "gap": "",
+              "bestLap": "57.196",
+              "points": 21,
+              "leadLap": true
+            },
+            {
+              "pos": 2,
               "no": 88,
               "cl": "I",
               "driver": "Mikey DOBLE",
@@ -20595,13 +20609,13 @@
               "car": "Audi A3 Saloon",
               "laps": 22,
               "time": "21:18.512",
-              "gap": "",
+              "gap": "0.092",
               "bestLap": "57.174",
-              "points": 20,
+              "points": 17,
               "leadLap": false
             },
             {
-              "pos": 2,
+              "pos": 3,
               "no": 3,
               "cl": "M",
               "driver": "Tom CHILTON",
@@ -20609,13 +20623,13 @@
               "car": "Hyundai i30N",
               "laps": 22,
               "time": "21:20.002",
-              "gap": "1.490",
+              "gap": "1.582",
               "bestLap": "57.313",
-              "points": 17,
+              "points": 15,
               "leadLap": false
             },
             {
-              "pos": 3,
+              "pos": 4,
               "no": 66,
               "cl": "M",
               "driver": "Josh COOK",
@@ -20623,25 +20637,11 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 22,
               "time": "21:22.604",
-              "gap": "4.092",
+              "gap": "4.184",
               "bestLap": "56.956",
-              "points": 16,
+              "points": 14,
               "fastestLap": true,
               "leadLap": false
-            },
-            {
-              "pos": 4,
-              "no": 16,
-              "cl": "I",
-              "driver": "Aiden MOFFAT",
-              "team": "LKQ Euro Car Parts with Power Maxed Racing",
-              "car": "Audi A3 Saloon",
-              "laps": 22,
-              "time": "21:23.420",
-              "gap": "4.908",
-              "bestLap": "57.196",
-              "points": 14,
-              "leadLap": true
             },
             {
               "pos": 5,
@@ -20652,7 +20652,7 @@
               "car": "BMW 330i M Sport",
               "laps": 22,
               "time": "21:23.862",
-              "gap": "5.350",
+              "gap": "5.442",
               "bestLap": "57.459",
               "points": 11,
               "leadLap": false
@@ -20666,7 +20666,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 22,
               "time": "21:26.622",
-              "gap": "8.110",
+              "gap": "8.202",
               "bestLap": "57.420",
               "points": 10,
               "leadLap": false
@@ -20680,7 +20680,7 @@
               "car": "BMW 330i M Sport",
               "laps": 22,
               "time": "21:27.406",
-              "gap": "8.894",
+              "gap": "8.986",
               "bestLap": "57.545",
               "points": 9,
               "leadLap": false
@@ -20694,7 +20694,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 22,
               "time": "21:30.517",
-              "gap": "12.005",
+              "gap": "12.097",
               "bestLap": "57.527",
               "points": 8,
               "leadLap": false
@@ -20708,7 +20708,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 22,
               "time": "21:35.969",
-              "gap": "17.457",
+              "gap": "17.549",
               "bestLap": "57.980",
               "points": 7,
               "leadLap": false
@@ -20722,7 +20722,7 @@
               "car": "Mercedes A35 Saloon",
               "laps": 22,
               "time": "21:36.207",
-              "gap": "17.695",
+              "gap": "17.787",
               "bestLap": "57.620",
               "points": 6,
               "leadLap": false
@@ -20736,7 +20736,7 @@
               "car": "Hyundai i30N",
               "laps": 22,
               "time": "21:41.540",
-              "gap": "23.028",
+              "gap": "23.120",
               "bestLap": "57.915",
               "points": 5,
               "leadLap": false
@@ -20750,7 +20750,7 @@
               "car": "Ford Focus Titanium",
               "laps": 22,
               "time": "21:41.634",
-              "gap": "23.122",
+              "gap": "23.214",
               "bestLap": "58.037",
               "points": 4,
               "leadLap": false
@@ -20764,7 +20764,7 @@
               "car": "Hyundai i30N",
               "laps": 22,
               "time": "21:41.795",
-              "gap": "23.283",
+              "gap": "23.375",
               "bestLap": "57.674",
               "points": 3,
               "leadLap": false
@@ -20778,7 +20778,7 @@
               "car": "Hyundai i30N",
               "laps": 22,
               "time": "21:42.511",
-              "gap": "23.999",
+              "gap": "24.091",
               "bestLap": "57.824",
               "points": 2,
               "leadLap": false
@@ -20792,7 +20792,7 @@
               "car": "Ford Focus Titanium",
               "laps": 22,
               "time": "21:42.752",
-              "gap": "24.240",
+              "gap": "24.332",
               "bestLap": "58.082",
               "points": 1,
               "leadLap": false
@@ -20806,7 +20806,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 22,
               "time": "21:43.220",
-              "gap": "24.708",
+              "gap": "24.800",
               "bestLap": "58.149",
               "points": 0,
               "leadLap": false
@@ -20820,7 +20820,7 @@
               "car": "Hyundai i30N",
               "laps": 22,
               "time": "21:43.772",
-              "gap": "25.260",
+              "gap": "25.352",
               "bestLap": "57.883",
               "points": 0,
               "leadLap": false
@@ -20834,7 +20834,7 @@
               "car": "Audi A3 Saloon",
               "laps": 22,
               "time": "21:44.862",
-              "gap": "26.350",
+              "gap": "26.442",
               "bestLap": "58.154",
               "points": 0,
               "leadLap": false
@@ -20848,7 +20848,7 @@
               "car": "Audi A3 Saloon",
               "laps": 22,
               "time": "21:48.008",
-              "gap": "29.496",
+              "gap": "29.588",
               "bestLap": "57.874",
               "points": 0,
               "leadLap": false
@@ -20862,7 +20862,7 @@
               "car": "BMW 330i M Sport",
               "laps": 22,
               "time": "21:48.712",
-              "gap": "30.200",
+              "gap": "30.292",
               "bestLap": "57.980",
               "points": 0,
               "leadLap": false
@@ -21081,30 +21081,30 @@
           "grid": [
             {
               "pos": 1,
+              "no": 16,
+              "cl": "",
+              "driver": "Aiden MOFFAT",
+              "team": ""
+            },
+            {
+              "pos": 2,
               "no": 88,
               "cl": "",
               "driver": "Mikey DOBLE",
               "team": ""
             },
             {
-              "pos": 2,
+              "pos": 3,
               "no": 3,
               "cl": "",
               "driver": "Tom CHILTON",
               "team": ""
             },
             {
-              "pos": 3,
+              "pos": 4,
               "no": 66,
               "cl": "",
               "driver": "Josh COOK",
-              "team": ""
-            },
-            {
-              "pos": 4,
-              "no": 16,
-              "cl": "",
-              "driver": "Aiden MOFFAT",
               "team": ""
             },
             {
