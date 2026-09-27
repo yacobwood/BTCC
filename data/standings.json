@@ -78,7 +78,7 @@
       "driver": "Charles RAINFORD",
       "nat": "GBR",
       "class": "I",
-      "points": 247,
+      "points": 244,
       "wins": 2,
       "seconds": 0,
       "thirds": 2,
@@ -126,7 +126,7 @@
       "driver": "Daryl DE LEON",
       "nat": "PHL",
       "class": "I",
-      "points": 214,
+      "points": 215,
       "wins": 0,
       "seconds": 0,
       "thirds": 3,
@@ -186,7 +186,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 120,
+      "points": 121,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -210,7 +210,7 @@
       "driver": "Sam OSBORNE",
       "nat": "GBR",
       "class": "M",
-      "points": 65,
+      "points": 66,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -339,7 +339,7 @@
     {
       "pos": 3,
       "team": "WSR",
-      "points": 426
+      "points": 425
     },
     {
       "pos": 4,
@@ -364,7 +364,7 @@
     {
       "pos": 8,
       "team": "Restart Racing",
-      "points": 244
+      "points": 245
     },
     {
       "pos": 9,
@@ -457,7 +457,7 @@
       "driver": "Charles RAINFORD",
       "nat": "GBR",
       "class": "I",
-      "points": 348,
+      "points": 345,
       "wins": 4,
       "seconds": 6,
       "thirds": 1,
@@ -465,6 +465,18 @@
     },
     {
       "pos": 4,
+      "car": "2",
+      "driver": "Daryl DE LEON",
+      "nat": "PHL",
+      "class": "I",
+      "points": 332,
+      "wins": 1,
+      "seconds": 5,
+      "thirds": 3,
+      "team": "WSR"
+    },
+    {
+      "pos": 5,
       "car": "16",
       "driver": "Aiden MOFFAT",
       "nat": "GBR",
@@ -474,18 +486,6 @@
       "seconds": 3,
       "thirds": 2,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
-    },
-    {
-      "pos": 5,
-      "car": "2",
-      "driver": "Daryl DE LEON",
-      "nat": "PHL",
-      "class": "I",
-      "points": 330,
-      "wins": 1,
-      "seconds": 5,
-      "thirds": 3,
-      "team": "WSR"
     },
     {
       "pos": 6,
@@ -517,7 +517,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 262,
+      "points": 263,
       "wins": 0,
       "seconds": 2,
       "thirds": 2,
@@ -697,5 +697,5 @@
   "season": "2026",
   "round": 9,
   "venue": "Silverstone",
-  "updated": "2026-09-27T17:09:09Z"
+  "updated": "2026-09-27T18:39:21Z"
 }
