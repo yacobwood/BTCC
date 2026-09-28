@@ -211,15 +211,10 @@ def main():
         # TEMPORARY DEBUG - remove before merging. Diagnosing 2026-09-28's
         # "parsed 0 rows" failure; can't fetch btcc.net directly (bot-walled)
         # or hold the Scrapfly key locally, so dumping structure via CI log.
-        desc_m = re.search(r'<meta name="description" content="([^"]*)"', wins_html)
-        print(f"DEBUG len={len(wins_html)} p_tags={len(re.findall(r'<p', wins_html))} "
-              f"has_next_data={'__NEXT_DATA__' in wins_html} desc_found={bool(desc_m)}")
-        if desc_m:
-            print("DEBUG full description:", desc_m.group(1))
-        nd_m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', wins_html, re.DOTALL)
-        if nd_m:
-            print("DEBUG next_data len:", len(nd_m.group(1)))
-            print("DEBUG next_data snippet:", nd_m.group(1)[:2000])
+        offsets = [m.start() for m in re.finditer("Turkington", wins_html)]
+        print(f"DEBUG len={len(wins_html)} turkington_offsets={offsets}")
+        for off in offsets:
+            print(f"DEBUG @ {off}:", wins_html[max(0, off - 400):off + 100])
 
     print("Fetching titles from btcc.net...")
     # referer=WINS_URL: less proven than scrape_articles.py's listing->article
