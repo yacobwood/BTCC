@@ -207,6 +207,14 @@ def main():
     wins_html = fetch_via_scrapfly(WINS_URL, render_js=True, label="wins")
     if wins_html is None:
         print("ERROR: could not fetch wins (Scrapfly fetch failed)", file=sys.stderr)
+    else:
+        # TEMPORARY DEBUG - remove before merging. Diagnosing 2026-09-28's
+        # "parsed 0 rows" failure; can't fetch btcc.net directly (bot-walled)
+        # or hold the Scrapfly key locally, so dumping structure via CI log.
+        idx = wins_html.find("Plato")
+        print(f"DEBUG len={len(wins_html)} p_tags={len(re.findall(r'<p', wins_html))} plato_idx={idx}")
+        if idx != -1:
+            print("DEBUG snippet:", wins_html[max(0, idx - 300):idx + 100])
 
     print("Fetching titles from btcc.net...")
     # referer=WINS_URL: less proven than scrape_articles.py's listing->article
