@@ -42,15 +42,6 @@ NAME_ALIASES = {
 
 # ── HTML helpers ─────────────────────────────────────────────────────────────
 
-def _strip_tags(html: str) -> str:
-    """Remove all HTML tags and decode common entities."""
-    text = re.sub(r"<[^>]+>", "", html)
-    for ent, ch in [("&amp;", "&"), ("&nbsp;", " "), ("&lt;", "<"), ("&gt;", ">"),
-                    ("&#xa0;", " "), ("\xa0", " ")]:
-        text = text.replace(ent, ch)
-    return text.strip()
-
-
 class _TableParser(HTMLParser):
     """Minimal SAX-style parser that extracts rows from the first <table>."""
 
@@ -89,20 +80,30 @@ class _TableParser(HTMLParser):
 
 # ── Parsers ───────────────────────────────────────────────────────────────────
 
-# Matches lines like "1. Jason Plato, 97" or "=8. Alain Menu, 36"
-_WIN_LINE = re.compile(r"^=?\d+\.\s+(.+),\s*(\d+)$")
-
-
 def parse_wins(html: str) -> dict[str, int]:
-    """Return {driver_name: win_count} from the drivers wins page."""
-    # Each entry is a <p> tag; extract the text of every <p> and filter
-    p_texts = re.findall(r"<p[^>]*>(.*?)</p>", html, re.DOTALL)
+    """Return {driver_name: win_count} from the drivers wins page.
+
+    Was a <p>-tag/regex scrape ("1. Jason Plato, 97") until btcc.net moved
+    this page to a real <table class="btcc-stats-table"> (Pos/Driver/Wins
+    columns) sometime before 2026-09-28, which broke it outright (0 rows
+    parsed - confirmed via a temporary CI debug dump, no <p> tags left in
+    the fetched HTML at all). Now shares _TableParser with parse_titles()
+    below - same "grab the first <table>" approach, already proven to work
+    against this site's markup.
+    """
+    parser = _TableParser()
+    parser.feed(html)
     wins = {}
-    for raw in p_texts:
-        text = _strip_tags(raw)
-        m = _WIN_LINE.match(text)
-        if m:
-            wins[m.group(1).strip()] = int(m.group(2))
+    for row in parser.rows:
+        if len(row) < 3:
+            continue
+        name = row[1].strip()
+        try:
+            count = int(row[2].strip())
+        except ValueError:
+            continue
+        if name and name.lower() != "driver":
+            wins[name] = count
     return wins
 
 
@@ -207,14 +208,6 @@ def main():
     wins_html = fetch_via_scrapfly(WINS_URL, render_js=True, label="wins")
     if wins_html is None:
         print("ERROR: could not fetch wins (Scrapfly fetch failed)", file=sys.stderr)
-    else:
-        # TEMPORARY DEBUG - remove before merging. Diagnosing 2026-09-28's
-        # "parsed 0 rows" failure; can't fetch btcc.net directly (bot-walled)
-        # or hold the Scrapfly key locally, so dumping structure via CI log.
-        offsets = [m.start() for m in re.finditer("Turkington", wins_html)]
-        print(f"DEBUG len={len(wins_html)} turkington_offsets={offsets}")
-        for off in offsets:
-            print(f"DEBUG @ {off}:", wins_html[max(0, off - 400):off + 100])
 
     print("Fetching titles from btcc.net...")
     # referer=WINS_URL: less proven than scrape_articles.py's listing->article

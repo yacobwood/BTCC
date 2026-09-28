@@ -17,7 +17,16 @@ from unittest.mock import patch
 import scrape_btcc_stats as s
 from scrape_btcc_stats import apply_updates, parse_titles, parse_wins
 
-WINS_HTML = "<html><body><p>1. Jason Plato, 97</p><p>=8. Alain Menu, 36</p></body></html>"
+# Table-based markup (btcc.net moved off <p> tags before 2026-09-28) -
+# Pos/Driver/Wins columns, ties included since the Pos column is discarded
+# entirely by parse_wins() and can't affect the parsed result either way.
+WINS_HTML = (
+    "<html><body><table class=\"btcc-stats-table\"><thead>"
+    "<tr><th>Pos</th><th>Driver</th><th>Wins</th></tr></thead><tbody>"
+    "<tr><td>1</td><td>Jason Plato</td><td>97</td></tr>"
+    "<tr><td>=8</td><td>Alain Menu</td><td>36</td></tr>"
+    "</tbody></table></body></html>"
+)
 TITLES_HTML = (
     "<html><body><table>"
     "<tr><th>Driver</th><th>Years</th><th>Titles</th></tr>"
@@ -27,7 +36,7 @@ TITLES_HTML = (
 
 
 class TestParseWins(unittest.TestCase):
-    def test_parses_plain_and_shared_positions(self):
+    def test_parses_table_rows_skipping_header(self):
         self.assertEqual(parse_wins(WINS_HTML), {"Jason Plato": 97, "Alain Menu": 36})
 
 
