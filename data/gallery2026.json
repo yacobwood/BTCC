@@ -176,6 +176,17 @@
       "capturedCount": 36,
       "totalCount": 36,
       "complete": true
+    },
+    {
+      "slug": "2026-silverstone",
+      "title": "2026 - Silverstone",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/334e6842-c410-43ff-9664-5ab18a560265/c21d097b-788d-4442-a17e-6ac67aef90bf/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 9,
+      "venue": "Silverstone",
+      "isCanonical": true,
+      "capturedCount": 186,
+      "totalCount": 186,
+      "complete": true
     }
   ]
 }
