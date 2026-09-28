@@ -995,6 +995,12 @@ describe('11. results2026.json <-> standings.json — points totals', () => {
     'Adam MORGAN': 5,
     'James DORLIN': 5,
     'Daniel LLOYD': 10,
+    // Silverstone 2026: 5-point deduction under Sporting Reg 1.16.9 for a
+    // driver's first engine change beyond the permitted allocation of two -
+    // confirmed against the asterisk on his row in the actual TSL
+    // championship PDF and against press coverage of the Hyundai engine
+    // switch (autosport.com), not just the raw-sum gap itself.
+    'Tom CHILTON': 5,
   };
 
   it('sum of r.points in results2026 matches standings.json total for every driver', () => {
