@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text} from 'react-native';
+import {Text, ScrollView} from 'react-native';
 import {fireEvent, render} from '@testing-library/react-native';
 import SessionAnalysisTabs from '../../src/components/SessionAnalysisTabs';
 
@@ -81,5 +81,22 @@ describe('SessionAnalysisTabs', () => {
     );
     expect(getByLabelText('A tab').props.accessibilityState.selected).toBe(true);
     expect(getByLabelText('B tab').props.accessibilityState.selected).toBe(false);
+  });
+
+  it('wraps the pill row in a horizontal ScrollView so an overflowing tab count stays reachable', () => {
+    // Confirmed live: 4 tabs (Leaderboard/Speed Trap/Perfect Lap/
+    // Conditions) is enough to overflow a phone-width screen, clipping the
+    // last pill with no way to reach it - a plain flexDirection:'row' View
+    // can't scroll, so this must actually be a ScrollView, not just styled
+    // to look like one.
+    const {UNSAFE_getByType} = render(
+      <SessionAnalysisTabs
+        roundNumber={1}
+        session="Race 1"
+        tabs={[makeTab('a', 'A', true, 'Panel A'), makeTab('b', 'B', true, 'Panel B')]}
+      />,
+    );
+    const scrollView = UNSAFE_getByType(ScrollView);
+    expect(scrollView.props.horizontal).toBe(true);
   });
 });

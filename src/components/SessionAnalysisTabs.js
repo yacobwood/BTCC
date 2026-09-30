@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, StyleSheet} from 'react-native';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 
@@ -26,7 +26,10 @@ export default function SessionAnalysisTabs({tabs, roundNumber, session}) {
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.tabRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabRow}>
         {available.map(t => (
           <TouchableOpacity
             key={t.key}
@@ -38,7 +41,7 @@ export default function SessionAnalysisTabs({tabs, roundNumber, session}) {
             <Text style={[styles.pillText, t.key === active.key && styles.pillTextActive]}>{t.label}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
       {active.render()}
     </View>
   );
@@ -46,6 +49,12 @@ export default function SessionAnalysisTabs({tabs, roundNumber, session}) {
 
 const styles = StyleSheet.create({
   wrap: {marginTop: 4},
+  // A 4th tab (Leaderboard/Speed Trap/Perfect Lap/Conditions, all shipped
+  // the same session) is enough to overflow a phone-width screen, with the
+  // last pill's label clipped and no way to reach it - confirmed live via
+  // a real device screenshot. Wrapped in a horizontal ScrollView so every
+  // pill stays reachable regardless of how many tabs a session ends up
+  // with, rather than re-hitting this each time one more tab ships.
   tabRow: {flexDirection: 'row', gap: 8, marginBottom: 8},
   pill: {
     paddingHorizontal: 14,
