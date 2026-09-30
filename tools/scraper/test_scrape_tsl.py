@@ -583,6 +583,17 @@ class TestBestSpeedsHeadings(unittest.TestCase):
         label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Qualifying Race")
         self.assertIsNotNone(pattern.search(text))
 
+    def test_tolerates_a_different_era_title_sponsor(self):
+        # Confirmed live: the title sponsor itself changes across years -
+        # "Kwik Fit" from 2019 on, "Dunlop MSA" for 2010-2018 - and every
+        # heading anchors on the page title, so a hardcoded sponsor name
+        # broke heading detection entirely for the older era (not a partial
+        # miss - zero reports parsed for any session, any year 2010-2018).
+        older_era_title = "2016 Dunlop MSA British Touring Car Championship"
+        text = f"{older_era_title}\n\nFREE PRACTICE SESSION - BEST SPEEDS\n\nPOS"
+        label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Free Practice")
+        self.assertIsNotNone(pattern.search(text))
+
     def test_title_case_is_ignored(self):
         # Confirmed live, same PDF: "championship" lowercase for Saturday
         # sessions, "Championship" capitalized for Sunday races - a TSL

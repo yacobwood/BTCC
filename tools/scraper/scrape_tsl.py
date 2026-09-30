@@ -115,25 +115,30 @@ SESSION_SUFFIXES = {
 # "Qualifying" entry after parsing (see _merge_best_speeds_blocks), since the
 # app has one Qualifying session, not two groups.
 #
-# Every heading is confirmed live to follow "...Kwik Fit British Touring Car
-# Championship" (the book's own repeated page title) - anchoring on that
-# rather than trying to match each heading's own text precisely sidesteps two
-# real-world quirks: (1) inconsistent whitespace around dashes (e.g. "FREE
-# PRACTICE SESSION  - BEST SPEEDS", double space, confirmed at one venue);
-# (2) an optional "- ROUND N" segment some venues insert into the Free
-# Practice/Qualifying Part 1/Part 2/Qualifying Race headings and others
-# don't (confirmed live both ways, including Round 1's Qualifying Race
-# heading, which omits it entirely: "QUALIFYING RACE - BEST SPEEDS", no
-# round number at all). Anchoring here also means the plain "ROUND N - BEST
-# SPEEDS" heading used by Race 1/2/3 can't be confused with "QUALIFYING RACE
-# - ROUND N - BEST SPEEDS" (a real substring-collision risk otherwise,
-# confirmed live) without needing a lookbehind, since only one of the two
-# ever follows the title line directly.
+# Every heading is confirmed live to follow "...{title sponsor} British
+# Touring Car Championship" (the book's own repeated page title) - anchoring
+# on the sponsor-independent tail rather than trying to match each heading's
+# own text precisely sidesteps three real-world quirks: (1) inconsistent
+# whitespace around dashes (e.g. "FREE PRACTICE SESSION  - BEST SPEEDS",
+# double space, confirmed at one venue); (2) an optional "- ROUND N" segment
+# some venues insert into the Free Practice/Qualifying Part 1/Part 2/
+# Qualifying Race headings and others don't (confirmed live both ways,
+# including Round 1's Qualifying Race heading, which omits it entirely:
+# "QUALIFYING RACE - BEST SPEEDS", no round number at all); (3) the title
+# sponsor itself changes over the years - confirmed live "Kwik Fit" from
+# 2019 on, "Dunlop MSA" for 2010-2018 - so the prefix before "British
+# Touring Car Championship" is a wildcard, not a fixed sponsor name, rather
+# than an ever-growing hardcoded list of every sponsor BTCC has ever had.
+# Anchoring here also means the plain "ROUND N - BEST SPEEDS" heading used
+# by Race 1/2/3 can't be confused with "QUALIFYING RACE - ROUND N - BEST
+# SPEEDS" (a real substring-collision risk otherwise, confirmed live)
+# without needing a lookbehind, since only one of the two ever follows the
+# title line directly.
 # Case-insensitive throughout: the book's own title text is confirmed to
 # vary between "Championship" and "championship" within the SAME PDF
 # (Saturday sessions vs Sunday races, at one venue) - a TSL template
 # inconsistency, not something to chase variant-by-variant.
-_TITLE = r"Kwik Fit British Touring Car Championship\s+"
+_TITLE = r"[^\n]*?British Touring Car Championship\s+"
 _DASH  = r"\s*-\s*"
 _ROUND_OPT = rf"(?:{_DASH}ROUND\s*\d+)?"
 
