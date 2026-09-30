@@ -1748,6 +1748,28 @@
     }
   },
   {
+    "id": "senna-proctor-stands-in-for-sam-osborne-at-thruxton",
+    "slug": "senna-proctor-stands-in-for-sam-osborne-at-thruxton",
+    "link": "https://btcc.net/senna-proctor-stands-in-for-sam-osborne-at-thruxton/",
+    "date": "2026-07-25T00:00:00",
+    "title": {
+      "rendered": "Senna Proctor stands in for Sam Osborne at Thruxton"
+    },
+    "excerpt": {
+      "rendered": "NAPA Racing UK has announced this morning (25 July) that..."
+    },
+    "content": {
+      "rendered": "<p>NAPA Racing UK has announced this morning (25 July) that Sam Osborne will not compete in the Thruxton event (25/26 July) due to illness.<br><br>The Alliance Racing-run squad has confirmed that reserve driver Senna Proctor will step into the Ford Focus Titanium for the weekend, racing the #18.</p>"
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112649-d95b6919-e6cd-4283-8b12-3ee79e9e2731-e1784968018327.jpg"
+        }
+      ]
+    }
+  },
+  {
     "id": "cook-the-king-of-thruxton-takes-race-to-pole-triumph",
     "slug": "cook-the-king-of-thruxton-takes-race-to-pole-triumph",
     "link": "https://btcc.net/cook-the-king-of-thruxton-takes-race-to-pole-triumph/",
@@ -1835,28 +1857,6 @@
       "wp:featuredmedia": [
         {
           "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112688-PM1-0Q3A0248-scaled.jpg"
-        }
-      ]
-    }
-  },
-  {
-    "id": "senna-proctor-stands-in-for-sam-osborne-at-thruxton",
-    "slug": "senna-proctor-stands-in-for-sam-osborne-at-thruxton",
-    "link": "https://btcc.net/senna-proctor-stands-in-for-sam-osborne-at-thruxton/",
-    "date": "2026-07-25T00:00:00",
-    "title": {
-      "rendered": "Senna Proctor stands in for Sam Osborne at Thruxton"
-    },
-    "excerpt": {
-      "rendered": "NAPA Racing UK has announced this morning (25 July) that..."
-    },
-    "content": {
-      "rendered": "<p>NAPA Racing UK has announced this morning (25 July) that Sam Osborne will not compete in the Thruxton event (25/26 July) due to illness.<br><br>The Alliance Racing-run squad has confirmed that reserve driver Senna Proctor will step into the Ford Focus Titanium for the weekend, racing the #18.</p>"
-    },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/112649-d95b6919-e6cd-4283-8b12-3ee79e9e2731-e1784968018327.jpg"
         }
       ]
     }
