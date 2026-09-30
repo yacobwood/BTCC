@@ -19,6 +19,7 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {Analytics} from '../utils/analytics';
 import {formatDriverName} from '../utils/driverName';
 import CachedImage from '../components/CachedImage';
+import CareerTimeline from '../components/CareerTimeline';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import {carThumbUrl} from '../api/parsers';
 
@@ -208,6 +209,29 @@ export default function TeamDetailScreen({route, navigation}) {
             </>
           )}
 
+          {team.history && team.history.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>SEASON HISTORY</Text>
+              <CareerTimeline history={team.history} />
+              <View style={styles.card}>
+                {[...team.history].sort((a, b) => b.year - a.year).map(h => {
+                  const posColor = h.pos === 1 ? Colors.yellow
+                    : h.pos === 2 ? '#C0C0C0'
+                    : h.pos === 3 ? '#CD7F32'
+                    : h.pos <= 10 ? '#fff'
+                    : Colors.textSecondary;
+                  return (
+                    <View key={h.year} style={styles.historyRow}>
+                      <Text style={styles.historyYear}>{h.year}</Text>
+                      <Text style={[styles.historyPos, {color: posColor}]}>P{h.pos}</Text>
+                      <Text style={styles.historyPoints}>{h.points} pts</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          )}
+
           {((team.sponsors && team.sponsors.length > 0) || team.sponsorsNote) && (
             <>
               <Text style={styles.sectionTitle}>SPONSORS</Text>
@@ -325,6 +349,10 @@ const styles = StyleSheet.create({
   specRowBorder: {borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.outline},
   specLabel: {color: Colors.textSecondary, fontSize: 12, flex: 1},
   specValue: {color: '#fff', fontSize: 12, fontWeight: '700', flex: 1.4, textAlign: 'right'},
+  historyRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 6},
+  historyYear: {color: '#fff', fontSize: 13, fontWeight: '700', flex: 1},
+  historyPos: {fontSize: 13, fontWeight: '800', flex: 1, textAlign: 'center'},
+  historyPoints: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700', flex: 1, textAlign: 'right'},
   champRow: {flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4},
   champLabel: {color: Colors.textSecondary, fontSize: 13},
   champValue: {color: Colors.yellow, fontSize: 14, fontWeight: '800'},
