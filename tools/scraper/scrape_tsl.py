@@ -567,10 +567,20 @@ def _collect_numbers(lines, idx, n):
     Scanning for the leading integer alone and ignoring name text entirely
     handles every one of those variants without caring which is in play -
     the name itself is always re-derived from the session's own results/grid
-    via car-number join in _resolve_best_speeds, never read off this page."""
+    via car-number join in _resolve_best_speeds, never read off this page.
+
+    Bounded to 1-3 digits: every real 2026 car number is confirmed <=132,
+    and when a block's real entries run out before reaching n (a driver
+    retired before this trap - see the duplicate-number check in
+    _parse_best_speeds_block), the scan can otherwise run into an unrelated
+    page-footer line like "2026 Kwik Fit British Touring Car Championship"
+    and misread the year itself as a car number - confirmed live
+    (Round 2/Brands Hatch Indy). A 4+ digit match is never a real car
+    number, so it's excluded here rather than surfacing as a bogus
+    "Car 2026" placeholder downstream."""
     numbers = []
     while len(numbers) < n and idx < len(lines):
-        m = re.match(r"^(\d+)(?:\s|$)", lines[idx])
+        m = re.match(r"^(\d{1,3})(?:\s|$)", lines[idx])
         if m:
             numbers.append(int(m.group(1)))
         idx += 1
@@ -654,6 +664,23 @@ def _parse_best_speeds_block(chunk):
         mph, idx = _collect_mph(lines, idx, n)
         if len(numbers) != n or len(mph) != n:
             return None  # malformed/truncated chunk - caller treats as "not available yet"
+        # A driver who retired before reaching a trap simply has no row for
+        # it, so a trap's real entry count can be LESS than n (the POS
+        # run's own length, i.e. the full classified field) - confirmed
+        # live (Round 1/Donington, Race 2: Intermediate 1 only had 19 real
+        # entries against n=21). _collect_numbers/_collect_mph don't know
+        # that "fewer than n" is possible - they keep scanning forward
+        # past the real block, skipping non-matching lines, until they've
+        # accumulated n matches regardless of source, silently absorbing
+        # the START of the NEXT trap's own numbers into this one's tail
+        # (confirmed: the last entries duplicated car numbers already seen
+        # earlier in the very same list). A trap's own car numbers can
+        # never legitimately repeat (each driver crosses it once) - any
+        # duplicate is proof this trap's block ran past its real end, and
+        # every trap after it in this chunk is misaligned the same way, so
+        # the whole block is treated as unreliable rather than shipping it.
+        if len(set(numbers)) != len(numbers):
+            return None
         key = _TRAP_SCHEMA_KEYS.get(label)
         if key:
             result[key] = _zip_speed_entries(numbers, mph)

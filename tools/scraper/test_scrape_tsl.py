@@ -509,6 +509,29 @@ class TestParseBestSpeedsBlock(unittest.TestCase):
     def test_returns_none_when_no_pos_run_found(self):
         self.assertIsNone(s._parse_best_speeds_block("some unrelated text\nwith no table in it"))
 
+    def test_trap_with_fewer_real_entries_than_the_pos_run_is_rejected_not_bled_into_next_trap(self):
+        # A driver who retired before reaching a trap simply has no row for
+        # it, so a trap's real entry count can be less than n (the POS
+        # run's own length, i.e. the full classified field) - confirmed
+        # live (Round 1/Donington, Race 2: Intermediate 1 had only 19 real
+        # entries against n=21). _collect_numbers/_collect_mph don't know
+        # "fewer than n" is possible - they scan forward, skipping
+        # non-matching lines, until n matches accumulate, silently
+        # absorbing the start of the NEXT trap's own numbers to pad out the
+        # count. Here Intermediate 2 has only 3 real entries (30/40/50)
+        # against a POS run of 5, with Finish Line's block (deliberately
+        # starting with 30 and 40 again, a real car appearing at two
+        # different finishing-ish ranks makes no sense but proves the
+        # bleed) immediately after.
+        header = "POS\n\nINTERMEDIATE 1\nNO SPEED TRAP INFORMATION\n\nINTERMEDIATE 2\n\nFINISH LINE\n\nNO NAME\n\nMPH\n\nNO NAME\n\n"
+        pos_run = "1\n2\n3\n4\n5\n"
+        int2_names = "30 GAMMA\n40 DELTA\n50 ECHO\n"  # only 3 real entries, not 5
+        int2_mph = "146.0\n144.0\n142.0\n"
+        finish_names = "30 GAMMA\n40 DELTA\n10 ALPHA\n20 BETA\n50 ECHO\n"
+        finish_mph = "130.0\n129.0\n128.0\n127.0\n126.0\n"
+        chunk = header + pos_run + "\n" + int2_names + "\n" + int2_mph + "\n" + finish_names + "\n" + finish_mph
+        self.assertIsNone(s._parse_best_speeds_block(chunk))
+
 
 class TestBestSpeedsHeadings(unittest.TestCase):
     """Regression coverage for real live PDF-formatting quirks that broke
