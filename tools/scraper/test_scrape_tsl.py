@@ -614,29 +614,272 @@ class TestNumberDriverMap(unittest.TestCase):
         self.assertEqual(s._number_driver_map(race), {3: ('Tom CHILTON', 'Team VERTU')})
 
 
+# ── weather ──────────────────────────────────────────────────────────────────
+
+class TestParseWeatherLine(unittest.TestCase):
+
+    def test_extracts_condition_and_track(self):
+        chunk = "some report text\nWeather / Track : Cloudy / Dry\nmore text\n"
+        self.assertEqual(s._parse_weather_line(chunk), {'condition': 'Cloudy', 'track': 'Dry'})
+
+    def test_distinguishes_wet_race_from_dry_sessions(self):
+        # Confirmed live, Round 9/Silverstone: Race 3 alone ran wet.
+        chunk = "Weather / Track : Rain / Wet\n"
+        self.assertEqual(s._parse_weather_line(chunk), {'condition': 'Rain', 'track': 'Wet'})
+
+    def test_returns_none_when_no_weather_line_present(self):
+        self.assertIsNone(s._parse_weather_line("no weather info here"))
+
+
+class TestParseWeather(unittest.TestCase):
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def test_parses_free_practice_and_race_weather(self):
+        text = (
+            f"{self.TITLE}\n\nFREE PRACTICE SESSION - BEST SPEEDS\n\nPOS\n"
+            f"Weather / Track : Cloudy / Dry\n\n"
+            f"{self.TITLE}\n\nROUND 9 - BEST SPEEDS\n\nPOS\n"
+            f"Weather / Track : Rain / Wet\n"
+        )
+        result = s.parse_weather(text)
+        self.assertEqual(result['Free Practice'], {'condition': 'Cloudy', 'track': 'Dry'})
+        self.assertEqual(result['Race 1'], {'condition': 'Rain', 'track': 'Wet'})
+        self.assertIsNone(result['Race 2'])
+
+    def test_qualifying_uses_part1_falling_back_to_part2(self):
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING - PART 1 - BEST SPEEDS\n\nPOS\n"
+            f"Weather / Track : Bright / Dry\n\n"
+            f"{self.TITLE}\n\nQUALIFYING - PART 2 - BEST SPEEDS\n\nPOS\n"
+            f"Weather / Track : Overcast / Dry\n"
+        )
+        self.assertEqual(s.parse_weather(text)['Qualifying'], {'condition': 'Bright', 'track': 'Dry'})
+
+    def test_qualifying_falls_back_to_part2_when_part1_missing(self):
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING - PART 2 - BEST SPEEDS\n\nPOS\n"
+            f"Weather / Track : Overcast / Dry\n"
+        )
+        self.assertEqual(s.parse_weather(text)['Qualifying'], {'condition': 'Overcast', 'track': 'Dry'})
+
+
+# ── flag statistics ─────────────────────────────────────────────────────────
+
+class TestParseFlagStatsBlock(unittest.TestCase):
+
+    def test_extracts_all_four_counts(self):
+        chunk = "Flag Statistics\nTYPE\nGreen\nRed\nSafety Car\nFCY\nCOUNT\n1\n0\n1\n2\n"
+        self.assertEqual(s._parse_flag_stats_block(chunk), {'green': 1, 'red': 0, 'safetyCar': 1, 'fcy': 2})
+
+    def test_all_zero_counts_for_an_incident_free_session(self):
+        chunk = "Flag Statistics\nTYPE\nGreen\nRed\nSafety Car\nFCY\nCOUNT\n1\n0\n0\n0\n"
+        self.assertEqual(s._parse_flag_stats_block(chunk), {'green': 1, 'red': 0, 'safetyCar': 0, 'fcy': 0})
+
+    def test_returns_none_when_no_flag_statistics_block_present(self):
+        self.assertIsNone(s._parse_flag_stats_block("no flag data here"))
+
+
+class TestParseFlagStats(unittest.TestCase):
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def test_race_with_safety_car_distinguished_from_clean_race(self):
+        # Confirmed live, Round 9: Qualifying Race ran behind a real Safety
+        # Car while every other session that weekend was flag-incident-free.
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING RACE - BEST SPEEDS\n\nPOS\n"
+            f"Flag Statistics\nTYPE\nGreen\nRed\nSafety Car\nFCY\nCOUNT\n1\n0\n1\n0\n\n"
+            f"{self.TITLE}\n\nROUND 9 - BEST SPEEDS\n\nPOS\n"
+            f"Flag Statistics\nTYPE\nGreen\nRed\nSafety Car\nFCY\nCOUNT\n1\n0\n0\n0\n"
+        )
+        result = s.parse_flag_stats(text)
+        self.assertEqual(result['Qualifying Race'], {'green': 1, 'red': 0, 'safetyCar': 1, 'fcy': 0})
+        self.assertEqual(result['Race 1'], {'green': 1, 'red': 0, 'safetyCar': 0, 'fcy': 0})
+
+    def test_qualifying_sums_part1_and_part2_counts(self):
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING - PART 1 - BEST SPEEDS\n\nPOS\n"
+            f"Flag Statistics\nTYPE\nGreen\nRed\nSafety Car\nFCY\nCOUNT\n1\n0\n0\n1\n\n"
+            f"{self.TITLE}\n\nQUALIFYING - PART 2 - BEST SPEEDS\n\nPOS\n"
+            f"Flag Statistics\nTYPE\nGreen\nRed\nSafety Car\nFCY\nCOUNT\n1\n0\n1\n0\n"
+        )
+        self.assertEqual(s.parse_flag_stats(text)['Qualifying'], {'green': 2, 'red': 0, 'safetyCar': 1, 'fcy': 1})
+
+
+# ── best sectors (Perfect Lap) ──────────────────────────────────────────────
+
+def make_best_sectors_chunk(numbers, names, ideal, best, diff, is_race, extra_ideal=None):
+    """Build a synthetic Best Sectors text chunk in the real book-PDF shape:
+    a leaderboard POS run (content irrelevant, only its length matters for
+    the anchor-skip logic) + filler, then the REAL POS run immediately
+    preceding this table, then N car numbers, N surname lines, an optional
+    session-summary lap time (non-race sessions only, confirmed live),
+    then N IDEAL, N BEST, N DIFF lines."""
+    n = len(numbers)
+    leaderboard_pos_run = "".join(f"{i + 1}\n" for i in range(n))
+    filler = "".join(f"{10 + i}.000\n" for i in range(n)) + "".join(f"{20 + i}.000\n" for i in range(n))
+    real_pos_run = "".join(f"{i + 1}\n" for i in range(n))
+    number_lines = "".join(f"{no}\n" for no in numbers)
+    name_lines = "".join(f"{name}\n" for name in names)
+    extra = f"{extra_ideal}\n" if (not is_race and extra_ideal is not None) else ""
+    ideal_lines = "".join(f"{v}\n" for v in ideal)
+    best_lines = "".join(f"{v}\n" for v in best)
+    diff_lines = "".join(f"{v}\n" for v in diff)
+    return (leaderboard_pos_run + filler + real_pos_run + number_lines + name_lines
+            + extra + ideal_lines + best_lines + diff_lines)
+
+
+class TestParseBestSectorsBlock(unittest.TestCase):
+
+    NOS = [10, 20, 30, 40, 50]
+    NAMES = ['ALPHA', 'BETA', 'GAMMA', 'DELTA', 'ECHO']
+
+    def test_non_race_session_skips_leading_theoretical_summary_value(self):
+        # Confirmed live: non-race sessions print one extra lap time (the
+        # session's fastest S1+S2+S3 combined, from up to three different
+        # drivers) before the real per-driver IDEAL column begins.
+        chunk = make_best_sectors_chunk(
+            self.NOS, self.NAMES,
+            ideal=[56.500, 56.600, 56.700, 56.800, 56.900],
+            best=[56.800, 56.900, 57.000, 57.100, 57.200],
+            diff=[0.300, 0.300, 0.300, 0.300, 0.300],
+            is_race=False, extra_ideal=56.100,
+        )
+        block = s._parse_best_sectors_block(chunk, is_race=False)
+        self.assertEqual(block[0], {'no': 10, 'ideal': 56.500, 'best': 56.800, 'diff': 0.300})
+        self.assertEqual(len(block), 5)
+
+    def test_race_session_has_no_leading_summary_value(self):
+        # Confirmed live: races never print that extra leading value -
+        # skipping it unconditionally would discard a real driver's ideal.
+        chunk = make_best_sectors_chunk(
+            self.NOS, self.NAMES,
+            ideal=[56.500, 56.600, 56.700, 56.800, 56.900],
+            best=[56.800, 56.900, 57.000, 57.100, 57.200],
+            diff=[0.300, 0.300, 0.300, 0.300, 0.300],
+            is_race=True,
+        )
+        block = s._parse_best_sectors_block(chunk, is_race=True)
+        self.assertEqual(block[0], {'no': 10, 'ideal': 56.500, 'best': 56.800, 'diff': 0.300})
+
+    def test_race_session_best_lap_over_a_minute_parsed_as_mmss(self):
+        # Confirmed live: a driver's BEST lap can print as "1:01.112"
+        # (M:SS.mmm) rather than plain seconds when it exceeds 60s - a plain
+        # decimal-only scan silently drops that line and shifts every value
+        # after it by one position.
+        chunk = make_best_sectors_chunk(
+            self.NOS, self.NAMES,
+            ideal=[56.500, 56.600, 56.700, 56.800, 56.900],
+            best=['1:01.112', 57.000, 57.100, 57.200, 57.300],
+            diff=[4.612, 0.400, 0.400, 0.400, 0.400],
+            is_race=True,
+        )
+        block = s._parse_best_sectors_block(chunk, is_race=True)
+        self.assertEqual(block[0], {'no': 10, 'ideal': 56.500, 'best': 61.112, 'diff': 4.612})
+
+    def test_entry_failing_diff_equals_best_minus_ideal_invariant_is_dropped(self):
+        # Confirmed live (Round 9, all three races): exactly one row per
+        # race session fails this hard invariant by a huge, physically
+        # impossible margin. Rather than discard an otherwise-good table
+        # over one bad row, that row alone is filtered out.
+        chunk = make_best_sectors_chunk(
+            self.NOS, self.NAMES,
+            ideal=[56.500, 56.600, 56.700, 56.800, 56.900],
+            best=[56.800, 56.900, 57.000, 57.100, 57.200],
+            diff=[99.900, 0.300, 0.300, 0.300, 0.300],
+            is_race=True,
+        )
+        block = s._parse_best_sectors_block(chunk, is_race=True)
+        self.assertEqual([e['no'] for e in block], [20, 30, 40, 50])
+
+    def test_returns_none_when_fewer_than_two_pos_runs_found(self):
+        self.assertIsNone(s._parse_best_sectors_block("some unrelated text\nwith no table in it", is_race=False))
+
+
+class TestBestSectorsHeadings(unittest.TestCase):
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def test_free_practice_heading_matches(self):
+        text = f"{self.TITLE}\n\nFREE PRACTICE SESSION - BEST SECTORS\n\nPOS"
+        label, pattern = next(p for p in s.BEST_SECTORS_HEADINGS if p[0] == "Free Practice")
+        self.assertIsNotNone(pattern.search(text))
+
+    def test_race_heading_matches_and_is_not_confused_with_qualifying_race(self):
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING RACE - ROUND 9 - BEST SECTORS\n...\n"
+            f"{self.TITLE}\n\nROUND 9 - BEST SECTORS\n"
+        )
+        matches = [m.group(0).split("\n\n")[-1] for m in s.RACE_BEST_SECTORS_RE.finditer(text)]
+        self.assertEqual(matches, ['ROUND 9 - BEST SECTORS'])
+
+
+class TestMergeBestSectorsBlocks(unittest.TestCase):
+
+    def test_merges_and_resorts_by_ideal_ascending(self):
+        part1 = [{'no': 1, 'ideal': 57.0, 'best': 57.2, 'diff': 0.2}]
+        part2 = [{'no': 2, 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}]
+        merged = s._merge_best_sectors_blocks(part1, part2)
+        self.assertEqual([e['no'] for e in merged], [2, 1])
+
+
+class TestResolveBestSectors(unittest.TestCase):
+
+    def test_resolves_car_number_to_canonical_driver_and_team(self):
+        entries = [{'no': 3, 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}]
+        resolved = s._resolve_best_sectors(entries, {3: ('Tom CHILTON', 'Team VERTU')})
+        self.assertEqual(resolved[0]['driver'], 'Tom CHILTON')
+        self.assertEqual(resolved[0]['team'], 'Team VERTU')
+
+    def test_falls_back_to_placeholder_when_car_number_unresolved(self):
+        entries = [{'no': 999, 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}]
+        resolved = s._resolve_best_sectors(entries, {})
+        self.assertEqual(resolved[0]['driver'], 'Car 999')
+        self.assertEqual(resolved[0]['team'], '')
+
+    def test_returns_none_for_empty_entries(self):
+        self.assertIsNone(s._resolve_best_sectors(None, {}))
+        self.assertIsNone(s._resolve_best_sectors([], {}))
+
+
 # ── merge_scraped_with_existing ───────────────────────────────────────────────
 
 def make_grid(*car_nos):
     """Build a minimal grid list from an ordered sequence of car numbers."""
     return [{'pos': i + 1, 'no': no, 'cl': '', 'driver': f'Driver{no}', 'team': ''} for i, no in enumerate(car_nos)]
 
-def make_scraped_round(r3_grid=None, r3_results=None, r3_draw=None, r3_best_speeds=None):
+def make_scraped_round(r3_grid=None, r3_results=None, r3_draw=None, r3_best_speeds=None,
+                        r3_weather=None, r3_flag_stats=None, r3_best_sectors=None):
     r3 = {'label': 'Race 3', 'results': r3_results or [], 'grid': r3_grid or []}
     if r3_draw is not None:
         r3['reverseGridDraw'] = r3_draw
     if r3_best_speeds is not None:
         r3['bestSpeeds'] = r3_best_speeds
+    if r3_weather is not None:
+        r3['weather'] = r3_weather
+    if r3_flag_stats is not None:
+        r3['flagStats'] = r3_flag_stats
+    if r3_best_sectors is not None:
+        r3['bestSectors'] = r3_best_sectors
     return {
         'round': 1, 'venue': 'Test', 'date': '01 Jan', 'youtubeUrls': [],
         'races': [{'label': 'Race 1', 'results': [], 'grid': []}, r3],
     }
 
-def make_existing_round(r3_grid=None, r3_results=None, r3_draw=None, youtube=None, r3_best_speeds=None):
+def make_existing_round(r3_grid=None, r3_results=None, r3_draw=None, youtube=None, r3_best_speeds=None,
+                         r3_weather=None, r3_flag_stats=None, r3_best_sectors=None):
     r3 = {'label': 'Race 3', 'results': r3_results or [], 'grid': r3_grid or []}
     if r3_draw is not None:
         r3['reverseGridDraw'] = r3_draw
     if r3_best_speeds is not None:
         r3['bestSpeeds'] = r3_best_speeds
+    if r3_weather is not None:
+        r3['weather'] = r3_weather
+    if r3_flag_stats is not None:
+        r3['flagStats'] = r3_flag_stats
+    if r3_best_sectors is not None:
+        r3['bestSectors'] = r3_best_sectors
     return {
         'round': 1, 'venue': 'Test', 'date': '01 Jan',
         'youtubeUrls': youtube or ['https://yt/r1', None, None, None, None, None],
@@ -735,6 +978,34 @@ class TestMergeScrapedWithExisting(unittest.TestCase):
         existing = make_existing_round(r3_best_speeds=old_speeds)
         s.merge_scraped_with_existing(scraped, existing)
         self.assertEqual(self._r3(scraped)['bestSpeeds']['intermediate2'][0]['name'], 'NEW')
+
+    def test_old_weather_flag_stats_best_sectors_preserved_when_book_fetch_fails(self):
+        old_weather = {'condition': 'Rain', 'track': 'Wet'}
+        old_flags = {'green': 1, 'red': 0, 'safetyCar': 1, 'fcy': 0}
+        old_sectors = [{'no': 1, 'driver': 'OLD', 'team': '', 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}]
+        scraped  = make_scraped_round()  # no book data this run
+        existing = make_existing_round(r3_weather=old_weather, r3_flag_stats=old_flags, r3_best_sectors=old_sectors)
+        s.merge_scraped_with_existing(scraped, existing)
+        r3 = self._r3(scraped)
+        self.assertEqual(r3['weather'], old_weather)
+        self.assertEqual(r3['flagStats'], old_flags)
+        self.assertEqual(r3['bestSectors'], old_sectors)
+
+    def test_new_weather_flag_stats_best_sectors_not_overwritten_by_old(self):
+        new_weather = {'condition': 'Cloudy', 'track': 'Dry'}
+        new_flags = {'green': 1, 'red': 0, 'safetyCar': 0, 'fcy': 0}
+        new_sectors = [{'no': 1, 'driver': 'NEW', 'team': '', 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}]
+        scraped  = make_scraped_round(r3_weather=new_weather, r3_flag_stats=new_flags, r3_best_sectors=new_sectors)
+        existing = make_existing_round(
+            r3_weather={'condition': 'Rain', 'track': 'Wet'},
+            r3_flag_stats={'green': 1, 'red': 0, 'safetyCar': 1, 'fcy': 0},
+            r3_best_sectors=[{'no': 1, 'driver': 'OLD', 'team': '', 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}],
+        )
+        s.merge_scraped_with_existing(scraped, existing)
+        r3 = self._r3(scraped)
+        self.assertEqual(r3['weather'], new_weather)
+        self.assertEqual(r3['flagStats'], new_flags)
+        self.assertEqual(r3['bestSectors'], new_sectors)
 
 
 # ── apply_draw_override ───────────────────────────────────────────────────────

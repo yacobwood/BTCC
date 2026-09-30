@@ -137,15 +137,38 @@ _TITLE = r"Kwik Fit British Touring Car Championship\s+"
 _DASH  = r"\s*-\s*"
 _ROUND_OPT = rf"(?:{_DASH}ROUND\s*\d+)?"
 
-BEST_SPEEDS_HEADINGS = [
-    ("Free Practice",     re.compile(rf"{_TITLE}FREE PRACTICE SESSION{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
-    ("Qualifying Part 1", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 1{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
-    ("Qualifying Part 2", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 2{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
-    ("Qualifying Race",   re.compile(rf"{_TITLE}QUALIFYING RACE{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
-]
 
-# Race 1/2/3's plain "ROUND N - BEST SPEEDS" headings, in document order.
-RACE_BEST_SPEEDS_RE = re.compile(rf"{_TITLE}ROUND\s*\d+{_DASH}BEST SPEEDS", re.IGNORECASE)
+def _session_heading_patterns(report_name):
+    """Build the same 4-heading family (FP/Qual Part 1/Qual Part 2/Qualifying
+    Race) as BEST_SPEEDS_HEADINGS, for any other book-PDF report that follows
+    the identical "{session} - {report_name}" shape (confirmed live for BEST
+    SECTORS and STATISTICS too, same title-anchoring, same whitespace/
+    round-number/case quirks)."""
+    return [
+        ("Free Practice",     re.compile(rf"{_TITLE}FREE PRACTICE SESSION{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
+        ("Qualifying Part 1", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 1{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
+        ("Qualifying Part 2", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 2{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
+        ("Qualifying Race",   re.compile(rf"{_TITLE}QUALIFYING RACE{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
+    ]
+
+
+def _race_heading_pattern(report_name):
+    """The plain "ROUND N - {report_name}" heading Race 1/2/3 use, for any
+    book-PDF report following the same shape as BEST SPEEDS (see
+    RACE_BEST_SPEEDS_RE's own docstring history for why this needs no
+    lookbehind despite the substring-collision risk with the Qualifying
+    Race heading above)."""
+    return re.compile(rf"{_TITLE}ROUND\s*\d+{_DASH}{report_name}", re.IGNORECASE)
+
+
+BEST_SPEEDS_HEADINGS = _session_heading_patterns("BEST SPEEDS")
+RACE_BEST_SPEEDS_RE = _race_heading_pattern("BEST SPEEDS")
+
+BEST_SECTORS_HEADINGS = _session_heading_patterns("BEST SECTORS")
+RACE_BEST_SECTORS_RE = _race_heading_pattern("BEST SECTORS")
+
+STATISTICS_HEADINGS = _session_heading_patterns("STATISTICS")
+RACE_STATISTICS_RE = _race_heading_pattern("STATISTICS")
 
 # Grid PDF suffix for each race session (published before the race starts)
 GRID_SUFFIXES = {
@@ -568,6 +591,26 @@ def _collect_mph(lines, idx, n):
     return values, idx
 
 
+def _collect_lap_time(lines, idx, n):
+    """Like _collect_mph, but for lap-time columns (Best Sectors' IDEAL/BEST/
+    DIFF), which can exceed 60 seconds - confirmed live in a Race session's
+    BEST column ("1:01.112", a driver's slowest-of-the-weekend best lap,
+    likely after being held up) - and print as M:SS.mmm rather than SS.mmm
+    when they do. A plain _collect_mph skips that line as non-matching,
+    silently dropping a real value and shifting every value after it by one
+    position. Both formats are accepted and normalised to total seconds."""
+    values = []
+    while len(values) < n and idx < len(lines):
+        if re.match(r"^\d+\.\d+$", lines[idx]):
+            values.append(float(lines[idx]))
+        else:
+            m = re.match(r"^(\d+):(\d+\.\d+)$", lines[idx])
+            if m:
+                values.append(int(m.group(1)) * 60 + float(m.group(2)))
+        idx += 1
+    return values, idx
+
+
 def _parse_best_speeds_block(chunk):
     """
     Parse one session's Best Speeds table from the text immediately following
@@ -677,6 +720,253 @@ def parse_best_speeds(text):
     return result
 
 
+def _parse_weather_line(chunk):
+    """"Weather / Track : {condition} / {track}" - confirmed live to print as
+    a one-line footer directly beneath every report page for a session (not
+    just its own WEATHER CONDITIONS page), so this is found within whichever
+    chunk is passed in rather than needing its own heading search."""
+    m = re.search(r"Weather\s*/\s*Track\s*:\s*([^/\n]+?)\s*/\s*([^\n]+?)\s*\n", chunk)
+    if not m:
+        return None
+    return {"condition": m.group(1).strip(), "track": m.group(2).strip()}
+
+
+def parse_weather(text):
+    """
+    Extract each session's weather/track condition tag. Confirmed live: a
+    genuinely wet race is distinguishable from every other dry session at
+    the same venue/weekend (Round 9/Silverstone Race 3: "Rain / Wet", every
+    other session "Cloudy / Dry" or "Bright / Dry"). Piggybacks on the same
+    Best Speeds heading search (BEST_SPEEDS_HEADINGS/RACE_BEST_SPEEDS_RE) -
+    no separate heading lookup needed, since the weather line sits within
+    that same chunk already. Qualifying's Part 1/Part 2 readings are
+    confirmed identical in practice (same session, minutes apart) - Part 1's
+    is used, falling back to Part 2's only if Part 1's page isn't found.
+    Returns {label: {"condition": str, "track": str} | None}.
+    """
+    result = {label: None for label in SESSION_SUFFIXES}
+    qual_parts = {}
+
+    for label, pattern in BEST_SPEEDS_HEADINGS:
+        m = pattern.search(text)
+        if not m:
+            continue
+        weather = _parse_weather_line(text[m.end():m.end() + 15000])
+        if label == "Qualifying Part 1":
+            qual_parts["part1"] = weather
+        elif label == "Qualifying Part 2":
+            qual_parts["part2"] = weather
+        else:
+            result[label] = weather
+
+    result["Qualifying"] = qual_parts.get("part1") or qual_parts.get("part2")
+
+    for label, m in zip(["Race 1", "Race 2", "Race 3"], RACE_BEST_SPEEDS_RE.finditer(text)):
+        result[label] = _parse_weather_line(text[m.end():m.end() + 15000])
+
+    return result
+
+
+def _parse_flag_stats_block(chunk):
+    """Flag Statistics: a fixed 4-row table (always exactly Green/Red/Safety
+    Car/FCY, confirmed live in that order every time) giving each flag
+    type's COUNT for the session. Deliberately scoped to just COUNT - the
+    same block's TOTAL LAPS/TOTAL TIME rows are confirmed live to sometimes
+    sit much further down the page (a session with extra class-specific
+    breakdown content pushes them past a lot of unrelated intervening text),
+    while COUNT is confirmed to always immediately follow the fixed
+    Green/Red/Safety Car/FCY label run - too fragile a position to rely on
+    for the extra fields, whereas COUNT alone already answers the real
+    question ("was there a Safety Car, how many periods").
+    """
+    m = re.search(
+        r"Flag Statistics\s*TYPE\s*Green\s*Red\s*Safety Car\s*FCY\s*COUNT\s*"
+        r"(\d+)\s*(\d+)\s*(\d+)\s*(\d+)",
+        chunk,
+    )
+    if not m:
+        return None
+    green, red, safety_car, fcy = (int(x) for x in m.groups())
+    return {"green": green, "red": red, "safetyCar": safety_car, "fcy": fcy}
+
+
+def parse_flag_stats(text):
+    """
+    Extract each session's flag-type counts (Green/Red/Safety Car/FCY).
+    Confirmed live: Round 9's Qualifying Race really did run behind a Safety
+    Car (1 period, per its own Flag Statistics block) while every other
+    session that weekend shows all-zero incident counts. Piggybacks on the
+    same Best Speeds heading search as parse_weather - no separate heading
+    lookup needed. Qualifying's Part 1/Part 2 counts are summed (both halves
+    of the same session, any incident in either belongs to it).
+    Returns {label: {"green", "red", "safetyCar", "fcy"} | None}.
+    """
+    result = {label: None for label in SESSION_SUFFIXES}
+    qual_parts = {}
+
+    for label, pattern in BEST_SPEEDS_HEADINGS:
+        m = pattern.search(text)
+        if not m:
+            continue
+        flags = _parse_flag_stats_block(text[m.end():m.end() + 15000])
+        if label == "Qualifying Part 1":
+            qual_parts["part1"] = flags
+        elif label == "Qualifying Part 2":
+            qual_parts["part2"] = flags
+        else:
+            result[label] = flags
+
+    p1, p2 = qual_parts.get("part1"), qual_parts.get("part2")
+    if p1 and p2:
+        result["Qualifying"] = {k: p1[k] + p2[k] for k in p1}
+    else:
+        result["Qualifying"] = p1 or p2
+
+    for label, m in zip(["Race 1", "Race 2", "Race 3"], RACE_BEST_SPEEDS_RE.finditer(text)):
+        result[label] = _parse_flag_stats_block(text[m.end():m.end() + 15000])
+
+    return result
+
+
+def _parse_best_sectors_block(chunk, is_race):
+    """
+    Perfect Lap (theoretical best lap): each driver's IDEAL lap (sum of their
+    own best individual sectors) vs their actual BEST lap, and the DIFF - a
+    classic "what they left on the table" broadcast stat. Confirmed live,
+    this shares its page with a Sector 1/2/3 leaderboard this app doesn't
+    surface (out of scope - too dense for mobile, and would need real
+    per-lap row reconstruction, unlike this fixed-length comparison table).
+
+    Confirmed live (by dumping raw chunk lines, not guessed) that the page's
+    own "PERFECT LAP" column label sits in the header block, before EVEN the
+    first of the page's two POS (1..N) runs (the header lists every column
+    across the whole page up front) - so it can't be used to anchor past the
+    Sector 1/2/3 leaderboard, which genuinely comes FIRST on this page, with
+    this Perfect Lap table's own POS run second. A third run found beyond
+    that belongs to the next report's page (Best Speeds, or for races, a
+    further "TOP 5 SPEEDS" report) having bled into this chunk, and is
+    ignored by only ever taking the second run found.
+
+    Body shape after that second POS run: N car numbers, then N surname
+    lines (both skippable via the same "scan for the right token type"
+    approach - _collect_numbers only matches leading integers, _collect_mph
+    only matches floats, so interleaved text is naturally skipped without
+    being told to). Confirmed live, non-race sessions then carry ONE extra
+    float before the real per-driver IDEAL column starts: it equals the
+    SESSION's own theoretical perfect lap (fastest S1 + fastest S2 + fastest
+    S3, from three different drivers, not any one driver's own row) that TSL
+    prints once as a summary before the per-driver breakdown. Race sessions
+    (confirmed live, all three) never carry this extra value - the real
+    IDEAL block starts immediately. Skipping it unconditionally cascaded a
+    real driver's own ideal value out of the results for races (the first
+    "real" IDEAL got discarded as if it were the summary value), so is_race
+    controls whether that skip happens. After the IDEAL column (present or
+    not): N IDEAL values, N BEST values, N DIFF values, in that fixed order
+    - same "scan for the next N floats, skip everything else" approach as
+    _collect_mph, reused directly since the field boundaries are the same
+    shape (a run of decimal numbers with nothing else interleaved).
+    """
+    lines = [l.strip() for l in chunk.split("\n")]
+    lines = [l for l in lines if l]
+
+    pos_runs = []
+    i = 0
+    while i < len(lines) - 4 and len(pos_runs) < 2:
+        if all(lines[i + k] == str(k + 1) for k in range(5)):
+            n = 0
+            for j in range(i, len(lines)):
+                if lines[j] == str(j - i + 1):
+                    n = j - i + 1
+                else:
+                    break
+            pos_runs.append((i, n))
+            i += n
+        else:
+            i += 1
+    if len(pos_runs) < 2:
+        return None
+    start, n = pos_runs[1]
+
+    pos = start + n
+    numbers, pos = _collect_numbers(lines, pos, n)
+    if not is_race:
+        _, pos = _collect_lap_time(lines, pos, 1)  # discard the session's theoretical perfect-lap summary value
+    ideal, pos = _collect_lap_time(lines, pos, n)
+    best, pos = _collect_lap_time(lines, pos, n)
+    diff, pos = _collect_lap_time(lines, pos, n)
+    if len(numbers) != n or len(ideal) != n or len(best) != n or len(diff) != n:
+        return None  # malformed/truncated chunk - caller treats as "not available yet"
+
+    # DIFF is defined as BEST - IDEAL, a hard invariant true for every
+    # confirmed-good row across a full season of live data. Confirmed live,
+    # exactly one row per race session (always position 0, a different car
+    # each time - car 66/116/80 across Round 9's three races) fails this by
+    # a huge margin (a "diff" over 60 seconds, which is physically
+    # impossible for a real lap - it would mean the driver's actual lap
+    # took nearly double their own theoretical best), while every other row
+    # in the same table matches to the rounding digit. Root cause not fully
+    # isolated - dropping just the failing row keeps the rest of a
+    # genuinely good table rather than discarding it over one bad entry.
+    return [
+        {"no": no, "ideal": i, "best": b, "diff": d}
+        for no, i, b, d in zip(numbers, ideal, best, diff)
+        if abs(d - (b - i)) <= 0.5
+    ]
+
+
+def _merge_best_sectors_blocks(part1, part2):
+    """Qualifying's Part 1/Part 2 driver pools never overlap (two disjoint
+    qualifying groups, confirmed live) - simple concatenation, re-sorted by
+    IDEAL ascending (fastest theoretical lap first) to give the merged list
+    a consistent, meaningful order."""
+    combined = (part1 or []) + (part2 or [])
+    return sorted(combined, key=lambda e: e["ideal"])
+
+
+def parse_best_sectors(text):
+    """
+    Extract every session's Perfect Lap (theoretical best lap) table.
+    Returns {label: [{"no", "ideal", "best", "diff"}] | None}.
+    """
+    result = {label: None for label in SESSION_SUFFIXES}
+    qual_parts = {}
+
+    for label, pattern in BEST_SECTORS_HEADINGS:
+        m = pattern.search(text)
+        if not m:
+            continue
+        block = _parse_best_sectors_block(text[m.end():m.end() + 15000], is_race=False)
+        if label == "Qualifying Part 1":
+            qual_parts["part1"] = block
+        elif label == "Qualifying Part 2":
+            qual_parts["part2"] = block
+        else:
+            result[label] = block
+
+    if qual_parts.get("part1") or qual_parts.get("part2"):
+        result["Qualifying"] = _merge_best_sectors_blocks(qual_parts.get("part1"), qual_parts.get("part2"))
+
+    for label, m in zip(["Race 1", "Race 2", "Race 3"], RACE_BEST_SECTORS_RE.finditer(text)):
+        result[label] = _parse_best_sectors_block(text[m.end():m.end() + 15000], is_race=True)
+
+    return result
+
+
+def _resolve_best_sectors(entries, number_map):
+    """Same car-number join as _resolve_best_speeds - the page's own driver
+    identification is never used, only the car number."""
+    if not entries:
+        return None
+    out = []
+    for e in entries:
+        driver, team = number_map.get(e["no"], ("", ""))
+        if not driver:
+            driver = f"Car {e['no']}"
+            print(f"    [best sectors] car {e['no']} not in session results/grid - using placeholder name")
+        out.append({"no": e["no"], "driver": driver, "team": team, "ideal": e["ideal"], "best": e["best"], "diff": e["diff"]})
+    return out
+
+
 def _number_driver_map(race):
     """car number -> (driver, team) from this session's own parsed results
     (falls back to grid, for a session with a grid but no results yet)."""
@@ -774,6 +1064,27 @@ def scrape_round(info, session_filter=None):
         if raw:
             race["bestSpeeds"] = _resolve_best_speeds(raw, _number_driver_map(race))
             print(f"    [best speeds] {race['label']}: parsed")
+
+    weather_raw = parse_weather(book_text) if book_data else {}
+    for race in races:
+        weather = weather_raw.get(race["label"])
+        if weather:
+            race["weather"] = weather
+            print(f"    [weather] {race['label']}: {weather['condition']} / {weather['track']}")
+
+    flag_stats_raw = parse_flag_stats(book_text) if book_data else {}
+    for race in races:
+        flags = flag_stats_raw.get(race["label"])
+        if flags:
+            race["flagStats"] = flags
+            print(f"    [flag stats] {race['label']}: parsed")
+
+    best_sectors_raw = parse_best_sectors(book_text) if book_data else {}
+    for race in races:
+        raw = best_sectors_raw.get(race["label"])
+        if raw:
+            race["bestSectors"] = _resolve_best_sectors(raw, _number_driver_map(race))
+            print(f"    [best sectors] {race['label']}: parsed")
 
     # Tag pole (P1 in Qualifying only)
     qual = next((r for r in races if r["label"] == "Qualifying"), None)
@@ -1505,8 +1816,9 @@ def merge_scraped_with_existing(scraped, existing_round):
       If the car-number order changed, a warning is printed.
     - Old grid is kept when the new fetch returned empty (transient failure).
     - New results overwrite old results when present; old results kept otherwise.
-    - New bestSpeeds overwrites old bestSpeeds when present; old bestSpeeds kept otherwise
-      (a transient book-fetch failure doesn't wipe previously-scraped speed data).
+    - New bestSpeeds/weather/flagStats/bestSectors each overwrite their own old value when
+      present; old value kept otherwise (a transient book-fetch failure doesn't wipe
+      previously-scraped data).
     - reverseGridDraw is preserved from the existing round when not set on the new scrape.
     - youtubeUrls are always carried forward (never re-scraped).
     """
@@ -1525,8 +1837,9 @@ def merge_scraped_with_existing(scraped, existing_round):
                 print(f"  *** {race['label']} grid CHANGED (TSL amendment?) old={old_nos[:3]}... new={new_nos[:3]}...")
         if ex.get("results") and not race.get("results"):
             race["results"] = ex["results"]
-        if ex.get("bestSpeeds") and not race.get("bestSpeeds"):
-            race["bestSpeeds"] = ex["bestSpeeds"]
+        for field in ("bestSpeeds", "weather", "flagStats", "bestSectors"):
+            if ex.get(field) and not race.get(field):
+                race[field] = ex[field]
         # Preserve an explicitly-set reverseGridDraw override
         if ex.get("reverseGridDraw") is not None and race.get("reverseGridDraw") is None:
             race["reverseGridDraw"] = ex["reverseGridDraw"]
