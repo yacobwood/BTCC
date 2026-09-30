@@ -9,8 +9,8 @@ jest.mock('../../src/utils/analytics', () => ({
   },
 }));
 
-function makeTab(key, label, hasData, text) {
-  return {key, label, hasData, render: () => <Text>{text}</Text>};
+function makeTab(key, label, hasData, text, group) {
+  return {key, label, hasData, group, render: () => <Text>{text}</Text>};
 }
 
 describe('SessionAnalysisTabs', () => {
@@ -185,6 +185,20 @@ describe('SessionAnalysisTabs', () => {
       // state, not the (absent) activeKey prop.
       expect(getByText('Panel B')).toBeTruthy();
     });
+  });
+
+  it('shows a group label above the title when the active tab has one', () => {
+    const {getByText, queryByText, getByLabelText} = render(
+      <SessionAnalysisTabs
+        roundNumber={1}
+        session="Race 1"
+        tabs={[makeTab('a', 'Intermediate 2', true, 'Panel A', 'SPEED TRAP'), makeTab('b', 'B', true, 'Panel B')]}
+      />,
+    );
+    expect(getByText('SPEED TRAP')).toBeTruthy();
+    expect(getByText('Intermediate 2')).toBeTruthy();
+    fireEvent.press(getByLabelText('Next data type'));
+    expect(queryByText('SPEED TRAP')).toBeNull(); // tab B has no group
   });
 
   it('visually dims a disabled arrow with both a colour change and opacity, matching this app\'s existing stepper-button pattern', () => {

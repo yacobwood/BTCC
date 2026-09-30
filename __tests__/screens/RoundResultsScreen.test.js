@@ -1146,6 +1146,7 @@ describe('RoundResultsScreen', () => {
       await findByText('Tom INGRAM');
       fireEvent.press(getByLabelText('Next data type'));
       expect(await findByText('Intermediate 2')).toBeTruthy(); // the page title itself
+      expect(await findByText('SPEED TRAP')).toBeTruthy(); // group label above the title, ties it back to its parent stat
       expect(await findByText('Sam OSBORNE')).toBeTruthy();
       await waitFor(() => expect(Analytics.speedTrapShown).toHaveBeenCalledWith(1, 'Free Practice', 'Intermediate 2', 6));
     });

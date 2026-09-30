@@ -11,10 +11,19 @@ import {Analytics} from '../utils/analytics';
 // and stopped fitting a phone screen (confirmed live); a horizontally
 // scrollable pill row fixed reachability, but the user preferred a design
 // that shows what's available without a scroll/swipe gesture first. Each
-// entry in `tabs` is {key, label, hasData, render}: only entries with real
-// data are considered, `render` is called lazily (only for whichever entry
-// is active). With one available panel it renders directly with no
-// paginator chrome at all - arrows with nowhere to go have nothing to show.
+// entry in `tabs` is {key, label, hasData, render, group?}: only entries
+// with real data are considered, `render` is called lazily (only for
+// whichever entry is active). With one available panel it renders directly
+// with no paginator chrome at all - arrows with nowhere to go have nothing
+// to show. The optional `group` renders as a small label above the title
+// (e.g. "SPEED TRAP" above "Intermediate 2") for a set of tabs that are
+// siblings under one parent concept - added when a bare "Intermediate 2"
+// title read as ungrouped and disconnected from "Speed Trap" on its own.
+// Deliberately NOT folded into `label` itself ("Speed Trap - Intermediate
+// 2"): `pagerTitle` has no width cap and this exact header has already
+// hit real overflow bugs at larger accessibility font scales (see the
+// 09-11 tab-bar/StatBox findings) - a standalone two-line eyebrow stays
+// short on each line instead of nearly doubling the single title's length.
 //
 // `activeKey`/`onActiveKeyChange` make this a controlled component when
 // BOTH are passed together - RoundResultsScreen does this, so the same
@@ -69,7 +78,10 @@ export default function SessionAnalysisTabs({tabs, roundNumber, session, activeK
           accessibilityState={{disabled: !canGoPrev}}>
           <Icon name="chevron-left" size={24} color={canGoPrev ? Colors.yellow : Colors.textSecondary} />
         </TouchableOpacity>
-        <Text style={styles.pagerTitle}>{active.label}</Text>
+        <View style={styles.pagerTitleWrap}>
+          {active.group && <Text style={styles.pagerEyebrow}>{active.group}</Text>}
+          <Text style={styles.pagerTitle}>{active.label}</Text>
+        </View>
         <TouchableOpacity
           onPress={() => goTo(activeIndex + 1)}
           disabled={!canGoNext}
@@ -97,5 +109,7 @@ const styles = StyleSheet.create({
   // A fixed minWidth keeps the arrows roughly in place as the title text
   // changes length between data types ("Leaderboard" vs "Conditions"),
   // rather than the whole row visibly shifting width on every page change.
-  pagerTitle: {color: Colors.yellow, fontSize: 14, fontWeight: '800', letterSpacing: 0.5, minWidth: 130, textAlign: 'center'},
+  pagerTitleWrap: {minWidth: 130, alignItems: 'center'},
+  pagerEyebrow: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 2},
+  pagerTitle: {color: Colors.yellow, fontSize: 14, fontWeight: '800', letterSpacing: 0.5, textAlign: 'center'},
 });

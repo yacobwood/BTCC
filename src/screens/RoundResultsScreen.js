@@ -372,7 +372,10 @@ export default function RoundResultsScreen({route, navigation}) {
           // One paginator tab per active speed trap, not one "Speed Trap"
           // tab containing all of them stacked - per the user's explicit
           // ask, once they saw Intermediate 1 and Finish Line sharing a
-          // single page: "seperate speedtrap onto seperate pages."
+          // single page: "seperate speedtrap onto seperate pages." Each
+          // still carries `group: 'SPEED TRAP'` so its title reads as
+          // "SPEED TRAP / Intermediate 2" rather than a bare "Intermediate
+          // 2" with no indication which parent stat it belongs to.
           const speedTrapTabs = [
             {key: 'intermediate1', label: 'Intermediate 1'},
             {key: 'intermediate2', label: 'Intermediate 2'},
@@ -382,6 +385,7 @@ export default function RoundResultsScreen({route, navigation}) {
             .map(t => ({
               key: `speedTrap_${t.key}`,
               label: t.label,
+              group: 'SPEED TRAP',
               hasData: true,
               render: () => (
                 <SpeedTrapCard
