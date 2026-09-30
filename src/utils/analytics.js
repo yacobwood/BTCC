@@ -85,6 +85,7 @@ export const Analytics = {
   perfectLapCollapsed: (round, session) => logEvent(fa(),'perfect_lap_collapsed', {round, session}),
   perfectLapRenderFailed: (round, session, errorCode) => logEvent(fa(),'perfect_lap_render_failed', {round, session, error_code: errorCode || 'unknown'}),
   conditionsShown: (round, session) => logEvent(fa(),'conditions_shown', {round, session}),
+  leaderboardShown: (round, session, driverCount) => logEvent(fa(),'leaderboard_shown', {round, session, driver_count: driverCount}),
   sessionAnalysisTabChanged: (round, session, tabKey) => logEvent(fa(),'session_analysis_tab_changed', {round, session, tab: tabKey}),
   newsSearched: (query) => logEvent(fa(),'search', {search_term: query?.substring(0, 100)}),
   searchOpened: () => logEvent(fa(),'search_opened'),

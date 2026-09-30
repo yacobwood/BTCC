@@ -25,6 +25,7 @@ jest.mock('../../src/utils/analytics', () => ({
     perfectLapCollapsed: jest.fn(),
     perfectLapRenderFailed: jest.fn(),
     conditionsShown: jest.fn(),
+    leaderboardShown: jest.fn(),
     sessionAnalysisTabChanged: jest.fn(),
     contentShared: jest.fn(),
     shareNudgeShown: jest.fn(),
@@ -1145,7 +1146,8 @@ describe('RoundResultsScreen', () => {
     it('shows the Speed Trap card and fires bestSpeedsShown when a session has bestSpeeds', async () => {
       const {Analytics} = require('../../src/utils/analytics');
       const {findByText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
-      expect(await findByText('Speed Trap')).toBeTruthy();
+      // Leaderboard is the default-active tab now - switch to Speed Trap first.
+      fireEvent.press(await findByText('Speed Trap'));
       // Chilton legitimately appears at both trap points (mirrors the real
       // confirmed Race 3 data) - assert on a name unique to one trap instead.
       expect(await findByText('Sam OSBORNE')).toBeTruthy();
@@ -1163,7 +1165,7 @@ describe('RoundResultsScreen', () => {
     it('shows only the top 5 by default, expands to all on "Show all" tap and logs the toggle', async () => {
       const {Analytics} = require('../../src/utils/analytics');
       const {findByText, queryByText, getByLabelText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
-      await findByText('Speed Trap');
+      fireEvent.press(await findByText('Speed Trap'));
       expect(queryByText('Ashley SUTTON')).toBeNull(); // pos 6, outside the default top 5
       const showAll = getByLabelText('Show all Intermediate 2');
       fireEvent.press(showAll);
@@ -1195,7 +1197,7 @@ describe('RoundResultsScreen', () => {
     it('shows the Perfect Lap card and fires perfectLapShown when a session has bestSectors', async () => {
       const {Analytics} = require('../../src/utils/analytics');
       const {findByText} = renderRound({round: roundWithBestSectors(), initialRace: 0});
-      expect(await findByText('Perfect Lap')).toBeTruthy();
+      fireEvent.press(await findByText('Perfect Lap'));
       expect(await findByText('Sam OSBORNE')).toBeTruthy();
       await waitFor(() => expect(Analytics.perfectLapShown).toHaveBeenCalledWith(1, 'Free Practice', 6));
     });
@@ -1211,7 +1213,7 @@ describe('RoundResultsScreen', () => {
     it('shows only the top 5 by default, expands to all on "Show all" tap and logs the toggle', async () => {
       const {Analytics} = require('../../src/utils/analytics');
       const {findByText, queryByText, getByLabelText} = renderRound({round: roundWithBestSectors(), initialRace: 0});
-      await findByText('Perfect Lap');
+      fireEvent.press(await findByText('Perfect Lap'));
       expect(queryByText('Ashley SUTTON')).toBeNull(); // pos 6, outside the default top 5
       fireEvent.press(getByLabelText('Show all Perfect Lap'));
       expect(await findByText('Ashley SUTTON')).toBeTruthy();
@@ -1234,7 +1236,8 @@ describe('RoundResultsScreen', () => {
       const {Analytics} = require('../../src/utils/analytics');
       const round = roundWithConditions({weather: {condition: 'Rain', track: 'Wet'}});
       const {findByText} = renderRound({round, initialRace: 0});
-      expect(await findByText('Conditions')).toBeTruthy();
+      // Leaderboard is the default-active tab now - switch to Conditions first.
+      fireEvent.press(await findByText('Conditions'));
       expect(await findByText('Rain / Wet')).toBeTruthy();
       await waitFor(() => expect(Analytics.conditionsShown).toHaveBeenCalledWith(1, 'Free Practice'));
     });
@@ -1242,6 +1245,7 @@ describe('RoundResultsScreen', () => {
     it('shows flag incident counts when present, only for incident types that occurred', async () => {
       const round = roundWithConditions({flagStats: {green: 1, red: 0, safetyCar: 1, fcy: 0}});
       const {findByText, queryByText} = renderRound({round, initialRace: 0});
+      fireEvent.press(await findByText('Conditions'));
       expect(await findByText('Safety Car: 1')).toBeTruthy();
       expect(queryByText('Red: 0')).toBeNull();
       expect(queryByText('Full Course Yellow: 0')).toBeNull();
@@ -1250,6 +1254,7 @@ describe('RoundResultsScreen', () => {
     it('shows "No flag incidents" for a clean session', async () => {
       const round = roundWithConditions({flagStats: {green: 1, red: 0, safetyCar: 0, fcy: 0}});
       const {findByText} = renderRound({round, initialRace: 0});
+      fireEvent.press(await findByText('Conditions'));
       expect(await findByText('No flag incidents')).toBeTruthy();
     });
 
@@ -1259,6 +1264,47 @@ describe('RoundResultsScreen', () => {
       await findByText('Tom INGRAM'); // wait for the results list to settle
       expect(queryByText('Conditions')).toBeNull();
       expect(Analytics.conditionsShown).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('leaderboard tab', () => {
+    function roundWithWeather(weather = {condition: 'Rain', track: 'Wet'}) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice' ? {...r, weather} : r),
+      };
+    }
+
+    it('shows the full results list by default with no other analysis data and fires leaderboardShown', async () => {
+      // The screen's own results FlatList was replaced by this tab - it's
+      // the only rendering of results now, always available and shown
+      // with no tab-bar chrome when nothing else has data yet (matches the
+      // old plain-list behaviour exactly, just reached through the tab
+      // switcher's single-tab render path instead of a bare FlatList).
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText} = renderRound({initialRace: 0}); // plain MOCK_ROUND
+      expect(await findByText('Tom INGRAM')).toBeTruthy();
+      expect(await findByText('Gordon SHEDDEN')).toBeTruthy();
+      await waitFor(() => expect(Analytics.leaderboardShown).toHaveBeenCalledWith(1, 'Free Practice', 2));
+    });
+
+    it('remains the default-active tab, showing results immediately, once another tab also has data', async () => {
+      const {findByText, queryByText} = renderRound({round: roundWithWeather(), initialRace: 0});
+      // Leaderboard's own results render without needing to tap anything.
+      expect(await findByText('Tom INGRAM')).toBeTruthy();
+      // Conditions is available (its pill shows) but not yet selected.
+      expect(await findByText('Conditions')).toBeTruthy();
+      expect(queryByText('Rain / Wet')).toBeNull();
+    });
+
+    it('switches to another tab and back without losing or duplicating results', async () => {
+      const {findByText, getAllByText, queryByText} = renderRound({round: roundWithWeather(), initialRace: 0});
+      await findByText('Tom INGRAM');
+      fireEvent.press(await findByText('Conditions'));
+      expect(await findByText('Rain / Wet')).toBeTruthy();
+      expect(queryByText('Tom INGRAM')).toBeNull(); // switched away, not duplicated alongside Conditions
+      fireEvent.press(await findByText('Leaderboard'));
+      await waitFor(() => expect(getAllByText('Tom INGRAM').length).toBe(1));
     });
   });
 

@@ -380,12 +380,8 @@ export default function RoundResultsScreen({route, navigation}) {
               {race?.date && race.date !== round.date && (
                 <Text style={styles.raceDateLabel}>{race.date}</Text>
               )}
-              <FlatList
-                data={race.results}
-                keyExtractor={(_, idx) => String(idx)}
-                renderItem={makeRenderResult(gridMap, ttbMap, race)}
-                contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}
-                ListHeaderComponent={(() => {
+              <ScrollView contentContainerStyle={{padding: 16, paddingBottom: 20 + CHAT_FAB_CLEARANCE}}>
+                {(() => {
                   const urls = round.youtubeUrls?.length ? round.youtubeUrls : (year === CURRENT_SEASON ? (BUNDLED_YOUTUBE_URLS[round.round] || []) : []);
                   const raceUrlMap = {'Free Practice': urls[0], 'Qualifying': urls[1], 'Qualifying Race': urls[2], 'Race 1': urls[3], 'Race 2': urls[4], 'Race 3': urls[5]};
                   const url = IS_UK ? raceUrlMap[race?.label] : null;
@@ -403,66 +399,129 @@ export default function RoundResultsScreen({route, navigation}) {
                     </TouchableOpacity>
                   );
                 })()}
-                ListFooterComponent={
-                  <>
-                    <SessionAnalysisTabs
-                      roundNumber={round.round}
-                      session={race.label}
-                      tabs={[
-                        {
-                          key: 'speedTrap',
-                          label: 'Speed Trap',
-                          hasData: !!race.bestSpeeds,
-                          render: () => (
-                            <BestSpeedsCard
-                              bestSpeeds={race.bestSpeeds}
-                              roundNumber={round.round}
-                              session={race.label}
-                              isFavourite={isFavourite}
-                              useKm={useKm}
-                            />
-                          ),
-                        },
-                        {
-                          key: 'perfectLap',
-                          label: 'Perfect Lap',
-                          hasData: !!race.bestSectors?.length,
-                          render: () => (
-                            <PerfectLapCard
-                              bestSectors={race.bestSectors}
-                              roundNumber={round.round}
-                              session={race.label}
-                              isFavourite={isFavourite}
-                            />
-                          ),
-                        },
-                        {
-                          key: 'conditions',
-                          label: 'Conditions',
-                          hasData: !!race.weather || !!race.flagStats,
-                          render: () => (
-                            <ConditionsCard
-                              weather={race.weather}
-                              flagStats={race.flagStats}
-                              roundNumber={round.round}
-                              session={race.label}
-                            />
-                          ),
-                        },
-                      ]}
-                    />
-                    <JudicialDecisionsCard
-                      penalties={penalties.filter(p => p.session === race.label)}
-                      roundNumber={round.round}
-                      session={race.label}
-                    />
-                  </>
-                }
-              />
+                <SessionAnalysisTabs
+                  roundNumber={round.round}
+                  session={race.label}
+                  tabs={[
+                    {
+                      // First, so it's the default-active tab whenever more
+                      // than one tab has data - this is now the screen's
+                      // only rendering of the results list (the plain
+                      // FlatList this replaced is gone), not a duplicate of
+                      // something already shown above it.
+                      key: 'leaderboard',
+                      label: 'Leaderboard',
+                      hasData: !!race.results?.length,
+                      render: () => (
+                        <LeaderboardTab
+                          results={race.results}
+                          renderResult={makeRenderResult(gridMap, ttbMap, race)}
+                          roundNumber={round.round}
+                          session={race.label}
+                        />
+                      ),
+                    },
+                    {
+                      key: 'speedTrap',
+                      label: 'Speed Trap',
+                      hasData: !!race.bestSpeeds,
+                      render: () => (
+                        <BestSpeedsCard
+                          bestSpeeds={race.bestSpeeds}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
+                          useKm={useKm}
+                        />
+                      ),
+                    },
+                    {
+                      key: 'perfectLap',
+                      label: 'Perfect Lap',
+                      hasData: !!race.bestSectors?.length,
+                      render: () => (
+                        <PerfectLapCard
+                          bestSectors={race.bestSectors}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
+                        />
+                      ),
+                    },
+                    {
+                      key: 'conditions',
+                      label: 'Conditions',
+                      hasData: !!race.weather || !!race.flagStats,
+                      render: () => (
+                        <ConditionsCard
+                          weather={race.weather}
+                          flagStats={race.flagStats}
+                          roundNumber={round.round}
+                          session={race.label}
+                        />
+                      ),
+                    },
+                  ]}
+                />
+                <JudicialDecisionsCard
+                  penalties={penalties.filter(p => p.session === race.label)}
+                  roundNumber={round.round}
+                  session={race.label}
+                />
+              </ScrollView>
             </View>
           );
         })}
       />
+    </View>
+  );
+}
+
+// The session's full classification, shown as the first (default-active)
+// tab of SessionAnalysisTabs. This used to be a separate, always-visible
+// FlatList above the tab switcher, with the switcher living in its
+// ListFooterComponent - the user first asked for the leaderboard to also
+// be reachable as one more tab (which briefly meant two copies on screen at
+// once, the plain list above plus this one below), then asked for the
+// plain list to go entirely: all session data, leaderboard included, now
+// lives in one tabbed area, with Leaderboard first/default so opening a
+// session tab still shows the results immediately, unchanged from before
+// this ever became tabbed. Reuses `renderResult` (the exact same
+// `makeRenderResult(gridMap, ttbMap, race)` closure the screen used to pass
+// straight to a FlatList's own `renderItem`) row-for-row rather than
+// re-implementing row rendering, so favourite highlighting/grid-delta
+// arrows/TTB badges/fastest-lap-lead-lap-pole-IND badges all keep working
+// unchanged. Rendered as a plain `.map()`, not a nested FlatList - the
+// outer container is now a ScrollView, not a FlatList, so there's no
+// virtualization to preserve. BTCC grids (~20-25 drivers) are small enough
+// that unvirtualized rendering here costs nothing in practice (the other
+// three tabs already render their own rows the same way).
+//
+// Deliberately NOT wrapped in the `bestSpeedsCard` container the other 3
+// tabs use: that container and `resultRow` both use `Colors.card` as their
+// background, so nesting rows inside it made every row's own background
+// blend into its parent - the gap between rows (`resultRow`'s own
+// `marginBottom`) just showed more of the same colour instead of a visible
+// break, confirmed live (real device screenshot showed rows running
+// together with no separation). Each row already carries its own
+// background/border-radius/margin from `resultRow`, so it only needs to
+// sit on the screen's own (different, darker) background to look right.
+function LeaderboardTab({results, renderResult, roundNumber, session}) {
+  useEffect(() => {
+    if (results?.length) Analytics.leaderboardShown(roundNumber, session, results.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundNumber, session, results?.length]);
+
+  if (!results?.length) return null;
+  return (
+    <View>
+      <View style={styles.bestSpeedsHeader}>
+        <Icon name="format-list-numbered" size={14} color={Colors.yellow} />
+        <Text style={styles.bestSpeedsTitle}>Leaderboard</Text>
+      </View>
+      {results.map((item, idx) => (
+        <React.Fragment key={idx}>{renderResult({item})}</React.Fragment>
+      ))}
     </View>
   );
 }
