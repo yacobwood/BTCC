@@ -587,6 +587,27 @@ def _collect_numbers(lines, idx, n):
     return numbers, idx
 
 
+def _peek_speed_block_order(lines, idx):
+    """A trap's own N-car-numbers/N-MPH-values pair can print in either
+    order - confirmed live, both occur within the very same PDF (2022
+    Donington: Race 1 prints numbers before MPH, Race 2 prints MPH before
+    numbers). Peeking forward for whichever pattern appears first (skipping
+    a literal "MPH" header line or anything else non-matching, same as
+    _collect_numbers/_collect_mph themselves do) tells the caller which
+    collector to run first - the two patterns are mutually exclusive (an
+    MPH line always has a decimal point immediately after 1+ digits, a car
+    number is 1-3 digits followed by whitespace/end/a name), so there's no
+    ambiguity. Returns "mph", "numbers", or None if neither is found (the
+    caller then treats this trap as unavailable, same as an empty scan
+    already did before this existed)."""
+    for i in range(idx, len(lines)):
+        if re.match(r"^\d+\.\d+$", lines[i]):
+            return "mph"
+        if re.match(r"^\d{1,3}(?:\s|$)", lines[i]):
+            return "numbers"
+    return None
+
+
 def _collect_mph(lines, idx, n):
     """Collect the next n MPH float lines, skipping everything else -
     including a literal "MPH" header line, which precedes a given trap's
@@ -660,8 +681,13 @@ def _parse_best_speeds_block(chunk):
     idx = start + n  # past the POS run
     result = {"intermediate1": None, "intermediate2": None, "finish": None}
     for label in active_traps:
-        numbers, idx = _collect_numbers(lines, idx, n)
-        mph, idx = _collect_mph(lines, idx, n)
+        order = _peek_speed_block_order(lines, idx)
+        if order == "mph":
+            mph, idx = _collect_mph(lines, idx, n)
+            numbers, idx = _collect_numbers(lines, idx, n)
+        else:
+            numbers, idx = _collect_numbers(lines, idx, n)
+            mph, idx = _collect_mph(lines, idx, n)
         if len(numbers) != n or len(mph) != n:
             return None  # malformed/truncated chunk - caller treats as "not available yet"
         # A driver who retired before reaching a trap simply has no row for

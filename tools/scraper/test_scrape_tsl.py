@@ -532,6 +532,25 @@ class TestParseBestSpeedsBlock(unittest.TestCase):
         chunk = header + pos_run + "\n" + int2_names + "\n" + int2_mph + "\n" + finish_names + "\n" + finish_mph
         self.assertIsNone(s._parse_best_speeds_block(chunk))
 
+    def test_mph_before_numbers_order_parsed_same_as_numbers_before_mph(self):
+        # Confirmed live: a trap's own N-numbers/N-MPH pair can print in
+        # either order, and both orders occur within the very same PDF
+        # (2022 Donington Race 1 prints numbers then MPH; Race 2, same
+        # file, prints MPH then numbers). Built directly rather than via
+        # make_best_speeds_chunk, which only ever emits names-then-mph.
+        header = "POS\n\nINTERMEDIATE 1\nNO SPEED TRAP INFORMATION\n\nINTERMEDIATE 2\n\nFINISH LINE\n\nNO NAME\n\nMPH\n\nNO NAME\n\n"
+        pos_run = "1\n2\n3\n4\n5\n"
+        int2_mph_first = "150.0\n148.0\n146.0\n144.0\n142.0\n"
+        int2_names = "10 ALPHA\n20 BETA\n30 GAMMA\n40 DELTA\n50 ECHO\n"
+        finish_names = "10 ALPHA\n20 BETA\n30 GAMMA\n40 DELTA\n50 ECHO\n"
+        finish_mph = "130.0\n129.0\n128.0\n127.0\n126.0\n"
+        chunk = header + pos_run + "\n" + int2_mph_first + "\n" + int2_names + "\n" + finish_names + "\n" + finish_mph
+        block = s._parse_best_speeds_block(chunk)
+        self.assertIsNotNone(block)
+        self.assertEqual(block['intermediate2'][0], {'pos': 1, 'no': 10, 'mph': 150.0})
+        self.assertEqual(len(block['intermediate2']), 5)
+        self.assertEqual(block['finish'][0], {'pos': 1, 'no': 10, 'mph': 130.0})
+
 
 class TestBestSpeedsHeadings(unittest.TestCase):
     """Regression coverage for real live PDF-formatting quirks that broke
