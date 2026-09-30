@@ -20,6 +20,7 @@ jest.mock('../../src/utils/analytics', () => ({
     bestSpeedsExpanded: jest.fn(),
     bestSpeedsCollapsed: jest.fn(),
     bestSpeedsRenderFailed: jest.fn(),
+    sessionAnalysisTabChanged: jest.fn(),
     contentShared: jest.fn(),
     shareNudgeShown: jest.fn(),
     shareNudgeDismissed: jest.fn(),

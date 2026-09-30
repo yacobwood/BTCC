@@ -80,6 +80,7 @@ export const Analytics = {
   bestSpeedsExpanded: (round, session, trapPoint) => logEvent(fa(),'best_speeds_expanded', {round, session, trap_point: trapPoint}),
   bestSpeedsCollapsed: (round, session, trapPoint) => logEvent(fa(),'best_speeds_collapsed', {round, session, trap_point: trapPoint}),
   bestSpeedsRenderFailed: (round, session, errorCode) => logEvent(fa(),'best_speeds_render_failed', {round, session, error_code: errorCode || 'unknown'}),
+  sessionAnalysisTabChanged: (round, session, tabKey) => logEvent(fa(),'session_analysis_tab_changed', {round, session, tab: tabKey}),
   newsSearched: (query) => logEvent(fa(),'search', {search_term: query?.substring(0, 100)}),
   searchOpened: () => logEvent(fa(),'search_opened'),
   searchClosed: () => logEvent(fa(),'search_closed'),

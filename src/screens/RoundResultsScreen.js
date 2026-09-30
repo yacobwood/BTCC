@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
+import SessionAnalysisTabs from '../components/SessionAnalysisTabs';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -403,12 +404,25 @@ export default function RoundResultsScreen({route, navigation}) {
                 })()}
                 ListFooterComponent={
                   <>
-                    <BestSpeedsCard
-                      bestSpeeds={race.bestSpeeds}
+                    <SessionAnalysisTabs
                       roundNumber={round.round}
                       session={race.label}
-                      isFavourite={isFavourite}
-                      useKm={useKm}
+                      tabs={[
+                        {
+                          key: 'speedTrap',
+                          label: 'Speed Trap',
+                          hasData: !!race.bestSpeeds,
+                          render: () => (
+                            <BestSpeedsCard
+                              bestSpeeds={race.bestSpeeds}
+                              roundNumber={round.round}
+                              session={race.label}
+                              isFavourite={isFavourite}
+                              useKm={useKm}
+                            />
+                          ),
+                        },
+                      ]}
                     />
                     <JudicialDecisionsCard
                       penalties={penalties.filter(p => p.session === race.label)}
