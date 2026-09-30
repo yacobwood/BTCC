@@ -784,6 +784,35 @@ describe('parseResults', () => {
     expect(parseResults(json)[0].races[0].bestSpeeds).toBeNull();
   });
 
+  test('passes the class code through', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Race 1',
+          results: [
+            {pos: 1, no: 88, cl: 'I', driver: 'Doble', team: 'Power Maxed', laps: 21, time: '26:01'},
+          ],
+        }],
+      }],
+    };
+    const rounds = parseResults(json);
+    expect(rounds[0].races[0].results[0].cl).toBe('I');
+  });
+
+  test('defaults the class code to an empty string when absent', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{label: 'Race 1', results: [{pos: 1, no: 1, driver: 'A', team: 'T', laps: 10, time: '20:00'}]}],
+      }],
+    };
+    const rounds = parseResults(json);
+    expect(rounds[0].races[0].results[0].cl).toBe('');
+  });
+
   test('computes points when not provided', () => {
     const json = {
       rounds: [{
@@ -1023,6 +1052,7 @@ describe('parsePenalties', () => {
         round: 3,
         penalties: [{
           session: 'Qualifying Race', driver: 'Charles Rainford', carNo: 99,
+          ruleRef: 'NCR 12.7.1.8',
           facts: 'contact was made with car 3 at the entry of turn 6',
           offence: 'NCR 12.7.1.8 Causing a collision, repetition of serious mistakes or the appearance of a lack of control over the car',
           decision: 'Be verbally warned',
@@ -1036,6 +1066,7 @@ describe('parsePenalties', () => {
     expect(rounds[0].round).toBe(3);
     expect(rounds[0].penalties[0]).toEqual({
       session: 'Qualifying Race', driver: 'Charles Rainford', carNo: 99,
+      ruleRef: 'NCR 12.7.1.8',
       facts: 'contact was made with car 3 at the entry of turn 6',
       offence: 'NCR 12.7.1.8 Causing a collision, repetition of serious mistakes or the appearance of a lack of control over the car',
       decision: 'Be verbally warned',
@@ -1049,6 +1080,7 @@ describe('parsePenalties', () => {
     const rounds = parsePenalties(json);
     expect(rounds[0].penalties[0].session).toBeNull();
     expect(rounds[0].penalties[0].carNo).toBeNull();
+    expect(rounds[0].penalties[0].ruleRef).toBeNull();
     expect(rounds[0].penalties[0].facts).toBeNull();
     expect(rounds[0].penalties[0].offence).toBeNull();
     expect(rounds[0].penalties[0].decision).toBeNull();

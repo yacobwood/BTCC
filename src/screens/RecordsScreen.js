@@ -32,9 +32,29 @@ const COUNT_SORTS = [
   {key: 'wins',          label: 'Wins',   format: v => v.toString(), sub: item => `${item.championships} title${item.championships !== 1 ? 's' : ''}`},
 ];
 
+// hideZero on every entry: a driver who never led a lap, never scored a hat
+// trick, etc. shouldn't clutter an all-time-records list at rank N with a 0.
+const STREAK_SORTS = [
+  {key: 'winStreak',         label: 'Win Streak',     format: v => `${v} race${v !== 1 ? 's' : ''}`, sub: item => `${item.wins} career win${item.wins !== 1 ? 's' : ''}`, hideZero: true},
+  {key: 'podiumStreak',      label: 'Podium Streak',  format: v => `${v} race${v !== 1 ? 's' : ''}`, sub: item => `${item.podiums} career podium${item.podiums !== 1 ? 's' : ''}`, hideZero: true},
+  {key: 'poleStreak',        label: 'Pole Streak',    format: v => `${v} race${v !== 1 ? 's' : ''}`, sub: item => `${item.poles} career pole${item.poles !== 1 ? 's' : ''}`, hideZero: true},
+  {key: 'consecutive',       label: 'Finish Streak',  format: v => `${v} race${v !== 1 ? 's' : ''}`, sub: item => `Longest run without a DNF · ${item.starts} starts`, hideZero: true},
+  {key: 'consecutivePoints', label: 'Points Streak',  format: v => `${v} race${v !== 1 ? 's' : ''}`, sub: item => `Longest run scoring points · ${item.starts} starts`, hideZero: true},
+  {key: 'bestSeasonWins',    label: 'Best Season (Wins)',    format: v => v.toString(), sub: item => `Best single season · ${item.wins} career wins`, hideZero: true},
+  {key: 'bestSeasonPodiums', label: 'Best Season (Podiums)', format: v => v.toString(), sub: item => `Best single season · ${item.podiums} career podiums`, hideZero: true},
+  {key: 'bestSeasonPoles',   label: 'Best Season (Poles)',   format: v => v.toString(), sub: item => `Best single season · ${item.poles} career poles`, hideZero: true},
+  {key: 'racesLed',          label: 'Races Led',      format: v => v.toString(), sub: item => `Races leading at least one lap · ${item.starts} starts`, hideZero: true},
+  {key: 'hatTricks',         label: 'Hat-tricks',     format: v => v.toString(), sub: () => 'Pole + win + fastest lap in Race 1 (reg 1.6.2.a)', hideZero: true},
+];
+
+// dataPool picks which driver pool (see sortedData below) feeds this
+// section - 'rates' is the only one pre-filtered to modern-era, min-starts
+// drivers; everything else draws from the full unfiltered pool and relies on
+// HISTORICAL_TABS/hideZero per sort key instead.
 const SECTION_DEFS = [
-  {label: 'Totals', sorts: COUNT_SORTS, subtitle: 'Source: btcc.net'},
-  {label: 'Rates',  sorts: RATE_SORTS,  subtitle: 'Min. 30 starts · 2004 onwards'},
+  {label: 'Totals',  sorts: COUNT_SORTS,  subtitle: 'Source: btcc.net', dataPool: 'totals'},
+  {label: 'Rates',   sorts: RATE_SORTS,   subtitle: 'Min. 30 starts · 2004 onwards', dataPool: 'rates'},
+  {label: 'Streaks', sorts: STREAK_SORTS, subtitle: 'All-time, across every season', dataPool: 'totals'},
 ];
 
 export default function RecordsScreen({navigation}) {
@@ -81,16 +101,22 @@ export default function RecordsScreen({navigation}) {
     Analytics.navItemClicked('records_sort:' + SECTION_DEFS[section].sorts[i].key);
   };
 
-  const HISTORICAL_TABS = new Set(['wins', 'championships']);
+  // Streak/season-best/hat-trick records include historical (pre-2004) drivers -
+  // like Titles/Wins, these are genuine all-time records, not rate stats that
+  // need a minimum-starts floor to be meaningful.
+  const HISTORICAL_TABS = new Set(['wins', 'championships', ...STREAK_SORTS.map(s => s.key)]);
 
+  const DATA_POOLS = {totals: totalsData, rates: ratesData};
   const sortedData = useMemo(
-    () => [totalsData, ratesData].map((sectionData, secIdx) =>
-      SECTION_DEFS[secIdx].sorts.map(s => {
+    () => SECTION_DEFS.map(section => {
+      const sectionData = DATA_POOLS[section.dataPool];
+      return section.sorts.map(s => {
         let base = HISTORICAL_TABS.has(s.key) ? sectionData : sectionData.filter(d => !d.historical);
         const filtered = s.hideZero ? base.filter(d => d[s.key] > 0) : base;
         return [...filtered].sort((a, b) => b[s.key] - a[s.key]);
-      })
-    ),
+      });
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ratesData, totalsData],
   );
 

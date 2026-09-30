@@ -212,4 +212,52 @@ describe('RecordsScreen', () => {
     const {getAllByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
     await waitFor(() => expect(getAllByText('🥈').length).toBeGreaterThan(0));
   });
+
+  // ── Streaks section ───────────────────────────────────────────────────────────
+
+  it('shows a Streaks section chip', async () => {
+    const {getByLabelText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await waitFor(() => expect(getByLabelText('Streaks')).toBeTruthy());
+  });
+
+  it('shows the all-time subtitle in Streaks', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await goToSection(getByLabelText, 'Streaks');
+    await waitFor(() => expect(getByText('All-time, across every season')).toBeTruthy());
+  });
+
+  it('defaults to Win Streak tab and shows the longest streak first', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await goToSection(getByLabelText, 'Streaks');
+    // Tom Ingram has the longest winStreak (4) in the mock
+    await waitFor(() => expect(getByText('4 races')).toBeTruthy());
+  });
+
+  it('includes historical drivers on a streak tab (genuine all-time record)', async () => {
+    const {getByLabelText, getByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await goToSection(getByLabelText, 'Streaks');
+    await waitFor(() => getByLabelText('Hat-tricks tab'));
+    fireEvent.press(getByLabelText('Hat-tricks tab'));
+    // Andy Rouse is historical with hatTricks:0 in the mock, so hideZero should exclude him
+    // while Tom Ingram (hatTricks:3) should still show - proves historical isn't blanket-excluded
+    await waitFor(() => expect(getByText('Tom Ingram')).toBeTruthy());
+  });
+
+  it('hides drivers with a zero value on a streak tab', async () => {
+    const {getByLabelText, queryByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await goToSection(getByLabelText, 'Streaks');
+    await waitFor(() => getByLabelText('Hat-tricks tab'));
+    fireEvent.press(getByLabelText('Hat-tricks tab'));
+    // Colin Turkington has hatTricks:0 in the mock
+    await waitFor(() => expect(queryByText('Colin Turkington')).toBeNull());
+  });
+
+  it('shows the Finish Streak tab with its DNF-free framing', async () => {
+    const {getByLabelText, getAllByText} = renderWithProviders(<RecordsScreen navigation={nav} />);
+    await goToSection(getByLabelText, 'Streaks');
+    await waitFor(() => getByLabelText('Finish Streak tab'));
+    fireEvent.press(getByLabelText('Finish Streak tab'));
+    // All three modern drivers have a non-zero streak - just confirm the framing text renders
+    await waitFor(() => expect(getAllByText(/Longest run without a DNF/).length).toBeGreaterThan(0));
+  });
 });

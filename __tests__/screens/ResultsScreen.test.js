@@ -131,6 +131,27 @@ describe('ResultsScreen', () => {
     await waitFor(() => expect(getByText('GALLERY')).toBeTruthy());
   });
 
+  // ── Nationality badge ────────────────────────────────────────────────────────
+
+  it('shows a nationality badge for a non-British driver', async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Osamu Kawashima', team: 'Team VERTU', points: 17, nat: 'JPN'}],
+      teams: [], season: '2026', round: 9, venue: 'Silverstone',
+    });
+    const {findByText} = renderResults();
+    expect(await findByText('JPN')).toBeTruthy();
+  });
+
+  it('shows no nationality badge for a British driver (the common case)', async () => {
+    parseStandings.mockReturnValue({
+      drivers: [{position: 1, name: 'Ashley Sutton', team: 'NAPA Racing UK', points: 377, nat: 'GBR'}],
+      teams: [], season: '2026', round: 9, venue: 'Silverstone',
+    });
+    const {findByText, queryByText} = renderResults();
+    await findByText('Ashley SUTTON');
+    expect(queryByText('GBR')).toBeNull();
+  });
+
   // ── Bundled year data ────────────────────────────────────────────────────────
   // Navigate to 2025 explicitly via the Previous season button so applyBundledYear
   // is called regardless of which year the component defaults to on startup.

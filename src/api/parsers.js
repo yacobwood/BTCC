@@ -433,6 +433,7 @@ export function parseResults(json) {
           return {
             position: pos,
             number: d.no || 0,
+            cl: d.cl || '',
             driver: d.driver || '',
             team: d.team || '',
             laps: d.laps || 0,
@@ -524,6 +525,7 @@ export function parsePenalties(json) {
       session: p.session || null,
       driver: p.driver || '',
       carNo: p.carNo ?? null,
+      ruleRef: p.ruleRef || null,
       // facts/offence/decision are the PDF's own labelled fields, verbatim
       // (Template B's document literally uses these three headings; the
       // scraper maps Template A's equivalent prose onto the same shape) -

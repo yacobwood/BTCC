@@ -249,6 +249,7 @@ export default function RoundResultsScreen({route, navigation}) {
             {item.fastestLap && <Badge text="FL" color="#A855F7" />}
             {item.leadLap && <Badge text="L" color={Colors.yellow} />}
             {item.pole && <Badge text="P" color={Colors.yellow} />}
+            {item.cl === 'I' && <Badge text="IND" color={Colors.textSecondary} />}
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
             <Text style={styles.teamName} numberOfLines={1}>{item.team}</Text>
@@ -564,9 +565,12 @@ function JudicialDecisionsCard({penalties, roundNumber, session}) {
         const hasDetail = p.facts || p.offence || p.decision;
         return (
           <View key={i} style={styles.penaltyRow}>
-            <Text style={styles.penaltyDriverLine}>
-              {p.driver}{p.carNo ? ` (No. ${p.carNo})` : ''}
-            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6}}>
+              <Text style={styles.penaltyDriverLine}>
+                {p.driver}{p.carNo ? ` (No. ${p.carNo})` : ''}
+              </Text>
+              {p.ruleRef && <Text style={styles.penaltyRuleRef}>{p.ruleRef}</Text>}
+            </View>
             {hasDetail ? (
               <>
                 {p.facts && <PenaltyField label="Facts" value={p.facts} />}
@@ -954,7 +958,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     marginTop: 8,
   },
-  penaltyDriverLine: {color: '#fff', fontSize: 13, fontWeight: '800', marginBottom: 6},
+  penaltyDriverLine: {color: '#fff', fontSize: 13, fontWeight: '800'},
+  penaltyRuleRef: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 0.5},
   penaltyOneLiner: {color: '#fff', fontSize: 12.5, lineHeight: 18},
   penaltyField: {marginTop: 6},
   penaltyFieldLabel: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1},

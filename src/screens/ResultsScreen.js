@@ -122,6 +122,49 @@ export function reconcileStatsOrder(stats, standings) {
   return [...stats].sort((a, b) => (officialPts[b.name] ?? b.points) - (officialPts[a.name] ?? a.points));
 }
 
+// Max points a single remaining race can swing between the leader and any
+// rival, per championship. The main Drivers' Championship alone scores the
+// Qualifying Race - every other championship is excluded from it entirely
+// (reg 1.6.7), and none of them carry the Fastest Lap / Race Leader bonus
+// points that only apply to the Drivers' Championship (reg 1.6.2.a).
+const RACE_POINTS_MAX = {
+  drivers: 22,           // 20 for the win + 1 fastest lap + 1 race leader (1.6.2.a)
+  independents: 20,      // no bonus points (1.6.2.b)
+  jst: 20,               // scored as the Independents' Trophy for Drivers (1.6.6)
+  teams: 37,             // best two cars, base points only: 20 + 17 (1.6.4)
+  independentsTeams: 20, // highest-placed car only (1.6.5)
+  manufacturers: 37,     // best two cars, base points only (1.6.3)
+};
+const QUALIFYING_RACE_POINTS_MAX = 10; // Drivers' Championship only (1.6.2.a / 1.6.7)
+
+// Points still in play for a championship: every scoring race with no result
+// yet, valued at its per-race maximum. This is what "still catchable" means -
+// not just who happens to be ahead today.
+function remainingPoints(rounds, champKey) {
+  if (!rounds || rounds.length === 0) return Infinity; // data not loaded - never claim clinched
+  let total = 0;
+  for (const round of rounds) {
+    for (const race of round.races) {
+      if (!SCORING_RACES.includes(race.label) || race.results.length > 0) continue;
+      total += race.label === 'Qualifying Race'
+        ? (champKey === 'drivers' ? QUALIFYING_RACE_POINTS_MAX : 0)
+        : (RACE_POINTS_MAX[champKey] ?? RACE_POINTS_MAX.drivers);
+    }
+  }
+  return total;
+}
+
+// True once 2nd place can no longer catch OR draw level with 1st. An exact
+// tie isn't safe to call early: regs 1.6.9/1.6.10 settle it by countback on
+// race wins, which could still favour the chaser.
+export function isChampionClinched(list, rounds, champKey) {
+  const leader = list?.find(i => i.position === 1);
+  const runnerUp = list?.find(i => i.position === 2);
+  if (!leader) return false;
+  if (!runnerUp) return true; // sole classified entrant
+  return (leader.points - runnerUp.points) > remainingPoints(rounds, champKey);
+}
+
 // Build a driver-name → team map from race results to fill gaps in standings
 function buildTeamMap(rounds) {
   const map = {};
@@ -432,6 +475,15 @@ export default function ResultsScreen({navigation, route}) {
   }, [standings, teamsChampionship]);
   const liveRound = standings?.round || 0;
 
+  const driverChampionClinched = useMemo(
+    () => isChampionClinched(driverStandings, results, championship === 'btcc' ? 'drivers' : championship),
+    [driverStandings, results, championship],
+  );
+  const teamChampionClinched = useMemo(
+    () => isChampionClinched(teamStandings, results, teamsChampionship),
+    [teamStandings, results, teamsChampionship],
+  );
+
   const seasonStats = useMemo(() => {
     if (bundledStats) {
       return bundledStats.map(s => ({
@@ -459,13 +511,23 @@ export default function ResultsScreen({navigation, route}) {
 
   const renderDriverStanding = useCallback(({item}) => {
     const fav = isFavourite(item.name);
+    const isChampion = item.position === 1 && driverChampionClinched;
     return (
-      <View style={[styles.standingRow, fav && {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'}]} accessibilityLabel={`Position ${item.position}, ${item.name}, ${item.points} points`}>
-        <Text style={[styles.pos, item.position === 1 && {color: '#FFD700'}, item.position === 2 && {color: '#C0C0C0'}, item.position === 3 && {color: '#CD7F32'}]}>{item.position}</Text>
+      <View style={[styles.standingRow, fav && {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)'}]} accessibilityLabel={`Position ${item.position}${isChampion ? ', Champion' : ''}, ${item.name}, ${item.points} points`}>
+        {isChampion ? (
+          <Icon name="emoji-events" size={20} color="#FFD700" style={styles.posIcon} />
+        ) : (
+          <Text style={[styles.pos, item.position === 1 && {color: '#FFD700'}, item.position === 2 && {color: '#C0C0C0'}, item.position === 3 && {color: '#CD7F32'}]}>{item.position}</Text>
+        )}
         <View style={{flex: 1}}>
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
             {fav && <Icon name="star" size={12} color={Colors.yellow} />}
             <Text style={[styles.driverName, fav && {color: Colors.yellow}]}>{formatDriverName(item.name)}</Text>
+            {/* GBR is the vast majority of the grid - only the rare non-British
+                driver (e.g. Kawashima, JPN) is worth a badge here. */}
+            {item.nat && item.nat !== 'GBR' && (
+              <Text style={{color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 0.5}}>{item.nat}</Text>
+            )}
           </View>
           <Text style={styles.teamName}>{item.team}</Text>
         </View>
@@ -501,18 +563,25 @@ export default function ResultsScreen({navigation, route}) {
         </View>
       </View>
     );
-  }, [isFavourite, championship]);
+  }, [isFavourite, championship, driverChampionClinched]);
 
-  const renderTeamStanding = useCallback(({item}) => (
-    <View style={styles.standingRow}>
-      <Text style={[styles.pos, item.position === 1 && {color: '#FFD700'}, item.position === 2 && {color: '#C0C0C0'}, item.position === 3 && {color: '#CD7F32'}]}>{item.position}</Text>
-      <Text style={[styles.driverName, {flex: 1}]}>{item.name}</Text>
-      <View style={styles.pointsBox}>
-        <Text style={styles.points}>{item.points}</Text>
-        <Text style={styles.pointsLabel}>PTS</Text>
+  const renderTeamStanding = useCallback(({item}) => {
+    const isChampion = item.position === 1 && teamChampionClinched;
+    return (
+      <View style={styles.standingRow} accessibilityLabel={`Position ${item.position}${isChampion ? ', Champion' : ''}, ${item.name}, ${item.points} points`}>
+        {isChampion ? (
+          <Icon name="emoji-events" size={20} color="#FFD700" style={styles.posIcon} />
+        ) : (
+          <Text style={[styles.pos, item.position === 1 && {color: '#FFD700'}, item.position === 2 && {color: '#C0C0C0'}, item.position === 3 && {color: '#CD7F32'}]}>{item.position}</Text>
+        )}
+        <Text style={[styles.driverName, {flex: 1}]}>{item.name}</Text>
+        <View style={styles.pointsBox}>
+          <Text style={styles.points}>{item.points}</Text>
+          <Text style={styles.pointsLabel}>PTS</Text>
+        </View>
       </View>
-    </View>
-  ), []);
+    );
+  }, [teamChampionClinched]);
 
   const renderRound = useCallback(({item}) => {
     const hasResults = item.races.some(r => r.results.length > 0 || r.grid?.length > 0);

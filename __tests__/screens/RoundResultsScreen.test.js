@@ -1053,6 +1053,29 @@ describe('RoundResultsScreen', () => {
       expect(queryByText(PENALTY_ONE_LINER)).toBeNull();
     });
 
+    it('shows the rule reference next to the driver line when present', async () => {
+      mockPenaltiesFetch({
+        season: '2026',
+        rounds: [{
+          round: 1,
+          penalties: [{
+            session: 'Free Practice', driver: 'Tom Ingram', carNo: 80,
+            ruleRef: 'NCR 12.7.1.8',
+            sanction: '5s time penalty', oneLiner: PENALTY_ONE_LINER, pdfUrl: PENALTY_PDF_URL,
+          }],
+        }],
+      });
+      const {findByText} = renderRound({initialRace: 0});
+      expect(await findByText('NCR 12.7.1.8')).toBeTruthy();
+    });
+
+    it('shows no rule reference when the scraper did not capture one', async () => {
+      mockPenaltiesFetch(); // base fixture has no ruleRef
+      const {findByText, queryByText} = renderRound({initialRace: 0});
+      await findByText(PENALTY_ONE_LINER);
+      expect(queryByText('NCR 12.7.1.8')).toBeNull();
+    });
+
     it('does not show a card on a session tab with no penalties of its own', async () => {
       mockPenaltiesFetch();
       const {findByText, queryByText} = renderRound({initialRace: 1}); // Qualifying
@@ -1144,6 +1167,28 @@ describe('RoundResultsScreen', () => {
       fireEvent.press(getByLabelText('Show top 5 Intermediate 2'));
       await waitFor(() => expect(queryByText('Ashley SUTTON')).toBeNull());
       expect(Analytics.bestSpeedsCollapsed).toHaveBeenCalledWith(1, 'Free Practice', 'intermediate2');
+    });
+  });
+
+  describe('class badge', () => {
+    function roundWithClass(cl) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice'
+          ? {...r, results: r.results.map((res, i) => i === 0 ? {...res, cl} : res)}
+          : r),
+      };
+    }
+
+    it('shows an IND badge for an Independent-class result', async () => {
+      const {findByText} = renderRound({round: roundWithClass('I'), initialRace: 0});
+      expect(await findByText('IND')).toBeTruthy();
+    });
+
+    it('shows no badge for a Manufacturer-class result', async () => {
+      const {findByText, queryByText} = renderRound({round: roundWithClass('M'), initialRace: 0});
+      await findByText('Tom INGRAM');
+      expect(queryByText('IND')).toBeNull();
     });
   });
 });
