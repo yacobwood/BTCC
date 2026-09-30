@@ -227,7 +227,11 @@
               "p": false,
               "avgLapSpeed": "127.793"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -540,7 +544,11 @@
               "p": false,
               "avgLapSpeed": "129.14"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -839,7 +847,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -1195,7 +1207,206 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 132.8
+              },
+              {
+                "pos": 2,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 132.1
+              },
+              {
+                "pos": 3,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 131.0
+              },
+              {
+                "pos": 4,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 130.5
+              },
+              {
+                "pos": 5,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "WIX Racing",
+                "mph": 130.5
+              },
+              {
+                "pos": 6,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 130.5
+              },
+              {
+                "pos": 7,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 130.0
+              },
+              {
+                "pos": 8,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 129.0
+              },
+              {
+                "pos": 9,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 129.0
+              },
+              {
+                "pos": 10,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 129.0
+              },
+              {
+                "pos": 11,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 128.5
+              },
+              {
+                "pos": 12,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 128.3
+              },
+              {
+                "pos": 13,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 128.3
+              },
+              {
+                "pos": 14,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 127.0
+              },
+              {
+                "pos": 15,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 127.0
+              },
+              {
+                "pos": 16,
+                "no": 90,
+                "driver": "Car 90",
+                "team": "",
+                "mph": 127.0
+              },
+              {
+                "pos": 17,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 126.6
+              },
+              {
+                "pos": 18,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 126.1
+              },
+              {
+                "pos": 19,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 126.1
+              },
+              {
+                "pos": 20,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 125.9
+              },
+              {
+                "pos": 21,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 125.6
+              },
+              {
+                "pos": 22,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 125.2
+              },
+              {
+                "pos": 23,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 125.2
+              },
+              {
+                "pos": 24,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 124.7
+              },
+              {
+                "pos": 25,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 124.0
+              },
+              {
+                "pos": 26,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 122.6
+              },
+              {
+                "pos": 27,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 122.6
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -1536,7 +1747,206 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 133.1
+              },
+              {
+                "pos": 2,
+                "no": 400,
+                "driver": "Car 400",
+                "team": "",
+                "mph": 132.1
+              },
+              {
+                "pos": 3,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 132.1
+              },
+              {
+                "pos": 4,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 132.1
+              },
+              {
+                "pos": 5,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 130.8
+              },
+              {
+                "pos": 6,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 130.3
+              },
+              {
+                "pos": 7,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 130.0
+              },
+              {
+                "pos": 8,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 129.5
+              },
+              {
+                "pos": 9,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 129.5
+              },
+              {
+                "pos": 10,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 129.3
+              },
+              {
+                "pos": 11,
+                "no": 500,
+                "driver": "Car 500",
+                "team": "",
+                "mph": 128.5
+              },
+              {
+                "pos": 12,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 128.3
+              },
+              {
+                "pos": 13,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 128.0
+              },
+              {
+                "pos": 14,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 127.8
+              },
+              {
+                "pos": 15,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 126.8
+              },
+              {
+                "pos": 16,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 126.8
+              },
+              {
+                "pos": 17,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 126.6
+              },
+              {
+                "pos": 18,
+                "no": 90,
+                "driver": "Car 90",
+                "team": "",
+                "mph": 126.6
+              },
+              {
+                "pos": 19,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 126.1
+              },
+              {
+                "pos": 20,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 124.9
+              },
+              {
+                "pos": 21,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 123.3
+              },
+              {
+                "pos": 22,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 121.5
+              },
+              {
+                "pos": 23,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "WIX Racing",
+                "mph": 121.3
+              },
+              {
+                "pos": 24,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 116.5
+              },
+              {
+                "pos": 25,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 114.9
+              },
+              {
+                "pos": 26,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 131.0
+              },
+              {
+                "pos": 27,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 131.0
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -1877,7 +2287,192 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 134.4
+              },
+              {
+                "pos": 2,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 132.8
+              },
+              {
+                "pos": 3,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 130.8
+              },
+              {
+                "pos": 4,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 129.5
+              },
+              {
+                "pos": 5,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 129.0
+              },
+              {
+                "pos": 6,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 129.0
+              },
+              {
+                "pos": 7,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 128.8
+              },
+              {
+                "pos": 8,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 128.5
+              },
+              {
+                "pos": 9,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 128.3
+              },
+              {
+                "pos": 10,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 126.3
+              },
+              {
+                "pos": 11,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 126.3
+              },
+              {
+                "pos": 12,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 126.1
+              },
+              {
+                "pos": 13,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 126.1
+              },
+              {
+                "pos": 14,
+                "no": 90,
+                "driver": "Car 90",
+                "team": "",
+                "mph": 126.1
+              },
+              {
+                "pos": 15,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 125.2
+              },
+              {
+                "pos": 16,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "WIX Racing",
+                "mph": 124.7
+              },
+              {
+                "pos": 17,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 123.5
+              },
+              {
+                "pos": 18,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 123.3
+              },
+              {
+                "pos": 19,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 122.4
+              },
+              {
+                "pos": 20,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 121.1
+              },
+              {
+                "pos": 21,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 118.9
+              },
+              {
+                "pos": 22,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 118.9
+              },
+              {
+                "pos": 23,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 113.9
+              },
+              {
+                "pos": 24,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 103.7
+              },
+              {
+                "pos": 25,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 100.0
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -2233,7 +2828,206 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 134.4
+              },
+              {
+                "pos": 2,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 134.2
+              },
+              {
+                "pos": 3,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 133.9
+              },
+              {
+                "pos": 4,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 133.9
+              },
+              {
+                "pos": 5,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 132.8
+              },
+              {
+                "pos": 6,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 132.6
+              },
+              {
+                "pos": 7,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 132.6
+              },
+              {
+                "pos": 8,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 132.1
+              },
+              {
+                "pos": 9,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 131.8
+              },
+              {
+                "pos": 10,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 131.8
+              },
+              {
+                "pos": 11,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 131.5
+              },
+              {
+                "pos": 12,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 131.5
+              },
+              {
+                "pos": 13,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 131.3
+              },
+              {
+                "pos": 14,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 131.3
+              },
+              {
+                "pos": 15,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 131.3
+              },
+              {
+                "pos": 16,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 131.0
+              },
+              {
+                "pos": 17,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 130.8
+              },
+              {
+                "pos": 18,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 130.3
+              },
+              {
+                "pos": 19,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 130.3
+              },
+              {
+                "pos": 20,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 130.3
+              },
+              {
+                "pos": 21,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 130.0
+              },
+              {
+                "pos": 22,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 130.0
+              },
+              {
+                "pos": 23,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 129.3
+              },
+              {
+                "pos": 24,
+                "no": 90,
+                "driver": "Car 90",
+                "team": "",
+                "mph": 128.8
+              },
+              {
+                "pos": 25,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "WIX Racing",
+                "mph": 128.0
+              },
+              {
+                "pos": 26,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 128.0
+              },
+              {
+                "pos": 27,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 127.8
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -2574,7 +3368,206 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 135.2
+              },
+              {
+                "pos": 2,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 134.7
+              },
+              {
+                "pos": 3,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 134.2
+              },
+              {
+                "pos": 4,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 133.9
+              },
+              {
+                "pos": 5,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 133.4
+              },
+              {
+                "pos": 6,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 132.8
+              },
+              {
+                "pos": 7,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 132.8
+              },
+              {
+                "pos": 8,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 132.8
+              },
+              {
+                "pos": 9,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 132.8
+              },
+              {
+                "pos": 10,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 132.6
+              },
+              {
+                "pos": 11,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 132.6
+              },
+              {
+                "pos": 12,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 132.3
+              },
+              {
+                "pos": 13,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "WIX Racing",
+                "mph": 132.1
+              },
+              {
+                "pos": 14,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 132.1
+              },
+              {
+                "pos": 15,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 132.1
+              },
+              {
+                "pos": 16,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 131.8
+              },
+              {
+                "pos": 17,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 131.8
+              },
+              {
+                "pos": 18,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 131.8
+              },
+              {
+                "pos": 19,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 131.8
+              },
+              {
+                "pos": 20,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 131.5
+              },
+              {
+                "pos": 21,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 131.5
+              },
+              {
+                "pos": 22,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 130.5
+              },
+              {
+                "pos": 23,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 130.0
+              },
+              {
+                "pos": 24,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 129.5
+              },
+              {
+                "pos": 25,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 129.3
+              },
+              {
+                "pos": 26,
+                "no": 90,
+                "driver": "Car 90",
+                "team": "",
+                "mph": 129.0
+              },
+              {
+                "pos": 27,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 128.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -2915,7 +3908,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -3257,7 +4254,199 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 122.9
+              },
+              {
+                "pos": 2,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 122.9
+              },
+              {
+                "pos": 3,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 122.2
+              },
+              {
+                "pos": 4,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 122.2
+              },
+              {
+                "pos": 5,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 122.2
+              },
+              {
+                "pos": 6,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 122.0
+              },
+              {
+                "pos": 7,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 121.7
+              },
+              {
+                "pos": 8,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 121.5
+              },
+              {
+                "pos": 9,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.5
+              },
+              {
+                "pos": 10,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 121.3
+              },
+              {
+                "pos": 11,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 121.3
+              },
+              {
+                "pos": 12,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 121.3
+              },
+              {
+                "pos": 13,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 121.1
+              },
+              {
+                "pos": 14,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 121.1
+              },
+              {
+                "pos": 15,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.1
+              },
+              {
+                "pos": 16,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 120.9
+              },
+              {
+                "pos": 17,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 120.9
+              },
+              {
+                "pos": 18,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 120.9
+              },
+              {
+                "pos": 19,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 120.6
+              },
+              {
+                "pos": 20,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 120.2
+              },
+              {
+                "pos": 21,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 120.2
+              },
+              {
+                "pos": 22,
+                "no": 51,
+                "driver": "Car 51",
+                "team": "",
+                "mph": 119.8
+              },
+              {
+                "pos": 23,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 119.1
+              },
+              {
+                "pos": 24,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 118.9
+              },
+              {
+                "pos": 25,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 118.5
+              },
+              {
+                "pos": 26,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 115.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Sunny",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -3584,7 +4773,192 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 122.2
+              },
+              {
+                "pos": 2,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 122.0
+              },
+              {
+                "pos": 3,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 4,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 5,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 6,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 7,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 121.5
+              },
+              {
+                "pos": 8,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 121.5
+              },
+              {
+                "pos": 9,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 121.3
+              },
+              {
+                "pos": 10,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.3
+              },
+              {
+                "pos": 11,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 121.1
+              },
+              {
+                "pos": 12,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 120.9
+              },
+              {
+                "pos": 13,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 120.9
+              },
+              {
+                "pos": 14,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 120.6
+              },
+              {
+                "pos": 15,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 120.6
+              },
+              {
+                "pos": 16,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 120.6
+              },
+              {
+                "pos": 17,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 120.6
+              },
+              {
+                "pos": 18,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 120.0
+              },
+              {
+                "pos": 19,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 120.0
+              },
+              {
+                "pos": 20,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 119.4
+              },
+              {
+                "pos": 21,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 119.4
+              },
+              {
+                "pos": 22,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 119.4
+              },
+              {
+                "pos": 23,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 119.1
+              },
+              {
+                "pos": 24,
+                "no": 51,
+                "driver": "Car 51",
+                "team": "",
+                "mph": 118.5
+              },
+              {
+                "pos": 25,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 118.1
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -3911,7 +5285,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -4267,7 +5645,199 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 125.9
+              },
+              {
+                "pos": 2,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 125.4
+              },
+              {
+                "pos": 3,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 124.5
+              },
+              {
+                "pos": 4,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 124.5
+              },
+              {
+                "pos": 5,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 124.2
+              },
+              {
+                "pos": 6,
+                "no": 4,
+                "driver": "Michael Caine",
+                "team": "Addison Lee Motorbase",
+                "mph": 124.2
+              },
+              {
+                "pos": 7,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 124.2
+              },
+              {
+                "pos": 8,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 124.2
+              },
+              {
+                "pos": 9,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 124.0
+              },
+              {
+                "pos": 10,
+                "no": 9,
+                "driver": "Car 9",
+                "team": "",
+                "mph": 123.8
+              },
+              {
+                "pos": 11,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 123.5
+              },
+              {
+                "pos": 12,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 123.5
+              },
+              {
+                "pos": 13,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 123.5
+              },
+              {
+                "pos": 14,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 123.3
+              },
+              {
+                "pos": 15,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 123.1
+              },
+              {
+                "pos": 16,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 123.1
+              },
+              {
+                "pos": 17,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 122.9
+              },
+              {
+                "pos": 18,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 122.6
+              },
+              {
+                "pos": 19,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 122.6
+              },
+              {
+                "pos": 20,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 122.6
+              },
+              {
+                "pos": 21,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 122.2
+              },
+              {
+                "pos": 22,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 23,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 24,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 121.1
+              },
+              {
+                "pos": 25,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 120.9
+              },
+              {
+                "pos": 26,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 120.6
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -4608,7 +6178,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -4949,7 +6523,192 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 122.2
+              },
+              {
+                "pos": 2,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 121.7
+              },
+              {
+                "pos": 3,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 121.5
+              },
+              {
+                "pos": 4,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 120.9
+              },
+              {
+                "pos": 5,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 120.4
+              },
+              {
+                "pos": 6,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "RCIB Insurance Racing",
+                "mph": 120.0
+              },
+              {
+                "pos": 7,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 119.8
+              },
+              {
+                "pos": 8,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 119.6
+              },
+              {
+                "pos": 9,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 119.1
+              },
+              {
+                "pos": 10,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 118.9
+              },
+              {
+                "pos": 11,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 118.7
+              },
+              {
+                "pos": 12,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 118.1
+              },
+              {
+                "pos": 13,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 117.9
+              },
+              {
+                "pos": 14,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 117.7
+              },
+              {
+                "pos": 15,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 116.9
+              },
+              {
+                "pos": 16,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 115.9
+              },
+              {
+                "pos": 17,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 115.3
+              },
+              {
+                "pos": 18,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 115.1
+              },
+              {
+                "pos": 19,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 114.9
+              },
+              {
+                "pos": 20,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 107.5
+              },
+              {
+                "pos": 21,
+                "no": 9,
+                "driver": "Car 9",
+                "team": "",
+                "mph": 105.1
+              },
+              {
+                "pos": 22,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 104.0
+              },
+              {
+                "pos": 23,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 94.6
+              },
+              {
+                "pos": 24,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 93.4
+              },
+              {
+                "pos": 25,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 88.5
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Rain",
+            "track": "Wet"
+          }
         }
       ]
     },
@@ -5305,7 +7064,206 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 122.6
+              },
+              {
+                "pos": 2,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 122.6
+              },
+              {
+                "pos": 3,
+                "no": 35,
+                "driver": "Car 35",
+                "team": "",
+                "mph": 122.2
+              },
+              {
+                "pos": 4,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 5,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 6,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 7,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 8,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 9,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 120.9
+              },
+              {
+                "pos": 10,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 120.9
+              },
+              {
+                "pos": 11,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 120.6
+              },
+              {
+                "pos": 12,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 120.4
+              },
+              {
+                "pos": 13,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 120.4
+              },
+              {
+                "pos": 14,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 120.2
+              },
+              {
+                "pos": 15,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 120.2
+              },
+              {
+                "pos": 16,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 120.2
+              },
+              {
+                "pos": 17,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 120.2
+              },
+              {
+                "pos": 18,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 120.2
+              },
+              {
+                "pos": 19,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 120.0
+              },
+              {
+                "pos": 20,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 120.0
+              },
+              {
+                "pos": 21,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 119.8
+              },
+              {
+                "pos": 22,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 119.8
+              },
+              {
+                "pos": 23,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 119.8
+              },
+              {
+                "pos": 24,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 119.1
+              },
+              {
+                "pos": 25,
+                "no": 44,
+                "driver": "Car 44",
+                "team": "",
+                "mph": 118.5
+              },
+              {
+                "pos": 26,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 118.5
+              },
+              {
+                "pos": 27,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 118.1
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -5674,7 +7632,199 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 122.9
+              },
+              {
+                "pos": 2,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 122.4
+              },
+              {
+                "pos": 3,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 4,
+                "no": 35,
+                "driver": "Robb Holland",
+                "team": "RCIB Insurance Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 5,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 121.5
+              },
+              {
+                "pos": 6,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 121.1
+              },
+              {
+                "pos": 7,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.1
+              },
+              {
+                "pos": 8,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 120.9
+              },
+              {
+                "pos": 9,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 120.9
+              },
+              {
+                "pos": 10,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 120.9
+              },
+              {
+                "pos": 11,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 120.4
+              },
+              {
+                "pos": 12,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 120.4
+              },
+              {
+                "pos": 13,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 120.4
+              },
+              {
+                "pos": 14,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 120.4
+              },
+              {
+                "pos": 15,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 120.0
+              },
+              {
+                "pos": 16,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 120.0
+              },
+              {
+                "pos": 17,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 120.0
+              },
+              {
+                "pos": 18,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 119.6
+              },
+              {
+                "pos": 19,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 119.6
+              },
+              {
+                "pos": 20,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 119.6
+              },
+              {
+                "pos": 21,
+                "no": 44,
+                "driver": "Car 44",
+                "team": "",
+                "mph": 118.7
+              },
+              {
+                "pos": 22,
+                "no": 15,
+                "driver": "James Kaye",
+                "team": "AmD Tuning.com",
+                "mph": 118.5
+              },
+              {
+                "pos": 23,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 118.1
+              },
+              {
+                "pos": 24,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 115.7
+              },
+              {
+                "pos": 25,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 115.3
+              },
+              {
+                "pos": 26,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 110.9
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -6043,7 +8193,192 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 35,
+                "driver": "Robb Holland",
+                "team": "RCIB Insurance Racing",
+                "mph": 122.4
+              },
+              {
+                "pos": 2,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 122.2
+              },
+              {
+                "pos": 3,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 122.0
+              },
+              {
+                "pos": 4,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 121.7
+              },
+              {
+                "pos": 5,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 121.5
+              },
+              {
+                "pos": 6,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 121.1
+              },
+              {
+                "pos": 7,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 120.9
+              },
+              {
+                "pos": 8,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 120.6
+              },
+              {
+                "pos": 9,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 120.6
+              },
+              {
+                "pos": 10,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 120.4
+              },
+              {
+                "pos": 11,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 120.4
+              },
+              {
+                "pos": 12,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 120.4
+              },
+              {
+                "pos": 13,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 120.2
+              },
+              {
+                "pos": 14,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 120.0
+              },
+              {
+                "pos": 15,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 120.0
+              },
+              {
+                "pos": 16,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 119.8
+              },
+              {
+                "pos": 17,
+                "no": 44,
+                "driver": "Car 44",
+                "team": "",
+                "mph": 119.6
+              },
+              {
+                "pos": 18,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 119.4
+              },
+              {
+                "pos": 19,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 119.1
+              },
+              {
+                "pos": 20,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 118.3
+              },
+              {
+                "pos": 21,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 118.1
+              },
+              {
+                "pos": 22,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 117.1
+              },
+              {
+                "pos": 23,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 115.5
+              },
+              {
+                "pos": 24,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 115.5
+              },
+              {
+                "pos": 25,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 114.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -6371,7 +8706,192 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 117.3
+              },
+              {
+                "pos": 2,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 116.9
+              },
+              {
+                "pos": 3,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 116.5
+              },
+              {
+                "pos": 4,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 116.3
+              },
+              {
+                "pos": 5,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 116.3
+              },
+              {
+                "pos": 6,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 116.1
+              },
+              {
+                "pos": 7,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 116.1
+              },
+              {
+                "pos": 8,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 116.1
+              },
+              {
+                "pos": 9,
+                "no": 23,
+                "driver": "Car 23",
+                "team": "",
+                "mph": 116.1
+              },
+              {
+                "pos": 10,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 115.9
+              },
+              {
+                "pos": 11,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 115.9
+              },
+              {
+                "pos": 12,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 115.9
+              },
+              {
+                "pos": 13,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 115.9
+              },
+              {
+                "pos": 14,
+                "no": 58,
+                "driver": "Car 58",
+                "team": "",
+                "mph": 115.9
+              },
+              {
+                "pos": 15,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 115.5
+              },
+              {
+                "pos": 16,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 115.3
+              },
+              {
+                "pos": 17,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 115.1
+              },
+              {
+                "pos": 18,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 114.9
+              },
+              {
+                "pos": 19,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 114.9
+              },
+              {
+                "pos": 20,
+                "no": 45,
+                "driver": "Car 45",
+                "team": "",
+                "mph": 114.9
+              },
+              {
+                "pos": 21,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 114.7
+              },
+              {
+                "pos": 22,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 114.7
+              },
+              {
+                "pos": 23,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 113.9
+              },
+              {
+                "pos": 24,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 113.3
+              },
+              {
+                "pos": 25,
+                "no": 16,
+                "driver": "Car 16",
+                "team": "",
+                "mph": 110.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -6684,7 +9204,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -7011,7 +9535,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -7367,7 +9895,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Drizzle",
+            "track": "Damp"
+          }
         },
         {
           "label": "Race 2",
@@ -7708,7 +10240,185 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 22,
+                "driver": "Car 22",
+                "team": "",
+                "mph": 101.0
+              },
+              {
+                "pos": 2,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 101.0
+              },
+              {
+                "pos": 3,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 100.7
+              },
+              {
+                "pos": 4,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 100.4
+              },
+              {
+                "pos": 5,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 100.4
+              },
+              {
+                "pos": 6,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 100.4
+              },
+              {
+                "pos": 7,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 100.4
+              },
+              {
+                "pos": 8,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 100.4
+              },
+              {
+                "pos": 9,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 100.3
+              },
+              {
+                "pos": 10,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 100.0
+              },
+              {
+                "pos": 11,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 99.8
+              },
+              {
+                "pos": 12,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 99.5
+              },
+              {
+                "pos": 13,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 99.5
+              },
+              {
+                "pos": 14,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 99.5
+              },
+              {
+                "pos": 15,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 99.5
+              },
+              {
+                "pos": 16,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 98.9
+              },
+              {
+                "pos": 17,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "Airwaves Racing",
+                "mph": 98.6
+              },
+              {
+                "pos": 18,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 98.6
+              },
+              {
+                "pos": 19,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 98.5
+              },
+              {
+                "pos": 20,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 97.8
+              },
+              {
+                "pos": 21,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 97.6
+              },
+              {
+                "pos": 22,
+                "no": 21,
+                "driver": "Car 21",
+                "team": "",
+                "mph": 97.2
+              },
+              {
+                "pos": 23,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 96.6
+              },
+              {
+                "pos": 24,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 93.8
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -8035,7 +10745,185 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 100.0
+              },
+              {
+                "pos": 2,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 99.4
+              },
+              {
+                "pos": 3,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 99.4
+              },
+              {
+                "pos": 4,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 99.4
+              },
+              {
+                "pos": 5,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 99.2
+              },
+              {
+                "pos": 6,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 99.2
+              },
+              {
+                "pos": 7,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 99.2
+              },
+              {
+                "pos": 8,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 99.1
+              },
+              {
+                "pos": 9,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 99.1
+              },
+              {
+                "pos": 10,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 98.8
+              },
+              {
+                "pos": 11,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 98.5
+              },
+              {
+                "pos": 12,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 98.5
+              },
+              {
+                "pos": 13,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 98.5
+              },
+              {
+                "pos": 14,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 98.3
+              },
+              {
+                "pos": 15,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 98.3
+              },
+              {
+                "pos": 16,
+                "no": 22,
+                "driver": "Car 22",
+                "team": "",
+                "mph": 98.2
+              },
+              {
+                "pos": 17,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 97.6
+              },
+              {
+                "pos": 18,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 97.5
+              },
+              {
+                "pos": 19,
+                "no": 21,
+                "driver": "Car 21",
+                "team": "",
+                "mph": 97.3
+              },
+              {
+                "pos": 20,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "Airwaves Racing",
+                "mph": 97.2
+              },
+              {
+                "pos": 21,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 96.5
+              },
+              {
+                "pos": 22,
+                "no": 12,
+                "driver": "David Nye",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 93.0
+              },
+              {
+                "pos": 23,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 65.7
+              },
+              {
+                "pos": 24,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 60.7
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -8377,7 +11265,199 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 138.3
+              },
+              {
+                "pos": 2,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 137.7
+              },
+              {
+                "pos": 3,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 137.2
+              },
+              {
+                "pos": 4,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 136.9
+              },
+              {
+                "pos": 5,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 136.9
+              },
+              {
+                "pos": 6,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 136.9
+              },
+              {
+                "pos": 7,
+                "no": 22,
+                "driver": "Car 22",
+                "team": "",
+                "mph": 136.9
+              },
+              {
+                "pos": 8,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 136.9
+              },
+              {
+                "pos": 9,
+                "no": 16,
+                "driver": "Car 16",
+                "team": "",
+                "mph": 135.8
+              },
+              {
+                "pos": 10,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 135.2
+              },
+              {
+                "pos": 11,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 135.2
+              },
+              {
+                "pos": 12,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 135.2
+              },
+              {
+                "pos": 13,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "Airwaves Racing",
+                "mph": 135.0
+              },
+              {
+                "pos": 14,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 135.0
+              },
+              {
+                "pos": 15,
+                "no": 55,
+                "driver": "Jeff Smith",
+                "team": "Pirtek Racing",
+                "mph": 134.7
+              },
+              {
+                "pos": 16,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 134.4
+              },
+              {
+                "pos": 17,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 134.4
+              },
+              {
+                "pos": 18,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 134.4
+              },
+              {
+                "pos": 19,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 134.4
+              },
+              {
+                "pos": 20,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 134.2
+              },
+              {
+                "pos": 21,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 133.9
+              },
+              {
+                "pos": 22,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 133.9
+              },
+              {
+                "pos": 23,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 133.6
+              },
+              {
+                "pos": 24,
+                "no": 44,
+                "driver": "Car 44",
+                "team": "",
+                "mph": 133.6
+              },
+              {
+                "pos": 25,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 132.8
+              },
+              {
+                "pos": 26,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 131.8
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -8732,7 +11812,11 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -9045,7 +12129,178 @@
               "p": false,
               "avgLapSpeed": "156.974"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 138.3
+              },
+              {
+                "pos": 2,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 137.7
+              },
+              {
+                "pos": 3,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 137.2
+              },
+              {
+                "pos": 4,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "Airwaves Racing",
+                "mph": 136.6
+              },
+              {
+                "pos": 5,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 136.6
+              },
+              {
+                "pos": 6,
+                "no": 22,
+                "driver": "Howard Fuller",
+                "team": "RCIB Insurance Racing",
+                "mph": 136.6
+              },
+              {
+                "pos": 7,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 136.3
+              },
+              {
+                "pos": 8,
+                "no": 44,
+                "driver": "Car 44",
+                "team": "",
+                "mph": 136.3
+              },
+              {
+                "pos": 9,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 136.1
+              },
+              {
+                "pos": 10,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 136.1
+              },
+              {
+                "pos": 11,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 135.5
+              },
+              {
+                "pos": 12,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 135.5
+              },
+              {
+                "pos": 13,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 135.5
+              },
+              {
+                "pos": 14,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 135.5
+              },
+              {
+                "pos": 15,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 135.2
+              },
+              {
+                "pos": 16,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 135.0
+              },
+              {
+                "pos": 17,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 134.4
+              },
+              {
+                "pos": 18,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 134.4
+              },
+              {
+                "pos": 19,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 134.4
+              },
+              {
+                "pos": 20,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 134.2
+              },
+              {
+                "pos": 21,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 134.2
+              },
+              {
+                "pos": 22,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 133.6
+              },
+              {
+                "pos": 23,
+                "no": 14,
+                "driver": "Will Bratt",
+                "team": "Rob Austin Racing",
+                "mph": 133.4
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Sunny",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -9401,7 +12656,11 @@
               "p": false,
               "avgLapSpeed": "121.88"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Rain",
+            "track": "Wet"
+          }
         },
         {
           "label": "Race 2",
@@ -9742,7 +13001,192 @@
               "p": false,
               "avgLapSpeed": "124.037"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 98.2
+              },
+              {
+                "pos": 2,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 98.1
+              },
+              {
+                "pos": 3,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 97.9
+              },
+              {
+                "pos": 4,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 97.8
+              },
+              {
+                "pos": 5,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 97.6
+              },
+              {
+                "pos": 6,
+                "no": 9,
+                "driver": "Jake Hill",
+                "team": "Exocet Racing",
+                "mph": 97.1
+              },
+              {
+                "pos": 7,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 96.8
+              },
+              {
+                "pos": 8,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 96.8
+              },
+              {
+                "pos": 9,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 96.6
+              },
+              {
+                "pos": 10,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 96.6
+              },
+              {
+                "pos": 11,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 96.5
+              },
+              {
+                "pos": 12,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 96.5
+              },
+              {
+                "pos": 13,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 96.2
+              },
+              {
+                "pos": 14,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "Airwaves Racing",
+                "mph": 96.1
+              },
+              {
+                "pos": 15,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 96.0
+              },
+              {
+                "pos": 16,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 95.8
+              },
+              {
+                "pos": 17,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 95.5
+              },
+              {
+                "pos": 18,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 95.3
+              },
+              {
+                "pos": 19,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 95.1
+              },
+              {
+                "pos": 20,
+                "no": 47,
+                "driver": "Car 47",
+                "team": "",
+                "mph": 95.1
+              },
+              {
+                "pos": 21,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 95.0
+              },
+              {
+                "pos": 22,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 94.3
+              },
+              {
+                "pos": 23,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 93.9
+              },
+              {
+                "pos": 24,
+                "no": 40,
+                "driver": "Shaun Hollamby",
+                "team": "AmD Tuning.com",
+                "mph": 92.6
+              },
+              {
+                "pos": 25,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 90.5
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Rain",
+            "track": "Wet"
+          }
         },
         {
           "label": "Race 3",
@@ -10097,7 +13541,192 @@
               "p": false,
               "avgLapSpeed": ""
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "RCIB Insurance Racing",
+                "mph": 98.3
+              },
+              {
+                "pos": 2,
+                "no": 7,
+                "driver": "Mat Jackson",
+                "team": "Airwaves Racing",
+                "mph": 97.9
+              },
+              {
+                "pos": 3,
+                "no": 29,
+                "driver": "Colin Turkington",
+                "team": "eBay Motors",
+                "mph": 97.9
+              },
+              {
+                "pos": 4,
+                "no": 9,
+                "driver": "Jake Hill",
+                "team": "Exocet Racing",
+                "mph": 97.9
+              },
+              {
+                "pos": 5,
+                "no": 8,
+                "driver": "\u00c1r\u00f3n Taylor-Smith",
+                "team": "Airwaves Racing",
+                "mph": 97.6
+              },
+              {
+                "pos": 6,
+                "no": 11,
+                "driver": "Frank Wrathall",
+                "team": "Dynojet",
+                "mph": 97.6
+              },
+              {
+                "pos": 7,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "eBay Motors",
+                "mph": 97.6
+              },
+              {
+                "pos": 8,
+                "no": 1,
+                "driver": "Gordon Shedden",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 97.5
+              },
+              {
+                "pos": 9,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "PPCGB.com / Kraftwerk Racing",
+                "mph": 97.5
+              },
+              {
+                "pos": 10,
+                "no": 5,
+                "driver": "Rob Collard",
+                "team": "eBay Motors",
+                "mph": 97.3
+              },
+              {
+                "pos": 11,
+                "no": 2,
+                "driver": "Matt Neal",
+                "team": "Honda Yuasa Racing Team",
+                "mph": 97.1
+              },
+              {
+                "pos": 12,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Speedworks Motorsport",
+                "mph": 97.1
+              },
+              {
+                "pos": 13,
+                "no": 13,
+                "driver": "Rob Austin",
+                "team": "WIX Racing",
+                "mph": 96.9
+              },
+              {
+                "pos": 14,
+                "no": 6,
+                "driver": "Tom Onslow-Cole",
+                "team": "Airwaves Racing",
+                "mph": 96.6
+              },
+              {
+                "pos": 15,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Ciceley Racing",
+                "mph": 96.5
+              },
+              {
+                "pos": 16,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG KX Momentum Racing",
+                "mph": 96.2
+              },
+              {
+                "pos": 17,
+                "no": 10,
+                "driver": "Daniel Welch",
+                "team": "Welch Motorsport with Sopp + Sopp",
+                "mph": 96.1
+              },
+              {
+                "pos": 18,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG KX Momentum Racing",
+                "mph": 96.1
+              },
+              {
+                "pos": 19,
+                "no": 77,
+                "driver": "Andrew Jordan",
+                "team": "Pirtek Racing",
+                "mph": 95.8
+              },
+              {
+                "pos": 20,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Speedworks Motorsport",
+                "mph": 95.8
+              },
+              {
+                "pos": 21,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Wheel Heaven / Houseman Racing",
+                "mph": 95.7
+              },
+              {
+                "pos": 22,
+                "no": 47,
+                "driver": "Tom Barley",
+                "team": "RCIB Insurance Racing",
+                "mph": 95.7
+              },
+              {
+                "pos": 23,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Team BMR Restart",
+                "mph": 94.3
+              },
+              {
+                "pos": 24,
+                "no": 66,
+                "driver": "Liam Griffin",
+                "team": "Addison Lee Racing",
+                "mph": 93.8
+              },
+              {
+                "pos": 25,
+                "no": 40,
+                "driver": "Shaun Hollamby",
+                "team": "AmD Tuning.com",
+                "mph": 93.8
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Rain",
+            "track": "Wet"
+          }
         }
       ]
     }

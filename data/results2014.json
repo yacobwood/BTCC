@@ -341,7 +341,11 @@
               "points": 0,
               "avgLapSpeed": "121.308"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -646,7 +650,11 @@
               "points": 0,
               "avgLapSpeed": "124.079"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -951,7 +959,227 @@
               "points": 0,
               "avgLapSpeed": "113.492"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 106.5
+              },
+              {
+                "pos": 2,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 106.5
+              },
+              {
+                "pos": 3,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 106.3
+              },
+              {
+                "pos": 4,
+                "no": 40,
+                "driver": "Car 40",
+                "team": "",
+                "mph": 106.1
+              },
+              {
+                "pos": 5,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 106.0
+              },
+              {
+                "pos": 6,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 105.8
+              },
+              {
+                "pos": 7,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 105.5
+              },
+              {
+                "pos": 8,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Vauxhall Insignia",
+                "mph": 105.5
+              },
+              {
+                "pos": 9,
+                "no": 80,
+                "driver": "Car 80",
+                "team": "",
+                "mph": 105.5
+              },
+              {
+                "pos": 10,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 105.5
+              },
+              {
+                "pos": 11,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 105.3
+              },
+              {
+                "pos": 12,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 105.3
+              },
+              {
+                "pos": 13,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 105.3
+              },
+              {
+                "pos": 14,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 105.3
+              },
+              {
+                "pos": 15,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 105.1
+              },
+              {
+                "pos": 16,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 105.1
+              },
+              {
+                "pos": 17,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 105.0
+              },
+              {
+                "pos": 18,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 104.8
+              },
+              {
+                "pos": 19,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 104.6
+              },
+              {
+                "pos": 20,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 104.5
+              },
+              {
+                "pos": 21,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 104.0
+              },
+              {
+                "pos": 22,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 104.0
+              },
+              {
+                "pos": 23,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 103.8
+              },
+              {
+                "pos": 24,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 103.8
+              },
+              {
+                "pos": 25,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 103.7
+              },
+              {
+                "pos": 26,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 103.5
+              },
+              {
+                "pos": 27,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 103.2
+              },
+              {
+                "pos": 28,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 101.0
+              },
+              {
+                "pos": 29,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 100.3
+              },
+              {
+                "pos": 30,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 32.2
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -1319,7 +1547,234 @@
               "points": 0,
               "avgLapSpeed": "123.764"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 120.0
+              },
+              {
+                "pos": 2,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 118.9
+              },
+              {
+                "pos": 3,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 118.7
+              },
+              {
+                "pos": 4,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 118.3
+              },
+              {
+                "pos": 5,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 116.7
+              },
+              {
+                "pos": 6,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.7
+              },
+              {
+                "pos": 7,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 115.3
+              },
+              {
+                "pos": 8,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 114.7
+              },
+              {
+                "pos": 9,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 114.5
+              },
+              {
+                "pos": 10,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 113.9
+              },
+              {
+                "pos": 11,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 113.7
+              },
+              {
+                "pos": 12,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 113.5
+              },
+              {
+                "pos": 13,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 113.1
+              },
+              {
+                "pos": 14,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 113.1
+              },
+              {
+                "pos": 15,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 113.1
+              },
+              {
+                "pos": 16,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 113.1
+              },
+              {
+                "pos": 17,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 113.1
+              },
+              {
+                "pos": 18,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 112.5
+              },
+              {
+                "pos": 19,
+                "no": 28,
+                "driver": "Chris Stockton",
+                "team": "Chevrolet Cruze 5dr",
+                "mph": 112.4
+              },
+              {
+                "pos": 20,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 111.2
+              },
+              {
+                "pos": 21,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 111.1
+              },
+              {
+                "pos": 22,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 110.7
+              },
+              {
+                "pos": 23,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 110.5
+              },
+              {
+                "pos": 24,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 110.1
+              },
+              {
+                "pos": 25,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 110.1
+              },
+              {
+                "pos": 26,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 108.2
+              },
+              {
+                "pos": 27,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 108.0
+              },
+              {
+                "pos": 28,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 107.8
+              },
+              {
+                "pos": 29,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 105.8
+              },
+              {
+                "pos": 30,
+                "no": 54,
+                "driver": "Car 54",
+                "team": "",
+                "mph": 99.8
+              },
+              {
+                "pos": 31,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 91.4
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Drying"
+          }
         },
         {
           "label": "Race 2",
@@ -1612,7 +2067,234 @@
               "points": 0,
               "avgLapSpeed": "117.733"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 10,
+                "driver": "Car 10",
+                "team": "",
+                "mph": 114.7
+              },
+              {
+                "pos": 2,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 114.5
+              },
+              {
+                "pos": 3,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 112.7
+              },
+              {
+                "pos": 4,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 112.7
+              },
+              {
+                "pos": 5,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 112.5
+              },
+              {
+                "pos": 6,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 112.4
+              },
+              {
+                "pos": 7,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 112.2
+              },
+              {
+                "pos": 8,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 110.7
+              },
+              {
+                "pos": 9,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 110.5
+              },
+              {
+                "pos": 10,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 110.1
+              },
+              {
+                "pos": 11,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 110.1
+              },
+              {
+                "pos": 12,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 109.8
+              },
+              {
+                "pos": 13,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 109.6
+              },
+              {
+                "pos": 14,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 109.4
+              },
+              {
+                "pos": 15,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 109.2
+              },
+              {
+                "pos": 16,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 109.1
+              },
+              {
+                "pos": 17,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 109.1
+              },
+              {
+                "pos": 18,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 108.7
+              },
+              {
+                "pos": 19,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 108.7
+              },
+              {
+                "pos": 20,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 108.2
+              },
+              {
+                "pos": 21,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Vauxhall Insignia",
+                "mph": 108.0
+              },
+              {
+                "pos": 22,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 107.8
+              },
+              {
+                "pos": 23,
+                "no": 48,
+                "driver": "Car 48",
+                "team": "",
+                "mph": 107.3
+              },
+              {
+                "pos": 24,
+                "no": 54,
+                "driver": "Car 54",
+                "team": "",
+                "mph": 106.0
+              },
+              {
+                "pos": 25,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 105.6
+              },
+              {
+                "pos": 26,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 104.5
+              },
+              {
+                "pos": 27,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 102.2
+              },
+              {
+                "pos": 28,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 102.2
+              },
+              {
+                "pos": 29,
+                "no": 20,
+                "driver": "Car 20",
+                "team": "",
+                "mph": 98.5
+              },
+              {
+                "pos": 30,
+                "no": 67,
+                "driver": "Car 67",
+                "team": "",
+                "mph": 96.6
+              },
+              {
+                "pos": 31,
+                "no": 9,
+                "driver": "Car 9",
+                "team": "",
+                "mph": 93.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Drying"
+          }
         },
         {
           "label": "Race 3",
@@ -1905,7 +2587,11 @@
               "points": 0,
               "avgLapSpeed": "127.733"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -2213,7 +2899,227 @@
               "points": 0,
               "avgLapSpeed": "161.418"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 136.1
+              },
+              {
+                "pos": 2,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 135.2
+              },
+              {
+                "pos": 3,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 135.2
+              },
+              {
+                "pos": 4,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 135.0
+              },
+              {
+                "pos": 5,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 134.4
+              },
+              {
+                "pos": 6,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 134.4
+              },
+              {
+                "pos": 7,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 134.4
+              },
+              {
+                "pos": 8,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 134.4
+              },
+              {
+                "pos": 9,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 133.9
+              },
+              {
+                "pos": 10,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 133.6
+              },
+              {
+                "pos": 11,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 133.6
+              },
+              {
+                "pos": 12,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 133.4
+              },
+              {
+                "pos": 13,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 133.4
+              },
+              {
+                "pos": 14,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 133.4
+              },
+              {
+                "pos": 15,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 133.4
+              },
+              {
+                "pos": 16,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 133.1
+              },
+              {
+                "pos": 17,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 133.1
+              },
+              {
+                "pos": 18,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 133.1
+              },
+              {
+                "pos": 19,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 132.8
+              },
+              {
+                "pos": 20,
+                "no": 17,
+                "driver": "Car 17",
+                "team": "",
+                "mph": 132.8
+              },
+              {
+                "pos": 21,
+                "no": 20,
+                "driver": "Car 20",
+                "team": "",
+                "mph": 132.8
+              },
+              {
+                "pos": 22,
+                "no": 11,
+                "driver": "Car 11",
+                "team": "",
+                "mph": 132.6
+              },
+              {
+                "pos": 23,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 132.1
+              },
+              {
+                "pos": 24,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 132.1
+              },
+              {
+                "pos": 25,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 132.1
+              },
+              {
+                "pos": 26,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 131.8
+              },
+              {
+                "pos": 27,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 130.8
+              },
+              {
+                "pos": 28,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 129.3
+              },
+              {
+                "pos": 29,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 128.5
+              },
+              {
+                "pos": 30,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 44.8
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -2518,7 +3424,227 @@
               "points": 0,
               "avgLapSpeed": "171.942"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 135.5
+              },
+              {
+                "pos": 2,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 135.0
+              },
+              {
+                "pos": 3,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 135.0
+              },
+              {
+                "pos": 4,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 134.7
+              },
+              {
+                "pos": 5,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 134.7
+              },
+              {
+                "pos": 6,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 134.4
+              },
+              {
+                "pos": 7,
+                "no": 54,
+                "driver": "Car 54",
+                "team": "",
+                "mph": 134.2
+              },
+              {
+                "pos": 8,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 134.2
+              },
+              {
+                "pos": 9,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 133.9
+              },
+              {
+                "pos": 10,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 133.9
+              },
+              {
+                "pos": 11,
+                "no": 101,
+                "driver": "Car 101",
+                "team": "",
+                "mph": 133.6
+              },
+              {
+                "pos": 12,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 133.4
+              },
+              {
+                "pos": 13,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 133.4
+              },
+              {
+                "pos": 14,
+                "no": 18,
+                "driver": "Car 18",
+                "team": "",
+                "mph": 133.4
+              },
+              {
+                "pos": 15,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 133.4
+              },
+              {
+                "pos": 16,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 133.4
+              },
+              {
+                "pos": 17,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 133.4
+              },
+              {
+                "pos": 18,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 133.1
+              },
+              {
+                "pos": 19,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 133.1
+              },
+              {
+                "pos": 20,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 133.1
+              },
+              {
+                "pos": 21,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 132.8
+              },
+              {
+                "pos": 22,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 132.6
+              },
+              {
+                "pos": 23,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 132.3
+              },
+              {
+                "pos": 24,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 132.3
+              },
+              {
+                "pos": 25,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 132.3
+              },
+              {
+                "pos": 26,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 132.1
+              },
+              {
+                "pos": 27,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 131.3
+              },
+              {
+                "pos": 28,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 130.0
+              },
+              {
+                "pos": 29,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 128.5
+              },
+              {
+                "pos": 30,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 128.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -2811,7 +3937,11 @@
               "points": 0,
               "avgLapSpeed": "133.226"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -3155,7 +4285,234 @@
               "points": 0,
               "avgLapSpeed": "141.653"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 123.1
+              },
+              {
+                "pos": 2,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 122.6
+              },
+              {
+                "pos": 3,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 122.6
+              },
+              {
+                "pos": 4,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 122.4
+              },
+              {
+                "pos": 5,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 122.2
+              },
+              {
+                "pos": 6,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 122.2
+              },
+              {
+                "pos": 7,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Vauxhall Insignia",
+                "mph": 122.0
+              },
+              {
+                "pos": 8,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 121.7
+              },
+              {
+                "pos": 9,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 121.3
+              },
+              {
+                "pos": 10,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 121.1
+              },
+              {
+                "pos": 11,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 121.1
+              },
+              {
+                "pos": 12,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 121.1
+              },
+              {
+                "pos": 13,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 121.1
+              },
+              {
+                "pos": 14,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 120.9
+              },
+              {
+                "pos": 15,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 120.9
+              },
+              {
+                "pos": 16,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 120.6
+              },
+              {
+                "pos": 17,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 120.6
+              },
+              {
+                "pos": 18,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 120.6
+              },
+              {
+                "pos": 19,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 120.6
+              },
+              {
+                "pos": 20,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 120.4
+              },
+              {
+                "pos": 21,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 120.2
+              },
+              {
+                "pos": 22,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 120.2
+              },
+              {
+                "pos": 23,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 120.0
+              },
+              {
+                "pos": 24,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 120.0
+              },
+              {
+                "pos": 25,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 119.6
+              },
+              {
+                "pos": 26,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 119.1
+              },
+              {
+                "pos": 27,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 118.5
+              },
+              {
+                "pos": 28,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 115.3
+              },
+              {
+                "pos": 29,
+                "no": 16,
+                "driver": "Car 16",
+                "team": "",
+                "mph": 109.8
+              },
+              {
+                "pos": 30,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 109.6
+              },
+              {
+                "pos": 31,
+                "no": 48,
+                "driver": "Car 48",
+                "team": "",
+                "mph": 98.8
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -3448,7 +4805,227 @@
               "points": 0,
               "avgLapSpeed": "131.657"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 123.8
+              },
+              {
+                "pos": 2,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 123.3
+              },
+              {
+                "pos": 3,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 123.3
+              },
+              {
+                "pos": 4,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 123.1
+              },
+              {
+                "pos": 5,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 122.9
+              },
+              {
+                "pos": 6,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 122.9
+              },
+              {
+                "pos": 7,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 122.6
+              },
+              {
+                "pos": 8,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 122.4
+              },
+              {
+                "pos": 9,
+                "no": 17,
+                "driver": "Car 17",
+                "team": "",
+                "mph": 122.0
+              },
+              {
+                "pos": 10,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Vauxhall Insignia",
+                "mph": 122.0
+              },
+              {
+                "pos": 11,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 122.0
+              },
+              {
+                "pos": 12,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 122.0
+              },
+              {
+                "pos": 13,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 121.7
+              },
+              {
+                "pos": 14,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 121.5
+              },
+              {
+                "pos": 15,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 121.5
+              },
+              {
+                "pos": 16,
+                "no": 33,
+                "driver": "Car 33",
+                "team": "",
+                "mph": 121.5
+              },
+              {
+                "pos": 17,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 121.5
+              },
+              {
+                "pos": 18,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 121.3
+              },
+              {
+                "pos": 19,
+                "no": 18,
+                "driver": "Car 18",
+                "team": "",
+                "mph": 121.3
+              },
+              {
+                "pos": 20,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 121.3
+              },
+              {
+                "pos": 21,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 121.3
+              },
+              {
+                "pos": 22,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 120.9
+              },
+              {
+                "pos": 23,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 120.6
+              },
+              {
+                "pos": 24,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 120.2
+              },
+              {
+                "pos": 25,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 119.8
+              },
+              {
+                "pos": 26,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 119.8
+              },
+              {
+                "pos": 27,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 118.9
+              },
+              {
+                "pos": 28,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 117.5
+              },
+              {
+                "pos": 29,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 116.9
+              },
+              {
+                "pos": 30,
+                "no": 48,
+                "driver": "Car 48",
+                "team": "",
+                "mph": 108.4
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -3729,7 +5306,11 @@
               "points": 0,
               "avgLapSpeed": "106.813"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Drying"
+          }
         }
       ]
     },
@@ -4085,7 +5666,11 @@
               "points": 0,
               "avgLapSpeed": "114.472"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -4366,7 +5951,11 @@
               "points": 0,
               "avgLapSpeed": "119.783"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -4611,7 +6200,227 @@
               "points": 0,
               "avgLapSpeed": "124.179"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 127.8
+              },
+              {
+                "pos": 2,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Vauxhall Insignia",
+                "mph": 126.8
+              },
+              {
+                "pos": 3,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 126.8
+              },
+              {
+                "pos": 4,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 126.1
+              },
+              {
+                "pos": 5,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Vauxhall Insignia",
+                "mph": 126.1
+              },
+              {
+                "pos": 6,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 126.1
+              },
+              {
+                "pos": 7,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 125.9
+              },
+              {
+                "pos": 8,
+                "no": 44,
+                "driver": "Car 44",
+                "team": "",
+                "mph": 125.6
+              },
+              {
+                "pos": 9,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 125.6
+              },
+              {
+                "pos": 10,
+                "no": 888,
+                "driver": "Car 888",
+                "team": "",
+                "mph": 125.6
+              },
+              {
+                "pos": 11,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 125.2
+              },
+              {
+                "pos": 12,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 125.2
+              },
+              {
+                "pos": 13,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 125.2
+              },
+              {
+                "pos": 14,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 124.9
+              },
+              {
+                "pos": 15,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 124.7
+              },
+              {
+                "pos": 16,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 124.7
+              },
+              {
+                "pos": 17,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 124.0
+              },
+              {
+                "pos": 18,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 123.8
+              },
+              {
+                "pos": 19,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 123.5
+              },
+              {
+                "pos": 20,
+                "no": 5,
+                "driver": "Car 5",
+                "team": "",
+                "mph": 123.3
+              },
+              {
+                "pos": 21,
+                "no": 7,
+                "driver": "Car 7",
+                "team": "",
+                "mph": 122.6
+              },
+              {
+                "pos": 22,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 122.6
+              },
+              {
+                "pos": 23,
+                "no": 4,
+                "driver": "Car 4",
+                "team": "",
+                "mph": 122.4
+              },
+              {
+                "pos": 24,
+                "no": 101,
+                "driver": "Car 101",
+                "team": "",
+                "mph": 122.4
+              },
+              {
+                "pos": 25,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 122.2
+              },
+              {
+                "pos": 26,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 121.7
+              },
+              {
+                "pos": 27,
+                "no": 67,
+                "driver": "Car 67",
+                "team": "",
+                "mph": 120.0
+              },
+              {
+                "pos": 28,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 116.9
+              },
+              {
+                "pos": 29,
+                "no": 80,
+                "driver": "Car 80",
+                "team": "",
+                "mph": 116.7
+              },
+              {
+                "pos": 30,
+                "no": 21,
+                "driver": "Car 21",
+                "team": "",
+                "mph": 0.2
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -4943,7 +6752,234 @@
               "points": 0,
               "avgLapSpeed": "132.974"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 122.6
+              },
+              {
+                "pos": 2,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 122.4
+              },
+              {
+                "pos": 3,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 121.7
+              },
+              {
+                "pos": 4,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 121.5
+              },
+              {
+                "pos": 5,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 121.3
+              },
+              {
+                "pos": 6,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Vauxhall Insignia",
+                "mph": 121.3
+              },
+              {
+                "pos": 7,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 121.3
+              },
+              {
+                "pos": 8,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 121.3
+              },
+              {
+                "pos": 9,
+                "no": 88,
+                "driver": "Car 88",
+                "team": "",
+                "mph": 121.3
+              },
+              {
+                "pos": 10,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 121.3
+              },
+              {
+                "pos": 11,
+                "no": 75,
+                "driver": "Car 75",
+                "team": "",
+                "mph": 121.1
+              },
+              {
+                "pos": 12,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 121.1
+              },
+              {
+                "pos": 13,
+                "no": 80,
+                "driver": "Car 80",
+                "team": "",
+                "mph": 121.1
+              },
+              {
+                "pos": 14,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 121.1
+              },
+              {
+                "pos": 15,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 120.6
+              },
+              {
+                "pos": 16,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 120.6
+              },
+              {
+                "pos": 17,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 120.6
+              },
+              {
+                "pos": 18,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 120.6
+              },
+              {
+                "pos": 19,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 120.4
+              },
+              {
+                "pos": 20,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 120.2
+              },
+              {
+                "pos": 21,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 120.2
+              },
+              {
+                "pos": 22,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 120.2
+              },
+              {
+                "pos": 23,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 120.2
+              },
+              {
+                "pos": 24,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 120.0
+              },
+              {
+                "pos": 25,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 119.6
+              },
+              {
+                "pos": 26,
+                "no": 18,
+                "driver": "Car 18",
+                "team": "",
+                "mph": 119.6
+              },
+              {
+                "pos": 27,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 119.6
+              },
+              {
+                "pos": 28,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 117.7
+              },
+              {
+                "pos": 29,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 117.5
+              },
+              {
+                "pos": 30,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 116.3
+              },
+              {
+                "pos": 31,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 114.9
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Sunny",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -5248,7 +7284,11 @@
               "points": 0,
               "avgLapSpeed": "110.446"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Sunny",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -5553,7 +7593,227 @@
               "points": 0,
               "avgLapSpeed": "137.283"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 121.7
+              },
+              {
+                "pos": 2,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 121.7
+              },
+              {
+                "pos": 3,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 121.3
+              },
+              {
+                "pos": 4,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 121.1
+              },
+              {
+                "pos": 5,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 121.1
+              },
+              {
+                "pos": 6,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 121.1
+              },
+              {
+                "pos": 7,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 121.1
+              },
+              {
+                "pos": 8,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 120.9
+              },
+              {
+                "pos": 9,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 120.9
+              },
+              {
+                "pos": 10,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 120.6
+              },
+              {
+                "pos": 11,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 120.4
+              },
+              {
+                "pos": 12,
+                "no": 18,
+                "driver": "Car 18",
+                "team": "",
+                "mph": 120.4
+              },
+              {
+                "pos": 13,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 120.4
+              },
+              {
+                "pos": 14,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 120.2
+              },
+              {
+                "pos": 15,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 120.2
+              },
+              {
+                "pos": 16,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 120.0
+              },
+              {
+                "pos": 17,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 119.8
+              },
+              {
+                "pos": 18,
+                "no": 75,
+                "driver": "Car 75",
+                "team": "",
+                "mph": 119.8
+              },
+              {
+                "pos": 19,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 119.8
+              },
+              {
+                "pos": 20,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 119.8
+              },
+              {
+                "pos": 21,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 119.6
+              },
+              {
+                "pos": 22,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 119.6
+              },
+              {
+                "pos": 23,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 119.4
+              },
+              {
+                "pos": 24,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 119.4
+              },
+              {
+                "pos": 25,
+                "no": 67,
+                "driver": "Car 67",
+                "team": "",
+                "mph": 119.4
+              },
+              {
+                "pos": 26,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 118.9
+              },
+              {
+                "pos": 27,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 118.7
+              },
+              {
+                "pos": 28,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 117.7
+              },
+              {
+                "pos": 29,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 116.3
+              },
+              {
+                "pos": 30,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 113.3
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -5873,7 +8133,234 @@
               "points": 0,
               "avgLapSpeed": "125.89"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 117.7
+              },
+              {
+                "pos": 2,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 117.1
+              },
+              {
+                "pos": 3,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 117.1
+              },
+              {
+                "pos": 4,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 116.9
+              },
+              {
+                "pos": 5,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 116.7
+              },
+              {
+                "pos": 6,
+                "no": 5,
+                "driver": "Car 5",
+                "team": "",
+                "mph": 116.5
+              },
+              {
+                "pos": 7,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 116.5
+              },
+              {
+                "pos": 8,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 116.5
+              },
+              {
+                "pos": 9,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 116.5
+              },
+              {
+                "pos": 10,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Volkswagen CC",
+                "mph": 116.5
+              },
+              {
+                "pos": 11,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 116.3
+              },
+              {
+                "pos": 12,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 116.3
+              },
+              {
+                "pos": 13,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 116.3
+              },
+              {
+                "pos": 14,
+                "no": 1,
+                "driver": "Car 1",
+                "team": "",
+                "mph": 116.1
+              },
+              {
+                "pos": 15,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 116.1
+              },
+              {
+                "pos": 16,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 116.1
+              },
+              {
+                "pos": 17,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 116.1
+              },
+              {
+                "pos": 18,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 116.1
+              },
+              {
+                "pos": 19,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 115.9
+              },
+              {
+                "pos": 20,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 115.7
+              },
+              {
+                "pos": 21,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.7
+              },
+              {
+                "pos": 22,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.7
+              },
+              {
+                "pos": 23,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 115.5
+              },
+              {
+                "pos": 24,
+                "no": 67,
+                "driver": "Car 67",
+                "team": "",
+                "mph": 115.3
+              },
+              {
+                "pos": 25,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 115.1
+              },
+              {
+                "pos": 26,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 114.9
+              },
+              {
+                "pos": 27,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 114.9
+              },
+              {
+                "pos": 28,
+                "no": 28,
+                "driver": "Chris Stockton",
+                "team": "Chevrolet Cruze 5dr",
+                "mph": 114.3
+              },
+              {
+                "pos": 29,
+                "no": 20,
+                "driver": "Car 20",
+                "team": "",
+                "mph": 114.1
+              },
+              {
+                "pos": 30,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 111.1
+              },
+              {
+                "pos": 31,
+                "no": 48,
+                "driver": "Car 48",
+                "team": "",
+                "mph": 110.5
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -6166,7 +8653,227 @@
               "points": 0,
               "avgLapSpeed": "114.56"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 117.1
+              },
+              {
+                "pos": 2,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 117.1
+              },
+              {
+                "pos": 3,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 116.7
+              },
+              {
+                "pos": 4,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 116.7
+              },
+              {
+                "pos": 5,
+                "no": 40,
+                "driver": "Car 40",
+                "team": "",
+                "mph": 116.7
+              },
+              {
+                "pos": 6,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 116.7
+              },
+              {
+                "pos": 7,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 116.5
+              },
+              {
+                "pos": 8,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 116.5
+              },
+              {
+                "pos": 9,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 116.5
+              },
+              {
+                "pos": 10,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 116.5
+              },
+              {
+                "pos": 11,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 116.3
+              },
+              {
+                "pos": 12,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 116.1
+              },
+              {
+                "pos": 13,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 115.9
+              },
+              {
+                "pos": 14,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 115.9
+              },
+              {
+                "pos": 15,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 115.9
+              },
+              {
+                "pos": 16,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.9
+              },
+              {
+                "pos": 17,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.7
+              },
+              {
+                "pos": 18,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 115.7
+              },
+              {
+                "pos": 19,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 115.7
+              },
+              {
+                "pos": 20,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 115.5
+              },
+              {
+                "pos": 21,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.3
+              },
+              {
+                "pos": 22,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 115.1
+              },
+              {
+                "pos": 23,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 114.7
+              },
+              {
+                "pos": 24,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 114.7
+              },
+              {
+                "pos": 25,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 114.7
+              },
+              {
+                "pos": 26,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 114.3
+              },
+              {
+                "pos": 27,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 114.1
+              },
+              {
+                "pos": 28,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 113.9
+              },
+              {
+                "pos": 29,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 109.6
+              },
+              {
+                "pos": 30,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 93.4
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -6471,7 +9178,213 @@
               "points": 0,
               "avgLapSpeed": "132.136"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 117.5
+              },
+              {
+                "pos": 2,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 117.3
+              },
+              {
+                "pos": 3,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 117.1
+              },
+              {
+                "pos": 4,
+                "no": 7,
+                "driver": "Car 7",
+                "team": "",
+                "mph": 116.7
+              },
+              {
+                "pos": 5,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 116.7
+              },
+              {
+                "pos": 6,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 116.5
+              },
+              {
+                "pos": 7,
+                "no": 40,
+                "driver": "Car 40",
+                "team": "",
+                "mph": 116.5
+              },
+              {
+                "pos": 8,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 116.5
+              },
+              {
+                "pos": 9,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 116.3
+              },
+              {
+                "pos": 10,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 116.3
+              },
+              {
+                "pos": 11,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 116.1
+              },
+              {
+                "pos": 12,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 116.1
+              },
+              {
+                "pos": 13,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 116.1
+              },
+              {
+                "pos": 14,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 116.1
+              },
+              {
+                "pos": 15,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.7
+              },
+              {
+                "pos": 16,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 115.7
+              },
+              {
+                "pos": 17,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 115.5
+              },
+              {
+                "pos": 18,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 115.5
+              },
+              {
+                "pos": 19,
+                "no": 101,
+                "driver": "Car 101",
+                "team": "",
+                "mph": 115.5
+              },
+              {
+                "pos": 20,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 115.3
+              },
+              {
+                "pos": 21,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 115.3
+              },
+              {
+                "pos": 22,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 115.1
+              },
+              {
+                "pos": 23,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 115.1
+              },
+              {
+                "pos": 24,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 114.9
+              },
+              {
+                "pos": 25,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 114.7
+              },
+              {
+                "pos": 26,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 114.5
+              },
+              {
+                "pos": 27,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 114.1
+              },
+              {
+                "pos": 28,
+                "no": 28,
+                "driver": "Chris Stockton",
+                "team": "Chevrolet Cruze 5dr",
+                "mph": 112.5
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -6827,7 +9740,234 @@
               "points": 0,
               "avgLapSpeed": "113.359"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 102.2
+              },
+              {
+                "pos": 2,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 101.6
+              },
+              {
+                "pos": 3,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 101.3
+              },
+              {
+                "pos": 4,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 101.2
+              },
+              {
+                "pos": 5,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 101.2
+              },
+              {
+                "pos": 6,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 100.7
+              },
+              {
+                "pos": 7,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 100.7
+              },
+              {
+                "pos": 8,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 100.7
+              },
+              {
+                "pos": 9,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 100.4
+              },
+              {
+                "pos": 10,
+                "no": 21,
+                "driver": "Glynn Geddie",
+                "team": "Toyota Avensis",
+                "mph": 100.4
+              },
+              {
+                "pos": 11,
+                "no": 20,
+                "driver": "Car 20",
+                "team": "",
+                "mph": 100.3
+              },
+              {
+                "pos": 12,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 100.3
+              },
+              {
+                "pos": 13,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 100.3
+              },
+              {
+                "pos": 14,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 100.3
+              },
+              {
+                "pos": 15,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 100.0
+              },
+              {
+                "pos": 16,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 99.8
+              },
+              {
+                "pos": 17,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 99.8
+              },
+              {
+                "pos": 18,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 99.7
+              },
+              {
+                "pos": 19,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 99.7
+              },
+              {
+                "pos": 20,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 99.5
+              },
+              {
+                "pos": 21,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 99.5
+              },
+              {
+                "pos": 22,
+                "no": 43,
+                "driver": "Car 43",
+                "team": "",
+                "mph": 99.5
+              },
+              {
+                "pos": 23,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 99.4
+              },
+              {
+                "pos": 24,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 99.4
+              },
+              {
+                "pos": 25,
+                "no": 28,
+                "driver": "Chris Stockton",
+                "team": "Chevrolet Cruze 5dr",
+                "mph": 99.2
+              },
+              {
+                "pos": 26,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 98.9
+              },
+              {
+                "pos": 27,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 98.9
+              },
+              {
+                "pos": 28,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 98.8
+              },
+              {
+                "pos": 29,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 97.2
+              },
+              {
+                "pos": 30,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 96.9
+              },
+              {
+                "pos": 31,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 93.7
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -7108,7 +10248,220 @@
               "points": 0,
               "avgLapSpeed": "125.32"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 30,
+                "driver": "Martin Depper",
+                "team": "Honda Civic",
+                "mph": 100.4
+              },
+              {
+                "pos": 2,
+                "no": 18,
+                "driver": "Car 18",
+                "team": "",
+                "mph": 100.3
+              },
+              {
+                "pos": 3,
+                "no": 80,
+                "driver": "Car 80",
+                "team": "",
+                "mph": 100.3
+              },
+              {
+                "pos": 4,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 100.1
+              },
+              {
+                "pos": 5,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 100.0
+              },
+              {
+                "pos": 6,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 99.7
+              },
+              {
+                "pos": 7,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 99.7
+              },
+              {
+                "pos": 8,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 99.5
+              },
+              {
+                "pos": 9,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 99.2
+              },
+              {
+                "pos": 10,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 99.2
+              },
+              {
+                "pos": 11,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 99.2
+              },
+              {
+                "pos": 12,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 99.1
+              },
+              {
+                "pos": 13,
+                "no": 10,
+                "driver": "Robert Collard",
+                "team": "BMW 125i M Sport",
+                "mph": 98.9
+              },
+              {
+                "pos": 14,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 98.9
+              },
+              {
+                "pos": 15,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 98.9
+              },
+              {
+                "pos": 16,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 98.8
+              },
+              {
+                "pos": 17,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 98.6
+              },
+              {
+                "pos": 18,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 98.5
+              },
+              {
+                "pos": 19,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 98.2
+              },
+              {
+                "pos": 20,
+                "no": 33,
+                "driver": "Car 33",
+                "team": "",
+                "mph": 98.2
+              },
+              {
+                "pos": 21,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 98.2
+              },
+              {
+                "pos": 22,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 98.2
+              },
+              {
+                "pos": 23,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 98.1
+              },
+              {
+                "pos": 24,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 98.1
+              },
+              {
+                "pos": 25,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 97.9
+              },
+              {
+                "pos": 26,
+                "no": 21,
+                "driver": "Car 21",
+                "team": "",
+                "mph": 96.5
+              },
+              {
+                "pos": 27,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 96.4
+              },
+              {
+                "pos": 28,
+                "no": 12,
+                "driver": "Dan Welch",
+                "team": "Proton Persona",
+                "mph": 96.0
+              },
+              {
+                "pos": 29,
+                "no": 16,
+                "driver": "Car 16",
+                "team": "",
+                "mph": 81.0
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -7353,7 +10706,11 @@
               "points": 0,
               "avgLapSpeed": "116.422"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -7673,7 +11030,11 @@
               "points": 0,
               "avgLapSpeed": "150.975"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -7990,7 +11351,234 @@
               "points": 0,
               "avgLapSpeed": "153.807"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 137.5
+              },
+              {
+                "pos": 2,
+                "no": 39,
+                "driver": "Warren Scott",
+                "team": "Volkswagen CC",
+                "mph": 137.2
+              },
+              {
+                "pos": 3,
+                "no": 9,
+                "driver": "Alain Menu",
+                "team": "Volkswagen CC",
+                "mph": 136.9
+              },
+              {
+                "pos": 4,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 136.3
+              },
+              {
+                "pos": 5,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 136.3
+              },
+              {
+                "pos": 6,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 136.1
+              },
+              {
+                "pos": 7,
+                "no": 31,
+                "driver": "Jack Goff",
+                "team": "Volkswagen CC",
+                "mph": 136.1
+              },
+              {
+                "pos": 8,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 135.8
+              },
+              {
+                "pos": 9,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 135.8
+              },
+              {
+                "pos": 10,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 135.5
+              },
+              {
+                "pos": 11,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 135.5
+              },
+              {
+                "pos": 12,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 135.5
+              },
+              {
+                "pos": 13,
+                "no": 54,
+                "driver": "Hunter Abbott",
+                "team": "Audi A4",
+                "mph": 135.5
+              },
+              {
+                "pos": 14,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 135.5
+              },
+              {
+                "pos": 15,
+                "no": 101,
+                "driver": "Car 101",
+                "team": "",
+                "mph": 135.5
+              },
+              {
+                "pos": 16,
+                "no": 67,
+                "driver": "Robb Holland",
+                "team": "Audi S3 Saloon",
+                "mph": 135.2
+              },
+              {
+                "pos": 17,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 135.2
+              },
+              {
+                "pos": 18,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 135.0
+              },
+              {
+                "pos": 19,
+                "no": 28,
+                "driver": "Chris Stockton",
+                "team": "Chevrolet Cruze 5dr",
+                "mph": 134.7
+              },
+              {
+                "pos": 20,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 134.7
+              },
+              {
+                "pos": 21,
+                "no": 23,
+                "driver": "Luke Hines",
+                "team": "Toyota Avensis",
+                "mph": 134.7
+              },
+              {
+                "pos": 22,
+                "no": 4,
+                "driver": "Matt Neal",
+                "team": "Honda Civic Tourer",
+                "mph": 134.4
+              },
+              {
+                "pos": 23,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 134.4
+              },
+              {
+                "pos": 24,
+                "no": 10,
+                "driver": "Car 10",
+                "team": "",
+                "mph": 134.2
+              },
+              {
+                "pos": 25,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 134.2
+              },
+              {
+                "pos": 26,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 134.2
+              },
+              {
+                "pos": 27,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 133.9
+              },
+              {
+                "pos": 28,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 133.9
+              },
+              {
+                "pos": 29,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 133.4
+              },
+              {
+                "pos": 30,
+                "no": 12,
+                "driver": "Car 12",
+                "team": "",
+                "mph": 130.3
+              },
+              {
+                "pos": 31,
+                "no": 48,
+                "driver": "Car 48",
+                "team": "",
+                "mph": 121.1
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Bright",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -8283,7 +11871,11 @@
               "points": 0,
               "avgLapSpeed": "135.367"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         }
       ]
     },
@@ -8555,7 +12147,11 @@
               "points": 0,
               "avgLapSpeed": "109.004"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 2",
@@ -8824,7 +12420,11 @@
               "points": 0,
               "avgLapSpeed": "138.4"
             }
-          ]
+          ],
+          "weather": {
+            "condition": "Cloudy",
+            "track": "Dry"
+          }
         },
         {
           "label": "Race 3",
@@ -9081,7 +12681,206 @@
               "points": 0,
               "avgLapSpeed": "122.438"
             }
-          ]
+          ],
+          "bestSpeeds": {
+            "intermediate1": null,
+            "intermediate2": null,
+            "finish": [
+              {
+                "pos": 1,
+                "no": 40,
+                "driver": "Aron Taylor-Smith",
+                "team": "Volkswagen CC",
+                "mph": 98.5
+              },
+              {
+                "pos": 2,
+                "no": 44,
+                "driver": "Jack Clarke",
+                "team": "Ford Focus ST MK.III",
+                "mph": 98.2
+              },
+              {
+                "pos": 3,
+                "no": 1,
+                "driver": "Andrew Jordan",
+                "team": "Honda Civic",
+                "mph": 97.9
+              },
+              {
+                "pos": 4,
+                "no": 52,
+                "driver": "Gordon Shedden",
+                "team": "Honda Civic Tourer",
+                "mph": 97.9
+              },
+              {
+                "pos": 5,
+                "no": 16,
+                "driver": "Aiden Moffat",
+                "team": "Chevrolet Cruze 4dr",
+                "mph": 97.6
+              },
+              {
+                "pos": 6,
+                "no": 6,
+                "driver": "Mat Jackson",
+                "team": "Ford Focus ST MK.III",
+                "mph": 97.5
+              },
+              {
+                "pos": 7,
+                "no": 17,
+                "driver": "Dave Newsham",
+                "team": "Ford Focus ST MK.III",
+                "mph": 97.3
+              },
+              {
+                "pos": 8,
+                "no": 101,
+                "driver": "Rob Austin",
+                "team": "Audi A4",
+                "mph": 97.3
+              },
+              {
+                "pos": 9,
+                "no": 888,
+                "driver": "Marc Hynes",
+                "team": "MG6 GT",
+                "mph": 97.2
+              },
+              {
+                "pos": 10,
+                "no": 7,
+                "driver": "Fabrizio Giovanardi",
+                "team": "Ford Focus ST MK.III",
+                "mph": 97.1
+              },
+              {
+                "pos": 11,
+                "no": 5,
+                "driver": "Colin Turkington",
+                "team": "BMW 125i M Sport",
+                "mph": 96.9
+              },
+              {
+                "pos": 12,
+                "no": 23,
+                "driver": "Luke Hines",
+                "team": "Toyota Avensis",
+                "mph": 96.9
+              },
+              {
+                "pos": 13,
+                "no": 88,
+                "driver": "Sam Tordoff",
+                "team": "MG6 GT",
+                "mph": 96.8
+              },
+              {
+                "pos": 14,
+                "no": 39,
+                "driver": "Car 39",
+                "team": "",
+                "mph": 96.5
+              },
+              {
+                "pos": 15,
+                "no": 99,
+                "driver": "Jason Plato",
+                "team": "MG6 GT",
+                "mph": 96.5
+              },
+              {
+                "pos": 16,
+                "no": 20,
+                "driver": "James Cole",
+                "team": "Toyota Avensis",
+                "mph": 96.2
+              },
+              {
+                "pos": 17,
+                "no": 30,
+                "driver": "Car 30",
+                "team": "",
+                "mph": 96.1
+              },
+              {
+                "pos": 18,
+                "no": 80,
+                "driver": "Tom Ingram",
+                "team": "Toyota Avensis",
+                "mph": 96.1
+              },
+              {
+                "pos": 19,
+                "no": 31,
+                "driver": "Car 31",
+                "team": "",
+                "mph": 95.4
+              },
+              {
+                "pos": 20,
+                "no": 43,
+                "driver": "Lea Wood",
+                "team": "Toyota Avensis",
+                "mph": 95.1
+              },
+              {
+                "pos": 21,
+                "no": 18,
+                "driver": "Nick Foster",
+                "team": "BMW 125i M Sport",
+                "mph": 94.5
+              },
+              {
+                "pos": 22,
+                "no": 28,
+                "driver": "Car 28",
+                "team": "",
+                "mph": 94.1
+              },
+              {
+                "pos": 23,
+                "no": 33,
+                "driver": "Adam Morgan",
+                "team": "Mercedes-Benz A-Class",
+                "mph": 94.1
+              },
+              {
+                "pos": 24,
+                "no": 11,
+                "driver": "Simon Belcher",
+                "team": "Toyota Avensis",
+                "mph": 93.5
+              },
+              {
+                "pos": 25,
+                "no": 54,
+                "driver": "Car 54",
+                "team": "",
+                "mph": 93.4
+              },
+              {
+                "pos": 26,
+                "no": 10,
+                "driver": "Car 10",
+                "team": "",
+                "mph": 91.3
+              },
+              {
+                "pos": 27,
+                "no": 48,
+                "driver": "Ollie Jackson",
+                "team": "Proton Persona",
+                "mph": 88.6
+              }
+            ]
+          },
+          "weather": {
+            "condition": "Rain",
+            "track": "Wet"
+          }
         }
       ]
     }
