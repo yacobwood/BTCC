@@ -110,6 +110,43 @@ SESSION_SUFFIXES = {
     "Race 3":          "rc3",
 }
 
+# Heading text for each session's "Best Speeds" (speed trap leaderboard) page
+# inside the book PDF. Qualifying Part 1 and Part 2 are merged into a single
+# "Qualifying" entry after parsing (see _merge_best_speeds_blocks), since the
+# app has one Qualifying session, not two groups.
+#
+# Every heading is confirmed live to follow "...Kwik Fit British Touring Car
+# Championship" (the book's own repeated page title) - anchoring on that
+# rather than trying to match each heading's own text precisely sidesteps two
+# real-world quirks: (1) inconsistent whitespace around dashes (e.g. "FREE
+# PRACTICE SESSION  - BEST SPEEDS", double space, confirmed at one venue);
+# (2) an optional "- ROUND N" segment some venues insert into the Free
+# Practice/Qualifying Part 1/Part 2/Qualifying Race headings and others
+# don't (confirmed live both ways, including Round 1's Qualifying Race
+# heading, which omits it entirely: "QUALIFYING RACE - BEST SPEEDS", no
+# round number at all). Anchoring here also means the plain "ROUND N - BEST
+# SPEEDS" heading used by Race 1/2/3 can't be confused with "QUALIFYING RACE
+# - ROUND N - BEST SPEEDS" (a real substring-collision risk otherwise,
+# confirmed live) without needing a lookbehind, since only one of the two
+# ever follows the title line directly.
+# Case-insensitive throughout: the book's own title text is confirmed to
+# vary between "Championship" and "championship" within the SAME PDF
+# (Saturday sessions vs Sunday races, at one venue) - a TSL template
+# inconsistency, not something to chase variant-by-variant.
+_TITLE = r"Kwik Fit British Touring Car Championship\s+"
+_DASH  = r"\s*-\s*"
+_ROUND_OPT = rf"(?:{_DASH}ROUND\s*\d+)?"
+
+BEST_SPEEDS_HEADINGS = [
+    ("Free Practice",     re.compile(rf"{_TITLE}FREE PRACTICE SESSION{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
+    ("Qualifying Part 1", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 1{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
+    ("Qualifying Part 2", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 2{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
+    ("Qualifying Race",   re.compile(rf"{_TITLE}QUALIFYING RACE{_ROUND_OPT}{_DASH}BEST SPEEDS", re.IGNORECASE)),
+]
+
+# Race 1/2/3's plain "ROUND N - BEST SPEEDS" headings, in document order.
+RACE_BEST_SPEEDS_RE = re.compile(rf"{_TITLE}ROUND\s*\d+{_DASH}BEST SPEEDS", re.IGNORECASE)
+
 # Grid PDF suffix for each race session (published before the race starts)
 GRID_SUFFIXES = {
     "Qualifying Race": "gqr",
@@ -465,6 +502,222 @@ def parse_laps_led(text):
     return result
 
 
+# ── Best Speeds from book PDF ─────────────────────────────────────────────────
+
+# Circuits have anywhere from 2 to 5 trap points in practice (confirmed live
+# across the 2026 season: Silverstone/Knockhill only wire up Intermediate
+# 2+Finish; Snetterton/Croft add Intermediate 1; Oulton Park/Thruxton wire up
+# Intermediate 1/2/3+Finish; Donington Park/Donington GP define up to
+# Intermediate 4, with only some of them active) - this app surfaces just 3
+# of the possible trap points. A venue with real Intermediate 3/4 data still
+# has it parsed (to keep the line position correct for whatever trap
+# follows) but dropped here, a deliberate scope limit.
+_TRAP_SCHEMA_KEYS = {"INTERMEDIATE 1": "intermediate1", "INTERMEDIATE 2": "intermediate2", "FINISH LINE": "finish"}
+
+
+def _detect_active_traps(header_text):
+    """
+    Scan the column-header block preceding a Best Speeds table's POS run for
+    every "INTERMEDIATE N" / "FINISH LINE" trap label, in the order printed,
+    and return only the ones with real recorded data - excluding any marked
+    "NO SPEED TRAP INFO" or "NO SPEED TRAP INFORMATION" (both wordings
+    confirmed live, varying by venue) between it and the next label. The
+    header's own shape varies too (labels can print before, after, or
+    interspersed with the POS/NO/NAME/MPH column headers) - never assumed.
+    """
+    spans = list(re.finditer(r"INTERMEDIATE \d+|FINISH LINE", header_text))
+    active = []
+    for i, m in enumerate(spans):
+        end = spans[i + 1].start() if i + 1 < len(spans) else len(header_text)
+        if "NO SPEED TRAP INFO" not in header_text[m.end():end]:
+            active.append(m.group(0))
+    return active
+
+
+def _collect_numbers(lines, idx, n):
+    """Collect the next n leading/standalone integers as car numbers,
+    skipping every other line. TSL lays a trap's N entries out two different
+    ways depending on venue (confirmed live): paired "NO NAME" per line (e.g.
+    "3 CHILTON"), or every car's number first as N separate lines followed by
+    every name as N separate lines - and a wrapped surname's own number can
+    print either before or after it (confirmed live, same PDF, both orders).
+    Scanning for the leading integer alone and ignoring name text entirely
+    handles every one of those variants without caring which is in play -
+    the name itself is always re-derived from the session's own results/grid
+    via car-number join in _resolve_best_speeds, never read off this page."""
+    numbers = []
+    while len(numbers) < n and idx < len(lines):
+        m = re.match(r"^(\d+)(?:\s|$)", lines[idx])
+        if m:
+            numbers.append(int(m.group(1)))
+        idx += 1
+    return numbers, idx
+
+
+def _collect_mph(lines, idx, n):
+    """Collect the next n MPH float lines, skipping everything else -
+    including a literal "MPH" header line, which precedes a given trap's
+    values on some pages but not others (pdfminer box-ordering quirk,
+    confirmed live) and needs no special-casing under a skip-non-matching
+    approach."""
+    values = []
+    while len(values) < n and idx < len(lines):
+        if re.match(r"^\d+\.\d+$", lines[idx]):
+            values.append(float(lines[idx]))
+        idx += 1
+    return values, idx
+
+
+def _parse_best_speeds_block(chunk):
+    """
+    Parse one session's Best Speeds table from the text immediately following
+    its heading. Confirmed live across the full 2026 season: the heading is
+    followed by a variable-length, unpredictably-ordered column-header block
+    naming each trap point before the actual POS list (1..N) begins - the
+    header's shape isn't relied on; the POS run is located by scanning for 5
+    consecutive lines "1".."5" instead. After the POS run, one block per
+    active trap (see _detect_active_traps), in the order printed: N car
+    numbers (see _collect_numbers) then N MPH values (see _collect_mph).
+    """
+    lines = [l.strip() for l in chunk.split("\n")]
+    lines = [l for l in lines if l]  # blank lines are a pdfminer layout artifact
+
+    start = None
+    for i in range(len(lines) - 4):
+        if all(lines[i + k] == str(k + 1) for k in range(5)):
+            start = i
+            break
+    if start is None:
+        return None
+    header_text = "\n".join(lines[:start])
+
+    n = 0
+    for i in range(start, len(lines)):
+        if lines[i] == str(i - start + 1):
+            n = i - start + 1
+        else:
+            break
+    if n == 0:
+        return None
+
+    active_traps = _detect_active_traps(header_text)
+    if not active_traps:
+        return None
+
+    idx = start + n  # past the POS run
+    result = {"intermediate1": None, "intermediate2": None, "finish": None}
+    for label in active_traps:
+        numbers, idx = _collect_numbers(lines, idx, n)
+        mph, idx = _collect_mph(lines, idx, n)
+        if len(numbers) != n or len(mph) != n:
+            return None  # malformed/truncated chunk - caller treats as "not available yet"
+        key = _TRAP_SCHEMA_KEYS.get(label)
+        if key:
+            result[key] = _zip_speed_entries(numbers, mph)
+
+    return result
+
+
+def _zip_speed_entries(numbers, mph_values):
+    # pos is the literal row index as printed by TSL (1..N), not a
+    # re-computed dense rank. Ties are not merged in the source table (e.g.
+    # pos 1 "52 SHEDDEN 128.9", pos 2 "3 CHILTON 128.9", same MPH).
+    return [{"pos": i + 1, "no": no, "mph": mph}
+            for i, (no, mph) in enumerate(zip(numbers, mph_values))]
+
+
+def _merge_best_speeds_blocks(part1, part2):
+    """Combine Qualifying Part 1 + Part 2 (the book's own two-group split)
+    into one ranked list per trap, re-sorted by MPH descending and
+    re-indexed 1..total - the app has a single Qualifying session, not two
+    groups."""
+    def merge_trap(key):
+        combined = sorted((part1.get(key) or []) + (part2.get(key) or []), key=lambda e: -e["mph"])
+        return [{**e, "pos": i + 1} for i, e in enumerate(combined)]
+    has_int1 = bool(part1.get("intermediate1") and part2.get("intermediate1"))
+    return {
+        "intermediate1": merge_trap("intermediate1") if has_int1 else None,
+        "intermediate2": merge_trap("intermediate2"),
+        "finish":        merge_trap("finish"),
+    }
+
+
+def parse_best_speeds(text):
+    """
+    Extract every session's Best Speeds table from the book PDF's plain text.
+    Returns {label: {"intermediate1": [...]|None, "intermediate2": [...], "finish": [...]} | None}
+    keyed by the app's 6 session labels (SESSION_SUFFIXES) - Qualifying is
+    already merged from the book's own Part 1/Part 2 pages. A label maps to
+    None when that session's page isn't in the book yet.
+    """
+    result = {label: None for label in SESSION_SUFFIXES}
+    qual_parts = {}
+
+    for label, pattern in BEST_SPEEDS_HEADINGS:
+        m = pattern.search(text)
+        if not m:
+            continue
+        # Wide enough for a 5-trap venue's worth of entries (confirmed live,
+        # Donington GP defines Intermediate 1-4 + Finish) without spilling
+        # into the next session's own heading.
+        block = _parse_best_speeds_block(text[m.end():m.end() + 15000])
+        if label == "Qualifying Part 1":
+            qual_parts["part1"] = block
+        elif label == "Qualifying Part 2":
+            qual_parts["part2"] = block
+        else:
+            result[label] = block
+
+    if qual_parts.get("part1") and qual_parts.get("part2"):
+        result["Qualifying"] = _merge_best_speeds_blocks(qual_parts["part1"], qual_parts["part2"])
+
+    for label, m in zip(["Race 1", "Race 2", "Race 3"], RACE_BEST_SPEEDS_RE.finditer(text)):
+        result[label] = _parse_best_speeds_block(text[m.end():m.end() + 15000])
+
+    return result
+
+
+def _number_driver_map(race):
+    """car number -> (driver, team) from this session's own parsed results
+    (falls back to grid, for a session with a grid but no results yet)."""
+    m = {}
+    for r in race.get("results") or []:
+        if r.get("no"):
+            m[r["no"]] = (r.get("driver", ""), r.get("team", ""))
+    if not m:
+        for g in race.get("grid") or []:
+            if g.get("no"):
+                m[g["no"]] = (g.get("driver", ""), g.get("team", ""))
+    return m
+
+
+def _resolve_best_speeds(block, number_map):
+    """Joins each Best Speeds entry's car number to the canonical
+    "Firstname SURNAME" driver string + team already resolved by
+    parse_classification()/parse_grid() for this same session - the parser
+    never reads a driver name off the Best Speeds page itself (see
+    _collect_numbers), only the car number, so this join is the only place
+    a name is attached at all."""
+    if not block:
+        return None
+    def resolve(entries):
+        if entries is None:
+            return None
+        out = []
+        for e in entries:
+            driver, team = number_map.get(e["no"], ("", ""))
+            if not driver:
+                driver = f"Car {e['no']}"  # unresolved car number - a session/grid data gap, not expected in practice
+                print(f"    [best speeds] car {e['no']} not in session results/grid - using placeholder name")
+            out.append({"pos": e["pos"], "no": e["no"], "driver": driver, "team": team, "mph": e["mph"]})
+        return out
+    return {
+        "intermediate1": resolve(block.get("intermediate1")),
+        "intermediate2": resolve(block.get("intermediate2")),
+        "finish":        resolve(block.get("finish")),
+    }
+
+
 # ── Round scraper ─────────────────────────────────────────────────────────────
 
 def scrape_round(info, session_filter=None):
@@ -508,11 +761,19 @@ def scrape_round(info, session_filter=None):
         print(f"  No results available yet — skipping")
         return None
 
-    # Download book PDF for laps led
+    # Download book PDF for laps led + best speeds
     book_url = TSL_BASE.format(year=YEAR, tsl=tsl, suffix="trg")
     print(f"  [book] → {book_url}")
     book_data = fetch_pdf(book_url)
-    laps_led = parse_laps_led(_pdf_text(book_data)) if book_data else {}
+    book_text = _pdf_text(book_data) if book_data else ""
+    laps_led = parse_laps_led(book_text) if book_data else {}
+
+    best_speeds_raw = parse_best_speeds(book_text) if book_data else {}
+    for race in races:
+        raw = best_speeds_raw.get(race["label"])
+        if raw:
+            race["bestSpeeds"] = _resolve_best_speeds(raw, _number_driver_map(race))
+            print(f"    [best speeds] {race['label']}: parsed")
 
     # Tag pole (P1 in Qualifying only)
     qual = next((r for r in races if r["label"] == "Qualifying"), None)
@@ -1244,6 +1505,8 @@ def merge_scraped_with_existing(scraped, existing_round):
       If the car-number order changed, a warning is printed.
     - Old grid is kept when the new fetch returned empty (transient failure).
     - New results overwrite old results when present; old results kept otherwise.
+    - New bestSpeeds overwrites old bestSpeeds when present; old bestSpeeds kept otherwise
+      (a transient book-fetch failure doesn't wipe previously-scraped speed data).
     - reverseGridDraw is preserved from the existing round when not set on the new scrape.
     - youtubeUrls are always carried forward (never re-scraped).
     """
@@ -1262,6 +1525,8 @@ def merge_scraped_with_existing(scraped, existing_round):
                 print(f"  *** {race['label']} grid CHANGED (TSL amendment?) old={old_nos[:3]}... new={new_nos[:3]}...")
         if ex.get("results") and not race.get("results"):
             race["results"] = ex["results"]
+        if ex.get("bestSpeeds") and not race.get("bestSpeeds"):
+            race["bestSpeeds"] = ex["bestSpeeds"]
         # Preserve an explicitly-set reverseGridDraw override
         if ex.get("reverseGridDraw") is not None and race.get("reverseGridDraw") is None:
             race["reverseGridDraw"] = ex["reverseGridDraw"]

@@ -16,6 +16,10 @@ jest.mock('../../src/utils/analytics', () => ({
     penaltiesShown: jest.fn(),
     penaltyDocumentOpened: jest.fn(),
     penaltyDocumentOpenFailed: jest.fn(),
+    bestSpeedsShown: jest.fn(),
+    bestSpeedsExpanded: jest.fn(),
+    bestSpeedsCollapsed: jest.fn(),
+    bestSpeedsRenderFailed: jest.fn(),
     contentShared: jest.fn(),
     shareNudgeShown: jest.fn(),
     shareNudgeDismissed: jest.fn(),
@@ -1082,6 +1086,63 @@ describe('RoundResultsScreen', () => {
       const link = await findByText('View decision →');
       await act(async () => fireEvent.press(link));
       await waitFor(() => expect(Analytics.penaltyDocumentOpenFailed).toHaveBeenCalledWith(1, 'Free Practice', 'no handler'));
+    });
+  });
+
+  describe('best speeds', () => {
+    const BEST_SPEEDS = {
+      intermediate1: null,
+      intermediate2: [
+        {pos: 1, no: 3, driver: 'Tom Chilton', team: 'Team VERTU', mph: 143.3},
+        {pos: 2, no: 77, driver: 'Sam Osborne', team: 'NAPA Racing UK', mph: 141.5},
+        {pos: 3, no: 32, driver: 'Daniel Rowbottom', team: 'CPRL', mph: 141.2},
+        {pos: 4, no: 16, driver: 'Aiden Moffat', team: 'Power Maxed Racing', mph: 140.9},
+        {pos: 5, no: 88, driver: 'Mikey Doble', team: 'MB Motorsport', mph: 140.3},
+        {pos: 6, no: 99, driver: 'Ashley Sutton', team: 'NAPA Racing UK', mph: 139.8}, // not in MOCK_ROUND's FP results - avoids colliding with a name already on this tab
+      ],
+      finish: [
+        {pos: 1, no: 52, driver: 'Gordon Shedden', team: 'Laser Tools', mph: 128.9},
+        {pos: 2, no: 3, driver: 'Tom Chilton', team: 'Team VERTU', mph: 128.9},
+      ],
+    };
+
+    function roundWithBestSpeeds(bestSpeeds = BEST_SPEEDS) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice' ? {...r, bestSpeeds} : r),
+      };
+    }
+
+    it('shows the Speed Trap card and fires bestSpeedsShown when a session has bestSpeeds', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
+      expect(await findByText('Speed Trap')).toBeTruthy();
+      // Chilton legitimately appears at both trap points (mirrors the real
+      // confirmed Race 3 data) - assert on a name unique to one trap instead.
+      expect(await findByText('Sam OSBORNE')).toBeTruthy();
+      await waitFor(() => expect(Analytics.bestSpeedsShown).toHaveBeenCalledWith(1, 'Free Practice', 2));
+    });
+
+    it('renders nothing when the session has no bestSpeeds yet', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText, queryByText} = renderRound({initialRace: 0}); // plain MOCK_ROUND, no bestSpeeds
+      await findByText('Tom INGRAM'); // wait for the results list to settle
+      expect(queryByText('Speed Trap')).toBeNull();
+      expect(Analytics.bestSpeedsShown).not.toHaveBeenCalled();
+    });
+
+    it('shows only the top 5 by default, expands to all on "Show all" tap and logs the toggle', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText, queryByText, getByLabelText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
+      await findByText('Speed Trap');
+      expect(queryByText('Ashley SUTTON')).toBeNull(); // pos 6, outside the default top 5
+      const showAll = getByLabelText('Show all Intermediate 2');
+      fireEvent.press(showAll);
+      expect(await findByText('Ashley SUTTON')).toBeTruthy();
+      expect(Analytics.bestSpeedsExpanded).toHaveBeenCalledWith(1, 'Free Practice', 'intermediate2');
+      fireEvent.press(getByLabelText('Show top 5 Intermediate 2'));
+      await waitFor(() => expect(queryByText('Ashley SUTTON')).toBeNull());
+      expect(Analytics.bestSpeedsCollapsed).toHaveBeenCalledWith(1, 'Free Practice', 'intermediate2');
     });
   });
 });

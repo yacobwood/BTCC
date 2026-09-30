@@ -106,6 +106,18 @@ export function buildGridMap(races, raceIndex) {
   return Object.keys(map).length ? map : null;
 }
 
+// Returns the entries to render for one Best Speeds trap column: the top
+// `count` ranked entries, plus (if outside that range) the row for whichever
+// driver the user has favourited - so a favourite outside the default top 5
+// isn't silently hidden. `expanded` bypasses this and returns every entry.
+export function selectBestSpeedsRows(entries, expanded, isFavourite, count = 5) {
+  if (!entries?.length) return [];
+  if (expanded) return entries;
+  const top = entries.slice(0, count);
+  const favExtra = entries.slice(count).find(e => isFavourite?.(e.driver));
+  return favExtra ? [...top, favExtra] : top;
+}
+
 const POLL_INTERVAL_MS = 60 * 1000;
 
 export default function RoundResultsScreen({route, navigation}) {
@@ -390,17 +402,114 @@ export default function RoundResultsScreen({route, navigation}) {
                   );
                 })()}
                 ListFooterComponent={
-                  <JudicialDecisionsCard
-                    penalties={penalties.filter(p => p.session === race.label)}
-                    roundNumber={round.round}
-                    session={race.label}
-                  />
+                  <>
+                    <BestSpeedsCard
+                      bestSpeeds={race.bestSpeeds}
+                      roundNumber={round.round}
+                      session={race.label}
+                      isFavourite={isFavourite}
+                      useKm={useKm}
+                    />
+                    <JudicialDecisionsCard
+                      penalties={penalties.filter(p => p.session === race.label)}
+                      roundNumber={round.round}
+                      session={race.label}
+                    />
+                  </>
                 }
               />
             </View>
           );
         })}
       />
+    </View>
+  );
+}
+
+const BEST_SPEEDS_DEFAULT_COUNT = 5;
+
+// Speed-trap leaderboard for this session (tools/scraper/scrape_tsl.py's
+// parse_best_speeds(), sourced from TSL's book PDF). Renders nothing when
+// there's no data yet, so it costs no space on a session that hasn't been
+// scraped for speeds. Top 5 per trap by default, with a favourited driver
+// pinned in even if they're outside the top 5, plus a "Show all" expand.
+function BestSpeedsCard({bestSpeeds, roundNumber, session, isFavourite, useKm}) {
+  const [expanded, setExpanded] = useState({});
+  const traps = [
+    bestSpeeds?.intermediate1?.length && {key: 'intermediate1', label: 'Intermediate 1', entries: bestSpeeds.intermediate1},
+    bestSpeeds?.intermediate2?.length && {key: 'intermediate2', label: 'Intermediate 2', entries: bestSpeeds.intermediate2},
+    bestSpeeds?.finish?.length && {key: 'finish', label: 'Finish Line', entries: bestSpeeds.finish},
+  ].filter(Boolean);
+
+  useEffect(() => {
+    if (traps.length) Analytics.bestSpeedsShown(roundNumber, session, traps.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundNumber, session, traps.length]);
+
+  if (!traps.length) return null;
+
+  const toggle = (trapKey) => {
+    setExpanded(prev => {
+      const next = {...prev, [trapKey]: !prev[trapKey]};
+      (next[trapKey] ? Analytics.bestSpeedsExpanded : Analytics.bestSpeedsCollapsed)(roundNumber, session, trapKey);
+      return next;
+    });
+  };
+
+  // A malformed/unexpected shape slipping through is the only realistic
+  // failure mode here (there's no fetch of its own to fail - this rides the
+  // results fetch) - computed defensively so one bad entry can't blank the
+  // whole results tab underneath it.
+  let sections;
+  try {
+    sections = traps.map(({key, label, entries}) => ({
+      key, label,
+      rows: selectBestSpeedsRows(entries, !!expanded[key], isFavourite, BEST_SPEEDS_DEFAULT_COUNT),
+      total: entries.length,
+    }));
+  } catch (e) {
+    Analytics.bestSpeedsRenderFailed(roundNumber, session, e?.message);
+    return null;
+  }
+
+  return (
+    <View style={styles.bestSpeedsCard}>
+      <View style={styles.bestSpeedsHeader}>
+        <Icon name="speed" size={14} color={Colors.yellow} />
+        <Text style={styles.bestSpeedsTitle}>Speed Trap</Text>
+      </View>
+      {sections.map(({key, label, rows, total}) => {
+        const isExpanded = !!expanded[key];
+        return (
+          <View key={key} style={styles.bestSpeedsSection}>
+            <Text style={styles.bestSpeedsSectionTitle}>{label.toUpperCase()}</Text>
+            {rows.map(row => {
+              const fav = isFavourite(row.driver);
+              return (
+                <View key={`${key}-${row.pos}`} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
+                  <Text style={styles.bestSpeedsPos}>{row.pos}</Text>
+                  <Text style={[styles.bestSpeedsDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
+                    {formatDriverName(row.driver)}
+                  </Text>
+                  <Text style={styles.bestSpeedsValue}>
+                    {useKm ? `${(row.mph * 1.60934).toFixed(1)} km/h` : `${row.mph.toFixed(1)} mph`}
+                  </Text>
+                </View>
+              );
+            })}
+            {total > BEST_SPEEDS_DEFAULT_COUNT && (
+              <TouchableOpacity
+                onPress={() => toggle(key)}
+                accessibilityRole="button"
+                accessibilityLabel={`${isExpanded ? 'Show top 5' : 'Show all'} ${label}`}>
+                <Text style={styles.bestSpeedsShowAllLink}>
+                  {isExpanded ? 'Show top 5' : `Show all ${total} →`}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -805,6 +914,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
+  bestSpeedsCard: {backgroundColor: Colors.card, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 6},
+  bestSpeedsHeader: {flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8},
+  bestSpeedsTitle: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 0.5},
+  bestSpeedsSection: {marginTop: 6},
+  bestSpeedsSectionTitle: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 4},
+  bestSpeedsRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 4, gap: 8},
+  bestSpeedsPos: {color: '#fff', fontSize: 12, fontWeight: '800', width: 20, textAlign: 'center'},
+  bestSpeedsDriver: {flex: 1, color: '#fff', fontSize: 12.5, fontWeight: '600'},
+  bestSpeedsValue: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700'},
+  bestSpeedsShowAllLink: {color: Colors.yellow, fontSize: 11, fontWeight: '700', marginTop: 4},
   penaltyCard: {
     backgroundColor: `${Colors.yellow}0D`,
     borderWidth: 1,

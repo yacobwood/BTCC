@@ -383,25 +383,260 @@ class TestUpdateCalendarRecords(unittest.TestCase):
         self.assertIsNone(s.fastest_lap_driver([]))
 
 
+# ── parse_best_speeds ─────────────────────────────────────────────────────────
+
+# Real sessions always have >=11 starters; _parse_best_speeds_block's POS-run
+# anchor requires 5 consecutive "1".."5" lines to avoid false-positives
+# elsewhere in the document, so every fixture below pads to >=5 entries.
+
+def make_best_speeds_chunk(pos_names_int2, mph_int2, pos_names_finish, mph_finish,
+                            finish_mph_header=True):
+    """Build a synthetic Best Speeds text chunk in the real book-PDF shape:
+    a variable-length header block (with Intermediate 1 absent, the real
+    shape at every venue confirmed live so far), then a POS run, then
+    Intermediate 2's "NO NAME" entries + MPH values, then Finish Line's.
+    `pos_names_int2` is a list of strings, each either "no NAME" (single
+    line) or "no\\nNAME" / "NAME\\nno" (the confirmed unstable wrap order)
+    to simulate a wrapped surname."""
+    n = len(pos_names_int2)
+    header = "POS\n\nINTERMEDIATE 1\nNO SPEED TRAP INFORMATION\n\nINTERMEDIATE 2\n\nFINISH LINE\n\nNO NAME\n\nMPH\n\nNO NAME\n\n"
+    pos_run = "".join(f"{i + 1}\n" for i in range(n))
+    int2_names = "".join(f"{e}\n" for e in pos_names_int2)
+    int2_mph = "".join(f"{v}\n" for v in mph_int2)
+    finish_names = "".join(f"{e}\n" for e in pos_names_finish)
+    finish_mph_hdr = "MPH\n\n" if finish_mph_header else ""
+    finish_mph = "".join(f"{v}\n" for v in mph_finish)
+    return header + pos_run + "\n" + int2_names + "\n" + int2_mph + "\n" + finish_names + "\n" + finish_mph_hdr + finish_mph
+
+
+class TestDetectActiveTraps(unittest.TestCase):
+
+    def test_marks_trap_inactive_when_no_speed_trap_info_follows(self):
+        header = "POS\n\nINTERMEDIATE 1\nNO SPEED TRAP INFORMATION\n\nINTERMEDIATE 2\n\nFINISH LINE\n\nNO NAME\n\nMPH\n\nNO NAME\n\n"
+        self.assertEqual(s._detect_active_traps(header), ['INTERMEDIATE 2', 'FINISH LINE'])
+
+    def test_shortened_no_speed_trap_info_wording_also_recognized(self):
+        # Confirmed live at one venue: "NO SPEED TRAP INFO", not the usual
+        # "...INFORMATION" - both must be recognized as "inactive".
+        header = "INTERMEDIATE 1\n\nPOS\n\nINTERMEDIATE 2\nNO SPEED TRAP INFO\n\nFINISH LINE\n\n"
+        self.assertEqual(s._detect_active_traps(header), ['INTERMEDIATE 1', 'FINISH LINE'])
+
+    def test_all_traps_active_when_no_marker_present(self):
+        # Confirmed live: some venues wire up every trap they define, with no
+        # "NO SPEED TRAP INFO" text anywhere in the header.
+        header = "INTERMEDIATE 1\n\nINTERMEDIATE 2\n\nINTERMEDIATE 3\n\nFINISH LINE\n\nPOS\n\n"
+        self.assertEqual(s._detect_active_traps(header), ['INTERMEDIATE 1', 'INTERMEDIATE 2', 'INTERMEDIATE 3', 'FINISH LINE'])
+
+    def test_no_labels_found_returns_empty(self):
+        self.assertEqual(s._detect_active_traps("POS\n\nNO NAME\n\n"), [])
+
+
+class TestParseBestSpeedsBlock(unittest.TestCase):
+
+    def test_basic_block_with_no_intermediate1(self):
+        chunk = make_best_speeds_chunk(
+            ['10 ALPHA', '20 BETA', '30 GAMMA', '40 DELTA', '50 ECHO'], [150.0, 148.0, 146.0, 144.0, 142.0],
+            ['20 BETA', '10 ALPHA', '30 GAMMA', '40 DELTA', '50 ECHO'], [130.0, 129.0, 129.0, 127.0, 126.0],
+        )
+        block = s._parse_best_speeds_block(chunk)
+        self.assertIsNone(block['intermediate1'])
+        self.assertEqual(block['intermediate2'][0], {'pos': 1, 'no': 10, 'mph': 150.0})
+        self.assertEqual(len(block['intermediate2']), 5)
+        self.assertEqual(len(block['finish']), 5)
+
+    def test_tied_mph_values_kept_as_separate_ranked_rows(self):
+        # Confirmed live behaviour: TSL does not merge ties into a shared
+        # rank - two equal MPH values still get consecutive pos numbers.
+        chunk = make_best_speeds_chunk(
+            ['10 ALPHA', '20 BETA', '30 GAMMA', '40 DELTA', '50 ECHO'], [150.0, 148.0, 148.0, 144.0, 142.0],
+            ['10 ALPHA', '20 BETA', '30 GAMMA', '40 DELTA', '50 ECHO'], [130.0, 129.0, 129.0, 127.0, 126.0],
+        )
+        block = s._parse_best_speeds_block(chunk)
+        pos_mph = [(e['pos'], e['mph']) for e in block['intermediate2']]
+        self.assertEqual(pos_mph, [(1, 150.0), (2, 148.0), (3, 148.0), (4, 144.0), (5, 142.0)])
+
+    def test_wrapped_car_number_extracted_regardless_of_wrap_order(self):
+        # Confirmed live: car 123/Daniel LLOYD's surname sometimes wraps as
+        # "123" then "LLOYD", sometimes as "LLOYD" then "123" (same PDF,
+        # different session pages) - the car number must come out right
+        # either way. The name itself is never read from this page at all
+        # (see _collect_numbers) - only the car number matters here.
+        no_then_name = make_best_speeds_chunk(
+            ['10 ALPHA', '123\nLLOYD', '30 GAMMA', '40 DELTA', '50 ECHO'], [150.0, 148.0, 146.0, 144.0, 142.0],
+            ['10 ALPHA', '20 BETA', '30 GAMMA', '40 DELTA', '50 ECHO'], [130.0, 129.0, 128.0, 127.0, 126.0],
+        )
+        name_then_no = make_best_speeds_chunk(
+            ['10 ALPHA', 'LLOYD\n123', '30 GAMMA', '40 DELTA', '50 ECHO'], [150.0, 148.0, 146.0, 144.0, 142.0],
+            ['10 ALPHA', '20 BETA', '30 GAMMA', '40 DELTA', '50 ECHO'], [130.0, 129.0, 128.0, 127.0, 126.0],
+        )
+        for chunk in (no_then_name, name_then_no):
+            block = s._parse_best_speeds_block(chunk)
+            entry = next(e for e in block['intermediate2'] if e['no'] == 123)
+            self.assertEqual(entry['mph'], 148.0)
+
+    def test_intermediate1_parsed_when_present(self):
+        # Untested live (every real venue seen so far prints "NO SPEED TRAP
+        # INFORMATION" for Intermediate 1) - built directly rather than via
+        # make_best_speeds_chunk, which only has two trap slots.
+        chunk = (
+            "POS\n\nINTERMEDIATE 1\n\nINTERMEDIATE 2\n\nFINISH LINE\n\nNO NAME\n\nMPH\n\nNO NAME\n\nMPH\n\nNO NAME\n\n"
+            "1\n2\n3\n4\n5\n\n"
+            "10 ALPHA\n20 BETA\n30 GAMMA\n40 DELTA\n50 ECHO\n\n"
+            "150.0\n148.0\n146.0\n144.0\n142.0\n\n"
+            "10 ALPHA\n20 BETA\n30 GAMMA\n40 DELTA\n50 ECHO\n\n"
+            "130.0\n129.0\n128.0\n127.0\n126.0\n\n"
+            "10 ALPHA\n20 BETA\n30 GAMMA\n40 DELTA\n50 ECHO\n\n"
+            "110.0\n109.0\n108.0\n107.0\n106.0\n"
+        )
+        block = s._parse_best_speeds_block(chunk)
+        self.assertIsNotNone(block['intermediate1'])
+        self.assertEqual(block['intermediate1'][0]['no'], 10)
+        self.assertEqual(block['intermediate1'][0]['mph'], 150.0)
+        self.assertEqual(block['intermediate2'][0]['mph'], 130.0)
+        self.assertEqual(block['finish'][0]['mph'], 110.0)
+
+    def test_finish_mph_header_line_is_optional(self):
+        # Confirmed live: a literal "MPH" line precedes Finish Line's values
+        # on some pages but not others (pdfminer box-ordering quirk) - both
+        # must parse identically.
+        names = ['10 ALPHA', '20 BETA', '30 GAMMA', '40 DELTA', '50 ECHO']
+        mph = [150.0, 148.0, 146.0, 144.0, 142.0]
+        with_header = make_best_speeds_chunk(names, mph, names, mph, finish_mph_header=True)
+        without_header = make_best_speeds_chunk(names, mph, names, mph, finish_mph_header=False)
+        self.assertEqual(s._parse_best_speeds_block(with_header)['finish'],
+                          s._parse_best_speeds_block(without_header)['finish'])
+
+    def test_returns_none_when_no_pos_run_found(self):
+        self.assertIsNone(s._parse_best_speeds_block("some unrelated text\nwith no table in it"))
+
+
+class TestBestSpeedsHeadings(unittest.TestCase):
+    """Regression coverage for real live PDF-formatting quirks that broke
+    heading detection across the 2026 season (confirmed against every
+    round's actual book PDF, not guessed)."""
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def test_tolerates_double_space_around_dash(self):
+        # Confirmed live: "FREE PRACTICE SESSION  - BEST SPEEDS" (Brands
+        # Hatch Indy) vs the usual single space elsewhere.
+        text = f"{self.TITLE}\n\nFREE PRACTICE SESSION  - BEST SPEEDS\n\nPOS"
+        label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Free Practice")
+        self.assertIsNotNone(pattern.search(text))
+
+    def test_tolerates_optional_embedded_round_number(self):
+        # Confirmed live: some venues insert "- ROUND N" into the Qualifying
+        # Part 1/2 headings, others don't - both must match.
+        with_round = f"{self.TITLE}\n\nQUALIFYING - PART 1 - ROUND 4 - BEST SPEEDS\n\nPOS"
+        without_round = f"{self.TITLE}\n\nQUALIFYING - PART 1 - BEST SPEEDS\n\nPOS"
+        label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Qualifying Part 1")
+        self.assertIsNotNone(pattern.search(with_round))
+        self.assertIsNotNone(pattern.search(without_round))
+
+    def test_qualifying_race_heading_without_round_number(self):
+        # Confirmed live: Round 1's Qualifying Race heading omits the round
+        # number entirely ("QUALIFYING RACE - BEST SPEEDS"), unlike every
+        # other round ("QUALIFYING RACE - ROUND N - BEST SPEEDS").
+        text = f"{self.TITLE}\n\nQUALIFYING RACE - BEST SPEEDS\n\nPOS"
+        label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Qualifying Race")
+        self.assertIsNotNone(pattern.search(text))
+
+    def test_title_case_is_ignored(self):
+        # Confirmed live, same PDF: "championship" lowercase for Saturday
+        # sessions, "Championship" capitalized for Sunday races - a TSL
+        # template inconsistency.
+        text = "2026 Kwik Fit British Touring Car championship\n\nFREE PRACTICE SESSION - BEST SPEEDS\n\nPOS"
+        label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Free Practice")
+        self.assertIsNotNone(pattern.search(text))
+
+    def test_race_heading_not_confused_with_qualifying_race_heading(self):
+        # The old lookbehind-based exclusion is gone (Python's re can't do a
+        # variable-width lookbehind, which flexible whitespace would need) -
+        # anchoring both patterns on the preceding title line instead makes
+        # them mutually exclusive by construction: only one of "QUALIFYING
+        # RACE" or "ROUND N" can immediately follow the title.
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING RACE - ROUND 25 - BEST SPEEDS\n...\n"
+            f"{self.TITLE}\n\nROUND 25 - BEST SPEEDS\n...\n"
+            f"{self.TITLE}\n\nROUND 26 - BEST SPEEDS\n...\n"
+            f"{self.TITLE}\n\nROUND 27 - BEST SPEEDS\n"
+        )
+        matches = [m.group(0).split("\n\n")[-1] for m in s.RACE_BEST_SPEEDS_RE.finditer(text)]
+        self.assertEqual(matches, ['ROUND 25 - BEST SPEEDS', 'ROUND 26 - BEST SPEEDS', 'ROUND 27 - BEST SPEEDS'])
+
+
+class TestMergeBestSpeedsBlocks(unittest.TestCase):
+
+    def test_merges_resorts_and_reindexes(self):
+        part1 = {'intermediate1': None,
+                  'intermediate2': [{'pos': 1, 'no': 1, 'mph': 140.0}],
+                  'finish': [{'pos': 1, 'no': 1, 'mph': 120.0}]}
+        part2 = {'intermediate1': None,
+                  'intermediate2': [{'pos': 1, 'no': 2, 'mph': 145.0}],
+                  'finish': [{'pos': 1, 'no': 2, 'mph': 118.0}]}
+        merged = s._merge_best_speeds_blocks(part1, part2)
+        self.assertEqual([(e['pos'], e['no']) for e in merged['intermediate2']], [(1, 2), (2, 1)])
+        self.assertEqual([(e['pos'], e['no']) for e in merged['finish']], [(1, 1), (2, 2)])
+        self.assertIsNone(merged['intermediate1'])
+
+
+class TestResolveBestSpeeds(unittest.TestCase):
+
+    def test_resolves_car_number_to_canonical_driver_and_team(self):
+        block = {'intermediate1': None,
+                 'intermediate2': [{'pos': 1, 'no': 3, 'mph': 143.3}],
+                 'finish': [{'pos': 1, 'no': 3, 'mph': 128.9}]}
+        number_map = {3: ('Tom CHILTON', 'Team VERTU')}
+        resolved = s._resolve_best_speeds(block, number_map)
+        self.assertEqual(resolved['intermediate2'][0]['driver'], 'Tom CHILTON')
+        self.assertEqual(resolved['intermediate2'][0]['team'], 'Team VERTU')
+
+    def test_falls_back_to_placeholder_when_car_number_unresolved(self):
+        block = {'intermediate1': None,
+                 'intermediate2': [{'pos': 1, 'no': 999, 'mph': 140.0}],
+                 'finish': [{'pos': 1, 'no': 999, 'mph': 120.0}]}
+        resolved = s._resolve_best_speeds(block, {})
+        self.assertEqual(resolved['intermediate2'][0]['driver'], 'Car 999')
+        self.assertEqual(resolved['intermediate2'][0]['team'], '')
+
+    def test_returns_none_for_none_block(self):
+        self.assertIsNone(s._resolve_best_speeds(None, {}))
+
+
+class TestNumberDriverMap(unittest.TestCase):
+
+    def test_builds_from_results(self):
+        race = {'results': [{'no': 3, 'driver': 'Tom CHILTON', 'team': 'Team VERTU'}], 'grid': []}
+        self.assertEqual(s._number_driver_map(race), {3: ('Tom CHILTON', 'Team VERTU')})
+
+    def test_falls_back_to_grid_when_no_results(self):
+        race = {'results': [], 'grid': [{'no': 3, 'driver': 'Tom CHILTON', 'team': 'Team VERTU'}]}
+        self.assertEqual(s._number_driver_map(race), {3: ('Tom CHILTON', 'Team VERTU')})
+
+
 # ── merge_scraped_with_existing ───────────────────────────────────────────────
 
 def make_grid(*car_nos):
     """Build a minimal grid list from an ordered sequence of car numbers."""
     return [{'pos': i + 1, 'no': no, 'cl': '', 'driver': f'Driver{no}', 'team': ''} for i, no in enumerate(car_nos)]
 
-def make_scraped_round(r3_grid=None, r3_results=None, r3_draw=None):
+def make_scraped_round(r3_grid=None, r3_results=None, r3_draw=None, r3_best_speeds=None):
     r3 = {'label': 'Race 3', 'results': r3_results or [], 'grid': r3_grid or []}
     if r3_draw is not None:
         r3['reverseGridDraw'] = r3_draw
+    if r3_best_speeds is not None:
+        r3['bestSpeeds'] = r3_best_speeds
     return {
         'round': 1, 'venue': 'Test', 'date': '01 Jan', 'youtubeUrls': [],
         'races': [{'label': 'Race 1', 'results': [], 'grid': []}, r3],
     }
 
-def make_existing_round(r3_grid=None, r3_results=None, r3_draw=None, youtube=None):
+def make_existing_round(r3_grid=None, r3_results=None, r3_draw=None, youtube=None, r3_best_speeds=None):
     r3 = {'label': 'Race 3', 'results': r3_results or [], 'grid': r3_grid or []}
     if r3_draw is not None:
         r3['reverseGridDraw'] = r3_draw
+    if r3_best_speeds is not None:
+        r3['bestSpeeds'] = r3_best_speeds
     return {
         'round': 1, 'venue': 'Test', 'date': '01 Jan',
         'youtubeUrls': youtube or ['https://yt/r1', None, None, None, None, None],
@@ -483,6 +718,23 @@ class TestMergeScrapedWithExisting(unittest.TestCase):
         existing = make_existing_round(r3_results=old_results)
         s.merge_scraped_with_existing(scraped, existing)
         self.assertEqual(self._r3(scraped)['results'][0]['driver'], 'Ingram')
+
+    def test_old_best_speeds_preserved_when_book_fetch_fails(self):
+        # Transient book-fetch failure this tick shouldn't wipe previously-
+        # scraped speed data.
+        old_speeds = {'intermediate1': None, 'intermediate2': [], 'finish': []}
+        scraped  = make_scraped_round()  # no bestSpeeds this run
+        existing = make_existing_round(r3_best_speeds=old_speeds)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped)['bestSpeeds'], old_speeds)
+
+    def test_new_best_speeds_not_overwritten_by_old(self):
+        old_speeds = {'intermediate1': None, 'intermediate2': [{'pos': 1, 'no': 1, 'name': 'OLD', 'mph': 100.0}], 'finish': []}
+        new_speeds = {'intermediate1': None, 'intermediate2': [{'pos': 1, 'no': 1, 'name': 'NEW', 'mph': 140.0}], 'finish': []}
+        scraped  = make_scraped_round(r3_best_speeds=new_speeds)
+        existing = make_existing_round(r3_best_speeds=old_speeds)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped)['bestSpeeds']['intermediate2'][0]['name'], 'NEW')
 
 
 # ── apply_draw_override ───────────────────────────────────────────────────────

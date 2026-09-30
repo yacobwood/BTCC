@@ -747,6 +747,43 @@ describe('parseResults', () => {
     expect(rounds[0].races[0].results[1].points).toBe(17);
   });
 
+  test('maps bestSpeeds when present', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Race 1',
+          results: [],
+          bestSpeeds: {
+            intermediate1: null,
+            intermediate2: [{pos: 1, no: 3, driver: 'Tom CHILTON', team: 'Team VERTU', mph: 143.3}],
+            finish: [
+              {pos: 1, no: 52, driver: 'Gordon SHEDDEN', team: 'LTR', mph: 128.9},
+              {pos: 2, no: 3, driver: 'Tom CHILTON', team: 'Team VERTU', mph: 128.9},
+            ],
+          },
+        }],
+      }],
+    };
+    const bestSpeeds = parseResults(json)[0].races[0].bestSpeeds;
+    expect(bestSpeeds.intermediate1).toBeNull();
+    expect(bestSpeeds.intermediate2).toEqual([{pos: 1, no: 3, driver: 'Tom CHILTON', team: 'Team VERTU', mph: 143.3}]);
+    expect(bestSpeeds.finish).toHaveLength(2);
+    expect(bestSpeeds.finish[1].driver).toBe('Tom CHILTON');
+  });
+
+  test('bestSpeeds is null when not yet scraped', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{label: 'Race 1', results: []}],
+      }],
+    };
+    expect(parseResults(json)[0].races[0].bestSpeeds).toBeNull();
+  });
+
   test('computes points when not provided', () => {
     const json = {
       rounds: [{

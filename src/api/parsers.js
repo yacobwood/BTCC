@@ -369,6 +369,22 @@ export function parseStandings(json) {
 // Parse race results JSON
 const POINTS_BY_POS = [20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
+// Speed-trap leaderboard entries from scrape_tsl.py's parse_best_speeds() -
+// already resolved to the canonical "Firstname SURNAME" driver string via
+// car-number join, so formatDriverName() renders it like any other results row.
+function mapBestSpeedEntry(e) {
+  return {pos: e.pos || 0, no: e.no || 0, driver: e.driver || '', team: e.team || '', mph: e.mph || 0};
+}
+
+function mapBestSpeeds(bs) {
+  if (!bs) return null;
+  return {
+    intermediate1: bs.intermediate1 ? bs.intermediate1.map(mapBestSpeedEntry) : null,
+    intermediate2: (bs.intermediate2 || []).map(mapBestSpeedEntry),
+    finish: (bs.finish || []).map(mapBestSpeedEntry),
+  };
+}
+
 export function parseResults(json) {
   return (json.rounds || []).map((r, i) => ({
     round: r.round || i + 1,
@@ -394,6 +410,7 @@ export function parseResults(json) {
           driver: g.driver || '',
           team: g.team || '',
         })),
+        bestSpeeds: mapBestSpeeds(race.bestSpeeds),
         results: (race.results || []).map(d => {
           const pos = d.pos || 0;
           const rawPts = d.points || 0;
