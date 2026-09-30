@@ -506,6 +506,15 @@ export default function RoundResultsScreen({route, navigation}) {
 // together with no separation). Each row already carries its own
 // background/border-radius/margin from `resultRow`, so it only needs to
 // sit on the screen's own (different, darker) background to look right.
+//
+// No "Leaderboard" title of its own either, nor do the other 3 tabs carry
+// their own title anymore - Leaderboard's `hasData` is unconditionally
+// true whenever this whole render branch is reached (guarded by the
+// `race.results.length` check above it), so any OTHER tab having data
+// always means at least 2 tabs are available, which always shows the pill
+// row with that same label already - a second, identical title directly
+// underneath it (confirmed live, a real device screenshot) read as a
+// literal duplicate, not reinforcement.
 function LeaderboardTab({results, renderResult, roundNumber, session}) {
   useEffect(() => {
     if (results?.length) Analytics.leaderboardShown(roundNumber, session, results.length);
@@ -515,10 +524,6 @@ function LeaderboardTab({results, renderResult, roundNumber, session}) {
   if (!results?.length) return null;
   return (
     <View>
-      <View style={styles.bestSpeedsHeader}>
-        <Icon name="format-list-numbered" size={14} color={Colors.yellow} />
-        <Text style={styles.bestSpeedsTitle}>Leaderboard</Text>
-      </View>
       {results.map((item, idx) => (
         <React.Fragment key={idx}>{renderResult({item})}</React.Fragment>
       ))}
@@ -574,10 +579,6 @@ function BestSpeedsCard({bestSpeeds, roundNumber, session, isFavourite, useKm}) 
 
   return (
     <View style={styles.bestSpeedsCard}>
-      <View style={styles.bestSpeedsHeader}>
-        <Icon name="speed" size={14} color={Colors.yellow} />
-        <Text style={styles.bestSpeedsTitle}>Speed Trap</Text>
-      </View>
       {sections.map(({key, label, rows, total}) => {
         const isExpanded = !!expanded[key];
         return (
@@ -661,10 +662,6 @@ function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
 
   return (
     <View style={styles.bestSpeedsCard}>
-      <View style={styles.bestSpeedsHeader}>
-        <Icon name="timer" size={14} color={Colors.yellow} />
-        <Text style={styles.bestSpeedsTitle}>Perfect Lap</Text>
-      </View>
       <View style={styles.bestSpeedsSection}>
         <View style={styles.perfectLapHeaderRow}>
           <Text style={[styles.bestSpeedsSectionTitle, styles.perfectLapDriverHeader]}>DRIVER</Text>
@@ -725,10 +722,6 @@ function ConditionsCard({weather, flagStats, roundNumber, session}) {
 
   return (
     <View style={styles.bestSpeedsCard}>
-      <View style={styles.bestSpeedsHeader}>
-        <Icon name="cloud" size={14} color={Colors.yellow} />
-        <Text style={styles.bestSpeedsTitle}>Conditions</Text>
-      </View>
       {weather && (
         <Text style={styles.conditionsWeather}>{weather.condition} / {weather.track}</Text>
       )}
@@ -1153,8 +1146,6 @@ const styles = StyleSheet.create({
   },
   youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
   bestSpeedsCard: {backgroundColor: Colors.card, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 6},
-  bestSpeedsHeader: {flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8},
-  bestSpeedsTitle: {color: Colors.yellow, fontSize: 12, fontWeight: '800', letterSpacing: 0.5},
   bestSpeedsSection: {marginTop: 6},
   bestSpeedsSectionTitle: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 4},
   bestSpeedsRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 4, gap: 8},
