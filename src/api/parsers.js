@@ -385,6 +385,28 @@ function mapBestSpeeds(bs) {
   };
 }
 
+function mapWeather(w) {
+  if (!w) return null;
+  return {condition: w.condition || '', track: w.track || ''};
+}
+
+function mapFlagStats(f) {
+  if (!f) return null;
+  return {green: f.green || 0, red: f.red || 0, safetyCar: f.safetyCar || 0, fcy: f.fcy || 0};
+}
+
+// Perfect Lap (theoretical best lap) entries from scrape_tsl.py's
+// parse_best_sectors() - already resolved to the canonical driver string via
+// car-number join, same as mapBestSpeedEntry.
+function mapBestSectorEntry(e) {
+  return {no: e.no || 0, driver: e.driver || '', team: e.team || '', ideal: e.ideal || 0, best: e.best || 0, diff: e.diff || 0};
+}
+
+function mapBestSectors(bs) {
+  if (!bs) return null;
+  return bs.map(mapBestSectorEntry);
+}
+
 export function parseResults(json) {
   return (json.rounds || []).map((r, i) => ({
     round: r.round || i + 1,
@@ -411,6 +433,9 @@ export function parseResults(json) {
           team: g.team || '',
         })),
         bestSpeeds: mapBestSpeeds(race.bestSpeeds),
+        weather: mapWeather(race.weather),
+        flagStats: mapFlagStats(race.flagStats),
+        bestSectors: mapBestSectors(race.bestSectors),
         results: (race.results || []).map(d => {
           const pos = d.pos || 0;
           const rawPts = d.points || 0;

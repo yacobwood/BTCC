@@ -831,7 +831,7 @@ def parse_flag_stats(text):
 def _parse_best_sectors_block(chunk, is_race):
     """
     Perfect Lap (theoretical best lap): each driver's IDEAL lap (sum of their
-    own best individual sectors) vs their actual BEST lap, and the DIFF - a
+    own best individual sectors) vs their actual BEST lap and the DIFF - a
     classic "what they left on the table" broadcast stat. Confirmed live,
     this shares its page with a Sector 1/2/3 leaderboard this app doesn't
     surface (out of scope - too dense for mobile, and would need real

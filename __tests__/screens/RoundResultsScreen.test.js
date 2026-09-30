@@ -20,6 +20,11 @@ jest.mock('../../src/utils/analytics', () => ({
     bestSpeedsExpanded: jest.fn(),
     bestSpeedsCollapsed: jest.fn(),
     bestSpeedsRenderFailed: jest.fn(),
+    perfectLapShown: jest.fn(),
+    perfectLapExpanded: jest.fn(),
+    perfectLapCollapsed: jest.fn(),
+    perfectLapRenderFailed: jest.fn(),
+    conditionsShown: jest.fn(),
     sessionAnalysisTabChanged: jest.fn(),
     contentShared: jest.fn(),
     shareNudgeShown: jest.fn(),
@@ -1167,6 +1172,93 @@ describe('RoundResultsScreen', () => {
       fireEvent.press(getByLabelText('Show top 5 Intermediate 2'));
       await waitFor(() => expect(queryByText('Ashley SUTTON')).toBeNull());
       expect(Analytics.bestSpeedsCollapsed).toHaveBeenCalledWith(1, 'Free Practice', 'intermediate2');
+    });
+  });
+
+  describe('perfect lap', () => {
+    const BEST_SECTORS = [
+      {no: 3, driver: 'Tom Chilton', team: 'Team VERTU', ideal: 56.5, best: 56.8, diff: 0.3},
+      {no: 77, driver: 'Sam Osborne', team: 'NAPA Racing UK', ideal: 56.6, best: 56.9, diff: 0.3},
+      {no: 32, driver: 'Daniel Rowbottom', team: 'CPRL', ideal: 56.7, best: 57.0, diff: 0.3},
+      {no: 16, driver: 'Aiden Moffat', team: 'Power Maxed Racing', ideal: 56.8, best: 57.1, diff: 0.3},
+      {no: 88, driver: 'Mikey Doble', team: 'MB Motorsport', ideal: 56.9, best: 57.2, diff: 0.3},
+      {no: 99, driver: 'Ashley Sutton', team: 'NAPA Racing UK', ideal: 57.0, best: 57.3, diff: 0.3},
+    ];
+
+    function roundWithBestSectors(bestSectors = BEST_SECTORS) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice' ? {...r, bestSectors} : r),
+      };
+    }
+
+    it('shows the Perfect Lap card and fires perfectLapShown when a session has bestSectors', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText} = renderRound({round: roundWithBestSectors(), initialRace: 0});
+      expect(await findByText('Perfect Lap')).toBeTruthy();
+      expect(await findByText('Sam OSBORNE')).toBeTruthy();
+      await waitFor(() => expect(Analytics.perfectLapShown).toHaveBeenCalledWith(1, 'Free Practice', 6));
+    });
+
+    it('renders nothing when the session has no bestSectors yet', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText, queryByText} = renderRound({initialRace: 0}); // plain MOCK_ROUND, no bestSectors
+      await findByText('Tom INGRAM'); // wait for the results list to settle
+      expect(queryByText('Perfect Lap')).toBeNull();
+      expect(Analytics.perfectLapShown).not.toHaveBeenCalled();
+    });
+
+    it('shows only the top 5 by default, expands to all on "Show all" tap and logs the toggle', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText, queryByText, getByLabelText} = renderRound({round: roundWithBestSectors(), initialRace: 0});
+      await findByText('Perfect Lap');
+      expect(queryByText('Ashley SUTTON')).toBeNull(); // pos 6, outside the default top 5
+      fireEvent.press(getByLabelText('Show all Perfect Lap'));
+      expect(await findByText('Ashley SUTTON')).toBeTruthy();
+      expect(Analytics.perfectLapExpanded).toHaveBeenCalledWith(1, 'Free Practice');
+      fireEvent.press(getByLabelText('Show top 5 Perfect Lap'));
+      await waitFor(() => expect(queryByText('Ashley SUTTON')).toBeNull());
+      expect(Analytics.perfectLapCollapsed).toHaveBeenCalledWith(1, 'Free Practice');
+    });
+  });
+
+  describe('conditions', () => {
+    function roundWithConditions({weather, flagStats} = {}) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice' ? {...r, weather, flagStats} : r),
+      };
+    }
+
+    it('shows the weather condition and fires conditionsShown', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const round = roundWithConditions({weather: {condition: 'Rain', track: 'Wet'}});
+      const {findByText} = renderRound({round, initialRace: 0});
+      expect(await findByText('Conditions')).toBeTruthy();
+      expect(await findByText('Rain / Wet')).toBeTruthy();
+      await waitFor(() => expect(Analytics.conditionsShown).toHaveBeenCalledWith(1, 'Free Practice'));
+    });
+
+    it('shows flag incident counts when present, only for incident types that occurred', async () => {
+      const round = roundWithConditions({flagStats: {green: 1, red: 0, safetyCar: 1, fcy: 0}});
+      const {findByText, queryByText} = renderRound({round, initialRace: 0});
+      expect(await findByText('Safety Car: 1')).toBeTruthy();
+      expect(queryByText('Red: 0')).toBeNull();
+      expect(queryByText('Full Course Yellow: 0')).toBeNull();
+    });
+
+    it('shows "No flag incidents" for a clean session', async () => {
+      const round = roundWithConditions({flagStats: {green: 1, red: 0, safetyCar: 0, fcy: 0}});
+      const {findByText} = renderRound({round, initialRace: 0});
+      expect(await findByText('No flag incidents')).toBeTruthy();
+    });
+
+    it('renders nothing when neither weather nor flagStats are available yet', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText, queryByText} = renderRound({initialRace: 0}); // plain MOCK_ROUND
+      await findByText('Tom INGRAM'); // wait for the results list to settle
+      expect(queryByText('Conditions')).toBeNull();
+      expect(Analytics.conditionsShown).not.toHaveBeenCalled();
     });
   });
 

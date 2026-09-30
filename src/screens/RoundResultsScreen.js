@@ -423,6 +423,32 @@ export default function RoundResultsScreen({route, navigation}) {
                             />
                           ),
                         },
+                        {
+                          key: 'perfectLap',
+                          label: 'Perfect Lap',
+                          hasData: !!race.bestSectors?.length,
+                          render: () => (
+                            <PerfectLapCard
+                              bestSectors={race.bestSectors}
+                              roundNumber={round.round}
+                              session={race.label}
+                              isFavourite={isFavourite}
+                            />
+                          ),
+                        },
+                        {
+                          key: 'conditions',
+                          label: 'Conditions',
+                          hasData: !!race.weather || !!race.flagStats,
+                          render: () => (
+                            <ConditionsCard
+                              weather={race.weather}
+                              flagStats={race.flagStats}
+                              roundNumber={round.round}
+                              session={race.label}
+                            />
+                          ),
+                        },
                       ]}
                     />
                     <JudicialDecisionsCard
@@ -525,6 +551,141 @@ function BestSpeedsCard({bestSpeeds, roundNumber, session, isFavourite, useKm}) 
           </View>
         );
       })}
+    </View>
+  );
+}
+
+// "56.887" for a sub-minute lap, "1:01.112" for anything over a minute -
+// mirrors TSL's own book-PDF formatting (see scrape_tsl.py's
+// _collect_lap_time), so a value copied off this card matches the source.
+function formatLapTime(secs) {
+  if (secs < 60) return secs.toFixed(3);
+  const m = Math.floor(secs / 60);
+  const s = (secs - m * 60).toFixed(3).padStart(6, '0');
+  return `${m}:${s}`;
+}
+
+const PERFECT_LAP_DEFAULT_COUNT = 5;
+
+// Perfect Lap (theoretical best lap) comparison table for this session
+// (tools/scraper/scrape_tsl.py's parse_best_sectors(), sourced from TSL's
+// book PDF): each driver's IDEAL lap (sum of their own best sectors) vs
+// their actual BEST lap, and the DIFF - "what they left on the table".
+// Already ranked by IDEAL ascending (TSL's own table order), so this reuses
+// selectBestSpeedsRows for top-5 + favourite-pin + expand exactly as Speed
+// Trap does - same shape of ranked {driver, ...} list.
+function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (bestSectors?.length) Analytics.perfectLapShown(roundNumber, session, bestSectors.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundNumber, session, bestSectors?.length]);
+
+  if (!bestSectors?.length) return null;
+
+  let rows;
+  try {
+    rows = selectBestSpeedsRows(bestSectors, expanded, isFavourite, PERFECT_LAP_DEFAULT_COUNT);
+  } catch (e) {
+    Analytics.perfectLapRenderFailed(roundNumber, session, e?.message);
+    return null;
+  }
+
+  const toggle = () => {
+    setExpanded(prev => {
+      const next = !prev;
+      (next ? Analytics.perfectLapExpanded : Analytics.perfectLapCollapsed)(roundNumber, session);
+      return next;
+    });
+  };
+
+  return (
+    <View style={styles.bestSpeedsCard}>
+      <View style={styles.bestSpeedsHeader}>
+        <Icon name="timer" size={14} color={Colors.yellow} />
+        <Text style={styles.bestSpeedsTitle}>Perfect Lap</Text>
+      </View>
+      <View style={styles.bestSpeedsSection}>
+        <View style={styles.perfectLapHeaderRow}>
+          <Text style={[styles.bestSpeedsSectionTitle, styles.perfectLapDriverHeader]}>DRIVER</Text>
+          <Text style={styles.perfectLapColHeader}>IDEAL</Text>
+          <Text style={styles.perfectLapColHeader}>BEST</Text>
+          <Text style={styles.perfectLapColHeader}>DIFF</Text>
+        </View>
+        {rows.map(row => {
+          const fav = isFavourite(row.driver);
+          return (
+            <View key={row.no} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
+              <Text style={[styles.bestSpeedsDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
+                {formatDriverName(row.driver)}
+              </Text>
+              <Text style={styles.perfectLapValue}>{formatLapTime(row.ideal)}</Text>
+              <Text style={styles.perfectLapValue}>{formatLapTime(row.best)}</Text>
+              <Text style={styles.perfectLapValue}>+{row.diff.toFixed(3)}</Text>
+            </View>
+          );
+        })}
+        {bestSectors.length > PERFECT_LAP_DEFAULT_COUNT && (
+          <TouchableOpacity
+            onPress={toggle}
+            accessibilityRole="button"
+            accessibilityLabel={`${expanded ? 'Show top 5' : 'Show all'} Perfect Lap`}>
+            <Text style={styles.bestSpeedsShowAllLink}>
+              {expanded ? 'Show top 5' : `Show all ${bestSectors.length} →`}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// Green isn't itself an incident - every session that ran has at least one
+// green-flag period, so it's the baseline, not something worth flagging.
+// Only Red/Safety Car/FCY represent an actual on-track incident.
+const FLAG_LABELS = [
+  {key: 'red', label: 'Red'},
+  {key: 'safetyCar', label: 'Safety Car'},
+  {key: 'fcy', label: 'Full Course Yellow'},
+];
+
+// Weather/track condition + flag-incident counts for this session
+// (tools/scraper/scrape_tsl.py's parse_weather()/parse_flag_stats()).
+// Renders nothing until at least one is available. A small fixed-size
+// summary, not a ranked list, so no expand/collapse interaction to track.
+function ConditionsCard({weather, flagStats, roundNumber, session}) {
+  useEffect(() => {
+    if (weather || flagStats) Analytics.conditionsShown(roundNumber, session);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundNumber, session, !!weather, !!flagStats]);
+
+  if (!weather && !flagStats) return null;
+
+  const incidentFlags = flagStats ? FLAG_LABELS.filter(f => flagStats[f.key] > 0) : [];
+
+  return (
+    <View style={styles.bestSpeedsCard}>
+      <View style={styles.bestSpeedsHeader}>
+        <Icon name="cloud" size={14} color={Colors.yellow} />
+        <Text style={styles.bestSpeedsTitle}>Conditions</Text>
+      </View>
+      {weather && (
+        <Text style={styles.conditionsWeather}>{weather.condition} / {weather.track}</Text>
+      )}
+      {flagStats && (
+        incidentFlags.length ? (
+          <View style={styles.conditionsFlagRow}>
+            {incidentFlags.map(f => (
+              <View key={f.key} style={styles.conditionsFlagChip}>
+                <Text style={styles.conditionsFlagChipText}>{f.label}: {flagStats[f.key]}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.conditionsClean}>No flag incidents</Text>
+        )
+      )}
     </View>
   );
 }
@@ -942,6 +1103,22 @@ const styles = StyleSheet.create({
   bestSpeedsDriver: {flex: 1, color: '#fff', fontSize: 12.5, fontWeight: '600'},
   bestSpeedsValue: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700'},
   bestSpeedsShowAllLink: {color: Colors.yellow, fontSize: 11, fontWeight: '700', marginTop: 4},
+  perfectLapHeaderRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 4, gap: 8},
+  perfectLapDriverHeader: {flex: 1, marginBottom: 0},
+  perfectLapColHeader: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, width: 58, textAlign: 'right'},
+  perfectLapValue: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700', width: 58, textAlign: 'right'},
+  conditionsWeather: {color: '#fff', fontSize: 13, fontWeight: '600'},
+  conditionsFlagRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8},
+  conditionsFlagChip: {
+    backgroundColor: `${Colors.yellow}1A`,
+    borderWidth: 1,
+    borderColor: `${Colors.yellow}33`,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  conditionsFlagChipText: {color: Colors.yellow, fontSize: 11, fontWeight: '700'},
+  conditionsClean: {color: Colors.textSecondary, fontSize: 12, fontWeight: '600', marginTop: 8},
   penaltyCard: {
     backgroundColor: `${Colors.yellow}0D`,
     borderWidth: 1,

@@ -784,6 +784,44 @@ describe('parseResults', () => {
     expect(parseResults(json)[0].races[0].bestSpeeds).toBeNull();
   });
 
+  test('maps weather, flagStats and bestSectors when present', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Race 3',
+          results: [],
+          weather: {condition: 'Rain', track: 'Wet'},
+          flagStats: {green: 1, red: 0, safetyCar: 1, fcy: 0},
+          bestSectors: [
+            {no: 3, driver: 'Tom CHILTON', team: 'Team VERTU', ideal: 56.887, best: 56.956, diff: 0.069},
+          ],
+        }],
+      }],
+    };
+    const race = parseResults(json)[0].races[0];
+    expect(race.weather).toEqual({condition: 'Rain', track: 'Wet'});
+    expect(race.flagStats).toEqual({green: 1, red: 0, safetyCar: 1, fcy: 0});
+    expect(race.bestSectors).toEqual([
+      {no: 3, driver: 'Tom CHILTON', team: 'Team VERTU', ideal: 56.887, best: 56.956, diff: 0.069},
+    ]);
+  });
+
+  test('weather, flagStats and bestSectors are null when not yet scraped', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{label: 'Race 1', results: []}],
+      }],
+    };
+    const race = parseResults(json)[0].races[0];
+    expect(race.weather).toBeNull();
+    expect(race.flagStats).toBeNull();
+    expect(race.bestSectors).toBeNull();
+  });
+
   test('passes the class code through', () => {
     const json = {
       rounds: [{
