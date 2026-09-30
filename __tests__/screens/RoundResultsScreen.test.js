@@ -16,14 +16,8 @@ jest.mock('../../src/utils/analytics', () => ({
     penaltiesShown: jest.fn(),
     penaltyDocumentOpened: jest.fn(),
     penaltyDocumentOpenFailed: jest.fn(),
-    bestSpeedsShown: jest.fn(),
-    bestSpeedsExpanded: jest.fn(),
-    bestSpeedsCollapsed: jest.fn(),
-    bestSpeedsRenderFailed: jest.fn(),
+    speedTrapShown: jest.fn(),
     perfectLapShown: jest.fn(),
-    perfectLapExpanded: jest.fn(),
-    perfectLapCollapsed: jest.fn(),
-    perfectLapRenderFailed: jest.fn(),
     conditionsShown: jest.fn(),
     leaderboardShown: jest.fn(),
     sessionAnalysisTabChanged: jest.fn(),
@@ -1119,7 +1113,7 @@ describe('RoundResultsScreen', () => {
     });
   });
 
-  describe('best speeds', () => {
+  describe('speed trap', () => {
     const BEST_SPEEDS = {
       intermediate1: null,
       intermediate2: [
@@ -1143,39 +1137,48 @@ describe('RoundResultsScreen', () => {
       };
     }
 
-    it('shows the Speed Trap card and fires bestSpeedsShown when a session has bestSpeeds', async () => {
+    it('gives each active trap its own page (skipping Intermediate 1, which has no data) and fires speedTrapShown', async () => {
       const {Analytics} = require('../../src/utils/analytics');
       const {findByText, getByLabelText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
-      // Leaderboard is the default-active page now - advance to Speed Trap first.
+      // Leaderboard is the default-active page now - advance once to reach
+      // Intermediate 2, the first trap with real data (Intermediate 1 is
+      // null here and must not get its own empty page).
       await findByText('Tom INGRAM');
       fireEvent.press(getByLabelText('Next data type'));
-      // Chilton legitimately appears at both trap points (mirrors the real
-      // confirmed Race 3 data) - assert on a name unique to one trap instead.
+      expect(await findByText('Intermediate 2')).toBeTruthy(); // the page title itself
       expect(await findByText('Sam OSBORNE')).toBeTruthy();
-      await waitFor(() => expect(Analytics.bestSpeedsShown).toHaveBeenCalledWith(1, 'Free Practice', 2));
+      await waitFor(() => expect(Analytics.speedTrapShown).toHaveBeenCalledWith(1, 'Free Practice', 'Intermediate 2', 6));
     });
 
     it('renders nothing when the session has no bestSpeeds yet', async () => {
       const {Analytics} = require('../../src/utils/analytics');
       const {findByText, queryByText} = renderRound({initialRace: 0}); // plain MOCK_ROUND, no bestSpeeds
       await findByText('Tom INGRAM'); // wait for the results list to settle
-      expect(queryByText('Speed Trap')).toBeNull();
-      expect(Analytics.bestSpeedsShown).not.toHaveBeenCalled();
+      expect(queryByText('Intermediate 2')).toBeNull();
+      expect(queryByText('Finish Line')).toBeNull();
+      expect(Analytics.speedTrapShown).not.toHaveBeenCalled();
     });
 
-    it('shows only the top 5 by default, expands to all on "Show all" tap and logs the toggle', async () => {
-      const {Analytics} = require('../../src/utils/analytics');
-      const {findByText, queryByText, getByLabelText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
+    it('shows every entry directly with no top-5 truncation, including position 6', async () => {
+      const {findByText, getByLabelText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
       await findByText('Tom INGRAM');
       fireEvent.press(getByLabelText('Next data type'));
-      expect(queryByText('Ashley SUTTON')).toBeNull(); // pos 6, outside the default top 5
-      const showAll = getByLabelText('Show all Intermediate 2');
-      fireEvent.press(showAll);
+      // Position 6 - would have been hidden behind a "Show all" tap under
+      // the old pill-row design - now visible immediately, since each trap
+      // has a whole dedicated page rather than sharing space with others.
       expect(await findByText('Ashley SUTTON')).toBeTruthy();
-      expect(Analytics.bestSpeedsExpanded).toHaveBeenCalledWith(1, 'Free Practice', 'intermediate2');
-      fireEvent.press(getByLabelText('Show top 5 Intermediate 2'));
-      await waitFor(() => expect(queryByText('Ashley SUTTON')).toBeNull());
-      expect(Analytics.bestSpeedsCollapsed).toHaveBeenCalledWith(1, 'Free Practice', 'intermediate2');
+    });
+
+    it('Intermediate 2 and Finish Line are separate pages, not stacked on one', async () => {
+      const {findByText, getByLabelText, queryByText} = renderRound({round: roundWithBestSpeeds(), initialRace: 0});
+      await findByText('Tom INGRAM');
+      fireEvent.press(getByLabelText('Next data type')); // Leaderboard -> Intermediate 2
+      expect(await findByText('Sam OSBORNE')).toBeTruthy();
+      expect(queryByText('Gordon SHEDDEN')).toBeNull(); // Finish Line's own driver, not shown yet
+      fireEvent.press(getByLabelText('Next data type')); // Intermediate 2 -> Finish Line
+      expect(await findByText('Finish Line')).toBeTruthy();
+      expect(await findByText('Gordon SHEDDEN')).toBeTruthy();
+      expect(queryByText('Sam OSBORNE')).toBeNull(); // Intermediate 2's own driver, not shown alongside it
     });
   });
 
@@ -1213,18 +1216,14 @@ describe('RoundResultsScreen', () => {
       expect(Analytics.perfectLapShown).not.toHaveBeenCalled();
     });
 
-    it('shows only the top 5 by default, expands to all on "Show all" tap and logs the toggle', async () => {
-      const {Analytics} = require('../../src/utils/analytics');
-      const {findByText, queryByText, getByLabelText} = renderRound({round: roundWithBestSectors(), initialRace: 0});
+    it('shows every entry directly with no top-5 truncation, including position 6', async () => {
+      const {findByText, getByLabelText} = renderRound({round: roundWithBestSectors(), initialRace: 0});
       await findByText('Tom INGRAM');
       fireEvent.press(getByLabelText('Next data type'));
-      expect(queryByText('Ashley SUTTON')).toBeNull(); // pos 6, outside the default top 5
-      fireEvent.press(getByLabelText('Show all Perfect Lap'));
+      // Position 6 - would have been hidden behind a "Show all" tap under
+      // the old pill-row design - now visible immediately, since Perfect
+      // Lap has a whole dedicated page rather than sharing space.
       expect(await findByText('Ashley SUTTON')).toBeTruthy();
-      expect(Analytics.perfectLapExpanded).toHaveBeenCalledWith(1, 'Free Practice');
-      fireEvent.press(getByLabelText('Show top 5 Perfect Lap'));
-      await waitFor(() => expect(queryByText('Ashley SUTTON')).toBeNull());
-      expect(Analytics.perfectLapCollapsed).toHaveBeenCalledWith(1, 'Free Practice');
     });
   });
 

@@ -107,18 +107,6 @@ export function buildGridMap(races, raceIndex) {
   return Object.keys(map).length ? map : null;
 }
 
-// Returns the entries to render for one Best Speeds trap column: the top
-// `count` ranked entries, plus (if outside that range) the row for whichever
-// driver the user has favourited - so a favourite outside the default top 5
-// isn't silently hidden. `expanded` bypasses this and returns every entry.
-export function selectBestSpeedsRows(entries, expanded, isFavourite, count = 5) {
-  if (!entries?.length) return [];
-  if (expanded) return entries;
-  const top = entries.slice(0, count);
-  const favExtra = entries.slice(count).find(e => isFavourite?.(e.driver));
-  return favExtra ? [...top, favExtra] : top;
-}
-
 const POLL_INTERVAL_MS = 60 * 1000;
 
 export default function RoundResultsScreen({route, navigation}) {
@@ -381,6 +369,32 @@ export default function RoundResultsScreen({route, navigation}) {
             return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight, results will appear when they're ready" />;
           }
 
+          // One paginator tab per active speed trap, not one "Speed Trap"
+          // tab containing all of them stacked - per the user's explicit
+          // ask, once they saw Intermediate 1 and Finish Line sharing a
+          // single page: "seperate speedtrap onto seperate pages."
+          const speedTrapTabs = [
+            {key: 'intermediate1', label: 'Intermediate 1'},
+            {key: 'intermediate2', label: 'Intermediate 2'},
+            {key: 'finish', label: 'Finish Line'},
+          ]
+            .filter(t => race.bestSpeeds?.[t.key]?.length)
+            .map(t => ({
+              key: `speedTrap_${t.key}`,
+              label: t.label,
+              hasData: true,
+              render: () => (
+                <SpeedTrapCard
+                  label={t.label}
+                  entries={race.bestSpeeds[t.key]}
+                  roundNumber={round.round}
+                  session={race.label}
+                  isFavourite={isFavourite}
+                  useKm={useKm}
+                />
+              ),
+            }));
+
           return (
             <View style={{flex: 1}}>
               {race?.date && race.date !== round.date && (
@@ -429,20 +443,7 @@ export default function RoundResultsScreen({route, navigation}) {
                         />
                       ),
                     },
-                    {
-                      key: 'speedTrap',
-                      label: 'Speed Trap',
-                      hasData: !!race.bestSpeeds,
-                      render: () => (
-                        <BestSpeedsCard
-                          bestSpeeds={race.bestSpeeds}
-                          roundNumber={round.round}
-                          session={race.label}
-                          isFavourite={isFavourite}
-                          useKm={useKm}
-                        />
-                      ),
-                    },
+                    ...speedTrapTabs,
                     {
                       key: 'perfectLap',
                       label: 'Perfect Lap',
@@ -539,83 +540,36 @@ function LeaderboardTab({results, renderResult, roundNumber, session}) {
   );
 }
 
-const BEST_SPEEDS_DEFAULT_COUNT = 5;
-
-// Speed-trap leaderboard for this session (tools/scraper/scrape_tsl.py's
-// parse_best_speeds(), sourced from TSL's book PDF). Renders nothing when
-// there's no data yet, so it costs no space on a session that hasn't been
-// scraped for speeds. Top 5 per trap by default, with a favourited driver
-// pinned in even if they're outside the top 5, plus a "Show all" expand.
-function BestSpeedsCard({bestSpeeds, roundNumber, session, isFavourite, useKm}) {
-  const [expanded, setExpanded] = useState({});
-  const traps = [
-    bestSpeeds?.intermediate1?.length && {key: 'intermediate1', label: 'Intermediate 1', entries: bestSpeeds.intermediate1},
-    bestSpeeds?.intermediate2?.length && {key: 'intermediate2', label: 'Intermediate 2', entries: bestSpeeds.intermediate2},
-    bestSpeeds?.finish?.length && {key: 'finish', label: 'Finish Line', entries: bestSpeeds.finish},
-  ].filter(Boolean);
-
+// One speed trap's leaderboard (Intermediate 1/2 or Finish Line), each now
+// its own page in the paginator rather than a sub-section sharing one
+// combined "Speed Trap" page - per the user's explicit ask, once they saw
+// multiple traps stacked together: "seperate speedtrap onto seperate
+// pages." Shows every entry directly, no top-5 truncation - "no need to
+// collapse" now that each trap has a whole dedicated page to itself
+// instead of competing for space with the others. Renders nothing when
+// this specific trap has no data, so RoundResultsScreen only builds a tab
+// for it at all once there's something to show (see the trap tabs there).
+function SpeedTrapCard({label, entries, roundNumber, session, isFavourite, useKm}) {
   useEffect(() => {
-    if (traps.length) Analytics.bestSpeedsShown(roundNumber, session, traps.length);
+    if (entries?.length) Analytics.speedTrapShown(roundNumber, session, label, entries.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roundNumber, session, traps.length]);
+  }, [roundNumber, session, label, entries?.length]);
 
-  if (!traps.length) return null;
-
-  const toggle = (trapKey) => {
-    setExpanded(prev => {
-      const next = {...prev, [trapKey]: !prev[trapKey]};
-      (next[trapKey] ? Analytics.bestSpeedsExpanded : Analytics.bestSpeedsCollapsed)(roundNumber, session, trapKey);
-      return next;
-    });
-  };
-
-  // A malformed/unexpected shape slipping through is the only realistic
-  // failure mode here (there's no fetch of its own to fail - this rides the
-  // results fetch) - computed defensively so one bad entry can't blank the
-  // whole results tab underneath it.
-  let sections;
-  try {
-    sections = traps.map(({key, label, entries}) => ({
-      key, label,
-      rows: selectBestSpeedsRows(entries, !!expanded[key], isFavourite, BEST_SPEEDS_DEFAULT_COUNT),
-      total: entries.length,
-    }));
-  } catch (e) {
-    Analytics.bestSpeedsRenderFailed(roundNumber, session, e?.message);
-    return null;
-  }
+  if (!entries?.length) return null;
 
   return (
     <View style={styles.bestSpeedsCard}>
-      {sections.map(({key, label, rows, total}) => {
-        const isExpanded = !!expanded[key];
+      {entries.map(row => {
+        const fav = isFavourite(row.driver);
         return (
-          <View key={key} style={styles.bestSpeedsSection}>
-            <Text style={styles.bestSpeedsSectionTitle}>{label.toUpperCase()}</Text>
-            {rows.map(row => {
-              const fav = isFavourite(row.driver);
-              return (
-                <View key={`${key}-${row.pos}`} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
-                  <Text style={styles.bestSpeedsPos}>{row.pos}</Text>
-                  <Text style={[styles.bestSpeedsDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
-                    {formatDriverName(row.driver)}
-                  </Text>
-                  <Text style={styles.bestSpeedsValue}>
-                    {useKm ? `${(row.mph * 1.60934).toFixed(1)} km/h` : `${row.mph.toFixed(1)} mph`}
-                  </Text>
-                </View>
-              );
-            })}
-            {total > BEST_SPEEDS_DEFAULT_COUNT && (
-              <TouchableOpacity
-                onPress={() => toggle(key)}
-                accessibilityRole="button"
-                accessibilityLabel={`${isExpanded ? 'Show top 5' : 'Show all'} ${label}`}>
-                <Text style={styles.bestSpeedsShowAllLink}>
-                  {isExpanded ? 'Show top 5' : `Show all ${total} →`}
-                </Text>
-              </TouchableOpacity>
-            )}
+          <View key={row.pos} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
+            <Text style={styles.bestSpeedsPos}>{row.pos}</Text>
+            <Text style={[styles.bestSpeedsDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
+              {formatDriverName(row.driver)}
+            </Text>
+            <Text style={styles.bestSpeedsValue}>
+              {useKm ? `${(row.mph * 1.60934).toFixed(1)} km/h` : `${row.mph.toFixed(1)} mph`}
+            </Text>
           </View>
         );
       })}
@@ -633,40 +587,19 @@ function formatLapTime(secs) {
   return `${m}:${s}`;
 }
 
-const PERFECT_LAP_DEFAULT_COUNT = 5;
-
 // Perfect Lap (theoretical best lap) comparison table for this session
 // (tools/scraper/scrape_tsl.py's parse_best_sectors(), sourced from TSL's
 // book PDF): each driver's IDEAL lap (sum of their own best sectors) vs
 // their actual BEST lap, and the DIFF - "what they left on the table".
-// Already ranked by IDEAL ascending (TSL's own table order), so this reuses
-// selectBestSpeedsRows for top-5 + favourite-pin + expand exactly as Speed
-// Trap does - same shape of ranked {driver, ...} list.
+// Already ranked by IDEAL ascending (TSL's own table order). Shows every
+// entry directly, no top-5 truncation, same reasoning as SpeedTrapCard.
 function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
-  const [expanded, setExpanded] = useState(false);
-
   useEffect(() => {
     if (bestSectors?.length) Analytics.perfectLapShown(roundNumber, session, bestSectors.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundNumber, session, bestSectors?.length]);
 
   if (!bestSectors?.length) return null;
-
-  let rows;
-  try {
-    rows = selectBestSpeedsRows(bestSectors, expanded, isFavourite, PERFECT_LAP_DEFAULT_COUNT);
-  } catch (e) {
-    Analytics.perfectLapRenderFailed(roundNumber, session, e?.message);
-    return null;
-  }
-
-  const toggle = () => {
-    setExpanded(prev => {
-      const next = !prev;
-      (next ? Analytics.perfectLapExpanded : Analytics.perfectLapCollapsed)(roundNumber, session);
-      return next;
-    });
-  };
 
   return (
     <View style={styles.bestSpeedsCard}>
@@ -677,7 +610,7 @@ function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
           <Text style={styles.perfectLapColHeader}>BEST</Text>
           <Text style={styles.perfectLapColHeader}>DIFF</Text>
         </View>
-        {rows.map(row => {
+        {bestSectors.map(row => {
           const fav = isFavourite(row.driver);
           return (
             <View key={row.no} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
@@ -690,16 +623,6 @@ function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
             </View>
           );
         })}
-        {bestSectors.length > PERFECT_LAP_DEFAULT_COUNT && (
-          <TouchableOpacity
-            onPress={toggle}
-            accessibilityRole="button"
-            accessibilityLabel={`${expanded ? 'Show top 5' : 'Show all'} Perfect Lap`}>
-            <Text style={styles.bestSpeedsShowAllLink}>
-              {expanded ? 'Show top 5' : `Show all ${bestSectors.length} →`}
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
@@ -1160,7 +1083,6 @@ const styles = StyleSheet.create({
   bestSpeedsPos: {color: '#fff', fontSize: 12, fontWeight: '800', width: 20, textAlign: 'center'},
   bestSpeedsDriver: {flex: 1, color: '#fff', fontSize: 12.5, fontWeight: '600'},
   bestSpeedsValue: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700'},
-  bestSpeedsShowAllLink: {color: Colors.yellow, fontSize: 11, fontWeight: '700', marginTop: 4},
   perfectLapHeaderRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 4, gap: 8},
   perfectLapDriverHeader: {flex: 1, marginBottom: 0},
   perfectLapColHeader: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, width: 58, textAlign: 'right'},
