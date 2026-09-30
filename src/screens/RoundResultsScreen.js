@@ -127,6 +127,12 @@ export default function RoundResultsScreen({route, navigation}) {
   // Mirrors SwipeableTabs' own index so a share fired from e.g. the R2 tab can
   // link back to R2 specifically, not just the round overview.
   const [activeRace, setActiveRace] = useState(initialRace ?? 0);
+  // Which SessionAnalysisTabs data type (Leaderboard/Speed Trap/Perfect
+  // Lap/Conditions) is showing, shared across every race's own instance of
+  // it rather than living locally inside each one - per the user's
+  // explicit ask, switching from e.g. FP to R1 should stay on whichever
+  // data type you were already viewing, not reset back to Leaderboard.
+  const [activeDataKey, setActiveDataKey] = useState('leaderboard');
   // Full season's rounds, kept alongside `round` so Race 1's TTB allocation
   // (reg 1.11.1.a - Championship Order before this round) can be reconstructed
   // from cumulative points across earlier rounds. Seeded from the bundled
@@ -402,6 +408,8 @@ export default function RoundResultsScreen({route, navigation}) {
                 <SessionAnalysisTabs
                   roundNumber={round.round}
                   session={race.label}
+                  activeKey={activeDataKey}
+                  onActiveKeyChange={setActiveDataKey}
                   tabs={[
                     {
                       // First, so it's the default-active tab whenever more
