@@ -15,8 +15,8 @@
     "number": "https://btcc.net/api/media/df2f31cf-ddb9-4a83-8d35-70d55fb0c407"
   },
   "Charles Rainford": {
-    "cutout": "https://btcc.net/api/media/eadf31c9-f6a3-4f9f-a1ae-71c4c75b7e24",
-    "car": "https://btcc.net/api/media/37e9b455-898f-49c6-9f26-381400e47d47",
+    "cutout": "https://btcc.net/api/media/05d6a5c9-d41c-440b-88b6-165763261eed",
+    "car": "https://btcc.net/api/media/72e2d464-4f69-451f-ba71-e69c04742b7b",
     "number": "https://btcc.net/api/media/515a4669-e859-46e8-80f0-5721bdc7a132"
   },
   "Chris Smiley": {
@@ -90,7 +90,7 @@
     "number": "https://btcc.net/api/media/a3b30424-fda4-43a5-99de-786fbbc218f3"
   },
   "Ryan Bensley": {
-    "cutout": "https://btcc.net/api/media/299b0fe1-c5e2-413d-ab1b-bdce90fd8c75",
+    "cutout": "https://btcc.net/api/media/380066ff-ea1a-41bc-87dc-e0476899b52c",
     "car": "https://btcc.net/api/media/b97fa1b5-62be-48e4-9806-8b5dd7e4bcc1",
     "number": "https://btcc.net/api/media/241efb20-ed6d-4326-b787-0f22c8254fd3"
   },
@@ -113,5 +113,10 @@
     "cutout": "https://btcc.net/api/media/75f38f46-226b-41ff-a95d-df8e3fe39424",
     "car": "https://btcc.net/api/media/fca5bc70-a5f0-4d14-abfa-f3d03ffea635",
     "number": "https://btcc.net/api/media/82cce5f4-4d2c-4bd2-89b6-5c241f5fba84"
+  },
+  "Osamu Kawashima": {
+    "cutout": "https://btcc.net/api/media/c58ed0bf-56a1-40af-a639-a2654f4e1096",
+    "car": "https://btcc.net/api/media/5d2b0f97-bf0a-4961-8cc1-06f846f9b723",
+    "number": "https://btcc.net/api/media/35a41c2c-b3ea-4dea-8956-a05f593cd670"
   }
 }
