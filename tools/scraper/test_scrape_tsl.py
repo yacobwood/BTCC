@@ -1243,6 +1243,50 @@ class TestMergeStandingsTimestamp(unittest.TestCase):
         self.assertEqual(existing, existing_copy)
 
 
+class TestParseLapsLed(unittest.TestCase):
+    """parse_laps_led had zero test coverage before this - a real bug (see
+    _session_leader_history_label) shipped and wasn't caught until a much
+    later backfill turned up wrong championship points."""
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def _leader_block(self, names):
+        return "Session Leader History\n\nNAME\n\n" + "".join(f"{n}\n" for n in names) + "FROM LAP\n\n1\n"
+
+    def test_labels_by_nearest_preceding_statistics_heading_not_position(self):
+        # Confirmed live (2019): a year with no Qualifying Race has only 3
+        # Session Leader History sections, not 4 - assuming position i
+        # always maps to BOOK_SESSION_ORDER[i] skipped the first real
+        # section as "Qualifying Race" and lost Race 3 entirely.
+        text = (
+            f"{self.TITLE}\n\nROUND 1 - STATISTICS\n\n" + self._leader_block(["Ashley SUTTON"]) +
+            f"{self.TITLE}\n\nROUND 2 - STATISTICS\n\n" + self._leader_block(["Josh COOK"]) +
+            f"{self.TITLE}\n\nROUND 3 - STATISTICS\n\n" + self._leader_block(["Tom INGRAM"])
+        )
+        result = s.parse_laps_led(text)
+        self.assertEqual(result.get("Race 1"), {"Ashley SUTTON"})
+        self.assertEqual(result.get("Race 2"), {"Josh COOK"})
+        self.assertEqual(result.get("Race 3"), {"Tom INGRAM"})
+
+    def test_qualifying_race_is_skipped_but_races_after_it_still_label_correctly(self):
+        text = (
+            f"{self.TITLE}\n\nQUALIFYING RACE - STATISTICS\n\n" + self._leader_block(["Dan CAMMISH"]) +
+            f"{self.TITLE}\n\nROUND 1 - STATISTICS\n\n" + self._leader_block(["Ashley SUTTON"]) +
+            f"{self.TITLE}\n\nROUND 2 - STATISTICS\n\n" + self._leader_block(["Josh COOK"])
+        )
+        result = s.parse_laps_led(text)
+        self.assertNotIn("Qualifying Race", result)
+        self.assertEqual(result.get("Race 1"), {"Ashley SUTTON"})
+        self.assertEqual(result.get("Race 2"), {"Josh COOK"})
+
+    def test_returns_empty_when_no_statistics_heading_exists_at_all(self):
+        # Confirmed live (2014-2018): some years' book PDFs never had a
+        # STATISTICS report at all - no anchor to label against, so this
+        # must degrade to "no data" rather than guessing a label.
+        text = "Session Leader History\n\nNAME\n\nAshley SUTTON\nFROM LAP\n\n1\n"
+        self.assertEqual(s.parse_laps_led(text), {})
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

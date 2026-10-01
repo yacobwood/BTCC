@@ -162,8 +162,13 @@ def _race_heading_pattern(report_name):
     book-PDF report following the same shape as BEST SPEEDS (see
     RACE_BEST_SPEEDS_RE's own docstring history for why this needs no
     lookbehind despite the substring-collision risk with the Qualifying
-    Race heading above)."""
-    return re.compile(rf"{_TITLE}ROUND\s*\d+{_DASH}{report_name}", re.IGNORECASE)
+    Race heading above). "ROUND N" here is confirmed live to be the RACE
+    number within the event (1/2/3), not the championship round number -
+    captured as a group so a caller can read the race number directly off
+    a match (e.g. _session_leader_history_label) rather than assuming a
+    fixed count/order of headings always precedes it, which breaks the
+    moment a report spans multiple pages with a repeated running header."""
+    return re.compile(rf"{_TITLE}ROUND\s*(\d+){_DASH}{report_name}", re.IGNORECASE)
 
 
 BEST_SPEEDS_HEADINGS = _session_heading_patterns("BEST SPEEDS")
@@ -478,6 +483,49 @@ def parse_classification(pdf_bytes, label):
 BOOK_SESSION_ORDER = ["Qualifying Race", "Race 1", "Race 2", "Race 3"]
 
 
+def _session_leader_history_label(text, section_start):
+    """Which session a "Session Leader History" table belongs to, by finding
+    the nearest preceding STATISTICS heading rather than assuming a fixed
+    BOOK_SESSION_ORDER position. The book always prints Leader History right
+    after that same session's own STATISTICS page - confirmed live across
+    both a 4-session year (2026: Qualifying Race + Race 1/2/3) and a
+    3-session year with no Qualifying Race at all (2019: Race 1/2/3 only).
+    Assuming position `i` in the book always corresponds to
+    BOOK_SESSION_ORDER[i] broke the moment a year didn't have every session
+    in that fixed list - 2019's 3 real sections (Race 1/2/3) silently became
+    (skipped as "Qualifying Race", Race 1, Race 2), losing Race 3's leaders
+    entirely and misattributing the other two. Returns None if no STATISTICS
+    heading precedes this section at all (year predates that report, or the
+    match is spurious)."""
+    # Bounded to a window immediately before this section rather than
+    # rescanning the whole document from position 0 every time: the book's
+    # own page-header text (matched by every heading pattern's leading
+    # wildcard) repeats on every page, so an unbounded re-scan from 0 is
+    # effectively quadratic over a several-hundred-page book - confirmed
+    # live, this made a 10-round, 10-year sweep take 20+ minutes without
+    # finishing even the first year. A Statistics heading has always been
+    # found within a few thousand characters of its own Leader History
+    # table (confirmed live); 15000 is a generous margin, matching the same
+    # lookahead window every other book-PDF report parser here already uses.
+    window_start = max(0, section_start - 15000)
+    window = text[window_start:section_start]
+    best_label, best_pos = None, -1
+    for label, pattern in STATISTICS_HEADINGS:
+        for m in pattern.finditer(window):
+            if m.start() > best_pos:
+                best_pos, best_label = m.start(), label
+    for m in RACE_STATISTICS_RE.finditer(window):
+        if m.start() > best_pos:
+            # The heading's own captured digit IS the race number (confirmed
+            # live: "ROUND 2 - STATISTICS" means Race 2) - read it directly
+            # rather than counting how many race headings precede this one,
+            # which overcounts the moment STATISTICS spans multiple pages
+            # with a repeated running header (confirmed live: this broke
+            # Race 2 entirely, double-counting into "Race 3" instead).
+            best_pos, best_label = m.start(), f"Race {m.group(1)}"
+    return best_label
+
+
 def parse_laps_led(text):
     """
     Extract drivers who led at least one lap in each Sunday race.
@@ -490,7 +538,7 @@ def parse_laps_led(text):
     sections = list(re.finditer(r"Session Leader History", text))
     result = {}
     for i, m in enumerate(sections):
-        label = BOOK_SESSION_ORDER[i] if i < len(BOOK_SESSION_ORDER) else None
+        label = _session_leader_history_label(text, m.start())
         if not label or label == "Qualifying Race":
             continue
         end = sections[i + 1].start() if i + 1 < len(sections) else m.start() + 3000
