@@ -26,7 +26,7 @@
               "time": "19:52.332",
               "gap": "",
               "bestLap": "48.860",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "140.862"
             },
             {
@@ -38,7 +38,7 @@
               "time": "",
               "gap": "+0.411",
               "bestLap": "48.885",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "140.814"
             },
             {
@@ -50,8 +50,9 @@
               "time": "",
               "gap": "+0.884",
               "bestLap": "48.756",
-              "points": 0,
-              "avgLapSpeed": "140.758"
+              "points": 16,
+              "avgLapSpeed": "140.758",
+              "fastestLap": true
             },
             {
               "pos": 4,
@@ -62,7 +63,7 @@
               "time": "",
               "gap": "+5.464",
               "bestLap": "48.892",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "140.22"
             },
             {
@@ -74,7 +75,7 @@
               "time": "",
               "gap": "+5.726",
               "bestLap": "48.876",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "140.189"
             },
             {
@@ -86,7 +87,7 @@
               "time": "",
               "gap": "+5.819",
               "bestLap": "48.826",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "140.178"
             },
             {
@@ -98,7 +99,7 @@
               "time": "",
               "gap": "+7.127",
               "bestLap": "48.983",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "140.025"
             },
             {
@@ -110,7 +111,7 @@
               "time": "",
               "gap": "+8.668",
               "bestLap": "48.904",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "139.846"
             },
             {
@@ -122,7 +123,7 @@
               "time": "",
               "gap": "+9.974",
               "bestLap": "48.789",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "139.694"
             },
             {
@@ -134,7 +135,7 @@
               "time": "",
               "gap": "+11.260",
               "bestLap": "49.085",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "139.545"
             },
             {
@@ -146,7 +147,7 @@
               "time": "",
               "gap": "+12.763",
               "bestLap": "48.974",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "139.37"
             },
             {
@@ -158,7 +159,7 @@
               "time": "",
               "gap": "+21.151",
               "bestLap": "49.412",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "138.407"
             },
             {
@@ -170,7 +171,7 @@
               "time": "",
               "gap": "+23.396",
               "bestLap": "49.370",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "138.152"
             },
             {
@@ -182,7 +183,7 @@
               "time": "",
               "gap": "+25.613",
               "bestLap": "49.017",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "137.9"
             },
             {
@@ -194,7 +195,7 @@
               "time": "",
               "gap": "+27.329",
               "bestLap": "49.085",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "137.706"
             },
             {
@@ -889,7 +890,7 @@
               "time": "19:57.832",
               "gap": "",
               "bestLap": "49.097",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "140.216"
             },
             {
@@ -901,8 +902,9 @@
               "time": "",
               "gap": "+0.040",
               "bestLap": "48.958",
-              "points": 0,
-              "avgLapSpeed": "140.211"
+              "points": 18,
+              "avgLapSpeed": "140.211",
+              "fastestLap": true
             },
             {
               "pos": 3,
@@ -913,7 +915,7 @@
               "time": "",
               "gap": "+1.131",
               "bestLap": "48.973",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "140.083"
             },
             {
@@ -925,7 +927,7 @@
               "time": "",
               "gap": "+4.646",
               "bestLap": "49.209",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "139.674"
             },
             {
@@ -937,7 +939,7 @@
               "time": "",
               "gap": "+5.229",
               "bestLap": "49.272",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "139.606"
             },
             {
@@ -949,7 +951,7 @@
               "time": "",
               "gap": "+5.566",
               "bestLap": "49.258",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "139.567"
             },
             {
@@ -961,7 +963,7 @@
               "time": "",
               "gap": "+8.365",
               "bestLap": "49.221",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "139.243"
             },
             {
@@ -973,7 +975,7 @@
               "time": "",
               "gap": "+9.176",
               "bestLap": "49.309",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "139.15"
             },
             {
@@ -985,7 +987,7 @@
               "time": "",
               "gap": "+9.653",
               "bestLap": "49.399",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "139.095"
             },
             {
@@ -997,7 +999,7 @@
               "time": "",
               "gap": "+12.826",
               "bestLap": "49.369",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "138.73"
             },
             {
@@ -1009,7 +1011,7 @@
               "time": "",
               "gap": "+13.275",
               "bestLap": "49.437",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "138.679"
             },
             {
@@ -1021,7 +1023,7 @@
               "time": "",
               "gap": "+13.733",
               "bestLap": "49.459",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "138.626"
             },
             {
@@ -1033,7 +1035,7 @@
               "time": "",
               "gap": "+13.886",
               "bestLap": "49.411",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "138.609"
             },
             {
@@ -1045,7 +1047,7 @@
               "time": "",
               "gap": "+17.025",
               "bestLap": "49.266",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "138.251"
             },
             {
@@ -1057,7 +1059,7 @@
               "time": "",
               "gap": "+21.380",
               "bestLap": "49.520",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "137.757"
             },
             {
@@ -1174,7 +1176,7 @@
               "time": "25:10.270",
               "gap": "",
               "bestLap": "49.140",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "125.109"
             },
             {
@@ -1186,7 +1188,7 @@
               "time": "",
               "gap": "+0.196",
               "bestLap": "49.170",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "125.093"
             },
             {
@@ -1198,8 +1200,9 @@
               "time": "",
               "gap": "+1.706",
               "bestLap": "49.015",
-              "points": 0,
-              "avgLapSpeed": "124.968"
+              "points": 16,
+              "avgLapSpeed": "124.968",
+              "fastestLap": true
             },
             {
               "pos": 4,
@@ -1210,7 +1213,7 @@
               "time": "",
               "gap": "+4.553",
               "bestLap": "49.343",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "124.733"
             },
             {
@@ -1222,7 +1225,7 @@
               "time": "",
               "gap": "+4.719",
               "bestLap": "49.359",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "124.72"
             },
             {
@@ -1234,7 +1237,7 @@
               "time": "",
               "gap": "+5.662",
               "bestLap": "49.197",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "124.642"
             },
             {
@@ -1246,7 +1249,7 @@
               "time": "",
               "gap": "+7.537",
               "bestLap": "49.256",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "124.488"
             },
             {
@@ -1258,7 +1261,7 @@
               "time": "",
               "gap": "+8.825",
               "bestLap": "49.331",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "124.383"
             },
             {
@@ -1270,7 +1273,7 @@
               "time": "",
               "gap": "+8.909",
               "bestLap": "49.447",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "124.376"
             },
             {
@@ -1282,7 +1285,7 @@
               "time": "",
               "gap": "+9.157",
               "bestLap": "49.309",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "124.355"
             },
             {
@@ -1294,7 +1297,7 @@
               "time": "",
               "gap": "+11.771",
               "bestLap": "49.570",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "124.142"
             },
             {
@@ -1306,7 +1309,7 @@
               "time": "",
               "gap": "+17.558",
               "bestLap": "49.325",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "123.672"
             },
             {
@@ -1318,7 +1321,7 @@
               "time": "",
               "gap": "+21.188",
               "bestLap": "49.684",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "123.378"
             },
             {
@@ -1330,7 +1333,7 @@
               "time": "",
               "gap": "+21.847",
               "bestLap": "49.860",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "123.325"
             },
             {
@@ -1342,7 +1345,7 @@
               "time": "",
               "gap": "+24.415",
               "bestLap": "50.051",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "123.119"
             },
             {
@@ -1438,7 +1441,7 @@
               "time": "18:54.080",
               "gap": "",
               "bestLap": "1:09.946",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "161.566"
             },
             {
@@ -1450,8 +1453,9 @@
               "time": "",
               "gap": "+1.401",
               "bestLap": "1:09.741",
-              "points": 0,
-              "avgLapSpeed": "161.367"
+              "points": 18,
+              "avgLapSpeed": "161.367",
+              "fastestLap": true
             },
             {
               "pos": 3,
@@ -1462,7 +1466,7 @@
               "time": "",
               "gap": "+1.782",
               "bestLap": "1:09.844",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "161.312"
             },
             {
@@ -1474,7 +1478,7 @@
               "time": "",
               "gap": "+5.961",
               "bestLap": "1:10.056",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "160.721"
             },
             {
@@ -1486,7 +1490,7 @@
               "time": "",
               "gap": "+14.328",
               "bestLap": "1:10.611",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "159.55"
             },
             {
@@ -1498,7 +1502,7 @@
               "time": "",
               "gap": "+15.177",
               "bestLap": "1:10.531",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "159.432"
             },
             {
@@ -1510,7 +1514,7 @@
               "time": "",
               "gap": "+20.279",
               "bestLap": "1:10.287",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "158.728"
             },
             {
@@ -1522,7 +1526,7 @@
               "time": "",
               "gap": "+20.314",
               "bestLap": "1:10.519",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "158.723"
             },
             {
@@ -1534,7 +1538,7 @@
               "time": "",
               "gap": "+21.774",
               "bestLap": "1:09.874",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "158.522"
             },
             {
@@ -1546,7 +1550,7 @@
               "time": "",
               "gap": "+22.269",
               "bestLap": "1:10.750",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "158.454"
             },
             {
@@ -1558,7 +1562,7 @@
               "time": "",
               "gap": "+25.881",
               "bestLap": "1:10.900",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "157.961"
             },
             {
@@ -1570,7 +1574,7 @@
               "time": "",
               "gap": "+26.711",
               "bestLap": "1:10.631",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "157.848"
             },
             {
@@ -1582,7 +1586,7 @@
               "time": "",
               "gap": "+29.701",
               "bestLap": "1:10.720",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "157.443"
             },
             {
@@ -1594,7 +1598,7 @@
               "time": "",
               "gap": "+30.707",
               "bestLap": "1:11.032",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "157.307"
             },
             {
@@ -1606,7 +1610,7 @@
               "time": "",
               "gap": "+30.988",
               "bestLap": "1:10.771",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "157.269"
             },
             {
@@ -1735,8 +1739,9 @@
               "time": "22:58.065",
               "gap": "",
               "bestLap": "1:10.055",
-              "points": 0,
-              "avgLapSpeed": "149.601"
+              "points": 21,
+              "avgLapSpeed": "149.601",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -1747,7 +1752,7 @@
               "time": "",
               "gap": "+2.501",
               "bestLap": "1:10.210",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "149.33"
             },
             {
@@ -1759,7 +1764,7 @@
               "time": "",
               "gap": "+8.832",
               "bestLap": "1:10.609",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "148.649"
             },
             {
@@ -1771,7 +1776,7 @@
               "time": "",
               "gap": "+10.484",
               "bestLap": "1:10.420",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "148.472"
             },
             {
@@ -1783,7 +1788,7 @@
               "time": "",
               "gap": "+10.693",
               "bestLap": "1:10.644",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "148.45"
             },
             {
@@ -1795,7 +1800,7 @@
               "time": "",
               "gap": "+10.982",
               "bestLap": "1:10.437",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "148.419"
             },
             {
@@ -1807,7 +1812,7 @@
               "time": "",
               "gap": "+10.991",
               "bestLap": "1:10.842",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "148.418"
             },
             {
@@ -1819,7 +1824,7 @@
               "time": "",
               "gap": "+12.002",
               "bestLap": "1:10.480",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "148.31"
             },
             {
@@ -1831,7 +1836,7 @@
               "time": "",
               "gap": "+12.150",
               "bestLap": "1:10.844",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "148.294"
             },
             {
@@ -1843,7 +1848,7 @@
               "time": "",
               "gap": "+12.320",
               "bestLap": "1:10.699",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "148.276"
             },
             {
@@ -1855,7 +1860,7 @@
               "time": "",
               "gap": "+13.666",
               "bestLap": "1:10.944",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "148.132"
             },
             {
@@ -1867,7 +1872,7 @@
               "time": "",
               "gap": "+14.514",
               "bestLap": "1:10.391",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "148.042"
             },
             {
@@ -1879,7 +1884,7 @@
               "time": "",
               "gap": "+14.695",
               "bestLap": "1:10.924",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "148.023"
             },
             {
@@ -1891,7 +1896,7 @@
               "time": "",
               "gap": "+17.086",
               "bestLap": "1:10.540",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "147.769"
             },
             {
@@ -1903,7 +1908,7 @@
               "time": "",
               "gap": "+17.387",
               "bestLap": "1:10.618",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "147.737"
             },
             {
@@ -2607,7 +2612,7 @@
               "time": "24:50.589",
               "gap": "0.00",
               "bestLap": "1:11.076",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "146"
             },
             {
@@ -2619,7 +2624,7 @@
               "time": "",
               "gap": "+0.157",
               "bestLap": "1:11.033",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "145.985"
             },
             {
@@ -2631,7 +2636,7 @@
               "time": "",
               "gap": "+1.038",
               "bestLap": "1:10.734",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "145.899"
             },
             {
@@ -2643,7 +2648,7 @@
               "time": "",
               "gap": "+3.563",
               "bestLap": "1:10.767",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "145.652"
             },
             {
@@ -2655,8 +2660,9 @@
               "time": "",
               "gap": "+3.613",
               "bestLap": "1:10.575",
-              "points": 0,
-              "avgLapSpeed": "145.647"
+              "points": 12,
+              "avgLapSpeed": "145.647",
+              "fastestLap": true
             },
             {
               "pos": 6,
@@ -2667,7 +2673,7 @@
               "time": "",
               "gap": "+3.889",
               "bestLap": "1:10.969",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "145.62"
             },
             {
@@ -2679,7 +2685,7 @@
               "time": "",
               "gap": "+4.035",
               "bestLap": "1:10.902",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "145.606"
             },
             {
@@ -2691,7 +2697,7 @@
               "time": "",
               "gap": "+6.542",
               "bestLap": "1:11.594",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "145.362"
             },
             {
@@ -2703,7 +2709,7 @@
               "time": "",
               "gap": "+7.515",
               "bestLap": "1:10.946",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "145.268"
             },
             {
@@ -2715,7 +2721,7 @@
               "time": "",
               "gap": "+7.600",
               "bestLap": "1:11.206",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "145.26"
             },
             {
@@ -2727,7 +2733,7 @@
               "time": "",
               "gap": "+8.582",
               "bestLap": "1:11.462",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "145.165"
             },
             {
@@ -2739,7 +2745,7 @@
               "time": "",
               "gap": "+8.772",
               "bestLap": "1:11.408",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "145.146"
             },
             {
@@ -2751,7 +2757,7 @@
               "time": "",
               "gap": "+11.162",
               "bestLap": "1:10.832",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "144.915"
             },
             {
@@ -2763,7 +2769,7 @@
               "time": "",
               "gap": "+12.057",
               "bestLap": "1:11.203",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "144.829"
             },
             {
@@ -2775,7 +2781,7 @@
               "time": "",
               "gap": "+13.476",
               "bestLap": "1:10.979",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "144.692"
             },
             {
@@ -3425,7 +3431,7 @@
               "time": "21:05.473",
               "gap": "",
               "bestLap": "1:17.741",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "172.581"
             },
             {
@@ -3437,7 +3443,7 @@
               "time": "",
               "gap": "+1.016",
               "bestLap": "1:18.049",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "172.442"
             },
             {
@@ -3449,7 +3455,7 @@
               "time": "",
               "gap": "+2.710",
               "bestLap": "1:17.724",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "172.212"
             },
             {
@@ -3461,8 +3467,9 @@
               "time": "",
               "gap": "+9.866",
               "bestLap": "1:17.388",
-              "points": 0,
-              "avgLapSpeed": "171.246"
+              "points": 14,
+              "avgLapSpeed": "171.246",
+              "fastestLap": true
             },
             {
               "pos": 5,
@@ -3473,7 +3480,7 @@
               "time": "",
               "gap": "+12.047",
               "bestLap": "1:17.855",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "170.953"
             },
             {
@@ -3485,7 +3492,7 @@
               "time": "",
               "gap": "+13.612",
               "bestLap": "1:18.231",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "170.744"
             },
             {
@@ -3497,7 +3504,7 @@
               "time": "",
               "gap": "+14.159",
               "bestLap": "1:18.182",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "170.671"
             },
             {
@@ -3509,7 +3516,7 @@
               "time": "",
               "gap": "+15.631",
               "bestLap": "1:18.111",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "170.475"
             },
             {
@@ -3521,7 +3528,7 @@
               "time": "",
               "gap": "+15.719",
               "bestLap": "1:18.047",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "170.463"
             },
             {
@@ -3533,7 +3540,7 @@
               "time": "",
               "gap": "+15.977",
               "bestLap": "1:18.615",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "170.429"
             },
             {
@@ -3545,7 +3552,7 @@
               "time": "",
               "gap": "+16.207",
               "bestLap": "1:18.389",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "170.399"
             },
             {
@@ -3557,7 +3564,7 @@
               "time": "",
               "gap": "+18.876",
               "bestLap": "1:18.153",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "170.044"
             },
             {
@@ -3569,7 +3576,7 @@
               "time": "",
               "gap": "+21.127",
               "bestLap": "1:17.586",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "169.747"
             },
             {
@@ -3581,7 +3588,7 @@
               "time": "",
               "gap": "+21.835",
               "bestLap": "1:18.615",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "169.654"
             },
             {
@@ -3593,7 +3600,7 @@
               "time": "",
               "gap": "+26.963",
               "bestLap": "1:18.849",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "168.98"
             },
             {
@@ -3722,7 +3729,7 @@
               "time": "21:05.521",
               "gap": "",
               "bestLap": "1:17.936",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "172.574"
             },
             {
@@ -3734,7 +3741,7 @@
               "time": "",
               "gap": "+0.442",
               "bestLap": "1:17.905",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "172.514"
             },
             {
@@ -3746,7 +3753,7 @@
               "time": "",
               "gap": "+3.475",
               "bestLap": "1:17.988",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "172.102"
             },
             {
@@ -3758,7 +3765,7 @@
               "time": "",
               "gap": "+4.022",
               "bestLap": "1:17.980",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "172.028"
             },
             {
@@ -3770,7 +3777,7 @@
               "time": "",
               "gap": "+6.962",
               "bestLap": "1:17.963",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "171.63"
             },
             {
@@ -3782,7 +3789,7 @@
               "time": "",
               "gap": "+10.385",
               "bestLap": "1:17.960",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "171.17"
             },
             {
@@ -3794,7 +3801,7 @@
               "time": "",
               "gap": "+10.833",
               "bestLap": "1:18.025",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "171.11"
             },
             {
@@ -3806,8 +3813,9 @@
               "time": "",
               "gap": "+12.963",
               "bestLap": "1:17.850",
-              "points": 0,
-              "avgLapSpeed": "170.824"
+              "points": 9,
+              "avgLapSpeed": "170.824",
+              "fastestLap": true
             },
             {
               "pos": 9,
@@ -3818,7 +3826,7 @@
               "time": "",
               "gap": "+13.755",
               "bestLap": "1:18.228",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "170.719"
             },
             {
@@ -3830,7 +3838,7 @@
               "time": "",
               "gap": "+14.339",
               "bestLap": "1:18.079",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "170.641"
             },
             {
@@ -3842,7 +3850,7 @@
               "time": "",
               "gap": "+17.095",
               "bestLap": "1:18.071",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "170.274"
             },
             {
@@ -3854,7 +3862,7 @@
               "time": "",
               "gap": "+18.046",
               "bestLap": "1:17.909",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "170.148"
             },
             {
@@ -3866,7 +3874,7 @@
               "time": "",
               "gap": "+20.161",
               "bestLap": "1:18.161",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "169.868"
             },
             {
@@ -3878,7 +3886,7 @@
               "time": "",
               "gap": "+27.429",
               "bestLap": "1:18.596",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "168.913"
             },
             {
@@ -3890,7 +3898,7 @@
               "time": "",
               "gap": "+40.166",
               "bestLap": "1:20.057",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "167.265"
             },
             {
@@ -4516,8 +4524,9 @@
               "time": "27:13.160",
               "gap": "",
               "bestLap": "1:17.366",
-              "points": 0,
-              "avgLapSpeed": "158.8"
+              "points": 21,
+              "avgLapSpeed": "158.8",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -4528,7 +4537,7 @@
               "time": "",
               "gap": "+1.452",
               "bestLap": "1:17.962",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "158.659"
             },
             {
@@ -4540,7 +4549,7 @@
               "time": "",
               "gap": "+2.641",
               "bestLap": "1:17.912",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "158.543"
             },
             {
@@ -4552,7 +4561,7 @@
               "time": "",
               "gap": "+3.131",
               "bestLap": "1:18.097",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "158.496"
             },
             {
@@ -4564,7 +4573,7 @@
               "time": "",
               "gap": "+4.531",
               "bestLap": "1:18.161",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "158.361"
             },
             {
@@ -4576,7 +4585,7 @@
               "time": "",
               "gap": "+5.610",
               "bestLap": "1:18.045",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "158.256"
             },
             {
@@ -4588,7 +4597,7 @@
               "time": "",
               "gap": "+7.734",
               "bestLap": "1:18.104",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "158.051"
             },
             {
@@ -4600,7 +4609,7 @@
               "time": "",
               "gap": "+7.944",
               "bestLap": "1:18.490",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "158.031"
             },
             {
@@ -4612,7 +4621,7 @@
               "time": "",
               "gap": "+8.188",
               "bestLap": "1:18.113",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "158.008"
             },
             {
@@ -4624,7 +4633,7 @@
               "time": "",
               "gap": "+8.523",
               "bestLap": "1:18.700",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "157.975"
             },
             {
@@ -4636,7 +4645,7 @@
               "time": "",
               "gap": "+11.683",
               "bestLap": "1:18.291",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "157.672"
             },
             {
@@ -4648,7 +4657,7 @@
               "time": "",
               "gap": "+15.279",
               "bestLap": "1:18.410",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "157.328"
             },
             {
@@ -4660,7 +4669,7 @@
               "time": "",
               "gap": "+15.735",
               "bestLap": "1:19.034",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "157.284"
             },
             {
@@ -4672,7 +4681,7 @@
               "time": "",
               "gap": "+16.022",
               "bestLap": "1:18.757",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "157.257"
             },
             {
@@ -4684,7 +4693,7 @@
               "time": "",
               "gap": "+19.165",
               "bestLap": "1:18.633",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "156.958"
             },
             {
@@ -5325,8 +5334,9 @@
               "time": "21:14.936",
               "gap": "",
               "bestLap": "1:26.462",
-              "points": 0,
-              "avgLapSpeed": "141.617"
+              "points": 21,
+              "avgLapSpeed": "141.617",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -5337,7 +5347,7 @@
               "time": "",
               "gap": "+1.322",
               "bestLap": "1:26.755",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "141.47"
             },
             {
@@ -5349,7 +5359,7 @@
               "time": "",
               "gap": "+2.789",
               "bestLap": "1:26.720",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "141.308"
             },
             {
@@ -5361,7 +5371,7 @@
               "time": "",
               "gap": "+3.696",
               "bestLap": "1:26.669",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "141.207"
             },
             {
@@ -5373,7 +5383,7 @@
               "time": "",
               "gap": "+5.187",
               "bestLap": "1:26.910",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "141.043"
             },
             {
@@ -5385,7 +5395,7 @@
               "time": "",
               "gap": "+6.439",
               "bestLap": "1:26.531",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "140.905"
             },
             {
@@ -5397,7 +5407,7 @@
               "time": "",
               "gap": "+7.582",
               "bestLap": "1:27.126",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "140.78"
             },
             {
@@ -5409,7 +5419,7 @@
               "time": "",
               "gap": "+8.807",
               "bestLap": "1:27.173",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "140.645"
             },
             {
@@ -5421,7 +5431,7 @@
               "time": "",
               "gap": "+10.432",
               "bestLap": "1:27.040",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "140.467"
             },
             {
@@ -5433,7 +5443,7 @@
               "time": "",
               "gap": "+12.527",
               "bestLap": "1:27.346",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "140.239"
             },
             {
@@ -5445,7 +5455,7 @@
               "time": "",
               "gap": "+13.924",
               "bestLap": "1:27.045",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "140.087"
             },
             {
@@ -5457,7 +5467,7 @@
               "time": "",
               "gap": "+15.197",
               "bestLap": "1:27.303",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "139.949"
             },
             {
@@ -5469,7 +5479,7 @@
               "time": "",
               "gap": "+16.841",
               "bestLap": "1:27.010",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "139.77"
             },
             {
@@ -5481,7 +5491,7 @@
               "time": "",
               "gap": "+17.870",
               "bestLap": "1:27.160",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "139.659"
             },
             {
@@ -5493,7 +5503,7 @@
               "time": "",
               "gap": "+20.001",
               "bestLap": "1:27.419",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "139.429"
             },
             {
@@ -6209,7 +6219,7 @@
               "time": "21:55.812",
               "gap": "",
               "bestLap": "1:27.031",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "147.019"
             },
             {
@@ -6221,7 +6231,7 @@
               "time": "",
               "gap": "+0.093",
               "bestLap": "1:26.939",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "147.008"
             },
             {
@@ -6233,7 +6243,7 @@
               "time": "",
               "gap": "+1.520",
               "bestLap": "1:27.184",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "146.849"
             },
             {
@@ -6245,7 +6255,7 @@
               "time": "",
               "gap": "+7.403",
               "bestLap": "1:26.960",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "146.196"
             },
             {
@@ -6257,8 +6267,9 @@
               "time": "",
               "gap": "+8.369",
               "bestLap": "1:26.768",
-              "points": 0,
-              "avgLapSpeed": "146.089"
+              "points": 12,
+              "avgLapSpeed": "146.089",
+              "fastestLap": true
             },
             {
               "pos": 6,
@@ -6269,7 +6280,7 @@
               "time": "",
               "gap": "+9.822",
               "bestLap": "1:27.139",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "145.929"
             },
             {
@@ -6281,7 +6292,7 @@
               "time": "",
               "gap": "+11.536",
               "bestLap": "1:27.000",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "145.741"
             },
             {
@@ -6293,7 +6304,7 @@
               "time": "",
               "gap": "+11.787",
               "bestLap": "1:27.141",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "145.713"
             },
             {
@@ -6305,7 +6316,7 @@
               "time": "",
               "gap": "+12.276",
               "bestLap": "1:27.196",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "145.66"
             },
             {
@@ -6317,7 +6328,7 @@
               "time": "",
               "gap": "+15.654",
               "bestLap": "1:27.222",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "145.29"
             },
             {
@@ -6329,7 +6340,7 @@
               "time": "",
               "gap": "+16.116",
               "bestLap": "1:27.550",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "145.24"
             },
             {
@@ -6341,7 +6352,7 @@
               "time": "",
               "gap": "+23.865",
               "bestLap": "1:27.286",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "144.4"
             },
             {
@@ -6353,7 +6364,7 @@
               "time": "",
               "gap": "+23.715",
               "bestLap": "1:27.956",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "144.416"
             },
             {
@@ -6365,7 +6376,7 @@
               "time": "",
               "gap": "+23.809",
               "bestLap": "1:27.546",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "144.406"
             },
             {
@@ -6377,7 +6388,7 @@
               "time": "",
               "gap": "+26.437",
               "bestLap": "1:27.009",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "144.123"
             },
             {
@@ -6530,7 +6541,7 @@
               "time": "22:02.470",
               "gap": "",
               "bestLap": "1:26.959",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "146.278"
             },
             {
@@ -6542,7 +6553,7 @@
               "time": "",
               "gap": "+0.264",
               "bestLap": "1:26.988",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "146.249"
             },
             {
@@ -6554,7 +6565,7 @@
               "time": "",
               "gap": "+0.766",
               "bestLap": "1:26.769",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "146.194"
             },
             {
@@ -6566,7 +6577,7 @@
               "time": "",
               "gap": "+2.997",
               "bestLap": "1:27.090",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "145.948"
             },
             {
@@ -6578,7 +6589,7 @@
               "time": "",
               "gap": "+3.137",
               "bestLap": "1:27.058",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "145.932"
             },
             {
@@ -6590,7 +6601,7 @@
               "time": "",
               "gap": "+3.831",
               "bestLap": "1:27.198",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "145.856"
             },
             {
@@ -6602,7 +6613,7 @@
               "time": "",
               "gap": "+4.381",
               "bestLap": "1:27.218",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "145.796"
             },
             {
@@ -6614,7 +6625,7 @@
               "time": "",
               "gap": "+4.772",
               "bestLap": "1:27.145",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "145.753"
             },
             {
@@ -6626,7 +6637,7 @@
               "time": "",
               "gap": "+7.105",
               "bestLap": "1:26.650",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "145.497"
             },
             {
@@ -6638,7 +6649,7 @@
               "time": "",
               "gap": "+7.152",
               "bestLap": "1:27.007",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "145.492"
             },
             {
@@ -6650,7 +6661,7 @@
               "time": "",
               "gap": "+11.762",
               "bestLap": "1:27.028",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "144.989"
             },
             {
@@ -6662,7 +6673,7 @@
               "time": "",
               "gap": "+12.121",
               "bestLap": "1:27.075",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "144.95"
             },
             {
@@ -6674,7 +6685,7 @@
               "time": "",
               "gap": "+12.531",
               "bestLap": "1:27.260",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "144.905"
             },
             {
@@ -6686,8 +6697,9 @@
               "time": "",
               "gap": "+16.099",
               "bestLap": "1:26.581",
-              "points": 0,
-              "avgLapSpeed": "144.519"
+              "points": 3,
+              "avgLapSpeed": "144.519",
+              "fastestLap": true
             },
             {
               "pos": 15,
@@ -6698,7 +6710,7 @@
               "time": "",
               "gap": "+19.046",
               "bestLap": "1:27.541",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "144.202"
             },
             {
@@ -6818,7 +6830,7 @@
               "time": "21:32.210",
               "gap": "",
               "bestLap": "1:24.718",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "142.911"
             },
             {
@@ -6830,8 +6842,9 @@
               "time": "",
               "gap": "+0.764",
               "bestLap": "1:24.590",
-              "points": 0,
-              "avgLapSpeed": "142.827"
+              "points": 18,
+              "avgLapSpeed": "142.827",
+              "fastestLap": true
             },
             {
               "pos": 3,
@@ -6842,7 +6855,7 @@
               "time": "",
               "gap": "+5.770",
               "bestLap": "1:25.033",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "142.276"
             },
             {
@@ -6854,7 +6867,7 @@
               "time": "",
               "gap": "+10.031",
               "bestLap": "1:24.983",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "141.811"
             },
             {
@@ -6866,7 +6879,7 @@
               "time": "",
               "gap": "+21.250",
               "bestLap": "1:25.774",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "140.599"
             },
             {
@@ -6878,7 +6891,7 @@
               "time": "",
               "gap": "+21.730",
               "bestLap": "1:25.731",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "140.548"
             },
             {
@@ -6890,7 +6903,7 @@
               "time": "",
               "gap": "+23.344",
               "bestLap": "1:24.992",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "140.376"
             },
             {
@@ -6902,7 +6915,7 @@
               "time": "",
               "gap": "+23.617",
               "bestLap": "1:25.494",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "140.346"
             },
             {
@@ -6914,7 +6927,7 @@
               "time": "",
               "gap": "+29.403",
               "bestLap": "1:25.762",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "139.732"
             },
             {
@@ -6926,7 +6939,7 @@
               "time": "",
               "gap": "+34.136",
               "bestLap": "1:25.813",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "139.233"
             },
             {
@@ -6938,7 +6951,7 @@
               "time": "",
               "gap": "+34.587",
               "bestLap": "1:25.827",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "139.186"
             },
             {
@@ -6950,7 +6963,7 @@
               "time": "",
               "gap": "+34.691",
               "bestLap": "1:25.656",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "139.175"
             },
             {
@@ -6962,7 +6975,7 @@
               "time": "",
               "gap": "+34.801",
               "bestLap": "1:25.115",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "139.164"
             },
             {
@@ -6974,7 +6987,7 @@
               "time": "",
               "gap": "+38.440",
               "bestLap": "1:25.859",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "138.783"
             },
             {
@@ -6986,7 +6999,7 @@
               "time": "",
               "gap": "+39.287",
               "bestLap": "1:26.141",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "138.695"
             },
             {
@@ -7768,7 +7781,7 @@
               "time": "21:48.128",
               "gap": "",
               "bestLap": "1:25.923",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "141.172"
             },
             {
@@ -7780,7 +7793,7 @@
               "time": "",
               "gap": "+2.368",
               "bestLap": "1:25.984",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "140.917"
             },
             {
@@ -7792,7 +7805,7 @@
               "time": "",
               "gap": "+2.936",
               "bestLap": "1:26.202",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "140.856"
             },
             {
@@ -7804,7 +7817,7 @@
               "time": "",
               "gap": "+3.548",
               "bestLap": "1:26.111",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "140.791"
             },
             {
@@ -7816,8 +7829,9 @@
               "time": "",
               "gap": "+8.023",
               "bestLap": "1:25.913",
-              "points": 0,
-              "avgLapSpeed": "140.312"
+              "points": 12,
+              "avgLapSpeed": "140.312",
+              "fastestLap": true
             },
             {
               "pos": 6,
@@ -7828,7 +7842,7 @@
               "time": "",
               "gap": "+8.404",
               "bestLap": "1:26.169",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "140.271"
             },
             {
@@ -7840,7 +7854,7 @@
               "time": "",
               "gap": "+8.558",
               "bestLap": "1:26.293",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "140.255"
             },
             {
@@ -7852,7 +7866,7 @@
               "time": "",
               "gap": "+13.384",
               "bestLap": "1:26.247",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "139.743"
             },
             {
@@ -7864,7 +7878,7 @@
               "time": "",
               "gap": "+14.725",
               "bestLap": "1:26.468",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "139.601"
             },
             {
@@ -7876,7 +7890,7 @@
               "time": "",
               "gap": "+15.620",
               "bestLap": "1:26.296",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "139.507"
             },
             {
@@ -7888,7 +7902,7 @@
               "time": "",
               "gap": "+16.933",
               "bestLap": "1:26.032",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "139.368"
             },
             {
@@ -7900,7 +7914,7 @@
               "time": "",
               "gap": "+24.820",
               "bestLap": "1:26.598",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "138.544"
             },
             {
@@ -7912,7 +7926,7 @@
               "time": "",
               "gap": "+26.263",
               "bestLap": "1:26.742",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "138.394"
             },
             {
@@ -7924,7 +7938,7 @@
               "time": "",
               "gap": "+26.431",
               "bestLap": "1:26.547",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "138.376"
             },
             {
@@ -7936,7 +7950,7 @@
               "time": "",
               "gap": "+26.741",
               "bestLap": "1:26.822",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "138.344"
             },
             {
@@ -8718,7 +8732,7 @@
               "time": "21:45.389",
               "gap": "",
               "bestLap": "1:25.854",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "141.469"
             },
             {
@@ -8730,7 +8744,7 @@
               "time": "",
               "gap": "+7.249",
               "bestLap": "1:25.717",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "140.687"
             },
             {
@@ -8742,7 +8756,7 @@
               "time": "",
               "gap": "+7.973",
               "bestLap": "1:25.809",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "140.61"
             },
             {
@@ -8754,7 +8768,7 @@
               "time": "",
               "gap": "+10.585",
               "bestLap": "1:26.047",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "140.331"
             },
             {
@@ -8766,7 +8780,7 @@
               "time": "",
               "gap": "+11.551",
               "bestLap": "1:26.071",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "140.228"
             },
             {
@@ -8778,7 +8792,7 @@
               "time": "",
               "gap": "+11.732",
               "bestLap": "1:25.917",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "140.209"
             },
             {
@@ -8790,7 +8804,7 @@
               "time": "",
               "gap": "+13.641",
               "bestLap": "1:25.861",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "140.006"
             },
             {
@@ -8802,7 +8816,7 @@
               "time": "",
               "gap": "+15.313",
               "bestLap": "1:25.389",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "139.828"
             },
             {
@@ -8814,8 +8828,9 @@
               "time": "",
               "gap": "+17.568",
               "bestLap": "1:25.339",
-              "points": 0,
-              "avgLapSpeed": "139.59"
+              "points": 8,
+              "avgLapSpeed": "139.59",
+              "fastestLap": true
             },
             {
               "pos": 10,
@@ -8826,7 +8841,7 @@
               "time": "",
               "gap": "+22.364",
               "bestLap": "1:26.217",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "139.086"
             },
             {
@@ -8838,7 +8853,7 @@
               "time": "",
               "gap": "+25.576",
               "bestLap": "1:26.474",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "138.75"
             },
             {
@@ -8850,7 +8865,7 @@
               "time": "",
               "gap": "+31.251",
               "bestLap": "1:26.823",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "138.161"
             },
             {
@@ -8862,7 +8877,7 @@
               "time": "",
               "gap": "+38.411",
               "bestLap": "1:26.651",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "137.425"
             },
             {
@@ -8874,7 +8889,7 @@
               "time": "",
               "gap": "+38.707",
               "bestLap": "1:26.781",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "137.395"
             },
             {
@@ -8886,7 +8901,7 @@
               "time": "",
               "gap": "+39.299",
               "bestLap": "1:26.553",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "137.334"
             },
             {
@@ -9638,8 +9653,9 @@
               "time": "23:46.381",
               "gap": "",
               "bestLap": "1:56.921",
-              "points": 0,
-              "avgLapSpeed": "144.708"
+              "points": 21,
+              "avgLapSpeed": "144.708",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -9650,7 +9666,7 @@
               "time": "",
               "gap": "+1.706",
               "bestLap": "1:57.459",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "144.535"
             },
             {
@@ -9662,7 +9678,7 @@
               "time": "",
               "gap": "+2.651",
               "bestLap": "1:57.356",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "144.439"
             },
             {
@@ -9674,7 +9690,7 @@
               "time": "",
               "gap": "+3.442",
               "bestLap": "1:57.570",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "144.359"
             },
             {
@@ -9686,7 +9702,7 @@
               "time": "",
               "gap": "+3.732",
               "bestLap": "1:57.382",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "144.33"
             },
             {
@@ -9698,7 +9714,7 @@
               "time": "",
               "gap": "+8.340",
               "bestLap": "1:57.751",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "143.866"
             },
             {
@@ -9710,7 +9726,7 @@
               "time": "",
               "gap": "+9.372",
               "bestLap": "1:57.202",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "143.763"
             },
             {
@@ -9722,7 +9738,7 @@
               "time": "",
               "gap": "+9.848",
               "bestLap": "1:57.647",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "143.715"
             },
             {
@@ -9734,7 +9750,7 @@
               "time": "",
               "gap": "+10.045",
               "bestLap": "1:57.330",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "143.696"
             },
             {
@@ -9746,7 +9762,7 @@
               "time": "",
               "gap": "+11.206",
               "bestLap": "1:57.608",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "143.58"
             },
             {
@@ -9758,7 +9774,7 @@
               "time": "",
               "gap": "+15.928",
               "bestLap": "1:57.104",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "143.109"
             },
             {
@@ -9770,7 +9786,7 @@
               "time": "",
               "gap": "+18.271",
               "bestLap": "1:58.089",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "142.877"
             },
             {
@@ -9782,7 +9798,7 @@
               "time": "",
               "gap": "+18.322",
               "bestLap": "1:57.822",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "142.872"
             },
             {
@@ -9794,7 +9810,7 @@
               "time": "",
               "gap": "+23.640",
               "bestLap": "1:57.714",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "142.348"
             },
             {
@@ -9806,7 +9822,7 @@
               "time": "",
               "gap": "+24.482",
               "bestLap": "1:58.509",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "142.266"
             },
             {
@@ -9959,7 +9975,7 @@
               "time": "23:51.149",
               "gap": "",
               "bestLap": "1:58.197",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "144.225"
             },
             {
@@ -9971,7 +9987,7 @@
               "time": "",
               "gap": "+3.140",
               "bestLap": "1:58.390",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "143.91"
             },
             {
@@ -9983,8 +9999,9 @@
               "time": "",
               "gap": "+3.320",
               "bestLap": "1:58.066",
-              "points": 0,
-              "avgLapSpeed": "143.892"
+              "points": 16,
+              "avgLapSpeed": "143.892",
+              "fastestLap": true
             },
             {
               "pos": 4,
@@ -9995,7 +10012,7 @@
               "time": "",
               "gap": "+3.502",
               "bestLap": "1:58.133",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "143.873"
             },
             {
@@ -10007,7 +10024,7 @@
               "time": "",
               "gap": "+3.757",
               "bestLap": "1:58.141",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "143.848"
             },
             {
@@ -10019,7 +10036,7 @@
               "time": "",
               "gap": "+5.280",
               "bestLap": "1:58.147",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "143.695"
             },
             {
@@ -10031,7 +10048,7 @@
               "time": "",
               "gap": "+14.236",
               "bestLap": "1:58.836",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "142.805"
             },
             {
@@ -10043,7 +10060,7 @@
               "time": "",
               "gap": "+21.381",
               "bestLap": "1:58.609",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "142.102"
             },
             {
@@ -10055,7 +10072,7 @@
               "time": "",
               "gap": "+24.378",
               "bestLap": "1:59.199",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "141.81"
             },
             {
@@ -10067,7 +10084,7 @@
               "time": "",
               "gap": "+25.172",
               "bestLap": "1:59.237",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "141.733"
             },
             {
@@ -10079,7 +10096,7 @@
               "time": "",
               "gap": "+28.777",
               "bestLap": "1:59.578",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "141.383"
             },
             {
@@ -10091,7 +10108,7 @@
               "time": "",
               "gap": "+32.120",
               "bestLap": "1:59.453",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "141.06"
             },
             {
@@ -10103,7 +10120,7 @@
               "time": "",
               "gap": "+42.334",
               "bestLap": "2:00.234",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "140.082"
             },
             {
@@ -10115,7 +10132,7 @@
               "time": "",
               "gap": "+42.939",
               "bestLap": "2:00.529",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "140.024"
             },
             {
@@ -10127,7 +10144,7 @@
               "time": "",
               "gap": "+43.814",
               "bestLap": "2:00.363",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "139.941"
             },
             {
@@ -10184,7 +10201,7 @@
               "time": "23:45.511",
               "gap": "",
               "bestLap": "1:57.697",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "144.796"
             },
             {
@@ -10196,7 +10213,7 @@
               "time": "",
               "gap": "+0.315",
               "bestLap": "1:57.915",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "144.764"
             },
             {
@@ -10208,7 +10225,7 @@
               "time": "",
               "gap": "+2.064",
               "bestLap": "1:57.933",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "144.587"
             },
             {
@@ -10220,7 +10237,7 @@
               "time": "",
               "gap": "+2.476",
               "bestLap": "1:58.013",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "144.545"
             },
             {
@@ -10232,7 +10249,7 @@
               "time": "",
               "gap": "+7.224",
               "bestLap": "1:57.874",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "144.066"
             },
             {
@@ -10244,7 +10261,7 @@
               "time": "",
               "gap": "+10.200",
               "bestLap": "1:57.864",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "143.767"
             },
             {
@@ -10256,7 +10273,7 @@
               "time": "",
               "gap": "+11.121",
               "bestLap": "1:58.328",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "143.675"
             },
             {
@@ -10268,7 +10285,7 @@
               "time": "",
               "gap": "+18.191",
               "bestLap": "1:59.066",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "142.971"
             },
             {
@@ -10280,7 +10297,7 @@
               "time": "",
               "gap": "+18.368",
               "bestLap": "1:58.442",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "142.954"
             },
             {
@@ -10292,7 +10309,7 @@
               "time": "",
               "gap": "+18.661",
               "bestLap": "1:58.281",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "142.925"
             },
             {
@@ -10304,7 +10321,7 @@
               "time": "",
               "gap": "+20.466",
               "bestLap": "1:58.322",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "142.746"
             },
             {
@@ -10316,7 +10333,7 @@
               "time": "",
               "gap": "+20.914",
               "bestLap": "1:58.461",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "142.702"
             },
             {
@@ -10328,7 +10345,7 @@
               "time": "",
               "gap": "+22.184",
               "bestLap": "1:59.130",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "142.577"
             },
             {
@@ -10340,7 +10357,7 @@
               "time": "",
               "gap": "+24.825",
               "bestLap": "1:58.612",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "142.317"
             },
             {
@@ -10352,7 +10369,7 @@
               "time": "",
               "gap": "+25.954",
               "bestLap": "1:58.113",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "142.207"
             },
             {
@@ -10460,8 +10477,9 @@
               "time": "",
               "gap": "+2Laps",
               "bestLap": "1:57.658",
-              "points": 0,
-              "avgLapSpeed": "116.714"
+              "points": 1,
+              "avgLapSpeed": "116.714",
+              "fastestLap": true
             }
           ],
           "weather": {
@@ -10496,7 +10514,7 @@
               "time": "22:43.347",
               "gap": "",
               "bestLap": "52.530",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "134.594"
             },
             {
@@ -10508,8 +10526,9 @@
               "time": "",
               "gap": "+1.720",
               "bestLap": "52.424",
-              "points": 0,
-              "avgLapSpeed": "134.424"
+              "points": 18,
+              "avgLapSpeed": "134.424",
+              "fastestLap": true
             },
             {
               "pos": 3,
@@ -10520,7 +10539,7 @@
               "time": "",
               "gap": "+1.891",
               "bestLap": "52.677",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "134.408"
             },
             {
@@ -10532,7 +10551,7 @@
               "time": "",
               "gap": "+2.734",
               "bestLap": "52.565",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "134.325"
             },
             {
@@ -10544,7 +10563,7 @@
               "time": "",
               "gap": "+7.820",
               "bestLap": "52.429",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "133.826"
             },
             {
@@ -10556,7 +10575,7 @@
               "time": "",
               "gap": "+7.925",
               "bestLap": "52.740",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "133.816"
             },
             {
@@ -10568,7 +10587,7 @@
               "time": "",
               "gap": "+8.060",
               "bestLap": "52.482",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "133.803"
             },
             {
@@ -10580,7 +10599,7 @@
               "time": "",
               "gap": "+11.128",
               "bestLap": "52.549",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "133.504"
             },
             {
@@ -10592,7 +10611,7 @@
               "time": "",
               "gap": "+11.762",
               "bestLap": "52.999",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "133.443"
             },
             {
@@ -10604,7 +10623,7 @@
               "time": "",
               "gap": "+15.593",
               "bestLap": "52.674",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "133.072"
             },
             {
@@ -10616,7 +10635,7 @@
               "time": "",
               "gap": "+15.772",
               "bestLap": "53.043",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "133.055"
             },
             {
@@ -10628,7 +10647,7 @@
               "time": "",
               "gap": "+17.354",
               "bestLap": "52.812",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "132.902"
             },
             {
@@ -10640,7 +10659,7 @@
               "time": "",
               "gap": "+22.315",
               "bestLap": "53.545",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "132.426"
             },
             {
@@ -10652,7 +10671,7 @@
               "time": "",
               "gap": "+27.282",
               "bestLap": "53.035",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "131.953"
             },
             {
@@ -10664,7 +10683,7 @@
               "time": "",
               "gap": "+31.678",
               "bestLap": "53.621",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "131.538"
             },
             {
@@ -11401,8 +11420,9 @@
               "time": "25:36.720",
               "gap": "",
               "bestLap": "52.716",
-              "points": 0,
-              "avgLapSpeed": "128.962"
+              "points": 21,
+              "avgLapSpeed": "128.962",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -11413,7 +11433,7 @@
               "time": "",
               "gap": "+3.419",
               "bestLap": "53.070",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "128.676"
             },
             {
@@ -11425,7 +11445,7 @@
               "time": "",
               "gap": "+4.371",
               "bestLap": "53.056",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "128.596"
             },
             {
@@ -11437,7 +11457,7 @@
               "time": "",
               "gap": "+4.946",
               "bestLap": "53.158",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "128.548"
             },
             {
@@ -11449,7 +11469,7 @@
               "time": "",
               "gap": "+5.219",
               "bestLap": "53.098",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "128.525"
             },
             {
@@ -11461,7 +11481,7 @@
               "time": "",
               "gap": "+5.831",
               "bestLap": "52.848",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "128.474"
             },
             {
@@ -11473,7 +11493,7 @@
               "time": "",
               "gap": "+6.281",
               "bestLap": "53.168",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "128.437"
             },
             {
@@ -11485,7 +11505,7 @@
               "time": "",
               "gap": "+7.168",
               "bestLap": "53.141",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "128.363"
             },
             {
@@ -11497,7 +11517,7 @@
               "time": "",
               "gap": "+8.982",
               "bestLap": "53.069",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "128.212"
             },
             {
@@ -11509,7 +11529,7 @@
               "time": "",
               "gap": "+11.772",
               "bestLap": "53.274",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "127.981"
             },
             {
@@ -11521,7 +11541,7 @@
               "time": "",
               "gap": "+12.257",
               "bestLap": "53.237",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "127.941"
             },
             {
@@ -11533,7 +11553,7 @@
               "time": "",
               "gap": "+14.134",
               "bestLap": "53.374",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "127.786"
             },
             {
@@ -11545,7 +11565,7 @@
               "time": "",
               "gap": "+14.257",
               "bestLap": "52.834",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "127.776"
             },
             {
@@ -11557,7 +11577,7 @@
               "time": "",
               "gap": "+14.560",
               "bestLap": "53.203",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "127.751"
             },
             {
@@ -11569,7 +11589,7 @@
               "time": "",
               "gap": "+15.456",
               "bestLap": "53.216",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "127.678"
             },
             {
@@ -12216,8 +12236,9 @@
               "time": "22:36.425",
               "gap": "",
               "bestLap": "52.731",
-              "points": 0,
-              "avgLapSpeed": "135.281"
+              "points": 21,
+              "avgLapSpeed": "135.281",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -12228,7 +12249,7 @@
               "time": "",
               "gap": "+0.350",
               "bestLap": "52.894",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "135.246"
             },
             {
@@ -12240,7 +12261,7 @@
               "time": "",
               "gap": "+11.923",
               "bestLap": "53.200",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "134.102"
             },
             {
@@ -12252,7 +12273,7 @@
               "time": "",
               "gap": "+12.107",
               "bestLap": "53.051",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "134.084"
             },
             {
@@ -12264,7 +12285,7 @@
               "time": "",
               "gap": "+12.372",
               "bestLap": "53.082",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "134.058"
             },
             {
@@ -12276,7 +12297,7 @@
               "time": "",
               "gap": "+13.620",
               "bestLap": "53.473",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "133.936"
             },
             {
@@ -12288,7 +12309,7 @@
               "time": "",
               "gap": "+14.530",
               "bestLap": "53.252",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "133.847"
             },
             {
@@ -12300,7 +12321,7 @@
               "time": "",
               "gap": "+15.588",
               "bestLap": "53.168",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "133.744"
             },
             {
@@ -12312,7 +12333,7 @@
               "time": "",
               "gap": "+17.872",
               "bestLap": "53.306",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "133.522"
             },
             {
@@ -12324,7 +12345,7 @@
               "time": "",
               "gap": "+19.365",
               "bestLap": "53.182",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "133.377"
             },
             {
@@ -12336,7 +12357,7 @@
               "time": "",
               "gap": "+20.175",
               "bestLap": "53.417",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "133.298"
             },
             {
@@ -12348,7 +12369,7 @@
               "time": "",
               "gap": "+20.546",
               "bestLap": "53.241",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "133.262"
             },
             {
@@ -12360,7 +12381,7 @@
               "time": "",
               "gap": "+20.772",
               "bestLap": "53.295",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "133.24"
             },
             {
@@ -12372,7 +12393,7 @@
               "time": "",
               "gap": "+22.274",
               "bestLap": "53.251",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "133.095"
             },
             {
@@ -12384,7 +12405,7 @@
               "time": "",
               "gap": "+22.864",
               "bestLap": "53.310",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "133.038"
             },
             {
@@ -13091,7 +13112,7 @@
               "time": "22:32.922",
               "gap": "",
               "bestLap": "1:23.238",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "132.923"
             },
             {
@@ -13103,8 +13124,9 @@
               "time": "",
               "gap": "+1.832",
               "bestLap": "1:23.193",
-              "points": 0,
-              "avgLapSpeed": "132.743"
+              "points": 18,
+              "avgLapSpeed": "132.743",
+              "fastestLap": true
             },
             {
               "pos": 3,
@@ -13115,7 +13137,7 @@
               "time": "",
               "gap": "+3.686",
               "bestLap": "1:23.658",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "132.561"
             },
             {
@@ -13127,7 +13149,7 @@
               "time": "",
               "gap": "+4.317",
               "bestLap": "1:23.415",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "132.5"
             },
             {
@@ -13139,7 +13161,7 @@
               "time": "",
               "gap": "+14.622",
               "bestLap": "1:23.822",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "131.501"
             },
             {
@@ -13151,7 +13173,7 @@
               "time": "",
               "gap": "+17.285",
               "bestLap": "1:23.754",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "131.246"
             },
             {
@@ -13163,7 +13185,7 @@
               "time": "",
               "gap": "+18.422",
               "bestLap": "1:23.508",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "131.137"
             },
             {
@@ -13175,7 +13197,7 @@
               "time": "",
               "gap": "+21.431",
               "bestLap": "1:23.632",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "130.85"
             },
             {
@@ -13187,7 +13209,7 @@
               "time": "",
               "gap": "+23.231",
               "bestLap": "1:23.233",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "130.679"
             },
             {
@@ -13199,7 +13221,7 @@
               "time": "",
               "gap": "+23.438",
               "bestLap": "1:23.846",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "130.659"
             },
             {
@@ -13211,7 +13233,7 @@
               "time": "",
               "gap": "+28.091",
               "bestLap": "1:24.022",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "130.219"
             },
             {
@@ -13223,7 +13245,7 @@
               "time": "",
               "gap": "+28.332",
               "bestLap": "1:23.867",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "130.196"
             },
             {
@@ -13235,7 +13257,7 @@
               "time": "",
               "gap": "+29.309",
               "bestLap": "1:23.824",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "130.104"
             },
             {
@@ -13247,7 +13269,7 @@
               "time": "",
               "gap": "+30.216",
               "bestLap": "1:24.502",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "130.019"
             },
             {
@@ -13259,7 +13281,7 @@
               "time": "",
               "gap": "+34.259",
               "bestLap": "1:24.633",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "129.64"
             },
             {
@@ -14062,8 +14084,9 @@
               "time": "22:42.190",
               "gap": "",
               "bestLap": "1:23.487",
-              "points": 0,
-              "avgLapSpeed": "132.018"
+              "points": 21,
+              "avgLapSpeed": "132.018",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -14074,7 +14097,7 @@
               "time": "",
               "gap": "+2.778",
               "bestLap": "1:23.882",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "131.75"
             },
             {
@@ -14086,7 +14109,7 @@
               "time": "",
               "gap": "+5.185",
               "bestLap": "1:23.670",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "131.518"
             },
             {
@@ -14098,7 +14121,7 @@
               "time": "",
               "gap": "+5.434",
               "bestLap": "1:24.015",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "131.494"
             },
             {
@@ -14110,7 +14133,7 @@
               "time": "",
               "gap": "+6.765",
               "bestLap": "1:24.003",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "131.366"
             },
             {
@@ -14122,7 +14145,7 @@
               "time": "",
               "gap": "+7.203",
               "bestLap": "1:23.937",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "131.324"
             },
             {
@@ -14134,7 +14157,7 @@
               "time": "",
               "gap": "+17.303",
               "bestLap": "1:24.206",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "130.362"
             },
             {
@@ -14146,7 +14169,7 @@
               "time": "",
               "gap": "+20.753",
               "bestLap": "1:23.991",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "130.037"
             },
             {
@@ -14158,7 +14181,7 @@
               "time": "",
               "gap": "+20.936",
               "bestLap": "1:24.115",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "130.02"
             },
             {
@@ -14170,7 +14193,7 @@
               "time": "",
               "gap": "+20.955",
               "bestLap": "1:24.696",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "130.018"
             },
             {
@@ -14182,7 +14205,7 @@
               "time": "",
               "gap": "+21.514",
               "bestLap": "1:24.666",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "129.966"
             },
             {
@@ -14194,7 +14217,7 @@
               "time": "",
               "gap": "+22.660",
               "bestLap": "1:24.281",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "129.858"
             },
             {
@@ -14206,7 +14229,7 @@
               "time": "",
               "gap": "+22.711",
               "bestLap": "1:24.508",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "129.853"
             },
             {
@@ -14218,7 +14241,7 @@
               "time": "",
               "gap": "+22.805",
               "bestLap": "1:24.283",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "129.844"
             },
             {
@@ -14230,7 +14253,7 @@
               "time": "",
               "gap": "+24.144",
               "bestLap": "1:24.642",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "129.719"
             },
             {
@@ -15024,8 +15047,9 @@
               "time": "29:22.424",
               "gap": "",
               "bestLap": "1:23.444",
-              "points": 0,
-              "avgLapSpeed": "121.17"
+              "points": 21,
+              "avgLapSpeed": "121.17",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -15036,7 +15060,7 @@
               "time": "",
               "gap": "+1.234",
               "bestLap": "1:23.584",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "121.085"
             },
             {
@@ -15048,7 +15072,7 @@
               "time": "",
               "gap": "+1.871",
               "bestLap": "1:23.524",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "121.041"
             },
             {
@@ -15060,7 +15084,7 @@
               "time": "",
               "gap": "+4.838",
               "bestLap": "1:23.758",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "120.838"
             },
             {
@@ -15072,7 +15096,7 @@
               "time": "",
               "gap": "+5.264",
               "bestLap": "1:24.400",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "120.809"
             },
             {
@@ -15084,7 +15108,7 @@
               "time": "",
               "gap": "+5.830",
               "bestLap": "1:24.153",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "120.77"
             },
             {
@@ -15096,7 +15120,7 @@
               "time": "",
               "gap": "+6.212",
               "bestLap": "1:24.275",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "120.744"
             },
             {
@@ -15108,7 +15132,7 @@
               "time": "",
               "gap": "+8.450",
               "bestLap": "1:24.549",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "120.592"
             },
             {
@@ -15120,7 +15144,7 @@
               "time": "",
               "gap": "+9.810",
               "bestLap": "1:24.632",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "120.499"
             },
             {
@@ -15132,7 +15156,7 @@
               "time": "",
               "gap": "+10.309",
               "bestLap": "1:24.501",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "120.465"
             },
             {
@@ -15144,7 +15168,7 @@
               "time": "",
               "gap": "+13.013",
               "bestLap": "1:24.357",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "120.282"
             },
             {
@@ -15156,7 +15180,7 @@
               "time": "",
               "gap": "+14.094",
               "bestLap": "1:24.788",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "120.209"
             },
             {
@@ -15168,7 +15192,7 @@
               "time": "",
               "gap": "+14.647",
               "bestLap": "1:24.964",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "120.171"
             },
             {
@@ -15180,7 +15204,7 @@
               "time": "",
               "gap": "+14.984",
               "bestLap": "1:23.599",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "120.148"
             },
             {
@@ -15192,7 +15216,7 @@
               "time": "",
               "gap": "+18.021",
               "bestLap": "1:24.545",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "119.943"
             },
             {
@@ -15276,8 +15300,9 @@
               "time": "21:47.275",
               "gap": "",
               "bestLap": "58.464",
-              "points": 0,
-              "avgLapSpeed": "159.939"
+              "points": 21,
+              "avgLapSpeed": "159.939",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -15288,7 +15313,7 @@
               "time": "",
               "gap": "+2.138",
               "bestLap": "58.587",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "159.678"
             },
             {
@@ -15300,7 +15325,7 @@
               "time": "",
               "gap": "+2.325",
               "bestLap": "58.601",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "159.655"
             },
             {
@@ -15312,7 +15337,7 @@
               "time": "",
               "gap": "+2.665",
               "bestLap": "58.767",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "159.614"
             },
             {
@@ -15324,7 +15349,7 @@
               "time": "",
               "gap": "+2.848",
               "bestLap": "58.742",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "159.592"
             },
             {
@@ -15336,7 +15361,7 @@
               "time": "",
               "gap": "+3.095",
               "bestLap": "58.563",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "159.562"
             },
             {
@@ -15348,7 +15373,7 @@
               "time": "",
               "gap": "+4.099",
               "bestLap": "58.624",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "159.439"
             },
             {
@@ -15360,7 +15385,7 @@
               "time": "",
               "gap": "+4.355",
               "bestLap": "58.713",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "159.408"
             },
             {
@@ -15372,7 +15397,7 @@
               "time": "",
               "gap": "+4.597",
               "bestLap": "58.839",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "159.379"
             },
             {
@@ -15384,7 +15409,7 @@
               "time": "",
               "gap": "+8.014",
               "bestLap": "58.627",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "158.965"
             },
             {
@@ -15396,7 +15421,7 @@
               "time": "",
               "gap": "+10.143",
               "bestLap": "58.913",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "158.708"
             },
             {
@@ -15408,7 +15433,7 @@
               "time": "",
               "gap": "+12.265",
               "bestLap": "59.025",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "158.453"
             },
             {
@@ -15420,7 +15445,7 @@
               "time": "",
               "gap": "+13.312",
               "bestLap": "59.046",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "158.327"
             },
             {
@@ -15432,7 +15457,7 @@
               "time": "",
               "gap": "+13.768",
               "bestLap": "58.991",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "158.273"
             },
             {
@@ -15444,7 +15469,7 @@
               "time": "",
               "gap": "+15.184",
               "bestLap": "58.890",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "158.103"
             },
             {
@@ -15609,7 +15634,7 @@
               "time": "21:48.624",
               "gap": "",
               "bestLap": "58.850",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "159.775"
             },
             {
@@ -15621,7 +15646,7 @@
               "time": "",
               "gap": "+1.802",
               "bestLap": "58.962",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "159.555"
             },
             {
@@ -15633,7 +15658,7 @@
               "time": "",
               "gap": "+2.791",
               "bestLap": "59.052",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "159.435"
             },
             {
@@ -15645,7 +15670,7 @@
               "time": "",
               "gap": "+7.547",
               "bestLap": "59.285",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "158.858"
             },
             {
@@ -15657,7 +15682,7 @@
               "time": "",
               "gap": "+7.803",
               "bestLap": "59.091",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "158.827"
             },
             {
@@ -15669,7 +15694,7 @@
               "time": "",
               "gap": "+7.962",
               "bestLap": "59.107",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "158.808"
             },
             {
@@ -15681,7 +15706,7 @@
               "time": "",
               "gap": "+8.454",
               "bestLap": "59.202",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "158.749"
             },
             {
@@ -15693,7 +15718,7 @@
               "time": "",
               "gap": "+13.402",
               "bestLap": "58.951",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "158.155"
             },
             {
@@ -15705,7 +15730,7 @@
               "time": "",
               "gap": "+13.848",
               "bestLap": "59.215",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "158.101"
             },
             {
@@ -15717,7 +15742,7 @@
               "time": "",
               "gap": "+14.109",
               "bestLap": "59.020",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "158.07"
             },
             {
@@ -15729,8 +15754,9 @@
               "time": "",
               "gap": "+15.616",
               "bestLap": "58.844",
-              "points": 0,
-              "avgLapSpeed": "157.89"
+              "points": 6,
+              "avgLapSpeed": "157.89",
+              "fastestLap": true
             },
             {
               "pos": 12,
@@ -15741,7 +15767,7 @@
               "time": "",
               "gap": "+21.098",
               "bestLap": "59.485",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "157.239"
             },
             {
@@ -15753,7 +15779,7 @@
               "time": "",
               "gap": "+21.732",
               "bestLap": "59.300",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "157.165"
             },
             {
@@ -15765,7 +15791,7 @@
               "time": "",
               "gap": "+22.006",
               "bestLap": "59.127",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "157.132"
             },
             {
@@ -15777,7 +15803,7 @@
               "time": "",
               "gap": "+23.476",
               "bestLap": "59.295",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "156.959"
             },
             {
@@ -16547,7 +16573,7 @@
               "time": "27:03.506",
               "gap": "",
               "bestLap": "59.148",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "146.348"
             },
             {
@@ -16559,7 +16585,7 @@
               "time": "",
               "gap": "+2.117",
               "bestLap": "58.948",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "146.157"
             },
             {
@@ -16571,7 +16597,7 @@
               "time": "",
               "gap": "+2.387",
               "bestLap": "58.992",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "146.133"
             },
             {
@@ -16583,7 +16609,7 @@
               "time": "",
               "gap": "+3.078",
               "bestLap": "59.116",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "146.071"
             },
             {
@@ -16595,7 +16621,7 @@
               "time": "",
               "gap": "+3.497",
               "bestLap": "59.122",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "146.033"
             },
             {
@@ -16607,7 +16633,7 @@
               "time": "",
               "gap": "+3.908",
               "bestLap": "59.174",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "145.996"
             },
             {
@@ -16619,8 +16645,9 @@
               "time": "",
               "gap": "+4.036",
               "bestLap": "58.827",
-              "points": 0,
-              "avgLapSpeed": "145.985"
+              "points": 10,
+              "avgLapSpeed": "145.985",
+              "fastestLap": true
             },
             {
               "pos": 8,
@@ -16631,7 +16658,7 @@
               "time": "",
               "gap": "+4.697",
               "bestLap": "59.202",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "145.925"
             },
             {
@@ -16643,7 +16670,7 @@
               "time": "",
               "gap": "+5.967",
               "bestLap": "59.214",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "145.812"
             },
             {
@@ -16655,7 +16682,7 @@
               "time": "",
               "gap": "+10.448",
               "bestLap": "59.289",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "145.412"
             },
             {
@@ -16667,7 +16694,7 @@
               "time": "",
               "gap": "+10.633",
               "bestLap": "59.193",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "145.395"
             },
             {
@@ -16679,7 +16706,7 @@
               "time": "",
               "gap": "+10.777",
               "bestLap": "58.876",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "145.383"
             },
             {
@@ -16691,7 +16718,7 @@
               "time": "",
               "gap": "+13.906",
               "bestLap": "59.345",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "145.105"
             },
             {
@@ -16703,7 +16730,7 @@
               "time": "",
               "gap": "+15.148",
               "bestLap": "59.263",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "144.995"
             },
             {
@@ -16715,7 +16742,7 @@
               "time": "",
               "gap": "+15.414",
               "bestLap": "59.387",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "144.971"
             },
             {
@@ -16859,8 +16886,9 @@
               "time": "31:15.989",
               "gap": "",
               "bestLap": "1:31.387",
-              "points": 0,
-              "avgLapSpeed": "135.26"
+              "points": 21,
+              "avgLapSpeed": "135.26",
+              "fastestLap": true
             },
             {
               "pos": 2,
@@ -16871,7 +16899,7 @@
               "time": "",
               "gap": "+0.715",
               "bestLap": "1:31.419",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "135.209"
             },
             {
@@ -16883,7 +16911,7 @@
               "time": "",
               "gap": "+1.889",
               "bestLap": "1:31.485",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "135.124"
             },
             {
@@ -16895,7 +16923,7 @@
               "time": "",
               "gap": "+3.920",
               "bestLap": "1:31.880",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "134.978"
             },
             {
@@ -16907,7 +16935,7 @@
               "time": "",
               "gap": "+5.696",
               "bestLap": "1:31.837",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "134.851"
             },
             {
@@ -16919,7 +16947,7 @@
               "time": "",
               "gap": "+7.260",
               "bestLap": "1:32.142",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "134.739"
             },
             {
@@ -16931,7 +16959,7 @@
               "time": "",
               "gap": "+7.783",
               "bestLap": "1:32.173",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "134.701"
             },
             {
@@ -16943,7 +16971,7 @@
               "time": "",
               "gap": "+8.213",
               "bestLap": "1:31.808",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "134.671"
             },
             {
@@ -16955,7 +16983,7 @@
               "time": "",
               "gap": "+8.631",
               "bestLap": "1:32.337",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "134.641"
             },
             {
@@ -16967,7 +16995,7 @@
               "time": "",
               "gap": "+8.965",
               "bestLap": "1:32.284",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "134.617"
             },
             {
@@ -16979,7 +17007,7 @@
               "time": "",
               "gap": "+9.935",
               "bestLap": "1:32.110",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "134.548"
             },
             {
@@ -16991,7 +17019,7 @@
               "time": "",
               "gap": "+12.599",
               "bestLap": "1:32.363",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "134.358"
             },
             {
@@ -17003,7 +17031,7 @@
               "time": "",
               "gap": "+16.092",
               "bestLap": "1:32.670",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "134.11"
             },
             {
@@ -17015,7 +17043,7 @@
               "time": "",
               "gap": "+16.389",
               "bestLap": "1:32.341",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "134.089"
             },
             {
@@ -17027,7 +17055,7 @@
               "time": "",
               "gap": "+20.452",
               "bestLap": "1:32.533",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "133.801"
             },
             {
@@ -18044,7 +18072,7 @@
               "time": "31:04.610",
               "gap": "",
               "bestLap": "1:31.982",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "136.086"
             },
             {
@@ -18056,7 +18084,7 @@
               "time": "",
               "gap": "+0.350",
               "bestLap": "1:31.905",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "136.06"
             },
             {
@@ -18068,8 +18096,9 @@
               "time": "",
               "gap": "+1.460",
               "bestLap": "1:31.824",
-              "points": 0,
-              "avgLapSpeed": "135.979"
+              "points": 16,
+              "avgLapSpeed": "135.979",
+              "fastestLap": true
             },
             {
               "pos": 4,
@@ -18080,7 +18109,7 @@
               "time": "",
               "gap": "+2.904",
               "bestLap": "1:32.028",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "135.874"
             },
             {
@@ -18092,7 +18121,7 @@
               "time": "",
               "gap": "+3.278",
               "bestLap": "1:32.144",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "135.847"
             },
             {
@@ -18104,7 +18133,7 @@
               "time": "",
               "gap": "+3.588",
               "bestLap": "1:32.074",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "135.824"
             },
             {
@@ -18116,7 +18145,7 @@
               "time": "",
               "gap": "+10.954",
               "bestLap": "1:31.908",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "135.291"
             },
             {
@@ -18128,7 +18157,7 @@
               "time": "",
               "gap": "+12.344",
               "bestLap": "1:32.203",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "135.191"
             },
             {
@@ -18140,7 +18169,7 @@
               "time": "",
               "gap": "+12.849",
               "bestLap": "1:32.355",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "135.154"
             },
             {
@@ -18152,7 +18181,7 @@
               "time": "",
               "gap": "+13.100",
               "bestLap": "1:32.285",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "135.136"
             },
             {
@@ -18164,7 +18193,7 @@
               "time": "",
               "gap": "+13.198",
               "bestLap": "1:32.431",
-              "points": 0,
+              "points": 5,
               "avgLapSpeed": "135.129"
             },
             {
@@ -18176,7 +18205,7 @@
               "time": "",
               "gap": "+13.675",
               "bestLap": "1:32.449",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "135.095"
             },
             {
@@ -18188,7 +18217,7 @@
               "time": "",
               "gap": "+14.003",
               "bestLap": "1:32.301",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "135.071"
             },
             {
@@ -18200,7 +18229,7 @@
               "time": "",
               "gap": "+21.288",
               "bestLap": "1:33.168",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "134.549"
             },
             {
@@ -18212,7 +18241,7 @@
               "time": "",
               "gap": "+21.415",
               "bestLap": "1:32.642",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "134.54"
             },
             {
@@ -19189,7 +19218,7 @@
               "time": "31:47.185",
               "gap": "",
               "bestLap": "1:31.645",
-              "points": 0,
+              "points": 20,
               "avgLapSpeed": "133.048"
             },
             {
@@ -19201,7 +19230,7 @@
               "time": "",
               "gap": "+3.536",
               "bestLap": "1:31.711",
-              "points": 0,
+              "points": 17,
               "avgLapSpeed": "132.801"
             },
             {
@@ -19213,7 +19242,7 @@
               "time": "",
               "gap": "+8.954",
               "bestLap": "1:31.726",
-              "points": 0,
+              "points": 15,
               "avgLapSpeed": "132.426"
             },
             {
@@ -19225,7 +19254,7 @@
               "time": "",
               "gap": "+9.086",
               "bestLap": "1:31.904",
-              "points": 0,
+              "points": 13,
               "avgLapSpeed": "132.417"
             },
             {
@@ -19237,7 +19266,7 @@
               "time": "",
               "gap": "+9.564",
               "bestLap": "1:31.694",
-              "points": 0,
+              "points": 11,
               "avgLapSpeed": "132.384"
             },
             {
@@ -19249,7 +19278,7 @@
               "time": "",
               "gap": "+10.079",
               "bestLap": "1:31.888",
-              "points": 0,
+              "points": 10,
               "avgLapSpeed": "132.348"
             },
             {
@@ -19261,7 +19290,7 @@
               "time": "",
               "gap": "+10.289",
               "bestLap": "1:32.270",
-              "points": 0,
+              "points": 9,
               "avgLapSpeed": "132.334"
             },
             {
@@ -19273,7 +19302,7 @@
               "time": "",
               "gap": "+10.492",
               "bestLap": "1:32.139",
-              "points": 0,
+              "points": 8,
               "avgLapSpeed": "132.32"
             },
             {
@@ -19285,7 +19314,7 @@
               "time": "",
               "gap": "+10.978",
               "bestLap": "1:32.296",
-              "points": 0,
+              "points": 7,
               "avgLapSpeed": "132.286"
             },
             {
@@ -19297,7 +19326,7 @@
               "time": "",
               "gap": "+11.220",
               "bestLap": "1:32.049",
-              "points": 0,
+              "points": 6,
               "avgLapSpeed": "132.27"
             },
             {
@@ -19309,8 +19338,9 @@
               "time": "",
               "gap": "+11.470",
               "bestLap": "1:31.619",
-              "points": 0,
-              "avgLapSpeed": "132.252"
+              "points": 6,
+              "avgLapSpeed": "132.252",
+              "fastestLap": true
             },
             {
               "pos": 12,
@@ -19321,7 +19351,7 @@
               "time": "",
               "gap": "+15.479",
               "bestLap": "1:32.292",
-              "points": 0,
+              "points": 4,
               "avgLapSpeed": "131.977"
             },
             {
@@ -19333,7 +19363,7 @@
               "time": "",
               "gap": "+15.979",
               "bestLap": "1:32.539",
-              "points": 0,
+              "points": 3,
               "avgLapSpeed": "131.942"
             },
             {
@@ -19345,7 +19375,7 @@
               "time": "",
               "gap": "+18.096",
               "bestLap": "1:32.476",
-              "points": 0,
+              "points": 2,
               "avgLapSpeed": "131.797"
             },
             {
@@ -19357,7 +19387,7 @@
               "time": "",
               "gap": "+19.976",
               "bestLap": "1:32.470",
-              "points": 0,
+              "points": 1,
               "avgLapSpeed": "131.669"
             },
             {
