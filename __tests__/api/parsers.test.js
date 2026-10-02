@@ -822,6 +822,53 @@ describe('parseResults', () => {
     expect(race.bestSectors).toBeNull();
   });
 
+  test('maps lapChart when present, preserving running order and lapped/gap fields', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{
+          label: 'Race 1',
+          results: [],
+          lapChart: [
+            {
+              lap: 1,
+              timeOfDay: '15:14:06.496',
+              order: [
+                {no: 33, driver: 'Ashley SUTTON', team: 'Team VERTU', gapSeconds: null, lapsDown: null, lapTimeSeconds: 99.094},
+                {no: 32, driver: 'Tom CHILTON', team: 'Team VERTU', gapSeconds: 0.409, lapsDown: null, lapTimeSeconds: 99.503},
+                {no: 2, driver: 'Josh COOK', team: 'NAPA Racing', gapSeconds: null, lapsDown: 2, lapTimeSeconds: 354.668},
+              ],
+            },
+          ],
+        }],
+      }],
+    };
+    const race = parseResults(json)[0].races[0];
+    expect(race.lapChart).toEqual([
+      {
+        lap: 1,
+        timeOfDay: '15:14:06.496',
+        order: [
+          {no: 33, driver: 'Ashley SUTTON', team: 'Team VERTU', gapSeconds: null, lapsDown: null, lapTimeSeconds: 99.094},
+          {no: 32, driver: 'Tom CHILTON', team: 'Team VERTU', gapSeconds: 0.409, lapsDown: null, lapTimeSeconds: 99.503},
+          {no: 2, driver: 'Josh COOK', team: 'NAPA Racing', gapSeconds: null, lapsDown: 2, lapTimeSeconds: 354.668},
+        ],
+      },
+    ]);
+  });
+
+  test('lapChart is null when not yet scraped', () => {
+    const json = {
+      rounds: [{
+        round: 1,
+        venue: 'Test',
+        races: [{label: 'Race 1', results: []}],
+      }],
+    };
+    expect(parseResults(json)[0].races[0].lapChart).toBeNull();
+  });
+
   test('passes the class code through', () => {
     const json = {
       rounds: [{

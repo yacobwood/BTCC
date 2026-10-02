@@ -1073,6 +1073,235 @@ def _resolve_best_sectors(entries, number_map):
     return out
 
 
+# ── Lap Chart from book PDF ───────────────────────────────────────────────────
+
+# Confirmed live: only Race 1/2/3 ever print a Lap Chart page - Free
+# Practice/Qualifying/Qualifying Race are about one flying lap each, not a
+# race-long running order, so _session_heading_patterns' FP/Qualifying Part
+# 1/2/Qualifying Race headings never match "LAP CHART" at all.
+RACE_LAP_CHART_RE = _race_heading_pattern("LAP CHART")
+
+_LAP_HEADER_RE = re.compile(r"^LAP\s+(\d+)$", re.IGNORECASE)
+_LAP_TIMESTAMP_RE = re.compile(r"^@\s*([\d:.]+)$")
+_LAPPED_RE = re.compile(r"^(\d+)\s+Laps?$", re.IGNORECASE)
+_INT_LINE_RE = re.compile(r"^\d{1,3}$")
+_LAP_CHART_VALUE_RE = re.compile(r"^\d{1,3}$|^\d+\.\d+$|^\d+:\d+\.\d+$|^\d+\s+Laps?$", re.IGNORECASE)
+
+
+def _split_merged_lap_chart_line(line):
+    """pdfminer can merge two adjacent values onto a single output line
+    with no line break between them - confirmed live, pre-2013 books only
+    (e.g. 2009: "12.667  1:01.346", a gap and the following car's own lap
+    time, two spaces apart). Splits back into two lines whenever a line is
+    exactly two whitespace-separated halves and each one, independently,
+    already matches a real NO/BEHIND/LAP TIME column value shape - never
+    splits on a single space (that's legitimate within one value, e.g.
+    "2 Laps") or a line that doesn't cleanly resolve to two real values."""
+    parts = line.split()
+    if len(parts) == 2 and _LAP_CHART_VALUE_RE.match(parts[0]) and _LAP_CHART_VALUE_RE.match(parts[1]):
+        return parts
+    # A three-way merge confirmed live (pre-2013 books, around a pit visit):
+    # a value, the trailing "P" pit marker, and the next block's own
+    # leading car number, all glued onto one line (e.g. "1:06.511 P 6").
+    if (len(parts) == 3 and parts[1].upper() == "P"
+            and _LAP_CHART_VALUE_RE.match(parts[0]) and _LAP_CHART_VALUE_RE.match(parts[2])):
+        return parts
+    return [line]
+
+
+def _skip_to_next_int_line(lines, idx):
+    while idx < len(lines) and not _INT_LINE_RE.match(lines[idx]):
+        idx += 1
+    return idx
+
+
+def _collect_consecutive_ints(lines, idx):
+    """Collect every immediately-consecutive 1-3 digit integer line (a lap-
+    block's own NO column never has anything interspersed within it - only
+    the labels/headers *before* it do), stopping at the first line that
+    isn't one. Unlike _collect_numbers (which keeps scanning past noise
+    toward a pre-known target count), there IS no pre-known count here -
+    this IS how a block's own car count is discovered - so stopping at the
+    first non-match is the only way to find the real boundary rather than
+    guessing how far to scan."""
+    numbers = []
+    while idx < len(lines) and _INT_LINE_RE.match(lines[idx]):
+        numbers.append(int(lines[idx]))
+        idx += 1
+    return numbers, idx
+
+
+def _collect_lap_chart_gaps(lines, idx, n):
+    """Collect a lap-block's n BEHIND-column entries (the leader's own
+    blank entry is never included - n is always one less than that block's
+    car count). Each entry is a gap-to-car-ahead float, a lapped car's
+    "N Lap(s)" marker (confirmed live, replaces the gap entirely - never
+    both), or - confirmed live, a gap can exceed 60 seconds without the car
+    yet being marked a full lap down - "M:SS.mmm" (same format
+    _collect_lap_time already handles for the LAP TIME column; omitting it
+    here silently truncated the gap collection one entry short, which then
+    broke this block's own n-check and silently discarded every remaining
+    lap on the page). Stops at the first non-matching line rather than
+    skipping past it (same rationale as _collect_consecutive_ints): a
+    short/malformed block must come back short, not silently swallow the
+    next block's own car numbers or a page-footer float (e.g. "2.4873"
+    from the track-length line) looking for n entries that aren't really
+    there."""
+    values = []
+    while len(values) < n and idx < len(lines):
+        line = lines[idx]
+        m = _LAPPED_RE.match(line)
+        if m:
+            values.append(("lapped", int(m.group(1))))
+        elif re.match(r"^\d+\.\d+$", line):
+            values.append(float(line))
+        else:
+            m2 = re.match(r"^(\d+):(\d+\.\d+)$", line)
+            if m2:
+                values.append(int(m2.group(1)) * 60 + float(m2.group(2)))
+            else:
+                break
+        idx += 1
+    return values, idx
+
+
+def _parse_lap_chart_page(page_text):
+    """
+    Parse every lap-block on a single book-PDF page of a Lap Chart report.
+    Confirmed live: TSL prints up to 5 laps side by side per page (fewer on
+    a race's last page), each headed "LAP N" (case varies by era - "Lap N"
+    pre-2013, "LAP N" 2013 on, confirmed live) optionally followed by
+    "@ HH:MM:SS.mmm" - a per-lap timestamp wasn't always printed (confirmed
+    live: entirely absent 2004-2014, present every year sampled from 2015
+    on) - pdfminer groups a page's own lap header (+ timestamp, where
+    present) pairs together first, in order, ahead of the page's "NO BEHIND
+    LAP TIME"-family column labels (repeated once per block, wording and
+    line-grouping both vary by era but neither is read - see
+    _skip_to_next_int_line) and the block data itself. Each block is then,
+    in the same column-grouped shape _parse_best_speeds_block already
+    handles for Best Speeds' trap columns (just 3 columns instead of 2,
+    repeated per lap instead of per trap): N car numbers (NO, the running
+    position order - index 0 is the race leader), N-1 gap values (BEHIND),
+    then N lap times (LAP TIME).
+
+    A literal "P" token can also print immediately after a block's own lap
+    times, flagging a pit visit that lap - confirmed live, it trails the
+    whole block rather than sitting inline with the pitted car's own row,
+    so which row it belongs to isn't reliably recoverable from text order
+    alone. It's consumed (so it doesn't get misread as the next block's
+    leading car number) and otherwise discarded rather than guessed at.
+
+    Returns a list of {"lap": int, "timeOfDay": str, "order": [{"no",
+    "gapSeconds", "lapsDown", "lapTimeSeconds"}]} dicts, one per lap-block
+    found on this page (empty if this page has none).
+    """
+    lines = []
+    for raw in page_text.split("\n"):
+        stripped = raw.strip()
+        if stripped:
+            lines.extend(_split_merged_lap_chart_line(stripped))
+
+    headers = []
+    idx = 0
+    while idx < len(lines):
+        m_lap = _LAP_HEADER_RE.match(lines[idx])
+        if not m_lap:
+            break
+        lap_no = int(m_lap.group(1))
+        timestamp = None
+        if idx + 1 < len(lines):
+            m_ts = _LAP_TIMESTAMP_RE.match(lines[idx + 1])
+            if m_ts:
+                timestamp = m_ts.group(1)
+                idx += 1  # also consume the timestamp line
+        headers.append((lap_no, timestamp))
+        idx += 1
+    if not headers:
+        return []
+
+    blocks = []
+    for lap_no, timestamp in headers:
+        idx = _skip_to_next_int_line(lines, idx)
+        numbers, idx = _collect_consecutive_ints(lines, idx)
+        if not numbers:
+            break  # malformed/truncated page - stop rather than misparse
+        n = len(numbers)
+        gaps, idx = _collect_lap_chart_gaps(lines, idx, n - 1)
+        times, idx = _collect_lap_time(lines, idx, n)
+        if len(gaps) != n - 1 or len(times) != n:
+            break
+
+        order = [{"no": numbers[0], "gapSeconds": None, "lapsDown": None, "lapTimeSeconds": times[0]}]
+        for no, gap, time in zip(numbers[1:], gaps, times[1:]):
+            if isinstance(gap, tuple):
+                order.append({"no": no, "gapSeconds": None, "lapsDown": gap[1], "lapTimeSeconds": time})
+            else:
+                order.append({"no": no, "gapSeconds": gap, "lapsDown": None, "lapTimeSeconds": time})
+        blocks.append({"lap": lap_no, "timeOfDay": timestamp, "order": order})
+
+        if idx < len(lines) and lines[idx] == "P":
+            idx += 1
+    return blocks
+
+
+def parse_lap_chart(text):
+    """
+    Extract each race's full Lap Chart (running order, gap-to-car-ahead and
+    lap time for every lap) from the book PDF's plain text. Returns
+    {label: [...]} for Race 1/2/3 only.
+
+    Unlike every other book-PDF report parsed here, a single race's own Lap
+    Chart spans MULTIPLE physical pages (confirmed live: up to 5 laps per
+    page) rather than one - so pages are grouped by race first, then each
+    page's own lap-blocks are parsed and concatenated in page order.
+    Grouping uses the heading's own "ROUND N" digit (shared with Best
+    Speeds/Best Sectors/Statistics/Grid/Classification's headings, via
+    RACE_LAP_CHART_RE), by first-seen order rather than by its literal
+    value - confirmed live, 2026 Donington GP prints "ROUND 19/20/21" for
+    its own Race 1/2/3, not "ROUND 1/2/3": the digit is this book's own
+    internal session counter, never the literal race number, same as every
+    other report's RACE_*_RE already assumes implicitly by zip-ordering
+    finditer() matches rather than reading the digit's value.
+    """
+    race_pages = {}
+    for page in text.split("\x0c"):
+        m = RACE_LAP_CHART_RE.search(page)
+        if m:
+            race_pages.setdefault(m.group(1), []).append(page[m.end():])
+
+    result = {}
+    for label, pages in zip(["Race 1", "Race 2", "Race 3"], race_pages.values()):
+        laps = []
+        for page in pages:
+            laps.extend(_parse_lap_chart_page(page))
+        if laps:
+            result[label] = laps
+    return result
+
+
+def _resolve_lap_chart(laps, number_map):
+    """Same car-number join as _resolve_best_speeds/_resolve_best_sectors -
+    the page's own driver identification is never used, only the car
+    number. A missing car is warned about once per car, not once per lap
+    (a race-long Lap Chart repeats every car on every lap, so the naive
+    per-row warning used elsewhere would print dozens of times for one
+    genuinely-missing car)."""
+    warned = set()
+    out = []
+    for entry in laps:
+        order = []
+        for row in entry["order"]:
+            driver, team = number_map.get(row["no"], ("", ""))
+            if not driver:
+                driver = f"Car {row['no']}"
+                if row["no"] not in warned:
+                    warned.add(row["no"])
+                    print(f"    [lap chart] car {row['no']} not in session results/grid - using placeholder name")
+            order.append({**row, "driver": driver, "team": team})
+        out.append({**entry, "order": order})
+    return out
+
+
 def _number_driver_map(race):
     """car number -> (driver, team) from this session's own parsed results
     (falls back to grid, for a session with a grid but no results yet)."""
@@ -1191,6 +1420,13 @@ def scrape_round(info, session_filter=None):
         if raw:
             race["bestSectors"] = _resolve_best_sectors(raw, _number_driver_map(race))
             print(f"    [best sectors] {race['label']}: parsed")
+
+    lap_chart_raw = parse_lap_chart(book_text) if book_data else {}
+    for race in races:
+        raw = lap_chart_raw.get(race["label"])
+        if raw:
+            race["lapChart"] = _resolve_lap_chart(raw, _number_driver_map(race))
+            print(f"    [lap chart] {race['label']}: parsed {len(raw)} laps")
 
     # Tag pole (P1 in Qualifying only)
     qual = next((r for r in races if r["label"] == "Qualifying"), None)
@@ -1922,9 +2158,9 @@ def merge_scraped_with_existing(scraped, existing_round):
       If the car-number order changed, a warning is printed.
     - Old grid is kept when the new fetch returned empty (transient failure).
     - New results overwrite old results when present; old results kept otherwise.
-    - New bestSpeeds/weather/flagStats/bestSectors each overwrite their own old value when
-      present; old value kept otherwise (a transient book-fetch failure doesn't wipe
-      previously-scraped data).
+    - New bestSpeeds/weather/flagStats/bestSectors/lapChart each overwrite their own old
+      value when present; old value kept otherwise (a transient book-fetch failure
+      doesn't wipe previously-scraped data).
     - reverseGridDraw is preserved from the existing round when not set on the new scrape.
     - youtubeUrls are always carried forward (never re-scraped).
     """
@@ -1943,7 +2179,7 @@ def merge_scraped_with_existing(scraped, existing_round):
                 print(f"  *** {race['label']} grid CHANGED (TSL amendment?) old={old_nos[:3]}... new={new_nos[:3]}...")
         if ex.get("results") and not race.get("results"):
             race["results"] = ex["results"]
-        for field in ("bestSpeeds", "weather", "flagStats", "bestSectors"):
+        for field in ("bestSpeeds", "weather", "flagStats", "bestSectors", "lapChart"):
             if ex.get(field) and not race.get(field):
                 race[field] = ex[field]
         # Preserve an explicitly-set reverseGridDraw override

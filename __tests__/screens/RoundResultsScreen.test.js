@@ -1228,6 +1228,40 @@ describe('RoundResultsScreen', () => {
     });
   });
 
+  describe('lap chart', () => {
+    // LapChartCard is globally stubbed (jest.setup.js, same as
+    // ProgressionChart) - its own content/analytics are covered by
+    // LapChartCard.test.js directly. This only checks the tab's wiring:
+    // it's reachable exactly when race.lapChart has data.
+    const LAP_CHART = [
+      {lap: 1, timeOfDay: '15:14:06.496', order: [
+        {no: 3, driver: 'Tom Chilton', team: 'Team VERTU', gapSeconds: null, lapsDown: null, lapTimeSeconds: 90},
+      ]},
+    ];
+
+    function roundWithLapChart(lapChart = LAP_CHART) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice' ? {...r, lapChart} : r),
+      };
+    }
+
+    it('becomes reachable and fires sessionAnalysisTabChanged when a session has lapChart data', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {findByText, getByLabelText} = renderRound({round: roundWithLapChart(), initialRace: 0});
+      await findByText('Tom INGRAM');
+      fireEvent.press(getByLabelText('Next data type'));
+      expect(await findByText('Lap Chart')).toBeTruthy();
+      await waitFor(() => expect(Analytics.sessionAnalysisTabChanged).toHaveBeenCalledWith(1, 'Free Practice', 'lapChart'));
+    });
+
+    it('is not reachable when the session has no lapChart yet', async () => {
+      const {findByText, queryByText} = renderRound({initialRace: 0}); // plain MOCK_ROUND, no lapChart
+      await findByText('Tom INGRAM');
+      expect(queryByText('Lap Chart')).toBeNull();
+    });
+  });
+
   describe('conditions', () => {
     function roundWithConditions({weather, flagStats} = {}) {
       return {

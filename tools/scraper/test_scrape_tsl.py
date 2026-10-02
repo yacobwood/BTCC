@@ -1287,6 +1287,218 @@ class TestParseLapsLed(unittest.TestCase):
         self.assertEqual(s.parse_laps_led(text), {})
 
 
+def make_lap_chart_page(lap_blocks):
+    """Build a synthetic single-page Lap Chart text chunk in the real
+    book-PDF shape (confirmed live via pdfminer.extract_text on the 2026
+    Donington GP and 2019 Silverstone book PDFs): every page's own
+    "LAP N" / "@ timestamp" header pairs are grouped together up front, in
+    order, followed by one repeat of "NO BEHIND LAP TIME" per block, then
+    the blocks' own column-grouped data in sequence (N car numbers, N-1
+    gaps, N lap times per block).
+
+    `lap_blocks` is a list of (lap_no, timestamp, rows) where rows is a
+    list of (car_no, gap, lap_time) - gap is None for the leader's row, a
+    float/str("M:SS.mmm") for a real gap, or ("lapped", n) for a lapped
+    car's "n Lap(s)" marker; lap_time is a float seconds value or a literal
+    "M:SS.mmm" string."""
+    headers = "".join(f"LAP {lap_no}\n\n@ {ts}\n\n" for lap_no, ts, _ in lap_blocks)
+    labels = "NO BEHIND LAP TIME\n\n" * len(lap_blocks)
+    blocks = ""
+    for _, _, rows in lap_blocks:
+        blocks += "".join(f"{no}\n" for no, _gap, _t in rows)
+        for _no, gap, _t in rows[1:]:
+            if isinstance(gap, tuple):
+                blocks += f"{gap[1]} Laps\n"
+            else:
+                blocks += f"{gap}\n"
+        for _no, _gap, t in rows:
+            blocks += f"{t}\n"
+    return headers + labels + blocks
+
+
+class TestCollectConsecutiveInts(unittest.TestCase):
+
+    def test_stops_at_first_non_integer_line_no_preknown_count(self):
+        lines = ["33", "32", "66", "0.409", "1:39.503"]
+        numbers, idx = s._collect_consecutive_ints(lines, 0)
+        self.assertEqual(numbers, [33, 32, 66])
+        self.assertEqual(idx, 3)
+
+    def test_skip_to_next_int_line_passes_over_header_labels(self):
+        lines = ["NO BEHIND LAP TIME", "NO BEHIND LAP TIME", "33"]
+        idx = s._skip_to_next_int_line(lines, 0)
+        self.assertEqual(idx, 2)
+
+
+class TestCollectLapChartGaps(unittest.TestCase):
+
+    def test_plain_float_gap(self):
+        values, idx = s._collect_lap_chart_gaps(["0.409", "1.226"], 0, 2)
+        self.assertEqual(values, [0.409, 1.226])
+        self.assertEqual(idx, 2)
+
+    def test_lapped_marker_replaces_gap(self):
+        values, idx = s._collect_lap_chart_gaps(["0.409", "2 Laps", "1.551"], 0, 3)
+        self.assertEqual(values, [0.409, ("lapped", 2), 1.551])
+
+    def test_singular_lap_marker(self):
+        values, _ = s._collect_lap_chart_gaps(["1 Lap"], 0, 1)
+        self.assertEqual(values, [("lapped", 1)])
+
+    def test_gap_over_a_minute_parsed_as_mmss(self):
+        # Confirmed live (Round 7/Donington GP, Race 3 page 2): a gap can
+        # exceed 60 seconds before the car is marked a full lap down, and
+        # prints as "M:SS.mmm" same as an over-a-minute lap time does. This
+        # was the real bug: without it, the collector stopped one entry
+        # short, under-filling this n-sized collection, which then failed
+        # the caller's len(gaps) == n-1 check and silently discarded every
+        # remaining lap on the page.
+        values, idx = s._collect_lap_chart_gaps(["5.147", "1:29.453"], 0, 2)
+        self.assertEqual(values, [5.147, 89.453])
+        self.assertEqual(idx, 2)
+
+    def test_stops_short_rather_than_skip_past_unrelated_footer_text(self):
+        values, idx = s._collect_lap_chart_gaps(["0.409", "Weather / Track : Dry"], 0, 2)
+        self.assertEqual(values, [0.409])
+        self.assertEqual(idx, 1)
+
+
+class TestParseLapChartPage(unittest.TestCase):
+
+    def test_parses_multiple_blocks_with_lap_numbers_and_timestamps(self):
+        page = make_lap_chart_page([
+            (1, "15:14:06.496", [(33, None, 99.094), (32, 0.409, 99.503), (66, 0.949, 100.043)]),
+            (2, "15:15:47.175", [(33, None, 100.679), (32, 0.427, 100.697), (66, 1.221, 100.951)]),
+        ])
+        blocks = s._parse_lap_chart_page(page)
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual(blocks[0]["lap"], 1)
+        self.assertEqual(blocks[0]["timeOfDay"], "15:14:06.496")
+        self.assertEqual(blocks[0]["order"][0], {"no": 33, "gapSeconds": None, "lapsDown": None, "lapTimeSeconds": 99.094})
+        self.assertEqual(blocks[0]["order"][1], {"no": 32, "gapSeconds": 0.409, "lapsDown": None, "lapTimeSeconds": 99.503})
+        self.assertEqual(blocks[1]["lap"], 2)
+
+    def test_lapped_car_marker_sets_laps_down_not_gap(self):
+        page = make_lap_chart_page([
+            (6, "15:23:46.785", [(33, None, 100.0), (32, 0.251, 101.0), (2, ("lapped", 2), 354.668)]),
+        ])
+        blocks = s._parse_lap_chart_page(page)
+        row = blocks[0]["order"][2]
+        self.assertEqual(row, {"no": 2, "gapSeconds": None, "lapsDown": 2, "lapTimeSeconds": 354.668})
+
+    def test_trailing_pit_marker_is_consumed_and_does_not_corrupt_next_block(self):
+        # Confirmed live: a literal "P" can print right after a block's own
+        # lap times (pit visit that lap). It isn't attributable to a
+        # specific row from text order alone (see docstring), but it MUST
+        # be consumed - otherwise it gets misread as the next lap-block's
+        # own leading car number.
+        page = (
+            "LAP 6\n\n@ 15:23:46.785\n\nLAP 7\n\n@ 15:25:22.092\n\n"
+            "NO BEHIND LAP TIME\n\nNO BEHIND LAP TIME\n\n"
+            "33\n2\n\n0.251\n\n100.0\n354.668\n\nP\n\n"
+            "33\n50\n\n0.5\n\n101.0\n102.0\n"
+        )
+        blocks = s._parse_lap_chart_page(page)
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual([r["no"] for r in blocks[1]["order"]], [33, 50])
+
+    def test_shrinking_car_count_across_blocks_is_handled(self):
+        # Confirmed live: a car can retire mid-race, so a later lap-block's
+        # own car count can be less than an earlier one's - no fixed n is
+        # assumed across blocks.
+        page = make_lap_chart_page([
+            (1, "15:14:06.496", [(33, None, 90.0), (32, 0.4, 90.5), (66, 0.9, 91.0)]),
+            (2, "15:15:47.175", [(33, None, 90.1), (32, 0.5, 90.6)]),
+        ])
+        blocks = s._parse_lap_chart_page(page)
+        self.assertEqual(len(blocks[0]["order"]), 3)
+        self.assertEqual(len(blocks[1]["order"]), 2)
+
+    def test_no_lap_chart_headers_returns_empty_list(self):
+        self.assertEqual(s._parse_lap_chart_page("some unrelated page text\nwith no table in it"), [])
+
+    def test_truncated_final_block_is_dropped_not_misparsed(self):
+        # A page cut off mid-block (e.g. a malformed/partial fetch) must
+        # come back with only the complete blocks before it, not a
+        # corrupted partial one.
+        page = (
+            "LAP 1\n\n@ 15:14:06.496\n\nLAP 2\n\n@ 15:15:47.175\n\n"
+            "NO BEHIND LAP TIME\n\nNO BEHIND LAP TIME\n\n"
+            "33\n32\n\n0.4\n\n90.0\n90.5\n\n"
+            "33\n32\n\n0.5\n\n90.1\n"  # missing the second lap time entirely
+        )
+        blocks = s._parse_lap_chart_page(page)
+        self.assertEqual(len(blocks), 1)
+        self.assertEqual(blocks[0]["lap"], 1)
+
+
+class TestParseLapChart(unittest.TestCase):
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def _page(self, round_no, lap_blocks):
+        header = f"{self.TITLE}\n\nROUND {round_no} - LAP CHART\n\n"
+        return header + make_lap_chart_page(lap_blocks)
+
+    def test_groups_pages_by_first_seen_round_digit_into_race_1_2_3(self):
+        # Confirmed live: the heading's own digit is this book's internal
+        # session counter (e.g. "ROUND 19/20/21"), never the literal race
+        # number - races are told apart by which distinct digit is seen
+        # first/second/third, not by the digit's value.
+        text = "\x0c".join([
+            self._page("19", [(1, "15:14:06.496", [(33, None, 90.0), (32, 0.4, 90.5)])]),
+            self._page("19", [(2, "15:15:47.175", [(33, None, 90.1), (32, 0.5, 90.6)])]),
+            self._page("20", [(1, "14:53:09.752", [(50, None, 91.0), (17, 0.3, 91.3)])]),
+            self._page("21", [(1, "17:42:42.538", [(80, None, 92.0), (22, 0.2, 92.2)])]),
+        ])
+        result = s.parse_lap_chart(text)
+        self.assertEqual(sorted(result.keys()), ["Race 1", "Race 2", "Race 3"])
+        self.assertEqual(len(result["Race 1"]), 2)  # both round-19 pages concatenated
+        self.assertEqual(len(result["Race 2"]), 1)
+        self.assertEqual(result["Race 2"][0]["order"][0]["no"], 50)
+        self.assertEqual(result["Race 3"][0]["order"][0]["no"], 80)
+
+    def test_qualifying_race_prefixed_heading_is_excluded(self):
+        # Confirmed live (Round 7/Donington GP): the Qualifying Race's own
+        # Lap Chart heading prints as "QUALIFYING -RACE - ROUND N - LAP
+        # CHART" - RACE_LAP_CHART_RE (same pattern already trusted for
+        # Best Speeds/Sectors/Statistics) must not confuse it with a plain
+        # "ROUND N -" Race 1/2/3 heading.
+        qr_page = f"{self.TITLE}\n\nQUALIFYING -RACE - ROUND 19 - LAP CHART\n\n" + make_lap_chart_page(
+            [(1, "15:14:06.496", [(5, None, 80.0), (6, 0.1, 80.1)])]
+        )
+        race1_page = self._page("20", [(1, "14:53:09.752", [(33, None, 90.0), (32, 0.4, 90.5)])])
+        result = s.parse_lap_chart(qr_page + "\x0c" + race1_page)
+        self.assertNotIn("Race 1", {k: v for k, v in result.items() if v and v[0]["order"][0]["no"] == 5})
+        self.assertEqual(result["Race 1"][0]["order"][0]["no"], 33)
+
+    def test_no_lap_chart_in_text_returns_empty_dict(self):
+        self.assertEqual(s.parse_lap_chart("no lap chart data here at all"), {})
+
+
+class TestResolveLapChart(unittest.TestCase):
+
+    def test_resolves_car_number_to_canonical_driver_and_team(self):
+        laps = [{"lap": 1, "timeOfDay": "t1", "order": [
+            {"no": 3, "gapSeconds": None, "lapsDown": None, "lapTimeSeconds": 90.0},
+        ]}]
+        resolved = s._resolve_lap_chart(laps, {3: ("Tom CHILTON", "Team VERTU")})
+        self.assertEqual(resolved[0]["order"][0]["driver"], "Tom CHILTON")
+        self.assertEqual(resolved[0]["order"][0]["team"], "Team VERTU")
+
+    def test_missing_car_gets_placeholder_name_warned_once_not_per_lap(self):
+        laps = [
+            {"lap": 1, "timeOfDay": "t1", "order": [{"no": 99, "gapSeconds": None, "lapsDown": None, "lapTimeSeconds": 90.0}]},
+            {"lap": 2, "timeOfDay": "t2", "order": [{"no": 99, "gapSeconds": None, "lapsDown": None, "lapTimeSeconds": 90.1}]},
+        ]
+        with mock.patch("builtins.print") as mock_print:
+            resolved = s._resolve_lap_chart(laps, {})
+        self.assertEqual(resolved[0]["order"][0]["driver"], "Car 99")
+        self.assertEqual(resolved[1]["order"][0]["driver"], "Car 99")
+        warn_calls = [c for c in mock_print.call_args_list if "not in session results/grid" in str(c)]
+        self.assertEqual(len(warn_calls), 1)
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

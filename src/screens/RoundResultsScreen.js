@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import SwipeableTabs from '../components/SwipeableTabs';
 import SessionAnalysisTabs from '../components/SessionAnalysisTabs';
+import LapChartCard from '../components/LapChartCard';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -444,6 +445,19 @@ export default function RoundResultsScreen({route, navigation}) {
                           renderResult={makeRenderResult(gridMap, ttbMap, race)}
                           roundNumber={round.round}
                           session={race.label}
+                        />
+                      ),
+                    },
+                    {
+                      key: 'lapChart',
+                      label: 'Lap Chart',
+                      hasData: !!race.lapChart?.length,
+                      render: () => (
+                        <LapChartCard
+                          lapChart={race.lapChart}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
                         />
                       ),
                     },

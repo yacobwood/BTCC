@@ -266,6 +266,7 @@ jest.mock('./src/components/CachedImage', () => {
   };
 });
 jest.mock('./src/components/ProgressionChart', () => ({__esModule: true, default: () => null}));
+jest.mock('./src/components/LapChartCard', () => ({__esModule: true, default: () => null}));
 
 // ── React Native Linking ──────────────────────────────────────────────────────
 // Patch Linking so AuthProvider's magic-link useEffect doesn't crash in tests.

@@ -376,7 +376,7 @@ function mapBestSpeedEntry(e) {
   return {pos: e.pos || 0, no: e.no || 0, driver: e.driver || '', team: e.team || '', mph: e.mph || 0};
 }
 
-function mapBestSpeeds(bs) {
+export function mapBestSpeeds(bs) {
   if (!bs) return null;
   return {
     intermediate1: bs.intermediate1 ? bs.intermediate1.map(mapBestSpeedEntry) : null,
@@ -385,12 +385,12 @@ function mapBestSpeeds(bs) {
   };
 }
 
-function mapWeather(w) {
+export function mapWeather(w) {
   if (!w) return null;
   return {condition: w.condition || '', track: w.track || ''};
 }
 
-function mapFlagStats(f) {
+export function mapFlagStats(f) {
   if (!f) return null;
   return {green: f.green || 0, red: f.red || 0, safetyCar: f.safetyCar || 0, fcy: f.fcy || 0};
 }
@@ -402,9 +402,33 @@ function mapBestSectorEntry(e) {
   return {no: e.no || 0, driver: e.driver || '', team: e.team || '', ideal: e.ideal || 0, best: e.best || 0, diff: e.diff || 0};
 }
 
-function mapBestSectors(bs) {
+export function mapBestSectors(bs) {
   if (!bs) return null;
   return bs.map(mapBestSectorEntry);
+}
+
+// Lap Chart (running order + gap-to-ahead + lap time, every lap) from
+// scrape_tsl.py's parse_lap_chart() - already resolved to the canonical
+// driver string via car-number join, same as mapBestSpeedEntry. `order` is
+// already the real running position order (index 0 is that lap's leader).
+function mapLapChartRow(r) {
+  return {
+    no: r.no || 0,
+    driver: r.driver || '',
+    team: r.team || '',
+    gapSeconds: r.gapSeconds ?? null,
+    lapsDown: r.lapsDown ?? null,
+    lapTimeSeconds: r.lapTimeSeconds || 0,
+  };
+}
+
+export function mapLapChart(lc) {
+  if (!lc) return null;
+  return lc.map(l => ({
+    lap: l.lap || 0,
+    timeOfDay: l.timeOfDay || '',
+    order: (l.order || []).map(mapLapChartRow),
+  }));
 }
 
 export function parseResults(json) {
@@ -436,6 +460,7 @@ export function parseResults(json) {
         weather: mapWeather(race.weather),
         flagStats: mapFlagStats(race.flagStats),
         bestSectors: mapBestSectors(race.bestSectors),
+        lapChart: mapLapChart(race.lapChart),
         results: (race.results || []).map(d => {
           const pos = d.pos || 0;
           const rawPts = d.points || 0;

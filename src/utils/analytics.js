@@ -78,6 +78,7 @@ export const Analytics = {
   penaltyDocumentOpenFailed: (round, session, errorCode) => logEvent(fa(),'penalty_document_open_failed', {round, session, error_code: errorCode || 'unknown'}),
   speedTrapShown: (round, session, trapLabel, driverCount) => logEvent(fa(),'speed_trap_shown', {round, session, trap: trapLabel, driver_count: driverCount}),
   perfectLapShown: (round, session, driverCount) => logEvent(fa(),'perfect_lap_shown', {round, session, driver_count: driverCount}),
+  lapChartShown: (round, session, driverCount, lapCount) => logEvent(fa(),'lap_chart_shown', {round, session, driver_count: driverCount, lap_count: lapCount}),
   conditionsShown: (round, session) => logEvent(fa(),'conditions_shown', {round, session}),
   leaderboardShown: (round, session, driverCount) => logEvent(fa(),'leaderboard_shown', {round, session, driver_count: driverCount}),
   sessionAnalysisTabChanged: (round, session, tabKey) => logEvent(fa(),'session_analysis_tab_changed', {round, session, tab: tabKey}),
