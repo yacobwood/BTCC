@@ -72,6 +72,29 @@ describe('htmlToSpeechText', () => {
     expect(htmlToSpeechText(html)).toBe('');
   });
 
+  it('drops an embedded iframe entirely, including its own inline style/script/text nodes', () => {
+    // Mirrors the real shape found in live btcc.net article content: the
+    // scraper inlines the iframe's own fully-rendered page (quote-clip
+    // embeds, podcast episodes) as literal children instead of leaving an
+    // empty <iframe src="...">, which used to make Listen read straight
+    // through the embed's player chrome after finishing the real article.
+    const html =
+      '<p>Real intro text.</p>' +
+      '<div class="wp-block-custom-html" data-html="&lt;iframe&gt;&lt;/iframe&gt;">' +
+      '<iframe src="https://example.com/player"><html><head>' +
+      '<style>.turbo-progress-bar { position: fixed; }</style>' +
+      '</head><body><h2>Some Episode Title</h2><button aria-label="Play">Play</button>' +
+      '</body></html></iframe></div>' +
+      '<p>Real outro text.</p>';
+    const result = htmlToSpeechText(html);
+    expect(result).toBe('Real intro text. Real outro text.');
+  });
+
+  it('strips a bare script or style block outside any iframe', () => {
+    const html = '<p>Before.</p><script>console.log("x");</script><style>.a{color:red;}</style><p>After.</p>';
+    expect(htmlToSpeechText(html)).toBe('Before. After.');
+  });
+
   it('handles a full article shape end to end: heading, paragraph, table, list, blockquote', () => {
     const html =
       '<p>Intro paragraph.</p>' +

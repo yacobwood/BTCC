@@ -53,6 +53,23 @@ export function htmlToSpeechText(html) {
   if (!html) return '';
   let text = html;
 
+  // Embedded audio/video clips (btcc.net driver-quote clips, podcast
+  // episodes) - the scraper bakes the <iframe>'s own fully-rendered page
+  // (player chrome, raw CSS rules, the clip's title restated two or three
+  // times) inline as the iframe's children instead of leaving it as an
+  // empty <iframe src="...">. None of that is article prose, so the whole
+  // thing is dropped before anything else runs - otherwise every stray
+  // text node inside (e.g. "Play"/"Rewind 15 seconds" button labels, the
+  // embed's own title) gets narrated verbatim, which is what made Listen
+  // read the real article and then keep going through player junk instead
+  // of stopping at the end (confirmed live against real article content,
+  // 2026-10-02). <script>/<style> are stripped the same way in case either
+  // ever appears outside an iframe too - the generic tag-strip below only
+  // removes the tags themselves, not the raw CSS/JS text between them.
+  text = text.replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '');
+  text = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
   // Tables first, while their <tr>/<td> structure is still intact - the
   // generic block-close pass below would otherwise just insert a line break
   // after every <tr>, leaving every cell's plain text run together with no
