@@ -3123,7 +3123,9 @@ function getSelectedCategory() {
 
 function renderHubNewsList() {
   const el = document.getElementById('hubnews-list');
-  const nonDigestPosts = hubNewsPosts.filter(p => p.category !== 'Weekly Digest');
+  const nonDigestPosts = hubNewsPosts
+    .filter(p => p.category !== 'Weekly Digest')
+    .sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
   if (!nonDigestPosts.length) { el.innerHTML = '<div class="section-note">No articles yet. Create one above.</div>'; return; }
   el.innerHTML = nonDigestPosts.map(p => {
     const status = p.status || 'published';
