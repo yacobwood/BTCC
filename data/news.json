@@ -5,6 +5,12 @@
     "title": {
       "rendered": "Speedworks Motorsport targets PM Junior Championship for 2027"
     },
-    "_embedded": {}
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/1367c892-a3a7-4a3f-b137-a7a4675eb772.jpg"
+        }
+      ]
+    }
   }
 ]
