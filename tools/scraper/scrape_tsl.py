@@ -138,7 +138,10 @@ SESSION_SUFFIXES = {
 # vary between "Championship" and "championship" within the SAME PDF
 # (Saturday sessions vs Sunday races, at one venue) - a TSL template
 # inconsistency, not something to chase variant-by-variant.
-_TITLE = r"[^\n]*?British Touring Car Championship\s+"
+# "Champ(?:ionship|inship)" also tolerates a confirmed-live literal typo
+# in the 2018 Donington National book ("Champinship") that otherwise
+# silently drops every report heading for 2 of that event's 3 races.
+_TITLE = r"[^\n]*?British Touring Car Champ(?:ionship|inship)\s+"
 _DASH  = r"\s*-\s*"
 _ROUND_OPT = rf"(?:{_DASH}ROUND\s*\d+)?"
 
