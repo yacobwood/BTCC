@@ -1,16 +1,10 @@
 [
   {
-    "id": "listen-again-tin-top-tuesday-powered-by-power-maxed-silverstone",
-    "slug": "listen-again-tin-top-tuesday-powered-by-power-maxed-silverstone",
+    "id": "speedworks-motorsport-targets-pm-junior-championship-for-2027",
+    "slug": "speedworks-motorsport-targets-pm-junior-championship-for-2027",
     "title": {
-      "rendered": "Listen Again: Tin Top Tuesday powered by Power Maxed - Silverstone"
+      "rendered": "Speedworks Motorsport targets PM Junior Championship for 2027"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/c71ca13e-3694-4791-bcf0-803b3b3be578.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
