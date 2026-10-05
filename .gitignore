@@ -90,6 +90,10 @@ android/app/src/main/res/raw/
 # Local AAB build output — never commit
 release-builds/
 
+# Local TSL book PDF archive — scraper fetches these live from TSL;
+# kept locally only as a backfill/offline reference, never commit (679MB)
+/Post Race Docs/
+
 # Keystore — never commit
 *.jks
 keystore.properties
