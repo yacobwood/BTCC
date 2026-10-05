@@ -100,40 +100,43 @@ describe('exportAnalyticsHistory', () => {
   // favouriteDrivers, searchTerms - 13 reports in total.
   const emptyReportsFrom3rd = () => { for (let i = 0; i < 11; i++) mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); };
 
-  it('accumulates totalUsersAllTime from the previous week\'s stored figure, without a bootstrap fetch', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 1000})}];
+  it('queries GA4\'s own totalUsers metric fresh every run, as the 14th report in the batch', async () => {
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([50, 200, 300, 10, 15, 8, 400], [])])); // overview
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
     emptyReportsFrom3rd();
-
-    await exportAnalyticsHistory.run();
-
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({totalUsersAllTime: 1050, newUsers: 50}));
-    // All 13 weekly reports were fetched, not a 14th bootstrap one
-    expect(mockFetchWithTimeout).toHaveBeenCalledTimes(13);
-  });
-
-  it('does a one-time full-history bootstrap fetch when no prior week is stored', async () => {
-    mockQuerySnapshot.empty = true;
-    mockQuerySnapshot.docs = [];
-    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([50, 200, 300, 10, 15, 8, 400], [])])); // overview
-    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
-    emptyReportsFrom3rd();
-    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([9999], [])])); // bootstrap totalUsers
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([1970], [])])); // totalUsersAllTime
 
     await exportAnalyticsHistory.run();
 
     expect(mockFetchWithTimeout).toHaveBeenCalledTimes(14);
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({totalUsersAllTime: 9999}));
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({totalUsersAllTime: 1970, newUsers: 50}));
+  });
+
+  // Regression guard for the 2026-09-28 fix: totalUsersAllTime used to
+  // accumulate (previous week's stored figure + this week's newUsers),
+  // which drifted upward forever from GA4 instance-ID churn (reinstalls,
+  // cleared app data, test devices) with no way to self-correct - it had
+  // reached 4,626 against a real ~1,970 install base before being caught.
+  // Firestore's previous-week document is never read for this any more, so
+  // a stale/wrong prior figure must never leak into a fresh run's result.
+  it('never falls back to Firestore\'s previously stored totalUsersAllTime, even if present', async () => {
+    mockQuerySnapshot.empty = false;
+    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 999999})}];
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // overview
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
+    emptyReportsFrom3rd();
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([2000], [])])); // totalUsersAllTime
+
+    await exportAnalyticsHistory.run();
+
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({totalUsersAllTime: 2000}));
   });
 
   it('reformats GA4\'s bare YYYYMMDD dates to YYYY-MM-DD in the daily breakdown', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 0})}];
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([1, 2, 3, 4, 5, 6, 7], [])])); // overview
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([1, 2, 3], ['20260818'])])); // daily
     emptyReportsFrom3rd();
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // totalUsersAllTime
 
     await exportAnalyticsHistory.run();
 
@@ -143,8 +146,6 @@ describe('exportAnalyticsHistory', () => {
   });
 
   it('writes appVersionBreakdown and screenPopularity using their standard GA4 dimensions', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 0})}];
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // overview
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // sources
@@ -158,6 +159,7 @@ describe('exportAnalyticsHistory', () => {
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // notificationOptIns
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // favouriteDrivers
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // searchTerms
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // totalUsersAllTime
 
     await exportAnalyticsHistory.run();
 
@@ -168,8 +170,6 @@ describe('exportAnalyticsHistory', () => {
   });
 
   it('derives donorGateFunnel and widgetAdoption from named events inside topEvents, not a separate GA4 call', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 0})}];
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // overview
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // sources
@@ -189,6 +189,7 @@ describe('exportAnalyticsHistory', () => {
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // notificationOptIns
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // favouriteDrivers
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // searchTerms
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // totalUsersAllTime
 
     await exportAnalyticsHistory.run();
 
@@ -199,8 +200,6 @@ describe('exportAnalyticsHistory', () => {
   });
 
   it('writes the custom-event-parameter breakdowns (share/onboarding/notifications/favourites/search)', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 0})}];
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // overview
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // sources
@@ -214,6 +213,7 @@ describe('exportAnalyticsHistory', () => {
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([4], ['results_live', 'false'])])); // notificationOptIns
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([7], ['Tom Ingram'])])); // favouriteDrivers
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([3], ['knockhill'])])); // searchTerms
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // totalUsersAllTime
 
     await exportAnalyticsHistory.run();
 
@@ -227,8 +227,6 @@ describe('exportAnalyticsHistory', () => {
   });
 
   it('degrades one failed report (e.g. an unregistered custom dimension) to an empty array instead of failing the whole export', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 0})}];
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([5, 50, 60, 1, 2, 3, 4], [])])); // overview - succeeds
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // sources
@@ -242,6 +240,7 @@ describe('exportAnalyticsHistory', () => {
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // notificationOptIns
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // favouriteDrivers
     mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // searchTerms
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // totalUsersAllTime
 
     await exportAnalyticsHistory.run();
 
@@ -252,8 +251,18 @@ describe('exportAnalyticsHistory', () => {
     expect(mockLogError).not.toHaveBeenCalled();
   });
 
+  it('degrades totalUsersAllTime to 0 (not a crash) if that one GA4 call fails, self-correcting next week', async () => {
+    mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([metricRow([5, 50, 60, 1, 2, 3, 4], [])])); // overview
+    for (let i = 0; i < 11; i++) mockFetchWithTimeout.mockResolvedValueOnce(ga4Response([])); // daily..searchTerms
+    mockFetchWithTimeout.mockRejectedValueOnce(new Error('GA4 API error: quota exceeded')); // totalUsersAllTime fails
+
+    await exportAnalyticsHistory.run();
+
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({totalUsersAllTime: 0}));
+    expect(mockLogError).not.toHaveBeenCalled();
+  });
+
   it('rethrows and alerts if even the fundamental overview report fails (a real GA4 outage, not one bad dimension)', async () => {
-    mockQuerySnapshot.empty = true;
     mockFetchWithTimeout.mockRejectedValue(new Error('network down'));
     await expect(exportAnalyticsHistory.run()).resolves.toBeUndefined();
     expect(mockLogError).toHaveBeenCalledWith('exportAnalyticsHistory', 'network down', expect.anything(), {alert: true});
@@ -278,21 +287,17 @@ describe('refreshAnalyticsHistory', () => {
   });
 
   it('runs the same weekly export as the Monday schedule and returns the resulting weekStart', async () => {
-    mockQuerySnapshot.empty = false;
-    mockQuerySnapshot.docs = [{data: () => ({totalUsersAllTime: 500})}];
-    mockFetchWithTimeout.mockResolvedValue(ga4Response([])); // all 13 reports, same empty shape
+    mockFetchWithTimeout.mockResolvedValue(ga4Response([])); // all 14 reports, same empty shape
     const req = makeReq({headers: {'x-admin-secret': 'test-admin-secret'}});
     const res = makeRes();
 
     await refreshAnalyticsHistory(req, res);
 
-    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({totalUsersAllTime: 500}));
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ok: true, weekStart: '2026-08-11'});
   });
 
   it('returns 500 and logs an alerting error if the underlying export fails outright', async () => {
-    mockQuerySnapshot.empty = true;
     mockFetchWithTimeout.mockRejectedValue(new Error('network down'));
     const req = makeReq({headers: {'x-admin-secret': 'test-admin-secret'}});
     const res = makeRes();

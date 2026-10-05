@@ -129,12 +129,17 @@ exports.syncAnalytics = onSchedule(
 // totals, a daily breakdown, acquisition sources, platform/OS split and
 // a UK city breakdown, not just a handful of headline numbers.
 //
-// Only ever fetches one week of GA4 data per run - totalUsersAllTime is
-// accumulated by reading the previous week's own stored figure and
-// adding this week's newUsers to it, rather than re-querying GA4's
-// entire history every week (which would only get slower and larger
-// over time). Only the very first run ever, with no prior week stored
-// yet, does a one-time full-history GA4 fetch to seed that baseline.
+// totalUsersAllTime queries GA4's own real totalUsers metric fresh every
+// run (2024-01-01 to yesterday), rather than accumulating last week's
+// stored figure plus this week's newUsers. **Fixed 2026-09-28**: that
+// accumulation approach was a genuine bug, not just a simplification - GA4's
+// newUsers counts by device/instance ID, not real distinct humans, so a
+// reinstall, a cleared app or a new test device each mint a "new user" GA4
+// has never seen before, and the accumulator had no way to ever self-correct
+// from that drift. It had inflated to 4,626 against a real ~1,970 install
+// base before this was caught. Re-querying GA4 directly every week costs one
+// extra report in the batch below and self-heals any given week's drift
+// within 7 days, instead of compounding it forever.
 //
 // Doesn't capture GA4's "Retained users" - that comes from a separate
 // cohort-based Retention report (a different request shape, cohortSpec),
@@ -313,6 +318,15 @@ async function runWeeklyAnalyticsExport() {
         orderBys: [{metric: {metricName: 'eventCount'}, desc: true}],
         limit: 10,
       }},
+      // GA4's own real all-time total, queried fresh every run - see the
+      // comment above this function for why this replaced an accumulator.
+      // A failure here degrades to 0 via the same Promise.allSettled
+      // handling as any other non-fundamental report below, self-correcting
+      // next week rather than needing its own bespoke fallback logic.
+      {key: 'totalUsersAllTime', body: {
+        dateRanges: [{startDate: '2024-01-01', endDate: 'yesterday'}],
+        metrics: [{name: 'totalUsers'}],
+      }},
     ];
 
     const settled = await Promise.allSettled(REPORTS.map(r => runReport(r.body)));
@@ -421,26 +435,9 @@ async function runWeeklyAnalyticsExport() {
     }));
 
     const newUsersThisWeek = parseInt(overviewRow?.metricValues?.[0]?.value || '0');
+    const totalUsersAllTime = parseInt(reportsByKey.totalUsersAllTime.rows?.[0]?.metricValues?.[0]?.value || '0');
 
-    // Running total is accumulated from last week's own stored figure
-    // rather than re-querying GA4's entire history every week (which only
-    // gets larger and slower over time) - only the very first run ever,
-    // with no prior week stored yet, needs a one-time full-history GA4
-    // fetch to establish a baseline.
     const historyRef = db.collection('analytics_history');
-    const prevSnap = await historyRef.orderBy('weekStart', 'desc').limit(1).get();
-
-    let totalUsersAllTime;
-    if (!prevSnap.empty) {
-      totalUsersAllTime = (prevSnap.docs[0].data().totalUsersAllTime || 0) + newUsersThisWeek;
-    } else {
-      const bootstrapReport = await runReport({
-        dateRanges: [{startDate: '2024-01-01', endDate: 'yesterday'}],
-        metrics: [{name: 'totalUsers'}],
-      });
-      totalUsersAllTime = parseInt(bootstrapReport.rows?.[0]?.metricValues?.[0]?.value || '0');
-    }
-
     const weekStart = getUKDateString(new Date(), -7);
 
     await historyRef.doc(weekStart).set({
