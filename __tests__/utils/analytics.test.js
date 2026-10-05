@@ -324,11 +324,6 @@ describe('Analytics', () => {
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'share_nudge_dismissed');
     });
 
-    it('inactivityBannerShown logs with no params', () => {
-      Analytics.inactivityBannerShown();
-      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'inactivity_banner_shown');
-    });
-
     it('donorGateShown/donorGateSkipped log with no params', () => {
       Analytics.donorGateShown();
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'donor_gate_shown');

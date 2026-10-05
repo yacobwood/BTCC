@@ -26,8 +26,6 @@ import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getReadIds} from '../utils/digestRead';
 import {getReadIds as getExplainerReadIds} from '../utils/explainerRead';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
-import {checkAndStampLastOpen} from '../utils/inactivityBanner';
-import NudgeBanner from '../components/NudgeBanner';
 const logoImg = require('../assets/logo_long.png');
 
 // orderDate (parseArticle/mapHubPosts) is the feed-ordering key - falls back
@@ -48,7 +46,6 @@ export default function NewsScreen({navigation}) {
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showInactivityBanner, setShowInactivityBanner] = useState(false);
   const flatListRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
   const [searchResults, setSearchResults] = useState([]);
@@ -153,14 +150,6 @@ export default function NewsScreen({navigation}) {
 
 
   useEffect(() => { Analytics.screen('news'); }, []);
-  // News is the app's default/home tab, so its mount is a reasonable proxy
-  // for "app opened" without threading a launch event through App.tsx.
-  useEffect(() => {
-    checkAndStampLastOpen().then(should => {
-      setShowInactivityBanner(should);
-      if (should) Analytics.inactivityBannerShown();
-    });
-  }, []);
   useFocusEffect(useCallback(() => {
     getReadIds().then(setDigestReadIds);
     getExplainerReadIds().then(setExplainerReadIds);
@@ -423,19 +412,6 @@ export default function NewsScreen({navigation}) {
         scrollEventThrottle={100}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.yellow} />
-        }
-        // Rendered as a scrollable list item (like DigestBanner further down)
-        // rather than a fixed sibling above the FlatList - a fixed sibling
-        // permanently ate space above the hero card for as long as it was
-        // visible, on every scroll position, not just the first frame.
-        ListHeaderComponent={
-          <NudgeBanner
-            visible={showInactivityBanner}
-            message="Welcome back! Catch up on results and standings."
-            actionLabel="Season"
-            onAction={() => { Analytics.navItemClicked('inactivity_banner_action'); setShowInactivityBanner(false); navigation.navigate('Results'); }}
-            onDismiss={() => { Analytics.navItemClicked('inactivity_banner_dismiss'); setShowInactivityBanner(false); }}
-          />
         }
         ListEmptyComponent={
           searchLoading ? (
