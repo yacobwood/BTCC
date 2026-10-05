@@ -34,6 +34,7 @@ build/
 .idea
 .kiro
 .gradle
+.gradle-cache-quarantine/
 local.properties
 *.iml
 *.hprof
