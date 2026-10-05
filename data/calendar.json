@@ -2335,7 +2335,7 @@
         {
           "name": "Qualifying",
           "day": "SAT",
-          "time": "13:45"
+          "time": "13:50"
         },
         {
           "name": "Qualifying Race",
@@ -2362,23 +2362,23 @@
         {
           "day": "SAT",
           "time": "09:00",
-          "endTime": "09:30",
-          "series": "Porsche Sprint Challenge Great Britain",
-          "session": "Qualifying",
-          "laps": null
-        },
-        {
-          "day": "SAT",
-          "time": "09:40",
-          "endTime": "10:00",
+          "endTime": "09:20",
           "series": "Caterham Seven Championship UK",
           "session": "Qualifying",
           "laps": null
         },
         {
           "day": "SAT",
+          "time": "09:30",
+          "endTime": "10:00",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Qualifying",
+          "laps": null
+        },
+        {
+          "day": "SAT",
           "time": "10:10",
-          "endTime": "10:50",
+          "endTime": "11:00",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Free Practice",
           "laps": null
@@ -2402,21 +2402,21 @@
         {
           "day": "SAT",
           "time": "12:20",
-          "series": "Porsche Sprint Challenge Great Britain",
-          "session": "Race",
-          "laps": "20 mins"
-        },
-        {
-          "day": "SAT",
-          "time": "12:55",
           "series": "Caterham Seven Championship UK",
           "session": "Race",
           "laps": "20 mins"
         },
         {
           "day": "SAT",
-          "time": "13:45",
-          "endTime": "14:20",
+          "time": "13:15",
+          "series": "Porsche Sprint Challenge Great Britain",
+          "session": "Race",
+          "laps": "20 mins"
+        },
+        {
+          "day": "SAT",
+          "time": "13:50",
+          "endTime": "14:25",
           "series": "Kwik Fit British Touring Car Championship",
           "session": "Qualifying",
           "laps": null
