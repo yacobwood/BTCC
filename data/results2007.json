@@ -54154,6 +54154,120 @@
                 }
               ]
             }
+          ],
+          "bestSectors": [
+            {
+              "no": 3,
+              "driver": "Colin Turkington",
+              "team": "Team RAC",
+              "ideal": 53.906,
+              "best": 53.573,
+              "diff": 0.003
+            },
+            {
+              "no": 11,
+              "driver": "Jason Plato",
+              "team": "SEAT Sport UK",
+              "ideal": 53.645,
+              "best": 53.639,
+              "diff": 0.333
+            },
+            {
+              "no": 7,
+              "driver": "Tom Chilton",
+              "team": "VX Racing",
+              "ideal": 53.68,
+              "best": 53.654,
+              "diff": 0.006
+            },
+            {
+              "no": 5,
+              "driver": "Fabrizio Giovanardi",
+              "team": "VX Racing",
+              "ideal": 53.835,
+              "best": 53.682,
+              "diff": 0.026
+            },
+            {
+              "no": 33,
+              "driver": "Tom Onslow-Cole",
+              "team": "Team RAC",
+              "ideal": 53.782,
+              "best": 53.753,
+              "diff": 0.153
+            },
+            {
+              "no": 77,
+              "driver": "Mike Jordan",
+              "team": "Team Eurotech with John Guest-Speedfit",
+              "ideal": 54.021,
+              "best": 53.859,
+              "diff": 0.029
+            },
+            {
+              "no": 52,
+              "driver": "Gordon Shedden",
+              "team": "Team Halfords",
+              "ideal": 54.1,
+              "best": 54.014,
+              "diff": 0.162
+            },
+            {
+              "no": 21,
+              "driver": "Adam Jones",
+              "team": "Team Air Cool",
+              "ideal": 54.069,
+              "best": 54.058,
+              "diff": 0.086
+            },
+            {
+              "no": 23,
+              "driver": "Matt Allison",
+              "team": "Motorbase Performance",
+              "ideal": 54.466,
+              "best": 54.246,
+              "diff": 0.011
+            },
+            {
+              "no": 8,
+              "driver": "Gavin Smith",
+              "team": "GR Asia",
+              "ideal": 54.474,
+              "best": 54.329,
+              "diff": 0.22
+            },
+            {
+              "no": 90,
+              "driver": "Erkut Kizilirmak",
+              "team": "Arkas Racing",
+              "ideal": 54.714,
+              "best": 54.66,
+              "diff": 0.145
+            },
+            {
+              "no": 43,
+              "driver": "Chris Stockton",
+              "team": "BTC Racing",
+              "ideal": 54.952,
+              "best": 54.771,
+              "diff": 0.054
+            },
+            {
+              "no": 59,
+              "driver": "Car 59",
+              "team": "",
+              "ideal": 54.907,
+              "best": 54.783,
+              "diff": 0.181
+            },
+            {
+              "no": 15,
+              "driver": "Martyn Bell",
+              "team": "Team Allaboutproperty.com",
+              "ideal": 55.621,
+              "best": 55.569,
+              "diff": 0.124
+            }
           ]},
         {
           "label": "Race 2",
@@ -61391,6 +61505,152 @@
                   "team": ""
                 }
               ]
+            }
+          ],
+          "bestSectors": [
+            {
+              "no": 5,
+              "driver": "Fabrizio Giovanardi",
+              "team": "VX Racing",
+              "ideal": 50.057,
+              "best": 49.902,
+              "diff": 0.098
+            },
+            {
+              "no": 77,
+              "driver": "Mike Jordan",
+              "team": "Team Eurotech with John Guest-Speedfit",
+              "ideal": 49.953,
+              "best": 49.94,
+              "diff": 0.155
+            },
+            {
+              "no": 12,
+              "driver": "Darren Turner",
+              "team": "SEAT Sport UK",
+              "ideal": 50.019,
+              "best": 49.967,
+              "diff": 0.013
+            },
+            {
+              "no": 48,
+              "driver": "Mat Jackson",
+              "team": "Jacksons Msport",
+              "ideal": 50.017,
+              "best": 49.981,
+              "diff": 0.052
+            },
+            {
+              "no": 33,
+              "driver": "Tom Onslow-Cole",
+              "team": "Team RAC",
+              "ideal": 50.121,
+              "best": 50.025,
+              "diff": 0.036
+            },
+            {
+              "no": 7,
+              "driver": "Tom Chilton",
+              "team": "VX Racing",
+              "ideal": 50.139,
+              "best": 50.049,
+              "diff": 0.096
+            },
+            {
+              "no": 52,
+              "driver": "Gordon Shedden",
+              "team": "Team Halfords",
+              "ideal": 50.204,
+              "best": 50.178,
+              "diff": 0.09
+            },
+            {
+              "no": 8,
+              "driver": "Gavin Smith",
+              "team": "GR Asia",
+              "ideal": 50.203,
+              "best": 50.184,
+              "diff": 0.026
+            },
+            {
+              "no": 11,
+              "driver": "Jason Plato",
+              "team": "SEAT Sport UK",
+              "ideal": 50.283,
+              "best": 50.221,
+              "diff": 0.019
+            },
+            {
+              "no": 21,
+              "driver": "Adam Jones",
+              "team": "Team Air Cool",
+              "ideal": 50.383,
+              "best": 50.308,
+              "diff": 0.062
+            },
+            {
+              "no": 23,
+              "driver": "Matt Allison",
+              "team": "Motorbase Performance",
+              "ideal": 50.541,
+              "best": 50.473,
+              "diff": 0.075
+            },
+            {
+              "no": 55,
+              "driver": "John George",
+              "team": "TH Motorsport",
+              "ideal": 50.646,
+              "best": 50.586,
+              "diff": 0.068
+            },
+            {
+              "no": 15,
+              "driver": "Martyn Bell",
+              "team": "Team Allaboutproperty.com",
+              "ideal": 50.916,
+              "best": 50.916,
+              "diff": 0.06
+            },
+            {
+              "no": 28,
+              "driver": "Jason Hughes",
+              "team": "Kartworld Racing",
+              "ideal": 51.026,
+              "best": 50.926,
+              "diff": 0.0
+            },
+            {
+              "no": 59,
+              "driver": "Car 59",
+              "team": "",
+              "ideal": 51.204,
+              "best": 51.057,
+              "diff": 0.1
+            },
+            {
+              "no": 90,
+              "driver": "Erkut Kizilirmak",
+              "team": "Arkas Racing",
+              "ideal": 51.349,
+              "best": 51.148,
+              "diff": 0.147
+            },
+            {
+              "no": 14,
+              "driver": "Eoin Murray",
+              "team": "Quest Racing",
+              "ideal": 52.075,
+              "best": 52.075,
+              "diff": 0.201
+            },
+            {
+              "no": 17,
+              "driver": "Car 17",
+              "team": "",
+              "ideal": 52.284,
+              "best": 52.275,
+              "diff": 0.0
             }
           ]}
       ]
