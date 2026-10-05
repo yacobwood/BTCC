@@ -30,6 +30,7 @@ export default StyleSheet.create({
     marginBottom: 6,
   },
   pos: {color: '#fff', fontSize: 18, fontWeight: '900', width: 40, textAlign: 'center', marginRight: 8},
+  posIcon: {width: 40, marginRight: 8, textAlign: 'center'},
   driverName: {color: '#fff', fontSize: 14, fontWeight: '700'},
   teamName: {color: Colors.textSecondary, fontSize: 12},
   pointsBox: {alignItems: 'center', marginLeft: 8},

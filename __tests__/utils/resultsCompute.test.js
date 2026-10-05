@@ -2,7 +2,7 @@
  * Unit tests for the pure compute functions exported from ResultsScreen.
  * These functions are never exercised by the component tests (parseResults is mocked there).
  */
-import {computeSeasonStats, computeProgression, reconcileStatsOrder} from '../../src/screens/ResultsScreen';
+import {computeSeasonStats, computeProgression, reconcileStatsOrder, isChampionClinched} from '../../src/screens/ResultsScreen';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -256,5 +256,75 @@ describe('reconcileStatsOrder', () => {
     const standings = {drivers: [{name: 'Morgan', points: 232}, {name: 'Rowbottom', points: 231}]};
     reconcileStatsOrder(stats, standings);
     expect(stats.map(s => s.name)).toEqual(['Rowbottom', 'Morgan']); // original order preserved
+  });
+});
+
+// ── isChampionClinched ──────────────────────────────────────────────────────
+// A remaining race is only "in play" if SCORING_RACES includes its label and
+// it has no results yet. Each championship values that race differently -
+// the Qualifying Race only ever pays the main Drivers' Championship (reg
+// 1.6.7); every other race pays 22 to a driver (20 + FL + leader, 1.6.2.a),
+// 20 to the Independents'/JST trophies (no bonuses, 1.6.2.b/1.6.6), 37 to
+// Teams/Manufacturers (best two cars, base points, 1.6.3/1.6.4) or 20 to
+// Independent Teams (best car only, 1.6.5).
+
+describe('isChampionClinched', () => {
+  function standing(position, points) {
+    return {position, points};
+  }
+
+  it('is not clinched while the runner-up could still draw level (exact tie is not safe, reg 1.6.9)', () => {
+    // One Race 1 left: drivers' max swing is 22. Gap of exactly 22 means the
+    // chaser could tie, not just lose - and a tie goes to countback.
+    const rounds = [makeRound(1, [makeRace('Race 1', [])])];
+    const list = [standing(1, 422), standing(2, 400)];
+    expect(isChampionClinched(list, rounds, 'drivers')).toBe(false);
+  });
+
+  it('is clinched once the gap exceeds every remaining race\'s maximum', () => {
+    const rounds = [makeRound(1, [makeRace('Race 1', [])])];
+    const list = [standing(1, 423), standing(2, 400)];
+    expect(isChampionClinched(list, rounds, 'drivers')).toBe(true);
+  });
+
+  it('never clinches while round data has not loaded yet', () => {
+    const list = [standing(1, 1000), standing(2, 0)];
+    expect(isChampionClinched(list, [], 'drivers')).toBe(false);
+  });
+
+  it('a completed season (no unscored races left) clinches on any positive gap', () => {
+    const rounds = [makeRound(1, [makeRace('Race 1', [makeResult('Alice', 1, {points: 20})])])];
+    const list = [standing(1, 400), standing(2, 399)];
+    expect(isChampionClinched(list, rounds, 'drivers')).toBe(true);
+  });
+
+  it('a sole classified entrant is trivially the champion', () => {
+    const rounds = [makeRound(1, [makeRace('Race 1', [])])];
+    const list = [standing(1, 100)];
+    expect(isChampionClinched(list, rounds, 'drivers')).toBe(true);
+  });
+
+  it('the Qualifying Race only counts for the main Drivers\' Championship (reg 1.6.7)', () => {
+    // Only a Qualifying Race left (worth 10 to drivers, 0 to every other championship).
+    const rounds = [makeRound(1, [makeRace('Qualifying Race', [])])];
+    const driversList = [standing(1, 409), standing(2, 400)]; // gap 9 < 10 - not clinched
+    const teamsList = [standing(1, 401), standing(2, 400)];   // gap 1 > 0 - clinched, QR pays teams nothing
+    expect(isChampionClinched(driversList, rounds, 'drivers')).toBe(false);
+    expect(isChampionClinched(teamsList, rounds, 'teams')).toBe(true);
+  });
+
+  it('values a remaining race at 37 for Teams/Manufacturers vs 20 for Independent Teams', () => {
+    const rounds = [makeRound(1, [makeRace('Race 1', [])])];
+    const gapOf30 = [standing(1, 430), standing(2, 400)];
+    // Teams: 30 < 37 remaining swing - not yet safe
+    expect(isChampionClinched(gapOf30, rounds, 'teams')).toBe(false);
+    // Independent Teams: 30 > 20 remaining swing - safe
+    expect(isChampionClinched(gapOf30, rounds, 'independentsTeams')).toBe(true);
+  });
+
+  it('ignores non-scoring sessions (Free Practice/Qualifying) when tallying what remains', () => {
+    const rounds = [makeRound(1, [makeRace('Free Practice', []), makeRace('Qualifying', [])])];
+    const list = [standing(1, 401), standing(2, 400)];
+    expect(isChampionClinched(list, rounds, 'drivers')).toBe(true);
   });
 });
