@@ -113,6 +113,7 @@ export const Analytics = {
   retryClicked: (screen) => logEvent(fa(),'retry_clicked', {screen}),
   scrollToTop: (screen) => logEvent(fa(),'scroll_to_top', {screen}),
   navItemClicked: (label) => logEvent(fa(),'nav_item_clicked', {label}),
+  inactivityBannerShown: () => logEvent(fa(),'inactivity_banner_shown'),
 
   notificationDelivered: (type, venue) => logEvent(fa(),'notification_delivered', {type, ...(venue ? {venue} : {})}),
   notificationOpened: (type) => logEvent(fa(),'notification_opened', {type: type || 'unknown'}),
