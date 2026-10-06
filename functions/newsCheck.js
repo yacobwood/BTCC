@@ -58,6 +58,15 @@ async function mirroredImageUrl(fetchFn, slug) {
   }
 }
 
+// sendSessionNotifications ticks every minute without waiting for the
+// previous tick to finish, so when a tick runs long (slow btcc.net/GitHub
+// fetches) the next one can start while it's still in flight. A pendingSend
+// claimed this recently is assumed to be that other tick's own in-flight
+// attempt at the same article, not an abandoned one - so this tick backs off
+// instead of racing it to messaging.send() and double-pushing the user. Set
+// well above this function's own realistic single-tick runtime.
+const CLAIM_STALE_MS = 3 * 60 * 1000;
+
 async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
   const newsRes = await fetchFn(NEWS_URL, 20000);
   const articles = await newsRes.json();
@@ -77,17 +86,20 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
     const data = snap.exists ? snap.data() : {};
     const lastId = data.lastId ?? null;
     const pendingSend = data.pendingSend ?? null;
+    const now = Date.now();
 
     if (latest.id !== lastId) {
       const title = decodeHtmlEntities(latest.title?.rendered || '') || 'New BTCC Article';
       const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
       // Only notify if this isn't the very first article we've ever seen
-      const payload = lastId !== null ? {title, imageUrl, slug: latest.slug || ''} : null;
+      const payload = lastId !== null ? {title, imageUrl, slug: latest.slug || '', claimedAt: now} : null;
       tx.set(stateRef, {lastId: latest.id, detectedAt: new Date().toISOString(), pendingSend: payload});
       notifyPayload = payload;
-    } else if (pendingSend) {
-      // Previous run wrote state but crashed before sending, or a prior tick
-      // deferred because the article mirror wasn't ready yet - either way, retry
+    } else if (pendingSend && now - (pendingSend.claimedAt ?? 0) > CLAIM_STALE_MS) {
+      // Previous run claimed this but either crashed before sending, or
+      // deferred and released its claim (see the mirror-gate below) - either
+      // way it's safe to claim and retry now.
+      tx.set(stateRef, {pendingSend: {...pendingSend, claimedAt: now}}, {merge: true});
       notifyPayload = pendingSend;
     }
   });
@@ -105,6 +117,17 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
   const mirrorImage = await mirroredImageUrl(fetchFn, notifyPayload.slug);
   if (mirrorImage === undefined) {
     console.log(`News notification deferred: "${notifyPayload.title}" (${notifyPayload.slug}) not yet in article mirror`);
+    // Release the claim (rather than leaving it fresh) so the very next tick
+    // retries immediately instead of waiting out CLAIM_STALE_MS. Transactional
+    // and slug-checked so a concurrent tick that already sent (cleared
+    // pendingSend to null) or a newer article (different slug) isn't clobbered.
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(stateRef);
+      const current = snap.exists ? (snap.data().pendingSend ?? null) : null;
+      if (current && current.slug === notifyPayload.slug) {
+        tx.set(stateRef, {pendingSend: {...current, claimedAt: 0}}, {merge: true});
+      }
+    });
     return;
   }
 

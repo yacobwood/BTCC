@@ -267,6 +267,57 @@ test('treats a page-file fetch failure as not-yet-mirrored and defers', async ()
   expect(messaging.send).not.toHaveBeenCalled();
 });
 
+// ── Concurrent-tick claim guard ─────────────────────────────────────────
+//
+// Regression for the exact bug that caused a user to see the same "New
+// Article" push twice (one "just now", one from several minutes earlier):
+// sendSessionNotifications ticks every minute without waiting for the
+// previous tick to finish. A deferred pendingSend used to be fair game for
+// every tick that ran while it waited on the article mirror, so two
+// overlapping ticks could both read it as non-null and both call
+// messaging.send() for the same article.
+
+test('does not resend when another tick already claimed this article within the stale window', async () => {
+  const pending = {title: ARTICLE.title.rendered, imageUrl: null, slug: ARTICLE.slug, claimedAt: Date.now()};
+  const db = makeDb({lastId: ARTICLE.id, pendingSend: pending});
+  const messaging = makeMessaging();
+  const logHistory = jest.fn();
+
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE]), db, messaging, logHistory});
+
+  expect(messaging.send).not.toHaveBeenCalled();
+  expect(logHistory).not.toHaveBeenCalled();
+  // This tick backs off entirely rather than reclaiming
+  expect(db._tx.set).not.toHaveBeenCalled();
+});
+
+test('reclaims and sends once a previous claim goes stale (crash recovery)', async () => {
+  const staleClaim = Date.now() - (4 * 60 * 1000); // older than CLAIM_STALE_MS
+  const pending = {title: ARTICLE.title.rendered, imageUrl: null, slug: ARTICLE.slug, claimedAt: staleClaim};
+  const db = makeDb({lastId: ARTICLE.id, pendingSend: pending});
+  const messaging = makeMessaging();
+
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE]), db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).toHaveBeenCalledTimes(1);
+});
+
+test('releases the claim when deferring so the next tick can retry immediately rather than waiting out the stale window', async () => {
+  const pending = {title: ARTICLE.title.rendered, imageUrl: null, slug: ARTICLE.slug};
+  const db = makeDb({lastId: ARTICLE.id, pendingSend: pending});
+  const messaging = makeMessaging();
+
+  // Mirror index still empty: defer again
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE], 200, {}), db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).not.toHaveBeenCalled();
+  expect(db._tx.set).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({pendingSend: expect.objectContaining({claimedAt: 0, slug: ARTICLE.slug})}),
+    {merge: true},
+  );
+});
+
 // ── Mirror image at send time, not a stale pendingSend snapshot ────────────
 //
 // Regression coverage for 2026-09-06: scrape_news.py's own image fetch (which
