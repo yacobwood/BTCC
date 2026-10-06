@@ -91,9 +91,17 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
     if (latest.id !== lastId) {
       const title = decodeHtmlEntities(latest.title?.rendered || '') || 'New BTCC Article';
       const imageUrl = latest._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
-      // Only notify if this isn't the very first article we've ever seen
-      const payload = lastId !== null ? {title, imageUrl, slug: latest.slug || '', claimedAt: now} : null;
-      tx.set(stateRef, {lastId: latest.id, detectedAt: new Date().toISOString(), pendingSend: payload});
+      // btcc.net can briefly double-publish the exact same story under a
+      // second slug (confirmed live 2026-10-06: "Where to Watch: Brands
+      // Hatch GP" scraped first as ...-2026, then as ...-2 once btcc.net's
+      // listing reshuffled - two different ids, identical title). A slug
+      // change alone doesn't mean a genuinely new article if the title is
+      // one we already notified about last time.
+      const isSameStoryNewSlug = lastId !== null && title === (data.lastTitle ?? null);
+      // Only notify if this isn't the very first article we've ever seen,
+      // and it isn't just a reslugged repeat of the last one
+      const payload = lastId !== null && !isSameStoryNewSlug ? {title, imageUrl, slug: latest.slug || '', claimedAt: now} : null;
+      tx.set(stateRef, {lastId: latest.id, lastTitle: title, detectedAt: new Date().toISOString(), pendingSend: payload});
       notifyPayload = payload;
     } else if (pendingSend && now - (pendingSend.claimedAt ?? 0) > CLAIM_STALE_MS) {
       // Previous run claimed this but either crashed before sending, or

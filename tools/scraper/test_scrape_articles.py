@@ -921,6 +921,75 @@ class TestHeroSourceRetry(unittest.TestCase):
         self.assertNotIn("heroSource", posts[0]["_embedded"])
 
 
+class TestTitleDateDuplicateCollapse(unittest.TestCase):
+    """Regression for a live incident, 2026-10-06: btcc.net briefly had
+    "Where to Watch: Brands Hatch GP" published under two different slugs
+    (where-to-watch-brands-hatch-gp-2026 and -2 - same title, same date) -
+    both got mirrored as separate permanent archive entries, so the News
+    tab's hero card and the first grid tile both rendered the same story. A
+    second slug for an already-known (title, date) must collapse into the
+    first instead of becoming its own entry."""
+
+    def test_two_slugs_sharing_a_title_and_date_in_the_same_run_collapse_to_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[
+                     {"slug": "where-to-watch-brands-hatch-gp-2026", "title": "Where to Watch: Brands Hatch GP",
+                      "media_url": "https://btcc.net/api/media/abc123", "excerpt": "", "date": "2026-10-06T00:00:00"},
+                     {"slug": "where-to-watch-brands-hatch-gp-2", "title": "Where to Watch: Brands Hatch GP",
+                      "media_url": "https://btcc.net/api/media/abc123", "excerpt": "", "date": "2026-10-06T00:00:00"},
+                 ]), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", return_value="abc123.jpg"):
+                posts, pending = build_articles(refresh_all=False)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0]["slug"], "where-to-watch-brands-hatch-gp-2026")
+
+    def test_a_new_slug_matching_an_already_mirrored_title_and_date_is_skipped(self):
+        """Cross-run case: the duplicate slug shows up on a later scrape,
+        after the first one is already sitting in the archive from a prior
+        run."""
+        with tempfile.TemporaryDirectory() as tmp:
+            articles_dir = Path(tmp) / "articles"
+            articles_dir.mkdir()
+            existing_post = {
+                "id": "where-to-watch-brands-hatch-gp-2026", "slug": "where-to-watch-brands-hatch-gp-2026",
+                "date": "2026-10-06T00:00:00", "firstSeenAt": "2026-10-06T00:00:00",
+                "title": {"rendered": "Where to Watch: Brands Hatch GP"}, "excerpt": {"rendered": ""},
+                "content": {"rendered": "Full report."}, "_embedded": {},
+            }
+            (articles_dir / "page_1.json").write_text(json.dumps([existing_post]))
+            with patch.object(scrape_articles, "ARTICLES_DIR", articles_dir), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[
+                     {"slug": "where-to-watch-brands-hatch-gp-2", "title": "Where to Watch: Brands Hatch GP",
+                      "media_url": None, "excerpt": "", "date": "2026-10-06T00:00:00"},
+                 ]), \
+                 patch("scrape_articles.fetch_article_body") as mock_body:
+                posts, pending = build_articles(refresh_all=False)
+        mock_body.assert_not_called()
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0]["slug"], "where-to-watch-brands-hatch-gp-2026")
+
+    def test_same_title_different_date_is_not_treated_as_a_duplicate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=[
+                     {"slug": "where-to-watch-croft", "title": "Where to Watch",
+                      "media_url": "https://btcc.net/api/media/abc123", "excerpt": "", "date": "2026-09-05T00:00:00"},
+                     {"slug": "where-to-watch-thruxton", "title": "Where to Watch",
+                      "media_url": "https://btcc.net/api/media/def456", "excerpt": "", "date": "2026-10-06T00:00:00"},
+                 ]), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Full report.", None)), \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")), \
+                 patch("scrape_articles.save_mirrored_image", side_effect=["abc123.jpg", "def456.jpg"]):
+                posts, pending = build_articles(refresh_all=False)
+        self.assertEqual(len(posts), 2)
+
+
 class TestPruneOrphanedImages(unittest.TestCase):
 
     def test_a_gallery_referenced_image_survives_pruning(self):

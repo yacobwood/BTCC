@@ -7,8 +7,8 @@ const ARTICLE = {
   _embedded: {'wp:featuredmedia': [{source_url: 'https://example.com/img.jpg'}]},
 };
 
-function makeDb({lastId, pendingSend = null, txSetSpy} = {}) {
-  const snap = {exists: lastId !== undefined, data: () => ({lastId, pendingSend})};
+function makeDb({lastId, pendingSend = null, lastTitle = null, txSetSpy} = {}) {
+  const snap = {exists: lastId !== undefined, data: () => ({lastId, pendingSend, lastTitle})};
   const tx = {get: jest.fn().mockResolvedValue(snap), set: txSetSpy || jest.fn()};
   const docRef = {update: jest.fn().mockResolvedValue()};
   return {
@@ -316,6 +316,47 @@ test('releases the claim when deferring so the next tick can retry immediately r
     expect.objectContaining({pendingSend: expect.objectContaining({claimedAt: 0, slug: ARTICLE.slug})}),
     {merge: true},
   );
+});
+
+// ── Same-story reslug guard ──────────────────────────────────────────────
+//
+// Regression for a live incident, 2026-10-06: btcc.net briefly had "Where to
+// Watch: Brands Hatch GP" published under two different slugs
+// (where-to-watch-brands-hatch-gp-2026 and -2) - data/news.json's single
+// "latest" slot flipped between them across two scrape ticks, so a bare
+// `latest.id !== lastId` check fired a second, spurious notification for
+// what a user correctly sees as the same article.
+
+test('does not notify when the title matches the previously-tracked title, even though the id changed', async () => {
+  const db = makeDb({lastId: 7, lastTitle: ARTICLE.title.rendered});
+  const messaging = makeMessaging();
+  const logHistory = jest.fn();
+
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE]), db, messaging, logHistory});
+
+  expect(messaging.send).not.toHaveBeenCalled();
+  expect(logHistory).not.toHaveBeenCalled();
+});
+
+test('still advances lastId/lastTitle when suppressing a same-title reslug, so state stays current', async () => {
+  const db = makeDb({lastId: 7, lastTitle: ARTICLE.title.rendered});
+  const messaging = makeMessaging();
+
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE]), db, messaging, logHistory: jest.fn()});
+
+  expect(db._tx.set).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({lastId: ARTICLE.id, lastTitle: ARTICLE.title.rendered, pendingSend: null}),
+  );
+});
+
+test('notifies normally when both id and title differ (a genuinely new article)', async () => {
+  const db = makeDb({lastId: 7, lastTitle: 'Some Other Older Headline'});
+  const messaging = makeMessaging();
+
+  await checkBtccNews({fetchFn: makeFetch([ARTICLE]), db, messaging, logHistory: jest.fn()});
+
+  expect(messaging.send).toHaveBeenCalledTimes(1);
 });
 
 // ── Mirror image at send time, not a stale pendingSend snapshot ────────────

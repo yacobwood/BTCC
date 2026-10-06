@@ -551,10 +551,36 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
         return [], pending
 
     merged = dict(existing)
+    # Maps (title, date) -> the slug already claimed for that story, seeded
+    # from the existing archive and extended as this run's own cards are
+    # processed - lets a story btcc.net briefly double-publishes under two
+    # different slugs (confirmed live 2026-10-06: "Where to Watch: Brands
+    # Hatch GP" scraped as both where-to-watch-brands-hatch-gp-2026 and
+    # where-to-watch-brands-hatch-gp-2, identical title and date) collapse to
+    # whichever slug was encountered first - across runs via `existing`,
+    # within a single run via cards processed earlier in this same loop -
+    # instead of mirroring (and later notifying about, see
+    # functions/newsCheck.js's own title-based guard for the same incident)
+    # the same story twice. Only keyed when a card has a parsed date at all,
+    # so two differently-dated cards can never collide on title alone.
+    seen_title_dates = {
+        (p["title"]["rendered"], p.get("date")): slug
+        for slug, p in existing.items()
+        if p.get("date")
+    }
     for i, card in enumerate(cards):
         if backfill_pages > 1 and i % 25 == 0:
             print(f"  Processing article {i + 1}/{len(cards)}...")
         slug = card["slug"]
+
+        if card["date"]:
+            title_date_key = (card["title"], card["date"])
+            canonical_slug = seen_title_dates.get(title_date_key)
+            if canonical_slug is not None and canonical_slug != slug:
+                print(f"  Skipping {slug}: duplicate of {canonical_slug} (same title+date)")
+                continue
+            seen_title_dates[title_date_key] = slug
+
         prior = existing.get(slug)
         prior_content = prior.get("content", {}).get("rendered", "") if prior else ""
         prior_image = prior.get("_embedded", {}).get("wp:featuredmedia", [{}])[0].get("source_url") if prior else None
