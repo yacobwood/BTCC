@@ -1,0 +1,5 @@
+• Fixed: duplicate "New Article" notifications arriving twice for the same story
+• Fixed: some historical race stats (Perfect Lap, Speed Trap, Weather) were missing or incorrect for a handful of older rounds
+• Fixed: champion trophy badge icon missing in the Results tab
+• Removed the "Welcome back" banner
+• Bug fixes and performance improvements

@@ -1,7 +1,7 @@
 {
   "name": "BTCCFanHub",
-  "version": "2.23.0",
-  "versionCode": 93,
+  "version": "2.23.1",
+  "versionCode": 94,
   "private": true,
   "scripts": {
     "android": "react-native run-android",
