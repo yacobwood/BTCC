@@ -908,6 +908,7 @@ export default function ArticleScreen({route, navigation}) {
     if (url.startsWith('data:') || url.startsWith('about:') || url === 'https://www.btcc.net' || url === 'https://www.btcc.net/') {
       return true;
     }
+    Analytics.articleExternalLinkClicked(article?.title, url);
     Linking.openURL(url);
     return false;
   };

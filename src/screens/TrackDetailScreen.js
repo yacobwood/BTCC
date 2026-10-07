@@ -496,7 +496,7 @@ export default function TrackDetailScreen({route, navigation}) {
               <TouchableOpacity
                 style={styles.youtubeBtn}
                 activeOpacity={0.8}
-                onPress={() => Linking.openURL(lapUrl)}
+                onPress={() => { Analytics.raceVideoOpened(track.round, 'Lap Preview'); Linking.openURL(lapUrl); }}
                 accessibilityLabel="Watch Lap Preview on YouTube"
                 accessibilityRole="button">
                 <Icon name="play-circle-filled" size={14} color="#FF0000" />
@@ -512,7 +512,7 @@ export default function TrackDetailScreen({route, navigation}) {
                       key={label}
                       style={[styles.youtubeBtn, {width: btnW}]}
                       activeOpacity={0.8}
-                      onPress={() => Linking.openURL(url)}
+                      onPress={() => { Analytics.raceVideoOpened(track.round, label); Linking.openURL(url); }}
                       accessibilityLabel={`Watch ${label} on YouTube`}
                       accessibilityRole="button">
                       <Icon name="play-circle-filled" size={14} color="#FF0000" />

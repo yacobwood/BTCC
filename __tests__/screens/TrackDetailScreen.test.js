@@ -7,7 +7,7 @@ import * as featureFlags from '../../src/store/featureFlags';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn(), contentShared: jest.fn()},
+  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn(), contentShared: jest.fn(), raceVideoOpened: jest.fn()},
 }));
 
 jest.mock('../../src/utils/weather', () => ({
@@ -479,6 +479,16 @@ describe('TrackDetailScreen', () => {
       // Race highlight buttons should not appear when youtubeUrls is empty
       expect(queryByLabelText('Watch Race 1 on YouTube')).toBeNull();
     });
+
+    it('fires Analytics.raceVideoOpened with the round and "Lap Preview" on tap', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      useBroadcaster.mockReturnValue('uk');
+      const {findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track: TRACK_WITH_PREVIEW})} navigation={nav} />,
+      );
+      fireEvent.press(await findByLabelText('Watch Lap Preview on YouTube'));
+      expect(Analytics.raceVideoOpened).toHaveBeenCalledWith(TRACK_WITH_PREVIEW.round, 'Lap Preview');
+    });
   });
 
   // ── Race highlight YouTube buttons ────────────────────────────────────────────
@@ -499,6 +509,19 @@ describe('TrackDetailScreen', () => {
       );
       expect(await findByLabelText('Watch Race 1 on YouTube')).toBeTruthy();
       expect(await findByLabelText('Watch Race 2 on YouTube')).toBeTruthy();
+    });
+
+    it('fires Analytics.raceVideoOpened with the round and race label on tap', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const track = {
+        ...TRACK,
+        youtubeUrls: ['https://youtu.be/r1', 'https://youtu.be/r2'],
+      };
+      const {findByLabelText} = renderWithProviders(
+        <TrackDetailScreen route={makeRoute({track})} navigation={nav} />,
+      );
+      fireEvent.press(await findByLabelText('Watch Race 1 on YouTube'));
+      expect(Analytics.raceVideoOpened).toHaveBeenCalledWith(track.round, 'Race 1');
     });
 
     it('shows all three race buttons when youtubeUrls has three entries', async () => {

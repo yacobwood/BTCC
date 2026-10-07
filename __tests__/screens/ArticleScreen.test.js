@@ -26,10 +26,12 @@ jest.mock('../../src/api/parsers', () => ({
 // WebView mock — supports firing onLoad and onMessage via test IDs.
 // `webview-message-likes` fires a 'likes' reaction.
 // `webview-message-dislikes` fires a 'dislikes' reaction.
+// `webview-should-start-load-external`/`-btccnet` fire onShouldStartLoadWithRequest
+// with a representative external/self URL, for testing the article-body link handler.
 jest.mock('react-native-webview', () => {
   const React = require('react');
   const {View, Text} = require('react-native');
-  const WebView = React.forwardRef(({onLoad, onMessage}, ref) => {
+  const WebView = React.forwardRef(({onLoad, onMessage, onShouldStartLoadWithRequest}, ref) => {
     React.useImperativeHandle(ref, () => ({
       injectJavaScript: jest.fn(),
     }));
@@ -44,6 +46,8 @@ jest.mock('react-native-webview', () => {
         {/* prev-carrying messages for toggle/switch tests */}
         <Text testID="webview-toggle-likes"     onPress={() => fire(null, 'likes')}>toggle-like</Text>
         <Text testID="webview-switch-to-dislike" onPress={() => fire('dislikes', 'likes')}>switch-dislike</Text>
+        <Text testID="webview-should-start-load-external" onPress={() => onShouldStartLoadWithRequest && onShouldStartLoadWithRequest({url: 'https://www.example.com/some-article'})}>external</Text>
+        <Text testID="webview-should-start-load-btccnet" onPress={() => onShouldStartLoadWithRequest && onShouldStartLoadWithRequest({url: 'https://www.btcc.net/'})}>btccnet</Text>
       </View>
     );
   });
@@ -101,6 +105,7 @@ jest.mock('../../src/utils/analytics', () => ({
     articleListenCompleted: jest.fn(),
     articleListenStopped: jest.fn(),
     articleListenFailed: jest.fn(),
+    articleExternalLinkClicked: jest.fn(),
   },
 }));
 
@@ -484,6 +489,34 @@ describe('ArticleScreen', () => {
       await waitFor(() => {
         expect(getByTestId('webview')).toBeTruthy();
       });
+    });
+  });
+
+  // ── Links tapped inside the article body ─────────────────────────────────────
+  // onShouldStartLoadWithRequest intercepts every link rendered inside the
+  // article's own HTML (e.g. the "Source: btcc.net" attribution line) and hands
+  // it to Linking.openURL instead of navigating the WebView itself.
+
+  describe('article body link taps', () => {
+    it('fires Analytics.articleExternalLinkClicked with the article title and url for an outbound link', async () => {
+      const {getByTestId} = renderArticle({article: FULL_ARTICLE});
+
+      await waitFor(() => expect(getByTestId('webview')).toBeTruthy());
+      fireEvent.press(getByTestId('webview-should-start-load-external'));
+
+      expect(Analytics.articleExternalLinkClicked).toHaveBeenCalledWith(
+        FULL_ARTICLE.title,
+        'https://www.example.com/some-article',
+      );
+    });
+
+    it('does not fire Analytics.articleExternalLinkClicked for the self-referential btcc.net load', async () => {
+      const {getByTestId} = renderArticle({article: FULL_ARTICLE});
+
+      await waitFor(() => expect(getByTestId('webview')).toBeTruthy());
+      fireEvent.press(getByTestId('webview-should-start-load-btccnet'));
+
+      expect(Analytics.articleExternalLinkClicked).not.toHaveBeenCalled();
     });
   });
 

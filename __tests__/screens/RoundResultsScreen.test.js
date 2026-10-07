@@ -24,6 +24,7 @@ jest.mock('../../src/utils/analytics', () => ({
     contentShared: jest.fn(),
     shareNudgeShown: jest.fn(),
     shareNudgeDismissed: jest.fn(),
+    raceVideoOpened: jest.fn(),
   },
 }));
 
@@ -995,6 +996,14 @@ describe('RoundResultsScreen', () => {
       };
       const {queryByText} = renderRound({round: roundWithUrls, year: 2024, initialRace: RACE_1_TAB});
       expect(queryByText('Watch Full Race')).toBeTruthy();
+    });
+
+    it('fires Analytics.raceVideoOpened with the round and race label on tap', () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+      const {getByText} = renderRound({year: 2026, initialRace: RACE_1_TAB});
+      fireEvent.press(getByText('Watch Full Race'));
+      expect(Analytics.raceVideoOpened).toHaveBeenCalledWith(MOCK_ROUND.round, 'Race 1');
     });
   });
 

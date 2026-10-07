@@ -415,7 +415,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     <TouchableOpacity
                       style={styles.youtubeBtn}
                       activeOpacity={0.8}
-                      onPress={() => Linking.openURL(url)}
+                      onPress={() => { Analytics.raceVideoOpened(round.round, race?.label || 'Full Race'); Linking.openURL(url); }}
                       accessibilityLabel="Watch full race on YouTube"
                       accessibilityRole="button">
                       <Icon name="play-circle-filled" size={16} color="#FF0000" style={{marginRight: 8}} />

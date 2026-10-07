@@ -140,6 +140,11 @@ describe('Analytics', () => {
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'live_timing_opened', {venue: 'Brands Hatch'});
     });
 
+    it('raceVideoOpened logs with round and video_label', () => {
+      Analytics.raceVideoOpened(10, 'Lap Preview');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'race_video_opened', {round: 10, video_label: 'Lap Preview'});
+    });
+
     it('weatherHourlyExpanded logs with venue', () => {
       Analytics.weatherHourlyExpanded('Knockhill');
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_hourly_expanded', {venue: 'Knockhill'});

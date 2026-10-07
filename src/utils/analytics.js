@@ -40,6 +40,7 @@ export const Analytics = {
   trackDetailViewed: (round, venue) => logEvent(fa(),'track_detail_viewed', {round, venue}),
   raceClicked: (round, venue) => logEvent(fa(),'race_clicked', {round, venue}),
   liveTimingOpened: (venue) => logEvent(fa(),'live_timing_opened', {venue}),
+  raceVideoOpened: (round, label) => logEvent(fa(),'race_video_opened', {round, video_label: label}),
   fullTimetableExpanded: (venue) => logEvent(fa(),'full_timetable_expanded', {venue}),
   fullTimetableCollapsed: (venue) => logEvent(fa(),'full_timetable_collapsed', {venue}),
   weatherHourlyExpanded: (venue) => logEvent(fa(),'weather_hourly_expanded', {venue}),
