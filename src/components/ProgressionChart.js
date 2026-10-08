@@ -11,11 +11,26 @@ const CHART_COLORS = [
 
 const screenWidth = Dimensions.get('window').width;
 
-function ProgressionChart({series: rawSeries, pointLabels = [], isFavourite}) {
-  // Deduplicate and prepend a R0 origin point (0 pts) so all lines start from the bottom-left
-  const series = rawSeries
+// Deduplicate, then place each driver's points on the shared global X axis.
+// Index 0 is the R0 origin; indices 1..pointLabels.length map 1:1 onto pointLabels.
+// A driver who joined mid-season (s.start > 0) gets leading nulls instead of
+// being left-shifted back to race 1 - segments skip nulls, so their line
+// correctly starts at their real first race rather than the origin.
+export function alignSeriesToAxis(rawSeries, pointLabels) {
+  const globalLen = pointLabels.length + 1;
+  return rawSeries
     .filter((s, i, arr) => arr.findIndex(x => x.name === s.name) === i)
-    .map(s => ({...s, points: [0, ...s.points]}));
+    .map(s => {
+      const start = s.start || 0;
+      const points = new Array(globalLen).fill(null);
+      if (start === 0) points[0] = 0;
+      s.points.forEach((v, i) => { points[start + i + 1] = v; });
+      return {...s, points};
+    });
+}
+
+function ProgressionChart({series: rawSeries, pointLabels = [], isFavourite}) {
+  const series = alignSeriesToAxis(rawSeries, pointLabels);
   const [visible, setVisible] = useState(() => {
     const m = {};
     series.forEach(s => { m[s.name] = true; });

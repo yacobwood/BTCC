@@ -73,7 +73,7 @@ export function computeProgression(rounds, standings) {
         if (!r.driver) continue;
         driverPoints[r.driver] = (driverPoints[r.driver] || 0) + r.points;
         if (firstPoint[r.driver] === undefined) firstPoint[r.driver] = pointLabels.length;
-        if (!series[r.driver]) series[r.driver] = {name: r.driver, points: []};
+        if (!series[r.driver]) series[r.driver] = {name: r.driver, points: [], start: pointLabels.length};
       }
       // Label: show round number on the last race of each round (marks the round boundary)
       const isLastRace = raceIdx === scoringRaces.length - 1;
