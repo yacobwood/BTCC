@@ -10,7 +10,6 @@ const {
   fetchWithTimeout,
   CALENDAR_URL,
   SCHEDULE_URL,
-  HUB_NEWS_URL,
   PODCAST_RSS_URL,
   SESSION_TOPICS,
   SESSION_CHANNELS,
@@ -152,56 +151,6 @@ exports.sendSessionNotifications = onSchedule(
     } catch (e) {
       console.error('News check failed:', e);
       await logError('sendSessionNotifications', e.message, e, {key: 'check-news', alert: true});
-    }
-
-    // ── Hub news alerts ───────────────────────────────────────────
-    try {
-      const hubData = await fetchWithTimeout(HUB_NEWS_URL).then(r => r.json());
-      // Exclude Weekly Digest — those have their own notification fired via the admin page.
-      // Also exclude articles older than 48 hours so a stale Firestore lastId can never
-      // cause an old article to appear "new" when hub_news.json changes for any reason.
-      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000);
-      const latestHub = hubData?.posts?.find(p =>
-        (!p.status || p.status === 'published') &&
-        p.category !== 'Weekly Digest' &&
-        new Date(p.pubDate) > cutoff
-      );
-      if (latestHub) {
-        const hubStateRef = db.collection('state').doc('hub_news');
-        let notifyPayload = null;
-        await db.runTransaction(async (tx) => {
-          notifyPayload = null;
-          const snap = await tx.get(hubStateRef);
-          const data = snap.exists ? snap.data() : {};
-          const lastHubId = data.lastId ?? null;
-          const pendingSend = data.pendingSend ?? null;
-          if (String(latestHub.id) !== String(lastHubId)) {
-            const newPayload = lastHubId !== null ? {
-              title: latestHub.title || 'New Post',
-              imageUrl: latestHub.heroImage || latestHub.images?.[0] || null,
-              id: String(latestHub.id),
-            } : null;
-            tx.set(hubStateRef, {lastId: String(latestHub.id), pendingSend: newPayload});
-            notifyPayload = newPayload;
-          } else if (pendingSend) {
-            notifyPayload = pendingSend;
-          }
-        });
-        if (notifyPayload) {
-          await messaging.send({
-            topic: 'news_alerts',
-            android: {collapseKey: `hub_${notifyPayload.id}`, priority: 'high', ttl: 3600000},
-            apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `hub_${notifyPayload.id}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Post', body: notifyPayload.title}}}},
-            data: {type: 'hub', id: notifyPayload.id, channel: 'news', title: notifyPayload.title, ...(notifyPayload.imageUrl ? {imageUrl: notifyPayload.imageUrl} : {})},
-          });
-          console.log(`Hub notification sent OK: "${notifyPayload.title}"`);
-          await hubStateRef.update({pendingSend: null});
-          logPushHistory('New Post', notifyPayload.title, 'news_alerts');
-        }
-      }
-    } catch (e) {
-      console.error('Hub news check failed:', e);
-      await logError('sendSessionNotifications', e.message, e, {key: 'check-hub', alert: true});
     }
 
     // ── Podcast alerts ────────────────────────────────────────────
