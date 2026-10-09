@@ -1,16 +1,10 @@
 [
   {
-    "id": "independent-contenders-mikey-doble",
-    "slug": "independent-contenders-mikey-doble",
+    "id": "napa-racing-uk-unveils-special-liveries-for-brands-hatch-finale",
+    "slug": "napa-racing-uk-unveils-special-liveries-for-brands-hatch-finale",
     "title": {
-      "rendered": "Independent Contenders: Mikey Doble"
+      "rendered": "NAPA Racing UK unveils special liveries for Brands Hatch finale"
     },
-    "_embedded": {
-      "wp:featuredmedia": [
-        {
-          "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/e7edf929-7d8c-4282-9f74-e4dfca337942.jpg"
-        }
-      ]
-    }
+    "_embedded": {}
   }
 ]
