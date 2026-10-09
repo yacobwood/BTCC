@@ -1,13 +1,3 @@
-const WMO_DESCRIPTIONS = {
-  0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
-  45: 'Fog', 48: 'Rime fog',
-  51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
-  61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
-  71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
-  80: 'Light showers', 81: 'Showers', 82: 'Heavy showers',
-  95: 'Thunderstorm', 96: 'Thunderstorm + hail', 99: 'Severe thunderstorm',
-};
-
 const WMO_ICONS = {
   0: 'wb-sunny', 1: 'wb-sunny', 2: 'cloud', 3: 'cloud',
   45: 'blur-on', 48: 'blur-on',
@@ -17,10 +7,6 @@ const WMO_ICONS = {
   80: 'water-drop', 81: 'water-drop', 82: 'water-drop',
   95: 'flash-on', 96: 'flash-on', 99: 'flash-on',
 };
-
-export function weatherDescription(code) {
-  return WMO_DESCRIPTIONS[code] || 'Unknown';
-}
 
 export function weatherIcon(code) {
   return WMO_ICONS[code] || 'cloud';
@@ -53,9 +39,10 @@ const MAX_FORECAST_DAYS = 10;
 // day rather than settling for whatever was true hours ago.
 const WEATHER_CACHE_MAX_AGE = 30 * 60 * 1000; // 30 minutes
 
-// fetchWeather() returns {daily, hourly} rather than a bare array (breaking
-// change from the daily-only shape) so the same call can drive both the
-// day-summary cards and the session-aligned hourly forecast.
+// fetchWeather() returns {hourly} - hourly only, aligned to session start
+// times by TrackDetailScreen. The old daily summary was dropped (2026-10-09)
+// because its whole-day max/min and worst-case rain regularly contradicted
+// the per-session forecast shown right beside it.
 export async function fetchWeather(lat, lng, startDate, endDate) {
   const today = new Date();
   const start = new Date(startDate);
@@ -71,7 +58,6 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-      `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
       `&hourly=weather_code,temperature_2m,precipitation_probability,wind_speed_10m,wind_gusts_10m,` +
       `wind_direction_10m,apparent_temperature,relative_humidity_2m,cloud_cover` +
       `&timezone=Europe/London&start_date=${startDate}&end_date=${endDate}`;
@@ -82,18 +68,9 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
     clearTimeout(timeoutId);
     if (!res.ok) return null;
     const json = await res.json();
-    const d = json.daily;
-    if (!d?.time) return null;
-    const daily = d.time.map((date, i) => ({
-      date,
-      weatherCode: d.weather_code[i],
-      tempMax: Math.round(d.temperature_2m_max[i]),
-      tempMin: Math.round(d.temperature_2m_min[i]),
-      precipProb: d.precipitation_probability_max[i],
-      windMax: Math.round(d.wind_speed_10m_max[i]),
-    }));
     const h = json.hourly;
-    const hourly = h?.time ? h.time.map((time, i) => ({
+    if (!h?.time) return null;
+    const hourly = h.time.map((time, i) => ({
       time,
       weatherCode: h.weather_code[i],
       temp: Math.round(h.temperature_2m[i]),
@@ -106,8 +83,8 @@ export async function fetchWeather(lat, lng, startDate, endDate) {
       feelsLike: Math.round(h.apparent_temperature?.[i] ?? h.temperature_2m[i]),
       humidity: Math.round(h.relative_humidity_2m?.[i] ?? 0),
       cloudCover: Math.round(h.cloud_cover?.[i] ?? 0),
-    })) : [];
-    const result = {daily, hourly};
+    }));
+    const result = {hourly};
     cacheWrite(cacheKey, result).catch(() => {});
     return result;
   } catch { return null; }

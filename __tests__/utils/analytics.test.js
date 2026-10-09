@@ -90,6 +90,18 @@ describe('Analytics', () => {
       expect(call.url.length).toBeLessThanOrEqual(100);
     });
 
+    it('articleImageOpened logs index and total image count', () => {
+      Analytics.articleImageOpened('Title', 2, 5);
+      expect(logEvent.mock.calls[0][1]).toBe('article_image_opened');
+      expect(logEvent.mock.calls[0][2]).toEqual({item_name: 'Title', photo_index: 2, photo_count: 5});
+    });
+
+    it('articleImageClosed logs the index the user left on', () => {
+      Analytics.articleImageClosed('Title', 3);
+      expect(logEvent.mock.calls[0][1]).toBe('article_image_closed');
+      expect(logEvent.mock.calls[0][2]).toEqual({item_name: 'Title', photo_index: 3});
+    });
+
     it('handles null title gracefully', () => {
       expect(() => Analytics.articleClicked(null, 0)).not.toThrow();
       const call = logEvent.mock.calls[0][2];
@@ -143,16 +155,6 @@ describe('Analytics', () => {
     it('raceVideoOpened logs with round and video_label', () => {
       Analytics.raceVideoOpened(10, 'Lap Preview');
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'race_video_opened', {round: 10, video_label: 'Lap Preview'});
-    });
-
-    it('weatherHourlyExpanded logs with venue', () => {
-      Analytics.weatherHourlyExpanded('Knockhill');
-      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_hourly_expanded', {venue: 'Knockhill'});
-    });
-
-    it('weatherHourlyCollapsed logs with venue', () => {
-      Analytics.weatherHourlyCollapsed('Knockhill');
-      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'weather_hourly_collapsed', {venue: 'Knockhill'});
     });
 
     it('weatherDetailExpanded logs with venue', () => {

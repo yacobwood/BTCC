@@ -7,12 +7,11 @@ import * as featureFlags from '../../src/store/featureFlags';
 import * as liveUrlsStore from '../../src/store/liveUrls';
 
 jest.mock('../../src/utils/analytics', () => ({
-  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherHourlyExpanded: jest.fn(), weatherHourlyCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn(), contentShared: jest.fn(), raceVideoOpened: jest.fn()},
+  Analytics: {screen: jest.fn(), trackDetailViewed: jest.fn(), liveTimingOpened: jest.fn(), fullTimetableExpanded: jest.fn(), fullTimetableCollapsed: jest.fn(), weatherDetailExpanded: jest.fn(), weatherDetailCollapsed: jest.fn(), contentShared: jest.fn(), raceVideoOpened: jest.fn()},
 }));
 
 jest.mock('../../src/utils/weather', () => ({
   fetchWeather:         jest.fn().mockResolvedValue(null),
-  weatherDescription:   jest.fn(() => 'Partly cloudy'),
   weatherIcon:          jest.fn(() => 'wb-cloudy'),
   weatherIconColor:     jest.fn(() => '#fff'),
   windDirectionCompass: jest.fn(() => 'NE'),
@@ -702,16 +701,7 @@ describe('TrackDetailScreen', () => {
       ],
     };
 
-    const DAILY_ONLY = {
-      daily: [
-        {date: '2026-04-25', weatherCode: 1,  tempMax: 18, tempMin: 10, precipProb: 5,  windMax: 12},
-        {date: '2026-04-26', weatherCode: 61, tempMax: 14, tempMin: 9,  precipProb: 70, windMax: 23},
-      ],
-      hourly: [],
-    };
-
     const WITH_HOURLY = {
-      daily: DAILY_ONLY.daily,
       hourly: [
         {time: '2026-04-25T09:00', weatherCode: 2,  temp: 12, precipProb: 10, windSpeed: 15, windGust: 22, windDir: 90,  feelsLike: 10, humidity: 65, cloudCover: 40},
         {time: '2026-04-26T14:00', weatherCode: 61, temp: 15, precipProb: 80, windSpeed: 20, windGust: 35, windDir: 225, feelsLike: 12, humidity: 90, cloudCover: 95},
@@ -733,116 +723,48 @@ describe('TrackDetailScreen', () => {
       flagsSpy.mockRestore();
     });
 
-    it('renders the daily forecast cards', async () => {
+    it('shows a weather chip per session straight away (no Daily view or toggle)', async () => {
       const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(DAILY_ONLY);
-      const {findByText} = renderWithProviders(
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
+      const {findByText, getByText, queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      expect(await findByText('18°')).toBeTruthy();
+      expect(await findByText('WEATHER FORECAST')).toBeTruthy();
+      expect(getByText('FP')).toBeTruthy();
+      expect(getByText('R1')).toBeTruthy();
+      expect(getByText('12°')).toBeTruthy();
+      expect(getByText('15°')).toBeTruthy();
+      expect(queryByText('Daily')).toBeNull();
+      expect(queryByText('By session')).toBeNull();
     });
 
-    it('hides Saturday\'s daily forecast card once viewed on the Sunday of the race weekend', async () => {
-      // A day's forecast is reference material, not history to keep browsing -
-      // once Saturday is over there's no reason to keep showing it, so both
-      // views hide a past day's card/chip, not just one of them (see the
-      // By-session test just below - the two views must stay consistent,
-      // whichever direction that consistency goes).
-      jest.setSystemTime(new Date('2026-04-26T10:00:00Z')); // Sunday of the race weekend
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(DAILY_ONLY);
-      const {findByText, queryByText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      expect(await findByText('14°')).toBeTruthy(); // Sunday's high - still visible
-      expect(queryByText('18°')).toBeNull(); // Saturday's high - gone now it's Sunday
-    });
-
-    it('hides Saturday\'s By-session weather chip too once viewed on the Sunday of the race weekend', async () => {
+    it('hides Saturday\'s session weather chip once viewed on the Sunday of the race weekend', async () => {
       jest.setSystemTime(new Date('2026-04-26T10:00:00Z')); // Sunday of the race weekend
       const {fetchWeather} = require('../../src/utils/weather');
       fetchWeather.mockResolvedValue(WITH_HOURLY);
       const {findByText, queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      fireEvent.press(await findByText('By session'));
       expect(await findByText('R1')).toBeTruthy(); // Sunday's session chip - still visible
       expect(queryByText('FP')).toBeNull(); // Saturday's session chip - gone now it's Sunday
     });
 
-    it('does not show the Daily/By session toggle when there is no hourly data', async () => {
+    it('hides the whole weather section when there is no hourly data', async () => {
       const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(DAILY_ONLY);
-      const {findByText, queryByText} = renderWithProviders(
+      fetchWeather.mockResolvedValue({hourly: []});
+      const {queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      await findByText('18°');
-      expect(queryByText('By session')).toBeNull();
+      await waitFor(() => expect(fetchWeather).toHaveBeenCalled());
+      expect(queryByText('WEATHER FORECAST')).toBeNull();
     });
 
-    it('shows the toggle and defaults to Daily when hourly data is present', async () => {
+    it('shows the detail toggle straight away', async () => {
       const {fetchWeather} = require('../../src/utils/weather');
       fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText} = renderWithProviders(
+      const {findByLabelText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      expect(await findByText('By session')).toBeTruthy();
-      expect(await findByText('18°')).toBeTruthy(); // daily still showing by default
-    });
-
-    it('switching to By session shows a weather chip per session', async () => {
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText, getByText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      fireEvent.press(await findByText('By session'));
-      expect(await findByText('FP')).toBeTruthy();
-      expect(getByText('R1')).toBeTruthy();
-      expect(getByText('12°')).toBeTruthy();
-      expect(getByText('15°')).toBeTruthy();
-    });
-
-    it('fires weatherHourlyExpanded when switching to By session', async () => {
-      const {Analytics} = require('../../src/utils/analytics');
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      fireEvent.press(await findByText('By session'));
-      expect(Analytics.weatherHourlyExpanded).toHaveBeenCalledWith('Donington Park');
-    });
-
-    it('fires weatherHourlyCollapsed when switching back to Daily', async () => {
-      const {Analytics} = require('../../src/utils/analytics');
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      fireEvent.press(await findByText('By session'));
-      fireEvent.press(await findByText('Daily'));
-      expect(Analytics.weatherHourlyCollapsed).toHaveBeenCalledWith('Donington Park');
-    });
-
-    it('does not show the detail toggle in Daily mode', async () => {
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText, queryByLabelText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      await findByText('18°');
-      expect(queryByLabelText('Show more weather detail')).toBeNull();
-    });
-
-    it('shows the detail toggle after switching to By session', async () => {
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText, findByLabelText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      fireEvent.press(await findByText('By session'));
       expect(await findByLabelText('Show more weather detail')).toBeTruthy();
     });
 
@@ -852,7 +774,7 @@ describe('TrackDetailScreen', () => {
       const {findByText, findByLabelText, getByText, queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      fireEvent.press(await findByText('By session'));
+      await findByText('FP');
       expect(queryByText('65% humidity')).toBeNull();
       fireEvent.press(await findByLabelText('Show more weather detail'));
       expect(getByText('65% humidity')).toBeTruthy();
@@ -867,7 +789,6 @@ describe('TrackDetailScreen', () => {
       const {findByText, findByLabelText, queryByText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      fireEvent.press(await findByText('By session'));
       fireEvent.press(await findByLabelText('Show more weather detail'));
       await findByLabelText('Show less weather detail');
       fireEvent.press(await findByLabelText('Show less weather detail'));
@@ -881,28 +802,15 @@ describe('TrackDetailScreen', () => {
       const {findByText, findByLabelText} = renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );
-      fireEvent.press(await findByText('By session'));
       fireEvent.press(await findByLabelText('Show more weather detail'));
       expect(Analytics.weatherDetailExpanded).toHaveBeenCalledWith('Donington Park');
       fireEvent.press(await findByLabelText('Show less weather detail'));
       expect(Analytics.weatherDetailCollapsed).toHaveBeenCalledWith('Donington Park');
     });
 
-    it('hides the detail toggle again after switching back to Daily', async () => {
-      const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(WITH_HOURLY);
-      const {findByText, findByLabelText, queryByLabelText} = renderWithProviders(
-        <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
-      );
-      fireEvent.press(await findByText('By session'));
-      await findByLabelText('Show more weather detail');
-      fireEvent.press(await findByText('Daily'));
-      expect(queryByLabelText('Show more weather detail')).toBeNull();
-    });
-
     it('refetches weather again after the poll interval elapses', async () => {
       const {fetchWeather} = require('../../src/utils/weather');
-      fetchWeather.mockResolvedValue(DAILY_ONLY);
+      fetchWeather.mockResolvedValue(WITH_HOURLY);
       renderWithProviders(
         <TrackDetailScreen route={makeRoute({track: WEATHER_TRACK})} navigation={nav} />,
       );

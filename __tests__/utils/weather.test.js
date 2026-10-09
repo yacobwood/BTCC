@@ -1,37 +1,9 @@
 import {
-  weatherDescription,
   weatherIcon,
   weatherIconColor,
   windDirectionCompass,
   fetchWeather,
 } from '../../src/utils/weather';
-
-// ── weatherDescription ─────────────────────────────────────────────────────────
-describe('weatherDescription', () => {
-  it('returns "Clear sky" for code 0', () => {
-    expect(weatherDescription(0)).toBe('Clear sky');
-  });
-
-  it('returns "Overcast" for code 3', () => {
-    expect(weatherDescription(3)).toBe('Overcast');
-  });
-
-  it('returns "Rain" for code 63', () => {
-    expect(weatherDescription(63)).toBe('Rain');
-  });
-
-  it('returns "Heavy snow" for code 75', () => {
-    expect(weatherDescription(75)).toBe('Heavy snow');
-  });
-
-  it('returns "Thunderstorm" for code 95', () => {
-    expect(weatherDescription(95)).toBe('Thunderstorm');
-  });
-
-  it('returns "Unknown" for an unrecognised code', () => {
-    expect(weatherDescription(999)).toBe('Unknown');
-  });
-});
 
 // ── weatherIcon ────────────────────────────────────────────────────────────────
 describe('weatherIcon', () => {
@@ -133,14 +105,6 @@ describe('windDirectionCompass', () => {
 
 // ── fetchWeather ───────────────────────────────────────────────────────────────
 const MOCK_RESPONSE = {
-  daily: {
-    time: ['2025-05-04', '2025-05-05'],
-    weather_code: [1, 61],
-    temperature_2m_max: [18.4, 14.1],
-    temperature_2m_min: [10.2, 9.8],
-    precipitation_probability_max: [5, 70],
-    wind_speed_10m_max: [12.3, 22.7],
-  },
   hourly: {
     time: ['2025-05-04T00:00', '2025-05-04T01:00', '2025-05-05T14:00'],
     weather_code: [1, 2, 61],
@@ -190,34 +154,7 @@ describe('fetchWeather', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('returns mapped daily forecast data for a date within range', async () => {
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(MOCK_RESPONSE),
-    });
-
-    const result = await fetchWeather(52.07, -1.02, '2025-05-04', '2025-05-05');
-
-    expect(result.daily).toHaveLength(2);
-    expect(result.daily[0]).toEqual({
-      date: '2025-05-04',
-      weatherCode: 1,
-      tempMax: 18,
-      tempMin: 10,
-      precipProb: 5,
-      windMax: 12,
-    });
-    expect(result.daily[1]).toEqual({
-      date: '2025-05-05',
-      weatherCode: 61,
-      tempMax: 14,
-      tempMin: 10,
-      precipProb: 70,
-      windMax: 23,
-    });
-  });
-
-  it('returns mapped hourly forecast data alongside the daily summary', async () => {
+  it('returns mapped hourly forecast data', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(MOCK_RESPONSE),
@@ -245,7 +182,6 @@ describe('fetchWeather', () => {
     // detail fields - fetchWeather should still return a usable entry rather
     // than NaN/undefined creeping into the UI.
     const partial = {
-      daily: MOCK_RESPONSE.daily,
       hourly: {
         time: ['2025-05-04T00:00'],
         weather_code: [1],
@@ -272,7 +208,7 @@ describe('fetchWeather', () => {
     });
   });
 
-  it('requests hourly fields alongside daily in the API call', async () => {
+  it('requests hourly fields only (no daily summary) in the API call', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(MOCK_RESPONSE),
@@ -282,18 +218,7 @@ describe('fetchWeather', () => {
 
     const url = global.fetch.mock.calls[0][0];
     expect(url).toContain('hourly=weather_code,temperature_2m,precipitation_probability,wind_speed_10m');
-  });
-
-  it('returns an empty hourly array when the response has no hourly data', async () => {
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({daily: MOCK_RESPONSE.daily}),
-    });
-
-    const result = await fetchWeather(52.07, -1.02, '2025-05-04', '2025-05-05');
-
-    expect(result.daily).toHaveLength(2);
-    expect(result.hourly).toEqual([]);
+    expect(url).not.toContain('daily=');
   });
 
   it('returns null when fetch response is not ok', async () => {
@@ -308,10 +233,10 @@ describe('fetchWeather', () => {
     expect(result).toBeNull();
   });
 
-  it('returns null when response has no daily.time', async () => {
+  it('returns null when response has no hourly.time', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({daily: {}}),
+      json: () => Promise.resolve({hourly: {}}),
     });
     const result = await fetchWeather(52.07, -1.02, '2025-05-04', '2025-05-05');
     expect(result).toBeNull();

@@ -17,6 +17,12 @@ export const Analytics = {
   shareNudgeDismissed: () => logEvent(fa(),'share_nudge_dismissed'),
   articleScrollDepth: (title, depth) => logEvent(fa(),'article_scroll_depth', {item_name: title?.substring(0, 100), depth_percent: depth}),
   articleExternalLinkClicked: (title, url) => logEvent(fa(),'article_external_link_clicked', {item_name: title?.substring(0, 100), url: url?.substring(0, 100)}),
+  // Tapping an inline body image (e.g. a btcc-gallery thumbnail) opens it
+  // full-screen in PhotoLightbox. photo_count is how many images the article
+  // body holds in total, so "opened 1 of 5" can be told apart from a
+  // single-image article.
+  articleImageOpened: (title, photoIndex, photoCount) => logEvent(fa(),'article_image_opened', {item_name: title?.substring(0, 100), photo_index: photoIndex, photo_count: photoCount}),
+  articleImageClosed: (title, photoIndex) => logEvent(fa(),'article_image_closed', {item_name: title?.substring(0, 100), photo_index: photoIndex}),
   // error_code is coarse by necessity: fetchArticleBySlug's own internal try/catch
   // (and fetchArticlesIndex/fetchArticlesPage/fetchJson beneath it) always resolves
   // to null rather than rethrowing, so "not yet mirrored" and "network/DNS failure"
@@ -43,8 +49,6 @@ export const Analytics = {
   raceVideoOpened: (round, label) => logEvent(fa(),'race_video_opened', {round, video_label: label}),
   fullTimetableExpanded: (venue) => logEvent(fa(),'full_timetable_expanded', {venue}),
   fullTimetableCollapsed: (venue) => logEvent(fa(),'full_timetable_collapsed', {venue}),
-  weatherHourlyExpanded: (venue) => logEvent(fa(),'weather_hourly_expanded', {venue}),
-  weatherHourlyCollapsed: (venue) => logEvent(fa(),'weather_hourly_collapsed', {venue}),
   weatherDetailExpanded: (venue) => logEvent(fa(),'weather_detail_expanded', {venue}),
   weatherDetailCollapsed: (venue) => logEvent(fa(),'weather_detail_collapsed', {venue}),
 

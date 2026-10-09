@@ -16,7 +16,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../theme/colors';
-import {fetchWeather, weatherDescription, weatherIcon, weatherIconColor, windDirectionCompass} from '../utils/weather';
+import {fetchWeather, weatherIcon, weatherIconColor, windDirectionCompass} from '../utils/weather';
 import CachedImage from '../components/CachedImage';
 import UKMapPin from '../components/UKMapPin';
 import {Analytics} from '../utils/analytics';
@@ -196,7 +196,6 @@ export default function TrackDetailScreen({route, navigation}) {
   const fullTimetable = track?.fullTimetable || [];
   const [showFullTimetable, setShowFullTimetable] = useState(false);
   const [weather, setWeather] = useState(null);
-  const [showHourlyWeather, setShowHourlyWeather] = useState(false);
   const [weatherDetailExpanded, setWeatherDetailExpanded] = useState(false);
   const [racesFinished, setRacesFinished] = useState(false);
   const detectedBroadcaster = useBroadcaster();
@@ -334,8 +333,11 @@ export default function TrackDetailScreen({route, navigation}) {
       items.push({type: 'schedule'});
     }
 
-    // Weather forecast (feature-flagged)
-    if (track_weather && weather?.daily?.length > 0) {
+    // Weather forecast (feature-flagged) - by session only, so it needs both
+    // hourly data and at least one session still to come.
+    const hasUpcomingSessionDay = ['SAT', 'SUN'].some(day =>
+      sessions.some(s => s.day === day) && (day === 'SAT' ? trackStart : trackEnd) >= today);
+    if (track_weather && weather?.hourly?.length > 0 && hasUpcomingSessionDay) {
       items.push({type: 'weatherHeader'});
       items.push({type: 'weather'});
     }
@@ -745,89 +747,34 @@ export default function TrackDetailScreen({route, navigation}) {
         return <Text style={styles.sectionTitle}>WEATHER FORECAST</Text>;
 
       case 'weather': {
-        const hasHourly = weather?.hourly?.length > 0;
         const weatherDayLabel = {SAT: 'Saturday', SUN: 'Sunday'};
-        // Same past-day rule as the Daily view just above (both must agree,
-        // not just Daily) - a day's forecast disappears from both views once
-        // it's over, not just Daily's. SAT maps to track.startDate/SUN to
-        // track.endDate, matching this file's own existing convention (see
-        // nearestHourlyEntry and the "weather" session-chip date lookup below).
+        // Session-aligned forecast only - the old whole-day summary (max/min,
+        // worst-case rain) regularly contradicted the per-session chips, so it
+        // was removed. A day disappears once it's over. SAT maps to
+        // track.startDate/SUN to track.endDate, matching nearestHourlyEntry.
         const weatherDays = ['SAT', 'SUN']
           .filter(day => sessions.some(s => s.day === day))
           .filter(day => (day === 'SAT' ? trackStart : trackEnd) >= today);
         return (
           <View>
-            {hasHourly && (
-              <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8}}>
-                <View style={[styles.timetableSegmentRow, {flex: 1, marginBottom: 0}]}>
-                  <TouchableOpacity
-                    style={[styles.timetableSegment, !showHourlyWeather && styles.timetableSegmentActive]}
-                    onPress={() => { if (showHourlyWeather) { setShowHourlyWeather(false); Analytics.weatherHourlyCollapsed(track.venue); } }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.timetableSegmentText, !showHourlyWeather && styles.timetableSegmentTextActive]}>Daily</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.timetableSegment, showHourlyWeather && styles.timetableSegmentActive]}
-                    onPress={() => { if (!showHourlyWeather) { setShowHourlyWeather(true); Analytics.weatherHourlyExpanded(track.venue); } }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.timetableSegmentText, showHourlyWeather && styles.timetableSegmentTextActive]}>By session</Text>
-                  </TouchableOpacity>
-                </View>
-                {showHourlyWeather && (
-                  <TouchableOpacity
-                    style={styles.weatherDetailToggle}
-                    onPress={() => {
-                      const next = !weatherDetailExpanded;
-                      setWeatherDetailExpanded(next);
-                      if (next) Analytics.weatherDetailExpanded(track.venue);
-                      else Analytics.weatherDetailCollapsed(track.venue);
-                    }}
-                    activeOpacity={0.7}
-                    accessibilityRole="button"
-                    accessibilityLabel={weatherDetailExpanded ? 'Show less weather detail' : 'Show more weather detail'}
-                  >
-                    <Icon name={weatherDetailExpanded ? 'unfold-less' : 'unfold-more'} size={18} color={Colors.textSecondary} />
-                  </TouchableOpacity>
-                )}
-              </View>
-            )}
+            <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 8}}>
+              <TouchableOpacity
+                style={styles.weatherDetailToggle}
+                onPress={() => {
+                  const next = !weatherDetailExpanded;
+                  setWeatherDetailExpanded(next);
+                  if (next) Analytics.weatherDetailExpanded(track.venue);
+                  else Analytics.weatherDetailCollapsed(track.venue);
+                }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={weatherDetailExpanded ? 'Show less weather detail' : 'Show more weather detail'}
+              >
+                <Icon name={weatherDetailExpanded ? 'unfold-less' : 'unfold-more'} size={18} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
 
-            {!showHourlyWeather && (
-              <View style={styles.weatherRow}>
-                {weather.daily.filter(day => new Date(day.date) >= today).map((day, i) => {
-                  const d = new Date(day.date);
-                  const dayName = d.toLocaleDateString('en-GB', {weekday: 'short'});
-                  return (
-                    <View key={i} style={styles.weatherDay}>
-                      <Text style={styles.weatherDayLabel}>{dayName}</Text>
-                      <Icon name={weatherIcon(day.weatherCode)} size={26} color={weatherIconColor(day.weatherCode)} />
-                      <Text style={styles.weatherDesc}>{weatherDescription(day.weatherCode)}</Text>
-                      <View style={styles.weatherTemps}>
-                        <Text style={styles.weatherTemp}>{day.tempMax}°</Text>
-                        <Text style={styles.weatherTempSep}>/</Text>
-                        <Text style={styles.weatherTempLow}>{day.tempMin}°</Text>
-                      </View>
-                      {day.precipProb > 0 && (
-                        <View style={styles.weatherStat}>
-                          <Icon name="water-drop" size={11} color="#5BA3FF" />
-                          <Text style={styles.weatherRain}>{day.precipProb}%</Text>
-                        </View>
-                      )}
-                      <View style={styles.weatherStat}>
-                        <Icon name="air" size={11} color={Colors.textSecondary} />
-                        <Text style={styles.weatherWind}>
-                          {useKm ? `${day.windMax} km/h` : `${Math.round(day.windMax * 0.621)} mph`}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-
-            {showHourlyWeather && weatherDays.map(day => (
+            {weatherDays.map(day => (
               <View key={day} style={{marginBottom: 12}}>
                 <Text style={styles.weatherSessionDayLabel}>{weatherDayLabel[day]}</Text>
                 <View style={{flexDirection: 'row', gap: 8}}>
@@ -1181,17 +1128,7 @@ const styles = StyleSheet.create({
   layoutSvgWrap: {width: '100%', height: 200, borderRadius: 10, overflow: 'hidden'},
 
   // Weather
-  weatherRow: {flexDirection: 'row', gap: 8},
-  weatherDay: {flex: 1, backgroundColor: Colors.card, borderRadius: 10, padding: 10, alignItems: 'center', gap: 4},
-  weatherDayLabel: {color: Colors.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 0.5},
-  weatherDesc: {color: Colors.textSecondary, fontSize: 10, textAlign: 'center'},
-  weatherTemps: {flexDirection: 'row', alignItems: 'baseline', gap: 2},
-  weatherTemp: {color: '#fff', fontSize: 16, fontWeight: '800'},
-  weatherTempSep: {color: Colors.textSecondary, fontSize: 12},
-  weatherTempLow: {color: Colors.textSecondary, fontSize: 13},
   weatherStat: {flexDirection: 'row', alignItems: 'center', gap: 3},
-  weatherRain: {color: '#5BA3FF', fontSize: 11, fontWeight: '700'},
-  weatherWind: {color: Colors.textSecondary, fontSize: 11},
   weatherSessionDayLabel: {color: Colors.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase'},
   weatherSessionChip: {backgroundColor: Colors.card, borderRadius: 10, padding: 8, alignItems: 'center', gap: 3, minWidth: 68},
   weatherSessionName: {color: Colors.textSecondary, fontSize: 10, fontWeight: '700'},
