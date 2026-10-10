@@ -54,7 +54,7 @@ test('sends notification when a new article is detected after first run', async 
   expect(messaging.send).toHaveBeenCalledTimes(1);
   expect(messaging.send).toHaveBeenCalledWith(
     expect.objectContaining({
-      topic: 'news_alerts',
+      condition: "'news_alerts' in topics && !('spoiler_free' in topics) && 'results_teaser' in topics",
       data: expect.objectContaining({type: 'news', slug: ARTICLE.slug, title: ARTICLE.title.rendered}),
     }),
   );
@@ -120,7 +120,7 @@ test('resends notification when pendingSend is set from a previous crashed run',
   expect(messaging.send).toHaveBeenCalledTimes(1);
   expect(messaging.send).toHaveBeenCalledWith(
     expect.objectContaining({
-      topic: 'news_alerts',
+      condition: "'news_alerts' in topics && !('spoiler_free' in topics) && 'results_teaser' in topics",
       data: expect.objectContaining({slug: ARTICLE.slug}),
     }),
   );

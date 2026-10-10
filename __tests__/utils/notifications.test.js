@@ -322,6 +322,59 @@ describe('displayAndroidDataNotification', () => {
 });
 
 // ── showLocalNotification ──────────────────────────────────────────────────────
+// Spoiler mode = NO notifications: last line of defence on Android, read
+// straight from AsyncStorage because the background handler runs headless.
+describe('spoiler mode display gate', () => {
+  const titled = {data: {title: 'Moffat wins the Qualifying Race', body: 'x', channel: 'qualifying_race'}};
+  function spoilerStored(value) {
+    AsyncStorage.getItem.mockImplementation(key =>
+      Promise.resolve(key === 'setting_spoiler_free' ? value : null));
+  }
+  afterEach(() => { AsyncStorage.getItem.mockReset(); Platform.OS = 'ios'; });
+
+  it('drops every Android data notification while spoiler mode is on', async () => {
+    spoilerStored('true');
+    for (const channel of ['news', 'results', 'race', 'chat_mentions', 'general', 'podcasts']) {
+      await displayAndroidDataNotification({data: {...titled.data, channel}});
+    }
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it('still displays when spoiler mode is off', async () => {
+    spoilerStored('false');
+    await displayAndroidDataNotification(titled);
+    expect(notifee.displayNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('still busts the results cache for results_refresh while spoiler mode is on', async () => {
+    spoilerStored('true');
+    await displayAndroidDataNotification({data: {type: 'results_refresh', year: '2026'}});
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith('cache_results_2026');
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it('fails toward silence if the storage read throws', async () => {
+    AsyncStorage.getItem.mockImplementation(() => Promise.reject(new Error('storage broken')));
+    await displayAndroidDataNotification(titled);
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it('drops the foreground Android path while spoiler mode is on', async () => {
+    spoilerStored('true');
+    Platform.OS = 'android';
+    onForegroundMessage(jest.fn());
+    const handler = onMessage.mock.calls[onMessage.mock.calls.length - 1][1];
+    await handler(titled);
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  it('drops local notifications while spoiler mode is on', async () => {
+    spoilerStored('true');
+    await showLocalNotification('New BTCC Podcast', 'Episode');
+    expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+});
+
 describe('showLocalNotification', () => {
   it('calls notifee.displayNotification with correct args', async () => {
     await showLocalNotification('Title', 'Body', 'podcasts', {type: 'podcast'});

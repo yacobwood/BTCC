@@ -45,7 +45,7 @@ BTCC Hub is a React Native mobile application for fans of the British Touring Ca
 - An in-app news feed combining official btcc.net articles with curated hub content
 - A community chat room (feature-flag gated)
 - Live radio streams and podcast archive
-- Spoiler-free mode to hide results until the user is ready
+- Spoiler-free mode: no notifications of any kind until the user next opens the app
 - An all-time records screen with championship, win, podium and pole statistics
 
 The app is published on both the Apple App Store and Google Play Store.
@@ -541,6 +541,13 @@ podcastAlerts       → podcast_alerts
 ```
 
 **Spoiler-free mode:** When enabled, sets an expiry of the next Monday at 23:00 local time (stored as ISO string). On every app open, if the expiry has passed the mode is silently cleared; if not yet expired the `SpoilerClearedDialog` is shown.
+
+**Spoiler mode = NO notifications (2026-10-10).** A user with No Spoilers on still got a race-winner push during the Brands Hatch GP weekend - spoiler mode used to unsubscribe only the 7 `results_*` topics, so news headlines (btcc.net race reports name the winner), pre-race alerts, broadcasts and chat mentions all still arrived. Now three independent layers block every push, so any single failure (a topic op that never landed, a sender someone forgot) is still covered:
+1. **Client topics** (`syncAllTopics` in `src/store/settings.js`): every visible topic including `broadcast` is unsubscribed, the `spoiler_free` marker topic is subscribed and the chat mention token is removed. Only the silent `results_live` cache refresh stays.
+2. **Server conditions** (`functions/spoilerSafe.js`): every visible push is built by `buildSpoilerSafePush()`, which sends to a condition excluding `spoiler_free`. Used by `newsCheck.js`, `sessionNotifications.js`, `scraperAdmin.js`'s teaser and `send-broadcast-notif.yml` (sparse-checks out the helper). `session_watcher.py` mirrors it by hand (`spoiler_safe_condition`). Chat mentions (token sends) skip any user whose synced profile has `spoilerFree: true`, failing toward silence if that read errors.
+3. **Android display gate** (`isSpoilerModeOn` in `src/utils/notifications.js`): Android is always sent data-only (no top-level `notification` block, which Android displays without running app code), so every push reaches `displayAndroidDataNotification`, which reads `setting_spoiler_free` straight from AsyncStorage (the background handler is headless) and drops it. Also gates the iOS foreground path and `showLocalNotification`.
+
+**Legacy stopgap:** builds released before the marker topic never subscribe `spoiler_free`, so `LEGACY_SPOILER_STOPGAP` also requires `'results_teaser' in topics` on every non-results send (spoiler mode already unsubscribes it on those builds). Side effect while on: users who turned off Results notifications themselves, and the current iOS build (older than `results_teaser`), get no non-results pushes. Turn it off once `update_min_version_android` in `data/flags.json` passes the build that ships the marker topic. `__tests__/functions/spoilerSafe.test.js` also scans every sender's source so a new push can't bypass the helper.
 
 **Legacy migration:** Old single-key settings (e.g. `setting_race_alerts`) are migrated to the new granular key structure on first load.
 

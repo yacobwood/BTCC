@@ -176,9 +176,10 @@ describe('notifyResultsUpdate', () => {
     // Race 1's own spoiler push (results_race1) doesn't also get this one -
     // see the 2026-09-06 comment above the send in scraperAdmin.js.
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      condition: "'results_teaser' in topics && !('results_race1' in topics)",
-      notification: expect.objectContaining({title: 'Results for Race 1 at Croft is now available'}),
-      // title/body/channel mirrored into data too (added alongside the
+      condition: "'results_teaser' in topics && !('results_race1' in topics) && !('spoiler_free' in topics)",
+      // Android is data-only (no top-level notification block, which
+      // Android would display without running the app's spoiler-mode
+      // gate) - title/body/channel mirrored into data too (added alongside the
       // 2026-09-09 foreground-Android-drop fix - see
       // project_chat_mention_foreground_android_notification_gap memory) -
       // without them the notification silently never displays at all if
@@ -190,6 +191,7 @@ describe('notifyResultsUpdate', () => {
         channel: 'results',
       },
     }));
+    expect(mockMessaging.send.mock.calls.find(c => c[0].condition)[0].notification).toBeUndefined();
     expect(mockLogPushHistory).toHaveBeenCalledWith('Results for Race 1 at Croft is now available', expect.any(String), 'results');
     expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
   });
@@ -210,8 +212,8 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      condition: "'results_teaser' in topics && !('results_race1' in topics)",
-      notification: expect.objectContaining({title: 'Results for Race 1 is now available'}),
+      condition: "'results_teaser' in topics && !('results_race1' in topics) && !('spoiler_free' in topics)",
+      data: expect.objectContaining({title: 'Results for Race 1 is now available'}),
     }));
   });
 
@@ -235,17 +237,17 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      condition: "'results_teaser' in topics && !('results_race2' in topics)",
-      notification: expect.objectContaining({title: 'Results for Race 2 at Croft is now available'}),
+      condition: "'results_teaser' in topics && !('results_race2' in topics) && !('spoiler_free' in topics)",
+      data: expect.objectContaining({title: 'Results for Race 2 at Croft is now available'}),
     }));
   });
 
   // Defensive fallback - every real session label in results{year}.json is
   // one of the 6 keys RESULTS_TOPIC_BY_LABEL knows about, but if an unknown
-  // one ever showed up this still delivers the teaser (as a flat topic
-  // send, same as before this exclusion existed) rather than silently
-  // dropping it.
-  it('falls back to a flat topic send if the changed session label has no known spoiler topic', async () => {
+  // one ever showed up this still delivers the teaser (without the
+  // session-topic exclusion, but still excluding spoiler mode) rather than
+  // silently dropping it.
+  it('still excludes spoiler-mode devices if the changed session label has no known spoiler topic', async () => {
     await seedBaseline();
     mockResultsOnce([{
       round: 8,
@@ -259,8 +261,8 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      topic: 'results_teaser',
-      notification: expect.objectContaining({title: 'Results for Warm-up Session at Croft is now available'}),
+      condition: "'results_teaser' in topics && !('spoiler_free' in topics)",
+      data: expect.objectContaining({title: 'Results for Warm-up Session at Croft is now available'}),
     }));
   });
 
@@ -361,7 +363,7 @@ describe('notifyResultsUpdate', () => {
     await call();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      condition: "'results_teaser' in topics && !('results_race1' in topics)",
+      condition: "'results_teaser' in topics && !('results_race1' in topics) && !('spoiler_free' in topics)",
       data: expect.objectContaining({round: '8', race: '2'}),
     }));
     const persisted = mockDocRef.set.mock.calls.find(c => c[0].fingerprints)[0].fingerprints;

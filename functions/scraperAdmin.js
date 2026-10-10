@@ -2,6 +2,7 @@ const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getMessaging} = require('firebase-admin/messaging');
 const {logError, logPushHistory, requireAdminPost} = require('./shared');
+const {buildSpoilerSafePush} = require('./spoilerSafe');
 const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession, listPopulatedSessions} = require('./resultsHash');
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
@@ -188,22 +189,17 @@ exports.notifyResultsUpdate = onRequest(
               // B" server-side in one send - there's no per-device filter
               // on a plain topic send.
               const sessionTopic = RESULTS_TOPIC_BY_LABEL[changed.label];
-              const target = sessionTopic
-                ? {condition: `'results_teaser' in topics && !('${sessionTopic}' in topics)`}
-                : {topic: 'results_teaser'}; // defensive: label should always be one of the 6 known session names
-              await getMessaging().send({
-                ...target,
-                notification: {title, body},
-                // title/body/channel mirrored into data - without this the
-                // foreground-Android JS display path (only reads data,
-                // drops anything missing data.title) silently ate this
-                // exact notification whenever a recipient had the app open -
-                // see project_chat_mention_foreground_android_notification_gap
-                // memory (found via chat, applied to every other affected
-                // sender at the same time, not fixed in isolation).
-                data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1), title, body, channel: 'results'},
-                android: {notification: {channelId: 'results'}},
-              });
+              // Also excludes spoiler-mode devices (spoilerSafe.js) - the
+              // helper keeps Android data-only, with title/body/channel
+              // mirrored into data for the JS display path.
+              await getMessaging().send(buildSpoilerSafePush({
+                topic: 'results_teaser',
+                exclude: sessionTopic ? [sessionTopic] : [], // defensive: label should always be one of the 6 known session names
+                title,
+                body,
+                channel: 'results',
+                data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
+              }));
               // Persisted only after a successful send - doing this before
               // the send (the original order) meant a failed send (transient
               // FCM outage) still advanced the baseline, so that result's

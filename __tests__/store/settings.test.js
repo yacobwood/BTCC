@@ -460,12 +460,60 @@ describe('SettingsProvider', () => {
       }
     });
 
-    it('spoilerFree=true does not unsubscribe non-result topics', async () => {
+    // Spoiler mode = NO notifications of any kind (changed 2026-10-10 after a
+    // No Spoilers user still got a race-winner push) - news headlines,
+    // pre-race alerts and broadcasts used to stay subscribed.
+    it('spoilerFree=true unsubscribes EVERY visible topic, including broadcast', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      subscribeToTopic.mockClear();
+      unsubscribeFromTopic.mockClear();
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      for (const topic of [...Object.values(LEAF_TOPICS), 'broadcast']) {
+        expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), topic);
+        expect(subscribeToTopic).not.toHaveBeenCalledWith(expect.anything(), topic);
+      }
+    });
+
+    it('spoilerFree=true subscribes the spoiler_free marker topic the server excludes', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      subscribeToTopic.mockClear();
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'spoiler_free');
+    });
+
+    it('spoilerFree=true keeps the silent results_live cache-refresh topic', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      subscribeToTopic.mockClear();
+      unsubscribeFromTopic.mockClear();
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'results_live');
+      expect(unsubscribeFromTopic).not.toHaveBeenCalledWith(expect.anything(), 'results_live');
+    });
+
+    it('spoilerFree=true removes the chat mention token', async () => {
+      let getHook;
+      await act(async () => { getHook = renderProvider(); });
+      syncChatMentionToken.mockClear();
+      await act(async () => { getHook().setSetting('spoilerFree', true); });
+      expect(syncChatMentionToken).toHaveBeenCalledWith(undefined, false);
+    });
+
+    it('spoilerFree=false drops the marker and restores normal topics and the mention token', async () => {
       let getHook;
       await act(async () => { getHook = renderProvider(); });
       await act(async () => { getHook().setSetting('spoilerFree', true); });
-      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'news_alerts');
-      expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), 'digest_alerts');
+      subscribeToTopic.mockClear();
+      unsubscribeFromTopic.mockClear();
+      syncChatMentionToken.mockClear();
+      await act(async () => { getHook().setSetting('spoilerFree', false); });
+      expect(unsubscribeFromTopic).toHaveBeenCalledWith(expect.anything(), 'spoiler_free');
+      for (const topic of ['news_alerts', 'pre_race1', 'results_race1', 'broadcast']) {
+        expect(subscribeToTopic).toHaveBeenCalledWith(expect.anything(), topic);
+      }
+      expect(syncChatMentionToken).toHaveBeenCalledWith(undefined, true);
     });
 
     // Changed 2026-09-05: results_teaser now deep-links straight to the

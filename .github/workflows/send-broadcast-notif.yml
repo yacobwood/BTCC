@@ -43,6 +43,15 @@ jobs:
   send:
     runs-on: ubuntu-latest
     steps:
+      # Only the spoiler-mode helper, into a subfolder - keeps the workspace
+      # root free of the app's package.json so the install below stays tiny.
+      - name: Checkout spoiler-safe push helper
+        uses: actions/checkout@v5
+        with:
+          path: repo
+          sparse-checkout: functions/spoilerSafe.js
+          sparse-checkout-cone-mode: false
+
       - name: Install firebase-admin
         run: npm install firebase-admin@12
 
@@ -52,6 +61,7 @@ jobs:
           const admin = require('./node_modules/firebase-admin');
           const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
           admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+          const {buildSpoilerSafePush} = require('./repo/functions/spoilerSafe.js');
 
           let extraData = {};
           try { extraData = JSON.parse(process.env.EXTRA_DATA || '{}'); } catch(e) {}
@@ -71,12 +81,16 @@ jobs:
           // this change. A caller wanting an actually-toggleable notification
           // (one with its own Settings switch) passes a specific topic instead.
           const topic = process.env.TOPIC || 'broadcast';
-          admin.messaging().send({
+          // Spoiler mode = no notifications: excludes spoiler-mode devices
+          // and keeps Android data-only (functions/spoilerSafe.js).
+          const {channel: _c, title: _t, body: _b, ...extra} = data;
+          admin.messaging().send(buildSpoilerSafePush({
             topic,
-            android: { priority: 'high' },
-            apns: { payload: { aps: { alert: { title: process.env.TITLE, body }, sound: 'default' } } },
-            data,
-          }).then(async r => {
+            title: process.env.TITLE,
+            body,
+            channel: process.env.CHANNEL,
+            data: extra,
+          })).then(async r => {
             console.log('Sent:', r);
             await db.collection('push_history').add({
               title: process.env.TITLE,

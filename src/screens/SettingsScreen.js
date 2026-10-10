@@ -145,7 +145,7 @@ export default function SettingsScreen({navigation}) {
         <Text style={styles.sectionTitle}>SPOILER-FREE MODE</Text>
         <SettingRow
           label="No Spoilers"
-          description="Pauses result notifications until you open the app or Monday night"
+          description="Pauses all notifications until you next open the app"
           value={settings.spoilerFree}
           onToggle={toggle('spoilerFree')}
         />
@@ -301,7 +301,7 @@ export default function SettingsScreen({navigation}) {
         />
         <SubRow
           label="Results are in"
-          description="A nudge straight to the latest result when one drops - suppressed by No Spoilers, same as the session alerts above"
+          description="A nudge straight to the latest result when one drops"
           accessibilityLabel="Results are in"
           value={settings.resultsTeaser}
           onToggle={toggle('resultsTeaser')}

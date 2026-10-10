@@ -102,7 +102,7 @@ describe('sendSessionNotifications', () => {
 
     await sendSessionNotifications.run();
 
-    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({topic: 'podcast_alerts'}));
+    expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({condition: "'podcast_alerts' in topics && !('spoiler_free' in topics) && 'results_teaser' in topics"}));
   });
 
   it('decodes HTML entities in a plain (non-CDATA) podcast title before sending', async () => {
@@ -117,7 +117,7 @@ describe('sendSessionNotifications', () => {
     await sendSessionNotifications.run();
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
-      topic: 'podcast_alerts',
+      condition: "'podcast_alerts' in topics && !('spoiler_free' in topics) && 'results_teaser' in topics",
       data: expect.objectContaining({title: 'Tom Ingram & Mikey Doble Join the BTCC Podcast'}),
     }));
   });

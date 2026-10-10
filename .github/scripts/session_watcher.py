@@ -151,6 +151,19 @@ def load_sessions(year, round_num, day):
 
 # ── FCM notification ──────────────────────────────────────────────────────────
 
+# Mirrors functions/spoilerSafe.js's SPOILER_MARKER_TOPIC / spoilerSafeCondition -
+# keep in sync by hand. Spoiler mode = no notifications: the app subscribes
+# this marker topic while No Spoilers is on, so every send here excludes it on
+# top of the app having already unsubscribed results_*. No legacy stopgap
+# clause needed for results_* topics (every spoiler-mode build unsubscribes
+# them already).
+SPOILER_MARKER_TOPIC = "spoiler_free"
+
+
+def spoiler_safe_condition(topic):
+    return f"'{topic}' in topics && !('{SPOILER_MARKER_TOPIC}' in topics)"
+
+
 def send_fcm(topic, title, body, channel, extra_data=None):
     """Send a topic push via FCM HTTP v1 API using the service account."""
     sa_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
@@ -178,7 +191,7 @@ def send_fcm(topic, title, body, channel, extra_data=None):
 
         message = {
             "message": {
-                "topic": topic,
+                "condition": spoiler_safe_condition(topic),
                 "android": {"priority": "high"},
                 "apns": {
                     "payload": {

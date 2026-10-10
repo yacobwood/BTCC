@@ -52,6 +52,61 @@ class TestImportSafety(unittest.TestCase):
             importlib.reload(session_watcher)
 
 
+class TestSendFcmSpoilerSafe(unittest.TestCase):
+    """Spoiler mode = NO notifications (2026-10-10): every results push is a
+    condition excluding the spoiler_free marker topic the app subscribes
+    while No Spoilers is on - mirrors functions/spoilerSafe.js."""
+
+    def test_condition_excludes_the_marker_topic(self):
+        self.assertEqual(
+            session_watcher.spoiler_safe_condition("results_qrace"),
+            "'results_qrace' in topics && !('spoiler_free' in topics)",
+        )
+
+    def test_send_fcm_posts_a_condition_not_a_plain_topic(self):
+        import types
+        posted = {}
+
+        class FakeCreds:
+            token = "tok"
+            def refresh(self, _req):
+                pass
+
+        sa_mod = types.ModuleType("google.oauth2.service_account")
+        sa_mod.Credentials = types.SimpleNamespace(from_service_account_info=lambda *a, **k: FakeCreds())
+        req_mod = types.ModuleType("google.auth.transport.requests")
+        req_mod.Request = lambda: None
+        requests_mod = types.ModuleType("requests")
+
+        def fake_post(url, headers=None, json=None, timeout=None):
+            posted["message"] = json["message"]
+            return types.SimpleNamespace(ok=True, status_code=200, text="")
+        requests_mod.post = fake_post
+
+        google = types.ModuleType("google")
+        oauth2 = types.ModuleType("google.oauth2")
+        oauth2.service_account = sa_mod
+        auth = types.ModuleType("google.auth")
+        transport = types.ModuleType("google.auth.transport")
+        transport.requests = req_mod
+        auth.transport = transport
+        google.oauth2 = oauth2
+        google.auth = auth
+        fake_modules = {
+            "google": google, "google.oauth2": oauth2, "google.oauth2.service_account": sa_mod,
+            "google.auth": auth, "google.auth.transport": transport,
+            "google.auth.transport.requests": req_mod, "requests": requests_mod,
+        }
+        with patch.dict(sys.modules, fake_modules), \
+             patch.dict("os.environ", {"FIREBASE_SERVICE_ACCOUNT": '{"project_id": "p"}'}):
+            session_watcher.send_fcm("results_qrace", "Qualifying Race Result", "X wins", "qualifying_race")
+
+        msg = posted["message"]
+        self.assertNotIn("topic", msg)
+        self.assertNotIn("notification", msg)
+        self.assertEqual(msg["condition"], "'results_qrace' in topics && !('spoiler_free' in topics)")
+
+
 class TestSessionToUTC(unittest.TestCase):
 
     def test_bst_date_converts_one_hour_back(self):

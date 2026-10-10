@@ -12,6 +12,11 @@ jest.mock('firebase-admin/messaging', () => ({
   getMessaging: jest.fn(() => mockMessaging),
 }), {virtual: true});
 
+const {db: mockFirestoreDb, docRef: mockFirestoreDocRef} = makeFirestoreMock();
+jest.mock('firebase-admin/firestore', () => ({
+  getFirestore: jest.fn(() => mockFirestoreDb),
+}), {virtual: true});
+
 const mockAuth = makeAuthMock();
 jest.mock('firebase-admin/auth', () => ({
   getAuth: jest.fn(() => mockAuth),
@@ -111,11 +116,42 @@ describe('onChatMention', () => {
 
     expect(mockMessaging.send).toHaveBeenCalledWith(expect.objectContaining({
       token: 'device-token-abc',
-      notification: expect.objectContaining({title: 'You were mentioned in Live Chat'}),
+      apns: {payload: {aps: expect.objectContaining({alert: expect.objectContaining({title: 'You were mentioned in Live Chat'})})}},
     }));
+    // No top-level notification block: Android would display it without
+    // running the app's spoiler-mode gate (displayAndroidDataNotification).
+    expect(mockMessaging.send.mock.calls[0][0].notification).toBeUndefined();
   });
 
-  it('mirrors title/body/channel into data too, not just the notification block', async () => {
+  it('sends nothing to a mentioned user whose synced profile has spoiler mode on', async () => {
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})});
+    mockFirestoreDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({spoilerFree: true})});
+
+    const event = {data: {val: () => ({text: '@Gordon Moffat won it', authorId: 'sender-1', authorName: 'Sender'})}};
+    await onChatMention.run(event);
+
+    expect(mockMessaging.send).not.toHaveBeenCalled();
+  });
+
+  it('fails toward silence if the spoiler-mode profile read errors', async () => {
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})});
+    mockFirestoreDocRef.get.mockRejectedValueOnce(new Error('firestore down'));
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const event = {data: {val: () => ({text: '@Gordon hi', authorId: 'sender-1', authorName: 'Sender'})}};
+    await onChatMention.run(event);
+
+    expect(mockMessaging.send).not.toHaveBeenCalled();
+    console.error.mockRestore();
+  });
+
+  it('mirrors title/body/channel into data (the only thing Android displays from)', async () => {
     // Regression test for a real, live-reported bug (2026-09-09): the
     // notification block alone auto-displays fine when the recipient's app
     // is backgrounded/killed, but the foreground-Android JS display path

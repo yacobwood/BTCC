@@ -26,10 +26,9 @@ const LEAF_TOPICS = {
   resultsRace1:      'results_race1',
   resultsRace2:      'results_race2',
   resultsRace3:      'results_race3',
-  // Now deep-links straight to the actual result (functions/scraperAdmin.js's
-  // notifyResultsUpdate, changed 2026-09-05) rather than sending a sanitized,
-  // non-deep-linking copy - so it belongs in RESULT_LEAF_KEYS below like any
-  // other result-revealing topic, unlike before when it deliberately wasn't.
+  // Deep-links straight to the actual result (functions/scraperAdmin.js's
+  // notifyResultsUpdate, changed 2026-09-05). Also the server's legacy
+  // spoiler-mode stopgap topic (functions/spoilerSafe.js).
   resultsTeaser:     'results_teaser',
 };
 
@@ -131,21 +130,25 @@ function isEffective(settings, key) {
   return (PARENT_CHAIN[key] || []).every(p => settings[p]);
 }
 
-const RESULT_LEAF_KEYS = new Set([
-  'resultsFP', 'resultsQualifying', 'resultsQRace',
-  'resultsRace1', 'resultsRace2', 'resultsRace3',
-  'resultsTeaser',
-]);
+// Marker topic subscribed while spoiler mode is on - every server send
+// excludes it (functions/spoilerSafe.js SPOILER_MARKER_TOPIC, keep in sync).
+const SPOILER_MARKER_TOPIC = 'spoiler_free';
 
+// Spoiler mode = NO notifications of any kind, not just results (changed
+// 2026-10-10 after a No Spoilers user still got a race-winner push - news
+// headlines, pre-race alerts, broadcasts and chat mentions all used to get
+// through). Every visible topic is dropped while it's on, the marker topic
+// lets the server exclude this device too, and the Android display path
+// drops anything that still arrives (notifications.js). Only results_live
+// stays: a silent cache refresh that never displays anything.
 function syncAllTopics(settings) {
   const messaging = getMessaging();
-  // All installs subscribe to these unconditionally — no user toggle.
-  subscribeToTopic(messaging, 'broadcast').catch(() => {});
-  // results_live receives silent cache-invalidation signals from the scraper bot.
+  const spoilerFree = !!settings.spoilerFree;
   subscribeToTopic(messaging, 'results_live').catch(() => {});
+  (spoilerFree ? unsubscribeFromTopic : subscribeToTopic)(messaging, 'broadcast').catch(() => {});
+  (spoilerFree ? subscribeToTopic : unsubscribeFromTopic)(messaging, SPOILER_MARKER_TOPIC).catch(() => {});
   for (const [key, topic] of Object.entries(LEAF_TOPICS)) {
-    const spoilerBlocked = settings.spoilerFree && RESULT_LEAF_KEYS.has(key);
-    const enabled = !spoilerBlocked && isEffective(settings, key);
+    const enabled = !spoilerFree && isEffective(settings, key);
     const fn = enabled ? subscribeToTopic : unsubscribeFromTopic;
     fn(messaging, topic).catch(() => {});
   }
@@ -235,7 +238,7 @@ export function SettingsProvider({children}) {
       }
       setSettings(loaded);
       syncAllTopics(loaded);
-      syncChatMentionToken(user?.uid, loaded.chatMentions);
+      syncChatMentionToken(user?.uid, loaded.chatMentions && !loaded.spoilerFree);
       // Push to native widget storage on every load - covers a fresh install/new
       // device pulling the value back from the Firestore profile, not just a
       // same-device toggle (see setSetting below).
@@ -269,7 +272,8 @@ export function SettingsProvider({children}) {
       // Re-sync all leaf topics since parent state may have changed
       syncAllTopics(next);
       // Not a topic - registers/removes this device's own token directly (see notifications.js)
-      if (key === 'chatMentions') syncChatMentionToken(user?.uid, next.chatMentions);
+      // Spoiler mode also pulls the mention token (no notifications at all).
+      if (key === 'chatMentions' || key === 'spoilerFree') syncChatMentionToken(user?.uid, next.chatMentions && !next.spoilerFree);
       // Not a topic - hands the value to the native widget (AsyncStorage isn't
       // readable from the widget process on either platform, see widgetSettings.js)
       if (key === 'use12HourTime') syncWidgetTimeFormat(next.use12HourTime);

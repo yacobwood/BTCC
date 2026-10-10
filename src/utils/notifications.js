@@ -91,6 +91,21 @@ export async function syncChatMentionToken(uid, enabled) {
 // silently dropped whenever the app was open. Kept as one function so the
 // title/body/channel resolution logic can't drift between the two call sites
 // the way the channel list itself already did once.
+// Spoiler mode = NO notifications (last line of defence - see
+// functions/spoilerSafe.js for the other two layers). Read straight from
+// AsyncStorage on every call rather than from React state: the background
+// handler (index.js) runs headless, with no SettingsProvider mounted at all.
+// Same storage key settings.js writes. Fails toward silence if the read
+// itself errors.
+const SPOILER_FREE_KEY = 'setting_spoiler_free';
+export async function isSpoilerModeOn() {
+  try {
+    return (await AsyncStorage.getItem(SPOILER_FREE_KEY)) === 'true';
+  } catch {
+    return true;
+  }
+}
+
 export async function displayAndroidDataNotification(remoteMessage) {
   const {data} = remoteMessage;
   // Silent cache-invalidation from scraper - no notification, just bust the cache.
@@ -100,6 +115,7 @@ export async function displayAndroidDataNotification(remoteMessage) {
     return;
   }
   if (!data?.title) return;
+  if (await isSpoilerModeOn()) return;
   const channelId = data.channel || 'news';
   const imageUrl = data.imageUrl || null;
   const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
@@ -131,6 +147,7 @@ export function onForegroundMessage(callback) {
     // iOS: if a notification payload is present, the system already shows it  -  skip notifee
     if (notification) return;
     if (!data?.title) return;
+    if (await isSpoilerModeOn()) return;
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
     const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
@@ -147,6 +164,7 @@ export function onForegroundMessage(callback) {
 }
 
 export async function showLocalNotification(title, body, channelId = 'news', data = {}) {
+  if (await isSpoilerModeOn()) return;
   await notifee.displayNotification({
     title, body, data,
     android: {channelId, smallIcon: 'ic_launcher', pressAction: {id: 'default'}},

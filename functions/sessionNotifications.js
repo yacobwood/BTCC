@@ -3,6 +3,7 @@ const {buildSessionAlertPayload} = require('./sessionAlerts');
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getFirestore} = require('firebase-admin/firestore');
+const {buildSpoilerSafePush} = require('./spoilerSafe');
 const {
   decodeEntities,
   logError,
@@ -74,23 +75,13 @@ exports.sendSessionNotifications = onSchedule(
             const channel = SESSION_CHANNELS[session.name] || 'race';
 
             sends.push(
-              messaging.send({
+              messaging.send(buildSpoilerSafePush({
                 topic,
-                notification: {title, body},
-                android: {notification: {channelId: channel}},
-                apns: {payload: {aps: {sound: 'default'}}},
-                // title/body/channel always mirrored into data (merged with
-                // whatever buildSessionAlertPayload already supplies for
-                // deep-linking, e.g. type/round/eventId) - data itself can
-                // be null there (a non-Race-3 session with no live-timing
-                // event ID), which used to mean NO data object was sent at
-                // all, not even a fallback. The foreground JS display path
-                // only reads from data and drops anything missing
-                // data.title - see project_chat_mention_foreground_android_notification_gap
-                // memory for the full root cause (found via chat, applied
-                // here too rather than fixed in isolation).
-                data: {...(data || {}), title, body, channel},
-              }),
+                title,
+                body,
+                channel,
+                data: data || {},
+              })),
             );
             logPushHistory(title, body, topic);
           }
@@ -104,15 +95,13 @@ exports.sendSessionNotifications = onSchedule(
             const wpTitle = 'Race Weekend Tomorrow';
             const wpBody = `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`;
             sends.push(
-              messaging.send({
+              messaging.send(buildSpoilerSafePush({
                 topic: 'weekend_preview',
-                notification: {title: wpTitle, body: wpBody},
-                android: {notification: {channelId: 'weekend_preview'}},
-                apns: {payload: {aps: {sound: 'default'}}},
-                // title/body/channel mirrored into data - see the session-alert
-                // fix just above for why (foreground Android drop otherwise).
-                data: {type: 'round', round: String(round.round), title: wpTitle, body: wpBody, channel: 'weekend_preview'},
-              }),
+                title: wpTitle,
+                body: wpBody,
+                channel: 'weekend_preview',
+                data: {type: 'round', round: String(round.round)},
+              })),
             );
             logPushHistory(wpTitle, wpBody, 'weekend_preview');
           }
@@ -126,15 +115,13 @@ exports.sendSessionNotifications = onSchedule(
             const suTitle = 'Standings Updated';
             const suBody = `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`;
             sends.push(
-              messaging.send({
+              messaging.send(buildSpoilerSafePush({
                 topic: 'standings_update',
-                notification: {title: suTitle, body: suBody},
-                android: {notification: {channelId: 'standings'}},
-                apns: {payload: {aps: {sound: 'default'}}},
-                // title/body/channel mirrored into data - see the session-alert
-                // fix above for why (foreground Android drop otherwise).
-                data: {type: 'history', title: suTitle, body: suBody, channel: 'standings'},
-              }),
+                title: suTitle,
+                body: suBody,
+                channel: 'standings',
+                data: {type: 'history'},
+              })),
             );
             logPushHistory(suTitle, suBody, 'standings_update');
           }
@@ -184,12 +171,15 @@ exports.sendSessionNotifications = onSchedule(
           }
         });
         if (notifyPayload) {
-          await messaging.send({
+          await messaging.send(buildSpoilerSafePush({
             topic: 'podcast_alerts',
-            android: {collapseKey: `podcast_${latestGuid}`, priority: 'high', ttl: 3600000},
-            apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Podcast', body: notifyPayload.title}}}},
-            data: {type: 'podcast', channel: 'podcasts', title: notifyPayload.title, ...(notifyPayload.artworkUrl ? {imageUrl: notifyPayload.artworkUrl} : {})},
-          });
+            title: notifyPayload.title,
+            channel: 'podcasts',
+            data: {type: 'podcast', ...(notifyPayload.artworkUrl ? {imageUrl: notifyPayload.artworkUrl} : {})},
+            android: {collapseKey: `podcast_${latestGuid}`, ttl: 3600000},
+            apnsHeaders: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`.slice(0, 64)},
+            alert: {title: 'New Podcast', body: notifyPayload.title},
+          }));
           console.log(`Podcast notification sent OK: "${notifyPayload.title}"`);
           await podcastStateRef.update({pendingSend: null});
           logPushHistory('New Podcast', notifyPayload.title, 'podcast_alerts');

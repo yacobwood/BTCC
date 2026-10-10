@@ -3,6 +3,7 @@ const {onRequest} = require('firebase-functions/v2/https');
 const {getMessaging} = require('firebase-admin/messaging');
 const {getDatabaseWithUrl} = require('firebase-admin/database');
 const {getAuth} = require('firebase-admin/auth');
+const {getFirestore} = require('firebase-admin/firestore');
 const {resolveMentionedAuthorIds} = require('./chatMentions');
 const {selectMessagesToTrim} = require('./chatTrim');
 const {requireAdminPost} = require('./shared');
@@ -70,12 +71,27 @@ exports.onChatMention = onValueCreated(
       await Promise.all(mentionedIds.map(async authorId => {
         const token = tokens[authorId];
         if (!token) return;
+        // Spoiler mode = no notifications at all, and a chat message can
+        // easily name a winner. The app also removes its token while
+        // spoiler mode is on, but builds released before 2026-10-10 don't,
+        // so check the synced profile too (signed-in users only - anonymous
+        // users have no profile). Fails toward silence if the read errors.
+        try {
+          const profile = await getFirestore().collection('users').doc(authorId).get();
+          if (profile.exists && profile.data().spoilerFree === true) return;
+        } catch (e) {
+          console.error('onChatMention spoiler check failed, skipping', authorId, e.message);
+          return;
+        }
         try {
           const title = 'You were mentioned in Live Chat';
           const notifBody = `${msg.authorName}: ${body}`;
           await messaging.send({
             token,
-            notification: {title, body: notifBody},
+            // No top-level `notification` block: Android would display it
+            // without running any app code, bypassing the spoiler-mode gate
+            // in displayAndroidDataNotification. iOS gets its alert via apns.
+            apns: {payload: {aps: {sound: 'default', alert: {title, body: notifBody}}}},
             // title/body/channel mirrored into data - the OS auto-displays
             // the notification block above when the recipient's app is
             // backgrounded/killed, but the foreground JS path
@@ -90,7 +106,7 @@ exports.onChatMention = onValueCreated(
             // session alerts/results_teaser - fixed alongside this, not in
             // isolation.
             data: {type: 'chat', title, body: notifBody, channel: 'chat_mentions'},
-            android: {notification: {channelId: 'chat_mentions'}},
+            android: {priority: 'high'},
           });
         } catch (e) {
           // Device uninstalled the app or the token otherwise rotated out from

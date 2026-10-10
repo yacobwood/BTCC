@@ -1,3 +1,5 @@
+const {buildSpoilerSafePush} = require('./spoilerSafe');
+
 // Scraped from btcc.net by tools/scraper/scrape_news.py and republished here -
 // Cloudflare blocks non-browser TLS clients (JA3 fingerprinting) regardless of
 // User-Agent, which this function's runtime fetch cannot impersonate.
@@ -140,12 +142,17 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
   }
 
   console.log(`News notification sending: "${notifyPayload.title}" (${notifyPayload.slug})`);
-  await messaging.send({
+  // Headlines are results too on a race weekend ("Flying Scotsman Moffat
+  // tames Brands Hatch") - spoiler-mode devices excluded like every other push.
+  await messaging.send(buildSpoilerSafePush({
     topic: 'news_alerts',
-    android: {collapseKey: `news_${notifyPayload.slug}`, priority: 'high', ttl: 3600000},
-    apns: {headers: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`.slice(0, 64)}, payload: {aps: {sound: 'default', alert: {title: 'New Article', body: notifyPayload.title}}}},
-    data: {type: 'news', slug: notifyPayload.slug, channel: 'news', title: notifyPayload.title, ...(mirrorImage ? {imageUrl: mirrorImage} : {})},
-  });
+    title: notifyPayload.title,
+    channel: 'news',
+    data: {type: 'news', slug: notifyPayload.slug, ...(mirrorImage ? {imageUrl: mirrorImage} : {})},
+    android: {collapseKey: `news_${notifyPayload.slug}`, ttl: 3600000},
+    apnsHeaders: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`.slice(0, 64)},
+    alert: {title: 'New Article', body: notifyPayload.title},
+  }));
   console.log(`News notification sent OK: "${notifyPayload.title}"`);
   await stateRef.update({pendingSend: null});
   logHistory('New Article', notifyPayload.title, 'news_alerts');
