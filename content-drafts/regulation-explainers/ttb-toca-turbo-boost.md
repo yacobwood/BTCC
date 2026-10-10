@@ -35,6 +35,8 @@ Free Practice is the exception to all of this. Every driver can use the maximum 
 
 None of this happens automatically. TTB is deployed by the driver pressing a button on the steering wheel, the same basic push-to-pass principle used in series like IndyCar, rather than anything the car manages by itself. BTCC development driver Darren Turner, who helped test the hybrid-turbo system that delivers TTB, has described deploying the boost manually via the steering wheel button. That button only does something once the car has actually cleared the minimum deployment speed in the table above. Press it below that threshold and nothing happens, which is why the leader's higher speed requirement is a second, compounding penalty stacked on top of their shorter allocation: not only do they get less boost, they have to be going faster before they can use any of it at all.
 
+TV commentators have described each press as a fixed five-second burst, which is why a driver with a 20-second allocation, the position 8+ A-circuit figure in the table above, gets four separate chances to call on it rather than one continuous block. That specific number is not written into the Sporting Regulations, which only publish the total seconds-per-lap allowance and the minimum trigger speed, not how the system doles that time out per press. Worth knowing as a practical detail of how the button actually behaves, just not one you will find chapter and verse in the rulebook.
+
 ## When TTB switches off
 
 TTB cannot be used at several specific moments. Knowing them explains why some overtakes that look inevitable simply do not happen:
