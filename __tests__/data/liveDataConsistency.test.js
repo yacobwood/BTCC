@@ -618,13 +618,25 @@ describe('results2026.json internal integrity', () => {
     expect([...unknown]).toEqual([]);
   });
 
+  // Sanctioned one-off number changes, keyed `${round}:${formatted name}`.
+  // Each must cite a source - anything not listed here is still a mismatch.
+  const ONE_OFF_NUMBERS = {
+    // btcc.net "NAPA Racing UK unveils special liveries for Brands Hatch
+    // finale" (2026-10-09): "Sutton will also swap his familiar #116 for #5
+    // at the Kent circuit", marking his fifth title. TSL timing confirms #5
+    // in every round 10 session.
+    '10:Ashley SUTTON': 5,
+  };
+
   it('grid car numbers match drivers.json', () => {
     const mismatches = [];
     for (const rnd of RESULTS.rounds) {
       for (const race of rnd.races || []) {
         for (const g of race.grid || []) {
           if (!g.driver || !g.no) continue;
-          const dr = driversMap[formatDriverName(g.driver)];
+          const name = formatDriverName(g.driver);
+          if (ONE_OFF_NUMBERS[`${rnd.round}:${name}`] === g.no) continue;
+          const dr = driversMap[name];
           if (dr && dr.number !== g.no) {
             mismatches.push(`Round ${rnd.round} ${race.label} grid: ${g.driver} no=${g.no} vs drivers.json=${dr.number}`);
           }
