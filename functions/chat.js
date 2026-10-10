@@ -6,7 +6,7 @@ const {getAuth} = require('firebase-admin/auth');
 const {getFirestore} = require('firebase-admin/firestore');
 const {resolveMentionedAuthorIds} = require('./chatMentions');
 const {selectMessagesToTrim} = require('./chatTrim');
-const {requireAdminPost} = require('./shared');
+const {requireAdminPost, logPushHistory} = require('./shared');
 
 const CHAT_DB_URL = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
 const getChatDb = () => getDatabaseWithUrl(CHAT_DB_URL);
@@ -67,10 +67,12 @@ exports.onChatMention = onValueCreated(
       const messaging = getMessaging();
       const staleTokenUpdates = {};
       const body = msg.text.length > 100 ? `${msg.text.slice(0, 97)}...` : msg.text;
+      // Counts only for push_history - no message text or recipient IDs.
+      const counts = {sent: 0, failed: 0, skippedSpoiler: 0, noToken: 0};
 
       await Promise.all(mentionedIds.map(async authorId => {
         const token = tokens[authorId];
-        if (!token) return;
+        if (!token) { counts.noToken++; return; }
         // Spoiler mode = no notifications at all, and a chat message can
         // easily name a winner. The app also removes its token while
         // spoiler mode is on, but builds released before 2026-10-10 don't,
@@ -78,9 +80,10 @@ exports.onChatMention = onValueCreated(
         // users have no profile). Fails toward silence if the read errors.
         try {
           const profile = await getFirestore().collection('users').doc(authorId).get();
-          if (profile.exists && profile.data().spoilerFree === true) return;
+          if (profile.exists && profile.data().spoilerFree === true) { counts.skippedSpoiler++; return; }
         } catch (e) {
           console.error('onChatMention spoiler check failed, skipping', authorId, e.message);
+          counts.skippedSpoiler++;
           return;
         }
         try {
@@ -108,7 +111,9 @@ exports.onChatMention = onValueCreated(
             data: {type: 'chat', title, body: notifBody, channel: 'chat_mentions'},
             android: {priority: 'high'},
           });
+          counts.sent++;
         } catch (e) {
+          counts.failed++;
           // Device uninstalled the app or the token otherwise rotated out from
           // under us - drop it so future mentions don't keep retrying a dead token.
           if (e.code === 'messaging/registration-token-not-registered' || e.code === 'messaging/invalid-registration-token') {
@@ -118,6 +123,10 @@ exports.onChatMention = onValueCreated(
           }
         }
       }));
+
+      await logPushHistory('You were mentioned in Live Chat', '', 'chat_mentions', {
+        source: 'chatMention', target: 'token', mentioned: mentionedIds.length, ...counts, ok: counts.failed === 0,
+      });
 
       if (Object.keys(staleTokenUpdates).length > 0) {
         await db.ref('/chat/deviceTokens').update(staleTokenUpdates);

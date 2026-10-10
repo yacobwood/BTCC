@@ -3,6 +3,8 @@ import notifee, {AndroidImportance, AndroidStyle} from '@notifee/react-native';
 import {Platform, PermissionsAndroid} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import database from '@react-native-firebase/database';
+import {logNotificationEvent} from './notificationLog';
+import {Analytics} from './analytics';
 
 export async function setupNotificationChannels() {
   await notifee.createChannel({id: 'general', name: 'General', importance: AndroidImportance.HIGH});
@@ -106,6 +108,17 @@ export async function isSpoilerModeOn() {
   }
 }
 
+// Records a received push in the on-device log (notificationLog.js) and, when
+// spoiler mode dropped it, a GA4 notification_suppressed event. Never throws.
+// Awaited by every caller: the Android background handler is a headless task
+// that can be torn down as soon as it resolves, losing an unawaited write.
+async function recordPush(data, outcome) {
+  await logNotificationEvent({kind: 'push', outcome, title: data?.title, type: data?.type, channel: data?.channel});
+  if (outcome === 'suppressed_spoiler') {
+    try { Analytics.notificationSuppressed(data?.channel); } catch {}
+  }
+}
+
 export async function displayAndroidDataNotification(remoteMessage) {
   const {data} = remoteMessage;
   // Silent cache-invalidation from scraper - no notification, just bust the cache.
@@ -114,8 +127,11 @@ export async function displayAndroidDataNotification(remoteMessage) {
     await AsyncStorage.removeItem(`cache_results_${year}`).catch(() => {});
     return;
   }
-  if (!data?.title) return;
-  if (await isSpoilerModeOn()) return;
+  // results_refresh above is deliberately NOT logged - it arrives every scrape
+  // tick on a race day and would push everything useful out of the log.
+  if (!data?.title) { await recordPush(data, 'dropped_no_title'); return; }
+  if (await isSpoilerModeOn()) { await recordPush(data, 'suppressed_spoiler'); return; }
+  await recordPush(data, 'shown');
   const channelId = data.channel || 'news';
   const imageUrl = data.imageUrl || null;
   const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
@@ -145,9 +161,10 @@ export function onForegroundMessage(callback) {
     }
     const {data, notification} = remoteMessage;
     // iOS: if a notification payload is present, the system already shows it  -  skip notifee
-    if (notification) return;
+    if (notification) { await recordPush(data, 'shown_by_os'); return; }
     if (!data?.title) return;
-    if (await isSpoilerModeOn()) return;
+    if (await isSpoilerModeOn()) { await recordPush(data, 'suppressed_spoiler'); return; }
+    await recordPush(data, 'shown');
     const channelId = data.channel || 'news';
     const imageUrl = data.imageUrl || null;
     const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
@@ -164,7 +181,9 @@ export function onForegroundMessage(callback) {
 }
 
 export async function showLocalNotification(title, body, channelId = 'news', data = {}) {
-  if (await isSpoilerModeOn()) return;
+  const logged = {...data, title, channel: channelId};
+  if (await isSpoilerModeOn()) { await recordPush(logged, 'suppressed_spoiler'); return; }
+  await recordPush(logged, 'shown_local');
   await notifee.displayNotification({
     title, body, data,
     android: {channelId, smallIcon: 'ic_launcher', pressAction: {id: 'default'}},

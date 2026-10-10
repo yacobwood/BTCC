@@ -28,6 +28,12 @@ jest.mock('../../functions/shared', () => ({
   logError: mockLogError,
   logPushHistory: mockLogPushHistory,
   fetchWithTimeout: (...args) => mockFetchWithTimeout(...args),
+  // Mirrors functions/shared.js's sendAndLog: send, then record the outcome.
+  sendAndLog: async (messaging, message, {title, body = '', channel, ...meta}) => {
+    const messageId = await messaging.send(message);
+    await mockLogPushHistory(title, body, channel, {target: message.condition, messageId, ...meta});
+    return messageId;
+  },
   CALENDAR_URL: 'https://example.com/calendar.json',
   SCHEDULE_URL: 'https://example.com/schedule.json',
   PODCAST_RSS_URL: 'https://example.com/podcast.rss',

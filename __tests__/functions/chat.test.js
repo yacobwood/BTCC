@@ -22,7 +22,9 @@ jest.mock('firebase-admin/auth', () => ({
   getAuth: jest.fn(() => mockAuth),
 }), {virtual: true});
 
+const mockLogPushHistory = jest.fn(() => Promise.resolve());
 jest.mock('../../functions/shared', () => ({
+  logPushHistory: (...args) => mockLogPushHistory(...args),
   ADMIN_SECRET: 'test-admin-secret',
   requireAdminPost: (req, res) => {
     if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
@@ -121,6 +123,21 @@ describe('onChatMention', () => {
     // No top-level notification block: Android would display it without
     // running the app's spoiler-mode gate (displayAndroidDataNotification).
     expect(mockMessaging.send.mock.calls[0][0].notification).toBeUndefined();
+  });
+
+  it('records one push_history row per message with counts only (no text, no recipient IDs)', async () => {
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1', 'mentioned-2']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon', 'mentioned-2': 'Ash'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})});
+
+    const event = {data: {val: () => ({text: '@Gordon @Ash secret text', authorId: 'sender-1', authorName: 'Sender'})}};
+    await onChatMention.run(event);
+
+    expect(mockLogPushHistory).toHaveBeenCalledWith('You were mentioned in Live Chat', '', 'chat_mentions', {
+      source: 'chatMention', target: 'token', mentioned: 2, sent: 1, failed: 0, skippedSpoiler: 0, noToken: 1, ok: true,
+    });
+    expect(JSON.stringify(mockLogPushHistory.mock.calls)).not.toMatch(/secret text|mentioned-1|device-token/);
   });
 
   it('sends nothing to a mentioned user whose synced profile has spoiler mode on', async () => {

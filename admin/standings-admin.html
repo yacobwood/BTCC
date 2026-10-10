@@ -5118,6 +5118,7 @@ async function loadBugReports() {
         description: f.description?.stringValue || '',
         steps: f.steps?.stringValue || '',
         submittedAt: f.submittedAt?.stringValue || '',
+        diagnostics: f.diagnostics?.stringValue || '',
       };
     }).sort((a,b) => b.submittedAt.localeCompare(a.submittedAt));
     renderBugReports();
@@ -5151,6 +5152,7 @@ function renderBugReports() {
       ${r.title ? `<div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(r.title)}</div>` : ''}
       ${r.description ? `<div style="color:var(--text-sec);font-size:13px;line-height:1.5;margin-bottom:4px">${escHtml(r.description)}</div>` : ''}
       ${r.steps ? `<div style="color:var(--text-sec);font-size:12px;margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;white-space:pre-wrap">${escHtml(r.steps)}</div>` : ''}
+      ${r.diagnostics ? `<details style="margin-top:6px"><summary style="color:var(--text-sec);font-size:12px;cursor:pointer">Notification log</summary><div style="color:var(--text-sec);font-size:11px;font-family:monospace;margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;white-space:pre-wrap">${escHtml(r.diagnostics)}</div></details>` : ''}
     </div>`;
   }).join('');
 }
@@ -5166,19 +5168,38 @@ async function deleteBugReport(id) {
 async function loadPushHistory() {
   document.getElementById('push-history-list').innerHTML = '<div class="section-note">Loading…</div>';
   try {
-    const r = await fetch(`${FS_BASE_URL}/push_history?key=${FS_API_KEY}&pageSize=50`);
+    // Newest first, server-side. The old plain list (`?pageSize=50`) came
+    // back in random document-ID order, so it showed 50 arbitrary pushes
+    // rather than the latest 50 (fixed 2026-10-10).
+    const r = await fetch(`${FS_BASE_URL}:runQuery?key=${FS_API_KEY}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({structuredQuery: {
+        from: [{collectionId: 'push_history'}],
+        orderBy: [{field: {fieldPath: 'sentAt'}, direction: 'DESCENDING'}],
+        limit: 100,
+      }}),
+    });
     const d = await r.json();
-    const docs = (d.documents || []).map(doc => {
+    const str = (f, k) => f[k]?.stringValue ?? (f[k]?.integerValue != null ? String(f[k].integerValue) : '');
+    const docs = (Array.isArray(d) ? d : []).filter(x => x.document).map(({document: doc}) => {
       const f = doc.fields || {};
       return {
         id: doc.name.split('/').pop(),
-        title: f.title?.stringValue || '',
-        body: f.body?.stringValue || '',
-        channel: f.channel?.stringValue || '',
+        title: str(f, 'title'),
+        body: str(f, 'body'),
+        channel: str(f, 'channel'),
         type: f.type?.stringValue || 'broadcast',
-        sentAt: f.sentAt?.stringValue || '',
+        sentAt: str(f, 'sentAt'),
+        // Added 2026-10-10 (functions/shared.js logPushHistory meta).
+        source: str(f, 'source'),
+        target: str(f, 'target'),
+        session: [str(f, 'round') && `R${str(f, 'round')}`, str(f, 'session')].filter(Boolean).join(' '),
+        failed: f.ok?.booleanValue === false,
+        error: str(f, 'error'),
+        counts: ['sent', 'failed', 'skippedSpoiler', 'noToken'].filter(k => f[k]?.integerValue != null).map(k => `${k}: ${f[k].integerValue}`).join(', '),
       };
-    }).sort((a,b) => b.sentAt.localeCompare(a.sentAt));
+    });
     const el = document.getElementById('push-history-list');
     if (!docs.length) { el.innerHTML = '<div class="section-note">No notifications sent yet.</div>'; return; }
     el.innerHTML = docs.map(n => {
@@ -5200,6 +5221,10 @@ async function loadPushHistory() {
         <div style="color:var(--text);font-size:14px;font-weight:700;margin-bottom:2px">${escHtml(n.title)}</div>
         ${n.body ? `<div style="color:var(--text-sec);font-size:13px">${escHtml(n.body)}</div>` : ''}
         ${n.channel ? `<div style="color:var(--text-sec);font-size:11px;margin-top:4px">channel: ${escHtml(n.channel)}</div>` : ''}
+        ${n.source || n.session ? `<div style="color:var(--text-sec);font-size:11px;margin-top:2px">from: ${escHtml([n.source, n.session].filter(Boolean).join(' · '))}</div>` : ''}
+        ${n.target ? `<div style="color:var(--text-sec);font-size:11px;margin-top:2px;font-family:monospace;word-break:break-all">to: ${escHtml(n.target)}</div>` : ''}
+        ${n.counts ? `<div style="color:var(--text-sec);font-size:11px;margin-top:2px">${escHtml(n.counts)}</div>` : ''}
+        ${n.failed ? `<div style="color:var(--red);font-size:11px;font-weight:800;margin-top:4px">FAILED${n.error ? `: ${escHtml(n.error)}` : ''}</div>` : ''}
       </div>`;
     }).join('');
   } catch(e) {

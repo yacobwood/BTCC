@@ -144,7 +144,7 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
   console.log(`News notification sending: "${notifyPayload.title}" (${notifyPayload.slug})`);
   // Headlines are results too on a race weekend ("Flying Scotsman Moffat
   // tames Brands Hatch") - spoiler-mode devices excluded like every other push.
-  await messaging.send(buildSpoilerSafePush({
+  const message = buildSpoilerSafePush({
     topic: 'news_alerts',
     title: notifyPayload.title,
     channel: 'news',
@@ -152,10 +152,18 @@ async function checkBtccNews({fetchFn, db, messaging, logHistory}) {
     android: {collapseKey: `news_${notifyPayload.slug}`, ttl: 3600000},
     apnsHeaders: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `news_${notifyPayload.slug}`.slice(0, 64)},
     alert: {title: 'New Article', body: notifyPayload.title},
-  }));
+  });
+  let messageId;
+  try {
+    messageId = await messaging.send(message);
+  } catch (e) {
+    // pendingSend stays set, so the next tick retries - record the failure.
+    await logHistory('New Article', notifyPayload.title, 'news_alerts', {source: 'newsCheck', target: message.condition, slug: notifyPayload.slug, ok: false, error: String(e?.message || e).slice(0, 300)});
+    throw e;
+  }
   console.log(`News notification sent OK: "${notifyPayload.title}"`);
   await stateRef.update({pendingSend: null});
-  logHistory('New Article', notifyPayload.title, 'news_alerts');
+  await logHistory('New Article', notifyPayload.title, 'news_alerts', {source: 'newsCheck', target: message.condition, messageId, slug: notifyPayload.slug});
 }
 
 module.exports = {checkBtccNews, NEWS_URL, ARTICLES_INDEX_URL};

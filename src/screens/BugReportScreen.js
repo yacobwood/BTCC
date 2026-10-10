@@ -7,12 +7,14 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {Analytics} from '../utils/analytics';
 import auth from '@react-native-firebase/auth';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
+import {buildDiagnosticsText} from '../utils/notificationLog';
 
 const FS_BASE = 'https://firestore.googleapis.com/v1/projects/btcchub-af77a/databases/(default)/documents';
 const FS_API_KEY = 'AIzaSyC0blgpkf9ioMa5QgkIwi9S6iCVnphSeHE';
@@ -24,6 +26,11 @@ export default function BugReportScreen({navigation}) {
   const [description, setDescription] = useState('');
   const [steps, setSteps] = useState('');
   const [state, setState] = useState('idle'); // idle, loading, success, error
+  // On by default: the notification log + app version/platform, so a report
+  // like "I got a spoiler with No Spoilers on" arrives with what the phone
+  // actually received (notificationLog.js). Titles of BTCC pushes and
+  // settings events only - no personal data.
+  const [includeDiagnostics, setIncludeDiagnostics] = useState(true);
 
   useEffect(() => { Analytics.screen('bug_report'); }, []);
 
@@ -31,6 +38,7 @@ export default function BugReportScreen({navigation}) {
     if (!title.trim() && !description.trim()) return;
     setState('loading');
     try {
+      const diagnostics = includeDiagnostics ? (await buildDiagnosticsText()).text : '';
       const res = await fetch(`${FS_BASE}/bug_reports?key=${FS_API_KEY}`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -42,11 +50,12 @@ export default function BugReportScreen({navigation}) {
             steps:       {stringValue: steps.trim()},
             submittedAt: {stringValue: new Date().toISOString()},
             uid:         {stringValue: auth().currentUser?.uid || 'anonymous'},
+            ...(diagnostics ? {diagnostics: {stringValue: diagnostics}} : {}),
           },
         }),
       });
       setState(res.ok ? 'success' : 'error');
-      if (res.ok) Analytics.bugReportSubmitted(category);
+      if (res.ok) Analytics.bugReportSubmitted(category, !!diagnostics);
     } catch {
       setState('error');
     }
@@ -122,6 +131,19 @@ export default function BugReportScreen({navigation}) {
           accessibilityLabel="Steps to reproduce"
         />
 
+        <View style={styles.diagRow}>
+          <View style={{flex: 1, marginRight: 12}}>
+            <Text style={styles.diagLabel}>Include notification log</Text>
+            <Text style={styles.diagDesc}>Recent BTCC Hub notifications on this device and whether each was shown, plus app version. Helps us trace notification problems.</Text>
+          </View>
+          <Switch
+            value={includeDiagnostics}
+            onValueChange={setIncludeDiagnostics}
+            trackColor={{false: Colors.outline, true: Colors.yellow}}
+            accessibilityLabel="Include notification log"
+          />
+        </View>
+
         {state === 'error' && (
           <Text style={{color: '#EF4444', fontSize: 13, marginTop: 8}}>
             Failed to submit. Please try again.
@@ -186,4 +208,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   submitText: {color: Colors.navy, fontSize: 15, fontWeight: '800'},
+  diagRow: {flexDirection: 'row', alignItems: 'center', marginTop: 20},
+  diagLabel: {color: '#fff', fontSize: 14, fontWeight: '700'},
+  diagDesc: {color: Colors.textSecondary, fontSize: 12, lineHeight: 17, marginTop: 2},
 });

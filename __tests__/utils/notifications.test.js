@@ -11,6 +11,7 @@ import {
   onMessage,
   requestPermission,
 } from '@react-native-firebase/messaging';
+import {logEvent} from '@react-native-firebase/analytics';
 import {
   setupNotificationChannels,
   requestNotificationPermission,
@@ -366,6 +367,32 @@ describe('spoiler mode display gate', () => {
     const handler = onMessage.mock.calls[onMessage.mock.calls.length - 1][1];
     await handler(titled);
     expect(notifee.displayNotification).not.toHaveBeenCalled();
+  });
+
+  // On-device log + GA4 (2026-10-10): every display decision is recorded so a
+  // "I got a spoiler" report can be traced from the phone itself.
+  const loggedOutcomes = () => AsyncStorage.setItem.mock.calls
+    .filter(([k]) => k === 'notification_log')
+    .map(([, v]) => JSON.parse(v).slice(-1)[0].outcome);
+
+  it('logs a suppressed push on-device and fires notification_suppressed', async () => {
+    spoilerStored('true');
+    await displayAndroidDataNotification(titled);
+    expect(loggedOutcomes()).toEqual(['suppressed_spoiler']);
+    expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'notification_suppressed', {reason: 'spoiler_mode', channel: 'qualifying_race'});
+  });
+
+  it('logs a shown push without a suppression event', async () => {
+    spoilerStored('false');
+    await displayAndroidDataNotification(titled);
+    expect(loggedOutcomes()).toEqual(['shown']);
+    expect(logEvent).not.toHaveBeenCalledWith(expect.anything(), 'notification_suppressed', expect.anything());
+  });
+
+  it('does not log the silent results_refresh (it would flood the log on race days)', async () => {
+    spoilerStored('false');
+    await displayAndroidDataNotification({data: {type: 'results_refresh', year: '2026'}});
+    expect(loggedOutcomes()).toEqual([]);
   });
 
   it('drops local notifications while spoiler mode is on', async () => {

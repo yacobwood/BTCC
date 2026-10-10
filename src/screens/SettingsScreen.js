@@ -35,6 +35,7 @@ function raceVersionLabel(v) {
   return `Season ${season} · Round ${round} · Lap ${lap}`;
 }
 import {getFCMToken} from '../utils/notifications';
+import {buildDiagnosticsText} from '../utils/notificationLog';
 import {navigateFromData} from '../utils/notifNavigation';
 import {navigationRef} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -117,6 +118,18 @@ export default function SettingsScreen({navigation}) {
         {text: 'Sign out', style: 'destructive', onPress: () => { Analytics.signedOut(); signOut().catch(() => {}); }},
       ],
     );
+  };
+
+  // Lets a user paste exactly what their phone received into chat or a bug
+  // report (see notificationLog.js) - added 2026-10-10 after a spoiler report
+  // nobody could trace.
+  const [copiedLog, setCopiedLog] = useState(false);
+  const copyNotificationLog = async () => {
+    const {text, entries} = await buildDiagnosticsText();
+    Clipboard.setString(text);
+    Analytics.notificationLogCopied(entries);
+    setCopiedLog(true);
+    setTimeout(() => setCopiedLog(false), 2000);
   };
 
   const copyFcmToken = () => {
@@ -470,6 +483,9 @@ export default function SettingsScreen({navigation}) {
             <Text style={styles.deviceIdText}>{copiedStableId ? '✓ Copied' : `User ID: ${user.uid.slice(0, 16)}…`}</Text>
           </TouchableOpacity>
         )}
+        <TouchableOpacity onPress={copyNotificationLog} accessibilityRole="button" accessibilityLabel="Copy notification log">
+          <Text style={styles.deviceIdText}>{copiedLog ? '✓ Copied' : 'Copy notification log'}</Text>
+        </TouchableOpacity>
         {!!fcmToken && (
           <TouchableOpacity onPress={copyFcmToken} accessibilityRole="button" accessibilityLabel="Copy device token">
             <Text style={styles.deviceIdText}>{copiedFcm ? '✓ Copied' : `Device Token: ${fcmToken.slice(0, 20)}…`}</Text>

@@ -1,7 +1,7 @@
 const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getMessaging} = require('firebase-admin/messaging');
-const {logError, logPushHistory, requireAdminPost} = require('./shared');
+const {logError, sendAndLog, requireAdminPost} = require('./shared');
 const {buildSpoilerSafePush} = require('./spoilerSafe');
 const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession, listPopulatedSessions} = require('./resultsHash');
 
@@ -192,14 +192,14 @@ exports.notifyResultsUpdate = onRequest(
               // Also excludes spoiler-mode devices (spoilerSafe.js) - the
               // helper keeps Android data-only, with title/body/channel
               // mirrored into data for the JS display path.
-              await getMessaging().send(buildSpoilerSafePush({
+              await sendAndLog(getMessaging(), buildSpoilerSafePush({
                 topic: 'results_teaser',
                 exclude: sessionTopic ? [sessionTopic] : [], // defensive: label should always be one of the 6 known session names
                 title,
                 body,
                 channel: 'results',
                 data: {type: 'results', year, round: String(changed.round), race: String(changed.raceIndex + 1)},
-              }));
+              }), {title, body, channel: 'results', source: 'resultsTeaser', round: String(changed.round), session: changed.label});
               // Persisted only after a successful send - doing this before
               // the send (the original order) meant a failed send (transient
               // FCM outage) still advanced the baseline, so that result's
@@ -211,7 +211,6 @@ exports.notifyResultsUpdate = onRequest(
                 [changed.round]: [...(announced[changed.round] || []), changed.label],
               };
               await stateRef.set({fingerprints: nextFp, announced: nextAnnounced, sentAt: new Date().toISOString()});
-              await logPushHistory(title, body, 'results');
             }
           } else {
             console.log('notifyResultsUpdate: no session content changed - skipping teaser push');

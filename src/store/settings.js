@@ -5,6 +5,8 @@ import {useAuth} from './auth';
 import {saveProfile} from '../utils/userProfile';
 import {syncChatMentionToken} from '../utils/notifications';
 import {syncWidgetTimeFormat} from '../utils/widgetSettings';
+import {logNotificationEvent} from '../utils/notificationLog';
+import {Analytics} from '../utils/analytics';
 
 // Leaf settings that map 1:1 to an FCM topic
 const LEAF_TOPICS = {
@@ -144,14 +146,25 @@ const SPOILER_MARKER_TOPIC = 'spoiler_free';
 function syncAllTopics(settings) {
   const messaging = getMessaging();
   const spoilerFree = !!settings.spoilerFree;
-  subscribeToTopic(messaging, 'results_live').catch(() => {});
-  (spoilerFree ? unsubscribeFromTopic : subscribeToTopic)(messaging, 'broadcast').catch(() => {});
-  (spoilerFree ? subscribeToTopic : unsubscribeFromTopic)(messaging, SPOILER_MARKER_TOPIC).catch(() => {});
+  // Failures used to be silently swallowed - now recorded (one log entry per
+  // sync, not one per topic) in the on-device notification log, since a topic
+  // change that never landed is exactly what a "spoiler mode was on but I
+  // still got a push" report needs to rule in or out.
+  const failed = [];
+  const run = (subscribe, topic) =>
+    (subscribe ? subscribeToTopic : unsubscribeFromTopic)(messaging, topic)
+      .catch(() => { failed.push(`${subscribe ? '+' : '-'}${topic}`); });
+  const ops = [
+    run(true, 'results_live'),
+    run(!spoilerFree, 'broadcast'),
+    run(spoilerFree, SPOILER_MARKER_TOPIC),
+  ];
   for (const [key, topic] of Object.entries(LEAF_TOPICS)) {
-    const enabled = !spoilerFree && isEffective(settings, key);
-    const fn = enabled ? subscribeToTopic : unsubscribeFromTopic;
-    fn(messaging, topic).catch(() => {});
+    ops.push(run(!spoilerFree && isEffective(settings, key), topic));
   }
+  Promise.all(ops).then(() => {
+    if (failed.length) logNotificationEvent({kind: 'topics', spoilerFree, failed});
+  });
 }
 
 // Returns ISO string for next Monday at 23:00 local time
@@ -235,6 +248,8 @@ export function SettingsProvider({children}) {
         // already-expired spoilerFree that just never got cleared until now
         // shouldn't claim anything was "disabled" for them just now.
         if (!expired) setSpoilerJustCleared(true);
+        logNotificationEvent({kind: 'spoiler', action: 'auto_cleared', detail: expired ? 'already expired' : 'on app open'});
+        try { Analytics.spoilerModeAutoCleared(expired); } catch {}
       }
       setSettings(loaded);
       syncAllTopics(loaded);
@@ -255,6 +270,7 @@ export function SettingsProvider({children}) {
       }
       // Manage spoiler-free expiry alongside the toggle
       if (key === 'spoilerFree') {
+        logNotificationEvent({kind: 'spoiler', action: value ? 'on' : 'off'});
         const expiry = value ? nextMondayNight() : null;
         next.spoilerFreeExpiry = expiry;
         if (expiry) {

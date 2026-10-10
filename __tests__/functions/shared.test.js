@@ -85,3 +85,46 @@ describe('decodeEntities', () => {
     expect(decodeEntities('Brands Hatch Race Review')).toBe('Brands Hatch Race Review');
   });
 });
+
+// 2026-10-10: push_history gained source/target/messageId/ok/error so a
+// "why did I get this push" report can be answered from the log alone.
+describe('sendAndLog', () => {
+  let add, sendAndLog, getFirestore;
+  beforeEach(() => {
+    jest.resetModules();
+    add = jest.fn(() => Promise.resolve());
+    ({getFirestore} = require('firebase-admin/firestore'));
+    getFirestore.mockReturnValue({collection: jest.fn(() => ({add}))});
+    ({sendAndLog} = require('../../functions/shared'));
+  });
+
+  const message = {condition: "'news_alerts' in topics && !('spoiler_free' in topics)", data: {}};
+
+  it('records a successful send with its message ID and exact target, after the send', async () => {
+    const messaging = {send: jest.fn(() => Promise.resolve('projects/p/messages/1'))};
+    const id = await sendAndLog(messaging, message, {title: 'T', body: 'B', channel: 'news_alerts', source: 'newsCheck', round: '10', session: undefined});
+
+    expect(id).toBe('projects/p/messages/1');
+    expect(add).toHaveBeenCalledTimes(1);
+    const row = add.mock.calls[0][0];
+    expect(row).toEqual(expect.objectContaining({
+      title: 'T', body: 'B', channel: 'news_alerts', type: 'auto', ok: true,
+      source: 'newsCheck', target: message.condition, messageId: 'projects/p/messages/1', round: '10',
+    }));
+    // Firestore rejects undefined values - they're dropped, not written.
+    expect('session' in row).toBe(false);
+  });
+
+  it('records a failed send with the error and rethrows', async () => {
+    const messaging = {send: jest.fn(() => Promise.reject(new Error('quota exceeded')))};
+    await expect(sendAndLog(messaging, message, {title: 'T', channel: 'news_alerts', source: 'newsCheck'})).rejects.toThrow('quota exceeded');
+    expect(add.mock.calls[0][0]).toEqual(expect.objectContaining({ok: false, error: 'quota exceeded', target: message.condition}));
+  });
+
+  it('labels a direct token send as target "token"', async () => {
+    const messaging = {send: jest.fn(() => Promise.resolve('id'))};
+    await sendAndLog(messaging, {token: 'abc'}, {title: 'T', channel: 'chat_mentions'});
+    expect(add.mock.calls[0][0].target).toBe('token');
+    expect(JSON.stringify(add.mock.calls)).not.toContain('abc');
+  });
+});

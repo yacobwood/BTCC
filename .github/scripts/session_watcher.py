@@ -174,13 +174,46 @@ def spoiler_safe_condition(topic):
     return f"'{topic}' in topics && !('{SPOILER_MARKER_TOPIC}' in topics)"
 
 
+def log_push_history(sa, creds, fields):
+    """Writes one push_history row - same shape as functions/shared.js's
+    logPushHistory (title/body/channel/type/sentAt + source/target/
+    messageId/ok/error). These winner-naming pushes were the one kind never
+    recorded, which is exactly what a 2026-10-10 spoiler report needed."""
+    import requests as req_lib
+    def to_value(v):
+        if isinstance(v, bool):
+            return {"booleanValue": v}
+        return {"stringValue": str(v)}
+    doc = {"fields": {k: to_value(v) for k, v in fields.items() if v is not None}}
+    try:
+        resp = req_lib.post(
+            f"https://firestore.googleapis.com/v1/projects/{sa['project_id']}/databases/(default)/documents/push_history",
+            headers={"Authorization": f"Bearer {creds.token}", "Content-Type": "application/json"},
+            json=doc,
+            timeout=10,
+        )
+        if not resp.ok:
+            log.error(f"push_history write failed {resp.status_code}: {resp.text[:200]}")
+    except Exception as e:
+        log.error(f"push_history write exception: {e}")
+
+
 def send_fcm(topic, title, body, channel, extra_data=None):
-    """Send a topic push via FCM HTTP v1 API using the service account."""
+    """Send a spoiler-safe topic push via FCM HTTP v1 API and record the
+    outcome in push_history."""
     sa_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
     if not sa_json:
         log.warning("FIREBASE_SERVICE_ACCOUNT not set — skipping notification")
         return
 
+    sa = creds = None
+    condition = spoiler_safe_condition(topic)
+    history = {
+        "title": title, "body": body, "channel": channel, "type": "auto",
+        "source": "sessionWatcher", "target": condition,
+        "round": (extra_data or {}).get("round"),
+        "session": (extra_data or {}).get("session"),
+    }
     try:
         import google.oauth2.service_account
         import google.auth.transport.requests
@@ -191,17 +224,20 @@ def send_fcm(topic, title, body, channel, extra_data=None):
 
         creds = google.oauth2.service_account.Credentials.from_service_account_info(
             sa,
-            scopes=["https://www.googleapis.com/auth/firebase.messaging"],
+            scopes=[
+                "https://www.googleapis.com/auth/firebase.messaging",
+                "https://www.googleapis.com/auth/datastore",
+            ],
         )
         creds.refresh(google.auth.transport.requests.Request())
 
         data_payload = {"channel": channel, "title": title, "body": body}
         if extra_data:
-            data_payload.update(extra_data)
+            data_payload.update({k: v for k, v in extra_data.items() if k != "session"})
 
         message = {
             "message": {
-                "condition": spoiler_safe_condition(topic),
+                "condition": condition,
                 "android": {"priority": "high"},
                 "apns": {
                     "payload": {
@@ -218,13 +254,23 @@ def send_fcm(topic, title, body, channel, extra_data=None):
             json=message,
             timeout=10,
         )
+        sent_at = datetime.now(timezone.utc).isoformat()
         if resp.ok:
             log.info(f"FCM sent to '{topic}': {title}")
+            message_id = None
+            try:
+                message_id = resp.json().get("name")
+            except Exception:
+                pass
+            log_push_history(sa, creds, {**history, "sentAt": sent_at, "ok": True, "messageId": message_id})
         else:
             log.error(f"FCM error {resp.status_code}: {resp.text}")
+            log_push_history(sa, creds, {**history, "sentAt": sent_at, "ok": False, "error": f"HTTP {resp.status_code}: {resp.text[:200]}"})
 
     except Exception as e:
         log.error(f"FCM exception: {e}")
+        if sa and creds and getattr(creds, "token", None):
+            log_push_history(sa, creds, {**history, "sentAt": datetime.now(timezone.utc).isoformat(), "ok": False, "error": str(e)[:300]})
 
 
 # ── Results scraping + commit ─────────────────────────────────────────────────
@@ -364,6 +410,8 @@ def handle_session_complete(session, year, round_num, venue):
             # handler always fell back to tab 0 (Free Practice) without
             # this, regardless of which session actually just completed.
             "race": SESSION_RACE_INDEX.get(label, ""),
+            # push_history only - stripped from the FCM data payload
+            "session": label,
         },
     )
 

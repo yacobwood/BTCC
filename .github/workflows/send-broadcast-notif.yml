@@ -84,23 +84,39 @@ jobs:
           // Spoiler mode = no notifications: excludes spoiler-mode devices
           // and keeps Android data-only (functions/spoilerSafe.js).
           const {channel: _c, title: _t, body: _b, ...extra} = data;
-          admin.messaging().send(buildSpoilerSafePush({
+          const message = buildSpoilerSafePush({
             topic,
             title: process.env.TITLE,
             body,
             channel: process.env.CHANNEL,
             data: extra,
-          })).then(async r => {
-            console.log('Sent:', r);
-            await db.collection('push_history').add({
-              title: process.env.TITLE,
-              body,
-              channel: process.env.CHANNEL,
-              type: topic === 'broadcast' ? 'broadcast' : 'topic:' + topic,
-              sentAt: new Date().toISOString(),
-            });
+          });
+          // Same push_history shape as functions/shared.js's logPushHistory
+          // meta (source/target/messageId/ok/error) - one row per real outcome.
+          const record = (fields) => db.collection('push_history').add({
+            title: process.env.TITLE,
+            body,
+            channel: process.env.CHANNEL,
+            type: topic === 'broadcast' ? 'broadcast' : 'topic:' + topic,
+            sentAt: new Date().toISOString(),
+            source: 'broadcastWorkflow',
+            target: message.condition,
+            ...fields,
+          });
+          (async () => {
+            let messageId;
+            try {
+              messageId = await admin.messaging().send(message);
+            } catch (e) {
+              console.error('Error:', e.message);
+              await record({ok: false, error: String(e.message).slice(0, 300)}).catch(() => {});
+              process.exit(1);
+            }
+            console.log('Sent:', messageId);
+            // The push went out - a failed history write mustn't report it as failed.
+            await record({ok: true, messageId}).catch(e => console.error('push_history write failed:', e.message));
             process.exit(0);
-          }).catch(e => { console.error('Error:', e.message); process.exit(1); });
+          })();
           EOF
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

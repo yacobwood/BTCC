@@ -6,6 +6,9 @@ import {renderWithProviders, makeNav} from './testUtils';
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {screen: jest.fn(), bugReportSubmitted: jest.fn()},
 }));
+jest.mock('../../src/utils/notificationLog', () => ({
+  buildDiagnosticsText: jest.fn(() => Promise.resolve({text: 'BTCC Hub 2.23.1 - spoiler mode on\n2026-10-10 14:36:00Z push shown [results]', entries: 1})),
+}));
 
 const nav = makeNav();
 
@@ -99,5 +102,30 @@ describe('BugReportScreen', () => {
     fireEvent.press(getByLabelText('Submit feedback'));
     await waitFor(() => getByText('Thanks!'));
     expect(getByText('Back to More')).toBeTruthy();
+  });
+
+  // ── Notification diagnostics (2026-10-10) ────────────────────────────────────
+
+  const submittedFields = () => JSON.parse(global.fetch.mock.calls.find(([url]) => String(url).includes('/bug_reports'))[1].body).fields;
+
+  it('attaches the notification log by default', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    const {getByLabelText} = renderWithProviders(<BugReportScreen navigation={nav} />);
+    fireEvent.changeText(getByLabelText('Title'), 'Got a spoiler');
+    fireEvent.press(getByLabelText('Submit feedback'));
+    await waitFor(() => expect(global.fetch.mock.calls.some(([url]) => String(url).includes('/bug_reports'))).toBe(true));
+    expect(submittedFields().diagnostics.stringValue).toContain('push shown [results]');
+    await waitFor(() => expect(Analytics.bugReportSubmitted).toHaveBeenCalledWith('Bug', true));
+  });
+
+  it('leaves the notification log out when the user switches it off', async () => {
+    const {Analytics} = require('../../src/utils/analytics');
+    const {getByLabelText} = renderWithProviders(<BugReportScreen navigation={nav} />);
+    fireEvent(getByLabelText('Include notification log'), 'valueChange', false);
+    fireEvent.changeText(getByLabelText('Title'), 'Got a spoiler');
+    fireEvent.press(getByLabelText('Submit feedback'));
+    await waitFor(() => expect(global.fetch.mock.calls.some(([url]) => String(url).includes('/bug_reports'))).toBe(true));
+    expect(submittedFields().diagnostics).toBeUndefined();
+    await waitFor(() => expect(Analytics.bugReportSubmitted).toHaveBeenCalledWith('Bug', false));
   });
 });

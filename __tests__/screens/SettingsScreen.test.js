@@ -13,6 +13,11 @@ jest.mock('../../src/store/auth', () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock('../../src/utils/notificationLog', () => ({
+  buildDiagnosticsText: jest.fn(() => Promise.resolve({text: 'BTCC Hub - spoiler mode off - 2 log entries', entries: 2})),
+  logNotificationEvent: jest.fn(() => Promise.resolve()),
+}));
+
 const mockUseAuth = require('../../src/store/auth').useAuth;
 
 const mockSendMagicLink = jest.fn(() => Promise.resolve());
@@ -443,5 +448,19 @@ describe('SettingsScreen', () => {
       expect(getByText('Season 2 · Round 23 · Lap 1')).toBeTruthy();
       expect(queryByText(/^Version /)).toBeNull();
     });
+  });
+});
+
+// 2026-10-10: lets a user paste what their phone received into chat.
+describe('SettingsScreen notification log', () => {
+  it('copies the notification log to the clipboard', async () => {
+    const {Clipboard} = require('react-native');
+    const setString = jest.spyOn(Clipboard, 'setString').mockImplementation(() => {});
+    const nav = makeNav();
+    const {getByLabelText, findByText} = renderWithProviders(<SettingsScreen navigation={nav} />);
+    await act(async () => { fireEvent.press(getByLabelText('Copy notification log')); });
+    expect(setString).toHaveBeenCalledWith('BTCC Hub - spoiler mode off - 2 log entries');
+    expect(await findByText('✓ Copied')).toBeTruthy();
+    setString.mockRestore();
   });
 });

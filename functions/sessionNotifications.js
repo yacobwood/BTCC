@@ -8,6 +8,7 @@ const {
   decodeEntities,
   logError,
   logPushHistory,
+  sendAndLog,
   fetchWithTimeout,
   CALENDAR_URL,
   SCHEDULE_URL,
@@ -75,15 +76,14 @@ exports.sendSessionNotifications = onSchedule(
             const channel = SESSION_CHANNELS[session.name] || 'race';
 
             sends.push(
-              messaging.send(buildSpoilerSafePush({
+              sendAndLog(messaging, buildSpoilerSafePush({
                 topic,
                 title,
                 body,
                 channel,
                 data: data || {},
-              })),
+              }), {title, body, channel: topic, source: 'sessionAlert', round: String(round.round), session: session.name}),
             );
-            logPushHistory(title, body, topic);
           }
         }
 
@@ -95,15 +95,14 @@ exports.sendSessionNotifications = onSchedule(
             const wpTitle = 'Race Weekend Tomorrow';
             const wpBody = `Rounds ${rStart}–${rStart + 2} at ${round.venue} start tomorrow. Don't miss a lap.`;
             sends.push(
-              messaging.send(buildSpoilerSafePush({
+              sendAndLog(messaging, buildSpoilerSafePush({
                 topic: 'weekend_preview',
                 title: wpTitle,
                 body: wpBody,
                 channel: 'weekend_preview',
                 data: {type: 'round', round: String(round.round)},
-              })),
+              }), {title: wpTitle, body: wpBody, channel: 'weekend_preview', source: 'weekendPreview', round: String(round.round)}),
             );
-            logPushHistory(wpTitle, wpBody, 'weekend_preview');
           }
         }
 
@@ -115,15 +114,14 @@ exports.sendSessionNotifications = onSchedule(
             const suTitle = 'Standings Updated';
             const suBody = `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`;
             sends.push(
-              messaging.send(buildSpoilerSafePush({
+              sendAndLog(messaging, buildSpoilerSafePush({
                 topic: 'standings_update',
                 title: suTitle,
                 body: suBody,
                 channel: 'standings',
                 data: {type: 'history'},
-              })),
+              }), {title: suTitle, body: suBody, channel: 'standings_update', source: 'standingsUpdate', round: String(round.round)}),
             );
-            logPushHistory(suTitle, suBody, 'standings_update');
           }
         }
       }
@@ -171,7 +169,7 @@ exports.sendSessionNotifications = onSchedule(
           }
         });
         if (notifyPayload) {
-          await messaging.send(buildSpoilerSafePush({
+          await sendAndLog(messaging, buildSpoilerSafePush({
             topic: 'podcast_alerts',
             title: notifyPayload.title,
             channel: 'podcasts',
@@ -179,10 +177,9 @@ exports.sendSessionNotifications = onSchedule(
             android: {collapseKey: `podcast_${latestGuid}`, ttl: 3600000},
             apnsHeaders: {'apns-expiration': String(Math.floor(Date.now() / 1000) + 3600), 'apns-collapse-id': `podcast_${latestGuid}`.slice(0, 64)},
             alert: {title: 'New Podcast', body: notifyPayload.title},
-          }));
+          }), {title: 'New Podcast', body: notifyPayload.title, channel: 'podcast_alerts', source: 'podcast'});
           console.log(`Podcast notification sent OK: "${notifyPayload.title}"`);
           await podcastStateRef.update({pendingSend: null});
-          logPushHistory('New Podcast', notifyPayload.title, 'podcast_alerts');
         }
       }
     } catch (e) {

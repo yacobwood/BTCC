@@ -43,6 +43,12 @@ jest.mock('../../functions/shared', () => ({
   logError: mockLogError,
   logPushHistory: mockLogPushHistory,
   fetchWithTimeout: mockFetchWithTimeout,
+  // Mirrors functions/shared.js's sendAndLog: send, then record the outcome.
+  sendAndLog: async (messaging, message, {title, body = '', channel, ...meta}) => {
+    const messageId = await messaging.send(message);
+    await mockLogPushHistory(title, body, channel, {target: message.condition, messageId, ...meta});
+    return messageId;
+  },
   ADMIN_SECRET: 'test-admin-secret',
   requireAdminPost: (req, res) => {
     if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
@@ -192,7 +198,13 @@ describe('notifyResultsUpdate', () => {
       },
     }));
     expect(mockMessaging.send.mock.calls.find(c => c[0].condition)[0].notification).toBeUndefined();
-    expect(mockLogPushHistory).toHaveBeenCalledWith('Results for Race 1 at Croft is now available', expect.any(String), 'results');
+    // push_history records the sender, exact target and session (2026-10-10).
+    expect(mockLogPushHistory).toHaveBeenCalledWith('Results for Race 1 at Croft is now available', expect.any(String), 'results', expect.objectContaining({
+      source: 'resultsTeaser',
+      target: "'results_teaser' in topics && !('results_race1' in topics) && !('spoiler_free' in topics)",
+      round: '8',
+      session: 'Race 1',
+    }));
     expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({fingerprints: expect.any(Object)}));
   });
 

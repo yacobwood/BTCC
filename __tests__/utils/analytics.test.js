@@ -294,9 +294,29 @@ describe('Analytics', () => {
       expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'pull_to_refresh', {screen: 'News'});
     });
 
-    it('bugReportSubmitted logs category', () => {
+    it('bugReportSubmitted logs category and whether diagnostics were attached', () => {
       Analytics.bugReportSubmitted('crash');
-      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'bug_report_submitted', {category: 'crash'});
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'bug_report_submitted', {category: 'crash', included_diagnostics: 'false'});
+      Analytics.bugReportSubmitted('Bug', true);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'bug_report_submitted', {category: 'Bug', included_diagnostics: 'true'});
+    });
+
+    // Spoiler mode diagnostics (2026-10-10)
+    it('spoilerModeAutoCleared logs whether it had already expired', () => {
+      Analytics.spoilerModeAutoCleared(false);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'spoiler_mode_auto_cleared', {was_expired: 'false'});
+    });
+
+    it('notificationSuppressed logs the reason and channel', () => {
+      Analytics.notificationSuppressed('news');
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'notification_suppressed', {reason: 'spoiler_mode', channel: 'news'});
+      Analytics.notificationSuppressed(undefined);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'notification_suppressed', {reason: 'spoiler_mode', channel: 'unknown'});
+    });
+
+    it('notificationLogCopied logs the entry count', () => {
+      Analytics.notificationLogCopied(12);
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'notification_log_copied', {entries: 12});
     });
 
     it('unitSystemChanged logs unit', () => {

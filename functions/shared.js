@@ -59,14 +59,37 @@ async function logError(fn, message, err, opts = {}) {
   }
 }
 
-async function logPushHistory(title, body, channel) {
+// One push_history row per send. `meta` (added 2026-10-10) records what the
+// original title/body/channel row couldn't answer when a user reported a
+// spoiler they shouldn't have got: which sender (source), exactly who it
+// targeted (target - the FCM condition), the FCM message ID, the round/
+// session it was about, and whether the send actually succeeded (ok/error).
+// Undefined meta fields are dropped (Firestore rejects undefined).
+async function logPushHistory(title, body, channel, meta = {}) {
   try {
     const db = getFirestore();
+    const extra = Object.fromEntries(Object.entries(meta).filter(([, v]) => v !== undefined));
     await db.collection('push_history').add({
-      title, body, channel, type: 'auto', sentAt: new Date().toISOString(),
+      title, body, channel, type: 'auto', sentAt: new Date().toISOString(), ok: true, ...extra,
     });
   } catch (e) {
     console.error('logPushHistory failed:', e);
+  }
+}
+
+// Sends one FCM message and records the real outcome - success with its
+// message ID, or a failure row with the error (then rethrows so the caller's
+// own error handling still runs). Replaces logging *before* the send resolved,
+// which recorded pushes that never went out.
+async function sendAndLog(messaging, message, {title, body = '', channel, ...meta}) {
+  const target = message.condition || message.topic || (message.token ? 'token' : undefined);
+  try {
+    const messageId = await messaging.send(message);
+    await logPushHistory(title, body, channel, {target, messageId, ...meta});
+    return messageId;
+  } catch (e) {
+    await logPushHistory(title, body, channel, {target, ...meta, ok: false, error: String(e?.message || e).slice(0, 300)});
+    throw e;
   }
 }
 
@@ -229,6 +252,7 @@ module.exports = {
   decodeEntities,
   logError,
   logPushHistory,
+  sendAndLog,
   fetchWithTimeout,
   CALENDAR_URL,
   SCHEDULE_URL,

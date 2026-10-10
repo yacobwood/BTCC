@@ -79,7 +79,11 @@ class TestSendFcmSpoilerSafe(unittest.TestCase):
         requests_mod = types.ModuleType("requests")
 
         def fake_post(url, headers=None, json=None, timeout=None):
-            posted["message"] = json["message"]
+            if "fcm.googleapis.com" in url:
+                posted["message"] = json["message"]
+                return types.SimpleNamespace(ok=True, status_code=200, text="", json=lambda: {"name": "projects/p/messages/123"})
+            posted["history_url"] = url
+            posted["history"] = json["fields"]
             return types.SimpleNamespace(ok=True, status_code=200, text="")
         requests_mod.post = fake_post
 
@@ -99,12 +103,25 @@ class TestSendFcmSpoilerSafe(unittest.TestCase):
         }
         with patch.dict(sys.modules, fake_modules), \
              patch.dict("os.environ", {"FIREBASE_SERVICE_ACCOUNT": '{"project_id": "p"}'}):
-            session_watcher.send_fcm("results_qrace", "Qualifying Race Result", "X wins", "qualifying_race")
+            session_watcher.send_fcm("results_qrace", "Qualifying Race Result", "X wins", "qualifying_race",
+                                     extra_data={"type": "results", "round": "10", "race": "1", "session": "Qualifying Race"})
 
         msg = posted["message"]
         self.assertNotIn("topic", msg)
         self.assertNotIn("notification", msg)
         self.assertEqual(msg["condition"], "'results_qrace' in topics && !('spoiler_free' in topics)")
+        # session label is for push_history only, not sent to devices
+        self.assertNotIn("session", msg["data"])
+
+        # 2026-10-10: these winner-naming pushes are now recorded in push_history
+        self.assertTrue(posted["history_url"].endswith("/documents/push_history"))
+        h = posted["history"]
+        self.assertEqual(h["source"], {"stringValue": "sessionWatcher"})
+        self.assertEqual(h["target"], {"stringValue": msg["condition"]})
+        self.assertEqual(h["messageId"], {"stringValue": "projects/p/messages/123"})
+        self.assertEqual(h["ok"], {"booleanValue": True})
+        self.assertEqual(h["round"], {"stringValue": "10"})
+        self.assertEqual(h["session"], {"stringValue": "Qualifying Race"})
 
 
 class TestPerSessionRun(unittest.TestCase):

@@ -2,6 +2,7 @@ import React from 'react';
 import {act, create} from 'react-test-renderer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {subscribeToTopic, unsubscribeFromTopic} from '@react-native-firebase/messaging';
+import {logEvent} from '@react-native-firebase/analytics';
 import {syncChatMentionToken} from '../../src/utils/notifications';
 import {syncWidgetTimeFormat} from '../../src/utils/widgetSettings';
 import {SettingsProvider, useSettings} from '../../src/store/settings';
@@ -546,6 +547,51 @@ describe('SettingsProvider', () => {
     // reads) that raced this provider's own load - folded into the same load
     // pass instead so the very first render/sync already reflects it. See
     // project memory: spoiler_mode_audit_2026_09_13.
+    // On-device notification log + GA4 (2026-10-10) - so a spoiler report
+    // can show when spoiler mode was on, when it cleared and whether any
+    // topic change silently failed.
+    describe('diagnostics logging', () => {
+      const logged = () => AsyncStorage.setItem.mock.calls
+        .filter(([k]) => k === 'notification_log')
+        .map(([, v]) => JSON.parse(v).slice(-1)[0]);
+
+      it('logs spoiler mode being turned on and off', async () => {
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        await act(async () => { getHook().setSetting('spoilerFree', true); });
+        await act(async () => { getHook().setSetting('spoilerFree', false); });
+        expect(logged().filter(e => e.kind === 'spoiler').map(e => e.action)).toEqual(['on', 'off']);
+      });
+
+      it('logs failed topic changes instead of swallowing them', async () => {
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        unsubscribeFromTopic.mockImplementationOnce(() => Promise.reject(new Error('SERVICE_NOT_AVAILABLE')));
+        await act(async () => { getHook().setSetting('spoilerFree', true); });
+        const topicsEntry = logged().find(e => e.kind === 'topics');
+        expect(topicsEntry).toEqual(expect.objectContaining({spoilerFree: true, failed: [expect.stringMatching(/^-/)]}));
+      });
+
+      it('logs nothing about topics when every change succeeds', async () => {
+        let getHook;
+        await act(async () => { getHook = renderProvider(); });
+        await act(async () => { getHook().setSetting('spoilerFree', true); });
+        expect(logged().some(e => e.kind === 'topics')).toBe(false);
+      });
+
+      it('logs the automatic clear on app open and fires spoiler_mode_auto_cleared', async () => {
+        const future = new Date(Date.now() + 86400000).toISOString();
+        AsyncStorage.getItem.mockImplementation((key) => {
+          if (key === 'setting_spoiler_free') return Promise.resolve('true');
+          if (key === 'setting_spoiler_free_expiry') return Promise.resolve(future);
+          return Promise.resolve(null);
+        });
+        await act(async () => { renderProvider(); });
+        expect(logged()).toContainEqual(expect.objectContaining({kind: 'spoiler', action: 'auto_cleared', detail: 'on app open'}));
+        expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'spoiler_mode_auto_cleared', {was_expired: 'false'});
+      });
+    });
+
     describe('auto-clear on load', () => {
       it('clears a still-active (not yet expired) spoilerFree and marks spoilerJustCleared', async () => {
         const future = new Date(Date.now() + 86400000).toISOString();

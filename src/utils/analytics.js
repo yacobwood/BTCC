@@ -98,6 +98,14 @@ export const Analytics = {
   // choice: 'allow' | 'skip' | 'learn_basics' - the first-launch onboarding dialog's outcome
   onboardingChoiceMade: (choice) => logEvent(fa(),'onboarding_choice_made', {choice}),
   notificationTypeToggled: (type, enabled) => logEvent(fa(),'notification_type_toggled', {type, enabled: enabled ? 'true' : 'false'}),
+  // Spoiler mode diagnostics (2026-10-10). Manual on/off is already
+  // notification_type_toggled {type: 'spoilerFree'} above. These cover the
+  // automatic clear on app open and every push the display gate drops, so
+  // aggregate counts confirm spoiler mode is actually blocking pushes without
+  // any per-user data.
+  spoilerModeAutoCleared: (wasExpired) => logEvent(fa(),'spoiler_mode_auto_cleared', {was_expired: wasExpired ? 'true' : 'false'}),
+  notificationSuppressed: (channel) => logEvent(fa(),'notification_suppressed', {reason: 'spoiler_mode', channel: channel || 'unknown'}),
+  notificationLogCopied: (entries) => logEvent(fa(),'notification_log_copied', {entries}),
   unitSystemChanged: (unit) => logEvent(fa(),'unit_system_changed', {unit}),
   timeFormatChanged: (format) => logEvent(fa(),'time_format_changed', {format}),
 
@@ -109,7 +117,7 @@ export const Analytics = {
   signInFailed: (method, errorCode) => logEvent(fa(), 'sign_in_failed', {method, error_code: errorCode || 'unknown'}),
   signedOut: () => logEvent(fa(), 'sign_out'),
 
-  bugReportSubmitted: (category) => logEvent(fa(),'bug_report_submitted', {category}),
+  bugReportSubmitted: (category, includedDiagnostics = false) => logEvent(fa(),'bug_report_submitted', {category, included_diagnostics: includedDiagnostics ? 'true' : 'false'}),
 
   roadmapVoted: (itemId) => logEvent(fa(),'roadmap_voted', {item_id: itemId}),
   roadmapIdeaSubmitted: () => logEvent(fa(),'roadmap_idea_submitted'),

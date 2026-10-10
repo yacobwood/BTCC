@@ -58,7 +58,11 @@ test('sends notification when a new article is detected after first run', async 
       data: expect.objectContaining({type: 'news', slug: ARTICLE.slug, title: ARTICLE.title.rendered}),
     }),
   );
-  expect(logHistory).toHaveBeenCalledWith('New Article', ARTICLE.title.rendered, 'news_alerts');
+  expect(logHistory).toHaveBeenCalledWith('New Article', ARTICLE.title.rendered, 'news_alerts', expect.objectContaining({
+    source: 'newsCheck',
+    target: "'news_alerts' in topics && !('spoiler_free' in topics) && 'results_teaser' in topics",
+    slug: ARTICLE.slug,
+  }));
 });
 
 test('clears pendingSend after a successful send', async () => {
@@ -410,4 +414,18 @@ test('omits imageUrl when the mirror has none, even if pendingSend had one cache
 
   const sentData = messaging.send.mock.calls[0][0].data;
   expect(sentData).not.toHaveProperty('imageUrl');
+});
+
+test('records a failed send in push_history and leaves pendingSend for the retry', async () => {
+  const db = makeDb({lastId: 7});
+  const messaging = makeMessaging();
+  messaging.send.mockRejectedValueOnce(new Error('FCM unavailable'));
+  const logHistory = jest.fn();
+
+  await expect(checkBtccNews({fetchFn: makeFetch([ARTICLE]), db, messaging, logHistory})).rejects.toThrow('FCM unavailable');
+
+  expect(logHistory).toHaveBeenCalledWith('New Article', ARTICLE.title.rendered, 'news_alerts', expect.objectContaining({
+    source: 'newsCheck', ok: false, error: 'FCM unavailable',
+  }));
+  expect(db._docRef.update).not.toHaveBeenCalledWith({pendingSend: null});
 });

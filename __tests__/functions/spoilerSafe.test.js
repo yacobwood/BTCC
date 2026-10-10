@@ -104,14 +104,16 @@ describe('every push sender is spoiler-safe', () => {
   it('the broadcast workflow sends through the helper', () => {
     const yml = read('.github/workflows/send-broadcast-notif.yml');
     expect(yml).toContain("require('./repo/functions/spoilerSafe.js')");
-    expect(yml).toContain('admin.messaging().send(buildSpoilerSafePush({');
+    expect(yml).toContain('const message = buildSpoilerSafePush({');
+    expect(yml).toContain('admin.messaging().send(message)');
     expect(yml).not.toMatch(/send\(\{\s*topic,/);
   });
 
   it('session_watcher.py sends by spoiler-safe condition with the same marker topic', () => {
     const py = read('.github/scripts/session_watcher.py');
     expect(py).toContain(`SPOILER_MARKER_TOPIC = "${SPOILER_MARKER_TOPIC}"`);
-    expect(py).toContain('"condition": spoiler_safe_condition(topic)');
+    expect(py).toContain('condition = spoiler_safe_condition(topic)');
+    expect(py).toContain('"condition": condition');
     expect(py).not.toContain('"topic": topic');
   });
 });
