@@ -2153,6 +2153,32 @@ def update_calendar_records(output_rounds, year):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+def _fill_placeholder_names(race):
+    """Replaces "Car N" placeholders in bestSpeeds/bestSectors/lapChart with
+    the real driver + team, once this race's results are in place. A
+    --session scrape (the session watcher) skips every other session's
+    classification PDF but still parses the whole book, so those sessions'
+    book data gets resolved against empty results - every row "Car N" -
+    while their real results only come back afterwards via the merge
+    carry-forward. Seen live on Brands Hatch GP Qualifying."""
+    number_map = _number_driver_map(race)
+    if not number_map:
+        return
+
+    def fill(e):
+        if e.get("driver") == f"Car {e.get('no')}" and e.get("no") in number_map:
+            e["driver"], e["team"] = number_map[e["no"]]
+
+    for entries in (race.get("bestSpeeds") or {}).values():
+        for e in entries or []:
+            fill(e)
+    for e in race.get("bestSectors") or []:
+        fill(e)
+    for lap in race.get("lapChart") or []:
+        for e in lap.get("order") or []:
+            fill(e)
+
+
 def merge_scraped_with_existing(scraped, existing_round):
     """Carry forward grids, results and reverseGridDraw from a previous scrape run.
 
@@ -2164,6 +2190,8 @@ def merge_scraped_with_existing(scraped, existing_round):
     - New bestSpeeds/weather/flagStats/bestSectors/lapChart each overwrite their own old
       value when present; old value kept otherwise (a transient book-fetch failure
       doesn't wipe previously-scraped data).
+    - "Car N" placeholder names in book data are filled from the (possibly
+      carried-forward) results - see _fill_placeholder_names.
     - reverseGridDraw is preserved from the existing round when not set on the new scrape.
     - youtubeUrls are always carried forward (never re-scraped).
     """
@@ -2185,6 +2213,7 @@ def merge_scraped_with_existing(scraped, existing_round):
         for field in ("bestSpeeds", "weather", "flagStats", "bestSectors", "lapChart"):
             if ex.get(field) and not race.get(field):
                 race[field] = ex[field]
+        _fill_placeholder_names(race)
         # Preserve an explicitly-set reverseGridDraw override
         if ex.get("reverseGridDraw") is not None and race.get("reverseGridDraw") is None:
             race["reverseGridDraw"] = ex["reverseGridDraw"]

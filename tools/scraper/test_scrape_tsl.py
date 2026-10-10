@@ -1060,6 +1060,35 @@ class TestMergeScrapedWithExisting(unittest.TestCase):
         self.assertEqual(r3['flagStats'], new_flags)
         self.assertEqual(r3['bestSectors'], new_sectors)
 
+    def test_placeholder_names_filled_from_carried_forward_results(self):
+        # --session scrape of another session: this session's results PDF was
+        # skipped (empty results), but its book data was still parsed and
+        # resolved against nothing - every row "Car N". The merge carries
+        # the old results forward, so the placeholders must be filled too.
+        results = [make_result('Ryan BENSLEY', 1, team='Team A', no=88)]
+        scraped = make_scraped_round(
+            r3_best_speeds={'intermediate1': [{'pos': 1, 'no': 88, 'driver': 'Car 88', 'team': '', 'mph': 112.7}],
+                            'intermediate2': None, 'finish': []},
+            r3_best_sectors=[{'no': 88, 'driver': 'Car 88', 'team': '', 'ideal': 56.5, 'best': 56.8, 'diff': 0.3}],
+        )
+        self._r3(scraped)['lapChart'] = [{'lap': 1, 'order': [{'pos': 1, 'no': 88, 'driver': 'Car 88', 'team': ''}]}]
+        existing = make_existing_round(r3_results=results)
+        s.merge_scraped_with_existing(scraped, existing)
+        r3 = self._r3(scraped)
+        self.assertEqual(r3['bestSpeeds']['intermediate1'][0]['driver'], 'Ryan BENSLEY')
+        self.assertEqual(r3['bestSpeeds']['intermediate1'][0]['team'], 'Team A')
+        self.assertEqual(r3['bestSectors'][0]['driver'], 'Ryan BENSLEY')
+        self.assertEqual(r3['lapChart'][0]['order'][0]['driver'], 'Ryan BENSLEY')
+
+    def test_placeholder_kept_when_car_genuinely_missing(self):
+        results = [make_result('Ryan BENSLEY', 1, no=88)]
+        scraped = make_scraped_round(
+            r3_best_speeds={'intermediate1': [{'pos': 1, 'no': 99, 'driver': 'Car 99', 'team': '', 'mph': 112.7}]},
+        )
+        existing = make_existing_round(r3_results=results)
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped)['bestSpeeds']['intermediate1'][0]['driver'], 'Car 99')
+
 
 # ── apply_draw_override ───────────────────────────────────────────────────────
 
