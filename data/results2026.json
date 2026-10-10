@@ -133554,19 +133554,6 @@
             },
             {
               "pos": 13,
-              "no": 15,
-              "cl": "M",
-              "driver": "Lewis SELBY",
-              "team": "NAPA Racing UK",
-              "car": "Ford Focus Titanium",
-              "laps": 10,
-              "time": "15:27.097",
-              "gap": "15.186",
-              "bestLap": "1:31.103",
-              "points": 0
-            },
-            {
-              "pos": 14,
               "no": 22,
               "cl": "I",
               "driver": "Chris SMILEY",
@@ -133579,7 +133566,7 @@
               "points": 2
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 52,
               "cl": "I",
               "driver": "Gordon SHEDDEN",
@@ -133592,7 +133579,7 @@
               "points": 1
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 3,
               "cl": "M",
               "driver": "Tom CHILTON",
@@ -133603,6 +133590,19 @@
               "gap": "16.239",
               "bestLap": "1:31.019",
               "points": 1
+            },
+            {
+              "pos": 16,
+              "no": 15,
+              "cl": "M",
+              "driver": "Lewis SELBY",
+              "team": "NAPA Racing UK",
+              "car": "Ford Focus Titanium",
+              "laps": 10,
+              "time": "15:27.097",
+              "gap": "",
+              "bestLap": "1:31.103",
+              "points": 0
             },
             {
               "pos": 17,
