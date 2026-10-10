@@ -60,6 +60,9 @@ yarn-error.log
 **/fastlane/Preview.html
 **/fastlane/screenshots
 **/fastlane/test_output
+# Play upload service-account keys must never be committed (key lives in ~/.config/play/)
+play-uploader*.json
+fastlane/*.json
 
 # Hub news draft — local testing only
 data/hub_news_draft.json

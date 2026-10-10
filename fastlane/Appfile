@@ -1,0 +1,7 @@
+# Google Play upload config (fastlane supply). Contains NO secrets: the
+# service-account key lives OUTSIDE the repo at ~/.config/play/play-uploader.json
+# (owner-only permissions), shared with TicketStack. Service account:
+# play-uploader@ticketstackapp.iam.gserviceaccount.com - needs BTCC Hub
+# added to its Play Console permissions separately (per-app).
+json_key_file(File.expand_path("~/.config/play/play-uploader.json"))
+package_name("com.btccfanhub")
