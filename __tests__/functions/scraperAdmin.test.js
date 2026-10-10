@@ -122,9 +122,9 @@ describe('notifyResultsUpdate', () => {
   // invocations, since these are plain jest.fn()s, not a real Firestore.
   async function seedBaseline() {
     await call();
-    const fingerprints = mockDocRef.set.mock.calls[0][0].fingerprints;
+    const {fingerprints, announced} = mockDocRef.set.mock.calls[0][0];
     jest.clearAllMocks();
-    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({fingerprints})});
+    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({fingerprints, announced})});
   }
 
   it('rejects a request without the correct scraper secret', async () => {
@@ -317,7 +317,10 @@ describe('notifyResultsUpdate', () => {
 
   it('still succeeds if the results_teaser send fails, and does NOT advance the fingerprint baseline (so the next tick retries instead of losing the push)', async () => {
     await seedBaseline();
-    mockResultsOnce([{round: 8, races: [{label: 'Qualifying', results: [{pos: 1, driver: 'B'}], grid: null}]}]);
+    mockResultsOnce([{round: 8, races: [
+      {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+      {label: 'Race 1', results: [{pos: 1, driver: 'B'}], grid: null},
+    ]}]);
     mockMessaging.send
       .mockResolvedValueOnce('ok') // results_live
       .mockRejectedValueOnce(new Error('teaser send failed')); // results_teaser
@@ -367,6 +370,61 @@ describe('notifyResultsUpdate', () => {
     expect(persisted[7]).toBeUndefined();
     // Round 8's notified session correctly advances.
     expect(persisted[8]['Race 1']).toEqual(expect.any(String));
+  });
+
+  it('records the notified session as announced', async () => {
+    await seedBaseline();
+    mockResultsOnce([{round: 8, venue: 'Croft', races: [
+      {label: 'Qualifying', results: [{pos: 1, driver: 'A'}], grid: null},
+      {label: 'Race 1', results: [{pos: 1, driver: 'A'}], grid: null},
+    ]}]);
+
+    await call();
+
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({
+      announced: {8: ['Qualifying', 'Race 1']},
+    }));
+  });
+
+  // The actual bug reported live 2026-10-10 (Brands Hatch GP FP day):
+  // backfill commits edited round 9's already-posted Race 1 (a pole flag)
+  // without calling this endpoint, so the next weekend's first tick sent
+  // "Results for Race 1 at Silverstone is now available" two weeks late.
+  it('does not send a teaser when results that were already announced get edited', async () => {
+    await seedBaseline(); // baseline: round 8 Qualifying scored + announced
+    mockResultsOnce([{round: 8, venue: 'Croft', races: [
+      {label: 'Qualifying', results: [{pos: 1, driver: 'A', pole: true}], grid: null},
+      {label: 'Race 1', results: [], grid: null},
+    ]}]);
+
+    await call();
+
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({condition: expect.stringContaining('results_teaser')}));
+    expect(mockLogPushHistory).not.toHaveBeenCalled();
+    // Baseline still advances so the same edit isn't re-flagged next tick.
+    const persisted = mockDocRef.set.mock.calls.find(c => c[0].fingerprints)[0];
+    expect(persisted.fingerprints[8].Qualifying).toEqual(
+      computeSessionFingerprints({rounds: [{round: 8, races: [{label: 'Qualifying', results: [{pos: 1, driver: 'A', pole: true}], grid: null}]}]})[8].Qualifying,
+    );
+  });
+
+  // State docs written before `announced` existed (the live doc at the time
+  // of the fix) - treat everything currently populated as already announced
+  // rather than as brand new.
+  it('treats every populated session as announced when the stored state predates the announced field', async () => {
+    await call(); // bootstrap
+    const {fingerprints} = mockDocRef.set.mock.calls[0][0];
+    jest.clearAllMocks();
+    mockDocRef.get.mockResolvedValueOnce({exists: true, data: () => ({fingerprints})}); // no `announced`
+    mockResultsOnce([{round: 8, venue: 'Croft', races: [
+      {label: 'Qualifying', results: [{pos: 1, driver: 'A', team: 'Cataclean Plato Racing'}], grid: null},
+      {label: 'Race 1', results: [], grid: null},
+    ]}]);
+
+    await call();
+
+    expect(mockMessaging.send).not.toHaveBeenCalledWith(expect.objectContaining({condition: expect.stringContaining('results_teaser')}));
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({announced: {8: ['Qualifying']}}));
   });
 
   it('logs and returns 500 if the primary results_live send fails', async () => {

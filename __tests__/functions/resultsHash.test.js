@@ -14,7 +14,7 @@ jest.mock('../../functions/shared', () => ({
   fetchWithTimeout: mockFetchWithTimeout,
 }));
 
-const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession} = require('../../functions/resultsHash');
+const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession, listPopulatedSessions} = require('../../functions/resultsHash');
 
 function race(label, results = [], grid = null) {
   return {label, results, grid};
@@ -101,5 +101,22 @@ describe('findChangedSession', () => {
 
     const changed = findChangedSession(after, afterFp, beforeFp);
     expect(changed.round).toBe(8);
+  });
+});
+
+describe('listPopulatedSessions', () => {
+  it('lists only sessions with at least one result row, keyed by round', () => {
+    const results = {rounds: [
+      {round: 9, races: [
+        {label: 'Free Practice', results: [{pos: 1}]},
+        {label: 'Race 3', results: [], grid: [{pos: 1}]},
+      ]},
+      {round: 10, races: [{label: 'Free Practice', results: []}]},
+    ]};
+    expect(listPopulatedSessions(results)).toEqual({9: ['Free Practice']});
+  });
+
+  it('returns an empty map for missing results', () => {
+    expect(listPopulatedSessions(null)).toEqual({});
   });
 });

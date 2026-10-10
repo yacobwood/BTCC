@@ -2,7 +2,7 @@ const {onRequest} = require('firebase-functions/v2/https');
 const {getFirestore} = require('firebase-admin/firestore');
 const {getMessaging} = require('firebase-admin/messaging');
 const {logError, logPushHistory, requireAdminPost} = require('./shared');
-const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession} = require('./resultsHash');
+const {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession, listPopulatedSessions} = require('./resultsHash');
 
 // ── Error dismissal — called from admin page ──────────────────────────────────
 exports.dismissError = onRequest(
@@ -96,6 +96,7 @@ exports.notifyResultsUpdate = onRequest(
       try {
         const {results} = await fetchResultsAndStandings(year);
         const currentFp = computeSessionFingerprints(results);
+        const currentPopulated = listPopulatedSessions(results);
         const stateRef = getFirestore().collection('state').doc('results_teaser');
         const snap = await stateRef.get();
         if (!snap.exists) {
@@ -105,10 +106,24 @@ exports.notifyResultsUpdate = onRequest(
           // just changed. Same "don't notify on the very first sighting"
           // idiom as newsCheck.js's state/news.lastId bootstrap - just seed
           // the baseline silently.
-          await stateRef.set({fingerprints: currentFp, sentAt: new Date().toISOString()});
+          await stateRef.set({fingerprints: currentFp, announced: currentPopulated, sentAt: new Date().toISOString()});
           console.log('notifyResultsUpdate: first-ever run, seeding fingerprints without sending');
         } else {
           const storedFp = snap.data().fingerprints || {};
+          // Sessions whose results have already been announced once. The
+          // title says "is now available", so it must only fire the first
+          // time a session goes from empty to populated - never for an edit
+          // to results that were already out. Confirmed live 2026-10-10
+          // (Brands Hatch GP, round 10, FP day): manual backfill commits
+          // between 09-30 and 10-02 (pole flags, CPRL team-name expansion)
+          // edited rounds 6 and 9 directly, never calling this endpoint, so
+          // the first scrape tick of the next weekend saw them as "changed"
+          // and sent "Results for Race 1 at Silverstone is now available"
+          // two weeks after the race. Docs written before this field
+          // existed seed it from what's populated right now (safe toward
+          // "don't spam" - a session posting in that exact tick only loses
+          // the teaser, session_watcher.py's spoiler push still goes out).
+          const announced = snap.data().announced || currentPopulated;
           const changed = findChangedSession(results, currentFp, storedFp);
           if (changed) {
             const roundObj = results.rounds.find(r => r.round === changed.round);
@@ -141,12 +156,18 @@ exports.notifyResultsUpdate = onRequest(
                 [changed.label]: currentFp[changed.round][changed.label],
               },
             };
+            const alreadyAnnounced = (announced[changed.round] || []).includes(changed.label);
             if (!hasResults) {
               // No send to guard here, so it's safe to persist immediately -
               // still stops this same grid-only change from re-triggering
               // every subsequent tick.
-              await stateRef.set({fingerprints: nextFp, sentAt: new Date().toISOString()});
+              await stateRef.set({fingerprints: nextFp, announced, sentAt: new Date().toISOString()});
               console.log(`notifyResultsUpdate: round ${changed.round} ${changed.label} grid-only change (no results yet) - skipping teaser push`);
+            } else if (alreadyAnnounced) {
+              // Edit to results that were already out (backfill, team name
+              // fix, penalty reclassification) - absorb silently.
+              await stateRef.set({fingerprints: nextFp, announced, sentAt: new Date().toISOString()});
+              console.log(`notifyResultsUpdate: round ${changed.round} ${changed.label} edited after already being announced - skipping teaser push`);
             } else {
               const raceName = roundObj?.venue ? `${changed.label} at ${roundObj.venue}` : changed.label;
               const title = `Results for ${raceName} is now available`;
@@ -189,7 +210,11 @@ exports.notifyResultsUpdate = onRequest(
               // teaser was lost for good instead of retried next tick -
               // re-fixing the exact bug class this dedup exists to prevent,
               // in this same function.
-              await stateRef.set({fingerprints: nextFp, sentAt: new Date().toISOString()});
+              const nextAnnounced = {
+                ...announced,
+                [changed.round]: [...(announced[changed.round] || []), changed.label],
+              };
+              await stateRef.set({fingerprints: nextFp, announced: nextAnnounced, sentAt: new Date().toISOString()});
               await logPushHistory(title, body, 'results');
             }
           } else {

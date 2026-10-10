@@ -67,4 +67,15 @@ function findChangedSession(results, currentFp, storedFp) {
   return picked;
 }
 
-module.exports = {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession};
+// {[round]: [sessionLabel, ...]} for every session that currently has at
+// least one result row - the shape scraperAdmin.js stores as `announced`.
+function listPopulatedSessions(results) {
+  const out = {};
+  for (const round of results?.rounds || []) {
+    const labels = (round.races || []).filter(r => (r.results?.length || 0) > 0).map(r => r.label);
+    if (labels.length) out[round.round] = labels;
+  }
+  return out;
+}
+
+module.exports = {fetchResultsAndStandings, computeSessionFingerprints, findChangedSession, listPopulatedSessions};
