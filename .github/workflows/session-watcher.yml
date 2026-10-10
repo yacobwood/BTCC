@@ -1,12 +1,13 @@
 name: Session Watcher
 
-# Connects to TSL SignalR for a race day, sends pre-session notifications,
-# and on sessioncomplete: scrapes results, commits, and sends results notification.
+# Connects to TSL SignalR live timing and on sessioncomplete: scrapes results,
+# commits and sends the session's results notification.
 #
-# Trigger manually from GitHub Actions → "Run workflow" before each race day,
-# supplying the round number and day (saturday / sunday).
-#
-# Auto-triggers are commented out below — enable once session times are confirmed.
+# Started automatically by functions/watcherDispatch.js (Cloud Scheduler):
+# one run per BTCC session, dispatched at that session's start time with the
+# `session` input set. Can still be run manually for a whole day (leave
+# `session` blank) as a fallback - don't do both for the same day, or every
+# result push goes out twice.
 
 on:
   workflow_dispatch:
@@ -24,22 +25,19 @@ on:
         description: "Season year"
         required: false
         default: "2026"
-
-  # Auto-start Saturday watcher at 08:45 UTC on race weekends
-  # (edit dates before enabling — remove the # below)
-  # schedule:
-  #   - cron: "45 8 18 4 6"    # Round 1 Saturday (April 18)
-  #   - cron: "45 8  9 5 6"    # Round 2 Saturday (May 9)
-  #   - cron: "45 8 23 5 6"    # Round 3 Saturday (May 23)
+      session:
+        description: "Only watch this session, e.g. Race 1 (blank = whole day, manual fallback only)"
+        required: false
+        default: ""
 
 concurrency:
-  group: session-watcher-${{ inputs.round }}-${{ inputs.day }}
+  group: session-watcher-${{ inputs.round }}-${{ inputs.day }}-${{ inputs.session }}
   cancel-in-progress: false
 
 jobs:
   watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 360      # 6-hour cap (enough for either race day)
+    timeout-minutes: 360      # GitHub's hosted-runner max. A per-session run needs well under 1h; a whole-day manual run can NOT cover Sunday (Race 1 start to Race 3 result is ~6.5h)
     permissions:
       contents: write
 
@@ -68,6 +66,8 @@ jobs:
           python .github/scripts/session_watcher.py \
             --round ${{ inputs.round }} \
             --day   ${{ inputs.day }}   \
-            --year  ${{ inputs.year || '2026' }}
+            --year  ${{ inputs.year || '2026' }} \
+            ${SESSION:+--session "$SESSION"}
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SESSION: ${{ inputs.session }}

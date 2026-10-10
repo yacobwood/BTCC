@@ -107,6 +107,25 @@ class TestSendFcmSpoilerSafe(unittest.TestCase):
         self.assertEqual(msg["condition"], "'results_qrace' in topics && !('spoiler_free' in topics)")
 
 
+class TestPerSessionRun(unittest.TestCase):
+    """2026-10-10: functions/watcherDispatch.js starts one run per session
+    (--session) at its start time, instead of one whole-day run."""
+
+    def test_filter_keeps_only_the_named_session(self):
+        _, _, sessions = load_sessions(2026, 10, "sunday")
+        self.assertEqual([s["label"] for s in session_watcher.filter_sessions(sessions, "Race 2")], ["Race 2"])
+
+    def test_filter_returns_nothing_for_an_unknown_label(self):
+        _, _, sessions = load_sessions(2026, 10, "sunday")
+        self.assertEqual(session_watcher.filter_sessions(sessions, "Warm-up"), [])
+
+    def test_session_flag_is_optional(self):
+        with patch.object(sys, "argv", ["x", "--round", "10", "--day", "sunday", "--session", "Race 1"]):
+            self.assertEqual(session_watcher.parse_args().session, "Race 1")
+        with patch.object(sys, "argv", ["x", "--round", "10", "--day", "sunday"]):
+            self.assertIsNone(session_watcher.parse_args().session)
+
+
 class TestSessionToUTC(unittest.TestCase):
 
     def test_bst_date_converts_one_hour_back(self):

@@ -13,10 +13,14 @@ name: Race Day Start
 # than on scrape-news.yml's own frequent polling, where a missed tick is
 # just briefly stale data.
 
+# SCHEDULE REMOVED 2026-10-10: the 08:27 UTC cron actually fired at
+# 13:08-14:34 UTC every race weekend checked, so the watcher missed most
+# sessions. functions/watcherDispatch.js (Cloud Scheduler) now starts one
+# watcher per session at its start time. Manual dispatch only - and only
+# as a fallback when that function is down, or every result push goes out
+# twice.
 on:
-  schedule:
-    - cron: "27 8 * * 6,0"   # 08:27 UTC, Saturdays and Sundays only
-  workflow_dispatch:           # allow manual trigger for testing
+  workflow_dispatch:
     inputs:
       is_retry:
         description: "internal - marks this run as an automated retry (do not set manually)"

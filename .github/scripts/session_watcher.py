@@ -97,6 +97,11 @@ def parse_args():
     p.add_argument("--round", type=int, required=True, help="Round number (1–10)")
     p.add_argument("--day",   choices=["saturday", "sunday"], required=True)
     p.add_argument("--year",  type=int, default=2026)
+    # One session per run (2026-10-10): functions/watcherDispatch.js dispatches
+    # a separate run at each session's start time. A whole-day run hit GitHub's
+    # 6-hour job cap before Sunday's Race 3 finished, and counted sessions off
+    # in order, so a late start mislabelled every result after it.
+    p.add_argument("--session", default=None, help='Only watch this session label, e.g. "Race 1"')
     return p.parse_args()
 
 
@@ -147,6 +152,11 @@ def load_sessions(year, round_num, day):
         })
 
     return rnd["tslEventId"], rnd["venue"], sessions
+
+
+def filter_sessions(sessions, label):
+    """Keep only the session with this exact label (see --session)."""
+    return [s for s in sessions if s["label"] == label]
 
 
 # ── FCM notification ──────────────────────────────────────────────────────────
@@ -441,6 +451,11 @@ def connect_and_watch(event_id, sessions, year, round_num, venue):
 def main():
     args = parse_args()
     event_id, venue, sessions = load_sessions(args.year, args.round, args.day)
+    if args.session:
+        sessions = filter_sessions(sessions, args.session)
+        if not sessions:
+            log.error(f"Session {args.session!r} not found for Round {args.round} ({args.day})")
+            sys.exit(1)
 
     log.info(f"Session watcher: Round {args.round} ({args.day}) — {venue} — TSL event {event_id}")
     log.info(f"Sessions: {[s['label'] for s in sessions]}")
