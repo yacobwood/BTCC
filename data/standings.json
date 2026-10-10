@@ -150,7 +150,7 @@
       "driver": "Tom CHILTON",
       "nat": "GBR",
       "class": "M",
-      "points": 188,
+      "points": 189,
       "wins": 1,
       "seconds": 1,
       "thirds": 2,
@@ -186,7 +186,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 122,
+      "points": 123,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -222,7 +222,7 @@
       "driver": "Lewis SELBY",
       "nat": "GBR",
       "class": "M",
-      "points": 45,
+      "points": 43,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -697,5 +697,5 @@
   "season": "2026",
   "round": 10,
   "venue": "Brands Hatch GP",
-  "updated": "2026-10-10T14:37:03Z"
+  "updated": "2026-10-10T16:42:58Z"
 }
