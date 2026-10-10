@@ -141,7 +141,11 @@ SESSION_SUFFIXES = {
 # "Champ(?:ionship|inship)" also tolerates a confirmed-live literal typo
 # in the 2018 Donington National book ("Champinship") that otherwise
 # silently drops every report heading for 2 of that event's 3 races.
-_TITLE = r"[^\n]*?British Touring Car Champ(?:ionship|inship)\s+"
+# "Br(?:i)?tish" likewise tolerates "Brtish", confirmed live on every Free
+# Practice page of the 2026 Brands Hatch GP book (Qualifying on the same
+# book spells it right) - it silently dropped that session's best speeds,
+# best sectors, weather and flag stats.
+_TITLE = r"[^\n]*?Br(?:i)?tish Touring Car Champ(?:ionship|inship)\s+"
 _DASH  = r"\s*-\s*"
 _ROUND_OPT = rf"(?:{_DASH}ROUND\s*\d+)?"
 

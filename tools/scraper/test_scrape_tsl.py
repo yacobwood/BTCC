@@ -602,6 +602,16 @@ class TestBestSpeedsHeadings(unittest.TestCase):
         label, pattern = next(p for p in s.BEST_SPEEDS_HEADINGS if p[0] == "Free Practice")
         self.assertIsNotNone(pattern.search(text))
 
+    def test_brtish_title_typo_is_tolerated(self):
+        # Confirmed live: every Free Practice page of the 2026 Brands Hatch GP
+        # book prints "Brtish" - it dropped that session's whole book data.
+        for report, headings in (("BEST SPEEDS", s.BEST_SPEEDS_HEADINGS),
+                                 ("BEST SECTORS", s.BEST_SECTORS_HEADINGS),
+                                 ("STATISTICS", s.STATISTICS_HEADINGS)):
+            text = f"2026 Kwik Fit Brtish Touring Car Championship\n\nFREE PRACTICE SESSION - {report}\n\nPOS"
+            label, pattern = next(p for p in headings if p[0] == "Free Practice")
+            self.assertIsNotNone(pattern.search(text), report)
+
     def test_race_heading_not_confused_with_qualifying_race_heading(self):
         # The old lookbehind-based exclusion is gone (Python's re can't do a
         # variable-width lookbehind, which flexible whitespace would need) -
