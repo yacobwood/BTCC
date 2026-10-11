@@ -211,7 +211,7 @@
     {
       "driver": "Tom Ingram",
       "starts": 385,
-      "wins": 43,
+      "wins": 45,
       "podiums": 124,
       "poles": 15,
       "fastestLaps": 52,
@@ -229,7 +229,7 @@
       "consecutivePoints": 36,
       "racesLed": 66,
       "hatTricks": 4,
-      "winPct": 0.11168831168831168,
+      "winPct": 0.11688311688311688,
       "podiumPct": 0.3220779220779221,
       "pointsPerStart": 10.192207792207792,
       "dnfPct": 0.0987012987012987
@@ -1199,7 +1199,7 @@
     {
       "driver": "Ricky Collard",
       "starts": 118,
-      "wins": 0,
+      "wins": 1,
       "podiums": 8,
       "poles": 0,
       "fastestLaps": 1,
@@ -1217,7 +1217,7 @@
       "consecutivePoints": 17,
       "racesLed": 4,
       "hatTricks": 0,
-      "winPct": 0.0,
+      "winPct": 0.00847457627118644,
       "podiumPct": 0.06779661016949153,
       "pointsPerStart": 4.627118644067797,
       "dnfPct": 0.2457627118644068
