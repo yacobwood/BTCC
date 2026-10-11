@@ -764,6 +764,11 @@
               "best": 70.472,
               "diff": 0.168
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         },
         {
@@ -1377,6 +1382,11 @@
               "best": 69.391,
               "diff": 0.293
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         },
         {
@@ -2255,6 +2265,11 @@
               "best": 69.444,
               "diff": 0.266
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         },
         {
@@ -6662,6 +6677,11 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         },
         {
@@ -10312,6 +10332,11 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         },
         {
@@ -14242,6 +14267,11 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         }
       ],
@@ -14845,6 +14875,12 @@
               "best": 48.622,
               "diff": 0.016
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -15306,6 +15342,12 @@
               "best": 48.127,
               "diff": 0.014
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -16068,6 +16110,12 @@
               "best": 48.452,
               "diff": 0.035
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -21058,6 +21106,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -24880,6 +24934,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -29690,6 +29750,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         }
       ],
@@ -30613,6 +30679,12 @@
               "best": 118.744,
               "diff": 0.225
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -31522,6 +31594,12 @@
               "best": 118.715,
               "diff": 0.0
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -32581,6 +32659,12 @@
               "best": 118.76599999999999,
               "diff": 0.009
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -35744,6 +35828,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -38881,6 +38971,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -42041,6 +42137,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         }
       ],
@@ -42922,6 +43024,12 @@
               "best": 86.491,
               "diff": 0.459
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -43789,6 +43897,12 @@
               "best": 85.443,
               "diff": 0.036
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -44332,6 +44446,12 @@
               "best": 86.098,
               "diff": 0.365
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -48039,6 +48159,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -51713,6 +51839,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -54720,6 +54852,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         }
       ],
@@ -55685,6 +55823,12 @@
               "best": 77.956,
               "diff": 0.302
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -56636,6 +56780,12 @@
               "best": 77.744,
               "diff": 0.357
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -57270,6 +57420,12 @@
               "best": 98.48599999999999,
               "diff": 3.24
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -61305,6 +61461,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -65331,6 +65493,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -68712,6 +68880,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         }
       ],
@@ -69557,6 +69731,12 @@
               "best": 52.825,
               "diff": 0.291
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -70388,6 +70568,12 @@
               "best": 52.647,
               "diff": 0.388
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -71046,6 +71232,12 @@
               "best": 52.842,
               "diff": 0.0
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -77084,6 +77276,11 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -82309,6 +82506,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -87863,6 +88066,11 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         }
       ],
@@ -88708,6 +88916,12 @@
               "best": 96.882,
               "diff": 0.733
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -89462,6 +89676,12 @@
               "best": 96.571,
               "diff": 0.629
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -89932,6 +90152,12 @@
               "driver": "Nick HALSTEAD",
               "team": ""
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -93496,6 +93722,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -96571,6 +96803,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -99725,6 +99963,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         }
       ],
@@ -100732,6 +100976,12 @@
               "best": 85.694,
               "diff": 0.074
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -101725,6 +101975,12 @@
               "best": 84.876,
               "diff": 0.0
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -102880,6 +103136,12 @@
               "best": 83.886,
               "diff": 0.358
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -106833,6 +107095,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -110801,6 +111069,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -114387,6 +114661,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         }
       ],
@@ -115232,6 +115512,12 @@
               "best": 59.776,
               "diff": 0.219
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -116063,6 +116349,12 @@
               "best": 59.234,
               "diff": 0.045
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -117057,6 +117349,12 @@
               "best": 59.715,
               "diff": 0.304
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -122145,6 +122443,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -127099,6 +127403,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -132077,6 +132387,11 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "sessionStats"
           ]
         }
       ],
@@ -133084,6 +133399,12 @@
               "best": 99.828,
               "diff": 0.292
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -134077,6 +134398,12 @@
               "best": 93.86500000000001,
               "diff": 0.383
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -135232,6 +135559,12 @@
               "best": 92.78399999999999,
               "diff": 0.287
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
@@ -138455,6 +138788,12 @@
                 }
               ]
             }
+          ],
+          "analysis": [
+            "laps",
+            "tyres",
+            "topSpeeds",
+            "sessionStats"
           ]
         },
         {
