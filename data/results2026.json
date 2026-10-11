@@ -133399,12 +133399,6 @@
               "best": 99.828,
               "diff": 0.292
             }
-          ],
-          "analysis": [
-            "laps",
-            "tyres",
-            "topSpeeds",
-            "sessionStats"
           ]
         },
         {
@@ -134398,12 +134392,6 @@
               "best": 93.86500000000001,
               "diff": 0.383
             }
-          ],
-          "analysis": [
-            "laps",
-            "tyres",
-            "topSpeeds",
-            "sessionStats"
           ]
         },
         {
@@ -135559,12 +135547,6 @@
               "best": 92.78399999999999,
               "diff": 0.287
             }
-          ],
-          "analysis": [
-            "laps",
-            "tyres",
-            "topSpeeds",
-            "sessionStats"
           ]
         },
         {
@@ -138788,12 +138770,6 @@
                 }
               ]
             }
-          ],
-          "analysis": [
-            "laps",
-            "tyres",
-            "topSpeeds",
-            "sessionStats"
           ]
         },
         {
