@@ -19,7 +19,7 @@
       "nat": "GBR",
       "class": "M",
       "points": 366,
-      "wins": 4,
+      "wins": 3,
       "seconds": 3,
       "thirds": 5,
       "team": "Team VERTU"
@@ -44,7 +44,7 @@
       "class": "M",
       "points": 287,
       "wins": 2,
-      "seconds": 2,
+      "seconds": 1,
       "thirds": 1,
       "team": "Speedworks Corolla Racing"
     },
@@ -93,7 +93,7 @@
       "points": 255,
       "wins": 0,
       "seconds": 3,
-      "thirds": 5,
+      "thirds": 4,
       "team": "Team VERTU"
     },
     {
@@ -697,5 +697,5 @@
   "season": "2026",
   "round": 10,
   "venue": "Brands Hatch GP",
-  "updated": "2026-10-11T11:07:05Z"
+  "updated": "2026-10-11T11:43:50Z"
 }
