@@ -105,9 +105,9 @@ def row_text(row):
 
 # ── Report index ──────────────────────────────────────────────────────────────
 
-REPORTS = ("SECTOR ANALYSIS", "STATISTICS", "TOP SPEEDS", "TYRE COMPOUNDS")
+REPORTS = ("SECTOR ANALYSIS", "STATISTICS", "TOP SPEEDS", "TYRE COMPOUNDS", "BEST SPEEDS", "BEST SECTORS")
 
-_REPORT_RE = re.compile(r"-\s*(SECTOR ANALYSIS|STATISTICS|TOP SPEEDS\s*@\s*(.+?)|TYRE COMPOUNDS)\s*$", re.IGNORECASE)
+_REPORT_RE = re.compile(r"-\s*(SECTOR ANALYSIS|STATISTICS|TOP SPEEDS\s*@\s*(.+?)|TYRE COMPOUNDS|BEST SPEEDS|BEST SECTORS)\s*$", re.IGNORECASE)
 _PART_RE = re.compile(r"^QUALIFYING\s*-\s*PART\s*(\d)", re.IGNORECASE)
 _RACE_RE = re.compile(r"^ROUND\s*(\d+)\s*-", re.IGNORECASE)
 # Same tolerance as scrape_tsl._TITLE: "Brtish" (2026 Brands Hatch GP practice
@@ -230,6 +230,87 @@ def parse_tyre_compounds(pages):
                 continue
             compounds = [c[2] for c in row if c[0] >= compound_x]
             out.append({"no": int(texts[0]), "compounds": compounds})
+    return out or None
+
+
+# ── Best speeds / best sectors (positional fallbacks) ─────────────────────────
+# scrape_tsl parses these two reports from the plain text stream, which
+# depends on pdfminer emitting the page's text boxes in a sensible order.
+# Confirmed live (2026 Brands Hatch GP Race 3, the amended finale): the POS
+# column came out AFTER every trap's data and the first trap's names came
+# out next to the second trap's speeds, so the text parser found nothing -
+# and pairing the lists by order would have given speeds to the wrong cars.
+# Reading by position on the page has no such ambiguity, and scored against
+# pdftotext -layout over all ten 2026 books these are exact wherever they
+# return a table, so scrape_tsl uses them first and the text parse second.
+
+_TRAP_LABEL_RE = re.compile(r"^(INTERMEDIATE \d+|FINISH LINE)$", re.IGNORECASE)
+
+
+def parse_best_speeds(pages):
+    """{"INTERMEDIATE 1": [(no, mph), ...], "FINISH LINE": [...], ...} in
+    printed (fastest-first) order, or None. Each trap is a NO/NAME/MPH column
+    group; the header row's MPH cells mark where each group ends and the
+    trap-label row gives their names left to right. Any mismatch between the
+    two returns None rather than guessing."""
+    traps = None
+    for page in pages:
+        labels, bounds = None, None
+        for row in _body_rows(page):
+            texts = [c[2].strip().upper() for c in row]
+            if labels is None:
+                found = [t for t in texts if _TRAP_LABEL_RE.match(t)]
+                if found:
+                    labels = found
+                continue
+            if bounds is None:
+                mph = [c for c in row if c[2].strip().upper() == "MPH"]
+                if mph and texts[0] == "POS":
+                    if len(mph) != len(labels):
+                        return None
+                    edges = [row[0][1]] + [c[1] + 1 for c in mph]
+                    bounds = list(zip(edges, edges[1:]))
+                    if traps is None:
+                        traps = {lab: [] for lab in labels}
+                continue
+            if not _INT_RE.match(texts[0]):
+                continue
+            for lab, (lo, hi) in zip(labels, bounds):
+                cells = [c[2].strip() for c in row if lo <= c[0] < hi]
+                if not cells:
+                    continue  # this trap has fewer entries than the POS run
+                no, speed = cells[0], cells[-1]
+                if not _INT_RE.match(no) or not _FLOAT_RE.match(speed):
+                    return None
+                traps[lab].append((int(no), float(speed)))
+    if not traps or not any(traps.values()):
+        return None
+    return traps
+
+
+# NAME is optional: a long surname can sit a fraction lower than the rest of
+# its row and land in a row of its own (confirmed live, 2026 Croft FP:
+# "5 116 1:21.162 1:21.251 0.089" with "SUTTON" alone underneath). The three
+# consecutive times at the end of the row are what identify it - the sector
+# columns to the left alternate car number / time.
+_BEST_SECTOR_ROW_RE = re.compile(
+    r"(?<![\d.])(\d+)\s+(\d+)\s+(?:([^\d\s][^\d]*?)\s+)?((?:\d+:)?\d{1,2}\.\d{3})\s+((?:\d+:)?\d{1,2}\.\d{3})\s+(\d+\.\d{3})$")
+
+
+def parse_best_sectors(pages):
+    """The IDEAL / BEST COMPARISON (Perfect Lap) table:
+    [{"no", "ideal", "best", "diff"}] in printed order, or None. It is the
+    right-hand block of every row (POS NO NAME IDEAL BEST DIFF), so it is
+    matched off the end of the row text - the sector columns to its left are
+    all numbers, so the NAME (never a number) anchors it."""
+    out = []
+    for page in pages:
+        for row in _body_rows(page):
+            m = _BEST_SECTOR_ROW_RE.search(row_text(row))
+            if not m:
+                continue
+            out.append({"no": int(m.group(2)), "ideal": time_to_secs(m.group(4)),
+                        "best": time_to_secs(m.group(5)), "diff": float(m.group(6))})
     return out or None
 
 
@@ -532,6 +613,8 @@ def parse_book_tables(pages):
     out = {}
     qual = {}
     for (session, report), entry in index.items():
+        if report not in _PARSERS:
+            continue  # BEST SPEEDS / BEST SECTORS: scrape_tsl fallbacks, see above
         field, parser = _PARSERS[report]
         value = parser(entry["pages"])
         if value is None:

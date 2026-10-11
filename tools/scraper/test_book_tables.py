@@ -101,7 +101,10 @@ class TestPageHeading(unittest.TestCase):
 
     def test_unrelated_reports_and_cover_ignored(self):
         self.assertIsNone(bt._page_heading(page("ROUND 25 - LAP CHART")))
-        self.assertIsNone(bt._page_heading(page("QUALIFYING - PART 1 - BEST SPEEDS")))
+        self.assertIsNone(bt._page_heading(page("QUALIFYING - PART 1 - POSITION CHART")))
+        # BEST SPEEDS / BEST SECTORS are indexed now (positional parsers, see below)
+        self.assertEqual(bt._page_heading(page("QUALIFYING - PART 1 - BEST SPEEDS")),
+                         ("Qualifying Part 1", "BEST SPEEDS", None))
         self.assertIsNone(bt._page_heading([heading("TOURING CAR CHAMPIONSHIP")]))
 
 
@@ -360,6 +363,92 @@ class TestMergeQualifyingStats(unittest.TestCase):
         self.assertEqual(m["finishTime"], "2026-09-26T14:40:00")
         self.assertEqual([(e["no"], e["group"]) for e in m["fastestLapHistory"]], [(1, 1), (2, 2)])
         self.assertEqual(m["classes"]["M"], {"starters": 12, "fastestLap": {"no": 2, "secs": 56.5}})
+
+
+
+# ── Best speeds / best sectors (x-positions from the live 2026 Brands Hatch GP
+#    Race 3 and Croft FP pages) ────────────────────────────────────────────────
+
+SPEED_LABELS = bt.make_row((67.4, 140.4, "INTERMEDIATE 1"), (203.5, 276.5, "INTERMEDIATE 2"),
+                           (486.9, 539.4, "FINISH LINE"))
+SPEED_HEADER = bt.make_row(
+    (17.0, 33.9, "POS"), (42.5, 54.5, "NO"), (58.8, 81.9, "NAME"), (149.5, 167.2, "MPH"),
+    (178.6, 190.6, "NO"), (195.6, 218.7, "NAME"), (285.5, 303.3, "MPH"),
+    (450.7, 462.7, "NO"), (467.7, 490.9, "NAME"), (557.7, 575.5, "MPH"))
+
+
+def speed_row(pos, *traps):
+    """traps: (no, name, mph) or None per trap, in SPEED_HEADER order."""
+    x = {0: (46.5, 59.5, 150.8), 1: (182.6, 195.6, 286.9), 2: (454.8, 467.7, 559.1)}
+    cells = [(27.5, 31.1, str(pos))]
+    for i, t in enumerate(traps):
+        if t:
+            no_x, name_x, mph_x = x[i]
+            cells += [(no_x, no_x + 7, str(t[0])), (name_x, name_x + 25, t[1]), (mph_x, mph_x + 16, t[2])]
+    return bt.make_row(*cells)
+
+
+class TestParseBestSpeeds(unittest.TestCase):
+    def test_reads_each_trap_by_column(self):
+        p = page("ROUND 30 - BEST SPEEDS", SPEED_LABELS, SPEED_HEADER,
+                 speed_row(1, (88, "DOBLE", "113.3"), (22, "SMILEY", "146.8"), (66, "COOK", "138.3")),
+                 speed_row(2, (16, "MOFFAT", "112.9"), (28, "HAMILTON", "145.8"), (2, "DE LEON", "137.2")))
+        self.assertEqual(bt.parse_best_speeds([p]), {
+            "INTERMEDIATE 1": [(88, 113.3), (16, 112.9)],
+            "INTERMEDIATE 2": [(22, 146.8), (28, 145.8)],
+            "FINISH LINE": [(66, 138.3), (2, 137.2)],
+        })
+
+    def test_short_trap_and_empty_pos_rows(self):
+        # 19 cars set speeds in that race but the POS column runs to 23
+        p = page("ROUND 30 - BEST SPEEDS", SPEED_LABELS, SPEED_HEADER,
+                 speed_row(1, (88, "DOBLE", "113.3"), (22, "SMILEY", "146.8"), (66, "COOK", "138.3")),
+                 speed_row(2, (16, "MOFFAT", "112.9"), None, (2, "DE LEON", "137.2")),
+                 speed_row(3))
+        self.assertEqual(bt.parse_best_speeds([p])["INTERMEDIATE 2"], [(22, 146.8)])
+
+    def test_label_and_column_count_mismatch_returns_none(self):
+        labels = bt.make_row((67.4, 140.4, "INTERMEDIATE 1"), (486.9, 539.4, "FINISH LINE"))
+        p = page("ROUND 30 - BEST SPEEDS", labels, SPEED_HEADER,
+                 speed_row(1, (88, "DOBLE", "113.3"), (22, "SMILEY", "146.8"), (66, "COOK", "138.3")))
+        self.assertIsNone(bt.parse_best_speeds([p]))
+
+    def test_indexed_as_a_race_report(self):
+        p = page("ROUND 30 - BEST SPEEDS", SPEED_LABELS)
+        self.assertIn(("Race 1", "BEST SPEEDS"), bt.index_reports([p]))
+
+
+SECTOR_BEST_HEADER = bt.make_row(
+    (17.0, 33.9, "POS"), (46.7, 58.7, "NO"), (70.8, 90.0, "TIME"), (131.8, 143.8, "NO"),
+    (155.9, 175.0, "TIME"), (306.1, 323.0, "POS"), (330.2, 342.2, "NO"), (348.7, 371.8, "NAME"),
+    (483.3, 506.4, "IDEAL"), (517.4, 538.2, "BEST"), (548.5, 566.3, "DIFF"))
+
+
+class TestParseBestSectors(unittest.TestCase):
+    def test_reads_perfect_lap_columns_with_their_own_car_number(self):
+        # The sector columns' car numbers (17, 116, 88) must not leak into the
+        # Perfect Lap row - the old text parse shifted numbers by a row.
+        p = page("FREE PRACTICE SESSION - BEST SECTORS", SECTOR_BEST_HEADER,
+                 bt.make_row((412.5, 458.0, "PERFECT LAP"), (482.9, 508.8, "1:20.789")),
+                 bt.make_row((27.5, 31.1, "1"), (50.8, 58.1, "2"), (72.0, 92.1, "24.587"),
+                             (133.7, 143.3, "32"), (157.1, 177.2, "33.130"), (319.5, 323.2, "1"),
+                             (332.1, 343.0, "32"), (348.7, 390.0, "ROWBOTTOM"), (483.3, 508.8, "1:20.827"),
+                             (517.3, 542.9, "1:20.996"), (554.8, 571.2, "0.169")))
+        self.assertEqual(bt.parse_best_sectors([p]),
+                         [{"no": 32, "ideal": 80.827, "best": 80.996, "diff": 0.169}])
+
+    def test_name_printed_on_its_own_row_still_counts(self):
+        p = page("FREE PRACTICE SESSION - BEST SECTORS", SECTOR_BEST_HEADER,
+                 bt.make_row((27.5, 31.1, "5"), (50.8, 58.1, "17"), (72.0, 92.1, "24.692"),
+                             (133.7, 143.3, "116"), (157.1, 177.2, "33.182"), (319.5, 323.2, "5"),
+                             (332.1, 343.0, "116"), (483.3, 508.8, "1:21.162"), (517.3, 542.9, "1:21.251"),
+                             (554.8, 571.2, "0.089")),
+                 bt.make_row((348.7, 375.6, "SUTTON")))
+        self.assertEqual(bt.parse_best_sectors([p]),
+                         [{"no": 116, "ideal": 81.162, "best": 81.251, "diff": 0.089}])
+
+    def test_no_rows_returns_none(self):
+        self.assertIsNone(bt.parse_best_sectors([page("ROUND 30 - BEST SECTORS", SECTOR_BEST_HEADER)]))
 
 
 if __name__ == "__main__":

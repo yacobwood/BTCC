@@ -895,6 +895,48 @@ def _zip_speed_entries(numbers, mph_values):
             for i, (no, mph) in enumerate(zip(numbers, mph_values))]
 
 
+def _positional_best_speeds(book_index, label):
+    """Best Speeds for one session read by page position (book_tables), in
+    the same shape as _parse_best_speeds_block. Primary source, text parse
+    is the fallback - see book_tables.parse_best_speeds."""
+    def one(session):
+        entry = book_index.get((session, "BEST SPEEDS"))
+        traps = book_tables.parse_best_speeds(entry["pages"]) if entry else None
+        if not traps:
+            return None
+        block = {"intermediate1": None, "intermediate2": None, "finish": None}
+        for trap_label, entries in traps.items():
+            key = _TRAP_SCHEMA_KEYS.get(trap_label.upper())
+            if key and entries:
+                block[key] = _zip_speed_entries([n for n, _ in entries], [m for _, m in entries])
+        return block
+    try:
+        if label == "Qualifying":
+            p1, p2 = one("Qualifying Part 1"), one("Qualifying Part 2")
+            return _merge_best_speeds_blocks(p1, p2) if p1 and p2 else None
+        return one(label)
+    except Exception as e:  # noqa: BLE001
+        print(f"    [best speeds] {label}: positional parse failed ({type(e).__name__}: {e})")
+        return None
+
+
+def _positional_best_sectors(book_index, label):
+    """Perfect Lap table for one session read by page position (book_tables),
+    in the same shape as _parse_best_sectors_block. Primary source, text
+    parse is the fallback."""
+    def one(session):
+        entry = book_index.get((session, "BEST SECTORS"))
+        return book_tables.parse_best_sectors(entry["pages"]) if entry else None
+    try:
+        if label == "Qualifying":
+            p1, p2 = one("Qualifying Part 1"), one("Qualifying Part 2")
+            return _merge_best_sectors_blocks(p1, p2) if (p1 or p2) else None
+        return one(label)
+    except Exception as e:  # noqa: BLE001
+        print(f"    [best sectors] {label}: positional parse failed ({type(e).__name__}: {e})")
+        return None
+
+
 def _merge_best_speeds_blocks(part1, part2):
     """Combine Qualifying Part 1 + Part 2 (the book's own two-group split)
     into one ranked list per trap, re-sorted by MPH descending and
@@ -1631,9 +1673,24 @@ def scrape_round(info, session_filter=None):
     book_text = _pdf_text(book_data) if book_data else ""
     laps_led = parse_laps_led(book_text) if book_data else {}
 
+    # Positional page model for the fallbacks below and the analysis tables.
+    # Guarded: these reports are extras, and an unforeseen page layout must
+    # never cost a live scrape its results/grids/standings.
+    try:
+        book_page_rows = book_tables.book_pages(book_data) if book_data else []
+        book_index = book_tables.index_reports(book_page_rows)
+    except Exception as e:  # noqa: BLE001
+        print(f"    [book] page model failed ({type(e).__name__}: {e}) - positional parsing skipped")
+        book_page_rows, book_index = [], {}
+
+    # Read by page position first, plain-text parse as the fallback. Scored
+    # against pdftotext -layout over all ten 2026 books: positional 42/42
+    # sessions right (28 it can't read, e.g. Silverstone's layout), text
+    # 24/26 - and text found nothing at all for the amended Brands Hatch GP
+    # Race 3 page, where its stream order was scrambled.
     best_speeds_raw = parse_best_speeds(book_text) if book_data else {}
     for race in races:
-        raw = best_speeds_raw.get(race["label"])
+        raw = _positional_best_speeds(book_index, race["label"]) or best_speeds_raw.get(race["label"])
         if raw:
             race["bestSpeeds"] = _resolve_best_speeds(raw, _number_driver_map(race))
             print(f"    [best speeds] {race['label']}: parsed")
@@ -1652,9 +1709,14 @@ def scrape_round(info, session_filter=None):
             race["flagStats"] = flags
             print(f"    [flag stats] {race['label']}: parsed")
 
+    # Position first, text fallback. The text parse got the Perfect Lap car
+    # numbers wrong in 33 of 50 2026 sessions (mostly races: P1's number was
+    # dropped and every row took the number of the row below, so the right
+    # times went to the wrong drivers). Positional: 70/70 sessions exact,
+    # including the two Qualifying groups, against pdftotext -layout.
     best_sectors_raw = parse_best_sectors(book_text) if book_data else {}
     for race in races:
-        raw = best_sectors_raw.get(race["label"])
+        raw = _positional_best_sectors(book_index, race["label"]) or best_sectors_raw.get(race["label"])
         if raw:
             race["bestSectors"] = _resolve_best_sectors(raw, _number_driver_map(race))
             print(f"    [best sectors] {race['label']}: parsed")
@@ -1666,10 +1728,8 @@ def scrape_round(info, session_filter=None):
             race["lapChart"] = _resolve_lap_chart(raw, _number_driver_map(race))
             print(f"    [lap chart] {race['label']}: parsed {len(raw)} laps")
 
-    # Guarded: these reports are extras, and an unforeseen page layout must
-    # never cost a live scrape its results/grids/standings.
     try:
-        tables = book_tables.parse_book_tables(book_tables.book_pages(book_data)) if book_data else {}
+        tables = book_tables.parse_book_tables(book_page_rows) if book_page_rows else {}
     except Exception as e:  # noqa: BLE001
         print(f"    [analysis] book tables failed ({type(e).__name__}: {e}) - skipped this run")
         tables = {}
