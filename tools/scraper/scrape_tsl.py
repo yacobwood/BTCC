@@ -738,8 +738,15 @@ def _parse_best_speeds_block(chunk):
     active trap (see _detect_active_traps), in the order printed: N car
     numbers (see _collect_numbers) then N MPH values (see _collect_mph).
     """
-    lines = [l.strip() for l in chunk.split("\n")]
-    lines = [l for l in lines if l]  # blank lines are a pdfminer layout artifact
+    # Each non-blank line keeps the id of the pdfminer text box it came from
+    # (boxes are separated by blank lines) for the _parse_speed_boxes fallback
+    boxed, box_id = [], 0
+    for l in chunk.split("\n"):
+        if l.strip():
+            boxed.append((box_id, l.strip()))
+        else:
+            box_id += 1
+    lines = [l for _, l in boxed]  # blank lines are a pdfminer layout artifact
 
     start = None
     for i in range(len(lines) - 4):
@@ -764,7 +771,25 @@ def _parse_best_speeds_block(chunk):
         return None
 
     idx = start + n  # past the POS run
+    traps = _parse_speeds_sequential(lines, idx, n, active_traps)
+    if traps is None:
+        traps = _parse_speed_boxes(boxed[idx:], n, len(active_traps))
+    if traps is None:
+        return None  # malformed/truncated chunk - caller treats as "not available yet"
+
     result = {"intermediate1": None, "intermediate2": None, "finish": None}
+    for label, (numbers, mph) in zip(active_traps, traps):
+        key = _TRAP_SCHEMA_KEYS.get(label)
+        if key:
+            result[key] = _zip_speed_entries(numbers, mph)
+    return result
+
+
+def _parse_speeds_sequential(lines, idx, n, active_traps):
+    """Read each trap as N car numbers then N MPH values (or the reverse, see
+    _peek_speed_block_order), in the order printed. Returns a list of
+    (numbers, mph) per trap, or None when the reads don't line up."""
+    traps = []
     for label in active_traps:
         order = _peek_speed_block_order(lines, idx)
         if order == "mph":
@@ -774,7 +799,7 @@ def _parse_best_speeds_block(chunk):
             numbers, idx = _collect_numbers(lines, idx, n)
             mph, idx = _collect_mph(lines, idx, n)
         if len(numbers) != n or len(mph) != n:
-            return None  # malformed/truncated chunk - caller treats as "not available yet"
+            return None
         # A driver who retired before reaching a trap simply has no row for
         # it, so a trap's real entry count can be LESS than n (the POS
         # run's own length, i.e. the full classified field) - confirmed
@@ -792,11 +817,68 @@ def _parse_best_speeds_block(chunk):
         # the whole block is treated as unreliable rather than shipping it.
         if len(set(numbers)) != len(numbers):
             return None
-        key = _TRAP_SCHEMA_KEYS.get(label)
-        if key:
-            result[key] = _zip_speed_entries(numbers, mph)
+        traps.append((numbers, mph))
+    return traps
 
-    return result
+
+def _parse_speed_boxes(boxed, n, trap_count):
+    """Fallback for when _parse_speeds_sequential can't line a trap up:
+    group by pdfminer text box instead of reading line by line.
+
+    Confirmed live (2026 Brands Hatch GP, Race 1): Shedden retired before
+    the finish line so that trap had 22 entries against n=23, AND pdfminer
+    printed the finish-line car numbers before Intermediate 3's MPH values.
+    The sequential read then pulled finish-line numbers from past the table,
+    the duplicate check rejected the whole session and Race 1 shipped no
+    speed traps at all, even though its other three traps were fine.
+
+    A text box never spans two traps, but one trap's column can be split
+    across boxes. So consecutive boxes of the same kind are joined while the
+    result is still a possible single trap (at most n entries; numbers never
+    repeat; MPH never rises down the list), and the i-th group of numbers is
+    paired with the i-th group of MPH values. Returns None unless every trap
+    pairs up with equal lengths."""
+    groups = []  # [box_id, [lines]] in printed order
+    for bid, line in boxed:
+        if groups and groups[-1][0] == bid:
+            groups[-1][1].append(line)
+        else:
+            groups.append([bid, [line]])
+
+    segments = {"num": [], "mph": []}
+    last_kind = None
+    for _, box_lines in groups:
+        nums = [int(m.group(1)) for l in box_lines if (m := re.match(r"^(\d{1,3})(?:\s|$)", l))]
+        mphs = [float(l) for l in box_lines if re.match(r"^\d+\.\d+$", l)]
+        if nums and not mphs:
+            kind, values = "num", nums
+        elif mphs and not nums:
+            kind, values = "mph", mphs
+        else:
+            continue  # headers, footers, anything mixed
+        segs = segments[kind]
+        if segs and last_kind == kind:
+            joined = segs[-1] + values
+            fits = len(joined) <= n and (
+                len(set(joined)) == len(joined) if kind == "num"
+                else all(a >= b for a, b in zip(joined, joined[1:])))
+            if fits:
+                segs[-1] = joined
+                continue
+        segs.append(values)
+        last_kind = kind
+
+    nums_segs = segments["num"][:trap_count]
+    mph_segs = segments["mph"][:trap_count]
+    if len(nums_segs) != trap_count or len(mph_segs) != trap_count:
+        return None
+    traps = []
+    for numbers, mph in zip(nums_segs, mph_segs):
+        if (len(numbers) != len(mph) or len(set(numbers)) != len(numbers)
+                or any(a < b for a, b in zip(mph, mph[1:]))):
+            return None
+        traps.append((numbers, mph))
+    return traps
 
 
 def _zip_speed_entries(numbers, mph_values):

@@ -533,9 +533,42 @@ class TestParseBestSpeedsBlock(unittest.TestCase):
         block = s._parse_best_speeds_block(chunk)
         self.assertIsNotNone(block['intermediate1'])
         self.assertEqual(block['intermediate1'][0]['no'], 10)
+
         self.assertEqual(block['intermediate1'][0]['mph'], 150.0)
         self.assertEqual(block['intermediate2'][0]['mph'], 130.0)
         self.assertEqual(block['finish'][0]['mph'], 110.0)
+
+    # Same shape as the live 2026 Brands Hatch GP Race 1 page: Intermediate 3
+    # present, a retirement (car 50) missing from the finish line, the finish
+    # numbers printed BEFORE Intermediate 3's MPH and one numbers column split
+    # across two text boxes. The sequential read fails here; the box fallback
+    # must recover every trap.
+    BRANDS_R1_SHAPE = (
+        "INTERMEDIATE 1\n\nINTERMEDIATE 2\n\nINTERMEDIATE 3\n\nFINISH LINE\n\nPOS\n\nNO NAME\n\nMPH NO NAME\n\n"
+        "1\n2\n3\n4\n5\n\n"
+        "10 ALPHA\n20 BETA\n30 GAMMA\n40 DELTA\n50 ECHO\n\n"
+        "113.1\n112.5\n112.4\n112.2\n53.1\n\n"
+        "30 GAMMA\n20 BETA\n\n10 ALPHA\n40 DELTA\n50 ECHO\n\n"   # split column
+        "147.4\n147.1\n146.5\n144.9\n75.0\n\n"
+        "40 DELTA\n10 ALPHA\n20 BETA\n30 GAMMA\n50 ECHO\n\n"     # Intermediate 3 numbers
+        "30 GAMMA\n40 DELTA\n20 BETA\n10 ALPHA\n\n"               # finish numbers, 4 of 5
+        "99.8\n97.8\n97.6\n97.1\n67.1\n\n"                       # Intermediate 3 MPH
+        "138.0\n137.7\n137.5\n133.4\n\n"                         # finish MPH
+        "ROUND 28 - TOP SPEEDS @ INTERMEDIATE 2\n\n1\n2\n3\n\n10 ALPHA\n20 BETA\n"
+    )
+
+    def test_short_finish_trap_with_reordered_columns_recovered(self):
+        block = s._parse_best_speeds_block(self.BRANDS_R1_SHAPE)
+        self.assertEqual([e['no'] for e in block['intermediate1']], [10, 20, 30, 40, 50])
+        self.assertEqual([e['no'] for e in block['intermediate2']], [30, 20, 10, 40, 50])
+        self.assertEqual(block['intermediate2'][4], {'pos': 5, 'no': 50, 'mph': 75.0})
+        self.assertEqual([(e['no'], e['mph']) for e in block['finish']],
+                         [(30, 138.0), (40, 137.7), (20, 137.5), (10, 133.4)])
+
+    def test_box_fallback_rejects_mismatched_lengths(self):
+        # Drop one finish MPH value: groups no longer pair up -> unusable
+        chunk = self.BRANDS_R1_SHAPE.replace("137.5\n133.4", "137.5")
+        self.assertIsNone(s._parse_best_speeds_block(chunk))
 
     def test_finish_mph_header_line_is_optional(self):
         # Confirmed live: a literal "MPH" line precedes Finish Line's values
@@ -551,7 +584,7 @@ class TestParseBestSpeedsBlock(unittest.TestCase):
     def test_returns_none_when_no_pos_run_found(self):
         self.assertIsNone(s._parse_best_speeds_block("some unrelated text\nwith no table in it"))
 
-    def test_trap_with_fewer_real_entries_than_the_pos_run_is_rejected_not_bled_into_next_trap(self):
+    def test_trap_with_fewer_real_entries_than_the_pos_run_recovered_not_bled_into_next_trap(self):
         # A driver who retired before reaching a trap simply has no row for
         # it, so a trap's real entry count can be less than n (the POS
         # run's own length, i.e. the full classified field) - confirmed
@@ -572,7 +605,13 @@ class TestParseBestSpeedsBlock(unittest.TestCase):
         finish_names = "30 GAMMA\n40 DELTA\n10 ALPHA\n20 BETA\n50 ECHO\n"
         finish_mph = "130.0\n129.0\n128.0\n127.0\n126.0\n"
         chunk = header + pos_run + "\n" + int2_names + "\n" + int2_mph + "\n" + finish_names + "\n" + finish_mph
-        self.assertIsNone(s._parse_best_speeds_block(chunk))
+        # The sequential read still can't place the short trap, but since
+        # 2026-10-11 the text-box fallback (_parse_speed_boxes) recovers it
+        # exactly instead of rejecting the whole session.
+        block = s._parse_best_speeds_block(chunk)
+        self.assertEqual([(e['no'], e['mph']) for e in block['intermediate2']],
+                         [(30, 146.0), (40, 144.0), (50, 142.0)])
+        self.assertEqual([e['no'] for e in block['finish']], [30, 40, 10, 20, 50])
 
     def test_mph_before_numbers_order_parsed_same_as_numbers_before_mph(self):
         # Confirmed live: a trap's own N-numbers/N-MPH pair can print in
