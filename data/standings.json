@@ -19,7 +19,7 @@
       "nat": "GBR",
       "class": "M",
       "points": 366,
-      "wins": 3,
+      "wins": 4,
       "seconds": 3,
       "thirds": 5,
       "team": "Team VERTU"
@@ -44,7 +44,7 @@
       "class": "M",
       "points": 287,
       "wins": 2,
-      "seconds": 1,
+      "seconds": 2,
       "thirds": 1,
       "team": "Speedworks Corolla Racing"
     },
@@ -54,7 +54,7 @@
       "driver": "Adam MORGAN",
       "nat": "GBR",
       "class": "M",
-      "points": 274,
+      "points": 272,
       "wins": 3,
       "seconds": 2,
       "thirds": 0,
@@ -93,7 +93,7 @@
       "points": 255,
       "wins": 0,
       "seconds": 3,
-      "thirds": 4,
+      "thirds": 5,
       "team": "Team VERTU"
     },
     {
@@ -174,7 +174,7 @@
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 170,
+      "points": 171,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -246,7 +246,7 @@
       "driver": "Daniel LLOYD",
       "nat": "GBR",
       "class": "I",
-      "points": 30,
+      "points": 31,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -364,17 +364,17 @@
     {
       "pos": 8,
       "team": "Restart Racing",
-      "points": 253
+      "points": 254
     },
     {
       "pos": 9,
       "team": "CPRL",
-      "points": 180
+      "points": 178
     },
     {
       "pos": 10,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 171
+      "points": 172
     }
   ],
   "manufacturers": [
@@ -697,5 +697,5 @@
   "season": "2026",
   "round": 10,
   "venue": "Brands Hatch GP",
-  "updated": "2026-10-11T11:43:50Z"
+  "updated": "2026-10-11T12:01:20Z"
 }
