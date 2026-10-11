@@ -475,6 +475,12 @@ describe('fetchHubPosts', () => {
     expect(result[0].title).toBe('Live');
   });
 
+  it('marks every mapped post as a hubPost (ArticleScreen keeps its styling)', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published]})});
+    const result = await fetchHubPosts();
+    expect(result[0].hubPost).toBe(true);
+  });
+
   it('filters out drafts not in previewDeviceIds', async () => {
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({posts: [published, draftOther]})});
     const result = await fetchHubPosts();

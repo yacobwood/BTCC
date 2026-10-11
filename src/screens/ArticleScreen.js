@@ -1052,12 +1052,17 @@ export default function ArticleScreen({route, navigation}) {
 
 // ─── HTML builder ─────────────────────────────────────────────────────────────
 
-function sanitise(html) {
-  return html
+// keepStyles: hub posts are written by us, so their own <style> blocks,
+// inline styles and image sizing are the point, not noise to strip. Only
+// scraped btcc.net content needs its inline styles removed (they fight the
+// app's dark layout). The empty-paragraph strip still applies to both.
+function sanitise(html, {keepStyles = false} = {}) {
+  const styled = keepStyles ? html : html
     .replace(/<style[^>]*>.*?<\/style>/gis, '')
     .replace(/\s+style="[^"]*"/g, '')
     .replace(/\s+style='[^']*'/g, '')
-    .replace(/\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*"/g, '')
+    .replace(/\s+(?:width|height|srcset|sizes|loading|decoding|fetchpriority)="[^"]*"/g, '');
+  return styled
     // A genuinely empty paragraph (a stray blank line left in the source
     // content - e.g. a markdown double-newline that survived conversion,
     // or one left over from admin/standings-admin.html's Quill editor
@@ -1081,7 +1086,7 @@ function sanitise(html) {
 // capture the `source` prop's html string, and changing that for every other
 // test in this file just to reach this one string wasn't worth it.
 export function buildHtml(article, topPad) {
-  const content = sanitise(article.content || '');
+  const content = sanitise(article.content || '', {keepStyles: !!article.hubPost});
   // Hub posts carry their own explicit external sourceUrl (e.g. a credited
   // Reddit thread); regular btcc.net-scraped articles never set that field
   // but do have `link` (the original btcc.net article URL) - fall back to
@@ -1175,6 +1180,25 @@ export function buildHtml(article, topPad) {
       ol.steps { list-style:none; counter-reset:step; }
       ol.steps li { position:relative; padding-left:26px; counter-increment:step; }
       ol.steps li::before { content:counter(step); position:absolute; left:-4px; top:-1px; width:20px; height:20px; border-radius:10px; background:#FEBD02; color:#020255; font-size:11px; font-weight:800; text-align:center; line-height:20px; }
+      /* Hub post layout kit - classes a hub post's own HTML can use for
+         richer layouts. Older app builds ignore unknown classes, so every
+         block below must still read sensibly as plain stacked content.
+         .media: image beside text (add .right to put the image on the
+         right). .card: highlighted panel. .kicker: small yellow label above
+         a heading. .pill: inline yellow badge. .stats/.stat: row of big
+         numbers with a caption underneath. */
+      .media { display:grid; grid-template-columns:38% 1fr; gap:14px; align-items:center; margin:16px 0; }
+      .media.right { grid-template-columns:1fr 38%; }
+      .media.right > :first-child { order:2; }
+      .media img { margin:0; }
+      .media > div > :last-child, .card > :last-child { margin-bottom:0; }
+      .card { background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:8px; padding:14px; margin:16px 0; }
+      .kicker { font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#FEBD02; margin:18px 0 0; }
+      .kicker + h2, .kicker + h3 { margin-top:2px; }
+      .pill { display:inline-block; background:#FEBD02; color:#020255; font-weight:800; border-radius:999px; padding:2px 10px; font-size:14px; line-height:1.5; }
+      .stats { display:flex; gap:8px; margin:16px 0; }
+      .stat { flex:1; background:rgba(255,255,255,0.05); border-radius:8px; padding:10px 6px; text-align:center; font-size:12px; color:#8B949E; line-height:1.3; }
+      .stat b { display:block; font-size:24px; font-weight:800; color:#fff; line-height:1.2; }
       iframe { width:100%!important; max-width:100%!important; border:none; }
       video { width:100%!important; height:auto!important; border-radius:8px; margin:12px 0; }
       .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:16px 0; }

@@ -22,7 +22,10 @@ const ARTICLE_NOTIF_TYPES = new Set(['news', 'hub', 'digest', 'explainer']);
 function fetchHubPost(id) {
   return fetch(HUB_NEWS_URL + '?t=' + Date.now())
     .then(r => r.json())
-    .then(data => data.posts?.find(p => String(p.id) === String(id)) || null);
+    .then(data => data.posts?.find(p => String(p.id) === String(id)) || null)
+    // Raw hub_news.json post, not run through client.js's mapHubPosts, so it
+    // needs the same hubPost flag for ArticleScreen to keep its styling.
+    .then(post => (post ? {...post, hubPost: true} : null));
 }
 
 /**

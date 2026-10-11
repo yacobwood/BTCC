@@ -281,6 +281,25 @@ describe('navigateFromData', () => {
       expect(ref.navigate).not.toHaveBeenCalled();
       expect(ref.dispatch).not.toHaveBeenCalled();
     });
+
+    it('type="hub" marks the fetched raw post as a hubPost so its styling is kept', async () => {
+      const prevFetch = global.fetch;
+      global.fetch = jest.fn().mockResolvedValue({
+        json: () => Promise.resolve({posts: [{id: '42', title: 'Styled', content: '<div style="color:red">x</div>'}]}),
+      });
+      try {
+        const ref = makeRef();
+        navigateFromData(ref, {type: 'hub', id: '42'});
+        await new Promise(r => setTimeout(r, 0));
+        await new Promise(r => setTimeout(r, 0));
+        const reset = ref.dispatch.mock.calls[0][0];
+        const article = reset.routes[0].state.routes[1].params.article;
+        expect(article.hubPost).toBe(true);
+        expect(article.title).toBe('Styled');
+      } finally {
+        global.fetch = prevFetch;
+      }
+    });
   });
 
   describe('explainer article deeplinks', () => {

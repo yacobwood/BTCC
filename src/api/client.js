@@ -399,6 +399,8 @@ function mapHubPosts(data, uid) {
       ].filter(Boolean).join('\n'),
       source: p.source || 'btcc hub',
       sourceUrl: p.sourceUrl || null,
+      // Lets ArticleScreen keep this post's own styling (see sanitise).
+      hubPost: true,
     }))
     .sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate))
     .slice(0, MAX_HUB_POSTS);

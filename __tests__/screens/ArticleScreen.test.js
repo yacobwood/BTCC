@@ -1011,6 +1011,43 @@ describe('buildHtml empty paragraph stripping', () => {
   });
 });
 
+// ─── buildHtml: hub post styling ───────────────────────────────────────────
+//
+// Scraped btcc.net articles have inline styles/sizes stripped because they
+// fight the dark layout. Hub posts are our own content, so their styling is
+// kept, letting a post lay an image beside text etc.
+
+describe('buildHtml hub post styling', () => {
+  const STYLED = '<style>.x{color:red}</style><div class="media" style="gap:20px"><img src="https://example.com/a.jpg" width="300"><div><p>Side text</p></div></div>';
+
+  it('keeps <style> blocks, inline styles and image sizes for hub posts', () => {
+    const html = buildHtml({title: 'T', content: STYLED, hubPost: true}, 0);
+    expect(html).toContain('.x{color:red}');
+    expect(html).toContain('style="gap:20px"');
+    expect(html).toContain('width="300"');
+  });
+
+  it('still strips them from scraped articles', () => {
+    const html = buildHtml({title: 'T', content: STYLED, source: 'btcc.net'}, 0);
+    expect(html).not.toContain('.x{color:red}');
+    expect(html).not.toContain('style="gap:20px"');
+    expect(html).not.toContain('width="300"');
+    expect(html).toContain('class="media"');
+  });
+
+  it('still removes empty paragraphs from hub posts', () => {
+    const html = buildHtml({title: 'T', content: '<p>A</p><p><br></p><p>B</p>', hubPost: true}, 0);
+    expect(html).not.toContain('<p><br></p>');
+  });
+
+  it('ships the layout kit classes hub posts can use', () => {
+    const html = buildHtml({title: 'T', content: '', hubPost: true}, 0);
+    ['.media {', '.media.right', '.card {', '.kicker {', '.pill {', '.stats {', '.stat b'].forEach(sel => {
+      expect(html).toContain(sel);
+    });
+  });
+});
+
 // ─── buildHtml: hero image attribution ─────────────────────────────────────
 //
 // CC-licensed hero images (currently just the Jack Sears Trophy explainer,
