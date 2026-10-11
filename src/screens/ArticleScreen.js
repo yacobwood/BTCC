@@ -1187,13 +1187,13 @@ export function buildHtml(article, topPad) {
          right). .card: highlighted panel. .kicker: small yellow label above
          a heading. .pill: inline yellow badge. .stats/.stat: row of big
          numbers with a caption underneath. */
-      .media { display:grid; grid-template-columns:38% 1fr; gap:14px; align-items:center; margin:12px 0; padding:14px; background:#151936; border-top:3px solid #FEBD02; border-radius:12px; }
+      .media { display:grid; grid-template-columns:38% 1fr; gap:14px; align-items:center; margin:20px 0; padding:14px; background:#232A5E; border-top:3px solid #FEBD02; border-radius:12px; box-shadow:0 10px 24px rgba(0,0,0,0.5); }
       .media.right { grid-template-columns:1fr 38%; }
       .media.right > :first-child { order:2; }
-      .media img { margin:0; background:radial-gradient(circle at 50% 60%, rgba(80,110,255,0.55), rgba(80,110,255,0) 62%); }
+      .media img { margin:0; background:radial-gradient(closest-side, rgba(80,110,255,0.5), rgba(80,110,255,0)); }
       .media > div > :last-child, .card > :last-child { margin-bottom:0; }
       .media .kicker, .card .kicker { margin-top:0; }
-      .card { background:#1A1D3A; border-left:3px solid #FEBD02; border-radius:8px; padding:14px; margin:12px 0; }
+      .card { background:#232A5E; border-left:3px solid #FEBD02; border-radius:8px; padding:14px; margin:16px 0; }
       .kicker { font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#FEBD02; margin:18px 0 0; }
       .kicker + h2, .kicker + h3 { margin-top:2px; }
       /* A top-level kicker opens a new part of the article: extra space and
