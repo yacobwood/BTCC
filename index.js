@@ -41,5 +41,12 @@ notifee.onBackgroundEvent(async ({type, detail}) => {
 
 AppRegistry.registerComponent(appName, () => App);
 if (Platform.OS === 'ios' && TrackPlayer) {
-  TrackPlayer.registerPlaybackService(() => async () => {});
+  // Lock-screen / Control Centre buttons only work if handled here.
+  const {Event} = require('react-native-track-player');
+  TrackPlayer.registerPlaybackService(() => async () => {
+    TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
+    TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
+    TrackPlayer.addEventListener(Event.RemoteStop, () => TrackPlayer.reset());
+    TrackPlayer.addEventListener(Event.RemoteSeek, ({position}) => TrackPlayer.seekTo(position));
+  });
 }

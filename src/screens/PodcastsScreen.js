@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useMemo, useRef} from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager, RefreshControl} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, InteractionManager, RefreshControl, PanResponder} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Colors} from '../theme/colors';
@@ -49,6 +49,98 @@ function formatDuration(raw) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+// <itunes:duration> may be plain seconds ("2730"), "MM:SS" or "HH:MM:SS".
+export function parseDurationSeconds(raw) {
+  if (!raw) return 0;
+  const parts = String(raw).trim().split(':').map(n => parseInt(n, 10));
+  if (parts.some(isNaN)) return 0;
+  return parts.reduce((total, n) => total * 60 + n, 0);
+}
+
+export function formatClock(totalSeconds) {
+  const t = Math.max(0, Math.floor(totalSeconds || 0));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  const ss = s.toString().padStart(2, '0');
+  return h > 0 ? `${h}:${m.toString().padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+}
+
+// Tap or drag anywhere on the track to seek. The thumb follows the finger
+// locally while dragging and only seeks once on release, so a drag doesn't
+// fire dozens of native seeks.
+function ProgressBar({position, duration, onSeek}) {
+  const [width, setWidth] = useState(0);
+  const [dragPos, setDragPos] = useState(null);
+  const stateRef = useRef({width: 0, duration: 0, onSeek});
+  stateRef.current = {width, duration, onSeek};
+
+  const toSeconds = (x) => {
+    const {width: w, duration: d} = stateRef.current;
+    if (!w || !d) return 0;
+    return Math.min(Math.max(x / w, 0), 1) * d;
+  };
+
+  const responder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => stateRef.current.duration > 0,
+    onMoveShouldSetPanResponder: () => stateRef.current.duration > 0,
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderGrant: e => setDragPos(toSeconds(e.nativeEvent.locationX)),
+    onPanResponderMove: e => setDragPos(toSeconds(e.nativeEvent.locationX)),
+    onPanResponderRelease: e => {
+      stateRef.current.onSeek(toSeconds(e.nativeEvent.locationX));
+      setDragPos(null);
+    },
+    onPanResponderTerminate: () => setDragPos(null),
+  }), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const shown = dragPos ?? position;
+  const pct = duration > 0 ? Math.min(shown / duration, 1) * 100 : 0;
+
+  return (
+    <View style={styles.progressWrap}>
+      <View
+        testID="podcast-progress"
+        style={styles.progressHit}
+        onLayout={e => setWidth(e.nativeEvent.layout.width)}
+        accessibilityRole="adjustable"
+        accessibilityLabel="Playback position"
+        accessibilityValue={{min: 0, max: Math.round(duration), now: Math.round(shown), text: `${formatClock(shown)} of ${formatClock(duration)}`}}
+        accessibilityActions={[{name: 'increment'}, {name: 'decrement'}]}
+        onAccessibilityAction={e => {
+          const step = e.nativeEvent.actionName === 'increment' ? 15 : -15;
+          onSeek(Math.min(Math.max(position + step, 0), duration));
+        }}
+        {...responder.panHandlers}>
+        <View style={styles.progressTrack} pointerEvents="none">
+          <View style={[styles.progressFill, {width: `${pct}%`}]} />
+        </View>
+        <View style={[styles.progressThumb, {left: `${pct}%`}]} pointerEvents="none" />
+      </View>
+      <View style={styles.progressTimes}>
+        <Text style={styles.progressTime}>{formatClock(shown)}</Text>
+        <View style={styles.skipRow}>
+          <TouchableOpacity
+            onPress={() => onSeek(Math.max(position - 10, 0))}
+            style={styles.skipBtn}
+            accessibilityLabel="Back 10 seconds"
+            accessibilityRole="button">
+            <Icon name="replay-10" size={26} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => onSeek(duration > 0 ? Math.min(position + 30, duration) : position + 30)}
+            style={styles.skipBtn}
+            accessibilityLabel="Forward 30 seconds"
+            accessibilityRole="button">
+            <Icon name="forward-30" size={26} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.progressTime}>{duration > 0 ? formatClock(duration) : '--:--'}</Text>
+      </View>
+    </View>
+  );
+}
+
 function formatDate(raw) {
   try {
     return new Date(raw).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
@@ -66,7 +158,7 @@ export default function PodcastsScreen({navigation}) {
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState('All');
   const [page, setPage] = useState(1);
-  const {currentStation, isPlaying, play, stop} = useRadio();
+  const {currentStation, isPlaying, isPaused, progress, play, stop, pause, resume, seekTo} = useRadio();
   // Tracks whether the initial fetch has already been kicked off - NOT
   // `loading` itself, because the effect below calls setLoading(false) on a
   // cache hit before it awaits InteractionManager. Driving the effect's
@@ -163,36 +255,77 @@ export default function PodcastsScreen({navigation}) {
   const onFilterChange = (f) => { setFilter(f); setPage(1); };
   const onLoadMore = () => { if (visible.length < filtered.length) setPage(p => p + 1); };
 
+  const hasActive = !!currentStation && (isPlaying || isPaused);
+
   const toggleEpisode = (episode) => {
-    if (currentStation === episode.title && isPlaying) {
-      Analytics.navItemClicked('podcast_stop:' + episode.title);
-      stop();
+    const isCurrent = hasActive && currentStation === episode.title;
+    if (isCurrent && isPlaying) {
+      Analytics.navItemClicked('podcast_pause:' + episode.title);
+      pause();
+    } else if (isCurrent && isPaused) {
+      Analytics.navItemClicked('podcast_resume:' + episode.title);
+      resume();
     } else {
       Analytics.navItemClicked('podcast_play:' + episode.title);
-      play({name: episode.title, streamUrl: episode.url});
+      play({name: episode.title, streamUrl: episode.url, isLive: false});
     }
   };
 
+  const stopEpisode = (episode) => {
+    Analytics.navItemClicked('podcast_stop:' + episode.title);
+    stop();
+  };
+
+  const seekEpisode = (episode, seconds) => {
+    Analytics.navItemClicked('podcast_seek:' + episode.title);
+    seekTo(seconds);
+  };
+
   const renderEpisode = ({item}) => {
-    const active = currentStation === item.title && isPlaying;
+    const active = hasActive && currentStation === item.title;
+    const playingNow = active && isPlaying;
+    const actionLabel = !active ? 'Play' : playingNow ? 'Pause' : 'Resume';
+    // The player's own duration is unknown until the file's header loads -
+    // fall back to the RSS duration so the bar has a scale straight away.
+    const duration = progress?.duration > 0 ? progress.duration : parseDurationSeconds(item.duration);
     return (
-      <TouchableOpacity
-        style={[styles.card, active && styles.cardActive]}
-        onPress={() => toggleEpisode(item)}
-        accessibilityLabel={`${active ? 'Stop' : 'Play'} ${item.title}`}
-        accessibilityRole="button">
-        <View style={[styles.playBtn, active && {backgroundColor: Colors.yellow}]}>
-          <Icon name={active ? 'stop' : 'play-arrow'} size={24} color={active ? Colors.navy : '#fff'} />
+      <View style={[styles.card, active && styles.cardActive]}>
+        <View style={styles.cardRow}>
+          <TouchableOpacity
+            style={styles.cardMain}
+            onPress={() => toggleEpisode(item)}
+            accessibilityLabel={`${actionLabel} ${item.title}`}
+            accessibilityRole="button">
+            <View style={[styles.playBtn, active && {backgroundColor: Colors.yellow}]}>
+              <Icon name={playingNow ? 'pause' : 'play-arrow'} size={24} color={active ? Colors.navy : '#fff'} />
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={[styles.title, active && {color: Colors.yellow}]} numberOfLines={2}>{item.title}</Text>
+              <View style={styles.meta}>
+                {item.pubDate ? <Text style={styles.metaText}>{formatDate(item.pubDate)}</Text> : null}
+                {item.duration ? <Text style={styles.metaText}>{formatDuration(item.duration)}</Text> : null}
+                {active && !playingNow ? <Text style={[styles.metaText, {color: Colors.yellow}]}>Paused</Text> : null}
+              </View>
+            </View>
+          </TouchableOpacity>
+          {active && (
+            <TouchableOpacity
+              style={styles.stopBtn}
+              onPress={() => stopEpisode(item)}
+              accessibilityLabel={`Stop ${item.title}`}
+              accessibilityRole="button">
+              <Icon name="stop" size={20} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
-        <View style={{flex: 1}}>
-          <Text style={[styles.title, active && {color: Colors.yellow}]} numberOfLines={2}>{item.title}</Text>
-          <View style={styles.meta}>
-            {item.pubDate ? <Text style={styles.metaText}>{formatDate(item.pubDate)}</Text> : null}
-            {item.duration ? <Text style={styles.metaText}>{formatDuration(item.duration)}</Text> : null}
-          </View>
-        </View>
-        {active && <View style={styles.liveDot} />}
-      </TouchableOpacity>
+        {active && (
+          <ProgressBar
+            position={progress?.position || 0}
+            duration={duration}
+            onSeek={s => seekEpisode(item, s)}
+          />
+        )}
+      </View>
     );
   };
 
@@ -203,7 +336,7 @@ export default function PodcastsScreen({navigation}) {
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>PODCASTS</Text>
-        {isPlaying && (
+        {hasActive && (
           <TouchableOpacity onPress={stop} style={styles.stopAllBtn} accessibilityLabel="Stop playback" accessibilityRole="button">
             <Icon name="stop" size={18} color={Colors.navy} />
           </TouchableOpacity>
@@ -278,13 +411,24 @@ const styles = StyleSheet.create({
   chipActive: {backgroundColor: Colors.yellow, borderColor: Colors.yellow},
   chipText: {color: Colors.textSecondary, fontSize: 13, fontWeight: '600'},
   chipTextActive: {color: Colors.navy},
-  card: {flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.card, borderRadius: 12, padding: 14, marginBottom: 10, gap: 12},
+  card: {backgroundColor: Colors.card, borderRadius: 12, padding: 14, marginBottom: 10},
+  cardRow: {flexDirection: 'row', alignItems: 'center', gap: 12},
+  cardMain: {flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12},
   cardActive: {borderWidth: 1, borderColor: Colors.yellow},
   playBtn: {width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center'},
   title: {color: '#fff', fontSize: 14, fontWeight: '700', lineHeight: 20},
   meta: {flexDirection: 'row', gap: 10, marginTop: 4},
   metaText: {color: Colors.textSecondary, fontSize: 11},
-  liveDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.yellow},
+  stopBtn: {width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.surface, justifyContent: 'center', alignItems: 'center'},
+  progressWrap: {marginTop: 12},
+  progressHit: {height: 24, justifyContent: 'center'},
+  progressTrack: {height: 4, borderRadius: 2, backgroundColor: Colors.surface, overflow: 'hidden'},
+  progressFill: {height: 4, backgroundColor: Colors.yellow},
+  progressThumb: {position: 'absolute', width: 14, height: 14, borderRadius: 7, marginLeft: -7, backgroundColor: Colors.yellow},
+  progressTimes: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2},
+  skipRow: {flexDirection: 'row', gap: 24},
+  skipBtn: {padding: 4},
+  progressTime: {color: Colors.textSecondary, fontSize: 11, fontVariant: ['tabular-nums']},
   emptyText: {color: Colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 40},
   monthHeader: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 2, marginTop: 16, marginBottom: 8},
 });
