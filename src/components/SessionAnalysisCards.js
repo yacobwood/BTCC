@@ -502,17 +502,16 @@ function TyresBody({tyres, order, roundNumber, session, isFavourite}) {
               {order[t.no] != null ? <RankBadge pos={order[t.no] + 1} /> : <Text style={styles.rankBlank}>-</Text>}
               <View style={tableStyles.main}><DriverName name={t.driver} fav={fav} /></View>
               <View style={styles.tyreRow}>
-                {t.compounds.map((c, i) => (
-                  <React.Fragment key={i}>
-                    {i > 0 && <Icon name="chevron-right" size={12} color={Colors.textSecondary} />}
-                    <TyreIcon name={c} size={22} />
-                  </React.Fragment>
-                ))}
+                {/* Side by side, not arrowed: TSL's columns aren't a reliable
+                    order of use - 2026 Brands Hatch GP Race 1 lists Collard
+                    as Medium + Soft with no pit stop (and Soft is banned in
+                    a Qualifying Race, where his sheet reads the same). */}
+                {t.compounds.map((c, i) => <TyreIcon key={i} name={c} size={22} />)}
               </View>
             </View>
           );
         })}
-        <Text style={tableStyles.footnote}>Compounds in the order each driver used them, listed in classification order</Text>
+        <Text style={tableStyles.footnote}>Compounds TSL recorded for each car</Text>
       </View>
     </View>
   );
@@ -778,7 +777,7 @@ const styles = StyleSheet.create({
   keyText: {color: Colors.textSecondary, fontSize: 10},
   tyre: {alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B0C14'},
   tyreLetter: {fontWeight: '900'},
-  tyreRow: {flexDirection: 'row', alignItems: 'center', gap: 3},
+  tyreRow: {flexDirection: 'row', alignItems: 'center', gap: 5},
   rankBlank: {color: Colors.textSecondary, width: 22, textAlign: 'center'},
   usageRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4, marginBottom: 6},
   usageTile: {flexGrow: 1, flexBasis: '30%', flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.card, borderRadius: 12, padding: 10},

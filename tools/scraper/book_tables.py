@@ -210,8 +210,9 @@ def _body_rows(page):
 # ── Tyre compounds ────────────────────────────────────────────────────────────
 
 def parse_tyre_compounds(pages):
-    """[{"no": int, "compounds": ["Medium", "Soft", ...]}] in the order each
-    driver used them. Compound cells are those starting at or right of the
+    """[{"no": int, "compounds": ["Medium", "Soft", ...]}] in the page's own
+    column order. Not a reliable order of use: 2026 Brands Hatch GP Race 1
+    lists Collard as Medium then Soft with no pit stop. Compound cells are those starting at or right of the
     "COMPOUND 1" header (left-aligned under it; the entry column to its left
     can run long, e.g. "Laser Tools Racing with MB Motorsport", which is
     exactly where the text-stream approach glued "Medium" onto the team)."""

@@ -231,6 +231,15 @@ describe('TyresCard', () => {
   });
 });
 
+describe('TyresCard compound display', () => {
+  it('shows compounds side by side with no order-of-use arrow', async () => {
+    const results = [{number: 11}, {number: 80}];
+    const {findByText, UNSAFE_queryAllByProps} = renderWithProviders(<TyresCard {...PROPS} results={results} />);
+    expect(await findByText('Compounds TSL recorded for each car')).toBeTruthy();
+    expect(UNSAFE_queryAllByProps({name: 'chevron-right'})).toHaveLength(0);
+  });
+});
+
 describe('TopSpeedsCard', () => {
   it('shows average and best in mph', async () => {
     const {findByText, getByText} = renderWithProviders(<TopSpeedsCard {...PROPS} useKm={false} />);
