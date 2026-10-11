@@ -273,6 +273,31 @@ def _pdf_text(pdf_bytes):
         Path(path).unlink(missing_ok=True)
 
 
+def foreign_classification_reason(pdf_text, results):
+    """Return why a session PDF must not be used, or None if it looks like a
+    real BTCC classification.
+
+    TSL briefly served the Porsche Carrera Cup GB race at the BTCC Race 1 URL
+    (2026-10-11, Brands Hatch GP, 264103rc1trg.pdf, ~11:43-12:00 UTC) before
+    replacing it with the amended BTCC classification. Parsed as BTCC it gave
+    15 rows with blank drivers and car 0, wiped the real Race 1 result, moved
+    wins/podiums in standings and set the Porsche 1:26.539 as the circuit's
+    BTCC race lap record (which the faster-only record rule then never undoes).
+
+    Every TSL BTCC PDF 2001-2026 prints "... Touring Car Championship" as
+    extractable text (checked against the full Post Race Docs archive), so a
+    PDF without it is another series. The second check catches any layout
+    mismatch: a genuine classification always yields a driver name and car
+    number for most rows."""
+    if pdf_text and not re.search(r"touring\s+car", pdf_text, re.I):
+        return "not a BTCC document"
+    if results:
+        named = sum(1 for r in results if r.get("driver") and r.get("no"))
+        if named * 2 < len(results):
+            return f"only {named}/{len(results)} rows have a driver and car number"
+    return None
+
+
 # ── Grid parser ──────────────────────────────────────────────────────────────
 
 def parse_grid(pdf_bytes):
@@ -1372,6 +1397,11 @@ def scrape_round(info, session_filter=None):
         else:
             results = parse_classification(data, label)
             print(f"    parsed {len(results)} entries")
+            reason = foreign_classification_reason(_pdf_text(data), results)
+            if reason:
+                # Treat as not available: the merge step keeps the stored results
+                print(f"    REJECTED ({reason}) - keeping previous data")
+                results = []
             if results:
                 any_results = True
 

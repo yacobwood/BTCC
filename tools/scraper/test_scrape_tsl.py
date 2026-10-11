@@ -293,6 +293,48 @@ class TestParseClassificationBestLap(unittest.TestCase):
         self.assertEqual(results[0]['bestLap'], '52.382')
 
 
+# ── foreign_classification_reason ───────────────────────────────────────────
+#
+# Regression coverage for 2026-10-11: TSL served the Porsche Carrera Cup race
+# at the BTCC Race 1 URL and the scraper published it as the BTCC result.
+
+class TestForeignClassificationReason(unittest.TestCase):
+
+    BTCC_TEXT = '2026 Kwik Fit British Touring Car Championship\nROUND 28 - CLASSIFICATION'
+    GOOD_ROW = {'pos': 1, 'no': 80, 'driver': 'Tom INGRAM'}
+
+    def test_real_btcc_classification_accepted(self):
+        self.assertIsNone(s.foreign_classification_reason(self.BTCC_TEXT, [self.GOOD_ROW] * 23))
+
+    def test_brtish_typo_title_still_accepted(self):
+        text = '2026 Kwik Fit Brtish Touring Car Championship'
+        self.assertIsNone(s.foreign_classification_reason(text, [self.GOOD_ROW]))
+
+    def test_other_series_rejected(self):
+        text = '2026 Porsche Carrera Cup Great Britain\nRACE 1 - CLASSIFICATION'
+        self.assertEqual(s.foreign_classification_reason(text, [self.GOOD_ROW]),
+                         'not a BTCC document')
+
+    def test_rows_without_driver_or_car_rejected(self):
+        # The exact bad parse: name landed in team, driver blank, car 0
+        bad = {'pos': 1, 'no': 0, 'driver': '', 'team': 'Callum VOISIN'}
+        reason = s.foreign_classification_reason(self.BTCC_TEXT, [bad] * 15)
+        self.assertEqual(reason, 'only 0/15 rows have a driver and car number')
+
+    def test_unreadable_text_falls_back_to_row_check(self):
+        # _pdf_text returns "" on extraction failure - don't reject on that alone
+        self.assertIsNone(s.foreign_classification_reason('', [self.GOOD_ROW]))
+
+    def test_scrape_round_keeps_rejected_session_out(self):
+        info = {'round': 10, 'venue': 'Brands Hatch GP', 'tsl': '264103'}
+        porsche = [{'pos': 1, 'no': 0, 'driver': '', 'team': 'Callum VOISIN'}]
+        with mock.patch.object(s, 'fetch_pdf', side_effect=lambda url: b'pdf' if 'rc1' in url else None), \
+             mock.patch.object(s, 'parse_classification', return_value=porsche), \
+             mock.patch.object(s, '_pdf_text', return_value='Porsche Carrera Cup GB'):
+            # Only session with data was rejected -> nothing to publish
+            self.assertIsNone(s.scrape_round(info, session_filter=['Race 1']))
+
+
 # ── update_calendar_records ─────────────────────────────────────────────────
 #
 # Regression coverage for a live data-integrity bug (2026-08-09): Knockhill's
