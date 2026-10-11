@@ -1187,14 +1187,18 @@ export function buildHtml(article, topPad) {
          right). .card: highlighted panel. .kicker: small yellow label above
          a heading. .pill: inline yellow badge. .stats/.stat: row of big
          numbers with a caption underneath. */
-      .media { display:grid; grid-template-columns:38% 1fr; gap:14px; align-items:center; margin:16px 0; }
+      .media { display:grid; grid-template-columns:38% 1fr; gap:14px; align-items:center; margin:12px 0; padding:14px; background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.07); border-radius:12px; }
       .media.right { grid-template-columns:1fr 38%; }
       .media.right > :first-child { order:2; }
       .media img { margin:0; }
       .media > div > :last-child, .card > :last-child { margin-bottom:0; }
-      .card { background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:8px; padding:14px; margin:16px 0; }
+      .media .kicker, .card .kicker { margin-top:0; }
+      .card { background:rgba(255,255,255,0.05); border-left:3px solid #FEBD02; border-radius:8px; padding:14px; margin:12px 0; }
       .kicker { font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#FEBD02; margin:18px 0 0; }
       .kicker + h2, .kicker + h3 { margin-top:2px; }
+      /* A top-level kicker opens a new part of the article: extra space and
+         a thin rule so consecutive sections don't run into each other. */
+      .content > .kicker { margin-top:34px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.12); }
       .pill { display:inline-block; background:#FEBD02; color:#020255; font-weight:800; border-radius:999px; padding:2px 10px; font-size:14px; line-height:1.5; }
       .stats { display:flex; gap:8px; margin:16px 0; }
       .stat { flex:1; background:rgba(255,255,255,0.05); border-radius:8px; padding:10px 6px; text-align:center; font-size:12px; color:#8B949E; line-height:1.3; }
