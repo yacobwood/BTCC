@@ -136019,6 +136019,490 @@
               "team": ""
             }
           ],
+          "bestSpeeds": {
+            "intermediate1": [
+              {
+                "pos": 1,
+                "no": 88,
+                "driver": "Mikey DOBLE",
+                "team": "LKQ Euro Car Parts with Power Maxed Racing",
+                "mph": 113.1
+              },
+              {
+                "pos": 2,
+                "no": 16,
+                "driver": "Aiden MOFFAT",
+                "team": "LKQ Euro Car Parts with Power Maxed Racing",
+                "mph": 112.5
+              },
+              {
+                "pos": 3,
+                "no": 66,
+                "driver": "Josh COOK",
+                "team": "Speedworks Corolla Racing",
+                "mph": 112.4
+              },
+              {
+                "pos": 4,
+                "no": 11,
+                "driver": "Ricky COLLARD",
+                "team": "Team VERTU",
+                "mph": 112.2
+              },
+              {
+                "pos": 5,
+                "no": 7,
+                "driver": "Ryan BENSLEY",
+                "team": "Speedworks Corolla Racing",
+                "mph": 112.0
+              },
+              {
+                "pos": 6,
+                "no": 77,
+                "driver": "Sam OSBORNE",
+                "team": "NAPA Racing UK",
+                "mph": 111.8
+              },
+              {
+                "pos": 7,
+                "no": 32,
+                "driver": "Daniel ROWBOTTOM",
+                "team": "CPRL",
+                "mph": 111.6
+              },
+              {
+                "pos": 8,
+                "no": 55,
+                "driver": "Nick HALSTEAD",
+                "team": "Steel Seal with Power Maxed Racing",
+                "mph": 111.4
+              },
+              {
+                "pos": 9,
+                "no": 17,
+                "driver": "Dexter PATTERSON",
+                "team": "Steel Seal with Power Maxed Racing",
+                "mph": 111.2
+              },
+              {
+                "pos": 10,
+                "no": 3,
+                "driver": "Tom CHILTON",
+                "team": "Team VERTU",
+                "mph": 111.2
+              },
+              {
+                "pos": 11,
+                "no": 15,
+                "driver": "Lewis SELBY",
+                "team": "NAPA Racing UK",
+                "mph": 111.1
+              },
+              {
+                "pos": 12,
+                "no": 28,
+                "driver": "Nicolas HAMILTON",
+                "team": "Team VERTU",
+                "mph": 110.9
+              },
+              {
+                "pos": 13,
+                "no": 27,
+                "driver": "Dan CAMMISH",
+                "team": "NAPA Racing UK",
+                "mph": 110.5
+              },
+              {
+                "pos": 14,
+                "no": 123,
+                "driver": "Daniel LLOYD",
+                "team": "Restart Racing",
+                "mph": 110.5
+              },
+              {
+                "pos": 15,
+                "no": 80,
+                "driver": "Tom INGRAM",
+                "team": "Team VERTU",
+                "mph": 109.2
+              },
+              {
+                "pos": 16,
+                "no": 50,
+                "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+                "team": "Laser Tools Racing with MB Motorsport",
+                "mph": 109.1
+              },
+              {
+                "pos": 17,
+                "no": 5,
+                "driver": "Ashley SUTTON",
+                "team": "NAPA Racing UK",
+                "mph": 108.5
+              },
+              {
+                "pos": 18,
+                "no": 33,
+                "driver": "Adam MORGAN",
+                "team": "CPRL",
+                "mph": 108.0
+              },
+              {
+                "pos": 19,
+                "no": 22,
+                "driver": "Chris SMILEY",
+                "team": "Restart Racing",
+                "mph": 107.7
+              },
+              {
+                "pos": 20,
+                "no": 2,
+                "driver": "Daryl DE LEON",
+                "team": "WSR",
+                "mph": 107.3
+              },
+              {
+                "pos": 21,
+                "no": 29,
+                "driver": "Lewis GILBERT",
+                "team": "WSR",
+                "mph": 107.0
+              },
+              {
+                "pos": 22,
+                "no": 99,
+                "driver": "Charles RAINFORD",
+                "team": "WSR",
+                "mph": 105.8
+              },
+              {
+                "pos": 23,
+                "no": 52,
+                "driver": "Gordon SHEDDEN",
+                "team": "Laser Tools Racing with MB Motorsport",
+                "mph": 53.1
+              }
+            ],
+            "intermediate2": [
+              {
+                "pos": 1,
+                "no": 3,
+                "driver": "Tom CHILTON",
+                "team": "Team VERTU",
+                "mph": 147.4
+              },
+              {
+                "pos": 2,
+                "no": 28,
+                "driver": "Nicolas HAMILTON",
+                "team": "Team VERTU",
+                "mph": 147.1
+              },
+              {
+                "pos": 3,
+                "no": 22,
+                "driver": "Chris SMILEY",
+                "team": "Restart Racing",
+                "mph": 146.5
+              },
+              {
+                "pos": 4,
+                "no": 29,
+                "driver": "Lewis GILBERT",
+                "team": "WSR",
+                "mph": 144.9
+              },
+              {
+                "pos": 5,
+                "no": 15,
+                "driver": "Lewis SELBY",
+                "team": "NAPA Racing UK",
+                "mph": 144.3
+              },
+              {
+                "pos": 6,
+                "no": 2,
+                "driver": "Daryl DE LEON",
+                "team": "WSR",
+                "mph": 144.0
+              },
+              {
+                "pos": 7,
+                "no": 123,
+                "driver": "Daniel LLOYD",
+                "team": "Restart Racing",
+                "mph": 144.0
+              },
+              {
+                "pos": 8,
+                "no": 99,
+                "driver": "Charles RAINFORD",
+                "team": "WSR",
+                "mph": 143.0
+              },
+              {
+                "pos": 9,
+                "no": 32,
+                "driver": "Daniel ROWBOTTOM",
+                "team": "CPRL",
+                "mph": 142.7
+              },
+              {
+                "pos": 10,
+                "no": 7,
+                "driver": "Ryan BENSLEY",
+                "team": "Speedworks Corolla Racing",
+                "mph": 142.7
+              },
+              {
+                "pos": 11,
+                "no": 55,
+                "driver": "Nick HALSTEAD",
+                "team": "Steel Seal with Power Maxed Racing",
+                "mph": 142.7
+              },
+              {
+                "pos": 12,
+                "no": 66,
+                "driver": "Josh COOK",
+                "team": "Speedworks Corolla Racing",
+                "mph": 142.4
+              },
+              {
+                "pos": 13,
+                "no": 16,
+                "driver": "Aiden MOFFAT",
+                "team": "LKQ Euro Car Parts with Power Maxed Racing",
+                "mph": 142.1
+              },
+              {
+                "pos": 14,
+                "no": 33,
+                "driver": "Adam MORGAN",
+                "team": "CPRL",
+                "mph": 142.1
+              },
+              {
+                "pos": 15,
+                "no": 17,
+                "driver": "Dexter PATTERSON",
+                "team": "Steel Seal with Power Maxed Racing",
+                "mph": 142.1
+              },
+              {
+                "pos": 16,
+                "no": 88,
+                "driver": "Mikey DOBLE",
+                "team": "LKQ Euro Car Parts with Power Maxed Racing",
+                "mph": 141.8
+              },
+              {
+                "pos": 17,
+                "no": 11,
+                "driver": "Ricky COLLARD",
+                "team": "Team VERTU",
+                "mph": 141.2
+              },
+              {
+                "pos": 18,
+                "no": 5,
+                "driver": "Ashley SUTTON",
+                "team": "NAPA Racing UK",
+                "mph": 141.2
+              },
+              {
+                "pos": 19,
+                "no": 80,
+                "driver": "Tom INGRAM",
+                "team": "Team VERTU",
+                "mph": 140.9
+              },
+              {
+                "pos": 20,
+                "no": 27,
+                "driver": "Dan CAMMISH",
+                "team": "NAPA Racing UK",
+                "mph": 140.9
+              },
+              {
+                "pos": 21,
+                "no": 77,
+                "driver": "Sam OSBORNE",
+                "team": "NAPA Racing UK",
+                "mph": 140.9
+              },
+              {
+                "pos": 22,
+                "no": 50,
+                "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+                "team": "Laser Tools Racing with MB Motorsport",
+                "mph": 140.1
+              },
+              {
+                "pos": 23,
+                "no": 52,
+                "driver": "Gordon SHEDDEN",
+                "team": "Laser Tools Racing with MB Motorsport",
+                "mph": 75.0
+              }
+            ],
+            "finish": [
+              {
+                "pos": 1,
+                "no": 3,
+                "driver": "Tom CHILTON",
+                "team": "Team VERTU",
+                "mph": 138.0
+              },
+              {
+                "pos": 2,
+                "no": 29,
+                "driver": "Lewis GILBERT",
+                "team": "WSR",
+                "mph": 137.7
+              },
+              {
+                "pos": 3,
+                "no": 32,
+                "driver": "Daniel ROWBOTTOM",
+                "team": "CPRL",
+                "mph": 137.5
+              },
+              {
+                "pos": 4,
+                "no": 28,
+                "driver": "Nicolas HAMILTON",
+                "team": "Team VERTU",
+                "mph": 137.2
+              },
+              {
+                "pos": 5,
+                "no": 11,
+                "driver": "Ricky COLLARD",
+                "team": "Team VERTU",
+                "mph": 136.9
+              },
+              {
+                "pos": 6,
+                "no": 5,
+                "driver": "Ashley SUTTON",
+                "team": "NAPA Racing UK",
+                "mph": 136.9
+              },
+              {
+                "pos": 7,
+                "no": 88,
+                "driver": "Mikey DOBLE",
+                "team": "LKQ Euro Car Parts with Power Maxed Racing",
+                "mph": 136.9
+              },
+              {
+                "pos": 8,
+                "no": 2,
+                "driver": "Daryl DE LEON",
+                "team": "WSR",
+                "mph": 136.9
+              },
+              {
+                "pos": 9,
+                "no": 27,
+                "driver": "Dan CAMMISH",
+                "team": "NAPA Racing UK",
+                "mph": 136.9
+              },
+              {
+                "pos": 10,
+                "no": 77,
+                "driver": "Sam OSBORNE",
+                "team": "NAPA Racing UK",
+                "mph": 136.9
+              },
+              {
+                "pos": 11,
+                "no": 22,
+                "driver": "Chris SMILEY",
+                "team": "Restart Racing",
+                "mph": 136.9
+              },
+              {
+                "pos": 12,
+                "no": 33,
+                "driver": "Adam MORGAN",
+                "team": "CPRL",
+                "mph": 136.6
+              },
+              {
+                "pos": 13,
+                "no": 123,
+                "driver": "Daniel LLOYD",
+                "team": "Restart Racing",
+                "mph": 136.3
+              },
+              {
+                "pos": 14,
+                "no": 55,
+                "driver": "Nick HALSTEAD",
+                "team": "Steel Seal with Power Maxed Racing",
+                "mph": 135.8
+              },
+              {
+                "pos": 15,
+                "no": 99,
+                "driver": "Charles RAINFORD",
+                "team": "WSR",
+                "mph": 135.8
+              },
+              {
+                "pos": 16,
+                "no": 66,
+                "driver": "Josh COOK",
+                "team": "Speedworks Corolla Racing",
+                "mph": 135.5
+              },
+              {
+                "pos": 17,
+                "no": 16,
+                "driver": "Aiden MOFFAT",
+                "team": "LKQ Euro Car Parts with Power Maxed Racing",
+                "mph": 135.5
+              },
+              {
+                "pos": 18,
+                "no": 80,
+                "driver": "Tom INGRAM",
+                "team": "Team VERTU",
+                "mph": 135.2
+              },
+              {
+                "pos": 19,
+                "no": 17,
+                "driver": "Dexter PATTERSON",
+                "team": "Steel Seal with Power Maxed Racing",
+                "mph": 134.7
+              },
+              {
+                "pos": 20,
+                "no": 7,
+                "driver": "Ryan BENSLEY",
+                "team": "Speedworks Corolla Racing",
+                "mph": 134.4
+              },
+              {
+                "pos": 21,
+                "no": 50,
+                "driver": "\u00c1r\u00f3n TAYLOR-SMITH",
+                "team": "Laser Tools Racing with MB Motorsport",
+                "mph": 134.2
+              },
+              {
+                "pos": 22,
+                "no": 15,
+                "driver": "Lewis SELBY",
+                "team": "NAPA Racing UK",
+                "mph": 133.4
+              }
+            ]
+          },
           "weather": {
             "condition": "Bright",
             "track": "Dry"
