@@ -1856,6 +1856,31 @@ class ApplyWinPodiumTalliesTest(unittest.TestCase):
         self.assertEqual(st["independents"][0], {"driver": "Dexter PATTERSON", "wins": 4, "seconds": 4, "thirds": 4})
 
 
+
+class PositionalQualifyingMergeTest(unittest.TestCase):
+    """Some older seasons ran qualifying in three groups (2024 Donington)."""
+
+    def test_best_sectors_merges_every_qualifying_group(self):
+        parts = {"Qualifying Part 1": [{"no": 1, "ideal": 75.5, "best": 75.6, "diff": 0.1}],
+                 "Qualifying Part 2": [{"no": 2, "ideal": 75.1, "best": 75.2, "diff": 0.1}],
+                 "Qualifying Part 3": [{"no": 3, "ideal": 75.3, "best": 75.4, "diff": 0.1}]}
+        index = {(k, "BEST SECTORS"): {"pages": k} for k in parts}
+        with mock.patch.object(s.book_tables, "parse_best_sectors", side_effect=lambda pages: parts[pages]):
+            merged = s._positional_best_sectors(index, "Qualifying")
+        self.assertEqual([e["no"] for e in merged], [2, 3, 1])
+
+    def test_best_speeds_needs_every_group(self):
+        index = {("Qualifying Part 1", "BEST SPEEDS"): {"pages": 1}, ("Qualifying Part 2", "BEST SPEEDS"): {"pages": 2},
+                 ("Qualifying Part 3", "BEST SPEEDS"): {"pages": 3}}
+        tables = {1: {"FINISH LINE": [(1, 130.0)]}, 2: {"FINISH LINE": [(2, 131.0)]}, 3: None}
+        with mock.patch.object(s.book_tables, "parse_best_speeds", side_effect=lambda pages: tables[pages]):
+            self.assertIsNone(s._positional_best_speeds(index, "Qualifying"))
+        tables[3] = {"FINISH LINE": [(3, 129.0)]}
+        with mock.patch.object(s.book_tables, "parse_best_speeds", side_effect=lambda pages: tables[pages]):
+            merged = s._positional_best_speeds(index, "Qualifying")
+        self.assertEqual([(e["no"], e["pos"]) for e in merged["finish"]], [(2, 1), (1, 2), (3, 3)])
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

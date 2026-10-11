@@ -912,8 +912,15 @@ def _positional_best_speeds(book_index, label):
         return block
     try:
         if label == "Qualifying":
-            p1, p2 = one("Qualifying Part 1"), one("Qualifying Part 2")
-            return _merge_best_speeds_blocks(p1, p2) if p1 and p2 else None
+            # 2 groups in 2026, 3 in some older seasons (2024 Donington)
+            sessions = [k[0] for k in book_index if k[1] == "BEST SPEEDS" and k[0].startswith("Qualifying Part")]
+            parts = [one(sn) for sn in sorted(sessions)]
+            if len(parts) < 2 or not all(parts):
+                return None
+            merged = parts[0]
+            for p in parts[1:]:
+                merged = _merge_best_speeds_blocks(merged, p)
+            return merged
         return one(label)
     except Exception as e:  # noqa: BLE001
         print(f"    [best speeds] {label}: positional parse failed ({type(e).__name__}: {e})")
@@ -929,8 +936,14 @@ def _positional_best_sectors(book_index, label):
         return book_tables.parse_best_sectors(entry["pages"]) if entry else None
     try:
         if label == "Qualifying":
-            p1, p2 = one("Qualifying Part 1"), one("Qualifying Part 2")
-            return _merge_best_sectors_blocks(p1, p2) if (p1 or p2) else None
+            sessions = sorted(k[0] for k in book_index if k[1] == "BEST SECTORS" and k[0].startswith("Qualifying Part"))
+            parts = [one(sn) for sn in sessions]
+            if not any(parts):
+                return None
+            merged = []
+            for p in parts:
+                merged = _merge_best_sectors_blocks(merged, p)
+            return merged
         return one(label)
     except Exception as e:  # noqa: BLE001
         print(f"    [best sectors] {label}: positional parse failed ({type(e).__name__}: {e})")
