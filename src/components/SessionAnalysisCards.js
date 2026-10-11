@@ -126,9 +126,11 @@ function clockTime(stamp, withSeconds = false) {
   return withSeconds ? t : t.slice(0, 5);
 }
 
+// Enough distinct colours for every non-first teammate in a full grid.
 const CHART_COLORS = [
   '#FEBD02', '#5B8DEF', '#E06060', '#4CAF7D', '#D4853F',
   '#9B7ED8', '#D07AAB', '#4DA8A0', '#C9943B', '#7B80C5',
+  '#4BA8C4', '#8BB44E', '#C44A6A', '#8B6BBF', '#E8E8E8', '#F28C38',
 ];
 
 // ── Lap times ────────────────────────────────────────────────────────────────
@@ -171,6 +173,38 @@ function sectorBests(drivers) {
     });
   });
   return {session, personal};
+}
+
+// One fixed line colour per driver for the whole session, worked out once
+// from the full field - never from the current selection. Deriving it from
+// the selection (an earlier version) re-coloured every line whenever a
+// driver was unticked and re-ticked, since re-adding moved them to the end
+// of the selection order (reported live). Favourites are assigned first so
+// they always keep their team's colour; after that the first car of each
+// team in classification order gets the team colour and any teammate gets
+// the next palette colour not already in use, so no two drivers share one.
+export function assignLapColours(drivers, isFavourite) {
+  const order = [...drivers.filter(d => isFavourite(d.driver)), ...drivers.filter(d => !isFavourite(d.driver))];
+  const used = new Set();
+  const teamsTaken = new Set();
+  const out = {};
+  let next = 0;
+  order.forEach(d => {
+    const team = TEAM_COLORS[d.team];
+    if (team && !teamsTaken.has(d.team) && !used.has(team)) {
+      teamsTaken.add(d.team);
+      out[d.no] = team;
+    } else {
+      let colour = null;
+      for (let i = 0; i < CHART_COLORS.length; i++) {
+        const c = CHART_COLORS[(next + i) % CHART_COLORS.length];
+        if (!used.has(c)) { colour = c; next = (next + i + 1) % CHART_COLORS.length; break; }
+      }
+      out[d.no] = colour || CHART_COLORS[next++ % CHART_COLORS.length];
+    }
+    used.add(out[d.no]);
+  });
+  return out;
 }
 
 function defaultSelection(drivers, isFavourite) {
@@ -302,14 +336,8 @@ function LapTimesBody({drivers, roundNumber, session, isFavourite}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundNumber, session]);
 
-  // Team colour when it's the only selected car from that team, otherwise a
-  // distinct palette colour so two teammates never share a line colour.
-  const colorOf = useCallback(d => {
-    const team = TEAM_COLORS[d.team];
-    const teamCount = [...selected].filter(no => drivers.find(x => x.no === no)?.team === d.team).length;
-    if (team && teamCount === 1) return team;
-    return CHART_COLORS[[...selected].indexOf(d.no) % CHART_COLORS.length] || CHART_COLORS[0];
-  }, [selected, drivers]);
+  const colours = useMemo(() => assignLapColours(drivers, isFavourite), [drivers, isFavourite]);
+  const colorOf = useCallback(d => colours[d.no] || CHART_COLORS[0], [colours]);
 
   const bestTimes = drivers.map(d => d.best).filter(t => t != null);
   const fastest = bestTimes.length ? Math.min(...bestTimes) : null;

@@ -29,7 +29,7 @@ import React from 'react';
 import {act, fireEvent, waitFor} from '@testing-library/react-native';
 import {
   LapTimesCard, TyresCard, TopSpeedsCard, SessionStatsCard,
-  cleanLaps, lapStats, delayLabel, formatLapTime, clearSessionAnalysisMemo,
+  cleanLaps, lapStats, delayLabel, formatLapTime, clearSessionAnalysisMemo, assignLapColours,
 } from '../../src/components/SessionAnalysisCards';
 import {fetchSessionAnalysis} from '../../src/api/client';
 import {Analytics} from '../../src/utils/analytics';
@@ -118,6 +118,31 @@ describe('helpers', () => {
   });
 });
 
+describe('assignLapColours', () => {
+  const D = (no, driver, team) => ({no, driver, team, laps: []});
+  const field = [
+    D(1, 'A ONE', 'Team VERTU'), D(2, 'B TWO', 'Team VERTU'), D(3, 'C THREE', 'NAPA Racing UK'),
+    D(4, 'D FOUR', 'Unknown Team'), D(5, 'E FIVE', 'Team VERTU'),
+  ];
+
+  it('gives the first car of each team its team colour and teammates distinct colours', () => {
+    const c = assignLapColours(field, () => false);
+    expect(c[1]).toBe('#159A8C'); // Team VERTU
+    expect(c[3]).toBe('#FFC72C'); // NAPA Racing UK
+    expect(new Set(Object.values(c)).size).toBe(5); // nobody shares a colour
+  });
+
+  it('lets a favourite keep their team colour even behind a teammate', () => {
+    const c = assignLapColours(field, n => n === 'E FIVE');
+    expect(c[5]).toBe('#159A8C');
+    expect(c[1]).not.toBe('#159A8C');
+  });
+
+  it('never depends on anything but the field and favourites', () => {
+    expect(assignLapColours(field, () => false)).toEqual(assignLapColours([...field], () => false));
+  });
+});
+
 describe('LapTimesCard', () => {
   it('loads the session file, lists drivers and logs shown + loaded', async () => {
     const {findByText, getByText} = renderWithProviders(<LapTimesCard {...PROPS} />);
@@ -137,6 +162,25 @@ describe('LapTimesCard', () => {
     fireEvent.press(await findByLabelText('Hide every lap for Aiden MOFFAT'));
     expect(Analytics.lapTimesDriverCollapsed).toHaveBeenCalledWith(10, 'Qualifying Race', 'Aiden MOFFAT');
     expect(queryByText('28.955')).toBeNull();
+  });
+
+  it('keeps every driver\'s colour when one is unticked and ticked again', async () => {
+    // Three drivers on palette colours (teams with no TEAM_COLORS entry) and a
+    // favourite first in the default selection - the reported live case.
+    const lap = (n, t) => ({lap: n, t, s: [20, 20, 20, t - 60], v: []});
+    const mk = (no, driver) => ({no, driver, team: 'No Colour Team ' + no, ideal: 89, best: 90, laps: [lap(1, 95), lap(2, 90), lap(3, 90.5)]});
+    fetchSessionAnalysis.mockResolvedValue({...FILE, laps: [mk(1, 'Ann ONE'), mk(2, 'Ben TWO'), mk(3, 'Cat THREE')]});
+    const {StyleSheet} = require('react-native');
+    const {findByLabelText, getByLabelText} = renderWithProviders(
+      <LapTimesCard {...PROPS} isFavourite={n => n === 'Cat THREE'} />,
+    );
+    const colourOf = name => StyleSheet.flatten(getByLabelText(`Plot ${name} on chart`).props.style).backgroundColor;
+    await findByLabelText('Plot Ann ONE on chart');
+    const before = ['Ann ONE', 'Ben TWO', 'Cat THREE'].map(colourOf);
+    fireEvent.press(getByLabelText('Plot Cat THREE on chart')); // untick the favourite
+    fireEvent.press(getByLabelText('Plot Cat THREE on chart')); // tick again
+    expect(['Ann ONE', 'Ben TWO', 'Cat THREE'].map(colourOf)).toEqual(before);
+    expect(new Set(before).size).toBe(3);
   });
 
   it('toggles a driver on and off the chart', async () => {
