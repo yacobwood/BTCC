@@ -1,6 +1,6 @@
 import React, {useEffect, useState, memo} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
-import Svg, {Polyline, Line, Text as SvgText} from 'react-native-svg';
+import Svg, {Polyline, Line, Circle, Text as SvgText} from 'react-native-svg';
 import {Colors} from '../theme/colors';
 import {TEAM_COLORS} from '../theme/teamColors';
 import {Analytics} from '../utils/analytics';
@@ -68,7 +68,7 @@ function pivotToSeries(lapChart) {
   const retiredNos = everyNo.filter(no => !stillRunning.has(no));
   const orderedNos = [...finishOrder, ...retiredNos];
 
-  return orderedNos.map(no => ({
+  const series = orderedNos.map(no => ({
     no,
     name: nameByNo[no],
     team: teamByNo[no],
@@ -78,6 +78,22 @@ function pivotToSeries(lapChart) {
       return idx === -1 ? null : idx + 1;
     }),
   }));
+
+  // A car with no lap-1 row at all (confirmed live, 2026 Brands Hatch GP
+  // Race 1: car 99/Charles Rainford pitted on the opening lap and first
+  // crossed the line on lap 6, already 5 laps down) still gets its own row
+  // in the gutter, below every car that did complete lap 1 - it hadn't
+  // crossed the line yet, so it was genuinely behind all of them. Several
+  // such cars stack in order of when they first appear. `startPos` is that
+  // row; `points` stays the real data, so the line itself only starts where
+  // the car actually reappears, leaving a gap after the lap-1 marker.
+  const lap1Count = reRanked[0].order.length;
+  series
+    .filter(sr => sr.points[0] == null && sr.points.some(v => v != null))
+    .sort((a, b) => a.points.findIndex(v => v != null) - b.points.findIndex(v => v != null))
+    .forEach((sr, k) => { sr.startPos = lap1Count + 1 + k; });
+  series.forEach(sr => { if (sr.startPos == null) sr.startPos = sr.points[0]; });
+  return series;
 }
 
 // The legend's P-number/"Retired" label. The lap chart alone can only say
@@ -138,7 +154,7 @@ function LapChartCard({lapChart, results, roundNumber, session, isFavourite}) {
   const plotH = chartH - padT - padB;
 
   const totalLaps = lapChart.length;
-  const maxPos = Math.max(...series.map(s => Math.max(...s.points.filter(v => v !== null), 1)), 1);
+  const maxPos = Math.max(...series.map(s => Math.max(...s.points.filter(v => v !== null), s.startPos || 1)), 1);
 
   // The Y-axis lists drivers by their STARTING position, not generic P1/
   // P10/P20 numbers - each driver's own row is labelled with a 3-letter
@@ -148,24 +164,13 @@ function LapChartCard({lapChart, results, roundNumber, session, isFavourite}) {
   // Replaces an earlier numeric-tick version that both crowded a 20+ car
   // field and hit a genuine text-rendering glitch with 2-digit labels
   // ("P10" reading as "R0" - confirmed live, never fully resolved by
-  // reordering/padding/thinning alone). Only cars with a real lap-1 row
-  // get a gutter label - lap 1's order is one car per position, so these
-  // can never share a row.
+  // reordering/padding/thinning alone). Every driver gets a row, one per
+  // position: a car missing from lap 1 sits below the lap-1 field (see
+  // `startPos` in pivotToSeries) rather than falling back to its first
+  // real position, which once printed two codes on one row.
   const startRows = series
-    .filter(s => s.points[0] != null)
-    .map(s => ({name: s.name, pos: s.points[0]}));
-
-  // A car missing from lap 1 entirely (confirmed live, 2026 Brands Hatch
-  // GP Race 1: car 99/Charles Rainford pitted on the opening lap and his
-  // first timing-line crossing came on lap 6, already 5 laps down) used to
-  // fall back to its first non-null position in the gutter. The lapsDown
-  // re-rank sorts such a car to the very back, which is a row another
-  // driver already owns at lap 1, so the two codes printed on top of each
-  // other. Labelled inline instead, just left of where its line begins.
-  const lateRows = series
-    .map(s => ({name: s.name, idx: s.points.findIndex(v => v !== null)}))
-    .filter(r => r.idx > 0)
-    .map(r => ({...r, pos: series.find(s => s.name === r.name).points[r.idx]}));
+    .filter(s => s.startPos != null)
+    .map(s => ({name: s.name, pos: s.startPos}));
 
   const codeFor = (name) => name.split(' ').pop().toUpperCase().slice(0, 3);
 
@@ -216,25 +221,31 @@ function LapChartCard({lapChart, results, roundNumber, session, isFavourite}) {
             s.points.forEach((v, i) => {
               if (v !== null) pts.push(`${x(i)},${y(v)}`);
             });
-            if (pts.length < 2) return null;
+            // A car with no lap-1 row gets a dot on its own lap-1 row, then
+            // a gap until the line picks up where it actually reappears -
+            // the one null run that is NOT bridged, per explicit user
+            // preference (a diagonal from the back row would read as the
+            // car gradually climbing, not sitting in the pits).
+            const lateStart = s.points[0] == null && s.startPos != null;
             return (
-              <Polyline
-                key={s.name}
-                points={pts.join(' ')}
-                fill="none"
-                stroke={color}
-                strokeWidth={1.5}
-                strokeLinejoin="round"
-                opacity={0.85}
-              />
+              <React.Fragment key={s.name}>
+                {lateStart && <Circle cx={x(0)} cy={y(s.startPos)} r={2.5} fill={color} opacity={0.85} />}
+                {pts.length >= 2 && (
+                  <Polyline
+                    points={pts.join(' ')}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={1.5}
+                    strokeLinejoin="round"
+                    opacity={0.85}
+                  />
+                )}
+              </React.Fragment>
             );
           })}
           {startRows.map(r => (
             <SvgText key={r.name} x={padL - 6} y={y(r.pos) + 3} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{codeFor(r.name)}</SvgText>
           ))}
-          {lateRows.map(r => (visible[r.name] === false ? null : (
-            <SvgText key={`late-${r.name}`} x={x(r.idx) - 4} y={y(r.pos) + 3} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{codeFor(r.name)}</SvgText>
-          )))}
           {lapTicks.map(l => {
             const xPos = x(l - 1);
             const anchor = xPos >= chartW - padR - 4 ? 'end' : (xPos <= padL + 4 ? 'start' : 'middle');

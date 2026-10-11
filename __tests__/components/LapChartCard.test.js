@@ -106,38 +106,45 @@ describe('LapChartCard', () => {
     await waitFor(() => expect(svgTextLabels(toJSON())).toContain('OZ'));
   });
 
-  it('a car missing from lap 1 is labelled inline where its line starts, not on another driver\'s gutter row', async () => {
-    // 2026 Brands Hatch GP Race 1 shape: car 99 pitted on lap 1, first
-    // crosses the line on lap 2 already a lap down, so re-ranks to the back
-    // - the same row Cook (P3 on lap 1) owns in the gutter.
+  it('a car missing from lap 1 gets its own gutter row below the field, a lap-1 dot, then a gap until it reappears', async () => {
+    // 2026 Brands Hatch GP Race 1 shape: car 99 pitted on lap 1 and has no
+    // row until lap 3, already laps down - the re-rank puts it at the back,
+    // the row Cook (P3 on lap 1) owns.
+    const rainford = {no: 99, driver: 'Charles Rainford', team: 'WSR', gapSeconds: null, lapsDown: 2, lapTimeSeconds: 99.0};
     const lateJoiner = [
       LAP_CHART[0],
-      {lap: 2, timeOfDay: '15:15:47.175', order: [
-        ...LAP_CHART[1].order,
-        {no: 99, driver: 'Charles Rainford', team: 'WSR', gapSeconds: null, lapsDown: 1, lapTimeSeconds: 140.0},
-      ]},
-      {lap: 3, timeOfDay: '15:17:27.000', order: [
-        ...LAP_CHART[1].order,
-        {no: 99, driver: 'Charles Rainford', team: 'WSR', gapSeconds: null, lapsDown: 1, lapTimeSeconds: 99.0},
-      ]},
+      LAP_CHART[1],
+      {lap: 3, timeOfDay: '15:17:27.000', order: [...LAP_CHART[1].order, rainford]},
+      {lap: 4, timeOfDay: '15:19:07.000', order: [...LAP_CHART[1].order, rainford]},
     ];
     const {toJSON} = renderWithProviders(
       <LapChartCard lapChart={lateJoiner} roundNumber={1} session="Race 1" isFavourite={isFavourite} />,
     );
     await waitFor(() => {
       const texts = [];
+      const circles = [];
+      const lines = [];
       (function walk(node) {
         if (!node || typeof node !== 'object') return;
         if (node.type === 'SvgText') texts.push({label: node.children.join(''), x: node.props.x, y: node.props.y});
+        if (node.type === 'Circle') circles.push(node.props);
+        if (node.type === 'Polyline') lines.push(node.props.points.split(' ').map(pt => pt.split(',').map(Number)));
         (node.children || []).forEach(walk);
       })(toJSON());
-      const gutterX = texts.find(t => t.label === 'COO').x;
+      const coo = texts.find(t => t.label === 'COO');
       const rai = texts.filter(t => t.label === 'RAI');
       expect(rai).toHaveLength(1);
-      expect(rai[0].x).toBeGreaterThan(gutterX);
-      // No two gutter labels share a row.
-      const gutterYs = texts.filter(t => t.x === gutterX).map(t => t.y);
+      expect(rai[0].x).toBe(coo.x); // in the gutter with everyone else
+      expect(rai[0].y).toBeGreaterThan(coo.y); // its own row, below the lap-1 field
+      const gutterYs = texts.filter(t => t.x === coo.x).map(t => t.y);
       expect(new Set(gutterYs).size).toBe(gutterYs.length);
+      // Dot at lap 1 on Rainford's row, line only from lap 3 - not a
+      // diagonal bridging back to the dot.
+      expect(circles).toHaveLength(1);
+      expect(circles[0].cy).toBe(rai[0].y - 3);
+      const lapXs = lines[0].map(([px]) => px);
+      const raiLine = lines.find(l => l.length === 2);
+      expect(raiLine[0][0]).toBeGreaterThan(lapXs[1]);
     });
   });
 
