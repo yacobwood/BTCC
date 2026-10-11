@@ -63,35 +63,6 @@ export const favRowStyle = {
   borderColor: 'rgba(254,189,2,0.55)',
 };
 
-// "YOUR DRIVER" card pinned above a tab's table, one line per favourite in
-// the session - rank, headline value and how far off the best they were -
-// so a fan sees their driver's story before scanning a 23-row list.
-// Renders nothing when no favourite took part.
-export function FavouriteSummary({items}) {
-  if (!items?.length) return null;
-  return (
-    <View style={styles.favCard} accessibilityLabel="Your favourite drivers in this session">
-      <View style={styles.favHeader}>
-        <Icon name="star" size={13} color={Colors.yellow} />
-        <Text style={styles.favHeaderText}>{items.length > 1 ? 'YOUR DRIVERS' : 'YOUR DRIVER'}</Text>
-      </View>
-      {items.map(item => (
-        <View key={item.key} style={styles.favRow}>
-          <TeamStripe team={item.team} />
-          <View style={styles.favMain}>
-            <Text style={styles.favName} numberOfLines={1}>{formatDriverName(item.driver)}</Text>
-            {!!item.detail && <Text style={styles.favDetail} numberOfLines={2}>{item.detail}</Text>}
-          </View>
-          <View style={styles.favRight}>
-            {item.pos != null && <Text style={[styles.favPos, item.pos <= 3 && {color: PODIUM[item.pos - 1]}]}>P{item.pos}</Text>}
-            {!!item.value && <Text style={styles.favValue}>{item.value}</Text>}
-          </View>
-        </View>
-      ))}
-    </View>
-  );
-}
-
 export function ColumnHeader({children, style}) {
   return <Text style={[styles.colHeader, style]}>{children}</Text>;
 }
@@ -121,17 +92,4 @@ const styles = StyleSheet.create({
   name: {color: '#fff', fontSize: 12.5, fontWeight: '700', flexShrink: 1},
   nameFav: {color: Colors.yellow},
   colHeader: {color: Colors.textSecondary, fontSize: 9.5, fontWeight: '800', letterSpacing: 1},
-  favCard: {
-    backgroundColor: 'rgba(254,189,2,0.08)', borderColor: 'rgba(254,189,2,0.45)', borderWidth: 1,
-    borderRadius: 12, padding: 10, marginTop: 4, marginBottom: 8,
-  },
-  favHeader: {flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4},
-  favHeaderText: {color: Colors.yellow, fontSize: 10, fontWeight: '900', letterSpacing: 1.2},
-  favRow: {flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 5},
-  favMain: {flex: 1, minWidth: 0},
-  favName: {color: '#fff', fontSize: 14, fontWeight: '800'},
-  favDetail: {color: Colors.textSecondary, fontSize: 11.5, marginTop: 1},
-  favRight: {alignItems: 'flex-end'},
-  favPos: {color: '#fff', fontSize: 16, fontWeight: '900'},
-  favValue: {color: Colors.textSecondary, fontSize: 11.5, fontWeight: '700', fontVariant: ['tabular-nums']},
 });

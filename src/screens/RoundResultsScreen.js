@@ -29,7 +29,7 @@ import {shareApp, shareContent} from '../utils/appShare';
 import {detectBroadcaster} from '../utils/broadcaster';
 import {ttbPositionMapForRace, isTtbSeasonOpener, getTtbBadge} from '../utils/ttb';
 import {
-  FavouriteSummary, TeamStripe, RankBadge, ValueBar, DriverName, closeness,
+  TeamStripe, RankBadge, ValueBar, DriverName, closeness,
   favRowStyle, tableStyles, ColumnHeader,
 } from '../components/analysisUi';
 
@@ -669,18 +669,9 @@ function SpeedTrapCard({label, entries, roundNumber, session, isFavourite, useKm
   const speeds = entries.map(e => e.mph);
   const best = Math.max(...speeds);
   const worst = Math.min(...speeds);
-  const favs = entries.filter(e => isFavourite(e.driver)).map(e => ({
-    key: e.no ?? e.driver,
-    driver: e.driver,
-    team: e.team,
-    pos: e.pos,
-    value: `${fmt(e.mph)} ${unit}`,
-    detail: e.mph === best ? `Fastest through ${label}` : `${fmt(best - e.mph)} ${unit} down on the fastest`,
-  }));
 
   return (
     <View>
-      <FavouriteSummary items={favs} />
       <View style={tableStyles.card}>
         {entries.map(row => {
           const fav = isFavourite(row.driver);
@@ -730,21 +721,9 @@ function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
   const ideals = bestSectors.map(r => r.ideal);
   const best = Math.min(...ideals);
   const worst = Math.max(...ideals);
-  const favs = bestSectors
-    .map((r, i) => ({r, pos: i + 1}))
-    .filter(({r}) => isFavourite(r.driver))
-    .map(({r, pos}) => ({
-      key: r.no ?? r.driver,
-      driver: r.driver,
-      team: r.team,
-      pos,
-      value: formatLapTime(r.ideal),
-      detail: `Best lap ${formatLapTime(r.best)} - ${r.diff.toFixed(3)}s left on the table`,
-    }));
 
   return (
     <View>
-      <FavouriteSummary items={favs} />
       <View style={tableStyles.card}>
         <View style={tableStyles.headerRow}>
           <ColumnHeader style={styles.perfectLapDriverHeader}>DRIVER</ColumnHeader>

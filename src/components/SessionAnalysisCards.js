@@ -6,7 +6,7 @@ import {TEAM_COLORS} from '../theme/teamColors';
 import {Analytics} from '../utils/analytics';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
-  FavouriteSummary, TeamStripe, RankBadge, ValueBar, DriverName, closeness,
+  TeamStripe, RankBadge, ValueBar, DriverName, closeness,
   favRowStyle, tableStyles, ColumnHeader,
 } from './analysisUi';
 import {fetchSessionAnalysis} from '../api/client';
@@ -182,12 +182,6 @@ function defaultSelection(drivers, isFavourite) {
 
 const screenWidth = Dimensions.get('window').width;
 
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd'];
-  const v = n % 100;
-  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
-}
-
 function LapTimesChart({drivers, selected, colorOf, isFavourite}) {
   const shown = drivers.filter(d => selected.has(d.no));
   const series = shown.map(d => ({d, laps: cleanLaps(d)})).filter(s => s.laps.length);
@@ -320,27 +314,6 @@ function LapTimesBody({drivers, roundNumber, session, isFavourite}) {
   const bestTimes = drivers.map(d => d.best).filter(t => t != null);
   const fastest = bestTimes.length ? Math.min(...bestTimes) : null;
   const slowest = bestTimes.length ? Math.max(...bestTimes) : null;
-  const byBest = [...drivers].filter(d => d.best != null).sort((a, b) => a.best - b.best).map(d => d.no);
-  const bySpread = [...drivers].filter(d => stats[d.no].spread != null && stats[d.no].clean >= 3)
-    .sort((a, b) => stats[a.no].spread - stats[b.no].spread).map(d => d.no);
-
-  const favItems = drivers.filter(d => isFavourite(d.driver)).map(d => {
-    const st = stats[d.no];
-    const cons = bySpread.indexOf(d.no);
-    const rank = byBest.indexOf(d.no);
-    const parts = [];
-    if (rank >= 0) parts.push(rank === 0 ? 'Fastest lap of the session' : `${ordinal(rank + 1)} fastest lap`);
-    if (st.avg != null) parts.push(`avg ${formatLapTime(st.avg)}`);
-    if (cons >= 0) parts.push(`${ordinal(cons + 1)} most consistent (±${st.spread.toFixed(2)}s)`);
-    return {
-      // No P-number here: this table runs in classification order, so a
-      // rank by best lap next to it read as a wrong finishing position.
-      key: d.no, driver: d.driver, team: d.team,
-      value: formatLapTime(d.best),
-      detail: parts.join(' · '),
-    };
-  });
-
   const toggle = d => {
     setSelected(prev => {
       const next = new Set(prev);
@@ -365,7 +338,6 @@ function LapTimesBody({drivers, roundNumber, session, isFavourite}) {
 
   return (
     <View>
-      <FavouriteSummary items={favItems} />
       <View style={styles.chartCard}>
         {shown.length > 0 && (
           <View style={styles.legendRow}>
@@ -472,12 +444,6 @@ export function TyreIcon({name, size = 24}) {
   );
 }
 
-function compoundStory(compounds) {
-  if (!compounds.length) return '';
-  if (compounds.length === 1) return `${compounds[0]} only`;
-  return `${compounds[0]}, then ${compounds.slice(1).join(' then ')}`;
-}
-
 function TyresBody({tyres, order, roundNumber, session, isFavourite}) {
   useEffect(() => {
     Analytics.tyresShown(roundNumber, session, tyres.length);
@@ -486,14 +452,8 @@ function TyresBody({tyres, order, roundNumber, session, isFavourite}) {
   const rows = [...tyres].sort((a, b) => (order[a.no] ?? 999) - (order[b.no] ?? 999) || a.no - b.no);
   const usage = {};
   tyres.forEach(t => new Set(t.compounds).forEach(c => { usage[c] = (usage[c] || 0) + 1; }));
-  const favItems = rows.filter(t => isFavourite(t.driver)).map(t => ({
-    key: t.no, driver: t.driver, team: t.team,
-    pos: order[t.no] != null ? order[t.no] + 1 : null,
-    detail: compoundStory(t.compounds),
-  }));
   return (
     <View>
-      <FavouriteSummary items={favItems} />
       <View style={styles.usageRow}>
         {Object.entries(usage).map(([c, n]) => (
           <View key={c} style={styles.usageTile}>
@@ -552,16 +512,8 @@ function TopSpeedsBody({entries, trap, roundNumber, session, isFavourite, useKm}
   const avgs = entries.map(e => e.avg);
   const top = Math.max(...avgs);
   const bottom = Math.min(...avgs);
-  const favItems = entries.filter(e => isFavourite(e.driver)).map(e => ({
-    key: e.no, driver: e.driver, team: e.team, pos: e.pos,
-    value: `${formatSpeed(e.avg, useKm)} ${unit}`,
-    detail: e.avg === top
-      ? `Quickest on average · best pass ${formatSpeed(e.best, useKm)}`
-      : `${formatSpeed(top - e.avg, useKm)} ${unit} down on the top average · best pass ${formatSpeed(e.best, useKm)}`,
-  }));
   return (
     <View>
-      <FavouriteSummary items={favItems} />
       <View style={tableStyles.card}>
         <View style={tableStyles.headerRow}>
           <ColumnHeader style={styles.flexIndent}>DRIVER</ColumnHeader>
@@ -660,23 +612,10 @@ function SessionStatsBody({stats, roundNumber, session, isFavourite, useKm, weat
   const incidents = flagStats ? FLAG_LABELS.filter(f => flagStats[f.key] > 0) : [];
   const history = stats.fastestLapHistory;
 
-  // A favourite's part in the session: how often they held the fastest lap.
-  const favCounts = {};
-  history.forEach(e => {
-    if (!isFavourite(e.driver)) return;
-    const f = favCounts[e.driver] || (favCounts[e.driver] = {driver: e.driver, team: e.team, n: 0, best: e});
-    f.n += 1;
-    if (e.secs != null && (f.best.secs == null || e.secs < f.best.secs)) f.best = e;
-  });
-  const favItems = Object.values(favCounts).map(f => ({
-    key: f.driver, driver: f.driver, team: f.team, value: f.best.time,
-    detail: `Set the session's fastest lap ${f.n === 1 ? 'once' : `${f.n} times`}`,
-  }));
   const finalHolder = history.length ? history[history.length - 1] : null;
 
   return (
     <View>
-      <FavouriteSummary items={favItems} />
       <View style={styles.tileGrid}>
         {weather && <Tile icon={weatherIcon(weather)} label="CONDITIONS" value={weather.condition} sub={`Track ${weather.track.toLowerCase()}`} />}
         {stats.actualStart && (
