@@ -3236,12 +3236,14 @@ const TRIGGER_DIGEST_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.
 const DISMISS_ERROR_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/dismissError';
 const SET_CHAT_DONOR_URL    = 'https://us-central1-btcchub-af77a.cloudfunctions.net/setChatDonor';
 const LOOKUP_USER_URL       = 'https://us-central1-btcchub-af77a.cloudfunctions.net/lookupUserByEmail';
+const BAN_CHAT_USER_URL     = 'https://us-central1-btcchub-af77a.cloudfunctions.net/banChatUser';
+const UNBAN_CHAT_USER_URL   = 'https://us-central1-btcchub-af77a.cloudfunctions.net/unbanChatUser';
 // KNOWN WEAKNESS, not a real fix: this page is served publicly via GitHub
 // Pages with no server-side gate, so this value is readable by anyone who
 // views source - the SHA-256 login above only hides the UI, it never
-// touches the 6 endpoints this secret gates (triggerDigest, dismissError,
+// touches the 8 endpoints this secret gates (triggerDigest, dismissError,
 // backfillAnalyticsDaily, setChatDonor, lookupUserByEmail,
-// refreshAnalyticsHistory - grep requireAdminPost across functions/*.js to
+// refreshAnalyticsHistory, banChatUser, unbanChatUser - grep requireAdminPost across functions/*.js to
 // recheck this count if it drifts again). Rotated 2026-08-28 after the
 // prior value was found exposed here; must match whatever ADMIN_SECRET is
 // currently set to in Firebase Secret Manager (functions/shared.js). A real
@@ -5439,6 +5441,11 @@ async function loadChatReports() {
             <option value="7d">7 days</option>
             <option value="permanent">Permanent</option>
           </select>
+          <select id="ban-msgs-${htmlEsc(rep.id)}" title="What happens to their existing messages" style="background:var(--surface);color:var(--text);border:1px solid var(--outline);border-radius:6px;padding:5px 8px;font-size:12px">
+            <option value="keep">Keep messages</option>
+            <option value="obscure">Obscure messages</option>
+            <option value="remove">Remove messages</option>
+          </select>
           <button class="btn-sm" data-author-id="${htmlEsc(msg.authorId||'')}" data-author-name="${htmlEsc(msg.authorName||'')}" data-report-id="${htmlEsc(rep.id)}" onclick="banUser(this.dataset.authorId,this.dataset.authorName,this.dataset.reportId)">BAN USER</button>
           <button class="btn-sm" style="color:var(--text-sec)" data-report-id="${htmlEsc(rep.id)}" onclick="dismissReport(this.dataset.reportId)">DISMISS</button>
         </div>
@@ -5470,7 +5477,7 @@ async function loadChatBans() {
           <span style="color:var(--yellow);font-weight:700;font-size:13px">${htmlEsc(ban.authorName || '—')}</span>
           <span style="color:var(--text-sec);font-size:11px"> #${htmlEsc((ban.authorId||'').slice(-4))}</span>
           <div style="color:var(--text-sec);font-size:12px;margin-top:4px">
-            Banned: ${htmlEsc(bannedAt)} &middot; Expires: ${htmlEsc(expiresAt)} &middot; Duration: ${htmlEsc({'1h':'1 hour','24h':'24 hours','7d':'7 days','permanent':'Permanent'}[ban.duration] || ban.duration || '—')}
+            Banned: ${htmlEsc(bannedAt)} &middot; Expires: ${htmlEsc(expiresAt)} &middot; Duration: ${htmlEsc({'1h':'1 hour','24h':'24 hours','7d':'7 days','permanent':'Permanent'}[ban.duration] || ban.duration || '—')} &middot; Messages: ${htmlEsc({keep:'kept',obscure:'obscured',remove:'removed'}[ban.messageAction] || 'removed')}${ban.linkedFrom ? ` &middot; <span style="color:var(--red)">Same device as banned #${htmlEsc(ban.linkedFrom.slice(-4))} (ban evasion)</span>` : ''}${ban.deviceBanned === false ? ' &middot; Device not banned (older app)' : ''}
           </div>
         </div>
         <button class="btn-sm" style="color:var(--red)" data-author-id="${htmlEsc(ban.authorId)}" onclick="unbanUser(this.dataset.authorId)">UNBAN</button>
@@ -5485,27 +5492,24 @@ async function banUser(authorId, authorName, reportId) {
   if (!authorId) { alert('No authorId on this report.'); return; }
   const durSel = document.getElementById(`ban-dur-${reportId}`);
   const duration = durSel ? durSel.value : '24h';
-  if (!confirm(`Ban ${authorName || authorId} for ${duration}?`)) return;
+  // keep = leave their messages, obscure = app collapses them behind
+  // tap-to-show while the ban is active, remove = onChatBan hides them
+  const msgsSel = document.getElementById(`ban-msgs-${reportId}`);
+  const messageAction = msgsSel ? msgsSel.value : 'keep';
+  if (!confirm(`Ban ${authorName || authorId} for ${duration} (${messageAction} messages)?`)) return;
 
-  const now = Date.now();
-  const durationMs = {'1h': 3600000, '24h': 86400000, '7d': 604800000, 'permanent': null};
-  const ms = durationMs[duration];
-  const ban = {
-    bannedAt: now,
-    expiresAt: ms !== null ? now + ms : null,
-    duration,
-    authorName: authorName || authorId,
-  };
-  if (reportId && chatReportsRaw[reportId]) ban.reportData = chatReportsRaw[reportId];
-
+  // Through banChatUser, not a raw RTDB PUT - /chat/bans is admin-only
+  // since 2026-10-11 so users can't delete their own ban. The function also
+  // bans the device and clears the report.
   try {
-    const r = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(ban),
+    const r = await fetch(BAN_CHAT_USER_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({authorId, authorName, duration, messageAction, reportId}),
     });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    if (reportId) await fetch(`${RTDB_URL}/chat/reports/${encodeURIComponent(reportId)}.json`, {method: 'DELETE'});
+    const res = await r.json().catch(() => ({}));
+    if (!r.ok || !res.ok) throw new Error(res.error || `HTTP ${r.status}`);
+    if (!res.deviceBanned) alert('Banned. Their device is not known (older app version), so a reinstall would get around this ban.');
     await loadChat();
   } catch (e) {
     alert(`Failed to ban: ${e.message}`);
@@ -5525,17 +5529,13 @@ async function dismissReport(reportId) {
 async function unbanUser(authorId) {
   if (!confirm(`Unban ${authorId}?`)) return;
   try {
-    const banR = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`);
-    const ban = banR.ok ? await banR.json() : null;
-    if (ban?.reportData) {
-      await fetch(`${RTDB_URL}/chat/reports.json`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(ban.reportData),
-      });
-    }
-    const r = await fetch(`${RTDB_URL}/chat/bans/${encodeURIComponent(authorId)}.json`, {method: 'DELETE'});
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const r = await fetch(UNBAN_CHAT_USER_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-admin-secret': TRIGGER_DIGEST_SECRET},
+      body: JSON.stringify({authorId}),
+    });
+    const res = await r.json().catch(() => ({}));
+    if (!r.ok || !res.ok) throw new Error(res.error || `HTTP ${r.status}`);
     await loadChat();
   } catch (e) {
     alert(`Failed to unban: ${e.message}`);

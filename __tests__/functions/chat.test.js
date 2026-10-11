@@ -41,7 +41,7 @@ jest.mock('../../functions/chatTrim', () => ({
   selectMessagesToTrim: jest.fn(),
 }));
 
-const {onChatBan, onChatMention, setChatDonor, lookupUserByEmail, trimChat} = require('../../functions/chat');
+const {onChatBan, onChatMention, setChatDonor, lookupUserByEmail, trimChat, banChatUser, unbanChatUser, onChatDeviceRegistered} = require('../../functions/chat');
 const {resolveMentionedAuthorIds} = require('../../functions/chatMentions');
 const {selectMessagesToTrim} = require('../../functions/chatTrim');
 
@@ -56,13 +56,13 @@ const {selectMessagesToTrim} = require('../../functions/chatTrim');
 describe('onChatBan', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('hides every message from the banned author and posts a ban_notice system message', async () => {
+  it('with messageAction remove, hides every message from the banned author and posts a ban_notice', async () => {
     const bannedMessages = {forEach: cb => { cb({key: 'msg-1'}); cb({key: 'msg-2'}); }};
     mockDatabaseRef.once.mockResolvedValueOnce({val: () => null, forEach: bannedMessages.forEach});
 
     const event = {
       params: {authorId: 'author-xyz'},
-      data: {val: () => ({authorName: 'Gordon', duration: '24h', bannedAt: 1000, expiresAt: 2000})},
+      data: {val: () => ({authorName: 'Gordon', duration: '24h', bannedAt: 1000, expiresAt: 2000, messageAction: 'remove'})},
     };
     await onChatBan.run(event);
 
@@ -73,8 +73,18 @@ describe('onChatBan', () => {
     }));
   });
 
+  it.each([['keep'], ['obscure'], [undefined]])('with messageAction %s, leaves existing messages untouched but still posts the notice', async (messageAction) => {
+    const event = {
+      params: {authorId: 'author-xyz'},
+      data: {val: () => ({authorName: 'Gordon', duration: '24h', bannedAt: 1000, expiresAt: 2000, messageAction})},
+    };
+    await onChatBan.run(event);
+    expect(mockDatabaseRef.once).not.toHaveBeenCalled();
+    expect(mockDatabaseRef.update).not.toHaveBeenCalled();
+    expect(mockDatabaseRef.push).toHaveBeenCalledWith(expect.objectContaining({type: 'ban_notice'}));
+  });
+
   it('phrases a permanent ban without "for"', async () => {
-    mockDatabaseRef.once.mockResolvedValueOnce({val: () => null, forEach: () => {}});
     const event = {
       params: {authorId: 'author-xyz'},
       data: {val: () => ({authorName: 'Gordon', duration: 'permanent', bannedAt: 1000, expiresAt: null})},
@@ -87,8 +97,123 @@ describe('onChatBan', () => {
 
   it('does not throw if the database call fails (caught and logged)', async () => {
     mockDatabaseRef.once.mockRejectedValueOnce(new Error('rtdb down'));
-    const event = {params: {authorId: 'x'}, data: {val: () => ({authorName: 'X', duration: '1h'})}};
+    const event = {params: {authorId: 'x'}, data: {val: () => ({authorName: 'X', duration: '1h', messageAction: 'remove'})}};
     await expect(onChatBan.run(event)).resolves.toBeUndefined();
+  });
+});
+
+describe('onChatBan linked (ban evasion) bans', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('posts no public notice for a ban carried over from a banned device', async () => {
+    const event = {params: {authorId: 'new-uid'}, data: {val: () => ({authorName: 'Fan #abcd', duration: '24h', linkedFrom: 'old-uid', messageAction: 'keep'})}};
+    await onChatBan.run(event);
+    expect(mockDatabaseRef.push).not.toHaveBeenCalled();
+  });
+});
+
+describe('banChatUser', () => {
+  beforeEach(() => jest.clearAllMocks());
+  const post = body => makeReq({method: 'POST', headers: {'x-admin-secret': ADMIN_SECRET}, body});
+
+  it('rejects a request without the correct admin secret', async () => {
+    const res = makeRes();
+    await banChatUser(makeReq({method: 'POST', headers: {'x-admin-secret': 'wrong'}, body: {authorId: 'a', duration: '24h'}}), res);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(mockDatabaseRef.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unknown duration or message action', async () => {
+    let res = makeRes();
+    await banChatUser(post({authorId: 'a', duration: '2y'}), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    res = makeRes();
+    await banChatUser(post({authorId: 'a', duration: '24h', messageAction: 'nuke'}), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it('writes the ban, bans the registered device and clears the report in one update', async () => {
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => 'device-abc'}) // devices/{uid}
+      .mockResolvedValueOnce({val: () => ({flaggedMessage: {text: 'x'}, reportedAt: 1})}); // reports/{id}
+    const res = makeRes();
+    await banChatUser(post({authorId: 'troll', authorName: 'Troll', duration: '24h', messageAction: 'obscure', reportId: 'rep-1'}), res);
+
+    const updates = mockDatabaseRef.update.mock.calls[0][0];
+    expect(updates['bans/troll']).toEqual(expect.objectContaining({
+      authorName: 'Troll', duration: '24h', messageAction: 'obscure', deviceBanned: true, reportData: {flaggedMessage: {text: 'x'}, reportedAt: 1},
+    }));
+    expect(updates['bans/troll'].expiresAt - updates['bans/troll'].bannedAt).toBe(86400000);
+    expect(updates['deviceBans/device-abc']).toEqual(expect.objectContaining({authorId: 'troll', duration: '24h'}));
+    expect(updates['reports/rep-1']).toBeNull();
+    expect(res.json).toHaveBeenCalledWith({ok: true, deviceBanned: true});
+  });
+
+  it('still bans by uid when the device is unknown (older app), and says so', async () => {
+    const res = makeRes();
+    await banChatUser(post({authorId: 'troll', duration: 'permanent'}), res);
+    const updates = mockDatabaseRef.update.mock.calls[0][0];
+    expect(updates['bans/troll']).toEqual(expect.objectContaining({expiresAt: null, messageAction: 'keep', deviceBanned: false}));
+    expect(Object.keys(updates).some(k => k.startsWith('deviceBans/'))).toBe(false);
+    expect(res.json).toHaveBeenCalledWith({ok: true, deviceBanned: false});
+  });
+});
+
+describe('unbanChatUser', () => {
+  beforeEach(() => jest.clearAllMocks());
+  const post = body => makeReq({method: 'POST', headers: {'x-admin-secret': ADMIN_SECRET}, body});
+
+  it('removes the ban, its device bans and carried-over bans, and restores the report', async () => {
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({reportData: {reportedAt: 5}})}) // bans/{uid}
+      .mockResolvedValueOnce({forEach: cb => cb({key: 'device-abc'})}) // deviceBans by authorId
+      .mockResolvedValueOnce({forEach: cb => cb({key: 'evader-uid'})}); // bans by linkedFrom
+    mockDatabaseRef.push.mockReturnValueOnce({key: 'new-rep'});
+    const res = makeRes();
+    await unbanChatUser(post({authorId: 'troll'}), res);
+
+    expect(mockDatabaseRef.update).toHaveBeenCalledWith({
+      'bans/troll': null,
+      'deviceBans/device-abc': null,
+      'bans/evader-uid': null,
+      'reports/new-rep': {reportedAt: 5},
+    });
+    expect(res.json).toHaveBeenCalledWith({ok: true});
+  });
+});
+
+describe('onChatDeviceRegistered', () => {
+  beforeEach(() => jest.clearAllMocks());
+  const event = {params: {authorId: 'new-uid'}, data: {val: () => 'device-abc'}};
+
+  it('carries an active device ban over to a new account on that device, quietly', async () => {
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({authorId: 'old-uid', duration: '24h', expiresAt: Date.now() + 60000})})
+      .mockResolvedValueOnce({val: () => null})
+      .mockResolvedValueOnce({val: () => 'Sneaky'});
+    await onChatDeviceRegistered.run(event);
+    expect(mockDatabaseRef.set).toHaveBeenCalledWith(expect.objectContaining({
+      authorName: 'Sneaky', duration: '24h', linkedFrom: 'old-uid', messageAction: 'keep',
+    }));
+  });
+
+  it('does nothing for an expired device ban, a clean device or the originally banned account', async () => {
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({authorId: 'old-uid', duration: '1h', expiresAt: Date.now() - 1000})})
+      .mockResolvedValueOnce({val: () => null})
+      .mockResolvedValueOnce({val: () => null});
+    await onChatDeviceRegistered.run(event);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => null})
+      .mockResolvedValueOnce({val: () => null})
+      .mockResolvedValueOnce({val: () => null});
+    await onChatDeviceRegistered.run(event);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({authorId: 'new-uid', duration: '24h', expiresAt: null})})
+      .mockResolvedValueOnce({val: () => null})
+      .mockResolvedValueOnce({val: () => null});
+    await onChatDeviceRegistered.run(event);
+    expect(mockDatabaseRef.set).not.toHaveBeenCalled();
   });
 });
 
@@ -135,7 +260,7 @@ describe('onChatMention', () => {
     await onChatMention.run(event);
 
     expect(mockLogPushHistory).toHaveBeenCalledWith('You were mentioned in Live Chat', '', 'chat_mentions', {
-      source: 'chatMention', target: 'token', mentioned: 2, sent: 1, failed: 0, skippedSpoiler: 0, noToken: 1, ok: true,
+      source: 'chatMention', target: 'token', senderId: 'sender-1', mentioned: 2, sent: 1, failed: 0, skippedSpoiler: 0, noToken: 1, ok: true,
     });
     expect(JSON.stringify(mockLogPushHistory.mock.calls)).not.toMatch(/secret text|mentioned-1|device-token/);
   });
@@ -209,6 +334,46 @@ describe('onChatMention', () => {
     await onChatMention.run(event);
 
     expect(mockDatabaseRef.update).toHaveBeenCalledWith({'mentioned-1': null});
+  });
+
+  it('sends nothing when the sender has an active ban, and logs the skip with the sender id', async () => {
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})})
+      .mockResolvedValueOnce({val: () => ({bannedAt: 1, duration: '24h', expiresAt: Date.now() + 60000})});
+
+    const event = {data: {val: () => ({text: '@Gordon hi', authorId: 'banned-1', authorName: 'Troll'})}};
+    await onChatMention.run(event);
+
+    expect(mockMessaging.send).not.toHaveBeenCalled();
+    expect(mockLogPushHistory).toHaveBeenCalledWith('You were mentioned in Live Chat', '', 'chat_mentions', expect.objectContaining({
+      senderId: 'banned-1', skippedBanned: true,
+    }));
+  });
+
+  it('treats a permanent ban (no expiresAt) as active', async () => {
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})})
+      .mockResolvedValueOnce({val: () => ({bannedAt: 1, duration: 'permanent'})});
+
+    const event = {data: {val: () => ({text: '@Gordon hi', authorId: 'banned-1', authorName: 'Troll'})}};
+    await onChatMention.run(event);
+    expect(mockMessaging.send).not.toHaveBeenCalled();
+  });
+
+  it('still sends when the sender\'s ban has expired', async () => {
+    resolveMentionedAuthorIds.mockReturnValue(['mentioned-1']);
+    mockDatabaseRef.once
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'Gordon'})})
+      .mockResolvedValueOnce({val: () => ({'mentioned-1': 'device-token-abc'})})
+      .mockResolvedValueOnce({val: () => ({bannedAt: 1, duration: '1h', expiresAt: Date.now() - 1000})});
+
+    const event = {data: {val: () => ({text: '@Gordon hi', authorId: 'was-banned', authorName: 'Fan'})}};
+    await onChatMention.run(event);
+    expect(mockMessaging.send).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing if nobody was actually mentioned', async () => {

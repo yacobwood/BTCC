@@ -1,5 +1,6 @@
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
 import {claimUsername, validateUsername} from './userProfile';
 
 const DB = database();
@@ -58,4 +59,22 @@ export async function saveChatDisplayName({authorId, user, name, previousName}) 
 export function syncChatAuthorName(authorId, name) {
   if (!authorId || !name) return;
   DB.ref(`/chat/authorNames/${authorId}`).set(name).catch(() => {});
+}
+
+// Register this device against the chat identity so a ban survives a
+// reinstall: reinstalling gets a fresh anonymous uid, but getUniqueId() is
+// ANDROID_ID on Android (survives reinstall, scoped to this app's signing
+// key) and identifierForVendor on iOS (only survives while another app from
+// the same developer stays installed). Write-once per uid in
+// database.rules.json, so repeat calls fail quietly - expected, not an error.
+// The banChatUser/onChatDeviceRegistered Cloud Functions do the rest.
+export async function syncChatDevice(authorId) {
+  if (!authorId || authorId === 'anonymous') return;
+  try {
+    const deviceId = String(await DeviceInfo.getUniqueId()).replace(/[^A-Za-z0-9-]/g, '').slice(0, 100);
+    if (!deviceId) return;
+    const ref = DB.ref(`/chat/devices/${authorId}`);
+    const snap = await ref.once('value');
+    if (!snap.val()) await ref.set(deviceId);
+  } catch {}
 }

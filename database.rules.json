@@ -14,7 +14,7 @@
         ".read": true,
         ".indexOn": ["timestamp"],
         "$msgId": {
-          ".write": "auth != null",
+          ".write": "auth != null && (newData.exists() ? (data.exists() || ((!root.child('chat/bans/' + auth.uid).exists() || (root.child('chat/bans/' + auth.uid).child('expiresAt').exists() && root.child('chat/bans/' + auth.uid).child('expiresAt').val() < now)) && (!root.child('chat/devices/' + auth.uid).exists() || !root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val()).exists() || (root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val()).child('expiresAt').exists() && root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val()).child('expiresAt').val() < now)))) : data.child('authorId').val() === auth.uid)",
           ".validate": "!newData.exists() || newData.hasChildren(['text', 'authorId', 'authorName', 'timestamp', 'flagCount', 'hidden'])",
           "text": {
             ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500 && (!data.exists() || newData.val() === data.val())"
@@ -44,9 +44,24 @@
       },
       "bans": {
         ".read": true,
+        ".indexOn": ["linkedFrom"],
         "$authorId": {
-          ".write": true,
-          ".validate": "!newData.exists() || newData.hasChildren(['bannedAt', 'duration', 'authorName'])"
+          ".write": false
+        }
+      },
+      "deviceBans": {
+        ".read": false,
+        ".indexOn": ["authorId"],
+        "$deviceId": {
+          ".write": false
+        }
+      },
+      "devices": {
+        ".read": false,
+        "$authorId": {
+          ".read": "auth != null && auth.uid === $authorId",
+          ".write": "auth != null && auth.uid === $authorId && !data.exists()",
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9-]{1,100}$/)"
         }
       },
       "authorNames": {

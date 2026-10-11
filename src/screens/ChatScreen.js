@@ -19,7 +19,7 @@ import {Colors} from '../theme/colors';
 import auth from '@react-native-firebase/auth';
 import {useAuth} from '../store/auth';
 import {saveProfile, claimUsername} from '../utils/userProfile';
-import {saveChatDisplayName, syncChatAuthorName} from '../utils/chatIdentity';
+import {saveChatDisplayName, syncChatAuthorName, syncChatDevice} from '../utils/chatIdentity';
 import {Analytics} from '../utils/analytics';
 import {fetchBlacklist} from '../api/client';
 import {timeAgo} from '../utils/timeAgo';
@@ -64,6 +64,15 @@ export default function ChatScreen({onClose} = {}) {
   const [myAuthorId, setMyAuthorId] = useState('anonymous');
   const [isBanned, setIsBanned] = useState(false);
   const [banInfo, setBanInfo] = useState(null);
+  // Every ban, keyed by authorId - drives the "obscure" moderation option
+  // (admin bans with messageAction 'obscure' collapse that author's
+  // messages behind a tap-to-show row while the ban is active).
+  const [bans, setBans] = useState({});
+  const [revealedIds, setRevealedIds] = useState(new Set());
+  // Re-render tick so "8m ago" labels keep counting while the chat stays
+  // open - timeAgo() reads Date.now() at render time, so without this they
+  // only moved when a new message arrived.
+  const [now, setNow] = useState(Date.now());
   const listRef = useRef(null);
   const inputRef = useRef(null);
   // @mention autocomplete: cursorPos tracks the cursor so the mention query
@@ -83,6 +92,7 @@ export default function ChatScreen({onClose} = {}) {
       const myId = currentUser?.uid || 'anonymous';
       myAuthorIdRef.current = myId;
       setMyAuthorId(myId);
+      syncChatDevice(myId);
 
       // Migrate pre-uniqueness names: claim the name in Firestore if not yet claimed.
       // If someone else grabbed it first, clear it so the user is prompted to choose a new one.
@@ -135,8 +145,29 @@ export default function ChatScreen({onClose} = {}) {
     const donorsRef = DB.ref('/chat/donors');
     donorsRef.on('value', snap => { setDonors(snap.val() || {}); });
 
-    return () => { ref.off('value'); namesRef.off('value'); donorsRef.off('value'); };
+    const bansRef = DB.ref('/chat/bans');
+    bansRef.on('value', snap => { setBans(snap.val() || {}); });
+
+    return () => { ref.off('value'); namesRef.off('value'); donorsRef.off('value'); bansRef.off('value'); };
   }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Authors whose messages are currently obscured. A ban without
+  // messageAction (or 'keep') leaves messages untouched; 'remove' is applied
+  // server-side by onChatBan (hidden: true), so only 'obscure' matters here.
+  const obscuredAuthorIds = useMemo(() => {
+    const ids = new Set();
+    Object.entries(bans).forEach(([authorId, ban]) => {
+      if (ban?.messageAction !== 'obscure') return;
+      if (ban.expiresAt && ban.expiresAt < now) return;
+      ids.add(authorId);
+    });
+    return ids;
+  }, [bans, now]);
 
   // Current display name for a given message, resolved live by authorId -
   // falls back to that message's own stored snapshot for authors who
@@ -403,6 +434,18 @@ export default function ChatScreen({onClose} = {}) {
         </View>
       );
     }
+    if (obscuredAuthorIds.has(item.authorId) && !revealedIds.has(item.id)) {
+      return (
+        <TouchableOpacity
+          style={styles.obscuredMsg}
+          onPress={() => setRevealedIds(prev => new Set(prev).add(item.id))}
+          accessibilityRole="button"
+          accessibilityLabel="Show message from a banned user">
+          <Icon name="visibility-off" size={14} color={Colors.textSecondary} />
+          <Text style={styles.obscuredMsgText}>Message from a banned user. Tap to show.</Text>
+        </TouchableOpacity>
+      );
+    }
     const isOwn = item.authorId === myAuthorId;
     const authorName = resolveAuthorName(item);
     return (
@@ -494,6 +537,7 @@ export default function ChatScreen({onClose} = {}) {
           data={messages}
           keyExtractor={item => item.id}
           renderItem={renderMessage}
+          extraData={now}
           inverted
           contentContainerStyle={messages.length === 0 ? styles.emptyContainer : {paddingVertical: 8}}
           ListEmptyComponent={<Text style={styles.emptyText}>No messages yet. Say hello! 👋</Text>}
@@ -731,6 +775,14 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.outline,
   },
 
+  obscuredMsg: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  obscuredMsgText: {color: Colors.textSecondary, fontSize: 13, fontStyle: 'italic'},
   systemMsg: {
     paddingHorizontal: 16,
     paddingVertical: 8,

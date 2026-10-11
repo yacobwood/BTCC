@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {claimUsername, validateUsername} from '../../src/utils/userProfile';
-import {hasChatDisplayName, saveChatDisplayName, syncChatAuthorName} from '../../src/utils/chatIdentity';
+import {hasChatDisplayName, saveChatDisplayName, syncChatAuthorName, syncChatDevice} from '../../src/utils/chatIdentity';
+import DeviceInfo from 'react-native-device-info';
 
 jest.mock('../../src/utils/userProfile', () => ({
   claimUsername: jest.fn(),
@@ -108,5 +109,35 @@ describe('syncChatAuthorName', () => {
   it('does not throw if the write fails (offline, rules hiccup)', () => {
     mockSet.mockReturnValueOnce(Promise.reject(new Error('offline')));
     expect(() => syncChatAuthorName('uid1', 'Gordon')).not.toThrow();
+  });
+});
+
+describe('syncChatDevice', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it('registers the device id when this uid has none yet', async () => {
+    mockOnce.mockResolvedValue({val: () => null});
+    await syncChatDevice('uid-1');
+    expect(mockSet).toHaveBeenCalledWith('test-device-id');
+  });
+
+  it('does not rewrite an existing registration (the rule is write-once)', async () => {
+    mockOnce.mockResolvedValue({val: () => 'test-device-id'});
+    await syncChatDevice('uid-1');
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it('strips characters that are not valid in a database key', async () => {
+    mockOnce.mockResolvedValue({val: () => null});
+    DeviceInfo.getUniqueId.mockResolvedValueOnce('AB.CD/12-34$');
+    await syncChatDevice('uid-1');
+    expect(mockSet).toHaveBeenCalledWith('ABCD12-34');
+  });
+
+  it('skips the placeholder anonymous id and swallows errors', async () => {
+    await syncChatDevice('anonymous');
+    expect(mockOnce).not.toHaveBeenCalled();
+    mockOnce.mockRejectedValue(new Error('offline'));
+    await expect(syncChatDevice('uid-1')).resolves.toBeUndefined();
   });
 });

@@ -11,7 +11,14 @@ const {requireAdminPost, logPushHistory} = require('./shared');
 const CHAT_DB_URL = 'https://btcchub-af77a-default-rtdb.europe-west1.firebasedatabase.app';
 const getChatDb = () => getDatabaseWithUrl(CHAT_DB_URL);
 
-// Apply ban: hide all existing messages from the banned author and write a system notice
+// Active = exists and either permanent (no expiresAt) or not yet expired.
+const isBanActive = (ban, now = Date.now()) => !!ban && (!ban.expiresAt || ban.expiresAt > now);
+
+// Apply ban: write a system notice, and deal with the author's existing
+// messages per the admin's choice (ban.messageAction):
+//   'keep' (default, also any ban written before the option existed) - leave them
+//   'obscure' - leave them; the app collapses them behind tap-to-show while the ban is active
+//   'remove' - hide them (hidden: true), the original pre-2026-10-11 behaviour
 exports.onChatBan = onValueCreated(
   {ref: '/chat/bans/{authorId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
   async (event) => {
@@ -20,10 +27,17 @@ exports.onChatBan = onValueCreated(
       const ban = event.data.val();
       const messagesRef = getChatDb().ref('/chat/messages');
 
-      const snap = await messagesRef.orderByChild('authorId').equalTo(authorId).once('value');
-      const updates = {};
-      snap.forEach(c => { updates[`${c.key}/hidden`] = true; });
-      if (Object.keys(updates).length > 0) await messagesRef.update(updates);
+      if (ban.messageAction === 'remove') {
+        const snap = await messagesRef.orderByChild('authorId').equalTo(authorId).once('value');
+        const updates = {};
+        snap.forEach(c => { updates[`${c.key}/hidden`] = true; });
+        if (Object.keys(updates).length > 0) await messagesRef.update(updates);
+      }
+
+      // A ban carried over to a new account on an already-banned device
+      // (onChatDeviceRegistered) stays quiet - that account has usually
+      // never posted, so a public notice would only tip them off.
+      if (ban.linkedFrom) return;
 
       const durationText = ban.duration === 'permanent' ? 'permanently' : `for ${ban.duration}`;
       await messagesRef.push({
@@ -37,6 +51,119 @@ exports.onChatBan = onValueCreated(
       });
     } catch (e) {
       console.error('onChatBan failed:', e);
+    }
+  },
+);
+
+const BAN_DURATIONS_MS = {'1h': 3600000, '24h': 86400000, '7d': 604800000, permanent: null};
+const MESSAGE_ACTIONS = ['keep', 'obscure', 'remove'];
+
+// Admin-only ban. /chat/bans is no longer client-writable (database.rules.json),
+// so the admin panel goes through here instead of a raw RTDB PUT - before
+// 2026-10-11 anyone could delete their own ban with one REST call. Also bans
+// the user's device (/chat/devices/{uid}, registered by the app since
+// 2026-10-11) so a reinstall - which gets a fresh anonymous uid - stays
+// banned: see onChatDeviceRegistered. Older app builds never registered a
+// device, so deviceBanned comes back false for them.
+exports.banChatUser = onRequest(
+  {secrets: ['ADMIN_SECRET'], cors: ['https://yacobwood.github.io']},
+  async (req, res) => {
+    if (requireAdminPost(req, res)) return;
+
+    const {authorId, authorName, duration, messageAction = 'keep', reportId} = req.body || {};
+    if (!authorId) { res.status(400).json({ok: false, error: 'authorId required'}); return; }
+    if (!(duration in BAN_DURATIONS_MS)) { res.status(400).json({ok: false, error: 'invalid duration'}); return; }
+    if (!MESSAGE_ACTIONS.includes(messageAction)) { res.status(400).json({ok: false, error: 'invalid messageAction'}); return; }
+
+    try {
+      const db = getChatDb();
+      const [deviceSnap, reportSnap] = await Promise.all([
+        db.ref(`/chat/devices/${authorId}`).once('value'),
+        reportId ? db.ref(`/chat/reports/${reportId}`).once('value') : Promise.resolve(null),
+      ]);
+      const deviceId = deviceSnap.val();
+      const now = Date.now();
+      const ms = BAN_DURATIONS_MS[duration];
+      const expiresAt = ms !== null ? now + ms : null;
+
+      const ban = {bannedAt: now, expiresAt, duration, authorName: authorName || authorId, messageAction, deviceBanned: !!deviceId};
+      // Kept on the ban so unbanning can put the report back in the queue.
+      if (reportSnap?.val()) ban.reportData = reportSnap.val();
+
+      const updates = {[`bans/${authorId}`]: ban};
+      if (deviceId) updates[`deviceBans/${deviceId}`] = {authorId, bannedAt: now, expiresAt, duration};
+      if (reportId) updates[`reports/${reportId}`] = null;
+      await db.ref('/chat').update(updates);
+      res.status(200).json({ok: true, deviceBanned: !!deviceId});
+    } catch (e) {
+      console.error('banChatUser failed:', e);
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
+);
+
+// Admin-only unban: removes the ban, its device ban and any bans it was
+// carried over to on new accounts, and puts the original report back.
+exports.unbanChatUser = onRequest(
+  {secrets: ['ADMIN_SECRET'], cors: ['https://yacobwood.github.io']},
+  async (req, res) => {
+    if (requireAdminPost(req, res)) return;
+
+    const {authorId} = req.body || {};
+    if (!authorId) { res.status(400).json({ok: false, error: 'authorId required'}); return; }
+
+    try {
+      const db = getChatDb();
+      const [banSnap, deviceBansSnap, linkedSnap] = await Promise.all([
+        db.ref(`/chat/bans/${authorId}`).once('value'),
+        db.ref('/chat/deviceBans').orderByChild('authorId').equalTo(authorId).once('value'),
+        db.ref('/chat/bans').orderByChild('linkedFrom').equalTo(authorId).once('value'),
+      ]);
+      const ban = banSnap.val();
+      const updates = {[`bans/${authorId}`]: null};
+      deviceBansSnap.forEach(c => { updates[`deviceBans/${c.key}`] = null; });
+      linkedSnap.forEach(c => { updates[`bans/${c.key}`] = null; });
+      if (ban?.reportData) updates[`reports/${db.ref('/chat/reports').push().key}`] = ban.reportData;
+      await db.ref('/chat').update(updates);
+      res.status(200).json({ok: true});
+    } catch (e) {
+      console.error('unbanChatUser failed:', e);
+      res.status(500).json({ok: false, error: e.message});
+    }
+  },
+);
+
+// Ban evasion: when an account registers a device that is already banned
+// (a reinstall gets a new anonymous uid but the same device id), copy the
+// ban onto the new account. database.rules.json already refuses messages
+// from a banned device directly; this copy is what makes the app show the
+// banned state, onChatMention skip them and the admin list show them.
+exports.onChatDeviceRegistered = onValueCreated(
+  {ref: '/chat/devices/{authorId}', region: 'europe-west1', instance: 'btcchub-af77a-default-rtdb'},
+  async (event) => {
+    try {
+      const authorId = event.params.authorId;
+      const deviceId = event.data.val();
+      if (!deviceId) return;
+      const db = getChatDb();
+      const [deviceBanSnap, existingSnap, nameSnap] = await Promise.all([
+        db.ref(`/chat/deviceBans/${deviceId}`).once('value'),
+        db.ref(`/chat/bans/${authorId}`).once('value'),
+        db.ref(`/chat/authorNames/${authorId}`).once('value'),
+      ]);
+      const deviceBan = deviceBanSnap.val();
+      if (!isBanActive(deviceBan) || deviceBan.authorId === authorId) return;
+      if (isBanActive(existingSnap.val())) return;
+      await db.ref(`/chat/bans/${authorId}`).set({
+        bannedAt: Date.now(),
+        expiresAt: deviceBan.expiresAt || null,
+        duration: deviceBan.duration,
+        authorName: nameSnap.val() || `Fan #${authorId.slice(-4)}`,
+        messageAction: 'keep',
+        linkedFrom: deviceBan.authorId,
+      });
+    } catch (e) {
+      console.error('onChatDeviceRegistered failed:', e);
     }
   },
 );
@@ -64,10 +191,22 @@ exports.onChatMention = onValueCreated(
 
       const tokensSnap = await db.ref('/chat/deviceTokens').once('value');
       const tokens = tokensSnap.val() || {};
+      // A banned sender never notifies anyone. The app blocks banned users
+      // from posting, but bans are per uid and the database rules only
+      // started enforcing them on 2026-10-11 - this is the backstop.
+      const banSnap = await db.ref(`/chat/bans/${msg.authorId}`).once('value');
+      if (isBanActive(banSnap.val())) {
+        await logPushHistory('You were mentioned in Live Chat', '', 'chat_mentions', {
+          source: 'chatMention', target: 'token', senderId: msg.authorId, mentioned: mentionedIds.length, skippedBanned: true, ok: true,
+        });
+        return;
+      }
       const messaging = getMessaging();
       const staleTokenUpdates = {};
       const body = msg.text.length > 100 ? `${msg.text.slice(0, 97)}...` : msg.text;
-      // Counts only for push_history - no message text or recipient IDs.
+      // Counts plus sender only for push_history - no message text or
+      // recipient IDs. senderId (added 2026-10-11) is what ties a mention
+      // push back to a user after they delete the message itself.
       const counts = {sent: 0, failed: 0, skippedSpoiler: 0, noToken: 0};
 
       await Promise.all(mentionedIds.map(async authorId => {
@@ -125,7 +264,7 @@ exports.onChatMention = onValueCreated(
       }));
 
       await logPushHistory('You were mentioned in Live Chat', '', 'chat_mentions', {
-        source: 'chatMention', target: 'token', mentioned: mentionedIds.length, ...counts, ok: counts.failed === 0,
+        source: 'chatMention', target: 'token', senderId: msg.authorId, mentioned: mentionedIds.length, ...counts, ok: counts.failed === 0,
       });
 
       if (Object.keys(staleTokenUpdates).length > 0) {

@@ -49,7 +49,17 @@ describe('database.rules.json', () => {
     });
 
     it('requires authentication to write a message', () => {
-      expect(msg['.write']).toBe('auth != null');
+      expect(msg['.write']).toMatch(/^auth != null && /);
+    });
+
+    it('blocks a uid with an active ban from creating messages (permanent = no expiresAt)', () => {
+      const w = msg['.write'];
+      expect(w).toContain("!root.child('chat/bans/' + auth.uid).exists()");
+      expect(w).toContain("child('expiresAt').val() < now");
+    });
+
+    it('only lets the author delete their own message', () => {
+      expect(msg['.write']).toContain(": data.child('authorId').val() === auth.uid");
     });
 
     it('locks authorId to the writer\'s own uid and makes it immutable after creation', () => {
@@ -77,15 +87,31 @@ describe('database.rules.json', () => {
     });
   });
 
-  describe('chat/bans', () => {
-    // Known, separate issue (see the growth/re-engagement report and the
-    // donor-badge plan) - .write is unconditionally true, so the admin
-    // panel's "privilege" here is really just URL obscurity, not real
-    // access control. This test documents the current state deliberately:
-    // if it ever flips false, that's a real fix and this assertion (plus
-    // the surrounding docs) should be updated as part of it, not silently.
-    it('is currently open-write for any client (documented known issue, not a target to fix here)', () => {
-      expect(rules.chat.bans.$authorId['.write']).toBe(true);
+  describe('chat/bans, deviceBans and devices', () => {
+    // Bans were open-write until 2026-10-11 (anyone could delete their own
+    // ban over REST). Now only the Admin SDK writes them, via the
+    // banChatUser/unbanChatUser/onChatDeviceRegistered Cloud Functions.
+    // Behaviour verified against the real database emulator that day.
+    it('makes bans readable by the app but not client-writable', () => {
+      expect(rules.chat.bans['.read']).toBe(true);
+      expect(rules.chat.bans.$authorId['.write']).toBe(false);
+    });
+
+    it('keeps device bans fully server-side', () => {
+      expect(rules.chat.deviceBans['.read']).toBe(false);
+      expect(rules.chat.deviceBans.$deviceId['.write']).toBe(false);
+    });
+
+    it('lets a user register their own device once and read only their own entry', () => {
+      const dev = rules.chat.devices;
+      expect(dev['.read']).toBe(false);
+      expect(dev.$authorId['.read']).toBe('auth != null && auth.uid === $authorId');
+      expect(dev.$authorId['.write']).toBe('auth != null && auth.uid === $authorId && !data.exists()');
+      expect(dev.$authorId['.validate']).toContain('matches(');
+    });
+
+    it('blocks messages from a banned device, not just a banned uid', () => {
+      expect(rules.chat.messages.$msgId['.write']).toContain("root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val())");
     });
   });
 

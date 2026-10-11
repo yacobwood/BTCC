@@ -28,6 +28,7 @@ var mockDbOn, mockDbOff, mockDbPush, mockDbUpdate, mockDbRemove, mockDbTransacti
 var mockBanOn, mockBanOff, mockBanRef;
 var mockNamesOn, mockNamesOff, mockNamesSet, mockNamesRef;
 var mockDonorsOn, mockDonorsOff, mockDonorsRef;
+var mockAllBansOn, mockAllBansOff, mockAllBansRef;
 
 jest.mock('@react-native-firebase/database', () => {
   mockDbOn          = jest.fn();
@@ -60,8 +61,12 @@ jest.mock('@react-native-firebase/database', () => {
   mockDonorsOn  = jest.fn();
   mockDonorsOff = jest.fn();
   mockDonorsRef = {on: mockDonorsOn, off: mockDonorsOff};
+  mockAllBansOn  = jest.fn();
+  mockAllBansOff = jest.fn();
+  mockAllBansRef = {on: mockAllBansOn, off: mockAllBansOff};
   const db = jest.fn(() => ({
     ref: jest.fn(path => {
+      if (path === '/chat/bans') return mockAllBansRef;
       if (path && path.startsWith('/chat/bans/')) return mockBanRef;
       if (path && path.startsWith('/chat/authorNames')) return mockNamesRef;
       if (path && path.startsWith('/chat/donors')) return mockDonorsRef;
@@ -90,6 +95,12 @@ function triggerBan(banData) {
 function triggerAuthorNames(namesMap) {
   const snap = {val: () => namesMap};
   const onCall = mockNamesOn.mock.calls[0];
+  if (onCall) onCall[1](snap);
+}
+
+function triggerAllBans(bansMap) {
+  const snap = {val: () => bansMap};
+  const onCall = mockAllBansOn.mock.calls[0];
   if (onCall) onCall[1](snap);
 }
 
@@ -1103,6 +1114,60 @@ describe('ChatScreen', () => {
     await act(async () => { triggerMessages([]); });
     unmount();
     expect(mockBanOff).toHaveBeenCalled();
+  });
+
+  // ── Obscured messages (admin ban with messageAction 'obscure') ─────────────
+
+  const trollMsg = {id: 't1', text: '@Jake again', authorId: 'troll', authorName: 'Troll', timestamp: 1000, flagCount: 0, hidden: false};
+  const okMsg = {id: 'o1', text: 'Great race', authorId: 'other', authorName: 'Other', timestamp: 2000, flagCount: 0, hidden: false};
+
+  it('collapses an obscure-banned author\'s messages behind tap-to-show, leaving others visible', async () => {
+    const {getByText, queryByText, getByLabelText} = renderChat();
+    await act(async () => { triggerMessages([trollMsg, okMsg]); });
+    await act(async () => {
+      triggerAllBans({troll: {bannedAt: 1, duration: '24h', expiresAt: Date.now() + 3600000, messageAction: 'obscure'}});
+    });
+    expect(queryByText('@Jake again')).toBeNull();
+    expect(getByText('Great race')).toBeTruthy();
+    await act(async () => { fireEvent.press(getByLabelText('Show message from a banned user')); });
+    expect(getByText('@Jake again')).toBeTruthy();
+  });
+
+  it.each([
+    ['keep', Date.now() + 3600000],
+    ['remove', Date.now() + 3600000],
+    [undefined, Date.now() + 3600000],
+    ['obscure', Date.now() - 1000],
+  ])('shows messages normally for messageAction %s (expiresAt %s)', async (messageAction, expiresAt) => {
+    const {getByText, queryByLabelText} = renderChat();
+    await act(async () => { triggerMessages([trollMsg]); });
+    await act(async () => {
+      triggerAllBans({troll: {bannedAt: 1, duration: '24h', expiresAt, messageAction}});
+    });
+    expect(getByText('@Jake again')).toBeTruthy();
+    expect(queryByLabelText('Show message from a banned user')).toBeNull();
+  });
+
+  it('cleans up the all-bans listener on unmount', async () => {
+    const {unmount} = renderChat();
+    unmount();
+    expect(mockAllBansOff).toHaveBeenCalledWith('value');
+  });
+
+  // ── Relative timestamps keep ticking ──────────────────────────────────────
+
+  it('re-renders "x ago" labels every 30s while open, without a new message', async () => {
+    jest.useFakeTimers();
+    try {
+      const {timeAgo} = require('../../src/utils/timeAgo');
+      renderChat();
+      await act(async () => { triggerMessages([okMsg]); });
+      const before = timeAgo.mock.calls.length;
+      await act(async () => { jest.advanceTimersByTime(30000); });
+      expect(timeAgo.mock.calls.length).toBeGreaterThan(before);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   // ── @mention autocomplete ────────────────────────────────────────────────────
