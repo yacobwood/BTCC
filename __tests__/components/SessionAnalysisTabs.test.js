@@ -6,6 +6,7 @@ import SessionAnalysisTabs from '../../src/components/SessionAnalysisTabs';
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {
     sessionAnalysisTabChanged: jest.fn(),
+    sessionAnalysisMenuOpened: jest.fn(),
   },
 }));
 
@@ -15,6 +16,42 @@ function makeTab(key, label, hasData, text, group) {
 
 describe('SessionAnalysisTabs', () => {
   beforeEach(() => jest.clearAllMocks());
+
+  describe('jump-to menu', () => {
+    const TABS = [
+      makeTab('a', 'A', true, 'Panel A'),
+      makeTab('b', 'B', true, 'Panel B', 'GROUP'),
+      makeTab('c', 'C', true, 'Panel C'),
+    ];
+
+    it('labels the title with position and opens a grid of every data type', () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {getByLabelText} = render(<SessionAnalysisTabs roundNumber={9} session="Race 3" tabs={TABS} />);
+      fireEvent.press(getByLabelText('A, 1 of 3. Show all data types'));
+      expect(Analytics.sessionAnalysisMenuOpened).toHaveBeenCalledWith(9, 'Race 3', 3);
+      expect(getByLabelText('GROUP B')).toBeTruthy();
+      expect(getByLabelText('C')).toBeTruthy();
+    });
+
+    it('jumps straight to a picked data type and logs it as a menu change', () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {getByLabelText, getByText, queryByText} = render(<SessionAnalysisTabs roundNumber={9} session="Race 3" tabs={TABS} />);
+      fireEvent.press(getByLabelText('A, 1 of 3. Show all data types'));
+      fireEvent.press(getByLabelText('C'));
+      expect(getByText('Panel C')).toBeTruthy();
+      expect(queryByText('Panel A')).toBeNull();
+      expect(Analytics.sessionAnalysisTabChanged).toHaveBeenCalledWith(9, 'Race 3', 'c', 'menu');
+    });
+
+    it('picking the current data type just closes the menu without logging a change', () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const {getByLabelText, getByText} = render(<SessionAnalysisTabs roundNumber={9} session="Race 3" tabs={TABS} />);
+      fireEvent.press(getByLabelText('A, 1 of 3. Show all data types'));
+      fireEvent.press(getByLabelText('A'));
+      expect(getByText('Panel A')).toBeTruthy();
+      expect(Analytics.sessionAnalysisTabChanged).not.toHaveBeenCalled();
+    });
+  });
 
   it('renders nothing when no tab has data', () => {
     const {toJSON} = render(
@@ -70,7 +107,7 @@ describe('SessionAnalysisTabs', () => {
     expect(getByText('B')).toBeTruthy();
     expect(getByText('Panel B')).toBeTruthy();
     expect(queryByText('Panel A')).toBeNull();
-    expect(Analytics.sessionAnalysisTabChanged).toHaveBeenCalledWith(9, 'Race 3', 'b');
+    expect(Analytics.sessionAnalysisTabChanged).toHaveBeenCalledWith(9, 'Race 3', 'b', 'arrow');
   });
 
   it('disables Next at the last panel and Previous returns to the first', () => {

@@ -4,7 +4,11 @@ import Svg, {Polyline, Line, Circle, Text as SvgText} from 'react-native-svg';
 import {Colors} from '../theme/colors';
 import {TEAM_COLORS} from '../theme/teamColors';
 import {Analytics} from '../utils/analytics';
-import {formatDriverName} from '../utils/driverName';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {
+  FavouriteSummary, TeamStripe, RankBadge, ValueBar, DriverName, closeness,
+  favRowStyle, tableStyles, ColumnHeader,
+} from './analysisUi';
 import {fetchSessionAnalysis} from '../api/client';
 import {mapSessionAnalysis} from '../api/parsers';
 
@@ -175,9 +179,16 @@ function defaultSelection(drivers, isFavourite) {
   return new Set([...favs, ...top]);
 }
 
+
 const screenWidth = Dimensions.get('window').width;
 
-function LapTimesChart({drivers, selected, colorOf}) {
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+}
+
+function LapTimesChart({drivers, selected, colorOf, isFavourite}) {
   const shown = drivers.filter(d => selected.has(d.no));
   const series = shown.map(d => ({d, laps: cleanLaps(d)})).filter(s => s.laps.length);
   if (!series.length) {
@@ -189,12 +200,12 @@ function LapTimesChart({drivers, selected, colorOf}) {
   let hi = Math.max(...allTimes);
   if (hi - lo < 0.5) { lo -= 0.25; hi += 0.25; }
 
-  const chartW = screenWidth - 64;
-  const chartH = 220;
-  const padL = 52;
+  const chartW = screenWidth - 48;
+  const chartH = 230;
+  const padL = 50;
   const padR = 10;
-  const padT = 10;
-  const padB = 20;
+  const padT = 12;
+  const padB = 22;
   const x = lap => padL + ((lap - 1) / (maxLap - 1)) * (chartW - padL - padR);
   // Faster (lower) times at the top, same direction as a position chart.
   const y = t => padT + ((t - lo) / (hi - lo)) * (chartH - padT - padB);
@@ -203,16 +214,21 @@ function LapTimesChart({drivers, selected, colorOf}) {
   const lapTicks = [];
   for (let l = 1; l <= maxLap; l += lapStep) lapTicks.push(l);
 
+  // Favourites draw last (on top) and thicker, so their line is never
+  // buried under the rest of the selection.
+  const ordered = [...series].sort((a, b) => Number(isFavourite(a.d.driver)) - Number(isFavourite(b.d.driver)));
+
   return (
     <Svg width={chartW} height={chartH}>
       {yTicks.map(t => (
         <React.Fragment key={t}>
-          <Line x1={padL} y1={y(t)} x2={chartW - padR} y2={y(t)} stroke={Colors.outline} strokeWidth={0.5} />
+          <Line x1={padL} y1={y(t)} x2={chartW - padR} y2={y(t)} stroke={Colors.outline} strokeWidth={0.5} strokeDasharray="3,4" />
           <SvgText x={padL - 6} y={y(t) + 3} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{formatLapTime(t)}</SvgText>
         </React.Fragment>
       ))}
-      {series.map(({d, laps}) => {
+      {ordered.map(({d, laps}) => {
         const color = colorOf(d);
+        const fav = isFavourite(d.driver);
         // A gap in the lap numbers (pit stop, Safety Car lap) breaks the
         // line rather than drawing a misleading straight join across it.
         const segments = [];
@@ -220,17 +236,19 @@ function LapTimesChart({drivers, selected, colorOf}) {
           if (i === 0 || l.lap !== laps[i - 1].lap + 1) segments.push([]);
           segments[segments.length - 1].push(`${x(l.lap)},${y(l.time)}`);
         });
+        const bestLap = laps.reduce((b, l) => (l.time < b.time ? l : b), laps[0]);
         return (
           <React.Fragment key={d.no}>
             {segments.map((pts, si) => (pts.length > 1 ? (
-              <Polyline key={si} points={pts.join(' ')} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" />
+              <Polyline key={si} points={pts.join(' ')} fill="none" stroke={color} strokeWidth={fav ? 2.75 : 1.5} strokeLinejoin="round" opacity={fav ? 1 : 0.85} />
             ) : null))}
-            {laps.map(l => <Circle key={l.lap} cx={x(l.lap)} cy={y(l.time)} r={2} fill={color} />)}
+            {laps.map(l => <Circle key={l.lap} cx={x(l.lap)} cy={y(l.time)} r={fav ? 2.5 : 1.75} fill={color} />)}
+            <Circle cx={x(bestLap.lap)} cy={y(bestLap.time)} r={5} fill={Colors.card} stroke={color} strokeWidth={2} />
           </React.Fragment>
         );
       })}
       {lapTicks.map(l => (
-        <SvgText key={l} x={x(l)} y={chartH - 4} fill={Colors.textSecondary} fontSize={8} textAnchor="middle">{l}</SvgText>
+        <SvgText key={l} x={x(l)} y={chartH - 5} fill={Colors.textSecondary} fontSize={8.5} textAnchor="middle">{l}</SvgText>
       ))}
     </Svg>
   );
@@ -254,25 +272,26 @@ function LapTable({driver, bests}) {
         ))}
         <Text style={[styles.lapCellTime, styles.colHeader]}>TIME</Text>
       </View>
-      {driver.laps.map(l => {
+      {driver.laps.map((l, idx) => {
         const note = l.deleted ? 'DEL' : l.outLap && l.inLap ? 'OUT/IN' : l.outLap ? 'OUT' : l.inLap ? 'IN' : l.pit ? 'PIT' : null;
+        const isBest = l.time === driver.best;
         return (
-          <View key={l.lap} style={styles.lapTableRow}>
+          <View key={l.lap} style={[styles.lapTableRow, idx % 2 === 1 && styles.lapTableRowAlt, isBest && styles.lapTableRowBest]}>
             <Text style={styles.lapCellLap}>{l.lap}</Text>
             {Array.from({length: sectorCount}, (_, i) => (
               <Text key={i} style={[styles.lapCell, tone(l.sectors[i], i)]}>
                 {l.sectors[i] == null ? '-' : formatLapTime(l.sectors[i])}
               </Text>
             ))}
-            <Text style={[styles.lapCellTime, l.deleted && styles.lapDeleted, l.time === driver.best && styles.sectorPersonalBest]}>
+            <Text style={[styles.lapCellTime, l.deleted && styles.lapDeleted, isBest && styles.sectorPersonalBest]}>
               {formatLapTime(l.time)}{note ? ` ${note}` : ''}
             </Text>
           </View>
         );
       })}
       <View style={styles.keyRow}>
-        <Text style={[styles.keyText, styles.sectorSessionBest]}>Session best</Text>
-        <Text style={[styles.keyText, styles.sectorPersonalBest]}>Personal best</Text>
+        <View style={styles.keyItem}><View style={[styles.keyDot, {backgroundColor: SESSION_BEST}]} /><Text style={styles.keyText}>Session best</Text></View>
+        <View style={styles.keyItem}><View style={[styles.keyDot, {backgroundColor: PERSONAL_BEST}]} /><Text style={styles.keyText}>Personal best</Text></View>
       </View>
     </View>
   );
@@ -289,11 +308,38 @@ function LapTimesBody({drivers, roundNumber, session, isFavourite}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundNumber, session]);
 
+  // Team colour when it's the only selected car from that team, otherwise a
+  // distinct palette colour so two teammates never share a line colour.
   const colorOf = useCallback(d => {
     const team = TEAM_COLORS[d.team];
-    if (team && [...selected].filter(no => drivers.find(x => x.no === no)?.team === d.team).length === 1) return team;
+    const teamCount = [...selected].filter(no => drivers.find(x => x.no === no)?.team === d.team).length;
+    if (team && teamCount === 1) return team;
     return CHART_COLORS[[...selected].indexOf(d.no) % CHART_COLORS.length] || CHART_COLORS[0];
   }, [selected, drivers]);
+
+  const bestTimes = drivers.map(d => d.best).filter(t => t != null);
+  const fastest = bestTimes.length ? Math.min(...bestTimes) : null;
+  const slowest = bestTimes.length ? Math.max(...bestTimes) : null;
+  const byBest = [...drivers].filter(d => d.best != null).sort((a, b) => a.best - b.best).map(d => d.no);
+  const bySpread = [...drivers].filter(d => stats[d.no].spread != null && stats[d.no].clean >= 3)
+    .sort((a, b) => stats[a.no].spread - stats[b.no].spread).map(d => d.no);
+
+  const favItems = drivers.filter(d => isFavourite(d.driver)).map(d => {
+    const st = stats[d.no];
+    const cons = bySpread.indexOf(d.no);
+    const rank = byBest.indexOf(d.no);
+    const parts = [];
+    if (rank >= 0) parts.push(rank === 0 ? 'Fastest lap of the session' : `${ordinal(rank + 1)} fastest lap`);
+    if (st.avg != null) parts.push(`avg ${formatLapTime(st.avg)}`);
+    if (cons >= 0) parts.push(`${ordinal(cons + 1)} most consistent (±${st.spread.toFixed(2)}s)`);
+    return {
+      // No P-number here: this table runs in classification order, so a
+      // rank by best lap next to it read as a wrong finishing position.
+      key: d.no, driver: d.driver, team: d.team,
+      value: formatLapTime(d.best),
+      detail: parts.join(' · '),
+    };
+  });
 
   const toggle = d => {
     setSelected(prev => {
@@ -315,52 +361,80 @@ function LapTimesBody({drivers, roundNumber, session, isFavourite}) {
     }
   };
 
+  const shown = drivers.filter(d => selected.has(d.no));
+
   return (
     <View>
+      <FavouriteSummary items={favItems} />
       <View style={styles.chartCard}>
-        <LapTimesChart drivers={drivers} selected={selected} colorOf={colorOf} />
+        {shown.length > 0 && (
+          <View style={styles.legendRow}>
+            {shown.map(d => (
+              <TouchableOpacity
+                key={d.no}
+                style={[styles.legendChip, {borderColor: colorOf(d)}]}
+                onPress={() => toggle(d)}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove ${d.driver} from chart`}>
+                <View style={[styles.legendDot, {backgroundColor: colorOf(d)}]} />
+                <Text style={[styles.legendText, isFavourite(d.driver) && styles.favText]} numberOfLines={1}>
+                  {d.driver.split(' ').pop()}
+                </Text>
+                <Icon name="close" size={12} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        <LapTimesChart drivers={drivers} selected={selected} colorOf={colorOf} isFavourite={isFavourite} />
+        <Text style={styles.hint}>Representative laps only. Ringed dot = each driver's best lap.</Text>
       </View>
-      <Text style={styles.hint}>Representative laps only - pit, out, in and Safety Car laps are left off the chart</Text>
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <Text style={[styles.colHeader, styles.chartToggle]} />
-          <Text style={[styles.colHeader, styles.flex]}>DRIVER</Text>
-          <Text style={[styles.colHeader, styles.num]}>BEST</Text>
-          <Text style={[styles.colHeader, styles.num]}>AVG</Text>
-          <Text style={[styles.colHeader, styles.numNarrow]}>±</Text>
+      <View style={tableStyles.card}>
+        <View style={tableStyles.headerRow}>
+          <ColumnHeader style={styles.checkHeader}>PLOT</ColumnHeader>
+          <ColumnHeader style={styles.flex}>DRIVER</ColumnHeader>
+          <ColumnHeader style={styles.num}>BEST</ColumnHeader>
+          <ColumnHeader style={styles.num}>AVG</ColumnHeader>
+          <ColumnHeader style={styles.numNarrow}>±</ColumnHeader>
         </View>
         {drivers.map(d => {
           const on = selected.has(d.no);
           const fav = isFavourite(d.driver);
           const st = stats[d.no];
+          const open = expanded === d.no;
           return (
             <View key={d.no}>
-              <View style={[styles.row, fav && styles.rowFav]}>
+              <View style={[tableStyles.row, fav && favRowStyle, open && styles.rowOpen]}>
+                <TeamStripe team={d.team} />
                 <TouchableOpacity
                   onPress={() => toggle(d)}
-                  style={[styles.chartToggle, styles.check, {borderColor: on ? colorOf(d) : Colors.outline, backgroundColor: on ? colorOf(d) : 'transparent'}]}
+                  hitSlop={8}
+                  style={[styles.check, {borderColor: on ? colorOf(d) : Colors.outline, backgroundColor: on ? colorOf(d) : 'transparent'}]}
                   accessibilityRole="checkbox"
                   accessibilityState={{checked: on}}
                   accessibilityLabel={`Plot ${d.driver} on chart`}>
-                  {on && <Text style={styles.checkMark}>✓</Text>}
+                  {on && <Icon name="check" size={13} color="#fff" />}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.expandArea}
                   onPress={() => toggleExpand(d)}
                   accessibilityRole="button"
-                  accessibilityState={{expanded: expanded === d.no}}
-                  accessibilityLabel={`${expanded === d.no ? 'Hide' : 'Show'} every lap for ${d.driver}`}>
-                  <Text style={[styles.driver, styles.flex, fav && styles.favText]} numberOfLines={1}>{formatDriverName(d.driver)}</Text>
-                  <Text style={[styles.value, styles.num]}>{formatLapTime(d.best)}</Text>
-                  <Text style={[styles.value, styles.num]}>{st.avg == null ? '-' : formatLapTime(st.avg)}</Text>
-                  <Text style={[styles.value, styles.numNarrow]}>{st.spread == null ? '-' : st.spread.toFixed(2)}</Text>
+                  accessibilityState={{expanded: open}}
+                  accessibilityLabel={`${open ? 'Hide' : 'Show'} every lap for ${d.driver}`}>
+                  <View style={tableStyles.main}>
+                    <DriverName name={d.driver} fav={fav} />
+                    <ValueBar fraction={closeness(d.best, fastest, slowest)} fav={fav} />
+                  </View>
+                  <Text style={[tableStyles.value, styles.num, d.best === fastest && styles.fastestText]}>{formatLapTime(d.best)}</Text>
+                  <Text style={[tableStyles.sub, styles.num]}>{st.avg == null ? '-' : formatLapTime(st.avg)}</Text>
+                  <Text style={[tableStyles.sub, styles.numNarrow]}>{st.spread == null ? '-' : st.spread.toFixed(2)}</Text>
+                  <Icon name={open ? 'expand-less' : 'expand-more'} size={16} color={Colors.textSecondary} />
                 </TouchableOpacity>
               </View>
-              {expanded === d.no && <LapTable driver={d} bests={bests} />}
+              {open && <LapTable driver={d} bests={bests} />}
             </View>
           );
         })}
-        <Text style={styles.footnote}>AVG and ± (spread, seconds) are over representative laps. Tap a driver for every lap and sector.</Text>
+        <Text style={tableStyles.footnote}>AVG and ± (spread in seconds - lower is more consistent) use representative laps. Tap a driver for every lap and sector.</Text>
       </View>
     </View>
   );
@@ -379,19 +453,29 @@ export function LapTimesCard({year, roundNumber, session, isFavourite}) {
 // ── Tyres ────────────────────────────────────────────────────────────────────
 
 const COMPOUND_COLORS = {
-  Soft: {bg: '#E5322D', fg: '#fff'},
-  Medium: {bg: '#FEBD02', fg: '#111'},
-  Hard: {bg: '#F2F2F2', fg: '#111'},
-  Wet: {bg: '#2F7FE0', fg: '#fff'},
+  Soft: '#E5322D',
+  Medium: '#FEBD02',
+  Hard: '#F2F2F2',
+  Wet: '#2F7FE0',
 };
 
-function CompoundChip({name}) {
-  const c = COMPOUND_COLORS[name] || {bg: Colors.outline, fg: '#fff'};
+// A tyre sidewall: dark disc ringed in the compound's colour with its
+// initial in the middle - the same visual language broadcast graphics use.
+export function TyreIcon({name, size = 24}) {
+  const color = COMPOUND_COLORS[name] || Colors.textSecondary;
   return (
-    <View style={[styles.chip, {backgroundColor: c.bg}]}>
-      <Text style={[styles.chipText, {color: c.fg}]}>{name}</Text>
+    <View
+      style={[styles.tyre, {width: size, height: size, borderRadius: size / 2, borderColor: color, borderWidth: Math.max(2.5, size / 8)}]}
+      accessibilityLabel={name}>
+      <Text style={[styles.tyreLetter, {color, fontSize: size * 0.42}]}>{(name || '?').charAt(0).toUpperCase()}</Text>
     </View>
   );
+}
+
+function compoundStory(compounds) {
+  if (!compounds.length) return '';
+  if (compounds.length === 1) return `${compounds[0]} only`;
+  return `${compounds[0]}, then ${compounds.slice(1).join(' then ')}`;
 }
 
 function TyresBody({tyres, order, roundNumber, session, isFavourite}) {
@@ -402,28 +486,46 @@ function TyresBody({tyres, order, roundNumber, session, isFavourite}) {
   const rows = [...tyres].sort((a, b) => (order[a.no] ?? 999) - (order[b.no] ?? 999) || a.no - b.no);
   const usage = {};
   tyres.forEach(t => new Set(t.compounds).forEach(c => { usage[c] = (usage[c] || 0) + 1; }));
+  const favItems = rows.filter(t => isFavourite(t.driver)).map(t => ({
+    key: t.no, driver: t.driver, team: t.team,
+    pos: order[t.no] != null ? order[t.no] + 1 : null,
+    detail: compoundStory(t.compounds),
+  }));
   return (
-    <View style={styles.card}>
+    <View>
+      <FavouriteSummary items={favItems} />
       <View style={styles.usageRow}>
         {Object.entries(usage).map(([c, n]) => (
-          <View key={c} style={styles.usageItem}>
-            <CompoundChip name={c} />
-            <Text style={styles.muted}>{n} {n === 1 ? 'car' : 'cars'}</Text>
+          <View key={c} style={styles.usageTile}>
+            <TyreIcon name={c} size={30} />
+            <View>
+              <Text style={styles.usageCount}>{n}</Text>
+              <Text style={styles.usageLabel}>{n === 1 ? 'car' : 'cars'} on {c}</Text>
+            </View>
           </View>
         ))}
       </View>
-      {rows.map(t => {
-        const fav = isFavourite(t.driver);
-        return (
-          <View key={t.no} style={[styles.row, fav && styles.rowFav]}>
-            <Text style={[styles.driver, styles.flex, fav && styles.favText]} numberOfLines={1}>{formatDriverName(t.driver)}</Text>
-            <View style={styles.chipRow}>
-              {t.compounds.map((c, i) => <CompoundChip key={i} name={c} />)}
+      <View style={tableStyles.card}>
+        {rows.map(t => {
+          const fav = isFavourite(t.driver);
+          return (
+            <View key={t.no} style={[tableStyles.row, fav && favRowStyle]}>
+              <TeamStripe team={t.team} />
+              {order[t.no] != null ? <RankBadge pos={order[t.no] + 1} /> : <Text style={styles.rankBlank}>-</Text>}
+              <View style={tableStyles.main}><DriverName name={t.driver} fav={fav} /></View>
+              <View style={styles.tyreRow}>
+                {t.compounds.map((c, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && <Icon name="chevron-right" size={12} color={Colors.textSecondary} />}
+                    <TyreIcon name={c} size={22} />
+                  </React.Fragment>
+                ))}
+              </View>
             </View>
-          </View>
-        );
-      })}
-      <Text style={styles.footnote}>Compounds in the order each driver used them</Text>
+          );
+        })}
+        <Text style={tableStyles.footnote}>Compounds in the order each driver used them, listed in classification order</Text>
+      </View>
     </View>
   );
 }
@@ -447,28 +549,44 @@ function TopSpeedsBody({entries, trap, roundNumber, session, isFavourite, useKm}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roundNumber, session, trap]);
   const unit = useKm ? 'km/h' : 'mph';
+  const avgs = entries.map(e => e.avg);
+  const top = Math.max(...avgs);
+  const bottom = Math.min(...avgs);
+  const favItems = entries.filter(e => isFavourite(e.driver)).map(e => ({
+    key: e.no, driver: e.driver, team: e.team, pos: e.pos,
+    value: `${formatSpeed(e.avg, useKm)} ${unit}`,
+    detail: e.avg === top
+      ? `Quickest on average · best pass ${formatSpeed(e.best, useKm)}`
+      : `${formatSpeed(top - e.avg, useKm)} ${unit} down on the top average · best pass ${formatSpeed(e.best, useKm)}`,
+  }));
   return (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <Text style={[styles.colHeader, styles.pos]} />
-        <Text style={[styles.colHeader, styles.flex]}>DRIVER</Text>
-        <Text style={[styles.colHeader, styles.num]}>AVG</Text>
-        <Text style={[styles.colHeader, styles.num]}>BEST</Text>
+    <View>
+      <FavouriteSummary items={favItems} />
+      <View style={tableStyles.card}>
+        <View style={tableStyles.headerRow}>
+          <ColumnHeader style={styles.flexIndent}>DRIVER</ColumnHeader>
+          <ColumnHeader style={styles.num}>AVG</ColumnHeader>
+          <ColumnHeader style={styles.numNarrow}>BEST</ColumnHeader>
+        </View>
+        {entries.map(e => {
+          const fav = isFavourite(e.driver);
+          return (
+            <View key={e.no} style={[tableStyles.row, fav && favRowStyle]}>
+              <TeamStripe team={e.team} />
+              <RankBadge pos={e.pos} />
+              <View style={tableStyles.main}>
+                <DriverName name={e.driver} fav={fav} />
+                <ValueBar fraction={closeness(e.avg, top, bottom)} fav={fav} />
+              </View>
+              <Text style={[tableStyles.value, styles.num]}>{formatSpeed(e.avg, useKm)}</Text>
+              <Text style={[tableStyles.sub, styles.numNarrow]}>{formatSpeed(e.best, useKm)}</Text>
+            </View>
+          );
+        })}
+        <Text style={tableStyles.footnote}>
+          Average of each driver's 5 fastest passes through {trap}, in {unit} - steadier than a single best, which one tow can inflate
+        </Text>
       </View>
-      {entries.map(e => {
-        const fav = isFavourite(e.driver);
-        return (
-          <View key={e.no} style={[styles.row, fav && styles.rowFav]}>
-            <Text style={styles.pos}>{e.pos}</Text>
-            <Text style={[styles.driver, styles.flex, fav && styles.favText]} numberOfLines={1}>{formatDriverName(e.driver)}</Text>
-            <Text style={[styles.valueStrong, styles.num]}>{formatSpeed(e.avg, useKm)}</Text>
-            <Text style={[styles.value, styles.num]}>{formatSpeed(e.best, useKm)}</Text>
-          </View>
-        );
-      })}
-      <Text style={styles.footnote}>
-        Average of each driver's 5 fastest passes through {trap}, in {unit} - steadier than a single best, which one tow can inflate
-      </Text>
     </View>
   );
 }
@@ -494,17 +612,42 @@ export function delayLabel(mins) {
   return `Started ${n} min ${mins > 0 ? 'late' : 'early'}`;
 }
 
-function StatRow({label, value}) {
-  if (value == null || value === '') return null;
+const FLAG_LABELS = [
+  {key: 'red', label: 'Red flag', color: '#E5322D'},
+  {key: 'safetyCar', label: 'Safety Car', color: '#FEBD02'},
+  {key: 'fcy', label: 'Full Course Yellow', color: '#FEBD02'},
+];
+
+function weatherIcon(weather) {
+  const c = `${weather?.condition || ''} ${weather?.track || ''}`.toLowerCase();
+  if (c.includes('rain') || c.includes('wet')) return 'grain';
+  if (c.includes('bright') || c.includes('sun')) return 'wb-sunny';
+  return 'wb-cloudy';
+}
+
+function minutesBetween(a, b) {
+  const t = s => {
+    const [h, m, sec] = (s.split('T')[1] || '').split(':').map(Number);
+    return h * 60 + m + (sec || 0) / 60;
+  };
+  if (!a || !b) return null;
+  return Math.round(t(b) - t(a));
+}
+
+function Tile({icon, label, value, sub, tone}) {
   return (
-    <View style={styles.row}>
-      <Text style={[styles.muted, styles.flex]}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
+    <View style={[styles.tile, tone === 'late' && styles.tileLate]}>
+      <View style={styles.tileHead}>
+        <Icon name={icon} size={14} color={tone === 'late' ? '#FF8A80' : Colors.yellow} />
+        <Text style={styles.tileLabel}>{label}</Text>
+      </View>
+      <Text style={styles.tileValue} numberOfLines={1}>{value}</Text>
+      {!!sub && <Text style={styles.tileSub} numberOfLines={1}>{sub}</Text>}
     </View>
   );
 }
 
-function SessionStatsBody({stats, roundNumber, session, isFavourite, useKm}) {
+function SessionStatsBody({stats, roundNumber, session, isFavourite, useKm, weather, flagStats}) {
   useEffect(() => {
     Analytics.sessionStatsShown(roundNumber, session);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -512,62 +655,108 @@ function SessionStatsBody({stats, roundNumber, session, isFavourite, useKm}) {
   const delay = delayLabel(stats.startDelayMins);
   const distance = stats.totalDistance == null ? null
     : useKm ? `${Math.round(stats.totalDistance * 1.60934).toLocaleString()} km` : `${Math.round(stats.totalDistance).toLocaleString()} miles`;
+  const duration = minutesBetween(stats.actualStart, stats.finishTime);
   const classes = Object.entries(stats.classes).filter(([, info]) => info.fastestLap);
+  const incidents = flagStats ? FLAG_LABELS.filter(f => flagStats[f.key] > 0) : [];
+  const history = stats.fastestLapHistory;
+
+  // A favourite's part in the session: how often they held the fastest lap.
+  const favCounts = {};
+  history.forEach(e => {
+    if (!isFavourite(e.driver)) return;
+    const f = favCounts[e.driver] || (favCounts[e.driver] = {driver: e.driver, team: e.team, n: 0, best: e});
+    f.n += 1;
+    if (e.secs != null && (f.best.secs == null || e.secs < f.best.secs)) f.best = e;
+  });
+  const favItems = Object.values(favCounts).map(f => ({
+    key: f.driver, driver: f.driver, team: f.team, value: f.best.time,
+    detail: `Set the session's fastest lap ${f.n === 1 ? 'once' : `${f.n} times`}`,
+  }));
+  const finalHolder = history.length ? history[history.length - 1] : null;
+
   return (
     <View>
-      <View style={styles.card}>
-        {delay && (
-          <View style={[styles.delayChip, stats.startDelayMins > 0 && styles.delayChipLate]}>
-            <Text style={styles.delayChipText}>{delay}</Text>
-          </View>
+      <FavouriteSummary items={favItems} />
+      <View style={styles.tileGrid}>
+        {weather && <Tile icon={weatherIcon(weather)} label="CONDITIONS" value={weather.condition} sub={`Track ${weather.track.toLowerCase()}`} />}
+        {stats.actualStart && (
+          <Tile
+            icon="schedule"
+            label="START"
+            value={clockTime(stats.actualStart)}
+            sub={delay ? `${delay}${stats.plannedStart ? ` (${clockTime(stats.plannedStart)})` : ''}` : null}
+            tone={stats.startDelayMins > 0 ? 'late' : null}
+          />
         )}
-        <StatRow label="Scheduled start" value={clockTime(stats.plannedStart)} />
-        <StatRow label="Actual start" value={clockTime(stats.actualStart, true)} />
-        <StatRow label="Finish" value={clockTime(stats.finishTime, true)} />
-        <StatRow label="Starters" value={stats.competitors} />
-        <StatRow label="Laps completed (all cars)" value={stats.totalLaps?.toLocaleString()} />
-        <StatRow label="Distance covered (all cars)" value={distance} />
+        {stats.competitors != null && <Tile icon="groups" label="STARTERS" value={String(stats.competitors)} sub={duration ? `${duration} min session` : null} />}
+        {stats.totalLaps != null && <Tile icon="loop" label="LAPS" value={stats.totalLaps.toLocaleString()} sub={distance ? `${distance} covered` : null} />}
       </View>
+      {flagStats && (
+        <View style={styles.flagRow}>
+          {incidents.length ? incidents.map(f => (
+            <View key={f.key} style={[styles.flagChip, {borderColor: f.color}]}>
+              <Icon name="flag" size={12} color={f.color} />
+              <Text style={styles.flagChipText}>{f.label}{flagStats[f.key] > 1 ? ` x${flagStats[f.key]}` : ''}</Text>
+            </View>
+          )) : (
+            <View style={[styles.flagChip, styles.flagChipClean]}>
+              <Icon name="flag" size={12} color="#4CD07D" />
+              <Text style={styles.flagChipText}>Green all the way - no flag incidents</Text>
+            </View>
+          )}
+        </View>
+      )}
       {classes.length > 0 && (
-        <View style={styles.card}>
+        <View style={tableStyles.card}>
           <Text style={styles.sectionTitle}>FASTEST LAP BY CLASS</Text>
           {classes.map(([cl, info]) => {
             const fav = isFavourite(info.fastestLap.driver);
             return (
-              <View key={cl} style={[styles.row, fav && styles.rowFav]}>
-                <Text style={[styles.muted, styles.classLabel]}>{CLASS_LABELS[cl] || cl}</Text>
-                <Text style={[styles.driver, styles.flex, fav && styles.favText]} numberOfLines={1}>{formatDriverName(info.fastestLap.driver)}</Text>
-                <Text style={[styles.value, styles.num]}>{info.fastestLap.time}</Text>
+              <View key={cl} style={[tableStyles.row, fav && favRowStyle]}>
+                <TeamStripe team={info.fastestLap.team} />
+                <View style={tableStyles.main}>
+                  <Text style={styles.classLabel}>{(CLASS_LABELS[cl] || cl).toUpperCase()}</Text>
+                  <DriverName name={info.fastestLap.driver} fav={fav} />
+                </View>
+                <View style={styles.classRight}>
+                  <Text style={tableStyles.value}>{info.fastestLap.time}</Text>
+                  {!!info.fastestLap.lap && <Text style={tableStyles.sub}>lap {info.fastestLap.lap}</Text>}
+                </View>
               </View>
             );
           })}
         </View>
       )}
-      {stats.fastestLapHistory.length > 0 && (
-        <View style={styles.card}>
+      {history.length > 0 && (
+        <View style={tableStyles.card}>
           <Text style={styles.sectionTitle}>FASTEST LAP PROGRESSION</Text>
-          {stats.fastestLapHistory.map((e, i) => {
+          {history.map((e, i) => {
             const fav = isFavourite(e.driver);
+            const last = e === finalHolder;
             return (
-              <View key={i} style={[styles.row, fav && styles.rowFav]}>
-                <Text style={[styles.muted, styles.lapNo]}>{e.group ? `G${e.group} ` : ''}L{e.lap}</Text>
-                <Text style={[styles.driver, styles.flex, fav && styles.favText]} numberOfLines={1}>{formatDriverName(e.driver)}</Text>
-                <Text style={[styles.value, styles.num]}>{e.time}</Text>
+              <View key={i} style={[styles.timelineRow, fav && favRowStyle]}>
+                <View style={styles.timelineRail}>
+                  <View style={[styles.timelineDot, last && styles.timelineDotLast, fav && styles.timelineDotFav]} />
+                  {i < history.length - 1 && <View style={styles.timelineLine} />}
+                </View>
+                <Text style={styles.lapNo}>{e.group ? `G${e.group} ` : ''}L{e.lap}</Text>
+                <View style={tableStyles.main}><DriverName name={e.driver} fav={fav} /></View>
+                <Text style={[tableStyles.value, last && styles.fastestText]}>{e.time}</Text>
               </View>
             );
           })}
-          <Text style={styles.footnote}>Every time the session's fastest lap was beaten{stats.fastestLapHistory.some(e => e.group) ? ' (G1/G2 = qualifying group)' : ''}</Text>
+          <Text style={tableStyles.footnote}>Every time the session's fastest lap was beaten{history.some(e => e.group) ? ' (G1/G2 = qualifying group)' : ''}</Text>
         </View>
       )}
     </View>
   );
 }
 
-export function SessionStatsCard({year, roundNumber, session, isFavourite, useKm}) {
+export function SessionStatsCard({year, roundNumber, session, isFavourite, useKm, weather, flagStats}) {
   return (
     <AnalysisGate year={year} roundNumber={roundNumber} session={session}>
       {data => (data.sessionStats ? (
-        <SessionStatsBody stats={data.sessionStats} roundNumber={roundNumber} session={session} isFavourite={isFavourite} useKm={useKm} />
+        <SessionStatsBody stats={data.sessionStats} roundNumber={roundNumber} session={session} isFavourite={isFavourite} useKm={useKm} weather={weather} flagStats={flagStats} />
       ) : <EmptyCard />)}
     </AnalysisGate>
   );
@@ -581,47 +770,71 @@ function EmptyCard() {
   );
 }
 
+const SESSION_BEST = '#C77DFF';
+const PERSONAL_BEST = '#4CD07D';
+
 const styles = StyleSheet.create({
-  card: {backgroundColor: Colors.card, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 6},
-  chartCard: {backgroundColor: Colors.card, borderRadius: 12, padding: 8, marginTop: 4, marginBottom: 6},
+  card: {backgroundColor: Colors.card, borderRadius: 12, padding: 14, marginTop: 4, marginBottom: 6, alignItems: 'center'},
+  chartCard: {backgroundColor: Colors.card, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 4, marginTop: 4, marginBottom: 6},
   chartEmpty: {textAlign: 'center', paddingVertical: 40},
-  hint: {color: Colors.textSecondary, fontSize: 11, textAlign: 'center', marginBottom: 6},
-  row: {flexDirection: 'row', alignItems: 'center', paddingVertical: 5, gap: 8},
-  rowFav: {borderWidth: 1, borderColor: 'rgba(254,189,2,0.5)', borderRadius: 6, paddingHorizontal: 4},
-  expandArea: {flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8},
+  hint: {color: Colors.textSecondary, fontSize: 10.5, textAlign: 'center', marginTop: 2},
+  legendRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 8, marginBottom: 6},
+  legendChip: {flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderRadius: 14, paddingLeft: 7, paddingRight: 6, paddingVertical: 3},
+  legendDot: {width: 8, height: 8, borderRadius: 4},
+  legendText: {color: '#fff', fontSize: 11, fontWeight: '700', maxWidth: 110},
   flex: {flex: 1},
-  pos: {color: '#fff', fontSize: 12, fontWeight: '800', width: 20, textAlign: 'center'},
-  driver: {color: '#fff', fontSize: 12.5, fontWeight: '600'},
+  flexIndent: {flex: 1, marginLeft: 36},
   favText: {color: Colors.yellow},
-  value: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700'},
-  valueStrong: {color: '#fff', fontSize: 12, fontWeight: '800'},
-  num: {width: 62, textAlign: 'right'},
-  numNarrow: {width: 38, textAlign: 'right'},
-  colHeader: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1},
-  sectionTitle: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 4},
+  fastestText: {color: '#C77DFF'},
+  num: {width: 58, textAlign: 'right'},
+  numNarrow: {width: 40, textAlign: 'right'},
+  checkHeader: {width: 34, marginLeft: 6},
+  colHeader: {color: Colors.textSecondary, fontSize: 9.5, fontWeight: '800', letterSpacing: 1},
+  sectionTitle: {color: Colors.textSecondary, fontSize: 10, fontWeight: '900', letterSpacing: 1.2, marginHorizontal: 6, marginTop: 6, marginBottom: 4},
   muted: {color: Colors.textSecondary, fontSize: 12},
-  footnote: {color: Colors.textSecondary, fontSize: 10.5, marginTop: 8, lineHeight: 15},
-  chartToggle: {width: 22},
-  check: {height: 22, borderRadius: 4, borderWidth: 2, alignItems: 'center', justifyContent: 'center'},
-  checkMark: {color: '#fff', fontSize: 11, fontWeight: '900'},
-  lapTable: {backgroundColor: Colors.surface, borderRadius: 8, padding: 8, marginVertical: 4},
-  lapTableRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 2},
-  lapCellLap: {color: Colors.textSecondary, fontSize: 11, width: 28},
+  check: {width: 22, height: 22, borderRadius: 6, borderWidth: 2, alignItems: 'center', justifyContent: 'center'},
+  expandArea: {flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6},
+  rowOpen: {backgroundColor: 'rgba(255,255,255,0.04)'},
+  lapTable: {backgroundColor: Colors.surface, borderRadius: 10, padding: 8, marginVertical: 4, marginLeft: 10},
+  lapTableRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 3, paddingHorizontal: 4, borderRadius: 4},
+  lapTableRowAlt: {backgroundColor: 'rgba(255,255,255,0.025)'},
+  lapTableRowBest: {backgroundColor: 'rgba(76,208,125,0.10)'},
+  lapCellLap: {color: Colors.textSecondary, fontSize: 11, width: 26, fontVariant: ['tabular-nums']},
   lapCell: {color: '#fff', fontSize: 11, flex: 1, textAlign: 'right', fontVariant: ['tabular-nums']},
-  lapCellTime: {color: '#fff', fontSize: 11, fontWeight: '700', width: 92, textAlign: 'right', fontVariant: ['tabular-nums']},
+  lapCellTime: {color: '#fff', fontSize: 11, fontWeight: '800', width: 92, textAlign: 'right', fontVariant: ['tabular-nums']},
   lapDeleted: {color: Colors.textSecondary, textDecorationLine: 'line-through'},
-  sectorSessionBest: {color: '#C77DFF', fontWeight: '800'},
-  sectorPersonalBest: {color: '#4CD07D', fontWeight: '800'},
-  keyRow: {flexDirection: 'row', gap: 16, marginTop: 6},
-  keyText: {fontSize: 10},
-  chip: {borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2},
-  chipText: {fontSize: 10.5, fontWeight: '800'},
-  chipRow: {flexDirection: 'row', gap: 4},
-  usageRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 6},
-  usageItem: {flexDirection: 'row', alignItems: 'center', gap: 6},
-  delayChip: {alignSelf: 'flex-start', backgroundColor: Colors.outline, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, marginBottom: 6},
-  delayChipLate: {backgroundColor: 'rgba(229,50,45,0.25)'},
-  delayChipText: {color: '#fff', fontSize: 11.5, fontWeight: '700'},
-  classLabel: {width: 96},
-  lapNo: {width: 52},
+  sectorSessionBest: {color: SESSION_BEST, fontWeight: '800'},
+  sectorPersonalBest: {color: PERSONAL_BEST, fontWeight: '800'},
+  keyRow: {flexDirection: 'row', gap: 16, marginTop: 8, paddingHorizontal: 4},
+  keyItem: {flexDirection: 'row', alignItems: 'center', gap: 5},
+  keyDot: {width: 7, height: 7, borderRadius: 4},
+  keyText: {color: Colors.textSecondary, fontSize: 10},
+  tyre: {alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B0C14'},
+  tyreLetter: {fontWeight: '900'},
+  tyreRow: {flexDirection: 'row', alignItems: 'center', gap: 3},
+  rankBlank: {color: Colors.textSecondary, width: 22, textAlign: 'center'},
+  usageRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4, marginBottom: 6},
+  usageTile: {flexGrow: 1, flexBasis: '30%', flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.card, borderRadius: 12, padding: 10},
+  usageCount: {color: '#fff', fontSize: 18, fontWeight: '900'},
+  usageLabel: {color: Colors.textSecondary, fontSize: 10.5, fontWeight: '700'},
+  tileGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4, marginBottom: 6},
+  tile: {flexBasis: '48%', flexGrow: 1, backgroundColor: Colors.card, borderRadius: 12, padding: 12},
+  tileLate: {backgroundColor: 'rgba(229,50,45,0.14)'},
+  tileHead: {flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 6},
+  tileLabel: {color: Colors.textSecondary, fontSize: 9.5, fontWeight: '900', letterSpacing: 1.1},
+  tileValue: {color: '#fff', fontSize: 18, fontWeight: '900'},
+  tileSub: {color: Colors.textSecondary, fontSize: 11, marginTop: 2},
+  flagRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6},
+  flagChip: {flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderRadius: 14, paddingHorizontal: 9, paddingVertical: 4, backgroundColor: Colors.card},
+  flagChipClean: {borderColor: 'rgba(76,208,125,0.6)'},
+  flagChipText: {color: '#fff', fontSize: 11.5, fontWeight: '700'},
+  classLabel: {color: Colors.textSecondary, fontSize: 9, fontWeight: '900', letterSpacing: 1, marginBottom: 1},
+  classRight: {alignItems: 'flex-end'},
+  timelineRow: {flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4, paddingRight: 6, borderRadius: 8, borderWidth: 1, borderColor: 'transparent'},
+  timelineRail: {width: 16, alignItems: 'center', alignSelf: 'stretch', justifyContent: 'center'},
+  timelineDot: {width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.textSecondary, zIndex: 1},
+  timelineDotLast: {backgroundColor: '#C77DFF', width: 10, height: 10, borderRadius: 5},
+  timelineDotFav: {backgroundColor: Colors.yellow},
+  timelineLine: {position: 'absolute', top: '50%', bottom: -14, width: 2, backgroundColor: Colors.outline},
+  lapNo: {color: Colors.textSecondary, fontSize: 11, fontWeight: '700', width: 44, fontVariant: ['tabular-nums']},
 });

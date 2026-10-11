@@ -28,6 +28,10 @@ import {maybeShowShareNudge, markShareNudgeShown} from '../utils/shareNudge';
 import {shareApp, shareContent} from '../utils/appShare';
 import {detectBroadcaster} from '../utils/broadcaster';
 import {ttbPositionMapForRace, isTtbSeasonOpener, getTtbBadge} from '../utils/ttb';
+import {
+  FavouriteSummary, TeamStripe, RankBadge, ValueBar, DriverName, closeness,
+  favRowStyle, tableStyles, ColumnHeader,
+} from '../components/analysisUi';
 
 // The require() path itself must stay a static literal (Metro can't resolve a
 // dynamic year here) - but every comparison below derives the current season
@@ -396,6 +400,7 @@ export default function RoundResultsScreen({route, navigation}) {
               key: `speedTrap_${t.key}`,
               label: t.label,
               group: 'SPEED TRAP',
+              icon: 'speed',
               hasData: true,
               render: () => (
                 <SpeedTrapCard
@@ -446,6 +451,7 @@ export default function RoundResultsScreen({route, navigation}) {
                       // FlatList this replaced is gone), not a duplicate of
                       // something already shown above it.
                       key: 'leaderboard',
+                      icon: 'format-list-numbered',
                       label: 'Leaderboard',
                       hasData: !!race.results?.length,
                       render: () => (
@@ -459,6 +465,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     },
                     {
                       key: 'lapChart',
+                      icon: 'show-chart',
                       label: 'Lap Chart',
                       hasData: !!race.lapChart?.length,
                       render: () => (
@@ -477,6 +484,7 @@ export default function RoundResultsScreen({route, navigation}) {
                       // on demand - see SessionAnalysisCards). `analysis`
                       // lists which reports that file holds.
                       key: 'lapTimes',
+                      icon: 'timer',
                       label: 'Lap Times',
                       hasData: hasAnalysis('laps'),
                       render: () => (
@@ -491,6 +499,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     ...speedTrapTabs,
                     {
                       key: 'topSpeeds',
+                      icon: 'av-timer',
                       label: 'Top 5 Average',
                       group: 'SPEED TRAP',
                       hasData: hasAnalysis('topSpeeds'),
@@ -506,6 +515,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     },
                     {
                       key: 'perfectLap',
+                      icon: 'auto-awesome',
                       label: 'Perfect Lap',
                       hasData: !!race.bestSectors?.length,
                       render: () => (
@@ -519,6 +529,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     },
                     {
                       key: 'tyres',
+                      icon: 'trip-origin',
                       label: 'Tyres',
                       hasData: hasAnalysis('tyres'),
                       render: () => (
@@ -533,6 +544,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     },
                     {
                       key: 'sessionStats',
+                      icon: 'insights',
                       label: 'Session Stats',
                       hasData: hasAnalysis('sessionStats'),
                       render: () => (
@@ -542,13 +554,20 @@ export default function RoundResultsScreen({route, navigation}) {
                           session={race.label}
                           isFavourite={isFavourite}
                           useKm={useKm}
+                          weather={race.weather}
+                          flagStats={race.flagStats}
                         />
                       ),
                     },
                     {
                       key: 'conditions',
+                      icon: 'wb-cloudy',
                       label: 'Conditions',
-                      hasData: !!race.weather || !!race.flagStats,
+                      // Folded into Session Stats (weather + flag tiles at
+                      // its top) whenever that tab exists - on its own it
+                      // was a near-empty page. Kept for sessions with no
+                      // analysis file (older rounds).
+                      hasData: (!!race.weather || !!race.flagStats) && !hasAnalysis('sessionStats'),
                       render: () => (
                         <ConditionsCard
                           weather={race.weather}
@@ -645,22 +664,42 @@ function SpeedTrapCard({label, entries, roundNumber, session, isFavourite, useKm
 
   if (!entries?.length) return null;
 
+  const fmt = (mph) => (useKm ? mph * 1.60934 : mph).toFixed(1);
+  const unit = useKm ? 'km/h' : 'mph';
+  const speeds = entries.map(e => e.mph);
+  const best = Math.max(...speeds);
+  const worst = Math.min(...speeds);
+  const favs = entries.filter(e => isFavourite(e.driver)).map(e => ({
+    key: e.no ?? e.driver,
+    driver: e.driver,
+    team: e.team,
+    pos: e.pos,
+    value: `${fmt(e.mph)} ${unit}`,
+    detail: e.mph === best ? `Fastest through ${label}` : `${fmt(best - e.mph)} ${unit} down on the fastest`,
+  }));
+
   return (
-    <View style={styles.bestSpeedsCard}>
-      {entries.map(row => {
-        const fav = isFavourite(row.driver);
-        return (
-          <View key={row.pos} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
-            <Text style={styles.bestSpeedsPos}>{row.pos}</Text>
-            <Text style={[styles.bestSpeedsDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
-              {formatDriverName(row.driver)}
-            </Text>
-            <Text style={styles.bestSpeedsValue}>
-              {useKm ? `${(row.mph * 1.60934).toFixed(1)} km/h` : `${row.mph.toFixed(1)} mph`}
-            </Text>
-          </View>
-        );
-      })}
+    <View>
+      <FavouriteSummary items={favs} />
+      <View style={tableStyles.card}>
+        {entries.map(row => {
+          const fav = isFavourite(row.driver);
+          return (
+            <View key={row.pos} style={[tableStyles.row, fav && favRowStyle]}>
+              <TeamStripe team={row.team} />
+              <RankBadge pos={row.pos} />
+              <View style={tableStyles.main}>
+                <DriverName name={row.driver} fav={fav} />
+                <ValueBar fraction={closeness(row.mph, best, worst)} fav={fav} />
+              </View>
+              <View style={styles.trapValueCol}>
+                <Text style={tableStyles.value}>{fmt(row.mph)}</Text>
+                <Text style={tableStyles.sub}>{row.mph === best ? unit : `-${fmt(best - row.mph)}`}</Text>
+              </View>
+            </View>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -678,9 +717,8 @@ function formatLapTime(secs) {
 // Perfect Lap (theoretical best lap) comparison table for this session
 // (tools/scraper/scrape_tsl.py's parse_best_sectors(), sourced from TSL's
 // book PDF): each driver's IDEAL lap (sum of their own best sectors) vs
-// their actual BEST lap, and the DIFF - "what they left on the table".
-// Already ranked by IDEAL ascending (TSL's own table order). Shows every
-// entry directly, no top-5 truncation, same reasoning as SpeedTrapCard.
+// their actual BEST lap, and the gap between them - "what they left on the
+// table". Already ranked by IDEAL ascending (TSL's own table order).
 function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
   useEffect(() => {
     if (bestSectors?.length) Analytics.perfectLapShown(roundNumber, session, bestSectors.length);
@@ -689,28 +727,51 @@ function PerfectLapCard({bestSectors, roundNumber, session, isFavourite}) {
 
   if (!bestSectors?.length) return null;
 
+  const ideals = bestSectors.map(r => r.ideal);
+  const best = Math.min(...ideals);
+  const worst = Math.max(...ideals);
+  const favs = bestSectors
+    .map((r, i) => ({r, pos: i + 1}))
+    .filter(({r}) => isFavourite(r.driver))
+    .map(({r, pos}) => ({
+      key: r.no ?? r.driver,
+      driver: r.driver,
+      team: r.team,
+      pos,
+      value: formatLapTime(r.ideal),
+      detail: `Best lap ${formatLapTime(r.best)} - ${r.diff.toFixed(3)}s left on the table`,
+    }));
+
   return (
-    <View style={styles.bestSpeedsCard}>
-      <View style={styles.bestSpeedsSection}>
-        <View style={styles.perfectLapHeaderRow}>
-          <Text style={[styles.bestSpeedsSectionTitle, styles.perfectLapDriverHeader]}>DRIVER</Text>
-          <Text style={styles.perfectLapColHeader}>IDEAL</Text>
-          <Text style={styles.perfectLapColHeader}>BEST</Text>
-          <Text style={styles.perfectLapColHeader}>DIFF</Text>
+    <View>
+      <FavouriteSummary items={favs} />
+      <View style={tableStyles.card}>
+        <View style={tableStyles.headerRow}>
+          <ColumnHeader style={styles.perfectLapDriverHeader}>DRIVER</ColumnHeader>
+          <ColumnHeader style={styles.perfectLapColHeader}>IDEAL</ColumnHeader>
+          <ColumnHeader style={styles.perfectLapDiffHeader}>LEFT</ColumnHeader>
         </View>
-        {bestSectors.map(row => {
+        {bestSectors.map((row, i) => {
           const fav = isFavourite(row.driver);
           return (
-            <View key={row.no} style={[styles.bestSpeedsRow, fav && styles.resultRowFav]}>
-              <Text style={[styles.bestSpeedsDriver, fav && {color: Colors.yellow}]} numberOfLines={1}>
-                {formatDriverName(row.driver)}
-              </Text>
-              <Text style={styles.perfectLapValue}>{formatLapTime(row.ideal)}</Text>
-              <Text style={styles.perfectLapValue}>{formatLapTime(row.best)}</Text>
-              <Text style={styles.perfectLapValue}>+{row.diff.toFixed(3)}</Text>
+            <View key={row.no} style={[tableStyles.row, fav && favRowStyle]}>
+              <TeamStripe team={row.team} />
+              <RankBadge pos={i + 1} />
+              <View style={tableStyles.main}>
+                <DriverName name={row.driver} fav={fav} />
+                <ValueBar fraction={closeness(row.ideal, best, worst)} fav={fav} />
+              </View>
+              <View style={styles.perfectLapValueCol}>
+                <Text style={tableStyles.value}>{formatLapTime(row.ideal)}</Text>
+                <Text style={tableStyles.sub}>best {formatLapTime(row.best)}</Text>
+              </View>
+              <View style={[styles.diffPill, row.diff <= 0.05 && styles.diffPillTight]}>
+                <Text style={[styles.diffPillText, row.diff <= 0.05 && styles.diffPillTextTight]}>+{row.diff.toFixed(3)}</Text>
+              </View>
             </View>
           );
         })}
+        <Text style={tableStyles.footnote}>IDEAL adds up each driver's own best sectors. LEFT is how far their best lap fell short of it.</Text>
       </View>
     </View>
   );
@@ -1165,16 +1226,15 @@ const styles = StyleSheet.create({
   },
   youtubeBtnText: {flex: 1, color: '#fff', fontSize: 13, fontWeight: '700'},
   bestSpeedsCard: {backgroundColor: Colors.card, borderRadius: 10, padding: 12, marginTop: 4, marginBottom: 6},
-  bestSpeedsSection: {marginTop: 6},
-  bestSpeedsSectionTitle: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 4},
-  bestSpeedsRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 4, gap: 8},
-  bestSpeedsPos: {color: '#fff', fontSize: 12, fontWeight: '800', width: 20, textAlign: 'center'},
-  bestSpeedsDriver: {flex: 1, color: '#fff', fontSize: 12.5, fontWeight: '600'},
-  bestSpeedsValue: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700'},
-  perfectLapHeaderRow: {flexDirection: 'row', alignItems: 'center', paddingVertical: 4, gap: 8},
-  perfectLapDriverHeader: {flex: 1, marginBottom: 0},
-  perfectLapColHeader: {color: Colors.textSecondary, fontSize: 10, fontWeight: '800', letterSpacing: 1, width: 58, textAlign: 'right'},
-  perfectLapValue: {color: Colors.textSecondary, fontSize: 12, fontWeight: '700', width: 58, textAlign: 'right'},
+  perfectLapDriverHeader: {flex: 1, marginLeft: 36},
+  perfectLapColHeader: {width: 76, textAlign: 'right'},
+  perfectLapDiffHeader: {width: 58, textAlign: 'center'},
+  perfectLapValueCol: {width: 76},
+  trapValueCol: {width: 64},
+  diffPill: {width: 58, borderRadius: 6, paddingVertical: 3, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center'},
+  diffPillTight: {backgroundColor: 'rgba(76,208,125,0.16)'},
+  diffPillText: {color: Colors.textSecondary, fontSize: 11, fontWeight: '800', fontVariant: ['tabular-nums']},
+  diffPillTextTight: {color: '#4CD07D'},
   conditionsWeather: {color: '#fff', fontSize: 13, fontWeight: '600'},
   conditionsFlagRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8},
   conditionsFlagChip: {

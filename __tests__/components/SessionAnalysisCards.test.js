@@ -165,15 +165,43 @@ describe('LapTimesCard', () => {
   });
 });
 
+describe('favourite summaries', () => {
+  it('Lap Times: says where the favourite ranks on pace without a misleading P-number', async () => {
+    const {findByText, queryByText} = renderWithProviders(<LapTimesCard {...PROPS} isFavourite={n => n === 'Tom INGRAM'} />);
+    expect(await findByText(/2nd fastest lap/)).toBeTruthy();
+    expect(queryByText('P2')).toBeNull();
+  });
+
+  it('Top 5 Average: fastest favourite reads as quickest on average', async () => {
+    const {findByText} = renderWithProviders(<TopSpeedsCard {...PROPS} useKm={false} isFavourite={n => n === 'Ricky COLLARD'} />);
+    expect(await findByText(/Quickest on average/)).toBeTruthy();
+    expect(await findByText('P1')).toBeTruthy();
+  });
+
+  it('shows nothing when no favourite took part', async () => {
+    const {findByText, queryByText} = renderWithProviders(<TopSpeedsCard {...PROPS} useKm={false} />);
+    await findByText('146.2');
+    expect(queryByText('YOUR DRIVER')).toBeNull();
+  });
+});
+
 describe('TyresCard', () => {
-  it('orders by classification and shows compound usage', async () => {
+  it('orders by classification, shows compound usage and draws tyre icons', async () => {
     const results = [{number: 11}, {number: 80}];
-    const {findAllByText, getAllByText, getByText} = renderWithProviders(<TyresCard {...PROPS} results={results} />);
-    await findAllByText('Medium');
-    expect(getAllByText('Medium')).toHaveLength(3); // usage chip + 2 drivers
-    expect(getByText('2 cars')).toBeTruthy();
-    expect(getByText('1 car')).toBeTruthy();
+    const {findByText, getByText, getAllByLabelText} = renderWithProviders(<TyresCard {...PROPS} results={results} />);
+    await findByText('cars on Medium');
+    expect(getByText('car on Soft')).toBeTruthy();
+    expect(getAllByLabelText('Medium')).toHaveLength(3); // usage tile + both drivers
     expect(Analytics.tyresShown).toHaveBeenCalledWith(10, 'Qualifying Race', 2);
+  });
+
+  it('tells a favourite driver\'s tyre story', async () => {
+    const results = [{number: 11}, {number: 80}];
+    const {findByText} = renderWithProviders(
+      <TyresCard {...PROPS} results={results} isFavourite={n => n === 'Ricky COLLARD'} />,
+    );
+    expect(await findByText('Medium, then Soft')).toBeTruthy();
+    expect(await findByText('YOUR DRIVER')).toBeTruthy();
   });
 });
 
@@ -194,14 +222,37 @@ describe('TopSpeedsCard', () => {
 describe('SessionStatsCard', () => {
   it('shows start delay, totals, class bests and fastest lap progression', async () => {
     const {findByText, getByText} = renderWithProviders(<SessionStatsCard {...PROPS} useKm={false} />);
-    await findByText('Started 20 min late');
-    expect(getByText('14:50')).toBeTruthy();
-    expect(getByText('15:09:48')).toBeTruthy();
-    expect(getByText('560 miles')).toBeTruthy();
-    expect(getByText('Manufacturer')).toBeTruthy();
-    expect(getByText('Independent')).toBeTruthy();
+    await findByText('Started 20 min late (14:50)');
+    expect(getByText('15:09')).toBeTruthy();
+    expect(getByText('560 miles covered')).toBeTruthy();
+    expect(getByText('15 min session')).toBeTruthy();
+    expect(getByText('MANUFACTURER')).toBeTruthy();
+    expect(getByText('INDEPENDENT')).toBeTruthy();
     expect(getByText('1:37.529')).toBeTruthy();
     expect(Analytics.sessionStatsShown).toHaveBeenCalledWith(10, 'Qualifying Race');
+  });
+
+  it('folds in weather and flag incidents', async () => {
+    const {findByText, getByText} = renderWithProviders(
+      <SessionStatsCard {...PROPS} useKm={false} weather={{condition: 'Rain', track: 'Wet'}} flagStats={{green: 2, red: 0, safetyCar: 2, fcy: 0}} />,
+    );
+    await findByText('Rain');
+    expect(getByText('Track wet')).toBeTruthy();
+    expect(getByText('Safety Car x2')).toBeTruthy();
+  });
+
+  it('shows a clean-session chip when no flags flew', async () => {
+    const {findByText} = renderWithProviders(
+      <SessionStatsCard {...PROPS} useKm={false} flagStats={{green: 1, red: 0, safetyCar: 0, fcy: 0}} />,
+    );
+    expect(await findByText('Green all the way - no flag incidents')).toBeTruthy();
+  });
+
+  it('credits a favourite who held the fastest lap', async () => {
+    const {findByText} = renderWithProviders(
+      <SessionStatsCard {...PROPS} useKm={false} isFavourite={n => n === 'Aiden MOFFAT'} />,
+    );
+    expect(await findByText("Set the session's fastest lap 2 times")).toBeTruthy();
   });
 
   it('tags qualifying group on merged qualifying history', async () => {

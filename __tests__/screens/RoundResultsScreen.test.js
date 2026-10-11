@@ -21,6 +21,7 @@ jest.mock('../../src/utils/analytics', () => ({
     conditionsShown: jest.fn(),
     leaderboardShown: jest.fn(),
     sessionAnalysisTabChanged: jest.fn(),
+    sessionAnalysisMenuOpened: jest.fn(),
     contentShared: jest.fn(),
     shareNudgeShown: jest.fn(),
     shareNudgeDismissed: jest.fn(),
@@ -1315,7 +1316,7 @@ describe('RoundResultsScreen', () => {
       await findByText('Tom INGRAM');
       fireEvent.press(getByLabelText('Next data type'));
       expect(await findByText('Lap Chart')).toBeTruthy();
-      await waitFor(() => expect(Analytics.sessionAnalysisTabChanged).toHaveBeenCalledWith(1, 'Free Practice', 'lapChart'));
+      await waitFor(() => expect(Analytics.sessionAnalysisTabChanged).toHaveBeenCalledWith(1, 'Free Practice', 'lapChart', 'arrow'));
     });
 
     it('is not reachable when the session has no lapChart yet', async () => {
