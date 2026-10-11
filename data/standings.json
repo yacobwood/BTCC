@@ -6,7 +6,7 @@
       "driver": "Ashley SUTTON",
       "nat": "GBR",
       "class": "M",
-      "points": 471,
+      "points": 482,
       "wins": 9,
       "seconds": 10,
       "thirds": 0,
@@ -18,8 +18,8 @@
       "driver": "Tom INGRAM",
       "nat": "GBR",
       "class": "M",
-      "points": 345,
-      "wins": 3,
+      "points": 366,
+      "wins": 4,
       "seconds": 3,
       "thirds": 5,
       "team": "Team VERTU"
@@ -30,7 +30,7 @@
       "driver": "Dan CAMMISH",
       "nat": "GBR",
       "class": "M",
-      "points": 334,
+      "points": 342,
       "wins": 2,
       "seconds": 2,
       "thirds": 3,
@@ -42,9 +42,9 @@
       "driver": "Josh COOK",
       "nat": "GBR",
       "class": "M",
-      "points": 269,
+      "points": 287,
       "wins": 2,
-      "seconds": 1,
+      "seconds": 2,
       "thirds": 1,
       "team": "Speedworks Corolla Racing"
     },
@@ -54,7 +54,7 @@
       "driver": "Adam MORGAN",
       "nat": "GBR",
       "class": "M",
-      "points": 267,
+      "points": 274,
       "wins": 3,
       "seconds": 2,
       "thirds": 0,
@@ -66,7 +66,7 @@
       "driver": "Daniel ROWBOTTOM",
       "nat": "GBR",
       "class": "M",
-      "points": 262,
+      "points": 266,
       "wins": 0,
       "seconds": 3,
       "thirds": 1,
@@ -78,7 +78,7 @@
       "driver": "Mikey DOBLE",
       "nat": "GBR",
       "class": "I",
-      "points": 247,
+      "points": 257,
       "wins": 2,
       "seconds": 1,
       "thirds": 1,
@@ -86,6 +86,18 @@
     },
     {
       "pos": 8,
+      "car": "11",
+      "driver": "Ricky COLLARD",
+      "nat": "GBR",
+      "class": "M",
+      "points": 255,
+      "wins": 0,
+      "seconds": 3,
+      "thirds": 5,
+      "team": "Team VERTU"
+    },
+    {
+      "pos": 9,
       "car": "99",
       "driver": "Charles RAINFORD",
       "nat": "GBR",
@@ -97,7 +109,7 @@
       "team": "WSR"
     },
     {
-      "pos": 9,
+      "pos": 10,
       "car": "52",
       "driver": "Gordon SHEDDEN",
       "nat": "GBR",
@@ -109,40 +121,28 @@
       "team": "Laser Tools Racing with MB Motorsport"
     },
     {
-      "pos": 10,
-      "car": "11",
-      "driver": "Ricky COLLARD",
-      "nat": "GBR",
-      "class": "M",
-      "points": 240,
-      "wins": 0,
-      "seconds": 3,
-      "thirds": 4,
-      "team": "Team VERTU"
-    },
-    {
       "pos": 11,
-      "car": "2",
-      "driver": "Daryl DE LEON",
-      "nat": "PHL",
-      "class": "I",
-      "points": 220,
-      "wins": 0,
-      "seconds": 0,
-      "thirds": 3,
-      "team": "WSR"
-    },
-    {
-      "pos": 12,
       "car": "16",
       "driver": "Aiden MOFFAT",
       "nat": "GBR",
       "class": "I",
-      "points": 219,
+      "points": 233,
       "wins": 1,
       "seconds": 1,
       "thirds": 1,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
+    },
+    {
+      "pos": 12,
+      "car": "2",
+      "driver": "Daryl DE LEON",
+      "nat": "PHL",
+      "class": "I",
+      "points": 229,
+      "wins": 0,
+      "seconds": 0,
+      "thirds": 3,
+      "team": "WSR"
     },
     {
       "pos": 13,
@@ -150,7 +150,7 @@
       "driver": "Tom CHILTON",
       "nat": "GBR",
       "class": "M",
-      "points": 189,
+      "points": 191,
       "wins": 1,
       "seconds": 1,
       "thirds": 2,
@@ -174,7 +174,7 @@
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 164,
+      "points": 170,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -210,7 +210,7 @@
       "driver": "Sam OSBORNE",
       "nat": "GBR",
       "class": "M",
-      "points": 66,
+      "points": 67,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -246,7 +246,7 @@
       "driver": "Daniel LLOYD",
       "nat": "GBR",
       "class": "I",
-      "points": 25,
+      "points": 30,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -258,7 +258,7 @@
       "driver": "Lewis GILBERT",
       "nat": "GBR",
       "class": "I",
-      "points": 16,
+      "points": 19,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -329,22 +329,22 @@
     {
       "pos": 1,
       "team": "NAPA Racing UK",
-      "points": 682
+      "points": 704
     },
     {
       "pos": 2,
       "team": "Team VERTU",
-      "points": 490
+      "points": 514
     },
     {
       "pos": 3,
-      "team": "WSR",
-      "points": 425
+      "team": "LKQ Euro Car Parts with Power Maxed Racing",
+      "points": 441
     },
     {
       "pos": 4,
-      "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 415
+      "team": "WSR",
+      "points": 435
     },
     {
       "pos": 5,
@@ -359,43 +359,43 @@
     {
       "pos": 7,
       "team": "Speedworks Corolla Racing",
-      "points": 245
+      "points": 265
     },
     {
       "pos": 8,
       "team": "Restart Racing",
-      "points": 245
+      "points": 253
     },
     {
       "pos": 9,
       "team": "CPRL",
-      "points": 167
+      "points": 180
     },
     {
       "pos": 10,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 163
+      "points": 171
     }
   ],
   "manufacturers": [
     {
       "pos": 1,
-      "points": 817,
+      "points": 845,
       "manufacturer": "Alliance Racing / Ford"
     },
     {
       "pos": 2,
-      "points": 620,
+      "points": 641,
       "manufacturer": "Mercedes"
     },
     {
       "pos": 3,
-      "points": 605,
+      "points": 634,
       "manufacturer": "EXCELR8 Motorsport / Hyundai"
     },
     {
       "pos": 4,
-      "points": 508,
+      "points": 533,
       "manufacturer": "Toyota"
     }
   ],
@@ -403,27 +403,27 @@
     {
       "pos": 1,
       "team": "LKQ Euro Car Parts with Power Maxed Racing",
-      "points": 458
+      "points": 478
     },
     {
       "pos": 2,
+      "team": "WSR",
+      "points": 441
+    },
+    {
+      "pos": 3,
       "team": "Laser Tools Racing with MB Motorsport",
       "points": 425
     },
     {
-      "pos": 3,
-      "team": "WSR",
-      "points": 424
-    },
-    {
       "pos": 4,
       "team": "Restart Racing",
-      "points": 358
+      "points": 371
     },
     {
       "pos": 5,
       "team": "Steel Seal with Power Maxed Racing",
-      "points": 344
+      "points": 359
     }
   ],
   "independents": [
@@ -433,14 +433,26 @@
       "driver": "Mikey DOBLE",
       "nat": "GBR",
       "class": "I",
-      "points": 373,
+      "points": 390,
       "wins": 6,
-      "seconds": 3,
+      "seconds": 4,
       "thirds": 4,
       "team": "LKQ Euro Car Parts with Power Maxed Racing"
     },
     {
       "pos": 2,
+      "car": "16",
+      "driver": "Aiden MOFFAT",
+      "nat": "GBR",
+      "class": "I",
+      "points": 350,
+      "wins": 6,
+      "seconds": 3,
+      "thirds": 2,
+      "team": "LKQ Euro Car Parts with Power Maxed Racing"
+    },
+    {
+      "pos": 3,
       "car": "52",
       "driver": "Gordon SHEDDEN",
       "nat": "GBR",
@@ -452,7 +464,19 @@
       "team": "Laser Tools Racing with MB Motorsport"
     },
     {
-      "pos": 3,
+      "pos": 4,
+      "car": "2",
+      "driver": "Daryl DE LEON",
+      "nat": "PHL",
+      "class": "I",
+      "points": 347,
+      "wins": 1,
+      "seconds": 5,
+      "thirds": 4,
+      "team": "WSR"
+    },
+    {
+      "pos": 5,
       "car": "99",
       "driver": "Charles RAINFORD",
       "nat": "GBR",
@@ -464,36 +488,12 @@
       "team": "WSR"
     },
     {
-      "pos": 4,
-      "car": "2",
-      "driver": "Daryl DE LEON",
-      "nat": "PHL",
-      "class": "I",
-      "points": 332,
-      "wins": 1,
-      "seconds": 5,
-      "thirds": 3,
-      "team": "WSR"
-    },
-    {
-      "pos": 5,
-      "car": "16",
-      "driver": "Aiden MOFFAT",
-      "nat": "GBR",
-      "class": "I",
-      "points": 330,
-      "wins": 5,
-      "seconds": 3,
-      "thirds": 2,
-      "team": "LKQ Euro Car Parts with Power Maxed Racing"
-    },
-    {
       "pos": 6,
       "car": "17",
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 299,
+      "points": 312,
       "wins": 2,
       "seconds": 1,
       "thirds": 4,
@@ -517,7 +517,7 @@
       "driver": "Chris SMILEY",
       "nat": "GBR",
       "class": "I",
-      "points": 263,
+      "points": 272,
       "wins": 0,
       "seconds": 2,
       "thirds": 2,
@@ -541,7 +541,7 @@
       "driver": "Lewis GILBERT",
       "nat": "GBR",
       "class": "I",
-      "points": 83,
+      "points": 93,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -553,7 +553,7 @@
       "driver": "Nick HALSTEAD",
       "nat": "GBR",
       "class": "I",
-      "points": 71,
+      "points": 79,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -565,7 +565,7 @@
       "driver": "Daniel LLOYD",
       "nat": "GBR",
       "class": "I",
-      "points": 54,
+      "points": 65,
       "wins": 0,
       "seconds": 0,
       "thirds": 1,
@@ -579,8 +579,8 @@
       "driver": "Dexter PATTERSON",
       "nat": "GBR",
       "class": "I",
-      "points": 459,
-      "wins": 13,
+      "points": 479,
+      "wins": 14,
       "seconds": 7,
       "thirds": 2,
       "team": "Steel Seal with Power Maxed Racing"
@@ -591,7 +591,7 @@
       "driver": "Lewis SELBY",
       "nat": "GBR",
       "class": "M",
-      "points": 348,
+      "points": 361,
       "wins": 3,
       "seconds": 5,
       "thirds": 8,
@@ -603,7 +603,7 @@
       "driver": "Nicolas HAMILTON",
       "nat": "GBR",
       "class": "M",
-      "points": 303,
+      "points": 312,
       "wins": 0,
       "seconds": 3,
       "thirds": 5,
@@ -611,6 +611,18 @@
     },
     {
       "pos": 4,
+      "car": "77",
+      "driver": "Sam OSBORNE",
+      "nat": "GBR",
+      "class": "M",
+      "points": 299,
+      "wins": 3,
+      "seconds": 6,
+      "thirds": 6,
+      "team": "NAPA Racing UK"
+    },
+    {
+      "pos": 5,
       "car": "132",
       "driver": "James DORLIN",
       "nat": "GBR",
@@ -622,24 +634,12 @@
       "team": "Restart Racing"
     },
     {
-      "pos": 5,
-      "car": "77",
-      "driver": "Sam OSBORNE",
-      "nat": "GBR",
-      "class": "M",
-      "points": 284,
-      "wins": 3,
-      "seconds": 6,
-      "thirds": 5,
-      "team": "NAPA Racing UK"
-    },
-    {
       "pos": 6,
       "car": "7",
       "driver": "Ryan BENSLEY",
       "nat": "GBR",
       "class": "M",
-      "points": 184,
+      "points": 195,
       "wins": 0,
       "seconds": 3,
       "thirds": 2,
@@ -651,9 +651,9 @@
       "driver": "Lewis GILBERT",
       "nat": "GBR",
       "class": "I",
-      "points": 136,
+      "points": 153,
       "wins": 2,
-      "seconds": 1,
+      "seconds": 2,
       "thirds": 1,
       "team": "WSR"
     },
@@ -663,7 +663,7 @@
       "driver": "Nick HALSTEAD",
       "nat": "GBR",
       "class": "I",
-      "points": 109,
+      "points": 119,
       "wins": 0,
       "seconds": 0,
       "thirds": 0,
@@ -697,5 +697,5 @@
   "season": "2026",
   "round": 10,
   "venue": "Brands Hatch GP",
-  "updated": "2026-10-10T16:42:58Z"
+  "updated": "2026-10-11T11:07:05Z"
 }
