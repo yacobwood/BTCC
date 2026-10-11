@@ -380,6 +380,61 @@ class TestBuildArticlesImageFetch(unittest.TestCase):
             "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/abc123.jpg",
         )
 
+    def _existing(self, tmp):
+        articles_dir = Path(tmp) / "articles"
+        articles_dir.mkdir()
+        (articles_dir / "page_1.json").write_text(json.dumps([{
+            "id": "finale", "slug": "finale", "date": "2026-10-11T00:00:00",
+            "firstSeenAt": "2026-10-11T17:13:39", "title": {"rendered": "Collard takes maiden victory"},
+            "excerpt": {"rendered": ""}, "content": {"rendered": "Collard took his first win."},
+            "_embedded": {"wp:featuredmedia": [{
+                "source_url": "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/old.jpg"}]},
+        }]))
+        return articles_dir
+
+    CARD = [{"slug": "finale", "title": "Cammish inherits win after Collard penalty",
+             "media_url": "https://btcc.net/api/media/new123", "excerpt": "", "date": "2026-10-11T00:00:00"}]
+
+    def test_refresh_slug_refetches_edited_body_and_image(self):
+        """2026 finale: btcc.net rewrote the story and changed its photo after
+        it was mirrored; the cache kept the old body and image."""
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", self._existing(tmp)), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=self.CARD), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Cammish inherits the win.", None)) as mock_body, \
+                 patch("scrape_articles.fetch_image_smart", return_value=(b"bytes", "image/jpeg")) as mock_image, \
+                 patch("scrape_articles.save_mirrored_image", return_value="new123.jpg"):
+                posts, _ = build_articles(refresh_all=False, refresh_slugs=frozenset({"finale"}))
+        mock_body.assert_called_once_with("finale")
+        mock_image.assert_called_once()
+        self.assertEqual(posts[0]["content"]["rendered"], "Cammish inherits the win.")
+        self.assertEqual(posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+                         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/new123.jpg")
+
+    def test_refresh_slug_keeps_old_image_if_new_one_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", self._existing(tmp)), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=self.CARD), \
+                 patch("scrape_articles.fetch_article_body", return_value=("Cammish inherits the win.", None)), \
+                 patch("scrape_articles.fetch_image_smart", return_value=None):
+                posts, _ = build_articles(refresh_all=False, refresh_slugs=frozenset({"finale"}))
+        self.assertEqual(posts[0]["_embedded"]["wp:featuredmedia"][0]["source_url"],
+                         "https://raw.githubusercontent.com/yacobwood/BTCC/main/data/media/news/old.jpg")
+
+    def test_without_refresh_slug_edited_article_stays_cached(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(scrape_articles, "ARTICLES_DIR", self._existing(tmp)), \
+                 patch.object(scrape_articles, "MEDIA_DIR", Path(tmp) / "media"), \
+                 patch("scrape_articles.scrape_card_list", return_value=self.CARD), \
+                 patch("scrape_articles.fetch_article_body") as mock_body, \
+                 patch("scrape_articles.fetch_image_smart") as mock_image:
+                posts, _ = build_articles(refresh_all=False)
+        mock_body.assert_not_called()
+        mock_image.assert_not_called()
+        self.assertEqual(posts[0]["content"]["rendered"], "Collard took his first win.")
+
     def test_fetches_image_for_a_genuinely_new_article(self):
         with tempfile.TemporaryDirectory() as tmp:
             with patch.object(scrape_articles, "ARTICLES_DIR", Path(tmp) / "articles"), \

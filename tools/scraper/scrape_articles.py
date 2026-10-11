@@ -532,7 +532,7 @@ def resolve_first_seen(prior: dict | None, now_iso: str, date_iso: str = "") -> 
     return now_iso
 
 
-def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dict], dict]:
+def build_articles(refresh_all: bool, backfill_pages: int = 1, refresh_slugs: frozenset = frozenset()) -> tuple[list[dict], dict]:
     # Always load the full accumulated archive - refresh_all forces today's
     # listing cards to refetch their content below, but must never wipe out
     # everything older than today's ~25 cards that's already been accumulated.
@@ -614,10 +614,19 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
         if prior is not None and not card["media_url"] and (not prior_image or prior_hero_source == "gallery"):
             image_retry_needed = needs_image_retry(prior.get("firstSeenAt"))
 
+        # --refresh-slug: btcc.net edited an already-mirrored article (2026
+        # finale: "Ricky Collard takes maiden BTCC victory" became "Cammish
+        # inherits win after Collard penalty" with a new photo) - the cache
+        # would otherwise keep the old body and image forever, while the
+        # listing card's new title still came through, so the app showed the
+        # new headline over the old story.
+        forced = slug in refresh_slugs
+
         has_content = (
             bool(prior_content)
             and not needs_full_refetch(prior_content, refresh_all)
             and not image_retry_needed
+            and not forced
         )
 
         if has_content:
@@ -655,7 +664,7 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
         if needs_gallery_mirror(content_html, prior.get("firstSeenAt") if prior else None, not has_content):
             content_html = mirror_gallery_images(content_html, slug)
 
-        if prior_image and prior_image.startswith(MEDIA_RAW_BASE) and prior_hero_source != "gallery":
+        if prior_image and prior_image.startswith(MEDIA_RAW_BASE) and prior_hero_source != "gallery" and not forced:
             image_url = prior_image
             hero_source = prior_hero_source
         else:
@@ -679,6 +688,9 @@ def build_articles(refresh_all: bool, backfill_pages: int = 1) -> tuple[list[dic
             else:
                 image_url = None
             hero_source = None  # a card/og image just confirmed above is never a guess
+            if not image_url and forced and prior_image:
+                # A forced refresh whose image fetch failed keeps what it had
+                image_url, hero_source = prior_image, prior_hero_source
             if not image_url:
                 # Tier 3: no listing-card thumbnail and no og:image either -
                 # confirmed live 2026-09-11 ("BTCC visit Darlington Memorial
@@ -821,10 +833,12 @@ def main():
     ap = argparse.ArgumentParser(description="Mirror BTCC articles into data/articles/page_<n>.json + index.json")
     ap.add_argument("--dry-run", action="store_true", help="Print result only, do not write")
     ap.add_argument("--refresh-all", action="store_true", help="Re-fetch full content for today's listing cards even if already cached (does not affect older accumulated articles)")
+    ap.add_argument("--refresh-slug", action="append", default=[], metavar="SLUG",
+                    help="Re-fetch this already-mirrored article's body AND hero image (btcc.net edited it). Repeatable; the slug must be on the crawled listing page(s)")
     ap.add_argument("--backfill-pages", type=int, default=1, help="Crawl this many /news/ listing pages (~25 articles each) instead of just page 1 - one-off deep backfill, not for routine runs")
     args = ap.parse_args()
 
-    posts, pending = build_articles(args.refresh_all, args.backfill_pages)
+    posts, pending = build_articles(args.refresh_all, args.backfill_pages, frozenset(args.refresh_slug))
 
     if pending:
         # Held back this run pending an image - see PUBLISH_HOLD_WINDOW.
