@@ -433,7 +433,7 @@ def extra_awards(results, analysis=None):
     min_starts = max(starts.values(), default=0) * MIN_RACE_SHARE
     T = team_of
     out = [
-        award("bridesmaid", "Bridesmaid Award", "stat", "sentiment-dissatisfied",
+        award("knockingOnTheDoor", "Knocking on the Door", "stat", "door-front",
               ranked(Counter({d: n for d, n in podiums.items() if not wins[d]}), tiebreak=pts_tb),
               lambda v, _: plural(v, "podium") + ", no wins", "Most podiums without a win", T),
         award("sectorKing", "Sector King", "stat", "timer", ranked(sectors, tiebreak=pts_tb),

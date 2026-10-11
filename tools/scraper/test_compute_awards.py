@@ -115,7 +115,7 @@ class TestTeamsAndNames(unittest.TestCase):
 
 
 class TestExtraAwards(unittest.TestCase):
-    def test_bridesmaid_excludes_winners(self):
+    def test_knocking_on_the_door_excludes_winners(self):
         data = season([
             session("Race 1", [res(1, "Ann A"), res(2, "Bob B"), res(3, "Cal C")]),
             session("Race 2", [res(1, "Ann A"), res(2, "Bob B"), res(3, "Cal C")]),
@@ -123,7 +123,7 @@ class TestExtraAwards(unittest.TestCase):
         a = by_id(ca.extra_awards(data))
         # Ann has wins so is excluded; Bob and Cal tie on 2 podiums and 0 points,
         # so the name tiebreak decides.
-        self.assertEqual(a["bridesmaid"]["winner"], "Bob B")
+        self.assertEqual(a["knockingOnTheDoor"]["winner"], "Bob B")
 
     def test_reverse_grid_counts_race_3_only(self):
         data = season([session("Race 1", [res(1, "Ann A", points=20)]),
