@@ -516,6 +516,14 @@
         },
         {
           "type": "heading",
+          "body": "How Is Boost Used?"
+        },
+        {
+          "type": "text",
+          "body": "Drivers deploy TTB with a button on the steering wheel. Each press gives 5 seconds of boost, as explained by the TV commentary team. This detail is not written into the Sporting Regulations, which only set how much boost each driver is allocated."
+        },
+        {
+          "type": "heading",
           "body": "The Full Scale (P1 to P8+)"
         },
         {
@@ -560,7 +568,7 @@
         },
         {
           "type": "text",
-          "body": "B-circuits are Brands Hatch (Indy), Knockhill and Silverstone (National). All other circuits on the calendar are A-circuits. B-circuits are shorter, meaning races have more total laps, but drivers receive fewer absolute TTB laps there. This means the championship leader (already restricted to 1 boost lap at B-circuits) must manage every activation extremely carefully at the short venues."
+          "body": "B-circuits are Brands Hatch (Indy), Knockhill and Silverstone (National). All other circuits on the calendar are A-circuits. B-circuits are shorter so races there run more laps. To match, every driver gets more TTB laps at B-circuits: the championship leader goes from 1 boost lap at an A-circuit to 4 at a B-circuit."
         },
         {
           "type": "heading",
