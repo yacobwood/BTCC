@@ -1917,7 +1917,55 @@ def _apply_per_race_points(rounds, per_race, scored_sessions):
                 # Drivers not in per_race (wildcards not in championship) are unchanged
 
 
-def _build_results_output(year, output_rounds, per_race, scored_sessions):
+# Points-scoring sessions in running order within a round - used to tag a
+# points adjustment with the last session the championship PDF covered when
+# the adjustment first appeared.
+_SCORED_SESSION_ORDER = ["Qualifying Race", "Race 1", "Race 2", "Race 3"]
+
+
+def update_points_adjustments(existing, standings_rows, per_race, scored_sessions):
+    """Detect championship points deductions (or reinstatements) and return the
+    updated adjustments list.
+
+    The ptstrg PDF's Total column includes points deductions (flagged "*"),
+    but its per-race columns don't - and the per-race columns are what get
+    written into results{year}.json. So summing results misses every
+    deduction. Total minus the per-race sum for one driver, read from the SAME
+    PDF, is that driver's net adjustment so far this season.
+
+    Adjustments are recorded incrementally: anything not already explained by
+    `existing` is appended, tagged with the round + last scored session the
+    PDF covered at that moment. That timing matters for TTB (reg 1.11.1) -
+    Race 1's Championship Order includes a deduction only if it had been
+    applied before Race 1. TSL republishes ptstrg after every scored session
+    (QR included), so the live scrape sees each change soon after it lands.
+
+    Returns `existing` unchanged when the PDF has no scored sessions."""
+    adjustments = list(existing or [])
+    if not scored_sessions:
+        return adjustments
+    pdf_round = max(rnd for rnd, _label in scored_sessions)
+    round_sessions = {label for rnd, label in scored_sessions if rnd == pdf_round}
+    after_session = max(round_sessions, key=lambda l: _SCORED_SESSION_ORDER.index(l)
+                        if l in _SCORED_SESSION_ORDER else -1)
+    known = {}
+    for adj in adjustments:
+        known[adj["driver"]] = known.get(adj["driver"], 0) + adj["points"]
+    for row in standings_rows or []:
+        driver = row.get("driver")
+        if not driver or driver not in per_race:
+            continue
+        net = row["points"] - sum(per_race[driver].values())
+        delta = net - known.get(driver, 0)
+        if delta:
+            print(f"  *** points adjustment: {driver} {delta:+d} "
+                  f"(round {pdf_round}, after {after_session}; official {row['points']})")
+            adjustments.append({"driver": driver, "round": pdf_round,
+                                "afterSession": after_session, "points": delta})
+    return adjustments
+
+
+def _build_results_output(year, output_rounds, per_race, scored_sessions, points_adjustments=None):
     """Applies the championship-PDF per-race point override (if any) to
     output_rounds and returns the exact dict main() should write to
     results{year}.json - the override and the file build happen in one
@@ -1944,7 +1992,10 @@ def _build_results_output(year, output_rounds, per_race, scored_sessions):
     a 400+ line main() sequences its own two steps correctly."""
     if per_race and scored_sessions:
         _apply_per_race_points(output_rounds, per_race, scored_sessions)
-    return {"season": str(year), "rounds": output_rounds}
+    out = {"season": str(year), "rounds": output_rounds}
+    if points_adjustments:
+        out["pointsAdjustments"] = points_adjustments
+    return out
 
 
 
@@ -2247,8 +2298,10 @@ def main():
     if results_path.exists():
         existing = json.loads(results_path.read_text())
         existing_rounds = {r["round"]: r for r in existing.get("rounds", [])}
+        existing_adjustments = existing.get("pointsAdjustments", [])
     else:
         existing_rounds = {}
+        existing_adjustments = []
 
     all_session_labels = list(SESSION_SUFFIXES.keys())
 
@@ -2288,8 +2341,10 @@ def main():
     latest = max(completed, key=lambda r: r["round"]) if completed else None
 
     # Try championship PDFs from most-recent completed round backwards.
-    # TSL only publishes ptstrg after Race 3, so mid-round we fall back to the
-    # previous round's official PDF rather than the computed standings.
+    # TSL republishes ptstrg after every scored session (Qualifying Race
+    # included - confirmed live at Brands Hatch GP 2026). Before a round's
+    # first scored session we fall back to the previous round's official PDF
+    # rather than the computed standings.
     standings = None
     per_race, scored_sessions = {}, set()  # populated below if a championship PDF parses; passed to _build_results_output regardless, so an empty/failed parse is a safe no-op override there
     if latest:
@@ -2337,7 +2392,12 @@ def main():
     # write happen together here, rather than writing output_rounds straight
     # after it was assembled above (which is what this code used to do, and
     # the root cause of a season-long points drift - fixed 2026-09-09).
-    results_out = _build_results_output(YEAR, output_rounds, per_race, scored_sessions)
+    # Only a parsed championship PDF can reveal deductions - with no PDF,
+    # update_points_adjustments sees no scored sessions and keeps the existing list.
+    points_adjustments = update_points_adjustments(
+        existing_adjustments, standings.get("standings", []) if per_race else [],
+        per_race, scored_sessions)
+    results_out = _build_results_output(YEAR, output_rounds, per_race, scored_sessions, points_adjustments)
     results_path.write_text(json.dumps(results_out, indent=2))
     print(f"\nWrote {results_path}")
 

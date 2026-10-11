@@ -127,6 +127,9 @@ export default function RoundResultsScreen({route, navigation}) {
   // from cumulative points across earlier rounds. Seeded from the bundled
   // snapshot so it works offline; refreshed opportunistically below.
   const [allRounds, setAllRounds] = useState(BUNDLED_RESULTS.rounds || []);
+  // Championship points deductions for TTB's Championship Order - see
+  // championshipOrderBeforeRound in utils/ttb.js.
+  const [pointsAdjustments, setPointsAdjustments] = useState(BUNDLED_RESULTS.pointsAdjustments || []);
   const handleBack = () => origin === 'calendar' ? navigation.navigate('ResultsList') : navigation.goBack();
 
   const {isFavourite} = useFavouriteDriver();
@@ -175,6 +178,7 @@ export default function RoundResultsScreen({route, navigation}) {
       const raw = await fetchResults(year, true);
       const parsed = parseResults(raw);
       setAllRounds(parsed);
+      setPointsAdjustments(raw?.pointsAdjustments || []);
       const fresh = parsed.find(r => r.round === round.round);
       if (fresh) setRound(fresh);
     } catch (_) {}
@@ -316,7 +320,7 @@ export default function RoundResultsScreen({route, navigation}) {
           // list below - ttbPositionMapForRace() covers Race 1/2/3 (laps) and
           // Qualifying/Qualifying Race (secs/lap), returning null for Free
           // Practice or any other label, so this is a cheap no-op there.
-          const ttbMap = year === CURRENT_SEASON ? ttbPositionMapForRace(race, races, allRounds, round.round) : null;
+          const ttbMap = year === CURRENT_SEASON ? ttbPositionMapForRace(race, races, allRounds, round.round, pointsAdjustments) : null;
           const isR3 = race?.label === 'Race 3';
           const isQual = race.label === 'Qualifying';
           const hasResults = race?.results?.length > 0;
@@ -331,6 +335,7 @@ export default function RoundResultsScreen({route, navigation}) {
                   venue={round.venue}
                   roundNumber={round.round}
                   allRounds={allRounds}
+                  pointsAdjustments={pointsAdjustments}
                   showTtb={year === CURRENT_SEASON}
                 />
               );
@@ -359,6 +364,7 @@ export default function RoundResultsScreen({route, navigation}) {
                     venue={round.venue}
                     roundNumber={round.round}
                     allRounds={allRounds}
+                    pointsAdjustments={pointsAdjustments}
                     showTtb={year === CURRENT_SEASON}
                   />
                 );
@@ -783,7 +789,7 @@ export function detectReversalCount(races, gridDrivers) {
   return null;
 }
 
-function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venue, roundNumber, allRounds, showTtb}) {
+function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venue, roundNumber, allRounds, pointsAdjustments, showTtb}) {
   const sorted = [...race.grid].sort((a, b) => a.pos - b.pos);
   const isR3 = race.label === 'Race 3';
   // Use explicit draw number if set (covers TSL grid PDF amendments caught after the window);
@@ -798,7 +804,7 @@ function StartingGridTab({race, races, isFavourite, predicted, sourceLabel, venu
   // has results). At the season opener every driver gets the max TTB tier
   // (see ttb.js header comment) rather than no badge. Race 1/2/3 get a laps
   // scale; Qualifying/Qualifying Race get a secs/lap scale - see getTtbBadge.
-  const ttbMap = showTtb ? ttbPositionMapForRace(race, races, allRounds, roundNumber) : null;
+  const ttbMap = showTtb ? ttbPositionMapForRace(race, races, allRounds, roundNumber, pointsAdjustments) : null;
   const ttbSeasonOpener = showTtb && ttbMap && isTtbSeasonOpener(race, allRounds, roundNumber);
   const isQualifyingType = race.label === 'Qualifying' || race.label === 'Qualifying Race';
   const leftItems = sorted.filter(g => g.pos % 2 === 1);

@@ -1126,6 +1126,49 @@ class TestApplyDrawOverride(unittest.TestCase):
         self.assertIsNone(r2_r3.get('reverseGridDraw'))
 
 
+# ── update_points_adjustments ────────────────────────────────────────────────
+# Points deductions only show in the ptstrg PDF's Total column, never in its
+# per-race columns (found 2026-10-11: Adam Morgan's -5 at Croft left summed
+# results 5 points high, which put the wrong TTB allocation on the Brands
+# Hatch GP Race 1 grid).
+class TestUpdatePointsAdjustments(unittest.TestCase):
+
+    PER_RACE = {
+        'Adam MORGAN': {(8, 'Qualifying Race'): 2, (8, 'Race 1'): 0},
+        'Josh COOK':   {(8, 'Qualifying Race'): 9, (8, 'Race 1'): 0},
+    }
+
+    def test_records_a_deduction_tagged_with_round_and_last_scored_session(self):
+        rows = [{'driver': 'Adam MORGAN', 'points': -3}, {'driver': 'Josh COOK', 'points': 9}]
+        out = s.update_points_adjustments([], rows, self.PER_RACE, {(8, 'Qualifying Race')})
+        self.assertEqual(out, [{'driver': 'Adam MORGAN', 'round': 8,
+                                'afterSession': 'Qualifying Race', 'points': -5}])
+
+    def test_does_not_re_record_an_adjustment_already_known(self):
+        existing = [{'driver': 'Adam MORGAN', 'round': 8, 'afterSession': 'Qualifying Race', 'points': -5}]
+        rows = [{'driver': 'Adam MORGAN', 'points': -3}]
+        sessions = {(8, 'Qualifying Race'), (8, 'Race 3')}
+        self.assertEqual(s.update_points_adjustments(existing, rows, self.PER_RACE, sessions), existing)
+
+    def test_records_only_the_change_when_a_deduction_grows_later(self):
+        existing = [{'driver': 'Adam MORGAN', 'round': 8, 'afterSession': 'Qualifying Race', 'points': -5}]
+        rows = [{'driver': 'Adam MORGAN', 'points': -8}]
+        sessions = {(8, 'Qualifying Race'), (8, 'Race 1'), (8, 'Race 2')}
+        out = s.update_points_adjustments(existing, rows, self.PER_RACE, sessions)
+        self.assertEqual(out[-1], {'driver': 'Adam MORGAN', 'round': 8,
+                                   'afterSession': 'Race 2', 'points': -5})
+
+    def test_keeps_existing_list_when_no_championship_pdf_parsed(self):
+        existing = [{'driver': 'Adam MORGAN', 'round': 8, 'afterSession': 'Race 3', 'points': -5}]
+        self.assertEqual(s.update_points_adjustments(existing, [], {}, set()), existing)
+
+    def test_build_results_output_writes_adjustments_only_when_present(self):
+        rounds = [{'round': 1, 'races': []}]
+        self.assertNotIn('pointsAdjustments', s._build_results_output(2026, rounds, {}, set(), []))
+        adj = [{'driver': 'X', 'round': 1, 'afterSession': 'Race 3', 'points': -5}]
+        self.assertEqual(s._build_results_output(2026, rounds, {}, set(), adj)['pointsAdjustments'], adj)
+
+
 # ── _build_results_output ────────────────────────────────────────────────────
 # Regression coverage for a season-long bug fixed 2026-09-09: main() used to
 # serialize+write results{year}.json immediately after output_rounds was

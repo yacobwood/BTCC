@@ -135259,5 +135259,37 @@
         null
       ]
     }
+  ],
+  "pointsAdjustments": [
+    {
+      "driver": "James DORLIN",
+      "round": 4,
+      "afterSession": "Race 2",
+      "points": -5
+    },
+    {
+      "driver": "Adam MORGAN",
+      "round": 8,
+      "afterSession": "Qualifying Race",
+      "points": -5
+    },
+    {
+      "driver": "Daniel LLOYD",
+      "round": 8,
+      "afterSession": "Qualifying Race",
+      "points": -5
+    },
+    {
+      "driver": "Daniel LLOYD",
+      "round": 8,
+      "afterSession": "Race 2",
+      "points": -5
+    },
+    {
+      "driver": "Tom CHILTON",
+      "round": 9,
+      "afterSession": "Qualifying Race",
+      "points": -5
+    }
   ]
 }

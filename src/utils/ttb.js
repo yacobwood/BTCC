@@ -14,9 +14,11 @@
 // Position source differs by race, but not in the way the two metrics might
 // suggest - Qualifying and the Qualifying Race share Race 1's source, not
 // each other's:
-//   Race 1, Qualifying, Qualifying Race -> Championship Order (points total
-//     before this round) - reg 1.11.1.b: "For Qualifying: ... reduced based
-//     on Championship Order")
+//   Qualifying, Qualifying Race -> Championship Order (points total before
+//     this round) - reg 1.11.1.b: "For Qualifying: ... reduced based on
+//     Championship Order")
+//   Race 1 -> Championship Order as it stands at Race 1, i.e. including
+//     this round's Qualifying Race points
 //   Race 2 -> Race 1 finishing order (same meeting)
 //   Race 3 -> Race 2 finishing order (same meeting)
 //
@@ -111,16 +113,42 @@ function rankByValueDesc(entries) {
 // points instead, per reg 1.11.1.b's tie rule already applied below. Skipped
 // when `points` is still empty (the true season opener), which has its own
 // max-tier-for-everyone fallback in ttbPositionMap.
-export function championshipOrderBeforeRound(allRounds, roundNumber, rosterDrivers) {
+//
+// `includeQualifyingRace` (optional) also counts THIS round's Qualifying Race
+// points. Race 1 needs it: the Qualifying Race runs before Race 1 and scores
+// championship points, so the Championship Order at Race 1 already includes
+// them. Confirmed against the broadcast grid graphic for Brands Hatch GP 2026
+// Race 1 (Doble 8 laps / Rainford 10 only match with QR points included).
+// Qualifying/the Qualifying Race itself must NOT pass it - those run before
+// any of this round's points exist.
+//
+// `pointsAdjustments` (optional, results{year}.json's top-level list, written
+// by scrape_tsl.py's update_points_adjustments) are championship points
+// deductions/reinstatements. The official TSL standings Total includes them
+// but per-race points don't, so summing results alone gets them wrong (e.g.
+// Adam Morgan -5 at Croft 2026). Each is tagged with the round + last scored
+// session the championship PDF covered when it first appeared: it counts for
+// any later round, and for this round's Race 1 only if it was already there
+// after the Qualifying Race.
+export function championshipOrderBeforeRound(allRounds, roundNumber, rosterDrivers, {includeQualifyingRace = false, pointsAdjustments} = {}) {
   const points = {};
-  (allRounds || [])
-    .filter(r => r.round < roundNumber)
-    .forEach(r => (r.races || []).forEach(race =>
-      (race.results || []).forEach(res => {
-        if (!res.driver) return;
-        points[res.driver] = (points[res.driver] || 0) + (res.points || 0);
-      })
-    ));
+  const add = (driver, value) => { points[driver] = (points[driver] || 0) + (value || 0); };
+  const addResults = race => (race.results || []).forEach(res => {
+    if (res.driver) add(res.driver, res.points);
+  });
+  (allRounds || []).forEach(r => {
+    if (r.round < roundNumber) (r.races || []).forEach(addResults);
+    else if (includeQualifyingRace && r.round === roundNumber) {
+      (r.races || []).filter(race => race.label === 'Qualifying Race').forEach(addResults);
+    }
+  });
+  if (Object.keys(points).length) {
+    (pointsAdjustments || []).forEach(adj => {
+      const applies = adj.round < roundNumber ||
+        (includeQualifyingRace && adj.round === roundNumber && adj.afterSession === 'Qualifying Race');
+      if (applies && adj.driver) add(adj.driver, adj.points);
+    });
+  }
   if (rosterDrivers && Object.keys(points).length) {
     rosterDrivers.forEach(driver => {
       if (driver && !(driver in points)) points[driver] = 0;
@@ -162,11 +190,14 @@ export function isSeasonOpenerRace1(race, allRounds, roundNumber) {
 // before Race 1 has results, or a race other than Race 1/2/3). At the season
 // opener, every driver in `race.grid` is assigned the max TTB tier rather
 // than returning null - see isSeasonOpenerRace1.
-export function ttbPositionMap(race, races, allRounds, roundNumber) {
+export function ttbPositionMap(race, races, allRounds, roundNumber, pointsAdjustments) {
   if (race.label === 'Race 1') {
-    const gridDrivers = (race.grid || []).map(g => g.driver).filter(Boolean);
-    const map = championshipOrderBeforeRound(allRounds, roundNumber, gridDrivers);
-    if (Object.keys(map).length) return map;
+    // Season opener check uses earlier rounds only - Round 1's own Qualifying
+    // Race points must not cancel the max-tier-for-everyone fallback.
+    if (!isSeasonOpenerRace1(race, allRounds, roundNumber)) {
+      const gridDrivers = (race.grid || []).map(g => g.driver).filter(Boolean);
+      return championshipOrderBeforeRound(allRounds, roundNumber, gridDrivers, {includeQualifyingRace: true, pointsAdjustments});
+    }
     if (!race.grid?.length) return null;
     const maxTierMap = {};
     race.grid.forEach(g => { if (g.driver) maxTierMap[g.driver] = TTB_RACE_SCALE.length; });
@@ -212,13 +243,13 @@ export function isSeasonOpenerQualifying(race, allRounds, roundNumber) {
 // mid-season-debut gap as championshipOrderBeforeRound documents above.
 // Returns null for any other race label, or when there's no grid/results yet
 // to build a roster from at the season opener.
-export function ttbQualifyingPositionMap(race, allRounds, roundNumber) {
+export function ttbQualifyingPositionMap(race, allRounds, roundNumber, pointsAdjustments) {
   if (race.label !== 'Qualifying' && race.label !== 'Qualifying Race') return null;
   const rosterDrivers = (race.label === 'Qualifying Race'
     ? (race.grid || []).map(g => g.driver)
     : (race.results || []).map(r => r.driver)
   ).filter(Boolean);
-  const map = championshipOrderBeforeRound(allRounds, roundNumber, rosterDrivers);
+  const map = championshipOrderBeforeRound(allRounds, roundNumber, rosterDrivers, {pointsAdjustments});
   if (Object.keys(map).length) return map;
   if (!rosterDrivers.length) return null;
   const maxTierMap = {};
@@ -231,11 +262,11 @@ export function ttbQualifyingPositionMap(race, allRounds, roundNumber) {
 // Same as ttbPositionMap, but also covers Qualifying/Qualifying Race - the
 // single entry point RoundResultsScreen uses regardless of which of reg
 // 1.11.1's two position sources actually applies to this race's label.
-export function ttbPositionMapForRace(race, races, allRounds, roundNumber) {
+export function ttbPositionMapForRace(race, races, allRounds, roundNumber, pointsAdjustments) {
   if (race.label === 'Qualifying' || race.label === 'Qualifying Race') {
-    return ttbQualifyingPositionMap(race, allRounds, roundNumber);
+    return ttbQualifyingPositionMap(race, allRounds, roundNumber, pointsAdjustments);
   }
-  return ttbPositionMap(race, races, allRounds, roundNumber);
+  return ttbPositionMap(race, races, allRounds, roundNumber, pointsAdjustments);
 }
 
 // Same as isSeasonOpenerRace1, but also covers Qualifying/Qualifying Race.

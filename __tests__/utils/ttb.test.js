@@ -172,6 +172,62 @@ describe('ttbPositionMap', () => {
     expect(ttbPositionMap(race, [], allRounds, 1)).toEqual({Alice: 8, Bob: 8});
   });
 
+  it('Race 1 counts this round\'s Qualifying Race points (they score before Race 1)', () => {
+    // Regression: Brands Hatch GP 2026 - Doble passed Rainford in the
+    // standings via the Qualifying Race, and the broadcast TTB allocation
+    // reflected that while the app still ranked on pre-round points.
+    const allRounds = [
+      {round: 1, races: [{label: 'Race 1', results: [
+        makeResult('Alice', 1, {points: 20}),
+        makeResult('Bob', 2, {points: 18}),
+      ]}]},
+      {round: 2, races: [
+        {label: 'Qualifying', results: [makeResult('Bob', 1, {points: 0})]},
+        {label: 'Qualifying Race', results: [
+          makeResult('Bob', 1, {points: 10}),
+          makeResult('Alice', 2, {points: 5}),
+        ]},
+      ]},
+    ];
+    expect(ttbPositionMap({label: 'Race 1'}, [], allRounds, 2)).toEqual({Bob: 1, Alice: 2});
+  });
+
+  describe('pointsAdjustments (championship points deductions)', () => {
+    // Alice leads Bob by 3 on results alone; a 5-point deduction flips them.
+    const allRounds = [
+      {round: 1, races: [{label: 'Race 1', results: [
+        makeResult('Alice', 1, {points: 20}),
+        makeResult('Bob', 2, {points: 17}),
+      ]}]},
+      {round: 2, races: [{label: 'Qualifying Race', results: []}]},
+    ];
+    const deduct = (round, afterSession) => [{driver: 'Alice', round, afterSession, points: -5}];
+
+    it('applies a deduction from an earlier round', () => {
+      expect(ttbPositionMap({label: 'Race 1'}, [], allRounds, 2, deduct(1, 'Race 3'))).toEqual({Bob: 1, Alice: 2});
+    });
+
+    it('applies a same-round deduction already in place after the Qualifying Race', () => {
+      expect(ttbPositionMap({label: 'Race 1'}, [], allRounds, 2, deduct(2, 'Qualifying Race'))).toEqual({Bob: 1, Alice: 2});
+    });
+
+    it('ignores a same-round deduction that only appeared after Race 1 or later', () => {
+      expect(ttbPositionMap({label: 'Race 1'}, [], allRounds, 2, deduct(2, 'Race 2'))).toEqual({Alice: 1, Bob: 2});
+    });
+
+    it('Qualifying ignores same-round deductions but applies earlier ones', () => {
+      const qual = {label: 'Qualifying', results: [makeResult('Alice', 1), makeResult('Bob', 2)]};
+      expect(ttbQualifyingPositionMap(qual, allRounds, 2, deduct(2, 'Qualifying Race'))).toEqual({Alice: 1, Bob: 2});
+      expect(ttbQualifyingPositionMap(qual, allRounds, 2, deduct(1, 'Race 3'))).toEqual({Bob: 1, Alice: 2});
+    });
+  });
+
+  it('Race 1 at round 1 stays max tier even once the Qualifying Race has points', () => {
+    const allRounds = [{round: 1, races: [{label: 'Qualifying Race', results: [makeResult('Alice', 1, {points: 10})]}]}];
+    const race = {label: 'Race 1', grid: [{pos: 1, driver: 'Alice'}, {pos: 2, driver: 'Bob'}]};
+    expect(ttbPositionMap(race, [], allRounds, 1)).toEqual({Alice: 8, Bob: 8});
+  });
+
   it('Race 1 at round 1 with no grid data yet returns null', () => {
     expect(ttbPositionMap({label: 'Race 1', grid: []}, [], [], 1)).toBeNull();
   });
