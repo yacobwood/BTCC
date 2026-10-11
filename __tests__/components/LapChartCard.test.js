@@ -106,6 +106,61 @@ describe('LapChartCard', () => {
     await waitFor(() => expect(svgTextLabels(toJSON())).toContain('OZ'));
   });
 
+  it('a car missing from lap 1 is labelled inline where its line starts, not on another driver\'s gutter row', async () => {
+    // 2026 Brands Hatch GP Race 1 shape: car 99 pitted on lap 1, first
+    // crosses the line on lap 2 already a lap down, so re-ranks to the back
+    // - the same row Cook (P3 on lap 1) owns in the gutter.
+    const lateJoiner = [
+      LAP_CHART[0],
+      {lap: 2, timeOfDay: '15:15:47.175', order: [
+        ...LAP_CHART[1].order,
+        {no: 99, driver: 'Charles Rainford', team: 'WSR', gapSeconds: null, lapsDown: 1, lapTimeSeconds: 140.0},
+      ]},
+      {lap: 3, timeOfDay: '15:17:27.000', order: [
+        ...LAP_CHART[1].order,
+        {no: 99, driver: 'Charles Rainford', team: 'WSR', gapSeconds: null, lapsDown: 1, lapTimeSeconds: 99.0},
+      ]},
+    ];
+    const {toJSON} = renderWithProviders(
+      <LapChartCard lapChart={lateJoiner} roundNumber={1} session="Race 1" isFavourite={isFavourite} />,
+    );
+    await waitFor(() => {
+      const texts = [];
+      (function walk(node) {
+        if (!node || typeof node !== 'object') return;
+        if (node.type === 'SvgText') texts.push({label: node.children.join(''), x: node.props.x, y: node.props.y});
+        (node.children || []).forEach(walk);
+      })(toJSON());
+      const gutterX = texts.find(t => t.label === 'COO').x;
+      const rai = texts.filter(t => t.label === 'RAI');
+      expect(rai).toHaveLength(1);
+      expect(rai[0].x).toBeGreaterThan(gutterX);
+      // No two gutter labels share a row.
+      const gutterYs = texts.filter(t => t.x === gutterX).map(t => t.y);
+      expect(new Set(gutterYs).size).toBe(gutterYs.length);
+    });
+  });
+
+  it('the legend uses the official classification over the lap chart\'s last-lap order when results are passed', async () => {
+    // Brands Hatch GP Race 1 shape: Cook is still circulating on the final
+    // lap (so the chart alone reads him as P3) but is officially NC, and
+    // Chilton/Sutton's official order differs from the last lap's.
+    const results = [
+      {position: 1, number: 32, status: null},
+      {position: 2, number: 33, status: null},
+      {position: 0, number: 2, status: 'NC'},
+    ];
+    const {getByText, queryByText} = renderWithProviders(
+      <LapChartCard lapChart={LAP_CHART} results={results} roundNumber={1} session="Race 1" isFavourite={isFavourite} />,
+    );
+    await waitFor(() => {
+      expect(getByText('NC')).toBeTruthy();
+      expect(getByText('P1')).toBeTruthy();
+      expect(getByText('P2')).toBeTruthy();
+      expect(queryByText('P3')).toBeNull();
+    });
+  });
+
   it('labels the legend with each driver\'s finishing position, not their starting one', async () => {
     const {getByText} = renderWithProviders(
       <LapChartCard lapChart={LAP_CHART} roundNumber={1} session="Race 1" isFavourite={isFavourite} />,

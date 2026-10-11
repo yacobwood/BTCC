@@ -464,6 +464,7 @@ export default function RoundResultsScreen({route, navigation}) {
                       render: () => (
                         <LapChartCard
                           lapChart={race.lapChart}
+                          results={race.results}
                           roundNumber={round.round}
                           session={race.label}
                           isFavourite={isFavourite}

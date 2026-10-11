@@ -69,6 +69,7 @@ function pivotToSeries(lapChart) {
   const orderedNos = [...finishOrder, ...retiredNos];
 
   return orderedNos.map(no => ({
+    no,
     name: nameByNo[no],
     team: teamByNo[no],
     finishPos: finishOrder.indexOf(no) + 1 || null, // null if retired before the end
@@ -79,8 +80,23 @@ function pivotToSeries(lapChart) {
   }));
 }
 
-function LapChartCard({lapChart, roundNumber, session, isFavourite}) {
+// The legend's P-number/"Retired" label. The lap chart alone can only say
+// who was still running on the final lap, which isn't the classification:
+// confirmed live, 2026 Brands Hatch GP Race 1 - car 99/Charles Rainford
+// was still circulating on the last lap 8 laps down, so the chart read him
+// as P21 while the official result is NC. The race's own results win when
+// present (a finisher's real position, or its DNF/NC/DQ status); the lap
+// chart's own reading is only the fallback for a race with no results yet.
+function legendLabel(s, resultByNo) {
+  const r = resultByNo[s.no];
+  if (r) return r.position > 0 ? `P${r.position}` : (r.status || 'Retired');
+  return s.finishPos ? `P${s.finishPos}` : 'Retired';
+}
+
+function LapChartCard({lapChart, results, roundNumber, session, isFavourite}) {
   const series = lapChart?.length ? pivotToSeries(lapChart) : [];
+  const resultByNo = {};
+  (results || []).forEach(r => { resultByNo[r.number] = r; });
   const [visible, setVisible] = useState(() => {
     const m = {};
     series.forEach(s => { m[s.name] = true; });
@@ -132,13 +148,26 @@ function LapChartCard({lapChart, roundNumber, session, isFavourite}) {
   // Replaces an earlier numeric-tick version that both crowded a 20+ car
   // field and hit a genuine text-rendering glitch with 2-digit labels
   // ("P10" reading as "R0" - confirmed live, never fully resolved by
-  // reordering/padding/thinning alone). Falls back to a driver's first
-  // non-null lap if they have none at lap 1 (defensive - a true
-  // non-starter wouldn't appear in the book's lap chart at all, so this is
-  // believed unreachable live).
+  // reordering/padding/thinning alone). Only cars with a real lap-1 row
+  // get a gutter label - lap 1's order is one car per position, so these
+  // can never share a row.
   const startRows = series
-    .map(s => ({name: s.name, pos: s.points.find(v => v !== null)}))
-    .filter(r => r.pos != null);
+    .filter(s => s.points[0] != null)
+    .map(s => ({name: s.name, pos: s.points[0]}));
+
+  // A car missing from lap 1 entirely (confirmed live, 2026 Brands Hatch
+  // GP Race 1: car 99/Charles Rainford pitted on the opening lap and his
+  // first timing-line crossing came on lap 6, already 5 laps down) used to
+  // fall back to its first non-null position in the gutter. The lapsDown
+  // re-rank sorts such a car to the very back, which is a row another
+  // driver already owns at lap 1, so the two codes printed on top of each
+  // other. Labelled inline instead, just left of where its line begins.
+  const lateRows = series
+    .map(s => ({name: s.name, idx: s.points.findIndex(v => v !== null)}))
+    .filter(r => r.idx > 0)
+    .map(r => ({...r, pos: series.find(s => s.name === r.name).points[r.idx]}));
+
+  const codeFor = (name) => name.split(' ').pop().toUpperCase().slice(0, 3);
 
   // Lap ticks: thinned to roughly 8 labels max regardless of race length,
   // same density ProgressionChart targets for its own round labels.
@@ -200,12 +229,12 @@ function LapChartCard({lapChart, roundNumber, session, isFavourite}) {
               />
             );
           })}
-          {startRows.map(r => {
-            const code = r.name.split(' ').pop().toUpperCase().slice(0, 3);
-            return (
-              <SvgText key={r.name} x={padL - 6} y={y(r.pos) + 3} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{code}</SvgText>
-            );
-          })}
+          {startRows.map(r => (
+            <SvgText key={r.name} x={padL - 6} y={y(r.pos) + 3} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{codeFor(r.name)}</SvgText>
+          ))}
+          {lateRows.map(r => (visible[r.name] === false ? null : (
+            <SvgText key={`late-${r.name}`} x={x(r.idx) - 4} y={y(r.pos) + 3} fill={Colors.textSecondary} fontSize={9} textAnchor="end">{codeFor(r.name)}</SvgText>
+          )))}
           {lapTicks.map(l => {
             const xPos = x(l - 1);
             const anchor = xPos >= chartW - padR - 4 ? 'end' : (xPos <= padL + 4 ? 'start' : 'middle');
@@ -242,7 +271,7 @@ function LapChartCard({lapChart, roundNumber, session, isFavourite}) {
               </View>
               <View>
                 <Text style={[styles.legendName, fav && {color: Colors.yellow}]} numberOfLines={1}>{formatDriverName(s.name)}</Text>
-                <Text style={styles.legendPts}>{s.finishPos ? `P${s.finishPos}` : 'Retired'}</Text>
+                <Text style={styles.legendPts}>{legendLabel(s, resultByNo)}</Text>
               </View>
             </TouchableOpacity>
           );
