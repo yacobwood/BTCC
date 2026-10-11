@@ -445,7 +445,7 @@
     {
       "driver": "Dan Cammish",
       "starts": 265,
-      "wins": 18,
+      "wins": 19,
       "podiums": 70,
       "poles": 8,
       "fastestLaps": 13,
@@ -463,7 +463,7 @@
       "consecutivePoints": 30,
       "racesLed": 24,
       "hatTricks": 2,
-      "winPct": 0.06792452830188679,
+      "winPct": 0.07169811320754717,
       "podiumPct": 0.2641509433962264,
       "pointsPerStart": 8.622641509433961,
       "dnfPct": 0.15471698113207547
@@ -1199,7 +1199,7 @@
     {
       "driver": "Ricky Collard",
       "starts": 118,
-      "wins": 1,
+      "wins": 0,
       "podiums": 8,
       "poles": 0,
       "fastestLaps": 1,
@@ -1217,7 +1217,7 @@
       "consecutivePoints": 17,
       "racesLed": 4,
       "hatTricks": 0,
-      "winPct": 0.00847457627118644,
+      "winPct": 0.0,
       "podiumPct": 0.06779661016949153,
       "pointsPerStart": 4.627118644067797,
       "dnfPct": 0.2457627118644068

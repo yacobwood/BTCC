@@ -107,5 +107,25 @@ class TestMainIsolation(unittest.TestCase):
         self.assertEqual(titles_call.kwargs.get("referer"), s.WINS_URL)
 
 
+
+class TestCorrectStaleWins(unittest.TestCase):
+    """2026 finale amendment: btcc.net kept crediting Collard, not Cammish."""
+
+    def test_corrects_while_btcc_net_shows_the_stale_value(self):
+        wins, notes = s.correct_stale_wins({"Ricky Collard": 1, "Dan Cammish": 18, "Tom Ingram": 45})
+        self.assertEqual(wins, {"Ricky Collard": 0, "Dan Cammish": 19, "Tom Ingram": 45})
+        self.assertEqual(len(notes), 2)
+
+    def test_no_op_once_btcc_net_is_fixed(self):
+        wins, notes = s.correct_stale_wins({"Ricky Collard": 0, "Dan Cammish": 19})
+        self.assertEqual(wins, {"Ricky Collard": 0, "Dan Cammish": 19})
+        self.assertEqual(notes, [])
+
+    def test_no_op_if_value_moved_on_in_another_way(self):
+        # e.g. Cammish wins again next season - never knock him back to 19
+        wins, _ = s.correct_stale_wins({"Dan Cammish": 21})
+        self.assertEqual(wins, {"Dan Cammish": 21})
+
+
 if __name__ == "__main__":
     unittest.main()

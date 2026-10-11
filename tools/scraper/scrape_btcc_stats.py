@@ -40,6 +40,34 @@ NAME_ALIASES = {
 }
 
 
+# Official win counts btcc.net hasn't caught up with yet, as
+# {driver: (stale_value_btcc_net_shows, corrected_value)}. Only applied while
+# btcc.net still shows exactly the stale value, so once the site is fixed the
+# entry stops mattering on its own (and can be deleted).
+#
+# 2026 Brands Hatch GP Race 3 (Round 30) was amended after the race: Ricky
+# Collard 5s penalty (breach of safety car restart procedure), P1 -> P8, Dan
+# Cammish inherits the win (TSL "ROUND 30 - CLASSIFICATION - AMENDED"). On
+# 2026-10-11 btcc.net's statistics page still credited Collard (0 -> 1) and
+# not Cammish (18).
+STALE_OFFICIAL_WINS = {
+    "Ricky Collard": (1, 0),
+    "Dan Cammish":   (18, 19),
+}
+
+
+def correct_stale_wins(wins: dict[str, int]) -> tuple[dict[str, int], list[str]]:
+    """Apply STALE_OFFICIAL_WINS to wins parsed from btcc.net (keyed by the
+    canonical name). Returns (wins, notes)."""
+    wins = dict(wins)
+    notes = []
+    for name, (stale, fixed) in STALE_OFFICIAL_WINS.items():
+        key = next((k for k in wins if canonical_name(k) == name), None)
+        if key is not None and wins[key] == stale:
+            wins[key] = fixed
+            notes.append(f"corrected stale btcc.net wins  {name}: {stale} -> {fixed}")
+    return wins, notes
+
 # ── HTML helpers ─────────────────────────────────────────────────────────────
 
 class _TableParser(HTMLParser):
@@ -236,6 +264,10 @@ def main():
     data    = json.loads(RECORDS.read_text())
     drivers = data["drivers"]
     print(f"  Loaded {len(drivers)} drivers from records.json")
+
+    wins, notes = correct_stale_wins(wins)
+    for n in notes:
+        print(" ", n)
 
     drivers, changes = apply_updates(drivers, wins, titles)
 
