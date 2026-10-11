@@ -33,6 +33,7 @@ import {timeAgo} from '../utils/timeAgo';
 import {containsProfanity} from '../utils/profanityFilter';
 import {htmlToSpeechText} from '../utils/htmlToSpeechText';
 import {useArticleReader} from '../utils/useArticleReader';
+import PhotoLightbox from '../components/PhotoLightbox';
 
 import {FIREBASE_API_KEY, FIREBASE_PROJECT_ID, FIRESTORE_BASE, COMMENT_REACT_URL} from '../config/firebase';
 const API_KEY = FIREBASE_API_KEY;
@@ -694,6 +695,12 @@ export default function ArticleScreen({route, navigation}) {
   const [comments, setComments] = useState(null);
   const [commenterName, setCommenterName] = useState(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  // {photos: [{viewUrl}], index} while an inline body image is open
+  // full-screen, null otherwise. lightboxIndexRef tracks the photo the user
+  // has swiped to so the close event reports where they left, not where
+  // they started.
+  const [lightbox, setLightbox] = useState(null);
+  const lightboxIndexRef = useRef(0);
   const myAuthorIdRef = useRef('anonymous');
 
   const loadArticle = useCallback((forceRefresh = false, isInitialLoad = false) => {
@@ -813,6 +820,20 @@ export default function ArticleScreen({route, navigation}) {
         return;
       }
 
+      if (msg.type === 'open_image') {
+        // The WebView renders scraped third-party HTML, so treat the message
+        // as untrusted - only real https image URLs and an in-range index.
+        const urls = Array.isArray(msg.urls)
+          ? msg.urls.filter(u => typeof u === 'string' && u.startsWith('https://'))
+          : [];
+        const index = Number.isInteger(msg.index) && msg.index >= 0 && msg.index < urls.length ? msg.index : 0;
+        if (!urls.length) return;
+        lightboxIndexRef.current = index;
+        setLightbox({photos: urls.map(viewUrl => ({viewUrl})), index});
+        Analytics.articleImageOpened(article?.title, index, urls.length);
+        return;
+      }
+
       // Reactions persistence
       const {type, prev} = msg;
       if (prev !== 'likes' && prev !== 'dislikes' && type !== 'likes' && type !== 'dislikes') return;
@@ -831,7 +852,14 @@ export default function ArticleScreen({route, navigation}) {
         }
       }
     } catch {}
-  }, [articleSlug]);
+  }, [articleSlug, article?.title]);
+
+  const closeLightbox = useCallback(() => {
+    Analytics.articleImageClosed(article?.title, lightboxIndexRef.current);
+    setLightbox(null);
+  }, [article?.title]);
+
+  const onLightboxIndexChange = useCallback((i) => { lightboxIndexRef.current = i; }, []);
 
   const topPadRef = useRef(topPad);
   if (!article) topPadRef.current = topPad;
@@ -1009,6 +1037,14 @@ export default function ArticleScreen({route, navigation}) {
         myAuthorId={myAuthorIdRef.current}
         commenterName={commenterName}
         setCommenterName={setCommenterName}
+      />
+
+      <PhotoLightbox
+        visible={!!lightbox}
+        photos={lightbox?.photos || []}
+        initialIndex={lightbox?.index ?? 0}
+        onClose={closeLightbox}
+        onIndexChange={onLightboxIndexChange}
       />
     </View>
   );
@@ -1239,6 +1275,24 @@ export function buildHtml(article, topPad) {
         _interacted = true;
         window.ReactNativeWebView.postMessage(JSON.stringify({type: toggling ? null : type, prev: prev}));
       }
+
+      // Tap any body image (btcc-gallery thumbnails are only a third of the
+      // screen wide) to open it full-screen in the native PhotoLightbox,
+      // swipeable across every image in the article. An image wrapped in a
+      // link to some other page keeps the link's behaviour - only links
+      // straight to an image file are taken over, since opening those in
+      // the external browser is just a worse version of the lightbox.
+      var _bodyImgs = Array.prototype.filter.call(document.querySelectorAll('.content img'), function(img) {
+        var a = img.closest('a');
+        return !a || /\\.(jpe?g|png|gif|webp)(\\?|$)/i.test(a.getAttribute('href') || '');
+      });
+      var _bodyImgUrls = _bodyImgs.map(function(img) { return img.src; });
+      _bodyImgs.forEach(function(img, i) {
+        img.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.ReactNativeWebView.postMessage(JSON.stringify({type: 'open_image', urls: _bodyImgUrls, index: i}));
+        });
+      });
 
       document.querySelectorAll('table').forEach(function(t) {
         if (t.parentElement.classList.contains('table-wrap')) return;

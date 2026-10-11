@@ -47,6 +47,8 @@ jest.mock('react-native-webview', () => {
         <Text testID="webview-toggle-likes"     onPress={() => fire(null, 'likes')}>toggle-like</Text>
         <Text testID="webview-switch-to-dislike" onPress={() => fire('dislikes', 'likes')}>switch-dislike</Text>
         <Text testID="webview-should-start-load-external" onPress={() => onShouldStartLoadWithRequest && onShouldStartLoadWithRequest({url: 'https://www.example.com/some-article'})}>external</Text>
+        <Text testID="webview-open-image" onPress={() => onMessage && onMessage({nativeEvent: {data: JSON.stringify({type: 'open_image', urls: ['https://example.com/a.jpg', 'https://example.com/b.jpg', 'javascript:alert(1)'], index: 1})}})}>open-image</Text>
+        <Text testID="webview-open-image-bad" onPress={() => onMessage && onMessage({nativeEvent: {data: JSON.stringify({type: 'open_image', urls: ['http://example.com/a.jpg'], index: 0})}})}>open-image-bad</Text>
         <Text testID="webview-should-start-load-btccnet" onPress={() => onShouldStartLoadWithRequest && onShouldStartLoadWithRequest({url: 'https://www.btcc.net/'})}>btccnet</Text>
       </View>
     );
@@ -94,6 +96,24 @@ jest.mock('@mhpdev/react-native-speech', () => ({
   },
 }));
 
+// PhotoLightbox has its own test file - here it only needs to expose what
+// ArticleScreen hands it (photo URLs, start index) and a way to close it.
+jest.mock('../../src/components/PhotoLightbox', () => {
+  const React = require('react');
+  const {View, Text} = require('react-native');
+  return function MockPhotoLightbox({visible, photos, initialIndex, onClose, onIndexChange}) {
+    if (!visible) return null;
+    return (
+      <View testID="photo-lightbox">
+        <Text testID="photo-lightbox-urls">{photos.map(p => p.viewUrl).join(',')}</Text>
+        <Text testID="photo-lightbox-index">{String(initialIndex)}</Text>
+        <Text testID="photo-lightbox-swipe" onPress={() => onIndexChange(0)}>swipe</Text>
+        <Text testID="photo-lightbox-close" onPress={onClose}>close</Text>
+      </View>
+    );
+  };
+});
+
 jest.mock('../../src/utils/analytics', () => ({
   Analytics: {
     screen: jest.fn(),
@@ -106,6 +126,8 @@ jest.mock('../../src/utils/analytics', () => ({
     articleListenStopped: jest.fn(),
     articleListenFailed: jest.fn(),
     articleExternalLinkClicked: jest.fn(),
+    articleImageOpened: jest.fn(),
+    articleImageClosed: jest.fn(),
   },
 }));
 
@@ -517,6 +539,41 @@ describe('ArticleScreen', () => {
       fireEvent.press(getByTestId('webview-should-start-load-btccnet'));
 
       expect(Analytics.articleExternalLinkClicked).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('article body image taps', () => {
+    it('opens the lightbox at the tapped image with only the https image URLs', async () => {
+      const {getByTestId} = renderArticle({article: FULL_ARTICLE});
+
+      await waitFor(() => expect(getByTestId('webview')).toBeTruthy());
+      fireEvent.press(getByTestId('webview-open-image'));
+
+      expect(getByTestId('photo-lightbox-urls').props.children).toBe('https://example.com/a.jpg,https://example.com/b.jpg');
+      expect(getByTestId('photo-lightbox-index').props.children).toBe('1');
+      expect(Analytics.articleImageOpened).toHaveBeenCalledWith(FULL_ARTICLE.title, 1, 2);
+    });
+
+    it('ignores an open_image message with no usable https URL', async () => {
+      const {getByTestId, queryByTestId} = renderArticle({article: FULL_ARTICLE});
+
+      await waitFor(() => expect(getByTestId('webview')).toBeTruthy());
+      fireEvent.press(getByTestId('webview-open-image-bad'));
+
+      expect(queryByTestId('photo-lightbox')).toBeNull();
+      expect(Analytics.articleImageOpened).not.toHaveBeenCalled();
+    });
+
+    it('closes the lightbox and reports the photo the user swiped to', async () => {
+      const {getByTestId, queryByTestId} = renderArticle({article: FULL_ARTICLE});
+
+      await waitFor(() => expect(getByTestId('webview')).toBeTruthy());
+      fireEvent.press(getByTestId('webview-open-image'));
+      fireEvent.press(getByTestId('photo-lightbox-swipe'));
+      fireEvent.press(getByTestId('photo-lightbox-close'));
+
+      expect(queryByTestId('photo-lightbox')).toBeNull();
+      expect(Analytics.articleImageClosed).toHaveBeenCalledWith(FULL_ARTICLE.title, 0);
     });
   });
 
@@ -1512,5 +1569,33 @@ describe('CommentsSheet', () => {
     await waitFor(() => {
       expect(getByText('edited')).toBeTruthy();
     });
+  });
+});
+
+// ─── buildHtml: tap-to-enlarge body images ─────────────────────────────────
+
+describe('buildHtml body image tap handler', () => {
+  const BASE = {title: 'T', content: '<p><img src="https://example.com/x.jpg"></p>'};
+
+  it('wires body images to post an open_image message', () => {
+    const html = buildHtml(BASE, 0);
+    expect(html).toContain("querySelectorAll('.content img')");
+    expect(html).toContain("type: 'open_image'");
+  });
+
+  it('emits page scripts that are valid JavaScript (escaping survives the template literal)', () => {
+    const html = buildHtml(BASE, 0);
+    const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+    expect(scripts.length).toBeGreaterThan(0);
+    // eslint-disable-next-line no-new-func
+    scripts.forEach(src => expect(() => new Function(src)).not.toThrow());
+  });
+
+  it('only takes over links that point straight at an image file', () => {
+    const html = buildHtml(BASE, 0);
+    const re = new RegExp(html.match(/return !a \|\| \/(.+)\/i\.test/)[1], 'i');
+    expect(re.test('https://example.com/photo.JPG')).toBe(true);
+    expect(re.test('https://example.com/photo.webp?w=800')).toBe(true);
+    expect(re.test('https://example.com/some-article/')).toBe(false);
   });
 });
