@@ -2249,6 +2249,27 @@ def _build_results_output(year, output_rounds, per_race, scored_sessions, points
 PODIUM_SESSIONS = {"Race 1", "Race 2", "Race 3"}
 
 
+def apply_win_podium_tallies(standings, rounds):
+    """Overwrite the Drivers' table Wins/2nds/3rds with tallies counted from
+    the race results (see the call site for why the PDF's columns aren't used).
+
+    Only the outright Drivers' table. The Independents' and Jack Sears Trophy
+    tables are class championships - their Wins/2nds/3rds count class
+    positions (best-placed independent / JST driver in a race), which
+    compute_win_podium_tallies doesn't compute. The JST table used to be
+    included: it only stayed right while no JST driver had an outright
+    podium (no tally entry, so the PDF value survived). The 2026 Brands Hatch
+    GP Race 3 amendment gave Dexter Patterson an outright 3rd and his 16 JST
+    wins were overwritten with 0. The PDF's own class columns are trusted
+    as-is for both class tables.
+    """
+    tallies = compute_win_podium_tallies(rounds)
+    for row in standings.get("standings", []):
+        t = tallies.get(row["driver"])
+        if t:
+            row["wins"], row["seconds"], row["thirds"] = t["wins"], t["seconds"], t["thirds"]
+
+
 def compute_win_podium_tallies(rounds):
     """Return {driver: {wins, seconds, thirds}} counted from Race 1/2/3 only."""
     from collections import defaultdict
@@ -2671,16 +2692,7 @@ def main():
     # drift out of alignment (see project memory: results/standings mismatch,
     # fixed 2026-07-14). Race-result-derived tallies are the trustworthy source.
     #
-    # NOTE: "independents" is deliberately excluded here. compute_win_podium_tallies
-    # counts outright (whole-grid) finishing positions, but the Independents Trophy's
-    # Wins/2nds/3rds are a class tally (best-placed independent in a race) - a
-    # different metric the app doesn't otherwise compute. The PDF's own columns for
-    # this section are trusted as-is; revisit if they're ever seen to drift too.
-    driver_tallies = compute_win_podium_tallies(output_rounds)
-    for row in standings.get("standings", []) + standings.get("jst", []):
-        t = driver_tallies.get(row["driver"])
-        if t:
-            row["wins"], row["seconds"], row["thirds"] = t["wins"], t["seconds"], t["thirds"]
+    apply_win_podium_tallies(standings, output_rounds)
 
     # Strip internal working fields that aren't JSON-serializable (tuple keys/sets)
     standings.pop("per_race_points", None)

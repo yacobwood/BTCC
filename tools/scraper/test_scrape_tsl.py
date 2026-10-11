@@ -1817,6 +1817,45 @@ class TestQualifyingRaceLapChart(unittest.TestCase):
         self.assertEqual(result["Race 1"][0]["order"][0]["no"], 33)
 
 
+
+class ApplyWinPodiumTalliesTest(unittest.TestCase):
+    """Class tables keep the championship PDF's class tallies (2026 Brands Hatch
+    GP Race 3: Patterson's outright 3rd wiped his 16 JST wins)."""
+
+    def _rounds(self):
+        race = lambda label, order: {"label": label, "results": [
+            {"pos": i + 1, "driver": d} for i, d in enumerate(order)]}
+        return [{"round": 10, "races": [
+            race("Qualifying Race", ["Dexter PATTERSON", "Dan CAMMISH", "Ashley SUTTON"]),
+            race("Race 3", ["Dan CAMMISH", "Ashley SUTTON", "Dexter PATTERSON"]),
+        ]}]
+
+    def _standings(self):
+        row = lambda d, w, s2, t: {"driver": d, "wins": w, "seconds": s2, "thirds": t}
+        return {
+            "standings": [row("Dan CAMMISH", 9, 9, 9), row("Dexter PATTERSON", 9, 9, 9)],
+            "jst": [row("Dexter PATTERSON", 16, 7, 2)],
+            "independents": [row("Dexter PATTERSON", 4, 4, 4)],
+        }
+
+    def test_drivers_table_uses_outright_race_1_to_3_tallies(self):
+        st = self._standings()
+        s.apply_win_podium_tallies(st, self._rounds())
+        self.assertEqual(st["standings"][0], {"driver": "Dan CAMMISH", "wins": 1, "seconds": 0, "thirds": 0})
+        # Qualifying Race win doesn't count
+        self.assertEqual(st["standings"][1], {"driver": "Dexter PATTERSON", "wins": 0, "seconds": 0, "thirds": 1})
+
+    def test_jst_keeps_pdf_class_tallies_even_with_an_outright_podium(self):
+        st = self._standings()
+        s.apply_win_podium_tallies(st, self._rounds())
+        self.assertEqual(st["jst"][0], {"driver": "Dexter PATTERSON", "wins": 16, "seconds": 7, "thirds": 2})
+
+    def test_independents_untouched(self):
+        st = self._standings()
+        s.apply_win_podium_tallies(st, self._rounds())
+        self.assertEqual(st["independents"][0], {"driver": "Dexter PATTERSON", "wins": 4, "seconds": 4, "thirds": 4})
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

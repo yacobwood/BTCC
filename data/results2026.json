@@ -159939,7 +159939,8 @@
               "time": "22:54.701",
               "gap": "5.876",
               "bestLap": "1:30.375",
-              "points": 14
+              "points": 14,
+              "pole": true
             },
             {
               "pos": 5,
@@ -167529,19 +167530,6 @@
           "results": [
             {
               "pos": 1,
-              "no": 11,
-              "cl": "M",
-              "driver": "Ricky COLLARD",
-              "team": "Team VERTU",
-              "car": "Hyundai i30N",
-              "laps": 18,
-              "time": "32:28.497",
-              "gap": "",
-              "bestLap": "1:30.444",
-              "points": 21
-            },
-            {
-              "pos": 2,
               "no": 27,
               "cl": "M",
               "driver": "Dan CAMMISH",
@@ -167549,12 +167537,12 @@
               "car": "Ford Focus Titanium",
               "laps": 18,
               "time": "32:29.523",
-              "gap": "1.026",
+              "gap": "",
               "bestLap": "1:30.762",
-              "points": 17
+              "points": 20
             },
             {
-              "pos": 3,
+              "pos": 2,
               "no": 5,
               "cl": "M",
               "driver": "Ashley SUTTON",
@@ -167562,13 +167550,13 @@
               "car": "Ford Focus Titanium",
               "laps": 18,
               "time": "32:29.654",
-              "gap": "1.157",
+              "gap": "0.131",
               "bestLap": "1:29.650",
-              "points": 16,
+              "points": 18,
               "fastestLap": true
             },
             {
-              "pos": 4,
+              "pos": 3,
               "no": 17,
               "cl": "I",
               "driver": "Dexter PATTERSON",
@@ -167576,12 +167564,12 @@
               "car": "Audi A3 Saloon",
               "laps": 18,
               "time": "32:29.998",
-              "gap": "1.501",
+              "gap": "0.475",
               "bestLap": "1:30.560",
-              "points": 13
+              "points": 15
             },
             {
-              "pos": 5,
+              "pos": 4,
               "no": 16,
               "cl": "I",
               "driver": "Aiden MOFFAT",
@@ -167589,12 +167577,12 @@
               "car": "Audi A3 Saloon",
               "laps": 18,
               "time": "32:31.025",
-              "gap": "2.528",
+              "gap": "1.502",
               "bestLap": "1:30.642",
-              "points": 11
+              "points": 13
             },
             {
-              "pos": 6,
+              "pos": 5,
               "no": 33,
               "cl": "M",
               "driver": "Adam MORGAN",
@@ -167602,12 +167590,12 @@
               "car": "Mercedes A35 Saloon",
               "laps": 18,
               "time": "32:31.291",
-              "gap": "2.794",
+              "gap": "1.768",
               "bestLap": "1:30.396",
-              "points": 10
+              "points": 11
             },
             {
-              "pos": 7,
+              "pos": 6,
               "no": 66,
               "cl": "M",
               "driver": "Josh COOK",
@@ -167615,12 +167603,12 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
               "time": "32:31.619",
-              "gap": "3.122",
+              "gap": "2.096",
               "bestLap": "1:30.279",
-              "points": 9
+              "points": 10
             },
             {
-              "pos": 8,
+              "pos": 7,
               "no": 123,
               "cl": "I",
               "driver": "Daniel LLOYD",
@@ -167628,9 +167616,22 @@
               "car": "Hyundai i30N",
               "laps": 18,
               "time": "32:33.002",
-              "gap": "4.505",
+              "gap": "3.479",
               "bestLap": "1:30.713",
-              "points": 8
+              "points": 9
+            },
+            {
+              "pos": 8,
+              "no": 11,
+              "cl": "M",
+              "driver": "Ricky COLLARD",
+              "team": "Team VERTU",
+              "car": "Hyundai i30N",
+              "laps": 18,
+              "time": "32:33.497",
+              "gap": "3.974",
+              "bestLap": "1:30.444",
+              "points": 9
             },
             {
               "pos": 9,
@@ -167641,7 +167642,7 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
               "time": "32:34.503",
-              "gap": "6.006",
+              "gap": "4.980",
               "bestLap": "1:30.907",
               "points": 7
             },
@@ -167654,7 +167655,7 @@
               "car": "Audi A3 Saloon",
               "laps": 18,
               "time": "32:34.656",
-              "gap": "6.159",
+              "gap": "5.133",
               "bestLap": "1:31.142",
               "points": 6
             },
@@ -167667,7 +167668,7 @@
               "car": "BMW 330i M Sport",
               "laps": 18,
               "time": "32:36.434",
-              "gap": "7.937",
+              "gap": "6.911",
               "bestLap": "1:30.533",
               "points": 5
             },
@@ -167680,25 +167681,12 @@
               "car": "Hyundai i30N",
               "laps": 18,
               "time": "32:37.488",
-              "gap": "8.991",
+              "gap": "7.965",
               "bestLap": "1:31.358",
               "points": 4
             },
             {
               "pos": 13,
-              "no": 2,
-              "cl": "I",
-              "driver": "Daryl DE LEON",
-              "team": "WSR",
-              "car": "BMW 330i M Sport",
-              "laps": 18,
-              "time": "32:37.717",
-              "gap": "9.220",
-              "bestLap": "1:31.160",
-              "points": 3
-            },
-            {
-              "pos": 14,
               "no": 77,
               "cl": "M",
               "driver": "Sam OSBORNE",
@@ -167706,12 +167694,12 @@
               "car": "Ford Focus Titanium",
               "laps": 18,
               "time": "32:39.077",
-              "gap": "10.580",
+              "gap": "9.554",
               "bestLap": "1:31.796",
-              "points": 2
+              "points": 3
             },
             {
-              "pos": 15,
+              "pos": 14,
               "no": 7,
               "cl": "M",
               "driver": "Ryan BENSLEY",
@@ -167719,12 +167707,12 @@
               "car": "Toyota Corolla GR Sport",
               "laps": 18,
               "time": "32:39.261",
-              "gap": "10.764",
+              "gap": "9.738",
               "bestLap": "1:31.519",
-              "points": 1
+              "points": 2
             },
             {
-              "pos": 16,
+              "pos": 15,
               "no": 29,
               "cl": "I",
               "driver": "Lewis GILBERT",
@@ -167732,12 +167720,12 @@
               "car": "BMW 330i M Sport",
               "laps": 18,
               "time": "32:39.990",
-              "gap": "11.493",
+              "gap": "10.467",
               "bestLap": "1:31.714",
-              "points": 0
+              "points": 1
             },
             {
-              "pos": 17,
+              "pos": 16,
               "no": 28,
               "cl": "M",
               "driver": "Nicolas HAMILTON",
@@ -167745,8 +167733,21 @@
               "car": "Hyundai i30N",
               "laps": 18,
               "time": "32:41.224",
-              "gap": "12.727",
+              "gap": "11.701",
               "bestLap": "1:31.980",
+              "points": 0
+            },
+            {
+              "pos": 17,
+              "no": 2,
+              "cl": "I",
+              "driver": "Daryl DE LEON",
+              "team": "WSR",
+              "car": "BMW 330i M Sport",
+              "laps": 18,
+              "time": "32:42.717",
+              "gap": "13.194",
+              "bestLap": "1:31.160",
               "points": 0
             },
             {
