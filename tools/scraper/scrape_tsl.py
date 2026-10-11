@@ -28,6 +28,9 @@ except ImportError:
     print("ERROR: pdfminer.six is required. Run: pip install pdfminer.six", file=sys.stderr)
     sys.exit(1)
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import book_tables  # noqa: E402  (positional parsers: tyres, top speeds, statistics, sector analysis)
+
 YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 2026
 ROUND_FILTER    = None
 SESSION_FILTER  = None  # None = all sessions; set of labels = only those
@@ -160,7 +163,10 @@ def _session_heading_patterns(report_name):
         ("Free Practice",     re.compile(rf"{_TITLE}FREE PRACTICE SESSION{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
         ("Qualifying Part 1", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 1{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
         ("Qualifying Part 2", re.compile(rf"{_TITLE}QUALIFYING{_DASH}PART 2{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
-        ("Qualifying Race",   re.compile(rf"{_TITLE}QUALIFYING RACE{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
+        # "QUALIFYING -RACE" (stray dash) is confirmed live on every Qualifying
+        # Race page of the 2026 Donington GP book - it silently dropped that
+        # session's best speeds, best sectors, weather and flag stats.
+        ("Qualifying Race",   re.compile(rf"{_TITLE}QUALIFYING(?:\s+|{_DASH})RACE{_ROUND_OPT}{_DASH}{report_name}", re.IGNORECASE)),
     ]
 
 
@@ -1189,11 +1195,13 @@ def _resolve_best_sectors(entries, number_map):
 
 # ── Lap Chart from book PDF ───────────────────────────────────────────────────
 
-# Confirmed live: only Race 1/2/3 ever print a Lap Chart page - Free
-# Practice/Qualifying/Qualifying Race are about one flying lap each, not a
-# race-long running order, so _session_heading_patterns' FP/Qualifying Part
-# 1/2/Qualifying Race headings never match "LAP CHART" at all.
+# Free Practice/Qualifying never print a Lap Chart (one flying lap each, no
+# running order). Race 1/2/3 do, and so does the Qualifying Race - an
+# earlier note here said it didn't, but every 2026 book has one
+# ("QUALIFYING RACE - ROUND 28 - LAP CHART", 2 pages at Brands Hatch GP);
+# it had just never been searched for.
 RACE_LAP_CHART_RE = _race_heading_pattern("LAP CHART")
+QR_LAP_CHART_RE = dict(_session_heading_patterns("LAP CHART"))["Qualifying Race"]
 
 _LAP_HEADER_RE = re.compile(r"^LAP\s+(\d+)$", re.IGNORECASE)
 _LAP_TIMESTAMP_RE = re.compile(r"^@\s*([\d:.]+)$")
@@ -1362,7 +1370,7 @@ def parse_lap_chart(text):
     """
     Extract each race's full Lap Chart (running order, gap-to-car-ahead and
     lap time for every lap) from the book PDF's plain text. Returns
-    {label: [...]} for Race 1/2/3 only.
+    {label: [...]} for the Qualifying Race and Race 1/2/3.
 
     Unlike every other book-PDF report parsed here, a single race's own Lap
     Chart spans MULTIPLE physical pages (confirmed live: up to 5 laps per
@@ -1378,12 +1386,20 @@ def parse_lap_chart(text):
     finditer() matches rather than reading the digit's value.
     """
     race_pages = {}
+    qr_pages = []
     for page in text.split("\x0c"):
+        m = QR_LAP_CHART_RE.search(page)
+        if m:
+            qr_pages.append(page[m.end():])
+            continue
         m = RACE_LAP_CHART_RE.search(page)
         if m:
             race_pages.setdefault(m.group(1), []).append(page[m.end():])
 
     result = {}
+    qr_laps = [lap for page in qr_pages for lap in _parse_lap_chart_page(page)]
+    if qr_laps:
+        result["Qualifying Race"] = qr_laps
     for label, pages in zip(["Race 1", "Race 2", "Race 3"], race_pages.values()):
         laps = []
         for page in pages:
@@ -1455,6 +1471,109 @@ def _resolve_best_speeds(block, number_map):
         "intermediate2": resolve(block.get("intermediate2")),
         "finish":        resolve(block.get("finish")),
     }
+
+
+def _resolve_numbered(entries, number_map, tag):
+    """Attach driver + team to any list of {"no": ...} book entries - the
+    same car-number join as _resolve_best_speeds, for the book_tables.py
+    reports. Warns once per unknown car."""
+    warned = set()
+    out = []
+    for e in entries or []:
+        driver, team = number_map.get(e["no"], ("", ""))
+        if not driver:
+            driver = f"Car {e['no']}"
+            if e["no"] not in warned:
+                warned.add(e["no"])
+                print(f"    [{tag}] car {e['no']} not in session results/grid - using placeholder name")
+        out.append({**e, "driver": driver, "team": team})
+    return out
+
+
+def round_number_map(races):
+    """car number -> (driver, team) across every session of the round, for
+    a car the book lists in a session it has no classification row for -
+    confirmed live: 2026 Donington GP Race 1's tyre sheet lists car 77,
+    which never started that race."""
+    m = {}
+    for race in races:
+        for no, entry in _number_driver_map(race).items():
+            m.setdefault(no, entry)
+    return m
+
+
+def _apply_book_tables(race, tables, fallback_map=None):
+    """Copies one session's book_tables.parse_book_tables() output onto the
+    race dict, parked on "_analysis" for main() to write to its own file
+    (write_session_analysis). None of it goes into results{year}.json
+    itself: that file is fetched whole by every app user on every results
+    view and is already ~4MB, while these reports are only needed when
+    someone opens their tab - a 2026 backfill inlining just the small
+    tables (tyres, top speeds, stats) grew it 21%. results{year}.json only
+    gets "analysis": the list of report keys the file holds, so the app
+    knows which tabs to offer without fetching blind."""
+    label = race["label"]
+    number_map = {**(fallback_map or {}), **_number_driver_map(race)}
+    analysis = {}
+    if tables.get("tyres"):
+        analysis["tyres"] = _resolve_numbered(tables["tyres"], number_map, "tyres")
+        print(f"    [tyres] {label}: {len(analysis['tyres'])} drivers")
+    if tables.get("topSpeeds"):
+        analysis["topSpeeds"] = _resolve_numbered(tables["topSpeeds"], number_map, "top speeds")
+        analysis["topSpeedsTrap"] = tables.get("topSpeedsTrap") or "Intermediate 2"
+        print(f"    [top speeds] {label}: {len(analysis['topSpeeds'])} drivers")
+    if tables.get("sessionStats"):
+        stats = dict(tables["sessionStats"])
+        stats["fastestLapHistory"] = _resolve_numbered(stats.get("fastestLapHistory"), number_map, "stats")
+        stats["classes"] = {
+            cl: {**info, "fastestLap": (_resolve_numbered([info["fastestLap"]], number_map, "stats")[0]
+                                        if info.get("fastestLap") else None)}
+            for cl, info in (stats.get("classes") or {}).items()
+        }
+        analysis["sessionStats"] = stats
+        print(f"    [session stats] {label}: parsed")
+    if tables.get("laps"):
+        analysis["laps"] = _resolve_numbered(tables["laps"], number_map, "lap analysis")
+        print(f"    [lap analysis] {label}: {len(analysis['laps'])} drivers, "
+              f"{sum(len(d['laps']) for d in analysis['laps'])} laps")
+    if analysis:
+        race["_analysis"] = analysis
+        race["analysis"] = [k for k in ANALYSIS_KEYS if k in analysis]
+
+
+# Report keys a session analysis file can hold, in the order the app lists them.
+ANALYSIS_KEYS = ("laps", "tyres", "topSpeeds", "sessionStats")
+ANALYSIS_DIR = DATA_DIR / "analysis"
+
+
+def session_slug(label):
+    """"Qualifying Race" -> "qualifying-race" (analysis file name)."""
+    return re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")
+
+
+def write_session_analysis(year, rnd):
+    """Pops every race's "_analysis" and writes it to
+    data/analysis/{year}/round{N}/{session-slug}.json. Lap-analysis drivers
+    are ordered by classification (unclassified/absent after, by car
+    number). Written compact - the app only ever parses it, and the per-lap
+    data is the bulk of it. A session with no fresh "_analysis" leaves any
+    existing file untouched (a transient book-fetch failure mustn't delete
+    earlier data). Returns the paths written."""
+    written = []
+    for race in rnd.get("races", []):
+        analysis = race.pop("_analysis", None)
+        if not analysis:
+            continue
+        if analysis.get("laps"):
+            order = {r["no"]: r.get("pos") or 999 for r in race.get("results") or [] if r.get("no")}
+            analysis["laps"] = sorted(analysis["laps"], key=lambda d: (order.get(d["no"], 999), d["no"]))
+        payload = {"year": year, "round": rnd["round"], "venue": rnd.get("venue", ""),
+                   "session": race["label"], **analysis}
+        path = ANALYSIS_DIR / str(year) / f"round{rnd['round']}" / f"{session_slug(race['label'])}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        written.append(path)
+    return written
 
 
 # ── Round scraper ─────────────────────────────────────────────────────────────
@@ -1546,6 +1665,17 @@ def scrape_round(info, session_filter=None):
         if raw:
             race["lapChart"] = _resolve_lap_chart(raw, _number_driver_map(race))
             print(f"    [lap chart] {race['label']}: parsed {len(raw)} laps")
+
+    # Guarded: these reports are extras, and an unforeseen page layout must
+    # never cost a live scrape its results/grids/standings.
+    try:
+        tables = book_tables.parse_book_tables(book_tables.book_pages(book_data)) if book_data else {}
+    except Exception as e:  # noqa: BLE001
+        print(f"    [analysis] book tables failed ({type(e).__name__}: {e}) - skipped this run")
+        tables = {}
+    fallback_map = round_number_map(races)
+    for race in races:
+        _apply_book_tables(race, tables.get(race["label"]) or {}, fallback_map)
 
     # Tag pole (P1 in Qualifying only)
     qual = next((r for r in races if r["label"] == "Qualifying"), None)
@@ -2344,6 +2474,18 @@ def _fill_placeholder_names(race):
     for lap in race.get("lapChart") or []:
         for e in lap.get("order") or []:
             fill(e)
+    analysis = race.get("_analysis") or {}
+    stats = analysis.get("sessionStats") or {}
+    for e in (analysis.get("tyres") or []) + (analysis.get("topSpeeds") or []) + (analysis.get("laps") or []):
+        fill(e)
+    for e in stats.get("fastestLapHistory") or []:
+        fill(e)
+    for info in (stats.get("classes") or {}).values():
+        if info.get("fastestLap"):
+            fill(info["fastestLap"])
+
+
+BOOK_FIELDS = ("bestSpeeds", "weather", "flagStats", "bestSectors", "lapChart", "analysis")
 
 
 def merge_scraped_with_existing(scraped, existing_round):
@@ -2354,9 +2496,10 @@ def merge_scraped_with_existing(scraped, existing_round):
       If the car-number order changed, a warning is printed.
     - Old grid is kept when the new fetch returned empty (transient failure).
     - New results overwrite old results when present; old results kept otherwise.
-    - New bestSpeeds/weather/flagStats/bestSectors/lapChart each overwrite their own old
-      value when present; old value kept otherwise (a transient book-fetch failure
-      doesn't wipe previously-scraped data).
+    - New bestSpeeds/weather/flagStats/bestSectors/lapChart/analysis each
+      overwrite their own old value when present;
+      old value kept otherwise (a transient book-fetch failure doesn't wipe
+      previously-scraped data).
     - "Car N" placeholder names in book data are filled from the (possibly
       carried-forward) results - see _fill_placeholder_names.
     - reverseGridDraw is preserved from the existing round when not set on the new scrape.
@@ -2377,7 +2520,7 @@ def merge_scraped_with_existing(scraped, existing_round):
                 print(f"  *** {race['label']} grid CHANGED (TSL amendment?) old={old_nos[:3]}... new={new_nos[:3]}...")
         if ex.get("results") and not race.get("results"):
             race["results"] = ex["results"]
-        for field in ("bestSpeeds", "weather", "flagStats", "bestSectors", "lapChart"):
+        for field in BOOK_FIELDS:
             if ex.get(field) and not race.get(field):
                 race[field] = ex[field]
         _fill_placeholder_names(race)
@@ -2438,6 +2581,10 @@ def main():
                 merge_scraped_with_existing(scraped, existing_rounds[info["round"]])
             else:
                 scraped["youtubeUrls"] = [None] * 6
+            # After the merge, so "Car N" placeholders in a --session scrape's
+            # other sessions are already filled from carried-forward results.
+            for path in write_session_analysis(YEAR, scraped):
+                print(f"  [analysis] wrote {path.relative_to(REPO_ROOT)}")
             output_rounds.append(scraped)
         elif info["round"] in existing_rounds:
             output_rounds.append(existing_rounds[info["round"]])

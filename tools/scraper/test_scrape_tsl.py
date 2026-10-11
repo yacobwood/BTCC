@@ -1662,6 +1662,161 @@ class TestResolveLapChart(unittest.TestCase):
         self.assertEqual(len(warn_calls), 1)
 
 
+
+# ── Session analysis (book_tables.py integration) ─────────────────────────────
+
+class TestApplyBookTables(unittest.TestCase):
+
+    def _race(self, label='Race 1'):
+        return make_race(label, [make_result('Tom INGRAM', 1, team='Team VERTU', no=80),
+                                 make_result('Josh COOK', 2, team='Speedworks', no=66)])
+
+    def test_resolves_names_and_parks_everything_off_results(self):
+        race = self._race()
+        tables = {
+            'tyres': [{'no': 80, 'compounds': ['Medium', 'Soft']}],
+            'topSpeeds': [{'pos': 1, 'no': 66, 'speeds': [140.0], 'avg': 140.0, 'best': 140.0}],
+            'topSpeedsTrap': 'Intermediate 2',
+            'sessionStats': {'competitors': 2, 'fastestLapHistory': [{'no': 80, 'time': '1:29.958', 'secs': 89.958}],
+                             'classes': {'M': {'starters': 2, 'fastestLap': {'no': 66, 'secs': 90.0}}}},
+            'laps': [{'no': 66, 'ideal': 90.0, 'best': 90.1, 'laps': [{'lap': 1, 't': 95.0}]}],
+        }
+        s._apply_book_tables(race, tables)
+        self.assertEqual(race['analysis'], ['laps', 'tyres', 'topSpeeds', 'sessionStats'])
+        a = race['_analysis']
+        self.assertEqual(a['tyres'][0]['driver'], 'Tom INGRAM')
+        self.assertEqual(a['topSpeeds'][0]['team'], 'Speedworks')
+        self.assertEqual(a['topSpeedsTrap'], 'Intermediate 2')
+        self.assertEqual(a['sessionStats']['fastestLapHistory'][0]['driver'], 'Tom INGRAM')
+        self.assertEqual(a['sessionStats']['classes']['M']['fastestLap']['driver'], 'Josh COOK')
+        self.assertEqual(a['laps'][0]['driver'], 'Josh COOK')
+        for field in ('tyres', 'topSpeeds', 'sessionStats', 'laps'):
+            self.assertNotIn(field, race)  # never inlined into results{year}.json
+
+    def test_no_tables_leaves_race_untouched(self):
+        race = self._race()
+        s._apply_book_tables(race, {})
+        self.assertNotIn('analysis', race)
+        self.assertNotIn('_analysis', race)
+
+    def test_round_fallback_names_a_non_starter(self):
+        # 2026 Donington GP Race 1: the tyre sheet lists car 77, which has no
+        # Race 1 classification row - its name comes from another session.
+        fp = make_race('Free Practice', [make_result('Sam OSBORNE', 5, team='NAPA', no=77)])
+        race = self._race()
+        s._apply_book_tables(race, {'tyres': [{'no': 77, 'compounds': ['Medium']}]},
+                             s.round_number_map([fp, race]))
+        self.assertEqual(race['_analysis']['tyres'][0]['driver'], 'Sam OSBORNE')
+
+    def test_round_number_map_prefers_first_session_seen(self):
+        a = make_race('Free Practice', [make_result('A', 1, team='T1', no=5)])
+        b = make_race('Race 1', [make_result('B', 1, team='T2', no=5)])
+        self.assertEqual(s.round_number_map([a, b])[5], ('A', 'T1'))
+
+
+
+class TestBookTablesFailSafe(unittest.TestCase):
+
+    def test_book_tables_crash_does_not_fail_the_scrape(self):
+        # These reports are extras - a parser crash on an unforeseen layout
+        # must still let the round's results through.
+        info = {'round': 1, 'venue': 'Test', 'date': '01 Jan', 'tsl': '000000'}
+        with mock.patch.object(s, 'fetch_pdf', return_value=b'%PDF'), \
+             mock.patch.object(s, 'parse_classification', return_value=[make_result('A', 1, no=1)]), \
+             mock.patch.object(s, 'parse_grid', return_value=[]), \
+             mock.patch.object(s, '_pdf_text', return_value=''), \
+             mock.patch.object(s.book_tables, 'book_pages', side_effect=RuntimeError('boom')):
+            rnd = s.scrape_round(info)
+        self.assertIsNotNone(rnd)
+        self.assertTrue(all(r['results'] for r in rnd['races']))
+        self.assertFalse(any('analysis' in r for r in rnd['races']))
+
+class TestWriteSessionAnalysis(unittest.TestCase):
+
+    def test_writes_compact_file_per_session_ordered_by_classification(self):
+        race = make_race('Qualifying Race', [make_result('Tom INGRAM', 2, no=80), make_result('Aiden MOFFAT', 1, no=16)])
+        race['_analysis'] = {'laps': [{'no': 80, 'laps': []}, {'no': 99, 'laps': []}, {'no': 16, 'laps': []}],
+                             'tyres': [{'no': 16, 'compounds': ['Medium']}]}
+        rnd = {'round': 10, 'venue': 'Brands Hatch GP', 'races': [race, make_race('Race 1', [])]}
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(s, 'ANALYSIS_DIR', Path(tmp)):
+            written = s.write_session_analysis(2026, rnd)
+            self.assertEqual([p.relative_to(tmp).as_posix() for p in written], ['2026/round10/qualifying-race.json'])
+            text = written[0].read_text()
+            self.assertNotIn('\n', text)  # compact
+            payload = json.loads(text)
+        self.assertEqual(payload['session'], 'Qualifying Race')
+        self.assertEqual(payload['round'], 10)
+        self.assertEqual([d['no'] for d in payload['laps']], [16, 80, 99])
+        self.assertEqual(payload['tyres'][0]['no'], 16)
+        self.assertNotIn('_analysis', race)  # popped, never serialized into results
+
+    def test_session_slug(self):
+        self.assertEqual(s.session_slug('Free Practice'), 'free-practice')
+        self.assertEqual(s.session_slug('Race 3'), 'race-3')
+
+
+class TestAnalysisMerge(unittest.TestCase):
+
+    def _r3(self, scraped):
+        return next(r for r in scraped['races'] if r['label'] == 'Race 3')
+
+    def test_analysis_flag_carried_forward_when_book_fetch_fails(self):
+        scraped = make_scraped_round()
+        existing = make_existing_round()
+        self._r3(existing)['analysis'] = ['laps', 'tyres']
+        s.merge_scraped_with_existing(scraped, existing)
+        self.assertEqual(self._r3(scraped)['analysis'], ['laps', 'tyres'])
+
+    def test_placeholders_in_pending_analysis_filled_from_carried_results(self):
+        scraped = make_scraped_round()
+        self._r3(scraped)['_analysis'] = {
+            'tyres': [{'no': 88, 'driver': 'Car 88', 'team': '', 'compounds': ['Soft']}],
+            'laps': [{'no': 88, 'driver': 'Car 88', 'team': '', 'laps': []}],
+            'sessionStats': {'fastestLapHistory': [{'no': 88, 'driver': 'Car 88', 'team': ''}],
+                             'classes': {'IND': {'fastestLap': {'no': 88, 'driver': 'Car 88', 'team': ''}}}},
+        }
+        existing = make_existing_round(r3_results=[make_result('Ryan BENSLEY', 1, team='Team A', no=88)])
+        s.merge_scraped_with_existing(scraped, existing)
+        a = self._r3(scraped)['_analysis']
+        self.assertEqual(a['tyres'][0]['driver'], 'Ryan BENSLEY')
+        self.assertEqual(a['laps'][0]['driver'], 'Ryan BENSLEY')
+        self.assertEqual(a['sessionStats']['fastestLapHistory'][0]['driver'], 'Ryan BENSLEY')
+        self.assertEqual(a['sessionStats']['classes']['IND']['fastestLap']['team'], 'Team A')
+
+
+class TestQualifyingRaceHeadingTypo(unittest.TestCase):
+
+    def test_dash_before_race_still_matches(self):
+        # "QUALIFYING -RACE": every Qualifying Race page of the 2026 Donington GP book
+        pattern = dict(s.BEST_SPEEDS_HEADINGS)['Qualifying Race']
+        text = "2026 Kwik Fit British Touring Car Championship\n\nQUALIFYING -RACE - ROUND 19 - BEST SPEEDS"
+        self.assertIsNotNone(pattern.search(text))
+        text = "2026 Kwik Fit British Touring Car Championship\n\nQUALIFYING RACE - ROUND 19 - BEST SPEEDS"
+        self.assertIsNotNone(pattern.search(text))
+
+    def test_part_headings_not_swallowed(self):
+        pattern = dict(s.BEST_SPEEDS_HEADINGS)['Qualifying Race']
+        text = "2026 Kwik Fit British Touring Car Championship\n\nQUALIFYING - PART 1 - BEST SPEEDS"
+        self.assertIsNone(pattern.search(text))
+
+
+class TestQualifyingRaceLapChart(unittest.TestCase):
+
+    TITLE = "2026 Kwik Fit British Touring Car Championship"
+
+    def test_qualifying_race_lap_chart_parsed_separately_from_races(self):
+        qr = f"{self.TITLE}\n\nQUALIFYING RACE - ROUND 28 - LAP CHART\n\n" + make_lap_chart_page(
+            [(1, "15:11:25.590", [(16, None, 97.5), (80, 0.6, 98.2)])])
+        qr2 = f"{self.TITLE}\n\nQUALIFYING -RACE - ROUND 28 - LAP CHART\n\n" + make_lap_chart_page(
+            [(2, "15:12:55.599", [(16, None, 90.0), (80, 0.4, 90.2)])])
+        r1 = f"{self.TITLE}\n\nROUND 28 - LAP CHART\n\n" + make_lap_chart_page(
+            [(1, "11:00:00.000", [(33, None, 90.0), (32, 0.4, 90.5)])])
+        result = s.parse_lap_chart("\x0c".join([qr, qr2, r1]))
+        self.assertEqual([l["lap"] for l in result["Qualifying Race"]], [1, 2])
+        self.assertEqual(result["Qualifying Race"][0]["order"][0]["no"], 16)
+        self.assertEqual(result["Race 1"][0]["order"][0]["no"], 33)
+
+
 if __name__ == '__main__':
     sys.argv = sys.argv[:1]  # strip the '2026' arg before unittest.main() parses argv
     unittest.main()

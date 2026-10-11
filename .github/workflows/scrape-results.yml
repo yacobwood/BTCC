@@ -110,7 +110,11 @@ jobs:
           # afterward. Committing the raw per-tick output would ship wrong
           # legendary-driver stats (confirmed: a test run dropped Jason Plato's
           # wins from 97 to 83) until the next daily override run corrected it.
-          file_pattern: "data/results*.json data/standings.json data/calendar.json"
+          # data/analysis: per-session lap/tyre/top-speed/stats files written by
+          # write_session_analysis - without it a race weekend's Lap Times,
+          # Tyres, Top 5 Average and Session Stats tabs would point at files
+          # that were never pushed.
+          file_pattern: "data/results*.json data/standings.json data/calendar.json data/analysis"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           push_options: "--force-with-lease"
