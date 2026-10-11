@@ -407,6 +407,9 @@ export default function ChatScreen({onClose} = {}) {
         DB.ref('/chat/reports').push({
           flaggedMessage: flaggedMsg,
           context,
+          // Who filed it - lets the admin panel spot reports filed by a
+          // banned user (database.rules.json also refuses those outright).
+          reporterId: myAuthorIdRef.current,
           reportedAt: database.ServerValue.TIMESTAMP,
         }),
         DB.ref(`/chat/messages/${msgId}`).transaction(msg => {
@@ -459,7 +462,7 @@ export default function ChatScreen({onClose} = {}) {
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
         <View style={styles.msgActions}>
-          {!isOwn && (
+          {!isOwn && !isBanned && (
             <TouchableOpacity onPress={() => handleFlag(item.id)} accessibilityLabel="Flag message" style={styles.msgActionBtn}>
               <Icon name="flag" size={13} color={flaggedIds.has(item.id) ? '#E53935' : Colors.textSecondary} />
             </TouchableOpacity>

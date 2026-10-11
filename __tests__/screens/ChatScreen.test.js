@@ -489,6 +489,34 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(Analytics.chatMessageFlagged).toHaveBeenCalled());
   });
 
+  it('records who filed the report (reporterId) so the admin panel can spot banned reporters', async () => {
+    const {getAllByLabelText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); }); // flush init()
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Bad message', authorName: 'Spammer', authorId: 'other123', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
+    });
+    await act(async () => { fireEvent.press(getAllByLabelText('Flag message')[0]); });
+    const {default: auth} = require('@react-native-firebase/auth');
+    expect(mockDbPush).toHaveBeenCalledWith(expect.objectContaining({reporterId: auth().currentUser.uid}));
+  });
+
+  it('hides the flag button while the user is banned, so they cannot file reports', async () => {
+    const {queryByLabelText} = renderChat();
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Someone else', authorName: 'Other', authorId: 'other123', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
+    });
+    await act(async () => {
+      triggerBan({bannedAt: Date.now(), expiresAt: Date.now() + 3600000, duration: '1h', authorName: 'Me'});
+    });
+    expect(queryByLabelText('Flag message')).toBeNull();
+    expect(queryByLabelText('Reply')).toBeTruthy();
+  });
+
   // ── Firebase lifecycle ────────────────────────────────────────────────────────
 
   it('registers Firebase listener on mount', () => {

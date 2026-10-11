@@ -5404,8 +5404,16 @@ async function dismissAllErrors() {
 // ── Chat moderation ──────────────────────────────────────────────────────────
 let chatReportsRaw = {}; // reportId -> raw RTDB data (used to store in ban for unban restore)
 
+let chatBansRaw = {}; // authorId -> ban, so the reports list can flag banned reporters/authors
+
 async function loadChat() {
+  try { chatBansRaw = (await (await fetch(`${RTDB_URL}/chat/bans.json`)).json()) || {}; } catch { chatBansRaw = {}; }
   await Promise.all([loadChatReports(), loadChatBans(), loadChatDonors()]);
+}
+
+function isChatBanned(authorId) {
+  const b = authorId && chatBansRaw[authorId];
+  return !!b && (!b.expiresAt || b.expiresAt > Date.now());
 }
 
 async function loadChatReports() {
@@ -5431,6 +5439,8 @@ async function loadChatReports() {
             <span style="color:var(--yellow);font-weight:700;font-size:13px">${htmlEsc(msg.authorName || '—')}</span>
             <span style="color:var(--text-sec);font-size:11px"> #${htmlEsc((msg.authorId||'').slice(-4))}</span>
             <span style="color:var(--text-sec);font-size:11px;margin-left:8px">${htmlEsc(ts)}</span>
+            ${isChatBanned(msg.authorId) ? '<span style="color:var(--red);font-size:11px;margin-left:8px">Author already banned</span>' : ''}
+            <div style="color:var(--text-sec);font-size:11px;margin-top:2px">Reported by ${rep.reporterId ? '#' + htmlEsc(rep.reporterId.slice(-4)) + (isChatBanned(rep.reporterId) ? ' <span style="color:var(--red)">(banned user)</span>' : '') : 'unknown (older app)'}</div>
           </div>
         </div>
         <div style="color:var(--text);font-size:14px;margin-bottom:10px">${htmlEsc(msg.text || '—')}</div>

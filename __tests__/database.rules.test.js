@@ -30,7 +30,17 @@ describe('database.rules.json', () => {
 
     it('only allows creating a new report or deleting an existing one, not editing one in place', () => {
       const write = reports.$reportId['.write'];
-      expect(write).toBe('!data.exists() || !newData.exists()');
+      expect(write).toMatch(/^data\.exists\(\) \? !newData\.exists\(\) : \(auth != null && /);
+    });
+
+    it('refuses new reports from a banned uid or banned device (since 2026-10-11)', () => {
+      const write = reports.$reportId['.write'];
+      expect(write).toContain("root.child('chat/bans/' + auth.uid)");
+      expect(write).toContain("root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val())");
+    });
+
+    it('locks reporterId to the reporter\'s own uid', () => {
+      expect(reports.$reportId.reporterId['.validate']).toBe('newData.val() === auth.uid');
     });
 
     it('validates required fields on write', () => {

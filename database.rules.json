@@ -6,8 +6,11 @@
       "reports": {
         ".read": true,
         "$reportId": {
-          ".write": "!data.exists() || !newData.exists()",
-          ".validate": "newData.hasChildren(['flaggedMessage', 'reportedAt'])"
+          ".write": "data.exists() ? !newData.exists() : (auth != null && (!root.child('chat/bans/' + auth.uid).exists() || (root.child('chat/bans/' + auth.uid).child('expiresAt').exists() && root.child('chat/bans/' + auth.uid).child('expiresAt').val() < now)) && (!root.child('chat/devices/' + auth.uid).exists() || !root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val()).exists() || (root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val()).child('expiresAt').exists() && root.child('chat/deviceBans/' + root.child('chat/devices/' + auth.uid).val()).child('expiresAt').val() < now)))",
+          ".validate": "newData.hasChildren(['flaggedMessage', 'reportedAt'])",
+          "reporterId": {
+            ".validate": "newData.val() === auth.uid"
+          }
         }
       },
       "messages": {
