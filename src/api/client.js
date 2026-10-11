@@ -143,6 +143,33 @@ export async function fetchResults(year = 2026, forceRefresh = false) {
   return fetchJson(`${BASE_GITHUB}/results${year}.json`, `results_${year}`, forceRefresh, /* staleFallback */ true, false, 5 * 60 * 1000);
 }
 
+// "Qualifying Race" -> "qualifying-race" - must match scrape_tsl.py's own
+// session_slug(), which names the files fetchSessionAnalysis reads.
+export function sessionSlug(label) {
+  return String(label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+// One session's book analysis (lap-by-lap sector times, tyre compounds, top
+// speeds, session stats), written by scrape_tsl.py's write_session_analysis
+// to data/analysis/{year}/round{N}/{slug}.json. Kept out of results{year}.json
+// (fetched whole on every results view, already ~4MB) and only loaded when
+// one of its tabs is opened - results{year}.json's per-race `analysis` list
+// says which tabs have a file behind them. Several tabs read the same file,
+// so a request already in flight is shared rather than repeated.
+const analysisInFlight = new Map();
+
+export function fetchSessionAnalysis(year, round, label, forceRefresh = false) {
+  const slug = sessionSlug(label);
+  const key = `analysis_${year}_${round}_${slug}`;
+  if (!forceRefresh && analysisInFlight.has(key)) return analysisInFlight.get(key);
+  const promise = fetchJson(
+    `${BASE_GITHUB}/analysis/${year}/round${round}/${slug}.json`, key, forceRefresh,
+    /* staleFallback */ true, false, 10 * 60 * 1000,
+  ).finally(() => analysisInFlight.delete(key));
+  analysisInFlight.set(key, promise);
+  return promise;
+}
+
 // Judicial decisions (tools/scraper/scrape_penalties.py, run the Monday
 // morning after each round). Same shape/cadence as fetchResults. Falls back
 // to the bundled 2026 snapshot on network error (same pattern as

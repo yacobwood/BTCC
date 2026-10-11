@@ -1,4 +1,4 @@
-import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parsePenalties, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl} from '../../src/api/parsers';
+import {parseArticle, formatDate, formatFullDate, decodeEntities, stripHtml, parseCalendar, parseGrid, parseStandings, parseResults, parsePenalties, parseDriverHistory, attachTeamDisplayFields, carThumbUrl, carThumbCropUrl, mapSessionAnalysis, mapAnalysisKeys} from '../../src/api/parsers';
 
 // Must be declared before any import so Jest hoists it above the require()
 // inside parsers.js. Venue names are synthetic to prevent tests passing by
@@ -1181,5 +1181,62 @@ describe('parsePenalties', () => {
   test('a round with no penalties yet returns an empty penalties array', () => {
     const rounds = parsePenalties({season: '2026', rounds: [{round: 8}]});
     expect(rounds[0].penalties).toEqual([]);
+  });
+});
+
+describe('mapAnalysisKeys', () => {
+  it('keeps known report keys and drops unknown ones', () => {
+    expect(mapAnalysisKeys(['laps', 'tyres', 'somethingNew', 'sessionStats'])).toEqual(['laps', 'tyres', 'sessionStats']);
+  });
+  it('returns an empty list for a race with no analysis', () => {
+    expect(mapAnalysisKeys(undefined)).toEqual([]);
+  });
+  it('is carried onto each race by parseResults', () => {
+    const [round] = parseResults({rounds: [{round: 1, races: [{label: 'Race 1', results: [], analysis: ['laps']}]}]});
+    expect(round.races[0].analysis).toEqual(['laps']);
+  });
+});
+
+describe('mapSessionAnalysis', () => {
+  const RAW = {
+    year: 2026, round: 10, session: 'Qualifying Race',
+    laps: [{no: 16, driver: 'Aiden MOFFAT', team: 'LKQ', ideal: 89.791, best: 89.94, laps: [
+      {lap: 1, t: 97.529, s: [null, 16.742, 23.664, 21.561], v: [106.3, 140.1, 96.5, 132.8], tod: '15:11:25'},
+      {lap: 2, t: 219.174, s: [null, 19.999, 30.569, null], v: [91.3, 99.5, 69.5, null], out: true, in: true, pit: true},
+      {lap: 3, t: 90.485, s: [29.067, 16.346, 23.655, 21.417], v: [], deleted: true},
+    ]}],
+    tyres: [{no: 11, driver: 'Ricky COLLARD', team: 'Team VERTU', compounds: ['Medium', 'Soft']}],
+    topSpeeds: [{pos: 1, no: 11, driver: 'Ricky COLLARD', team: 'Team VERTU', speeds: [146.8, 146.5], avg: 146.2, best: 146.8}],
+    topSpeedsTrap: 'Intermediate 1',
+    sessionStats: {
+      competitors: 23, plannedStart: '2026-10-10T14:50:00', actualStart: '2026-10-10T15:09:48', startDelayMins: 20,
+      totalLaps: 230, totalDistance: 559.6566, trackLength: 2.4332,
+      fastestLapHistory: [{no: 16, driver: 'Aiden MOFFAT', time: '1:29.940', secs: 89.94, lap: 3, timeOfDay: '15:14:25'}],
+      classes: {IND: {starters: 11, fastestLap: {no: 16, driver: 'Aiden MOFFAT', time: '1:29.940', secs: 89.94, lap: 3}}, M: {starters: 12, fastestLap: null}},
+    },
+  };
+
+  it('maps laps with readable flag names', () => {
+    const {laps} = mapSessionAnalysis(RAW);
+    expect(laps[0].best).toBe(89.94);
+    expect(laps[0].laps[0]).toEqual({lap: 1, time: 97.529, sectors: [null, 16.742, 23.664, 21.561], speeds: [106.3, 140.1, 96.5, 132.8], timeOfDay: '15:11:25', pit: false, deleted: false, outLap: false, inLap: false});
+    expect(laps[0].laps[1]).toMatchObject({outLap: true, inLap: true, pit: true});
+    expect(laps[0].laps[2].deleted).toBe(true);
+  });
+
+  it('maps tyres, top speeds and session stats', () => {
+    const a = mapSessionAnalysis(RAW);
+    expect(a.tyres[0].compounds).toEqual(['Medium', 'Soft']);
+    expect(a.topSpeeds[0]).toMatchObject({avg: 146.2, best: 146.8});
+    expect(a.topSpeedsTrap).toBe('Intermediate 1');
+    expect(a.sessionStats.startDelayMins).toBe(20);
+    expect(a.sessionStats.fastestLapHistory[0]).toMatchObject({driver: 'Aiden MOFFAT', lap: 3, group: null});
+    expect(a.sessionStats.classes.IND.fastestLap.time).toBe('1:29.940');
+    expect(a.sessionStats.classes.M.fastestLap).toBeNull();
+  });
+
+  it('fills missing reports with empty values', () => {
+    expect(mapSessionAnalysis({session: 'Race 1'})).toEqual({laps: [], tyres: [], topSpeeds: [], topSpeedsTrap: 'Intermediate 2', sessionStats: null});
+    expect(mapSessionAnalysis(null)).toBeNull();
   });
 });

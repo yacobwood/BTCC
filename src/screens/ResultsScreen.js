@@ -16,7 +16,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
 import {fetchStandings, fetchResults} from '../api/client';
-import {parseStandings, parseResults, mapBestSpeeds, mapWeather, mapFlagStats, mapBestSectors, mapLapChart} from '../api/parsers';
+import {parseStandings, parseResults, mapBestSpeeds, mapWeather, mapFlagStats, mapBestSectors, mapLapChart, mapAnalysisKeys} from '../api/parsers';
 import styles from './ResultsScreen.styles';
 import {useFavouriteDriver} from '../store/favouriteDriver';
 import {getSeasonData} from '../assets/seasonData';
@@ -305,6 +305,7 @@ export default function ResultsScreen({navigation, route}) {
           flagStats: mapFlagStats(race.flagStats),
           bestSectors: mapBestSectors(race.bestSectors),
           lapChart: mapLapChart(race.lapChart),
+          analysis: mapAnalysisKeys(race.analysis),
           results: (race.results || []).map(d => ({
             position: d.pos || 0,
             number: d.no || 0,

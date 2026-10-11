@@ -28,6 +28,20 @@ jest.mock('../../src/utils/analytics', () => ({
   },
 }));
 
+// The analysis cards fetch their own file - stubbed here so the screen test
+// covers only which tabs are offered and what they're handed (the cards
+// themselves: __tests__/components/SessionAnalysisCards.test.js).
+jest.mock('../../src/components/SessionAnalysisCards', () => {
+  const {Text} = require('react-native');
+  const stub = (name) => (props) => <Text>{`${name} ${props.session} ${props.roundNumber} ${props.year}`}</Text>;
+  return {
+    LapTimesCard: stub('LapTimesCard'),
+    TyresCard: stub('TyresCard'),
+    TopSpeedsCard: stub('TopSpeedsCard'),
+    SessionStatsCard: stub('SessionStatsCard'),
+  };
+});
+
 const nav = makeNav();
 
 function renderRound({round = MOCK_ROUND, initialRace = 0, favourites = [], year = 2026} = {}) {
@@ -1234,6 +1248,46 @@ describe('RoundResultsScreen', () => {
       // the old pill-row design - now visible immediately, since Perfect
       // Lap has a whole dedicated page rather than sharing space.
       expect(await findByText('Ashley SUTTON')).toBeTruthy();
+    });
+  });
+
+  describe('session analysis tabs', () => {
+    function roundWithAnalysis(analysis) {
+      return {
+        ...MOCK_ROUND,
+        races: MOCK_ROUND.races.map(r => r.label === 'Free Practice' ? {...r, analysis} : r),
+      };
+    }
+
+    it('offers Lap Times, Top 5 Average, Tyres and Session Stats in that order when the file has them', async () => {
+      const {findByText, getByLabelText} = renderRound({
+        round: roundWithAnalysis(['laps', 'tyres', 'topSpeeds', 'sessionStats']), initialRace: 0,
+      });
+      await findByText('Tom INGRAM');
+      fireEvent.press(getByLabelText('Next data type'));
+      expect(await findByText('LapTimesCard Free Practice 1 2026')).toBeTruthy();
+      fireEvent.press(getByLabelText('Next data type'));
+      expect(await findByText('TopSpeedsCard Free Practice 1 2026')).toBeTruthy();
+      fireEvent.press(getByLabelText('Next data type'));
+      expect(await findByText('TyresCard Free Practice 1 2026')).toBeTruthy();
+      fireEvent.press(getByLabelText('Next data type'));
+      expect(await findByText('SessionStatsCard Free Practice 1 2026')).toBeTruthy();
+    });
+
+    it('only offers the reports the analysis list names', async () => {
+      const {findByText, getByLabelText, queryByText} = renderRound({round: roundWithAnalysis(['tyres']), initialRace: 0});
+      await findByText('Tom INGRAM');
+      expect(queryByText('Lap Times')).toBeNull();
+      fireEvent.press(getByLabelText('Next data type'));
+      expect(await findByText('TyresCard Free Practice 1 2026')).toBeTruthy();
+      expect(queryByText('Session Stats')).toBeNull();
+    });
+
+    it('offers none of them for a session with no analysis file', async () => {
+      const {findByText, queryByText} = renderRound({initialRace: 0});
+      await findByText('Tom INGRAM');
+      expect(queryByText('Lap Times')).toBeNull();
+      expect(queryByText('Tyres')).toBeNull();
     });
   });
 

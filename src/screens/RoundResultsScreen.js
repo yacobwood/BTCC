@@ -13,6 +13,7 @@ import {
 import SwipeableTabs from '../components/SwipeableTabs';
 import SessionAnalysisTabs from '../components/SessionAnalysisTabs';
 import LapChartCard from '../components/LapChartCard';
+import {LapTimesCard, TyresCard, TopSpeedsCard, SessionStatsCard} from '../components/SessionAnalysisCards';
 import {CHAT_FAB_CLEARANCE} from '../utils/chatFabLayout';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Colors} from '../theme/colors';
@@ -376,6 +377,8 @@ export default function RoundResultsScreen({route, navigation}) {
             return <EmptyState icon="schedule" title="Nothing to see here. Literally." subtitle="Hang tight, results will appear when they're ready" />;
           }
 
+          const hasAnalysis = (key) => (race.analysis || []).includes(key);
+
           // One paginator tab per active speed trap, not one "Speed Trap"
           // tab containing all of them stacked - per the user's explicit
           // ask, once they saw Intermediate 1 and Finish Line sharing a
@@ -467,7 +470,39 @@ export default function RoundResultsScreen({route, navigation}) {
                         />
                       ),
                     },
+                    {
+                      // Book Sector Analysis: every lap + sector for every
+                      // driver, from this session's analysis file (loaded
+                      // on demand - see SessionAnalysisCards). `analysis`
+                      // lists which reports that file holds.
+                      key: 'lapTimes',
+                      label: 'Lap Times',
+                      hasData: hasAnalysis('laps'),
+                      render: () => (
+                        <LapTimesCard
+                          year={year}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
+                        />
+                      ),
+                    },
                     ...speedTrapTabs,
+                    {
+                      key: 'topSpeeds',
+                      label: 'Top 5 Average',
+                      group: 'SPEED TRAP',
+                      hasData: hasAnalysis('topSpeeds'),
+                      render: () => (
+                        <TopSpeedsCard
+                          year={year}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
+                          useKm={useKm}
+                        />
+                      ),
+                    },
                     {
                       key: 'perfectLap',
                       label: 'Perfect Lap',
@@ -478,6 +513,34 @@ export default function RoundResultsScreen({route, navigation}) {
                           roundNumber={round.round}
                           session={race.label}
                           isFavourite={isFavourite}
+                        />
+                      ),
+                    },
+                    {
+                      key: 'tyres',
+                      label: 'Tyres',
+                      hasData: hasAnalysis('tyres'),
+                      render: () => (
+                        <TyresCard
+                          year={year}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
+                          results={race.results}
+                        />
+                      ),
+                    },
+                    {
+                      key: 'sessionStats',
+                      label: 'Session Stats',
+                      hasData: hasAnalysis('sessionStats'),
+                      render: () => (
+                        <SessionStatsCard
+                          year={year}
+                          roundNumber={round.round}
+                          session={race.label}
+                          isFavourite={isFavourite}
+                          useKm={useKm}
                         />
                       ),
                     },

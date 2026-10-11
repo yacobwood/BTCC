@@ -431,6 +431,91 @@ export function mapLapChart(lc) {
   }));
 }
 
+// Report keys results{year}.json lists per race as having a session analysis
+// file behind them (scrape_tsl.py's ANALYSIS_KEYS) - unknown keys dropped so
+// an older app never offers a tab it has no card for.
+const ANALYSIS_KEYS = ['laps', 'tyres', 'topSpeeds', 'sessionStats'];
+
+export function mapAnalysisKeys(keys) {
+  return Array.isArray(keys) ? keys.filter(k => ANALYSIS_KEYS.includes(k)) : [];
+}
+
+function mapLapEntry(l) {
+  return {
+    lap: l.lap || 0,
+    time: l.t ?? null,
+    sectors: Array.isArray(l.s) ? l.s : [],
+    speeds: Array.isArray(l.v) ? l.v : [],
+    timeOfDay: l.tod || '',
+    pit: !!l.pit,
+    deleted: !!l.deleted,
+    outLap: !!l.out,
+    inLap: !!l.in,
+  };
+}
+
+function mapFastestLapEntry(e) {
+  return {
+    no: e.no || 0,
+    driver: e.driver || '',
+    team: e.team || '',
+    time: e.time || '',
+    secs: e.secs ?? null,
+    lap: e.lap || 0,
+    timeOfDay: e.timeOfDay || '',
+    group: e.group ?? null,
+  };
+}
+
+// One session analysis file (fetchSessionAnalysis) - the book reports parsed
+// by tools/scraper/book_tables.py, already joined to driver names by car
+// number. Missing reports come back as empty lists/null, never undefined.
+export function mapSessionAnalysis(json) {
+  if (!json || typeof json !== 'object') return null;
+  const stats = json.sessionStats;
+  return {
+    laps: (json.laps || []).map(d => ({
+      no: d.no || 0,
+      driver: d.driver || '',
+      team: d.team || '',
+      ideal: d.ideal ?? null,
+      best: d.best ?? null,
+      laps: (d.laps || []).map(mapLapEntry),
+    })),
+    tyres: (json.tyres || []).map(e => ({
+      no: e.no || 0,
+      driver: e.driver || '',
+      team: e.team || '',
+      compounds: Array.isArray(e.compounds) ? e.compounds : [],
+    })),
+    topSpeeds: (json.topSpeeds || []).map(e => ({
+      pos: e.pos || 0,
+      no: e.no || 0,
+      driver: e.driver || '',
+      team: e.team || '',
+      speeds: Array.isArray(e.speeds) ? e.speeds : [],
+      avg: e.avg || 0,
+      best: e.best || 0,
+    })),
+    topSpeedsTrap: json.topSpeedsTrap || 'Intermediate 2',
+    sessionStats: stats ? {
+      competitors: stats.competitors ?? null,
+      plannedStart: stats.plannedStart || null,
+      actualStart: stats.actualStart || null,
+      finishTime: stats.finishTime || null,
+      startDelayMins: stats.startDelayMins ?? null,
+      trackLength: stats.trackLength ?? null,
+      totalLaps: stats.totalLaps ?? null,
+      totalDistance: stats.totalDistance ?? null,
+      fastestLapHistory: (stats.fastestLapHistory || []).map(mapFastestLapEntry),
+      classes: Object.fromEntries(Object.entries(stats.classes || {}).map(([cl, info]) => [cl, {
+        starters: info?.starters ?? null,
+        fastestLap: info?.fastestLap ? mapFastestLapEntry(info.fastestLap) : null,
+      }])),
+    } : null,
+  };
+}
+
 export function parseResults(json) {
   return (json.rounds || []).map((r, i) => ({
     round: r.round || i + 1,
@@ -461,6 +546,7 @@ export function parseResults(json) {
         flagStats: mapFlagStats(race.flagStats),
         bestSectors: mapBestSectors(race.bestSectors),
         lapChart: mapLapChart(race.lapChart),
+        analysis: mapAnalysisKeys(race.analysis),
         results: (race.results || []).map(d => {
           const pos = d.pos || 0;
           const rawPts = d.points || 0;

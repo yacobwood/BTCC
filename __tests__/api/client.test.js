@@ -34,6 +34,8 @@ import {
   fetchPartners,
   fetchGallery,
   fetchGalleryAlbum,
+  fetchSessionAnalysis,
+  sessionSlug,
 } from '../../src/api/client';
 
 describe('fetchCalendar', () => {
@@ -980,5 +982,37 @@ describe('fetchPartners', () => {
     global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve(cached)});
     await fetchPartners();
     expect(cacheRead).toHaveBeenCalledWith('partners', 48 * 60 * 60 * 1000);
+  });
+});
+
+describe('fetchSessionAnalysis', () => {
+  it('slugs session labels the same way scrape_tsl.session_slug does', () => {
+    expect(sessionSlug('Free Practice')).toBe('free-practice');
+    expect(sessionSlug('Qualifying Race')).toBe('qualifying-race');
+    expect(sessionSlug('Race 3')).toBe('race-3');
+  });
+
+  it('fetches the per-session analysis file with its own cache key', async () => {
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({session: 'Race 1'})});
+    const data = await fetchSessionAnalysis(2026, 9, 'Race 1');
+    expect(data).toEqual({session: 'Race 1'});
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/data/analysis/2026/round9/race-1.json'));
+    expect(cacheWrite).toHaveBeenCalledWith('analysis_2026_9_race-1', {session: 'Race 1'});
+  });
+
+  it('shares one request between tabs asking for the same file at once', async () => {
+    global.fetch.mockClear();
+    global.fetch.mockResolvedValueOnce({ok: true, json: () => Promise.resolve({session: 'Qualifying'})});
+    const [a, b] = await Promise.all([
+      fetchSessionAnalysis(2026, 10, 'Qualifying'),
+      fetchSessionAnalysis(2026, 10, 'Qualifying'),
+    ]);
+    expect(a).toBe(b);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects when the file is missing and nothing is cached', async () => {
+    global.fetch.mockResolvedValueOnce({ok: false, status: 404});
+    await expect(fetchSessionAnalysis(2026, 1, 'Race 2')).rejects.toThrow('HTTP 404');
   });
 });
