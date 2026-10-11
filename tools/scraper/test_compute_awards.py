@@ -149,6 +149,17 @@ class TestExtraAwards(unittest.TestCase):
         self.assertEqual(a["launch"]["stat"], "+1 places")
 
 
+class TestPerfectLap(unittest.TestCase):
+    def test_one_disrupted_race_does_not_swamp_the_season(self):
+        races = []
+        for i in range(5):
+            races.append(session("Race 1", [res(1, "Ann A"), res(2, "Bob B")],
+                                 bestSectors=[{"driver": "Ann A", "diff": 0.10 if i else 16.7},
+                                              {"driver": "Bob B", "diff": 0.15}]))
+        a = by_id(ca.stat_awards(season(races)))
+        self.assertEqual(a["perfectLap"]["winner"], "Ann A")
+
+
 class TestBuild(unittest.TestCase):
     def test_season_complete_needs_final_race_3(self):
         done = season([session("Race 3", [res(1, "Ann A")])])

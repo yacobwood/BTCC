@@ -201,7 +201,9 @@ def stat_awards(results, prev_results=None, penalties=None):
             if r.get("fastestLap"):
                 flagged = d
             if not is_classified(r):
-                dnfs[d] += 1
+                # Retirements count Races 1-3 only, same as wins/podiums.
+                if label in MAIN_RACES:
+                    dnfs[d] += 1
                 streak[d] = 0
                 continue
             p = r["pos"]
@@ -256,7 +258,9 @@ def stat_awards(results, prev_results=None, penalties=None):
         return f"{n} {word}{'' if n == 1 else 's'}"
 
     avg_finish = {d: sum(v) / len(v) for d, v in finishes.items() if starts[d] >= min_starts and v}
-    avg_ideal = {d: sum(v) / len(v) for d, v in ideal_diff.items() if starts[d] >= min_starts and v}
+    # Median, not mean: one disrupted race can leave a best lap 10s+ off the
+    # ideal (Morgan, Thruxton R3 2026: 16.7s) and swamp a whole season.
+    avg_ideal = {d: statistics.median(v) for d, v in ideal_diff.items() if starts[d] >= min_starts and v}
 
     climbs.sort(key=lambda c: (-c[1], c[2][1], c[0]))
     wins_from_grid.sort(key=lambda w: (-w[1], w[0]))
@@ -292,7 +296,7 @@ def stat_awards(results, prev_results=None, penalties=None):
         award("dominantWin", "Most Dominant Win", "stat", "flash-on", margins_big,
               lambda v, x: f"by {v:.3f}s, {x[1]}", "Biggest winning margin", T),
         award("perfectLap", "Perfect Lap", "stat", "gps-fixed", ranked(avg_ideal, reverse=False, tiebreak=pts_tb),
-              lambda v, _: f"{v:.3f}s off ideal", "Best lap closest to their ideal lap, on average", T),
+              lambda v, _: f"{v:.3f}s off ideal", "Best lap closest to their ideal lap (season median)", T),
         award("topSpeed", "Top Speed", "stat", "speed", speeds,
               lambda v, x: f"{v:.1f} mph, {x}", "Fastest speed-trap reading of the season", T),
         award("hardLuck", "Hard Luck Award", "stat", "car-crash", ranked(dnfs, tiebreak=pts_tb),

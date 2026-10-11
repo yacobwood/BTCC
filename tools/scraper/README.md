@@ -212,6 +212,7 @@ field replaced.
 | `scrape_schedule.py` | Pure local transform of `calendar.json`'s already-scraped `fullTimetable` into the app's session-schedule shape | `data/schedule.json` |
 | `merge_schedule.py` | Merges `schedule.json` sessions into `data/calendar.json` | `data/calendar.json` |
 | `compute_records.py` | Computes all-time driver records from bundled `season_*.json` + `results{year}.json` | `data/records.json` |
+| `compute_awards.py` | BTCC Hub end-of-season awards. Championship awards from official `standings.json`; win/podium/fastest-lap/DNF counts use Races 1-3 only (matching official figures, fastest lap from the results `fastestLap` flag); Perfect Lap uses the season median; lap-by-lap awards read `data/analysis/{year}`. Run manually after the final race (`--provisional` to run earlier, `--out` to write elsewhere). Writes `published: false` | `data/awards{year}.json` |
 | `career_stats.py` | Computes per-driver per-year career stats from the same local archives; has a `--verify-champions` self-check mode | stdout only |
 
 `scrape_schedule.py`/`merge_schedule.py` run as later steps in `scrape-calendar.yml`, right
