@@ -1,7 +1,7 @@
 """
 Tests for scrape_penalties.py — covers the pure parsing/matching logic
 (checkbox-to-option matching, sanction humanizing, session normalization,
-notice filtering, exoneration detection, noticeboard slug resolution)
+noticeboard feed filtering and round assignment, exoneration detection)
 without touching the network.
 
 The line-layout fixtures below are transcribed verbatim (y0, x0, text) from
@@ -125,6 +125,50 @@ DORLIN_POINTS_LINES = [
     (334.7, 56.5, "Signed:"),
 ]
 
+# Same recipient-form shape, full page: Chilton engine change, Silverstone R9 2026
+# (GT Apps noticeboard) - the team and car sit under the first "To:", the driver under the second.
+CHILTON_POINTS_LINES = [
+    (786.7, 0.0, "BRITISH TOURING CAR CHAMPIONSHIP"),
+    (767.1, 56.7, "JUDICIAL ACTION"),
+    (737.2, 62.1, "From:"), (737.2, 305.7, "Venue:"),
+    (725.1, 114.3, "Ian Watson  -  Clerk of the Course"), (725.1, 428.4, "Silverstone"),
+    (702.7, 62.1, "To:"), (702.7, 305.7, "Licence No.:"),
+    (698.0, 167.3, "Team Vertu"), (690.7, 437.1, "374558"),
+    (683.4, 183.4, "Car 3"),
+    (668.2, 62.1, "To:"), (668.2, 305.7, "Licence No:"),
+    (656.1, 166.2, "Tom Chilton"), (656.1, 437.1, "153629"),
+    (633.7, 62.1, "Date:"), (633.7, 305.7, "Time:"),
+    (621.7, 144.6, "26th September 2026"), (621.7, 441.7, "08.00"),
+    (567.5, 56.7, "Following  a  report  from  the  BTCC  Scrutineer  and  after  further  investigation,  I  find  that  you  are"),
+    (552.9, 56.7, "guilty of contravening championship regulation CR 1.16:"),
+    (508.9, 92.7, "Having changed an engine above the number permitted within 1.16.2"),
+    (464.9, 56.7, "Therefore, under CR 1.16.9 I order that;"),
+    (435.6, 92.7, "5 (five) points be deducted from the Drivers’ Championship for Tom Chilton and,"),
+    (377.1, 56.7, "You are reminded of your right of appeal as laid down within the regulations."),
+    (319.2, 56.7, "Signed:"),
+]
+
+# Stewards' appeal hearing form: Collard, Brands Hatch GP R10 2026 (page 1 of 2).
+COLLARD_HEARING_LINES = [
+    (738.1, 49.7, "DECISION OF THE STEWARDS HEARING"),
+    (712.6, 157.8, "BARC (Head Office)"), (712.6, 406.1, "11th October 2026"),
+    (712.0, 47.6, "Organising Club"), (712.0, 353.0, "Date"),
+    (656.3, 49.7, "Reason for hearing:  Appeal"), (656.3, 183.8, "Referral from Clerk of the Course"),
+    (604.0, 200.6, "Team Vertu / Ricky Collard"), (603.3, 47.6, "Name:"),
+    (589.3, 200.6, "191337"), (588.7, 47.6, "Competition / Entrant Licence No:"),
+    (574.1, 47.6, "Issuing ASN (If not Motorsport UK):"),
+    (560.0, 200.6, "11"), (559.5, 47.6, "Competition Number in Event:"),
+    (545.2, 199.9, "British Touring Car Championship"), (544.8, 47.6, "Race / Class:"),
+    (513.4, 49.7, "The Stewards heard evidence from the following persons:"),
+    (494.3, 54.6, "David Tredinnick (Team Manager #11) and Ricky Collard (Driver #11)"),
+    (418.5, 49.7, "The Stewards decision is:"),
+    (399.3, 55.2, "1. The Appeal is deemed admissible, following the competitor's commitment to pay the appeal fee."),
+    (387.0, 55.2, "2. The appeal is rejected"),
+    (374.6, 55.2, "3.The Clerk of the Course decision is upheld."),
+    (323.7, 49.7, "Reason(s) for this decision:"),
+    (300.8, 55.2, "See 'Reasons' document attached."),
+]
+
 # No-action exoneration (template A) - must be excluded entirely, not recorded generically.
 NO_ACTION_LINES = [
     (786.7, 0.0, "BRITISH AUTOMOBILE RACING CLUB"),
@@ -193,10 +237,52 @@ class TestParseTemplateB(unittest.TestCase):
 
     def test_missing_driver_header_shape_returns_none(self):
         # Dorlin's points-deduction doc uses two separate "To:" recipients
-        # instead of the standard "Car No / Driver" line - this must fail
-        # cleanly (caller falls back to a minimal entry) rather than
-        # fabricate a wrong driver/car.
+        # instead of the standard "Car No / Driver" line - template B itself
+        # must not fabricate a driver/car from it (parse_recipient_form
+        # handles this shape instead).
         self.assertIsNone(sp.parse_template_b(DORLIN_POINTS_LINES))
+
+
+class TestParseRecipientForm(unittest.TestCase):
+    def test_points_deduction(self):
+        result = sp.parse_recipient_form(CHILTON_POINTS_LINES)
+        self.assertIsNone(result["driver"])  # caller fills it from the noticeboard title
+        self.assertEqual(result["carNo"], 3)
+        self.assertIsNone(result["sessionRaw"])
+        self.assertEqual(result["ruleRef"], "CR 1.16")
+        self.assertEqual(result["offence"], "championship regulation CR 1.16")
+        self.assertEqual(result["facts"], "Having changed an engine above the number permitted within 1.16.2")
+        self.assertEqual(result["decision"], "5 (five) points be deducted from the Drivers’ Championship for Tom Chilton")
+        self.assertEqual(result["sanction"], "5 points deducted")
+
+    def test_truncated_layout_without_car_line(self):
+        result = sp.parse_recipient_form(DORLIN_POINTS_LINES)
+        self.assertIsNone(result["carNo"])
+        self.assertEqual(result["sanction"], "5 points deducted")
+
+    def test_dispatch_uses_title_driver(self):
+        original = sp.extract_pdf_lines
+        sp.extract_pdf_lines = lambda _pdf_bytes: CHILTON_POINTS_LINES
+        try:
+            result = sp.parse_penalty_pdf(b"unused", "Tom Chilton", "https://example.com/x")
+        finally:
+            sp.extract_pdf_lines = original
+        self.assertEqual(result["driver"], "Tom Chilton")
+        self.assertEqual(result["confidence"], "full")
+
+
+class TestParseStewardsHearing(unittest.TestCase):
+    def test_detected_as_hearing(self):
+        self.assertEqual(sp.detect_template(COLLARD_HEARING_LINES), "H")
+
+    def test_appeal_rejected(self):
+        result = sp.parse_stewards_hearing(COLLARD_HEARING_LINES)
+        self.assertEqual(result["driver"], "Ricky Collard")
+        self.assertEqual(result["carNo"], 11)
+        self.assertIsNone(result["sessionRaw"])
+        self.assertTrue(result["decision"].startswith("1. The Appeal is deemed admissible"))
+        self.assertTrue(result["decision"].endswith("decision is upheld."))
+        self.assertEqual(result["sanction"], "Appeal rejected - penalty upheld")
 
 
 class TestNoAction(unittest.TestCase):
@@ -270,6 +356,15 @@ class TestHumanizeSanction(unittest.TestCase):
         text = "Be given a five second time penalty added to your elapsed time for round 19"
         self.assertEqual(sp.humanize_sanction(text), "5s time penalty")
 
+    def test_hyphenated_result_place_penalty(self):
+        text = "By means of a three-place penalty for the result of the Qualifying Race"
+        self.assertEqual(sp.humanize_sanction(text), "3-place penalty")
+
+    def test_appeal_outcomes(self):
+        self.assertEqual(sp.humanize_sanction("2. The appeal is rejected 3.The Clerk of the Course decision is upheld."),
+                         "Appeal rejected - penalty upheld")
+        self.assertEqual(sp.humanize_sanction("The appeal is upheld"), "Appeal upheld")
+
     def test_grid_penalty_word_number(self):
         self.assertEqual(sp.humanize_sanction("Be penalised by means of a three place grid penalty for your next race"), "3-place grid penalty")
 
@@ -330,63 +425,113 @@ class TestFindCheckedOption(unittest.TestCase):
         self.assertEqual(checked, "By the addition of 5 seconds to your race time for the result of the Qualifying Race")
 
 
-class TestExtractBtccNotices(unittest.TestCase):
-    ROW = '<div class="row aligned-row"><h4>{heading}</h4><a target="_blank" href="{url}" class="btn noticeboard btn-download">CLICK TO VIEW</a></div>'
+def _doc(title, event="silverstone", category="Judicial Decision", uuid=None):
+    uuid = uuid or title
+    return {"title": title, "category_name": category, "season_event_uuid": event,
+            "pdf_url": f"https://example.com/{uuid}/pdf#zoom=page-width"}
 
-    def _page(self, rows):
-        return "<div>" + "".join(self.ROW.format(heading=h, url=u) for h, u in rows) + "</div>"
 
-    def test_filters_to_btcc_only(self):
-        page = self._page([
-            ("British Touring Car Championship - Charles Rainford", "a.pdf"),
-            ("Mini Challenge - Sam Gornall", "b.pdf"),
-            ("BTCC - Round 19 - Grid", "c.pdf"),  # abbreviated form: results/grid, not a decision
+FEED_EVENTS = {"seasons": [{"name": "2026 Season", "events": [
+    {"uuid": "silverstone", "event_from_date": "2026-09-26", "event_to_date": "2026-09-27"},
+    {"uuid": "brands", "event_from_date": "2026-10-10", "event_to_date": "2026-10-11"},
+]}]}
+
+
+def _round(num, venue, start, end):
+    import datetime
+    return {"round": num, "venue": venue,
+            "_start": datetime.date.fromisoformat(start), "_end": datetime.date.fromisoformat(end)}
+
+
+SILVERSTONE = _round(9, "Silverstone", "2026-09-26", "2026-09-27")
+CROFT = _round(8, "Croft", "2026-09-05", "2026-09-06")
+DONINGTON = _round(7, "Donington Park GP", "2026-08-22", "2026-08-23")
+
+
+class TestBtccNoticesForRound(unittest.TestCase):
+    """Feed fixtures mirror the live GT Apps TOCA board (10-12): every series'
+    documents mixed together, BTCC decisions identified by title."""
+
+    def _feed(self, docs):
+        return {**FEED_EVENTS, "documents": docs}
+
+    def test_filters_to_btcc_decisions_at_this_event(self):
+        feed = self._feed([
+            _doc("British Touring Car Championship - Josh Cook"),
+            _doc("British F4 - Roman Felber"),
+            _doc("British Touring Car Championship - Race 1 Classification", category="Race Classification"),
+            _doc("British Touring Car Championship - Lewis Selby", event="brands", category="Clerks Decision"),
         ])
-        notices = sp.extract_btcc_notices(page)
-        self.assertEqual(len(notices), 1)
-        self.assertEqual(notices[0]["driver"], "Charles Rainford")
-        self.assertEqual(notices[0]["pdf_url"], "a.pdf")
+        found, notices = sp.btcc_notices_for_round(feed, SILVERSTONE)
+        self.assertTrue(found)
+        self.assertEqual([n["driver"] for n in notices], ["Josh Cook"])
+        self.assertEqual(notices[0]["pdf_url"], "https://example.com/British Touring Car Championship - Josh Cook/pdf")
 
-    def test_three_part_heading_uses_last_segment_as_driver(self):
-        page = self._page([("British Touring Car Championship - Restart Racing - Chris Smiley", "a.pdf")])
-        self.assertEqual(sp.extract_btcc_notices(page)[0]["driver"], "Chris Smiley")
-
-    def test_strips_wordpress_dedup_suffix(self):
-        page = self._page([("British Touring Car Championship - Tom Ingram (2)", "a.pdf")])
-        self.assertEqual(sp.extract_btcc_notices(page)[0]["driver"], "Tom Ingram")
-
-
-class TestFindNoticeboardEntry(unittest.TestCase):
-    """find_noticeboard_entry's HTTP call is monkeypatched so this tests the
-    slug-matching logic (venue keyword + month + both day tokens) without
-    touching the network."""
-
-    def _entries(self, slugs):
-        return [{"id": i, "slug": s, "link": f"https://example.com/{s}/", "date": "2025-12-01"} for i, s in enumerate(slugs)]
-
-    def test_matches_correct_slug_and_ignores_adjacent_date_event(self):
-        import datetime
-        entries = self._entries([
-            "2026-donington-park-grand-prix-august-22-23",
-            "donington-park-august-21-22",  # confirmed-live false-positive risk: shares day "22" only
+    def test_clerks_and_stewards_decisions_count(self):
+        feed = self._feed([
+            _doc("British Touring Car Championship - Tom Chilton", event="brands", category="Clerks Decision"),
+            _doc("British Touring Car Championship - Ricky Collard", event="brands", category="Stewards Decision"),
         ])
-        original = sp.fetch_json
-        sp.fetch_json = lambda url, _entries=entries: (_entries if "page=1" in url else [])
-        try:
-            result = sp.find_noticeboard_entry("Donington Park GP", datetime.date(2026, 8, 22), datetime.date(2026, 8, 23))
-        finally:
-            sp.fetch_json = original
-        self.assertEqual(result["slug"], "2026-donington-park-grand-prix-august-22-23")
+        _, notices = sp.btcc_notices_for_round(feed, _round(10, "Brands Hatch GP", "2026-10-10", "2026-10-11"))
+        self.assertEqual(len(notices), 2)
 
-    def test_no_match_returns_none(self):
-        import datetime
-        original = sp.fetch_json
-        sp.fetch_json = lambda url: []
-        try:
-            result = sp.find_noticeboard_entry("Silverstone", datetime.date(2026, 9, 26), datetime.date(2026, 9, 27))
-        finally:
-            sp.fetch_json = original
-        self.assertIsNone(result)
+    def test_venue_tag_moves_decision_to_that_round(self):
+        feed = self._feed([
+            _doc("British Touring Car Championship - Sam Osborne (Croft)"),
+            _doc("British Touring Car Championship - Josh Cook"),
+        ])
+        found, croft = sp.btcc_notices_for_round(feed, CROFT)
+        self.assertFalse(found)  # Croft itself predates the board
+        self.assertEqual([n["driver"] for n in croft], ["Sam Osborne"])
+        _, silverstone = sp.btcc_notices_for_round(feed, SILVERSTONE)
+        self.assertEqual([n["driver"] for n in silverstone], ["Josh Cook"])
+
+    def test_skips_continuation_pages(self):
+        feed = self._feed([
+            _doc("British Touring Car Championship - Ricky Collard Page 1 of 2", uuid="p1"),
+            _doc("British Touring Car Championship - Ricky Collard Page 2 of 2", uuid="p2"),
+        ])
+        _, notices = sp.btcc_notices_for_round(feed, SILVERSTONE)
+        self.assertEqual([(n["driver"], n["pdf_url"]) for n in notices], [("Ricky Collard", "https://example.com/p1/pdf")])
+
+    def test_round_not_on_board(self):
+        found, notices = sp.btcc_notices_for_round(self._feed([]), DONINGTON)
+        self.assertFalse(found)
+        self.assertEqual(notices, [])
+
+
+class TestTitleDriver(unittest.TestCase):
+    def test_live_title_variants(self):
+        cases = {
+            "British Touring Car Championship - Josh Cook": "Josh Cook",
+            "British Touring Car Championship -Tom Chilton": "Tom Chilton",
+            "British Touring Car Championship  - Aron Taylor-Smith": "Aron Taylor-Smith",
+            "British Touring Car Championship - No 3 Tom Chilton (Croft)": "Tom Chilton",
+            "British Touring Car Championship - Ricky Collard Page 1 of 2": "Ricky Collard",
+            "British Touring Car Championship - Restart Racing - Chris Smiley": "Chris Smiley",
+            "British Touring Car Championship - Tom Ingram (2)": "Tom Ingram",
+        }
+        for title, driver in cases.items():
+            self.assertEqual(sp._title_driver(title), driver, title)
+
+
+class TestInheritAppealSessions(unittest.TestCase):
+    def test_appeal_takes_the_original_decision_session(self):
+        penalties = [
+            {"driver": "Ricky Collard", "session": "Race 3", "sanction": "5s time penalty"},
+            {"driver": "Ricky Collard", "session": None, "sanction": "Appeal rejected - penalty upheld"},
+        ]
+        sp._inherit_appeal_sessions(penalties)
+        self.assertEqual(penalties[1]["session"], "Race 3")
+
+    def test_ambiguous_appeal_stays_unassigned(self):
+        penalties = [
+            {"driver": "A", "session": "Race 1", "sanction": "Written reprimand"},
+            {"driver": "A", "session": "Race 2", "sanction": "5s time penalty"},
+            {"driver": "A", "session": None, "sanction": "Appeal rejected - penalty upheld"},
+        ]
+        sp._inherit_appeal_sessions(penalties)
+        self.assertIsNone(penalties[2]["session"])
 
 
 class TestBuildOneLiner(unittest.TestCase):
@@ -409,8 +554,8 @@ class TestBuildOneLiner(unittest.TestCase):
 class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
     """main() must not let a round that scrapes to zero penalties silently
     overwrite real, non-empty data already on file for that round - the
-    noticeboard page fetching fine but _ROW_RE/BARC_SERIES_MARKER matching
-    nothing (e.g. BARC changes its markup) looks identical to a genuinely
+    noticeboard feed fetching fine but BARC_SERIES_MARKER matching nothing
+    (e.g. BARC changes its title wording) looks identical to a genuinely
     penalty-free weekend from the empty list alone, so an empty result can
     only be trusted when there was nothing already on file to lose."""
 
@@ -429,6 +574,8 @@ class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
         self._orig_calendar_path = sp.CALENDAR_PATH
         self._orig_data_dir = sp.DATA_DIR
         self._orig_scrape_round_penalties = sp.scrape_round_penalties
+        self._orig_fetch_noticeboard = sp.fetch_noticeboard
+        sp.fetch_noticeboard = lambda: {"documents": []}
         sp.CALENDAR_PATH = self.calendar_path
         sp.DATA_DIR = self.data_dir
 
@@ -436,6 +583,7 @@ class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
         sp.CALENDAR_PATH = self._orig_calendar_path
         sp.DATA_DIR = self._orig_data_dir
         sp.scrape_round_penalties = self._orig_scrape_round_penalties
+        sp.fetch_noticeboard = self._orig_fetch_noticeboard
 
     def _write_existing_penalties(self, round_num, penalties):
         self.penalties_path.write_text(json.dumps(
@@ -445,7 +593,7 @@ class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
     def test_existing_data_preserved_and_run_fails_when_new_scrape_is_empty(self):
         existing_penalty = {"driver": "Chris Smiley", "summary": "5s time penalty"}
         self._write_existing_penalties(99, [existing_penalty])
-        sp.scrape_round_penalties = lambda round_info: []
+        sp.scrape_round_penalties = lambda round_info, feed: []
 
         with self.assertRaises(SystemExit) as ctx:
             sp.main()
@@ -461,7 +609,7 @@ class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
         # No prior penalties.json at all for this round - an empty result is
         # the only information we have, so it's accepted as legitimate
         # rather than treated as a suspected failure.
-        sp.scrape_round_penalties = lambda round_info: []
+        sp.scrape_round_penalties = lambda round_info, feed: []
 
         sp.main()  # must not raise
 
@@ -472,13 +620,31 @@ class TestMainEmptyResultDoesNotOverwriteExistingData(unittest.TestCase):
     def test_non_empty_new_result_still_overwrites_normally(self):
         self._write_existing_penalties(99, [{"driver": "Old Driver", "summary": "Old penalty"}])
         new_penalty = {"driver": "New Driver", "summary": "New penalty"}
-        sp.scrape_round_penalties = lambda round_info: [new_penalty]
+        sp.scrape_round_penalties = lambda round_info, feed: [new_penalty]
 
         sp.main()  # must not raise - a real, non-empty new result is a normal update
 
         on_disk = json.loads(self.penalties_path.read_text())
         round_99 = next(r for r in on_disk["rounds"] if r["round"] == 99)
         self.assertEqual(round_99["penalties"], [new_penalty])
+
+    def test_round_missing_from_noticeboard_fails_the_run(self):
+        # The old barc.net source vanished and four weekly runs went green
+        # with nothing scraped - a round that can't be found must now fail.
+        self._write_existing_penalties(99, [{"driver": "Kept"}])
+        sp.scrape_round_penalties = lambda round_info, feed: None
+
+        with self.assertRaises(SystemExit) as ctx:
+            sp.main()
+        self.assertNotEqual(ctx.exception.code, 0)
+        on_disk = json.loads(self.penalties_path.read_text())
+        self.assertEqual(on_disk["rounds"][0]["penalties"], [{"driver": "Kept"}])
+
+    def test_unreachable_feed_fails_the_run(self):
+        sp.fetch_noticeboard = lambda: None
+        with self.assertRaises(SystemExit) as ctx:
+            sp.main()
+        self.assertNotEqual(ctx.exception.code, 0)
 
 
 if __name__ == "__main__":
