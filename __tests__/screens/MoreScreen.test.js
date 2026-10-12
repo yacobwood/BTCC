@@ -125,194 +125,21 @@ describe('MoreScreen', () => {
     shareSpy.mockRestore();
   });
 
-  // ── Support buttons (Android only) ────────────────────────────────────────────
+  // ── No donations (Google Play Payments policy) ──────────────────────────────
+  // Play rejected the app (2026-10-12) for a Buy Me a Coffee donation link:
+  // donations to a non-tax-exempt developer must use Play billing or not exist.
+  // The card, its donor-name prompt and the chat supporter badge were removed.
 
-  it('shows Buy Me a Coffee button on Android', async () => {
-    Platform.OS = 'android';
-    const {getByLabelText} = renderMore();
-    await waitFor(() => {
-      expect(getByLabelText('Buy me a coffee')).toBeTruthy();
-    });
-    Platform.OS = 'ios';
-  });
-
-  it('opens buymeacoffee URL when Buy Me a Coffee is pressed', async () => {
-    Platform.OS = 'android';
+  it.each(['android', 'ios'])('has no donation link on %s', async (os) => {
+    Platform.OS = os;
     const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
-    const {getByLabelText} = renderMore();
-    await waitFor(() => getByLabelText('Buy me a coffee'));
-    fireEvent.press(getByLabelText('Buy me a coffee'));
-    // Opening the link is now gated on an async hasChatDisplayName check (see
-    // the "donor name gate" describe block below), so this resolves a tick later.
-    await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
+    const {queryByLabelText, queryByText, getByText} = renderMore();
+    await waitFor(() => getByText('Feedback & Bugs'));
+    expect(queryByLabelText('Buy me a coffee')).toBeNull();
+    expect(queryByText(/coffee|donat|support development/i)).toBeNull();
+    expect(openURL).not.toHaveBeenCalledWith(expect.stringContaining('buymeacoffee'));
+    openURL.mockRestore();
     Platform.OS = 'ios';
-  });
-
-  it('hides support buttons on iOS', async () => {
-    Platform.OS = 'ios';
-    const {queryByLabelText} = renderMore();
-    await waitFor(() => expect(queryByLabelText('Buy me a coffee')).toBeNull());
-  });
-
-  it('shows the restyled card title and supporting copy', async () => {
-    // Regression: this used to be a bare buymeacoffee.com badge image with no
-    // in-app text at all - promoting it also means it should read like an
-    // app-native CTA, not a stamped-in web badge.
-    Platform.OS = 'android';
-    const {getByText} = renderMore();
-    await waitFor(() => {
-      expect(getByText('Buy me a coffee')).toBeTruthy();
-      expect(getByText('Enjoying the app? Consider supporting development.')).toBeTruthy();
-    });
-    Platform.OS = 'ios';
-  });
-
-  it('renders Buy Me a Coffee as the very first thing on the screen', async () => {
-    // Regression: it used to render below Feedback & Bugs, at the very
-    // bottom of the screen - it should now appear before every other
-    // section, including "NEW HERE?" (the first section title otherwise).
-    Platform.OS = 'android';
-    const {getByLabelText, toJSON} = renderMore();
-    await waitFor(() => getByLabelText('Buy me a coffee'));
-    const rendered = JSON.stringify(toJSON());
-    const coffeeIndex = rendered.indexOf('Buy me a coffee');
-    const newHereIndex = rendered.indexOf('NEW HERE?');
-    const feedbackIndex = rendered.indexOf('Feedback & Bugs');
-    expect(coffeeIndex).toBeGreaterThan(-1);
-    expect(coffeeIndex).toBeLessThan(newHereIndex);
-    expect(coffeeIndex).toBeLessThan(feedbackIndex);
-    Platform.OS = 'ios';
-  });
-
-  // ── Donor name gate ────────────────────────────────────────────────────────────
-
-  describe('donor name gate', () => {
-    beforeEach(() => { Platform.OS = 'android'; });
-    afterEach(() => { Platform.OS = 'ios'; });
-
-    it('opens the coffee link directly, with no prompt, when a chat display name is already set', async () => {
-      hasChatDisplayName.mockResolvedValue(true);
-      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
-      const {getByLabelText, queryByLabelText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
-      expect(queryByLabelText('Chat display name')).toBeNull();
-    });
-
-    it('shows the name-gate prompt when no chat display name is set yet', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      const {getByLabelText, getByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => expect(getByText('One quick thing')).toBeTruthy());
-      expect(getByLabelText('Chat display name')).toBeTruthy();
-      expect(Analytics.donorGateShown).toHaveBeenCalled();
-    });
-
-    it('shows a "sign in to make this permanent" link for an anonymous user', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      mockAuthModule().currentUser = {uid: 'anon1', isAnonymous: true};
-      const {getByLabelText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => expect(getByLabelText('Sign in to make this permanent')).toBeTruthy());
-    });
-
-    it('does not show the sign-in link for an already signed-in user', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      mockAuthModule().currentUser = {uid: 'uid1', isAnonymous: false};
-      const {getByLabelText, getByText, queryByLabelText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByText('One quick thing'));
-      expect(queryByLabelText('Sign in to make this permanent')).toBeNull();
-    });
-
-    it('pressing the sign-in link navigates to Settings and closes the gate', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      const {getByLabelText, queryByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByLabelText('Sign in to make this permanent'));
-      fireEvent.press(getByLabelText('Sign in to make this permanent'));
-      expect(nav.navigate).toHaveBeenCalledWith('Settings');
-      expect(queryByText('One quick thing')).toBeNull();
-    });
-
-    it('Save & Continue saves the name via chatIdentity then opens the coffee link', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      saveChatDisplayName.mockResolvedValue({status: 'ok', name: 'Speedy'});
-      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
-      const {getByLabelText, getByText, queryByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByText('One quick thing'));
-      fireEvent.changeText(getByLabelText('Chat display name'), 'Speedy');
-      fireEvent.press(getByLabelText('Save name and continue'));
-      await waitFor(() => expect(saveChatDisplayName).toHaveBeenCalledWith(
-        expect.objectContaining({name: 'Speedy'}),
-      ));
-      await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
-      expect(queryByText('One quick thing')).toBeNull();
-      expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('ok');
-    });
-
-    it('shows an error and keeps the gate open when the name cannot be saved', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      saveChatDisplayName.mockResolvedValue({status: 'taken', message: 'That name is already taken'});
-      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
-      const {getByLabelText, getByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByText('One quick thing'));
-      fireEvent.changeText(getByLabelText('Chat display name'), 'Gordon');
-      fireEvent.press(getByLabelText('Save name and continue'));
-      await waitFor(() => expect(getByText('That name is already taken')).toBeTruthy());
-      expect(openURL).not.toHaveBeenCalled();
-      expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('taken');
-    });
-
-    it('rejects an empty name instead of silently falling back to a generated "Fan #" name', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
-      const {getByLabelText, getByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByText('One quick thing'));
-      // Leave the input blank - don't fireEvent.changeText at all
-      fireEvent.press(getByLabelText('Save name and continue'));
-      await waitFor(() => expect(getByText('Enter a display name, or tap Skip')).toBeTruthy());
-      expect(saveChatDisplayName).not.toHaveBeenCalled();
-      expect(openURL).not.toHaveBeenCalled();
-      expect(Analytics.donorGateNameSaveResult).toHaveBeenCalledWith('empty');
-    });
-
-    it('rejects a whitespace-only name the same way', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      const {getByLabelText, getByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByText('One quick thing'));
-      fireEvent.changeText(getByLabelText('Chat display name'), '   ');
-      fireEvent.press(getByLabelText('Save name and continue'));
-      await waitFor(() => expect(getByText('Enter a display name, or tap Skip')).toBeTruthy());
-      expect(saveChatDisplayName).not.toHaveBeenCalled();
-    });
-
-    it('Skip opens the coffee link directly without saving a name', async () => {
-      hasChatDisplayName.mockResolvedValue(false);
-      const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
-      const {getByLabelText, getByText, queryByText} = renderMore();
-      await waitFor(() => getByLabelText('Buy me a coffee'));
-      fireEvent.press(getByLabelText('Buy me a coffee'));
-      await waitFor(() => getByText('One quick thing'));
-      fireEvent.press(getByLabelText('Skip'));
-      expect(saveChatDisplayName).not.toHaveBeenCalled();
-      await waitFor(() => expect(openURL).toHaveBeenCalledWith('https://www.buymeacoffee.com/btcchub'));
-      expect(queryByText('One quick thing')).toBeNull();
-      expect(Analytics.donorGateSkipped).toHaveBeenCalled();
-    });
   });
 
   // Regression guard (2026-08-30): scroll-to-top used to fire on every focus,

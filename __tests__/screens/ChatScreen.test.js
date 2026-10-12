@@ -361,28 +361,17 @@ describe('ChatScreen', () => {
     await waitFor(() => expect(getByText(/Gordon/)).toBeTruthy());
   });
 
-  describe('supporter badge', () => {
-    it('shows the supporter badge for a message author flagged in /chat/donors', async () => {
-      const {getByLabelText} = renderChat();
-      await act(async () => {
-        triggerMessages([
-          {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
-        ]);
-        triggerDonors({xyz: true});
-      });
-      await waitFor(() => expect(getByLabelText('Supporter')).toBeTruthy());
+  // Donor badges were removed with the Buy Me a Coffee link (Play Payments
+  // policy, 2026-10-12): an in-app perk for paying outside Play billing.
+  it('shows no supporter badge and does not read /chat/donors', async () => {
+    const {queryByLabelText} = renderChat();
+    await act(async () => {
+      triggerMessages([
+        {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
+      ]);
     });
-
-    it('does not show a badge for a non-donor', async () => {
-      const {queryByLabelText} = renderChat();
-      await act(async () => {
-        triggerMessages([
-          {id: '1', text: 'Great race!', authorName: 'Gordon', authorId: 'xyz', timestamp: 1000, flagCount: 0, hidden: false},
-        ]);
-        triggerDonors({someoneElse: true});
-      });
-      await waitFor(() => expect(queryByLabelText('Supporter')).toBeNull());
-    });
+    expect(mockDonorsOn).not.toHaveBeenCalled();
+    expect(queryByLabelText('Supporter')).toBeNull();
   });
 
   it('reply mention uses the resolved current name, not the stale message snapshot', async () => {

@@ -50,7 +50,6 @@ export default function ChatScreen({onClose} = {}) {
   // as a fallback for authors who've never (re)named themselves since this
   // map existed.
   const [authorNames, setAuthorNames] = useState({});
-  const [donors, setDonors] = useState({});
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
   const [commenterName, setCommenterName] = useState(null);
@@ -141,14 +140,10 @@ export default function ChatScreen({onClose} = {}) {
     const namesRef = DB.ref('/chat/authorNames');
     namesRef.on('value', snap => { setAuthorNames(snap.val() || {}); });
 
-    // Live authorId -> donor flag map, for the supporter badge in renderMessage
-    const donorsRef = DB.ref('/chat/donors');
-    donorsRef.on('value', snap => { setDonors(snap.val() || {}); });
-
     const bansRef = DB.ref('/chat/bans');
     bansRef.on('value', snap => { setBans(snap.val() || {}); });
 
-    return () => { ref.off('value'); namesRef.off('value'); donorsRef.off('value'); bansRef.off('value'); };
+    return () => { ref.off('value'); namesRef.off('value'); bansRef.off('value'); };
   }, []);
 
   useEffect(() => {
@@ -455,9 +450,6 @@ export default function ChatScreen({onClose} = {}) {
       <View style={styles.msgRow}>
         <View style={styles.msgMeta}>
           <Text style={[styles.msgAuthor, isOwn && styles.msgAuthorOwn]}>{authorName}</Text>
-          {!!donors[item.authorId] && (
-            <Icon name="local-cafe" size={12} color={Colors.yellow} accessibilityLabel="Supporter" />
-          )}
           <Text style={styles.msgTime}>{timeAgo(item.timestamp)}</Text>
         </View>
         <Text style={styles.msgText}>{item.text}</Text>
