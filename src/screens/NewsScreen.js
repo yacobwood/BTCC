@@ -62,18 +62,26 @@ export default function NewsScreen({navigation}) {
   const [explainerArticles, setExplainerArticles] = useState([]);
   useEffect(() => { fetchExplainerArticles().then(setExplainerArticles).catch(() => {}); }, []);
   const [explainerReadIds, setExplainerReadIds] = useState(new Set());
-  // Same "fetch once on mount, independent of the main News pagination/pull-
-  // to-refresh cycle" precedent as explainerArticles above - this is
-  // homepage-native content mirrored weekly, not something that needs to
-  // feel live on every refresh.
+  // Cached copy first (instant), then a forced network fetch replaces it.
+  // Used to be a single cached fetch on mount only: fetchJson's background
+  // refresh writes storage but never this state, and the News tab stays
+  // mounted all session, so a device that cached shorts.json within the
+  // 6-hour max age kept showing the old set until a full app restart - pull-
+  // to-refresh didn't touch shorts at all (confirmed live 2026-10-13, after
+  // the weekly scrape landed new Shorts).
   const [shorts, setShorts] = useState([]);
-  useEffect(() => {
-    fetchShorts().then(raw => {
+  const loadShorts = useCallback((forceRefresh = false) =>
+    fetchShorts(forceRefresh).then(raw => {
       const parsed = parseShorts(raw).shorts;
       setShorts(parsed);
-      if (parsed.length > 0) Analytics.shortsViewed(parsed.length);
-    }).catch(e => Analytics.shortsLoadFailed(e?.message));
-  }, []);
+      return parsed;
+    }), []);
+  useEffect(() => {
+    loadShorts()
+      .then(parsed => { if (parsed.length > 0) Analytics.shortsViewed(parsed.length); })
+      .catch(e => Analytics.shortsLoadFailed(e?.message))
+      .finally(() => loadShorts(true).catch(() => {}));
+  }, [loadShorts]);
 
   const hubNewsEnabledRef = React.useRef(hub_news_enabled);
   useEffect(() => { hubNewsEnabledRef.current = hub_news_enabled; }, [hub_news_enabled]);
@@ -183,7 +191,8 @@ export default function NewsScreen({navigation}) {
     Analytics.pullToRefresh('news');
     setRefreshing(true);
     load(1, false, true);
-  }, [load]);
+    loadShorts(true).catch(() => {});
+  }, [load, loadShorts]);
 
   const onEndReached = useCallback(() => {
     if (!hasMore || loadingMore || searchActive) return;

@@ -575,5 +575,37 @@ describe('NewsScreen', () => {
       await act(async () => { fireEvent.press(getByLabelText('View Channel Shorts')); });
       expect(openURL).toHaveBeenCalledWith('https://www.youtube.com/@OfficialBTCC/shorts');
     });
+
+    // Regression 2026-10-13: a device holding a <6h-old cached shorts.json
+    // kept showing the old Shorts all session - the cached read was the only
+    // one that ever reached state.
+    it('replaces cached shorts with a fresh network fetch on mount', async () => {
+      renderNews();
+      fetchShorts.mockImplementation(force => Promise.resolve(
+        {updatedAt: '', shorts: force ? SHORTS : SHORTS.slice(0, 1)},
+      ));
+      const {getByText, getAllByLabelText} = renderWithProviders(<NewsScreen navigation={nav} />);
+      await waitFor(() => getByText('LATEST BTCC SHORTS'));
+      await waitFor(() => expect(getAllByLabelText('Watch BTCC short on YouTube')).toHaveLength(2));
+      expect(fetchShorts).toHaveBeenCalledWith(false);
+      expect(fetchShorts).toHaveBeenCalledWith(true);
+    });
+
+    it('pull-to-refresh force-refetches shorts', async () => {
+      const {getByLabelText} = renderNews({shorts: SHORTS});
+      await waitFor(() => expect(fetchShorts).toHaveBeenCalledTimes(2));
+      await act(async () => { fireEvent.press(getByLabelText('Refresh news')); });
+      expect(fetchShorts).toHaveBeenCalledTimes(3);
+      expect(fetchShorts).toHaveBeenLastCalledWith(true);
+    });
+
+    it('counts shorts as viewed once per mount, not again for the fresh fetch', async () => {
+      const {Analytics} = require('../../src/utils/analytics');
+      const spy = jest.spyOn(Analytics, 'shortsViewed');
+      renderNews({shorts: SHORTS});
+      await waitFor(() => expect(fetchShorts).toHaveBeenCalledTimes(2));
+      expect(spy).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
+    });
   });
 });
