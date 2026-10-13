@@ -4,21 +4,23 @@
 # hand from the admin ACADEMY tab. Logic lives in
 # scripts/explainerAutoPublish.js.
 #
-# Publish time is 19:00 UK (evening, when more people are reading). Two
-# crons cover both GMT and BST (the script itself skips any run before
-# 19:00 London time), plus a later catch-up in case GitHub drops a
-# scheduled run. Re-running is harmless:
-# already-published articles are skipped. Off the :00 mark per the root
-# README's "overnight cron gap" note.
+# Publish time is 19:00 UK. Triggered by the triggerAcademyAutoPublish
+# Cloud Function (functions/academyDispatch.js, Cloud Scheduler at 19:00
+# Europe/London) - NOT by a `schedule:` here: GitHub's own cron proved to
+# run hours late on this repo, so none of the first evening's three crons
+# had even started by 22:16 (2026-10-13). The script only publishes
+# between 19:00 and 21:59 London time unless `force` is ticked, so a late
+# trigger can never send a notification at night. Re-running is harmless:
+# already-published articles are skipped.
 name: Publish Scheduled Academy Articles
 
 on:
-  schedule:
-    - cron: "7 18 * * *"   # 19:07 BST / 18:07 GMT (skipped in winter)
-    - cron: "7 19 * * *"   # 20:07 BST / 19:07 GMT
-    - cron: "37 20 * * *"  # catch-up: 21:37 BST / 20:37 GMT
   workflow_dispatch:
     inputs:
+      force:
+        description: "Publish whatever is due now, ignoring the 19:00-21:59 UK window"
+        type: boolean
+        default: false
       is_retry:
         description: "internal - marks this run as an automated retry (do not set manually)"
         type: boolean
@@ -47,8 +49,7 @@ jobs:
         id: publish
         env:
           NOTIFS_FILE: ${{ runner.temp }}/explainer-notifs.json
-          # A manual run publishes whatever is due regardless of the hour.
-          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+          FORCE: ${{ github.event.inputs.force == 'true' }}
         run: node scripts/explainerAutoPublish.js publish
 
       - name: Commit published articles
@@ -81,7 +82,7 @@ jobs:
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish-scheduled-explainers.yml/dispatches" \
-            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || { echo "Retry dispatch failed - reporting failure directly instead"; echo "dispatch_failed=true" >> "$GITHUB_OUTPUT"; }
+            -d '{"ref":"main","inputs":{"is_retry":"true","force":"${{ github.event.inputs.force == 'true' }}"}}' || { echo "Retry dispatch failed - reporting failure directly instead"; echo "dispatch_failed=true" >> "$GITHUB_OUTPUT"; }
 
       - name: Report failure
         if: (failure() || cancelled()) && (steps.notify.outcome == 'failure' || github.event.inputs.is_retry == 'true' || steps.retry.outputs.dispatch_failed == 'true')

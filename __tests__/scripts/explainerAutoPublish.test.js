@@ -71,6 +71,13 @@ describe('runPublish', () => {
     expect(written.posts.find(p => p.id === 'explainer-a').status).toBe('published');
     expect(written.posts.find(p => p.id === 'explainer-b').status).toBe('staged');
   });
+  it('does nothing after 21:59 London time (a late trigger must not notify at night)', () => {
+    expect(runPublish({now: new Date('2026-10-16T21:05:00Z')})).toEqual([]);
+    expect(written).toBeNull();
+  });
+  it('still publishes at 21:xx London time', () => {
+    expect(runPublish({now: new Date('2026-10-16T20:55:00Z')}).map(n => n.id)).toEqual(['explainer-a']);
+  });
   it('a manual (forced) run ignores the hour', () => {
     expect(runPublish({now: new Date('2026-10-16T08:00:00Z'), force: true}).map(n => n.id)).toEqual(['explainer-a']);
   });

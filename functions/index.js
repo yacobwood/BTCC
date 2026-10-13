@@ -14,6 +14,7 @@ Object.assign(exports, require('./chat'));
 Object.assign(exports, require('./analytics'));
 Object.assign(exports, require('./scraperAdmin'));
 Object.assign(exports, require('./resultsDispatch'));
+Object.assign(exports, require('./academyDispatch'));
 Object.assign(exports, require('./newsDispatch'));
 // Only the trigger - watcherDispatch.js also exports plain helpers for tests.
 exports.startSessionWatchers = require('./watcherDispatch').startSessionWatchers;

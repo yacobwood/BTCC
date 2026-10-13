@@ -21,6 +21,12 @@ const path = require('path');
 const DATA_PATH = path.join(__dirname, '..', 'data', 'explainer_articles.json');
 const REPO = process.env.GITHUB_REPOSITORY || 'yacobwood/BTCC';
 const PUBLISH_HOUR_LONDON = 19;
+// Last hour a run may still publish (21:xx). GitHub's own schedule trigger
+// proved to run hours late on this repo (none of the three 2026-10-13
+// evening crons had started by 22:16), so a late trigger must never fire a
+// notification at night - it does nothing and the article waits for the
+// next evening's run instead. A forced manual run ignores the window.
+const LAST_PUBLISH_HOUR_LONDON = 21;
 // An accepted article more than this many days past its scheduledDate is
 // skipped rather than published, so a long Actions outage (or a batch of
 // old dates) can't fire a burst of notifications in one run.
@@ -69,8 +75,8 @@ function publishArticle(p, nowIso) {
 
 function runPublish({now = new Date(), force = false} = {}) {
   const {date, hour} = londonParts(now);
-  if (!force && hour < PUBLISH_HOUR_LONDON) {
-    console.log(`London time is ${hour}:xx, before ${PUBLISH_HOUR_LONDON}:00 - nothing to do yet.`);
+  if (!force && (hour < PUBLISH_HOUR_LONDON || hour > LAST_PUBLISH_HOUR_LONDON)) {
+    console.log(`London time is ${hour}:xx, outside the ${PUBLISH_HOUR_LONDON}:00-${LAST_PUBLISH_HOUR_LONDON}:59 publish window - nothing to do.`);
     return [];
   }
   const raw = fs.readFileSync(DATA_PATH, 'utf8');
