@@ -433,6 +433,9 @@ select.input { cursor: pointer; }
 .resize-btn .resize-dim { font-size: 10px; font-weight: 600; opacity: 0.7; margin-left: 3px; }
 
 /* ── Image uploader ── */
+.explainer-image-preview { position:relative; width:100%; max-width:520px; aspect-ratio:16/9; border-radius:10px; border:1px dashed var(--outline-lo, #2A2D44); background:#0B0C0F center/cover no-repeat; display:flex; align-items:center; justify-content:center; color:var(--text-sec); font-size:12px; cursor:pointer; }
+.explainer-image-preview.has-image { border-style:solid; }
+.explainer-image-preview.drag-over { border-color:var(--yellow); }
 .upload-zone {
   border: 2px dashed var(--outline);
   border-radius: 12px;
@@ -1451,6 +1454,28 @@ select.input { cursor: pointer; }
     <div class="field-group">
       <div class="field-label">TITLE</div>
       <input type="text" id="explainer-edit-title" placeholder="Headline">
+    </div>
+    <div class="field-group">
+      <div class="field-label">HEADER IMAGE</div>
+      <div id="explainer-image-preview" class="explainer-image-preview" title="Click or drop an image to replace"
+        onclick="document.getElementById('explainer-image-file').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');uploadExplainerImage(event.dataTransfer.files[0])"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn-sm" onclick="document.getElementById('explainer-image-file').click()">Upload new</button>
+        <button class="btn-sm" onclick="setExplainerImageFromUrl()">Use URL</button>
+        <button class="btn-danger" onclick="clearExplainerImage()">Remove</button>
+        <input type="file" id="explainer-image-file" accept="image/*" style="display:none" onchange="uploadExplainerImage(this.files[0]);this.value=''">
+      </div>
+      <div class="img-upload-status" id="explainer-image-status"></div>
+      <input type="hidden" id="explainer-image-url">
+      <div class="field-label" style="margin-top:12px">PHOTO CREDIT <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(required for Creative Commons photos - clear it if a new image doesn't need one)</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" id="explainer-image-credit" placeholder="Photographer / source" style="flex:1;min-width:160px">
+        <input type="text" id="explainer-image-credit-url" placeholder="Credit link (https://…)" style="flex:2;min-width:200px">
+        <input type="text" id="explainer-image-license" placeholder="Licence, e.g. CC BY-SA 2.0" style="flex:1;min-width:140px">
+      </div>
     </div>
     <div class="field-group">
       <div class="field-label">BODY</div>
@@ -3700,7 +3725,9 @@ function previewExplainerEditInBrowser() {
   const raw = explainerQuill ? explainerQuill.root.innerHTML : '';
   const content = raw === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(raw), explainerEditTables);
   const title = document.getElementById('explainer-edit-title').value.trim() || saved.title || '';
-  openArticleWebPreview({...saved, title}, content);
+  const draft = {...saved, title};
+  applyExplainerImageFields(draft);
+  openArticleWebPreview(draft, content);
 }
 
 function openArticleWebPreview(article, content) {
@@ -3710,6 +3737,10 @@ function openArticleWebPreview(article, content) {
   const hero = article.imageUrl
     ? `<div class="hero" style="background-image:url('${htmlEsc(article.imageUrl)}')"><div class="hero-gradient"></div><div class="hero-text"><h1>${title}</h1><p class="date">${date}</p></div></div>`
     : `<div style="padding:50px 16px 0"><h1>${title}</h1><p class="date">${date}</p></div>`;
+  // Same attribution line ArticleScreen renders under a credited hero.
+  const credit = article.imageUrl && article.imageCredit
+    ? `<p class="image-credit">Photo: ${article.imageCreditUrl ? `<a href="${htmlEsc(article.imageCreditUrl)}">${htmlEsc(article.imageCredit)}</a>` : htmlEsc(article.imageCredit)}${article.imageLicense ? ` (${htmlEsc(article.imageLicense)})` : ''}</p>`
+    : '';
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview: ${title}</title><style>
     * { box-sizing:border-box; margin:0; padding:0; }
     html { background:#1a1b22; }
@@ -3719,6 +3750,8 @@ function openArticleWebPreview(article, content) {
     .hero { position:relative; width:100%; min-height:300px; background-size:cover; background-position:center; display:flex; flex-direction:column; justify-content:flex-end; }
     .hero-gradient { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,transparent 30%,transparent 50%,rgba(11,12,15,0.95) 100%); }
     .hero-text { position:relative; z-index:1; padding:0 16px 20px; }
+    .image-credit { margin:6px 16px 0; font-size:11px; color:#8B949E; }
+    .image-credit a { color:#8B949E; text-decoration:underline; }
     h1 { font-size:22px; font-weight:700; margin-bottom:6px; line-height:1.3; }
     h2 { font-size:18px; font-weight:700; margin-top:14px; }
     h3 { font-size:16px; font-weight:700; margin-top:14px; }
@@ -3741,11 +3774,95 @@ function openArticleWebPreview(article, content) {
     th { background:rgba(255,255,255,0.08); font-weight:700; color:#fff; }
     tr:nth-child(even) { background:rgba(255,255,255,0.03); }
     td { color:#ccc; }
-  </style></head><body><div class="phone"><div class="banner">PREVIEW - NOT PUBLISHED</div>${hero}<div class="divider"></div><div class="content">${content || ''}</div></div></body></html>`;
+  </style></head><body><div class="phone"><div class="banner">PREVIEW - NOT PUBLISHED</div>${hero}${credit}<div class="divider"></div><div class="content">${content || ''}</div></div></body></html>`;
   const url = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
   const win = window.open(url, '_blank');
   if (!win) alert('Your browser blocked the preview tab - allow pop-ups for this page.');
   setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// Header image editing (2026-10-13), the Academy equivalent of the hub
+// post image manager. The URL lives in a hidden field until save; a fresh
+// upload previews from the local file because raw.githubusercontent.com can
+// take a few minutes to serve a just-committed image.
+const EXPLAINER_IMAGE_FIELDS = [
+  ['imageCredit', 'explainer-image-credit'],
+  ['imageCreditUrl', 'explainer-image-credit-url'],
+  ['imageLicense', 'explainer-image-license'],
+];
+
+function loadExplainerImageFields(p) {
+  document.getElementById('explainer-image-url').value = p.imageUrl || '';
+  for (const [key, el] of EXPLAINER_IMAGE_FIELDS) document.getElementById(el).value = p[key] || '';
+  document.getElementById('explainer-image-status').textContent = '';
+  renderExplainerImagePreview(p.imageUrl || '');
+}
+
+function renderExplainerImagePreview(src) {
+  const el = document.getElementById('explainer-image-preview');
+  el.style.backgroundImage = src ? `url("${src.replace(/"/g, '%22')}")` : '';
+  el.classList.toggle('has-image', !!src);
+  el.textContent = src ? '' : 'No header image - click or drop one here';
+}
+
+function explainerImageCreditNudge() {
+  const hasCredit = EXPLAINER_IMAGE_FIELDS.some(([, el]) => document.getElementById(el).value.trim());
+  return hasCredit ? ' - check the photo credit below still applies to the new image' : '';
+}
+
+async function uploadExplainerImage(file) {
+  if (!file) return;
+  const statusEl = document.getElementById('explainer-image-status');
+  const localUrl = URL.createObjectURL(file);
+  statusEl.style.color = 'var(--text-sec)';
+  statusEl.textContent = 'Compressing and uploading…';
+  try {
+    const blob = await compressImage(file, 1200);
+    const dims = await getImageDimensions(blob);
+    const slug = (document.getElementById('explainer-edit-id').value || 'explainer-' + slugifyExplainerTitle(document.getElementById('explainer-edit-title').value || 'article')).replace(/^explainer-/, '');
+    const url = await uploadImageToGitHub(blob, `data/media/explainers/${slug}-${Date.now()}.webp`);
+    document.getElementById('explainer-image-url').value = url;
+    renderExplainerImagePreview(localUrl);
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = `✓ Uploaded · ${Math.round(file.size / 1024)}KB → ${Math.round(blob.size / 1024)}KB · ${dims.w}×${dims.h} - Save to apply${explainerImageCreditNudge()}`;
+  } catch (e) {
+    URL.revokeObjectURL(localUrl);
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = `Upload failed: ${e.message}`;
+  }
+}
+
+function setExplainerImageFromUrl() {
+  const url = prompt('Image URL (https://…):', document.getElementById('explainer-image-url').value);
+  if (url === null) return;
+  const trimmed = url.trim();
+  if (trimmed && !/^https:\/\//i.test(trimmed)) { alert('Use a full https:// link.'); return; }
+  document.getElementById('explainer-image-url').value = trimmed;
+  renderExplainerImagePreview(trimmed);
+  const statusEl = document.getElementById('explainer-image-status');
+  statusEl.style.color = 'var(--text-sec)';
+  statusEl.textContent = trimmed ? `Image set - Save to apply${explainerImageCreditNudge()}` : '';
+}
+
+function clearExplainerImage() {
+  document.getElementById('explainer-image-url').value = '';
+  renderExplainerImagePreview('');
+  const statusEl = document.getElementById('explainer-image-status');
+  statusEl.style.color = 'var(--text-sec)';
+  statusEl.textContent = 'Header image removed - Save to apply';
+}
+
+// Writes the form's image + credit onto an article. A field left unchanged
+// is not touched at all (null and '' count as the same "empty"), so a save
+// that didn't involve the image doesn't register as an image edit in
+// mergePostLists.
+function applyExplainerImageFields(article) {
+  const fields = [['imageUrl', 'explainer-image-url'], ...EXPLAINER_IMAGE_FIELDS];
+  for (const [key, el] of fields) {
+    const val = document.getElementById(el).value.trim();
+    if ((article[key] || '') === val) continue;
+    if (val) article[key] = val; else delete article[key];
+  }
 }
 
 function slugifyExplainerTitle(title) {
@@ -3763,6 +3880,7 @@ function newExplainerArticle() {
   document.getElementById('explainer-edit-title').value = '';
   document.getElementById('explainer-notif-title').value = '';
   document.getElementById('explainer-notif-body').value = '';
+  loadExplainerImageFields({});
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3785,6 +3903,7 @@ function openExplainerEdit(id) {
   // saveExplainerEdit.
   document.getElementById('explainer-notif-title').value = p.notifTitleOverride || '';
   document.getElementById('explainer-notif-body').value = p.notifBodyOverride || '';
+  loadExplainerImageFields(p);
   document.getElementById('explainer-edit-status').textContent = '';
   document.getElementById('explainer-edit-card').style.display = 'block';
   initExplainerQuill();
@@ -3857,6 +3976,7 @@ async function saveExplainerEdit(mode = 'save') {
       ...(notifTitleOverride ? {notifTitleOverride} : {}),
       ...(notifBodyOverride ? {notifBodyOverride} : {}),
     };
+    applyExplainerImageFields(article);
     explainerPosts.push(article);
   } else {
     const idx = explainerPosts.findIndex(p => p.id === id);
@@ -3884,6 +4004,7 @@ async function saveExplainerEdit(mode = 'save') {
     else delete explainerPosts[idx].notifTitleOverride;
     if (notifBodyOverride) explainerPosts[idx].notifBodyOverride = notifBodyOverride;
     else delete explainerPosts[idx].notifBodyOverride;
+    applyExplainerImageFields(explainerPosts[idx]);
     article = explainerPosts[idx];
   }
 
@@ -4362,19 +4483,19 @@ function compressImage(file, maxWidth = 1200, quality = 0.82) {
   });
 }
 
-async function uploadImageToGitHub(blob) {
+async function uploadImageToGitHub(blob, path = null) {
   const tok = getToken();
   if (!tok) throw new Error('No GitHub token saved.');
   const d = new Date(), p = n => String(n).padStart(2,'0');
   const dateStr = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
-  const path = `data/hub_images/${dateStr}/hub-${Date.now()}.webp`;
+  path = path || `data/hub_images/${dateStr}/hub-${Date.now()}.webp`;
   const buf = await blob.arrayBuffer();
   let binary = '';
   new Uint8Array(buf).forEach(b => binary += String.fromCharCode(b));
   const r = await fetch(`${GH_API}/repos/${REPO}/contents/${path}`, {
     method: 'PUT',
     headers: { Authorization: 'token ' + tok, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: 'Upload hub image', content: btoa(binary) }),
+    body: JSON.stringify({ message: path.startsWith('data/media/explainers/') ? 'Upload Academy header image' : 'Upload hub image', content: btoa(binary) }),
   });
   if (!r.ok) { const e = await r.json(); throw new Error(e.message || r.status); }
   return `https://raw.githubusercontent.com/${REPO}/main/${path}`;
