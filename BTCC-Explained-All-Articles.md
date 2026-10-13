@@ -36,7 +36,7 @@ Graphic: Goodyear tyre-supplier branding. Where it goes: A fixed position set ou
 Graphic: Kwik Fit title-sponsor decal. Where it goes: Front bumper and rear window band.
 Graphic: Trade-sponsor logos (for example Autocar). Where it goes: Along the sill.
 
-Appendix 2b extends the same principle to the driver, not just the car. It sets out two approved layouts, Option A and Option B, for how sponsor badges and the championship logo are arranged across a driver's race suit, one stacking sponsor patches down the chest with a shoulder logo, the other running a single sponsor row across the shoulders with an arm-mounted championship badge. Every driver on the grid picks from one of those two templates, again under the Administrator's final say on design, positioning and type.
+Appendix 2b extends the same principle to the driver, not just the car. It shows two approved race suit layouts, Option A and Option B, which are mirror images of each other. Both put the Kwik Fit BTCC logo at the top of one chest column with seven sponsor patches filling out a two-by-four grid across the chest. A Goodyear badge goes on the opposite upper arm. The only difference between the two is which side the logo and the Goodyear badge sit on. Every driver on the grid uses one of those two layouts, again under the Administrator's final say on design, positioning and type.
 
 Why bother standardising all of this
 
@@ -467,12 +467,13 @@ Every tyre choice in BTCC is a Goodyear tyre. Sporting Regulation 1.14 confirms 
 
 The venue-by-venue compound table
 
-BTCC does not run the same three compounds everywhere. Reg 1.14.1.d sets a specific table of Tyre A (white, soft), Tyre B (yellow, medium) and Tyre C (red, hard) allocations for each circuit, with one compound highlighted at each venue as the standard for that event. Snetterton, for example, gets twelve soft and four medium tyres, with eight carryover tyres permitted on top of a sixteen-tyre new allocation. Thruxton runs the opposite extreme, four medium and sixteen hard tyres, with the medium compound restricted to qualifying use only. Croft and Silverstone National get eight soft and four hard tyres each, but only twelve new tyres total, the smallest allocation of the season.
-Side by side, those three examples look like this:
+BTCC does not run the same three compounds everywhere. Reg 1.14.1.d sets a specific table of Tyre A (white, soft), Tyre B (yellow, medium) and Tyre C (red, hard) allocations for each circuit, with one compound highlighted at each venue as the standard for that event. Snetterton, for example, gets twelve soft and four medium tyres, with eight carryover tyres permitted on top of a sixteen-tyre new allocation. Thruxton runs the opposite extreme, four medium and sixteen hard tyres, with the medium compound restricted to qualifying use only. Croft gets eight soft and four hard tyres while Silverstone National gets eight soft and four medium. Both get only twelve new tyres, the joint-smallest allocation of the season alongside Brands Hatch GP.
+Side by side, those examples look like this:
 Here is a breakdown by Venue, Allocation, Detail.
 Venue: Snetterton. Allocation: 12 soft (Tyre A), 4 medium (Tyre B). Detail: 16 new tyres, plus up to 8 carryover permitted.
 Venue: Thruxton. Allocation: 4 medium (Tyre B), 16 hard (Tyre C). Detail: Medium compound restricted to qualifying use only.
-Venue: Croft and Silverstone National. Allocation: 8 soft (Tyre A), 4 hard (Tyre C). Detail: 12 new tyres total, the smallest allocation of the season.
+Venue: Croft. Allocation: 8 soft (Tyre A), 4 hard (Tyre C). Detail: 12 new tyres, joint-smallest allocation of the season.
+Venue: Silverstone National. Allocation: 8 soft (Tyre A), 4 medium (Tyre B). Detail: 12 new tyres, joint-smallest allocation of the season.
 
 
 The "option tyre" rule
