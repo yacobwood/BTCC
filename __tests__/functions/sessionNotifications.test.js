@@ -72,6 +72,44 @@ describe('sendSessionNotifications', () => {
     expect(mockFetchWithTimeout).not.toHaveBeenCalledWith(expect.stringContaining('schedule.json'));
   });
 
+  describe('Tuesday 9am standings update', () => {
+    const shared = require('../../functions/shared');
+    const calendar = {rounds: [
+      {round: 9, venue: 'Silverstone', startDate: '2026-09-26', endDate: '2026-09-27'},
+      {round: 10, venue: 'Brands Hatch GP', startDate: '2026-10-10', endDate: '2026-10-11'},
+    ]};
+
+    function runTuesdayAfter(sundayStr) {
+      shared.getUKTimeParts.mockReturnValue({weekday: 'Tuesday', hour: 9, minute: 0});
+      // getUKDateString(now, -2) is the Sunday just gone; other offsets are irrelevant here.
+      shared.getUKDateString.mockImplementation((_now, offset) => (offset === -2 ? sundayStr : '2026-01-01'));
+      mockFetchWithTimeout.mockImplementation((url) => {
+        if (url.includes('calendar.json')) return emptyJsonResponse(calendar);
+        if (url.includes('schedule.json')) return emptyJsonResponse({rounds: []});
+        if (url.includes('podcast.rss')) return Promise.resolve({text: () => Promise.resolve('')});
+        return emptyJsonResponse({});
+      });
+      return sendSessionNotifications.run();
+    }
+
+    afterEach(() => {
+      shared.getUKTimeParts.mockReturnValue({weekday: 'Wednesday', hour: 12, minute: 0});
+      shared.getUKDateString.mockImplementation(() => '2026-08-19');
+    });
+
+    it('sends after a mid-season round', async () => {
+      await runTuesdayAfter('2026-09-27');
+      expect(mockLogPushHistory).toHaveBeenCalledWith(
+        'Standings Updated', expect.stringContaining('Rounds 25–27 at Silverstone'), 'standings_update', expect.anything(),
+      );
+    });
+
+    it('does not send after the season finale', async () => {
+      await runTuesdayAfter('2026-10-11');
+      expect(mockLogPushHistory).not.toHaveBeenCalledWith('Standings Updated', expect.anything(), expect.anything(), expect.anything());
+    });
+  });
+
   it('delegates the news check to checkBtccNews with the expected dependencies', async () => {
     await sendSessionNotifications.run();
     expect(mockCheckBtccNews).toHaveBeenCalledWith(expect.objectContaining({

@@ -715,7 +715,7 @@ All notification subscriptions are topic-based (not individual tokens), managed 
 | `explainer_alerts` | New "Academy" regulation-explainer article published - see the Academy section entry below and [§6](#6-screens-reference) |
 | `podcast_alerts` | New podcast episode |
 | `weekend_preview` | Friday 9am before a race weekend |
-| `standings_update` | Tuesday 9am after a race weekend |
+| `standings_update` | Tuesday 9am after a race weekend (not after the season finale - the championship is already decided) |
 | `pre_fp` | 15 minutes before Free Practice |
 | `pre_qualifying` | 15 minutes before Qualifying |
 | `pre_qrace` | 15 minutes before Qualifying Race |
@@ -756,7 +756,7 @@ The main workhorse function. Runs every minute and handles two categories of wor
 **Race-day gated** (only runs on race days, Friday before or Tuesday after):
 - Pre-session alerts: 15 minutes before each session start time from `schedule.json` (`buildSessionAlertPayload()` in `functions/sessionAlerts.js`, injected-deps-free pure function for testability). Every session deep-links to live timing when `round.tslEventId` is set, **except Race 3**: its grid is a reverse-grid derived from Race 2's result (BTCC reg 3.4.1.b) and reliably already published by the time this 15-minutes-before alert fires, so its body reads "...Tap to see the starting grid." and it deep-links to the grid tab (`{type: 'results', round, year, race: '3'}`, reusing `notifNavigation.js`'s existing race-index handling) instead of live timing.
 - Friday 9am: race weekend preview notification to `weekend_preview` topic
-- Tuesday 9am: standings update notification to `standings_update` topic
+- Tuesday 9am: standings update notification to `standings_update` topic. Skipped after the final round in `calendar.json` (highest `round`) since the title is decided by then - added 2026-10-13 after it fired following the Brands Hatch GP finale
 
 Session results notifications are a separate mechanism entirely - `.github/scripts/session_watcher.py` (Python, connected to TSL's live-timing SignalR feed, not this Cloud Function) sends those on `sessioncomplete` events, since it needs to react the moment a session actually finishes rather than poll once a minute. **Fixed 2026-09-02** (both the `race-day-start.yml` dispatch bug and a second, deeper `load_sessions()` schema mismatch it had been masking - see §20 for the full writeup) ahead of round 8 (Croft, 2026-09-05/06), its first live run all season. Not verifiable end-to-end without an actual live TSL feed, so that weekend is this fix's real first test regardless of how carefully it was checked beforehand.
 

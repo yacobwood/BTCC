@@ -107,9 +107,12 @@ exports.sendSessionNotifications = onSchedule(
         }
 
         // ── Tuesday 9am — standings update ─────────────────────────
+        // Skipped after the season finale: the championship is decided by
+        // then, so "see how the championship looks" has nothing left to say.
         if (uk.weekday === 'Tuesday' && uk.hour === 9 && uk.minute === 0) {
           const round = calendar.rounds.find(r => r.endDate === sundayStr);
-          if (round) {
+          const finalRound = Math.max(...calendar.rounds.map(r => r.round));
+          if (round && round.round !== finalRound) {
             const rStart = (round.round - 1) * 3 + 1;
             const suTitle = 'Standings Updated';
             const suBody = `See how the championship looks after Rounds ${rStart}–${rStart + 2} at ${round.venue}`;
