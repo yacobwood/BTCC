@@ -3553,6 +3553,51 @@ async function saveHubNews(commitMessage, notifArticle = null) {
 // ── Explained (regulation-explainer articles) ─────────────────────────────────
 const EXPLAINER_PATH = 'data/explainer_articles.json';
 let explainerPosts = [], explainerFileSha = null;
+// Each article as it was when this page last loaded or saved the file, keyed
+// by id. saveExplainers diffs explainerPosts against it so only what was
+// actually changed here gets written, merged field by field onto the latest
+// copy on GitHub - see mergeExplainerPosts.
+let explainerBaseline = new Map();
+
+function snapshotExplainerBaseline(posts) {
+  explainerBaseline = new Map(posts.map(p => [p.id, JSON.parse(JSON.stringify(p))]));
+}
+
+function decodeGithubJson(meta) {
+  const bytes = Uint8Array.from(atob(meta.content.replace(/\s/g, '')), c => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+}
+
+// Three-way merge of this page's edits onto the latest file (2026-10-13).
+// Before this, a save wrote the page's whole in-memory copy, so a page
+// loaded before the auto-publish workflow ran silently reverted its work:
+// the 22:44 Accept on launch night un-published article #1 (hiding Academy
+// in the app) and undid two content fixes committed earlier that day.
+// Now: an article untouched here keeps the latest version; a field changed
+// here overrides only that field; an article deleted here is removed; a new
+// one is appended. Returns {posts, conflicts} - conflicts lists fields that
+// changed BOTH here and on GitHub since load, so the caller can confirm
+// before overwriting someone else's change.
+function mergeExplainerPosts(base, local, remote) {
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const localById = new Map(local.map(p => [p.id, p]));
+  const remoteIds = new Set(remote.map(p => p.id));
+  const posts = [], conflicts = [];
+  for (const rp of remote) {
+    const lp = localById.get(rp.id), bp = base.get(rp.id);
+    if (!lp) { if (!bp) posts.push(rp); continue; } // deleted here, or new elsewhere
+    if (!bp) { posts.push(lp); continue; }
+    const out = {...rp};
+    for (const k of new Set([...Object.keys(bp), ...Object.keys(lp)])) {
+      if (same(lp[k], bp[k])) continue;
+      if (!same(rp[k], bp[k]) && !same(rp[k], lp[k])) conflicts.push(`"${lp.title || lp.id}" - ${k}`);
+      if (lp[k] === undefined) delete out[k]; else out[k] = lp[k];
+    }
+    posts.push(out);
+  }
+  for (const lp of local) if (!remoteIds.has(lp.id) && !base.has(lp.id)) posts.push(lp);
+  return {posts, conflicts};
+}
 
 async function loadExplainers() {
   try {
@@ -3561,10 +3606,8 @@ async function loadExplainers() {
     if (!r.ok) throw new Error(`GitHub ${r.status}`);
     const meta = await r.json();
     explainerFileSha = meta.sha;
-    const bytes = Uint8Array.from(atob(meta.content.replace(/\s/g, '')), c => c.charCodeAt(0));
-    const text = new TextDecoder('utf-8').decode(bytes);
-    const data = JSON.parse(text);
-    explainerPosts = data.posts || [];
+    explainerPosts = decodeGithubJson(meta).posts || [];
+    snapshotExplainerBaseline(explainerPosts);
   } catch(e) { console.error('loadExplainers failed:', e); }
   renderExplainersList();
 }
@@ -4032,19 +4075,29 @@ async function waitForExplainerLive(articleId, predicate, {timeoutMs = 360000, i
 async function saveExplainers(commitMessage, notifArticle = null, {onWaitTick} = {}) {
   const tok = getToken();
   if (!tok) { alert('Save your GitHub token first (Dash tab).'); return {ok: false, notifSent: null}; }
-  const content = JSON.stringify({posts: explainerPosts}, null, 2) + '\n';
-  const encoded = btoa(unescape(encodeURIComponent(content)));
   try {
-    // Always fetch the latest SHA first, same reasoning as saveHubNews - avoids
-    // clobbering a concurrent edit made since this page loaded its own copy.
-    const meta = await fetch(`${GH_API}/repos/${REPO}/contents/${EXPLAINER_PATH}`, {headers:{Authorization:'token '+tok}});
-    if (meta.ok) explainerFileSha = (await meta.json()).sha;
+    // Fetch the latest file and merge this page's edits onto it rather than
+    // overwriting it with the page's own (possibly stale) copy - see
+    // mergeExplainerPosts. Taking only the latest SHA, as this used to,
+    // just made a stale overwrite succeed.
+    const metaRes = await fetch(`${GH_API}/repos/${REPO}/contents/${EXPLAINER_PATH}?t=${Date.now()}`, {headers:{Authorization:'token '+tok}, cache: 'no-store'});
+    if (!metaRes.ok) throw new Error(`could not load the latest file (GitHub ${metaRes.status})`);
+    const meta = await metaRes.json();
+    explainerFileSha = meta.sha;
+    const {posts: merged, conflicts} = mergeExplainerPosts(explainerBaseline, explainerPosts, decodeGithubJson(meta).posts || []);
+    if (conflicts.length && !confirm(`These were also changed elsewhere since you loaded this page:\n\n${conflicts.join('\n')}\n\nSave your version over them anyway? (Cancel, then Refresh, to see the latest first.)`)) {
+      return {ok: false, notifSent: null};
+    }
+    explainerPosts = merged;
+    const content = JSON.stringify({posts: explainerPosts}, null, 2) + '\n';
+    const encoded = btoa(unescape(encodeURIComponent(content)));
 
     const body = {message: commitMessage, content: encoded};
     if (explainerFileSha) body.sha = explainerFileSha;
     const r = await fetch(`${GH_API}/repos/${REPO}/contents/${EXPLAINER_PATH}`, {method:'PUT', headers:{Authorization:'token '+tok,'Content-Type':'application/json'}, body:JSON.stringify(body)});
     if (r.ok) {
       const d = await r.json(); explainerFileSha = d.content?.sha || null;
+      snapshotExplainerBaseline(explainerPosts);
       renderExplainersList();
       if (!notifArticle) return {ok: true, notifSent: null};
       // Wait for raw.githubusercontent.com to actually be serving the
