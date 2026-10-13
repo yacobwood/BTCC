@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
-import java.net.URL
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -44,12 +43,13 @@ data class TimetableCalInfo(
 class TimetableWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        for (id in appWidgetIds) {
-            appWidgetManager.updateAppWidget(id, fallbackViews(context, appWidgetManager, id))
-        }
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            try { withTimeout(25_000L) {
+            // Fallback built off the main thread - it reads prefs and renders the livery bitmap.
+            for (id in appWidgetIds) {
+                try { appWidgetManager.updateAppWidget(id, fallbackViews(context, appWidgetManager, id)) } catch (_: Exception) {}
+            }
+            try { withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                 val cal = fetchCalendar(context)
                 for (id in appWidgetIds) {
                     val opts = appWidgetManager.getAppWidgetOptions(id)
@@ -79,10 +79,10 @@ class TimetableWidget : AppWidgetProvider() {
     ) {
         val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
         val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 300)
-        val theme = WidgetPrefs.getTheme(context, appWidgetId)
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            try { withTimeout(25_000L) {
+            val theme = WidgetPrefs.getTheme(context, appWidgetId)
+            try { withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                 val cal = fetchCalendar(context)
                 try {
                     appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, cal, appWidgetId, minW, minH, theme))
@@ -181,10 +181,10 @@ class TimetableWidget : AppWidgetProvider() {
     }
 
     companion object {
-        fun fetchCalendar(context: Context): TimetableCalInfo? {
+        suspend fun fetchCalendar(context: Context): TimetableCalInfo? {
             val prefs = context.getSharedPreferences(WidgetPrefs.PREFS_NAME, Context.MODE_PRIVATE)
             val body = try {
-                val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+                val text = WidgetHttp.fetchText("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json")
                 prefs.edit().putString("calendar_json", text).apply()
                 text
             } catch (_: Exception) {

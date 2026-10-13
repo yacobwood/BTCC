@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
-import java.net.URL
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -24,7 +23,7 @@ open class CountdownWidget : AppWidgetProvider() {
     override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
         val p = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            try { withTimeout(10_000L) {
+            try { withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                 val cal = fetchCal(ctx)
                 for (id in ids) {
                     val o = mgr.getAppWidgetOptions(id)
@@ -79,10 +78,10 @@ open class CountdownWidget : AppWidgetProvider() {
         }
         return v
     }
-    private fun fetchCal(ctx: Context): Cal? {
+    private suspend fun fetchCal(ctx: Context): Cal? {
         val prefs = ctx.getSharedPreferences("widget_cache", Context.MODE_PRIVATE)
         val body = try {
-            val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+            val text = WidgetHttp.fetchText("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json")
             prefs.edit().putString("calendar_json", text).apply()
             text
         } catch (_: Exception) {

@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
-import java.net.URL
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -25,7 +24,7 @@ class SmallWidget : AppWidgetProvider() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                withTimeout(10_000L) {
+                withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                     val cal = fetchNextRace(context)
                     for (id in appWidgetIds) {
                         val opts = appWidgetManager.getAppWidgetOptions(id)
@@ -48,12 +47,11 @@ class SmallWidget : AppWidgetProvider() {
     ) {
         val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 40)
         val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 40)
-        val theme = WidgetPrefs.getTheme(context, appWidgetId)
-
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
+            val theme = WidgetPrefs.getTheme(context, appWidgetId)
             try {
-                withTimeout(10_000L) {
+                withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                     val cal = fetchNextRace(context)
                     val views = buildViews(context, cal, minW, minH, theme)
                     appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -129,10 +127,10 @@ class SmallWidget : AppWidgetProvider() {
         return views
     }
 
-    private fun fetchNextRace(context: Context): Triple<LocalDate, String, Int>? {
+    private suspend fun fetchNextRace(context: Context): Triple<LocalDate, String, Int>? {
         val prefs = context.getSharedPreferences(WidgetPrefs.PREFS_NAME, Context.MODE_PRIVATE)
         val body = try {
-            val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+            val text = WidgetHttp.fetchText("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json")
             prefs.edit().putString("calendar_json", text).apply()
             text
         } catch (_: Exception) {

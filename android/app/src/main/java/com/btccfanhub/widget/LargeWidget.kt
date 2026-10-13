@@ -15,21 +15,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
-import java.net.URL
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+// Weather is optional, so it gets what's left of the update budget after the calendar fetch.
+private const val WEATHER_DEADLINE_MS = 3_000L
+
 class LargeWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        // Show fallback immediately
-        for (id in appWidgetIds) {
-            appWidgetManager.updateAppWidget(id, fallbackViews(context, appWidgetManager, id))
-        }
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            try { withTimeout(25_000L) {
+            // Show fallback immediately - built here rather than on the main thread
+            // because it reads prefs and renders the livery bitmap.
+            for (id in appWidgetIds) {
+                try { appWidgetManager.updateAppWidget(id, fallbackViews(context, appWidgetManager, id)) } catch (_: Exception) {}
+            }
+            try { withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                 val cal = fetchCalendar(context)
                 val daysUntil = if (cal != null) ChronoUnit.DAYS.between(LocalDate.now(), cal.startDate) else Long.MAX_VALUE
                 val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0 && daysUntil <= 7) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
@@ -61,11 +64,10 @@ class LargeWidget : AppWidgetProvider() {
     ) {
         val minW = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250)
         val minH = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
-        val theme = WidgetPrefs.getTheme(context, appWidgetId)
-
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            try { withTimeout(25_000L) {
+            val theme = WidgetPrefs.getTheme(context, appWidgetId)
+            try { withTimeout(WidgetHttp.UPDATE_DEADLINE_MS) {
                 val cal = fetchCalendar(context)
                 val daysUntil = if (cal != null) ChronoUnit.DAYS.between(LocalDate.now(), cal.startDate) else Long.MAX_VALUE
                 val weather = if (cal != null && cal.lat != 0.0 && cal.lng != 0.0 && daysUntil <= 7) fetchWeather(cal.lat, cal.lng, cal.startDate, cal.endDate) else emptyList()
@@ -214,12 +216,12 @@ class LargeWidget : AppWidgetProvider() {
         }
     }
 
-    private fun fetchWeather(lat: Double, lng: Double, startDate: LocalDate, endDate: LocalDate): List<DayWeather> {
+    private suspend fun fetchWeather(lat: Double, lng: Double, startDate: LocalDate, endDate: LocalDate): List<DayWeather> {
         return try {
             val today = LocalDate.now()
             if (ChronoUnit.DAYS.between(today, startDate) > 16) return emptyList()
             val url = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&daily=weather_code,temperature_2m_max,precipitation_probability_max&timezone=Europe/London&start_date=$startDate&end_date=$endDate"
-            val json = JSONObject(URL(url).readText())
+            val json = JSONObject(WidgetHttp.fetchText(url, WEATHER_DEADLINE_MS))
             val d = json.optJSONObject("daily") ?: return emptyList()
             val times = d.optJSONArray("time") ?: return emptyList()
             val codes = d.optJSONArray("weather_code")
@@ -242,10 +244,10 @@ class LargeWidget : AppWidgetProvider() {
         else -> "☁"
     }
 
-    private fun fetchCalendar(context: Context): CalInfo? {
+    private suspend fun fetchCalendar(context: Context): CalInfo? {
         val prefs = context.getSharedPreferences(WidgetPrefs.PREFS_NAME, Context.MODE_PRIVATE)
         val body = try {
-            val text = URL("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json").readText()
+            val text = WidgetHttp.fetchText("https://raw.githubusercontent.com/yacobwood/BTCC/main/data/calendar.json")
             prefs.edit().putString("calendar_json", text).apply()
             text
         } catch (_: Exception) {
