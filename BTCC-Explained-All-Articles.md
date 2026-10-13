@@ -36,7 +36,7 @@ Graphic: Goodyear tyre-supplier branding. Where it goes: A fixed position set ou
 Graphic: Kwik Fit title-sponsor decal. Where it goes: Front bumper and rear window band.
 Graphic: Trade-sponsor logos (for example Autocar). Where it goes: Along the sill.
 
-Appendix 2b extends the same principle to the driver, not just the car. It sets out two approved layouts, Option A and Option B, for how sponsor badges and the championship logo are arranged across a driver's race suit, one stacking sponsor patches down the chest with a shoulder logo, the other running a single sponsor row across the shoulders with an arm-mounted championship badge. Every driver on the grid picks from one of those two templates, again under the Administrator's final say on design, positioning and type.
+Appendix 2b extends the same principle to the driver, not just the car. It shows two approved race suit layouts, Option A and Option B, which are mirror images of each other. Both put the Kwik Fit BTCC logo at the top of one chest column with seven sponsor patches filling out a two-by-four grid across the chest. A Goodyear badge goes on the opposite upper arm. The only difference between the two is which side the logo and the Goodyear badge sit on. Every driver on the grid uses one of those two layouts, again under the Administrator's final say on design, positioning and type.
 
 Why bother standardising all of this
 
