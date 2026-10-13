@@ -54,9 +54,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-10-20",
+      "scheduledDate": "2026-10-27",
       "pubDate": null,
-      "order": 3,
+      "order": 5,
       "previewDeviceIds": [
         "ZzVw630F1tSeMg912pBHAnMdi132",
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
@@ -74,9 +74,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-10-23",
+      "scheduledDate": "2026-10-30",
       "pubDate": null,
-      "order": 4,
+      "order": 6,
       "previewDeviceIds": [
         "ZzVw630F1tSeMg912pBHAnMdi132",
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
@@ -94,9 +94,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-10-27",
+      "scheduledDate": "2026-11-03",
       "pubDate": null,
-      "order": 5,
+      "order": 7,
       "previewDeviceIds": [
         "ZzVw630F1tSeMg912pBHAnMdi132",
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
@@ -114,9 +114,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-10-30",
+      "scheduledDate": "2026-11-06",
       "pubDate": null,
-      "order": 6,
+      "order": 8,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -133,9 +133,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-11-03",
+      "scheduledDate": "2026-12-11",
       "pubDate": null,
-      "order": 7,
+      "order": 18,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -152,9 +152,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-11-06",
+      "scheduledDate": "2026-12-08",
       "pubDate": null,
-      "order": 8,
+      "order": 17,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -171,9 +171,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-11-10",
+      "scheduledDate": "2027-01-22",
       "pubDate": null,
-      "order": 9,
+      "order": 27,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -190,9 +190,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-11-13",
+      "scheduledDate": "2026-11-10",
       "pubDate": null,
-      "order": 10,
+      "order": 9,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -209,9 +209,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-11-17",
+      "scheduledDate": "2026-11-24",
       "pubDate": null,
-      "order": 11,
+      "order": 13,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -228,9 +228,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "draft",
-      "scheduledDate": "2026-11-20",
+      "scheduledDate": "2026-11-17",
       "pubDate": null,
-      "order": 12,
+      "order": 11,
       "previewDeviceIds": [
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
       ]
@@ -247,9 +247,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-11-24",
+      "scheduledDate": "2026-11-27",
       "pubDate": null,
-      "order": 13
+      "order": 14
     },
     {
       "id": "explainer-gear-changes-quickshift",
@@ -263,9 +263,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-11-27",
+      "scheduledDate": "2026-12-01",
       "pubDate": null,
-      "order": 14
+      "order": 15
     },
     {
       "id": "explainer-fuel-rules",
@@ -279,9 +279,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-01",
+      "scheduledDate": "2026-12-15",
       "pubDate": null,
-      "order": 15
+      "order": 19
     },
     {
       "id": "explainer-safety-equipment",
@@ -295,9 +295,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-04",
+      "scheduledDate": "2026-12-22",
       "pubDate": null,
-      "order": 16
+      "order": 21
     },
     {
       "id": "explainer-weighing-ride-height",
@@ -311,9 +311,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-08",
+      "scheduledDate": "2026-11-20",
       "pubDate": null,
-      "order": 17
+      "order": 12
     },
     {
       "id": "explainer-noise-control",
@@ -327,9 +327,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-11",
+      "scheduledDate": "2027-01-12",
       "pubDate": null,
-      "order": 18
+      "order": 24
     },
     {
       "id": "explainer-cooling-devices",
@@ -343,9 +343,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-15",
+      "scheduledDate": "2027-01-19",
       "pubDate": null,
-      "order": 19
+      "order": 26
     },
     {
       "id": "explainer-emissions-testing",
@@ -359,9 +359,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-18",
+      "scheduledDate": "2027-01-26",
       "pubDate": null,
-      "order": 20
+      "order": 28
     },
     {
       "id": "explainer-onboard-electronics-data-recorders",
@@ -375,9 +375,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2026-12-22",
+      "scheduledDate": "2027-01-05",
       "pubDate": null,
-      "order": 21
+      "order": 22
     },
     {
       "id": "explainer-pit-equipment-speed-control",
@@ -391,9 +391,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-05",
+      "scheduledDate": "2026-12-18",
       "pubDate": null,
-      "order": 22
+      "order": 20
     },
     {
       "id": "explainer-starts-false-starts",
@@ -407,9 +407,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-08",
+      "scheduledDate": "2026-12-04",
       "pubDate": null,
-      "order": 23
+      "order": 16
     },
     {
       "id": "explainer-race-stoppage-procedure",
@@ -423,9 +423,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-12",
+      "scheduledDate": "2027-01-08",
       "pubDate": null,
-      "order": 24
+      "order": 23
     },
     {
       "id": "explainer-race-finishes-results",
@@ -439,9 +439,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-15",
+      "scheduledDate": "2027-01-29",
       "pubDate": null,
-      "order": 25
+      "order": 29
     },
     {
       "id": "explainer-adverse-weather",
@@ -455,9 +455,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-19",
+      "scheduledDate": "2027-01-15",
       "pubDate": null,
-      "order": 26
+      "order": 25
     },
     {
       "id": "explainer-scrutineering",
@@ -471,9 +471,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-22",
+      "scheduledDate": "2026-11-13",
       "pubDate": null,
-      "order": 27
+      "order": 10
     },
     {
       "id": "explainer-parc-ferme",
@@ -487,9 +487,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-26",
+      "scheduledDate": "2027-02-02",
       "pubDate": null,
-      "order": 28
+      "order": 30
     },
     {
       "id": "explainer-replacement-cars",
@@ -503,9 +503,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-01-29",
+      "scheduledDate": "2027-02-05",
       "pubDate": null,
-      "order": 29
+      "order": 31
     },
     {
       "id": "explainer-independents-trophy",
@@ -519,9 +519,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-02-02",
+      "scheduledDate": "2026-10-20",
       "pubDate": null,
-      "order": 30
+      "order": 3
     },
     {
       "id": "explainer-jack-sears-trophy",
@@ -535,9 +535,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-02-05",
+      "scheduledDate": "2026-10-23",
       "pubDate": null,
-      "order": 31
+      "order": 4
     },
     {
       "id": "explainer-driving-standards",
@@ -583,9 +583,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-02-16",
+      "scheduledDate": "2027-02-19",
       "pubDate": null,
-      "order": 34
+      "order": 35
     },
     {
       "id": "explainer-respect-code",
@@ -599,9 +599,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-02-19",
+      "scheduledDate": "2027-02-23",
       "pubDate": null,
-      "order": 35
+      "order": 36
     },
     {
       "id": "explainer-judicial-procedures-licence-endorsement",
@@ -615,9 +615,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-02-23",
+      "scheduledDate": "2027-02-16",
       "pubDate": null,
-      "order": 36
+      "order": 34
     },
     {
       "id": "explainer-driver-licensing-eligibility",
@@ -647,9 +647,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-03-02",
+      "scheduledDate": "2027-03-05",
       "pubDate": null,
-      "order": 38
+      "order": 39
     },
     {
       "id": "explainer-regulations-awareness-test",
@@ -663,9 +663,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-03-05",
+      "scheduledDate": "2027-03-02",
       "pubDate": null,
-      "order": 39
+      "order": 38
     },
     {
       "id": "explainer-what-it-costs-to-enter",
@@ -759,9 +759,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-03-26",
+      "scheduledDate": "2027-03-30",
       "pubDate": null,
-      "order": 45
+      "order": 46
     },
     {
       "id": "explainer-image-rights-data-sharing",
@@ -775,9 +775,9 @@
       "category": "Regs Explained",
       "source": "btcc hub",
       "status": "staged",
-      "scheduledDate": "2027-03-30",
+      "scheduledDate": "2027-03-26",
       "pubDate": null,
-      "order": 46
+      "order": 45
     },
     {
       "id": "explainer-single-use-plastics-ban",
