@@ -1431,7 +1431,7 @@ select.input { cursor: pointer; }
 <div id="panel-explainers" class="tab-panel">
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div class="section-note" style="margin:0">Regulation-explainer reference articles for the app's Academy section. Review, edit and publish when ready.</div>
+    <div class="section-note" style="margin:0">Regulation-explainer reference articles for the app's Academy section. Review, edit and publish when ready. Mark an article <strong>Accepted</strong> and it publishes itself (with its notification) at 7pm UK on its scheduled date - anything not accepted waits for you to publish it by hand.</div>
     <button class="btn-sm" onclick="window._explainersLoaded=false;loadExplainers()" style="flex-shrink:0;margin-left:12px">↻ Refresh</button>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:16px">
@@ -3527,15 +3527,23 @@ function renderExplainersList() {
     // alone that it's already live on someone's device, just not the real
     // News tab for everyone.
     const isPreview = p.status === 'draft' && p.previewDeviceIds?.length;
+    const dateLabel = p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : null;
+    // accepted:true is what publish-scheduled-explainers.yml looks for -
+    // see scripts/explainerAutoPublish.js. Not accepted = manual publish only.
+    const meta = [
+      p.accepted ? (dateLabel ? `Auto-publishes ${dateLabel}, 7pm` : 'Accepted, but no scheduled date - will not auto-publish') : `Scheduled ${dateLabel || 'unscheduled'} - not accepted, publish by hand`,
+      isPreview ? `visible only on ${p.previewDeviceIds.length} device${p.previewDeviceIds.length > 1 ? 's' : ''}` : null,
+    ].filter(Boolean).join(' · ');
     return `
     <div class="hub-article-card">
       <div class="hub-article-body">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
           <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
-          <span class="status-badge badge-dft">${isPreview ? '◎ PREVIEW (DEVICE)' : '◎ STAGED'}</span>
+          <span class="status-badge ${p.accepted ? 'badge-sch' : 'badge-dft'}">${p.accepted ? '✓ ACCEPTED' : isPreview ? '◎ PREVIEW (DEVICE)' : '◎ STAGED'}</span>
         </div>
-        <div class="hub-article-meta">${isPreview ? `Visible only on ${p.previewDeviceIds.length} device${p.previewDeviceIds.length > 1 ? 's' : ''} - not the real News tab` : 'Scheduled ' + (p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'unscheduled')}${p.description ? ' · ' + htmlEsc(p.description) : ''}</div>
+        <div class="hub-article-meta">${meta}${p.description ? ' · ' + htmlEsc(p.description) : ''}</div>
         <div class="hub-article-actions">
+          <button class="btn-sm" style="border-color:var(--yellow);color:${p.accepted ? 'var(--bg, #0d1117)' : 'var(--yellow)'};${p.accepted ? 'background:var(--yellow);' : ''}" onclick="toggleExplainerAccepted('${htmlEsc(p.id)}')" title="${p.accepted ? 'Click to un-accept - it will then wait for a manual publish' : 'Accept: auto-publish with a notification at 7pm UK on the scheduled date'}">${p.accepted ? '✓ Accepted' : 'Accept'}</button>
           <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="quickPublishExplainer('${htmlEsc(p.id)}')">Publish Now</button>
           <button class="btn-sm" onclick="openExplainerEdit('${htmlEsc(p.id)}')">Edit</button>
           <button class="btn-danger" onclick="deleteExplainer('${htmlEsc(p.id)}')">Delete</button>
@@ -3805,16 +3813,41 @@ async function quickPublishExplainer(articleId) {
   if (!confirm(`Publish "${p.title}"? This sends a push notification once it's confirmed live (usually within a few minutes).`)) return;
   p.status = 'published';
   p.pubDate = p.pubDate || nowIso();
-  const {notifSent} = await saveExplainers('Publish explainer article: ' + p.title, p);
+  // Same notification title/body as Save & Publish (and the auto-publish
+  // workflow) - before 2026-10-13 this path ignored notifTitleOverride/
+  // notifBodyOverride and sent the headline with the truncated description.
+  const notifArticle = {...p, title: p.notifTitleOverride || p.title, description: p.notifBodyOverride || ''};
+  delete p.notifTitleOverride;
+  delete p.notifBodyOverride;
+  const {notifSent} = await saveExplainers('Publish explainer article: ' + p.title, notifArticle);
   if (notifSent === false) {
     alert(`"${p.title}" is published, but the notification was NOT sent - raw.githubusercontent.com never confirmed it live within 6 minutes. Click Publish again once you've confirmed it's actually live (e.g. reopen the Academy section) to send the notification then.`);
   }
+}
+
+async function toggleExplainerAccepted(articleId) {
+  const p = explainerPosts.find(x => x.id === articleId);
+  if (!p) return;
+  if (p.accepted) {
+    if (!confirm(`Un-accept "${p.title}"? It will no longer auto-publish - you'll need to publish it by hand.`)) return;
+    delete p.accepted;
+    await saveExplainers('Un-accept explainer article: ' + p.title);
+    return;
+  }
+  const when = p.scheduledDate ? new Date(p.scheduledDate).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : null;
+  if (!when) { alert('This article has no scheduled date, so it cannot auto-publish. Publish it by hand instead.'); return; }
+  if (!confirm(`Accept "${p.title}"?\n\nIt will publish automatically with a push notification at 7pm UK on ${when}.`)) return;
+  p.accepted = true;
+  await saveExplainers('Accept explainer article for auto-publish: ' + p.title);
 }
 
 async function quickUnpublishExplainer(articleId) {
   const p = explainerPosts.find(x => x.id === articleId);
   if (!p || !confirm('Unpublish this article? It will go back to staged.')) return;
   p.status = 'staged';
+  // Un-accept too, or the auto-publish workflow would republish it on its
+  // next run while its date is still within the catch-up window.
+  delete p.accepted;
   await saveExplainers('Unpublish explainer article: ' + p.title);
 }
 

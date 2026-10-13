@@ -1,0 +1,96 @@
+# Auto-publishes Academy articles the admin has marked "Accepted" on their
+# scheduledDate, with the usual explainer_alerts notification. Articles that
+# aren't accepted are never touched - they stay staged until published by
+# hand from the admin ACADEMY tab. Logic lives in
+# scripts/explainerAutoPublish.js.
+#
+# Publish time is 19:00 UK (evening, when more people are reading). Two
+# crons cover both GMT and BST (the script itself skips any run before
+# 19:00 London time), plus a later catch-up in case GitHub drops a
+# scheduled run. Re-running is harmless:
+# already-published articles are skipped. Off the :00 mark per the root
+# README's "overnight cron gap" note.
+name: Publish Scheduled Academy Articles
+
+on:
+  schedule:
+    - cron: "7 18 * * *"   # 19:07 BST / 18:07 GMT (skipped in winter)
+    - cron: "7 19 * * *"   # 20:07 BST / 19:07 GMT
+    - cron: "37 20 * * *"  # catch-up: 21:37 BST / 20:37 GMT
+  workflow_dispatch:
+    inputs:
+      is_retry:
+        description: "internal - marks this run as an automated retry (do not set manually)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish-scheduled-explainers
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Pull latest
+        run: git pull --rebase origin main
+
+      - name: Publish accepted articles due today
+        id: publish
+        env:
+          NOTIFS_FILE: ${{ runner.temp }}/explainer-notifs.json
+          # A manual run publishes whatever is due regardless of the hour.
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+        run: node scripts/explainerAutoPublish.js publish
+
+      - name: Commit published articles
+        id: commit
+        uses: ./.github/actions/commit-and-push
+        with:
+          commit_message: "content(academy): auto-publish accepted article(s) [skip ci]"
+          file_pattern: "data/explainer_articles.json"
+
+      - name: Notify once live
+        id: notify
+        if: steps.commit.outputs.changes_detected == 'true'
+        env:
+          NOTIFS_FILE: ${{ runner.temp }}/explainer-notifs.json
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/explainerAutoPublish.js notify
+
+      # Only for failures BEFORE anything was published - a retry from a
+      # fresh checkout redoes the whole thing safely. A notify failure is
+      # deliberately not retried: the article is already published by then,
+      # so a retry would find nothing due and the missing notification would
+      # go unnoticed. That case is reported straight away below instead.
+      - name: Retry once on failure
+        id: retry
+        if: (failure() || cancelled()) && steps.notify.outcome != 'failure' && github.event.inputs.is_retry != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish-scheduled-explainers.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || { echo "Retry dispatch failed - reporting failure directly instead"; echo "dispatch_failed=true" >> "$GITHUB_OUTPUT"; }
+
+      - name: Report failure
+        if: (failure() || cancelled()) && (steps.notify.outcome == 'failure' || github.event.inputs.is_retry == 'true' || steps.retry.outputs.dispatch_failed == 'true')
+        env:
+          SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
+          MESSAGE: ${{ steps.notify.outcome == 'failure' && 'Academy article auto-published but notification NOT sent - resend from admin' || 'Academy auto-publish failed (auto-retry also failed)' }}
+        run: |
+          curl -sf --retry 3 --retry-delay 5 --retry-all-errors -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-scraper-secret: ${SCRAPER_SECRET}" \
+            -d "{\"workflow\":\"publish-scheduled-explainers\",\"message\":\"${MESSAGE}\",\"runUrl\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "https://us-central1-btcchub-af77a.cloudfunctions.net/reportScraperFailure" || echo "Failure report failed (non-fatal)"
