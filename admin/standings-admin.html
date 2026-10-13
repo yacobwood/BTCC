@@ -55,6 +55,8 @@
    missing table. Confirmed live 2026-09-02 via a real draft's table.
    Values copied from ArticleScreen.js's buildHtml() - keep in sync. */
 .ql-editor .table-wrap { overflow-x: auto; margin: 16px 0; }
+.ql-editor .ql-table-preview { position: relative; cursor: default; user-select: none; outline: 1px dashed rgba(255,255,255,0.15); outline-offset: 4px; }
+.ql-editor .ql-table-preview::before { content: 'TABLE - PREVIEW ONLY, NOT EDITABLE HERE'; display: block; font-size: 10px; letter-spacing: 1px; color: #8B949E; margin-bottom: -8px; }
 .ql-editor table { width: auto; min-width: 100%; border-collapse: collapse; font-size: 14px; }
 .ql-editor th, .ql-editor td { border: 1px solid #333; padding: 8px 10px; text-align: left; white-space: nowrap; }
 .ql-editor th { background: rgba(255,255,255,0.08); font-weight: 700; color: #fff; }
@@ -1949,24 +1951,76 @@ function stripEmptyParagraphs(html) {
 // paragraph in its place within one Quill init cycle, before any user
 // interaction. Saving after that would permanently strip the table from
 // the real published content, not a preview-only loss. Rather than let
-// Quill ever see a table, extractTables() swaps each one for a plain-text
-// placeholder paragraph before loading (Quill handles ordinary text fine)
-// and restoreTables() splices the real table HTML back in at save time,
-// matched by the placeholder's position/number. If the placeholder text
-// itself gets deleted while editing, its table is correctly dropped too -
-// same as deleting any other paragraph - so this only actively protects a
-// table the admin never touched, not one they deliberately removed.
+// Quill ever parse a table, extractTables() wraps each one in a read-only
+// preview block (see tablePreviewHtml below - was a plain-text
+// "[Table N]" placeholder until 2026-10-13) and restoreTables() splices the
+// original table HTML back in at save time. If the preview block gets
+// deleted while editing, its table is correctly dropped too - same as
+// deleting any other paragraph - so this only actively protects a table
+// the admin never touched, not one they deliberately removed.
 function extractTables(html) {
+  registerTablePreviewBlot();
   const tables = [];
   const stripped = (html || '').replace(/<div class="table-wrap">[\s\S]*?<\/table>\s*<\/div>/gi, match => {
     tables.push(match);
-    return `<p>[Table ${tables.length} - not editable here, kept as-is on save]</p>`;
+    return tablePreviewHtml(match);
   });
   return {stripped, tables};
 }
 
+// Read-only table preview (2026-10-13) - replaces the old plain-text
+// "[Table N - not editable here]" placeholder so the real table is visible
+// while editing. A Quill BlockEmbed is a leaf: Quill treats it as one
+// opaque unit and never parses or "fixes" its inner DOM, so the table
+// inside survives where a bare <table> would be deleted. The original
+// table HTML rides along in data-html and is spliced back in verbatim by
+// restoreTables, so a save is byte-identical to before for an untouched
+// table. Deleting the preview block deletes its table, same as before.
+function tablePreviewHtml(tableHtml) {
+  const attr = tableHtml.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return `<div class="ql-table-preview" contenteditable="false" data-html="${attr}">${tableHtml}</div>`;
+}
+
+let tablePreviewRegistered = false;
+function registerTablePreviewBlot() {
+  if (tablePreviewRegistered || !window.Quill) return;
+  const BlockEmbed = Quill.import('blots/block/embed');
+  class TablePreview extends BlockEmbed {
+    // Only called when Quill itself inserts one (e.g. undo after deleting
+    // a table) - content loaded via root.innerHTML keeps its existing DOM.
+    static create(tableHtml) {
+      const node = super.create();
+      node.setAttribute('contenteditable', 'false');
+      node.setAttribute('data-html', tableHtml);
+      node.innerHTML = tableHtml;
+      return node;
+    }
+    static value(node) { return node.getAttribute('data-html') || ''; }
+  }
+  TablePreview.blotName = 'tablePreview';
+  TablePreview.tagName = 'DIV';
+  TablePreview.className = 'ql-table-preview';
+  Quill.register(TablePreview, true);
+  tablePreviewRegistered = true;
+}
+
 function restoreTables(html, tables) {
-  let result = html;
+  // Preview blocks -> their original table HTML, via a token so the table
+  // markup itself never goes through a DOM re-serialise.
+  const originals = [];
+  let result = html || '';
+  if (result.includes('ql-table-preview')) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = result;
+    tpl.content.querySelectorAll('.ql-table-preview').forEach(el => {
+      originals.push(el.getAttribute('data-html') || '');
+      el.replaceWith(document.createTextNode(`@@TABLE_PREVIEW_${originals.length - 1}@@`));
+    });
+    result = tpl.innerHTML;
+    result = result.replace(/@@TABLE_PREVIEW_(\d+)@@/g, (_, i) => originals[Number(i)]);
+  }
+  // Legacy plain-text markers, in case an editor was opened before this
+  // version of the page loaded.
   (tables || []).forEach((table, i) => {
     const marker = new RegExp('<p>\\s*\\[Table ' + (i + 1) + '[^\\]]*\\]\\s*</p>', 'i');
     result = result.replace(marker, table);
@@ -4312,6 +4366,7 @@ function autoCleanEmptyLinesOnBlur(quillInstance) {
 }
 
 function initDigestQuill() {
+  registerTablePreviewBlot();
   if (digestQuill) return;
   digestQuill = new Quill('#digest-content-editor', {
     theme: 'snow',
@@ -4332,6 +4387,7 @@ function initDigestQuill() {
 let explainerQuill = null;
 
 function initExplainerQuill() {
+  registerTablePreviewBlot();
   if (explainerQuill) return;
   explainerQuill = new Quill('#explainer-content-editor', {
     theme: 'snow',
@@ -4350,6 +4406,7 @@ function initExplainerQuill() {
 }
 
 function initQuill() {
+  registerTablePreviewBlot();
   if (quill) return;
 
   // Image handler: file picker → compress → upload → insert
