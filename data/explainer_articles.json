@@ -11,12 +11,10 @@
       "imageLicense": null,
       "category": "Regs Explained",
       "source": "btcc hub",
-      "status": "draft",
+      "status": "published",
       "scheduledDate": "2026-10-13",
-      "pubDate": null,
+      "pubDate": "2026-10-13T21:20:04.008Z",
       "order": 1,
-      "notifTitleOverride": "Introducing BTCC Academy",
-      "notifBodyOverride": "Your guide to the rules behind the racing - new explainer articles added regularly",
       "previewDeviceIds": [
         "ZzVw630F1tSeMg912pBHAnMdi132",
         "pUI1L8INKZMwjplh0So54Wb7FGk2"
