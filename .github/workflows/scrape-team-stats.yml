@@ -58,13 +58,10 @@ jobs:
         run: python3 scrape_team_stats.py
 
       - name: Commit team stats update
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: ./.github/actions/commit-and-push
         with:
           commit_message: "chore: update team stats from btcc.net [skip ci]"
           file_pattern: "data/drivers.json"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          push_options: "--force-with-lease"
 
       # Covers a genuine script failure() as well as cancelled(). This only
       # runs weekly, so unlike scrape-news.yml (which gets a free retry
@@ -74,6 +71,7 @@ jobs:
       # is_retry=true, so a second failure falls through to "Report
       # failure" instead of dispatching again.
       - name: Retry once on failure
+        id: retry
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,12 +80,15 @@ jobs:
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-team-stats.yml/dispatches" \
-            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || echo "Retry dispatch failed (non-fatal)"
+            -d '{"ref":"main","inputs":{"is_retry":"true"}}' || { echo "Retry dispatch failed - reporting failure directly instead"; echo "dispatch_failed=true" >> "$GITHUB_OUTPUT"; }
 
       # Only reached once the automated retry above has ALSO failed/been
-      # cancelled - a single transient blip no longer emails anyone.
+      # cancelled, or when dispatching that retry failed in the first place
+      # (e.g. during a GitHub outage, confirmed live 2026-10-07 on
+      # scrape-shorts.yml) - a single transient blip no longer emails anyone,
+      # but a retry that never happened can no longer stay silent either.
       - name: Report failure
-        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
+        if: (failure() || cancelled()) && (github.event.inputs.is_retry == 'true' || steps.retry.outputs.dispatch_failed == 'true')
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |

@@ -99,7 +99,7 @@ jobs:
         if: |
           github.event_name == 'workflow_dispatch' ||
           steps.raceday.outputs.in_session_window == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: ./.github/actions/commit-and-push
         with:
           commit_message: "chore: update ${{ github.event.inputs.year || '2026' }} results [skip ci]"
           # records.json is deliberately excluded here even though scrape_tsl.py
@@ -115,9 +115,6 @@ jobs:
           # Tyres, Top 5 Average and Session Stats tabs would point at files
           # that were never pushed.
           file_pattern: "data/results*.json data/standings.json data/calendar.json data/analysis"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          push_options: "--force-with-lease"
 
       - name: Notify app clients to refresh results cache
         if: steps.commit.outputs.changes_detected == 'true'
@@ -148,13 +145,18 @@ jobs:
       # different scraper, a hub-news/digest publish, ...) lands on main in the
       # few seconds between this run's rebase and its push - confirmed live,
       # the first real failure this surfaced. Not a real problem: a fresh
-      # `git pull --rebase` on the very next attempt resolves it cleanly. Same
+      # `git pull --rebase` on the very next attempt resolves it cleanly.
+      # Since 2026-10-13 the commit step itself uses the shared
+      # .github/actions/commit-and-push action, which does that
+      # rebase-and-retry in-step (up to 5 plain pushes), so this retry is now
+      # a second line of defence for genuine failures rather than routine. Same
       # auto-retry-before-alerting pattern the 5 btcc.net-facing workflows
       # already use (scrape-news.yml etc.) - re-dispatches this same workflow
       # once, carrying forward whatever manual inputs this run had, before ever
       # alerting. Whole-job `failure()`, not scoped to one step, so it also
       # catches the commit step's own failure alongside the scrape step's.
       - name: Retry once on failure
+        id: retry
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,10 +165,10 @@ jobs:
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-results.yml/dispatches" \
-            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"year\":\"${{ github.event.inputs.year || '2026' }}\",\"round\":\"${{ github.event.inputs.round }}\",\"override_reverse_grid_draw\":\"${{ github.event.inputs.override_reverse_grid_draw }}\"}}" || echo "Retry dispatch failed (non-fatal)"
+            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"year\":\"${{ github.event.inputs.year || '2026' }}\",\"round\":\"${{ github.event.inputs.round }}\",\"override_reverse_grid_draw\":\"${{ github.event.inputs.override_reverse_grid_draw }}\"}}" || { echo "Retry dispatch failed - reporting failure directly instead"; echo "dispatch_failed=true" >> "$GITHUB_OUTPUT"; }
 
       - name: Report failure
-        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
+        if: (failure() || cancelled()) && (github.event.inputs.is_retry == 'true' || steps.retry.outputs.dispatch_failed == 'true')
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |

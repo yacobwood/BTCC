@@ -1,0 +1,88 @@
+# Shared commit step for every scraper workflow - replaces
+# stefanzweifel/git-auto-commit-action, whose single `git push
+# --force-with-lease` attempt rejected with "stale info" whenever any other
+# push landed on main in the few seconds between a run's rebase and its own
+# push. scrape-news.yml's article mirror alone commits every ~5 minutes, so
+# this was a recurring race, not a one-off (confirmed live 2026-10-13:
+# scrape-shorts.yml lost the race by 1 second, after its 10-07 run had
+# already been lost to a GitHub 500 on push).
+#
+# Instead: commit once, then rebase onto the latest main and do a plain
+# (fast-forward only, never forced) push, up to 5 attempts with a growing
+# jittered backoff. A plain push can never overwrite someone else's commit,
+# so this is strictly safer than --force-with-lease as well as more
+# reliable. --autostash because some workflows deliberately leave files
+# outside file_pattern modified (scrape-results.yml's records.json). A
+# genuine rebase conflict (two runs editing the same data file) aborts
+# cleanly and fails the step, which the workflow's own "Retry once on
+# failure" then picks up from a fresh checkout.
+#
+# Exposes `changes_detected` with the same name and meaning as
+# git-auto-commit-action's output (scrape-results.yml gates its
+# notifyResultsUpdate call on it).
+name: Commit and push
+description: Commit matching files and push to main, rebasing and retrying on a push race
+
+inputs:
+  commit_message:
+    description: Commit message
+    required: true
+  file_pattern:
+    description: Space-separated git pathspecs to stage (globs allowed)
+    required: true
+
+outputs:
+  changes_detected:
+    description: "'true' if a commit was made and pushed, otherwise 'false'"
+    value: ${{ steps.push.outputs.changes_detected }}
+
+runs:
+  using: composite
+  steps:
+    - id: push
+      shell: bash
+      env:
+        COMMIT_MESSAGE: ${{ inputs.commit_message }}
+        FILE_PATTERN: ${{ inputs.file_pattern }}
+      run: |
+        set -euo pipefail
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Stage each pathspec separately, skipping any that match nothing
+        # tracked or new (e.g. a media dir this run never created) - a bare
+        # `git add` errors on an unmatched pathspec. set -f stops the shell
+        # expanding globs itself, so git's own pathspec matching handles
+        # them (and so deleted files under a glob still get staged).
+        set -f
+        for p in $FILE_PATTERN; do
+          if [ -n "$(git ls-files --cached --others --exclude-standard -- "$p" 2>/dev/null | head -n 1)" ]; then
+            git add -A -- "$p"
+          fi
+        done
+        set +f
+
+        if git diff --cached --quiet; then
+          echo "No changes to commit."
+          echo "changes_detected=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        git commit -q -m "$COMMIT_MESSAGE"
+
+        for attempt in 1 2 3 4 5; do
+          if ! git pull --rebase --autostash -q origin main; then
+            git rebase --abort || true
+            echo "::error::Rebase onto origin/main conflicted - not pushing."
+            exit 1
+          fi
+          if git push -q origin HEAD:main; then
+            echo "Pushed on attempt $attempt."
+            echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          delay=$(( attempt * 5 + RANDOM % 5 ))
+          echo "Push attempt $attempt rejected, retrying in ${delay}s..."
+          sleep "$delay"
+        done
+        echo "::error::Push still rejected after 5 attempts."
+        exit 1

@@ -116,13 +116,10 @@ jobs:
       # currently says, so this fast, notification-critical update must
       # never be held hostage by the full article mirror that follows.
       - name: Commit news update
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: ./.github/actions/commit-and-push
         with:
           commit_message: "chore: update news.json from btcc.net [skip ci]"
           file_pattern: "data/news.json data/media/news/"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          push_options: "--force-with-lease"
 
       - name: Scrape full article mirror
         env:
@@ -142,19 +139,17 @@ jobs:
         run: git pull --rebase --autostash origin main
 
       - name: Commit article mirror
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: ./.github/actions/commit-and-push
         with:
           commit_message: "chore: update article mirror from btcc.net [skip ci]"
           file_pattern: "data/articles.json data/articles/ data/media/news/"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          push_options: "--force-with-lease"
 
       # Covers both a genuine script failure() and a cancelled() run. A
       # single blip self-heals on the next scheduled tick regardless, so
       # only alert once a retry has ALSO failed - see README §20's "Failure
       # handling convention".
       - name: Retry once on failure
+        id: retry
         if: (failure() || cancelled()) && github.event.inputs.is_retry != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,10 +158,10 @@ jobs:
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-news.yml/dispatches" \
-            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"force\":\"${{ github.event.inputs.force || 'false' }}\"}}" || echo "Retry dispatch failed (non-fatal)"
+            -d "{\"ref\":\"main\",\"inputs\":{\"is_retry\":\"true\",\"force\":\"${{ github.event.inputs.force || 'false' }}\"}}" || { echo "Retry dispatch failed - reporting failure directly instead"; echo "dispatch_failed=true" >> "$GITHUB_OUTPUT"; }
 
       - name: Report failure
-        if: (failure() || cancelled()) && github.event.inputs.is_retry == 'true'
+        if: (failure() || cancelled()) && (github.event.inputs.is_retry == 'true' || steps.retry.outputs.dispatch_failed == 'true')
         env:
           SCRAPER_SECRET: ${{ secrets.SCRAPER_SECRET }}
         run: |
