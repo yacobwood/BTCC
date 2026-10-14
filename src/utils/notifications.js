@@ -119,6 +119,15 @@ async function recordPush(data, outcome) {
   }
 }
 
+// Every channel setupNotificationChannels creates. A push naming any other
+// channel falls back to 'news': posting to an unregistered channel is a
+// silent no-op on Android 8+, which swallowed every Academy push until
+// 2026-09-03 and the 10-12/10-14 digest pushes (sent as 'digest').
+const PUSH_CHANNELS = new Set([
+  'general', 'news', 'race', 'qualifying', 'free_practice', 'results',
+  'weekend_preview', 'standings', 'chat_mentions', 'explainer', 'podcasts',
+]);
+
 export async function displayAndroidDataNotification(remoteMessage) {
   const {data} = remoteMessage;
   // Silent cache-invalidation from scraper - no notification, just bust the cache.
@@ -132,7 +141,7 @@ export async function displayAndroidDataNotification(remoteMessage) {
   if (!data?.title) { await recordPush(data, 'dropped_no_title'); return; }
   if (await isSpoilerModeOn()) { await recordPush(data, 'suppressed_spoiler'); return; }
   await recordPush(data, 'shown');
-  const channelId = data.channel || 'news';
+  const channelId = PUSH_CHANNELS.has(data.channel) ? data.channel : 'news';
   const imageUrl = data.imageUrl || null;
   const notifTitle = data.body ? data.title : (channelId === 'podcasts' ? 'New Podcast' : 'New Article');
   const notifBody = data.body || data.title;

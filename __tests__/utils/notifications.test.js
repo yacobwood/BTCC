@@ -296,6 +296,27 @@ describe('displayAndroidDataNotification', () => {
     );
   });
 
+  // Regression: 2026-10-10 to 10-14 digest pushes arrived with channel
+  // 'digest', which no build ever created, so Android silently dropped them.
+  it('falls back to the "news" channel for a channel the app never creates', async () => {
+    await displayAndroidDataNotification({data: {channel: 'digest', title: 'The 2026 BTCC Hub Awards', body: 'Every trophy.'}});
+    expect(notifee.displayNotification).toHaveBeenCalledWith(
+      expect.objectContaining({android: expect.objectContaining({channelId: 'news'})}),
+    );
+  });
+
+  it('keeps every channel setupNotificationChannels creates', async () => {
+    await setupNotificationChannels();
+    const created = notifee.createChannel.mock.calls.map(([c]) => c.id);
+    for (const channel of created) {
+      notifee.displayNotification.mockClear();
+      await displayAndroidDataNotification({data: {channel, title: 'T'}});
+      expect(notifee.displayNotification).toHaveBeenCalledWith(
+        expect.objectContaining({android: expect.objectContaining({channelId: channel})}),
+      );
+    }
+  });
+
   it('uses data.title as the body and a generic title when data.body is absent (scraper-style)', async () => {
     await displayAndroidDataNotification({data: {channel: 'news', title: 'Article headline'}});
     expect(notifee.displayNotification).toHaveBeenCalledWith(

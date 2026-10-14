@@ -83,12 +83,18 @@ jobs:
           const topic = process.env.TOPIC || 'broadcast';
           // Spoiler mode = no notifications: excludes spoiler-mode devices
           // and keeps Android data-only (functions/spoilerSafe.js).
-          const {channel: _c, title: _t, body: _b, ...extra} = data;
+          // data.channel wins over the channel input, as it did before the
+          // 2026-10-10 spoilerSafe refactor: admin sends digests with input
+          // channel 'digest' (the push_history label) but data
+          // {"channel":"news"}, and the app never creates a 'digest' Notifee
+          // channel - posting to it is a silent no-op on Android, so the
+          // 10-12 and 10-14 digest pushes never showed.
+          const {channel: androidChannel, title: _t, body: _b, ...extra} = data;
           const message = buildSpoilerSafePush({
             topic,
             title: process.env.TITLE,
             body,
-            channel: process.env.CHANNEL,
+            channel: androidChannel,
             data: extra,
           });
           // Same push_history shape as functions/shared.js's logPushHistory
