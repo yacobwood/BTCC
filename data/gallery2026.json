@@ -198,6 +198,17 @@
       "capturedCount": 33,
       "totalCount": 33,
       "complete": true
+    },
+    {
+      "slug": "2026-brands-hatch-gp",
+      "title": "2026 - Brands Hatch GP",
+      "cover": "https://ylxmhtbmzvpwyvkmomex.supabase.co/storage/v1/object/public/gallery/galleries/de6e5bc8-24af-44f3-a7ce-b2a8b9462574/b7854ba7-4b43-45a0-b0f3-6e889cdf3e13/variants/thumb-gallery-editor-client-v1.webp",
+      "round": 10,
+      "venue": "Brands Hatch GP",
+      "isCanonical": true,
+      "capturedCount": 69,
+      "totalCount": 69,
+      "complete": true
     }
   ]
 }
