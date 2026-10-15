@@ -85,13 +85,34 @@ async function triggerNewsScrape(fnName) {
   await logError(fnName, lastError.message, lastError, {key: fnName, alert: true});
 }
 
+// Temporary hourly-only mode until the Scrapfly quota resets on 1 Nov
+// 2026: October's 200k ran out on the 15th, so the rest of the month is
+// billed pay-as-you-go. Until then only the :03 tick of each busy hour
+// dispatches (same cadence as overnight); the other five ticks are
+// skipped. Reverts to every 10 minutes by itself on 1 Nov - no second
+// deploy needed. Off-season, so an hour's lag on a new article is fine.
+const HOURLY_UNTIL = Date.UTC(2026, 10, 1); // 2026-11-01T00:00Z
+
+function isHourlyOnlySkip(scheduleTime) {
+  const t = scheduleTime ? new Date(scheduleTime) : new Date();
+  // < 10, not === 3: allows for the function starting a little late when
+  // scheduleTime isn't available. The next tick is :13.
+  return t.getTime() < HOURLY_UNTIL && t.getUTCMinutes() >= 10;
+}
+
 exports.triggerNewsScrapeBusy = onSchedule(
   {
     schedule: '3-59/10 7-19 * * *',
     timeZone: 'Etc/UTC',
     secrets: ['GITHUB_TOKEN', 'GMAIL_APP_PASSWORD'],
   },
-  () => triggerNewsScrape('triggerNewsScrapeBusy'),
+  (event) => {
+    if (isHourlyOnlySkip(event && event.scheduleTime)) {
+      console.log('triggerNewsScrapeBusy: hourly-only until 1 Nov (Scrapfly PAYG), skipping this tick');
+      return null;
+    }
+    return triggerNewsScrape('triggerNewsScrapeBusy');
+  },
 );
 
 exports.triggerNewsScrapeOvernight = onSchedule(

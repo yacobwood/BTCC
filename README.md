@@ -789,6 +789,8 @@ Added 2026-09-26, same fix as `triggerResultsScrape` above applied to `scrape-ne
 
 **Busy window slowed to every 10 minutes (2026-10-15):** once this trigger delivered every tick (167 runs/day), the real Scrapfly cost was ~10-13k credits/day and the October 200k subscription ran out on the 15th (every run 429'd from 07:04 UTC). The original 5-minute sizing had only ever run against GitHub's own cron, which dropped ~97% of ticks, so the budget was never really tested. Combined with `listing_cache.py` (one `/news/` fetch per run instead of two, see §20) the routine cost is now ~89 runs x ~30 credits, ~2.7k/day. Trade-off: a new article can take up to 10 minutes to reach the app in UK daytime.
 
+**Hourly-only until 1 Nov 2026:** October's quota ran out on the 15th, so the rest of the month is billed pay-as-you-go. `triggerNewsScrapeBusy` stays on its 10-minute schedule but skips every tick except :03 while `scheduleTime` is before `2026-11-01T00:00Z` (`HOURLY_UNTIL`), making news hourly all day (~24 runs, ~720 credits/day). It reverts to every 10 minutes on 1 Nov by itself, no deploy needed. Off-season, so an hour's lag on a new article is acceptable.
+
 ### weeklyDigest (Monday 8am)
 
 1. Scrapes: Reddit r/BTCC, btcc.net WordPress, Autosport RSS, Motorsport.com RSS, Touring Car Times RSS

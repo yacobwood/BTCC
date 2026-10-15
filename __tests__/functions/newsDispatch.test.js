@@ -11,9 +11,12 @@ const {triggerNewsScrapeBusy, triggerNewsScrapeOvernight} = require('../../funct
 
 // The retry delay (3s) uses a real setTimeout - fake timers so these run
 // instantly, same reason resultsDispatch.test.js's own retry tests do this.
+// A :03 tick, which dispatches whether or not hourly-only mode is on.
+const ON_THE_HOUR = {scheduleTime: '2026-10-20T09:03:00Z'};
+
 async function runWithFakeTimers(fn) {
   jest.useFakeTimers();
-  const done = fn.run();
+  const done = fn.run(ON_THE_HOUR);
   await jest.advanceTimersByTimeAsync(3000);
   await done;
   jest.useRealTimers();
@@ -26,7 +29,7 @@ describe('triggerNewsScrapeBusy', () => {
   });
 
   it('dispatches scrape-news.yml', async () => {
-    await triggerNewsScrapeBusy.run();
+    await triggerNewsScrapeBusy.run(ON_THE_HOUR);
 
     expect(mockFetchWithTimeout).toHaveBeenCalledTimes(1);
     expect(mockFetchWithTimeout).toHaveBeenCalledWith(
@@ -71,7 +74,7 @@ describe('triggerNewsScrapeOvernight', () => {
   });
 
   it('dispatches scrape-news.yml too, keyed under its own function name on failure', async () => {
-    await triggerNewsScrapeOvernight.run();
+    await triggerNewsScrapeOvernight.run(ON_THE_HOUR);
     expect(mockFetchWithTimeout).toHaveBeenCalledTimes(1);
 
     mockFetchWithTimeout.mockResolvedValue({status: 401, text: () => Promise.resolve('Bad credentials')});
@@ -96,5 +99,33 @@ describe('news scrape schedules', () => {
 
   it('runs hourly overnight', () => {
     expect(triggerNewsScrapeOvernight.__endpoint.scheduleTrigger.schedule).toBe('3 0-6,20-23 * * *');
+  });
+});
+
+// 2026-10-15: hourly-only for the rest of October while Scrapfly bills
+// pay-as-you-go, reverting to every 10 minutes on 1 Nov without a deploy.
+describe('triggerNewsScrapeBusy hourly-only mode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFetchWithTimeout.mockResolvedValue({status: 204});
+  });
+
+  it('dispatches the :03 tick in October', async () => {
+    await triggerNewsScrapeBusy.run({scheduleTime: '2026-10-20T14:03:00Z'});
+    expect(mockFetchWithTimeout).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the other ticks in October', async () => {
+    for (const minute of ['13', '23', '33', '43', '53']) {
+      await triggerNewsScrapeBusy.run({scheduleTime: `2026-10-31T19:${minute}:00Z`});
+    }
+    expect(mockFetchWithTimeout).not.toHaveBeenCalled();
+    expect(mockLogError).not.toHaveBeenCalled();
+  });
+
+  it('dispatches every tick again from 1 Nov', async () => {
+    await triggerNewsScrapeBusy.run({scheduleTime: '2026-11-01T07:13:00Z'});
+    await triggerNewsScrapeBusy.run({scheduleTime: '2026-11-01T07:53:00Z'});
+    expect(mockFetchWithTimeout).toHaveBeenCalledTimes(2);
   });
 });
