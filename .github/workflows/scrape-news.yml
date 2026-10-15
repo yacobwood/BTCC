@@ -26,6 +26,13 @@
 # worst month on record (June 2026, 53 articles) at ~83-88% of the 200k
 # ceiling - comfortable margin, not razor's-edge.
 #
+# 2026-10-15: that sizing was wrong in practice - it assumed one /news/
+# listing fetch per run (there were two until listing_cache.py) and was
+# only ever exercised against GitHub's own cron, which dropped ~97% of
+# ticks. Once Cloud Scheduler delivered every tick, the October 200k
+# subscription ran out on the 15th. The busy window is now every 10 minutes
+# (functions/newsDispatch.js) and the listing is fetched once per run.
+#
 # The self-hosted Playwright path (btcc_playwright.py, RenderedFetcher) is
 # deliberately left completely intact and untouched in the repo - dormant,
 # not deleted, in case Scrapfly ever needs to be swapped back out.
@@ -103,6 +110,11 @@ jobs:
       - name: Scrape news
         env:
           SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+          # Saves the /news/ listing for the article-mirror step below to
+          # reuse instead of paying Scrapfly for the same page twice (see
+          # tools/scraper/listing_cache.py). runner.temp: outside the repo,
+          # so it can never be swept into a commit.
+          NEWS_LISTING_CACHE: ${{ runner.temp }}/news-listing.html
         working-directory: tools/scraper
         run: |
           ARGS=""
@@ -124,6 +136,7 @@ jobs:
       - name: Scrape full article mirror
         env:
           SCRAPFLY_API_KEY: ${{ secrets.SCRAPFLY_API_KEY }}
+          NEWS_LISTING_CACHE: ${{ runner.temp }}/news-listing.html
           # Passed via env, never interpolated into the script, so a typed
           # input can't inject shell.
           REFRESH_SLUG: ${{ github.event.inputs.refresh_slug }}

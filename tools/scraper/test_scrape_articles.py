@@ -262,6 +262,33 @@ class TestScrapeCardList(unittest.TestCase):
         )
         self.assertEqual(scrape_card_list(), [])
 
+    CACHED_HTML = (
+        '<article class="news-card">'
+        '<h3><a href="/cached-story/">Cached Story</a></h3>'
+        '</article>'
+    )
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_reuses_the_listing_scrape_news_already_fetched(self, mock_fetch):
+        with patch("scrape_articles.listing_cache.load", return_value=self.CACHED_HTML):
+            cards = scrape_card_list()
+        mock_fetch.assert_not_called()
+        self.assertEqual([c["slug"] for c in cards], ["cached-story"])
+
+    @patch("scrape_articles.fetch_via_scrapfly")
+    def test_fetches_when_no_cached_listing(self, mock_fetch):
+        mock_fetch.return_value = self.CACHED_HTML
+        with patch("scrape_articles.listing_cache.load", return_value=None):
+            scrape_card_list()
+        mock_fetch.assert_called_once()
+
+    @patch("scrape_articles.fetch_via_scrapfly", return_value="")
+    def test_never_uses_the_cache_for_another_url(self, mock_fetch):
+        with patch("scrape_articles.listing_cache.load", return_value=self.CACHED_HTML) as mock_load:
+            scrape_card_list("https://btcc.net/page/2/")
+        mock_load.assert_not_called()
+        mock_fetch.assert_called_once()
+
 
 class TestScrapePages(unittest.TestCase):
     """Regression coverage for the 2026-09-01 fix: the real pagination URL

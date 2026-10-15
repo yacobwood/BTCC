@@ -85,3 +85,16 @@ describe('triggerNewsScrapeOvernight', () => {
     );
   });
 });
+
+// Cadence is the Scrapfly bill (each run is a paid fetch) - pinned so a
+// change to it is deliberate. 2026-10-15: busy window slowed 5 -> 10 min
+// after the October subscription ran out on the 15th.
+describe('news scrape schedules', () => {
+  it('runs every 10 minutes 07:00-20:00 UTC', () => {
+    expect(triggerNewsScrapeBusy.__endpoint.scheduleTrigger.schedule).toBe('3-59/10 7-19 * * *');
+  });
+
+  it('runs hourly overnight', () => {
+    expect(triggerNewsScrapeOvernight.__endpoint.scheduleTrigger.schedule).toBe('3 0-6,20-23 * * *');
+  });
+});

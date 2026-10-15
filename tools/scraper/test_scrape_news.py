@@ -172,7 +172,15 @@ class TestScrapeNews(unittest.TestCase):
 
     @patch("scrape_news.fetch_via_scrapfly", return_value=None)
     def test_returns_none_rather_than_raising_when_fetch_fails(self, mock_fetch):
-        self.assertIsNone(scrape_news())
+        with patch("scrape_news.listing_cache.save") as mock_save:
+            self.assertIsNone(scrape_news())
+        mock_save.assert_not_called()
+
+    @patch("scrape_news.fetch_via_scrapfly", return_value="<html><body>no cards here</body></html>")
+    def test_saves_the_fetched_listing_for_scrape_articles(self, mock_fetch):
+        with patch("scrape_news.listing_cache.save") as mock_save:
+            scrape_news()
+        mock_save.assert_called_once_with("<html><body>no cards here</body></html>")
 
     @patch("scrape_news.fetch_via_scrapfly", return_value="<html><body>no cards here</body></html>")
     def test_returns_none_when_no_article_card_found(self, mock_fetch):

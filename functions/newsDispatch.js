@@ -20,6 +20,16 @@
 // Two exported functions rather than one, mirroring scrape-news.yml's own
 // two cron lines exactly - Cloud Scheduler's unix-cron can't express "every
 // 5 minutes in this hour range, hourly in that one" as a single expression.
+//
+// Busy window slowed from every 5 to every 10 minutes on 2026-10-15: once
+// this trigger actually delivered every tick, the real Scrapfly bill (~60
+// credits x 167 runs/day, ~10-13k/day) ran through the 200k/month
+// subscription by the 15th - the original 5-minute sizing had only ever
+// been tested against GitHub's own cron, which dropped ~97% of runs.
+// Together with listing_cache.py (one /news/ fetch per run instead of two)
+// that's ~89 runs x ~30 credits, ~2.7k/day, ~80-85k/month before article
+// and image fetches. Trade-off: a new btcc.net article can now take up to
+// 10 minutes (not 5) to reach the app in UK daytime.
 const {onSchedule} = require('firebase-functions/v2/scheduler');
 const {fetchWithTimeout, logError} = require('./shared');
 
@@ -77,7 +87,7 @@ async function triggerNewsScrape(fnName) {
 
 exports.triggerNewsScrapeBusy = onSchedule(
   {
-    schedule: '3-59/5 7-19 * * *',
+    schedule: '3-59/10 7-19 * * *',
     timeZone: 'Etc/UTC',
     secrets: ['GITHUB_TOKEN', 'GMAIL_APP_PASSWORD'],
   },

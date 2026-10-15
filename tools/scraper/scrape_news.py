@@ -53,6 +53,7 @@ import re
 import sys
 from pathlib import Path
 
+import listing_cache
 from media_utils import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
 from scrapfly_fallback import fetch_image_smart, fetch_via_scrapfly
 
@@ -134,6 +135,9 @@ def scrape_news(force: bool = False) -> list | None:
     if html is None:
         print("ERROR: could not fetch news (Scrapfly fetch failed)", file=sys.stderr)
         return None
+    # Handed to scrape_articles.py's next step so it doesn't pay for the
+    # same page again - see listing_cache.py.
+    listing_cache.save(html)
 
     article_m = ARTICLE_RE.search(html)
     if not article_m:

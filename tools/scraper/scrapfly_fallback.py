@@ -82,15 +82,46 @@ def _error_detail(e: Exception) -> str:
     times that day and every log line said only the generic phrase, giving
     no way to tell "genuinely broken request" from "Scrapfly-side blip"
     without this. Falls back to str(e) for anything that isn't an
-    HTTPError - or if reading the body itself fails."""
+    HTTPError - or if reading the body itself fails.
+
+    A JSON body is reduced to Scrapfly's own error fields first: confirmed
+    live 2026-10-15, its 429 body leads with an echo of our whole request
+    "config", which used up the old flat 500-char cut before the actual
+    error code was ever reached - so a quota 429 couldn't be told apart from
+    a concurrency 429 from the logs."""
     if isinstance(e, urllib.error.HTTPError):
         try:
-            body = e.read().decode("utf-8", errors="replace")[:500]
-            if body:
-                return f"{e} - {body}"
+            body = e.read().decode("utf-8", errors="replace")
         except Exception:  # noqa: BLE001 - the body read is itself best-effort
-            pass
+            body = ""
+        if body:
+            return f"{e} - {_summarise_error_body(body)}"
     return str(e)
+
+
+# Scrapfly's error fields, wherever they sit in the body (top level, or
+# under result.error for a target-side failure).
+_ERROR_FIELDS = ("code", "http_code", "message", "description", "retryable", "error_id")
+
+
+def _summarise_error_body(body: str) -> str:
+    try:
+        data = json.loads(body)
+    except ValueError:
+        return body[:500]
+    if not isinstance(data, dict):
+        return body[:500]
+    sources = [data]
+    result = data.get("result")
+    if isinstance(result, dict) and isinstance(result.get("error"), dict):
+        sources.append(result["error"])
+    fields = {k: src[k] for src in sources for k in _ERROR_FIELDS if src.get(k) not in (None, "")}
+    if fields:
+        return json.dumps(fields)[:500]
+    # Unknown shape - still drop the request echo so whatever else is
+    # there gets the space.
+    rest = {k: v for k, v in data.items() if k not in ("config", "context")}
+    return json.dumps(rest)[:500]
 
 
 def fetch_via_scrapfly(

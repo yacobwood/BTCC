@@ -112,6 +112,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import listing_cache
 from media_utils import MEDIA_SRC_RE_FRAGMENT, resolve_media_url, save_mirrored_image
 from scrapfly_fallback import fetch_image_smart, fetch_via_scrapfly
 
@@ -256,8 +257,16 @@ def scrape_card_list(url: str = NEWS_URL) -> list[dict]:
     fresh image, since Scrapfly bills each image independently (~225
     credits, confirmed live 2026-09-01) rather than capturing every image on
     a page for free as a side effect of rendering it once, the way
-    Playwright did."""
-    html = fetch_via_scrapfly(url, render_js=True, label="news-listing")
+    Playwright did.
+
+    Reuses the page scrape_news.py already fetched earlier in the same
+    scrape-news.yml run when one is cached (see listing_cache.py) - same
+    URL, seconds apart, so a second ~30-credit fetch bought nothing."""
+    html = listing_cache.load() if url == NEWS_URL else None
+    if html is not None:
+        print("  news-listing: reusing scrape_news.py's fetch from this run (no Scrapfly call)")
+    else:
+        html = fetch_via_scrapfly(url, render_js=True, label="news-listing")
     if html is None:
         return []
     return _parse_cards(html)

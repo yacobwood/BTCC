@@ -366,6 +366,42 @@ class TestErrorDetail(unittest.TestCase):
         )
         self.assertEqual(_error_detail(err), str(err))
 
+    def test_surfaces_the_error_code_past_a_long_config_echo(self):
+        # 2026-10-15: a quota/concurrency 429 body leads with an echo of the
+        # whole request config, which used to eat the entire 500-char cut.
+        body = json.dumps({
+            "config": {"asp": True, "url": "https://btcc.net/news/", "padding": "x" * 2000},
+            "code": "ERR::THROTTLE::MAX_REQUEST_RATE_EXCEEDED",
+            "message": "Quota exhausted",
+            "http_code": 429,
+        }).encode()
+        err = urllib.error.HTTPError(
+            url="https://api.scrapfly.io/scrape", code=429, msg="Too Many Requests", hdrs=None, fp=BytesIO(body),
+        )
+        detail = _error_detail(err)
+        self.assertIn("ERR::THROTTLE::MAX_REQUEST_RATE_EXCEEDED", detail)
+        self.assertIn("Quota exhausted", detail)
+        self.assertNotIn("padding", detail)
+
+    def test_reads_the_error_from_result_error(self):
+        body = json.dumps({
+            "config": {"asp": True},
+            "result": {"success": False, "error": {"code": "ERR::ASP::SHIELD_ERROR", "message": "blocked"}},
+        }).encode()
+        err = urllib.error.HTTPError(
+            url="https://api.scrapfly.io/scrape", code=422, msg="Unprocessable Entity", hdrs=None, fp=BytesIO(body),
+        )
+        self.assertIn("ERR::ASP::SHIELD_ERROR", _error_detail(err))
+
+    def test_drops_the_config_echo_for_an_unknown_json_shape(self):
+        body = json.dumps({"config": {"padding": "x" * 2000}, "detail": "something odd"}).encode()
+        err = urllib.error.HTTPError(
+            url="https://api.scrapfly.io/scrape", code=500, msg="Server Error", hdrs=None, fp=BytesIO(body),
+        )
+        detail = _error_detail(err)
+        self.assertIn("something odd", detail)
+        self.assertNotIn("padding", detail)
+
 
 if __name__ == "__main__":
     unittest.main()
