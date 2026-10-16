@@ -85,8 +85,15 @@ concurrency:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # NEWS_FETCH_BACKEND repo variable = 'playwright' (set 2026-10-16, Scrapfly
+    # Discovery quota exhausted until 11-01 with no top-up): runs on the
+    # self-hosted btcc-mac runner and fetches through local Playwright
+    # (scrapfly_fallback.py FETCH_BACKEND) instead of Scrapfly. Delete the
+    # variable (`gh variable delete NEWS_FETCH_BACKEND`) to go back.
+    runs-on: ${{ vars.NEWS_FETCH_BACKEND == 'playwright' && fromJSON('["self-hosted","btcc-mac"]') || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    env:
+      FETCH_BACKEND: ${{ vars.NEWS_FETCH_BACKEND }}
     permissions:
       contents: write
       actions: write
@@ -105,6 +112,7 @@ jobs:
       # btcc_playwright.py directly for these same helpers used to pull in
       # Playwright too, which isn't installed here and doesn't need to be).
       - name: Install dependencies
+        if: vars.NEWS_FETCH_BACKEND != 'playwright'
         run: pip install --quiet Pillow
 
       - name: Scrape news
@@ -121,7 +129,10 @@ jobs:
           if [ "${{ github.event.inputs.force }}" = "true" ]; then
             ARGS="--force"
           fi
-          python3 scrape_news.py $ARGS
+          PY=python3
+          # The runner's own venv already has Playwright + Pillow.
+          if [ "$FETCH_BACKEND" = "playwright" ]; then PY="$HOME/.btcc-scraper-venv/bin/python"; fi
+          "$PY" scrape_news.py $ARGS
 
       # Committed immediately, before the slower article-mirror step below -
       # sendSessionNotifications can only react to whatever data/news.json
@@ -142,10 +153,12 @@ jobs:
           REFRESH_SLUG: ${{ github.event.inputs.refresh_slug }}
         working-directory: tools/scraper
         run: |
+          PY=python3
+          if [ "$FETCH_BACKEND" = "playwright" ]; then PY="$HOME/.btcc-scraper-venv/bin/python"; fi
           if [ -n "$REFRESH_SLUG" ]; then
-            python3 scrape_articles.py --refresh-slug "$REFRESH_SLUG"
+            "$PY" scrape_articles.py --refresh-slug "$REFRESH_SLUG"
           else
-            python3 scrape_articles.py
+            "$PY" scrape_articles.py
           fi
 
       - name: Pull latest before article commit

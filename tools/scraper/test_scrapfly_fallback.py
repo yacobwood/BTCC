@@ -405,3 +405,55 @@ class TestErrorDetail(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPlaywrightBackend(unittest.TestCase):
+    """FETCH_BACKEND=playwright (2026-10-16, Scrapfly quota out) must route
+    both fetchers through RenderedFetcher and never call Scrapfly."""
+
+    def setUp(self):
+        env = patch.dict("os.environ", {"FETCH_BACKEND": "playwright", "SCRAPFLY_API_KEY": "k"})
+        env.start()
+        self.addCleanup(env.stop)
+        self.fetcher = MagicMock()
+        fp = patch("scrapfly_fallback._playwright_fetcher", return_value=self.fetcher)
+        fp.start()
+        self.addCleanup(fp.stop)
+        up = patch("scrapfly_fallback.urllib.request.urlopen")
+        self.urlopen = up.start()
+        self.addCleanup(up.stop)
+
+    def test_page_fetch_uses_playwright_not_scrapfly(self):
+        self.fetcher.get.return_value = "<html>ok</html>"
+        html = fetch_via_scrapfly("https://btcc.net/news/", referer="https://btcc.net/", label="x", wait_for_selector="main")
+        self.assertEqual(html, "<html>ok</html>")
+        self.fetcher.get.assert_called_once_with(
+            "https://btcc.net/news/", wait_selector="main", timeout=30000, referer="https://btcc.net/")
+        self.urlopen.assert_not_called()
+
+    def test_page_fetch_failure_returns_none(self):
+        self.fetcher.get.side_effect = RuntimeError("HTTP 429")
+        self.assertIsNone(fetch_via_scrapfly("https://btcc.net/news/"))
+        self.urlopen.assert_not_called()
+
+    def _page_returning(self, body, content_type="image/jpeg", ok=True):
+        resp = MagicMock(ok=ok, status=200 if ok else 403, headers={"content-type": content_type})
+        resp.body.return_value = body
+        page = MagicMock()
+        page.goto.return_value = resp
+        self.fetcher._context.new_page.return_value = page
+        return page
+
+    def test_image_fetch_uses_playwright(self):
+        page = self._page_returning(b"\xff\xd8jpeg")
+        self.assertEqual(fetch_image_via_scrapfly("https://btcc.net/api/media/abc"), (b"\xff\xd8jpeg", "image/jpeg"))
+        page.close.assert_called_once()
+        self.urlopen.assert_not_called()
+
+    def test_image_fetch_rejects_non_image(self):
+        self._page_returning(b"<html>challenge</html>", content_type="text/html")
+        self.assertIsNone(fetch_image_via_scrapfly("https://btcc.net/api/media/abc"))
+
+    def test_image_fetch_http_error_returns_none(self):
+        self._page_returning(b"", ok=False)
+        self.assertIsNone(fetch_image_via_scrapfly("https://btcc.net/api/media/abc"))

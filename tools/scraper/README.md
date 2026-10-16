@@ -23,6 +23,14 @@ has used that runner since the migration, so there was nothing left for it to wa
 cadence-mismatched threshold had been firing false "btcc-mac may be offline" alerts every
 overnight run since the migration (see main README's "Overnight cron gaps" note in §20).
 
+**2026-10-16 - news temporarily back on this path.** The Scrapfly Discovery quota ran out on
+10-15 (no top-up possible until the 11-01 reset). `FETCH_BACKEND=playwright` makes
+`fetch_via_scrapfly` / `fetch_image_via_scrapfly` use `RenderedFetcher` instead, with no
+caller changes. `scrape-news.yml` turns it on (and moves to `btcc-mac`, using
+`~/.btcc-scraper-venv`) when the `NEWS_FETCH_BACKEND` repo variable is `playwright`. Undo with
+`gh variable delete NEWS_FETCH_BACKEND -R yacobwood/BTCC`. Needs the Mac on and awake. Other
+Scrapfly scrapers are not switched.
+
 btcc.net is a Vercel-hosted React app protected by Vercel BotID (Kasada-powered): every
 request that can't execute JavaScript gets a proof-of-work challenge and a 429, and the
 challenge also factors in network/IP reputation on top of the JS check - confirmed by testing

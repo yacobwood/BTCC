@@ -34,6 +34,7 @@ scrape_tsl.py's own choice of urllib over requests for its plain
 
 from __future__ import annotations
 
+import atexit
 import base64
 import json
 import os
@@ -69,6 +70,62 @@ _SUPABASE_RE = re.compile(r"supabase\.co/storage/")
 # unbounded, so a genuinely-down target fails in ~2x the time instead of
 # hanging the whole run.
 _MAX_ATTEMPTS = 2
+
+# FETCH_BACKEND=playwright (2026-10-16): routes fetch_via_scrapfly and
+# fetch_image_via_scrapfly through the dormant self-hosted Playwright path
+# (btcc_playwright.RenderedFetcher) instead of Scrapfly, without touching the
+# callers. Added when the Discovery plan's 200k credits ran out on 10-15 with
+# no top-up possible - btcc.net's BotID still clears from the btcc-mac
+# runner's residential IP. scrape-news.yml sets it (and picks that runner)
+# from the NEWS_FETCH_BACKEND repo variable; delete the variable to go back.
+_fetcher = None
+
+
+def _use_playwright() -> bool:
+    return os.environ.get("FETCH_BACKEND") == "playwright"
+
+
+def _playwright_fetcher():
+    """One browser per process, shared by every fetch in the run (opening a
+    new browser per fetch is itself a bot signal - see fetch_rendered)."""
+    global _fetcher
+    if _fetcher is None:
+        from btcc_playwright import RenderedFetcher
+        _fetcher = RenderedFetcher().__enter__()
+        atexit.register(_fetcher.__exit__, None, None, None)
+    return _fetcher
+
+
+def _fetch_page_via_playwright(url, referer, label, timeout, wait_for_selector):
+    try:
+        html = _playwright_fetcher().get(url, wait_selector=wait_for_selector, timeout=timeout * 1000, referer=referer)
+    except Exception as e:  # noqa: BLE001 - same never-crash contract as the Scrapfly path
+        print(f"  PLAYWRIGHT_FETCH: slug={label or url} result=fail ({e})", file=sys.stderr)
+        return None
+    print(f"  PLAYWRIGHT_FETCH: slug={label or url} result=ok", file=sys.stderr)
+    return html
+
+
+def _fetch_image_via_playwright(url, label, timeout):
+    """page.goto on the image URL itself, so btcc.net's /api/media/<uuid>
+    redirect is followed by the real browser with its challenge cookies."""
+    try:
+        page = _playwright_fetcher()._context.new_page()
+        try:
+            resp = page.goto(url, timeout=timeout * 1000)
+            if resp is None or not resp.ok:
+                raise RuntimeError(f"HTTP {resp.status if resp else '?'}")
+            body = resp.body()
+            content_type = (resp.headers.get("content-type") or "image/jpeg").split(";")[0].strip()
+        finally:
+            page.close()
+        if not body or not content_type.startswith("image/"):
+            raise RuntimeError(f"not an image ({content_type}, {len(body or b'')} bytes)")
+    except Exception as e:  # noqa: BLE001 - image mirroring must never crash the whole scrape
+        print(f"  PLAYWRIGHT_FETCH: image={label or url} result=fail ({e})", file=sys.stderr)
+        return None
+    return body, content_type
+
 _RETRY_DELAY_SECONDS = 3
 
 
@@ -167,6 +224,8 @@ def fetch_via_scrapfly(
     parsing already treats as legitimately-optional (see e.g.
     extract_media_urls's "not_found" vs "failed" distinction), waiting on
     it here risks turning a genuine absence into a hard timeout instead."""
+    if _use_playwright():
+        return _fetch_page_via_playwright(url, referer, label, timeout, wait_for_selector)
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
@@ -242,6 +301,8 @@ def fetch_image_via_scrapfly(url: str, label: str = "", timeout: int = 60) -> tu
     padding" base64-decode failures that looked like flakiness at first -
     every attempt was trying to decode that reference URL string as if it
     were the image data itself."""
+    if _use_playwright():
+        return _fetch_image_via_playwright(url, label, timeout)
     api_key = os.environ.get("SCRAPFLY_API_KEY")
     if not api_key:
         return None
