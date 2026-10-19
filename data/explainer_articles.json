@@ -521,7 +521,8 @@
       "status": "staged",
       "scheduledDate": "2026-10-20",
       "pubDate": null,
-      "order": 3
+      "order": 3,
+      "accepted": true
     },
     {
       "id": "explainer-jack-sears-trophy",
