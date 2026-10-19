@@ -184,6 +184,17 @@ describe('draftHubArticle', () => {
   });
 });
 
+describe('house style', () => {
+  it('includes the no-groups-of-three rule', () => {
+    expect(STYLE_RULES).toMatch(/Never group things in threes/);
+  });
+  it('has no em/en dashes in the prompt outside the rule that names them', () => {
+    const text = (_internal.buildSystemPrompt() + _internal.buildUserContent({brief: 'b', sources: [], reference: '', recentTitles: []}))
+      .split('\n').filter(l => !l.startsWith('- Never use em dashes')).join('\n');
+    expect(text).not.toMatch(/[\u2014\u2013]/);
+  });
+});
+
 describe('helpers', () => {
   it('formats a UK wall-clock timestamp', () => {
     expect(_internal.ukNowIso(new Date('2026-07-01T12:05:00Z'))).toBe('2026-07-01T13:05');

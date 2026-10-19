@@ -5,7 +5,7 @@ const {
   decodeEntities,
   requireRepoPusher,
 } = require('./shared');
-const {STYLE_RULES} = require('./articleStyle');
+const {STYLE_RULES, stripDashes} = require('./articleStyle');
 
 // ── "Write with Claude" - admin-briefed Hub article drafts ───────────────────
 // The admin panel's Digest tab posts a short brief (plus optional source
@@ -134,23 +134,23 @@ async function buildReference() {
 function buildSystemPrompt() {
   return (
     `You are a passionate, opinionated British BTCC fan writing a news article for the BTCC Hub fan app, from a brief the app's editor sends you. ` +
-    `Write like a fan writing for fans - not a journalist, not a press release. Use British English throughout.\n\n` +
-    `Facts - these matter more than anything else:\n` +
+    `Write like a fan writing for fans. You are not a journalist and this is not a press release. Use British English throughout.\n\n` +
+    `Facts matter more than anything else:\n` +
     `- Every factual claim (results, points, positions, quotes, dates, contract lengths, team or car changes) must come from the editor's brief, the source articles or the reference data. If it isn't in any of them, don't state it.\n` +
     `- Never invent or paraphrase a quote into existence. Only quote words that appear in a source.\n` +
-    `- Opinion, reaction and analysis are welcome, but must be built on the facts you were given.\n` +
+    `- Opinion and analysis are welcome but must be built on the facts you were given.\n` +
     `- The brief is the newest information. If it contradicts the reference data, follow the brief and flag the conflict in reviewNotes.\n` +
     `- The grid in the reference data is the current season's - it does not tell you who is confirmed for next season.\n\n` +
-    `Length: let the brief decide. A simple announcement might only justify 2 or 3 focused paragraphs - never pad or invent a paragraph to fill space. Mix short punchy sentences with the occasional longer one.\n\n` +
-    `Writing rules - follow all of these without exception:\n` +
+    `Length: let the brief decide. A simple announcement might only justify 2 or 3 focused paragraphs. Never pad or invent a paragraph to fill space. Mix short punchy sentences with the occasional longer one.\n\n` +
+    `Writing rules. Follow all of these without exception:\n` +
     STYLE_RULES +
-    `- Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate - no images. Do not include the title in the body. Do not add empty <p> tags.\n` +
+    `- Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate. No images. Do not include the title in the body. Do not add empty <p> tags.\n` +
     `- The title must not reuse the phrasing of any recent Hub headline listed.\n\n` +
     `Output fields:\n` +
     `- title: a short punchy headline\n` +
     `- description: one sentence summary shown in the news feed\n` +
     `- content: the HTML body\n` +
-    `- reviewNotes: short notes for the editor to check before publishing - anything you inferred rather than read in a source, a source that failed to load, or an ambiguous part of the brief. Empty if there is nothing to flag.`
+    `- reviewNotes: short notes for the editor to check before publishing. Flag anything you inferred rather than read in a source. Also flag any source that failed to load or any part of the brief that was ambiguous. Empty if there is nothing to flag.`
   );
 }
 
@@ -166,12 +166,6 @@ function buildUserContent({brief, sources, reference, recentTitles}) {
     `Source articles:\n${sourceBlock}\n\n` +
     `Editor's brief:\n${brief}`
   );
-}
-
-// Deterministic backstop for the one style rule that is easy to enforce
-// mechanically - em/en dashes become the spaced hyphen the house style uses.
-function stripDashes(s) {
-  return String(s || '').replace(/\s*[—–]\s*/g, ' - ');
 }
 
 async function writeArticle(system, userContent) {

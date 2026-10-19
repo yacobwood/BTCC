@@ -8,7 +8,7 @@ const {
   getUKDateString,
   requireAdminPost,
 } = require('./shared');
-const {STYLE_RULES} = require('./articleStyle');
+const {STYLE_RULES, stripDashes} = require('./articleStyle');
 
 // ── Shared digest prompt intros ───────────────────────────────
 // Used by weeklyDigest/raceWeekendDigest (scheduled) and triggerDigest (manual admin
@@ -17,27 +17,27 @@ const {STYLE_RULES} = require('./articleStyle');
 function weeklyDigestPromptIntro() {
   return (
     `You are a passionate, opinionated British BTCC fan writing a weekly round-up for the BTCC Hub fan app. ` +
-    `Write like someone who was glued to their TV or at the circuit all weekend — not a journalist, not a press release. ` +
+    `Write like someone who was glued to their TV or at the circuit all weekend. You are not a journalist and this is not a press release. ` +
     `Use British English throughout. ` +
-    `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why — these matter for the title fight. ` +
+    `Cover the past 7 days: race results, driver performances, team news, championship picture, fan reaction and anything else worth talking about. If any drivers received penalty points on their licence, mention who got them and why, since these matter for the title fight. ` +
     `Let the length be dictated entirely by how much genuinely happened this week - never pad, stretch thin material or invent a paragraph just to hit a target. A quiet week might only justify 2 or 3 focused paragraphs; a dramatic one might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-    `Have opinions — say who impressed you, who disappointed, what surprised you. ` +
-    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-    `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`
+    `Have opinions. Say who impressed you and who disappointed you. ` +
+    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate. No images. ` +
+    `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements. Place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`
   );
 }
 
 function raceWeekendPromptIntro(round) {
   return (
     `You are a passionate, opinionated British BTCC fan writing a race weekend preview for the BTCC Hub fan app. ` +
-    `Write like someone who can't wait for the weekend — not a journalist, not a press release. ` +
+    `Write like someone who can't wait for the weekend. You are not a journalist and this is not a press release. ` +
     `Use British English throughout. ` +
     (round ? `This weekend the BTCC heads to ${round.venue} (${round.location}). ` : '') +
-    `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special, and any team or driver news fans need to know. ` +
+    `Build genuine anticipation: who to watch, the storylines going in, the championship battle, what makes this circuit special and any team or driver news fans need to know. ` +
     `Let the length be dictated entirely by how much there genuinely is to say - never pad, stretch thin material or invent a paragraph just to hit a target. A round with few storylines might only justify 2 or 3 focused paragraphs; one with plenty going on might justify 8 or more. Every paragraph must be built around something real and specific, not general filler. Each paragraph should have a clear focus. Mix short punchy sentences with the occasional longer one for rhythm. ` +
-    `Have opinions — get fans excited, make predictions, say who you think will shine or struggle. ` +
-    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate — no images. ` +
-    `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements — place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`
+    `Have opinions. Get fans excited and say who you think will shine or struggle. ` +
+    `Write the body in HTML using <p>, <strong>, <em>, <h2>, <h3>, <ul>, <ol>, <li> and <a> tags as appropriate. No images. ` +
+    `Do not include the title in the body. Do not add empty <p> tags or blank lines between elements. Place each <h2> or <h3> immediately after the closing </p> of the previous paragraph with no gap.\n\n`
   );
 }
 
@@ -177,7 +177,7 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
         const plain = (p.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1500);
         return `  • "${p.title}" (${p.pubDate?.slice(0, 10) || 'undated'})\n    ${plain}`;
       }).join('\n\n')
-    : '  (none yet — this is the first digest)';
+    : '  (none yet - this is the first digest)';
 
   const message = await client.messages.create({
     model: 'claude-opus-4-6',
@@ -187,7 +187,7 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
         role: 'user',
         content:
           promptIntro +
-          `Writing rules — follow all of these without exception:\n` +
+          `Writing rules. Follow all of these without exception:\n` +
           STYLE_RULES +
           `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
           hubNews.posts.filter(isVisible).slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
@@ -200,18 +200,18 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
     ],
   });
 
-  let title = `BTCC Digest — ${today}`;
+  let title = `BTCC Digest - ${today}`;
   let content = '<p>No content generated.</p>';
   let description = '';
   try {
     const raw = message.content[0].text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const parsed = JSON.parse(raw);
-    title = parsed.title || title;
-    content = (parsed.content || content)
+    title = stripDashes(parsed.title || title);
+    content = stripDashes(parsed.content || content)
       .replace(/<p>\s*<\/p>/g, '')
       .replace(/<h([23])>\s*/g, '<h$1>')
       .replace(/\s*<\/h([23])>/g, '</h$1>');
-    description = parsed.description || '';
+    description = stripDashes(parsed.description || '');
   } catch (e) {
     console.error(`${label}: failed to parse Claude response:`, e);
     content = `<p>${message.content[0].text}</p>`;
@@ -241,7 +241,7 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
     method: 'PUT',
     headers: {...ghHeaders, 'Content-Type': 'application/json'},
     body: JSON.stringify({
-      message: `${label} digest draft — ${today}`,
+      message: `${label} digest draft - ${today}`,
       content: updatedContent,
       sha: fileData.sha,
     }),

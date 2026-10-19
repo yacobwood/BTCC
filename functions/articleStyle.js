@@ -11,8 +11,16 @@ const STYLE_RULES =
   `- Never use the words: delve, showcase, navigate, elevate, crucial, pivotal, fascinating, notably, seamlessly, underscores, landscape\n` +
   `- Avoid passive voice where active is possible\n` +
   `- Use specific names, lap times, positions and details rather than vague generalities\n` +
-  `- Do not use full car model names (e.g. "Ford Focus Titanium", "BMW 330i M Sport") — just say "car" or refer to the team/manufacturer only when the make is genuinely relevant\n` +
-  `- Express opinions and reactions — this is a fan writing for fans, not a wire report\n` +
-  `- The app is called "BTCC Hub" — never refer to it as "BTCC Fan Hub"\n`;
+  `- Do not use full car model names (e.g. "Ford Focus Titanium", "BMW 330i M Sport") - just say "car" or refer to the team/manufacturer only when the make is genuinely relevant\n` +
+  `- Express opinions and reactions: this is a fan writing for fans, not a wire report\n` +
+  `- The app is called "BTCC Hub". Never refer to it as "BTCC Fan Hub"\n` +
+  `- Never group things in threes. No three-item lists inside a sentence (e.g. "pace, racecraft and consistency"), no three-beat sentence patterns and no bulleted or numbered list with exactly three items. Use two items or four or more instead. Giving each point its own sentence also works\n`;
 
-module.exports = {STYLE_RULES};
+// Deterministic backstop for the one rule that is easy to enforce
+// mechanically - em/en dashes become the spaced hyphen the house style uses.
+// The prompt rule alone never fully stopped them.
+function stripDashes(s) {
+  return String(s || '').replace(/\s*[\u2014\u2013]\s*/g, ' - ');
+}
+
+module.exports = {STYLE_RULES, stripDashes};

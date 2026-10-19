@@ -88,6 +88,26 @@ describe('weeklyDigest', () => {
     );
   });
 
+  it('replaces any em/en dashes Claude writes anyway before committing', async () => {
+    mockClaudeResponse({title: 'Croft — a classic', content: '<p>Wet – then dry.</p>', description: 'Rain — chaos.'});
+    await weeklyDigest.run();
+    const put = mockFetchWithTimeout.mock.calls.find(([, , o = {}]) => o.method === 'PUT');
+    const post = JSON.parse(Buffer.from(JSON.parse(put[2].body).content, 'base64').toString()).posts[0];
+    expect(post.title).toBe('Croft - a classic');
+    expect(post.content).toBe('<p>Wet - then dry.</p>');
+    expect(post.description).toBe('Rain - chaos.');
+  });
+
+  // Models copy the style of the prompt they're given - these prompts used
+  // to forbid em dashes while containing a dozen of them.
+  it('sends a prompt with no em/en dashes outside the rule that names them', async () => {
+    mockClaudeResponse();
+    await weeklyDigest.run();
+    const prompt = mockCreate.mock.calls[0][0].messages[0].content
+      .split('\n').filter(l => !l.startsWith('- Never use em dashes')).join('\n');
+    expect(prompt).not.toMatch(/[\u2014\u2013]/);
+  });
+
   it('skips without calling Claude if no sources are found anywhere', async () => {
     mockFetchWithTimeout.mockImplementation((url, ms, options = {}) => {
       if (url.includes('api.github.com')) {

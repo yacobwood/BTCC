@@ -806,7 +806,7 @@ Same pipeline as weeklyDigest but uses a race-specific prompt focused on the upc
 
 Admin-callable manual trigger for digest generation. CORS restricted to `yacobwood.github.io`. Secret-protected.
 
-The house writing rules (British English, no em dashes, no comma before "and", banned words) live in `functions/articleStyle.js` as `STYLE_RULES`, shared by the digest prompts and `draftHubArticle` below. Moved there 2026-10-19 with the digest prompt verified byte-for-byte unchanged.
+The house writing rules (British English, no em dashes, no comma before "and", banned words) live in `functions/articleStyle.js` as `STYLE_RULES`, shared by the digest prompts and `draftHubArticle` below. Moved there 2026-10-19 with the digest prompt verified byte-for-byte unchanged. Same day: added a rule against grouping things in threes (three-item lists, three-beat sentences, three-bullet lists) and rewrote every prompt without em dashes or groups of three, since the prompts had forbidden em dashes while containing a dozen of them and models copy the style of their prompt. `stripDashes` (also in `articleStyle.js`) now replaces any em/en dash in the digest's output too, not just `draftHubArticle`'s. Tests assert no prompt contains a dash outside the rule line itself.
 
 ### draftHubArticle (HTTP POST) - "Write with Claude"
 
