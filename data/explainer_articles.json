@@ -538,7 +538,8 @@
       "status": "staged",
       "scheduledDate": "2026-10-23",
       "pubDate": null,
-      "order": 4
+      "order": 4,
+      "accepted": true
     },
     {
       "id": "explainer-driving-standards",
