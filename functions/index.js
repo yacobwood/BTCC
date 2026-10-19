@@ -10,6 +10,8 @@ initializeApp();
 
 Object.assign(exports, require('./sessionNotifications'));
 Object.assign(exports, require('./digest'));
+// Only the trigger - hubArticle.js also exports plain helpers for tests.
+exports.draftHubArticle = require('./hubArticle').draftHubArticle;
 Object.assign(exports, require('./chat'));
 Object.assign(exports, require('./analytics'));
 Object.assign(exports, require('./scraperAdmin'));

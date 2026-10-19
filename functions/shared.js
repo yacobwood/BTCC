@@ -248,6 +248,31 @@ function requireAdminPost(req, res) {
   return false;
 }
 
+// Per-admin auth for admin-page endpoints, as the alternative to the shared
+// ADMIN_SECRET above (which is readable in the public admin page source - see
+// the KNOWN WEAKNESS note next to TRIGGER_DIGEST_SECRET there). The caller
+// sends the GitHub token it already keeps in localStorage for its own GitHub
+// writes, and the request only passes if GitHub itself says that token can
+// push to the repo - so nothing that unlocks this endpoint ever ships in the
+// page. Async, unlike requireAdminPost: `if (await requireRepoPusher(req, res)) return;`
+const ADMIN_REPO = 'yacobwood/BTCC';
+async function requireRepoPusher(req, res) {
+  if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return true; }
+  const m = /^(?:token|Bearer)\s+(\S+)$/i.exec(req.headers.authorization || '');
+  if (!m) { res.status(401).send('Unauthorized'); return true; }
+  try {
+    const r = await fetchWithTimeout(`https://api.github.com/repos/${ADMIN_REPO}`, 10000, {
+      headers: {Authorization: `Bearer ${m[1]}`, Accept: 'application/vnd.github+json'},
+    });
+    const repo = r.ok ? await r.json() : null;
+    if (repo?.permissions?.push === true) return false;
+  } catch (e) {
+    console.warn('requireRepoPusher: GitHub check failed:', e.message);
+  }
+  res.status(401).send('Unauthorized');
+  return true;
+}
+
 module.exports = {
   decodeEntities,
   logError,
@@ -266,4 +291,5 @@ module.exports = {
   getUKDateString,
   ADMIN_SECRET,
   requireAdminPost,
+  requireRepoPusher,
 };

@@ -1273,6 +1273,26 @@ select.input { cursor: pointer; }
     <button class="btn-sm" id="gen-race-btn" onclick="triggerDigestGenerate('race')" style="border-color:var(--yellow);color:var(--yellow)">⚡ Generate Race Preview</button>
   </div>
 
+  <!-- Write with Claude: brief in, aiDraft draft out (functions/hubArticle.js) -->
+  <div class="card" id="ai-write-card" style="margin-bottom:16px">
+    <div class="card-header"><div class="section-label">WRITE WITH CLAUDE</div></div>
+    <div class="section-note" style="margin-bottom:10px">Describe the story and Claude writes it as a draft in the list below for you to check, add an image and publish. Nothing goes live or notifies until you publish.</div>
+    <div class="field-group">
+      <div class="field-label">BRIEF</div>
+      <textarea id="ai-brief" rows="5" placeholder="e.g. Sutton confirmed at NAPA for 2027 - angle: can anyone stop a fifth title?"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">SOURCE LINKS <span style="color:var(--text-sec);font-weight:400;letter-spacing:0">(optional, one per line, up to 5)</span></div>
+      <textarea id="ai-urls" rows="2" placeholder="https://www.btcc.net/…"></textarea>
+    </div>
+    <div class="field-group">
+      <div class="field-label">CATEGORY</div>
+      <select class="input" id="ai-category"><option>News</option><option>Paddock</option></select>
+    </div>
+    <button class="btn-primary" id="ai-write-btn" onclick="writeWithClaude()">WRITE DRAFT</button>
+    <div id="ai-write-status" class="status-line"></div>
+  </div>
+
   <!-- Inline edit form -->
   <div class="card" id="digest-edit-card" style="display:none;margin-bottom:16px">
     <div class="card-header">
@@ -3201,8 +3221,9 @@ function getSelectedCategory() {
 
 function renderHubNewsList() {
   const el = document.getElementById('hubnews-list');
+  // Claude drafts sit in the Digest tab's review queue until published.
   const nonDigestPosts = hubNewsPosts
-    .filter(p => p.category !== 'Weekly Digest')
+    .filter(p => p.category !== 'Weekly Digest' && !p.aiDraft)
     .sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0));
   if (!nonDigestPosts.length) { el.innerHTML = '<div class="section-note">No articles yet. Create one above.</div>'; return; }
   el.innerHTML = nonDigestPosts.map(p => {
@@ -3237,9 +3258,13 @@ function renderHubNewsList() {
 function renderDigestList() {
   const el = document.getElementById('digest-list');
   if (!el) return;
-  const digestPosts = hubNewsPosts.filter(p => p.category === 'Weekly Digest');
+  // Claude-written article drafts (aiDraft) are reviewed here alongside the
+  // digests, but keep their real category so they publish as News/Paddock
+  // and notify on the news channel, not the Flying Lap one.
+  const digestPosts = hubNewsPosts.filter(p => p.category === 'Weekly Digest' || p.aiDraft);
   if (!digestPosts.length) { el.innerHTML = '<div class="section-note">No digests yet. They appear here automatically each Monday and before race weekends.</div>'; return; }
   el.innerHTML = digestPosts.map(p => {
+    if (p.aiDraft) return renderAiDraftCard(p);
     const status = p.status || 'published';
     const badgeClass = status === 'published' ? 'badge-pub' : status === 'scheduled' ? 'badge-sch' : 'badge-dft';
     const badgeLabel = status === 'published' ? '● LIVE' : status === 'scheduled' ? '◷ SCHEDULED' : '◎ DRAFT';
@@ -3263,6 +3288,116 @@ function renderDigestList() {
       </div>
     </div>`;
   }).join('');
+}
+
+function renderAiDraftCard(p) {
+  const notes = (p.aiNotes || []).map(n => `<li>${htmlEsc(n)}</li>`).join('');
+  return `
+    <div class="hub-article-card">
+      ${p.imageUrl ? `<img class="hub-article-thumb" src="${htmlEsc(p.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="hub-article-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+          <div class="hub-article-title" style="flex:1">${htmlEsc(p.title)}</div>
+          <span class="status-badge badge-dft">◎ CLAUDE DRAFT</span>
+        </div>
+        <div class="hub-article-meta">${htmlEsc(p.category || 'News')}${p.imageUrl ? '' : ' · no image yet'}</div>
+        <div class="hub-article-meta" style="margin-top:4px">${htmlEsc(p.description || '')}</div>
+        ${p.aiBrief ? `<div class="hub-article-meta" style="margin-top:6px"><strong>Brief:</strong> ${htmlEsc(p.aiBrief)}</div>` : ''}
+        ${notes ? `<div class="hub-article-meta" style="margin-top:6px;color:var(--yellow)"><strong>Check before publishing:</strong><ul style="margin:4px 0 0 16px;padding:0">${notes}</ul></div>` : ''}
+        <div class="hub-article-actions">
+          <button class="btn-sm" style="border-color:var(--green);color:var(--green)" onclick="publishAiDraft('${htmlEsc(p.id)}')">Publish Now</button>
+          <button class="btn-sm" onclick="editAiDraft('${htmlEsc(p.id)}')">Edit</button>
+          <button class="btn-sm" onclick="regenerateAiDraft('${htmlEsc(p.id)}')">↻ Regenerate</button>
+          <button class="btn-danger" onclick="deleteArticle('${htmlEsc(p.id)}');renderDigestList()">Delete</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// The full Hub News editor, not the digest one - it has the image uploader
+// and category picker an article needs before it goes out.
+function editAiDraft(id) {
+  switchTabByName('hubnews');
+  editArticle(id);
+}
+
+async function publishAiDraft(id) {
+  const p = hubNewsPosts.find(x => x.id === id);
+  if (!p) return;
+  const warn = p.imageUrl ? '' : '\n\nIt has no image yet - tap Edit first to add one.';
+  if (!confirm(`Publish "${p.title}" and send the news notification?${warn}`)) return;
+  await quickPublish(id);
+  renderDigestList();
+}
+
+const DRAFT_HUB_ARTICLE_URL = 'https://us-central1-btcchub-af77a.cloudfunctions.net/draftHubArticle';
+
+// Authenticates with this browser's own GitHub token (checked server-side
+// for push access) rather than TRIGGER_DIGEST_SECRET below, which anyone can
+// read in this page's source.
+async function callDraftHubArticle(payload) {
+  const tok = getToken();
+  if (!tok) throw new Error('Save your GitHub token first (Dash tab).');
+  const res = await fetch(DRAFT_HUB_ARTICLE_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', Authorization: 'token ' + tok},
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || (res.status === 401 ? 'GitHub token rejected - it needs push access to the repo.' : `HTTP ${res.status}`));
+  return data;
+}
+
+// Not retried automatically on failure: every call costs Anthropic credit,
+// and a dropped connection (phone screen locking) usually means the draft is
+// still being written server-side - Refresh shows it once it lands.
+async function runAiWrite(payload, statusEl, btn) {
+  const idleLabel = btn?.textContent;
+  if (btn) { btn.disabled = true; btn.textContent = 'WRITING…'; }
+  statusEl.textContent = 'Claude is writing - usually about a minute. If you leave this page it keeps going; tap Refresh later to see it.';
+  try {
+    const data = await callDraftHubArticle(payload);
+    statusEl.innerHTML = `<span class="ok">Draft ready: ${htmlEsc(data.title)}</span>`;
+    window._hubnewsLoaded = false;
+    window._digestLoaded = false;
+    await loadHubNews();
+    return true;
+  } catch (e) {
+    statusEl.innerHTML = `<span class="err">${htmlEsc(e.message)}</span>`;
+    return false;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = idleLabel; }
+  }
+}
+
+async function writeWithClaude() {
+  const brief = document.getElementById('ai-brief').value.trim();
+  if (brief.length < 10) { alert('Give Claude at least a sentence to work from.'); return; }
+  const urls = document.getElementById('ai-urls').value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (urls.length > 5) { alert('Up to 5 source links.'); return; }
+  const ok = await runAiWrite(
+    {brief, urls, category: document.getElementById('ai-category').value},
+    document.getElementById('ai-write-status'),
+    document.getElementById('ai-write-btn'),
+  );
+  if (ok) {
+    document.getElementById('ai-brief').value = '';
+    document.getElementById('ai-urls').value = '';
+  }
+}
+
+async function regenerateAiDraft(id) {
+  const p = hubNewsPosts.find(x => x.id === id);
+  if (!p) return;
+  const brief = prompt('Regenerate with this brief (edit it to change the angle):', p.aiBrief || '');
+  if (brief === null) return;
+  if (brief.trim().length < 10) { alert('Give Claude at least a sentence to work from.'); return; }
+  document.getElementById('ai-write-card').scrollIntoView({behavior: 'smooth'});
+  await runAiWrite(
+    {brief: brief.trim(), urls: p.aiSourceUrls || [], category: p.category, regenerateId: id},
+    document.getElementById('ai-write-status'),
+    document.getElementById('ai-write-btn'),
+  );
 }
 
 let digestEditTables = [];
@@ -3428,6 +3563,9 @@ async function quickPublish(articleId) {
   p.status = 'published';
   p.pubDate = p.pubDate || nowIso();
   delete p.scheduledAt; delete p.previewDeviceIds;
+  // Publishing a Claude draft moves it out of the Digest review queue into
+  // Hub News; aiBrief/aiSourceUrls stay as a record of how it was made.
+  delete p.aiDraft; delete p.aiNotes;
   // Only fire notification when transitioning from draft/scheduled → published
   await saveHubNews('Publish article: ' + p.title, wasPublished ? null : p);
 }
@@ -3453,7 +3591,8 @@ async function publishArticle() {
   const images = imagesRaw ? imagesRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
   const rawContent = quill ? quill.root.innerHTML : '';
   const content = rawContent === '<p><br></p>' ? '' : restoreTables(stripEmptyParagraphs(rawContent), hubNewsEditTables);
-  if (currentArticleStatus === 'draft' && !previewDeviceIds.length) {
+  const editingAiDraft = !!editId && !!hubNewsPosts.find(p => p.id === editId)?.aiDraft;
+  if (currentArticleStatus === 'draft' && !previewDeviceIds.length && !editingAiDraft) {
     if (!confirm('No preview devices added — this draft will be invisible to everyone. Continue?')) return;
   }
 
@@ -3490,6 +3629,15 @@ async function publishArticle() {
   const priorArticle = editId ? hubNewsPosts.find(p => p.id === editId) : null;
   const wasAlreadyPublished = !!priorArticle && (priorArticle.status === 'published' || !priorArticle.status);
   const isNewlyPublished = currentArticleStatus === 'published' && !wasAlreadyPublished;
+  // `article` is rebuilt from the form above, which has no aiDraft fields -
+  // carry them over while it's still a draft (e.g. saving after adding an
+  // image) so it stays in the Digest tab's review queue, and let them drop
+  // once it's published or scheduled, moving it into Hub News.
+  if (priorArticle?.aiDraft && currentArticleStatus === 'draft') {
+    Object.assign(article, {aiDraft: true, aiBrief: priorArticle.aiBrief, aiSourceUrls: priorArticle.aiSourceUrls, aiNotes: priorArticle.aiNotes});
+  } else if (priorArticle?.aiBrief) {
+    Object.assign(article, {aiBrief: priorArticle.aiBrief, aiSourceUrls: priorArticle.aiSourceUrls});
+  }
 
   if (editId) {
     const idx = hubNewsPosts.findIndex(p => p.id === editId);

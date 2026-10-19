@@ -128,3 +128,70 @@ describe('sendAndLog', () => {
     expect(JSON.stringify(add.mock.calls)).not.toContain('abc');
   });
 });
+
+// The real helper, not a stand-in - requireAdminPost's fail-open bug above
+// is exactly what goes unnoticed when every caller's test mocks it away.
+describe('requireRepoPusher', () => {
+  const realFetch = global.fetch;
+  afterEach(() => {
+    global.fetch = realFetch;
+    jest.resetModules();
+  });
+
+  function mockGithub(response) {
+    global.fetch = jest.fn(() => (response instanceof Error ? Promise.reject(response) : Promise.resolve(response)));
+  }
+
+  it('rejects a non-POST request without calling GitHub', async () => {
+    mockGithub({ok: true, json: () => Promise.resolve({permissions: {push: true}})});
+    const {requireRepoPusher} = require('../../functions/shared');
+    const res = makeRes();
+    expect(await requireRepoPusher(makeReq({method: 'GET'}), res)).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(405);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects a request with no token without calling GitHub', async () => {
+    mockGithub({ok: true, json: () => Promise.resolve({permissions: {push: true}})});
+    const {requireRepoPusher} = require('../../functions/shared');
+    const res = makeRes();
+    expect(await requireRepoPusher(makeReq({headers: {}}), res)).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('accepts a token GitHub says can push to the repo', async () => {
+    mockGithub({ok: true, json: () => Promise.resolve({permissions: {push: true}})});
+    const {requireRepoPusher} = require('../../functions/shared');
+    const res = makeRes();
+    expect(await requireRepoPusher(makeReq({headers: {authorization: 'token gh-abc'}}), res)).toBe(false);
+    expect(res.status).not.toHaveBeenCalled();
+    const [url, , opts] = [global.fetch.mock.calls[0][0], null, global.fetch.mock.calls[0][1]];
+    expect(url).toBe('https://api.github.com/repos/yacobwood/BTCC');
+    expect(opts.headers.Authorization).toBe('Bearer gh-abc');
+  });
+
+  it('rejects a valid token that only has read access', async () => {
+    mockGithub({ok: true, json: () => Promise.resolve({permissions: {push: false, pull: true}})});
+    const {requireRepoPusher} = require('../../functions/shared');
+    const res = makeRes();
+    expect(await requireRepoPusher(makeReq({headers: {authorization: 'token gh-read'}}), res)).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('rejects a token GitHub does not recognise', async () => {
+    mockGithub({ok: false, status: 401, json: () => Promise.resolve({})});
+    const {requireRepoPusher} = require('../../functions/shared');
+    const res = makeRes();
+    expect(await requireRepoPusher(makeReq({headers: {authorization: 'Bearer nope'}}), res)).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('fails CLOSED when GitHub cannot be reached', async () => {
+    mockGithub(new Error('network down'));
+    const {requireRepoPusher} = require('../../functions/shared');
+    const res = makeRes();
+    expect(await requireRepoPusher(makeReq({headers: {authorization: 'token gh-abc'}}), res)).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+});

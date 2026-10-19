@@ -8,6 +8,7 @@ const {
   getUKDateString,
   requireAdminPost,
 } = require('./shared');
+const {STYLE_RULES} = require('./articleStyle');
 
 // ── Shared digest prompt intros ───────────────────────────────
 // Used by weeklyDigest/raceWeekendDigest (scheduled) and triggerDigest (manual admin
@@ -187,16 +188,7 @@ async function runDigest(label, promptIntro, {force = false} = {}) {
         content:
           promptIntro +
           `Writing rules — follow all of these without exception:\n` +
-          `- Write in British English (tyre not tire, colour not color, etc.)\n` +
-          `- Never use a comma before "and"\n` +
-          `- Never use em dashes (— or –)\n` +
-          `- Never start a sentence with "It's worth noting", "Furthermore", "Additionally", "Moreover" or "In conclusion"\n` +
-          `- Never use the words: delve, showcase, navigate, elevate, crucial, pivotal, fascinating, notably, seamlessly, underscores, landscape\n` +
-          `- Avoid passive voice where active is possible\n` +
-          `- Use specific names, lap times, positions and details rather than vague generalities\n` +
-          `- Do not use full car model names (e.g. "Ford Focus Titanium", "BMW 330i M Sport") — just say "car" or refer to the team/manufacturer only when the make is genuinely relevant\n` +
-          `- Express opinions and reactions — this is a fan writing for fans, not a wire report\n` +
-          `- The app is called "BTCC Hub" — never refer to it as "BTCC Fan Hub"\n` +
+          STYLE_RULES +
           `- The title and body must feel completely distinct from any previously published article. Do not reuse phrasing, angles or story structures from these existing titles:\n` +
           hubNews.posts.filter(isVisible).slice(0, 20).map(p => `  • ${p.title}`).join('\n') + '\n\n' +
           `- Before writing anything, read every previous digest below in full and mentally list the specific topics, storylines and driver narratives each one already covered. Your new digest must not repeat any of them. A story is only fair game again if something genuinely new has happened since that digest was published (a new result, a new statement, a new incident) - and even then, spend at most a sentence on the recap before moving straight to what's new. If, after checking, nothing new has happened on a given storyline this week, leave it out entirely rather than restating it. Do not cover a topic just because it's the most obvious one available - covering fewer, genuinely fresh stories is better than covering a full spread that repeats last time:\n` +
