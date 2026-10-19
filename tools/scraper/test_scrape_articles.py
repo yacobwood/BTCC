@@ -26,6 +26,7 @@ from scrape_articles import (
     scrape_card_list,
     scrape_pages,
     sort_posts,
+    split_soft_breaks,
 )
 
 
@@ -1093,6 +1094,57 @@ class TestPruneOrphanedImages(unittest.TestCase):
             self.assertEqual(removed, 1)
             self.assertTrue((media_dir / "a.jpg").exists())
             self.assertFalse((media_dir / "orphan.jpg").exists())
+
+
+
+class SplitSoftBreaksTests(unittest.TestCase):
+    """Mid-paragraph <br> rendered as overlapping lines on app 2.26.2 and
+    earlier (MINI CHALLENGE article, 2026-10-19) - see split_soft_breaks."""
+
+    def test_splits_a_quote_attribution(self):
+        html = '<p>Andy Menzies said:<br>\u201cFollowing a great round.\u201d</p>'
+        self.assertEqual(split_soft_breaks(html),
+                         '<p>Andy Menzies said:</p><p>\u201cFollowing a great round.\u201d</p>')
+
+    def test_splits_several_breaks_and_keeps_neighbours(self):
+        html = '<p>One.</p><p>A<br>B<br/>C</p><p>Two.</p>'
+        self.assertEqual(split_soft_breaks(html), '<p>One.</p><p>A</p><p>B</p><p>C</p><p>Two.</p>')
+
+    def test_leaves_paragraphs_without_breaks_untouched(self):
+        html = '<p>Plain.</p><p><strong>Bold</strong> text.</p>'
+        self.assertEqual(split_soft_breaks(html), html)
+
+    def test_leaves_break_nested_in_inline_tag(self):
+        html = '<p><strong>a<br>b</strong></p>'
+        self.assertEqual(split_soft_breaks(html), html)
+
+    def test_splits_break_after_closed_inline_tag(self):
+        html = '<p><strong>Name:</strong><br>Quote</p>'
+        self.assertEqual(split_soft_breaks(html), '<p><strong>Name:</strong></p><p>Quote</p>')
+
+    def test_drops_empty_halves(self):
+        self.assertEqual(split_soft_breaks('<p>Text<br></p>'), '<p>Text</p>')
+        self.assertEqual(split_soft_breaks('<p><br>Text</p>'), '<p>Text</p>')
+
+    def test_leaves_a_bare_empty_paragraph_alone(self):
+        # The app strips these itself; nothing to split.
+        self.assertEqual(split_soft_breaks('<p><br></p>'), '<p><br></p>')
+
+    def test_keeps_paragraph_attributes(self):
+        self.assertEqual(split_soft_breaks('<p class="x">A<br>B</p>'),
+                         '<p class="x">A</p><p class="x">B</p>')
+
+    def test_ignores_breaks_outside_paragraphs(self):
+        html = '<ul><li>A<br>B</li></ul><pre>x<br>y</pre>'
+        self.assertEqual(split_soft_breaks(html), html)
+
+    def test_is_idempotent(self):
+        once = split_soft_breaks('<p>A<br>B</p>')
+        self.assertEqual(split_soft_breaks(once), once)
+
+    def test_handles_empty_input(self):
+        self.assertEqual(split_soft_breaks(''), '')
+        self.assertEqual(split_soft_breaks(None), '')
 
 
 if __name__ == "__main__":

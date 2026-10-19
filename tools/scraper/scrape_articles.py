@@ -195,6 +195,53 @@ OG_IMAGE_RE = re.compile(
 GALLERY_IMG_RE = re.compile(r'<img[^>]*src="(/site-assets/[^"]+)"')
 
 
+# A <p> with no nested <p> inside it, attributes kept.
+PARAGRAPH_RE = re.compile(r'<p(\s[^>]*)?>((?:(?!<p[\s>]).)*?)</p>', re.DOTALL | re.IGNORECASE)
+TAG_RE = re.compile(r'<(/?)([a-zA-Z][a-zA-Z0-9]*)[^>]*?(/?)>')
+VOID_TAGS = {"br", "img", "hr", "wbr", "input", "source"}
+
+
+def split_soft_breaks(content_html: str) -> str:
+    """Turn every top-level <br> inside a <p> into a paragraph break, so
+    <p>Name said:<br>"Quote"</p> becomes <p>Name said:</p><p>"Quote"</p>.
+
+    Older app builds (2.26.2 and earlier) style any paragraph whose only
+    child ELEMENT is a <br> as an empty spacer (line-height 0.3), and CSS
+    ignores the text either side, so these paragraphs rendered with every
+    wrapped line drawn over the one before (MINI CHALLENGE article,
+    2026-10-19). Fixing the data reaches every installed build at once.
+
+    A <br> nested inside an inline tag (<strong>a<br>b</strong>) is left
+    alone: splitting there would cut the tag in half. Empty halves (a
+    leading or trailing <br>) are dropped. Idempotent - safe to run on
+    already-split content every scrape."""
+    def split_one(m: re.Match) -> str:
+        attrs, inner = m.group(1) or "", m.group(2)
+        if not re.search(r'<br\b', inner, re.IGNORECASE):
+            return m.group(0)
+        pieces, depth, start = [], 0, 0
+        for t in TAG_RE.finditer(inner):
+            closing, name, self_closing = t.group(1), t.group(2).lower(), t.group(3)
+            if name == "br" and depth == 0:
+                pieces.append(inner[start:t.start()])
+                start = t.end()
+            elif name in VOID_TAGS or self_closing:
+                continue
+            elif closing:
+                depth = max(0, depth - 1)
+            else:
+                depth += 1
+        if not pieces:
+            return m.group(0)
+        pieces.append(inner[start:])
+        kept = [p.strip() for p in pieces if p.strip() and p.strip() != "&nbsp;"]
+        if not kept:
+            return m.group(0)
+        return "".join(f"<p{attrs}>{p}</p>" for p in kept)
+
+    return PARAGRAPH_RE.sub(split_one, content_html or "")
+
+
 def extract_og_image(html: str) -> str | None:
     m = OG_IMAGE_RE.search(html)
     if not m:
@@ -877,6 +924,13 @@ def main():
     if args.dry_run:
         print("Dry run - no file written.")
         return
+
+    # Every post, not just this run's fetches, so cached archive content
+    # gets the same treatment without a refetch. See split_soft_breaks.
+    for p in posts:
+        content = p.get("content")
+        if content and content.get("rendered"):
+            content["rendered"] = split_soft_breaks(content["rendered"])
 
     removed = prune_orphaned_images(posts)
     if removed:
